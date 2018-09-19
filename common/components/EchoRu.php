@@ -26,7 +26,7 @@ class EchoRu
      * @var $category string Category
      * @return string
      */
-    public static function echo(string $index, string $body, string $category = NULL): string
+    public static function echo(string $index, string $body, string $category = null): string
     {
         if (!$category) {
             $category = self::$message_category;

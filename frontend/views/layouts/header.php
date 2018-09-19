@@ -35,6 +35,8 @@ if (!Yii::$app->user->isGuest) {
         Yii::t('message', 'frontend.views.layouts.header.var8', ['ru' => 'Непрочитанных сообщений:']),
     ];
 
+
+
     $js = <<<JS
     
 

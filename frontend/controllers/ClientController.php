@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use api\common\models\iiko\iikoAgent;
 use common\components\SimpleChecker;
+use common\models\OrderStatus;
 use Yii;
 use common\models\Currency;
 use common\models\ManagerAssociate;
@@ -735,7 +736,7 @@ class ClientController extends DefaultController
                                 $price = str_replace('.', '', $price);
                             }
 
-                            $newProduct = CatalogBaseGoods::findOne(['product' => $product]);
+                            $newProduct = CatalogBaseGoods::findOne(['product' => $product, 'supp_org_id' => $get_supp_org_id]);
                             if (empty($newProduct)) {
                                 $newProduct = new CatalogBaseGoods();
                             }
@@ -1578,16 +1579,16 @@ class ClientController extends DefaultController
         }
 
         $header_info_zakaz = \common\models\Order::find()->
-        where(['client_id' => $currentUser->organization_id])->andWhere(['not in', 'status', [Order::STATUS_FORMING]])->count();
+        where(['client_id' => $currentUser->organization_id])->andWhere(['not in', 'status', [OrderStatus::STATUS_FORMING]])->count();
         empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int)$header_info_zakaz;
         $header_info_suppliers = \common\models\RelationSuppRest::find()->
         where(['rest_org_id' => $currentUser->organization_id, 'invite' => RelationSuppRest::INVITE_ON])->count();
         empty($header_info_suppliers) ? $header_info_suppliers = 0 : $header_info_suppliers = (int)$header_info_suppliers;
         $header_info_purchases = \common\models\Order::find()->
-        where(['client_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])->count();
+        where(['client_id' => $currentUser->organization_id, 'status' => OrderStatus::STATUS_DONE])->count();
         empty($header_info_purchases) ? $header_info_purchases = 0 : $header_info_purchases = (int)$header_info_purchases;
         $header_info_items = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
-        where(['in', 'order_id', \common\models\Order::find()->select('id')->where(['client_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])])->one()->quantity;
+        where(['in', 'order_id', \common\models\Order::find()->select('id')->where(['client_id' => $currentUser->organization_id, 'status' => OrderStatus::STATUS_DONE])])->one()->quantity;
         empty($header_info_items) ? $header_info_items = 0 : $header_info_items = (int)$header_info_items;
         $filter_get_supplier = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
         where(['in', 'id', \common\models\RelationSuppRest::find()->
@@ -1643,7 +1644,7 @@ class ClientController extends DefaultController
         $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
                 (select sum(total_price) FROM `order` 
                 where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
-                client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and ("
+                client_id = $currentUser->organization_id and status<>" . OrderStatus::STATUS_FORMING . " and ("
             . "DATE(created_at) between '" .
             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
             date('Y-m-d', strtotime($filter_to_date)) . "') " .
@@ -1651,7 +1652,7 @@ class ClientController extends DefaultController
             ") AS `total_price`  
                 FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
                 FROM `order` where 
-                client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and("
+                client_id = $currentUser->organization_id and status<>" . OrderStatus::STATUS_FORMING . " and("
             . "DATE(created_at) between '" .
             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
             date('Y-m-d', strtotime($filter_to_date)) . "') " . $where . ")`tb`")->queryAll();
@@ -1677,7 +1678,7 @@ class ClientController extends DefaultController
             date('Y-m-d', strtotime($filter_from_date)) . "' AND '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
             $where .
             " AND client_id = " . $currentUser->organization_id .
-            " AND STATUS<>" . Order::STATUS_FORMING . " GROUP BY vendor_id ORDER BY total_price DESC")->queryAll();
+            " AND STATUS<>" . OrderStatus::STATUS_FORMING . " GROUP BY vendor_id ORDER BY total_price DESC")->queryAll();
         $vendors_total_price = [];
         $vendors_labels = [];
         $vendors_colors = [];
@@ -1717,7 +1718,7 @@ class ClientController extends DefaultController
             WHERE order_id IN (
                   SELECT id FROM `order` WHERE 
                   (DATE(created_at) BETWEEN '" . date('Y-m-d', strtotime($filter_from_date)) . "' AND '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
-            " AND status<>" . Order::STATUS_FORMING .
+            " AND status<>" . OrderStatus::STATUS_FORMING .
             " AND client_id = " . $currentUser->organization_id . $where .
             ") 
             GROUP BY product_id ORDER BY sum(price*quantity) DESC
@@ -2055,7 +2056,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dateTo = date('Y-m-d', strtotime($post['filter_from_date_price_stat'] . " + 14 days"));
         $orderContent = OrderContent::find()
             ->joinWith('order')
-            ->where(['order.status' => Order::STATUS_DONE])
+            ->where(['order.status' => OrderStatus::STATUS_DONE])
             ->andWhere([
                 'between',
                 'order.created_at',

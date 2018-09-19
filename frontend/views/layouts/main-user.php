@@ -38,6 +38,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
+        <?= \common\assets\FireBaseAsset::widget() ?>
     </head>
     <body class="hold-transition skin-blue sidebar-mini" style="background: url(../images/login-bg.jpg) no-repeat center center fixed; 
   -webkit-background-size: cover;

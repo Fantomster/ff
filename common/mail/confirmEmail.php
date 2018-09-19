@@ -32,6 +32,7 @@ use yii\helpers\Url;
                                 <?= Yii::t('app', 'common.mail.confirm_email.confirm', ['ru' => 'Подтвердить']) ?>
                             </a>
                         </p>
+                        <?= isset($newPassword) ? Yii::t('app', 'franchise.views.site.user.default.password', ['ru' => 'Пароль']) . ": <b>" . $newPassword . "</b>" : "" ?>
                     </td>
                 </tr>
                 </tbody>
@@ -41,4 +42,4 @@ use yii\helpers\Url;
     </tbody>
 </table>
 
-<?=$this->renderAjax('layouts/mail_footer', ['user' => $user ?? null])?>
+<?= $this->renderAjax('layouts/mail_footer', ['user' => $user ?? null]) ?>

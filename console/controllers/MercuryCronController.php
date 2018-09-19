@@ -23,6 +23,7 @@ use yii\console\Controller;
 use api\common\models\merc\mercService;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use Yii;
+use api_web\components\FireBase;
 
 class MercuryCronController extends Controller
 {
@@ -106,6 +107,11 @@ class MercuryCronController extends Controller
         echo "FINISH" . PHP_EOL;
     }
 
+    public function actionTest3()
+    {
+        IikoProductsSync::getUpdateData(5144);
+    }
+
     public function actionTestOne()
     {
         $load = new Products();
@@ -150,5 +156,16 @@ class MercuryCronController extends Controller
         $w->data = 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b';
         $w->getData();
         echo "FINISH" . PHP_EOL;
+    }
+
+    public function actionTestFcm()
+    {
+        FireBase::getInstance()->update([
+            'mercury',
+            'operation' => 'MercVSDList',
+            'enterpriseGuid' => 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b',
+        ], [
+            'update_date' => strtotime(gmdate("M d Y H:i:s")),
+        ]);
     }
 }

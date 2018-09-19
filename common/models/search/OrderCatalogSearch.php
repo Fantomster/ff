@@ -41,6 +41,7 @@ class OrderCatalogSearch extends \yii\base\Model
      */
     public function search($params)
     {
+
         $this->load($params);
 
         $fieldsCBG = [

@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\CatalogGoodsBlocked;
 use common\models\Order;
+use common\models\OrderStatus;
 use common\models\Organization;
 use Yii;
 use yii\data\SqlDataProvider;
@@ -70,10 +71,10 @@ class FavoriteSearch extends \yii\base\Model
 
         //Только эти заказы
         $query->andWhere(['in', 'ord.status', [
-            Order::STATUS_PROCESSING,
-            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-            Order::STATUS_DONE
+            OrderStatus::STATUS_PROCESSING,
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            OrderStatus::STATUS_DONE
         ]]);
 
         if (!empty($this->searchString)) {

@@ -10,6 +10,7 @@ use common\models\Cart;
 use common\models\CartContent;
 use common\models\Order;
 use common\models\OrderContent;
+use common\models\OrderStatus;
 use yii\db\Expression;
 use yii\db\Query;
 use common\models\Organization;
@@ -231,8 +232,9 @@ class CartWebApi extends \api_web\components\WebApi
             $order->client_id = $client->id;
             $order->created_by_id = $this->user->id;
             $order->vendor_id = $vendor->id;
-            $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+            $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
             $order->currency_id = ($cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->one())->currency_id;
+            $order->service_id = 9;
 
             if (!empty($post['delivery_date'])) {
                 $d = str_replace('.', '-', $post['delivery_date']);

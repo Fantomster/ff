@@ -2,6 +2,7 @@
 
 namespace backend\models;
 
+use common\models\OrderStatus;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -52,10 +53,10 @@ class OrderWithAttachmentsSearch extends OrderAttachment {
         $assignmentTable = OrderAssignment::tableName();
 
         $editableOrders = [
-            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-            Order::STATUS_PROCESSING,
-            Order::STATUS_DONE,
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+            OrderStatus::STATUS_PROCESSING,
+            OrderStatus::STATUS_DONE,
         ];
         
         $query = OrderAttachment::find();

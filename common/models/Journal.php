@@ -75,7 +75,7 @@ class Journal extends \yii\db\ActiveRecord
         return [
             'id' => Yii::t('app', 'ID'),
             'service_id' => Yii::t('app', 'Сервис'),
-            'operation_code' => Yii::t('app', 'Operation Code'),
+            'operation_code' => Yii::t('app', 'Операция'),
             'user_id' => Yii::t('app', 'User ID'),
             'organization_id' => Yii::t('app', 'Организация'),
             'response' => Yii::t('app', 'Response'),

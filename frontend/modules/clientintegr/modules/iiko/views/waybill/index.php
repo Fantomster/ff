@@ -44,11 +44,11 @@ $headers = [
     'positionCount' => EchoRu::echo ('frontend.views.order.position_сount', 'Кол-во позиций'),
 ];
 
-$dont_show = FALSE;
+$dont_show = false;
 if ($way) {
     if (isset($_COOKIE[SearchOrdersComponent::IIKO_WB_DONT_SHOW_VARNAME_PREF.$way]) &&
         $_COOKIE[SearchOrdersComponent::IIKO_WB_DONT_SHOW_VARNAME_PREF.$way] == $way) {
-        $dont_show = TRUE;
+        $dont_show = true;
     }
 }
 
@@ -402,7 +402,7 @@ $this->registerCss($css);
                                 # 2. SELECT SUPPLIER Filter field
                                 echo $form->field($searchModel, 'vendor_id')->widget($filterWidgetNames['orderAff'], [
                                     'data' => $filterOptions['orderAff'], 'options' => ['placeholder' => $filterValues['orderAff']],
-                                    'pluginOptions' => ['allowClear' => FALSE],
+                                    'pluginOptions' => ['allowClear' => false],
                                     'id' => 'orgFilter',
                                 ])->label($filterLabels['orderAff'], ['class' => 'label', 'style' => 'color:#555']);
                                 ?>
@@ -429,7 +429,7 @@ $this->registerCss($css);
                                 # 4. STATUS OF ASSOCIATED DOCUMENTS TYPE WAYBILL Filter field
                                 echo $form->field($searchModel, 'wb_status')->widget($filterWidgetNames['wbStatus'], [
                                     'data' => $filterOptions['wbStatus'], 'options' => ['placeholder' => $filterValues['wbStatus']],
-                                    'pluginOptions' => ['allowClear' => TRUE], 'hideSearch' => TRUE,
+                                    'pluginOptions' => ['allowClear' => true], 'hideSearch' => true,
                                     'id' => 'wbStatus',
                                 ])->label($filterLabels['wbStatus'], ['class' => 'label', 'style' => 'color:#555']);
                                 ?>

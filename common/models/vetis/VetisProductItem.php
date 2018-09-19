@@ -8,6 +8,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\products\ListOptions;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\Products;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "vetis_product_item".
@@ -109,7 +110,7 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
             'updateDate' => 'Update Date',
         ];
     }
-    
+
     public function getProductItem()
     {
         return \yii\helpers\Json::decode($this->data);
@@ -145,8 +146,7 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
 
             if (!empty($queue->organization_id)) {
                 $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
-            }
-            else {
+            } else {
                 $queueName = $queue->consumer_class_name;
             }
 
@@ -158,5 +158,19 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
         }
+    }
+
+
+    public static function getProductItemList($subproduct_uuid)
+    {
+        $models = self::find()
+            ->select(['uuid', 'name'])
+            ->where(['active' => true, 'last' => true, 'subproduct_uuid' => $subproduct_uuid])
+            ->asArray()
+            ->all();
+
+        return ArrayHelper::map($models, 'uuid', function ($model) {
+            return $model['name'];
+        });
     }
 }

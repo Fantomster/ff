@@ -143,8 +143,9 @@ class VendorController extends WebApiController
      *                             "name": "ООО Рога и Копыта",
      *                             "phone": "+79182225588",
      *                             "email":"test@test.ru",
-     *                             "inn": "0001112223",
+     *                             "inn": "1111111111",
      *                             "contact_name": "Контактное имя",
+     *                             "gmt": 3,
      *                             "address": {
      *                                  "country":"Россия",
      *                                  "region": "Московская область",
@@ -227,8 +228,8 @@ class VendorController extends WebApiController
     /**
      * @SWG\Post(path="/vendor/get-goods-in-catalog",
      *     tags={"Vendor/Catalog"},
-     *     summary="Список товаров в каталоге",
-     *     description="Список товаров в каталоге",
+     *     summary="Список товаров в индивидуальном каталоге",
+     *     description="Список товаров в индивидуальном каталоге",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -239,7 +240,7 @@ class VendorController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "cat_id": 3010,
+     *                      "vendor_id": 3010,
      *                      "pagination":{
      *                          "page":1,
      *                          "page_size":12
@@ -269,10 +270,14 @@ class VendorController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/vendor/upload-main-catalog",
+     * @SWG\Post(path="/vendor/upload-personal-catalog",
      *     tags={"Vendor/Catalog"},
-     *     summary="Загрузка основного каталога",
-     *     description="Загрузка основного каталога",
+     *     summary="Загрузка индивидуального каталога",
+     *     description="Загрузка индивидуального каталога на файловый сервер.
+     * Ответ возвращает 20 строк файла, для предпросмотра, и выбора колонок
+     * На этом этапе, в базе не хранится ничего, кроме названия файла
+     * vendor_id = ID вендора каталога в который происходит загрузка
+     * data = документ Excel в base64",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -283,7 +288,7 @@ class VendorController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "cat_id": 4,
+     *                      "vendor_id": 3010,
      *                      "data": "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,BASE64_ENCODE_SOURCE"
      *                  }
      *              )
@@ -335,16 +340,17 @@ class VendorController extends WebApiController
      *     )
      * )
      */
-    public function actionUploadMainCatalog()
+    public function actionUploadPersonalCatalog()
     {
-        $this->response = $this->container->get('VendorWebApi')->uploadMainCatalog($this->request);
+        $this->response = $this->container->get('VendorWebApi')->uploadPersonalCatalog($this->request);
     }
 
     /**
      * @SWG\Post(path="/vendor/get-list-main-index",
      *     tags={"Vendor/Catalog"},
      *     summary="Список ключей для загрузки каталога",
-     *     description="Список ключей для загрузки каталога",
+     *     description="Список ключей, доступных для выбора пользователю. Далее по этому ключу будет осуществляться поиск дублей.
+     * Передавать в метод /vendor/import-personal-catalog параметр index_field",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -354,7 +360,8 @@ class VendorController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={}
+     *                  default={
+     *                  }
      *              )
      *         )
      *     ),
@@ -363,6 +370,9 @@ class VendorController extends WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *              default={
+     *                 "product": "Продукт",
+     *                 "article": "Артикул",
+     *                 "other": "Другое"
      *             }
      *          ),
      *     ),
@@ -382,10 +392,50 @@ class VendorController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/vendor/import-main-catalog",
+     * @SWG\Post(path="/vendor/import-personal-catalog",
      *     tags={"Vendor/Catalog"},
-     *     summary="Маппинг, валидация и импорт основного каталога",
-     *     description="Маппинг, валидация и импорт основного каталога",
+     *     summary="Маппинг, валидация и импорт индивидуального каталога",
+     *     description="Метод Импортирует файл с сервера во временную таблицу БД, по правилам которые переданы в параметре mapping
+     * vendor_id = ID вендора
+     * index_field = ключ поиска дублей
+     * mapping = очередность колонок, при загрузке файла
+     *
+     *     Пример:
+     *     POST /vendor/upload-personal-catalog вернул результат
+     *     {
+     *          result: true,
+     *          temp_id: 2,
+     *          rows: [
+     *              [
+     *                  Артикул,
+     *                  Наименование,
+     *                  Кратность,
+     *                  Цена,
+     *                  Единица измерения,
+     *                  Комментарий
+     *              ],
+     *              [
+     *                  10,
+     *                  Товар 10,
+     *                  '',
+     *                  100,
+     *                  бутылка,
+     *                  ''
+     *              ],
+     *              [
+     *                  111004,
+     *                  Балтика 7,
+     *                  1.25,
+     *                  45.5,
+     *                  бутылка,
+     *                  ''
+     *              ]
+     *         ]
+     *     }
+     *
+     *     Тогда в mapping мы передаем очередность полей как на фронте ее отмечает пользователь
+     *     mapping = {1:article, 3:units, 5:ed, 4:price, 2:product, 6:other}
+     * ",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -397,55 +447,9 @@ class VendorController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "cat_id": 3010,
+     *                      "vendor_id": 3010,
      *                      "index_field": "article",
-     *                      "mapping": {"article", "product", "units", "price", "ed", "other"}
-     *                  }
-     *              )
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *         @SWG\Schema(
-     *              default={
-     *                  "cat_id": 4,
-     *                  "uploaded_name": "dfg5fhbdhb"
-     *             }
-     *          ),
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "error"
-     *     )
-     * )
-     */
-    public function actionImportMainCatalog()
-    {
-        $this->response = $this->container->get('VendorWebApi')->importMainCatalog($this->request);
-    }
-
-    /**
-     * @SWG\Post(path="/vendor/update-main-catalog",
-     *     tags={"Vendor/Catalog"},
-     *     summary="Обновление главного каталога",
-     *     description="Обновление главного каталога",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         description="",
-     *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                      "cat_id": 3010
+     *                      "mapping": {1:"article", 2:"product", 3:"units", 4:"price", 5:"ed", 6:"other"}
      *                  }
      *              )
      *         )
@@ -469,9 +473,54 @@ class VendorController extends WebApiController
      *     )
      * )
      */
-    public function actionUpdateMainCatalog()
+    public function actionImportPersonalCatalog()
     {
-        $this->response = $this->container->get('CatalogWebApi')->updateMainCatalog($this->request);
+        $this->response = $this->container->get('VendorWebApi')->importPersonalCatalog($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/vendor/update-personal-catalog",
+     *     tags={"Vendor/Catalog"},
+     *     summary="Обновление индивидуального каталога",
+     *     description="Обновление индивидуального каталога",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vendor_id": 3010
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionUpdatePersonalCatalog()
+    {
+        $this->response = $this->container->get('CatalogWebApi')->updatePersonalCatalog($this->request);
     }
 
     /**
@@ -561,7 +610,7 @@ class VendorController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "cat_id": 3010
+     *                      "vendor_id": 3010
      *                  }
      *              )
      *         )
@@ -629,7 +678,7 @@ class VendorController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "cat_id": 3010
+     *                      "vendor_id": 3674
      *                  }
      *              )
      *         )
@@ -656,5 +705,52 @@ class VendorController extends WebApiController
     public function actionAutoClearTempDuplicatePosition()
     {
         $this->response = $this->container->get('CatalogWebApi')->autoClearTempDuplicatePosition($this->request);
+    }
+
+
+    /**
+     * @SWG\Post(path="/vendor/set-currency-for-personal-catalog",
+     *     tags={"Vendor/Catalog"},
+     *     summary="Установка валюты для индивидуального каталога",
+     *     description="Установка валюты для индивидуального каталога",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vendor_id": 3674,
+     *                      "currency_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                      "result": true
+     *                  }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionSetCurrencyForPersonalCatalog()
+    {
+        $this->response = $this->container->get('CatalogWebApi')->setCurrencyForPersonalCatalog($this->request);
     }
 }

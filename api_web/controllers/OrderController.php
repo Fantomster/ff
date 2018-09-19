@@ -69,7 +69,7 @@ class OrderController extends WebApiController
      *                      "ed": "",
      *                      "currency": "RUB",
      *                      "currency_id": 1,
-     *                      "image": "data:image/png;base64,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"
+     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
      *                  }
      *              },
      *              "client": {
@@ -203,7 +203,7 @@ class OrderController extends WebApiController
      *                      "ed": "",
      *                      "currency": "RUB",
      *                      "currency_id": 1,
-     *                      "image": "data:image/png;base64,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"
+     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
      *                  }
      *              },
      *              "client": {
@@ -267,6 +267,144 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('OrderWebApi')->update($this->request);
     }
 
+
+    /**
+     * @SWG\Post(path="/order/update-order-by-unconfirmed-vendor",
+     *     tags={"Order/UnconfirmedVendorActions"},
+     *     summary="Редактирование заказа вендором с неподтвержденным e-mail'ом",
+     *     description="Редактирование заказа вендором с неподтвержденным e-mail'ом",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "order_id":1,
+     *                      "comment": "Комментарий к заказу",
+     *                      "discount": {
+     *                          "type": "FIXED|PERCENT",
+     *                          "amount": 100
+     *                      },
+     *                      "delivery_price": 100,
+     *                      "actual_delivery": "2016-09-28 15:22:20",
+     *                      "products": {
+     *                          {"operation":"edit", "id":1, "price":200.2, "quantity":2, "comment":"Комментарий к товару!"},
+     *                          {"operation":"edit", "id":2, "price":100.2},
+     *                          {"operation":"add", "id":3, "quantity":2, "comment":"Комментарий к товару!"},
+     *                          {"operation":"delete", "id":4}
+     *                       }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *         default={
+     *              "id": 1,
+     *              "total_price": 22,
+     *              "invoice_relation": "",
+     *              "created_at": "2016-09-28 15:22:20",
+     *              "requested_delivery": "",
+     *              "actual_delivery": "",
+     *              "comment": "",
+     *              "discount": 0,
+     *              "completion_date": "",
+     *              "order_code": 1,
+     *              "currency": "RUB",
+     *              "currency_id": 1,
+     *              "status_id": 4,
+     *              "status_text": "Завершен",
+     *              "position_count": 2,
+     *              "delivery_price": 0,
+     *              "min_order_price": 3191,
+     *              "total_price_without_discount": 22,
+     *              "items": {
+     *                  {
+     *                      "id": 2,
+     *                      "product": "мясо",
+     *                      "product_id": 9,
+     *                      "catalog_id": 5,
+     *                      "price": 3,
+     *                      "quantity": 2.001,
+     *                      "comment": "",
+     *                      "total": 6,
+     *                      "rating": 0,
+     *                      "brand": "",
+     *                      "article": "4545",
+     *                      "ed": "",
+     *                      "currency": "RUB",
+     *                      "currency_id": 1,
+     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
+     *                  }
+     *              },
+     *              "client": {
+     *                  "id": 2,
+     *                  "name": "j262@mail.ru",
+     *                  "legal_entity": "",
+     *                  "contact_name": "",
+     *                  "phone": "",
+     *                  "email": "",
+     *                  "site": "",
+     *                  "address": "",
+     *                  "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/restaurant-noavatar.gif",
+     *                  "type_id": 1,
+     *                  "type": "Ресторан",
+     *                  "rating": 0,
+     *                  "house": "",
+     *                  "route": "",
+     *                  "city": "",
+     *                  "administrative_area_level_1": "",
+     *                  "country": "",
+     *                  "place_id": "",
+     *                  "about": ""
+     *              },
+     *              "vendor": {
+     *                  "id": 3,
+     *                  "name": "bcpostavshik2@yandex.ru",
+     *                  "legal_entity": "",
+     *                  "contact_name": "",
+     *                  "phone": "+7 (926) 499 18 89",
+     *                  "email": "j262@mail.ru",
+     *                  "site": "ww.ru",
+     *                  "address": "Ломоносовчкий проспект 34 к 1",
+     *                  "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/vendor-noavatar.gif",
+     *                  "type_id": 2,
+     *                  "type": "Поставщик",
+     *                  "rating": 0,
+     *                  "house": "",
+     *                  "route": "",
+     *                  "city": "",
+     *                  "administrative_area_level_1": "",
+     *                  "country": "",
+     *                  "place_id": "",
+     *                  "about": "",
+     *                  "allow_editing": 0
+     *              }
+     *          }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionUpdateOrderByUnconfirmedVendor()
+    {
+        $this->response = $this->container->get('OrderWebApi')->update($this->request, true);
+    }
+
+
     /**
      * @SWG\Post(path="/order/products",
      *     tags={"Order"},
@@ -305,23 +443,23 @@ class OrderController extends WebApiController
      *      {
      *          "headers":{
      *                  "id": "ID",
-    "product": "Название"
+     *                  "product": "Название"
      *          },
      *          "products":{
-    {
-    "id": "5269",
-    "product": "Треска горячего копчения",
-    "article": "457",
-    "supplier": "ООО Рога и Копыта",
-    "supp_org_id": 4,
-    "cat_id": "3",
-     *                                  "category_id": 24,
-    "price": 499.80,
-    "ed": "шт.",
-    "currency": "RUB",
-    "image":"https://mixcart.ru/fmarket/images/image-category/51.jpg",
-    "in_basket": 0
-    }
+     *               {
+     *                   "id": "5269",
+     *                   "product": "Треска горячего копчения",
+     *                   "article": "457",
+     *                   "supplier": "ООО Рога и Копыта",
+     *                   "supp_org_id": 4,
+     *                   "cat_id": "3",
+     *                   "category_id": 24,
+     *                   "price": 499.80,
+     *                   "ed": "шт.",
+     *                   "currency": "RUB",
+     *                   "image":"https://mixcart.ru/fmarket/images/image-category/51.jpg",
+     *                   "in_basket": 0
+     *               }
      *          },
      *          "pagination":{
      *              "page":1,
@@ -346,6 +484,88 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->products($this->request);
     }
+
+
+    /**
+     * @SWG\Post(path="/order/products-list-for-unconfirmed-vendor",
+     *     tags={"Order/UnconfirmedVendorActions"},
+     *     summary="Список товаров доступных для заказа у неподтвержденного вендора",
+     *     description="Список товаров доступных для заказа у неподтвержденного вендора",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                               "search":{
+     *                                   "product":"искомая строка",
+     *                                   "category_id": {24, 17},
+     *                                   "order_id": 5757,
+     *                                   "price": {"from":100, "to":300},
+     *                               },
+     *                               "pagination":{
+     *                                   "page":1,
+     *                                   "page_size":12
+     *                               },
+     *                               "sort":"-product"
+     *                           }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default=
+     *      {
+     *          "headers":{
+     *                  "id": "ID",
+     *                  "product": "Название"
+     *          },
+     *          "products":{
+     *               {
+     *                   "id": "5269",
+     *                   "product": "Треска горячего копчения",
+     *                   "article": "457",
+     *                   "supplier": "ООО Рога и Копыта",
+     *                   "supp_org_id": 4,
+     *                   "cat_id": "3",
+     *                   "category_id": 24,
+     *                   "price": 499.80,
+     *                   "ed": "шт.",
+     *                   "currency": "RUB",
+     *                   "image":"https://mixcart.ru/fmarket/images/image-category/51.jpg",
+     *                   "in_basket": 0
+     *               }
+     *          },
+     *          "pagination":{
+     *              "page":1,
+     *              "total_page":17,
+     *              "page_size":12
+     *          },
+     *          "sort":"-product"
+     *     }
+     *            ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionProductsListForUnconfirmedVendor()
+    {
+        $this->response = $this->container->get('OrderWebApi')->products($this->request, true);
+    }
+
 
     /**
      * @SWG\Post(path="/order/categories",
@@ -398,6 +618,62 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->categories($this->request);
     }
+
+
+    /**
+     * @SWG\Post(path="/order/categories-for-unconfirmed-vendor",
+     *     tags={"Order/UnconfirmedVendorActions"},
+     *     summary="Список категорий товаров для неподтвержденного вендора",
+     *     description="Список категорий товаров для неподтвержденного вендора",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=false,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                               "order_id": 13574
+     *                          }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default=
+     *              {
+     *                  {"id": 1,
+     *                  "name": "МЯСО",
+     *                  "image": "https://market.mixcart.ru/fmarket/images/image-category/1.jpg",
+     *                  "subcategories": {
+     *                      {
+     *                          "id": 2,
+     *                          "name": "Баранина",
+     *                          "image": "https://market.mixcart.ru/fmarket/images/image-category/1.jpg"
+     *                      }
+     *                  }}
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionCategoriesForUnconfirmedVendor()
+    {
+        $this->response = $this->container->get('OrderWebApi')->categories($this->request, true);
+    }
+
 
     /**
      * @SWG\Post(path="/order/comment",
@@ -536,7 +812,7 @@ class OrderController extends WebApiController
      *                      "ed": "",
      *                      "currency": "RUB",
      *                      "currency_id": 1,
-     *                      "image": "data:image/png;base64,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"
+     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx"
      *                  }
      *              },
      *              "client": {
@@ -599,6 +875,129 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->cancel($this->request);
     }
+
+
+    /**
+     * @SWG\Post(path="/order/cancel-order-by-unconfirmed-vendor",
+     *     tags={"Order/UnconfirmedVendorActions"},
+     *     summary="Отменить заказ вендором с неподтвержденным емейлом",
+     *     description="Отменить заказ вендором с неподтвержденным емейлом",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"order_id":1}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *         default={
+     *              "id": 1,
+     *              "total_price": 22,
+     *              "invoice_relation": "",
+     *              "created_at": "2016-09-28 15:22:20",
+     *              "requested_delivery": "",
+     *              "actual_delivery": "",
+     *              "comment": "",
+     *              "discount": 0,
+     *              "completion_date": "",
+     *              "order_code": 1,
+     *              "currency": "RUB",
+     *              "currency_id": 1,
+     *              "status_id": 4,
+     *              "status_text": "Завершен",
+     *              "position_count": 2,
+     *              "delivery_price": 0,
+     *              "min_order_price": 3191,
+     *              "total_price_without_discount": 22,
+     *              "items": {
+     *                  {
+     *                      "id": 2,
+     *                      "product": "мясо",
+     *                      "product_id": 9,
+     *                      "catalog_id": 5,
+     *                      "price": 3,
+     *                      "quantity": 2.001,
+     *                      "comment": "",
+     *                      "total": 6,
+     *                      "rating": 0,
+     *                      "brand": "",
+     *                      "article": "4545",
+     *                      "ed": "",
+     *                      "currency": "RUB",
+     *                      "currency_id": 1,
+     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADh"
+     *                  }
+     *              },
+     *              "client": {
+     *                  "id": 2,
+     *                  "name": "j262@mail.ru",
+     *                  "legal_entity": "",
+     *                  "contact_name": "",
+     *                  "phone": "",
+     *                  "email": "",
+     *                  "site": "",
+     *                  "address": "",
+     *                  "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/restaurant-noavatar.gif",
+     *                  "type_id": 1,
+     *                  "type": "Ресторан",
+     *                  "rating": 0,
+     *                  "house": "",
+     *                  "route": "",
+     *                  "city": "",
+     *                  "administrative_area_level_1": "",
+     *                  "country": "",
+     *                  "place_id": "",
+     *                  "about": ""
+     *              },
+     *              "vendor": {
+     *                  "id": 3,
+     *                  "name": "bcpostavshik2@yandex.ru",
+     *                  "legal_entity": "",
+     *                  "contact_name": "",
+     *                  "phone": "+7 (926) 499 18 89",
+     *                  "email": "j262@mail.ru",
+     *                  "site": "ww.ru",
+     *                  "address": "Ломоносовчкий проспект 34 к 1",
+     *                  "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/vendor-noavatar.gif",
+     *                  "type_id": 2,
+     *                  "type": "Поставщик",
+     *                  "rating": 0,
+     *                  "house": "",
+     *                  "route": "",
+     *                  "city": "",
+     *                  "administrative_area_level_1": "",
+     *                  "country": "",
+     *                  "place_id": "",
+     *                  "about": "",
+     *                  "allow_editing": 0
+     *              }
+     *          }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionCancelOrderByUnconfirmedVendor()
+    {
+        $this->response = $this->container->get('OrderWebApi')->cancel($this->request, true);
+    }
+
 
     /**
      * @SWG\Post(path="/order/repeat",
@@ -692,7 +1091,7 @@ class OrderController extends WebApiController
      *                         "ed": "in",
      *                         "currency": "RUB",
      *                         "currency_id": 1,
-     *                         "image": "data:image/png;base64,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"
+     *                         "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCA"
      *                      }
      *                   },
      *                   "client": {

@@ -18,6 +18,13 @@ use Yii;
  * @property string $article
  * @property integer $units
  * @property string $comment
+ * @property string $merc_uuid
+ * @property integer $vat_product
+ * @property string $edi_desadv
+ * @property string $edi_alcdes
+ * @property string $edi_number
+ * @property string $edi_recadv
+ * @property string $edi_invoice
  *
  * @property Order $order
  * @property CatalogBaseGoods $product
@@ -42,8 +49,9 @@ class OrderContent extends \yii\db\ActiveRecord
     {
         return [
             [['order_id', 'product_id', 'quantity', 'price', 'product_name'], 'required'],
-            [['order_id', 'product_id', 'updated_user_id'], 'integer'],
+            [['order_id', 'product_id', 'updated_user_id', 'vat_product'], 'integer'],
             [['price', 'quantity', 'initial_quantity', 'units', 'plan_price', 'plan_quantity'], 'number'],
+            [['merc_uuid', 'edi_desadv', 'edi_alcdes', 'edi_number', 'edi_recadv', 'edi_invoice'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],
@@ -225,7 +233,7 @@ class OrderContent extends \yii\db\ActiveRecord
         }
         
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            if($this->order->status == Order::STATUS_FORMING)
+            if($this->order->status == OrderStatus::STATUS_FORMING)
                 \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCartContent($this->id);
         }
 
@@ -240,7 +248,7 @@ class OrderContent extends \yii\db\ActiveRecord
         $result = parent::beforeDelete();
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            if($this->order->status == Order::STATUS_FORMING)
+            if($this->order->status == OrderStatus::STATUS_FORMING)
                 \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCartContentDelete($this);
         }
         

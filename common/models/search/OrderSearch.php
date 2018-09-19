@@ -6,6 +6,8 @@ use api\common\models\iiko\iikoWaybill;
 use api\common\models\one_s\OneSWaybill;
 use api\common\models\RkStoretree;
 use api\common\models\RkWaybill;
+use common\models\AllService;
+use common\models\OrderStatus;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -31,6 +33,8 @@ class OrderSearch extends Order
     public $date_to;
     public $docStatus;
     public $completion_date_to;
+    public $service_id;
+    public $service_id_excluded = [];
 
     /**
      * @inheritdoc
@@ -38,7 +42,7 @@ class OrderSearch extends Order
     public function rules(): array
     {
         return [
-            [['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 'client_search_id', 'vendor_search_id', 'manager_id'], 'integer'],
+            [['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 'client_search_id', 'vendor_search_id', 'manager_id', 'service_id'], 'integer'],
             [['created_at', 'updated_at', 'date_from', 'date_to', 'docStatus'], 'safe'],
         ];
     }
@@ -77,11 +81,6 @@ class OrderSearch extends Order
     public function search($params)
     {
 
-
-        /**
-         * @editedBy Basil A Konakov
-         * @editedByKonakovAt 2018-08-13
-         */
         if (isset($params['OrderSearch']['id']) && (int)$params['OrderSearch']['id'] > 0) {
             $query = Order::find()->where(['id' => (int)$params['OrderSearch']['id']])
                 ->andWhere(['client_id' => User::findOne(Yii::$app->user->id)->organization_id])->limit(1);
@@ -126,16 +125,16 @@ class OrderSearch extends Order
 
         switch ($this->status) {
             case 1: //new
-                $this->status_array = [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
+                $this->status_array = [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
                 break;
             case 2: //canceled
-                $this->status_array = [Order::STATUS_REJECTED, Order::STATUS_CANCELLED];
+                $this->status_array = [OrderStatus::STATUS_REJECTED, OrderStatus::STATUS_CANCELLED];
                 break;
             case 3: //processing
-                $this->status_array = [Order::STATUS_PROCESSING];
+                $this->status_array = [OrderStatus::STATUS_PROCESSING];
                 break;
             case 4: //done
-                $this->status_array = [Order::STATUS_DONE];
+                $this->status_array = [OrderStatus::STATUS_DONE];
                 break;
         }
 
@@ -168,7 +167,7 @@ class OrderSearch extends Order
             $orderTable = Order::tableName();
             $query->rightJoin($maTable, "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->manager_id);
         }
-        $query->where(Order::tableName() . '.status != :status', ['status' => Order::STATUS_FORMING]);
+        $query->where(Order::tableName() . '.status != :status', ['status' => OrderStatus::STATUS_FORMING]);
 
         $addSortAttributes = $this->vendor_search_id ? ['client.name'] : ['vendor.name'];
         $addSortAttributes[] = 'createdByProfile.full_name';
@@ -218,12 +217,29 @@ class OrderSearch extends Order
             $query->rightJoin('integration_invoice', 'integration_invoice.number=order.waybill_number');
         }
 
+        /**
+         * @editedBy Basil A Konakov
+         * @editedByKonakovAt 2018-08-13
+         * Служба или источник получения заказа (EDI и т.д.) - см., например, таблицу all_service
+         */
+        if (!empty($this->service_id)) {
+            $query->andFilterWhere(['service_id' => $this->service_id]);
+        }
+        if (!empty($this->service_id_excluded) && is_array($this->service_id_excluded)) {
+            $query->andWhere(
+                ['OR',
+                    ['not in', 'service_id', $this->service_id_excluded],
+                    ['service_id' => NULL]
+                ]);
+        }
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => ['pageSize' => 20],
         ]);
         return $dataProvider;
+
     }
 
 
@@ -252,7 +268,7 @@ class OrderSearch extends Order
 
         //$query = Order::find();
 
-        $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
+        $query = Order::find()->andWhere(['status' => OrderStatus::STATUS_DONE])
             ->andWhere(['client_id' => User::findOne(Yii::$app->user->id)->organization_id]);
 
         $this->load($params);
@@ -272,16 +288,16 @@ class OrderSearch extends Order
 
         switch ($this->status) {
             case 1: //new
-                $this->status_array = [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
+                $this->status_array = [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
                 break;
             case 2: //canceled
-                $this->status_array = [Order::STATUS_REJECTED, Order::STATUS_CANCELLED];
+                $this->status_array = [OrderStatus::STATUS_REJECTED, OrderStatus::STATUS_CANCELLED];
                 break;
             case 3: //processing
-                $this->status_array = [Order::STATUS_PROCESSING];
+                $this->status_array = [OrderStatus::STATUS_PROCESSING];
                 break;
             case 4: //done
-                $this->status_array = [Order::STATUS_DONE];
+                $this->status_array = [OrderStatus::STATUS_DONE];
                 break;
         }
 
@@ -434,7 +450,7 @@ class OrderSearch extends Order
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-        $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
+        $query = Order::find()->andWhere(['status' => OrderStatus::STATUS_DONE])
             ->andWhere(['client_id' => User::findOne($userID)->organization_id]);
 
         if ($orderID) {
@@ -521,7 +537,7 @@ class OrderSearch extends Order
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-        $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
+        $query = Order::find()->andWhere(['status' => OrderStatus::STATUS_DONE])
             ->andWhere(['client_id' => User::findOne($userID)->organization_id]);
 
         if ($orderID) {

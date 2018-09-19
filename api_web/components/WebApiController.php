@@ -139,6 +139,8 @@ class WebApiController extends \yii\rest\Controller
             $this->user = $this->container->get('UserWebApi')->getUser();
             $this->request = \Yii::$app->request->getBodyParam('request');
 
+            \Yii::$app->setTimeZone('Etc/GMT' . $this->container->get('UserWebApi')->checkGMTFromDb());
+
             if (strstr(\Yii::$app->request->contentType, 'multipart/form-data') !== false) {
                 $this->request = [
                     'post' => \Yii::$app->request->post()

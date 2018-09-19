@@ -29,6 +29,8 @@ class iikoWaybillData extends \yii\db\ActiveRecord
 {
     public $pdenom;
     public $enable_all_map = true;
+    public $koef_buttons;
+    public $koef_forever;
 
     /**
      * @inheritdoc
@@ -55,7 +57,7 @@ class iikoWaybillData extends \yii\db\ActiveRecord
             [['waybill_id'], 'required'],
             [['waybill_id', 'product_id', 'product_rid', 'org', 'vat', 'vat_included'], 'integer'],
             [['sum', 'quant', 'defsum', 'defquant', 'koef', 'created_at', 'updated_at', 'pdenom'], 'safe'],
-            [['munit'], 'string', 'max' => 10],
+            [['munit', 'koef_buttons'], 'string', 'max' => 10],
             [['koef', 'sum', 'quant'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             ['koef', 'filter', 'filter' => function ($value) {
                 $newValue = 0 + str_replace(',', '.', $value);
@@ -96,6 +98,9 @@ class iikoWaybillData extends \yii\db\ActiveRecord
             'updated_at' => Yii::t('app', 'Updated At'),
             'fproductnameProduct' => Yii::t('app', 'Наименование продукции'),
             'enable_all_map' => Yii::t('app', 'Сохранить в сопоставлении'),
+            'koef_buttons' => Yii::t('app', ''),
+            'koef_forever' => Yii::t('app', ''),
+            'querys' => Yii::t('app', ''),
             'unload_status' => Yii::t('app', 'Статус для отправления'),
         ];
     }
@@ -125,10 +130,11 @@ class iikoWaybillData extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
-                $this->setReadyToExportStatus();
+        $this->setReadyToExportStatus();
     }
 
-    protected function setReadyToExportStatus () {
+    protected function setReadyToExportStatus()
+    {
 
         $wmodel = $this->waybill;
         $check = $this::find()
@@ -137,13 +143,13 @@ class iikoWaybillData extends \yii\db\ActiveRecord
             ->andWhere('unload_status=1')
             ->count('*');
 
-            if (!isset($wmodel->store_id) || empty($wmodel->agent_uuid) || $check > 0) {
-                $wmodel->readytoexport = 0;
-                $wmodel->status_id = 1;
-            } else {
-                $wmodel->readytoexport = 1;
-                $wmodel->status_id = 4;
-            }
+        if (!isset($wmodel->store_id) || empty($wmodel->agent_uuid) || $check > 0) {
+            $wmodel->readytoexport = 0;
+            $wmodel->status_id = 1;
+        } else {
+            $wmodel->readytoexport = 1;
+            $wmodel->status_id = 4;
+        }
 
         if (!$wmodel->save(false)) {
             echo "Can't save model in after save";

@@ -9,8 +9,10 @@ use api_web\classes\CartWebApi;
 use api_web\classes\RkeeperWebApi;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperOrder;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperStore;
+use common\components\COOK;
 use common\models\Cart;
 use common\models\CatalogGoodsBlocked;
+use common\models\OrderStatus;
 use common\models\search\OrderProductsSearch;
 use frontend\helpers\GenerationTime;
 use Yii;
@@ -42,6 +44,7 @@ use kartik\mpdf\Pdf;
 use yii\filters\AccessControl;
 use yii\web\BadRequestHttpException;
 use yii\helpers\Url;
+use Exception;
 
 
 class OrderController extends DefaultController
@@ -572,94 +575,174 @@ class OrderController extends DefaultController
         return $this->renderPartial('_vds_list', compact('mercVSDs'));
     }
 
+
+
+    /**
+     * Редактирование шаблона
+     * @param $initGuideItems array
+     * @return array
+     */
+    public function getOrderGuideItems(array $initGuideItems = []): array
+    {
+
+        #---------------------------------------------------------------------------------------------------------------
+        # загружаем временные параметры шаблона из куки и корректируем сохраненные товары шаблона на только что загруженные
+        # в итоге получаем товары шаблона для отображения
+        $itemsInCookie = COOK::get(COOK::ORDER_GUIDE_SELECTED_PRODUCTS);
+        if (str_replace(COOK::DELIMITER_VALUE, null, $itemsInCookie)) {
+            foreach (explode(COOK::DELIMITER_VALUE, $itemsInCookie) as $gp) {
+                if ($gp) {
+                    $gp = str_replace('+', '', $gp);
+                    if ((int)$gp > 0) {
+                        if (!in_array($gp, $initGuideItems)) {
+                            $initGuideItems[] = $gp;
+                        }
+                    } elseif ((int)$gp < 0) {
+                        $gp = -$gp;
+                        if (in_array($gp, $initGuideItems)) {
+                            unset($initGuideItems[array_search($gp, $initGuideItems)]);
+                        }
+                    }
+                }
+            }
+        }
+        #---------------------------------------------------------------------------------------------------------------
+        return $initGuideItems;
+        #---------------------------------------------------------------------------------------------------------------
+
+    }
+
     /**
      * Редактирование шаблона
      * @param int $id
      * @return string
      */
-    public function actionEditGuide(int $id)
+    public function actionEditGuide(int $id): string
     {
+
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
-        $params['show_sorting'] = true;
-
+        $vendors = $client->getSuppliers(null, false);
         if (empty($guide)) {
             return $this->redirect(['order/guides']);
         }
+        # обнуляем временные товары шаблона (если хранимые в куки настройки шаблона относятся к другому шаблону)
+        COOK::removeOrderGuideParamsIfOrderGuideIsNotCurrent($id);
+        # обновляем id последнего просматриваемого шаблона
+        COOK::set(COOK::ORDER_GUIDE_CURRENT, $id);
 
-        $session = Yii::$app->session;
+        #---------------------------------------------------------------------------------------------------------------
+        # уточненяем базовые параметры работы страницы
+        $params = [
+            # храним только числовые идентификаторы (show_sorting = false)
+            'show_sorting' => false,
+            # назначаем идентификатор шаблона
+            'guide_id' => $id,
+            # обнуляем фильтр поиска по поставщику
+            'VendorSearch' => null,
+            # обнуляем сортировку по умолчанию (начальную)
+            'sort' => null,
+            # обнуляем поиск товаров по каталогу
+            'OrderCatalogSearch' => null,
+            # настройки выбранного поставщика
+            'selectedVendor' => null,
+            # обнуляем поиск товаров в шаблоне
+            'BaseProductSearch' => null,
+        ];
+        #---------------------------------------------------------------------------------------------------------------
 
-        if (isset($session['currentGuide']) && $id != $session['currentGuide']) {
-            unset($session['guideProductList']);
-            unset($session['selectedVendor']);
+        $guideItems = $this->getOrderGuideItems($guide->guideProductsIds);
+
+        #---------------------------------------------------------------------------------------------------------------
+        # корректируем параметры работы виджетов - работа фильтра поиск по поставщику, сортировка товаров,
+        # фильтр поиска по каталогу товаров, поиск по товарам шаблона
+        if (isset(Yii::$app->request->post("VendorSearch")['search_string'])) {
+            $params['VendorSearch']['search_string'] = Yii::$app->request->post("VendorSearch")['search_string'];
+            COOK::set(COOK::ORDER_GUIDE_SEARCH_VENDOR, $params['VendorSearch']['search_string']);
+        } elseif (COOK::get(COOK::ORDER_GUIDE_SEARCH_VENDOR)) {
+            $params['VendorSearch']['search_string'] = COOK::get(COOK::ORDER_GUIDE_SEARCH_VENDOR);
         }
-
-        $session['currentGuide'] = $id;
-
-        $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
-        $session['guideProductList'] = $guideProductList;
-
-        if (!count($session['guideProductList'])) {
-            $params['show_sorting'] = false;
+        #---------------------------------------------------------------------------------------------------------------
+        if (Yii::$app->request->get("sort")) {
+            $params['sort'] = Yii::$app->request->get("sort");
+            COOK::set(COOK::ORDER_GUIDE_SORT_PRODUCTS, $params['sort']);
+        } elseif (COOK::get(COOK::ORDER_GUIDE_SORT_PRODUCTS)) {
+            $params['sort'] = COOK::get(COOK::ORDER_GUIDE_SORT_PRODUCTS);
         }
-
-        if (is_iterable($session['guideProductList'])) {
-            foreach ($session['guideProductList'] as $one) {
-                if (gettype($one) == "integer") {
-                    $params['show_sorting'] = false;
-                    break;
-                }
-            }
+        #---------------------------------------------------------------------------------------------------------------
+        if (isset(Yii::$app->request->post("OrderCatalogSearch")['searchString'])) {
+            $params['OrderCatalogSearch']['searchString'] = Yii::$app->request->post("OrderCatalogSearch")['searchString'];
+            COOK::set(COOK::ORDER_GUIDE_SEARCH_CATALOG, $params['OrderCatalogSearch']['searchString']);
+        } elseif (COOK::get(COOK::ORDER_GUIDE_SEARCH_CATALOG)) {
+            $params['OrderCatalogSearch']['searchString'] = COOK::get(COOK::ORDER_GUIDE_SEARCH_CATALOG);
         }
+        #---------------------------------------------------------------------------------------------------------------
+        if (isset(Yii::$app->request->post("BaseProductSearch")['searchString'])) {
+            $params['BaseProductSearch']['searchString'] = Yii::$app->request->post("BaseProductSearch")['searchString'];
+            COOK::set(COOK::ORDER_GUIDE_SEARCH_PROODUCTS, $params['BaseProductSearch']['searchString']);
+        } elseif (COOK::get(COOK::ORDER_GUIDE_SEARCH_PROODUCTS)) {
+            $params['BaseProductSearch']['searchString'] = COOK::get(COOK::ORDER_GUIDE_SEARCH_PROODUCTS);
+        }
+        #---------------------------------------------------------------------------------------------------------------
 
+        #---------------------------------------------------------------------------------------------------------------
+        # формируем модель поиска и провайдер данных для первого блока (ПОСТАВЩИКИ)
         $vendorSearchModel = new VendorSearch();
-        if (Yii::$app->request->post("VendorSearch")) {
-            $session['vendorSearchString'] = Yii::$app->request->post("VendorSearch");
-        }
-        $params['VendorSearch'] = $session['vendorSearchString'];
-        $params['guide_id'] = $id;
-
-        $session['sort'] = $params['sort'] = Yii::$app->request->get("sort") ?? $session['sort'] ?? '';
-
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
         $vendorDataProvider->pagination = ['pageSize' => 8];
-
+        #---------------------------------------------------------------------------------------------------------------
+        # формируем модель поиска и провайдер данных для второго блока (КАТАЛОГ ТОВАРОВ)
         $productSearchModel = new OrderCatalogSearch();
-        $vendors = $client->getSuppliers(null, false);
-        $selectedVendor = $session['selectedVendor'];
-        if (empty($selectedVendor)) {
-            $selectedVendor = isset(array_keys($vendors)[0]) ? array_keys($vendors)[0] : null;
-        }
-
-        $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
-        $productSearchModel->catalogs = $catalogs;
-        $productSearchModel->product_block = true;
-        if (Yii::$app->request->post("OrderCatalogSearch")) {
-            $session['orderCatalogSearchString'] = Yii::$app->request->post("OrderCatalogSearch");
+        if (COOK::get(COOK::ORDER_GUIDE_SELECTED_VENDOR)) {
+            $params['selectedVendor'] = COOK::get(COOK::ORDER_GUIDE_SELECTED_VENDOR);
+        } else {
+            $params['selectedVendor'] = array_keys($vendors)[0];
+            COOK::set(COOK::ORDER_GUIDE_SELECTED_VENDOR, $params['selectedVendor']);
         }
-        $params['OrderCatalogSearch'] = $session['orderCatalogSearchString'];
+        $productSearchModel->catalogs = $client->getCatalogs($params['selectedVendor']) ?? "(0)";
+        $productSearchModel->product_block = true;
         $productDataProvider = $productSearchModel->search($params);
         $productDataProvider->pagination = ['pageSize' => 8];
-
+        #---------------------------------------------------------------------------------------------------------------
+        # формируем модель поиска и провайдер данных для третьего блока (ТОВАРЫ ШАБЛОНА)
         $guideSearchModel = new BaseProductSearch();
-        if (Yii::$app->request->post("BaseProductSearch")) {
-            $session['baseProductSearchString'] = Yii::$app->request->post("BaseProductSearch");
-        }
-        $params['BaseProductSearch'] = $session['baseProductSearchString'];
-        $guideDataProvider = $guideSearchModel->search($params, $guideProductList);
+        $guideDataProvider = $guideSearchModel->search($params, $guideItems);
         $guideDataProvider->pagination = ['pageSize' => 7];
+        #---------------------------------------------------------------------------------------------------------------
 
+        #---------------------------------------------------------------------------------------------------------------
+        # рендеринг
         $pjax = Yii::$app->request->get("_pjax");
+        #---------------------------------------------------------------------------------------------------------------
         if (Yii::$app->request->isPjax && $pjax == '#vendorList') {
-            return $this->renderPartial('guides/_vendor-list', compact('vendorDataProvider', 'selectedVendor', 'session', 'params'));
+            return $this->renderPartial('guides/_vendor-list', ['selectedVendor' => $params['selectedVendor']]);
         } elseif (Yii::$app->request->isPjax && $pjax == '#productList') {
-            return $this->renderPartial('guides/_product-list', compact('productDataProvider', 'guideProductList', 'session', 'params'));
+            return $this->renderPartial('guides/_product-list', ['productDataProvider' => $productDataProvider]);
         } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
-            return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList', 'session', 'params'));
+            return $this->renderPartial('guides/_guide-product-list', [
+                'show_sorting' => $params['show_sorting'],
+                'sort' => $params['sort'],
+                'guideDataProvider' => $guideDataProvider,
+                'guideSearchModel' => $guideSearchModel,
+            ]);
         } else {
-            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider', 'session', 'params', 'client'));
+            return $this->render('guides/edit-guide', [
+                'selectedVendor' => $params['selectedVendor'],
+                'guide' => $guide,
+                'client' => $client,
+                'vendorSearchModel' => $vendorSearchModel,
+                'vendorDataProvider' => $vendorDataProvider,
+                'productSearchModel' => $productSearchModel,
+                'productDataProvider' => $productDataProvider,
+                'guideProductList' => $guideItems,
+                'guideSearchModel' => $guideSearchModel,
+                'guideDataProvider' => $guideDataProvider,
+                'params' => $params,
+            ]);
         }
+        #---------------------------------------------------------------------------------------------------------------
+
     }
 
     /**
@@ -670,48 +753,43 @@ class OrderController extends DefaultController
      */
     public function actionSaveGuide($id)
     {
-        $transaction = Yii::$app->db->beginTransaction();
-        try {
-            $client = $this->currentUser->organization;
-            $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
 
-            $current_id = Yii::$app->session->get('currentGuide', null);
-            if ($id != $current_id) {
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            if ($id != COOK::get(COOK::ORDER_GUIDE_CURRENT)) {
                 return $this->redirect(['order/guides']);
             }
-
-            $guideProductList = Yii::$app->session->get('guideProductList');
-
+            $client = $this->currentUser->organization;
+            $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+            $guideItems = $this->getOrderGuideItems($guide->guideProductsIds);
             foreach ($guide->guideProducts as $guideProduct) {
-                if (!in_array($guideProduct->cbg_id, $guideProductList)) {
+
+                if (!in_array($guideProduct->cbg_id, $guideItems)) {
                     $guideProduct->delete();
                 } else {
-                    $position = array_search($guideProduct->cbg_id, $guideProductList);
-                    if ($position !== false) {
-                        unset($guideProductList[$position]);
-                    }
+                    $position = array_search($guideProduct->cbg_id, $guideItems);
+                    unset($guideItems[$position]);
                 }
             }
-
             $rows = [];
-            foreach ($guideProductList as $newProductId) {
+            foreach ($guideItems as $newProductId) {
                 $rows[] = [
                     'guide_id' => $id,
                     'cbg_id' => $newProductId,
                 ];
             }
 
-            if (!empty($rows)) {
+            if ($rows) {
                 Yii::$app->db->createCommand()
                     ->batchInsert(GuideProduct::tableName(), ['guide_id', 'cbg_id'], $rows)
                     ->execute();
             }
+            COOK::removeOrderGuideParamsIfOrderGuideIsNotCurrent();
 
-            Yii::$app->session->remove('guideProductList');
-            Yii::$app->session->remove('selectedVendor');
-            Yii::$app->session->remove('currentGuide');
             $transaction->commit();
-        } catch (\Exception $e) {
+
+        } catch (Exception $e) {
             $transaction->rollBack();
             throw $e;
         }
@@ -725,10 +803,7 @@ class OrderController extends DefaultController
      */
     public function actionResetGuide()
     {
-        $session = Yii::$app->session;
-        unset($session['guideProductList']);
-        unset($session['selectedVendor']);
-        unset($session['currentGuide']);
+        COOK::removeOrderGuideParamsIfOrderGuideIsNotCurrent();
         return $this->redirect(['order/guides']);
     }
 
@@ -751,7 +826,7 @@ class OrderController extends DefaultController
         $guideDataProvider->pagination = false; //['pageSize' => 8];
         if (!Yii::$app->request->isPjax) {
             foreach ($_SESSION as $key => &$item) {
-                if (strpos($key, 'uideProductCount')) {
+                if (strpos($key, 'GuideProductCount')) {
                     unset($_SESSION[$key]);
                 }
             }
@@ -771,44 +846,94 @@ class OrderController extends DefaultController
      */
     public function actionAjaxSelectVendor($id)
     {
-        Yii::$app->session->set('selectedVendor', $id);
+        COOK::set(COOK::ORDER_GUIDE_SELECTED_VENDOR, $id);
         return true;
     }
 
     /**
      * Добавляем товар в шаблон
-     * @param $id
+     * @param $guideId integer
+     * @param $productId integer
      * @return bool
      */
-    public function actionAjaxAddToGuide($id)
+    public function actionAjaxAddToGuide(int $guideId, int $productId): bool
     {
-        $client = $this->currentUser->organization;
-        $session = Yii::$app->session;
-        $product = $client->getProductIfAvailable($id);
-        if ($product) {
-            $guideProductList = $session->get('guideProductList', []);
-            if (!in_array($product->id, $guideProductList)) {
-                $guideProductList[] = $product->id;
-                $session->set('guideProductList', $guideProductList);
+
+        if (!COOK::set(COOK::ORDER_GUIDE_CURRENT, $guideId)) {
+            return false;
+        }
+
+        $cookieKey = COOK::ORDER_GUIDE_SELECTED_PRODUCTS;
+        $orderGuide = COOK::get($cookieKey);
+
+        if (!$orderGuide) {
+            // 1. если кука пустая то заворачиваем инструкцию на добавление позиции в шаблон в ";"
+            // инструкция на добавление реализована через префикс
+            // заворачиваем чтобы искать можно было по маске по полному вхождению
+            return COOK::set($cookieKey, COOK::DELIMITER_VALUE.'+'.$productId.COOK::DELIMITER_VALUE);
+        } else {
+            // 2. если инструкции на добавление в куки нет, то тогда отрабатываем сценарий для уже непустой куки
+            // если инструкция на добавление уже есть, то ничего не делаем
+            if (substr_count($orderGuide, COOK::DELIMITER_VALUE.'+'.$productId.COOK::DELIMITER_VALUE) < 1) {
+
+                if (substr_count($orderGuide, COOK::DELIMITER_VALUE.'-'.$productId.COOK::DELIMITER_VALUE) > 0) {
+                    // 2.1. если инструкции на удаление в куки есть, то просто удаляем инструкцию на удаление
+                    // удаляем инструкцию по маске
+                    $orderGuide = str_replace(COOK::DELIMITER_VALUE.'-'.$productId.COOK::DELIMITER_VALUE,
+                        COOK::DELIMITER_VALUE, $orderGuide);
+                } else {
+                    // 2.2. если инструкции на удаление в куки нет, то добавляем инструкцию на добавление
+                    $orderGuide .= '+'.$productId.COOK::DELIMITER_VALUE;
+                }
+                return COOK::set($cookieKey, $orderGuide);
             }
         }
-        return isset($product);
+
+        return true;
+
     }
 
     /**
      * Удаление товара из шаблона
-     * @param $id
+     * @param $guideId integer
+     * @param $productId integer
      * @return bool
      */
-    public function actionAjaxRemoveFromGuide($id)
+    public function actionAjaxRemoveFromGuide(int $guideId, int $productId): bool
     {
-        $session = Yii::$app->session;
-        $guideProductList = $session->get('guideProductList', []);
-        if (in_array($id, $guideProductList)) {
-            $session->set('guideProductList', array_diff($guideProductList, [$id]));
-            return true;
+
+        if (!COOK::set(COOK::ORDER_GUIDE_CURRENT, $guideId)) {
+            return false;
         }
-        return false;
+
+        $cookieKey = COOK::ORDER_GUIDE_SELECTED_PRODUCTS;
+        $orderGuide = COOK::get($cookieKey);
+
+        if (!$orderGuide) {
+            // 1. если кука пустая то заворачиваем инструкцию на добавление позиции в шаблон в ";"
+            // инструкция на добавление реализована через префикс
+            // заворачиваем чтобы искать можно было по маске по полному вхождению
+            return COOK::set($cookieKey, COOK::DELIMITER_VALUE.'-'.$productId.COOK::DELIMITER_VALUE);
+        } else {
+            // 2. если инструкции на добавление в куки нет, то тогда отрабатываем сценарий для уже непустой куки
+            // если инструкция на добавление уже есть, то ничего не делаем
+            if (substr_count($orderGuide, COOK::DELIMITER_VALUE.'-'.$productId.COOK::DELIMITER_VALUE) < 1) {
+
+                if (substr_count($orderGuide, COOK::DELIMITER_VALUE.'+'.$productId.COOK::DELIMITER_VALUE) > 0) {
+                    // 2.1. если инструкции на удаление в куки есть, то просто удаляем инструкцию на удаление
+                    // удаляем инструкцию по маске
+                    $orderGuide = str_replace(COOK::DELIMITER_VALUE.'+'.$productId.COOK::DELIMITER_VALUE,
+                        COOK::DELIMITER_VALUE, $orderGuide);
+                } else {
+                    // 2.2. если инструкции на удаление в куки нет, то добавляем инструкцию на добавление
+                    $orderGuide .= '-'.$productId.COOK::DELIMITER_VALUE;
+                }
+                return COOK::set($cookieKey, $orderGuide);
+            }
+        }
+
+        return true;
+
     }
 
     /**
@@ -889,8 +1014,8 @@ class OrderController extends DefaultController
 
         return $post['id'];
     }
-    
-    
+
+
     public function actionAjaxAddToCartNotice()
     {
         try {
@@ -945,7 +1070,7 @@ class OrderController extends DefaultController
             $quantity = Yii::$app->request->post('quantity');
             $product_id = Yii::$app->request->post('product_id');
             $vendor_id = Yii::$app->request->post('vendor_id');
-            $order = Order::find()->where(['vendor_id' => Yii::$app->request->post('vendor_id'), 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
+            $order = Order::find()->where(['vendor_id' => Yii::$app->request->post('vendor_id'), 'client_id' => $client->id, 'status' => OrderStatus::STATUS_FORMING])->one();
             foreach ($order->orderContent as $position) {
                 if ($position->product_id == $product_id) {
                     $position->quantity = $quantity;
@@ -957,7 +1082,7 @@ class OrderController extends DefaultController
         }
 
         if (Yii::$app->request->get()) {
-            $order = Order::findOne(['vendor_id' => $vendor_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+            $order = Order::findOne(['vendor_id' => $vendor_id, 'client_id' => $client->id, 'status' => OrderStatus::STATUS_FORMING]);
             $vendor_name = $order->vendor->name;
             foreach ($order->orderContent as $position) {
                 if ($position->product_id == $product_id) {
@@ -1003,7 +1128,7 @@ class OrderController extends DefaultController
                 if (Yii::$app->request->post("comment")) {
                     $order->comment = Yii::$app->request->post("comment");
                 }
-                $order->status = ($initiator->type_id == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
+                $order->status = ($initiator->type_id == Organization::TYPE_RESTAURANT) ? OrderStatus::STATUS_CANCELLED : OrderStatus::STATUS_REJECTED;
                 $systemMessage = $initiator->name . Yii::t('message', 'frontend.controllers.order.cancelled_order', ['ru' => ' отменил заказ!']);
                 $danger = true;
                 $order->save();
@@ -1212,10 +1337,10 @@ class OrderController extends DefaultController
         $searchModel = new OrderSearch2();
         $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
         $statuses = [
-            'new' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR],
-            'stopped' => [Order::STATUS_CANCELLED, Order::STATUS_REJECTED],
-            'processing' => Order::STATUS_PROCESSING,
-            'fulfilled' => Order::STATUS_DONE,
+            'new' => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR],
+            'stopped' => [OrderStatus::STATUS_CANCELLED, OrderStatus::STATUS_REJECTED],
+            'processing' => OrderStatus::STATUS_PROCESSING,
+            'fulfilled' => OrderStatus::STATUS_DONE,
         ];
 
         $search = new SearchOrdersComponent();
@@ -1266,10 +1391,10 @@ class OrderController extends DefaultController
         if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
             throw new \yii\web\HttpException(404, Yii::t('message', 'frontend.controllers.order.get_out', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
-        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
+        if (($order->status == OrderStatus::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
             $this->redirect(['/order/index']);
         }
-        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
+        if (($order->status == OrderStatus::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
             $this->redirect(['/order/checkout']);
         }
         $organizationType = $user->organization->type_id;
@@ -1284,9 +1409,9 @@ class OrderController extends DefaultController
                 $product = OrderContent::findOne(['id' => $position['id']]);
                 $initialQuantity = $product->initial_quantity;
                 $allowedStatuses = [
-                    Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-                    Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-                    Order::STATUS_PROCESSING
+                    OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                    OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                    OrderStatus::STATUS_PROCESSING
                 ];
                 $quantityChanged = ($position['quantity'] != $product->quantity);
                 $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
@@ -1307,7 +1432,7 @@ class OrderController extends DefaultController
                         $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' => $product->product_name, 'productPrice' => $product->price]) . $position['price'] . " руб";
                         $product->price = $position['price'];
                     }
-                    if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
+                    if ($quantityChanged && ($order->status == OrderStatus::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
                         $product->initial_quantity = $initialQuantity;
                     }
                     if ($product->quantity == -1) {
@@ -1318,11 +1443,11 @@ class OrderController extends DefaultController
                 }
             }
             if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_SUPPLIER)) {
-                $order->status = Order::STATUS_REJECTED;
+                $order->status = OrderStatus::STATUS_REJECTED;
                 $orderChanged = -1;
             }
             if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_RESTAURANT)) {
-                $order->status = Order::STATUS_CANCELLED;
+                $order->status = OrderStatus::STATUS_CANCELLED;
                 $orderChanged = -1;
             }
             if ($orderChanged < 0) {
@@ -1352,20 +1477,20 @@ class OrderController extends DefaultController
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.cancel_discount', ['ru' => ' отменил скидку на заказ №']) . $order->id);
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
-                $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                $order->status = ($order->status === OrderStatus::STATUS_PROCESSING) ? OrderStatus::STATUS_PROCESSING : OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
                 $this->sendOrderChange($order->client, $order);
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
-                $order->status = $order->status == Order::STATUS_PROCESSING;
+                $order->status = $order->status == OrderStatus::STATUS_PROCESSING;
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
                 $this->sendOrderChange($order->vendor, $order);
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
-                if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
+                if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == OrderStatus::STATUS_PROCESSING)) {
                     $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order', ['ru' => ' получил заказ!']);
-                    $order->status = Order::STATUS_DONE;
+                    $order->status = OrderStatus::STATUS_DONE;
                     $this->sendSystemMessage($user, $order->id, $systemMessage);
                     $this->sendOrderDone($order->acceptedBy, $order);
                 }
@@ -1391,10 +1516,10 @@ class OrderController extends DefaultController
         $user->organization->markViewed($id);
 
         $editableOrders = [
-            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-            Order::STATUS_PROCESSING,
-            Order::STATUS_DONE,
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+            OrderStatus::STATUS_PROCESSING,
+            OrderStatus::STATUS_DONE,
         ];
         if ($user->organization->type_id == Organization::TYPE_SUPPLIER) {
             $order = $this->findOrder([Order::tableName() . '.id' => $id, Order::tableName() . '.status' => $editableOrders], Yii::$app->user->can('manage'));
@@ -1405,10 +1530,10 @@ class OrderController extends DefaultController
         if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
             throw new \yii\web\HttpException(404, Yii::t('message', 'frontend.controllers.order.get_out_two', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
-        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
+        if (($order->status == OrderStatus::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
             $this->redirect(['/order/index']);
         }
-        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
+        if (($order->status == OrderStatus::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
             $this->redirect(['/order/checkout']);
         }
         $organizationType = $user->organization->type_id;
@@ -1426,9 +1551,9 @@ class OrderController extends DefaultController
                 $product = OrderContent::findOne(['id' => $position['id']]);
                 $initialQuantity = $product->initial_quantity;
                 $allowedStatuses = [
-                    Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-                    Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-                    Order::STATUS_PROCESSING
+                    OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                    OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                    OrderStatus::STATUS_PROCESSING
                 ];
                 $quantityChanged = ($position['quantity'] != $product->quantity);
                 $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
@@ -1458,7 +1583,7 @@ class OrderController extends DefaultController
                             }
                         }
                     }
-                    if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
+                    if ($quantityChanged && ($order->status == OrderStatus::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
                         $product->initial_quantity = $initialQuantity;
                     }
                     if ($product->quantity == -1) {
@@ -1471,11 +1596,11 @@ class OrderController extends DefaultController
                 }
             }
             if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_SUPPLIER)) {
-                $order->status = Order::STATUS_REJECTED;
+                $order->status = OrderStatus::STATUS_REJECTED;
                 $orderChanged = -1;
             }
             if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_RESTAURANT)) {
-                $order->status = Order::STATUS_CANCELLED;
+                $order->status = OrderStatus::STATUS_CANCELLED;
                 $orderChanged = -1;
             }
             if ($orderChanged < 0) {
@@ -1516,8 +1641,8 @@ class OrderController extends DefaultController
                 $order->calculateTotalPrice();
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
-                if ($order->status != Order::STATUS_DONE) {
-                    $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                if ($order->status != OrderStatus::STATUS_DONE) {
+                    $order->status = ($order->status === OrderStatus::STATUS_PROCESSING) ? OrderStatus::STATUS_PROCESSING : OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 }
                 $this->sendSystemMessage($user, $order->id, $order->client->name . Yii::t('message', 'frontend.controllers.order.change_details_three', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
                 $order->calculateTotalPrice();
@@ -1532,9 +1657,9 @@ class OrderController extends DefaultController
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
-                if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
+                if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == OrderStatus::STATUS_PROCESSING)) {
                     $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order_two', ['ru' => ' получил заказ!']);
-                    $order->status = Order::STATUS_DONE;
+                    $order->status = OrderStatus::STATUS_DONE;
                     $this->sendSystemMessage($user, $order->id, $systemMessage);
                     $this->sendOrderDone($order->acceptedBy, $order);
                 }
@@ -1566,10 +1691,10 @@ class OrderController extends DefaultController
         if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
             throw new \yii\web\HttpException(404, Yii::t('message', 'frontend.controllers.order.get_out_three', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
-        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
+        if (($order->status == OrderStatus::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
             $this->redirect(['/order/index']);
         }
-        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
+        if (($order->status == OrderStatus::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
             $this->redirect(['/order/checkout']);
         }
         $organizationType = $user->organization->type_id;
@@ -1634,10 +1759,10 @@ class OrderController extends DefaultController
         if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
             throw new \yii\web\HttpException(404, Yii::t('message', 'frontend.controllers.order.get_out_four', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
-        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
+        if (($order->status == OrderStatus::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
             $this->redirect(['/order/index']);
         }
-        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
+        if (($order->status == OrderStatus::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
             $this->redirect(['/order/checkout']);
         }
         $organizationType = $user->organization->type_id;
@@ -1660,7 +1785,7 @@ class OrderController extends DefaultController
             $systemMessage = '';
             switch (Yii::$app->request->post('action')) {
                 case 'cancel':
-                    $order->status = ($organizationType == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
+                    $order->status = ($organizationType == Organization::TYPE_RESTAURANT) ? OrderStatus::STATUS_CANCELLED : OrderStatus::STATUS_REJECTED;
                     $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
                     $systemMessage = $initiator . Yii::t('message', 'frontend.controllers.order.cancelled_order_five', ['ru' => ' отменил заказ!']);
                     $danger = true;
@@ -1673,23 +1798,23 @@ class OrderController extends DefaultController
                 case 'confirm':
                     if ($order->isObsolete) {
                         $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order_three', ['ru' => ' получил заказ!']);
-                        $order->status = Order::STATUS_DONE;
+                        $order->status = OrderStatus::STATUS_DONE;
                         $order->actual_delivery = gmdate("Y-m-d H:i:s");
                         $this->sendOrderDone($order->createdBy, $order);
-                    } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
-                        $order->status = Order::STATUS_PROCESSING;
+                    } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
+                        $order->status = OrderStatus::STATUS_PROCESSING;
                         $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.confirm_order', ['ru' => ' подтвердил заказ!']);
                         $this->sendOrderProcessing($order->client, $order);
                         $edit = true;
-                    } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $order->status == Order::STATUS_PROCESSING)) {
+                    } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $order->status == OrderStatus::STATUS_PROCESSING)) {
                         $systemMessage = $order->vendor->name . Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
                         $order->accepted_by_id = $user_id;
-                        $order->status = Order::STATUS_PROCESSING;
+                        $order->status = OrderStatus::STATUS_PROCESSING;
                         $edit = true;
                         $this->sendOrderProcessing($order->vendor, $order);
-                    } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
+                    } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == OrderStatus::STATUS_PROCESSING)) {
                         $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order_four', ['ru' => ' получил заказ!']);
-                        $order->status = Order::STATUS_DONE;
+                        $order->status = OrderStatus::STATUS_DONE;
                         $order->actual_delivery = gmdate("Y-m-d H:i:s");
                         $this->sendOrderDone($order->createdBy, $order);
                     }
@@ -1716,7 +1841,7 @@ class OrderController extends DefaultController
         }
 
         $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order_five', ['ru' => ' получил заказ!']);
-        $order->status = Order::STATUS_DONE;
+        $order->status = OrderStatus::STATUS_DONE;
         $order->actual_delivery = gmdate("Y-m-d H:i:s");
         $this->sendOrderDone($order->createdBy, $order);
 
@@ -1745,9 +1870,9 @@ class OrderController extends DefaultController
             $canRepeatOrder = false;
             if ($organizationType == Organization::TYPE_RESTAURANT) {
                 switch ($order->status) {
-                    case Order::STATUS_DONE:
-                    case Order::STATUS_REJECTED:
-                    case Order::STATUS_CANCELLED:
+                    case OrderStatus::STATUS_DONE:
+                    case OrderStatus::STATUS_REJECTED:
+                    case OrderStatus::STATUS_CANCELLED:
                         $canRepeatOrder = true;
                         break;
                 }
@@ -2431,7 +2556,7 @@ class OrderController extends DefaultController
             $objPHPExcel->getActiveSheet()->setCellValue($col . $i, '=SUM(C' . $i . ':' . $last_col . $i . ')');
         }
 
-        $objPHPExcel->getActiveSheet()->fromArray($report, NULL, 'A' . $row_data);
+        $objPHPExcel->getActiveSheet()->fromArray($report, null, 'A' . $row_data);
 
         $objPHPExcel->getActiveSheet()->getStyle('A1:' . $col . '1')->getAlignment()->setWrapText(true);
         $objPHPExcel->getActiveSheet()->getStyle('A1:' . $col . (count($report) + 2))->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
@@ -2550,8 +2675,8 @@ class OrderController extends DefaultController
 
     public function actionAjaxClearSession()
     {
-        foreach ($_SESSION as $key => &$item) {
-            if (strpos($key, 'uideProductCount')) {
+        foreach ($_SESSION as $key => $item) {
+            if (strpos($key, 'GuideProductCount')) {
                 unset($_SESSION[$key]);
             }
         }

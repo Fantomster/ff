@@ -3,7 +3,6 @@
 use kartik\grid\GridView;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
-use api\common\models\one_s\OneSPconst;
 use api\common\models\one_s\OneSDicconst;
 
 ?>
@@ -82,15 +81,17 @@ if (empty($model)) {
                         ['title' => Yii::t('backend', 'Изменить шапку'), 'data-pjax' => "0"]);
                 },
                 'map' => function ($url, $model) {
-                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/map', 'waybill_id' => $model->id, 'way' => 0]);
+                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/odinsobsh/waybill/map', 'waybill_id' => $model->id, 'way' => 0, 'OneSWaybillDataSearch[vat]' => 1]);
                     return \yii\helpers\Html::a('<i class="fa fa-chain" aria-hidden="true"></i>', $customurl,
                         ['title' => Yii::t('backend', 'Сопоставить'), 'data-pjax' => "0"]);
                 },
             ]
         ]
     );
-    $timestamp_now=time();
-    if (!(($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))))) {unset($columns[10]['buttons']['export']);}
+    $timestamp_now = time();
+    if (!(($lic->status_id == 1) && ($timestamp_now <= (strtotime($lic->td))))) {
+        unset($columns[10]['buttons']['export']);
+    }
 
     echo GridView::widget([
         'dataProvider' => new ActiveDataProvider([

@@ -89,7 +89,7 @@ class SearchOrdersComponent extends Component
         foreach ($this->searchParams as $k => $v) {
             if (is_array($v) && $v) {
                 foreach ($v as $kk => $vv) {
-                    $sp[str_replace('amp;', NULL, $k)][$kk] = $vv;
+                    $sp[str_replace('amp;', null, $k)][$kk] = $vv;
                 }
             }
         }
@@ -120,7 +120,7 @@ class SearchOrdersComponent extends Component
         $query = Order::find()->select(['organization.id', 'organization.name'])->where(['client_id' => $orgId])
             ->leftJoin('organization', 'organization.id = order.vendor_id')->groupBy('vendor_id');
         $data = $query->asArray()->all();
-        $data[''] = ['id' => '', 'name' => NULL];
+        $data[''] = ['id' => '', 'name' => null];
         $this->affiliated = ArrayHelper::map($data, 'id', 'name');
         asort($this->affiliated);
         // 4. Update Totalprice
@@ -164,7 +164,7 @@ class SearchOrdersComponent extends Component
         foreach ($this->searchParams as $k => $v) {
             if (is_array($v) && $v) {
                 foreach ($v as $kk => $vv) {
-                    $sp[str_replace('amp;', NULL, $k)][$kk] = $vv;
+                    $sp[str_replace('amp;', null, $k)][$kk] = $vv;
                 }
             }
         }
@@ -198,7 +198,7 @@ class SearchOrdersComponent extends Component
             $query = Order::find()->select(['organization.id', 'organization.name'])->where(['vendor_id' => $orgId])
                 ->leftJoin('organization', 'organization.id = order.client_id')->groupBy('client_id');
             $data = $query->asArray()->all();
-            $data[''] = ['id' => '', 'name' => NULL];
+            $data[''] = ['id' => '', 'name' => null];
             $this->affiliated = ArrayHelper::map($data, 'id', 'name');
             asort($this->affiliated);
 
@@ -217,6 +217,7 @@ class SearchOrdersComponent extends Component
             }
             // 3.3. Update Totalprice - otherwise
             $this->totalPrice = Order::find()
+                ->leftJoin("$tblMA", "$tblMA.organization_id = `$tblOrder`.vendor_id")
                 ->where(['status' => $statuses['fulfilled'], "$tblMA.manager_id" => $userId, 'vendor_id' => $orgId])
                 ->sum("total_price");
             // 3.4. Detect Restaurants
@@ -226,7 +227,7 @@ class SearchOrdersComponent extends Component
                 ->leftJoin('organization', 'organization.id = order.client_id')
                 ->groupBy("$tblMA.organization_id");
             $data = $query->asArray()->all();
-            $data[''] = ['id' => '', 'name' => NULL];
+            $data[''] = ['id' => '', 'name' => null];
             $this->affiliated = ArrayHelper::map($data, 'id', 'name');
             asort($this->affiliated);
 
@@ -279,7 +280,7 @@ class SearchOrdersComponent extends Component
         foreach ($this->searchParams as $k => $v) {
             if (is_array($v) && $v) {
                 foreach ($v as $kk => $vv) {
-                    $sp[str_replace('amp;', NULL, $k)][$kk] = $vv;
+                    $sp[str_replace('amp;', null, $k)][$kk] = $vv;
                 }
             }
         }
@@ -310,7 +311,7 @@ class SearchOrdersComponent extends Component
         $query = Order::find()->select(['organization.id', 'organization.name'])->where(['client_id' => $orgId])
             ->leftJoin('organization', 'organization.id = order.vendor_id')->groupBy('vendor_id');
         $data = $query->asArray()->all();
-        $data[''] = ['id' => '', 'name' => NULL];
+        $data[''] = ['id' => '', 'name' => null];
         $this->affiliated = ArrayHelper::map($data, 'id', 'name');
         asort($this->affiliated);
 

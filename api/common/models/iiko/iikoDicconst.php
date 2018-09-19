@@ -76,7 +76,7 @@ class iikoDicconst extends \yii\db\ActiveRecord
         return $res;
     }
 
-    public static function getSetting($denom)
+    public static function getSetting($denom, $orgId = null)
     {
         $model = self::findOne(['denom' => $denom]);
         if ($model) {

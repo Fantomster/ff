@@ -187,7 +187,6 @@ class VendorWebApi extends \api_web\components\WebApi
                  * Отправка почты
                  *
                  * */
-                $currentUser->sendInviteToVendor($user);
                 $relation->invite = RelationSuppRest::INVITE_ON;
                 $relation->save();
 
@@ -195,13 +194,14 @@ class VendorWebApi extends \api_web\components\WebApi
                 $currentOrganization->step = Organization::STEP_OK;
                 $currentOrganization->save();
 
+                $transaction->commit();
                 if (!empty($profile->phone)) {
                     $text = Yii::$app->sms->prepareText('sms.client_invite', [
                         'name' => $currentUser->organization->name
                     ]);
                     Yii::$app->sms->send($text, $profile->phone);
                 }
-                $transaction->commit();
+                $currentUser->sendInviteToVendor($user);
 
                 $result = [
                     'success' => true,
@@ -373,6 +373,10 @@ class VendorWebApi extends \api_web\components\WebApi
                 $model->inn = $post['inn'];
             }
 
+            if (!empty($post['gmt'])) {
+                $model->gmt = $post['gmt'];
+            }
+
             if (!empty($post['contact_name'])) {
                 $model->contact_name = $post['contact_name'];
             }
@@ -475,30 +479,32 @@ class VendorWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Загрузка основного каталога
+     * Загрузка индивид. каталога
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
      * @throws \yii\base\Exception
      */
-    public function uploadMainCatalog(array $request)
+    public function uploadPersonalCatalog(array $request)
     {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
+        if (empty($request['vendor_id'])) {
+            throw new BadRequestHttpException('empty_param|vendor_id');
         }
+        $vendorID = $request['vendor_id'];
 
         if (empty($request['data'])) {
             throw new BadRequestHttpException('empty_param|data');
         }
 
-        $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendorID, $this->user->organization);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
         }
+        $catalogID = $catalog->id;
 
         //проверка нет ли уже загруженного временного каталога
         //если есть - удаляем
-        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalogID, 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
             Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
             CatalogTempContent::deleteAll(['temp_id' => $tempCatalog->id]);
@@ -512,7 +518,7 @@ class VendorWebApi extends \api_web\components\WebApi
                 $file = \api_web\helpers\File::getFromBase64($base64, $type, "xlsx");
                 Yii::$app->get('resourceManager')->save($file, Excel::excelTempFolder . DIRECTORY_SEPARATOR . $file->name);
                 $newTempCatalog = new CatalogTemp();
-                $newTempCatalog->cat_id = $request['cat_id'];
+                $newTempCatalog->cat_id = $catalogID;
                 $newTempCatalog->user_id = $this->user->id;
                 $newTempCatalog->excel_file = $file->name;
                 $newTempCatalog->save();
@@ -530,19 +536,22 @@ class VendorWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Валидация и импорт уже загруженного основного каталога
+     * Валидация и импорт уже загруженного инд. каталога
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function importMainCatalog(array $request)
+    public function importPersonalCatalog(array $request)
     {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
+        if (empty($request['vendor_id'])) {
+            throw new BadRequestHttpException('empty_param|vendor_id');
         }
-
-        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        if (!$catalog) {
+            throw new BadRequestHttpException("Catalog not found");
+        }
+        $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($tempCatalog)) {
             throw new BadRequestHttpException("Temp catalog not found");
         }

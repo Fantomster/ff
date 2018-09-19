@@ -6,7 +6,7 @@ use common\models\CatalogBaseGoods;
 use Yii;
 
 /**
- * This is the model class for table "iiko_waybill_data".
+ * This is the model class for table "one_s_waybill_data".
  *
  * @property integer $id
  * @property integer $waybill_id
@@ -23,11 +23,14 @@ use Yii;
  * @property double $koef
  * @property string $created_at
  * @property string $updated_at
+ * @property integer $unload_status
  */
 class OneSWaybillData extends \yii\db\ActiveRecord
 {
     public $pdenom;
     public $enable_all_map = true;
+    public $koef_buttons;
+    public $koef_forever;
 
     /**
      * @inheritdoc
@@ -54,7 +57,7 @@ class OneSWaybillData extends \yii\db\ActiveRecord
             [['waybill_id'], 'required'],
             [['waybill_id', 'product_id', 'product_rid', 'org', 'vat', 'vat_included'], 'integer'],
             [['sum', 'quant', 'defsum', 'defquant', 'koef', 'created_at', 'updated_at', 'pdenom'], 'safe'],
-            [['munit'], 'string', 'max' => 10],
+            [['munit', 'koef_buttons'], 'string', 'max' => 10],
             [['koef', 'sum', 'quant'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             ['koef', 'filter', 'filter' => function ($value) {
                 $newValue = 0 + str_replace(',', '.', $value);
@@ -95,6 +98,10 @@ class OneSWaybillData extends \yii\db\ActiveRecord
             'updated_at' => Yii::t('app', 'Updated At'),
             'fproductnameProduct' => Yii::t('app', 'Наименование продукции'),
             'enable_all_map' => Yii::t('app', 'Сохранить в сопоставлении'),
+            'koef_buttons' => Yii::t('app', ''),
+            'koef_forever' => Yii::t('app', ''),
+            'querys' => Yii::t('app', ''),
+            'unload_status' => Yii::t('app', 'Статус для отправления'),
         ];
     }
 

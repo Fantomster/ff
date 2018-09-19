@@ -123,11 +123,12 @@ class iikoSync extends WebApi
                     $model->denom = $store['name'];
                 }
                 if (!empty($store['code'])) {
-                    $model->store_code = $store['code'];
+                    $model->store_code = is_array($store['code']) ? implode('_', $store['code']) : (string)$store['code'];
                 }
                 if (!empty($store['type'])) {
                     $model->store_type = $store['type'];
                 }
+
                 //Валидируем сохраняем
                 if (!$model->validate() || !$model->save()) {
                     throw new ValidationException($model->getFirstErrors());

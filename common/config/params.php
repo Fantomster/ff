@@ -86,6 +86,11 @@ return [
         'DEFAULT_URL' => 'https://mixcart-test.firebaseio.com',
         'DEFAULT_TOKEN' => '',
         'DEFAULT_PATH' => '/',
+        'apiKey' => "AIzaSyCJU32Bx9BvEU2FLd0BS3FZw1fKTmLTc_M",
+        'authDomain' => "mixcart-test.firebaseapp.com",
+        'projectId' => "mixcart-test",
+        'storageBucket' => "mixcart-test.appspot.com",
+        'messagingSenderId' => "1068392671931"
     ],
     
     'vtsHttp' => [

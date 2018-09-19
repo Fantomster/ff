@@ -51,14 +51,13 @@ class OneSWaybillDataSearch extends OneSWaybillData
             ->select('one_s_waybill_data.*, one_s_good.name as pdenom')
             ->leftJoin('one_s_good', 'one_s_good.id = product_rid')
             ->where(['waybill_id' => Yii::$app->request->get('waybill_id')]);
-        if(isset($params['OneSWaybillDataSearch']['vat']) && $params['OneSWaybillDataSearch']['vat'] != 1){
+        if (isset($params['OneSWaybillDataSearch']['vat']) && $params['OneSWaybillDataSearch']['vat'] != 1) {
             $vat = $params['OneSWaybillDataSearch']['vat'];
             $query = $query->andWhere(['vat' => $vat]);
         }
         $query = $query->all();
 
-        foreach ($query as $key=>$value)
-        {
+        foreach ($query as $key => $value) {
             $data = $value->attributes;
             $data['fproductnameProduct'] = $value->fproductnameProduct;
             $arr[$key] = $data;
@@ -72,11 +71,11 @@ class OneSWaybillDataSearch extends OneSWaybillData
 
         ]);
 
-       $dataProvider->setSort([
+        $dataProvider->setSort([
             'attributes' => [
-                'product_id'=>[
-                    'asc' => ['catalog_base_goods.id' => SORT_ASC],
-                    'desc' => ['catalog_base_goods.id' => SORT_DESC],
+                'product_id' => [
+                    'asc' => ['product_id' => SORT_ASC],
+                    'desc' => ['product_id' => SORT_DESC],
                 ],
                 'fproductnameProduct'
             ],

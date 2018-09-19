@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api\common\models\merc\MercVsd;
 use Yii;
 
 /**
@@ -16,10 +17,15 @@ use Yii;
  * @property double $vat_waybill
  * @property string $merc_uuid
  * @property int $unload_status
+ * @property int $sum_with_vat
+ * @property int $sum_without_vat
+ * @property int $price_with_vat
+ * @property int $price_without_vat
+ *
  *
  * @property Waybill $waybill
  */
-class WaybillContent extends \yii\db\ActiveRecord
+class WaybillContent extends yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -44,7 +50,7 @@ class WaybillContent extends \yii\db\ActiveRecord
     {
         return [
             [['waybill_id'], 'required'],
-            [['waybill_id', 'order_content_id', 'product_outer_id', 'unload_status'], 'integer'],
+            [['waybill_id', 'order_content_id', 'product_outer_id', 'unload_status', 'sum_with_vat', 'sum_without_vat', 'price_with_vat', 'price_without_vat'], 'integer'],
             [['quantity_waybill', 'price_waybill', 'vat_waybill'], 'number'],
             [['merc_uuid'], 'string', 'max' => 255],
             [['waybill_id'], 'exist', 'skipOnError' => true, 'targetClass' => Waybill::className(), 'targetAttribute' => ['waybill_id' => 'id']],
@@ -75,5 +81,12 @@ class WaybillContent extends \yii\db\ActiveRecord
     public function getWaybill()
     {
         return $this->hasOne(Waybill::className(), ['id' => 'waybill_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     * */
+    public function getMercVsd(){
+        return $this->hasOne(MercVsd::className(), ['uuid' => 'merc_uuid']);
     }
 }

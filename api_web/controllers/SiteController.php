@@ -3,6 +3,7 @@
 namespace api_web\controllers;
 
 use api_web\components\WebApi;
+use api_web\components\WebApiSwaggerAction;
 use Yii;
 use yii\web\Controller;
 use frontend\modules\billing\models\BillingPayment;
@@ -32,7 +33,9 @@ class SiteController extends Controller
             Yii::getAlias('@api_web/controllers/ChatController.php'),
             Yii::getAlias('@api_web/controllers/RequestController.php'),
             Yii::getAlias('@api_web/controllers/NotificationController.php'),
+            Yii::getAlias('@api_web/controllers/EdoController.php'),
             Yii::getAlias('@api_web/controllers/SystemController.php'),
+            Yii::getAlias('@api_web/controllers/RabbitController.php'),
             Yii::getAlias('@api_web/modules/integration/controllers/DefaultController.php'),
         ];
 
@@ -60,7 +63,7 @@ class SiteController extends Controller
                 'restUrl' => \yii\helpers\Url::to(['/site/api'], true),
             ],
             'api' => [
-                'class' => 'light\swagger\SwaggerApiAction',
+                'class' => WebApiSwaggerAction::class,
                 'scanDir' => $scanDir,
                 'cache' => 'cache',
                 'cacheKey' => 'api-web-swagger-cache'

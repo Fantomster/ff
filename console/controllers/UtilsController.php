@@ -271,10 +271,19 @@ class UtilsController extends Controller
         $i=0;
 
         do {
-            \Yii::$app->db_api->close();
-            \Yii::$app->db_api->open();
+            /*\Yii::$app->db_api->close();
+            \Yii::$app->db_api->open();*/
 
-            $sql = ($offset == 0) ? "SELECT uuid, `data` FROM vetis_product_item LIMIT $count" : "SELECT uuid, `data` FROM vetis_product_item LIMIT $count, $offset";
+            $sql = ($offset == 0) ? "select
+  uuid,
+  (SELECT data FROM vetis_product_item t2 WHERE t1.uuid = t2.uuid) as data
+from vetis_product_item t1
+LIMIT $count"
+                : "select
+  uuid,
+  (SELECT data FROM vetis_product_item t2 WHERE t1.uuid = t2.uuid) as data
+from vetis_product_item t1
+LIMIT $count, $offset";
 
             echo "start SQL".PHP_EOL;
             $rows = \Yii::$app->db_api->createCommand($sql)->queryAll();

@@ -736,7 +736,7 @@ class ClientController extends DefaultController
                                 $price = str_replace('.', '', $price);
                             }
 
-                            $newProduct = CatalogBaseGoods::findOne(['product' => $product]);
+                            $newProduct = CatalogBaseGoods::findOne(['product' => $product, 'supp_org_id' => $get_supp_org_id]);
                             if (empty($newProduct)) {
                                 $newProduct = new CatalogBaseGoods();
                             }

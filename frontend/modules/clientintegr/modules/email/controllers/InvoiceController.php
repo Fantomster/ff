@@ -170,7 +170,7 @@ class InvoiceController extends Controller
                 }
             }
             //Пересчитаем заказ
-            $order->calculateTotalPrice();
+            $order->calculateTotalPrice(true, $invoice->total_sum_withtax);
             $invoice->order_id = $order->id;
             $invoice->save();
             $transaction->commit();

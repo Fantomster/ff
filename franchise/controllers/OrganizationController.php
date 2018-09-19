@@ -255,14 +255,13 @@ class OrganizationController extends DefaultController {
                         $user->save();
                         // send email
                         $model = new Organization();
-                        $model->sendGenerationPasswordEmail($user);
-
                         $profile->setUser($user->id)->save();
                         $client->save();
                         $user->setOrganization($client);
                         $this->addOrganization($client);
                         $buisinessInfo->setOrganization($client);
                         $transaction->commit();
+                        $model->sendGenerationPasswordEmail($user);
                         return $this->redirect(['organization/clients']);
                     } catch (Exception $e) {
                         $transaction->rollback();
@@ -475,7 +474,6 @@ class OrganizationController extends DefaultController {
                         $vendor->save();
                         // send email
                         $model = new Organization();
-                        $model->sendGenerationPasswordEmail($user);
                         $catalog->name = Yii::t('app', \common\models\Catalog::CATALOG_BASE_NAME);
                         $catalog->status = 1;
                         $catalog->type = \common\models\Catalog::BASE_CATALOG;
@@ -485,6 +483,7 @@ class OrganizationController extends DefaultController {
                         $this->addOrganization($vendor);
                         $buisinessInfo->setOrganization($vendor);
                         $transaction->commit();
+                        $model->sendGenerationPasswordEmail($user);
                         return $this->redirect(['organization/vendors']);
                     } catch (Exception $e) {
                         $transaction->rollback();

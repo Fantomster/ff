@@ -171,7 +171,7 @@ $this->registerCss("
                                 <div id="upload-avatar"></div>
                             </div>
                             <img id="newAvatar"
-                                 style="background-color:#ccc; display: block; width: 420px; margin-top: 15px; z-index: 1; max-height:236px;"
+                                 style="background-color:#ccc; display: block; width: 420px; margin-top: 15px; z-index: 1; max-height:236px; height:236px;"
                                  class="center-block" src="<?= $organization->pictureUrl ?>">
                             <label class="btn btn-gray" id="uploadAvatar"
                                    style="width:420px; display: block; margin: 0 auto; z-index: 999; border-radius: 0; margin-bottom:20px;"> <?= Yii::t('message', 'frontend.views.client.settings.avatar', ['ru' => 'Загрузить аватар']) ?>

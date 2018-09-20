@@ -216,7 +216,6 @@ Modal::widget([
         ]
     );
     ?>
-
     <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
     <h4><?= Yii::t('message', 'frontend.client.integration.mercury.store_entry_list', ['ru'=>'Журнал входной продукци']) ?>:</h4>
     <div class="box box-info">

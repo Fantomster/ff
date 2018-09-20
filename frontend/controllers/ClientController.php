@@ -783,18 +783,18 @@ class ClientController extends DefaultController
                          * Отправка почты
                          *
                          * */
-                        $currentUser->sendInviteToVendor($user);
                         $currentOrganization = $currentUser->organization;
                         $currentOrganization->step = Organization::STEP_OK;
                         $currentOrganization->save();
 
+                        $transaction->commit();
                         if (!empty($profile->phone)) {
                             $text = Yii::$app->sms->prepareText('sms.client_invite', [
                                 'name' => $currentUser->organization->name
                             ]);
                             Yii::$app->sms->send($text, $profile->phone);
                         }
-                        $transaction->commit();
+                        $currentUser->sendInviteToVendor($user);
                         if ($check['eventType'] == 5) {
                             if ($user && $currentUser) {
                                 $managerAssociate = new ManagerAssociate();
@@ -987,18 +987,18 @@ class ClientController extends DefaultController
                          * Отправка почты
                          *
                          * */
-                        $currentUser->sendInviteToVendor($user);
                         $currentOrganization = $currentUser->organization;
                         $currentOrganization->step = Organization::STEP_OK;
                         $currentOrganization->save();
 
+                        $transaction->commit();
                         if (!empty($profile->phone)) {
                             $text = Yii::$app->sms->prepareText('sms.client_invite', [
                                 'name' => $currentUser->organization->name
                             ]);
                             Yii::$app->sms->send($text, $profile->phone);
                         }
-                        $transaction->commit();
+                        $currentUser->sendInviteToVendor($user);
                         if ($check['eventType'] == 5) {
                             /**
                              *

@@ -48,7 +48,7 @@
         "kartik-v/yii2-field-range": "*",
         "kartik-v/yii2-grid": "@dev",
         "kartik-v/yii2-mpdf": "*",
-        "kartik-v/yii2-tree-manager": "@dev",
+        "kartik-v/yii2-tree-manager": "dev-master#8ab3047",
         "kartik-v/yii2-widget-depdrop": "@dev",
         "kartik-v/yii2-widget-select2": "@dev",
         "kartik-v/yii2-widget-typeahead": "*",

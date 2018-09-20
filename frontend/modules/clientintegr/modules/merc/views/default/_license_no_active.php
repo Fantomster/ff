@@ -36,12 +36,13 @@ if (($lic->status_id==1) and ($timestamp_now>(strtotime($lic->td)))) $lic_merc=1
             </div>
         </div>
     </div>
-<?php
-$enterpriseGuid = \api\common\models\merc\mercDicconst::getSetting('enterprise_guid');
-$messageVSD = 'Время последнего обновления списка ВСД: ';
-$messageStock = 'Время последнего обновления журнала входной продукции: ';
 
-$customJs = <<< JS
+<?php
+try {
+    $enterpriseGuid = \api\common\models\merc\mercDicconst::getSetting('enterprise_guid');
+    $messageVSD = 'Время последнего обновления списка ВСД: ';
+    $messageStock = 'Время последнего обновления журнала входной продукции: ';
+    $customJs = <<< JS
         var refVSD = firebase.database().ref('/mercury/operation/MercVSDList/enterpriseGuid/$enterpriseGuid');
         refVSD.on("value", (snapshot) => {
             if(snapshot.val() != null) {
@@ -65,5 +66,8 @@ $customJs = <<< JS
         }
     });
 JS;
-$this->registerJs($customJs, View::POS_END);
+    $this->registerJs($customJs, View::POS_END);
+}
+catch (\Exception $e)
+{}
 ?>

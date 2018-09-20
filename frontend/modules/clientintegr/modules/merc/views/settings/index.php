@@ -36,16 +36,14 @@ Modal::widget([
     ])
     ?>
 </section>
+<section class="content">
 <?=
 $this->render('/default/_license_no_active.php', ['lic' => $lic]);
 ?>
-<section class="content-header">
+
     <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
-</section>
-<section class="content-header">
+
     <h4><?= Yii::t('message', 'frontend.client.integration.mercury.settings', ['ru'=>'Настройки']) ?>:</h4>
-</section>
-<section class="content">
     <div class="catalog-index">
         <div class="box box-info">
             <div class="box-header with-border">

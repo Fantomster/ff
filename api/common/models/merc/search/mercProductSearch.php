@@ -3,8 +3,7 @@
 namespace api\common\models\merc\search;
 
 use api\common\models\merc\mercDicconst;
-use api\common\models\merc\MercStockEntry;
-use api\common\models\vetis\VetisPackingType;
+use common\models\vetis\VetisPackingType;
 use common\models\vetis\VetisProductItem;
 use common\models\vetis\VetisUnit;
 use yii\base\Model;
@@ -46,7 +45,7 @@ class mercProductSearch extends VetisProductItem
      */
     public function search($params)
     {
-        $guid = 'fceda1c9-218a-11e2-a69b-b499babae7ea';//mercDicconst::getSetting('enterprise_guid');
+        $guid = mercDicconst::getSetting('issuer_id');
         $productTable = VetisProductItem::tableName();
         $unitTable = VetisUnit::tableName();
         $packingTypeTable = VetisPackingType::tableName();

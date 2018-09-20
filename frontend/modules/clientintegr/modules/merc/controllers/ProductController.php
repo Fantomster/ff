@@ -19,6 +19,7 @@ use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use frontend\modules\clientintegr\modules\merc\models\dateForm;
 use frontend\modules\clientintegr\modules\merc\models\expiryDate;
 use frontend\modules\clientintegr\modules\merc\models\inputDate;
+use frontend\modules\clientintegr\modules\merc\models\productForm;
 use frontend\modules\clientintegr\modules\merc\models\productionDate;
 use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
 use Yii;
@@ -110,89 +111,86 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
         }
     }
 
-    /*public function actionCreate()
+    public function actionCreate()
     {
-        $model = new createStoreEntryForm();
-        $productionDate = new productionDate();
-        $expiryDate = new expiryDate();
-        $inputDate = new inputDate();
-        if ($model->load(Yii::$app->request->post()) && $productionDate->load(Yii::$app->request->post()) && $expiryDate->load(Yii::$app->request->post()) && $inputDate->load(Yii::$app->request->post())) {
-            //var_dump($productionDate->first_date, date('d.m.Y H:i'));
+        $model = new productForm();
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if (!Yii::$app->request->isAjax) {
-                // var_dump("setp 2");
-                $res = $model->validate() && $productionDate->validate() && $expiryDate->validate() && $inputDate->validate();
-                if ($res) {
-                    $model->dateOfProduction = $productionDate;
-                    $model->expiryDate = $expiryDate;
-                    $model->vsd_issueDate = $inputDate;
+                //try {
+                    $result = mercuryApi::getInstance()->modifyProducerStockListOperation('CREATE', null, $model);
+                    if (!isset($result))
+                        throw new \Exception('Error create Product');
 
-                    try {
-                        $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($model);
-                        if(!isset($result))
-                            throw new \Exception('Error create Stock entry');
-
-                        Yii::$app->session->setFlash('success', 'Позиция добавлена на склад!');
-                        return $this->redirect(['index']);
-                    } catch (\Error $e) {
-                        Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                        return $this->redirect(['index']);
-                    } catch (\Exception $e) {
-                        Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                        return $this->redirect(['index']);
-                    }
-                }
+                    Yii::$app->session->setFlash('success', 'Позиция добавлена в номенклатуру!');
+                    return $this->redirect(['index']);
+                /*} catch (\Error $e) {
+                    Yii::$app->session->setFlash('error', $this->getErrorText($e));
+                    return $this->redirect(['index']);
+                } catch (\Exception $e) {
+                    Yii::$app->session->setFlash('error', $this->getErrorText($e));
+                    return $this->redirect(['index']);
+                }*/
             }
         }
-        $params = ['model' => $model, 'productionDate' => $productionDate, 'expiryDate' => $expiryDate, 'inputDate' => $inputDate];
+        $params = ['model' => $model];
         if (Yii::$app->request->isAjax) {
-            return $this->renderAjax('add-stock-enrty/_mainForm', $params);
+            return $this->renderAjax('_form', $params);
         } else {
-            return $this->render('add-stock-enrty/create', $params);
+            return $this->render('create', $params);
         }
     }
 
-
-    public function actionProducersList($q = null, $c=null)
+    public function actionUpdate($uuid)
     {
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $out =  ['results' => ['id' => '', 'text' => '']];
-        if (!is_null($q)) {
-            if($c !== '72a84b51-5c5e-11e1-b9b7-001966f192f1' && $c != null) {
-                $res = [];
-                $list = cerberApi::getInstance()->getForeignEnterpriseList($q,$c);
-                if (isset($list)) {
-                    $res = [];
-                    foreach ($list as $item) {
-                        if (($item->last) && ($item->active))
-                            $res[] = ['id' => $item->guid,
-                                'text' => $item->name . '(' .
-                                    $item->address->addressView
-                                    . ')'
-                            ];
-                    }
-                }
-            }
-
-            if($c == '72a84b51-5c5e-11e1-b9b7-001966f192f1' || $c == null) {
-                $list = cerberApi::getInstance()->getRussianEnterpriseList($q);
-                //var_dump($list);
-                if (isset($list)) {
-
-                    foreach ($list as $item) {
-                        if (($item->last) && ($item->active))
-                            $res[] = ['id' => $item->guid,
-                                'text' => $item->name . '(' .
-                                    $item->address->addressView
-                                    . ')'
-                            ];
-                    }
-                }
-            }
-            if (count($res) > 0)
-                $out['results'] = $res;
-
+        $product = VetisProductItem::findOne(['uuid' => $uuid, 'last' => true, 'active' => true]);
+        if(is_null($product)) {
+            Yii::$app->session->setFlash('error', 'Позиция не найдена или не активна!');
+            return $this->redirect(['index']);
         }
-        return $out;
+        $model = new productForm();
+        $model->setAttributes($product->attributes);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            if (!Yii::$app->request->isAjax) {
+                try {
+                    $result = mercuryApi::getInstance()->modifyProducerStockListOperation('UPDATE', $uuid, $model);
+                    if (!isset($result))
+                        throw new \Exception('Error update Product');
+
+                    Yii::$app->session->setFlash('success', 'Позиция изменена!');
+                    return $this->redirect(['index']);
+                } catch (\Error $e) {
+                    Yii::$app->session->setFlash('error', $this->getErrorText($e));
+                    return $this->redirect(['index']);
+                } catch (\Exception $e) {
+                    Yii::$app->session->setFlash('error', $this->getErrorText($e));
+                    return $this->redirect(['index']);
+                }
+            }
+        }
+        $params = ['model' => $model];
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('_form', $params);
+        } else {
+            return $this->render('update', $params);
+        }
+    }
+
+    public function actionDelete($uuid)
+    {
+       try {
+            $result = mercuryApi::getInstance()->modifyProducerStockListOperation('DELETE', $uuid);
+            if (!isset($result))
+                throw new \Exception('Error delete Product');
+
+            Yii::$app->session->setFlash('success', 'Позиция удалена из номенклатуры!');
+            return $this->redirect(['index']);
+        } catch (\Error $e) {
+            Yii::$app->session->setFlash('error', $this->getErrorText($e));
+            return $this->redirect(['index']);
+        } catch (\Exception $e) {
+            Yii::$app->session->setFlash('error', $this->getErrorText($e));
+            return $this->redirect(['index']);
+        }
     }
 
     private function getErrorText($e)
@@ -201,5 +199,5 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
             return "При обращении к api Меркурий возникла ошибка. Ошибка зарегистрирована в журнале за номером №" . $e->getMessage() . ". Если ошибка повторяется обратитесь в техническую службу.";
         else
             return "При обращении к api Меркурий возникла ошибка. Если ошибка повторяется обратитесь в техническую службу.";
-    }*/
+    }
 }

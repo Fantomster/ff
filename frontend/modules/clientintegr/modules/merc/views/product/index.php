@@ -39,7 +39,7 @@ Modal::widget([
     ])
     ?>
 </section>
-<section class="content-header">
+<section class="content">
     <?=
     $this->render('/default/_license_no_active.php', ['lic' => $lic]);
     ?>
@@ -134,18 +134,24 @@ Modal::widget([
                     ]);
                     return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                 },
+                'update' =>  function ($url, $model) {
+                    $customurl = Url::to(['update','uuid'=>$model->uuid]);
+                    return \yii\helpers\Html::a( '<i class="fa fa-pencil" aria-hidden="true"></i>', $customurl,
+                        ['title' => 'Редактировать позицию', 'data-pjax'=>"0"]);
+                },
+                'delete' =>  function ($url, $model) {
+                    $customurl = Url::to(['delete','uuid'=>$model->uuid]);
+                    return \yii\helpers\Html::a( '<i class="fa fa-trash" aria-hidden="true"></i>', $customurl,
+                        ['title' => 'Удалить позицию', 'class' => 'del', 'data-pjax'=>"0", 'style'=>"color: #d9534f;"]);
+                },
             ]
         ]
     );
     ?>
-</section>
-<section class="content-header">
     <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
-</section>
-<section class="content-header">
+
     <h4><?= 'Справочники продукции' ?>:</h4>
-</section>
-<section class="content-header">
+
     <div class="box box-info">
         <div class="box-header with-border">
             <div class="panel-body">
@@ -394,7 +400,38 @@ $("#ajax-load").on("click", ".save-form", function() {
         $(".box-body").on("change", "#statusFilter", function() {
             $("#search-form").submit();
         });
-     }); 
+     });
+  $(document).on("click",".del", function(e){
+      e.preventDefault();
+        bootbox.confirm({
+            title: "Удалить позицию?",
+            message: "Позиция будет удалена из номенклатуры", 
+            buttons: {
+                confirm: {
+                    label: 'Удалить',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'Отмена',
+                    className: 'btn-default'
+                }
+            },
+            className: "danger-fk",
+            callback: function(result) {
+		if(result){
+		$.ajax({
+	        url: $(this).attr("href"),
+	        type: "GET",
+	        cache: false,
+	        success: function(response) {
+			       $.pjax.reload({container: "#pjax-product-list",timeout:30000});
+		        }	
+		    });
+		}else{
+		console.log('cancel');	
+		}
+	}});      
+})
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

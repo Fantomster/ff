@@ -21,6 +21,13 @@ class MercProductItemList extends MercDictConsumer
     public static $timeout  = 60*60*24;
     public static $timeoutExecuting = 60*60*12;
 
+    public static function updateList($list)
+    {
+        $obj = new self(0);
+        $obj->init();
+        $obj->saveList($list);
+    }
+
     /**
      * Обработка и сохранение результата
      * @param $list

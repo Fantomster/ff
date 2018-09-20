@@ -1,6 +1,6 @@
 <?php
 
-namespace api\common\models\vetis;
+namespace common\models\vetis;
 
 use Yii;
 

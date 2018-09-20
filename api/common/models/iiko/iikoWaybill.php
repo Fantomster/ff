@@ -132,6 +132,12 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             }
         }
 
+        $doc_num = $this->order->waybill_number;
+
+        if (!empty($doc_num)) {
+            $this->num_code = $doc_num;
+        }
+
 
         return parent::beforeSave($insert);
 
@@ -199,11 +205,25 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         if ($waybillMode !== '0') {
             $xml->addChild('documentNumber', $model->order_id . '-' . $model->num_code);
             $xml->addChild('invoice', $model->text_code);
-            $xml->addChild('incomingDocumentNumber', $model->order_id . '-' . $model->num_code);
+
+            $doc_num = $this->order->waybill_number;
+
+            if (!empty($doc_num)) {
+                $xml->addChild('incomingDocumentNumber', $doc_num);
+            } else {
+                $xml->addChild('incomingDocumentNumber', $model->order_id . '-' . $model->num_code);
+            }
+
         } else {
             $xml->addChild('documentNumber', $model->order_id);
             $xml->addChild('invoice', $model->text_code);
-            $xml->addChild('incomingDocumentNumber', $model->num_code);
+
+            if (!empty($doc_num)) {
+                $xml->addChild('incomingDocumentNumber', $doc_num);
+            } else {
+                $xml->addChild('incomingDocumentNumber', $model->num_code);
+            }
+
         }
 
         $xml->addChild('comment', $model->note);

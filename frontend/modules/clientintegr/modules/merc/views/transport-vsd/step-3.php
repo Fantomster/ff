@@ -112,7 +112,7 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                 ?>
                 <?= $form->field($model, 'seriesTTN')->textInput(['maxlength' => true]); ?>
                 <?= $form->field($model, 'numberTTN',['enableClientValidation' => false])->textInput(['maxlength' => true]); ?>
-                <?php echo '<label class="control-label"><b>Дата бумажного ТТН</b></label>';
+                <?php echo '<label class="control-label"><b>Дата ТТН</b></label>';
                 echo $form->field($model, 'dateTTN',['enableClientValidation' => false])->widget(\kartik\widgets\DatePicker::classname(), [
                     'options' => ['placeholder' => 'Дата ТТН'],
                     'pluginOptions' => [

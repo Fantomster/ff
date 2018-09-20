@@ -161,8 +161,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                 }
                 $client_id .= ")";
             }
-        }
-        }
+
         }
 
         $sql = "

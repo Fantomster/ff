@@ -154,8 +154,14 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         if( $this->service_id == 2) {
             $mainOrg_id = iikoService::getMainOrg($this->client->id);
             if ($mainOrg_id != $this->client->id) {
-                $client_id = "IF(product_id in (select product_id from `$dbName`.all_map where service_id = 2 and org_id = $client_id), $client_id, $mainOrg_id)";
+                $client_id = "IF(product_id in (select product_id from `$dbName`.all_map where service_id = 2 and org_id = $client_id), $client_id";
+
+                if (!empty($mainOrg_id)) {
+                    $client_id .= ", $mainOrg_id";
+                }
+                $client_id .= ")";
             }
+
         }
 
         $sql = "

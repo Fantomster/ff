@@ -126,8 +126,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
         }
 
-        if (Yii::$app->request->isAjax)
+        if (Yii::$app->request->isAjax) {
             return $this->renderAjax('step-1', ['list' => $list]);
+        }
         return $this->render('step-1', ['list' => $list]);
     }
 
@@ -314,8 +315,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
         }
 
-        if (Yii::$app->request->isAjax)
+        if (Yii::$app->request->isAjax) {
             return $this->renderAjax('conversion-step-1', ['list' => $list]);
+        }
         return $this->render('conversion-step-1', ['list' => $list]);
     }
 
@@ -358,8 +360,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             }
         }
         $params = ['model' => $model, 'productionDate' => $productionDate, 'expiryDate' => $expiryDate, 'inputDate' => $inputDate];
-        if (Yii::$app->request->isAjax)
+        if (Yii::$app->request->isAjax) {
             return $this->renderAjax('conversion-step-2', $params);
+        }
         return $this->render('conversion-step-2', $params);
     }
 
@@ -380,8 +383,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 }
             }
         }
-        if (count($res) > 0)
+        if (count($res) > 0) {
             $out['results'] = $res;
+        }
 
         return $out;
     }

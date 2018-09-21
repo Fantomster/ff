@@ -60,6 +60,9 @@ use yii\widgets\Pjax;
         case \api\common\models\iiko\iikoDicconst::TYPE_LIST:
             echo $this->render('_goods_list', ['org' => $org, 'id' => $id]);
             break;
+        case \api\common\models\iiko\iikoDicconst::TYPE_INT:
+            echo $form->field($model, 'value')->input('number',['maxlength' => true]);
+            break;
         default:
             echo $form->field($model, 'value')->textInput(['maxlength' => true]);
     }

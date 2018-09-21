@@ -247,7 +247,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             }
             else {
                 if(isset($hc->owner)) {
-                    $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->owner->uuid);
+                    $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
                 }
                 else {
                     return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
@@ -256,7 +256,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         } catch (\SoapFault $e) {
             return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
         }
-        return (['result' => true, 'name' => $hc->name . ', ИНН:' . $hc->inn, 'uuid' => $hc->uuid]);
+        return (['result' => true, 'name' => $hc->name . ', ИНН:' . $hc->inn, 'uuid' => $hc->guid]);
     }
 
     private function getErrorText($e)
@@ -346,10 +346,10 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                         return $this->redirect(['/clientintegr/merc/stock-entry']);
                     } catch (\Error $e) {
                         Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                        return $this->redirect(['conversion-step-2']);
+                        return $this->redirect(['/clientintegr/merc/stock-entry']);
                     } catch (\Exception $e) {
                         Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                        return $this->redirect(['conversion-step-2']);
+                        return $this->redirect(['/clientintegr/merc/stock-entry']);
                     }
                 }
             }

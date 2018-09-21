@@ -226,6 +226,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out =  ['results' => ['id' => '', 'text' => '']];
+        $res = [];
         if (!is_null($q)) {
             if($c !== '72a84b51-5c5e-11e1-b9b7-001966f192f1' && $c != null) {
                 $res = [];
@@ -245,7 +246,6 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
             if($c == '72a84b51-5c5e-11e1-b9b7-001966f192f1' || $c == null) {
                 $list = cerberApi::getInstance()->getRussianEnterpriseList($q);
-                //var_dump($list);
                 if (isset($list)) {
 
                     foreach ($list as $item) {

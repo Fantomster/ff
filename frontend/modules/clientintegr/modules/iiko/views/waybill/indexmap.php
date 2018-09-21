@@ -624,6 +624,7 @@ $js = <<< JS
                     html: '<i class="glyphicon glyphicon-edit"></i>  <span style="font-size:14px">Редактировать продукт iiko</span></br></br><span id="tovar">товар</span></br></br>' +
                      '<input type="text" id="bukv-tovar" class="swal2-input" placeholder="Введите или выберите товар" autofocus>'+
                      '<div id="bukv-tovar2" style="margin-top:0px;padding-top:0px;"></div>'+'<div id="bukv-tovar3" style="margin-top:0px;padding-top:0px;"></div>'
+                     +'<div id="bukv-tovar4" style="margin-top:0px;padding-top:0px;"></div>'
                      + '</br><input type="submit" name="denom_forever" id="denom_forever" class="btn btn-sm btn-primary butsubmit" value="Сопоставить и запомнить"> '
                      +'<input type="submit" name="denom_onlyone" id="denom_onlyone" class="btn btn-sm btn-success butsubmit" value="Сопоставить"> '+
                      '<input type="button" id="denom_close" class="btn btn-sm btn-outline-danger" value="Отменить">',
@@ -637,6 +638,13 @@ $js = <<< JS
                             {
                                 $("#bukv-tovar").attr( 'placeholder', cont_old);
                             }
+                            $.post('auto-complete-selected-products').done(
+                                function(data){
+                                    if (data!=0) {
+                                        $('#bukv-tovar4').html('<i><span style="color:orange">Поиск осуществляется по '+data+' выбранным позициям.</span></i>');
+                                    }
+                                }
+                            )
                             $.post('auto-complete-new', {stroka: a}).done(
                                 function(data){
                                     if (data.length>0) {
@@ -827,28 +835,6 @@ $js = <<< JS
         $(document).ready(function() {
             links_column3();
         });
-        
-        /*$(document).ready(function() {
-            var hr = $('[data-col-seq='+0+'] a').attr('href');
-            console.log(hr);
-            var vatf = $('#vatFilter').val();
-            console.log(vatf);
-            var qasc=$('.asc').attr('data-sort');
-            var qdesc=$('.desc').attr('data-sort');
-            if (typeof qdesc === 'undefined') {
-                var sortirov=qasc;
-            } else {
-                var sortirov=qdesc;
-            }
-            var sortirov0=sortirov.substring(0,1);
-            if (sortirov0=='-') {
-                sortirov=sortirov.substring(1);
-            } else {
-                sortirov='-'+sortirov;
-            }
-            console.log(sortirov);       
-        });*/
-        
         
         FF = {};
         FF.deleteBtn = {

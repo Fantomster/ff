@@ -127,6 +127,14 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $sql = "UPDATE iiko_waybill_data SET product_rid = :w_prid, munit = :w_munit, updated_at = NOW(), linked_at = NOW() WHERE id = :w_id";
         $result = Yii::$app->db_api->createCommand($sql, [':w_prid' => $product_rid, ':w_munit' => $munit, ':w_id' => $number])->execute();
 
+        $sql = "SELECT COUNT(*) FROM iiko_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
+        $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryScalar();
+
+        if ($kolvo_nesopost==0) {
+            $sql = "UPDATE iiko_waybill SET readytoexport = 1, status_id = 4, updated_at = NOW() WHERE id = :w_wid";
+            $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+        }
+
         if ($button == 'forever') {
             $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
             $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 2, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
@@ -509,7 +517,11 @@ SQL;
             $orgId = User::findOne(Yii::$app->user->id)->organization_id;
             $constId = iikoDicconst::findOne(['denom' => 'main_org']);
             $parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
-            $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
+            // $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
+
+            $organizationID = (isset($parentId, $parentId->value) && strlen((int) $parentId->value) ==
+                strlen($parentId->value) && $parentId->value > 0) ? $parentId->value : $orgId;
+
             $andWhere = '';
             $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $organizationID])->all(), 'id', 'product_id');
             if (count($arr)) {

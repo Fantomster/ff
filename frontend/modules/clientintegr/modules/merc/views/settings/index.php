@@ -36,16 +36,14 @@ Modal::widget([
     ])
     ?>
 </section>
+<section class="content">
 <?=
 $this->render('/default/_license_no_active.php', ['lic' => $lic]);
 ?>
-<section class="content-header">
+
     <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
-</section>
-<section class="content-header">
+
     <h4><?= Yii::t('message', 'frontend.client.integration.mercury.settings', ['ru'=>'Настройки']) ?>:</h4>
-</section>
-<section class="content">
     <div class="catalog-index">
         <div class="box box-info">
             <div class="box-header with-border">
@@ -138,6 +136,7 @@ $this->render('/default/_license_no_active.php', ['lic' => $lic]);
     </div>
 </section>
 <?php
+$loading = Yii::t('message', 'frontend.client.integration.loading', ['ru' => 'Загрузка']);
 $customJs = <<< JS
 $(".modal").removeAttr("tabindex");
 
@@ -165,6 +164,17 @@ $("#settings-edit-form").on("click", ".save-form", function() {
 $("body").on("hidden.bs.modal", "#settings-edit-form", function() {
 $(this).data("bs.modal", null);
 })
+
+$("body").on("show.bs.modal", "#settings-edit-form", function() {
+    $(this).data("bs.modal", null);
+    var modal = $(this);
+    modal.find('.modal-content').html(
+    "<div class=\"modal-header\">" + 
+    "<button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>" + 
+    "</span><h4 class=\"modal-title\"><span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span>$loading</h4></div>");
+});
+
+$(".modal").removeAttr("tabindex");
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

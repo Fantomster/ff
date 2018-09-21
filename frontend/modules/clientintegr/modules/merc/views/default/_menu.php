@@ -4,8 +4,6 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 
 ?>
-
-
 <div class="catalog-index">
     <div class="box box-info">
         <div class="box-header with-border">
@@ -35,5 +33,4 @@ use yii\helpers\Url;
             </div>
         </div>
     </div>
-
 </div>

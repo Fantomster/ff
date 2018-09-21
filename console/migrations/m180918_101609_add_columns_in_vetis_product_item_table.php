@@ -18,6 +18,10 @@ class m180918_101609_add_columns_in_vetis_product_item_table extends Migration
      */
     public function safeUp()
     {
+        $this->truncateTable('{{%vetis_product_item}}');
+
+        $this->alterColumn('{{%vetis_product_item}}', 'uuid', $this->string(36));
+        $this->addPrimaryKey('pk_uuid', '{{%vetis_product_item}}', 'uuid');
 
         $this->addColumn('{{%vetis_product_item}}', 'packagingType_guid', $this->string(255));
         $this->addColumn('{{%vetis_product_item}}', 'packagingType_uuid', $this->string(255));
@@ -39,6 +43,8 @@ class m180918_101609_add_columns_in_vetis_product_item_table extends Migration
      */
     public function safeDown()
     {
+        $this->dropPrimaryKey('pk_uuid', '{{%vetis_product_item}}');
+
         $this->dropColumn('{{%vetis_product_item}}', 'packagingType_guid');
         $this->dropColumn('{{%vetis_product_item}}', 'packagingType_uuid');
         $this->dropColumn('{{%vetis_product_item}}', 'unit_uuid');

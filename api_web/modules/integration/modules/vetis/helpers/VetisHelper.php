@@ -194,7 +194,7 @@ class VetisHelper
                     'COUNT(m.id) as count',
                     'o.created_at',
                     'o.total_price',
-                    'GROUP_CONCAT(`wc`.`merc_uuid` SEPARATOR \',\') AS `uuids`',
+                    'GROUP_CONCAT(`m`.`uuid` SEPARATOR \',\') AS `uuids`',
                     'GROUP_CONCAT(DISTINCT `m`.`status` SEPARATOR \',\') AS `statuses`',
                 ]
             )

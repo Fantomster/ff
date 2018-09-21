@@ -12,7 +12,10 @@ namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
+use common\models\vetis\VetisProductItem;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use frontend\modules\clientintegr\modules\merc\models\expiryDate;
+use frontend\modules\clientintegr\modules\merc\models\productionDate;
 use yii\base\Component;
 
 class CreateRegisterProductionRequest extends Component{
@@ -30,10 +33,10 @@ class CreateRegisterProductionRequest extends Component{
         $request->initiator = $this->initiator;
         $enterprise = mercDicconst::getSetting('enterprise_guid');
         $request->enterprise['guid'] = $enterprise;
-        $firstDate = new \DateTime($this->step2['dateOfProduction']['first_date']);
+        /*$firstDate = new \DateTime($this->step2['dateOfProduction']['first_date']);
         $secondDate = new \DateTime($this->step2['dateOfProduction']['second_date']);
         $firstDateExpire = new \DateTime($this->step2['expiryDate']['first_date']);
-        $secondDateExpire = new \DateTime($this->step2['expiryDate']['second_date']);
+        $secondDateExpire = new \DateTime($this->step2['expiryDate']['second_date']);*/
         $array = [];
 
         foreach ($this->step1 as $id => $value){
@@ -52,29 +55,32 @@ class CreateRegisterProductionRequest extends Component{
             }
         }
 
-        $arr = explode('|', $this->step2['product_name']);
-        if(isset($arr[1])){
-            $productUUID = trim($arr[1]);
-        }else{
-            $productUUID = $this->step2['product_name'];
-        }
+        $product = VetisProductItem::findOne(['guid' => $this->step2['product_name']]);
+
+        $productionDate = new productionDate();
+        $productionDate->first_date = $this->step2['dateOfProduction']['first_date'];
+        $productionDate->second_date = $this->step2['dateOfProduction']['second_date'];
+
+        $expiryDate = new expiryDate();
+        $expiryDate ->first_date = $this->step2['expiryDate']['first_date'];
+        $expiryDate ->second_date = $this->step2['expiryDate']['second_date'];
 
         $array['productiveBatch'] = [
             'product' => [
-                'uuid' => $this->step2['product']
+                'guid' => $product->product_guid,
             ],
             'subProduct' => [
-                'uuid' => $this->step2['subProduct']
+                'guid' => $product->subproduct_guid,
             ],
             'productItem' => [
-                'uuid' => $productUUID
+                'guid' => $this->step2['product_name']
             ],
             'volume' => $this->step2['volume'],
             'unit' => [
                 'uuid' => $this->step2['unit']
             ],
-            'dateOfProduction' =>
-            [
+            'dateOfProduction' => json_encode($this->convertDate($productionDate)),
+            /*[
                 'firstDate' => [
                     'year' => $firstDate->format('Y'),
                     'month' => $firstDate->format('m'),
@@ -87,9 +93,10 @@ class CreateRegisterProductionRequest extends Component{
                     'day' => $secondDate->format('d'),
                     'hour' => $secondDate->format('h')
                 ]
-            ],
-            'expiryDate' =>
-                [
+            ],*/
+            
+            'expiryDate' => json_encode($this->convertDate($expiryDate)),
+               /* [
                     'firstDate' => [
                         'year' => $firstDateExpire->format('Y'),
                         'month' => $firstDateExpire->format('m'),
@@ -102,7 +109,7 @@ class CreateRegisterProductionRequest extends Component{
                         'day' => $secondDateExpire->format('d'),
                         'hour' => $secondDateExpire->format('h')
                     ]
-                ],
+                ],*/
             'batchID' => $this->step2['batchID'],
             'perishable' => 'perishable'
         ];
@@ -114,6 +121,29 @@ class CreateRegisterProductionRequest extends Component{
         ];
         $request->productionOperation = $array;
         return $request;
+    }
+
+    private function convertDate($date)
+    {
+        $time = strtotime($date->first_date);
+
+        $res = new GoodsDate();
+        $res->firstDate = new ComplexDate();
+        $res->firstDate->year = date('Y', $time);
+        $res->firstDate->month = date('m', $time);
+        $res->firstDate->day = date('d', $time);
+        $res->firstDate->hour = date('h', $time);
+
+        if (isset($date->secondDate)) {
+            $time = strtotime($date->second_date);
+
+            $res->secondDate = new ComplexDate();
+            $res->secondDate->year = date('Y', $time);
+            $res->secondDate->month = date('m', $time);
+            $res->secondDate->day = date('d', $time);
+            $res->secondDate->hour = date('h', $time);
+        }
+        return $res;
     }
 
 }

@@ -11,7 +11,7 @@ use yii\web\BadRequestHttpException;
  * @property integer $id ID статуса заказа
  * @property string $denom ИДЕНТИФИКАТОР СООТВЕТСТВУЮЩЕЙ КОНСТАНТЫ В МОДЕЛИ ORDER
  * @property string $comment Общее описание статуса
- * @property string $comment_edo Описание статуса заказа, обрабатываемого в системе EDI
+ * @property string $comment_edi Описание статуса заказа, обрабатываемого в системе EDI
  */
 class OrderStatus extends ActiveRecord
 {
@@ -23,8 +23,8 @@ class OrderStatus extends ActiveRecord
     const STATUS_REJECTED = 5;
     const STATUS_CANCELLED = 6;
     const STATUS_FORMING = 7;
-    const STATUS_EDO_SENT_BY_VENDOR = 8;
-    const STATUS_EDO_ACCEPTANCE_FINISHED = 9;
+    const STATUS_EDI_SENT_BY_VENDOR = 8;
+    const STATUS_EDI_ACCEPTANCE_FINISHED = 9;
 
     static $clientPermissionsDef = [
         'edit' => true,
@@ -48,16 +48,16 @@ class OrderStatus extends ActiveRecord
                 self::STATUS_REJECTED,
                 self::STATUS_CANCELLED,
                 self::STATUS_FORMING,
-                self::STATUS_EDO_SENT_BY_VENDOR,
-                self::STATUS_EDO_ACCEPTANCE_FINISHED,
+                self::STATUS_EDI_SENT_BY_VENDOR,
+                self::STATUS_EDI_ACCEPTANCE_FINISHED,
             ])) {
             return null;
         }
         if (in_array($status, [
             self::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
             self::STATUS_PROCESSING,
-            self::STATUS_EDO_SENT_BY_VENDOR,
-            self::STATUS_EDO_ACCEPTANCE_FINISHED,
+            self::STATUS_EDI_SENT_BY_VENDOR,
+            self::STATUS_EDI_ACCEPTANCE_FINISHED,
             self::STATUS_DONE,
             self::STATUS_CANCELLED,
         ])) {
@@ -66,7 +66,7 @@ class OrderStatus extends ActiveRecord
                 'cancel' => false,
                 'complete' => false,
             ];
-            if ($status == self::STATUS_EDO_SENT_BY_VENDOR) {
+            if ($status == self::STATUS_EDI_SENT_BY_VENDOR) {
                 $res['edit'] = $res['complete'] = true;
             }
         }
@@ -98,13 +98,13 @@ class OrderStatus extends ActiveRecord
      * CheckOrderPermission
      * @param Order $order Order
      * @param string $type Type of client permission
-     * @param array $edoExcludesStatuses Excluded statuses for this check
+     * @param array $ediExcludesStatuses Excluded statuses for this check
      * @throws BadRequestHttpException
      */
-    public static function checkEdiOrderPermissions(Order $order = null, string $type = null, array $edoExcludesStatuses = [])
+    public static function checkEdiOrderPermissions(Order $order = null, string $type = null, array $ediExcludesStatuses = [])
     {
         if ($order && $order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
-            if (!$edoExcludesStatuses || !in_array($order->status, $edoExcludesStatuses)) {
+            if (!$ediExcludesStatuses || !in_array($order->status, $ediExcludesStatuses)) {
                 if (OrderStatus::getClientPermissionByType($order->status, $type) == null) {
                     throw new BadRequestHttpException('Bad permission type! Check the awailable list of types.');
                 } elseif (!OrderStatus::getClientPermissionByType($order->status, $type)) {
@@ -124,7 +124,7 @@ class OrderStatus extends ActiveRecord
     {
         return [
             [['id'], 'required'],
-            [['denom', 'comment', 'comment_edo'], 'string', 'max' => 255],
+            [['denom', 'comment', 'comment_edi'], 'string', 'max' => 255],
         ];
     }
 
@@ -134,7 +134,7 @@ class OrderStatus extends ActiveRecord
             'id' => Yii::t('app', 'common.models.order_status.id', ['ru' => 'ID статуса заказа']),
             'denom' => Yii::t('app', 'common.models.order_status.denom', ['ru' => 'ИДЕНТИФИКАТОР СООТВЕТСТВУЮЩЕЙ КОНСТАНТЫ В МОДЕЛИ ORDER']),
             'comment' => Yii::t('app', 'common.models.order_status.comment', ['ru' => 'Общее описание статуса']),
-            'comment_edo' => Yii::t('app', 'common.models.order_status.comment_edo', ['ru' => 'Описание статуса заказа, обрабатываемого в системе EDI']),
+            'comment_edi' => Yii::t('app', 'common.models.order_status.comment_edi', ['ru' => 'Описание статуса заказа, обрабатываемого в системе EDI']),
         ];
     }
 

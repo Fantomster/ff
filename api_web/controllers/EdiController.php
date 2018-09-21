@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class EdoController
+ * Class EdiController
  * @package api\modules\v1\modules\web\controllers
  * @createdBy Basil A Konakov
  * @createdAt 2018-09-11
@@ -15,15 +15,15 @@ namespace api_web\controllers;
 use api_web\components\WebApiController;
 
 /**
- * Class EdoController
+ * Class EdiController
  * @package api_web\controllers
  */
-class EdoController extends WebApiController
+class EdiController extends WebApiController
 {
 
     /**
-     * @SWG\Post(path="/edo/order-history",
-     *     tags={"Edo"},
+     * @SWG\Post(path="/edi/order-history",
+     *     tags={"edi"},
      *     summary="Данные заказов в системе EDI",
      *     description="Данные заказов в системе EDI",
      *     produces={"application/json"},
@@ -111,12 +111,12 @@ class EdoController extends WebApiController
      */
     public function actionOrderHistory()
     {
-        $this->response = $this->container->get('EdoWebApi')->getOrderHistory($this->request);
+        $this->response = $this->container->get('EdiWebApi')->getOrderHistory($this->request);
     }
 
     /**
-     * @SWG\Post(path="/edo/order-info",
-     *     tags={"Edo"},
+     * @SWG\Post(path="/edi/order-info",
+     *     tags={"edi"},
      *     summary="Карточка заказа в системе EDI",
      *     description="Карточка заказа в системе EDI",
      *     produces={"application/json"},
@@ -290,12 +290,12 @@ class EdoController extends WebApiController
      */
     public function actionOrderInfo()
     {
-        $this->response = $this->container->get('EdoWebApi')->getOrderInfo($this->request);
+        $this->response = $this->container->get('EdiWebApi')->getOrderInfo($this->request);
     }
 
     /**
-     * @SWG\Post(path="/edo/accept-products",
-     *     tags={"Edo"},
+     * @SWG\Post(path="/edi/accept-products",
+     *     tags={"edi"},
      *     summary="Завершение приемки товаров по заказу",
      *     description="Завершение приемки товаров по заказу",
      *     produces={"application/json"},
@@ -334,12 +334,12 @@ class EdoController extends WebApiController
      */
     public function actionAcceptProducts()
     {
-        $this->response = $this->container->get('EdoWebApi')->acceptProducts($this->request);
+        $this->response = $this->container->get('EdiWebApi')->acceptProducts($this->request);
     }
 
     /**
-     * @SWG\Post(path="/edo/finish-order",
-     *     tags={"Edo"},
+     * @SWG\Post(path="/edi/finish-order",
+     *     tags={"edi"},
      *     summary="Завершение заказа",
      *     description="Завершение заказа",
      *     produces={"application/json"},
@@ -378,15 +378,14 @@ class EdoController extends WebApiController
      */
     public function actionFinishOrder()
     {
-        $this->response = $this->container->get('EdoWebApi')->finishOrder($this->request);
+        $this->response = $this->container->get('EdiWebApi')->finishOrder($this->request);
     }
 
     /**
-     * @SWG\Post(path="/edo/history-count",
-     *     tags={"Edo"},
+     * @SWG\Post(path="/edi/history-count",
+     *     tags={"edi"},
      *     summary="История заказов EDI в цифрах",
      *     description="История заказов EDI в цифрах",
-
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -426,7 +425,7 @@ class EdoController extends WebApiController
      */
     public function actionHistoryCount()
     {
-        $this->response = $this->container->get('EdoWebApi')->getHistoryCount($this->request);
+        $this->response = $this->container->get('EdiWebApi')->getHistoryCount($this->request);
     }
 
 }

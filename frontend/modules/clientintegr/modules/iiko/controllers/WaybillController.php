@@ -130,7 +130,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $sql = "SELECT COUNT(*) FROM iiko_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
         $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryScalar();
 
-        if ($kolvo_nesopost==0) {
+        if ($kolvo_nesopost == 0) {
             $sql = "UPDATE iiko_waybill SET readytoexport = 1, status_id = 4, updated_at = NOW() WHERE id = :w_wid";
             $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
         }
@@ -201,6 +201,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $product_rid = $result[0]["product_rid"];
         $org_id = $result[0]["org"];
         $vat = $result[0]["vat"];
+        if ($koef == 0) {
+            $koef = $koef_old;
+        }
         $quant_new = $quant_old * ($koef / $koef_old);
         $quant_new = round($quant_new, 4);
         $sql = "UPDATE iiko_waybill_data SET quant = :w_quant, koef = :w_koef WHERE id = :w_id";
@@ -244,6 +247,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $sql = "UPDATE all_map SET koef = :w_koef, vat = :w_vat, updated_at = NOW() WHERE id = :w_id";
                 $result = Yii::$app->db_api->createCommand($sql, [':w_koef' => $koef, ':w_vat' => $vat, ':w_id' => $id_all_map])->execute();
             }
+            //}
             $temp0 = explode('+', $querys);
             $sort = $temp0[1];
             $temp1 = explode('-', $temp0[0]);
@@ -519,7 +523,7 @@ SQL;
             $parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
             // $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
 
-            $organizationID = (isset($parentId, $parentId->value) && strlen((int) $parentId->value) ==
+            $organizationID = (isset($parentId, $parentId->value) && strlen((int)$parentId->value) ==
                 strlen($parentId->value) && $parentId->value > 0) ? $parentId->value : $orgId;
 
             $andWhere = '';
@@ -560,7 +564,14 @@ SQL;
             $constId = iikoDicconst::findOne(['denom' => 'main_org']);
             $parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
             $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
-            $sql = 'SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = ' . $organizationID . ' ORDER BY denom LIMIT 100';
+
+            $andWhere = '';
+            $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $organizationID])->all(), 'id', 'product_id');
+            if (count($arr)) {
+                $andWhere = ' AND id in (' . implode(',', $arr) . ')';
+            }
+
+            $sql = 'SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = ' . $organizationID . $andWhere . ' ORDER BY denom LIMIT 100';
 
             /**
              * @var $db Connection
@@ -1032,5 +1043,20 @@ SQL;
         $waybill_id = $arr["waybill_id"];
 
         return $this->redirect(['map', 'waybill_id' => $waybill_id, 'way' => 0, 'sort' => $sort, 'iikoWaybillDataSearch[vat]' => $vatf, 'page' => 1]);
+    }
+
+    public function actionAutoCompleteSelectedProducts()
+    {
+        $orgId = User::findOne(Yii::$app->user->id)->organization_id;
+        $constId = iikoDicconst::findOne(['denom' => 'main_org']);
+        $parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
+
+        $organizationID = (isset($parentId, $parentId->value) && strlen((int)$parentId->value) ==
+            strlen($parentId->value) && $parentId->value > 0) ? $parentId->value : $orgId;
+
+        $sql = "SELECT COUNT(*) FROM iiko_selected_product WHERE organization_id = :w_org";
+        $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $organizationID])->queryScalar();
+
+        return $result;
     }
 }

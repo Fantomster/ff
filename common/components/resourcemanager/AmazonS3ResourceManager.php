@@ -9,12 +9,9 @@
 namespace common\components\resourcemanager;
 
 use Aws\S3\S3Client;
-use Guzzle\Http\Exception\ClientErrorResponseException;
-use Guzzle\Service\Client;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
-use Yii;
 
 /**
  *

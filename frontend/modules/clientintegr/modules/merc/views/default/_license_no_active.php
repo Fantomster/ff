@@ -45,7 +45,12 @@ try {
     $customJs = <<< JS
         var refVSD = firebase.database().ref('/mercury/operation/MercVSDList/enterpriseGuid/$enterpriseGuid');
         refVSD.on("value", (snapshot) => {
-            if(snapshot.val() != null) {
+            if (typeof(snapshot.val()) == "undefined" || snapshot.val() == null || snapshot.val().length == 0 )
+             {
+                $('#mercNotificationVsd').html('$messageVSD' + 'неизвестно');
+            }
+            else
+             {
                 var now = new Date();
                 var timestamp = snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
                 now = new Date(timestamp);
@@ -56,7 +61,12 @@ try {
     });
         var refStock = firebase.database().ref('/mercury/operation/MercStockEntryList/enterpriseGuid/$enterpriseGuid');
         refStock.on("value", (snapshot) => {
-        if(snapshot.val() != null) {   
+         if (typeof(snapshot.val()) == "undefined" || snapshot.val() == null || snapshot.val().length == 0 ) 
+          {
+                $('#mercNotificationStockEntry').html('$messageStock' + 'неизвестно');
+        }
+        else
+         { 
             var now = new Date();
             var timestamp = snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
             now = new Date(timestamp);
@@ -69,5 +79,6 @@ JS;
     $this->registerJs($customJs, View::POS_END);
 }
 catch (\Exception $e)
-{}
+{
+}
 ?>

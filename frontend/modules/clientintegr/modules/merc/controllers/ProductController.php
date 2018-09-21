@@ -117,7 +117,7 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
         $model = new productForm();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if (!Yii::$app->request->isAjax) {
-                //try {
+                try {
                     $result = mercuryApi::getInstance()->modifyProducerStockListOperation('CREATE', null, $model);
                     if (!isset($result)) {
                         throw new \Exception('Error create Product');
@@ -125,13 +125,13 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
 
                     Yii::$app->session->setFlash('success', 'Позиция добавлена в номенклатуру!');
                     return $this->redirect(['index']);
-                /*} catch (\Error $e) {
+                } catch (\Error $e) {
                     Yii::$app->session->setFlash('error', $this->getErrorText($e));
                     return $this->redirect(['index']);
                 } catch (\Exception $e) {
                     Yii::$app->session->setFlash('error', $this->getErrorText($e));
                     return $this->redirect(['index']);
-                }*/
+                }
             }
         }
         $params = ['model' => $model];

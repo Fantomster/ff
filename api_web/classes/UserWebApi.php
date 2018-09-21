@@ -115,7 +115,7 @@ class UserWebApi extends \api_web\components\WebApi
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function createUser(array $post, $role_id)
+    public function createUser(array $post, $role_id, $status = null)
     {
         if (User::findOne(['email' => $post['user']['email']])) {
             throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
@@ -129,7 +129,7 @@ class UserWebApi extends \api_web\components\WebApi
         if (!$user->validate()) {
             throw new ValidationException($user->getFirstErrors());
         }
-        $user->setRegisterAttributes($role_id, User::STATUS_ACTIVE);
+        $user->setRegisterAttributes($role_id, $status);
         $user->save();
         return $user;
     }
@@ -727,7 +727,7 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('no such user');
         }
 
-        if ($user->status != User::STATUS_UNCONFIRMED_EMAIL) {
+        if ($user->status == User::STATUS_ACTIVE) {
             throw new BadRequestHttpException('you have no rights for this action');
         }
 

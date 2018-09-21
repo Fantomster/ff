@@ -190,18 +190,18 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 $request->step2 = $session->get('TrVsd_step2');
                 $request->step3 = $session->get('TrVsd_step3');
 
-                try {
+                //try {
                     mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($request);
                     Yii::$app->session->setFlash('success', 'Транспортный ВСД успешно создан!');
                     $session->remove('TrVsd_step1');
                     $session->remove('TrVsd_step2');
                     $session->remove('TrVsd_step3');
                     $session->remove('TrVsd_step4');
-                } catch (\SoapFault $e) {
+               /* } catch (\SoapFault $e) {
                     Yii::$app->session->setFlash('error', $this->getErrorText($e));
                 } catch (\Exception $e) {
                     Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                }
+                }*/
                 return $this->redirect(['/clientintegr/merc/stock-entry']);
             }
         }
@@ -247,7 +247,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             }
             else {
                 if(isset($hc->owner)) {
-                    $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->owner->uuid);
+                    $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
                 }
                 else {
                     return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
@@ -256,7 +256,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         } catch (\SoapFault $e) {
             return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
         }
-        return (['result' => true, 'name' => $hc->name . ', ИНН:' . $hc->inn, 'uuid' => $hc->uuid]);
+        return (['result' => true, 'name' => $hc->name . ', ИНН:' . $hc->inn, 'uuid' => $hc->guid]);
     }
 
     private function getErrorText($e)
@@ -346,10 +346,10 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                         return $this->redirect(['/clientintegr/merc/stock-entry']);
                     } catch (\Error $e) {
                         Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                        return $this->redirect(['conversion-step-2']);
+                        return $this->redirect(['/clientintegr/merc/stock-entry']);
                     } catch (\Exception $e) {
                         Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                        return $this->redirect(['conversion-step-2']);
+                        return $this->redirect(['/clientintegr/merc/stock-entry']);
                     }
                 }
             }

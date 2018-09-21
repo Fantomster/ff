@@ -16,13 +16,11 @@ $guideUrl = Url::to(['order/ajax-create-guide']);
 $guideUrlRename = Url::to(['order/ajax-rename-guide']);
 
 $css = <<< CSS
-
 #yii-debug-toolbar{
     display: none !important;
     position: fixed;
     left: 0;
 }
-
 CSS;
 $this->registerCss($css);
 

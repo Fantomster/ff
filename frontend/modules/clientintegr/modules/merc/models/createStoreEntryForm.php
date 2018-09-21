@@ -10,6 +10,7 @@
 namespace frontend\modules\clientintegr\modules\merc\models;
 
 use api\common\models\merc\mercDicconst;
+use common\models\vetis\VetisProductItem;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
@@ -65,7 +66,7 @@ class createStoreEntryForm extends Model
     public function rules()
     {
         return [
-            [['productType', 'product', 'subProduct', 'product_name', 'volume', 'unit', 'perishable', 'country', 'producer', 'vsd_issueNumber'], 'required'],
+            [['product_name', 'volume', 'unit', 'perishable', 'country', 'producer', 'vsd_issueNumber'], 'required'],
             [['productType', 'perishable'], 'integer'],
             [['volume'], 'double'],
             [['product', 'subProduct', 'product_name', 'unit', 'country', 'producer', 'producer_role', 'producer_product_name', 'batchID', 'country', 'vsd_issueNumber', 'vsd_issueSeries'], 'string', 'max' => 255],

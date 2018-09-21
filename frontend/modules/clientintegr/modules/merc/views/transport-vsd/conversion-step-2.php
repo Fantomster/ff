@@ -43,30 +43,31 @@ $this->title = Yii::t('app', 'frontend.client.integration.store_entry.conversion
                     <?= '<li class="fk-prev">' . Html::a(Yii::t('message', 'frontend.views.vendor.back', ['ru' => 'Назад']), ['conversion-step-1']) . '</li>' ?>
                 </ul>
             </div>
-
-
             <div class="dict-agent-form">
                 <h4>Информация о продукции: </h4>
                 <?= $form->field($model, 'batchID')->textInput(['maxlength' => true]); ?>
 
-                <?=
-                $form->field($model, 'productType')
-                    ->dropDownList(\api\common\models\merc\MercVsd::$product_types, ['prompt' => 'не указано']);
-                ?>
+                <?php
+                $url = \yii\helpers\Url::to(['product-items']);
+                $desc = '';//empty($model->city) ? '' : City::findOne($model->city)->description;
 
-                <?=
-                $form->field($model, 'product')
-                    ->dropDownList($model->getProductList(), ['prompt' => 'не указано'])
-                ?>
-
-                <?=
-                $form->field($model, 'subProduct')
-                    ->dropDownList($model->getSubProductList(), ['prompt' => 'не указано'])
-                ?>
-
-                <?=
-                $form->field($model, 'product_name')
-                    ->dropDownList($model->getProductsNamesList(), ['prompt' => 'не указано'])
+                echo $form->field($model, 'product_name')->widget(Select2::classname(), [
+                    'initValueText' => $desc, // set the initial display text
+                    'options' => ['placeholder' => 'Укажите название продукции  ...'],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => 3,
+                        'language' => [
+                            'errorLoading' => new JsExpression("function () { return 'Поиск...'; }"),
+                        ],
+                        'ajax' => [
+                            'url' => $url,
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        ],
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                    ],
+                ]);
                 ?>
 
                 <?= $form->field($model, 'volume')->textInput(['maxlength' => true]); ?>

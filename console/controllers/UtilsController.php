@@ -234,8 +234,9 @@ class UtilsController extends Controller
                     $cart = new \common\models\Cart();
                     $cart->user_id = $order->created_by_id;
                     $cart->organization_id = $order->client_id;
-                    if (!$cart->save())
+                    if (!$cart->save()) {
                         throw new \Exception ("Error create cart from order ID" . $order->id . PHP_EOL);
+                    }
                 }
                 foreach ($order->orderContent as $position) {
                     $cartContent = new \common\models\CartContent();

@@ -16,7 +16,7 @@ class m180921_090742_add_index_to_vetis_tables extends Migration
     /**
      * {@inheritdoc}
      */
-    public function safeUp()
+    public function up()
     {
         //Создаем новую таблицу
         $newTable = '_vetis_russian_enterprise';

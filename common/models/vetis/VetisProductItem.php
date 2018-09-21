@@ -133,16 +133,18 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
 
     public function getUnit()
     {
-        if(!is_null($this->unit_uuid))
+        if(!is_null($this->unit_uuid)) {
             return $this->hasOne(VetisUnit::className(), ['uuid' => 'unit_uuid']);
+        }
 
         return $this->hasOne(VetisUnit::className(), ['guid' => 'unit_guid']);
     }
 
     public function getPackingType()
     {
-        if(!is_null($this->packagingType_uuid))
+        if(!is_null($this->packagingType_uuid)) {
             return $this->hasOne(VetisUnit::className(), ['uuid' => 'packagingType_uuid']);
+        }
 
         return $this->hasOne(VetisUnit::className(), ['guid' => 'packagingType_guid']);
     }
@@ -157,8 +159,9 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
 
     public function getSubProduct()
     {
-        if(!is_null($this->subproduct_uuid))
+        if(!is_null($this->subproduct_uuid)) {
             return $this->hasOne(VetisSubproductByProduct::className(), ['uuid' => 'subproduct_uuid']);
+        }
 
         return $this->hasOne(VetisSubproductByProduct::className(), ['guid' => 'subproduct_guid']);
     }

@@ -845,9 +845,9 @@ class mercuryApi extends baseApi
             $productItem->producer->guid = $this->issuerID;
             $productItem->tmOwner = new BusinessEntity();
             $productItem->tmOwner->guid = $this->issuerID;
-            /*$productItem->producing = new ProductItemProducing();
+            $productItem->producing = new ProductItemProducing();
             $productItem->producing->location = new Enterprise();
-            $productItem->producing->location->guid = $this->enterpriseGuid;*/
+            $productItem->producing->location->guid = $this->enterpriseGuid;
 
             if(isset($form->packagingType_guid))
             {

@@ -101,6 +101,8 @@ class Unit{
     var $factor;//integer
 }
 class PackingType{
+    var $uuid;//UUID
+    var $guid;//UUID
     var $globalID;//PackingCodeType
     var $name;//String255
 }
@@ -240,6 +242,8 @@ class BusinessEntityList{
     var $businessEntity;//BusinessEntity
 }
 class ProductItem{
+    var $uuid;//UUID
+    var $guid;//UUID
     var $globalID;//GTINType
     var $name;//String255
     var $code;//String255
@@ -807,6 +811,8 @@ class ResolveDiscrepancyResponse{
     var $stockEntryList;//StockEntryList
 }
 class ModifyProducerStockListRequest{
+    var $localTransactionId;
+    var $initiator; //User
     var $modificationOperation;//PSLModificationOperation
 }
 class ModifyProducerStockListResponse{

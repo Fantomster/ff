@@ -789,7 +789,7 @@ class UserController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={"user": {"email": "neo@neo.com"},"profile": {"phone": "+79182225588"}}
+     *                  default={"user": {"id": 1},"profile": {"phone": "+79182225587"}}
      *              )
      *         )
      *     ),

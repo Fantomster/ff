@@ -109,8 +109,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             $selected = implode(",", $res);
         }
 
-        if (!isset($list))
+        if (!isset($list)) {
             $list = step1Form::find()->where("id in ($selected)")->all();
+        }
         if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
             $attributes = [];
             foreach ($list as $item) {
@@ -260,10 +261,12 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
     private function getErrorText($e)
     {
-        if ($e->getCode() == 600)
+        if ($e->getCode() == 600) {
             return "При обращении к api Меркурий возникла ошибка. Ошибка зарегистрирована в журнале за номером №" . $e->getMessage() . ". Если ошибка повторяется обратитесь в техническую службу.";
-        else
+        } else {
             return "При обращении к api Меркурий возникла ошибка. Если ошибка повторяется обратитесь в техническую службу.";
+
+        }
     }
 
 
@@ -294,8 +297,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             $selected = implode(",", $res);
         }
 
-        if (!isset($list))
+        if (!isset($list)) {
             $list = step1Form::find()->where("id in ($selected)")->all();
+        }
         if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
             $attributes = [];
             foreach ($list as $item) {

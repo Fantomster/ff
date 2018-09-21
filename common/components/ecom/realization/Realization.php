@@ -109,8 +109,7 @@ class Realization extends AbstractRealization implements RealizationInterface
             $order->edi_ordersp = $this->xml->filename;
         }
         $order->save();
-        var_dump($order->orderContent);
-        return false;
+
         \Yii::$app->language = $order->edi_order->lang ?? 'ru';
         $user = User::findOne(['id' => $order->created_by_id]);
 
@@ -118,34 +117,36 @@ class Realization extends AbstractRealization implements RealizationInterface
         if (!count($positions)) {
             $positions = $this->xml->HEAD->PACKINGSEQUENCE->POSITION;
         }
-        $positionsArray = [];
+
+        $waybillId = $this->getWaybillId($ediOrganization->organization_id);
+
+
+
+//        $positionsArray = [];
         $arr = [];
         $barcodeArray = [];
         $totalQuantity = 0;
         $totalPrice = 0;
 
         foreach ($positions as $position) {
-            $contID = (int)$position->PRODUCTIDBUYER;
-            if (!$contID) {
-                $contID = (int)$position->PRODUCT;
+            $contID = (int)($position->PRODUCTIDBUYER ?? $position->PRODUCT);
+
+//            $positionsArray[] = (int)$contID;
+            $quantity = (float)($position->DELIVEREDQUANTITY ?? $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY);
+            if ($quantity != 0.00 || $position->(float)($position->PRICEWITHVAT ?? $position->PRICE)){
+
             }
-            $positionsArray[] = (int)$contID;
-            if ($this->fileType == 'desadv') {
-                $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
-            } else {
-                $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
-            }
-            $arr[$contID]['PRICE'] = (float)$position->PRICEWITHVAT ?? (float)$position->PRICE;
-            $arr[$contID]['PRICEWITHVAT'] = (float)$position->PRICEWITHVAT ?? 0.00;
-            $arr[$contID]['TAXRATE'] = (float)$position->TAXRATE ?? 0.00;
-            $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
-            $arr[$contID]['WAYBILLNUMBER'] = $position->WAYBILLNUMBER ?? null;
-            $arr[$contID]['WAYBILLDATE'] = $position->WAYBILLDATE ?? null;
-            $arr[$contID]['DELIVERYNOTENUMBER'] = $position->DELIVERYNOTENUMBER ?? null;
-            $arr[$contID]['DELIVERYNOTEDATE'] = $position->DELIVERYNOTEDATE ?? null;
-            $arr[$contID]['GTIN'] = $position->GTIN ?? null;
-            $arr[$contID]['UUID'] = $position->UUID ?? null;
-            $arr[$contID]['VETID'] = $position->VETIS->VETID ?? null;
+//            $arr[$contID]['PRICE'] = (float)$position->PRICEWITHVAT ?? (float)$position->PRICE;
+//            $arr[$contID]['PRICEWITHVAT'] = (float)$position->PRICEWITHVAT ?? 0.00;
+//            $arr[$contID]['TAXRATE'] = (float)$position->TAXRATE ?? 0.00;
+//            $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
+//            $arr[$contID]['WAYBILLNUMBER'] = $position->WAYBILLNUMBER ?? null;
+//            $arr[$contID]['WAYBILLDATE'] = $position->WAYBILLDATE ?? null;
+//            $arr[$contID]['DELIVERYNOTENUMBER'] = $position->DELIVERYNOTENUMBER ?? null;
+//            $arr[$contID]['DELIVERYNOTEDATE'] = $position->DELIVERYNOTEDATE ?? null;
+//            $arr[$contID]['GTIN'] = $position->GTIN ?? null;
+//            $arr[$contID]['UUID'] = $position->UUID ?? null;
+//            $arr[$contID]['VETID'] = $position->VETIS->VETID ?? null;
             $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
             $totalPrice += $arr[$contID]['PRICE'];
 
@@ -164,22 +165,7 @@ class Realization extends AbstractRealization implements RealizationInterface
             $order->save();
             return true;
         }
-        $db = \Yii::$app->db_api;
-        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
-        $sql = ' SELECT m.store_rid FROM `'.$dbName.'`.`order_content` o '.
-            ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id IN (1,2) AND m.org_id = '.$order->client_id.
-            ' WHERE o.order_id = ' . $orderID .
-            ' GROUP BY store_rid';
-        $stories = $db->createCommand($sql)->queryAll();
 
-        $hasWaybill = OrderContent::findOne(['edi_desadv' => $this->xml->filename]);
-        if (!$hasWaybill && !$isOrderSp) {
-            $modelWaybill = new Waybill();
-            $modelWaybill->acquirer_id = $ediOrganization->organization_id;
-            $modelWaybill->service_id = WaybillHelper::EDI_SERVICE_ID;
-            $modelWaybill->outer_store_uuid = '';
-            $modelWaybill->save();
-        }
 
         $summ = 0;
         $ordContArr = [];
@@ -436,4 +422,26 @@ class Realization extends AbstractRealization implements RealizationInterface
         return true;
     }
 
+    private function getWaybillId($orgId){
+
+        //        $db = \Yii::$app->db_api;
+//        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+//        $sql = ' SELECT m.store_rid FROM `'.$dbName.'`.`order_content` o '.
+//            ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id IN (1,2) AND m.org_id = '.$order->client_id.
+//            ' WHERE o.order_id = ' . $orderID .
+//            ' GROUP BY store_rid';
+//        $stories = $db->createCommand($sql)->queryAll();
+
+        if($this->fileType != 'ordrsp') {
+            $hasWaybill = OrderContent::findOne(['edi_desadv' => $this->xml->filename]);
+            if (!$hasWaybill) {
+                $modelWaybill = new Waybill();
+                $modelWaybill->acquirer_id = $orgId;
+                $modelWaybill->service_id = WaybillHelper::EDI_SERVICE_ID;
+                $modelWaybill->outer_store_uuid = '';
+                $modelWaybill->save();
+            }
+
+        }
+    }
 }

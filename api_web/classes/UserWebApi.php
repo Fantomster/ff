@@ -705,8 +705,8 @@ class UserWebApi extends \api_web\components\WebApi
     {
         WebApiHelper::clearRequest($post);
 
-        if (empty($post['user']['email'])) {
-            throw new BadRequestHttpException('empty_param|email');
+        if (empty($post['user']['id'])) {
+            throw new BadRequestHttpException('empty_param|id');
         }
 
         if (empty($post['profile']['phone'])) {
@@ -722,7 +722,7 @@ class UserWebApi extends \api_web\components\WebApi
             throw new ValidationException(['phone' => 'bad_format_phone']);
         }
 
-        $user = User::findOne(['email' => $post['user']['email']]);
+        $user = User::findOne(['id' => $post['user']['id']]);
         if (!$user) {
             throw new BadRequestHttpException('no such user');
         }

@@ -190,18 +190,18 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 $request->step2 = $session->get('TrVsd_step2');
                 $request->step3 = $session->get('TrVsd_step3');
 
-                //try {
+                try {
                     mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($request);
                     Yii::$app->session->setFlash('success', 'Транспортный ВСД успешно создан!');
                     $session->remove('TrVsd_step1');
                     $session->remove('TrVsd_step2');
                     $session->remove('TrVsd_step3');
                     $session->remove('TrVsd_step4');
-               /* } catch (\SoapFault $e) {
+                } catch (\SoapFault $e) {
                     Yii::$app->session->setFlash('error', $this->getErrorText($e));
                 } catch (\Exception $e) {
                     Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                }*/
+                }
                 return $this->redirect(['/clientintegr/merc/stock-entry']);
             }
         }

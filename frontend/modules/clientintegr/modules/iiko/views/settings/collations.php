@@ -52,7 +52,7 @@ use yii\helpers\Url;
                                 $arTmp['readonly'] = true;
                                 $options = ['options' => $arTmp];
 		                    }
-	                        
+
 	                        echo $form->field($model, 'name')->dropDownList($items, $options)->label('Укажите главный бизнес');
 	                        ?>
                             <?= \yii\helpers\Html::a('Применить сопоставление', false, ['class' => 'btn btn-md fk-button', 'id' => 'apply_collation']); ?>
@@ -142,7 +142,8 @@ $js = <<< JS
 		                                console.log(data);
 		                                if (data.success === true) {
 		                                    swal.close();
-		                                    swal('Готово', '', 'success')
+		                                    swal('Готово', '', 'success');
+		                                    location.reload();
 		                                } else {
 		                                    console.log(data.error);
 		                                    swal(
@@ -201,9 +202,7 @@ $js = <<< JS
 		                                if (data.success === true) {
 		                                    swal.close();
 		                                    swal('Готово', '', 'success');
-		                                    setInterval(function(){
-		                                    	location.reload();
-		                                    }, 1500);
+	                                        location.reload();
 		                                } else {
 		                                    console.log(data.error);
 		                                    swal(

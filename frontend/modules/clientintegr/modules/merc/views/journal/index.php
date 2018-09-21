@@ -35,13 +35,9 @@ use yii\widgets\Breadcrumbs;
     ])
     ?>
 </section>
-<section class="content-header">
+<section class="content">
     <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
-</section>
-<section class="content-header">
     <h4><?=$this->title?>:</h4>
-</section>
-<section class="content-header">
     <div class="box box-info">
         <div class="box-header with-border">
             <div class="panel-body">

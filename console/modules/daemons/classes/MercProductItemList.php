@@ -21,6 +21,13 @@ class MercProductItemList extends MercDictConsumer
     public static $timeout  = 60*60*24;
     public static $timeoutExecuting = 60*60*12;
 
+    public static function updateList($list)
+    {
+        $obj = new self(0);
+        $obj->init();
+        $obj->saveList($list);
+    }
+
     /**
      * Обработка и сохранение результата
      * @param $list
@@ -52,6 +59,14 @@ class MercProductItemList extends MercDictConsumer
             $model->data = serialize($item);
             $model->createDate = date('Y-m-d H:i:s',strtotime($model->createDate));
             $model->updateDate = date('Y-m-d H:i:s',strtotime($model->updateDate));
+            if (isset($attributes['packaging'])) {
+                $model->packagingType_guid = isset($attributes['packaging']['packagingType']['guid']) ? $attributes['packaging']['packagingType']['guid'] : null;
+                $model->packagingType_uuid = isset($attributes['packaging']['packagingType']['uuid']) ? $attributes['packaging']['packagingType']['uuid'] : null;
+                $model->unit_uuid = isset($attributes['packaging']['unit']['uuid']) ? $attributes['packaging']['unit']['uuid'] : null;
+                $model->unit_guid = isset($attributes['packaging']['unit']['guid']) ? $attributes['packaging']['unit']['guid'] : null;
+                $model->packagingQuantity = isset($attributes['packaging']['quantity']) ? $attributes['packaging']['quantity'] : null;
+                $model->packagingVolume = isset($attributes['packaging']['volumne']) ? $attributes['packaging']['volumne'] : null;
+            }
             if (!$model->save()) {
                 $result[]['error'] = $model->getErrors();
                 $result[]['model-data'] = $model->attributes;

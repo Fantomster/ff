@@ -245,19 +245,21 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         Yii::$app->response->format = Response::FORMAT_JSON;
         try {
             $hc = cerberApi::getInstance()->getEnterpriseByGuid($recipient_guid);
-            if (!isset($hc)) {
-                return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
-            } else {
-                if (isset($hc->owner)) {
-                    $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->owner->uuid);
-                } else {
-                    return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
+            if(!isset($hc)) {
+                return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
+            }
+            else {
+                if(isset($hc->owner)) {
+                    $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
+                }
+                else {
+                    return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
                 }
             }
         } catch (\SoapFault $e) {
             return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
         }
-        return (['result' => true, 'name' => $hc->name . ', ИНН:' . $hc->inn, 'uuid' => $hc->uuid]);
+        return (['result' => true, 'name' => $hc->name . ', ИНН:' . $hc->inn, 'uuid' => $hc->guid]);
     }
 
     private function getErrorText($e)

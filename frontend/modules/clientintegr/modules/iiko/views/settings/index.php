@@ -110,6 +110,9 @@ use kartik\grid\GridView;
                                     ],
                                     'buttons' => [
                                         'clear' => function ($url, $model) {
+                                            if ($model->denom == 'main_org') {
+                                                return false;
+                                            }
                                             $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/settings/change-const', 'id' => $model->id]);
                                             return \yii\helpers\Html::a('<i class="fa fa-wrench" aria-hidden="true"></i>', $customurl,
                                                 ['title' => 'Изменить значение', 'data-pjax' => "0"]);

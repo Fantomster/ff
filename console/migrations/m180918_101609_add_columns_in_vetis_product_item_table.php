@@ -20,7 +20,7 @@ class m180918_101609_add_columns_in_vetis_product_item_table extends Migration
     {
 
         $this->addColumn('{{%vetis_product_item}}', 'packagingType_guid', $this->string(255));
-        //$this->addColumn('{{%vetis_product_item}}', 'packagingType_uuid', $this->string(255));
+        $this->addColumn('{{%vetis_product_item}}', 'packagingType_uuid', $this->string(255));
         $this->addColumn('{{%vetis_product_item}}', 'unit_uuid', $this->string(255));
         $this->addColumn('{{%vetis_product_item}}', 'unit_guid', $this->string(255));
         $this->addColumn('{{%vetis_product_item}}', 'packagingQuantity', $this->integer());
@@ -45,8 +45,6 @@ class m180918_101609_add_columns_in_vetis_product_item_table extends Migration
         $this->dropColumn('{{%vetis_product_item}}', 'unit_guid');
         $this->dropColumn('{{%vetis_product_item}}', 'packagingQuantity');
         $this->dropColumn('{{%vetis_product_item}}', 'packagingVolume');
-
-        return false;
     }
 
 }

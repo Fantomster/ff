@@ -148,12 +148,12 @@ $("#settings-edit-form").on("click", ".save-form", function() {
     data: form.serialize(),
     cache: false,
     success: function(response) {
-        $.pjax.reload({container: "#st-list",timeout:30000});
         if(response != true) 
             form.replaceWith(response);
-        else
-                $("#settings-edit-form").modal('hide');
-                  
+        else {
+                $("#settings-edit-form .close").click()
+                $.pjax.reload({container: "#st-list",timeout:30000});
+                }
         },
         failure: function(errMsg) {
         console.log(errMsg);

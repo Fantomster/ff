@@ -775,7 +775,6 @@ class mercuryApi extends baseApi
         mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
-            $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntry;
             $stockList = $result->application->result->any['registerProductionOperationResponse']->stockEntryList->stockEntry;
             (new LoadStockEntryList())->updateDocumentsList($stockList);
             $vetDoc[] = $result->application->result->any['registerProductionOperationResponse']->vetDocument;

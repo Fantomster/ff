@@ -44,7 +44,7 @@ class LoadStockEntryList extends Model
                 'product_type' => $item->batch->productType,
                 'product_name' => $item->batch->productItem->name,
                 'amount' => $item->batch->volume,
-                'unit' => isset($uint) ? $unit->name : null,
+                'unit' => isset($unit) ? $unit->name : null,
                 'gtin' => $item->batch->productItem->globalID,
                 'article' => $item->batch->productItem->code,
                 'production_date' => MercStockEntry::getDate($item->batch->dateOfProduction),

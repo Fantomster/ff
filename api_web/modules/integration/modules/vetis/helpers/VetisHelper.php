@@ -200,10 +200,9 @@ class VetisHelper
             )
             ->from('`' . $tableName . '`.merc_vsd m')
             ->leftJoin('`' . $tableName . '`.waybill_content wc', 'wc.merc_uuid = m.uuid COLLATE utf8_unicode_ci')
-            ->leftJoin('`' . $tableName . '`.waybill w', 'w.id = wc.waybill_id')
+            ->leftJoin('`' . $tableName . '`.waybill w', 'w.id = wc.waybill_id AND w.service_id = 4')
             ->leftJoin('order_content oc', 'oc.id = wc.order_content_id')
             ->leftJoin('order o', 'o.id = oc.order_id')
-            ->where('w.service_id = 4')
             ->groupBy('group_name')
             ->orderBy(['group_name' => SORT_DESC]);
 

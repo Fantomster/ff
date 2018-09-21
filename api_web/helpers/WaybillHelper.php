@@ -18,7 +18,8 @@ class WaybillHelper
 {
     /**@var int const for mercuriy service id in all_service table */
     const MERC_SERVICE_ID = 4;
-    
+    const EDI_SERVICE_ID = 6;
+
     /**
      * Create waybill and waybill_content and binding VSD
      * @param string $uuid VSD uuid

@@ -50,15 +50,19 @@ return [
         ],
         'resourceManager' => [
             'class' => 'common\components\resourcemanager\AmazonS3ResourceManager',
-            'key' => 'AKIAJZH26ZXTQSLVFT6A',
-            'secret' => '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',
             'bucket' => 'fkeeper',
+            'region' => 'eu-west-1',
+            'credentials' => [
+                'key' => 'AKIAJZH26ZXTQSLVFT6A',
+                'secret' => '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',
+            ],
         ],
         'resourceManagerStatic' => [
             'class' => 'common\components\resourcemanager\AmazonS3ResourceManager',
             'key' => 'AKIAJZH26ZXTQSLVFT6A',
             'secret' => '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',
             'bucket' => 'static.mixcart.ru',
+            'region' => 'eu-west-1',
         ],
         'i18n' => [
             'translations' => [
@@ -222,9 +226,9 @@ return [
         //Rabbit MQ
         'rabbit' => [
             'class' => 'console\modules\daemons\components\RabbitService',
-            'host' => '192.168.0.100',    #host - имя хоста, на котором запущен сервер RabbitMQ
-            'port' => 5672,        #port - номер порта сервиса, по умолчанию - 5672
-            'user' => 'login',        #user - имя пользователя для соединения с сервером
+            'host' => '192.168.0.100', #host - имя хоста, на котором запущен сервер RabbitMQ
+            'port' => 5672, #port - номер порта сервиса, по умолчанию - 5672
+            'user' => 'login', #user - имя пользователя для соединения с сервером
             'password' => 'password',
             'vhost' => '/prod'
         ],

@@ -38,6 +38,7 @@ class AmazonS3ResourceManager extends Component implements ResourceManagerInterf
 //    public $secret;
 
     public $credentials = [];
+
     /**
      * @var string Amazon Bucket
      */
@@ -118,14 +119,8 @@ class AmazonS3ResourceManager extends Component implements ResourceManagerInterf
      */
     public function fileExists($name)
     {
-        return false;
-        $http = new \GuzzleHttp\Client();
-        //try {
-            $response = $http->get($this->getUrl($name));
-//        } catch (ClientErrorResponseException $e) {
-//            return false;
-//        }
-        return $response->isSuccessful();
+        $result = $this->getClient()->doesObjectExist($this->bucket, $name);
+        return $result;
     }
 
     /**

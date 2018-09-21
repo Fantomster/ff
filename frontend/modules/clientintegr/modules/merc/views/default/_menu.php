@@ -4,8 +4,6 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 
 ?>
-
-
 <div class="catalog-index">
     	<div class="box box-info">
             <div class="box-header with-border">
@@ -23,14 +21,18 @@ use yii\helpers\Url;
                             <?php
                             $user = Yii::$app->user->identity;
                             if (($lic->code == \api\common\models\merc\mercService::EXTENDED_LICENSE_CODE) && ($currentUrl != Url::to(['/clientintegr/merc/stock-entry']))) {
+                                echo ' ';
                                 echo Html::a(Yii::t('message', 'frontend.views.layouts.client.left.store_entry', ['ru'=>'Журнал продукции']), ['/clientintegr/merc/stock-entry'], ['class'=>'btn btn-md fk-button']);
                             }
-                            ?>
+                            if (($lic->code == \api\common\models\merc\mercService::EXTENDED_LICENSE_CODE) && ($currentUrl != Url::to(['/clientintegr/merc/product']))) {
+                                echo ' ';
+                                echo Html::a('Справочники продукции', ['/clientintegr/merc/product'], ['class' => 'btn btn-md fk-button']);
+                            } ?>
+                            <?= ' ' ?>
                             <?= ($currentUrl != Url::to(['/clientintegr/merc/journal'])) ? Html::a('Журнал', ['/clientintegr/merc/journal'], ['class' => 'btn btn-md fk-button']) : ''; ?>
                         </div>
                     </div>
                 </div>
             </div>
           </div>
-
 </div>

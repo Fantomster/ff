@@ -42,7 +42,7 @@ Modal::widget([
         ])
         ?>
     </section>
-    <section class="content-header">
+    <section class="content">
         <?=
         $this->render('/default/_license_no_active.php', ['lic' => $lic]);
         ?>
@@ -200,14 +200,10 @@ Modal::widget([
             unset($columns[7]['buttons']['rejected']);
         }
         ?>
-    </section>
-    <section class="content-header">
         <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
-    </section>
-    <section class="content-header">
+
         <h4><?= Yii::t('message', 'frontend.client.integration.mercury.vsd_list', ['ru' => 'Список ВСД"']) ?>:</h4>
-    </section>
-    <section class="content-header">
+
         <div class="box box-info">
             <div class="box-header with-border">
                 <div class="panel-body">

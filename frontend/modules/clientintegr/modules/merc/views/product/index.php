@@ -47,130 +47,74 @@ Modal::widget([
     $timestamp_now=time();
     ($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))) ? $lic_merc=1 : $lic_merc=0;
     $columns = array (
-        [
+        /*[
             'class' => 'yii\grid\CheckboxColumn',
             'contentOptions'   =>   ['class' => 'small_cell_checkbox'],
             'headerOptions'    =>   ['style' => 'text-align:center; '],
             'checkboxOptions' => function($model, $key, $index, $widget) use ($searchModel){
                 return ['value' => $model->uuid,'class'=>'checkbox-group_operations'];
             }
-        ],
+        ],*/
         [
-            'attribute' => 'entryNumber',
-            'format' => 'raw',
-            'value' => function ($data) {
-                return $data['entryNumber'];
-            },
-        ],
-        [
-            'attribute' => 'create_date',
-            'label' => Yii::t('message', 'frontend.client.integration.create_date', ['ru' => 'Дата добавления']),
-            'format' => 'raw',
-            'value' => function ($data) {
-                return Yii::$app->formatter->asDatetime($data['create_date'], "php:j M Y");
-            },
-        ],
-        [
-            'attribute' => 'product_name',
+            'attribute' => 'name',
             'label' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
             'format' => 'raw',
             'value' => function ($data) {
-                return $data['product_name'];
+                return $data['name'];
             },
         ],
         [
-            'attribute' => 'amount',
-            'label' => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
+            'attribute' => 'globalID',
+            'label' => 'GTIN',
             'format' => 'raw',
             'value' => function ($data) {
-                return $data['amount']." ".$data['unit'];
+                return $data['globalID'];
             },
         ],
         [
-            'attribute' => 'production_date',
-            'label' => Yii::t('message', 'frontend.client.integration.production_date', ['ru' => 'Дата производство']),
+            'attribute' => 'code',
+            'label' => 'Артикул',
             'format' => 'raw',
             'value' => function ($data) {
-                $res = $data['production_date'];
-                try{
-                    $res = Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
-                }
-                catch (Exception $e)
-                {
-                    $res = $data['production_date'];
-                }
-                return $res;
+                return $data['code'];
             },
         ],
         [
-            'attribute' => 'expiry_date',
-            'label' => Yii::t('message', 'frontend.client.integration.expiry_date', ['ru' => 'Срок годности']),
+            'attribute' => 'packagingType',
+            'label' => 'Упаковка',
             'format' => 'raw',
             'value' => function ($data) {
-                $res = $data['expiry_date'];
-                try{
-                    $res = Yii::$app->formatter->asDatetime($data['expiry_date'], "php:j M Y");
-                }
-                catch (Exception $e)
-                {
-                    $res = $data['expiry_date'];
-                }
-                return $res;
+                return $data['packagingType'] ?? null;
             },
         ],
-        /*[
+        [
+            'attribute' => 'unit',
+            'label' => 'Ед. Изм.',
+            'format' => 'raw',
+            'value' => function ($data) {
+                return $data['unit'] ?? null;
+            },
+        ],
+        [
+            'attribute' => 'createDate',
+            'label' => 'Дата добавления',
+            'format' => 'raw',
+            'value' => function ($data) {
+                return Yii::$app->formatter->asDatetime($data['createDate'], "php:j M Y");
+            },
+        ],
+        [
             'attribute' => 'status',
-            'label' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
+            'label' => 'Статус',
             'format' => 'raw',
             'value' => function ($data) {
-                return '<span class="status">'.\api\common\models\merc\MercStockEntry::$statuses[$data['status']].'</span>';
-            },
-        ],*/
-        /*[
-            'attribute' => 'producer_name',
-            'label' => Yii::t('message', 'frontend.client.integration.producer_name', ['ru' => 'Производитель']),
-            'format' => 'raw',
-            'value' => function ($data) {
-                return $data['product_name'];
-            },
-        ],*/
-
-        /*[
-            'attribute' => 'amount',
-            'label' => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
-            'format' => 'raw',
-            'value' => function ($data) {
-                return $data['amount']." ".$data['unit'];
-            },
-        ],*/
-        [
-            'attribute' => 'producer_country',
-            'label' => Yii::t('message', 'frontend.client.integration.producer_country', ['ru' => 'Страна происхождения']),
-            'format' => 'raw',
-            'value' => function ($data) {
-                return $data['producer_country'];
+                return \api\common\models\merc\MercStockEntry::$statuses[$data['status']];
             },
         ],
-        [
-            'attribute' => 'producer_name',
-            'label' => Yii::t('message', 'frontend.client.integration.producer_name', ['ru' => 'Производитель']),
-            'format' => 'raw',
-            'value' => function ($data) {
-                return $data['producer_name'];
-            },
-        ],
-        /*[
-            'attribute' => 'product_marks',
-            'label' => Yii::t('message', 'frontend.client.integration.product_marks', ['ru' => 'Маркировка/клеймо']),
-            'format' => 'raw',
-            'value' => function ($data) {
-                return $data['product_marks'];
-            },
-        ],*/
         [
             'class' => 'yii\grid\ActionColumn',
             'contentOptions' => ['style' => 'width: 7%;'],
-            'template' => '{view}&nbsp;&nbsp;&nbsp;{create}&nbsp;&nbsp;&nbsp;{inventory}',
+            'template' => '{view}&nbsp;&nbsp;&nbsp;{update}&nbsp;&nbsp;&nbsp;{delete}',
             'buttons' => [
                 'view' => function ($url, $model, $key) use ($lic_merc) {
                     $options = [
@@ -190,39 +134,29 @@ Modal::widget([
                     ]);
                     return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                 },
-                'create' =>  function ($url, $model) {
-                    $customurl = Url::to(['transport-vsd/step-1','selected'=>$model->id]);
-                    return \yii\helpers\Html::a( '<i class="fa fa-truck" aria-hidden="true"></i>', $customurl,
-                        ['title' => Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), 'data-pjax'=>"0"]);
+                'update' =>  function ($url, $model) {
+                    $customurl = Url::to(['update','uuid'=>$model->uuid]);
+                    return \yii\helpers\Html::a( '<i class="fa fa-pencil" aria-hidden="true"></i>', $customurl,
+                        ['title' => 'Редактировать позицию', 'data-pjax'=>"0"]);
                 },
-                'inventory' => function ($url, $model, $key) use ($searchModel) {
-                    $options = [
-                        'title' => Yii::t('message', 'frontend.client.integration.inventory', ['ru' => 'Инвентаризация']),
-                        'aria-label' => Yii::t('message', 'frontend.client.integration.inventory', ['ru' => 'Инвентаризация']),
-                        'data' => [
-                            //'pjax'=>0,
-                            'target' => '#ajax-load',
-                            'toggle' => 'modal',
-                            'backdrop' => 'static',
-                        ],
-                    ];
-                    $icon = Html::tag('img', '', [
-                        'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
-                        'style' => 'width: 24px'
-                    ]);
-                    return Html::a($icon, ['inventory', 'id' => $model->id], $options);
+                'delete' =>  function ($url, $model) {
+                    $customurl = Url::to(['delete','uuid'=>$model->uuid]);
+                    return \yii\helpers\Html::a( '<i class="fa fa-trash" aria-hidden="true"></i>', $customurl,
+                        ['title' => 'Удалить позицию', 'class' => 'del', 'data-pjax'=>"0", 'style'=>"color: #d9534f;"]);
                 },
             ]
         ]
     );
     ?>
     <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
-    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.store_entry_list', ['ru'=>'Журнал входной продукци']) ?>:</h4>
+
+    <h4><?= 'Справочники продукции' ?>:</h4>
+
     <div class="box box-info">
         <div class="box-header with-border">
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
-                    <?php Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]); ?>
+                    <?php Pjax::begin(['id' => 'pjax-product-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]); ?>
                     <?php if (Yii::$app->session->hasFlash('success')): ?>
                         <div class="alert alert-success alert-dismissable">
                             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
@@ -242,7 +176,7 @@ Modal::widget([
                         </div>
                     <?php endif; ?>
                     <?=
-                    Html::a('<i class="fa fa-plus" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> Добавление входной продукции на предприятие  </span>', ['create'], [
+                    Html::a('<i class="fa fa-plus" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> Добавление новой продукции в номеклатуру </span>', ['create'], [
                         'class' => 'btn btn-success',
                         'data-pjax' => 0,
                     ]);
@@ -261,7 +195,7 @@ Modal::widget([
                         <div class="col-sm-2">
                             <div class="form-group field-statusFilter">
                                 <?=
-                                $form->field($searchModel, "product_name", [
+                                $form->field($searchModel, "name", [
                                     'addon' => [
                                         'append' => [
                                             'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
@@ -271,7 +205,7 @@ Modal::widget([
                                         ],
                                     ],
                                 ])
-                                    ->textInput(['prompt' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']), 'class' => 'form-control', 'id' => 'product_name'])
+                                    ->textInput(['prompt' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']), 'class' => 'form-control', 'id' => 'name'])
                                     ->label(Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']), ['class' => 'label search_string', 'style' => 'color:#555'])
                                 ?>
                             </div>
@@ -279,7 +213,7 @@ Modal::widget([
                         <div class="col-sm-2">
                             <div class="form-group field-statusFilter">
                                 <?=
-                                $form->field($searchModel, "producer_name", [
+                                $form->field($searchModel, "globalID", [
                                     'addon' => [
                                         'append' => [
                                             'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
@@ -289,43 +223,48 @@ Modal::widget([
                                         ],
                                     ],
                                 ])
-                                    ->textInput(['prompt' => 'Производитель', 'class' => 'form-control', 'id' => 'producer_name'])
-                                    ->label( 'Производитель', ['class' => 'label search_string', 'style' => 'color:#555'])
+                                    ->textInput(['prompt' => 'GTIN', 'class' => 'form-control', 'id' => 'globalID'])
+                                    ->label('GTIN', ['class' => 'label search_string', 'style' => 'color:#555'])
                                 ?>
                             </div>
                         </div>
-                        <div class="col-lg-3 col-md-3 col-sm-6">
-                            <?= Html::label( Yii::t('message', 'frontend.client.integration.production_date', ['ru' => 'Дата производства']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-                            <div class="form-group" style="height: 44px;">
+                        <div class="col-sm-2">
+                            <div class="form-group field-statusFilter">
                                 <?=
-                                DatePicker::widget([
-                                    'model' => $searchModel,
-                                    'attribute' => 'date_from_production_date',
-                                    'attribute2' => 'date_to_production_date',
-                                    'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFromProductionDate'],
-                                    'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateToProductionDate'],
-                                    'separator' => '-',
-                                    'type' => DatePicker::TYPE_RANGE,
-                                    'pluginOptions' => [
-                                        'orientation' => 'bottom left',
-                                        'format' => 'dd.mm.yyyy', //'d M yyyy',//
-                                        'autoclose' => true,
-                                        'endDate' => "0d",
-                                    ]
+                                $form->field($searchModel, "code", [
+                                    'addon' => [
+                                        'append' => [
+                                            'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                            'options' => [
+                                                'class' => 'append',
+                                            ],
+                                        ],
+                                    ],
                                 ])
+                                    ->textInput(['prompt' => 'Артикул', 'class' => 'form-control', 'id' => 'code'])
+                                    ->label('Артикул', ['class' => 'label search_string', 'style' => 'color:#555'])
+                                ?>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group field-statusFilter">
+                                <?=
+                                $form->field($searchModel, 'status')
+                                    ->dropDownList(\api\common\models\merc\MercStockEntry::$statuses, ['id' => 'statusFilter','prompt'=>'Все'])
+                                    ->label('Статус', ['class' => 'label', 'style' => 'color:#555'])
                                 ?>
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-6">
-                            <?= Html::label(Yii::t('message', 'frontend.client.integration.expiry_date', ['ru' => 'Срок годности']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                            <?= Html::label( 'Дата добавления', null, ['class' => 'label', 'style' => 'color:#555']) ?>
                             <div class="form-group" style="height: 44px;">
                                 <?=
                                 DatePicker::widget([
                                     'model' => $searchModel,
-                                    'attribute' => 'date_from_expiry_date',
-                                    'attribute2' => 'date_to_expiry_date',
-                                    'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFromExpiryDate'],
-                                    'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateToExpiryDate'],
+                                    'attribute' => 'from_create_date',
+                                    'attribute2' => 'to_create_date',
+                                    'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'fromCreateDate'],
+                                    'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'toCreateDate'],
                                     'separator' => '-',
                                     'type' => DatePicker::TYPE_RANGE,
                                     'pluginOptions' => [
@@ -361,37 +300,20 @@ Modal::widget([
                         ?>
                     </div>
                     <?php Pjax::end(); ?>
-                    <?= '<div class="col-md-3">' . Html::submitButton(Yii::t('app', 'frontend.client.integration.store_entry.inventory_all', ['ru' => 'Списать все']), ['class' => 'btn btn-danger inventory_all']) . '</div>' ?>
-                    <?= '<div class="col-md-3">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), ['class' => 'btn btn-success create_vsd']) . '</div>' ?>
-                    <?= '<div class="col-md-3">' . Html::submitButton(Yii::t('app', 'frontend.client.integration.store_entry.conversion', ['ru' => 'Переработка']), ['class' => 'btn btn-primary create_vsd_conversion']) . '</div>' ?>
-                </div>
+                 </div>
             </div>
         </div>
     </div>
 </section>
 
 <?php
-$urlCreateVSD = Url::to(['transport-vsd/step-1']);
-$urlCreateVSDConversion = Url::to(['transport-vsd/conversion-step-1']);
 $loading = Yii::t('message', 'frontend.client.integration.loading', ['ru' => 'Загрузка']);
-$urlInventoryVSD = Url::to(['inventory-all']);
+$urlCreateVSD = '';
 $customJs = <<< JS
 var justSubmitted = false;
 $(document).on("click", ".create_vsd", function(e) {
         if($("#vetStoreEntryList").yiiGridView("getSelectedRows").length > 0){
             window.location.href =  "$urlCreateVSD?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
-        }
-    });
-
-$(document).on("click", ".create_vsd_conversion", function(e) {
-        if($("#vetStoreEntryList").yiiGridView("getSelectedRows").length > 0){
-            window.location.href =  "$urlCreateVSDConversion?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
-        }
-    });
-
-$(document).on("click", ".inventory_all", function(e) {
-        if($("#vetStoreEntryList").yiiGridView("getSelectedRows").length > 0){
-            window.location.href =  "$urlInventoryVSD?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
         }
     });
 
@@ -418,7 +340,7 @@ $("#ajax-load").on("click", ".save-form", function() {
             form.serialize()
             )
             .done(function(result) {
-            $.pjax.reload("#pjax-vsd-list", {timeout:30000});
+            $.pjax.reload("#pjax-product-list", {timeout:30000});
             if(result != true)    
                 form.replaceWith(result);
             else
@@ -427,35 +349,17 @@ $("#ajax-load").on("click", ".save-form", function() {
         return false;
     });
 
- /*$("document").ready(function(){
-        $(".box-body").on("change", "#statusFilter", function() {
-            $("#search-form").submit();
-        });
-     }); 
- 
-  $("document").ready(function(){
-        $(".box-body").on("change", "#typeFilter", function() {
-            $("#search-form").submit();
-        });
-     });  
- 
- $("document").ready(function(){
-        $(".box-body").on("change", "#recipientFilter", function() {
-            $("#search-form").submit();
-        });
-     });   
- */
  $(document).on("click", ".clear_filters", function () {
-           $('#product_name').val(''); 
-           $('#producer_name').val('');
-           $('#dateFromProductionDate').val('');
-           $('#dateToProductionDate').val('');
-           $('#dateFromExpiryDate').val('');
-           $('#dateToExpiryDate').val('');
+           $('#name').val(''); 
+           $('#globalID').val('');
+           $('#fromCreateDate').val('');
+           $('#toCreateDate').val('');
+            $("#statusFilter").removeAttr("selected");
+           $('#code').val('');
            $("#search-form").submit();
     });
  
- $(".box-body").on("change", "#dateFromProductionDate, #dateToProductionDate", function() {
+ $(".box-body").on("change", "#fromCreateDate, #toCreateDate", function() {
             if (!justSubmitted) {
                 $("#search-form").submit();
                 justSubmitted = true;
@@ -465,34 +369,69 @@ $("#ajax-load").on("click", ".save-form", function() {
             }
         });
  
-  $(".box-body").on("change", "#dateFromExpiryDate, #dateToExpiryDate", function() {
-            if (!justSubmitted) {
-                $("#search-form").submit();
-                justSubmitted = true;
-                setTimeout(function() {
-                    justSubmitted = false;
-                }, 500);
-            }
+ $(document).on("change keyup paste cut", "#name", function() {
+     if (justSubmitted) {
+            clearTimeout(justSubmitted);
+        }
+        justSubmitted = setTimeout(function() {
+            justSubmitted = false;
+            $("#search-form").submit();
+        }, 700);
+    });
+  $(document).on("change keyup paste cut", "#globalID", function() {
+     if (justSubmitted) {
+            clearTimeout(justSubmitted);
+        }
+        justSubmitted = setTimeout(function() {
+            justSubmitted = false;
+            $("#search-form").submit();
+        }, 700);
+    });
+    $(document).on("change keyup paste cut", "#code", function() {
+     if (justSubmitted) {
+            clearTimeout(justSubmitted);
+        }
+        justSubmitted = setTimeout(function() {
+            justSubmitted = false;
+            $("#search-form").submit();
+        }, 700);
+    });
+  $("document").ready(function(){
+        $(".box-body").on("change", "#statusFilter", function() {
+            $("#search-form").submit();
         });
- 
- $(document).on("change keyup paste cut", "#product_name", function() {
-     if (justSubmitted) {
-            clearTimeout(justSubmitted);
-        }
-        justSubmitted = setTimeout(function() {
-            justSubmitted = false;
-            $("#search-form").submit();
-        }, 700);
-    });
-  $(document).on("change keyup paste cut", "#producer_name", function() {
-     if (justSubmitted) {
-            clearTimeout(justSubmitted);
-        }
-        justSubmitted = setTimeout(function() {
-            justSubmitted = false;
-            $("#search-form").submit();
-        }, 700);
-    });
+     });
+  $(document).on("click",".del", function(e){
+      e.preventDefault();
+        bootbox.confirm({
+            title: "Удалить позицию?",
+            message: "Позиция будет удалена из номенклатуры", 
+            buttons: {
+                confirm: {
+                    label: 'Удалить',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'Отмена',
+                    className: 'btn-default'
+                }
+            },
+            className: "danger-fk",
+            callback: function(result) {
+		if(result){
+		$.ajax({
+	        url: $(this).attr("href"),
+	        type: "GET",
+	        cache: false,
+	        success: function(response) {
+			       $.pjax.reload({container: "#pjax-product-list",timeout:30000});
+		        }	
+		    });
+		}else{
+		console.log('cancel');	
+		}
+	}});      
+})
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

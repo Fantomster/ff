@@ -18,16 +18,41 @@ class m180921_090742_add_index_to_vetis_tables extends Migration
      */
     public function safeUp()
     {
-        $this->createIndex('vetis_russian_enterprise_owner_uuid', '{{%vetis_russian_enterprise}}', 'owner_uuid');
-        $this->createIndex('vetis_russian_enterprise_owner_guid', '{{%vetis_russian_enterprise}}', 'owner_guid');
-        $this->execute("ALTER TABLE vetis_russian_enterprise ADD FULLTEXT INDEX vetis_russian_enterprise_name (name ASC)");
+        //Создаем новую таблицу
+        $newTable = '_vetis_russian_enterprise';
+        $sql = "
+        CREATE TABLE $newTable
+        (
+            uuid varchar(36) not null primary key,
+            guid varchar(255) not null,
+            last tinyint(1) null,
+            active tinyint(1) null,
+            type int null,
+            next varchar(255) null,
+            previous varchar(255) null,
+            name varchar(255) null,
+            inn varchar(255) null,
+            kpp varchar(255) null,
+            addressView text null,
+            data text null,
+            owner_guid varchar(255) null comment 'Глобальный идентификатор хозяйствующего субъекта владельца',
+            owner_uuid varchar(255) null comment 'Идентификатор хозяйствующего субъекта владельца',
+            constraint uuid unique (uuid) 
+        );
 
-        $this->createIndex('vetis_foreign_enterprise_owner_uuid', '{{%vetis_foreign_enterprise}}', 'owner_uuid');
-        $this->createIndex('vetis_foreign_enterprise_owner_guid', '{{%vetis_foreign_enterprise}}', 'owner_guid');
-        $this->createIndex('vetis_foreign_enterprise_country_guid', '{{%vetis_foreign_enterprise}}', 'country_guid');
-        $this->execute("ALTER TABLE vetis_foreign_enterprise ADD FULLTEXT INDEX vetis_foreign_enterprise_name (name ASC)");
+        create index vetis_russian_enterprise_guid on $newTable (guid);
+        create index vetis_russian_enterprise_uuid on $newTable (uuid);
+        ALTER TABLE $newTable ADD FULLTEXT INDEX vetis_russian_enterprise_name (name ASC);
+        ";
+        $this->execute($sql);
 
-        $this->execute("ALTER TABLE vetis_business_entity ADD FULLTEXT INDEX vetis_business_entity_name (name ASC)");
+        //Переносим данные
+        $sql = "INSERT INTO $newTable SELECT * FROM vetis_russian_enterprise";
+        $this->execute($sql);
+
+        //переименовываем
+        $this->renameTable('vetis_russian_enterprise', 'vetis_russian_enterprise_old');
+        $this->renameTable('_vetis_russian_enterprise', 'vetis_russian_enterprise');
     }
 
     /**
@@ -35,16 +60,6 @@ class m180921_090742_add_index_to_vetis_tables extends Migration
      */
     public function safeDown()
     {
-        $this->dropIndex('vetis_russian_enterprise_owner_uuid', '{{%vetis_russian_enterprise}}');
-        $this->dropIndex('vetis_russian_enterprise_owner_guid', '{{%vetis_russian_enterprise}}');
-        $this->dropIndex('vetis_russian_enterprise_name', '{{%vetis_russian_enterprise}}');
-
-        $this->dropIndex('vetis_foreign_enterprise_owner_uuid', '{{%vetis_foreign_enterprise}}');
-        $this->dropIndex('vetis_foreign_enterprise_owner_guid', '{{%vetis_foreign_enterprise}}');
-        $this->dropIndex('vetis_foreign_enterprise_country_guid', '{{%vetis_foreign_enterprise}}');
-        $this->dropIndex('vetis_foreign_enterprise_name', '{{%vetis_foreign_enterprise}}');
-
-        $this->dropIndex('vetis_business_entity_name', '{{%vetis_business_entity}}');
     }
 
 }

@@ -57,7 +57,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         return [
             [['waybill_id', 'product_id'], 'required'],
             //  [['koef'], 'number'],
-            //  
+            //
             [['koef', 'sum', 'quant'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             // ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800]],
             //   [['koef','sum','quant'], 'number', 'min' => 0.000001],
@@ -128,7 +128,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         return RkWaybill::findOne(['id' => $this->waybill_id]);
 
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
     }
 
     public function getVat()
@@ -145,7 +145,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
 
         return $rprod;
 
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
     }
 
     /**
@@ -168,7 +168,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
 
             if (!$insert) {  // Обновление
 
-                /*    if (strrpos($this->koef,','))  
+                /*    if (strrpos($this->koef,','))
                   $this->koef = (double) str_replace(',', '.',$this->koef);
 
                   if (strrpos($this->sum,','))
@@ -188,6 +188,9 @@ class RkWaybilldata extends \yii\db\ActiveRecord
                 if ($this->attributes['quant'] != $this->oldAttributes['quant']) {
 
                     $this->koef = round($this->quant / $this->defquant, 10);
+                    if ($this->attributes['quant'] == 0) {
+                        $this->koef = 1;
+                    }
                 }
 
                 $this->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');

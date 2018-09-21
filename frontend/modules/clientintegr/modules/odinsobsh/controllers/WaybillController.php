@@ -131,7 +131,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $sql = "SELECT COUNT(*) FROM one_s_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
         $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryScalar();
 
-        if ($kolvo_nesopost==0) {
+        if ($kolvo_nesopost == 0) {
             $sql = "UPDATE one_s_waybill SET readytoexport = 1, status_id = 3, updated_at = NOW() WHERE id = :w_wid";
             $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
         }
@@ -202,6 +202,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $product_rid = $result[0]["product_rid"];
         $org_id = $result[0]["org"];
         $vat = $result[0]["vat"];
+        if ($koef == 0) {
+            $koef = $koef_old;
+        }
         $quant_new = $quant_old * ($koef / $koef_old);
         $quant_new = round($quant_new, 4);
         $sql = "UPDATE one_s_waybill_data SET quant = :w_quant, koef = :w_koef WHERE id = :w_id";

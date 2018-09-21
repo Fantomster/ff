@@ -117,6 +117,9 @@ class OneSWaybillData extends \yii\db\ActiveRecord
                 }
                 if ($this->attributes['quant'] != $this->oldAttributes['quant']) {
                     $this->koef = round($this->quant / $this->defquant, 10);
+                    if ($this->attributes['quant'] == 0) {
+                        $this->koef = 1;
+                    }
                 }
             } else { // Создание
                 //    $this->koef = 1;

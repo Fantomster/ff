@@ -49,7 +49,7 @@ class SyncController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/sync/list",
-     *     tags={"Integration/iiko/sync"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Список синхронизируемых справочников",
      *     description="Список синхронизируемых справочников",
      *     produces={"application/json"},
@@ -83,7 +83,7 @@ class SyncController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/sync/create-waybill-data",
-     *     tags={"Integration/iiko/sync"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Создание сопоставлений номенклатуры накладной с продуктами MixCart",
      *     description="Создание сопоставлений номенклатуры накладной с продуктами MixCart",
      *     produces={"application/json"},

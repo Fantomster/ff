@@ -9,7 +9,7 @@ class StoreController extends WebApiController
 {
     /**
      * @SWG\Post(path="/integration/iiko/store/list",
-     *     tags={"Integration/iiko/store"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Список складов",
      *     description="Список складов",
      *     produces={"application/json"},

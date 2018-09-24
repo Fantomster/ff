@@ -10,7 +10,7 @@ class OrderController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/order/list",
-     *     tags={"Integration/iiko/order"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Список завершенных заказов",
      *     description="Список завершенных заказов",
      *     produces={"application/json"},
@@ -80,7 +80,7 @@ class OrderController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/order/waybills-list",
-     *     tags={"Integration/iiko/order"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Список Накладных к заказу",
      *     description="Список Накладных к заказу",
      *     produces={"application/json"},
@@ -129,7 +129,7 @@ class OrderController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/order/get-waybill",
-     *     tags={"Integration/iiko/order"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Информация о накладной",
      *     description="Информация о накладной",
      *     produces={"application/json"},
@@ -197,7 +197,7 @@ class OrderController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/order/create-waybill",
-     *     tags={"Integration/iiko/order"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Создание накладной к заказу",
      *     description="Создание накладной к заказу",
      *     produces={"application/json"},
@@ -249,7 +249,7 @@ class OrderController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/order/update-waybill",
-     *     tags={"Integration/iiko/order"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Редактирование накладной к заказу",
      *     description="Редактирование накладной к заказу",
      *     produces={"application/json"},

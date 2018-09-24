@@ -11,7 +11,7 @@ class AgentController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/agent/list",
-     *     tags={"Integration/iiko/agent"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Список контрагентов синхронизированных из внешней системы",
      *     description="Список контрагентов синхронизированных из внешней системы",
      *     produces={"application/json"},
@@ -74,7 +74,7 @@ class AgentController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/agent/update",
-     *     tags={"Integration/iiko/agent"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Обновление данных для связи контрагента",
      *     description="Обновление данных для связи контрагента",
      *     produces={"application/json"},

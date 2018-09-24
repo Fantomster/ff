@@ -51,28 +51,11 @@ class SyncLog
     }
 
     /**
-     * Log integration procedure and throw exception if needed
-     * @param $message string Log info message
-     * @param $exceptionMessage string Exception message
-     * @throws BadRequestHttpException
-     */
-    public static function exit(string $message, string $exceptionMessage = null)
-    {
-        SyncLog::fix($message);
-        # здесь будет логирование неудачных операций синхронизации
-        // self::show();
-        // exit;
-        if ($exceptionMessage) {
-            throw new BadRequestHttpException($exceptionMessage);
-        }
-    }
-
-    /**
      * Log microaction
      * @param $message string Log info message
      * @param $service string Service name
      */
-    public static function fix(string $message, string $service = null)
+    public static function trace(string $message, string $service = null)
     {
 
         $currentTime = (string)microtime(true);
@@ -89,10 +72,6 @@ class SyncLog
         if ($service) {
             self::$servicePrefix = '__' . $service . '__';
         }
-        self::$logData[self::$logIndex][] = [
-            'time' => $currentTime,
-            'mess' => $message,
-        ];
         if ($service) {
             $i = 0;
             foreach (self::$logData[self::$logIndex] as $k => $mess) {
@@ -107,6 +86,10 @@ class SyncLog
                 file_put_contents(self::$logDir . '/' . self::$servicePrefix . self::$logIndex . '.log', $mess, FILE_APPEND);
             }
         }
+        self::$logData[self::$logIndex][] = [
+            'time' => $currentTime,
+            'mess' => $message,
+        ];
         $message = (count(self::$logData[self::$logIndex]) + 1) . ') "' . $message . '" - [' .
             round(($currentTime - self::$timePrev), 5) . '/' . round(($currentTime - self::$timeInit), 5) . '] ms' . PHP_EOL;
         file_put_contents(self::$logDir . '/' . self::$servicePrefix . self::$logIndex . '.log', $message, FILE_APPEND);

@@ -74,27 +74,32 @@ class SyncController extends WebApiController
     public function actionRun()
     {
 
-        # 1. Check if thet is callback
+        # 1. Get `task_id` if in query params
         $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
 
+        # 2. Checkout other params and fix callback
         if ($task_id) {
-            # 1.1. Fix callback
-            SyncLog::fix('Use global factory: ' . SyncServiceFactory::class);
+
+            # 2.2.1.Trace callback operation with task_id
+            SyncLog::trace('Callback operation `task_id` params is ' . $task_id);
 
         } else {
 
-            # 1.2. Check root script params
+            # 2.2.1. Check root script params
             if (!isset($this->request['service_id']) || !$this->request['service_id'] || !is_int($this->request['service_id'])) {
-                SyncLog::exit('"Service ID" is required and empty!', "empty_param|service_id");
+                SyncLog::trace('"Service ID" is required and empty!');
+                throw new BadRequestHttpException("empty_param|service_id");
             }
             if (!isset($this->request['params']) || !is_array($this->request['params']) || !$this->request['params']) {
-                SyncLog::exit('Required variable "params" is empty!', "empty_param|params");
+                SyncLog::trace('Required variable "params" is empty!');
+                throw new BadRequestHttpException("empty_param|params");
             }
+            SyncLog::trace('Fix non-callback operation scenario');
 
         }
 
-        # 2. Load integration script with env and post params
-        SyncLog::fix('Use global factory: ' . SyncServiceFactory::class);
+        # 3. Load integration script with env and post params
+        SyncLog::trace('Use global factory: ' . SyncServiceFactory::class);
         $this->response = (new SyncServiceFactory($this->request['service_id'], $this->request['params'], $task_id))->syncResult;
 
     }

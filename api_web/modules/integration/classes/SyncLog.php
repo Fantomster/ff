@@ -96,7 +96,6 @@ class SyncLog
         if ($service) {
             $i = 0;
             foreach (self::$logData[self::$logIndex] as $k => $mess) {
-                print_r($k);
                 if (!$i) {
                     $timePrev = 0;
                 } else {

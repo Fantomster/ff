@@ -132,7 +132,7 @@ class ServiceRkws extends AbstractSyncFactory
 
 
         # 2. Check if licence active state exists - try to use it
-        $sess = RkSession::findOne(['acc' => 1, 'status' => 1]);
+        $sess = RkSession::findOne(['acc' => $this->user->organization_id, 'status' => 1]);
 
         $app = Yii::$app;
         /** @var Object $app */
@@ -197,7 +197,7 @@ class ServiceRkws extends AbstractSyncFactory
                 $sess->cook = $cookList[self::COOK_AUTH_PREFIX_LOGIN];
                 $sess->fd = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                 $sess->td = Yii::$app->formatter->asDate('2030-01-01 23:59:59', 'yyyy-MM-dd HH:mm:ss');
-                $sess->acc = 1;
+                $sess->acc = $this->user->organization_id;
                 $sess->status = 1;
                 $sess->fid = 1;
                 $sess->ver = 1;

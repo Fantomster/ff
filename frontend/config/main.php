@@ -63,9 +63,5 @@ return [
         'billing' => [
             'class' => 'frontend\modules\billing\Module',
         ],
-        'debug' => [
-            'class' => 'yii\debug\Module',
-            'allowedIPs' => ['*']
-        ],
     ],
 ];

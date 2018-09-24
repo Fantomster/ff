@@ -130,7 +130,6 @@ class ServiceRkws extends AbstractSyncFactory
         }
         SyncLog::fix('Active licence for user\'s organization #' . $this->user->organization_id . ' found (Service code and final date are ' . $this->serviceCode . '/' . $this->serviceData->td . ')');
 
-
         # 2. Check if licence active state exists - try to use it
         $sess = RkSession::findOne(['acc' => $this->user->organization_id, 'status' => 1]);
 
@@ -155,6 +154,7 @@ class ServiceRkws extends AbstractSyncFactory
                     if (isset($xml['@attributes']['id']) && $xml['@attributes']['id'] == $this->serviceCode && !$err) {
                         # 2.1.1. Use valid session code
                         SyncLog::fix('Service licence with active state id good - use it');
+                        $transaction->rollback();
                         return $sess->cook;
                     }
                 }
@@ -173,7 +173,6 @@ class ServiceRkws extends AbstractSyncFactory
         } else {
             SyncLog::fix('Service licence wit hactive state was not found');
         }
-
         # 3. Checkout existing valig connection params
         $access = RkAccess::findOne(['fid' => $this->serviceData->id]);
         if (!$access) {
@@ -297,6 +296,7 @@ class ServiceRkws extends AbstractSyncFactory
     public function prepareXmlWithTaskAndServiceCode($index, $code, $guid): string
     {
         $cb = $this->getCallbackURL($index) . '/?' . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
+        SyncLog::fix('Callback url is: '.$cb);
         return '<?xml version="1.0" encoding="utf-8"?>
 <RQ cmd="sh_get_corrs" tasktype="any_call" callback="' . $cb . '">
     <PARAM name="object_id" val="' . $code . '"/>

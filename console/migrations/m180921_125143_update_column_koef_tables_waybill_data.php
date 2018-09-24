@@ -15,6 +15,7 @@ class m180921_125143_update_column_koef_tables_waybill_data extends Migration
         $this->execute('alter table `iiko_waybill_data` change column `koef` `koef` DOUBLE NOT NULL DEFAULT 1');
         $this->execute('alter table `rk_waybill_data` change column `koef` `koef` DOUBLE NOT NULL DEFAULT 1');
         $this->execute('alter table `one_s_waybill_data` change column `koef` `koef` DOUBLE NOT NULL DEFAULT 1');
+        $this->update('{{%all_map%}}', ['koef'=>1], ['koef' => NULL]);
         $this->execute('alter table `all_map` change column `koef` `koef` DOUBLE NOT NULL DEFAULT 1');
         $this->addCommentOnColumn('{{%iiko_waybill_data}}', 'koef', 'Коэффициент пересчёта в приходной накладной в системе IIKO');
         $this->addCommentOnColumn('{{%rk_waybill_data}}', 'koef', 'Коэффициент пересчёта в приходной накладной в системе R-Keeper');

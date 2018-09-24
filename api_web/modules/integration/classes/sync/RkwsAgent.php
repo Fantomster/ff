@@ -15,7 +15,7 @@ namespace api_web\modules\integration\classes\sync;
 class RkwsAgent extends ServiceRkws
 {
 
-    /** @var string $_index Символьный идентификатор справочника */
-    public $_index = 'agent';
+    /** @var string $index Символьный идентификатор справочника */
+    public $index = 'agent';
 
 }

@@ -15,7 +15,7 @@ namespace api_web\modules\integration\classes\sync;
 class RkwsProduct extends ServiceRkws
 {
 
-    /** @var string $_index Символьный идентификатор справочника */
-    public $_index = 'product';
+    /** @var string $index Символьный идентификатор справочника */
+    public $index = 'product';
 
 }

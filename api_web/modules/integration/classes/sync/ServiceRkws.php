@@ -31,19 +31,19 @@ class ServiceRkws extends AbstractSyncFactory
         self::DICTIONARY_STORE,
     ];
 
-    /** @var $_serviceData RkServicedata */
-    public $_serviceData;
+    /** @var $serviceData RkServicedata */
+    public $serviceData;
 
-    /** @var $_serviceCode string */
-    public $_serviceCode;
+    /** @var $serviceCode string */
+    public $serviceCode;
 
-    /** @var $_serviceId int */
-    public $_serviceId = 1;
+    /** @var $serviceId int */
+    public $serviceId = 1;
 
-    /** @var $_now string */
-    public $_now;
+    /** @var $now string */
+    public $now;
 
-    public $_index;
+    public $index;
 
     public $urlCmdInit = 'http://ws.ucs.ru/WSClient/api/Client/Cmd';
     public $urlLoginInit = 'http://ws.ucs.ru/WSClient/api/Client/Login';
@@ -68,10 +68,10 @@ class ServiceRkws extends AbstractSyncFactory
         if (!$cook) {
             SyncLog::exit('Cannot authorize with curl', 'Cannot authorize with curl');
         }
-        if ($this->_serviceCode) {
+        if ($this->serviceCode) {
             $url = $this->getUrlCmd();
             $guid = UUID::uuid4();
-            $xml = $this->prepareXmlWithTaskAndServiceCode($this->_index, $this->_serviceCode, $guid);
+            $xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->serviceCode, $guid);
             $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
             if ($xmlData) {
                 $xml = (array)simplexml_load_string($xmlData);
@@ -82,11 +82,11 @@ class ServiceRkws extends AbstractSyncFactory
                     /** @var PDO $pdo */
                     $transaction = $pdo->beginTransaction();
                     $task = new OuterTask([
-                        'service_id' => $this->_serviceId,
+                        'service_id' => $this->serviceId,
                         'retry' => 0,
                         'org_id' => $this->user->organization_id,
                         'inner_guid' => $guid,
-                        'salespoint_id' => (string)$this->_serviceData->id,
+                        'salespoint_id' => (string)$this->serviceData->id,
                         'int_status_id' => OuterTask::STATUS_REQUESTED,
                         'outer_guid' => $xml['@attributes']['taskguid'],
                         'broker_version' => $xml['@attributes']['version'],
@@ -95,6 +95,8 @@ class ServiceRkws extends AbstractSyncFactory
                     if ($task->save()) {
                         /** @var PDO $transaction */
                         $transaction->commit();
+                        SyncLog::fix('SUCCESS. json-response-data: '.
+                            str_replace(',',  PHP_EOL. '      ', json_encode($task->attributes)));
                         return [
                             'task_id' => $task->id,
                             'task_status' => $task->int_status_id,
@@ -116,17 +118,17 @@ class ServiceRkws extends AbstractSyncFactory
 
         # 1. Check if authorization is required && active license exists
         SyncLog::fix('Begin "auth check" in ' . __METHOD__);
-        $this->_now = date('Y-m-d H:i:s', time());
+        $this->now = date('Y-m-d H:i:s', time());
         if (!$this->checkAuth()) {
             # 1.1. Find license data
-            $this->_serviceData = RkServicedata::findOne(['org' => $this->user->organization_id]);
-            $this->_serviceCode = $this->_serviceData->getCode();
+            $this->serviceData = RkServicedata::findOne(['org' => $this->user->organization_id]);
+            $this->serviceCode = $this->serviceData->getCode();
             # 1.2. Check if license expiratioon date is fault
-            if (!$this->_serviceData || !$this->_serviceData->status_id || ($this->_serviceData->td <= $this->_now)) {
+            if (!$this->serviceData || !$this->serviceData->status_id || ($this->serviceData->td <= $this->now)) {
                 SyncLog::exit('Service licence active state not found!', 'no_license');
             }
         }
-        SyncLog::fix('Active licence for user\'s organization #' . $this->user->organization_id . ' found (Service code and final date are ' . $this->_serviceCode . '/' . $this->_serviceData->td . ')');
+        SyncLog::fix('Active licence for user\'s organization #' . $this->user->organization_id . ' found (Service code and final date are ' . $this->serviceCode . '/' . $this->serviceData->td . ')');
 
 
         # 2. Check if licence active state exists - try to use it
@@ -150,7 +152,7 @@ class ServiceRkws extends AbstractSyncFactory
                 if (isset($xml['OBJECTINFO'])) {
                     $xml = (array)$xml['OBJECTINFO'];
                     $err = (isset($xml['ERROR']) && $xml['ERROR']) ? $xml['ERROR'] : null;
-                    if (isset($xml['@attributes']['id']) && $xml['@attributes']['id'] == $this->_serviceCode && !$err) {
+                    if (isset($xml['@attributes']['id']) && $xml['@attributes']['id'] == $this->serviceCode && !$err) {
                         # 2.1.1. Use valid session code
                         SyncLog::fix('Service licence with active state id good - use it');
                         return $sess->cook;
@@ -268,7 +270,7 @@ class ServiceRkws extends AbstractSyncFactory
         SyncLog::fix('Prepare XML-data type "Service test" in ' . __METHOD__);
         return '<?xml version="1.0" encoding="utf-8" ?>
     <RQ cmd="get_objectinfo">
-        <PARAM name="object_id" val="' . $this->_serviceCode . '" />
+        <PARAM name="object_id" val="' . $this->serviceCode . '" />
     </RQ>';
     }
 

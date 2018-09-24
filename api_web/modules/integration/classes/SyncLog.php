@@ -17,9 +17,14 @@ use yii\web\BadRequestHttpException;
 class SyncLog
 {
 
+    public static $logDir;
     public static $logIndex;
+    public static $servicePrefix;
 
     public static $logData = [];
+
+    public static $timePrev;
+    public static $timeInit;
 
     /**
      * Show log in screen or push it to other points
@@ -65,16 +70,49 @@ class SyncLog
     /**
      * Log microaction
      * @param $message string Log info message
+     * @param $service string Service name
      */
-    public static function fix(string $message)
+    public static function fix(string $message, string $service = null)
     {
+
+        $currentTime = (string)microtime(true);
         if (!self::$logIndex) {
-            self::$logIndex = self::uuid4();
+            self::$logIndex = (string)microtime(true) . '--' . self::uuid4();
+            if (!is_dir(self::$logDir)) {
+                self::$logDir = \Yii::$app->getRuntimePath() . '/logs/sync';
+                if (!is_dir(self::$logDir)) {
+                    mkdir(self::$logDir);
+                }
+            }
+            self::$timePrev = self::$timeInit = $currentTime;
+        }
+        if ($service) {
+            self::$servicePrefix = '__' . $service . '__';
         }
         self::$logData[self::$logIndex][] = [
-            'time' => (string)microtime(true),
+            'time' => $currentTime,
             'mess' => $message,
         ];
+        if ($service) {
+            $i = 0;
+            foreach (self::$logData[self::$logIndex] as $k => $mess) {
+                print_r($k);
+                if (!$i) {
+                    $timePrev = 0;
+                } else {
+                    $timePrev = self::$logData[self::$logIndex][$k-1]['time'];
+                }
+                $i++;
+                $mess = $i . ') "' . $mess['mess'] . '" - [' .
+                    round(($mess['time'] - $timePrev), 5) . '/' . round(($mess['time'] - self::$logData[self::$logIndex][0]['time']), 5) . '] ms' . PHP_EOL;
+                file_put_contents(self::$logDir . '/' . self::$servicePrefix . self::$logIndex . '.log', $mess, FILE_APPEND);
+            }
+        }
+        $message = (count(self::$logData[self::$logIndex]) + 1) . ') "' . $message . '" - [' .
+            round(($currentTime - self::$timePrev), 5) . '/' . round(($currentTime - self::$timeInit), 5) . '] ms' . PHP_EOL;
+        file_put_contents(self::$logDir . '/' . self::$servicePrefix . self::$logIndex . '.log', $message, FILE_APPEND);
+
+        self::$timePrev = $currentTime;
     }
 
     /**

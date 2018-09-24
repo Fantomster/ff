@@ -15,7 +15,7 @@ namespace api_web\modules\integration\classes\sync;
 class RkwsCategory extends ServiceRkws
 {
 
-    /** @var string $_index Символьный идентификатор справочника */
-    public $_index = 'category';
+    /** @var string $index Символьный идентификатор справочника */
+    public $index = 'category';
 
 }

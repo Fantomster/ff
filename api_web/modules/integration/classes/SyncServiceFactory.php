@@ -54,7 +54,7 @@ class SyncServiceFactory extends WebApi
 
             # 2.2. Use entity class (by factory)
             $entity = $this->factory($this->allServicesMap[$service_id]);
-            SyncLog::fix('Initialized entity class: ' . get_class($entity));
+            SyncLog::fix('Initialized entity class: ' . get_class($entity), $this->allServicesMap[$service_id]);
 
             # 2.3. Load dictionary data
             /** AbstractSyncFactory $entity */

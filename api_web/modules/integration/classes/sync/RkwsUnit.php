@@ -15,7 +15,7 @@ namespace api_web\modules\integration\classes\sync;
 class RkwsUnit extends ServiceRkws
 {
 
-    /** @var string $_index Символьный идентификатор справочника */
-    public $_index = 'unit';
+    /** @var string $index Символьный идентификатор справочника */
+    public $index = 'unit';
 
 }

@@ -36,7 +36,7 @@ abstract class AbstractSyncFactory extends WebApi
 
     public $dictionaryAvailable = [];
 
-    public $_serviceName;
+    public $serviceName;
 
     /**
      * Construct method for Class SyncServiceFactory
@@ -45,7 +45,7 @@ abstract class AbstractSyncFactory extends WebApi
     public function __construct(string $service)
     {
         parent::__construct();
-        $this->_serviceName = $service;
+        $this->serviceName = $service;
     }
 
     /**
@@ -72,6 +72,7 @@ abstract class AbstractSyncFactory extends WebApi
 
         # 3. Make transaction "Send request"
         if (method_exists($entity, 'sendRequest')) {
+            SyncLog::fix('Target method "sendRequest" in the dictionary class "'.get_class($entity).'" exist');
             return $entity->sendRequest();
         } else {
             SyncLog::exit('Target method "sendRequest" in the dictionary class does not exist!', "method_not_exist");
@@ -86,9 +87,9 @@ abstract class AbstractSyncFactory extends WebApi
      */
     public function factory(string $dictionary): ?AbstractSyncFactory
     {
-        $className = __NAMESPACE__ . '\\' . $this->_serviceName . ucfirst($dictionary);
+        $className = __NAMESPACE__ . '\\' . $this->serviceName . ucfirst($dictionary);
         if (class_exists($className)) {
-            return new $className($this->_serviceName);
+            return new $className($this->serviceName);
         }
         SyncLog::exit("The requested dictionary class does not exist!", "class_not_exist");
         return null;

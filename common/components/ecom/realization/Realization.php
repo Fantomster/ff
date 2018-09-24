@@ -104,6 +104,11 @@ class Realization extends AbstractRealization implements RealizationInterface
             throw new Exception('No such order ID: ' . $orderID);
         }
 
+        if ($this->fileType != 'ordrsp') {
+            $helper = new WaybillHelper();
+            $helper->createWaybill($orderID);
+        }
+        return false;
         $order->service_id = WaybillHelper::EDI_SERVICE_ID;
         if ($this->fileType == 'ordrsp') {
             $order->edi_ordersp = $this->xml->filename;
@@ -118,44 +123,103 @@ class Realization extends AbstractRealization implements RealizationInterface
             $positions = $this->xml->HEAD->PACKINGSEQUENCE->POSITION;
         }
 
-        $waybillId = $this->getWaybillId($ediOrganization->organization_id);
-
-
-
-//        $positionsArray = [];
-        $arr = [];
         $barcodeArray = [];
         $totalQuantity = 0;
         $totalPrice = 0;
+        $sum = 0;
 
         foreach ($positions as $position) {
             $contID = (int)($position->PRODUCTIDBUYER ?? $position->PRODUCT);
-
-//            $positionsArray[] = (int)$contID;
             $quantity = (float)($position->DELIVEREDQUANTITY ?? $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY);
-            if ($quantity != 0.00 || $position->(float)($position->PRICEWITHVAT ?? $position->PRICE)){
+            $price = (float)($position->PRICEWITHVAT ?? $position->PRICE);
+            $barcode = $position->PRODUCT;
+            $barcodeArray[] = $barcode;
+            if ($quantity != 0.00 || $price != 0.00) {
+                $ordCont = $order->orderContent[$barcode];
+                $good = CatalogBaseGoods::findOne(['barcode' => $barcode]);
+                if ($ordCont) {
+                    if ($ordCont->quantity != $quantity) {
+                        if ($quantity == 0) {
+                            $message .= \Yii::t('message', 'frontend.controllers.order.del',
+                                ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $ordCont->product_name]);
+                            $ordCont->delete();
+                        } else {
+                            $message .= \Yii::t('message', 'frontend.controllers.order.change',
+                                    ['ru'      => "<br/>изменил количество {prod} с {oldQuan} {ed} на ",
+                                     'prod'    => $ordCont->product_name,
+                                     'oldQuan' => $ordCont->quantity,
+                                     'ed'      => $good->ed]
+                                ) . " $quantity" . $good->ed;
+                        }
+                    }
+                    if ($ordCont->price != $price) {
+                        if ($price == 0) {
+                            $message .= \Yii::t('message', 'frontend.controllers.order.del',
+                                ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $ordCont->product_name]);
+                            $ordCont->delete();
+                        } else {
+                            $message .= \Yii::t('message', 'frontend.controllers.order.change_price',
+                                    ['ru'             => "<br/>изменил цену {prod} с {productPrice} руб на ",
+                                     'prod'           => $ordCont->product_name,
+                                     'productPrice'   => $ordCont->price,
+                                     'currencySymbol' => $order->currency->iso_code]
+                                ) . $price . " руб";
+                        }
+                    }
 
+                    $arUpdate = [
+                        'price'       => $price,
+                        'quantity'    => $quantity,
+                        'updated_at'  => new Expression('NOW()'),
+                        'edi_number'  => $position->DELIVERYNOTENUMBER ?? $position->WAYBILLNUMBER ?? $orderID,
+                        'vat_product' => (float)($position->TAXRATE ?? null),
+                        'merc_uuid'   => $position->VETIS->VETID ?? null,
+                    ];
+
+                    if (in_array($this->fileType, ['desadv', 'alcdes'])) {
+                        $arUpdate['edi_' . $this->fileType] = $this->xml->filename;
+                    }
+
+                    \Yii::$app->db->createCommand()->update('order_content', $arUpdate, 'id=' . $ordCont->id)->execute();
+
+                    $docType = ($isAlcohol) ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
+                    $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $ordCont->id]);
+                    $ediOrderContent->doc_type = $docType;
+                    $ediOrderContent->pricewithvat = $position->PRICEWITHVAT ?? 0.00;
+                    $ediOrderContent->taxrate = $position->TAXRATE ?? 0.00;
+                    $ediOrderContent->uuid = $position->UUID ?? null;
+                    $ediOrderContent->gtin = $position->GTIN ?? null;
+                    $ediOrderContent->waybill_date = $position->WAYBILLDATE ?? null;
+                    $ediOrderContent->waybill_number = $position->WAYBILLNUMBER ?? null;
+                    $ediOrderContent->delivery_note_date = $position->DELIVERYNOTEDATE ?? null;
+                    $ediOrderContent->delivery_note_number = $position->DELIVERYNOTENUMBER ?? null;
+                    $ediOrderContent->save();
+                }
+            } else {
+                if ($this->fileType != 'desadv') {
+//                Если нет в ордер контенте и в известных баркодах создаём.
+                    if (!in_array($barcode, $order->orderContent)) {
+                        $good = CatalogBaseGoods::findOne(['barcode' => $barcode]);
+                        \Yii::$app->db->createCommand()->insert('order_content', [
+                            'order_id'         => $order->id,
+                            'product_id'       => $good->id,
+                            'quantity'         => $quantity,
+                            'price'            => (float)$position->PRICE,
+                            'initial_quantity' => $quantity,
+                            'product_name'     => $good->product,
+                            'plan_quantity'    => $quantity,
+                            'plan_price'       => (float)$position->PRICE,
+                            'units'            => $good->units,
+                            'updated_at'       => new Expression('NOW()'),
+                        ])->execute();
+                        $message .= \Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
+                    }
+                }
             }
-//            $arr[$contID]['PRICE'] = (float)$position->PRICEWITHVAT ?? (float)$position->PRICE;
-//            $arr[$contID]['PRICEWITHVAT'] = (float)$position->PRICEWITHVAT ?? 0.00;
-//            $arr[$contID]['TAXRATE'] = (float)$position->TAXRATE ?? 0.00;
-//            $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
-//            $arr[$contID]['WAYBILLNUMBER'] = $position->WAYBILLNUMBER ?? null;
-//            $arr[$contID]['WAYBILLDATE'] = $position->WAYBILLDATE ?? null;
-//            $arr[$contID]['DELIVERYNOTENUMBER'] = $position->DELIVERYNOTENUMBER ?? null;
-//            $arr[$contID]['DELIVERYNOTEDATE'] = $position->DELIVERYNOTEDATE ?? null;
-//            $arr[$contID]['GTIN'] = $position->GTIN ?? null;
-//            $arr[$contID]['UUID'] = $position->UUID ?? null;
-//            $arr[$contID]['VETID'] = $position->VETIS->VETID ?? null;
-            $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
-            $totalPrice += $arr[$contID]['PRICE'];
 
-
-
-
-
-
-
+            $totalQuantity += $quantity;
+            $totalPrice += $price;
+            $sum += $quantity * $price;
         }
         if ($totalQuantity == 0.00 || $totalPrice == 0.00) {
             OrderController::sendOrderCanceled($order->client, $order);
@@ -166,136 +230,18 @@ class Realization extends AbstractRealization implements RealizationInterface
             return true;
         }
 
-
-        $summ = 0;
-        $ordContArr = [];
-
-
-
-        foreach ($order->orderContent as $orderContent) {
-            $index = $orderContent->id;
-            $hasWaybillContent = WaybillContent::findOne(['order_content_id' => $index]);
-            if (!$hasWaybill && !$isOrderSp && !$hasWaybillContent) {
-                $modelWaybillContent = new WaybillContent();
-                $modelWaybillContent->order_content_id = $index;
-                $modelWaybillContent->merc_uuid = $arr[$index]['VETID'] ?? null;
-                $modelWaybillContent->waybill_id = $modelWaybill->id;
-                $modelWaybillContent->product_outer_id = $index;
-                $modelWaybillContent->quantity_waybill = (float)($arr[$index]['ACCEPTEDQUANTITY'] ?? null);
-                $modelWaybillContent->price_waybill = (float)($arr[$index]['PRICE'] ?? null);
-                $modelWaybillContent->vat_waybill = (float)($arr[$index]['PRICEWITHVAT'] ?? null);
-                $modelWaybillContent->save();
-            }
-
-            $ordContArr[] = $orderContent->id;
-            if (!isset($arr[$index]['BARCODE'])) {
-                if (isset($orderContent->ediOrderContent)) {
-                    $index = $orderContent->ediOrderContent->barcode;
-                    $ordContArr[] = $index;
-                } else {
-                    continue;
-                }
-            }
-            if (!isset($arr[$index]['BARCODE'])) continue;
-            $good = CatalogBaseGoods::findOne(['barcode' => $arr[$index]['BARCODE']]);
-            if (!$good) continue;
-            $barcodeArray[] = $good->barcode;
-
-            $ordCont = OrderContent::findOne(['id' => $orderContent->id]);
-
-            if (!$ordCont) continue;
-            if (in_array($index, $positionsArray)) {
-                $ordCont->delete();
-                $message .= \Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-            } else {
-                $oldQuantity = (float)$ordCont->quantity;
-                $newQuantity = (float)($arr[$index]['ACCEPTEDQUANTITY'] ?? null);
-
-                if ($oldQuantity != $newQuantity) {
-                    if ($newQuantity == 0) {
-                        $ordCont->delete();
-                        $message .= \Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-                    } else {
-                        $message .= \Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
-                    }
-                }
-
-                $oldPrice = (float)$ordCont->price;
-                $newPrice = (float)($arr[$index]['PRICE'] ?? null);
-                if ($oldPrice != $newPrice) {
-                    if ($newPrice == 0) {
-                        $ordCont->delete();
-                        $message .= \Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-                    } else {
-                        $message .= \Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' => $orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol' => $order->currency->iso_code]) . $newPrice . " руб";
-                    }
-                }
-
-                $summ += $newQuantity * $newPrice;
-
-                $arUpdate = [
-                    'price'       => $newPrice,
-                    'quantity'    => $newQuantity,
-                    'updated_at'  => new Expression('NOW()'),
-                    'edi_number'  => $arr[$index]['DELIVERYNOTENUMBER'] ?? $arr[$index]['WAYBILLNUMBER'] ?? $orderID,
-                    'vat_product' => (float)($arr[$index]['TAXRATE'] ?? null),
-                    'merc_uuid'   => $arr[$index]['VETID'] ?? null,
-                ];
-
-                if (in_array($this->fileType, ['desadv', 'alcdes'])) {
-                    $arUpdate['edi_'.$this->fileType] = $this->xml->filename;
-                }
-
-                \Yii::$app->db->createCommand()->update('order_content', $arUpdate, 'id=' . $ordCont->id)->execute();
-
-                $docType = ($isAlcohol) ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
-                $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $orderContent->id]);
-                $ediOrderContent->doc_type = $docType;
-                $ediOrderContent->pricewithvat = $arr[$index]['PRICEWITHVAT'] ?? 0.00;
-                $ediOrderContent->taxrate = $arr[$index]['TAXRATE'] ?? 0.00;
-                $ediOrderContent->uuid = $arr[$index]['UUID'] ?? null;
-                $ediOrderContent->gtin = $arr[$index]['GTIN'] ?? null;
-                $ediOrderContent->waybill_date = $arr[$index]['WAYBILLDATE'] ?? null;
-                $ediOrderContent->waybill_number = $arr[$index]['WAYBILLNUMBER'] ?? null;
-                $ediOrderContent->delivery_note_date = $arr[$index]['DELIVERYNOTEDATE'] ?? null;
-                $ediOrderContent->delivery_note_number = $arr[$index]['DELIVERYNOTENUMBER'] ?? null;
-                $ediOrderContent->save();
+        foreach ($order->orderContent as $item) {
+            if (!array_key_exists($item, $barcodeArray)) {
+                $message .= \Yii::t('message', 'frontend.controllers.order.del',
+                    ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $item->product_name]);
+                $item->delete();
             }
         }
-        if (!$isDesadv) {
-            foreach ($positions as $position) {
-                if ($position->ACCEPTEDQUANTITY == 0.00 || $position->PRICE == 0.00) continue;
-                $contID = (int)$position->PRODUCTIDBUYER;
-                if (!$contID) {
-                    $contID = (int)$position->PRODUCT;
-                }
-                if (!$contID) continue;
-                $barcode = (int)$position->PRODUCT;
-                if (!in_array($contID, $ordContArr) && !in_array($barcode, $barcodeArray)) {
-                    $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
-                    if (!$good) continue;
-                    if ($isDesadv) {
-                        $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
-                    } else {
-                        $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
-                    }
-                    \Yii::$app->db->createCommand()->insert('order_content', [
-                        'order_id'         => $order->id,
-                        'product_id'       => $good->id,
-                        'quantity'         => $quan,
-                        'price'            => (float)$position->PRICE,
-                        'initial_quantity' => $quan,
-                        'product_name'     => $good->product,
-                        'plan_quantity'    => $quan,
-                        'plan_price'       => (float)$position->PRICE,
-                        'units'            => $good->units,
-                        'updated_at'       => new Expression('NOW()'),
-                    ])->execute();
-                    $message .= \Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
-                    $summ += $quan * $position->PRICE;
-                }
-            }
+        if ($this->fileType != 'ordrsp') {
+            $helper = new WaybillHelper();
+            $helper->createWaybill($orderID);
         }
+
         \Yii::$app->db->createCommand()->update('order', ['status' => OrderStatus::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
         $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
         if ($ediOrder) {
@@ -422,26 +368,5 @@ class Realization extends AbstractRealization implements RealizationInterface
         return true;
     }
 
-    private function getWaybillId($orgId){
 
-        //        $db = \Yii::$app->db_api;
-//        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
-//        $sql = ' SELECT m.store_rid FROM `'.$dbName.'`.`order_content` o '.
-//            ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id IN (1,2) AND m.org_id = '.$order->client_id.
-//            ' WHERE o.order_id = ' . $orderID .
-//            ' GROUP BY store_rid';
-//        $stories = $db->createCommand($sql)->queryAll();
-
-        if($this->fileType != 'ordrsp') {
-            $hasWaybill = OrderContent::findOne(['edi_desadv' => $this->xml->filename]);
-            if (!$hasWaybill) {
-                $modelWaybill = new Waybill();
-                $modelWaybill->acquirer_id = $orgId;
-                $modelWaybill->service_id = WaybillHelper::EDI_SERVICE_ID;
-                $modelWaybill->outer_store_uuid = '';
-                $modelWaybill->save();
-            }
-
-        }
-    }
 }

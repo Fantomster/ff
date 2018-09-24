@@ -297,7 +297,8 @@ class OrderNotice
                 'notifications' => uniqid(),
             ], [
                 'body' => $newMessage->message,
-                'date' => \Yii::$app->formatter->asDatetime('now', 'php:' . \DateTime::ATOM)
+                'date' => \Yii::$app->formatter->asDatetime('now', 'php:' . \DateTime::ATOM),
+                'order_id' => $order_id
             ]);
         }
         foreach ($vendorUsers as $vendorUser) {
@@ -316,7 +317,11 @@ class OrderNotice
                 'user' => $vendorUser->id,
                 'organization' => $newMessage->recipient_id,
                 'notifications' => uniqid(),
-            ], ['body' => $newMessage->message]);
+            ], [
+                'body' => $newMessage->message,
+                'date' => \Yii::$app->formatter->asDatetime('now', 'php:' . \DateTime::ATOM),
+                'order_id' => $order_id
+            ]);
         }
 
         return true;

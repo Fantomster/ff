@@ -446,10 +446,23 @@ class FullmapController extends DefaultController
         }
 
         $selected = implode(',', $selected);
+        if ($service_id == 2) {
+            $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
+        }
 
         foreach ($noProducts as $prod) {
 
             $model = new AllMaps();
+            if ($service_id == 2) {
+                if(isset($mainOrg)) {
+                    $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
+                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
+                        ->andWhere('product_id = :prod', [':prod' => $prod])->one();
+                    if(isset($hasProduct)) {
+                        $model->setAttributes($hasProduct->attributes);
+                    }
+                }
+            }
 
             $model->service_id = $service_id;
             $model->org_id = $organization;

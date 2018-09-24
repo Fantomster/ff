@@ -175,7 +175,7 @@ class ServiceRkws extends AbstractSyncFactory
         }
 
         # 3. Checkout existing valig connection params
-        $access = RkAccess::findOne(['fid' => 1]);
+        $access = RkAccess::findOne(['fid' => $this->serviceData->id]);
         if (!$access) {
             SyncLog::exit('Empty connection params', 'empty_params');
         }
@@ -199,7 +199,7 @@ class ServiceRkws extends AbstractSyncFactory
                 $sess->td = Yii::$app->formatter->asDate('2030-01-01 23:59:59', 'yyyy-MM-dd HH:mm:ss');
                 $sess->acc = $this->user->organization_id;
                 $sess->status = 1;
-                $sess->fid = 1;
+                $sess->fid = $this->serviceData->id;
                 $sess->ver = 1;
                 $sess->status = 1;
                 if (!$sess->save()) {

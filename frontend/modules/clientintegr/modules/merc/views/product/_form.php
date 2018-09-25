@@ -39,6 +39,7 @@ use kartik\form\ActiveForm;
     <?= $form->field($model, 'gost')->textInput();?>
     </div>
 
+    <?php /*
     <?=
     $form->field($model, 'packagingType_guid')
         ->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\vetis\VetisPackingType::find()->all(), 'guid', 'name'),
@@ -50,6 +51,7 @@ use kartik\form\ActiveForm;
         ->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\vetis\VetisUnit::findAll(['last' => true, 'active' => true]), 'guid', 'name'),
             ['prompt' => 'не указано'])
     ?>
+ */ ?>
 
     <div class="form-group">
         <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.save', ['ru' => 'Сохранить']), ['class' => 'btn btn-success']) ?>

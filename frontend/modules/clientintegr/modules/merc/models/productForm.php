@@ -10,6 +10,7 @@ namespace frontend\modules\clientintegr\modules\merc\models;
 
 
 use common\models\vetis\VetisProductItem;
+use Real\Validator\Gtin;
 
 class productForm extends VetisProductItem
 {
@@ -20,9 +21,10 @@ class productForm extends VetisProductItem
     {
         return [
             [['name', 'productType','product_guid','subproduct_guid'], 'required'],
-            [['productType', 'correspondsToGost', 'packagingQuantity','globalID'], 'integer'],
+            [['productType', 'correspondsToGost', 'packagingQuantity'], 'integer'],
             [['gost'],'checkGost'],
-            [['name', 'code', 'globalID', 'product_uuid', 'product_guid', 'subproduct_uuid',
+            [['globalID'], 'checkGlobalID'],
+            [['name', 'code', 'product_uuid', 'product_guid', 'subproduct_uuid',
                 'subproduct_guid', 'gost', 'producer_uuid', 'producer_guid', 'tmOwner_uuid', 'tmOwner_guid',
                 'packagingType_guid', 'packagingType_uuid', 'unit_uuid', 'unit_guid'], 'string', 'max' => 255],
             [['packagingVolume'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
@@ -63,6 +65,38 @@ class productForm extends VetisProductItem
         ];
     }
 
+    public function checkGlobalID()
+    {
+        if(isset($this->globalID)) {
+            try {
+                $gtin = Gtin\Factory::create($this->globalID);
+            } catch (Gtin\NonNormalizable $e) {
+                switch ($e->getCode()) {
+                    case Gtin\NonNormalizable::CODE_LENGTH_14:
+                        $message = 'Длина больше 14 символов';
+                        break;
+                    case Gtin\NonNormalizable::CODE_LENGTH_8:
+                        $message = 'Длина меньше 8 символов';
+                        break;
+                    case Gtin\NonNormalizable::CODE_LENGTH_KEY:
+                        $message = 'Длина не соответствует вариации GTIN (GTIN-8, GTIN-12, GTIN-13, GTIN-14)';
+                        break;
+                    case Gtin\NonNormalizable::CODE_DIGITS:
+                        $message = 'Некоторые символы не являются цифрами';
+                        break;
+                    case Gtin\NonNormalizable::CODE_PREFIX:
+                        $message = 'Префикс недействителен';
+                        break;
+                    default:
+                        $message = 'Недопустимый аргумент';
+                        var_dump($e->getTraceAsString());
+                        break;
+                }
+                $this->addError('globalID', $message);
+            }
+        }
+    }
+
     public function checkGost()
     {
         if($this->correspondsToGost)
@@ -70,18 +104,6 @@ class productForm extends VetisProductItem
             if(empty($this->gost))
             {
                 $this->addError('gost', 'ГОСТ должен быть заполнен');
-            }
-        }
-    }
-
-    public function checkGlobalID()
-    {
-        $len = strlen($this->globalID);
-        if(!($len == 8 || $len == 12 || $len == 13 || $len == 14))
-        {
-            if(empty($this->globalID))
-            {
-                $this->addError('globalID', 'Длина не соответствует формату GTIN-8, GTIN-12, GTIN-13, GTIN-14');
             }
         }
     }

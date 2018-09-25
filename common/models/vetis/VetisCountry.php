@@ -114,12 +114,12 @@ class VetisCountry extends \yii\db\ActiveRecord implements  UpdateDictInterface
     
     public static function getCountryList() {
         $models = self::find()
-                ->select(['uuid', 'name'])
+                ->select(['guid', 'name'])
                 ->where(['active' => true, 'last' => true])
                 ->asArray()
                 ->all();
 
-        return ArrayHelper::map($models, 'uuid', 'name');
+        return ArrayHelper::map($models, 'guid', 'name');
     }
 
     /**

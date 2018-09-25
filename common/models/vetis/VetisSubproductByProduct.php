@@ -90,15 +90,15 @@ class VetisSubproductByProduct extends \yii\db\ActiveRecord implements UpdateDic
         return \yii\helpers\Json::decode($this->data);
     }
     
-    public static function getSubProductByProductList($product_uuid) {
-        $product = VetisProductByType::findOne(['active' => true, 'last' => true, 'uuid' => $product_uuid]);
+    public static function getSubProductByProductList($product_guid) {
+        $product = VetisProductByType::findOne(['active' => true, 'last' => true, 'guid' => $product_guid]);
         $models = self::find()
-                ->select(['uuid', 'name', 'code'])
+                ->select(['guid', 'name', 'code'])
                 ->where(['active' => true, 'last' => true, 'productGuid' => $product->guid])
                 ->asArray()
                 ->all();
 
-        return ArrayHelper::map($models, 'uuid', function($model) {
+        return ArrayHelper::map($models, 'guid', function($model) {
             return $model['name'] . ' (' . $model['code'] . ')';
         });
     }

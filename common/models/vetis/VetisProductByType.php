@@ -97,12 +97,12 @@ class VetisProductByType extends \yii\db\ActiveRecord implements UpdateDictInter
     public static function getProductByTypeList($type)
     {
         $models = self::find()
-                ->select(['uuid', 'name'])
+                ->select(['guid', 'name'])
                 ->where(['active' => true, 'last' => true, 'productType' => $type])
                 ->asArray()
                 ->all();
 
-        return ArrayHelper::map($models, 'uuid', 'name');
+        return ArrayHelper::map($models, 'guid', 'name');
     }
 
     public static function getUpdateData($org_id)

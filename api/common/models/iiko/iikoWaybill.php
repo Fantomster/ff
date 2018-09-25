@@ -280,9 +280,17 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
 
+        $childOrg = $order->client_id;
+        $client_id = $childOrg;
+        $mainOrg = iikoService::getMainOrg($childOrg);
+
+        if ($mainOrg != $childOrg) {
+            $client_id = "IF(m.product_id in (select product_id from all_map where service_id = 2 and org_id = $client_id), $client_id, $mainOrg)";
+        }
+
         $db = Yii::$app->db_api;
         $sql = ' SELECT m.store_rid FROM `' . $dbName . '`.`order_content` o ' .
-            ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 2 AND m.org_id = ' . $order->client_id .
+            ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 2 AND m.org_id in (' . $client_id .') '.
             ' WHERE o.order_id = ' . $order_id .
             ' GROUP BY store_rid';
 
@@ -407,7 +415,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 $wdmodel->defquant = $record->quantity;
                 $wdmodel->defsum = round($record->price * $record->quantity, 2);
                 $wdmodel->vat = $taxVat;
-                $wdmodel->org = $this->org; //iikoService::getMainOrg($this->org);
+                $wdmodel->org = iikoService::getMainOrg($this->org);
                 $wdmodel->koef = 1;
                 // New check mapping
                 $client_id = $this->org;

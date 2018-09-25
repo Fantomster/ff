@@ -13,6 +13,7 @@ return [
         '/user/registration-repeat-sms',
         '/user/password-recovery',
         '/user/get-agreement',
+        '/user/change-unconfirmed-users-phone',
         '/market/product',
         '/market/products',
         '/market/categories',

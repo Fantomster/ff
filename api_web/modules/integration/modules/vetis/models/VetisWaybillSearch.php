@@ -9,6 +9,7 @@
 namespace api_web\modules\integration\modules\vetis\models;
 
 
+use api\common\models\merc\mercDicconst;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use api\common\models\merc\MercVsd;
 use yii\base\Model;
@@ -54,7 +55,12 @@ class VetisWaybillSearch extends MercVsd
             } elseif ($key == 'product_name') {
                 $query->andFilterWhere(['like', 'm.product_name', $this->product_name]);
             } elseif ($key == 'acquirer_id') {
-                $query->andWhere(['w.' . $key => $this->{$key}]);
+                $enterprise_guid = mercDicconst::getSetting('enterprise_guid', $this->{$key});
+                $query->andWhere([
+                    'OR',
+                    ['m.recipient_guid' => $enterprise_guid],
+                    ['m.sender_guid' =>  $enterprise_guid]
+                ]);
             } else {
                 $query->andWhere(['m.' . $key => $this->{$key}]);
             }

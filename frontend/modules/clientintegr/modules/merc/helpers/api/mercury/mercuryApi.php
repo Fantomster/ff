@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 
 use api\common\models\merc\MercVsd;
+use console\modules\daemons\classes\MercProductItemList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
@@ -774,7 +775,6 @@ class mercuryApi extends baseApi
         mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
 
         if ($status == 'COMPLETED') {
-            $result = $result->application->result->any['prepareOutgoingConsignmentResponse']->stockEntry;
             $stockList = $result->application->result->any['registerProductionOperationResponse']->stockEntryList->stockEntry;
             (new LoadStockEntryList())->updateDocumentsList($stockList);
             $vetDoc[] = $result->application->result->any['registerProductionOperationResponse']->vetDocument;
@@ -783,6 +783,118 @@ class mercuryApi extends baseApi
             $result = null;
         }
 
+        return $result;
+    }
+
+    /**
+     * @param $action
+     * @param $uuid
+     * @param null productForm $form
+     * @return null
+     * @throws \Exception
+     */
+    public function modifyProducerStockListOperation($action, $uuid, $form = null)
+    {
+        $result = null;
+
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        //Готовим запрос
+        $client = $this->getSoapClient('mercury');
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        //Формируем тело запроса
+        $request_body = new ModifyProducerStockListRequest();
+        $request_body->localTransactionId = $localTransactionId;
+        $request_body->initiator = new User();
+        $request_body->initiator->login = $this->vetisLogin;
+        $request_body->modificationOperation = new PSLModificationOperation();
+        $request_body->modificationOperation->type = $action;
+
+        if($action == 'DELETE')
+        {
+            $affectedList = new ProductItemList();
+            $affectedList->productItem = new ProductItem();
+            $affectedList->productItem->uuid = $uuid;
+            $request_body->modificationOperation->affectedList = $affectedList;
+        }
+        else
+        {
+            $resultingList = new ProductItemList();
+            $productItem = new ProductItem();
+
+            if($action == 'UPDATE') {
+                $productItem->uuid = $uuid;
+            }
+
+            $productItem->globalID = !empty($form->globalID) ? $form->globalID : null;
+            $productItem->name = $form->name;
+            $productItem->code = $form->code;
+            $productItem->productType = $form->productType;
+            $productItem->product = new Product();
+            $productItem->product->guid = $form->product_guid;
+            $productItem->subProduct = new SubProduct();
+            $productItem->subProduct->guid = $form->subproduct_guid;
+            $productItem->correspondsToGost = $form->correspondsToGost;
+            $productItem->gost = $form->gost;
+            $productItem->producer = new BusinessEntity();
+            $productItem->producer->guid = $this->issuerID;
+            $productItem->tmOwner = new BusinessEntity();
+            $productItem->tmOwner->guid = $this->issuerID;
+            $productItem->producing = new ProductItemProducing();
+            $productItem->producing->location = new Enterprise();
+            $productItem->producing->location->guid = $this->enterpriseGuid;
+
+            if(isset($form->packagingType_guid))
+            {
+                $packaging = new Packaging();
+                $packaging->packagingType = new PackingType();
+                $packaging->packagingType->guid = $form->packagingType_guid;
+                if(isset($form->unit_guid)) {
+                    $packaging->unit = new Unit();
+                    $packaging->unit->guid = $form->unit_guid;
+                }
+            }
+
+            $resultingList->productItem = $productItem;
+            $request_body->modificationOperation->resultingList = $resultingList;
+        }
+
+        $appData->any['ns3:modifyProducerStockListRequest'] = $request_body;
+
+        $request->application->data = $appData;
+
+        try {
+            $result = $client->submitApplicationRequest($request);
+
+            $reuest_xml = $client->__getLastRequest();
+
+            $app_id = $result->application->applicationId;
+            do {
+                //timeout перед запросом результата
+                sleep($this->query_timeout);
+                //Получаем результат запроса
+                $result = $this->getReceiveApplicationResult($app_id);
+
+                $status = $result->application->status;
+            } while ($status == 'IN_PROCESS');
+
+            //Пишем лог
+            mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+
+            if ($status == 'COMPLETED') {
+                $list = $result->application->result->any['modifyProducerStockListResponse']->productItemList->productItem;
+                MercProductItemList::updateList($list);
+            } else {
+                $result = null;
+            }
+        } catch (\SoapFault $e) {
+            Yii::error($e->detail);
+        }
         return $result;
     }
 

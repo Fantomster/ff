@@ -57,20 +57,14 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
         $enterprise = mercDicconst::getSetting('enterprise_guid');
         $hc =  mercDicconst::getSetting('issuer_id');
 
-        /*$enterprise = cerberApi::getInstance()->getEnterpriseByGuid($enterprise);
-        $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc);*/
-
         $delivery = new Delivery();
         $delivery->consignor = new BusinessMember();
-        $delivery->consignor->enterprise = (cerberApi::getInstance()->getEnterpriseByGuid($enterprise))->enterprise;
-        $delivery->consignor->businessEntity = (cerberApi::getInstance()->getBusinessEntityByGuid($hc))->businessEntity;
-
-        /*$enterprise = cerberApi::getInstance()->getEnterpriseByGuid($this->step3['recipient']);
-        $hc = cerberApi::getInstance()->getBusinessEntityByGuid($this->step3['hc']);*/
+        $delivery->consignor->enterprise = (cerberApi::getInstance()->getEnterpriseByGuid($enterprise));
+        $delivery->consignor->businessEntity = (cerberApi::getInstance()->getBusinessEntityByGuid($hc));
 
         $delivery->consignee = new BusinessMember();
-        $delivery->consignee->enterprise = (cerberApi::getInstance()->getEnterpriseByGuid($this->step3['recipient']))->enterprise;
-        $delivery->consignee->businessEntity = (cerberApi::getInstance()->getBusinessEntityByGuid($this->step3['hc']))->businessEntity;
+        $delivery->consignee->enterprise = (cerberApi::getInstance()->getEnterpriseByGuid($this->step3['recipient']));
+        $delivery->consignee->businessEntity = (cerberApi::getInstance()->getBusinessEntityByGuid($this->step3['hc']));
 
         $consigments = [];
         $vetCertificates = [];

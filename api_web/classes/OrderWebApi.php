@@ -627,15 +627,9 @@ class OrderWebApi extends \api_web\components\WebApi
                     'accept_user' => $model->acceptedByProfile->full_name ?? ''
                 ];
             }
-            if (isset($orders[0])) {
-                foreach (array_keys($orders[0]) as $key) {
-                    $headers[$key] = (new Order())->getAttributeLabel($key);
-                }
-            }
         }
 
         $return = [
-            'headers' => $headers,
             'orders' => $orders,
             'pagination' => [
                 'page' => ($dataProvider->pagination->page + 1),

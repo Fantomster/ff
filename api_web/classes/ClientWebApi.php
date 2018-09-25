@@ -603,7 +603,7 @@ class ClientWebApi extends WebApi
                     ]
                 ];
                 //Создаем пользователя
-                $user = $user_api->createUser($request, $role_id);
+                $user = $user_api->createUser($request, $role_id, User::STATUS_ACTIVE);
                 //Устанавливаем текущую организацию
                 $user->setOrganization($this->user->organization, true);
                 //Создаем профиль пользователя

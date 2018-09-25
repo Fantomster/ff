@@ -39,7 +39,7 @@ Modal::widget([
     ])
     ?>
 </section>
-<section class="content-header">
+<section class="content">
     <?=
     $this->render('/default/_license_no_active.php', ['lic' => $lic]);
     ?>
@@ -216,14 +216,8 @@ Modal::widget([
         ]
     );
     ?>
-</section>
-<section class="content-header">
     <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
-</section>
-<section class="content-header">
     <h4><?= Yii::t('message', 'frontend.client.integration.mercury.store_entry_list', ['ru'=>'Журнал входной продукци']) ?>:</h4>
-</section>
-<section class="content-header">
     <div class="box box-info">
         <div class="box-header with-border">
             <div class="panel-body">

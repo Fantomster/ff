@@ -115,7 +115,7 @@ class UserWebApi extends \api_web\components\WebApi
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function createUser(array $post, $role_id)
+    public function createUser(array $post, $role_id, $status = null)
     {
         if (User::findOne(['email' => $post['user']['email']])) {
             throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
@@ -129,7 +129,7 @@ class UserWebApi extends \api_web\components\WebApi
         if (!$user->validate()) {
             throw new ValidationException($user->getFirstErrors());
         }
-        $user->setRegisterAttributes($role_id, User::STATUS_ACTIVE);
+        $user->setRegisterAttributes($role_id, $status);
         $user->save();
         return $user;
     }
@@ -692,6 +692,55 @@ class UserWebApi extends \api_web\components\WebApi
         }
         return ['result' => true];
     }
+
+
+    /**
+     * Смена телефона неподтвержденным пользователем
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function changeUnconfirmedUsersPhone($post)
+    {
+        WebApiHelper::clearRequest($post);
+
+        if (empty($post['user']['id'])) {
+            throw new BadRequestHttpException('empty_param|id');
+        }
+
+        if (empty($post['profile']['phone'])) {
+            throw new BadRequestHttpException('empty_param|phone');
+        }
+
+        $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
+        if (mb_substr($phone, 0, 1) == '8') {
+            $phone = preg_replace('#^8(\d.+?)#', '+7$1', $phone);
+        }
+        //Проверяем телефон
+        if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
+            throw new ValidationException(['phone' => 'bad_format_phone']);
+        }
+
+        $user = User::findOne(['id' => $post['user']['id']]);
+        if (!$user) {
+            throw new BadRequestHttpException('no such user');
+        }
+
+        if ($user->status == User::STATUS_ACTIVE) {
+            throw new BadRequestHttpException('you have no rights for this action');
+        }
+
+        $profile = Profile::findOne(['user_id' => $user->id]);
+        if (!$profile) {
+            throw new BadRequestHttpException('no such users profile');
+        }
+        $profile->phone = $post['profile']['phone'];
+        $profile->save();
+
+        return ['result' => true];
+    }
+
 
     /**
      * Информация о поставщике

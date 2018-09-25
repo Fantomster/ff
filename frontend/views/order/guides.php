@@ -14,6 +14,12 @@ yii\jui\JuiAsset::register($this);
 
 $guideUrl = Url::to(['order/ajax-create-guide']);
 $guideUrlRename = Url::to(['order/ajax-rename-guide']);
+$css = <<< CSS
+#yii-debug-toolbar{
+    display: none !important;
+}
+CSS;
+$this->registerCss($css);
 
 $this->registerJs('
     $(document).on("click", ".delete-guide", function(e) {

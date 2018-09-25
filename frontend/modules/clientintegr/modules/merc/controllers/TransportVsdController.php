@@ -5,6 +5,7 @@ namespace frontend\modules\clientintegr\modules\merc\controllers;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
+use common\models\vetis\VetisProductItem;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\CreatePrepareOutgoingConsignmentRequest;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\CreateRegisterProductionRequest;
@@ -108,8 +109,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             $selected = implode(",", $res);
         }
 
-        if (!isset($list))
+        if (!isset($list)) {
             $list = step1Form::find()->where("id in ($selected)")->all();
+        }
         if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
             $attributes = [];
             foreach ($list as $item) {
@@ -124,8 +126,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
         }
 
-        if (Yii::$app->request->isAjax)
+        if (Yii::$app->request->isAjax) {
             return $this->renderAjax('step-1', ['list' => $list]);
+        }
         return $this->render('step-1', ['list' => $list]);
     }
 
@@ -247,7 +250,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             }
             else {
                 if(isset($hc->owner)) {
-                    $hc = cerberApi::getInstance()->getBusinessEntityByUuid($hc->owner->uuid);
+                    $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
                 }
                 else {
                     return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
@@ -256,15 +259,17 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         } catch (\SoapFault $e) {
             return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
         }
-        return (['result' => true, 'name' => $hc->name . ', ИНН:' . $hc->inn, 'uuid' => $hc->uuid]);
+        return (['result' => true, 'name' => $hc->name . ', ИНН:' . $hc->inn, 'uuid' => $hc->guid]);
     }
 
     private function getErrorText($e)
     {
-        if ($e->getCode() == 600)
+        if ($e->getCode() == 600) {
             return "При обращении к api Меркурий возникла ошибка. Ошибка зарегистрирована в журнале за номером №" . $e->getMessage() . ". Если ошибка повторяется обратитесь в техническую службу.";
-        else
+        } else {
             return "При обращении к api Меркурий возникла ошибка. Если ошибка повторяется обратитесь в техническую службу.";
+
+        }
     }
 
 
@@ -295,8 +300,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             $selected = implode(",", $res);
         }
 
-        if (!isset($list))
+        if (!isset($list)) {
             $list = step1Form::find()->where("id in ($selected)")->all();
+        }
         if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
             $attributes = [];
             foreach ($list as $item) {
@@ -311,8 +317,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
         }
 
-        if (Yii::$app->request->isAjax)
+        if (Yii::$app->request->isAjax) {
             return $this->renderAjax('conversion-step-1', ['list' => $list]);
+        }
         return $this->render('conversion-step-1', ['list' => $list]);
     }
 
@@ -346,17 +353,42 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                         return $this->redirect(['/clientintegr/merc/stock-entry']);
                     } catch (\Error $e) {
                         Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                        return $this->redirect(['conversion-step-2']);
+                        return $this->redirect(['/clientintegr/merc/stock-entry']);
                     } catch (\Exception $e) {
                         Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                        return $this->redirect(['conversion-step-2']);
+                        return $this->redirect(['/clientintegr/merc/stock-entry']);
                     }
                 }
             }
         }
         $params = ['model' => $model, 'productionDate' => $productionDate, 'expiryDate' => $expiryDate, 'inputDate' => $inputDate];
-        if (Yii::$app->request->isAjax)
+        if (Yii::$app->request->isAjax) {
             return $this->renderAjax('conversion-step-2', $params);
+        }
         return $this->render('conversion-step-2', $params);
+    }
+
+    public function actionProductItems($q = null)
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = ['results' => ['id' => '', 'text' => '']];
+        if (!is_null($q)) {
+            $producer = mercDicconst::getSetting('issuer_id');
+            $res = [];
+            $list = VetisProductItem::find()->where("name LIKE '%$q%'")->andWhere(['active'=>true, 'last' => true, 'producer_guid' => $producer])->limit(20)->all();
+            if (isset($list)) {
+                $res = [];
+                foreach ($list as $item) {
+                    if (($item->last) && ($item->active))
+                        $res[] = ['id' => $item->guid,
+                            'text' => $item->name];
+                }
+            }
+        }
+        if (count($res) > 0) {
+            $out['results'] = $res;
+        }
+
+        return $out;
     }
 }

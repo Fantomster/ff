@@ -4,6 +4,7 @@ namespace api_web\modules\integration\modules\vetis\models;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
+use api_web\components\WebApi;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentDone;
@@ -12,12 +13,15 @@ use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
-class VetisWaybill
+class VetisWaybill extends WebApi
 {
+
+    private $helper;
 
     public function __construct()
     {
         $this->helper = new VetisHelper();
+        parent::__construct();
     }
 
     /**
@@ -27,20 +31,21 @@ class VetisWaybill
      */
     public function getGroupsList($request)
     {
-        $reqPag = $request['pagination'];
-        $reqSearch = $request['search'];
-        $page = $this->helper->isSetDef($reqPag['page'], 1);
-        $pageSize = $this->helper->isSetDef($reqPag['page_size'], 12);
+        $reqPag = $request['pagination'] ?? [];
+        $reqSearch = $request['search'] ?? [];
+        $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
+        $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
+
+        $acquirer_id = null;
+        if(isset($request['search']['acquirer_id'])) {
+            $acquirer_id = $request['search']['acquirer_id'];
+        }
+
+        $reqSearch['acquirer_id'] = $this->helper->isSetDef($acquirer_id, $this->user->organization->id);
 
         $search = new VetisWaybillSearch();
-        if (isset($reqSearch)) {
-            $params = $this->helper->set($search, $reqSearch, ['acquirer_id', 'type', 'status', 'sender_guid', 'product_name', 'date']);
-            $dataProvider = $search->search($params);
-        } else {
-            $dataProvider = new ActiveDataProvider([
-                'query' => $this->helper->getOrdersQueryVetis(),
-            ]);
-        }
+        $params = $this->helper->set($search, $reqSearch, ['acquirer_id', 'type', 'status', 'sender_guid', 'product_name', 'date']);
+        $dataProvider = $search->search($params);
 
         $pagination = new Pagination();
         $pagination->setPage($page - 1);
@@ -57,10 +62,10 @@ class VetisWaybill
             $result[$model['group_name']]['status'] = $this->helper->getStatusForGroup($model['statuses']);
         }
         $return = [
-            'result'     => $result,
+            'result' => $result,
             'pagination' => [
-                'page'       => ($dataProvider->pagination->page + 1),
-                'page_size'  => $dataProvider->pagination->pageSize,
+                'page' => ($dataProvider->pagination->page + 1),
+                'page_size' => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -82,16 +87,16 @@ class VetisWaybill
         $result = [];
         foreach ($models as $model) {
             $result[] = [
-                'uuid'            => $model->uuid,
-                'product_name'    => $model->product_name,
-                'sender_name'     => $model->sender_name,
-                'status'          => $model->status,
-                'status_text'     => MercVsd::$statuses[$model->status],
-                'status_date'     => $model->last_update_date,
-                'amount'          => $model->amount,
-                'unit'            => $model->unit,
+                'uuid' => $model->uuid,
+                'product_name' => $model->product_name,
+                'sender_name' => $model->sender_name,
+                'status' => $model->status,
+                'status_text' => MercVsd::$statuses[$model->status],
+                'status_date' => $model->last_update_date,
+                'amount' => $model->amount,
+                'unit' => $model->unit,
                 'production_date' => $model->production_date,
-                'date_doc'        => $model->date_doc,
+                'date_doc' => $model->date_doc,
             ];
         }
 
@@ -106,10 +111,10 @@ class VetisWaybill
     {
         return [
             'result' => [
-                'vsd'      => $this->getFilterVsd(),
+                'vsd' => $this->getFilterVsd(),
                 'statuses' => $this->getFilterStatus(),
-                'sender'   => $this->getSenderOrProductFilter(['search' => 'sender_name'], 'sender_name'),
-                'product'  => $this->getSenderOrProductFilter(['search' => 'product_name'], 'product_name'),
+                'sender' => $this->getSenderOrProductFilter(['search' => 'sender_name'], 'sender_name'),
+                'product' => $this->getSenderOrProductFilter(['search' => 'product_name'], 'product_name'),
             ]
         ];
     }
@@ -127,7 +132,7 @@ class VetisWaybill
             'result' => [
                 $inc => $types[$inc],
                 $out => $types[$out],
-                ''   => 'Все ВСД',
+                '' => 'Все ВСД',
             ]
         ];
     }
@@ -248,9 +253,9 @@ class VetisWaybill
             throw new BadRequestHttpException('Uuid not for this organization');
         }
         $params = [
-            'decision'    => VetDocumentDone::PARTIALLY,
-            'volume'      => $request['amount'],
-            'reason'      => $request['reason'],
+            'decision' => VetDocumentDone::PARTIALLY,
+            'volume' => $request['amount'],
+            'reason' => $request['reason'],
             'description' => $request['description'],
         ];
 
@@ -265,6 +270,7 @@ class VetisWaybill
 
         return ['result' => $result];
     }
+
     /**
      * Возврат ВСД
      * @param $request
@@ -284,8 +290,8 @@ class VetisWaybill
             throw new BadRequestHttpException('Uuid not for this organization');
         }
         $params = [
-            'decision'    => VetDocumentDone::RETURN_ALL,
-            'reason'      => $request['reason'],
+            'decision' => VetDocumentDone::RETURN_ALL,
+            'reason' => $request['reason'],
             'description' => $request['description'],
         ];
 

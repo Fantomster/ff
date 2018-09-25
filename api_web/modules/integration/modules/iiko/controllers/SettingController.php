@@ -10,7 +10,7 @@ class SettingController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/setting/get",
-     *     tags={"Integration/iiko/setting"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Получение настроек сервиса iiko",
      *     description="Получение сервиса iiko",
      *     produces={"application/json"},
@@ -43,7 +43,7 @@ class SettingController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/setting/set",
-     *     tags={"Integration/iiko/setting"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Установка настроек сервиса iiko",
      *     description="Установка настроек сервиса iiko",
      *     produces={"application/json"},

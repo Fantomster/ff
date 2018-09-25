@@ -9,7 +9,7 @@ class ProductController extends WebApiController
 {
     /**
      * @SWG\Post(path="/integration/iiko/product/get",
-     *     tags={"Integration/iiko/product"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Информация о продукте",
      *     description="Информация о продукте",
      *     produces={"application/json"},
@@ -62,7 +62,7 @@ class ProductController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/product/list",
-     *     tags={"Integration/iiko/product"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Список продуктов",
      *     description="Список продуктов",
      *     produces={"application/json"},

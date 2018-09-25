@@ -13,7 +13,7 @@ use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
- * Class EdoWebApi
+ * Class EdiWebApi
  * @package api_web\classes
  * @createdBy Basil A Konakov
  * @createdAt 2018-09-11
@@ -21,7 +21,7 @@ use yii\web\BadRequestHttpException;
  * @module WEB-API
  * @version 2.0
  */
-class EdoWebApi extends WebApi
+class EdiWebApi extends WebApi
 {
 
     /**
@@ -46,7 +46,7 @@ class EdoWebApi extends WebApi
             throw new BadRequestHttpException("order_not_found");
         } elseif ($order->service_id != (AllService::findOne(['denom' => 'EDI']))->id) {
             throw new BadRequestHttpException("Доступно только для документов ЭДО");
-        } elseif ($order->status != OrderStatus::STATUS_EDO_SENT_BY_VENDOR) {
+        } elseif ($order->status != OrderStatus::STATUS_EDI_SENT_BY_VENDOR) {
             throw new BadRequestHttpException("Должен быть статус \"Отправлено поставщиком\"");
         }
 
@@ -57,7 +57,7 @@ class EdoWebApi extends WebApi
 
         if ((new EComIntegration())->sendOrderInfo($order, Organization::findOne($order->vendor_id),
             Organization::findOne($order->client_id), $eComAccess->login, $eComAccess->pass, true)) {
-            $order->status = OrderStatus::STATUS_EDO_ACCEPTANCE_FINISHED;
+            $order->status = OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED;
             $order->save();
             return true;
         }
@@ -88,7 +88,7 @@ class EdoWebApi extends WebApi
             throw new BadRequestHttpException("order_not_found");
         } elseif ($order->service_id != (AllService::findOne(['denom' => 'EDI']))->id) {
             throw new BadRequestHttpException("Доступно только для документов ЭДО");
-        } elseif ($order->status != OrderStatus::STATUS_EDO_ACCEPTANCE_FINISHED) {
+        } elseif ($order->status != OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED) {
             throw new BadRequestHttpException("Должен быть статус \"Приемка завершена\"");
         }
 
@@ -215,10 +215,10 @@ class EdoWebApi extends WebApi
                     case OrderStatus::STATUS_PROCESSING:
                         $return['processing'] += $row['count'];
                         break;
-                    case OrderStatus::STATUS_EDO_SENT_BY_VENDOR:
+                    case OrderStatus::STATUS_EDI_SENT_BY_VENDOR:
                         $return['sent_by_vendor'] += $row['count'];
                         break;
-                    case OrderStatus::STATUS_EDO_ACCEPTANCE_FINISHED:
+                    case OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED:
                         $return['acceptance_finished'] += $row['count'];
                         break;
                     case OrderStatus::STATUS_DONE:

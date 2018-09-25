@@ -43,7 +43,7 @@ class WebApiHelper
                 if (is_array($value)) {
                     self::formatDate($value);
                 } else {
-                    if (self::checkDateAttribute($key)) {
+                    if (self::checkDateAttribute($key) && !empty($value)) {
                         $response[$key] = \Yii::$app->formatter->asDatetime(strtotime($value), self::$formatDate);
                     }
                 }

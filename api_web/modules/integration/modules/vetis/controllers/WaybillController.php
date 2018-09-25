@@ -655,8 +655,8 @@ class WaybillController extends WebApiController
     /**
      * @SWG\Post(path="/integration/vetis/waybill/return-vsd",
      *     tags={"Integration/vetis/waybill"},
-     *     summary="Частичное погашение ВСД",
-     *     description="Частичное погашение ВСД amount: 37, Не может быть больше merc_vsd.amount reason:Частичная приемка, Обязательное поле",
+     *     summary="Возврат ВСД",
+     *     description="Возврат ВСД",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",

@@ -30,4 +30,12 @@ class Dictionary
     public function productList($request){
         return $this->dict->productList($request);
     }
+
+    public function agentList($request){
+    	return $this->dict->agentList($request);
+    }
+
+    public function agentUpdate($request){
+    	return $this->dict->agentUpdate($request);
+    }
 }

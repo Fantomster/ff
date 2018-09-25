@@ -89,4 +89,16 @@ class OuterAgent extends \yii\db\ActiveRecord
             ],
         ];
     }
+
+    public function getVendor(){
+    	return $this->hasOne(Organization::class, ['id' => 'vendor_id']);
+    }
+
+    public function getStore(){
+    	return $this->hasOne(OuterStore::class, ['id' => 'store_id']);
+    }
+
+    public function getNameWaybills(){
+    	return $this->hasMany(OuterAgentNameWaybill::class, ['agent_id' => 'id']);
+    }
 }

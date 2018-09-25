@@ -12,12 +12,63 @@ use yii\web\BadRequestHttpException;
 class WebApiHelper
 {
     /**
+     * Атрибуты, в которых дата
+     * @var array
+     */
+    private static $dateField = [
+        'date'
+    ];
+
+    /**
      * @param array $response
      * @return array
      */
     public static function response(Array $response)
     {
+        //Форматируем все даты в ATOM
+        self::formatDate($response);
         return $response;
+    }
+
+    /**
+     * Форматирование всех дат в ATOM
+     * @var array
+     */
+    private static $formatDate = 'php:' . \DateTime::ATOM;
+
+    private static function formatDate(&$response)
+    {
+        if (is_array($response)) {
+            foreach ($response as $key => &$value) {
+                if (is_array($value)) {
+                    self::formatDate($value);
+                } else {
+                    if (self::checkDateAttribute($key)) {
+                        $response[$key] = \Yii::$app->formatter->asDatetime(strtotime($value), self::$formatDate);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Является ли атрибут датой
+     * @param $string
+     * @param array $needle_array
+     * @return bool
+     */
+    private static function checkDateAttribute($string, $needle_array = ['_at', '_date'])
+    {
+        if (in_array($string, self::$dateField)) {
+            return true;
+        }
+
+        foreach ($needle_array as $item) {
+            if (mb_strstr($string, $item)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -102,6 +153,10 @@ class WebApiHelper
         return $item;
     }
 
+    /**
+     * Значения которых не должно быть в реквесте
+     * @var array
+     */
     public static $clearValue = ['d.m.Y', ''];
 
     public static function clearRequest(&$post)

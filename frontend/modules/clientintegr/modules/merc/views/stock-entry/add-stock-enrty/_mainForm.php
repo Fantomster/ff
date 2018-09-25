@@ -95,7 +95,7 @@ use yii\web\JsExpression;
     </div>
     <h4>Сведения о происхождении продукции: </h4>
     <?php
-    $model->country = isset($model->country) ? $model->country : '72a84b51-5c5e-11e1-b9b7-001966f192f1';
+    $model->country = isset($model->country) ? $model->country : '74a3cbb1-56fa-94f3-ab3f-e8db4940d96b';
     echo $form->field($model, 'country')
         ->dropDownList(createStoreEntryForm::getCountryList(),['prompt' => 'не указано',
            /* 'options'=>[

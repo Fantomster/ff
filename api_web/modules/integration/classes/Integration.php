@@ -9,6 +9,9 @@
 namespace api_web\modules\integration\classes;
 
 
+use common\models\OuterAgentNameWaybill;
+use yii\web\BadRequestHttpException;
+
 class Integration
 {
     static $service_map = [
@@ -29,6 +32,18 @@ class Integration
 
     private function getDictName($type){
         return "api_web\modules\integration\classes\dictionaries\\" . $this->serviceName . $type;
+    }
+    
+    /**
+     * Check agent name 
+     * @throws BadRequestHttpException
+     * */
+    public static function checkAgentNameExists($request){
+        if(!isset($request['name']) && !empty($request['name'])){
+            throw new BadRequestHttpException('Name is required field and being not empty');
+        }
+        
+        return ['result' => OuterAgentNameWaybill::find()->where(['name' => $request['name']])->exists()];
     }
 
 

@@ -10,6 +10,7 @@ namespace api_web\modules\integration\controllers;
 
 
 use api_web\modules\integration\classes\Dictionary;
+use yii\web\BadRequestHttpException;
 
 class DictionaryController extends \api_web\components\WebApiController
 {
@@ -79,6 +80,10 @@ class DictionaryController extends \api_web\components\WebApiController
      */
     public function actionProductList()
     {
+        if (empty($this->request['service_id'])) {
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+
         $this->response = (new Dictionary($this->request['service_id'], 'Product'))->productList($this->request);
     }
 }

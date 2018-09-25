@@ -269,8 +269,8 @@ class DictionaryController extends \api_web\components\WebApiController
     /**
      * @SWG\Post(path="/integration/dictionary/check-agent-name",
      *     tags={"Integration/dictionary/product"},
-     *     summary="Список контрагентов",
-     *     description="Список контрагентов",
+     *     summary="Проверка: имеется ли такое название накладной",
+     *     description="Проверяет существует ли данное название накладной в таблице",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",

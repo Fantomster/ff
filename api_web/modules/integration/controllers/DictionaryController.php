@@ -86,4 +86,174 @@ class DictionaryController extends \api_web\components\WebApiController
 
         $this->response = (new Dictionary($this->request['service_id'], 'Product'))->productList($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/agent-list",
+     *     tags={"Integration/dictionary/product"},
+     *     summary="Список контрагентов",
+     *     description="Список контрагентов",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 2,
+     *                      "search": {
+     *                          "name": "название"
+     *                      },
+     *                      "pagination":{
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                       "agents": {
+     *                        {
+     *                            "id": 1,
+     *                            "outer_uid": "123",
+     *                            "name": "name",
+     *                            "vendor_id": 222,
+     *                            "vendor_name": "TRAVEL COFFEE",
+     *                            "store_id": 1,
+     *                            "store_name": "qqqq",
+     *                            "payment_delay": 5,
+     *                            "is_active": 1,
+     *                            "name_waybill": {
+     *                                "huy",
+     *                                "2huya"
+     *                            }
+     *                        },
+     *                        {
+     *                            "id": 2,
+     *                            "outer_uid": "123",
+     *                            "name": "name",
+     *                            "vendor_id": 222,
+     *                            "vendor_name": "TRAVEL COFFEE",
+     *                            "store_id": 1,
+     *                            "store_name": "qqqq",
+     *                            "payment_delay": 5,
+     *                            "is_active": 1,
+     *                            "name_waybill": {}
+     *                        },
+     *                       },
+     *                       "pagination": {
+     *                            "page": 1,
+     *                            "total_page": 17,
+     *                            "page_size": 12
+     *                       }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionAgentList()
+    {
+        $this->response = (new Dictionary($this->request['service_id'], 'Agent'))->agentList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/agent-update",
+     *     tags={"Integration/dictionary/product"},
+     *     summary="Список контрагентов",
+     *     description="Список контрагентов",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                        "id": 1,
+     *                      "service_id": 2,
+     *                        "vendor_id": 3,
+     *                        "store_id": 2,
+     *                        "payment_delay": 5,
+     *                        "name_waybill": {
+     *                            "ООО Рос Прод Торг",
+     *                            "Российская продовольственная торговая компания",
+     *                            "ООО Российский продовльственный торговый дом"
+     *                        }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                       "agents": {
+     *                        {
+     *                            "id": 1,
+     *                            "outer_uid": "123",
+     *                            "name": "name",
+     *                            "vendor_id": 222,
+     *                            "vendor_name": "TRAVEL COFFEE",
+     *                            "store_id": 1,
+     *                            "store_name": "qqqq",
+     *                            "payment_delay": 5,
+     *                            "is_active": 1,
+     *                            "name_waybill": {
+     *                                "huy",
+     *                                "2huya"
+     *                            }
+     *                        },
+     *                        {
+     *                            "id": 2,
+     *                            "outer_uid": "123",
+     *                            "name": "name",
+     *                            "vendor_id": 222,
+     *                            "vendor_name": "TRAVEL COFFEE",
+     *                            "store_id": 1,
+     *                            "store_name": "qqqq",
+     *                            "payment_delay": 5,
+     *                            "is_active": 1,
+     *                            "name_waybill": {}
+     *                        },
+     *                       },
+     *                       "pagination": {
+     *                            "page": 1,
+     *                            "total_page": 17,
+     *                            "page_size": 12
+     *                       }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionAgentUpdate()
+    {
+        $this->response = (new Dictionary($this->request['service_id'], 'Agent'))->agentUpdate($this->request);
+    }
 }

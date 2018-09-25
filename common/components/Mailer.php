@@ -25,7 +25,6 @@ class Mailer extends \yii\mail\BaseMailer
     private $to;
     private $subject;
     public $defaultFrom = "";
-    public $queueName = "process_email";
     public $sqsQueueUrl;
 
     public function compose($view = null, array $params = [])
@@ -84,19 +83,11 @@ class Mailer extends \yii\mail\BaseMailer
 
         $save = $newEmail->save();
         if ($save && !($newEmail->status == EmailQueue::STATUS_FAILED)) {
-            try {
-//            \Yii::$app->get('rabbit')
-//                ->setQueue($this->queueName)
-//                ->addRabbitQueue(json_encode([$newEmail->id]));
-                $result = \Yii::$app->get('sqsQueue')
-                        ->getClient()
-                        ->sendMessage([
-                    'QueueUrl' => $this->sqsQueueUrl,
-                    'MessageBody' => Json::encode([$newEmail->id]),
-                ]);
-            } catch (\Exception $e) {
-                Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
-            }
+            //try {
+                $result = \Yii::$app->get('sqsQueue')->sendMessage($this->sqsQueueUrl, [$newEmail->id]);
+//            } catch (\Exception $e) {
+//                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
+//            }
         }
 
         return $save;

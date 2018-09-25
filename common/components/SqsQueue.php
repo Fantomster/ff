@@ -44,14 +44,12 @@ class SqsQueue extends Component
      */
     public function sendMessage($queueUrl, $message)
     {
-        $result = $this->_client->sendMessage([
+        $client = $this->getClient();
+        
+        $result = $client->sendMessage([
             'QueueUrl' => $queueUrl,
             'MessageBody' => Json::encode($message),
         ]);
-//        $result = $this->_client->getCommand('SendMessage',[
-//            'QueueUrl' => $queueUrl,
-//            'MessageBody' => Json::encode($message),
-//        ]);
         return ($result !== null);
     }
 }

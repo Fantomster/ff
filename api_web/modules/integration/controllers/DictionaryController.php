@@ -77,6 +77,7 @@ class DictionaryController extends \api_web\components\WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws BadRequestHttpException
      */
     public function actionProductList()
     {
@@ -234,5 +235,64 @@ class DictionaryController extends \api_web\components\WebApiController
     public function actionAgentUpdate()
     {
         $this->response = (new Dictionary($this->request['service_id'], 'Agent'))->agentUpdate($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/store-list",
+     *     tags={"Integration/dictionary/product"},
+     *     summary="Список складов",
+     *     description="Полный список складов",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 2,
+     *                      "search": {
+     *                          "name": "название"
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                            "id": 1,
+     *                            "outer_uid": "123",
+     *                            "name": "name",
+     *                            "vendor_id": 222,
+     *                            "vendor_name": "TRAVEL COFFEE",
+     *                            "store_id": 1,
+     *                            "store_name": "qqqq",
+     *                            "payment_delay": 5,
+     *                            "is_active": 1,
+     *                            "name_waybill": {
+     *                                "huy",
+     *                                "2huya"
+     *                            }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionStoreList()
+    {
+        $this->response = (new Dictionary($this->request['service_id'], 'Store'))->storeList($this->request);
     }
 }

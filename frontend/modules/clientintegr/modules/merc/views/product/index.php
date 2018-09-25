@@ -354,7 +354,7 @@ $("#ajax-load").on("click", ".save-form", function() {
            $('#globalID').val('');
            $('#fromCreateDate').val('');
            $('#toCreateDate').val('');
-            $("#statusFilter").removeAttr("selected");
+            $("#statusFilter option:selected").removeAttr("selected");
            $('#code').val('');
            $("#search-form").submit();
     });

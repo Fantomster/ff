@@ -43,8 +43,8 @@ class WebApiHelper
                 if (is_array($value)) {
                     self::formatDate($value);
                 } else {
-                    if (self::checkDateAttribute($key) && !empty($value)) {
-                        $response[$key] = \Yii::$app->formatter->asDatetime(strtotime($value), self::$formatDate);
+                    if (self::checkDateAttribute($key) && !empty($value) && preg_match('#.*[\d{4})].*#s', $value)) {
+                        $response[$key] = \Yii::$app->formatter->asDatetime($value, self::$formatDate);
                     }
                 }
             }
@@ -57,8 +57,12 @@ class WebApiHelper
      * @param array $needle_array
      * @return bool
      */
-    private static function checkDateAttribute($string, $needle_array = ['_at', '_date'])
+    private static function checkDateAttribute($string, $needle_array = ['_at', '_date', 'date_'])
     {
+        if(is_numeric($string)) {
+            return false;
+        }
+
         if (in_array($string, self::$dateField)) {
             return true;
         }

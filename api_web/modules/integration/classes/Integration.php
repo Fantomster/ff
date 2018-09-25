@@ -16,18 +16,32 @@ class Integration
 
     ];
 
+    /**
+     * Integration constructor.
+     * @param $serviceId
+     */
     public function __construct($serviceId)
     {
         $this->service_id = $serviceId;
         $this->serviceName = self::$service_map[$serviceId];
     }
 
-    public function getDict($type){
+    /**
+     * @param $type
+     * @return mixed
+     */
+    public function getDict($type)
+    {
         $_ = $this->getDictName($type);
         return new $_($this->service_id);
     }
 
-    private function getDictName($type){
+    /**
+     * @param $type
+     * @return string
+     */
+    private function getDictName($type)
+    {
         return "api_web\modules\integration\classes\dictionaries\\" . $this->serviceName . $type;
     }
 

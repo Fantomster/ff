@@ -169,7 +169,7 @@ class AbstractDictionary extends WebApi
         $model = OuterAgent::findOne($request['id']);
 
         if (empty($model)) {
-            throw new BadRequestHttpException('model_nol_found');
+            throw new BadRequestHttpException('model_not_found');
         }
 
         $model->vendor_id = $request['vendor_id'] ?? null;

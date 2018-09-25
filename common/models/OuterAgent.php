@@ -22,6 +22,9 @@ use yii\behaviors\TimestampBehavior;
  * @property string $updated_at Изменено по GMT-0
  * @property string $inn ИНН
  * @property string $kpp КПП
+ * @property Organization $vendor
+ * @property OuterStore $store
+ * @property OuterAgentNameWaybill|array $nameWaybills
  */
 class OuterAgent extends \yii\db\ActiveRecord
 {
@@ -90,16 +93,25 @@ class OuterAgent extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getVendor()
     {
         return $this->hasOne(Organization::class, ['id' => 'vendor_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getStore()
     {
         return $this->hasOne(OuterStore::class, ['id' => 'store_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getNameWaybills()
     {
         return $this->hasMany(OuterAgentNameWaybill::class, ['agent_id' => 'id']);

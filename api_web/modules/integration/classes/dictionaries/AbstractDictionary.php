@@ -10,6 +10,7 @@ namespace api_web\modules\integration\classes\dictionaries;
 
 
 use api_web\components\WebApi;
+use api_web\exceptions\ValidationException;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
 use common\models\OuterProduct;
@@ -17,6 +18,7 @@ use common\models\OuterUnit;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
+use yii\web\BadRequestHttpException;
 
 class AbstractDictionary extends WebApi
 {
@@ -91,6 +93,11 @@ class AbstractDictionary extends WebApi
         ];
     }
 
+    /**
+     * Список агентов
+     * @param $request
+     * @return array
+     */
     public function agentList($request)
     {
         $pag = $request['pagination'];
@@ -116,6 +123,9 @@ class AbstractDictionary extends WebApi
         $pagination->setPageSize($pageSize);
         $dataProvider->setPagination($pagination);
 
+        /**
+         * @var $model OuterAgent
+         */
         $result = [];
         foreach ($dataProvider->models as $model) {
             $result[] = [
@@ -148,31 +158,49 @@ class AbstractDictionary extends WebApi
     }
 
     /**
-     * @throws \yii\base\InvalidArgumentException
-     * */
+     * Обновление контрагента
+     * @param $request
+     * @return array
+     * @throws ValidationException
+     * @throws \Throwable
+     */
     public function agentUpdate($request)
     {
         $model = OuterAgent::findOne($request['id']);
+
+        if (empty($model)) {
+            throw new BadRequestHttpException('model_nol_found');
+        }
+
         $model->vendor_id = $request['vendor_id'] ?? null;
         $model->store_id = $request['store_id'] ?? null;
         $model->payment_delay = $request['payment_delay'] ?? null;
-        if ($model->validate()) {
-            $model->save();
+        if (!$model->save()) {
+            throw new ValidationException($model->getFirstErrors());
         }
 
-        OuterAgentNameWaybill::deleteAll(['agent_id' => $request['id']]);
+        if (OuterAgentNameWaybill::find()->where(['agent_id' => $request['id']])->exists()) {
+            OuterAgentNameWaybill::deleteAll(['agent_id' => $request['id']]);
+        }
+
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             \Yii::$app->db_api->createCommand()
-                ->batchInsert(OuterAgentNameWaybill::tableName(), ['agent_id', 'name'], array_map(function ($el) use ($request) {
-                    return [$request['id'], $el];
-                }, $request['name_waybill']))
-                ->execute();
+                ->batchInsert(
+                    OuterAgentNameWaybill::tableName(),
+                    ['agent_id', 'name'],
+                    array_map(
+                        function ($el) use ($request) {
+                            return [$request['id'], $el];
+                        },
+                        $request['name_waybill']
+                    )
+                )->execute();
             $transaction->commit();
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
-            return ['success' => false, 'error' => $throwable->getMessage()];
+            throw $throwable;
         }
 
         return [
@@ -185,9 +213,12 @@ class AbstractDictionary extends WebApi
             'store_name'    => $model->store->name ?? null,
             'payment_delay' => $model->payment_delay,
             'is_active'     => (int)!$model->is_deleted,
-            'name_waybill'  => array_map(function ($el) {
-                return $el['name'];
-            }, $model->nameWaybills)
+            'name_waybill'  => array_map(
+                function ($el) {
+                    return $el['name'];
+                },
+                $model->nameWaybills
+            )
         ];
     }
 }

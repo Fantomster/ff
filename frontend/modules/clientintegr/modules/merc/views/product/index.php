@@ -403,6 +403,7 @@ $("#ajax-load").on("click", ".save-form", function() {
      });
   $(document).on("click",".del", function(e){
       e.preventDefault();
+      var url = $(this).attr("href");
         bootbox.confirm({
             title: "Удалить позицию?",
             message: "Позиция будет удалена из номенклатуры", 
@@ -420,7 +421,7 @@ $("#ajax-load").on("click", ".save-form", function() {
             callback: function(result) {
 		if(result){
 		$.ajax({
-	        url: $(this).attr("href"),
+	        url: url,
 	        type: "GET",
 	        cache: false,
 	        success: function(response) {

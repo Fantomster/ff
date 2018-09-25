@@ -37,7 +37,7 @@ class VetisWaybill extends WebApi
         $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
 
         $acquirer_id = null;
-        if(isset($request['search']['acquirer_id'])) {
+        if (isset($request['search']['acquirer_id'])) {
             $acquirer_id = $request['search']['acquirer_id'];
         }
 
@@ -56,21 +56,36 @@ class VetisWaybill extends WebApi
         $pagination->setPage($page - 1);
         $pagination->setPageSize($pageSize);
         $dataProvider->setPagination($pagination);
-        $result = [];
+
+        $result = [
+            'documents'           => [],
+            'order_not_installed' => []
+        ];
+
         foreach ($dataProvider->models as $model) {
-            $result[$model['group_name']]['count'] = $model['count'];
             if ($model['group_name'] != 'order_not_installed') {
-                $result[$model['group_name']]['date'] = $model['created_at'];
-                $result[$model['group_name']]['total_price'] = $model['total_price'];
+                $result['documents'][$model['group_name']] = [
+                    'count'       => (int)$model['count'],
+                    'date'        => $model['created_at'],
+                    'vendor_name' => $model['vendor_name'],
+                    'sender_name' => $model['sender_name'],
+                    'total_price' => $model['total_price'],
+                    'uuids'       => explode(',', $model['uuids']),
+                    'status'      => $this->helper->getStatusForGroup($model['statuses'])
+                ];
+            } else {
+                $result['order_not_installed'] = [
+                    'uuids'  => explode(',', $model['uuids']),
+                    'status' => $this->helper->getStatusForGroup($model['statuses'])
+                ];
             }
-            $result[$model['group_name']]['uuids'] = explode(',', $model['uuids']);
-            $result[$model['group_name']]['status'] = $this->helper->getStatusForGroup($model['statuses']);
+
         }
         $return = [
-            'result' => $result,
+            'result'     => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -92,16 +107,16 @@ class VetisWaybill extends WebApi
         $result = [];
         foreach ($models as $model) {
             $result[] = [
-                'uuid' => $model->uuid,
-                'product_name' => $model->product_name,
-                'sender_name' => $model->sender_name,
-                'status' => $model->status,
-                'status_text' => MercVsd::$statuses[$model->status],
-                'status_date' => $model->last_update_date,
-                'amount' => $model->amount,
-                'unit' => $model->unit,
+                'uuid'            => $model->uuid,
+                'product_name'    => $model->product_name,
+                'sender_name'     => $model->sender_name,
+                'status'          => $model->status,
+                'status_text'     => MercVsd::$statuses[$model->status],
+                'status_date'     => $model->last_update_date,
+                'amount'          => $model->amount,
+                'unit'            => $model->unit,
                 'production_date' => $model->production_date,
-                'date_doc' => $model->date_doc,
+                'date_doc'        => $model->date_doc,
             ];
         }
 
@@ -116,10 +131,10 @@ class VetisWaybill extends WebApi
     {
         return [
             'result' => [
-                'vsd' => $this->getFilterVsd(),
+                'vsd'      => $this->getFilterVsd(),
                 'statuses' => $this->getFilterStatus(),
-                'sender' => $this->getSenderOrProductFilter(['search' => 'sender_name'], 'sender_name'),
-                'product' => $this->getSenderOrProductFilter(['search' => 'product_name'], 'product_name'),
+                'sender'   => $this->getSenderOrProductFilter(['search' => 'sender_name'], 'sender_name'),
+                'product'  => $this->getSenderOrProductFilter(['search' => 'product_name'], 'product_name'),
             ]
         ];
     }
@@ -137,7 +152,7 @@ class VetisWaybill extends WebApi
             'result' => [
                 $inc => $types[$inc],
                 $out => $types[$out],
-                '' => 'Все ВСД',
+                ''   => 'Все ВСД',
             ]
         ];
     }
@@ -258,9 +273,9 @@ class VetisWaybill extends WebApi
             throw new BadRequestHttpException('Uuid not for this organization');
         }
         $params = [
-            'decision' => VetDocumentDone::PARTIALLY,
-            'volume' => $request['amount'],
-            'reason' => $request['reason'],
+            'decision'    => VetDocumentDone::PARTIALLY,
+            'volume'      => $request['amount'],
+            'reason'      => $request['reason'],
             'description' => $request['description'],
         ];
 
@@ -295,8 +310,8 @@ class VetisWaybill extends WebApi
             throw new BadRequestHttpException('Uuid not for this organization');
         }
         $params = [
-            'decision' => VetDocumentDone::RETURN_ALL,
-            'reason' => $request['reason'],
+            'decision'    => VetDocumentDone::RETURN_ALL,
+            'reason'      => $request['reason'],
             'description' => $request['description'],
         ];
 

@@ -48,7 +48,30 @@ class WaybillController extends WebApiController
      *            @SWG\Schema(
      *              default={
      *                      "result": {
-     *                            "id": 1
+     *                            "documents": {
+     *                                  "6777": {
+     *                                      "count": 1,
+     *                                      "date": "2018-09-04T10:08:18+03:00",
+     *                                      "vendor_name": "EL Поставщик",
+     *                                      "sender_name": "Поставщик №2(600021, обл.Владимирская, г.Муром, ул.Октябрьской Революции,д.2Б)",
+     *                                      "total_price": "76.88",
+     *                                      "uuids": {
+     *                                          "d50becf5-ad90-45dd-aebd-8bc36fe984e0"
+     *                                      },
+     *                                      "status": {
+     *                                          "id": "UTILIZED",
+     *                                          "text": "Сертификаты погашены"
+     *                                      }
+     *                                  }
+     *                              },
+     *                              "order_not_installed": {
+     *                                  "uuids": {
+     *                                      "df618d56-67c5-4c89-8956-45f54ff7ebfd",
+     *                                      "6a781eb8-c314-4026-b40c-02fd80f12e57",
+     *                                      "1d7befcb-57c4-44fd-adc9-f058972739f9",
+     *                                      "1495e3f9-35ab-46e4-aeff-618921e4e168"
+     *                                  }
+     *                              }
      *                      },
      *                      "pagination": {
      *                            "page": 1,

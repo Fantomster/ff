@@ -43,6 +43,11 @@ class VetisWaybill extends WebApi
 
         $reqSearch['acquirer_id'] = $this->helper->isSetDef($acquirer_id, $this->user->organization->id);
 
+        /**
+         * Без этого GROUP_CONCAT возвращает только 1024 символа, и режет данные
+         */
+        \Yii::$app->db->createCommand('SET SESSION group_concat_max_len = 1000000')->execute();
+
         $search = new VetisWaybillSearch();
         $params = $this->helper->set($search, $reqSearch, ['acquirer_id', 'type', 'status', 'sender_guid', 'product_name', 'date']);
         $dataProvider = $search->search($params);

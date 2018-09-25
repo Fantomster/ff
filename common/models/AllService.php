@@ -15,6 +15,7 @@ use Yii;
  * @property string $created_at
  * @property string $updated_at
  * @property string $log_table
+ * @property string $log_field
  *
  * @property AllServiceOperation[] $allServiceOperations
  */
@@ -44,7 +45,7 @@ class AllService extends \yii\db\ActiveRecord
         return [
             [['type_id', 'is_active'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['denom', 'vendor', 'log_table'], 'string', 'max' => 255],
+            [['denom', 'vendor', 'log_table', 'log_field'], 'string', 'max' => 255],
         ];
     }
 
@@ -62,6 +63,7 @@ class AllService extends \yii\db\ActiveRecord
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
             'log_table' => Yii::t('app', 'Log Table'),
+            'log_field' => Yii::t('app', 'Log Field'),
         ];
     }
 

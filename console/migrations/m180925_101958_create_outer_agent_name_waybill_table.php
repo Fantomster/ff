@@ -7,11 +7,11 @@ use yii\db\Migration;
  */
 class m180925_101958_create_outer_agent_name_waybill_table extends Migration
 {
-	public function init()
-	{
-		$this->db = 'db_api';
-		parent::init();
-	}
+    public function init()
+    {
+        $this->db = 'db_api';
+        parent::init();
+    }
 
     /**
      * {@inheritdoc}
@@ -19,9 +19,9 @@ class m180925_101958_create_outer_agent_name_waybill_table extends Migration
     public function safeUp()
     {
         $this->createTable('{{%outer_agent_name_waybill}}', [
-            'id' => $this->primaryKey(),
-	        'agent_id' => $this->integer()->comment('ID контрагента из outer_agent'),
-	        'name' => $this->string()->comment('Название'),
+            'id'       => $this->primaryKey(),
+            'agent_id' => $this->integer()->comment('ID контрагента из outer_agent'),
+            'name'     => $this->string()->comment('Название'),
         ]);
     }
 

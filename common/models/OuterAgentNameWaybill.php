@@ -7,8 +7,8 @@ use Yii;
 /**
  * This is the model class for table "outer_agent_name_waybill".
  *
- * @property int $id
- * @property int $agent_id
+ * @property int    $id
+ * @property int    $agent_id
  * @property string $name
  */
 class OuterAgentNameWaybill extends \yii\db\ActiveRecord
@@ -46,9 +46,9 @@ class OuterAgentNameWaybill extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'       => 'ID',
             'agent_id' => 'Agent ID',
-            'name' => 'Name',
+            'name'     => 'Name',
         ];
     }
 }

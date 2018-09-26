@@ -79,7 +79,7 @@ Modal::widget([
                 return $data['code'];
             },
         ],
-        [
+        /*[
             'attribute' => 'packagingType',
             'label' => 'Упаковка',
             'format' => 'raw',
@@ -94,7 +94,7 @@ Modal::widget([
             'value' => function ($data) {
                 return $data['unit'] ?? null;
             },
-        ],
+        ],*/
         [
             'attribute' => 'createDate',
             'label' => 'Дата добавления',

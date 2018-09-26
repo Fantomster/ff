@@ -14,7 +14,7 @@ use api_web\modules\integration\interfaces\DictionaryInterface;
 
 class Dictionary
 {
-    /**@var abstractDictionary*/
+    /**@var abstractDictionary */
     public $dict;
 
     public function __construct($service_id, $type)
@@ -23,11 +23,32 @@ class Dictionary
         $this->setDictionary($int->getDict($type));
     }
 
-    private function setDictionary(DictionaryInterface $dict){
+    private function setDictionary(DictionaryInterface $dict)
+    {
         $this->dict = $dict;
     }
 
-    public function productList($request){
-        return $this->dict->productList($request);
+//    public function productList($request)
+//    {
+//        return $this->dict->productList($request);
+//    }
+//
+//    public function agentList($request)
+//    {
+//        return $this->dict->agentList($request);
+//    }
+//
+//    public function agentUpdate($request)
+//    {
+//        return $this->dict->agentUpdate($request);
+//    }
+//
+//    public function storeList($request){
+//        return $this->dict->storeList($request);
+//    }
+
+    public function __call($name, $arguments)
+    {
+        return $this->dict->{$name}($arguments);
     }
 }

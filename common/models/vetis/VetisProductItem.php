@@ -214,12 +214,12 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
     public static function getProductItemList($subproduct_uuid)
     {
         $models = self::find()
-            ->select(['uuid', 'name'])
+            ->select(['guid', 'name'])
             ->where(['active' => true, 'last' => true, 'subproduct_uuid' => $subproduct_uuid])
             ->asArray()
             ->all();
 
-        return ArrayHelper::map($models, 'uuid', function ($model) {
+        return ArrayHelper::map($models, 'guid', function ($model) {
             return $model['name'];
         });
     }

@@ -187,9 +187,9 @@ class createStoreEntryForm extends Model
         $res = [];
         foreach ($list->productItemList->productItem as $item) {
             if ($item->last && $item->active) {
-                $res[] = ['value' => $item->name . " | " . $item->uuid,
+                $res[] = ['value' => $item->name . " | " . $item->guid,
                     'label' => $item->name,
-                    'uuid' => $item->uuid,
+                    'guid' => $item->guid,
                 ];
             }
         }
@@ -235,7 +235,7 @@ class createStoreEntryForm extends Model
         $stockEntry->batch->productItem->name = $this->product_name;
         $stockEntry->batch->volume = $this->volume;
         $stockEntry->batch->unit = new Unit();
-        $stockEntry->batch->unit->uuid = $this->unit;
+        $stockEntry->batch->unit->guid = $this->unit;
 
         $stockEntry->batch->dateOfProduction = $this->convertDate($this->dateOfProduction);
         $stockEntry->batch->expiryDate = $this->convertDate($this->expiryDate);
@@ -245,7 +245,7 @@ class createStoreEntryForm extends Model
 
         $stockEntry->batch->origin = new BatchOrigin();
         $stockEntry->batch->origin->country = new Country();
-        $stockEntry->batch->origin->country->uuid = $this->country;
+        $stockEntry->batch->origin->country->guid = $this->country;
         $stockEntry->batch->origin->producer = new Producer();
         $stockEntry->batch->origin->producer->role = 'PRODUCER';
         $stockEntry->batch->origin->producer->enterprise = new Enterprise();
@@ -307,7 +307,7 @@ class createStoreEntryForm extends Model
             return $this->reason;
         }
 
-        return "dsdsds";
+        return "";
     }
 
     public function getDescription()

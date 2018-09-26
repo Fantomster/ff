@@ -58,7 +58,8 @@ abstract class AbstractSyncFactory extends WebApi
         }
     }
 
-    public function getObjects(array $params):array {
+    public function getObjects(array $params): array
+    {
 
         $entity = $this->factory($params['dictionary']);
         if (method_exists($entity, 'sendRequestForObjects')) {
@@ -119,11 +120,11 @@ abstract class AbstractSyncFactory extends WebApi
         if ($sendUrl && $sendData) {
 
             # 1.1.1. Prepare curl headers
-            $headers = array(
+            $headers = [
                 "Content-type: application/xml; charset=utf-8",
                 "Content-length: " . strlen($sendData),
                 "Connection: close",
-            );
+            ];
             SyncLog::trace('Curl headers were just prepared (length: ' . strlen($sendData));
 
             # 1.1.2. Init curl
@@ -185,8 +186,17 @@ abstract class AbstractSyncFactory extends WebApi
 
     /**
      * Отправка запроса, обязательный метод
-     * @return mixed
+     * @return array
      */
-    abstract public function sendRequest();
+    abstract public function sendRequest(): array;
+
+    /**
+     * Метод отправки накладной
+     * @return array
+     */
+    public function sendWaybill(): array
+    {
+        return ['Не определена функция отправки накладной в классе: ' . get_class($this)];
+    }
 
 }

@@ -84,6 +84,7 @@ class MercStockEntryList extends MercDictConsumer
                     if ($stockEntryList->count < $stockEntryList->total) {
                         $this->data['listOptions']['offset'] += $stockEntryList->count;
                     }
+                    $error = 0;
                 } catch (\Throwable $e) {
                     $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
                     mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
@@ -92,7 +93,8 @@ class MercStockEntryList extends MercDictConsumer
                         throw new \Exception('Error operation');
                     }
                 }
-            } while ($stockEntryList->total > ($stockEntryList->count + $stockEntryList->offset));
+                $total = $stockEntryList->total ?? ($this->request['listOptions']['count'] + $this->request['listOptions']['offset'] +1);
+            } while ($total > ($this->request['listOptions']['count'] + $this->request['listOptions']['offset']));
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
             mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());

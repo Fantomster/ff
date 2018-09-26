@@ -55,7 +55,7 @@ $timestamp_now=time();
                                 'format' => 'raw',
                                 'value' => $model->correspondsToGost ? ($model->gost ?? null) : 'Нет',
                             ],
-                            [
+                            /*[
                                 'attribute' => 'packagingType_uuid',
                                 'format' => 'raw',
                                 'value' => $model->packingType->name ?? null,
@@ -64,7 +64,7 @@ $timestamp_now=time();
                                 'attribute' => 'unit_uuid',
                                 'format' => 'raw',
                                 'value' => $model->unit->name ?? null,
-                            ],
+                            ],*/
                         ],
                     ]) ?>
             </div>

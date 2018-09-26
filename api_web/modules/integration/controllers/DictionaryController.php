@@ -90,7 +90,7 @@ class DictionaryController extends \api_web\components\WebApiController
 
     /**
      * @SWG\Post(path="/integration/dictionary/agent-list",
-     *     tags={"Integration/dictionary/product"},
+     *     tags={"Integration/dictionary"},
      *     summary="Список контрагентов",
      *     description="Список контрагентов",
      *     produces={"application/json"},
@@ -174,7 +174,7 @@ class DictionaryController extends \api_web\components\WebApiController
 
     /**
      * @SWG\Post(path="/integration/dictionary/agent-update",
-     *     tags={"Integration/dictionary/product"},
+     *     tags={"Integration/dictionary"},
      *     summary="Обновление данных контрагента",
      *     description="Обновление данных контрагента",
      *     produces={"application/json"},
@@ -239,7 +239,7 @@ class DictionaryController extends \api_web\components\WebApiController
 
     /**
      * @SWG\Post(path="/integration/dictionary/store-list",
-     *     tags={"Integration/dictionary/product"},
+     *     tags={"Integration/dictionary"},
      *     summary="Список складов",
      *     description="Полный список складов",
      *     produces={"application/json"},

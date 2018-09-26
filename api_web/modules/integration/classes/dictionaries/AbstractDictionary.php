@@ -275,7 +275,7 @@ class AbstractDictionary extends WebApi
             'store_type' => $model->store_type,
             'created_at' => $model->created_at,
             'updated_at' => $model->updated_at,
-            'is_active'  => !$model->is_deleted,
+            'is_active'  => (int)!$model->is_deleted,
             'childs'     => $child($model),
         ];
     }

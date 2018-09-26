@@ -10,6 +10,7 @@ namespace api_web\modules\integration\controllers;
 
 
 use api_web\modules\integration\classes\Dictionary;
+use api_web\modules\integration\classes\Integration;
 use yii\web\BadRequestHttpException;
 
 class DictionaryController extends \api_web\components\WebApiController
@@ -168,6 +169,10 @@ class DictionaryController extends \api_web\components\WebApiController
      */
     public function actionAgentList()
     {
+        if (empty($this->request['service_id'])) {
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+
         $this->response = (new Dictionary($this->request['service_id'], 'Agent'))->agentList($this->request);
     }
 
@@ -233,6 +238,63 @@ class DictionaryController extends \api_web\components\WebApiController
      */
     public function actionAgentUpdate()
     {
+        if (empty($this->request['service_id'])) {
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+
         $this->response = (new Dictionary($this->request['service_id'], 'Agent'))->agentUpdate($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/check-agent-name",
+     *     tags={"Integration/dictionary/product"},
+     *     summary="Проверка: имеется ли такое название накладной",
+     *     description="Проверяет существует ли данное название накладной в таблице",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                        "agent_id": 1,
+     *                        "name": "ООО Рос Прод Торг"
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                          {
+     *                              "result": false,
+     *                              "message": "Такое название уже задано"
+     *                          },
+     *                          {
+     *                              "result": true
+     *                          }
+     *                      }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionCheckAgentName()
+    {
+        $this->response = Integration::checkAgentNameExists($this->request);
+    }
+
+
 }

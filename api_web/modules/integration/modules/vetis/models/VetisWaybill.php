@@ -8,7 +8,6 @@ use api_web\components\WebApi;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentDone;
-use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
@@ -246,9 +245,13 @@ class VetisWaybill extends WebApi
                 }
             }
         } catch (\Throwable $t) {
-            $result['error'] = $t->getMessage();
-            $result['trace'] = $t->getTraceAsString();
-            $result['code'] = $t->getCode();
+            if($t->getCode() == 600){
+                $result['error'] = 'Заявка отклонена';
+            } else {
+                $result['error'] = $t->getMessage();
+                $result['trace'] = $t->getTraceAsString();
+                $result['code'] = $t->getCode();
+            }
         }
 
         return ['result' => $result];

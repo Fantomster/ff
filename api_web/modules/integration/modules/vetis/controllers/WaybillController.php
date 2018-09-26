@@ -48,7 +48,30 @@ class WaybillController extends WebApiController
      *            @SWG\Schema(
      *              default={
      *                      "result": {
-     *                            "id": 1
+     *                            "documents": {
+     *                                  "6777": {
+     *                                      "count": 1,
+     *                                      "date": "2018-09-04T10:08:18+03:00",
+     *                                      "vendor_name": "EL Поставщик",
+     *                                      "sender_name": "Поставщик №2(600021, обл.Владимирская, г.Муром, ул.Октябрьской Революции,д.2Б)",
+     *                                      "total_price": "76.88",
+     *                                      "uuids": {
+     *                                          "d50becf5-ad90-45dd-aebd-8bc36fe984e0"
+     *                                      },
+     *                                      "status": {
+     *                                          "id": "UTILIZED",
+     *                                          "text": "Сертификаты погашены"
+     *                                      }
+     *                                  }
+     *                              },
+     *                              "order_not_installed": {
+     *                                  "uuids": {
+     *                                      "df618d56-67c5-4c89-8956-45f54ff7ebfd",
+     *                                      "6a781eb8-c314-4026-b40c-02fd80f12e57",
+     *                                      "1d7befcb-57c4-44fd-adc9-f058972739f9",
+     *                                      "1495e3f9-35ab-46e4-aeff-618921e4e168"
+     *                                  }
+     *                              }
      *                      },
      *                      "pagination": {
      *                            "page": 1,
@@ -528,6 +551,55 @@ class WaybillController extends WebApiController
         $this->response = (new VetisWaybill())->getFullInfoAboutVsd($this->request);
     }
 
+
+    /**
+     * @SWG\Post(path="/integration/vetis/waybill/return-vsd",
+     *     tags={"Integration/vetis/waybill"},
+     *     summary="Возврат ВСД",
+     *     description="Возврат ВСД",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "93cdc45a-edc3-472f-bd70-99ffca18edc9",
+     *                      "reason":"Nulla in gravida ex. In hac habitasse platea dictumst.",
+     *                      "description":"long string description"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      "ede52e76-6091-46bb-9349-87324ee1ae41":true,
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionReturnVsd()
+    {
+        $this->response = (new VetisWaybill())->returnVsd($this->request);
+    }
+
     /**
      * @SWG\Post(path="/integration/vetis/waybill/repay-vsd",
      *     tags={"Integration/vetis/waybill"},
@@ -629,51 +701,4 @@ class WaybillController extends WebApiController
         $this->response = (new VetisWaybill())->partialAcceptance($this->request);
     }
 
-    /**
-     * @SWG\Post(path="/integration/vetis/waybill/return-vsd",
-     *     tags={"Integration/vetis/waybill"},
-     *     summary="Частичное погашение ВСД",
-     *     description="Частичное погашение ВСД amount: 37, Не может быть больше merc_vsd.amount reason:Частичная приемка, Обязательное поле",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                      "uuid": "93cdc45a-edc3-472f-bd70-99ffca18edc9",
-     *                      "reason":"Nulla in gravida ex. In hac habitasse platea dictumst.",
-     *                      "description":"long string description"
-     *                  }
-     *              )
-     *         )
-     *     ),
-     *    @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *            @SWG\Schema(
-     *              default={
-     *                  "result": {
-     *                      "ede52e76-6091-46bb-9349-87324ee1ae41":true,
-     *                  }
-     *              }
-     *          )
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "error"
-     *     )
-     * )
-     */
-    public function actionReturnVsd()
-    {
-        $this->response = (new VetisWaybill())->returnVsd($this->request);
-    }
 }

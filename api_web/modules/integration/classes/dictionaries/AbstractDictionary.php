@@ -263,15 +263,16 @@ class AbstractDictionary extends WebApi
     {
         $child = function ($model) {
             $childrens = $model->children()->all();
-            $_ = [];
+            $arReturn = [];
             foreach ($childrens as $children) {
-                $_[] = $this->prepareStore($children);
+                $arReturn[] = $this->prepareStore($children);
             }
-            return $_;
+            return $arReturn;
         };
         return [
             'id'         => $model->id,
             'outer_uid'  => $model->outer_uid,
+            'name'       => $model->name,
             'store_type' => $model->store_type,
             'created_at' => $model->created_at,
             'updated_at' => $model->updated_at,

@@ -276,19 +276,56 @@ class DictionaryController extends \api_web\components\WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                            "id": 1,
-     *                            "outer_uid": "123",
-     *                            "name": "name",
-     *                            "vendor_id": 222,
-     *                            "vendor_name": "TRAVEL COFFEE",
-     *                            "store_id": 1,
-     *                            "store_name": "qqqq",
-     *                            "payment_delay": 5,
-     *                            "is_active": 1,
-     *                            "name_waybill": {
-     *                                "huy",
-     *                                "2huya"
-     *                            }
+     *                  "stores": {
+     *                      "id": 5,
+     *                      "outer_uid": "c9319967c038f9b923068dabdf60cfe3",
+     *                      "name": "Все склады",
+     *                      "store_type": null,
+     *                      "created_at": "2018-09-14T11:31:07-02:00",
+     *                      "updated_at": null,
+     *                      "is_active": 1,
+     *                      "childs": {
+     *                          {
+     *                              "id": 9,
+     *                              "outer_uid": "91e0dd93-0923-4509-9435-6cc6224768af",
+     *                              "store_type": "STORE",
+     *                              "created_at": "2018-09-14T11:31:07-02:00",
+     *                              "updated_at": null,
+     *                              "is_active": 1,
+     *                              "childs": {}
+     *                          },
+     *                          {
+     *                              "id": 8,
+     *                              "outer_uid": "73045059-5e4f-4358-90a4-23b2c0641e0f",
+     *                              "name": "доп2 склад",
+     *                              "store_type": "STORE",
+     *                              "created_at": "2018-09-14T11:31:07-02:00",
+     *                              "updated_at": null,
+     *                              "is_active": 1,
+     *                              "childs": {}
+     *                          },
+     *                          {
+     *                              "id": 7,
+     *                              "outer_uid": "a3acc051-bfbb-45a9-9e1a-87d2f605f76e",
+     *                              "name": "доп2 склад",
+     *                              "store_type": "STORE",
+     *                              "created_at": "2018-09-14T11:31:07-02:00",
+     *                              "updated_at": null,
+     *                              "is_active": 1,
+     *                              "childs": {}
+     *                          },
+     *                          {
+     *                              "id": 6,
+     *                              "outer_uid": "1239d270-1bbe-f64f-b7ea-5f00518ef508",
+     *                              "name": "доп2 склад",
+     *                              "store_type": "STORE",
+     *                              "created_at": "2018-09-14T11:31:07-02:00",
+     *                              "updated_at": null,
+     *                              "is_active": 1,
+     *                              "childs": {}
+     *                          }
+     *                      }
+     *                  }
      *              }
      *          )
      *     ),

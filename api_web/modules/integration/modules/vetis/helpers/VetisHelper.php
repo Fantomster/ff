@@ -112,7 +112,7 @@ class VetisHelper
                     $labResearch->referencedDocument->issueDate . ' ( ' . $labResearch->indicator->name . ' - ' .
                     $labResearch->conclusion . ' )';
             }
-        } catch (\Throwable $t){
+        } catch (\Throwable $t) {
             // too many errors in VSD
         }
         $this->transport_type = isset($this->doc->certifiedConsignment->transportInfo->transportType) ?
@@ -194,6 +194,8 @@ class VetisHelper
                     'COUNT(m.id) as count',
                     'o.created_at',
                     'o.total_price',
+                    'vendor.name as vendor_name',
+                    'm.sender_name as sender_name',
                     'GROUP_CONCAT(`m`.`uuid` SEPARATOR \',\') AS `uuids`',
                     'GROUP_CONCAT(DISTINCT `m`.`status` SEPARATOR \',\') AS `statuses`',
                 ]
@@ -203,6 +205,7 @@ class VetisHelper
             ->leftJoin('`' . $tableName . '`.waybill w', 'w.id = wc.waybill_id AND w.service_id = 4')
             ->leftJoin('order_content oc', 'oc.id = wc.order_content_id')
             ->leftJoin('order o', 'o.id = oc.order_id')
+            ->leftJoin('organization vendor', 'o.vendor_id = vendor.id')
             ->groupBy('group_name')
             ->orderBy(['group_name' => SORT_DESC]);
 
@@ -227,15 +230,22 @@ class VetisHelper
     /**
      * Get group status from array statuses
      * @param string $strStatuses
-     * @return string status
+     * @return array
      * */
     public function getStatusForGroup($strStatuses)
     {
         $statuses = explode(',', $strStatuses);
         if (count($statuses) > 1) {
-            return \Yii::t('api_web', self::$ordersStatuses['CONFIRMED']);
+            return [
+                'id'   => 'CONFIRMED',
+                'text' => \Yii::t('api_web', self::$ordersStatuses['CONFIRMED'])
+            ];
         } else {
-            return \Yii::t('api_web', self::$ordersStatuses[current($statuses)]);
+            $status = current($statuses);
+            return [
+                'id'   => $status,
+                'text' => \Yii::t('api_web', self::$ordersStatuses[$status])
+            ];
         }
     }
 }

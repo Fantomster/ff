@@ -405,8 +405,8 @@ $("#ajax-load").on("click", ".save-form", function() {
       e.preventDefault();
       var url = $(this).attr("href");
         bootbox.confirm({
-            title: "Удалить позицию?",
-            message: "Позиция будет удалена из номенклатуры", 
+            title: "Вы уверены что необходимо удалить данную запись?",
+            message: "После удаления, производство данной продукции будет недоступно", 
             buttons: {
                 confirm: {
                     label: 'Удалить',

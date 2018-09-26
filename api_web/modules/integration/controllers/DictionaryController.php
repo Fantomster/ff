@@ -179,8 +179,8 @@ class DictionaryController extends \api_web\components\WebApiController
     /**
      * @SWG\Post(path="/integration/dictionary/agent-update",
      *     tags={"Integration/dictionary/product"},
-     *     summary="Список контрагентов",
-     *     description="Список контрагентов",
+     *     summary="Обновление данных контрагента",
+     *     description="Обновление данных контрагента",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -192,7 +192,7 @@ class DictionaryController extends \api_web\components\WebApiController
      *                  property="request",
      *                  default={
      *                        "id": 1,
-     *                      "service_id": 2,
+     *                        "service_id": 2,
      *                        "vendor_id": 3,
      *                        "store_id": 2,
      *                        "payment_delay": 5,
@@ -210,8 +210,6 @@ class DictionaryController extends \api_web\components\WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                       "agents": {
-     *                        {
      *                            "id": 1,
      *                            "outer_uid": "123",
      *                            "name": "name",
@@ -225,25 +223,6 @@ class DictionaryController extends \api_web\components\WebApiController
      *                                "huy",
      *                                "2huya"
      *                            }
-     *                        },
-     *                        {
-     *                            "id": 2,
-     *                            "outer_uid": "123",
-     *                            "name": "name",
-     *                            "vendor_id": 222,
-     *                            "vendor_name": "TRAVEL COFFEE",
-     *                            "store_id": 1,
-     *                            "store_name": "qqqq",
-     *                            "payment_delay": 5,
-     *                            "is_active": 1,
-     *                            "name_waybill": {}
-     *                        },
-     *                       },
-     *                       "pagination": {
-     *                            "page": 1,
-     *                            "total_page": 17,
-     *                            "page_size": 12
-     *                       }
      *              }
      *          )
      *     ),

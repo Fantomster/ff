@@ -79,7 +79,7 @@ class ServiceRkws extends AbstractSyncFactory
 
     }
 
-    public function sendRequest(): ?array
+    public function sendRequest(): array
     {
 
         # 1. Start "Send request" action
@@ -363,4 +363,12 @@ class ServiceRkws extends AbstractSyncFactory
 </RQ>';
     }
 
+    /**
+     * Метод отправки накладной
+     * @return array
+     */
+    public function sendWaybill(): array
+    {
+
+    }
 }

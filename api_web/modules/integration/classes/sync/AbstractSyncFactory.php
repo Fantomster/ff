@@ -185,8 +185,14 @@ abstract class AbstractSyncFactory extends WebApi
 
     /**
      * Отправка запроса, обязательный метод
-     * @return mixed
+     * @return array
      */
-    abstract public function sendRequest();
+    abstract public function sendRequest() :array;
+
+    /**
+     * Метод отправки накладной
+     * @return array
+     */
+    abstract public function sendWaybill() :array;
 
 }

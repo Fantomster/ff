@@ -25,7 +25,11 @@ class ServiceIiko extends AbstractSyncFactory
         self::DICTIONARY_STORE,
     ];
 
-    public function sendRequest()
+    /**
+     * @return array
+     * @throws ServerErrorHttpException
+     */
+    public function sendRequest(): array
     {
         if(empty($this->queueName)) {
             throw new ServerErrorHttpException('Empty field $queueName in class ' . get_class($this), 500);
@@ -37,5 +41,14 @@ class ServiceIiko extends AbstractSyncFactory
         ]);
 
         return ['success' => true];
+    }
+
+    /**
+     * Метод отправки накладной
+     * @return array
+     */
+    public function sendWaybill(): array
+    {
+
     }
 }

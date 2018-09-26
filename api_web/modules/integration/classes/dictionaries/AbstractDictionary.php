@@ -14,6 +14,7 @@ use api_web\exceptions\ValidationException;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
 use common\models\OuterProduct;
+use common\models\OuterStore;
 use common\models\OuterUnit;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
@@ -219,6 +220,64 @@ class AbstractDictionary extends WebApi
                 },
                 $model->nameWaybills
             )
+        ];
+    }
+
+    /**
+     * Получение списка складов
+     * @param $request
+     * @return array
+     * */
+    public function storeList($request): array
+    {
+        $search = OuterStore::find()->where(['org_id' => $this->user->organization->id, 'service_id' => $this->service_id]);
+
+
+        if (isset($request['search'])) {
+            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+                $search->andWhere(['like', 'name', $request['search']['name']]);
+
+            }
+        }
+        $rootModels = $search->roots()->indexBy('id')->all();
+
+        $result = [];
+
+        foreach ($rootModels as $rootModel) {
+            $result = $this->prepareStore($rootModel);
+        }
+
+        $return = [
+            'stores' => $result,
+        ];
+
+        return $return;
+    }
+
+    /**
+     * Функция рекурсия от корневого склада
+     * @param OuterStore $model
+     * @return array
+     * */
+    private function prepareStore($model)
+    {
+        $child = function ($model) {
+            $childrens = $model->children()->all();
+            $arReturn = [];
+            foreach ($childrens as $children) {
+                $arReturn[] = $this->prepareStore($children);
+            }
+            return $arReturn;
+        };
+        return [
+            'id'         => $model->id,
+            'outer_uid'  => $model->outer_uid,
+            'name'       => $model->name,
+            'store_type' => $model->store_type,
+            'created_at' => $model->created_at,
+            'updated_at' => $model->updated_at,
+            'is_active'  => (int)!$model->is_deleted,
+            'childs'     => $child($model),
         ];
     }
 }

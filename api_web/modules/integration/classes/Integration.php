@@ -22,6 +22,7 @@ class Integration
     /**
      * Integration constructor.
      * @param $serviceId
+     * @throws BadRequestHttpException
      */
     public function __construct($serviceId)
     {

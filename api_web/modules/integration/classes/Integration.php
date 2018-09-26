@@ -25,25 +25,31 @@ class Integration
         $this->serviceName = self::$service_map[$serviceId];
     }
 
-    public function getDict($type){
+    public function getDict($type)
+    {
         $_ = $this->getDictName($type);
         return new $_($this->service_id);
     }
 
-    private function getDictName($type){
+    private function getDictName($type)
+    {
         return "api_web\modules\integration\classes\dictionaries\\" . $this->serviceName . $type;
     }
-    
+
     /**
-     * Check agent name 
+     * Check agent name
      * @throws BadRequestHttpException
      * */
-    public static function checkAgentNameExists($request){
-        if(!isset($request['name']) && !empty($request['name'])){
-            throw new BadRequestHttpException('Name is required field and being not empty');
+    public static function checkAgentNameExists($request)
+    {
+        if (!isset($request['name']) && !empty($request['name'])) {
+            throw new BadRequestHttpException('empty_param|name');
         }
-        
-        return ['result' => OuterAgentNameWaybill::find()->where(['name' => $request['name']])->exists()];
+        if (!isset($request['agent_id']) && !empty($request['agent_id'])) {
+            throw new BadRequestHttpException('empty_param|agent_id');
+        }
+
+        return ['result' => OuterAgentNameWaybill::find()->where(['name' => $request['name'], 'agent_id' => $request['agent_id']])->exists()];
     }
 
 

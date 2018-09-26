@@ -338,10 +338,14 @@ class DictionaryController extends \api_web\components\WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws BadRequestHttpException
      */
 
     public function actionStoreList()
     {
+        if (!isset($this->request['service_id'])){
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
         $this->response = (new Dictionary($this->request['service_id'], 'Store'))->storeList($this->request);
     }
 

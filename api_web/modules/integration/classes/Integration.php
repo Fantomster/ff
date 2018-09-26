@@ -26,9 +26,6 @@ class Integration
      */
     public function __construct($serviceId)
     {
-        if (!isset($serviceId)){
-            throw new BadRequestHttpException('empty_param|service_id');
-        }
         $this->service_id = $serviceId;
         $this->serviceName = self::$service_map[$serviceId];
     }

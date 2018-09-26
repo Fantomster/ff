@@ -86,6 +86,7 @@ class MercVSDList extends MercDictConsumer
                     if ($vetDocumentList->count < $vetDocumentList->total) {
                         $this->data['listOptions']['offset'] += $vetDocumentList->count;
                     }
+                    $error = 0;
                 } catch (\Throwable $e) {
                     $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
                     mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
@@ -94,7 +95,8 @@ class MercVSDList extends MercDictConsumer
                         throw new \Exception('Error operation');
                     }
                 }
-            } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
+                $total = $vetDocumentList->total ?? ($this->request['listOptions']['count'] + $this->request['listOptions']['offset'] +1);
+            } while ($total > ($this->request['listOptions']['count'] + $this->request['listOptions']['offset']));
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
             mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());

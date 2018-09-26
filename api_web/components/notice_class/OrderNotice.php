@@ -106,6 +106,10 @@ class OrderNotice
             foreach ($orgs as $org) {
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification && $notification->order_created) {
+                    
+//                    if ($recipient->organization->type_id == Organization::TYPE_RESTAURANT) {
+//                        //
+//                    }
                     try {
                         $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                             ->setTo($email)

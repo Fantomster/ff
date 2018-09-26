@@ -1021,6 +1021,7 @@ class OrderController extends DefaultController
         try {
             (new CartWebApi())->noticeWhenProductAddToCart();
         } catch (\Exception $e) {
+            \Yii::error(PHP_EOL . $e->getTraceAsString() . PHP_EOL . $e->getMessage());
             return false;
         }
 
@@ -1045,13 +1046,11 @@ class OrderController extends DefaultController
         }
         $vendor = $baseProduct->vendor;
 
-
         return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId', 'currencySymbol'));
     }
 
     public function actionAjaxRemovePosition($product_id)
     {
-
         $client = $this->currentUser->organization;
         $data = ['product_id' => $product_id, 'quantity' => 0];
         $items = (new CartWebApi())->add($data);
@@ -1063,7 +1062,6 @@ class OrderController extends DefaultController
 
     public function actionAjaxChangeQuantity($vendor_id = null, $product_id = null)
     {
-
         $client = $this->currentUser->organization;
 
         if (Yii::$app->request->post()) {
@@ -1538,7 +1536,7 @@ class OrderController extends DefaultController
         }
         $organizationType = $user->organization->type_id;
         $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
-        $message = "";
+        $message = "<ul style='{ul_style}'>";
         $orderChanged = 0;
         $currencySymbol = $order->currency->symbol;
         $changed = [];
@@ -1562,16 +1560,16 @@ class OrderController extends DefaultController
                     if ($quantityChanged) {
                         $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
                         if ($position['quantity'] == -1) {
-                            $message .= Yii::t('message', 'frontend.controllers.del_two', ['ru' => '<br/> удалил {prod} из заказа', 'prod' => $product->product_name]);
+                            $message .= "<li style='{li_style}'>" . Yii::t('message', 'frontend.controllers.del_two', ['ru' => '<br/> удалил {prod} из заказа', 'prod' => $product->product_name]) . "</li>";
                         } else {
                             $oldQuantity = $product->quantity + 0;
                             $newQuantity = $position["quantity"] + 0;
-                            $message .= Yii::t('message', 'frontend.controllers.order.change_three', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $product->product_name, 'oldQuan' => $oldQuantity, 'ed' => $ed]) . " $newQuantity" . $ed;
+                            $message .= "<li style='{li_style}'>" . Yii::t('message', 'frontend.controllers.order.change_three', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $product->product_name, 'oldQuan' => $oldQuantity, 'ed' => $ed]) . " $newQuantity" . $ed . "</li>";
                         }
                         $product->quantity = $position['quantity'];
                     }
                     if ($priceChanged) {
-                        $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} {currencySymbol} на ", 'prod' => $product->product_name, 'productPrice' => $product->price, 'currencySymbol' => $currencySymbol]) . $position['price'] . $currencySymbol;
+                        $message .= "<li style='{li_style}'>" . Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} {currencySymbol} на ", 'prod' => $product->product_name, 'productPrice' => $product->price, 'currencySymbol' => $currencySymbol]) . $position['price'] . $currencySymbol  . "</li>";
                         $product->price = $position['price'];
                         if ($user->organization->type_id == Organization::TYPE_RESTAURANT && !$order->vendor->hasActiveUsers()) {
                             $prodFromCat = $product->getProductFromCatalog();
@@ -1625,21 +1623,21 @@ class OrderController extends DefaultController
                         $order->discount = abs($discount['discount']);
                         $discountValue = $order->discount . "%";
                     }
-                    $message .= Yii::t('message', 'frontend.controllers.order.made_discount', ['ru' => "<br/> сделал скидку на заказ № {order_id} в размере:", 'order_id' => $order->id]) . $discountValue;
+                    $message .= "<li style='{li_style}'>" . Yii::t('message', 'frontend.controllers.order.made_discount', ['ru' => "<br/> сделал скидку на заказ № {order_id} в размере:", 'order_id' => $order->id]) . $discountValue . "</li>";
                     $orderChanged = 1;
                 } else {
-                    $message .= Yii::t('app', 'frontend.controllers.order.not_changed', ['ru' => "<br/> изначальная скидка сохранена для новых условий заказа № "]) . $order->id;
+                    $message .= "<li style='{li_style}'>" . Yii::t('message', 'frontend.controllers.order.not_changed', ['ru' => "<br/> изначальная скидка сохранена для новых условий заказа № "]) . $order->id . "</li>";
                 }
             } else {
                 if ($order->discount > 0) {
-                    //$message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_four', ['ru'=>"<br/> отменил скидку на заказ № "]) . $order->id;
-                    $message .= Yii::t('app', 'frontend.controllers.order.not_changed', ['ru' => "<br/> изначальная скидка сохранена для новых условий заказа № "]) . $order->id;
+                    $message .= "<li style='{li_style}'>" . Yii::t('message', 'frontend.controllers.order.not_changed', ['ru' => "<br/> изначальная скидка сохранена для новых условий заказа № "]) . $order->id . "</li>";
                     $orderChanged = 1;
                 }
                 //$order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
                 //$order->discount = null;
                 $order->calculateTotalPrice();
             }
+            $message .= "</ul>";
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 if ($order->status != OrderStatus::STATUS_DONE) {
                     $order->status = ($order->status === OrderStatus::STATUS_PROCESSING) ? OrderStatus::STATUS_PROCESSING : OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;

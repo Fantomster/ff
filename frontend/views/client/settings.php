@@ -226,9 +226,7 @@ $this->registerCss("
                             </div>
                             <div class="form-group">
                                 <?=
-                                $form->field($organization, 'is_allowed_for_franchisee')
-                                    ->label(Yii::t('message', 'frontend.views.client.settings.franchisee', ['ru' => 'Разрешить франчайзи вход в данный Личный Кабинет']))
-                                    ->checkbox()
+                                $form->field($organization, 'is_allowed_for_franchisee')->checkbox()
                                 ?>
                             </div>
                         </div>

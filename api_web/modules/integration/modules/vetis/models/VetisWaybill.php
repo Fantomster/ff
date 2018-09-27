@@ -36,19 +36,17 @@ class VetisWaybill extends WebApi
         $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
         $offset = $this->helper->isSetDef($reqPag['offset'] ?? null, 0);
         $groups = $this->helper->isSetDef($request['groups'] ?? null, []);
-        $groups_in_query = [];
 
         $acquirer_id = null;
         if (isset($request['search']['acquirer_id'])) {
             $acquirer_id = $request['search']['acquirer_id'];
         }
-
         $reqSearch['acquirer_id'] = $this->helper->isSetDef($acquirer_id, $this->user->organization->id);
-
+        //Поиск ВСД
         $search = new VetisWaybillSearch();
         $params = $this->helper->set($search, $reqSearch, ['acquirer_id', 'type', 'status', 'sender_guid', 'product_name', 'date']);
         $dataProvider = $search->search($params);
-
+        //Отсекаем группы, которые отдавали
         if (!empty($groups)) {
             $dataProvider->query->andWhere([
                 'or',
@@ -56,37 +54,44 @@ class VetisWaybill extends WebApi
                 ['NOT IN', 'o.id', array_keys($groups)]
             ]);
         }
-
+        //Супер пагинация
         $dataProvider->pagination->setPage($page);
         $dataProvider->pagination->setPageSize($pageSize);
         $dataProvider->query->limit($pageSize);
         $dataProvider->query->offset(($page * $pageSize) - $offset);
+
+        //Делаем ассоциативный массив с uuid ключом, чтобы мерж проходил успешно
         $models = ArrayHelper::index($dataProvider->models, 'uuid');
-
-        //Собираем информацию о группах, в выборке
-        foreach ($models as $model) {
-            if (!is_null($model['document_id'])) {
-                $groups_in_query[$model['document_id']] = true;
-                $offset++;
-            }
-        }
-
-        //Собираем подробную информацию о группе
-        $groups = ArrayHelper::merge($groups, $groups_in_query);
+        //Собираем данные о группах
+        $documentsInRows = ArrayHelper::getColumn($models, 'document_id');
+        //Удаляем пустые и null
+        $documentsInRows = array_diff($documentsInRows, ['', null]);
+        //Считаем сколько записей с группой, прибавляем к offset
+        $offset += count($documentsInRows);
+        //Переворачиваем ключ=значение
+        $documentsInRows = array_flip($documentsInRows);
+        //Строим список групп
+        $groups = ArrayHelper::merge($groups, $documentsInRows);
+        //Собираем подробную информацию о группах
         foreach ($groups as $group_id => &$v) {
             $v = $this->helper->getGroupInfo((int)$group_id);
         }
+        //Добираем необходимые ВСД для групп
+        $attachGroup = array_keys($documentsInRows);
+        if (!empty($attachGroup)) {
+            $models = $this->helper->attachModelsInDocument($models, array_keys($documentsInRows));
+        }
+        //Приходится бегать, чтоб собрать статусы текстом
+        foreach ($models as &$model) {
+            $model['status_text'] = MercVsd::$statuses[$model['status']];
+        }
 
-        /**
-         * Нужно дабрать ВСД для групп
-         */
-        $models = $this->helper->attachModelsInDocument($models, array_keys($groups_in_query));
-
+        //Строим результат
         $result = [
             'items'  => array_values($models),
             'groups' => $groups
         ];
-
+        //Ответ для АПИ
         $return = [
             'result'     => $result,
             'pagination' => [

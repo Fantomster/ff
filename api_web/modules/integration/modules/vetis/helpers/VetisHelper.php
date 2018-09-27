@@ -296,13 +296,15 @@ class VetisHelper
             ")
             ->from('order o')
             ->leftJoin('order_content oc', 'oc.order_id = o.id')
-            ->leftJoin('`' . $tableName . '`.merc_vsd m', 'm.uuid = oc.merc_uuid COLLATE utf8_unicode_ci')
+            ->leftJoin('`' . $tableName . '`.merc_vsd m', 'm.uuid = oc.merc_uuid')
             ->where(['in', 'o.id', $order_ids])
             ->andWhere('oc.merc_uuid is not null')
             ->all();
 
         $query = ArrayHelper::index($query, 'uuid');
+
         $models = ArrayHelper::merge($models, $query);
+
         ArrayHelper::multisort($models, 'date_doc', SORT_DESC);
 
         return $models;

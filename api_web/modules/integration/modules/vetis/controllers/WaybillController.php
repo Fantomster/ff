@@ -54,7 +54,7 @@ class WaybillController extends WebApiController
      *              default={
      *                      "result": {
      *                            "items": {
-     *                                  "774daf95-01ee-486c-ae05-4ab301a9b85d": {
+     *                                  {
      *                                      "uuid": "774daf95-01ee-486c-ae05-4ab301a9b85d",
      *                                      "sender_name": "Поставщик №1(600021, обл.Владимирская, г.Муром, ул.Октябрьской Революции,д.2Б)",
      *                                      "product_name": "мясо верблюда",
@@ -64,7 +64,8 @@ class WaybillController extends WebApiController
      *                                      "unit": "кг",
      *                                      "production_date": "2018-07-02T03:00:00+03:00",
      *                                      "date_doc": "2018-08-30T15:00:00+03:00",
-     *                                      "document_id": null
+     *                                      "document_id": null,
+     *                                      "status_text": "Статус"
      *                                  },
      *                              },
      *                              "groups": {

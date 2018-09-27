@@ -11,6 +11,8 @@ namespace api_web\modules\integration\classes\dictionaries;
 
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use common\helpers\DBNameHelper;
+use common\models\Organization;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
 use common\models\OuterProduct;
@@ -32,7 +34,7 @@ class AbstractDictionary extends WebApi
     }
 
     /**
-     * Список продуктов полученных из iiko
+     * Список продуктов полученных из внешней системы
      * @param $request
      * @return array
      */
@@ -105,9 +107,12 @@ class AbstractDictionary extends WebApi
         $page = (isset($pag['page']) ? $pag['page'] : 1);
         $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
 
+
         $search = OuterAgent::find()->joinWith(['vendor', 'store', 'nameWaybills'])
-            ->leftJoin('organization o', 'outer_agent.vendor_id = o.id')
-            ->where(['`outer_agent`.org_id' => $this->user->organization->id, '`outer_agent`.service_id' => $this->service_id]);
+            ->where([
+                '`outer_agent`.org_id'     => $this->user->organization->id,
+                '`outer_agent`.service_id' => $this->service_id
+            ]);
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {

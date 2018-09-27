@@ -9,6 +9,7 @@
 namespace api_web\modules\integration\modules\vetis\helpers;
 
 use api\common\models\merc\MercVsd;
+use common\helpers\DBNameHelper;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use yii\db\Query;
@@ -247,11 +248,7 @@ class VetisHelper
      * */
     private function getDsnAttribute($name, $dsn)
     {
-        if (preg_match('/' . $name . '=([^;]*)/', $dsn, $match)) {
-            return $match[1];
-        } else {
-            return null;
-        }
+        return DBNameHelper::getDsnAttribute($name, $dsn);
     }
 
     /**

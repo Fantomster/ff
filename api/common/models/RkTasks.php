@@ -105,7 +105,7 @@ class RkTasks extends \yii\db\ActiveRecord
             $journal->log_guide = $this->guid;
             $journal->service_id = rkeeperService::getServiceId();
         } else {
-            $journal = Journal::findOne(['service_id' => rkeeperService::getServiceId(), 'guide' => $this->guid]);
+            $journal = Journal::findOne(['service_id' => rkeeperService::getServiceId(), 'log_guide' => $this->guid]);
         }
 
         $journal->type = ($this->intstatus_id == self::INTSTATUS_EXTERROR ? 'error' : 'success');

@@ -303,7 +303,7 @@ class VetisHelper
 
         $query = ArrayHelper::index($query, 'uuid');
         $models = ArrayHelper::merge($models, $query);
-        ArrayHelper::multisort($models, ['date_doc', 'document_id'], [SORT_DESC, SORT_ASC]);
+        ArrayHelper::multisort($models, 'date_doc', SORT_DESC);
 
         return $models;
     }

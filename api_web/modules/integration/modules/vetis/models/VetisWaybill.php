@@ -83,7 +83,7 @@ class VetisWaybill extends WebApi
         $models = $this->helper->attachModelsInDocument($models, array_keys($groups_in_query));
 
         $result = [
-            'items'  => $models,
+            'items'  => array_values($models),
             'groups' => $groups
         ];
 

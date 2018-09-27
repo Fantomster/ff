@@ -127,18 +127,6 @@ class OrderCatalogSearch extends \yii\base\Model
            cat_id IN (" . $this->catalogs . ")
            " . $where . "
            AND (cbg.status = 1 AND cbg.deleted = 0)
-        UNION ALL
-          SELECT 
-          " . implode(',', $fieldsCG) . "
-          FROM `catalog_goods` `cg`
-           LEFT JOIN `catalog_base_goods` `cbg` ON cg.base_goods_id = cbg.id
-           LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
-           LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
-           LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-          WHERE 
-          cg.cat_id IN (" . $this->catalogs . ")
-          " . $where . "
-          AND (cbg.status = 1 AND cbg.deleted = 0)
         ) as c WHERE id != 0 " . $where_all;
 
         $dataProvider = new SqlDataProvider([

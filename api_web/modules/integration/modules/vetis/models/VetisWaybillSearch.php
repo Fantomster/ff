@@ -38,7 +38,7 @@ class VetisWaybillSearch extends MercVsd
      */
     public function search($params)
     {
-        $query = (new VetisHelper())->getOrdersQueryVetis();
+        $query = (new VetisHelper())->getListQuery();
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);

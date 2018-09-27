@@ -15,6 +15,7 @@ use yii\db\Query;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -182,32 +183,58 @@ class VetisHelper
     }
 
     /**
-     * @return Query
-     * */
-    public function getOrdersQueryVetis()
+     * @param int $id
+     * @return array|bool
+     */
+    public function getGroupInfo(int $id)
     {
         $tableName = $this->getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
         $query = (new Query())
             ->select(
                 [
-                    'COALESCE(o.id, \'order_not_installed\' ) as group_name',
-                    'COUNT(m.id) as count',
+                    'COUNT(oc.id) as count',
                     'o.created_at',
                     'o.total_price',
                     'vendor.name as vendor_name',
-                    'm.sender_name as sender_name',
-                    'GROUP_CONCAT(`m`.`uuid` SEPARATOR \',\') AS `uuids`',
                     'GROUP_CONCAT(DISTINCT `m`.`status` SEPARATOR \',\') AS `statuses`',
                 ]
             )
-            ->from('`' . $tableName . '`.merc_vsd m')
-            ->leftJoin('`' . $tableName . '`.waybill_content wc', 'wc.merc_uuid = m.uuid COLLATE utf8_unicode_ci')
-            ->leftJoin('`' . $tableName . '`.waybill w', 'w.id = wc.waybill_id AND w.service_id = 4')
-            ->leftJoin('order_content oc', 'oc.id = wc.order_content_id')
-            ->leftJoin('order o', 'o.id = oc.order_id')
+            ->from('order o')
+            ->leftJoin('order_content oc', 'oc.order_id = o.id')
             ->leftJoin('organization vendor', 'o.vendor_id = vendor.id')
-            ->groupBy('group_name')
-            ->orderBy(['group_name' => SORT_DESC]);
+            ->leftJoin('`' . $tableName . '`.merc_vsd m', 'm.uuid = oc.merc_uuid COLLATE utf8_unicode_ci')
+            ->where(['o.id' => $id])
+            ->andWhere('oc.merc_uuid is not null')
+            ->one(\Yii::$app->db);
+
+        $query['statuses'] = $this->getStatusForGroup($query['statuses']);
+
+        return $query;
+    }
+
+    /**
+     * @return Query
+     */
+    public function getListQuery()
+    {
+        $tableName = $this->getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+        $query = (new Query())
+            ->select("
+                  `m`.uuid,
+                  `m`.`sender_name`,
+                  `m`.`product_name`,
+                  `m`.`status`,
+                  `m`.`last_update_date` as status_date,
+                  `m`.`amount`,
+                  `m`.`unit`,
+                  `m`.`production_date`,
+                  `m`.`date_doc`,
+                  `o`.id as document_id
+            ")
+            ->from('`' . $tableName . '`.merc_vsd m')
+            ->leftJoin('order_content oc', 'oc.merc_uuid = m.uuid COLLATE utf8_unicode_ci')
+            ->leftJoin('order o', 'o.id = oc.order_id')
+            ->orderBy(['m.date_doc' => SORT_DESC]);
 
         return $query;
     }
@@ -247,5 +274,40 @@ class VetisHelper
                 'text' => \Yii::t('api_web', self::$ordersStatuses[$status])
             ];
         }
+    }
+
+    /**
+     * @param $models
+     * @param array $order_ids
+     * @return array
+     */
+    public function attachModelsInDocument($models, array $order_ids)
+    {
+        $tableName = $this->getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+        $query = (new Query())
+            ->select("
+                `m`.uuid,
+                `m`.`sender_name`,
+                `m`.`product_name`,
+                `m`.`status`,
+                `m`.`last_update_date` as status_date,
+                `m`.`amount`,
+                `m`.`unit`,
+                `m`.`production_date`,
+                `m`.`date_doc`,
+                `o`.id as document_id
+            ")
+            ->from('order o')
+            ->leftJoin('order_content oc', 'oc.order_id = o.id')
+            ->leftJoin('`' . $tableName . '`.merc_vsd m', 'm.uuid = oc.merc_uuid COLLATE utf8_unicode_ci')
+            ->where(['in', 'o.id', $order_ids])
+            ->andWhere('oc.merc_uuid is not null')
+            ->all();
+
+        $query = ArrayHelper::index($query, 'uuid');
+        $models = ArrayHelper::merge($models, $query);
+        ArrayHelper::multisort($models, ['date_doc', 'document_id'], [SORT_DESC, SORT_ASC]);
+
+        return $models;
     }
 }

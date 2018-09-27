@@ -34,9 +34,14 @@ class WaybillController extends WebApiController
      *                              "to":"22.22.1111"
      *                          }
      *                      },
+     *                      "groups":{
+     *                          "6776":true,
+     *                          "6777":true
+     *                      },
      *                      "pagination": {
      *                          "page": 1,
-     *                          "page_size": 12
+     *                          "page_size": 12,
+     *                          "offset": 0
      *                      }
      *                  }
      *              )
@@ -48,35 +53,38 @@ class WaybillController extends WebApiController
      *            @SWG\Schema(
      *              default={
      *                      "result": {
-     *                            "documents": {
-     *                                  "6777": {
-     *                                      "count": 1,
-     *                                      "date": "2018-09-04T10:08:18+03:00",
-     *                                      "vendor_name": "EL Поставщик",
-     *                                      "sender_name": "Поставщик №2(600021, обл.Владимирская, г.Муром, ул.Октябрьской Революции,д.2Б)",
-     *                                      "total_price": "76.88",
-     *                                      "uuids": {
-     *                                          "d50becf5-ad90-45dd-aebd-8bc36fe984e0"
-     *                                      },
-     *                                      "status": {
-     *                                          "id": "UTILIZED",
-     *                                          "text": "Сертификаты погашены"
-     *                                      }
-     *                                  }
+     *                            "items": {
+     *                                  "774daf95-01ee-486c-ae05-4ab301a9b85d": {
+     *                                      "uuid": "774daf95-01ee-486c-ae05-4ab301a9b85d",
+     *                                      "sender_name": "Поставщик №1(600021, обл.Владимирская, г.Муром, ул.Октябрьской Революции,д.2Б)",
+     *                                      "product_name": "мясо верблюда",
+     *                                      "status": "CONFIRMED",
+     *                                      "status_date": "2018-08-30T13:11:02+03:00",
+     *                                      "amount": "55.000",
+     *                                      "unit": "кг",
+     *                                      "production_date": "2018-07-02T03:00:00+03:00",
+     *                                      "date_doc": "2018-08-30T15:00:00+03:00",
+     *                                      "document_id": null
+     *                                  },
      *                              },
-     *                              "order_not_installed": {
-     *                                  "uuids": {
-     *                                      "df618d56-67c5-4c89-8956-45f54ff7ebfd",
-     *                                      "6a781eb8-c314-4026-b40c-02fd80f12e57",
-     *                                      "1d7befcb-57c4-44fd-adc9-f058972739f9",
-     *                                      "1495e3f9-35ab-46e4-aeff-618921e4e168"
+     *                              "groups": {
+     *                                  "6776": {
+     *                                      "count": "3",
+     *                                      "created_at": "2018-09-04T09:55:22+03:00",
+     *                                      "total_price": "30.00",
+     *                                      "vendor_name": "EL Поставщик",
+     *                                      "statuses": {
+     *                                          "id": "CONFIRMED",
+     *                                          "text": "Сертификаты ожидают погашения"
+     *                                      }
      *                                  }
      *                              }
      *                      },
      *                      "pagination": {
      *                            "page": 1,
+     *                            "page_size": 12,
      *                            "total_page": 17,
-     *                            "page_size": 12
+     *                            "offset": 1
      *                      }
      *              }
      *          )

@@ -3,9 +3,12 @@
 use yii\helpers\Url;
 use common\models\Organization;
 use common\helpers\MailHelper;
+use common\models\Role;
 
 $currencySymbol = $order->currency->symbol;
 $senderIsClient = ($senderOrg->type_id == Organization::TYPE_RESTAURANT);
+$recipientIsClient = ($recipient->organization->type_id == Organization::TYPE_RESTAURANT) && ($recipient->organization_id == $senderOrg->id);
+$recipientIsFranchisee = isset($recipient->role_id) && in_array($recipient->role_id, [Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_LEADER, Role::ROLE_FRANCHISEE_MANAGER]);
 $self = MailHelper::isSelf($senderOrg, $recipient);
 $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['ru' => "Ресторан"]) : Yii::t('app', 'common.mail.order_created.vendor', ['ru' => "Поставщик"]);
 ?>
@@ -25,7 +28,15 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
                             <tr>
                                 <td valign="top" style="font-family: 'Open Sans', Arial, sans-serif;color: #8c8f8d;font-size: 16px;">
                                     <span  style="font-family: 'Open Sans', Arial, sans-serif;color: #8c8f8d;font-size: 16px;">
-                                        <?= $orgType . ' ' . $senderOrg->name . Yii::t('app', 'common.mail.order_created.new_order', ['ru' => ' создал новый заказ']) ?>                                        
+                                        <?php
+                                        if ($recipientIsClient) {
+                                            echo Yii::t('app', 'common.mail.order_created.client_new', ['ru' => 'Вы создали новый заказ. Пожалуйста, просмотрите заказ и скорректируйте его при необходимости.']);
+                                        } elseif ($recipientIsFranchisee) {
+                                            echo $orgType . ' ' . $senderOrg->name . Yii::t('app', 'common.mail.order_created.new_order', ['ru' => ' создал новый заказ']);
+                                        } else {
+                                            echo Yii::t('app', 'common.mail.order_created.vendor_new', ['ru' => 'Вам поступил новый заказ. Пожалуйста, просмотрите заказ и скорректируйте его при необходимости.']);
+                                        }
+                                        ?>                                        
                                     </span>
                                 </td>
                                 <td align="center" valign="top" style="color: #ffffff;font-family: 'Open Sans', Arial, sans-serif;text-transform: uppercase;font-size: 16px;">
@@ -78,41 +89,41 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
                                 </td>
                                 <td valign="top" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 600;color: #8c8f8d;">
                                     <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 600;color: #8c8f8d;">
-                                        <?php if ($order->discount) { ?>
-                                            <?= Yii::t('app', 'common.mail.bill.discount', ['ru' => 'Скидка:']) ?> <b style="font-size: 16px;color: #000000;line-height: 1;"><?= $order->getFormattedDiscount() ?></b>
-                                        <?php } ?>
+                                        <?= Yii::t('app', 'common.mail.bill.discount', ['ru' => 'Скидка:']) ?> <b style="font-size: 16px;color: #000000;line-height: 1;"><?= $order->discount ? $order->getFormattedDiscount() : 0 ?></b>
                                     </span>
                                 </td>
                             </tr>
                             <tr>
-                                <td height="30" valign="middle" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;font-weight: 700;color: #000000;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;font-weight: 700;color: #000000;"><?= $order->total_price ?> <?= $currencySymbol ?></span>
+                                <td height="30" valign="middle" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 700;color: #000000;">
+                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 700;color: #000000;"><?= $order->total_price ?> <?= $currencySymbol ?></span>
                                 </td>
                                 <td height="30" align="center" valign="middle" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;font-weight: 700;color: #000000;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;font-weight: 700;color: #000000;"><?= $order->actual_delivery ? Yii::$app->formatter->asDatetime($order->actual_delivery, "php:d.m.y") : '' ?></span>
+                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;font-weight: 700;color: #000000;"><?= $order->requested_delivery ? Yii::$app->formatter->asDatetime($order->requested_delivery, "php:d.m.y") : '' ?></span>
                                 </td>
                                 <td height="30" valign="middle" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 600;color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 600;color: #8c8f8d;"><?= Yii::t('message', 'frontend.views.vendor.delivery', ['ru' => 'Доставка']) ?>: <b style="font-size: 16px;color: #000000;line-height: 16px;"><?= $order->calculateDelivery() ?> <?= $currencySymbol ?></b></span>
+                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 600;color: #8c8f8d;"><?= Yii::t('message', 'frontend.views.vendor.delivery', ['ru' => 'Доставка']) ?>: <b style="font-size: 14px;color: #000000;line-height: 14px;"><?= $order->calculateDelivery() ?> <?= $currencySymbol ?></b></span>
                                 </td>
                             </tr>
                         </table>
                     </td>
                     <td valign="top" style="padding: 16px 20px 0 0;">
-                        <?= $senderIsClient ? $this->render("_new_client", compact("recipient")) : $this->render("_new_vendor", compact("senderOrg", "order")) ?>
+                        <?= $recipientIsClient ? $this->render("_new_client", compact("order")) : $this->render("_new_vendor", compact("order")) ?>
                     </td>
                 </tr>
-                <tr>
-                    <td colspan="4" valign="top" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 18px;font-weight: 700;color: #000000;padding: 0 20px 20px;">
-                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 18px;font-weight: 700;color: #000000;"><?= Yii::t('message', 'frontend.views.request.order_comment', ['ru' => 'Комментарий к заказу']) ?></span>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="4" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-style: italic; color: #8c8f8d; padding: 0 20px 26px;">
-                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-style: italic; color: #8c8f8d;">
-                            <?= $order->comment ?>
-                        </span>
-                    </td>
-                </tr>
+                <?php if (!empty($order->comment)) { ?>
+                    <tr>
+                        <td colspan="4" valign="top" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 18px;font-weight: 700;color: #000000;padding: 0 20px 20px;">
+                            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 18px;font-weight: 700;color: #000000;"><?= Yii::t('message', 'frontend.views.request.order_comment', ['ru' => 'Комментарий к заказу']) ?></span>
+                        </td>
+                    </tr>
+                <?php } ?>
+                    <tr>
+                        <td colspan="4" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-style: italic; color: #8c8f8d; padding: 0 20px 26px;">
+                            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-style: italic; color: #8c8f8d;">
+                                <?= $order->comment ?>
+                            </span>
+                        </td>
+                    </tr>
             </table>
         </td>
     </tr>
@@ -121,104 +132,7 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
             <table cellpadding="0" cellspacing="0" border="0" width="680" style="max-width: 680px; min-width: 320px;">
                 <tr>
                     <td valign="top">
-                        <table width="100%" cellspacing="0" border="0" cellpadding="0" style="table-layout: fixed;border-collapse:collapse;font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;">
-                            <tr>
-                                <td style="width: 7%;background: #f3f3f3;"></td>
-                                <td style="width: 24%;padding: 14px 5px 14px 0;font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;background: #f3f3f3;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;">Товар</span>
-                                </td>
-                                <td style="width: 11%;padding: 14px 0;font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;background: #f3f3f3;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;">Артикул</span>
-                                </td>
-                                <td style="width: 9%;padding: 14px 0;font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;background: #f3f3f3;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;">Кол-во</span>
-                                </td>
-                                <td style="width: 14%;padding: 14px 0;font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;background: #f3f3f3;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;">Цена</span>
-                                </td>
-                                <td style="width: 12%;padding: 14px 0;font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;background: #f3f3f3;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;">Сумма</span>
-                                </td>
-                                <td style="width: 23%;padding: 14px 0;font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;background: #f3f3f3;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #000000;">Комментарий</span>
-                                </td>
-                            </tr>
-
-                            <!-- СТРОКА -->
-                            <tr style="border-bottom: 2px solid #F0F4F2;">
-                                <td valign="top" style="padding: 12px 0 12px 20px;background: #ffffff !important;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">1</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 8px 12px 0;background: #ffffff !important;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">Котлеты для гамбургеров "С говядиной деликатесные" TM Street Food (соль/перец) (200г.), 1кор.*5кг</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 5px 12px 0;background: #ffffff !important;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">00193498</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 5px 12px 0;background: #ffffff !important;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">30 кор.</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 5px 12px 0;background: #ffffff !important;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">1200 руб/кор</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 5px 12px 0;background: #ffffff !important;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">36000 RUB</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 20px 12px 0;background: #ffffff !important;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-style: italic; color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-style: italic; color: #8c8f8d;">Текст комментария к товару от ресторана отображается полностью</span>
-                                </td>
-                            </tr>
-
-                            <!-- СТРОКА -->
-                            <tr style="border-bottom: 2px solid #F0F4F2;">
-                                <td valign="top" style="padding: 12px 0 12px 20px;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">2</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 8px 12px 0;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">Котлеты для гамбургеров "С говядиной деликатесные" TM Street Food (соль/перец) (200г.), 1кор.*5кг</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 5px 12px 0;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">00193498</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 5px 12px 0;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">30 кор.</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 5px 12px 0;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">1200 руб/кор</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 5px 12px 0;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">36000 RUB</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 20px 12px 0;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-style: italic; color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-style: italic; color: #8c8f8d;">Текст комментария к товару от ресторана отображается полностью</span>
-                                </td>
-                            </tr>
-
-                            <!-- СТРОКА -->
-                            <tr style="border-bottom: 2px solid #F0F4F2;">
-                                <td valign="top" style="padding: 12px 0 12px 20px;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">3</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 8px 12px 0;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">Котлеты для гамбургеров "С говядиной деликатесные" TM Street Food (соль/перец) (200г.), 1кор.*5кг</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 5px 12px 0;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;color: #8c8f8d;">00193498</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 5px 12px 0;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">30 кор.</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 5px 12px 0;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">1200 руб/кор</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 5px 12px 0;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px; color: #8c8f8d;">36000 RUB</span>
-                                </td>
-                                <td valign="top" style="padding: 12px 20px 12px 0;background: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-style: italic; color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-style: italic; color: #8c8f8d;">Текст комментария к товару от ресторана отображается полностью</span>
-                                </td>
-                            </tr>
-                        </table>
+                        <?= $this->render("_order-grid", compact("dataProvider", "order")) ?>
                     </td>
                 </tr>
             </table>
@@ -244,7 +158,7 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
                                 </td>
                                 <td align="left" valign="middle" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
                                     <a href="tel:84994041018" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;text-decoration: none;color: #2a2c2e;">
-                                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;">8-499-404-10-18</span>
+                                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;"><?= Yii::t('app', 'common.mail.layouts.phone', ['ru' => '8-499-404-10-18']) ?></span>
                                     </a>
                                 </td>
                                 <td align="center" valign="middle" width="33">
@@ -254,7 +168,7 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
                                 </td>
                                 <td align="left" valign="middle" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
                                     <a href="mailto:info@mixcart.ru" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;text-decoration: none;color: #2a2c2e;">
-                                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;">info@mixcart.ru</span>
+                                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;"><?= Yii::t('app', 'common.mail.layouts.infoemail') ?></span>
                                     </a>
                                 </td>
                                 <td align="center" valign="middle" width="30">
@@ -263,8 +177,8 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
                                     </a>
                                 </td>
                                 <td align="left" valign="middle" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
-                                    <a href="https://mixcart.ru/" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;text-decoration: none;color: #2a2c2e;">
-                                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;">www.mixcart.ru</span>
+                                    <a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?>" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;text-decoration: none;color: #2a2c2e;">
+                                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;"><?= Yii::$app->params['shortHome'] ?></span>
                                     </a>
                                 </td>
                             </tr>

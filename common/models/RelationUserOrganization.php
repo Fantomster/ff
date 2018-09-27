@@ -83,7 +83,7 @@ class RelationUserOrganization extends \yii\db\ActiveRecord
 
     public static function relationExists($user_id, $organization_id) 
     {
-        return self::find()->where(['user_id' => $user_id, 'organization' => $organization_id])->exists();
+        return self::find()->where(['user_id' => $user_id, 'organization_id' => $organization_id])->exists();
     }
     
     /**

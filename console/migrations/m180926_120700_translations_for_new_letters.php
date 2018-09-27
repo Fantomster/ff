@@ -11,6 +11,8 @@ class m180926_120700_translations_for_new_letters extends Migration
         'common.mail.order_created.string1' => 'Перейти к заказу',
         'common.models.order_status.status_awaiting_accept_from_vendor' => 'Ожидает потверждения поставщика',
         'common.mail.order.delivery_date' => 'Дата доставки',
+        'common.mail.order_created.vendor_new' => 'Вам поступил новый заказ. Пожалуйста, просмотрите заказ и скорректируйте его при необходимости.',
+        'common.mail.order_created.client_new' => 'Вы создали новый заказ. Пожалуйста, просмотрите заказ и скорректируйте его при необходимости.',
     ];
 
     /**

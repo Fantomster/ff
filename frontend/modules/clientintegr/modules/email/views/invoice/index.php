@@ -9,7 +9,7 @@ use kartik\date\DatePicker;
 use yii\helpers\Url;
 use common\components\UrlPjax;
 
-function renderButton($id)
+/*function renderButton($id)
 {
     return \yii\helpers\Html::tag('a', 'Задать', [
         'class' => 'actions_icon view-relations',
@@ -19,12 +19,12 @@ function renderButton($id)
         'style' => 'cursor:pointer;align:center;color:red;',
         'href' => '#'
     ]);
-}
+}*/
 
 Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
 $form = ActiveForm::begin([
     'options' => [
-        'data-pjax' => true,
+        'data-pjax' => false,
         'id' => 'search-form',
         'role' => 'search',
 
@@ -53,7 +53,7 @@ $this->registerJs('
                 }, 500);
             }
         });
-        $(".box-body").on("change keyup paste cut", "#name_postav", function() {
+        $(".box-body").on("change keyup paste cut", "#name_postav_filter", function() {
             if (timer) {
                 clearTimeout(timer);
             }
@@ -105,10 +105,12 @@ $this->registerJs('
         <div class="box box-info">
             <div class="box-header with-border">
                 <?= \Yii::$app->controller->module->renderMenu() ?>
-                <a href="#"
-                   class="btn btn-success pull-right" id="save-button">
-                    <i class="fa fa-save"></i> Сохранить
-                </a>
+                <span id="button_save">
+                    <a href="#"
+                       class="btn btn-success pull-right" id="save-button" disabled>
+                        <i class="fa fa-save"></i> Сохранить
+                    </a>
+                </span>
             </div>
 
             <div class="box-body">
@@ -145,7 +147,7 @@ $this->registerJs('
                     <div class="col-lg-2 col-md-3 col-sm-6">
                         <?php
                         echo $form->field($searchModel, 'name_postav')
-                            ->textInput(['prompt' => 'Поиск', 'class' => 'form-control fa fa-search', 'id' => 'name_postav'])
+                            ->textInput(['prompt' => 'Поиск', 'class' => 'form-control fa fa-search', 'id' => 'name_postav_filter'])
                             ->label(Yii::t('message', 'frontend.views.supplier.denome', ['ru' => 'Наименование поставщика']), ['class' => 'label', 'style' => 'color:#555']);
                         ?>
                     </div>
@@ -173,21 +175,30 @@ $this->registerJs('
                                         'class' => 'form-control',
                                         'placeholder' => '№ накладной'
                                     ],
-                                    'value' => function ($data) {
-                                        if ($data->order_id) return '';
-                                        return \yii\helpers\Html::input('radio', 'invoice_id', $data->id, ['class' => 'invoice_radio']);
+                                    'value' => function ($model) {
+                                        if ($model->order_id) return ' ';
+                                        if (!($model->vendor_id)) return '';
+                                        //return \yii\helpers\Html::input('radio', 'invoice_id', $model->id, ['class' => 'invoice_radio']);
+                                        //return '<button type="button" class="btn-primary invoice_radio" id="'.$model->id.'" title="Применить"><i class="glyphicon glyphicon-ok"></i></button>';
+                                        return '<a href="#" class="btn btn-secondary btn-lg invoice_radio" role="button" aria-disabled="true" id="' . $model->id . '">☐</a>';
                                     },
-                                    'contentOptions' => ['class' => 'text-center'],
+                                    //'contentOptions' => ['class' => 'text-center'],
+                                    'contentOptions' => function ($model) {
+                                        return ["id" => "rbutton" . $model->id];
+                                    },
                                     'headerOptions' => ['style' => 'width: 100px;'],
                                 ],
                                 [
                                     'format' => 'raw',
                                     'header' => 'Номер накладной',
-                                    'attribute' => 'name_postav',
+                                    'attribute' => 'invoice_id',
                                     'filterInputOptions' => [
                                         'class' => 'form-control',
                                         'placeholder' => 'Наименование поставщика'
                                     ],
+                                    'contentOptions' => function ($model) {
+                                        return ["id" => "nn" . $model->id];
+                                    },
                                     'value' => function ($data) {
 
                                         $user = Yii::$app->user->identity;
@@ -255,6 +266,9 @@ $this->registerJs('
                                 [
                                     'format' => 'raw',
                                     'attribute' => 'order_id',
+                                    'contentOptions' => function ($data) {
+                                        return ["id" => "oid" . $data->id];
+                                    },
                                     'value' => function ($data) {
                                         return UrlPjax::make($data->order_id, '/order/view', $data->order_id);
 
@@ -268,18 +282,30 @@ $this->registerJs('
                                 ],
                                 [
                                     'header' => 'Связь с поставщиком',
-                                    'class' => 'yii\grid\ActionColumn',
-                                    'template' => '{view_relations}',
-                                    'contentOptions' => ['style' => 'text-align:center'],
-                                    'buttons' => [
+                                    //'class' => 'yii\grid\ActionColumn',
+                                    //'template' => '{view_relations}',
+                                    //'contentOptions' => ['style' => 'text-align:center'],
+                                    'hAlign' => 'center',
+                                    'contentOptions' => function ($data) {
+                                        return ["id" => "way" . $data->id,
+                                            "data-vendor" => $data->vendor_id];
+                                    },
+                                    /*'buttons' => [
                                         'view_relations' => function ($url, $model) {
                                             if (isset($model->order->vendor)) {
                                                 return $model->order->vendor->name;
                                             } else {
-                                                return renderButton($model->id);
+                                                return 'Задать'renderButton($model->id);
                                             }
                                         }
-                                    ],
+                                    ],*/
+                                    'value' => function ($model) {
+                                        if (isset($model->vendor_id)) {
+                                            return $model->vendor->name;
+                                        } else {
+                                            return 'Задать';
+                                        }
+                                    }
                                 ],
                                 [
                                     'class' => 'kartik\grid\ExpandRowColumn',
@@ -343,8 +369,379 @@ if (!empty($integration)) {
 }
 
 $js = <<<JS
+    $(function () {
+        function links_column9 () {
+            $('[data-col-seq='+9+']').each(function() {
+                var idtd = $(this).attr('id');
+                var idtds = String(idtd);
+                var idnumber = idtds.substring(3);
+                var idbutton = 'but' + idnumber;
+                var cont_old = $(this).html();
+                var oid = $('#oid'+idnumber+' a').html();
+                if (oid=='') {cont_old='<i>'+cont_old+'</i>';}
+                var cont_new = '<button type="button" class="button_name" id="'+idbutton+'" style="background:none;color:red;border:none;border-bottom:1px dashed">'+cont_old+'</button>';
+                if (idbutton!='butefined') {
+                    if (oid=='') {
+                        $(this).html(cont_new);
+                    }
+                }
+                
+                $('.button_name').on('click', function () {
+                var idtd = $(this).attr('id');
+                var idtds = String(idtd);
+                var idnumber = idtds.substring(3);
+                var invoice_id = idnumber;
+                var td = $(this).parents('tr').find('td:last-child');
+                var this_ = $(this);
+                var organization_id = $organization->id;
+                    swal({
+                html: '<input type="text" id="bukv-postav" class="swal2-input" placeholder="Введите или выберите поставщика" autofocus>'+'<div id="bukv-postav2" style="margin-top:0px;padding-top:0px;"></div>'+'<div id="bukv-postav3" style="margin-top:0px;padding-top:0px;"></div>',
+                inputPlaceholder: 'Введите или выберите поставщика',
+                confirmButtonText: 'Выбрать',
+                cancelButtonText: 'Отмена',
+                showCancelButton: true,
+                title: 'Выберите поставщика',
+                inputOptions: new Promise(function (resolve) {
+                    $(document).ready ( function(){
+                        $("#bukv-postav").focus();
+                        var a = $("#bukv-postav").val();
+                        $.post('$url/list-postav', {org_id: organization_id, stroka: a}).done(
+                                    function(data){
+                                        var arr = JSON.parse(data);
+                                        if (arr.length>0) {
+                                            var sel100 = 'Показаны первые 100 позиций';
+                                            if (arr.length>=100) {
+                                            $('#bukv-postav3').html(sel100);
+                                        }
+                                            var sel = '<div id="spisok">';
+                                            sel = sel+'<select id="selpos" name="list_postav" class="swal2-input">';
+                                            var index;
+                                            for (index = 0; index < arr.length; ++index) {
+                                                sel = sel+'<option value="'+arr[index]['id']+'">'+arr[index]['name']+'</option>';
+                                            }
+                                            sel = sel+'</select></div>';
+                                        } else {
+                                            sel = 'Нет данных.';
+                                        }
+                                        $('#bukv-postav2').html(sel);
+                                        $('#bukv-postav').css("margin-bottom", "0px");
+                                        $('#selpos').css("margin-top", "0px");
+                                });
+                        $("#bukv-postav").keyup(function() {
+                            var a = $("#bukv-postav").val();
+                                    $.post('$url/list-postav', {org_id: organization_id, stroka: a}).done(
+                                    function(data){
+                                        var arr = JSON.parse(data);
+                                        if (arr.length>0) {
+                                            var sel = '<div id="spisok">';
+                                            sel = sel+'<select id="selpos" name="list_postav" class="swal2-input">';
+                                            var index;
+                                            for (index = 0; index < arr.length; ++index) {
+                                                sel = sel+'<option value="'+arr[index]['id']+'">'+arr[index]['name']+'</option>';
+                                            }
+                                            sel = sel+'</select></div>';
+                                        } else {
+                                            sel = 'Нет данных.';
+                                        }
+                                        $('#bukv-postav2').html(sel);
+                                        $('#bukv-postav').css("margin-bottom", "0px");
+                                        $('#selpos').css("margin-top", "0px");
+                                });
+                        })
+                    })
+                })
+            }
+        ).then(function (result) {
+            if(result.value) {
+                var selectd = $("#selpos").val();
+                console.log(selectd);
+                if (selectd) {
+                    var selected_name = $("#selpos option:selected").text();
+                    console.log(selected_name);
+                    if (selectd!=-1) {console.log(invoice_id);console.log(selectd);
+                        $.post('$url/set-vendor', {
+                            vendor_search_id: selectd,
+                            vendor_id: selectd,
+                            invoice_id: invoice_id
+                        }, function (data) {
+                            console.log(idnumber);
+                            $('#but'+idnumber).html('<i>'+selected_name+'</i>');
+                            $('#id'+idnumber).attr('data-vendor',selectd);
+                            $('#rbutton'+idnumber).html('<a href="#" class="btn btn-secondary btn-lg invoice_radio" role="button" aria-disabled="true" id="'+idnumber+'">☐</a>');
+                            radio_column1();
+                        });
+                    }
+                }
+            }
+        });
+                })
+            });
+        };
+        
+        function radio_column1 () {
+            $('.invoice_radio').on('click', function () {
+                var idnumber = $(this).attr('id');
+                var invoice_number = $('#nn'+idnumber).text();
+                var selectd = $('#way'+idnumber).attr('data-vendor');
+                $('.orders').hide();
+                
+                $('[data-col-seq='+0+']').each(function() {
+                    var ert = $(this).find("a");
+                    var ert2 = ert.text();
+                    if (ert2=='☑') ert.text('☐');
+                })
+                
+                $('#'+idnumber).text('☑');
+                $('#save-button').removeAttr('disabled', false);
+                $.get('$url/get-orders-torg12', {
+                    OrderSearch: {vendor_search_id: selectd, vendor_id: selectd},
+                    invoice_id: invoice_number
+                    }, function (data) {
+                        $('#invoice-orders').html(data);
+                        $('.orders').show();
+                        $('#invoice-orders').ajaxComplete( function () {
+                            history.pushState('', '', '/ru/clientintegr/email/invoice');
+                        })
+                    })
+                
+                $('#save-button').click(function () {
 
-    $('.view-relations').click(function () {
+                    var button = $(this);
+
+                    if(button.attr('disabled') === 'disabled') {
+                        return;
+                    }
+
+                    button.attr('disabled', 'disabled');
+                    button.html('Сохранение...');
+
+                    var params = {};
+                    var create_order = true;
+                    //row_invoice = $('.invoice_radio:checked').parents('tr');
+                    $('[data-col-seq='+0+']').each(function() {
+                        var ert = $(this).find("a");
+                        var ert2 = ert.text();
+                        if (ert2=='☑') {
+                            idnumber = ert.attr('id');
+                        };
+                    })
+                    params.invoice_id = idnumber;
+                    var selectd = $('#way'+idnumber).attr('data-vendor');
+                    params.vendor_id = selectd;
+                    params.order_id = $('.orders_radio:checked').val();
+                    
+                    if (params.order_id === undefined) {
+                        create_order = false;
+                        swal({
+                            title: 'Будет создан новый заказ?',
+                            text: "Вы уверены, что не хотите прикрепить накладную к существующему заказу?",
+                            type: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Продолжить',
+                            cancelButtonText: 'Отмена',
+                        }).then(function (result) {
+                            if(result.dismiss == 'cancel'){
+                                button.removeAttr('disabled', false);
+                                button.html('<i class="fa fa-save"></i> Сохранить');
+                                return false;
+                            }
+                            $.post('$url/create-order', params, function (data) {
+                                console.log(params);
+                                if (data.status === true) {
+                                $('.catalog-index.orders').hide();
+                                var number_order = data.order_id;
+                                var us = data.us;
+                                $('#rbutton'+idnumber).html('');
+                                $('#oid'+idnumber).html('<a class="target-blank" href="/ru/order/'+number_order+'" data-pjax="0">'+number_order+'</a>');
+                                var nn_old = $('#nn'+idnumber).html();
+                                var nn_new = '<a href="/ru/clientintegr/'+us+'/waybill/index?way='+number_order+'">'+nn_old+'</a>';
+                                $('#nn'+idnumber).html(nn_new);
+                                var ssp = $('#but'+idnumber).text();
+                                $('#way'+idnumber).html(ssp);
+                                //$(row_invoice).find('.invoice_radio').remove();
+                                swal(
+                                    'Накладная успешно привязана!',
+                                    'Перейти в интеграцию: $list_integration',
+                                    'success'
+                                );
+                                } else {
+                                    errorSwal(data.error)
+                                }
+                                button.html('<i class="fa fa-save"></i> Сохранить');
+                            });
+                        });
+                    } else {
+                        if (create_order === true) {
+                            $.post('$url/create-order', params, function (data) {
+                                if (data.status === true) {
+                                $('input[class="orders_radio"]').prop('checked', false);
+                                $('.catalog-index.orders').hide();
+                                var number_order = data.order_id;
+                                var us = data.us;
+                                $('#rbutton'+idnumber).html('');
+                                $('#oid'+idnumber).html('<a class="target-blank" href="/ru/order/'+number_order+'" data-pjax="0">'+number_order+'</a>');
+                                var nn_old = $('#nn'+idnumber).html();
+                                var nn_new = '<a href="/ru/clientintegr/'+us+'/waybill/index?way='+number_order+'">'+nn_old+'</a>';
+                                $('#nn'+idnumber).html(nn_new);
+                                var ssp = $('#but'+idnumber).text();
+                                $('#way'+idnumber).html(ssp);
+                                //$(row_invoice).find('.invoice_radio').remove();
+                                swal(
+                                    'Накладная успешно привязана!',
+                                    'Перейти в интеграцию: $list_integration',
+                                    'success'
+                                );
+                                } else {
+                                    errorSwal(data.error)
+                                }
+                                button.html('<i class="fa fa-save"></i> Сохранить');
+                            });
+                        }
+                    }
+                });
+            })
+        }
+        
+        function krestik () {
+            $('.box-body').on('click', '.clear_invoice_radio', function () {
+                $('[data-col-seq='+0+']').each(function() {
+                    var ert = $(this).find("a");
+                    var ert2 = ert.text();
+                    if (ert2=='☑') ert.text('☐');
+                })
+                $('.orders').hide();
+                $('#save-button').attr('disabled', 'disabled');
+            });
+        }
+        
+    $(document).ready(function() {
+        links_column9();
+        radio_column1();
+        krestik();
+    });
+        
+    $('.box-body').on('click', '.clear_radio', function () {
+        $('.orders_radio').prop('checked', false);
+    });
+
+    /*$('.box-body').on('click', '.clear_invoice_radio', function () {
+        $('[data-col-seq='+0+']').each(function() {
+                    var ert = $(this).find("a");
+                    var ert2 = ert.text();
+                    if (ert2=='☑') ert.text('☐');
+                })
+                
+        $('.orders').hide();
+        $('#save-button').attr('disabled', 'disabled');
+    });*/
+    
+    $(document).on('pjax:end', function() {
+        links_column9();
+        radio_column1();
+        krestik();
+    });
+    
+    /*$('#save-button').click(function () {
+
+        var button = $(this);
+
+        if(button.attr('disabled') === 'disabled') {
+            alert('Идёт обработка накладной, подождите...');
+            return;
+        }
+
+        button.attr('disabled', 'disabled');
+        button.html('Сохранение...');
+
+        var params = {};
+        var create_order = true;
+        row_invoice = $('.invoice_radio:checked').parents('tr');
+        params.invoice_id = $(row_invoice).find('.invoice_radio:checked').val();
+        params.vendor_id = $(row_invoice).find('.view-relations').data('vendor_id');
+        params.order_id = $('.orders_radio:checked').val();*/
+
+        /*if (params.invoice_id === undefined) {
+            errorSwal('Необходимо выбрать накладную.');
+            button.removeAttr('disabled', false);
+            button.html('<i class="fa fa-save"></i> Сохранить');
+            return false;
+        }
+
+        if (params.vendor_id === undefined) {
+            errorSwal('Необходимо задать связь с поставщиком.');
+            button.removeAttr('disabled', false);
+            button.html('<i class="fa fa-save"></i> Сохранить');
+            return false;
+        }*/
+
+        /*if (params.order_id === undefined) {
+            create_order = false;
+            swal({
+                title: 'Будет создан новый заказ?',
+                text: "Вы уверены, что не хотите прикрепить накладную к существующему заказу.",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Продолжить',
+                cancelButtonText: 'Отмена',
+            }).then(function (result) {
+                if(result.dismiss == 'cancel'){
+                    button.removeAttr('disabled', false);
+                    button.html('<i class="fa fa-save"></i> Сохранить');
+                    return false;
+                }
+                $.post('$url/create-order', params, function (data) {
+                if (data.status === true) {
+                    $('input[class="orders_radio"]').prop('checked', false);
+                    $('.catalog-index.orders').hide();
+                    $(row_invoice).find('.invoice_radio').remove();
+                    swal(
+                    'Накладная успешно привязана!',
+                    'Перейти в интеграцию: $list_integration',
+                    'success'
+                    );
+                } else {
+                    errorSwal(data.error)
+                }
+                button.removeAttr('disabled', false);
+                button.html('<i class="fa fa-save"></i> Сохранить');
+                });
+            });
+        }else{
+                if (create_order === true) {
+                    $.post('$url/create-order', params, function (data) {
+                        if (data.status === true) {
+                        $('input[class="orders_radio"]').prop('checked', false);
+                        $('.catalog-index.orders').hide();
+                        $(row_invoice).find('.invoice_radio').remove();
+                        swal(
+                        'Накладная успешно привязана!',
+                        'Перейти в интеграцию: $list_integration',
+                        'success'
+                        );
+                        } else {
+                        errorSwal(data.error)
+                        }
+                        button.removeAttr('disabled', false);
+                        button.html('<i class="fa fa-save"></i> Сохранить');
+                    });
+                }
+            }
+    });*/
+
+    function errorSwal(message) {
+        swal(
+            'Ошибка',
+            message,
+            'error'
+        )
+    }
+    });
+            
+    /*$('.view-relations').click(function () {
         var invoice_id = $(this).data('invoice_id');
         var td = $(this).parents('tr').find('td:last-child');
         var this_ = $(this);
@@ -432,112 +829,9 @@ $js = <<<JS
                 }
             }
         });
-    });
+    });*/
 
-    $('.box-body').on('click', '.clear_radio', function () {
-        $('.orders_radio').prop('checked', false);
-    });
-
-    $('.box-body').on('click', '.clear_invoice_radio', function () {
-        $('.invoice_radio').prop('checked', false);
-    });
-
-    $('#save-button').click(function () {
-
-        var button = $(this);
-
-        if(button.attr('disabled') === 'disabled') {
-            alert('Идёт обработка накладной, подождите...');
-            return;
-        }
-
-        button.attr('disabled', 'disabled');
-        button.html('Сохранение...');
-
-        var params = {};
-        var create_order = true;
-        row_invoice = $('.invoice_radio:checked').parents('tr');
-        params.invoice_id = $(row_invoice).find('.invoice_radio:checked').val();
-        params.vendor_id = $(row_invoice).find('.view-relations').data('vendor_id');
-        params.order_id = $('.orders_radio:checked').val();
-
-        if (params.invoice_id === undefined) {
-            errorSwal('Необходимо выбрать накладную.');
-            button.removeAttr('disabled', false);
-            button.html('<i class="fa fa-save"></i> Сохранить');
-            return false;
-        }
-
-        if (params.vendor_id === undefined) {
-            errorSwal('Необходимо задать связь с поставщиком.');
-            button.removeAttr('disabled', false);
-            button.html('<i class="fa fa-save"></i> Сохранить');
-            return false;
-        }
-
-        if (params.order_id === undefined) {
-            create_order = false;
-            swal({
-                title: 'Будет создан новый заказ?',
-                text: "Вы уверены, что не хотите прикрепить накладную к существующему заказу.",
-                type: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Продолжить',
-                cancelButtonText: 'Отмена',
-            }).then(function (result) {
-                if(result.dismiss == 'cancel'){
-                    button.removeAttr('disabled', false);
-                    button.html('<i class="fa fa-save"></i> Сохранить');
-                    return false;
-                }
-                $.post('$url/create-order', params, function (data) {
-                if (data.status === true) {
-                    $('input[class="orders_radio"]').prop('checked', false);
-                    $('.catalog-index.orders').hide();
-                    $(row_invoice).find('.invoice_radio').remove();
-                    swal(
-                    'Накладная успешно привязана!',
-                    'Перейти в интеграцию: $list_integration',
-                    'success'
-                    );
-                } else {
-                    errorSwal(data.error)
-                }
-                button.removeAttr('disabled', false);
-                button.html('<i class="fa fa-save"></i> Сохранить');
-                });
-            });
-        }else{
-                if (create_order === true) {
-                    $.post('$url/create-order', params, function (data) {
-                        if (data.status === true) {
-                        $('input[class="orders_radio"]').prop('checked', false);
-                        $('.catalog-index.orders').hide();
-                        $(row_invoice).find('.invoice_radio').remove();
-                        swal(
-                        'Накладная успешно привязана!',
-                        'Перейти в интеграцию: $list_integration',
-                        'success'
-                        );
-                        } else {
-                        errorSwal(data.error)
-                        }
-                        button.removeAttr('disabled', false);
-                        button.html('<i class="fa fa-save"></i> Сохранить');
-                    });
-                }
-            }
-    });
-
-    function errorSwal(message) {
-        swal(
-            'Ошибка',
-            message,
-            'error'
-        )
-    }
+    
     
 JS;
 $this->registerJs($js);

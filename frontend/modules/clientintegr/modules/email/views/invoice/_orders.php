@@ -10,11 +10,12 @@
         <b>Выберите заказ для связи с накладной:</b>
     </div>
     <div class="col-md-5">
-        <?= \yii\helpers\Html::checkbox('show_all_waybills', $showAll, ['label' => "<span style='min-height: 20px; padding-left: 20px; margin-bottom: 0;'>" . Yii::t('app', 'franchise.views.anal.all_orders_four', ['ru' => 'Все заказы']) . "</span>", 'id' => 'alShowAllWaybills']); ?>
+        <?= \yii\helpers\Html::checkbox('show_all_waybills', $show_waybill, ['label' => "<span style='min-height: 20px; padding-left: 20px; margin-bottom: 0;'>" . Yii::t('app', 'franchise.views.anal.all_orders_four', ['ru' => 'Все заказы']) . "</span>", 'id' => 'alShowAllWaybills']); ?>
     </div>
 </div>
 <br>
 <?php
+
 use \common\models\Order;
 use common\models\OrderStatus;
 use yii\web\View;
@@ -22,9 +23,9 @@ use yii\helpers\Url;
 
 $columns = [
     [
-        'header' => 'выбрать / '.\yii\helpers\Html::tag('i', '', ['class' => 'fa fa-close clear_radio', 'style' => 'cursor:pointer;color:red']),
+        'header' => 'выбрать / ' . \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-close clear_radio', 'style' => 'cursor:pointer;color:red']),
         'format' => 'raw',
-        'value' => function($data) {
+        'value' => function ($data) {
             return \yii\helpers\Html::input('radio', 'order_id', $data->id, ['class' => 'orders_radio']);
         },
         'contentOptions' => ['class' => 'text-center'],
@@ -33,7 +34,7 @@ $columns = [
     [
         'attribute' => 'id',
         'format' => 'raw',
-        'value' => function($data){
+        'value' => function ($data) {
             return \yii\helpers\Html::a($data->id, Url::to(['/order/view', 'id' => $data->id]), ['class' => 'target-blank', 'data-pjax' => "0", 'target' => '_blank']);
         },
         'label' => '№',
@@ -45,30 +46,30 @@ $columns = [
     [
         'attribute' => 'vendor.name',
         'value' => 'vendor.name',
-        'label' => Yii::t('message', 'frontend.views.client.index.vendor', ['ru'=>'Поставщик']),
+        'label' => Yii::t('message', 'frontend.views.client.index.vendor', ['ru' => 'Поставщик']),
     ],
     [
         'attribute' => 'createdByProfile.full_name',
         'value' => 'createdByProfile.full_name',
-        'label' => Yii::t('message', 'frontend.views.client.index.created', ['ru'=>'Заказ создал']),
+        'label' => Yii::t('message', 'frontend.views.client.index.created', ['ru' => 'Заказ создал']),
     ],
     [
         'attribute' => 'acceptedByProfile.full_name',
         'value' => 'acceptedByProfile.full_name',
-        'label' => Yii::t('message', 'frontend.views.client.index.rec', ['ru'=>'Заказ принял']),
+        'label' => Yii::t('message', 'frontend.views.client.index.rec', ['ru' => 'Заказ принял']),
     ],
     [
         'attribute' => 'positionCount',
         'label' => 'Кол-во позиций',
-        'format'=>'raw',
+        'format' => 'raw',
         'value' => function ($data) {
             return $data->positionCount .
-                '<a class="ajax-popover" data-container="body" data-content="Loading..." '.
-                'data-html="data-html" data-placement="bottom" data-title="Состав Заказа" '.
-                'data-toggle="popover"  data-trigger="focus" data-url="'.
-                Url::base(true).Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/']).
-                '/getpopover" role="button" tabindex="0" '.
-                'data-original-title="" title="" data-model="'.$data->id.'"> '.
+                '<a class="ajax-popover" data-container="body" data-content="Loading..." ' .
+                'data-html="data-html" data-placement="bottom" data-title="Состав Заказа" ' .
+                'data-toggle="popover"  data-trigger="focus" data-url="' .
+                Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/']) .
+                '/getpopover" role="button" tabindex="0" ' .
+                'data-original-title="" title="" data-model="' . $data->id . '"> ' .
                 '<i class="fa fa-info-circle"></i></a>';
         }
 
@@ -76,24 +77,24 @@ $columns = [
     [
         'format' => 'raw',
         'attribute' => 'total_price',
-        'value' => function($data) {
+        'value' => function ($data) {
             return "<b>$data->total_price</b> " . $data->currency->symbol;
         },
-        'label' => Yii::t('message', 'frontend.views.client.index.sum', ['ru'=>'Сумма']),
+        'label' => Yii::t('message', 'frontend.views.client.index.sum', ['ru' => 'Сумма']),
     ],
     [
         'format' => 'raw',
         'attribute' => 'created_at',
-        'value' => function($data) {
+        'value' => function ($data) {
             $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
             return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
         },
-        'label' => Yii::t('message', 'frontend.views.client.index.created_at', ['ru'=>'Дата создания']),
+        'label' => Yii::t('message', 'frontend.views.client.index.created_at', ['ru' => 'Дата создания']),
     ],
     [
         'format' => 'raw',
         'attribute' => 'status',
-        'value' => function($data) {
+        'value' => function ($data) {
             switch ($data->status) {
                 case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
                 case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
@@ -112,7 +113,7 @@ $columns = [
             }
             return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>'; //<i class="fa fa-circle-thin"></i>
         },
-        'label' => Yii::t('message', 'frontend.views.client.index.status', ['ru'=>'Статус']),
+        'label' => Yii::t('message', 'frontend.views.client.index.status', ['ru' => 'Статус']),
     ]
 ];
 ?>
@@ -164,12 +165,12 @@ $("[data-toggle='popover']").popover({
 
 SCRIPT;
 // Register tooltip/popover initialization javascript
-$this->registerJs($js,View::POS_END);
+$this->registerJs($js, View::POS_END);
 
 $customJs = <<< JS
  $('#alShowAllWaybills').on('click', function(e) {
      var checked = $(this).prop('checked');
-     $.get('$url/get-orders', {
+     $.get('$url/get-orders-torg12', {
                     OrderSearch: {vendor_search_id: $vendor_id, vendor_id: $vendor_id},
                     invoice_id:"$invoice_id",
                     show_waybill: checked
@@ -212,7 +213,7 @@ $('.ajax-popover').click(function() {
   }
 });
 SCRIPT;
-$this->registerJs($js,View::POS_END);
+$this->registerJs($js, View::POS_END);
 ?>
 <?php
 $js = <<< 'SCRIPT'
@@ -255,7 +256,7 @@ $('.ajax-popover').click(function() {
 })
 SCRIPT;
 // Register tooltip/popover initialization javascript
-$this->registerJs($js,View::POS_END);
+$this->registerJs($js, View::POS_END);
 ?>
 
 

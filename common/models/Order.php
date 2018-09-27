@@ -30,6 +30,7 @@ use api\common\models\iiko\iikoDicconst;
  * @property string $discount
  * @property integer $discount_type
  * @property integer $currency_id
+ * @property string $waybill_number
  * @property integer $service_id
  * @property string $status_updated_at
  * @property string $edi_order
@@ -574,7 +575,7 @@ class Order extends \yii\db\ActiveRecord
             }
         }
         if ($this->status == OrderStatus::STATUS_DONE) {
-                AutoWaybillHelper::processWaybill($this->id);
+            AutoWaybillHelper::processWaybill($this->id);
         }
 
     }
@@ -671,7 +672,7 @@ class Order extends \yii\db\ActiveRecord
     {
         return $this->hasOne(OrderAssignment::className(), ['order_id' => 'id']);
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */

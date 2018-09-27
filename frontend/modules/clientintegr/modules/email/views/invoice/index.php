@@ -466,7 +466,7 @@ $js = <<<JS
                         }, function (data) {
                             console.log(idnumber);
                             $('#but'+idnumber).html('<i>'+selected_name+'</i>');
-                            $('#id'+idnumber).attr('data-vendor',selectd);
+                            $('#way'+idnumber).attr('data-vendor',selectd);
                             $('#rbutton'+idnumber).html('<a href="#" class="btn btn-secondary btn-lg invoice_radio" role="button" aria-disabled="true" id="'+idnumber+'">☐</a>');
                             radio_column1();
                         });

@@ -49,10 +49,9 @@ class VetisWaybill extends WebApi
         //Отсекаем группы, которые отдавали
         if (!empty($groups)) {
             $in = [];
-            foreach (array_keys($groups) as $id_group => $v) {
+            foreach (array_keys($groups) as $id_group) {
                 $in = (int)$id_group;
             }
-
             $dataProvider->query->andWhere([
                 'or',
                 'o.id IS NULL',

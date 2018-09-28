@@ -363,6 +363,9 @@ $this->registerJs(
                           //  'responsive' => false,
                             'summary' => '',
                             'pjax' => true,
+                            'pjaxSettings' => [
+                                'options' => ['timeout' => 30000, 'scrollTo' => true, 'enablePushState' => false  ]
+                            ],
                             'panel' => [
                                 'type' => GridView::TYPE_DEFAULT,
                                 'heading' => false,

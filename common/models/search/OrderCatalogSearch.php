@@ -139,7 +139,6 @@ class OrderCatalogSearch extends \yii\base\Model
                " . $where . "
                AND (cbg.status = 1 AND cbg.deleted = 0)
         ) as c WHERE id != 0 " . $where_all . " group by c.id";
-
         $dataProvider = new SqlDataProvider([
             'sql' => $sql,
             'params' => $params_sql,

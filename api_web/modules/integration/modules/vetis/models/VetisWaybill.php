@@ -52,7 +52,7 @@ class VetisWaybill extends WebApi
             foreach (array_keys($groups) as $id_group) {
                 $in = (int)$id_group;
             }
-            $dataProvider->query->andWhere([
+            $dataProvider->query->andFilterWhere([
                 'or',
                 'o.id IS NULL',
                 ['NOT IN', 'o.id', $in]

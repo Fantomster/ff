@@ -62,6 +62,20 @@ class LicenseService extends \yii\db\ActiveRecord
         ];
     }
 
+
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
+    }
+
+
     /**
      * @return \yii\db\ActiveQuery
      */

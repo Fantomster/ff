@@ -22,8 +22,8 @@ class m180928_064927_create_license_service_table extends Migration
             'id' => $this->primaryKey()->comment('Уникальный ID'),
             'license_id' => $this->integer()->comment('Указатель на ID лицензии'),
             'service_id' => $this->integer()->comment('Указатель на ID сервиса'),
-            'created_at' => $this->timestamp()->comment('Дата создания'),
-            'updated_at' => $this->timestamp()->comment('Дата обновления')
+            'created_at' => $this->timestamp()->null()->comment('Дата создания'),
+            'updated_at' => $this->timestamp()->null()->comment('Дата обновления')
         ]);
 
         $this->addForeignKey('license_id', 'license_service', 'license_id', 'license', 'id', 'CASCADE');

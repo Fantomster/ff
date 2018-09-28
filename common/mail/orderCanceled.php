@@ -65,3 +65,4 @@ if ($senderIsClient && empty($order->comment)) {
         </td>
     </tr>
 </table>
+<?= $this->render("_order_footer") ?>

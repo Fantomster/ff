@@ -165,3 +165,4 @@ if (!empty($lastMessage)) {
         </tr>
     </table>
 <?php } ?>
+<?= $this->render("_order_footer") ?>

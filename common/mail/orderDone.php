@@ -68,3 +68,4 @@ if (!$senderIsClient && !$self) {
         </td>
     </tr>
 </table>
+<?= $this->render("_order_footer") ?>

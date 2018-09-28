@@ -56,3 +56,4 @@ if ($recipientIsClient) {
         </td>
     </tr>
 </table>
+<?= $this->render("_order_footer") ?>

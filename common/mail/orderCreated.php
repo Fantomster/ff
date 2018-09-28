@@ -138,3 +138,4 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
         </td>
     </tr>
 </table>
+<?= $this->render("_order_footer") ?>

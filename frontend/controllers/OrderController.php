@@ -1125,6 +1125,8 @@ class OrderController extends DefaultController
             if ($order) {
                 if (Yii::$app->request->post("comment")) {
                     $order->comment = Yii::$app->request->post("comment");
+                } else {
+                    $order->comment = '';
                 }
                 $order->status = ($initiator->type_id == Organization::TYPE_RESTAURANT) ? OrderStatus::STATUS_CANCELLED : OrderStatus::STATUS_REJECTED;
                 $systemMessage = $initiator->name . Yii::t('message', 'frontend.controllers.order.cancelled_order', ['ru' => ' отменил заказ!']);
@@ -1798,23 +1800,23 @@ class OrderController extends DefaultController
                         $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order_three', ['ru' => ' получил заказ!']);
                         $order->status = OrderStatus::STATUS_DONE;
                         $order->actual_delivery = gmdate("Y-m-d H:i:s");
-                        $this->sendOrderDone($order->createdBy, $order);
+                        $this->sendOrderDone($this->currentUser, $order);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
                         $order->status = OrderStatus::STATUS_PROCESSING;
                         $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.confirm_order', ['ru' => ' подтвердил заказ!']);
-                        $this->sendOrderProcessing($order->client, $order);
+                        $this->sendOrderProcessing($this->currentUser, $order);
                         $edit = true;
                     } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $order->status == OrderStatus::STATUS_PROCESSING)) {
                         $systemMessage = $order->vendor->name . Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
                         $order->accepted_by_id = $user_id;
                         $order->status = OrderStatus::STATUS_PROCESSING;
                         $edit = true;
-                        $this->sendOrderProcessing($order->vendor, $order);
+                        $this->sendOrderProcessing($this->currentUser, $order);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == OrderStatus::STATUS_PROCESSING)) {
                         $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order_four', ['ru' => ' получил заказ!']);
                         $order->status = OrderStatus::STATUS_DONE;
                         $order->actual_delivery = gmdate("Y-m-d H:i:s");
-                        $this->sendOrderDone($order->createdBy, $order);
+                        $this->sendOrderDone($this->currentUser, $order);
                     }
                     break;
             }
@@ -1841,7 +1843,7 @@ class OrderController extends DefaultController
         $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order_five', ['ru' => ' получил заказ!']);
         $order->status = OrderStatus::STATUS_DONE;
         $order->actual_delivery = gmdate("Y-m-d H:i:s");
-        $this->sendOrderDone($order->createdBy, $order);
+        $this->sendOrderDone($this->currentUser, $order);
 
         if ($order->save()) {
             $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, false);

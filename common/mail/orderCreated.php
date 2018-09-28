@@ -1,13 +1,12 @@
 <?php
 
-use yii\helpers\Url;
 use common\models\Organization;
 use common\helpers\MailHelper;
 use common\models\Role;
 
 $currencySymbol = $order->currency->symbol;
 $senderIsClient = ($senderOrg->type_id == Organization::TYPE_RESTAURANT);
-$recipientIsClient = ($recipient->organization->type_id == Organization::TYPE_RESTAURANT) && ($recipient->organization_id == $senderOrg->id);
+$recipientIsClient = ($recipient->organization->type_id == Organization::TYPE_RESTAURANT);
 $recipientIsFranchisee = isset($recipient->role_id) && in_array($recipient->role_id, [Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_LEADER, Role::ROLE_FRANCHISEE_MANAGER]);
 $self = MailHelper::isSelf($senderOrg, $recipient);
 $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['ru' => "Ресторан"]) : Yii::t('app', 'common.mail.order_created.vendor', ['ru' => "Поставщик"]);
@@ -69,7 +68,7 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
                                     <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;font-weight: 700;color: #000000;"><?= Yii::t('app', 'common.mail.order_processing.order_no', ['ru' => 'Заказ №']) . $order->id ?></span>
                                 </td>
                                 <td colspan="1" valign="bottom" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #8c8f8d;">
-                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #8c8f8d;line-height: 1.7;"><?= Yii::$app->formatter->asDatetime($order->created_at, "php:d.m.Y, H:i") ?></span>
+                                    <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #8c8f8d;line-height: 1.7;"><?= $order->getFormattedCreationDate() ?></span>
                                 </td>
                             </tr>
                             <tr>
@@ -89,7 +88,7 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
                                 </td>
                                 <td valign="top" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 600;color: #8c8f8d;">
                                     <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 600;color: #8c8f8d;">
-                                        <?= Yii::t('app', 'common.mail.bill.discount', ['ru' => 'Скидка:']) ?> <b style="font-size: 16px;color: #000000;line-height: 1;"><?= $order->discount ? $order->getFormattedDiscount() : 0 ?></b>
+<?= Yii::t('app', 'common.mail.bill.discount', ['ru' => 'Скидка:']) ?> <b style="font-size: 16px;color: #000000;line-height: 1;"><?= $order->discount ? $order->getFormattedDiscount() : 0 ?></b>
                                     </span>
                                 </td>
                             </tr>
@@ -107,23 +106,23 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
                         </table>
                     </td>
                     <td valign="top" style="padding: 16px 20px 0 0;">
-                        <?= $recipientIsClient ? $this->render("_new_client", compact("order")) : $this->render("_new_vendor", compact("order")) ?>
+<?= $recipientIsClient ? $this->render("_new_client", compact("order")) : $this->render("_new_vendor", compact("order")) ?>
                     </td>
                 </tr>
-                <?php if (!empty($order->comment)) { ?>
+<?php if (!empty($order->comment)) { ?>
                     <tr>
                         <td colspan="4" valign="top" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 18px;font-weight: 700;color: #000000;padding: 0 20px 20px;">
                             <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 18px;font-weight: 700;color: #000000;"><?= Yii::t('message', 'frontend.views.request.order_comment', ['ru' => 'Комментарий к заказу']) ?></span>
                         </td>
                     </tr>
-                <?php } ?>
-                    <tr>
-                        <td colspan="4" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-style: italic; color: #8c8f8d; padding: 0 20px 26px;">
-                            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-style: italic; color: #8c8f8d;">
-                                <?= $order->comment ?>
-                            </span>
-                        </td>
-                    </tr>
+<?php } ?>
+                <tr>
+                    <td colspan="4" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-style: italic; color: #8c8f8d; padding: 0 20px 26px;">
+                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-style: italic; color: #8c8f8d;">
+<?= $order->comment ?>
+                        </span>
+                    </td>
+                </tr>
             </table>
         </td>
     </tr>
@@ -132,97 +131,7 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
             <table cellpadding="0" cellspacing="0" border="0" width="680" style="max-width: 680px; min-width: 320px;">
                 <tr>
                     <td valign="top">
-                        <?= $this->render("_order-grid", compact("dataProvider", "order")) ?>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
-<!-- FOOTER -->
-<table cellpadding="0" cellspacing="0" border="0" width="100%" style="min-width: 340px;line-height: normal;background: #f0f4f2;border-top: 2px solid #f0f4f2;">
-    <tr>
-        <td align="center" valign="top">
-            <table  cellpadding="0" cellspacing="0" border="0" width="680" style="background: #ffffff; max-width: 680px; min-width: 320px;">
-                <tr>
-                    <td align="center" valign="top">
-                        <table cellspacing="0" cellspacing="0" width="500" style="background: #ffffff; max-width: 500px;">
-                            <tr>
-                                <td height="20"></td>
-                            </tr>
-                            <tr>
-                                <td align="center" valign="middle" width="28">
-                                    <a href="tel:84994041018" target="_blank" style="text-decoration: none;">
-                                        <img src="https://mixcart.ru/img-host/phone.png" alt="Phone" width="18" height="18" border="0" style="border:0; outline:none; text-decoration:none; display:block;">
-                                    </a>
-                                </td>
-                                <td align="left" valign="middle" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
-                                    <a href="tel:84994041018" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;text-decoration: none;color: #2a2c2e;">
-                                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;"><?= Yii::t('app', 'common.mail.layouts.phone', ['ru' => '8-499-404-10-18']) ?></span>
-                                    </a>
-                                </td>
-                                <td align="center" valign="middle" width="33">
-                                    <a href="mailto:info@mixcart.ru" target="_blank" style="text-decoration: none;">
-                                        <img src="https://mixcart.ru/img-host/mail.png" alt="Mail" width="24" height="18" border="0" style="border:0; outline:none; text-decoration:none; display:block;">
-                                    </a>
-                                </td>
-                                <td align="left" valign="middle" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
-                                    <a href="mailto:info@mixcart.ru" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;text-decoration: none;color: #2a2c2e;">
-                                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;"><?= Yii::t('app', 'common.mail.layouts.infoemail') ?></span>
-                                    </a>
-                                </td>
-                                <td align="center" valign="middle" width="30">
-                                    <a href="https://mixcart.ru/" target="_blank" style="text-decoration: none;">
-                                        <img src="https://mixcart.ru/img-host/web.png" alt="Web" width="21" height="21" border="0" style="border:0; outline:none; text-decoration:none; display:block;">
-                                    </a>
-                                </td>
-                                <td align="left" valign="middle" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
-                                    <a href="<?= Yii::$app->params['staticUrl'][Yii::$app->language]['home'] ?>" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;text-decoration: none;color: #2a2c2e;">
-                                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;"><?= Yii::$app->params['shortHome'] ?></span>
-                                    </a>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
-<table cellpadding="0" cellspacing="0" border="0" width="100%" style="min-width: 200px;line-height: normal;background: #f0f4f2;">
-    <tr>
-        <td align="center" valign="top">
-            <table  cellpadding="0" cellspacing="0" border="0" width="680" height="70" style="max-width: 680px; background: #ffffff;">
-                <tr>
-                    <td align="center" valign="middle">
-                        <table cellspacing="0" cellspacing="0" width="70" style="max-width: 70px;">
-                            <tr>
-                                <td align="left">
-                                    <a href="https://www.facebook.com/mixcartru/" target="_blank"><img src="https://mixcart.ru/img-host/facebook.png" alt="Facebook Logo" width="25" height="25" style="border:0; outline:none; text-decoration:none;"></a>
-                                </td>
-                                <td align="right">
-                                    <a href="https://www.instagram.com/mixcart_ru/?hl=ru" target="_blank"><img src="https://mixcart.ru/img-host/instagram.png" alt="Facebook Logo" width="25" height="25" style="border:0; outline:none; text-decoration:none;"></a>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
-<table cellpadding="0" cellspacing="0" border="0" width="100%" style="min-width: 340px;line-height: normal;background: #f0f4f2;padding: 0 0 16px;">
-    <tr>
-        <td align="center" valign="top">
-            <table  cellpadding="0" cellspacing="0" border="0" width="680" style="border-radius: 0 0 4px 4px;background: #ffffff; max-width: 680px; min-width: 320px;">
-                <tr>
-                    <td align="center" valign="middle" height="20" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;">
-                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;"><a href="https://mixcart.ru/" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;text-decoration: underline;">Отписатьтся</a> от этой рассылки</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td align="center" valign="middle" height="70" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;">
-                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;">&copy; 2018 MixCart — ООО «Онлайн Маркет»</span>
+<?= $this->render("_order-grid", compact("dataProvider", "order")) ?>
                     </td>
                 </tr>
             </table>

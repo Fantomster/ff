@@ -85,7 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         //Добавляем сообщение
                         if($reason !== null) {
                             $html .= '<div class="email-error text-sm alert alert-danger" >';
-                            $html .= '<b>' . \Yii::t('app', 'Не удалось отправить письмо') . '</b><br>';
+                            $html .= '<b>' . \Yii::t('app', 'Не удалось отправить письмо') . '</b> ' . $lastFail->created_at . '<br>';
                             $html .= \Yii::t('app', 'Причина') . ':' . $reason;
                             $html .= '</div>';
                         }

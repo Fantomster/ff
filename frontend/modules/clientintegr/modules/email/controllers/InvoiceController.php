@@ -165,6 +165,7 @@ class InvoiceController extends Controller
 
             //Создаём товары для накладных, и получаем их модели
             $content = $invoice->getBaseGoods($vendor);
+            $temp = $invoice->addProductsFromTorg12InCatalogGoods($vendor);
             if (empty($content)) {
                 throw new Exception('Содержимое накладной не может быть пустым.');
             }

@@ -1569,7 +1569,7 @@ class OrderController extends DefaultController
                         $product->quantity = $position['quantity'];
                     }
                     if ($priceChanged) {
-                        $message .= "<li style='{li_style}'>" . Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} {currencySymbol} на ", 'prod' => $product->product_name, 'productPrice' => $product->price, 'currencySymbol' => $currencySymbol]) . $position['price'] . $currencySymbol  . "</li>";
+                        $message .= "<li style='{li_style}'>" . Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} {currencySymbol} на ", 'prod' => $product->product_name, 'productPrice' => $product->price, 'currencySymbol' => $currencySymbol]) . " " . $position['price'] . " " . $currencySymbol  . "</li>";
                         $product->price = $position['price'];
                         if ($user->organization->type_id == Organization::TYPE_RESTAURANT && !$order->vendor->hasActiveUsers()) {
                             $prodFromCat = $product->getProductFromCatalog();
@@ -1623,7 +1623,7 @@ class OrderController extends DefaultController
                         $order->discount = abs($discount['discount']);
                         $discountValue = $order->discount . "%";
                     }
-                    $message .= "<li style='{li_style}'>" . Yii::t('message', 'frontend.controllers.order.made_discount', ['ru' => "<br/> сделал скидку на заказ № {order_id} в размере:", 'order_id' => $order->id]) . $discountValue . "</li>";
+                    $message .= "<li style='{li_style}'>" . Yii::t('message', 'frontend.controllers.order.made_discount', ['ru' => "<br/> сделал скидку на заказ № {order_id} в размере:", 'order_id' => $order->id]) . " " . $discountValue . "</li>";
                     $orderChanged = 1;
                 } else {
                     $message .= "<li style='{li_style}'>" . Yii::t('message', 'frontend.controllers.order.not_changed', ['ru' => "<br/> изначальная скидка сохранена для новых условий заказа № "]) . $order->id . "</li>";

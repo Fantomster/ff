@@ -13,6 +13,10 @@ class m180926_120700_translations_for_new_letters extends Migration
         'common.mail.order.delivery_date' => 'Дата доставки',
         'common.mail.order_created.vendor_new' => 'Вам поступил новый заказ. Пожалуйста, просмотрите заказ и скорректируйте его при необходимости.',
         'common.mail.order_created.client_new' => 'Вы создали новый заказ. Пожалуйста, просмотрите заказ и скорректируйте его при необходимости.',
+        'common.mail.order_changed.self_title' => 'Вы изменили детали заказа №',
+        'common.mail.order_changed.another_party_title' => '{org_name} изменил детали заказа №',
+        'common.mail.order_changed.string1' => 'Измененный заказ вы можете просмотреть ниже.',
+        'common.mail.order_changed.string2' => 'Информация об изменениях была отправлена поставщику по электронной почте и SMS.',
     ];
 
     /**

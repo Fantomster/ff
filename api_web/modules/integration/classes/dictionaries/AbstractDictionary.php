@@ -10,6 +10,7 @@ namespace api_web\modules\integration\classes\dictionaries;
 
 
 use api_web\components\WebApi;
+use api_web\exceptions\ValidationException;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
 use common\models\OuterProduct;
@@ -103,7 +104,7 @@ class AbstractDictionary extends WebApi
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
-                $search->andWhere(['like', 'name', $request['search']['name']]);
+                $search->andWhere(['like', '`outer_agent`.name', $request['search']['name']]);
             }
         }
 

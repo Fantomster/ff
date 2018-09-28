@@ -308,6 +308,8 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             $client_id = "IF(m.product_id in (select product_id from all_map where service_id = 2 and org_id = $client_id), $client_id, $mainOrg)";
         }
 
+        // Получаем список складов, чтобы понять сколько надо делать накладных
+
         $db = Yii::$app->db_api;
         $sql = ' SELECT m.store_rid FROM `' . $dbName . '`.`order_content` o ' .
             ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 2 AND m.org_id in (' . $client_id .') '.

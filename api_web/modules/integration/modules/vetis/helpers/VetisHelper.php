@@ -201,14 +201,20 @@ class VetisHelper
                 ]
             )
             ->from('order o')
-            ->leftJoin('order_content oc', 'oc.order_id = o.id')
-            ->leftJoin('organization vendor', 'o.vendor_id = vendor.id')
+            ->innerJoin('order_content oc', 'oc.order_id = o.id')
+            ->innerJoin('organization vendor', 'o.vendor_id = vendor.id')
             ->leftJoin('`' . $tableName . '`.merc_vsd m', 'm.uuid = oc.merc_uuid COLLATE utf8_unicode_ci')
             ->where(['o.id' => $id])
             ->andWhere('oc.merc_uuid is not null')
             ->one(\Yii::$app->db);
 
-        $query['statuses'] = $this->getStatusForGroup($query['statuses']);
+        if (!is_null($query['statuses'])) {
+            $query['statuses'] = $this->getStatusForGroup($query['statuses']);
+        }
+
+        if($query['count'] == 0) {
+            return null;
+        }
 
         return $query;
     }
@@ -266,10 +272,12 @@ class VetisHelper
             ];
         } else {
             $status = current($statuses);
-            return [
-                'id'   => $status,
-                'text' => \Yii::t('api_web', self::$ordersStatuses[$status])
-            ];
+            if ($status) {
+                return [
+                    'id'   => $status,
+                    'text' => \Yii::t('api_web', self::$ordersStatuses[$status])
+                ];
+            }
         }
     }
 
@@ -304,8 +312,6 @@ class VetisHelper
         $query = ArrayHelper::index($query, 'uuid');
 
         $models = ArrayHelper::merge($models, $query);
-
-        ArrayHelper::multisort($models, 'date_doc', SORT_DESC);
 
         return $models;
     }

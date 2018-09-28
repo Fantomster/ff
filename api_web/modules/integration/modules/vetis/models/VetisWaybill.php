@@ -48,10 +48,15 @@ class VetisWaybill extends WebApi
         $dataProvider = $search->search($params);
         //Отсекаем группы, которые отдавали
         if (!empty($groups)) {
+            $in = [];
+            foreach (array_keys($groups) as $id_group => $v) {
+                $in = (int)$id_group;
+            }
+
             $dataProvider->query->andWhere([
                 'or',
                 'o.id IS NULL',
-                ['NOT IN', 'o.id', array_keys($groups)]
+                ['NOT IN', 'o.id', $in]
             ]);
         }
         //Супер пагинация
@@ -74,7 +79,12 @@ class VetisWaybill extends WebApi
         $groups = ArrayHelper::merge($groups, $documentsInRows);
         //Собираем подробную информацию о группах
         foreach ($groups as $group_id => &$v) {
-            $v = $this->helper->getGroupInfo((int)$group_id);
+            $info = $this->helper->getGroupInfo((int)$group_id);
+            if (is_null($info)) {
+                unset($groups[$group_id]);
+                continue;
+            }
+            $v = $info;
         }
         //Добираем необходимые ВСД для групп
         $attachGroup = array_keys($documentsInRows);

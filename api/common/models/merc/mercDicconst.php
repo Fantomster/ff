@@ -102,8 +102,7 @@ class mercDicconst extends \yii\db\ActiveRecord
             }
             catch (\Exception $e)
             {
-                var_dump($e->getMessage(), $e->getTraceAsString()); die();
-                //return false;
+                return false;
             }
         }
 

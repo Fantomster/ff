@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'raw',
                 'value' => function($data) {
-                    switch($data->status) {
+                    switch ($data->status) {
                         case 0: return 'Не активен';
                             break;
                         case 1: return 'Активен';
@@ -68,28 +68,44 @@ $this->params['breadcrumbs'][] = $this->title;
                         $html .= '<span class="badge pull-right">' . \Yii::t('app', 'Email в черном списке') . '</span>';
                     }
 
-                    //Находим последний фэйл по этому емэйлу
-                    if ($lastFail = $model->getEmailLastFail()) {
-                        $body = json_decode($lastFail->body, true);
-                        $reason = null;
-                        switch ($body['notificationType']) {
-                            case 'Complaint':
-                                $reason = $body['complaint']['complaintFeedbackType'];
-                                break;
-                            case 'Bounce':
-                                if (isset($body['bounce']['bouncedRecipients'][0])) {
-                                    $reason = isset($body['bounce']['bouncedRecipients'][0]['diagnosticCode']) ? $body['bounce']['bouncedRecipients'][0]['diagnosticCode'] : 'неизвестно';
-                                }
-                                break;
-                        }
-                        //Добавляем сообщение
-                        if($reason !== null) {
-                            $html .= '<div class="email-error text-sm alert alert-danger" >';
-                            $html .= '<b>' . \Yii::t('app', 'Не удалось отправить письмо') . '</b> ' . $lastFail->created_at . '<br>';
-                            $html .= \Yii::t('app', 'Причина') . ':' . $reason;
-                            $html .= '</div>';
-                        }
+//                    //Находим последний фэйл по этому емэйлу
+//                    if ($lastFail = $model->getEmailLastFail()) {
+//                        $body = json_decode($lastFail->body, true);
+//                        $reason = null;
+//                        switch ($body['notificationType']) {
+//                            case 'Complaint':
+//                                $reason = $body['complaint']['complaintFeedbackType'];
+//                                break;
+//                            case 'Bounce':
+//                                if (isset($body['bounce']['bouncedRecipients'][0])) {
+//                                    $reason = isset($body['bounce']['bouncedRecipients'][0]['diagnosticCode']) ? $body['bounce']['bouncedRecipients'][0]['diagnosticCode'] : 'неизвестно';
+//                                }
+//                                break;
+//                        }
+//                        //Добавляем сообщение
+//                        if($reason !== null) {
+//                            $html .= '<div class="email-error text-sm alert alert-danger" >';
+//                            $html .= '<b>' . \Yii::t('app', 'Не удалось отправить письмо') . '</b> ' . $lastFail->created_at . '<br>';
+//                            $html .= \Yii::t('app', 'Причина') . ':' . $reason;
+//                            $html .= '</div>';
+//                        }
+//                    }
+                    $email = $model->lastEmail;
+                    $message = $email->statusText . " " . Yii::$app->formatter->asTime($email->updated_at, "php:j M Y, H:i:s");
+                    $class = 'list-group-item-success';
+
+                    if ($email->status == common\models\EmailQueue::STATUS_FAILED) {
+                        $message = 'ошибка при отправке почты ' . Yii::$app->formatter->asTime($email->updated_at, "php:j M Y, H:i:s");
+                        $class = 'list-group-item-warning';
                     }
+
+                    if (\common\models\notifications\EmailBlacklist::findOne(['email' => $email->to])) {
+                        $message = 'в черном списке';
+                        $class = 'list-group-item-danger';
+                    }
+
+                    $html .= "<div style='padding-top: 20px;'>Последнее письмо</div>";
+                    $html .= Html::tag('div', $message . '.<br>' . $email->subject, ['class' => 'list-group-item email-error ' . $class]);
 
                     return $html;
                 }
@@ -135,7 +151,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'raw',
                 'value' => function($data) {
-                    switch($data->profile->gender) {
+                    switch ($data->profile->gender) {
                         case 0: return 'Не указан';
                             break;
                         case 1: return 'Мужской';
@@ -149,7 +165,10 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'raw',
                 'value' => function($data) {
-                    if($data->profile->job_id==0) return 'Не указана'; else return \common\models\Job::getJobById($data->profile->job_id)['name_job'];
+                    if ($data->profile->job_id == 0)
+                        return 'Не указана';
+                    else
+                        return \common\models\Job::getJobById($data->profile->job_id)['name_job'];
                 },
                 'label' => 'Должность',
             ],
@@ -161,7 +180,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'raw',
                 'value' => function($data) {
-                    switch($data->sms_subscribe) {
+                    switch ($data->sms_subscribe) {
                         case 0: return 'Не указано';
                             break;
                         case 1: return 'Согласен';
@@ -175,7 +194,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'raw',
                 'value' => function($data) {
-                    switch($data->subscribe) {
+                    switch ($data->subscribe) {
                         case 0: return 'Не указано';
                             break;
                         case 1: return 'Согласен';

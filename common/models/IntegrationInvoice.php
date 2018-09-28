@@ -226,7 +226,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
          * @var $row IntegrationInvoiceContent
          */
         //Ищем товары у поставщика по наименованию
-        //Если не нашли, создаем
+        //Если не нашли, создаём
         foreach ($this->content as $row) {
             $model = CatalogBaseGoods::find()->where(['supp_org_id' => $vendor->id])
                 ->andWhere('product LIKE :product', [':product' => $row->title])
@@ -257,6 +257,54 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         }
 
         return $models;
+    }
+
+    /**
+     * Записывает товарные позиции из накладной ТОРГ-12 в таблицу catalog_goods
+     * @param Organization $vendor
+     * @return boolean
+     * @throws Exception
+     */
+    public function addProductsFromTorg12InCatalogGoods(Organization $vendor)
+    {
+        /**
+         * @var $row IntegrationInvoiceContent
+         */
+        //Ищем товары у поставщика по наименованию в специально назначенном для ресторана каталоге
+        //Если не нашли, создаём
+        /**
+         * @var $user User
+         */
+        $user = \Yii::$app->user->identity;
+        $rest_id = $user->organization_id;
+        $db = Yii::$app->db;
+        $query = 'SELECT `cat_id` FROM `relation_supp_rest` WHERE `rest_org_id` = ' . $rest_id . ' AND `supp_org_id` = ' . $vendor->id;
+        $catalogs = $db->createCommand($query)->queryAll();
+        if (empty($catalogs)) {
+            return false;
+        }
+        foreach ($this->content as $row) {
+            $model = CatalogBaseGoods::find()->where(['supp_org_id' => $vendor->id])
+                ->andWhere('product LIKE :product', [':product' => $row->title])
+                ->one();
+            foreach ($catalogs as $catalog) {
+                $model2 = CatalogGoods::find()->where(['cat_id' => $catalog['cat_id']])
+                    ->andWhere(['base_goods_id' => $model->id])
+                    ->one();
+
+                if (empty($model2)) {
+                    $model2 = new CatalogGoods();
+                    $model2->cat_id = $catalog['cat_id'];
+                    $model2->base_goods_id = $model->id;
+                    $model2->price = $row->price_nds;
+                    if (!$model2->save()) {
+                        throw new \yii\db\Exception(print_r($model2->getFirstErrors(), 1));
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
 }

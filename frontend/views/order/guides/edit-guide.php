@@ -113,6 +113,10 @@ $(document).on("click", ".remove-from-guide", function () {
 
 
 // -------------------------------------------------------------------------------------------
+$(document).on("click", ".btnSubmit", function () {
+     $($(this).data("target-form")).submit();
+});
+
 
 $(document).on("change", "#baseproductsearch-sort", function () {
     var sort = $(this).val();

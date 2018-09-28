@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 break;
                             case 'Bounce':
                                 if (isset($body['bounce']['bouncedRecipients'][0])) {
-                                    $reason = $body['bounce']['bouncedRecipients'][0]['diagnosticCode'];
+                                    $reason = isset($body['bounce']['bouncedRecipients'][0]['diagnosticCode']) ? $body['bounce']['bouncedRecipients'][0]['diagnosticCode'] : 'неизвестно';
                                 }
                                 break;
                         }

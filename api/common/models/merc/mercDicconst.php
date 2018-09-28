@@ -76,7 +76,7 @@ class mercDicconst extends \yii\db\ActiveRecord
 
     public static function getSetting($denom, $org = null)
     {
-        $iskl = ['hand_load_only','vetis_password'];
+        $iskl = ['hand_load_only'=> 0,'vetis_password' => ''];
         $model = self::findOne(['denom' => $denom]);
             if ($model) {
                 if (is_a(Yii::$app, 'yii\web\Application') && ($org == null)) {
@@ -84,8 +84,8 @@ class mercDicconst extends \yii\db\ActiveRecord
                 } else {
                     $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => $org]);
                 }
-                if (!empty($pConst) || (in_array($denom, $iskl))) {
-                    return $pConst->value;
+                if (isset($pConst) || (key_exists($denom, $iskl))) {
+                    return key_exists($denom, $iskl) ? $iskl[$denom] : $pConst->value;
                 } else {
                     throw new \Exception('Не заполнено свойство в настройках ' . $denom);
                 }

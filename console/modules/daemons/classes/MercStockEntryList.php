@@ -113,7 +113,7 @@ class MercStockEntryList extends MercDictConsumer
 
         FireBase::getInstance()->update([
             'mercury',
-            'operation' => 'MercVSDList',
+            'operation' => 'MercStockEntryList',
             'enterpriseGuid' => $this->data['enterpriseGuid'],
         ], [
             'update_date' => strtotime(gmdate("M d Y H:i:s")),

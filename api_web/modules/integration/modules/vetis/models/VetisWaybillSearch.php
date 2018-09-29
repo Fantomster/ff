@@ -38,7 +38,7 @@ class VetisWaybillSearch extends MercVsd
      */
     public function search($params)
     {
-        $query = (new VetisHelper())->getOrdersQueryVetis();
+        $query = (new VetisHelper())->getListQuery();
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -56,13 +56,13 @@ class VetisWaybillSearch extends MercVsd
                 $query->andFilterWhere(['like', 'm.product_name', $this->product_name]);
             } elseif ($key == 'acquirer_id') {
                 $enterprise_guid = mercDicconst::getSetting('enterprise_guid', $this->{$key});
-                $query->andWhere([
+                $query->andFilterWhere([
                     'OR',
                     ['m.recipient_guid' => $enterprise_guid],
                     ['m.sender_guid' =>  $enterprise_guid]
                 ]);
             } else {
-                $query->andWhere(['m.' . $key => $this->{$key}]);
+                $query->andFilterWhere(['m.' . $key => $this->{$key}]);
             }
         }
 

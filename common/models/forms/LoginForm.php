@@ -60,7 +60,7 @@ class LoginForm extends \amnah\yii2\user\models\forms\LoginForm {
             $user = new \api\modules\v1\modules\mobile\models\User();
             $user = $user::find();
             if ($this->module->loginEmail) {
-                $user->orWhere(["email" => $this->email]);
+                $user->orWhere(["email" => trim($this->email)]);
             }
             if ($this->module->loginUsername) {
                 $user->orWhere(["username" => $this->email]);

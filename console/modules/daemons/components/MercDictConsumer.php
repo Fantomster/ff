@@ -21,6 +21,8 @@ use yii\helpers\BaseStringHelper;
  */
 class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
 {
+    const DEFAULT_STEP = 1000;
+
     /**
      * Description
      * @var baseApi
@@ -93,10 +95,11 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
     public function getData()
     {
         $this->init();
-        $count = $this->request['listOptions']['offset'];
         $this->log('Load' . PHP_EOL);
         $error = 0;
         $list = null;
+        $offset = $this->request['listOptions']['offset'];
+        $step = $this->request['listOptions']['count'];
         try {
             do {
                 try {
@@ -108,9 +111,9 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                     //Выполняем запрос и обработку полученных данных
                     $response = $this->instance->sendRequest($this->method, $this->request);
                     $list = $response->{$this->listName};
-                    $count += $list->count;
-                    $this->log('Load ' . $count . ' / ' . $list->total . PHP_EOL);
-                    echo 'Load ' . $count . ' / ' . $list->total . PHP_EOL;
+                    $offset += $list->count;
+                    $this->log('Load ' . $offset. ' / ' . $list->total . PHP_EOL);
+                    echo 'Load ' . $offset. ' / ' . $list->total . PHP_EOL;
 
                     if ($list->count > 0) {
                         $result = $this->saveList($list->{$this->listItemName});
@@ -120,17 +123,36 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                     }
 
                     if ($list->count < $list->total) {
-                        $this->request['listOptions']['offset'] += $list->count;
+                        $this->request['listOptions']['offset'] += $step;
+                        $step = self::DEFAULT_STEP;
+                        $this->request['listOptions']['count'] = $step;
                     }
+                    $error = 0;
                 } catch (\Throwable $e) {
                     $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
                     mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
                     $error++;
                     if ($error == 3) {
+                        //throw new \Exception('Error operation');
+                        if ($step > 1) {
+                            $step = round($step / 2);
+                            $this->request['listOptions']['count'] = $step;
+                            //$this->request['listOptions']['offset'] += $this->request['listOptions']['count'];
+                        }
+                        else
+                        {
+                            $this->log('ERROR RECORD' . json_encode($this->request, true) . PHP_EOL);
+                            $step = self::DEFAULT_STEP;
+                            $this->request['listOptions']['count'] = $step;
+                            $this->request['listOptions']['offset'] += 1;
+                            $error = 0;
+                        }
+                    }elseif ($error > 3) {
                         throw new \Exception('Error operation');
                     }
                 }
-            } while ($list->total > ($list->count + $list->offset));
+              $total = $list->total ?? ($this->request['listOptions']['count'] + $this->request['listOptions']['offset'] +1);
+            } while ($total > ($this->request['listOptions']['count'] + $this->request['listOptions']['offset']));
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
             mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());

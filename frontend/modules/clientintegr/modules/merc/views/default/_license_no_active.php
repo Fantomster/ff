@@ -40,12 +40,12 @@ if (($lic->status_id==1) and ($timestamp_now>(strtotime($lic->td)))) $lic_merc=1
 <?php
 try {
     $enterpriseGuid = \api\common\models\merc\mercDicconst::getSetting('enterprise_guid');
-    $messageVSD = 'Время последнего обновления списка ВСД: ';
-    $messageStock = 'Время последнего обновления журнала входной продукции: ';
+    $messageVSD = 'Время последнего обновления списка ВСД (Следующее обновление будет произведено в течении 15 минут): ';
+    $messageStock = 'Время последнего обновления журнала входной продукции (Следующее обновление будет произведено в течении 15 минут): ';
     $customJs = <<< JS
         var refVSD = firebase.database().ref('/mercury/operation/MercVSDList/enterpriseGuid/$enterpriseGuid');
         refVSD.on("value", (snapshot) => {
-            if (typeof(snapshot.val()) == "undefined" || snapshot.val() == null || snapshot.val().length == 0 )
+            if (typeof(snapshot.val()) == "undefined" || snapshot.val() == null || snapshot.val().length == 0)
              {
                 $('#mercNotificationVsd').html('$messageVSD' + 'неизвестно');
             }
@@ -53,6 +53,10 @@ try {
              {
                 var now = new Date();
                 var timestamp = snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
+                if(isNaN(timestamp)) {
+                    $('#mercNotificationVsd').html('$messageVSD' + 'неизвестно');
+                    return;
+                }
                 now = new Date(timestamp);
                 var formatted =  ('0' + now.getDate()).substr(-2,2) + '.' + ('0' + (now.getMonth() + 1)).substr(-2,2) + '.' + now.getFullYear() + ' ' + ('0' + now.getHours()).substr(-2,2) + ":" + ('0' + now.getMinutes()).substr(-2,2) + ":" + ('0' + now.getSeconds()).substr(-2,2);
                 $('#mercNotificationVsd').html('$messageVSD' + formatted);    
@@ -61,7 +65,7 @@ try {
     });
         var refStock = firebase.database().ref('/mercury/operation/MercStockEntryList/enterpriseGuid/$enterpriseGuid');
         refStock.on("value", (snapshot) => {
-         if (typeof(snapshot.val()) == "undefined" || snapshot.val() == null || snapshot.val().length == 0 ) 
+         if (typeof(snapshot.val()) == "undefined" || snapshot.val() == null || snapshot.val().length == 0 || isNaN(snapshot.val())) 
           {
                 $('#mercNotificationStockEntry').html('$messageStock' + 'неизвестно');
         }
@@ -69,6 +73,10 @@ try {
          { 
             var now = new Date();
             var timestamp = snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
+             if(isNaN(timestamp)) {
+                    $('#mercNotificationVsd').html('$messageStock' + 'неизвестно');
+                    return;
+                }
             now = new Date(timestamp);
             var formatted =  ('0' + now.getDate()).substr(-2,2) + '.' + ('0' + (now.getMonth() + 1)).substr(-2,2) + '.' + now.getFullYear() + ' ' + ('0' + now.getHours()).substr(-2,2) + ":" + ('0' + now.getMinutes()).substr(-2,2) + ":" + ('0' + now.getSeconds()).substr(-2,2);
             $('#mercNotificationStockEntr').html('$messageStock' + formatted);    

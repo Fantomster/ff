@@ -26,7 +26,7 @@ use api_web\components\FireBase;
  */
 class MercVSDList extends MercDictConsumer
 {
-    public static $timeout = 60 * 5;
+    public static $timeout = 60 * 15;
     public static $timeoutExecuting = 60 * 60;
     private $result = true;
 
@@ -41,11 +41,11 @@ class MercVSDList extends MercDictConsumer
             $this->data = json_decode($this->queue->data_request, true);
             if (!isset($this->data)) {
                 $this->log('Not data for request' . PHP_EOL);
-                die('Not data for request' . PHP_EOL);
+                throw new \Exception('Not data for request');
             }
         } else {
             $this->log('Dictionaries are currently being updated' . PHP_EOL);
-            die('Dictionaries are currently being updated' . PHP_EOL);
+            throw new \Exception('Dictionaries are currently being updated');
         }
     }
 
@@ -86,15 +86,18 @@ class MercVSDList extends MercDictConsumer
                     if ($vetDocumentList->count < $vetDocumentList->total) {
                         $this->data['listOptions']['offset'] += $vetDocumentList->count;
                     }
+                    $error = 0;
                 } catch (\Throwable $e) {
                     $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
-                    mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
+                    //mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
                     $error++;
                     if ($error == 3) {
                         throw new \Exception('Error operation');
                     }
                 }
-            } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
+                $total = $vetDocumentList->total ?? ($this->request['listOptions']['count'] + $this->request['listOptions']['offset'] +1);
+                sleep(60);
+            } while ($total > ($this->request['listOptions']['count'] + $this->request['listOptions']['offset']));
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
             mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());

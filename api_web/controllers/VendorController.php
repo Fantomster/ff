@@ -15,7 +15,8 @@ class VendorController extends WebApiController
      * @var array
      */
     public $not_log_actions = [
-        'upload-main-catalog'
+        'upload-main-catalog',
+        'upload-personal-catalog'
     ];
 
     /**

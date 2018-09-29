@@ -300,9 +300,13 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
 
+        $client_id = self::getClientIDcondition($order->client_id, 'm.product_id');
+
+        // Получаем список складов, чтобы понять сколько надо делать накладных
+
         $db = Yii::$app->db_api;
         $sql = ' SELECT m.store_rid FROM `' . $dbName . '`.`order_content` o ' .
-            ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 2 AND m.org_id = ' . $order->client_id .
+            ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 2 AND m.org_id in (' . $client_id .') '.
             ' WHERE o.order_id = ' . $order_id .
             ' GROUP BY store_rid';
 
@@ -342,6 +346,19 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         return $res;
 
+    }
+
+    private static function getClientIDcondition($org_id, $product_field)
+    {
+        $client_id = $org_id;
+        $mainOrg = iikoService::getMainOrg($org_id);
+
+        if ($mainOrg != $org_id) {
+            $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+            $client_id = "IF($product_field in (select product_id from $dbName.all_map where service_id = 2 and org_id = $client_id), $client_id, $mainOrg)";
+        }
+
+        return $client_id;
     }
 
     public static function exportWaybill($order_id)
@@ -394,19 +411,20 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
-        if ($waybillMode !== '0') {
 
+        if ($waybillMode !== '0') {
+            $client_id = self::getClientIDcondition($this->org, '`' . $dbName . '`.all_map.product_id');
             if ($this->store_id === null) {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
                     ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2')
-                    ->andWhere('`' . $dbName . '`.all_map.store_rid is null')
+                    ->andWhere('`' . $dbName . '`.all_map.store_rid is null and `' . $dbName . '`.all_map.org_id in (' . $client_id .')')
                     ->all();
             } else {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
                     ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2')
-                    ->andWhere('`' . $dbName . '`.all_map.store_rid =' . $this->store_id)
+                    ->andWhere('`' . $dbName . '`.all_map.store_rid =' . $this->store_id.' and `' . $dbName . '`.all_map.org_id in (' . $client_id .')')
                     ->all();
             }
         } else {
@@ -427,7 +445,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 $wdmodel->defquant = $record->quantity;
                 $wdmodel->defsum = round($record->price * $record->quantity, 2);
                 $wdmodel->vat = $taxVat;
-                $wdmodel->org = $this->org; //iikoService::getMainOrg($this->org);
+                $wdmodel->org = iikoService::getMainOrg($this->org);
                 $wdmodel->koef = 1;
                 // New check mapping
                 $client_id = $this->org;

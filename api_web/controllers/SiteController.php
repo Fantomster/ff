@@ -33,17 +33,23 @@ class SiteController extends Controller
             Yii::getAlias('@api_web/controllers/ChatController.php'),
             Yii::getAlias('@api_web/controllers/RequestController.php'),
             Yii::getAlias('@api_web/controllers/NotificationController.php'),
-            Yii::getAlias('@api_web/controllers/EdoController.php'),
+            Yii::getAlias('@api_web/controllers/EdiController.php'),
             Yii::getAlias('@api_web/controllers/SystemController.php'),
-            Yii::getAlias('@api_web/controllers/RabbitController.php'),
-            Yii::getAlias('@api_web/modules/integration/controllers/DefaultController.php'),
-            Yii::getAlias('@api_web/modules/integration/controllers/DictionaryController.php'),
+            Yii::getAlias('@api_web/controllers/RabbitController.php')
         ];
 
         /**
          * Добавление интеграционных контроллеров происходит автоматически
          */
         $module = Yii::$app->getModule('integration');
+        $controllers = array_filter(scandir($module->getControllerPath()), function ($name) {
+            return strstr($name, 'Controller.php');
+        });
+
+        foreach ($controllers as $file) {
+            $scanDir[] = $module->getControllerPath() . '/' . $file;
+        }
+
         foreach ($module->modules as $keyModule => $class) {
             $subModule = $module->getModule($keyModule);
 

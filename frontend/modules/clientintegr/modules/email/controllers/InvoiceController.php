@@ -77,6 +77,7 @@ class InvoiceController extends Controller
         $params = \Yii::$app->request->getQueryParams();
         $params['OrderSearch']['client_id'] = $user->organization_id;
         $params['OrderSearch']['client_search_id'] = $user->organization_id;
+
         $searchModel = new OrderSearch();
         $searchModel->status_array = [OrderStatus::STATUS_DONE, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
         $dataProvider = $searchModel->search($params);
@@ -86,13 +87,18 @@ class InvoiceController extends Controller
         $invoice_id = $params['invoice_id'];
         $showAll = (isset($params['show_waybill']) && $params['show_waybill'] == 'true') ? 1 : 0;
 
+        $searchModel = new OrderSearch();
+        $searchModel->status_array = [OrderStatus::STATUS_DONE, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination->pageSize = 5;
+
         $dataProvider->pagination->pageParam = 'page_order';
         return $this->renderAjax('_orders', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
-            'vendor_id' => $vendor_id,
-            'invoice_id' => $invoice_id,
-            'showAll' => $showAll
+            'vendor_id' => $params['OrderSearch']['vendor_id'],
+            'invoice_id' => $params['invoice_id'],
+            'show_waybill' => $showAll
         ]);
     }
 
@@ -126,6 +132,24 @@ class InvoiceController extends Controller
                 }
             }
 
+            $user = Yii::$app->user->identity;
+            $licenses = $user->organization->getLicenseList();
+            $timestamp_now = time();
+            if (isset($licenses['rkws'])) {
+                $sub0 = explode(' ', $licenses['rkws']->td);
+                $sub1 = explode('-', $sub0[0]);
+                $licenses['rkws']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
+                if ($licenses['rkws']->status_id == 0) $rk_us = 0;
+                if (($licenses['rkws']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws']->td)))) $link = 'rkws';
+            }
+            if (isset($licenses['iiko'])) {
+                $sub0 = explode(' ', $licenses['iiko']->td);
+                $sub1 = explode('-', $sub0[0]);
+                $licenses['iiko']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
+                if ($licenses['iiko']->status_id == 0) $lic_iiko = 0;
+                if (($licenses['iiko']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['iiko']->td)))) $link = 'iiko';
+            }
+
             /**
              * @var $user User
              */
@@ -139,12 +163,13 @@ class InvoiceController extends Controller
                 throw new Exception('Нам не удалось найти эту накладную.');
             }
 
-            //Создаем товары для накладных, и получаем их модели
+            //Создаём товары для накладных, и получаем их модели
             $content = $invoice->getBaseGoods($vendor);
+            $temp = $invoice->addProductsFromTorg12InCatalogGoods($vendor);
             if (empty($content)) {
                 throw new Exception('Содержимое накладной не может быть пустым.');
             }
-            //Создаем заказ
+            //Создаём заказ
             $order = new Order();
             $order->client_id = $user->organization_id;
             $order->vendor_id = $vendor->id;
@@ -152,10 +177,11 @@ class InvoiceController extends Controller
             $order->status = OrderStatus::STATUS_DONE;
             $order->total_price = 0;
             $order->currency_id = $vendor->baseCatalog->currency_id;
+            $order->invoice_relation = $params['invoice_id'];
             if (!$order->save()) {
                 throw new Exception('Не вышло создать заказ, что-то пошло не так.');
             }
-            //Создаем детальную часть заказа
+            //Создаём детальную часть заказа
             foreach ($content as $value) {
                 $model = new OrderContent();
                 $model->order_id = $order->id;
@@ -174,7 +200,7 @@ class InvoiceController extends Controller
             $invoice->order_id = $order->id;
             $invoice->save();
             $transaction->commit();
-            return ['status' => true];
+            return ['status' => true, 'order_id' => $order->id, 'us' => $link];
         } catch (\Exception $e) {
             $transaction->rollBack();
             return ['status' => false, 'error' => $e->getMessage()];
@@ -200,16 +226,69 @@ class InvoiceController extends Controller
     {
         $org_id = $_POST["org_id"];
         $stroka = $_POST["stroka"];
-        $res = Organization::getSuppliersByString($org_id,$stroka);
+        $res = Organization::getSuppliersByString($org_id, $stroka);
         $res = json_encode($res);
         return $res;
     }
 
-    protected function getEarliestOrder($org_id) {
+    protected function getEarliestOrder($org_id)
+    {
 
         $eDate = Order::find()->andWhere(['client_id' => $org_id])->orderBy('updated_at ASC')->one();
 
-        return isset($eDate) ?  $eDate->updated_at : null;
+        return isset($eDate) ? $eDate->updated_at : null;
 
+    }
+
+    public function actionSetVendor()
+    {
+        $vendor_id = \Yii::$app->request->post('vendor_id');
+        $invoice_id = \Yii::$app->request->post('invoice_id');
+        $model = IntegrationInvoice::find()->where(['id' => $invoice_id])->one();
+        $model->vendor_id = $vendor_id;
+        $model->save();
+        //$res = json_encode($res);
+        return true;
+    }
+
+    public function actionGetOrdersTorg12()
+    {
+        /**
+         * @var $user User
+         */
+        $user = \Yii::$app->user->identity;
+        $params = \Yii::$app->request->getQueryParams();
+        $params['OrderSearch']['client_id'] = $user->organization_id;
+        $params['OrderSearch']['client_search_id'] = $user->organization_id;
+
+        $searchModel = new OrderSearch();
+        $searchModel->status_array = [OrderStatus::STATUS_DONE, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
+        $dataProvider = $searchModel->searchForTorg12($params);
+        $dataProvider->pagination->pageSize = 5;
+
+        if (\Yii::$app->request->get('show_waybill')) {
+            if (\Yii::$app->request->get('show_waybill') == 'true') {
+                $showAll = 1;
+            } else {
+                $showAll = 0;
+            }
+        } else {
+            $showAll = 0;
+        }
+        $params['show_waybill'] = $showAll;
+
+        $searchModel = new OrderSearch();
+        $searchModel->status_array = [OrderStatus::STATUS_DONE, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
+        $dataProvider = $searchModel->searchForTorg12($params);
+        $dataProvider->pagination->pageSize = 5;
+
+        $dataProvider->pagination->pageParam = 'page_order';
+        return $this->renderAjax('_orders', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'vendor_id' => $params['OrderSearch']['vendor_id'],
+            'invoice_id' => $params['invoice_id'],
+            'show_waybill' => $params['show_waybill']
+        ]);
     }
 }

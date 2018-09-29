@@ -79,7 +79,7 @@ Modal::widget([
                 return $data['code'];
             },
         ],
-        [
+        /*[
             'attribute' => 'packagingType',
             'label' => 'Упаковка',
             'format' => 'raw',
@@ -94,7 +94,7 @@ Modal::widget([
             'value' => function ($data) {
                 return $data['unit'] ?? null;
             },
-        ],
+        ],*/
         [
             'attribute' => 'createDate',
             'label' => 'Дата добавления',
@@ -354,7 +354,7 @@ $("#ajax-load").on("click", ".save-form", function() {
            $('#globalID').val('');
            $('#fromCreateDate').val('');
            $('#toCreateDate').val('');
-            $("#statusFilter").removeAttr("selected");
+            $("#statusFilter option:selected").removeAttr("selected");
            $('#code').val('');
            $("#search-form").submit();
     });
@@ -403,9 +403,10 @@ $("#ajax-load").on("click", ".save-form", function() {
      });
   $(document).on("click",".del", function(e){
       e.preventDefault();
+      var url = $(this).attr("href");
         bootbox.confirm({
-            title: "Удалить позицию?",
-            message: "Позиция будет удалена из номенклатуры", 
+            title: "Вы уверены что необходимо удалить данную запись?",
+            message: "После удаления, производство данной продукции будет недоступно", 
             buttons: {
                 confirm: {
                     label: 'Удалить',
@@ -420,7 +421,7 @@ $("#ajax-load").on("click", ".save-form", function() {
             callback: function(result) {
 		if(result){
 		$.ajax({
-	        url: $(this).attr("href"),
+	        url: url,
 	        type: "GET",
 	        cache: false,
 	        success: function(response) {

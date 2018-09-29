@@ -54,6 +54,11 @@ class mercProductSearch extends VetisProductItem
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'name' => SORT_ASC,
+                ]
+            ],
         ]);
 
         $query->select(
@@ -73,7 +78,7 @@ class mercProductSearch extends VetisProductItem
         }
 
         $query->andFilterWhere(['like', $productTable.'.name', $this->name]);
-        $query->andFilterWhere(['like', 'globalID', $this->globalID]);
+        $query->andFilterWhere(['like', $productTable.'.globalID', $this->globalID]);
         $query->andFilterWhere(['like', 'code', $this->code]);
         $query->andFilterWhere(['packagingType_uuid' => $this->packagingType_uuid]);
         $query->andFilterWhere(['unit_uuid' => $this->unit_uuid]);

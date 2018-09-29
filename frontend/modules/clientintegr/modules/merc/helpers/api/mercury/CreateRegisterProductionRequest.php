@@ -69,7 +69,7 @@ class CreateRegisterProductionRequest extends Component{
             ],
             'volume' => $this->step2['volume'],
             'unit' => [
-                'uuid' => $this->step2['unit']
+                'guid' => $this->step2['unit']
             ],
             'dateOfProduction' => json_decode(json_encode($this->convertDate($productionDate)), true),
             

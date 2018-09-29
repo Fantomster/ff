@@ -62,7 +62,7 @@ class AllMaps extends \yii\db\ActiveRecord
             }, 'on' => 'koef'],
             //  [['koef'], 'number', 'min' => 0.0001],
             //   [['comment'], 'string', 'max' => 255],
-            [['product_rid', 'product_id', 'updated_at', 'vat', 'koef', 'org_id', 'supp_id',
+            [['serviceproduct_id', 'product_id', 'updated_at', 'vat', 'koef', 'org_id', 'supp_id',
                 'vat_included', 'linked_at', 'pdenom', 'munit_rid', 'store_rid'], 'safe']
         ];
 
@@ -80,7 +80,7 @@ class AllMaps extends \yii\db\ActiveRecord
             'supp_id' => 'Поставщик',
             'cat_id' => 'Каталог',
             'product_id' => 'Продукт Поставщика',
-            'product_rid' => 'Продукт сервиса',
+            'serviceproduct_id' => 'Продукт сервиса',
             'org_id' => 'Организация',
             'vat' => 'Ставка НДС',
             'vat_included' => 'НДС включен в цену',

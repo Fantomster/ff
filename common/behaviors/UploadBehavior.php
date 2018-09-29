@@ -3,7 +3,7 @@
 namespace common\behaviors;
 
 use Yii;
-use dosamigos\resourcemanager\ResourceManagerInterface;
+use common\components\resourcemanager\ResourceManagerInterface;
 use yii\web\UploadedFile;
 use yii\base\InvalidParamException;
 use yii\db\BaseActiveRecord;

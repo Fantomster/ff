@@ -16,9 +16,9 @@ use yii\web\BadRequestHttpException;
 
 class IikoSyncConsumer extends AbstractConsumer
 {
-    /**@property int|null $orgId Id организации*/
+    /**@property int|null $orgId Id организации */
     public $orgId;
-    /**@var integer*/
+    /**@var integer */
     const SERVICE_ID = 2;
 
     public function __construct($orgId = null)
@@ -73,12 +73,11 @@ class IikoSyncConsumer extends AbstractConsumer
         }
     }
 
-
     /**
      * Запрос на постановку в очередь обновлений справочника
      * @param integer $org_id
      */
-    public static function getUpdateData($org_id) : void
+    public static function getUpdateData($org_id): void
     {
         $arClassName = explode("\\", static::class);
         $className = array_pop($arClassName);
@@ -89,7 +88,7 @@ class IikoSyncConsumer extends AbstractConsumer
                 $queue = new RabbitQueues();
                 $queue->consumer_class_name = $className;
                 $queue->organization_id = $org_id;
-                if($queue->validate()){
+                if ($queue->validate()) {
                     $queue->save();
                 }
             }

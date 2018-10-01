@@ -29,9 +29,9 @@ class Mailer extends \yii\mail\BaseMailer
 
     public function compose($view = null, array $params = [])
     {
-        $message = $this->createMessage();
+//        $message = $this->createMessage();
         if ($view === null) {
-            return $message;
+            return null;
         }
 
         if (array_key_exists('order', $params)) {

@@ -71,6 +71,13 @@ class mercVSDSearch extends MercVsd
 
         $query->andFilterWhere(['like', 'product_name', $this->product_name]);
 
+        if($this->type == 2) {
+            $query->andFilterWhere(['recipient_guid' => $this->sender_guid]);
+        }
+        else {
+            $query->andFilterWhere(['sender_guid' => $this->recipient_guid]);
+        }
+
         return $dataProvider;
     }
 

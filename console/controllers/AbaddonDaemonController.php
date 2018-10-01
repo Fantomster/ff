@@ -59,6 +59,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
 
     /**
      * get queue name from array of db row
+     *
      * @param array $row
      * @return string
      */
@@ -72,6 +73,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
 
     /**
      * get full class name with namespace
+     *
      * @param string $className shortClassName
      * @return string
      */
@@ -82,6 +84,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
 
     /**
      * Selecting consumer classes and check queues for count jobs
+     *
      * @return array of demons)
      */
     protected function defineJobs()
@@ -101,6 +104,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
                     'storeId'       => $row['store_id'],
                     'demonize'      => 1,
                     'hardKill'      => $kill,
+                    'lastExec'      => $row['last_executed'],
                 ];
             } catch (\Throwable $t) {
                 $log = \Yii::getLogger();
@@ -123,6 +127,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
 
     /**
      * Check condition for killing consumer or nor
+     *
      * @param array $row sql array from rabbit_queues table row
      * @return boolean
      * */

@@ -355,7 +355,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         if ($mainOrg != $org_id) {
             $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
-            $client_id = "IF($product_field in (select product_id from $dbName.all_map where service_id = 2 and org_id = $client_id), $client_id, $mainOrg)";
+            $client_id = "IF($product_field in (select product_id from `$dbName`.all_map where service_id = 2 and org_id = $client_id), $client_id, $mainOrg)";
         }
 
         return $client_id;

@@ -9,8 +9,23 @@
 namespace common\components\ecom;
 
 
+/**
+ * Interface ProviderInterface
+ *
+ * @package common\components\ecom
+ */
 interface ProviderInterface
 {
+    /**
+     * @param $login
+     * @param $pass
+     * @return mixed
+     */
     public function getResponse($login, $pass);
+
+    /**
+     * @param array $list
+     * @return mixed
+     */
     public function insertFilesInQueue(array $list);
 }

@@ -11,14 +11,14 @@ namespace common\components\ecom\providers;
 
 use common\components\ecom\AbstractProvider;
 use common\components\ecom\ProviderInterface;
-use yii\base\Exception;
+use common\components\ecom\TestClient;
 
 /**
- * Class Provider
+ * Class TestProvider for unit tests
  *
  * @package common\components\ecom\providers
  */
-class Provider extends AbstractProvider implements ProviderInterface
+class TestProvider extends AbstractProvider implements ProviderInterface
 {
     /**
      * @var mixed
@@ -30,26 +30,19 @@ class Provider extends AbstractProvider implements ProviderInterface
      */
     public function __construct()
     {
-        $this->client = \Yii::$app->siteApi;
+        $this->client = new TestClient();
     }
 
     /**
      * @param $login
      * @param $pass
-     * @return null
-     * @throws \yii\base\Exception
+     * @return array|mixed
      */
     public function getResponse($login, $pass){
-        $object = $this->client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
-
-        if ($object->result->errorCode != 0) {
-            throw new Exception('EComIntegration getList Error №' . $object->result->errorCode);
+        $list = [];
+        foreach (glob('tests/edi_xml/test_*.xml') as $file){
+            $list[] = str_replace('tests/edi_xml/', '', $file);
         }
-        $list = $object->result->list ?? null;
-        if (!$list) {
-            throw new Exception('No files for ' . $login);
-        }
-
         return $list;
     }
 
@@ -80,6 +73,7 @@ class Provider extends AbstractProvider implements ProviderInterface
                 $transaction->commit();
             } catch (\Throwable $e) {
                 $transaction->rollback();
+                var_dump($e->getMessage());
                 \Yii::error($e->getMessage());
             }
         }

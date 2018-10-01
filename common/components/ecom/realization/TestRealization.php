@@ -8,7 +8,7 @@
 
 namespace common\components\ecom\realization;
 
-
+use common\models\Waybill;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WaybillHelper;
 use common\components\ecom\AbstractRealization;
@@ -26,23 +26,39 @@ use common\models\OrderStatus;
 use common\models\Organization;
 use common\models\RelationSuppRest;
 use common\models\User;
-use common\models\Waybill;
 use common\models\WaybillContent;
 use frontend\controllers\OrderController;
+use function print_r;
+use stdClass;
 use yii\db\Exception;
 use yii\db\Expression;
 
 /**
- * Class Realization
+ * Class TestRealization for unit tests
  *
  * @package common\components\ecom\realization
  */
-class Realization extends AbstractRealization implements RealizationInterface
+class TestRealization extends AbstractRealization implements RealizationInterface
 {
     /**
      * @var \SimpleXMLElement
      */
     public $xml;
+
+    /**
+     * @var array
+     */
+    public $fileToXml;
+
+    /**
+     * TestRealization constructor.
+     *
+     * @param array $ar
+     */
+    public function __construct(array $ar)
+    {
+        $this->fileToXml = $ar;
+    }
 
 
     /**
@@ -60,7 +76,10 @@ class Realization extends AbstractRealization implements RealizationInterface
         try {
             $this->updateQueue(self::STATUS_PROCESSING, '');
             try {
-                $doc = $client->getDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $fileName]);
+                $dir = \Yii::getAlias('@tests/edi_xml/');
+                $doc = new stdClass();
+                $doc->result = new stdClass();
+                $doc->result->content = file_get_contents($dir . $fileName);
             } catch (\Throwable $e) {
                 $this->updateQueue(self::STATUS_ERROR, $e->getMessage());
                 return false;
@@ -71,9 +90,9 @@ class Realization extends AbstractRealization implements RealizationInterface
                 return false;
             }
 
-            if (!$this->checkOrgIdAndOrderId($doc->result->content, $fileName)) {
-                return false;
-            }
+//            if (!$this->checkOrgIdAndOrderId($doc->result->content, $fileName)) {
+//                return false;
+//            }
 
             $content = $doc->result->content;
             $dom = new \DOMDocument();
@@ -82,8 +101,7 @@ class Realization extends AbstractRealization implements RealizationInterface
             $this->xml->addChild('filename', $fileName);
 
             $success = false;
-            $this->fileType = substr($fileName, 0, 6);
-
+            $this->fileType = substr($fileName, 5, 6);
             if ($this->fileType == 'pricat') {
                 $success = $this->handlePriceListUpdating();
             } elseif ($this->fileType == 'desadv' || $this->fileType == 'ordrsp') {
@@ -99,7 +117,8 @@ class Realization extends AbstractRealization implements RealizationInterface
                 $this->updateQueue(self::STATUS_ERROR, 'Error handling file 1');
             }
         } catch (\Throwable $t) {
-            $this->updateQueue(self::STATUS_ERROR, $t->getMessage());
+            $this->updateQueue(self::STATUS_ERROR, $t->getMessage() . PHP_EOL . $t->getLine() .
+                PHP_EOL . $t->getTraceAsString());
             return false;
         }
         return true;
@@ -114,16 +133,21 @@ class Realization extends AbstractRealization implements RealizationInterface
      * @throws \yii\db\Exception
      * @throws \yii\db\StaleObjectException
      */
-    private function handleOrderResponse(bool $isAlcohol = false) : bool
+    private function handleOrderResponse(bool $isAlcohol = false): bool
     {
-        $orderID = $this->xml->NUMBER;
-        $supplier = $this->xml->HEAD->SUPPLIER;
-        $message = "";
-        $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
-        if (!$ediOrganization) {
-            throw new Exception('Dont find any edi org with gln' . $supplier);
+        $fl = (string)$this->xml->filename;
+        if (array_key_exists($fl, $this->fileToXml)) {
+            $orderID = $this->fileToXml[$fl];
+        } else {
+            return false;
         }
-        $order = Order::findOne(['id' => $orderID, 'vendor_id' => $ediOrganization->organization_id]);
+//        $supplier = $this->xml->HEAD->SUPPLIER;
+        $message = "";
+//        $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
+//        if (!$ediOrganization) {
+//            throw new Exception('Dont find any edi org with gln' . $supplier);
+//        }
+        $order = Order::findOne(['id' => $orderID]);
         if (!$order) {
             throw new Exception('No such order ID: ' . $orderID);
         }
@@ -155,8 +179,9 @@ class Realization extends AbstractRealization implements RealizationInterface
             $barcode = (int)$position->PRODUCT;
             $barcodeArray[] = $barcode;
             $taxRate = (float)($position->TAXRATE ?? null);
+            $ediNumber = $position->DELIVERYNOTENUMBER ?? $position->WAYBILLNUMBER ?? $orderID;
             $priceWithVat = (float)($position->PRICEWITHVAT ?? $taxRate ? $position->PRICE + ($position->PRICE *
-                ($taxRate / 100)) : $price);
+                        ($taxRate / 100)) : $price);
             $priceWithoutVat = $taxRate ? $priceWithVat / (1 + ($taxRate / 100)) : $price;
             if ($price > 0 && (float)$position->PRICEWITHVAT == (float)$position->PRICE && $position->TAXRATE > 0) {
                 $price = $priceWithoutVat;
@@ -181,7 +206,7 @@ class Realization extends AbstractRealization implements RealizationInterface
                     $ordCont->plan_price = $price;
                     $ordCont->units = $good->units;
                     $ordCont->vat_product = $taxRate;
-                    $ordCont->edi_number = $position->DELIVERYNOTENUMBER ?? $position->WAYBILLNUMBER ?? $orderID;
+                    $ordCont->edi_number = $ediNumber;
                     $ordCont->merc_uuid = $position->VETIS->VETID ?? null;
                     if (!$ordCont->save()) {
                         throw new ValidationException([], $ordCont->getErrorSummary(true));
@@ -200,7 +225,7 @@ class Realization extends AbstractRealization implements RealizationInterface
                         $modelWaybillContent->waybill_id = $waybill->id;
                     }
                     $modelWaybillContent->merc_uuid = isset($position->VETIS) ? $position->VETIS->VETID : null;
-                    $modelWaybillContent->product_outer_id = $contID;
+                    $modelWaybillContent->product_outer_id = $ediNumber;
                     $modelWaybillContent->quantity_waybill = $quantity;
                     $modelWaybillContent->price_waybill = $price; //TODO: ???
                     $modelWaybillContent->vat_waybill = $taxRate;
@@ -230,7 +255,7 @@ class Realization extends AbstractRealization implements RealizationInterface
                 $ordCont->quantity = $quantity;
                 $ordCont->price = $price; //TODO:?
                 $ordCont->vat_product = $taxRate;
-                $ordCont->edi_number = $position->DELIVERYNOTENUMBER ?? $position->WAYBILLNUMBER ?? $orderID;
+                $ordCont->edi_number = $ediNumber;
                 $ordCont->merc_uuid = $position->VETIS->VETID ?? null;
                 if (in_array($this->fileType, ['desadv', 'alcdes'])) {
                     $prop = 'edi_' . $this->fileType;
@@ -421,12 +446,14 @@ class Realization extends AbstractRealization implements RealizationInterface
     /**
      * @return array
      */
-    public function getFileList() : array
+    public function getFileList()
     {
         return (new \yii\db\Query())
             ->select(['id', 'name'])
             ->from('edi_files_queue')
             ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
+            ->andWhere(['like', 'name', 'test_'])
             ->all();
     }
+
 }

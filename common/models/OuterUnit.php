@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use Yii;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -27,12 +26,14 @@ class OuterUnit extends \yii\db\ActiveRecord
         return 'outer_unit';
     }
 
+
     /**
-     * @return \yii\db\Connection the database connection used by this AR class.
+     * @return null|object|\yii\db\Connection the database connection used by this AR class.
+     * @throws \yii\base\InvalidConfigException
      */
     public static function getDb()
     {
-        return Yii::$app->get('db_api');
+        return \Yii::$app->get('db_api');
     }
 
     /**
@@ -66,6 +67,9 @@ class OuterUnit extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return array
+     */
     public function behaviors()
     {
         return [

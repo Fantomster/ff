@@ -6,10 +6,9 @@ use common\components\EComIntegration;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
 use yii\behaviors\AttributesBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
-use api\common\models\iiko\iikoDicconst;
 
 /**
  * This is the model class for table "order".
@@ -86,10 +85,10 @@ class Order extends \yii\db\ActiveRecord
     {
         return [
             'timestamp' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'value' => function ($event) {
-                    return gmdate("Y-m-d H:i:s");
-                },
+                'class' => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => \gmdate('Y-m-d H:i:s'),
             ],
             'attributes' => [
                 'class' => AttributesBehavior::class,

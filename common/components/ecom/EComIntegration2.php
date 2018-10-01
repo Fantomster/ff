@@ -2,34 +2,20 @@
 
 namespace common\components\ecom;
 
-use api_web\helpers\WaybillHelper;
-use common\helpers\DBNameHelper;
-use common\models\Catalog;
 use common\models\CatalogBaseGoods;
-use common\models\CatalogGoods;
-use common\models\Currency;
 use common\models\EdiOrder;
 use common\models\EdiOrderContent;
 use common\models\EdiOrganization;
 use common\models\Order;
 use common\models\OrderContent;
-use common\models\OrderStatus;
 use common\models\Organization;
-use common\models\RelationSuppRest;
-use common\models\User;
-use common\models\Waybill;
-use common\models\WaybillContent;
-use frontend\controllers\OrderController;
 use Yii;
 use yii\base\Component;
 use yii\db\Exception;
-use yii\db\Expression;
 
 /**
  * Class for E-COM integration methods
- *
- * @author alexey.sergeev
- *
+ * @author Silukov Konstantin
  */
 class EComIntegration2 extends Component
 {
@@ -39,21 +25,31 @@ class EComIntegration2 extends Component
 //    const STATUS_ERROR = 3;
 //    const STATUS_HANDLED = 4;
 
-    /**@var ProviderInterface*/
+    /**@var ProviderInterface */
     public $provider;
     /**@var RealizationInterface*/
     public $realization;
 
-    public function setProvider(ProviderInterface $provider){
+    /**
+     * @param \common\components\ecom\ProviderInterface $provider
+     */
+    public function setProvider(ProviderInterface $provider)
+    {
         $this->provider = $provider;
     }
 
-    public function setRealization(RealizationInterface $realization){
+    /**
+     * @param \common\components\ecom\RealizationInterface $realization
+     */
+    public function setRealization(RealizationInterface $realization)
+    {
         $this->realization = $realization;
     }
 
     /**
      * get distinct organization
+     *
+     * @return \yii\db\ActiveRecord[]
      * */
     private function getOrganizations()
     {
@@ -63,6 +59,9 @@ class EComIntegration2 extends Component
             ->groupBy('login')->distinct()->all();
     }
 
+    /**
+     * Get files list from provider and insert to table
+     */
     public function handleFilesList(): void
     {
         $ediOrganizations = $this->getOrganizations();
@@ -86,14 +85,12 @@ class EComIntegration2 extends Component
         }
     }
 
+    /**
+     * Get all files on edi_files_queue table and parse it
+     */
     public function handleFilesListQueue(): void
     {
-        $rows = (new \yii\db\Query())
-            ->select(['id', 'name'])
-            ->from('edi_files_queue')
-            ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
-            ->all();
-
+        $rows = $this->realization->getFileList();
         $ediOrganizations = $this->getOrganizations();
 
         foreach ($ediOrganizations as $ediOrganization) {
@@ -103,6 +100,16 @@ class EComIntegration2 extends Component
         }
     }
 
+    /**
+     * @param \common\models\Order        $order
+     * @param \common\models\Organization $vendor
+     * @param \common\models\Organization $client
+     * @param String                      $login
+     * @param String                      $pass
+     * @param bool                        $done
+     * @return bool
+     * @throws \yii\base\InvalidArgumentException
+     */
     public function sendOrderInfo(Order $order, Organization $vendor, Organization $client, String $login, String $pass, bool $done = false): bool
     {
         $transaction = Yii::$app->db_api->beginTransaction();
@@ -156,6 +163,10 @@ class EComIntegration2 extends Component
     }
 
 
+    /**
+     * @param String $dateString
+     * @return String
+     */
     private function formatDate(String $dateString): String
     {
         $date = new \DateTime($dateString);
@@ -163,6 +174,10 @@ class EComIntegration2 extends Component
     }
 
 
+    /**
+     * @param String $dateString
+     * @return String
+     */
     private function formatTime(String $dateString): String
     {
         $date = new \DateTime($dateString);
@@ -170,6 +185,10 @@ class EComIntegration2 extends Component
     }
 
 
+    /**
+     * @param \common\models\Order $order
+     * @return array
+     */
     private function getDateData(Order $order): array
     {
         $arr = [];
@@ -182,6 +201,14 @@ class EComIntegration2 extends Component
     }
 
 
+    /**
+     * @param \common\models\Organization $vendor
+     * @param String                      $string
+     * @param String                      $remoteFile
+     * @param String                      $login
+     * @param String                      $pass
+     * @return bool
+     */
     private function sendDoc(Organization $vendor, String $string, String $remoteFile, String $login, String $pass): bool
     {
         $client = Yii::$app->siteApi;
@@ -194,6 +221,9 @@ class EComIntegration2 extends Component
         }
     }
 
+    /**
+     * @throws \yii\db\Exception
+     */
     public function archiveFiles()
     {
         Yii::$app->db->createCommand()->delete('edi_files_queue', 'updated_at <= DATE_SUB(CURDATE(),INTERVAL 30 DAY) AND updated_at IS NOT NULL')->execute();

@@ -8,7 +8,25 @@
 
 namespace common\components\ecom;
 
+/**
+ * Interface RealizationInterface
+ *
+ * @package common\components\ecom
+ */
 interface RealizationInterface
 {
+    /**
+     * @param        $client
+     * @param String $fileName
+     * @param String $login
+     * @param String $pass
+     * @param int    $ediFilesQueueID
+     * @return mixed
+     */
     public function getDoc($client, String $fileName, String $login, String $pass, int $ediFilesQueueID);
+
+    /**
+     * @return array
+     */
+    public function getFileList();
 }

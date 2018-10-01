@@ -16,29 +16,57 @@ use common\models\Organization;
 use common\models\RelationSuppRest;
 use yii\db\Expression;
 
+/**
+ * Class AbstractRealization
+ *
+ * @package common\components\ecom
+ */
 abstract class AbstractRealization
 {
 
+    /**
+     *
+     */
     const STATUS_NEW = 1;
+    /**
+     *
+     */
     const STATUS_PROCESSING = 2;
+    /**
+     *
+     */
     const STATUS_ERROR = 3;
+    /**
+     *
+     */
     const STATUS_HANDLED = 4;
 
+    /**
+     * @var
+     */
     public $fileId;
 
+    /**
+     * @var
+     */
     public $fileType;
 
+    /**
+     * @param int    $status
+     * @param String $errorText
+     * @throws \yii\db\Exception
+     */
     protected function updateQueue(int $status, String $errorText): void
     {
         \Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText], 'id=' . $this->fileId)->execute();
     }
 
-
     /**
      * check gln code for organization and check orderId if file dont have pricat prefix
-     * @var string  $content
-     * @var string  $fileName
-     * @return boolean
+     * @param $content
+     * @param $fileName
+     * @return bool
+     * @throws \yii\db\Exception
      */
     protected function checkOrgIdAndOrderId($content, $fileName)
     {
@@ -95,9 +123,10 @@ abstract class AbstractRealization
 
     /**
      * Return string between $startTag and $endTag
-     * @var string $startTag
-     * @var string $endTag
-     * @return string
+     * @param $string
+     * @param $startTag
+     * @param $endTag
+     * @return bool|string
      */
     private function getStringBetweenTags($string, $startTag, $endTag)
     {
@@ -109,6 +138,12 @@ abstract class AbstractRealization
         return substr($string, $start, $end - $start);
     }
 
+    /**
+     * @param \common\models\Organization $organization
+     * @param \common\models\Currency     $currency
+     * @param \common\models\Organization $rest
+     * @return int
+     */
     protected function createCatalog(Organization $organization, Currency $currency, Organization $rest): int
     {
         $catalog = new Catalog();
@@ -121,6 +156,12 @@ abstract class AbstractRealization
         $catalog->currency_id = $currency->id ?? 1;
         $catalog->save();
         $catalogID = $catalog->id;
+
+        if (!$catalog->save()){
+//            throw new Exception($catalog->getErrorSummary(true));
+            file_put_contents('1.log', $catalog->getErrorSummary(true), FILE_APPEND);
+        }
+        file_put_contents('1.log', $catalog->id, FILE_APPEND);
 
         $rel = new RelationSuppRest();
         $rel->rest_org_id = $rest->id;
@@ -135,6 +176,13 @@ abstract class AbstractRealization
     }
 
 
+    /**
+     * @param int   $catID
+     * @param int   $catalogBaseGoodID
+     * @param float $price
+     * @return bool
+     * @throws \yii\db\Exception
+     */
     protected function insertGood(int $catID, int $catalogBaseGoodID, float $price): bool
     {
         $res = \Yii::$app->db->createCommand()->insert('catalog_goods', [

@@ -40,12 +40,6 @@ abstract class AbstractDaemonController extends DaemonController
     public $maxChildProcesses = 5;
 
     /**
-     * rabbit queues table name
-     * @var \DateTime
-     * */
-    public $lastExec = null;
-
-    /**
      * Check consumer implements interfaces methods
      * @param \console\modules\daemons\components\ConsumerInterface $consumer
      */

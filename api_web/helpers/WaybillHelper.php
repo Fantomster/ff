@@ -24,6 +24,20 @@ class WaybillHelper
     const MERC_SERVICE_ID = 4;
     /**@var int const for EDI service id in all_service table */
     const EDI_SERVICE_ID = 6;
+    const WAYBILL_FORMED = 'Сформирована';
+    const WAYBILL_FORMED = 'Сформирована';
+    const WAYBILL_FORMED = 'Сформирована';
+    const WAYBILL_FORMED = 'Сформирована';
+    const WAYBILL_FORMED = 'Сформирована';
+    const WAYBILL_FORMED = 'Сформирована';
+    static $types = [
+        self::WAYBILL_FORMED => 1,
+        self::WAYBILL_FORMED => 1,
+        self::WAYBILL_FORMED => 1,
+        self::WAYBILL_FORMED => 1,
+        self::WAYBILL_FORMED => 1,
+        self::WAYBILL_FORMED => 1,
+    ];
 
     /**
      * Create waybill and waybill_content and binding VSD

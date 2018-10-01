@@ -128,7 +128,7 @@ class Realization extends AbstractRealization implements RealizationInterface
             throw new Exception('No such order ID: ' . $orderID);
         }
 
-        $helper = new WaybillHelper(); //TODO: why not create waybill for ordersp
+        $helper = new WaybillHelper(); //TODO: why not create waybill for ordersp *Create for all
         $arWaybills = $helper->createWaybill($order);
 
         \Yii::$app->language = $order->edi_order->lang ?? 'ru';
@@ -167,14 +167,15 @@ class Realization extends AbstractRealization implements RealizationInterface
                 $ordCont = $arOrderContentBarCodes[$barcode];
             } else {
                 if (!$good) {
-                    continue; //TODO: no good in catalog, dont parse?
+                    continue; //TODO: no good in catalog, dont parse? *Ok
+                    //TODO: if good is $deleted = 0 can buy || $deleted=1 set quantity 0 price 0 and cant buy
                 }
-                if ($this->fileType == 'ordrsp') { //TODO: why only ordrsp?
+//                if ($this->fileType == 'ordrsp') { //TODO: why only ordrsp? *For all
                     $ordCont = new OrderContent();
                     $ordCont->order_id = $order->id;
                     $ordCont->product_id = $good->id;
-                    $ordCont->quantity = $quantity; //TODO: wtf convert to decimal?
-                    $ordCont->price = $price; //TODO: $priceWithVat or $priceWithoutVat
+                    $ordCont->quantity = $quantity; //TODO: wtf convert to decimal? *Speaking
+                    $ordCont->price = $price; //TODO: $priceWithVat or $priceWithoutVat *$priceWithoutVat
                     $ordCont->initial_quantity = $quantity;
                     $ordCont->product_name = $good->product;
                     $ordCont->plan_quantity = $quantity;
@@ -187,10 +188,10 @@ class Realization extends AbstractRealization implements RealizationInterface
                         throw new ValidationException([], $ordCont->getErrorSummary(true));
                     }
                     $message .= \Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
-                }
+//                }
             }
 
-            if ($quantity > 0.00 && $price > 0.00) {
+//            if ($quantity > 0.00 && $price > 0.00) { //parse all
                 /**@var Waybill $waybill */
                 foreach ($arWaybills as $waybill) {
                     $modelWaybillContent = WaybillContent::findOne(['order_content_id' => $ordCont->id]);
@@ -257,11 +258,11 @@ class Realization extends AbstractRealization implements RealizationInterface
                 if (!$ediOrderContent->save()){
                     throw new ValidationException([], $ediOrderContent->getErrorSummary(true));
                 }
-            } else {
-                $message .= \Yii::t('message', 'frontend.controllers.order.del',
-                    ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $ordCont->product_name]);
-                $ordCont->delete();
-            }
+//            } else {
+//                $message .= \Yii::t('message', 'frontend.controllers.order.del',
+//                    ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $ordCont->product_name]);
+//                $ordCont->delete();
+//            }
             $totalQuantity += $quantity;
             $totalPrice += $price;
             $sum += $quantity * $price;
@@ -275,13 +276,13 @@ class Realization extends AbstractRealization implements RealizationInterface
             return true;
         }
 
-        foreach ($order->orderContent as $item) {
-            if (!array_key_exists($item->product->barcode, $barcodeArray)) {
-                $message .= \Yii::t('message', 'frontend.controllers.order.del',
-                    ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $item->product_name]);
-                $item->delete();
-            }
-        }
+//        foreach ($order->orderContent as $item) {
+//            if (!array_key_exists($item->product->barcode, $barcodeArray)) {
+//                $message .= \Yii::t('message', 'frontend.controllers.order.del',
+//                    ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $item->product_name]);
+//                $item->delete();
+//            }
+//        }
         $order->status = OrderStatus::STATUS_PROCESSING;
         $order->total_price = $sum; //TODO:wtf decimal
         $order->service_id = WaybillHelper::EDI_SERVICE_ID;

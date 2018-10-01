@@ -1804,14 +1804,14 @@ class OrderController extends DefaultController
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
                         $order->status = OrderStatus::STATUS_PROCESSING;
                         $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.confirm_order', ['ru' => ' подтвердил заказ!']);
-                        $this->sendOrderProcessing($this->currentUser, $order);
+                        $this->sendOrderProcessing($this->currentUser->organization, $order);
                         $edit = true;
                     } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $order->status == OrderStatus::STATUS_PROCESSING)) {
                         $systemMessage = $order->vendor->name . Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
                         $order->accepted_by_id = $user_id;
                         $order->status = OrderStatus::STATUS_PROCESSING;
                         $edit = true;
-                        $this->sendOrderProcessing($this->currentUser, $order);
+                        $this->sendOrderProcessing($this->currentUser->organization, $order);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == OrderStatus::STATUS_PROCESSING)) {
                         $systemMessage = $order->client->name . Yii::t('message', 'frontend.controllers.order.receive_order_four', ['ru' => ' получил заказ!']);
                         $order->status = OrderStatus::STATUS_DONE;
@@ -2108,6 +2108,7 @@ class OrderController extends DefaultController
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@common/mail/layouts/order';
         // send email
         $subject = Yii::t('message', 'frontend.controllers.order.change_in_order', ['ru' => "Измененения в заказе №"]) . $order->id;
 
@@ -2246,6 +2247,7 @@ class OrderController extends DefaultController
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@common/mail/layouts/order';
         // send email
         $subject = Yii::t('message', 'frontend.controllers.order.accepted_order', ['ru' => "Заказ № {order_id} подтвержден!", 'order_id' => $order->id]);
 

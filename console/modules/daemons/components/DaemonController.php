@@ -52,6 +52,12 @@ abstract class DaemonController extends Controller
      * @var null
      */
     public $storeId = null;
+
+    /**
+     * rabbit queues table name
+     * @var \DateTime
+     * */
+    public $lastExec = null;
     
     /**
      * @var $parentPID int main procces pid
@@ -228,6 +234,7 @@ abstract class DaemonController extends Controller
             'orgId',
             'consumerClass',
             'storeId',
+            'lastExec'
         ];
     }
     

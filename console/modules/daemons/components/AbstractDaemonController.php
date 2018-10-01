@@ -40,12 +40,15 @@ abstract class AbstractDaemonController extends DaemonController
     public $maxChildProcesses = 5;
 
     /**
+<<<<<<< HEAD
      * last_executed consumer time
      * @var \DateTime
      * */
     public $lastExec = null;
 
     /**
+=======
+>>>>>>> 1.26.34
      * Check consumer implements interfaces methods
      * @param \console\modules\daemons\components\ConsumerInterface $consumer
      */

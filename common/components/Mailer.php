@@ -88,11 +88,11 @@ class Mailer extends \yii\mail\BaseMailer
 
         $save = $newEmail->save();
         if ($save && !($newEmail->status == EmailQueue::STATUS_FAILED)) {
-            //try {
-            $result = \Yii::$app->get('sqsQueue')->sendMessage($this->sqsQueueUrl, [$newEmail->id]);
-//            } catch (\Exception $e) {
-//                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
-//            }
+            try {
+                $result = \Yii::$app->get('sqsQueue')->sendMessage($this->sqsQueueUrl, [$newEmail->id]);
+            } catch (\Exception $e) {
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
+            }
         }
 
         return $save;

@@ -680,4 +680,9 @@ class Order extends \yii\db\ActiveRecord
     {
         return $this->hasMany(EmailQueue::className(), ['order_id' => 'id']);
     }
+    
+    public function getFormattedCreationDate()
+    {
+        return Yii::$app->formatter->asDatetime($this->created_at, "php:d.m.Y, H:i");
+    }
 }

@@ -95,6 +95,7 @@ class OrderNotice
         /** @var \yii\swiftmailer\Mailer $mailer */
         /** @var \yii\swiftmailer\Message $message */
         $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@common/mail/layouts/order';
         $senderOrg = $sender;
         $subject = Yii::t('message', 'frontend.controllers.order.new_order') . $order->id . "!";
         $dataProvider = new ArrayDataProvider(['allModels' => $order->orderContent, 'pagination' => false]);
@@ -106,6 +107,10 @@ class OrderNotice
             foreach ($orgs as $org) {
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification && $notification->order_created) {
+                    
+//                    if ($recipient->organization->type_id == Organization::TYPE_RESTAURANT) {
+//                        //
+//                    }
                     try {
                         $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                             ->setTo($email)
@@ -144,6 +149,7 @@ class OrderNotice
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@common/mail/layouts/order';
         $subject = Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
 
         $searchModel = new OrderContentSearch();
@@ -199,6 +205,7 @@ class OrderNotice
         /** @var Message $message */
         $sender = $order->createdBy;
         $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@common/mail/layouts/order';
         $senderOrg = $sender->organization;
         $subject = Yii::t('message', 'frontend.controllers.order.complete', ['ru' => "Заказ № {order_id} выполнен!", 'order_id' => $order->id]);
 

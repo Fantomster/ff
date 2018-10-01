@@ -116,7 +116,7 @@ class AbstractDictionary extends WebApi
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
-                $search->andWhere(['like', 'name', $request['search']['name']]);
+                $search->andWhere(['like', '`outer_agent`.name', $request['search']['name']]);
             }
         }
 

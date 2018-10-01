@@ -170,8 +170,8 @@ class AgentHelper extends AuthHelper {
             
             $amodel = new RkAgent();
 
-            $nameEnc = iconv('Windows-1252', 'Windows-1251', $a['name']);
-            $nameEnc = iconv('Windows-1252', 'utf8', $nameEnc);
+          //  $nameEnc = iconv('Windows-1252', 'Windows-1251', $a['name']);
+          //  $nameEnc = iconv('Windows-1252', 'utf8', $nameEnc);
             
             $amodel->acc = $acc; // $tmodel->acc; 
             $amodel->rid = $a['rid'];

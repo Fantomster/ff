@@ -1132,7 +1132,7 @@ class VendorController extends DefaultController
 
             $CatalogGoods = CatalogGoods::deleteAll(['cat_id' => $cat_id]);
 
-            $RelationSuppRest = RelationSuppRest::updateAll(['cat_id' => null], ['cat_id' => $cat_id]);
+            $RelationSuppRest = RelationSuppRest::updateAll(['cat_id' => 0], ['cat_id' => $cat_id]);
 
             $result = ['success' => true];
             return $result;

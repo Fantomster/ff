@@ -21,6 +21,7 @@ use yii\db\Exception;
  * @property string $created_at
  * @property string $updated_at
  * @property string $consignee
+ * @property int $vendor_id
  *
  * @property IntegrationInvoiceContent[] $Content
  * @property Organization $organization
@@ -58,7 +59,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
     {
         return [
             [['organization_id', 'integration_setting_from_email_id'], 'required'],
-            [['organization_id', 'integration_setting_from_email_id', 'order_id'], 'integer'],
+            [['organization_id', 'integration_setting_from_email_id', 'order_id', 'vendor_id'], 'integer'],
             [['date', 'created_at', 'updated_at', 'total_sum_withtax', 'price_without_tax_sum'], 'safe'],
             [['file_content'], 'string'],
             [['number', 'email_id', 'file_mime_type', 'file_hash_summ', 'name_postav', 'inn_postav', 'kpp_postav', 'consignee'], 'string', 'max' => 255],
@@ -94,6 +95,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
             'inn_postav' => 'ИНН поставщика',
             'kpp_postav' => 'КПП поставщика',
             'consignee' => 'Грузополучатель',
+            'vendor_id' => 'Идентификатор поставщика'
         ];
     }
 
@@ -130,6 +132,14 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
     public function getOrder()
     {
         return $this->hasOne(Order::className(), ['id' => 'order_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getVendor()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'vendor_id']);
     }
 
     /**
@@ -191,7 +201,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
                     'price_without_nds' => round($row['price_without_tax'], 2),
                     'quantity' => $row['cnt'],
                     'sum_without_nds' => $row['sum_without_tax'],
-                        // 'quantity' => ceil($row['cnt']) Hotfix 1.5.12
+                    // 'quantity' => ceil($row['cnt']) Hotfix 1.5.12
                 ]);
                 if (!$content->save()) {
                     throw new Exception(implode(' ', $content->getFirstErrors()));
@@ -216,11 +226,11 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
          * @var $row IntegrationInvoiceContent
          */
         //Ищем товары у поставщика по наименованию
-        //Если не нашли, создаем
+        //Если не нашли, создаём
         foreach ($this->content as $row) {
             $model = CatalogBaseGoods::find()->where(['supp_org_id' => $vendor->id])
-                    ->andWhere('product LIKE :product', [':product' => $row->title])
-                    ->one();
+                ->andWhere('product LIKE :product', [':product' => $row->title])
+                ->one();
 
             if (empty($model)) {
                 $model = new CatalogBaseGoods();
@@ -247,6 +257,54 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         }
 
         return $models;
+    }
+
+    /**
+     * Записывает товарные позиции из накладной ТОРГ-12 в таблицу catalog_goods
+     * @param Organization $vendor
+     * @return boolean
+     * @throws Exception
+     */
+    public function addProductsFromTorg12InCatalogGoods(Organization $vendor)
+    {
+        /**
+         * @var $row IntegrationInvoiceContent
+         */
+        //Ищем товары у поставщика по наименованию в специально назначенном для ресторана каталоге
+        //Если не нашли, создаём
+        /**
+         * @var $user User
+         */
+        $user = \Yii::$app->user->identity;
+        $rest_id = $user->organization_id;
+        $db = Yii::$app->db;
+        $query = 'SELECT `cat_id` FROM `relation_supp_rest` WHERE `rest_org_id` = ' . $rest_id . ' AND `supp_org_id` = ' . $vendor->id;
+        $catalogs = $db->createCommand($query)->queryAll();
+        if (empty($catalogs)) {
+            return false;
+        }
+        foreach ($this->content as $row) {
+            $model = CatalogBaseGoods::find()->where(['supp_org_id' => $vendor->id])
+                ->andWhere('product LIKE :product', [':product' => $row->title])
+                ->one();
+            foreach ($catalogs as $catalog) {
+                $model2 = CatalogGoods::find()->where(['cat_id' => $catalog['cat_id']])
+                    ->andWhere(['base_goods_id' => $model->id])
+                    ->one();
+
+                if (empty($model2)) {
+                    $model2 = new CatalogGoods();
+                    $model2->cat_id = $catalog['cat_id'];
+                    $model2->base_goods_id = $model->id;
+                    $model2->price = $row->price_nds;
+                    if (!$model2->save()) {
+                        throw new \yii\db\Exception(print_r($model2->getFirstErrors(), 1));
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
 }

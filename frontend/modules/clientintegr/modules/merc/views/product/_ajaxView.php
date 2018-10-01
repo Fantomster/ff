@@ -48,7 +48,7 @@ $timestamp_now=time();
                             [
                                 'attribute' => 'globalID',
                                 'format' => 'raw',
-                                'value' => $model->globalID,
+                                'value' => $model->globalID ?? '-',
                             ],
                             [
                                 'attribute' => 'correspondsToGost',

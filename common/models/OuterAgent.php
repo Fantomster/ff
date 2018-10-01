@@ -2,22 +2,24 @@
 
 namespace common\models;
 
+use common\helpers\DBNameHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "outer_agent".
  *
- * @property int    $id
+ * @property int $id
  * @property string $outer_uid Внешний ID
- * @property int    $service_id ID сервиса
+ * @property int $service_id ID сервиса
  * @property string $name Название
  * @property string $comment Комментарий
- * @property int    $vendor_id
- * @property int    $store_id ID склада
- * @property int    $payment_delay Отложенная оплата в днях
- * @property int    $org_id ID организации
- * @property int    $is_deleted Статус удаления
+ * @property int $vendor_id
+ * @property int $store_id ID склада
+ * @property int $payment_delay Отложенная оплата в днях
+ * @property int $org_id ID организации
+ * @property int $is_deleted Статус удаления
  * @property string $created_at Создано по GMT-0
  * @property string $updated_at Изменено по GMT-0
  * @property string $inn ИНН
@@ -98,7 +100,12 @@ class OuterAgent extends \yii\db\ActiveRecord
      */
     public function getVendor()
     {
-        return $this->hasOne(Organization::class, ['id' => 'vendor_id']);
+        $db_instance = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        return (new ActiveQuery(Organization::class))
+            ->from($db_instance . '.' . Organization::tableName() . ' o')
+            ->onCondition([
+                'o.`id`' => '`outer_agent`.`vendor_id`'
+            ]);
     }
 
     /**

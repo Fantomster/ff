@@ -92,6 +92,7 @@ class OrderSearch extends Order
         $query = Order::find();
         $this->load($params);
 
+
         $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
         if ($from) {
             $t1_f = $from->format('Y-m-d H:i:s');
@@ -122,6 +123,7 @@ class OrderSearch extends Order
         /**
          * END
          */
+
 
         switch ($this->status) {
             case 1: //new
@@ -167,7 +169,7 @@ class OrderSearch extends Order
             $orderTable = Order::tableName();
             $query->rightJoin($maTable, "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->manager_id);
         }
-        $query->where(Order::tableName() . '.status != :status', ['status' => OrderStatus::STATUS_FORMING]);
+        $query->where('`' . Order::tableName() . '`.`status` != :status', ['status' => OrderStatus::STATUS_FORMING]);
 
         $addSortAttributes = $this->vendor_search_id ? ['client.name'] : ['vendor.name'];
         $addSortAttributes[] = 'createdByProfile.full_name';
@@ -210,11 +212,11 @@ class OrderSearch extends Order
         if (!empty($this->vendor_array)) {
             $query->andFilterWhere(['in', 'vendor_id', $this->vendor_array]);
         } else {
-            $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
+            $query->andFilterWhere(['`order`.`vendor_id`' => $this->vendor_id]);
         }
         $query->andFilterWhere(['client_id' => $this->client_id]);
         if ((isset($params['invoice_id']) && !isset($params['show_waybill'])) || (isset($params['show_waybill']) && $params['show_waybill'] == 'false')) {
-            $query->rightJoin('integration_invoice', 'integration_invoice.number=order.waybill_number');
+            $query->rightJoin('integration_invoice', '`integration_invoice`.`number`=`order`.`waybill_number`');
         }
 
         /**
@@ -232,7 +234,6 @@ class OrderSearch extends Order
                     ['service_id' => NULL]
                 ]);
         }
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
@@ -600,6 +601,41 @@ class OrderSearch extends Order
             'page_size' => $pageSize
         ];
         return $arr;
+    }
+
+    /**
+     * Создаёт dataProvider для представления заказов при сопоставлении их с накладными ТОРГ-12
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function searchForTorg12($params)
+    {
+        $query = Order::find();
+        $deleted_status = OrderStatus::STATUS_CANCELLED;
+        //$this->load($params);
+
+        if ((isset($params['invoice_id']) && !isset($params['show_waybill'])) || (isset($params['show_waybill']) && $params['show_waybill'] == 'false')) {
+            $query->andFilterWhere(['waybill_number' => $params['invoice_id'],
+                'client_id' => $params['OrderSearch']['client_id'],
+                'vendor_id' => $params['OrderSearch']['vendor_id'],
+                'invoice_relation' => null,]);
+            $query->andWhere("status!=$deleted_status");
+        } else {
+            $query->andFilterWhere(['client_id' => $params['OrderSearch']['client_id'],
+                'vendor_id' => $params['OrderSearch']['vendor_id'],
+                'invoice_relation' => null]);
+            $query->andWhere("status!=$deleted_status");
+        }
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'pagination' => ['pageSize' => 20],
+        ]);
+        return $dataProvider;
+
     }
 
 }

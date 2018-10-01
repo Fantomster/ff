@@ -15,8 +15,8 @@ use yii\web\BadRequestHttpException;
 class Integration
 {
     static $service_map = [
+        1 => 'Rkws',
         2 => 'Iiko',
-
     ];
 
     /**

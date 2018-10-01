@@ -49,6 +49,6 @@ class Dictionary
 
     public function __call($name, $arguments)
     {
-        return $this->dict->{$name}($arguments);
+        return $this->dict->{$name}(current($arguments));
     }
 }

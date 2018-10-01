@@ -32,60 +32,82 @@ class VetisWaybill extends WebApi
     {
         $reqPag = $request['pagination'] ?? [];
         $reqSearch = $request['search'] ?? [];
-        $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
+        $page = $this->helper->isSetDef($reqPag['page'] ?? null, 0);
         $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
+        $offset = $this->helper->isSetDef($reqPag['offset'] ?? null, 0);
+        $groups = $this->helper->isSetDef($request['groups'] ?? null, []);
 
         $acquirer_id = null;
         if (isset($request['search']['acquirer_id'])) {
             $acquirer_id = $request['search']['acquirer_id'];
         }
-
         $reqSearch['acquirer_id'] = $this->helper->isSetDef($acquirer_id, $this->user->organization->id);
-
-        /**
-         * Без этого GROUP_CONCAT возвращает только 1024 символа, и режет данные
-         */
-        \Yii::$app->db->createCommand('SET SESSION group_concat_max_len = 1000000')->execute();
-
+        //Поиск ВСД
         $search = new VetisWaybillSearch();
         $params = $this->helper->set($search, $reqSearch, ['acquirer_id', 'type', 'status', 'sender_guid', 'product_name', 'date']);
         $dataProvider = $search->search($params);
-
-        $pagination = new Pagination();
-        $pagination->setPage($page - 1);
-        $pagination->setPageSize($pageSize);
-        $dataProvider->setPagination($pagination);
-
-        $result = [
-            'documents'           => [],
-            'order_not_installed' => []
-        ];
-
-        foreach ($dataProvider->models as $model) {
-            if ($model['group_name'] != 'order_not_installed') {
-                $result['documents'][$model['group_name']] = [
-                    'count'       => (int)$model['count'],
-                    'date'        => $model['created_at'],
-                    'vendor_name' => $model['vendor_name'],
-                    'sender_name' => $model['sender_name'],
-                    'total_price' => $model['total_price'],
-                    'uuids'       => explode(',', $model['uuids']),
-                    'status'      => $this->helper->getStatusForGroup($model['statuses'])
-                ];
-            } else {
-                $result['order_not_installed'] = [
-                    'uuids'  => explode(',', $model['uuids']),
-                    'status' => $this->helper->getStatusForGroup($model['statuses'])
-                ];
+        //Отсекаем группы, которые отдавали
+        if (!empty($groups)) {
+            $in = [];
+            foreach (array_keys($groups) as $id_group) {
+                $in = (int)$id_group;
             }
-
+            $dataProvider->query->andFilterWhere([
+                'or',
+                'o.id IS NULL',
+                ['NOT IN', 'o.id', $in]
+            ]);
         }
+        //Супер пагинация
+        $dataProvider->pagination->setPage($page);
+        $dataProvider->pagination->setPageSize($pageSize);
+        $dataProvider->query->limit($pageSize);
+        $dataProvider->query->offset(($page * $pageSize) - $offset);
+
+        //Делаем ассоциативный массив с uuid ключом, чтобы мерж проходил успешно
+        $models = ArrayHelper::index($dataProvider->models, 'uuid');
+        //Собираем данные о группах
+        $documentsInRows = ArrayHelper::getColumn($models, 'document_id');
+        //Удаляем пустые и null
+        $documentsInRows = array_diff($documentsInRows, ['', null]);
+        //Считаем сколько записей с группой, прибавляем к offset
+        $offset += count($documentsInRows);
+        //Переворачиваем ключ=значение
+        $documentsInRows = array_flip($documentsInRows);
+        //Строим список групп
+        $groups = ArrayHelper::merge($groups, $documentsInRows);
+        //Собираем подробную информацию о группах
+        foreach ($groups as $group_id => &$v) {
+            $info = $this->helper->getGroupInfo((int)$group_id);
+            if (is_null($info)) {
+                unset($groups[$group_id]);
+                continue;
+            }
+            $v = $info;
+        }
+        //Добираем необходимые ВСД для групп
+        $attachGroup = array_keys($documentsInRows);
+        if (!empty($attachGroup)) {
+            $models = $this->helper->attachModelsInDocument($models, array_keys($documentsInRows));
+        }
+        //Приходится бегать, чтоб собрать статусы текстом
+        foreach ($models as &$model) {
+            $model['status_text'] = MercVsd::$statuses[$model['status']];
+        }
+
+        //Строим результат
+        $result = [
+            'items'  => array_values($models),
+            'groups' => $groups
+        ];
+        //Ответ для АПИ
         $return = [
             'result'     => $result,
             'pagination' => [
-                'page'       => ($dataProvider->pagination->page + 1),
-                'page_size'  => $dataProvider->pagination->pageSize,
-                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+                'page'       => $page,
+                'page_size'  => $pageSize,
+                'totalCount' => ceil($dataProvider->query->count() / $pageSize),
+                'offset'     => ceil($offset),
             ]
         ];
         return $return;
@@ -245,7 +267,7 @@ class VetisWaybill extends WebApi
                 }
             }
         } catch (\Throwable $t) {
-            if($t->getCode() == 600){
+            if ($t->getCode() == 600) {
                 $result['error'] = 'Заявка отклонена';
             } else {
                 $result['error'] = $t->getMessage();

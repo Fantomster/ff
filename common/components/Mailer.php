@@ -29,6 +29,11 @@ class Mailer extends \yii\mail\BaseMailer
 
     public function compose($view = null, array $params = [])
     {
+        $message = $this->createMessage();
+        if ($view === null) {
+            return $message;
+        }
+
         if (array_key_exists('order', $params)) {
             $this->order_id = isset($params['order']->id) ? $params['order']->id : null;
         }
@@ -62,7 +67,7 @@ class Mailer extends \yii\mail\BaseMailer
     {
         $this->defaultFrom = $from;
     }
-    
+
     public function send($message = null)
     {
         $newEmail = new EmailQueue();

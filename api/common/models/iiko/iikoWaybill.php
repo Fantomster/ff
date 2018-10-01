@@ -417,14 +417,14 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             if ($this->store_id === null) {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2')
-                    ->andWhere('`' . $dbName . '`.all_map.store_rid is null and `' . $dbName . '`.all_map.org_id in (' . $client_id .')')
+                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2 and `' . $dbName . '`.all_map.org_id in (' . $client_id .')')
+                    ->andWhere('`' . $dbName . '`.all_map.store_rid is null')
                     ->all();
             } else {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2')
-                    ->andWhere('`' . $dbName . '`.all_map.store_rid =' . $this->store_id.' and `' . $dbName . '`.all_map.org_id in (' . $client_id .')')
+                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2 and `' . $dbName . '`.all_map.org_id in (' . $client_id .')')
+                    ->andWhere('`' . $dbName . '`.all_map.store_rid =' . $this->store_id)
                     ->all();
             }
         } else {

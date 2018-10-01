@@ -2153,6 +2153,7 @@ class OrderController extends DefaultController
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@common/mail/layouts/order';
         // send email
         $senderOrg = $sender->organization;
         $subject = Yii::t('message', 'frontend.controllers.order.complete', ['ru' => "Заказ № {order_id} выполнен!", 'order_id' => $order->id]);
@@ -2199,6 +2200,7 @@ class OrderController extends DefaultController
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@common/mail/layouts/order';
         // send email
         $senderOrg = $sender->organization;
         $subject = Yii::t('message', 'frontend.controllers.order.new_order', ['ru' => "Новый заказ №"]) . $order->id . "!";
@@ -2293,6 +2295,7 @@ class OrderController extends DefaultController
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@common/mail/layouts/order';
         // send email
         $subject = Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
 

@@ -48,8 +48,9 @@ class SyncLog
         }
     }
 
-    public static function showLog(array $params) {
-        if(isset($params['service_prefix']) && isset($params['log_index'])) {
+    public static function showLog(array $params)
+    {
+        if (isset($params['service_prefix']) && isset($params['log_index'])) {
             $file = self::$logDir . '/' . $params['service_prefix'] . $params['log_index'] . '.log';
             if (file_exists($file)) {
                 echo file_get_contents($file);
@@ -86,7 +87,7 @@ class SyncLog
                 if (!$i) {
                     $timePrev = 0;
                 } else {
-                    $timePrev = self::$logData[self::$logIndex][$k-1]['time'];
+                    $timePrev = self::$logData[self::$logIndex][$k - 1]['time'];
                 }
                 $i++;
                 $mess = $i . ') "' . $mess['mess'] . '" - [' .

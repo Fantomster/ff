@@ -88,11 +88,11 @@ class SyncController extends WebApiController
             if (!isset($this->request['service_id'])) {
                 $this->request['service_id'] = null;
             }
-            SyncLog::trace('Service ID is: '.$this->request['service_id']);
+            SyncLog::trace('Service ID is: ' . $this->request['service_id']);
             if (!isset($this->request['params'])) {
                 $this->request['params'] = [];
             }
-            SyncLog::trace('Request params are: '.json_encode($this->request['params']));
+            SyncLog::trace('Request params are: ' . json_encode($this->request['params']));
 
         } else {
 

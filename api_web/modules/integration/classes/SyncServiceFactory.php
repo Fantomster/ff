@@ -73,7 +73,7 @@ class SyncServiceFactory extends WebApi
             /** AbstractSyncFactory $entity */
             $this->syncResult = $entity->loadDictionary($params);
 
-        } elseif($callbackTaskId == self::TASK_SYNC_GET_LOG) {
+        } elseif ($callbackTaskId == self::TASK_SYNC_GET_LOG) {
             SyncLog::trace('Show log!');
             SyncLog::showLog($params);
 

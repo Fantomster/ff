@@ -1522,9 +1522,9 @@ class ParserTorg12
         Yii::$app->language = $language;
         $subject = Yii::t('app', 'common.mail.error.subject', ['ru' => 'В вашей накладной ошибка!']);
 
-        if(!empty($user->email)) {
+        if(!empty($email)) {
             $mailer->compose('@common/mail/empty', compact("user"))
-                ->setTo($user->email)
+                ->setTo($email)
                 ->setSubject($subject)
                 ->send();
         }

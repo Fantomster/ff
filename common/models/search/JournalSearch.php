@@ -71,7 +71,7 @@ class JournalSearch extends Journal
             $query->andFilterWhere(['in', 'organization_id', $this->organizations]);
         }
 
-        $query->andFilterWhere(['like', 'operation_code', $this->operation_code])
+        $query->andFilterWhere(['operation_code' => $this->operation_code])
             ->andFilterWhere(['like', 'response', $this->response])
             ->andFilterWhere(['like', 'log_guide', $this->log_guide])
             ->andFilterWhere(['like', 'type', $this->type]);

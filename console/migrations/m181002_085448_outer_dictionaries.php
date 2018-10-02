@@ -42,7 +42,6 @@ class m181002_085448_outer_dictionaries extends Migration
         ]);
 
         $this->addForeignKey('{{%organization_dictionary_outer_dic}}', '{{%organization_dictionary}}', 'outer_dic_id', '{{%outer_dictionary}}', 'id');
-        $this->addForeignKey('{{%organization_dictionary_organization}}', '{{%organization_dictionary}}', 'org_id', '{{%organization}}', 'id');
 
     }
 

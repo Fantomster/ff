@@ -198,7 +198,7 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 
         $vsd = self::findOne(['uuid' => $uuid]);
 
-        return ($guid == $vsd->sender_guid) ? 2 : 1;
+        return ($guid == $vsd->sender_guid) ? self::OUTCOME_VSD : self::INCOME_VSD;
     }
 
     public static function getNumber($series, $number)

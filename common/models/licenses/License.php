@@ -3,6 +3,7 @@
 namespace common\models\licenses;
 
 use Yii;
+use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -16,7 +17,7 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property LicenseService[] $licenseServices
  */
-class License extends \yii\db\ActiveRecord
+class License extends ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -79,6 +80,6 @@ class License extends \yii\db\ActiveRecord
      */
     public function getLicenseServices()
     {
-        return $this->hasMany(LicenseService::className(), ['license_id' => 'id']);
+        return $this->hasMany(LicenseService::class, ['license_id' => 'id']);
     }
 }

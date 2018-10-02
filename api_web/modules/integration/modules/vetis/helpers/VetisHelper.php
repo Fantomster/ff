@@ -52,6 +52,7 @@ class VetisHelper
 
     /**
      * Получение краткой информации о ВСД
+     *
      * @param string $uuid
      * @throws BadRequestHttpException
      * */
@@ -81,6 +82,7 @@ class VetisHelper
 
     /**
      * Получение полной информации о ВСД
+     *
      * @param $uuid
      * @throws BadRequestHttpException
      * */
@@ -134,6 +136,7 @@ class VetisHelper
 
     /**
      * Парсит $doc->referencedDocument и записывает в экземпляр класса
+     *
      * @param object $refDoc
      * */
     public function setTransportWaybill($refDoc): void
@@ -212,7 +215,7 @@ class VetisHelper
             $query['statuses'] = $this->getStatusForGroup($query['statuses']);
         }
 
-        if($query['count'] == 0) {
+        if ($query['count'] == 0) {
             return null;
         }
 
@@ -220,45 +223,20 @@ class VetisHelper
     }
 
     /**
-     * @return Query
-     */
-    public function getListQuery()
-    {
-        $tableName = $this->getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
-        $query = (new Query())
-            ->select("
-                  `m`.uuid,
-                  `m`.`sender_name`,
-                  `m`.`product_name`,
-                  `m`.`status`,
-                  `m`.`last_update_date` as status_date,
-                  `m`.`amount`,
-                  `m`.`unit`,
-                  `m`.`production_date`,
-                  `m`.`date_doc`,
-                  `o`.id as document_id
-            ")
-            ->from('`' . $tableName . '`.merc_vsd m')
-            ->leftJoin('order_content oc', 'oc.merc_uuid = m.uuid COLLATE utf8_unicode_ci')
-            ->leftJoin('order o', 'o.id = oc.order_id')
-            ->orderBy(['m.date_doc' => SORT_DESC]);
-
-        return $query;
-    }
-
-    /**
      * Get database name from config
+     *
      * @param string $name
      * @param string $dsn dsn string from config
      * @return string database name
      * */
-    private function getDsnAttribute($name, $dsn)
+    public function getDsnAttribute($name, $dsn)
     {
         return DBNameHelper::getDsnAttribute($name, $dsn);
     }
 
     /**
      * Get group status from array statuses
+     *
      * @param string $strStatuses
      * @return array
      * */
@@ -282,7 +260,7 @@ class VetisHelper
     }
 
     /**
-     * @param $models
+     * @param       $models
      * @param array $order_ids
      * @return array
      */

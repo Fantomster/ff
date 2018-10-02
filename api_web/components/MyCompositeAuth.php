@@ -10,6 +10,9 @@ use yii\filters\auth\CompositeAuth;
  */
 class MyCompositeAuth extends CompositeAuth
 {
+    /**
+     * @var array
+     */
     public $no_auth = [];
 
     /**
@@ -21,8 +24,10 @@ class MyCompositeAuth extends CompositeAuth
     protected function isActive($action)
     {
         $is_action_auth = true;
-        if (in_array(\Yii::$app->request->url, $this->no_auth)) {
-            $is_action_auth = false;
+        if (is_array($this->no_auth)){
+            if (in_array(\Yii::$app->request->url, $this->no_auth)) {
+                $is_action_auth = false;
+            }
         }
 
         if ($is_action_auth == true) {

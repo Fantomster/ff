@@ -42,12 +42,12 @@ class SyncServiceFactory extends WebApi
 
     /**
      * Construct method for Class SyncServiceFactory
-     * @param mixed $service_id Service ID
+     * @param mixed $serviceId Service ID
      * @param array $params Transaction params
      * @param string $callbackTaskId Callback task id
      * @throws BadRequestHttpException
      */
-    public function __construct($service_id = 0, array $params = [], string $callbackTaskId = null)
+    public function __construct($serviceId = 0, array $params = [], string $callbackTaskId = null)
     {
 
         # 1. Load integration script with application environment params
@@ -58,16 +58,16 @@ class SyncServiceFactory extends WebApi
         if (!$callbackTaskId) {
 
             # 2.1.1. Identify Service ID
-            if (!array_key_exists($service_id, $this->allServicesMap)) {
-                SyncLog::trace('Invalid service_id: "' . $service_id . '"');
+            if (!array_key_exists($serviceId, $this->allServicesMap)) {
+                SyncLog::trace('Invalid service_id: "' . $serviceId . '"');
                 throw new BadRequestHttpException("empty_param|params");
             } else {
-                SyncLog::trace('Identified Service ID: ' . $service_id);
+                SyncLog::trace('Identified Service ID: ' . $serviceId);
             }
 
             # 2.1.2. Use entity class (by factory)
-            $entity = $this->factory((int)$service_id, (string)$this->allServicesMap[$service_id]);
-            SyncLog::trace('Initialized entity class: ' . get_class($entity), $this->allServicesMap[$service_id]);
+            $entity = $this->factory((int)$serviceId, (string)$this->allServicesMap[$serviceId]);
+            SyncLog::trace('Initialized entity class: ' . get_class($entity), $this->allServicesMap[$serviceId]);
 
             # 2.1.3. Load dictionary data
             /** AbstractSyncFactory $entity */

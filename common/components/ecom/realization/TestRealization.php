@@ -152,9 +152,6 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
             throw new Exception('No such order ID: ' . $orderID);
         }
 
-        $helper = new WaybillHelper(); //TODO: why not create waybill for ordersp
-        $arWaybills = $helper->createWaybill($order);
-
         \Yii::$app->language = $order->edi_order->lang ?? 'ru';
         $user = User::findOne(['id' => $order->created_by_id]);
 

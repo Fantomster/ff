@@ -25,19 +25,21 @@ class WaybillHelper
     /**@var int const for EDI service id in all_service table */
     const EDI_SERVICE_ID = 6;
     //TODO:translate
-    const WAYBILL_FORMED = 'Сформирована';
-    const WAYBILL_FORMED = 'Сформирована';
-    const WAYBILL_FORMED = 'Сформирована';
-    const WAYBILL_FORMED = 'Сформирована';
-    const WAYBILL_FORMED = 'Сформирована';
-    const WAYBILL_FORMED = 'Выгружается';
-    static $types = [
-        self::WAYBILL_FORMED => 1,
-        self::WAYBILL_FORMED => 1,
-        self::WAYBILL_FORMED => 1,
-        self::WAYBILL_FORMED => 1,
-        self::WAYBILL_FORMED => 1,
-        self::WAYBILL_FORMED => 1,
+    const WAYBILL_COMPARED = 'compared';
+    const WAYBILL_FORMED = 'formed';
+    const WAYBILL_ERROR = 'error';
+    const WAYBILL_RESET = 'reset';
+    const WAYBILL_UNLOADED = 'unloaded';
+    const WAYBILL_UNLOADING = 'unloading';
+
+    /**@var array $statuses*/
+    static $statuses = [
+        self::WAYBILL_COMPARED => 1,
+        self::WAYBILL_FORMED => 2,
+        self::WAYBILL_ERROR => 3,
+        self::WAYBILL_RESET => 4,
+        self::WAYBILL_UNLOADED => 5,
+        self::WAYBILL_UNLOADING => 6,
     ];
 
     /**
@@ -126,7 +128,7 @@ class WaybillHelper
         $model = new Waybill();
         $model->acquirer_id = $order->client_id;
         $model->service_id = WaybillHelper::EDI_SERVICE_ID;
-        $model->bill_status_id = 000; //TODO: bill_status_id ???
+        $model->bill_status_id = self::$statuses[self::WAYBILL_FORMED]; //TODO: bill_status_id ???
         $model->readytoexport = 0;
         $model->is_deleted = 0;
         $datetime = new \DateTime();

@@ -114,8 +114,8 @@ class UserWebApi extends \api_web\components\WebApi
     /**
      * Создание пользователя
      *
-     * @param array $post
-     * @param       $role_id
+     * @param array   $post
+     * @param integer $role_id
      * @return User
      * @throws BadRequestHttpException
      * @throws ValidationException
@@ -858,7 +858,7 @@ class UserWebApi extends \api_web\components\WebApi
     /**
      * @return array
      */
-    public function getAvailableBusinesses()
+    public function getUserOrganizationBusinessList()
     {
         $subQuery = (new Query())->select(['coalesce(parent_id, id)'])->from('organization')
             ->where(['id' => $this->user->organization->id]);

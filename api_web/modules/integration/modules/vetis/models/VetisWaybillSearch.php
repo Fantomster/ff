@@ -48,7 +48,7 @@ class VetisWaybillSearch extends MercVsd
                 $strOrgIds = $this->acquirer_id;
             }
         } else {
-            $orgIds = (new UserWebApi())->getAvailableBusinesses();
+            $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
             $strOrgIds = array_map(function ($el) {
                 return $el['id'];
             }, $orgIds['result']);
@@ -87,7 +87,7 @@ class VetisWaybillSearch extends MercVsd
                       and aa.uuid = ab.merc_uuid COLLATE utf8_unicode_ci
                   )
                 else null end ort
-                FROM (SELECT @row := 0, @page_size := ' . $pageSize . ', @page := 0, @offset := 0, @prev_order_id := NULL) x,
+                FROM (SELECT @row := 0, @page_size := :pageSize, @page := 0, @offset := 0, @prev_order_id := NULL) x,
                        merc_vsd a
                 join merc_pconst b on b.const_id = 10 and b.value in (a.recipient_guid,  a.sender_guid)
                 left join `' . $tableName . '`.order_content c on a.uuid = c.merc_uuid COLLATE utf8_unicode_ci
@@ -95,9 +95,12 @@ class VetisWaybillSearch extends MercVsd
                 b.org in (' . $strOrgIds . ')
                 order by coalesce(ort, a.date_doc) desc, order_id, a.date_doc desc
                 ) tb 
-              ) tb2 where pg=' . $page . '
+              ) tb2 where pg=:page
              ';
-
+        $query_params = [
+            ':page'     => $page,
+            ':pageSize' => $pageSize,
+        ];
 
         foreach ($params as $key => $param) {
             if ($key == 'from') {
@@ -105,20 +108,30 @@ class VetisWaybillSearch extends MercVsd
             } elseif ($key == 'to') {
                 $end_date = date('Y-m-d 23:59:59', strtotime($this->to));
             } elseif ($key == 'product_name') {
-                $sql .= " and product_name LIKE '%$this->product_name%' ";
-            } elseif ($key == 'acquirer_id') {
-
+                $sql .= " and product_name LIKE :product_name";
+                $query_params[':product_name'] = '%' . $this->product_name . '%';
             } elseif ($key == 'sender_guid') {
-                $sql .= " and sender_guid in ('" . implode('\',\'', $this->sender_guid) . "') ";
-            } else {
-                $sql .= ' and ' . $key . '=\'' . $this->{$key} . '\'';
+                foreach ($this->sender_guid as $item) {
+                    if (!preg_match('/[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}/', $item)) {
+                        return ['uuids' => [], 'groups' => []];
+                    }
+                }
+                $sender = implode('\',\'', $this->sender_guid);
+                $sql .= " and sender_guid in ('$sender') ";
+            } elseif ($key == 'type') {
+                $sql .= ' and type=:type';
+                $query_params[':type'] = $this->type;
+            } elseif ($key == 'status') {
+                $sql .= ' and status=:status';
+                $query_params[':status'] = $this->status;
             }
         }
-
         if (isset($start_date) && isset($end_date)) {
-            $sql .= ' and (date_doc >= ' . $start_date . ' and date_doc <= ' . $end_date . ') ';
+            $query_params[':start_date'] = $start_date;
+            $query_params[':end_date'] = $end_date;
+            $sql .= ' and (date_doc >= :start_date and date_doc <= :end_date) ' . count($query_params);
         }
-        $result = \Yii::$app->db_api->createCommand($sql)->queryAll();
+        $result = \Yii::$app->db_api->createCommand($sql, $query_params)->queryAll();
         $arUuids = $arOrders = [];
         foreach ($result as $row) {
             $arUuids[] = $row['uuid'];

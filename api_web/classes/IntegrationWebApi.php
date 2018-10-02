@@ -11,7 +11,9 @@ use api_web\modules\integration\modules\iiko\models\iikoService;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OuterAgent;
+use common\models\OuterProduct;
 use common\models\OuterStore;
+use common\models\OuterUnit;
 use common\models\Waybill;
 use common\models\WaybillContent;
 use yii\base\Exception;
@@ -192,6 +194,58 @@ class IntegrationWebApi extends WebApi
         $waybillContent->save();
 
         return ['success' => true, 'waybill_content_id' => $post['waybill_content_id']];
+    }
+
+
+    /**
+     * integration: Позиция накладной - Детальная информация
+     * @param array $post
+     * @return array
+     */
+    public function showWaybillContent(array $post): array
+    {
+        if (!isset($post['waybill_content_id'])) {
+            throw new BadRequestHttpException("empty_param|waybill_content_id");
+        }
+
+        $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
+        if(!$waybillContent){
+            throw new BadRequestHttpException("not found");
+        }
+        $arr = $waybillContent->attributes;
+
+        $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
+        if($orderContent){
+            $allMap = AllMaps::findOne(['product_id' => $orderContent->product_id]);
+            if($allMap){
+                $arr['koef'] = $allMap->koef;
+                $arr['serviceproduct_id'] = $allMap->serviceproduct_id;
+                $arr['store_rid'] = $allMap->store_rid;
+                $outerProduct = OuterProduct::findOne(['id' => $allMap->serviceproduct_id]);
+                if($outerProduct){
+                    $arr['outer_product_name'] = $outerProduct->name;
+                    $arr['outer_product_id'] = $outerProduct->id;
+                    $arr['product_id_equality'] = true;
+                }else{
+                    $arr['product_id_equality'] = false;
+                }
+                $outerStore = OuterStore::findOne(['outer_uid' => $allMap->store_rid]);
+                if($outerStore){
+                    $arr['outer_store_name'] = $outerStore->name;
+                    $arr['outer_store_id'] = $outerStore->id;
+                    $arr['store_id_equality'] = true;
+                }else{
+                    $arr['store_id_equality'] = false;
+                }
+                $outerUnit = OuterUnit::findOne(['outer_uid' => $allMap->unit_rid]);
+                if($outerUnit){
+                    $arr['outer_unit_name'] = $outerUnit->name;
+                    $arr['outer_unit_id'] = $outerUnit->id;
+                }
+            }
+        }
+
+        return $arr;
     }
 
 }

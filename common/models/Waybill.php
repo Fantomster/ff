@@ -94,4 +94,28 @@ class Waybill extends yii\db\ActiveRecord
     {
         return $this->hasMany(WaybillContent::class, ['waybill_id' => 'id']);
     }
+
+    /**
+     * @return bool
+     */
+    public function getIsMercuryCert()
+    {
+        return (WaybillContent::find()->where(['waybill_id' => $this->id])->andWhere('merc_uuid is not null')->count()) > 0;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalCount()
+    {
+        return WaybillContent::find()->where(['waybill_id' => $this->id])->count();
+    }
+
+    /**
+     * @return float
+     */
+    public function getTotalPrice()
+    {
+        return round(WaybillContent::find()->where(['waybill_id' => $this->id])->sum('sum_with_vat'),2);
+    }
 }

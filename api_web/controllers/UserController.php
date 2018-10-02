@@ -774,7 +774,6 @@ class UserController extends WebApiController
         $this->response['text'] = \Yii::t('api_web', 'api_web.user.agreement.' . $this->request['type']);
     }
 
-
     /**
      * @SWG\Post(path="/user/change-unconfirmed-users-phone",
      *     tags={"User"},
@@ -815,5 +814,65 @@ class UserController extends WebApiController
         $this->response = $this->container->get('UserWebApi')->changeUnconfirmedUsersPhone($this->request);
     }
 
+    /**
+     * @SWG\Post(path="/user/get-available-businesses",
+     *     tags={"User"},
+     *     summary="Список фильтров имен бизнесов",
+     *     description="Список доступных бизнесов для текущего юзера",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "id": "4300",
+     *                          "parent_id": "4398",
+     *                          "name": "1йцу"
+     *                      },
+     *                      {
+     *                          "id": "4392",
+     *                          "parent_id": "4398",
+     *                          "name": "тест сортировка"
+     *                      },
+     *                      {
+     *                          "id": "4400",
+     *                          "parent_id": "4398",
+     *                          "name": "421"
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionGetAvailableBusinesses()
+    {
+        $this->response = $this->container->get('UserWebApi')->getAvailableBusinesses();
+    }
 
 }

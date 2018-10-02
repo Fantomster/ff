@@ -2,9 +2,10 @@
 
 namespace common\models\licenses;
 
-use common\models\AllService;
 use Yii;
+use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
+use common\models\AllService;
 
 /**
  * This is the model class for table "license_service".
@@ -18,7 +19,7 @@ use yii\behaviors\TimestampBehavior;
  * @property License $license
  * @property AllService $service
  */
-class LicenseService extends \yii\db\ActiveRecord
+class LicenseService extends ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -44,8 +45,8 @@ class LicenseService extends \yii\db\ActiveRecord
         return [
             [['license_id', 'service_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['license_id'], 'exist', 'skipOnError' => true, 'targetClass' => License::className(), 'targetAttribute' => ['license_id' => 'id']],
-            [['service_id'], 'exist', 'skipOnError' => true, 'targetClass' => AllService::className(), 'targetAttribute' => ['service_id' => 'id']],
+            [['license_id'], 'exist', 'skipOnError' => true, 'targetClass' => License::class, 'targetAttribute' => ['license_id' => 'id']],
+            [['service_id'], 'exist', 'skipOnError' => true, 'targetClass' => AllService::class, 'targetAttribute' => ['service_id' => 'id']],
         ];
     }
 
@@ -82,7 +83,7 @@ class LicenseService extends \yii\db\ActiveRecord
      */
     public function getLicense()
     {
-        return $this->hasOne(License::className(), ['id' => 'license_id']);
+        return $this->hasOne(License::class, ['id' => 'license_id']);
     }
 
     /**
@@ -90,6 +91,6 @@ class LicenseService extends \yii\db\ActiveRecord
      */
     public function getService()
     {
-        return $this->hasOne(AllService::className(), ['id' => 'service_id']);
+        return $this->hasOne(AllService::class, ['id' => 'service_id']);
     }
 }

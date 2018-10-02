@@ -104,4 +104,50 @@ class DefaultController extends \api_web\components\WebApiController
     {
         $this->response = $this->container->get('IntegrationWebApi')->handleWaybill($this->request);
     }
+
+
+    /**
+     * @SWG\Post(path="/integration/default/reset-waybill-content",
+     *     tags={"Integration"},
+     *     summary="Сброс данных позиции, на значения из заказа",
+     *     description="Сброс данных позиции, на значения из заказа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                              "waybill_content_id": 14822
+     *                          }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                "success": true,
+     *                "waybill_id": 1,
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionResetWaybillContent()
+    {
+        $this->response = $this->container->get('IntegrationWebApi')->resetWaybillContent($this->request);
+    }
 }

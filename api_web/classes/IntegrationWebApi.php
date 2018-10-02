@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api\common\models\AllMaps;
 use api_web\components\WebApi;
 use api_web\modules\integration\interfaces\ServiceInterface;
 use api_web\modules\integration\modules\one_s\models\one_sService;
@@ -156,4 +157,41 @@ class IntegrationWebApi extends WebApi
 
         return ['success' => true, 'waybill_id' => $waybill->id];
     }
+
+
+    /**
+     * integration: Сброс данных позиции, на значения из заказа
+     * @param array $post
+     * @return array
+     */
+    public function resetWaybillContent(array $post): array
+    {
+        if (!isset($post['waybill_content_id'])) {
+            throw new BadRequestHttpException("empty_param|waybill_content_id");
+        }
+
+        $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
+        if(!$waybillContent){
+            throw new BadRequestHttpException("not found");
+        }
+
+        $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
+        if($orderContent){
+            $waybillContent->quantity_waybill = $orderContent->quantity;
+            $waybillContent->price_without_vat = (int)$orderContent->price;
+            $waybillContent->vat_waybill = $orderContent->vat_product;
+            $waybillContent->price_with_vat = (int)($orderContent->price + ($orderContent->price * $orderContent->vat_product));
+            $waybillContent->sum_without_vat = (int)$orderContent->price * $orderContent->quantity;
+            $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $orderContent->quantity;
+            $allMap = AllMaps::findOne(['product_id' => $orderContent->product_id]);
+            if($allMap){
+                $waybillContent->product_outer_id = $allMap->serviceproduct_id;
+            }
+        }
+
+        $waybillContent->save();
+
+        return ['success' => true, 'waybill_content_id' => $post['waybill_content_id']];
+    }
+
 }

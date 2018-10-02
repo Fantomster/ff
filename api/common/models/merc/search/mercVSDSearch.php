@@ -18,7 +18,7 @@ class mercVSDSearch extends MercVsd
         return [
             [['date_doc', 'production_date', 'guid', 'date_from', 'date_to'], 'safe'],
             [['amount','type'], 'number'],
-            [['uuid', 'number', 'status', 'product_name', 'unit', 'sender_name','type', 'sender_guid'], 'string', 'max' => 255],
+            [['uuid', 'number', 'status', 'product_name', 'unit', 'sender_name','type', 'sender_guid','recipient_guid'], 'string', 'max' => 255],
         ];
     }
 
@@ -58,10 +58,14 @@ class mercVSDSearch extends MercVsd
             'amount' => $this->amount,
         ]);
 
-        if($this->type == 2)
+        if($this->type == self::OUTCOME_VSD) {
             $query->andWhere("sender_guid = '$guid'");
-        else
+            $query->andFilterWhere(['recipient_guid' => $this->recipient_guid]);
+        }
+        else {
             $query->andWhere("recipient_guid = '$guid'");
+            $query->andFilterWhere(['sender_guid' => $this->sender_guid]);
+        }
 
         if ( !empty($this->date_from) && !empty($this->date_to)) {
             $start_date = date('Y-m-d 00:00:00',strtotime($this->date_from));
@@ -71,20 +75,13 @@ class mercVSDSearch extends MercVsd
 
         $query->andFilterWhere(['like', 'product_name', $this->product_name]);
 
-        if($this->type == 2) {
-            $query->andFilterWhere(['recipient_guid' => $this->sender_guid]);
-        }
-        else {
-            $query->andFilterWhere(['sender_guid' => $this->recipient_guid]);
-        }
-
         return $dataProvider;
     }
 
     public function getRecipientList()
     {
         $guid = mercDicconst::getSetting('enterprise_guid');
-        if($this->type == 1)
+        if($this->type == self::INCOME_VSD)
             return array_merge(['' => 'Все'], ArrayHelper::map(MercVsd::find()->where("recipient_guid = '$guid'")->groupBy('sender_guid')->all(), 'sender_guid', 'sender_name'));
         else
             return array_merge(['' => 'Все'], ArrayHelper::map(MercVsd::find()->where("sender_guid = '$guid'")->groupBy('recipient_guid')->all(), 'recipient_guid', 'recipient_name'));

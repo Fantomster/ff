@@ -105,7 +105,7 @@ class VetisWaybillSearch extends MercVsd
             } elseif ($key == 'to') {
                 $end_date = date('Y-m-d 23:59:59', strtotime($this->to));
             } elseif ($key == 'product_name') {
-                $sql .= " and product_name LIKE '%$this->producer_name%' ";
+                $sql .= " and product_name LIKE '%$this->product_name%' ";
             } elseif ($key == 'acquirer_id') {
 
             } elseif ($key == 'sender_guid') {

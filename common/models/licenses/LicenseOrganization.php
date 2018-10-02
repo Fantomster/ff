@@ -4,6 +4,7 @@ namespace common\models\licenses;
 
 use common\models\Organization;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "license_organization".

@@ -179,6 +179,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'label' => 'Тестовые вендоры',
                                     'url' => ['/organization/test-vendors'],
                                 ],
+                                [
+                                    'label' => 'Лицензии',
+                                    'url' => ['/organization/list-organizations-for-licenses'],
+                                ],
                             ],
                         ],
                         [

@@ -3,6 +3,7 @@
 namespace common\models\licenses;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "license".

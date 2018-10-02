@@ -257,7 +257,7 @@ Modal::widget([
                                 <div class="form-group field-statusFilter">
                                     <?=
                                     $form->field($searchModel, 'type')
-                                        ->dropDownList([1 => 'Входящие', 2 => 'Исходящие'], ['id' => 'typeFilter'], ['options' =>
+                                        ->dropDownList([MercVsd::INCOME_VSD => 'Входящие', MercVsd::OUTCOME_VSD => 'Исходящие'], ['id' => 'typeFilter'], ['options' =>
                                             [
                                                 1 => ['selected' => true]
                                             ]

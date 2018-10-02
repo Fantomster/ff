@@ -58,7 +58,7 @@ class mercVSDSearch extends MercVsd
             'amount' => $this->amount,
         ]);
 
-        if($this->type == 2) {
+        if($this->type == self::OUTCOME_VSD) {
             $query->andWhere("sender_guid = '$guid'");
             $query->andFilterWhere(['recipient_guid' => $this->recipient_guid]);
         }
@@ -81,7 +81,7 @@ class mercVSDSearch extends MercVsd
     public function getRecipientList()
     {
         $guid = mercDicconst::getSetting('enterprise_guid');
-        if($this->type == 1)
+        if($this->type == self::INCOME_VSD)
             return array_merge(['' => 'Все'], ArrayHelper::map(MercVsd::find()->where("recipient_guid = '$guid'")->groupBy('sender_guid')->all(), 'sender_guid', 'sender_name'));
         else
             return array_merge(['' => 'Все'], ArrayHelper::map(MercVsd::find()->where("sender_guid = '$guid'")->groupBy('recipient_guid')->all(), 'recipient_guid', 'recipient_name'));

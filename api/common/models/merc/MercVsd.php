@@ -47,6 +47,9 @@ use Yii;
  */
 class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
+    const INCOME_VSD = 1;
+    const OUTCOME_VSD = 2;
+
     const DOC_TYPE_INCOMMING = 'INCOMING';
     const DOC_TYPE_OUTGOING = 'OUTGOING';
     const DOC_TYPE_PRODUCTIVE = 'PRODUCTIVE';

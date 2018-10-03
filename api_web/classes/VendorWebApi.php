@@ -564,6 +564,7 @@ class VendorWebApi extends \api_web\components\WebApi
         if (empty($request['mapping']) && empty($tempCatalog->cat->mapping)) {
             throw new BadRequestHttpException('empty_param|mapping');
         }
+        $request['mapping'] = isset($request['mapping']) ? array_flip($request['mapping']) : null;
         $mapping = $request['mapping'] ?? $tempCatalog->cat->mapping;
         if (is_string($mapping)) {
             $mapping = \json_decode($mapping);

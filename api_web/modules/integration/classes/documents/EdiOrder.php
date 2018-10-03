@@ -1,7 +1,7 @@
 <?php
 namespace api_web\modules\integration\classes\documents;
 
-use api_web\modules\integration\classes\Document;
+use api_web\modules\integration\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\EdiOrder as BaseOrder;
 
@@ -19,7 +19,7 @@ class EdiOrder extends BaseOrder implements DocumentInterface
         }
 
        $return = Order::prepareModel($this->order_id);
-       $return["type"] = Document::TYPE_ORDER_EDI;
+       $return["type"] = DocumentWebApi::TYPE_ORDER_EDI;
        return $return;
     }
 

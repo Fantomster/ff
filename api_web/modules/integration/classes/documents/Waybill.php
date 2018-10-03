@@ -2,7 +2,7 @@
 namespace api_web\modules\integration\classes\documents;
 
 use api_web\modules\integration\classes\Dictionary;
-use api_web\modules\integration\classes\Document;
+use api_web\modules\integration\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\Waybill as BaseWaybill;
 
@@ -15,18 +15,19 @@ class Waybill extends BaseWaybill implements DocumentInterface
      */
     public function prepare()
     {
-        if (empty($model)) {
+        if (empty($this->attributes)) {
             return [];
         }
 
         $return = [
-            "id" => $model->id,
-            "type" => Document::TYPE_WAYBILL,
-            "status_id" => $model->bill_status_id,
+            "id" => $this->id,
+            "number" => $this->outer_number_code,
+            "type" => DocumentWebApi::TYPE_WAYBILL,
+            "status_id" => $this->bill_status_id,
             "status_text" => "",
         ];
 
-        $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_contractor_uuid);
+        $agent = (new Dictionary($this->service_id, 'Agent'))->agentInfo($this->outer_contractor_uuid);
 
         $return ["agent"] = [
             "uid" => $agent['outer_uid'],
@@ -39,10 +40,10 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "name" => $agent['vendor_name'],
             "difer" => false,
         ];
-        $return["is_mercury_cert"] = $model->getIsMercuryCert();
-        $return["count"] = $model->getTotalCount();
-        $return["total_price"] = $model->getTotalPrice();
-        $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($model->doc_date));
+        $return["is_mercury_cert"] = $this->getIsMercuryCert();
+        $return["count"] = $this->getTotalCount();
+        $return["total_price"] = $this->getTotalPrice();
+        $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->doc_date));
 
         return $return;
     }

@@ -1,7 +1,7 @@
 <?php
 namespace api_web\modules\integration\classes\documents;
 
-use api_web\modules\integration\classes\Document;
+use api_web\modules\integration\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\IntegrationInvoice as BaseOrder;
 
@@ -22,7 +22,8 @@ class OrderEmail extends BaseOrder implements DocumentInterface
 
         $return = [
             "id" => $this->id,
-            "type" => Document::TYPE_ORDER_EMAIL,
+            "mumber" => $this->number,
+            "type" => DocumentWebApi::TYPE_ORDER_EMAIL,
             "status_id" => isset($order) ? $order->status_id : null,
             "status_text" => isset($order) ? $order->statusText : null,
         ];

@@ -1,7 +1,7 @@
 <?php
 namespace api_web\modules\integration\classes\documents;
 
-use api_web\modules\integration\classes\Document;
+use api_web\modules\integration\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\Order as BaseOrder;
 use common\models\OrderContent;
@@ -21,7 +21,8 @@ class Order extends BaseOrder implements DocumentInterface
 
         $return = [
             "id" => $this->id,
-            "type" => Document::TYPE_ORDER,
+            "mumber" => $this->id,
+            "type" => DocumentWebApi::TYPE_ORDER,
             "status_id" => $this->status_id,
             "status_text" => $this->statusText,
         ];

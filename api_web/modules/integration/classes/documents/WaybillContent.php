@@ -13,7 +13,7 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
      */
     public function prepare()
     {
-        if (empty($model)) {
+        if (empty($this->attributes)) {
             return [];
         }
 

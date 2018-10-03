@@ -3,7 +3,7 @@
 namespace api\common\models\iiko;
 
 use api\common\models\AllMaps;
-use api_web\modules\integration\classes\Document;
+use api_web\modules\integration\classes\DocumentWebApi;
 use common\helpers\DBNameHelper;
 use common\models\Order;
 use common\models\OrderContent;

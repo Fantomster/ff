@@ -157,7 +157,7 @@ class ServiceRkws extends AbstractSyncFactory
         # 3. Find license Rkeeper data
         $license = RkService::findOne([
             'id' => $licenseMixcart->service_id,
-            'org' => $this->user->organization_id,
+            // 'org' => $this->user->organization_id, поле не используется!
             'status_id' => 1,
             'is_deleted' => 0
         ]);

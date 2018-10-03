@@ -4,6 +4,7 @@ namespace api\common\models\rkws;
 
 use api\common\models\iiko\iikoService;
 use yii\data\SqlDataProvider;
+use common\models\Catalog;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
@@ -80,7 +81,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
 
         ];
 
-        $fieldsCBG = array_merge([
+        /*$fieldsCBG = array_merge([
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
             "(`cbg`.`article` + 0) AS c_article_1",
@@ -88,9 +89,21 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'cbg.updated_at',
             "curr.id as currency_id", "fmap.id as fmap_id", "fmap.vat as vat", "fmap.koef as koef", "fmap.service_id as service_id",
             "allservice.denom as service_denom"
+        ], $fields[$this->service_id]);*/
+
+        $fieldsCBG = array_merge([
+            'cbg.id', 'cbg.product', 'cbg.supp_org_id', /*'cbg.units', 'cbg.price', */
+            'cbg.cat_id', /*'cbg.category_id',*/
+            'cbg.article', /*'cbg.note', */
+            'cbg.ed', 'org.name',
+            /*"(`cbg`.`article` + 0) AS c_article_1",
+            "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",*/
+            /*"`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'cbg.updated_at',*/
+            "fmap.id as fmap_id", "fmap.vat as vat", "fmap.koef as koef", "fmap.service_id as service_id",
+            "allservice.denom as service_denom"
         ], $fields[$this->service_id]);
 
-        $fieldsCG = array_merge([
+        /*$fieldsCG = array_merge([
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
             "(`cbg`.`article` + 0) AS c_article_1",
@@ -98,15 +111,11 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'coalesce( cg.updated_at, cbg.updated_at) AS updated_at',
             "curr.id as currency_id", "fmap.id as fmap_id", "fmap.vat as vat", "fmap.koef as koef", "fmap.service_id as service_id",
             "allservice.denom as service_denom"
-        ], $fields[$this->service_id]);
+        ], $fields[$this->service_id]);*/
 
         $where = '';
         $where_all = '';
         $params_sql = [];
-        if (!empty($this->searchString)) {
-            $where .= 'AND (cbg.product  LIKE :searchString OR cbg.article LIKE :searchString)';
-            $params_sql[':searchString'] = "%" . $this->searchString . "%";
-        }
 
         if (!empty($this->selectedVendor)) {
             if (is_array($this->selectedVendor)) {
@@ -120,7 +129,12 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             $where .= ' AND `org`.id IN (' . $this->selectedVendor . ') ';
         }
 
-        if (!empty($this->searchCategory)) {
+        if (!empty($this->searchString)) {
+            $where .= 'AND (cbg.product  LIKE :searchString OR cbg.article LIKE :searchString)';
+            $params_sql[':searchString'] = "%" . $this->searchString . "%";
+        }
+
+        /*if (!empty($this->searchCategory)) {
             if (is_array($this->searchCategory)) {
                 foreach ($this->searchCategory as $key => $category_id) {
                     $this->searchCategory[$key] = (int)$category_id;
@@ -145,7 +159,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                 $params_sql[':price_end'] = $this->searchPrice['to'];
                 $where_all .= ' AND price <= :price_end ';
             }
-        }
+        }*/
 
         if (!$this->service_id) {
             $where_all .= ' AND service_id = 0';
@@ -165,13 +179,24 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
 
         }
 
-        $sql = "
+        $sql = "SELECT " . implode(',', $fieldsCBG) . "
+        FROM `catalog_base_goods` `cbg`
+             LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
+             LEFT JOIN `$dbName`.`all_map` `fmap` ON cbg.id = fmap.product_id AND fmap.org_id = " . $client_id . " AND fmap.service_id = " . $this->service_id . "
+             " . $joins[$this->service_id] . "
+             LEFT JOIN `$dbName`.`all_service` `allservice` ON fmap.service_id = allservice.id       
+           WHERE          
+           cbg.deleted = 0
+           " . $where . "
+           AND cbg.deleted = 0";
+
+        /*$sql = "
         SELECT DISTINCT * FROM (
            SELECT 
               " . implode(',', $fieldsCBG) . "
            FROM `catalog_base_goods` `cbg`
              LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
-             LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
+             LEFT JOIN `catalog` `cat` ON  cbg.cat_id = cat.id AND cat.type = 1
              LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
              LEFT JOIN `$dbName`.`all_map` fmap ON cbg.id = fmap.product_id AND fmap.org_id = " . $client_id . " AND fmap.service_id = " . $this->service_id . "
              " . $joins[$this->service_id] . "
@@ -195,7 +220,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
           cg.cat_id IN (" . $this->catalogs . ")
           " . $where . "
           AND cbg.deleted = 0     
-        ) as c WHERE id != 0 " . $where_all;
+        ) as c WHERE id != 0 " . $where_all;*/
 
         $query = \Yii::$app->db->createCommand($sql);
 

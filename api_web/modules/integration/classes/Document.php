@@ -1,5 +1,6 @@
 <?php
 namespace api_web\modules\integration\classes;
+use api_web\modules\integration\classes\documents\EdiOrder;
 use api_web\modules\integration\classes\documents\Order;
 use api_web\modules\integration\classes\documents\OrderContent;
 use api_web\modules\integration\classes\documents\Waybill;
@@ -24,14 +25,14 @@ class Document
         self::TYPE_WAYBILL => Waybill::class,
         self::TYPE_ORDER => Order::class,
         //self::TYPE_ORDER_EMAIL => IntegrationInvoice::class,
-        //self::TYPE_ORDER_EDI => EdiOrder::class,
+        self::TYPE_ORDER_EDI => EdiOrder::class,
     ];
 
     private static $modelsContent = [
         self::TYPE_WAYBILL => WaybillContent::class,
         self::TYPE_ORDER => OrderContent::class,
-        /*self::TYPE_ORDER_EMAIL => IntegrationInvoiceContent::class,
-        self::TYPE_ORDER_EDI => EdiOrderContent::class,*/
+        //self::TYPE_ORDER_EMAIL => IntegrationInvoiceContent::class,
+        self::TYPE_ORDER_EDI => EdiOrderContent::class,
     ];
 
     /**
@@ -81,4 +82,52 @@ class Document
         $className = self::$modelsContent[$post['type']];
         return $className::prepareModel($post['document_id']);
     }
+
+    /**
+     * Получение состава накладной
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getWaybillContents(array $post)
+    {
+        if (empty($post['waybill_id'])) {
+            throw new BadRequestHttpException("empty_param|waybill_id");
+        }
+
+        $contents = WaybillContent::find()->where(['waibill_id' => $post['waybill_id']])->all();
+
+        $return = [];
+        foreach ($contents as $item)
+        {
+            $return[] = $item->prepare();
+        }
+
+        return $return;
+    }
+
+    /**
+     * Получение состава накладной
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getDocumentContents(array $post)
+    {
+        if (empty($post['waybill_id'])) {
+            throw new BadRequestHttpException("empty_param|waybill_id");
+        }
+
+        $contents = WaybillContent::find()->where(['waibill_id' => $post['waybill_id']])->all();
+
+        $return = [];
+        foreach ($contents as $item)
+        {
+            $return[] = $item->prepare();
+        }
+
+        return $return;
+    }
+
+
 }

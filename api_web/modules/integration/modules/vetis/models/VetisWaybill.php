@@ -68,6 +68,7 @@ class VetisWaybill extends WebApi
             'pagination' => [
                 'page'       => $page,
                 'page_size'  => $pageSize,
+                'total_count' => $arResult['count'],
             ]
         ];
         return $return;
@@ -81,11 +82,12 @@ class VetisWaybill extends WebApi
      * */
     public function getList($uuids) : array
     {
-        $models = MercVsd::findAll(['uuid' => $uuids]);
-        $result = [];
+        $result = $uuids;
+        $models = MercVsd::findAll(['uuid' => array_keys($uuids)]);
         foreach ($models as $model) {
-            $result[] = [
+            $result[$model->uuid] = [
                 'uuid'            => $model->uuid,
+                'document_id'     => $uuids[$model->uuid],
                 'product_name'    => $model->product_name,
                 'sender_name'     => $model->sender_name,
                 'status'          => $model->status,

@@ -81,11 +81,12 @@ class VetisWaybill extends WebApi
      * */
     public function getList($uuids) : array
     {
-        $models = MercVsd::findAll(['uuid' => $uuids]);
+        $models = MercVsd::findAll(['uuid' => array_keys($uuids)]);
         $result = [];
         foreach ($models as $model) {
             $result[] = [
                 'uuid'            => $model->uuid,
+                'document_id'     => $uuids[$model->uuid],
                 'product_name'    => $model->product_name,
                 'sender_name'     => $model->sender_name,
                 'status'          => $model->status,

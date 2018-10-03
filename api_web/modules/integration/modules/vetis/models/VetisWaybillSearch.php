@@ -83,14 +83,14 @@ class VetisWaybillSearch extends MercVsd
                   select max(date_doc) 
                     from  merc_vsd aa,
                           `' . $tableName . '`.order_content ab 
-                    where ab.order_id = c.order_id COLLATE utf8_unicode_ci
-                      and aa.uuid = ab.merc_uuid COLLATE utf8_unicode_ci
+                    where ab.order_id = c.order_id
+                      and aa.uuid = ab.merc_uuid
                   )
                 else null end ort
                 FROM (SELECT @row := 0, @page_size := :pageSize, @page := 0, @offset := 0, @prev_order_id := NULL) x,
                        merc_vsd a
                 join merc_pconst b on b.const_id = 10 and b.value in (a.recipient_guid,  a.sender_guid)
-                left join `' . $tableName . '`.order_content c on a.uuid = c.merc_uuid COLLATE utf8_unicode_ci
+                left join `' . $tableName . '`.order_content c on a.uuid = c.merc_uuid
                 where 
                 b.org in (' . $strOrgIds . ')
                 order by coalesce(ort, a.date_doc) desc, order_id, a.date_doc desc

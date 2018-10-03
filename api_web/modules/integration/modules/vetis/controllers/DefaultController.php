@@ -723,7 +723,7 @@ class DefaultController extends WebApiController
      */
     public function actionAcquirerFilter()
     {
-        $this->response = $this->container->get('UserWebApi')->getAvailableBusinesses();
+        $this->response = $this->container->get('UserWebApi')->getUserOrganizationBusinessList();
     }
 
 }

@@ -872,7 +872,7 @@ class UserController extends WebApiController
      */
     public function actionGetAvailableBusinesses()
     {
-        $this->response = $this->container->get('UserWebApi')->getAvailableBusinesses();
+        $this->response = $this->container->get('UserWebApi')->getUserOrganizationBusinessList();
     }
 
 }

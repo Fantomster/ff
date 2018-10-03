@@ -860,12 +860,9 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function getUserOrganizationBusinessList()
     {
-        $subQuery = (new Query())->select(['coalesce(parent_id, id)'])->from('organization')
-            ->where(['id' => $this->user->organization->id]);
-        $res = (new Query())->select(['a.id', 'a.parent_id', 'a.name'])->from('organization a')
+        $res = (new Query())->select(['a.id', 'a.name'])->from('organization a')
             ->leftJoin('relation_user_organization b', 'a.id = b.organization_id')
             ->where([
-                'a.parent_id' => $subQuery,
                 'b.user_id'   => $this->user->id,
                 'a.type_id'   => 1,
                 'b.role_id'   => [

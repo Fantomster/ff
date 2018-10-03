@@ -17,6 +17,7 @@ use common\models\OuterUnit;
 use common\models\Waybill;
 use common\models\WaybillContent;
 use yii\base\Exception;
+use yii\web\BadRequestHttpException;
 
 class IntegrationWebApi extends WebApi
 {
@@ -119,17 +120,17 @@ class IntegrationWebApi extends WebApi
             }
 
             $orderContent = OrderContent::findOne(['order_id' => $order->id]);
-            if($orderContent->edi_number){
+            if ($orderContent->edi_number) {
                 $arr = explode('-', $orderContent->edi_number);
-                if(isset($arr[1])){
+                if (isset($arr[1])) {
                     $i = (int)$arr[1];
                     $ediNumber = $arr[0] . "-" . $i;
-                }else{
+                } else {
                     $ediNumber = $orderContent->edi_number . "-1";
                 }
-            }else{
+            } else {
                 $waybillsCount = Waybill::find()->where(['order_id' => $post['order_id']])->count();
-                if(!$waybillsCount){
+                if (!$waybillsCount) {
                     $waybillsCount = 1;
                 }
                 $ediNumber = $post['order_id'] . "-" . $waybillsCount;
@@ -160,12 +161,12 @@ class IntegrationWebApi extends WebApi
         }
 
         $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
-        if(!$waybillContent){
-            throw new BadRequestHttpException("not found");
+        if (!$waybillContent) {
+            throw new BadRequestHttpException("waybill content not found");
         }
 
         $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
-        if($orderContent){
+        if ($orderContent) {
             $waybillContent->quantity_waybill = $orderContent->quantity;
             $waybillContent->price_without_vat = (int)$orderContent->price;
             $waybillContent->vat_waybill = $orderContent->vat_product;
@@ -173,10 +174,10 @@ class IntegrationWebApi extends WebApi
             $waybillContent->sum_without_vat = (int)$orderContent->price * $orderContent->quantity;
             $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $orderContent->quantity;
             $allMap = AllMaps::findOne(['product_id' => $orderContent->product_id]);
-            if($allMap){
+            if ($allMap) {
                 $waybillContent->product_outer_id = $allMap->serviceproduct_id;
             }
-        }else{
+        } else {
             throw new BadRequestHttpException("order content not found");
         }
 
@@ -198,36 +199,36 @@ class IntegrationWebApi extends WebApi
         }
 
         $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
-        if(!$waybillContent){
-            throw new BadRequestHttpException("not found");
+        if (!$waybillContent) {
+            throw new BadRequestHttpException("waybill content not found");
         }
         $arr = $waybillContent->attributes;
 
         $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
-        if($orderContent){
+        if ($orderContent) {
             $allMap = AllMaps::findOne(['product_id' => $orderContent->product_id]);
-            if($allMap){
+            if ($allMap) {
                 $arr['koef'] = $allMap->koef;
                 $arr['serviceproduct_id'] = $allMap->serviceproduct_id;
                 $arr['store_rid'] = $allMap->store_rid;
                 $outerProduct = OuterProduct::findOne(['id' => $allMap->serviceproduct_id]);
-                if($outerProduct){
+                if ($outerProduct) {
                     $arr['outer_product_name'] = $outerProduct->name;
                     $arr['outer_product_id'] = $outerProduct->id;
                     $arr['product_id_equality'] = true;
-                }else{
+                } else {
                     $arr['product_id_equality'] = false;
                 }
                 $outerStore = OuterStore::findOne(['outer_uid' => $allMap->store_rid]);
-                if($outerStore){
+                if ($outerStore) {
                     $arr['outer_store_name'] = $outerStore->name;
                     $arr['outer_store_id'] = $outerStore->id;
                     $arr['store_id_equality'] = true;
-                }else{
+                } else {
                     $arr['store_id_equality'] = false;
                 }
                 $outerUnit = OuterUnit::findOne(['outer_uid' => $allMap->unit_rid]);
-                if($outerUnit){
+                if ($outerUnit) {
                     $arr['outer_unit_name'] = $outerUnit->name;
                     $arr['outer_unit_id'] = $outerUnit->id;
                 }

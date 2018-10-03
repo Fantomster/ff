@@ -11,6 +11,7 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api_web\classes\UserWebApi;
 use api\common\models\merc\MercVsd;
 use common\helpers\DBNameHelper;
+use yii\db\Query;
 
 /**
  * Class VetisWaybillSearch
@@ -132,6 +133,7 @@ class VetisWaybillSearch extends MercVsd
             $sql .= ' and (date_doc >= :start_date and date_doc <= :end_date) ' . count($query_params);
         }
         $result = \Yii::$app->db_api->createCommand($sql, $query_params)->queryAll();
+
         $arUuids = $arOrders = [];
         foreach ($result as $row) {
             $arUuids[$row['uuid']] = $row['order_id'];
@@ -140,6 +142,8 @@ class VetisWaybillSearch extends MercVsd
             }
         }
 
-        return ['uuids' => $arUuids, 'groups' => $arOrders];
+        $count = MercVsd::find()->leftJoin('merc_pconst b', 'b.const_id = 10 and b.value in (merc_vsd.recipient_guid,  merc_vsd.sender_guid)')->where(['b.org' => explode(',', $strOrgIds)])->count();
+
+        return ['uuids' => $arUuids, 'groups' => $arOrders, 'count' => $count];
     }
 }

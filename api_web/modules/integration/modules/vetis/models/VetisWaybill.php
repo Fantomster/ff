@@ -68,6 +68,7 @@ class VetisWaybill extends WebApi
             'pagination' => [
                 'page'       => $page,
                 'page_size'  => $pageSize,
+                'total_count' => $arResult['count'],
             ]
         ];
         return $return;

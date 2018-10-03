@@ -1506,4 +1506,54 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('IntegrationWebApi')->showWaybillContent($this->request);
     }
+
+
+    /**
+     * @SWG\Post(path="/order/update-waybill-content",
+     *     tags={"Order/Integration"},
+     *     summary="Накладные - Обновление детальной информации позиции накладной",
+     *     description="Накладные - Обновление детальной информации позиции накладной",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                              "waybill_content_id": 5,
+     *                              "koef": 1.55,
+     *                              "quantity_waybill": 1,
+     *                              "product_outer_id": 4822,
+     *                              "price_without_vat": 35000,
+     *                              "vat_waybill": 0.18
+     *                          }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                "success": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionUpdateWaybillContent()
+    {
+        $this->response = $this->container->get('IntegrationWebApi')->updateWaybillContent($this->request);
+    }
 }

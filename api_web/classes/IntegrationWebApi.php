@@ -238,4 +238,63 @@ class IntegrationWebApi extends WebApi
         return $arr;
     }
 
+
+    /**
+     * integration: Накладные - Обновление детальной информации позиции накладной
+     * @param array $post
+     * @return array
+     */
+    public function updateWaybillContent(array $post): array
+    {
+        if (!isset($post['waybill_content_id'])) {
+            throw new BadRequestHttpException("empty_param|waybill_content_id");
+        }
+
+        $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
+        if (!$waybillContent) {
+            throw new BadRequestHttpException("waybill content not found");
+        }
+        if(isset($post['vat_waybill'])){
+            $waybillContent->vat_waybill = (float)$post['vat_waybill'];
+        }
+        if(isset($post['koef'])){
+            $waybillContent->koef = (float)$post['koef'];
+        }
+        if(isset($post['quantity_waybill'])){
+            $waybillContent->quantity_waybill = (int)$post['quantity_waybill'];
+        }
+        if(isset($post['product_outer_id'])){
+            $waybillContent->product_outer_id = $post['product_outer_id'];
+            $allMap = AllMaps::findOne(['product_id' => $post['product_outer_id']]);
+            if($allMap){
+                $outerStore = OuterStore::findOne(['id' => $allMap->store_rid]);
+                if($outerStore){
+                    $waybill = Waybill::findOne(['id' => $waybillContent->waybill_id]);
+                    if($waybill){
+                        $waybill->outer_store_uuid = $outerStore->outer_uid;
+                        $waybill->save();
+                    }
+                }
+            }
+        }
+
+        $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
+        if (!$orderContent) {
+            if(isset($post['price_without_vat'])){
+                $waybillContent->price_without_vat = (int)$post['price_without_vat'];
+                if(isset($post['vat_waybill'])){
+                    $waybillContent->price_with_vat = (int)($post['price_without_vat'] + ($post['price_without_vat'] * $post['vat_waybill']));
+                    if(isset($post['quantity_waybill'])){
+                        $waybillContent->sum_without_vat = (int)$post['price_without_vat'] * $post['quantity_waybill'];
+                        $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $post['quantity_waybill'];
+                    }
+                }
+            }
+        }
+
+        $waybillContent->save();
+
+        return ['success' => true];
+    }
+
 }

@@ -8,7 +8,6 @@
 
 namespace common\components\ecom\realization;
 
-use common\models\Waybill;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WaybillHelper;
 use common\components\ecom\AbstractRealization;
@@ -26,9 +25,7 @@ use common\models\OrderStatus;
 use common\models\Organization;
 use common\models\RelationSuppRest;
 use common\models\User;
-use common\models\WaybillContent;
 use frontend\controllers\OrderController;
-use function print_r;
 use stdClass;
 use yii\db\Exception;
 use yii\db\Expression;
@@ -168,7 +165,6 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
         $totalQuantity = 0;
         $totalPrice = 0;
         $sum = 0;
-
         foreach ($positions as $position) {
             $contID = (int)($position->PRODUCTIDBUYER ?? $position->PRODUCT);
             $quantity = (float)($position->DELIVEREDQUANTITY ?? $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY);
@@ -176,7 +172,6 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
             $barcode = (int)$position->PRODUCT;
             $barcodeArray[] = $barcode;
             $taxRate = (float)($position->TAXRATE ?? null);
-            $ediNumber = $position->DELIVERYNOTENUMBER ?? $position->WAYBILLNUMBER ?? $orderID;
             $priceWithVat = (float)($position->PRICEWITHVAT ?? $taxRate ? $position->PRICE + ($position->PRICE *
                         ($taxRate / 100)) : $price);
             $priceWithoutVat = $taxRate ? $priceWithVat / (1 + ($taxRate / 100)) : $price;
@@ -189,105 +184,79 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
                 $ordCont = $arOrderContentBarCodes[$barcode];
             } else {
                 if (!$good) {
-                    continue; //TODO: no good in catalog, dont parse?
+                    continue;
+                    //TODO: if good is $deleted = 0 can buy || $deleted=1 set quantity 0 price 0 and cant buy
                 }
-                if ($this->fileType == 'ordrsp') { //TODO: why only ordrsp?
-                    $ordCont = new OrderContent();
-                    $ordCont->order_id = $order->id;
-                    $ordCont->product_id = $good->id;
-                    $ordCont->quantity = $quantity; //TODO: wtf convert to decimal?
-                    $ordCont->price = $price; //TODO: $priceWithVat or $priceWithoutVat
-                    $ordCont->initial_quantity = $quantity;
-                    $ordCont->product_name = $good->product;
-                    $ordCont->plan_quantity = $quantity;
-                    $ordCont->plan_price = $price;
-                    $ordCont->units = $good->units;
-                    $ordCont->vat_product = $taxRate;
-                    $ordCont->edi_number = $ediNumber;
-                    $ordCont->merc_uuid = $position->VETIS->VETID ?? null;
-                    if (!$ordCont->save()) {
-                        throw new ValidationException([], $ordCont->getErrorSummary(true));
-                    }
-                    $message .= \Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
-                }
-            }
-
-            if ($quantity > 0.00 && $price > 0.00) {
-                /**@var Waybill $waybill */
-                foreach ($arWaybills as $waybill) {
-                    $modelWaybillContent = WaybillContent::findOne(['order_content_id' => $ordCont->id]);
-                    if (!$modelWaybillContent) {
-                        $modelWaybillContent = new WaybillContent();
-                        $modelWaybillContent->order_content_id = $ordCont->id;
-                        $modelWaybillContent->waybill_id = $waybill->id;
-                    }
-                    $modelWaybillContent->merc_uuid = isset($position->VETIS) ? $position->VETIS->VETID : null;
-                    $modelWaybillContent->product_outer_id = $ediNumber;
-                    $modelWaybillContent->quantity_waybill = $quantity;
-                    $modelWaybillContent->price_waybill = $price; //TODO: ???
-                    $modelWaybillContent->vat_waybill = $taxRate;
-                    $modelWaybillContent->sum_with_vat = $quantity * $priceWithVat;
-                    $modelWaybillContent->sum_without_vat = $quantity * $priceWithoutVat;
-                    $modelWaybillContent->price_with_vat = $priceWithVat;
-                    $modelWaybillContent->price_without_vat = $priceWithoutVat;
-                    $modelWaybillContent->save();
-                }
-                if ($ordCont->quantity != $quantity) {
-                    $message .= \Yii::t('message', 'frontend.controllers.order.change',
-                            ['ru'      => "<br/>изменил количество {prod} с {oldQuan} {ed} на ",
-                             'prod'    => $ordCont->product_name,
-                             'oldQuan' => $ordCont->quantity,
-                             'ed'      => $good->ed]
-                        ) . " $quantity" . $good->ed;
-                }
-                if ($ordCont->price != $price) {
-                    $message .= \Yii::t('message', 'frontend.controllers.order.change_price',
-                            ['ru'             => "<br/>изменил цену {prod} с {productPrice} руб на ",
-                             'prod'           => $ordCont->product_name,
-                             'productPrice'   => $ordCont->price,
-                             'currencySymbol' => $order->currency->iso_code]
-                        ) . $price . " руб";
-
-                }
-                $ordCont->quantity = $quantity;
-                $ordCont->price = $price; //TODO:?
+                $ordCont = new OrderContent();
+                $ordCont->order_id = $order->id;
+                $ordCont->product_id = $good->id;
+                $ordCont->quantity = $quantity; //TODOO: wtf convert to decimal? *Speaking
+                $ordCont->price = $price;
+                $ordCont->initial_quantity = $quantity;
+                $ordCont->product_name = $good->product;
+                $ordCont->plan_quantity = $quantity;
+                $ordCont->plan_price = $price;
+                $ordCont->units = $good->units;
                 $ordCont->vat_product = $taxRate;
-                $ordCont->edi_number = $ediNumber;
+                $ordCont->edi_number = $position->DELIVERYNOTENUMBER ?? $position->WAYBILLNUMBER ?? $orderID;
                 $ordCont->merc_uuid = $position->VETIS->VETID ?? null;
-                if (in_array($this->fileType, ['desadv', 'alcdes'])) {
-                    $prop = 'edi_' . $this->fileType;
-                    $ordCont->{$prop} = $this->xml->filename;
-                }
-                if (!$ordCont->save()){
+                if (!$ordCont->save()) {
                     throw new ValidationException([], $ordCont->getErrorSummary(true));
                 }
+                $message .= \Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
+            }
+            if ($ordCont->quantity != $quantity) {
+                $message .= \Yii::t('message', 'frontend.controllers.order.change',
+                        ['ru'      => "<br/>изменил количество {prod} с {oldQuan} {ed} на ",
+                         'prod'    => $ordCont->product_name,
+                         'oldQuan' => $ordCont->quantity,
+                         'ed'      => $good->ed]
+                    ) . " $quantity" . $good->ed;
+            }
+            if ($ordCont->price != $price) {
+                $message .= \Yii::t('message', 'frontend.controllers.order.change_price',
+                        ['ru'             => "<br/>изменил цену {prod} с {productPrice} руб на ",
+                         'prod'           => $ordCont->product_name,
+                         'productPrice'   => $ordCont->price,
+                         'currencySymbol' => $order->currency->iso_code]
+                    ) . $price . " руб";
 
-                $docType = $isAlcohol ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
-                $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $ordCont->id]);
-                if (!$ediOrderContent){
-                    $ediOrderContent = new EdiOrderContent(); //TODO: wtf why not create in EComIntegration?
-                }
-                $ediOrderContent->doc_type = $docType;
-                $ediOrderContent->pricewithvat = $priceWithVat;
-                $ediOrderContent->taxrate = $taxRate;
-                $ediOrderContent->uuid = $position->UUID ?? null;
-                $ediOrderContent->gtin = $position->GTIN ?? null;
-                $ediOrderContent->waybill_date = $position->WAYBILLDATE ?? null;
-                $ediOrderContent->waybill_number = $position->WAYBILLNUMBER ?? null;
-                $ediOrderContent->delivery_note_date = $position->DELIVERYNOTEDATE ?? null;
-                $ediOrderContent->delivery_note_number = $position->DELIVERYNOTENUMBER ?? null;
-                if (!$ediOrderContent->save()){
-                    throw new ValidationException([], $ediOrderContent->getErrorSummary(true));
-                }
-            } else {
-                $message .= \Yii::t('message', 'frontend.controllers.order.del',
-                    ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $ordCont->product_name]);
-                $ordCont->delete();
+            }
+            $ordCont->quantity = $quantity;
+            $ordCont->price = $price;
+            $ordCont->vat_product = $taxRate;
+            $ordCont->edi_number = $position->DELIVERYNOTENUMBER ?? $position->WAYBILLNUMBER ?? $orderID;
+            $ordCont->merc_uuid = $position->VETIS->VETID ?? null;
+            if (in_array($this->fileType, ['desadv', 'alcdes'])) {
+                $prop = 'edi_' . $this->fileType;
+                $ordCont->{$prop} = $this->xml->filename;
+            }
+            if (!$ordCont->save()) {
+                throw new ValidationException([], $ordCont->getErrorSummary(true));
+            }
+
+            $docType = $isAlcohol ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
+            $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $ordCont->id]);
+            if (!$ediOrderContent) {
+                $ediOrderContent = new EdiOrderContent();
+            }
+            $ediOrderContent->doc_type = $docType;
+            $ediOrderContent->pricewithvat = $priceWithVat;
+            $ediOrderContent->taxrate = $taxRate;
+            $ediOrderContent->uuid = $position->UUID ?? null;
+            $ediOrderContent->gtin = $position->GTIN ?? null;
+            $ediOrderContent->waybill_date = $position->WAYBILLDATE ?? null;
+            $ediOrderContent->waybill_number = $position->WAYBILLNUMBER ?? null;
+            $ediOrderContent->delivery_note_date = $position->DELIVERYNOTEDATE ?? null;
+            $ediOrderContent->delivery_note_number = $position->DELIVERYNOTENUMBER ?? null;
+            if (!$ediOrderContent->save()) {
+                throw new ValidationException([], $ediOrderContent->getErrorSummary(true));
             }
             $totalQuantity += $quantity;
             $totalPrice += $price;
             $sum += $quantity * $price;
         }
+
         if ($totalQuantity <= 0.00 || $totalPrice <= 0.00) {
             OrderController::sendOrderCanceled($order->client, $order);
             $message .= \Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
@@ -297,15 +266,8 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
             return true;
         }
 
-        foreach ($order->orderContent as $item) {
-            if (!array_key_exists($item->product->barcode, $barcodeArray)) {
-                $message .= \Yii::t('message', 'frontend.controllers.order.del',
-                    ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $item->product_name]);
-                $item->delete();
-            }
-        }
         $order->status = OrderStatus::STATUS_PROCESSING;
-        $order->total_price = $sum; //TODO:wtf decimal
+        $order->total_price = $sum; //TODOO:wtf decimal
         $order->service_id = WaybillHelper::EDI_SERVICE_ID;
         if ($this->fileType == 'ordrsp') {
             $order->edi_ordersp = $this->xml->filename;
@@ -317,6 +279,9 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
             $ediOrder->invoice_date = $this->xml->DELIVERYNOTEDATE ?? '';
             $ediOrder->save();
         }
+
+
+
 
         if ($message != '') {
             OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . \Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");

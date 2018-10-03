@@ -100,7 +100,7 @@ class VetisWaybill extends WebApi
             ];
         }
 
-        return $result;
+        return array_values($result);
     }
 
     /**

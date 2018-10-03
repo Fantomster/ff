@@ -164,7 +164,13 @@ class DocumentWebApi extends \api_web\components\WebApi
         return $return;
     }
 
-    public function getDocumentList(array $post)
+    /**
+     * Получение списка документов
+     * @param array $post
+     * @return array
+     */
+
+    public function getDocumentsList(array $post)
     {
         $client = $this->user->organization;
 
@@ -197,22 +203,59 @@ class DocumentWebApi extends \api_web\components\WebApi
             $params_sql[':waybill_date'] = $post['search']['waybill_date'];
         }
 
-        if (isset($post['search']['vendors'])) {
+        if (isset($post['search']['waybill_date']) && !empty($post['search']['waybill_date'])) {
+            if (isset($post['search']['waybill_date']['start']) && !empty($post['search']['waybill_date']['start'])) {
+                $from = self::convertDate($post['search']['waybill_date']['start']);
+            }
+
+            if (isset($post['search']['waybill_date']['end']) && !empty($post['search']['waybill_date']['end'])) {
+                $to = self::convertDate($post['search']['waybill_date']['end']);
+            }
+
+            $where_all .= " AND waybill_date BETWEEN :waybill_date_from AND :waybill_date_to";
+            $params_sql[':waybill_date_from'] = $from;
+            $params_sql[':waybill_date_to'] = $to;
+
+        }
+
+        if (isset($post['search']['order_date'])) {
+            $where_all .= " AND order_date = :order_date";
+            $params_sql[':order_date'] = $post['search']['order_date'];
+        }
+
+        if (isset($post['search']['order_date']) && !empty($post['search']['order_date'])) {
+            if (isset($post['search']['order_date']['start']) && !empty($post['search']['order_date']['start'])) {
+                $from = self::convertDate($post['search']['order_date']['start']);
+            }
+
+            if (isset($post['search']['order_date']['end']) && !empty($post['search']['order_date']['end'])) {
+                $to = self::convertDate($post['search']['order_date']['end']);
+            }
+
+            $where_all .= " AND order_date BETWEEN :order_date_from AND :order_date_to";
+            $params_sql[':order_date_from'] = $from;
+            $params_sql[':order_date_to'] = $to;
+
+        }
+
+
+        if (isset($post['search']['vendor'])) {
             $where_all .= " AND vendor_id in (:vendors)";
-            $vendors = implode("', '", $post['search']['vendors']);
+            $vendors = implode("', '", $post['search']['vendor']);
             $params_sql[':vendors'] = "'".$vendors."'";
         }
 
-        if (isset($post['search']['stories'])) {
-            $where_all .= " AND store_id in (:stories)";
-            $stories = implode(",", $post['search']['stories']);
+        if (isset($post['search']['store'])) {
+            $where_all .= " AND store_id in (:store)";
+            $stories = implode(",", $post['search']['store']);
             $params_sql[':stories'] = $stories;
         }
 
+        $sort_field = "";
         if ($sort) {
             $order = (preg_match('#^-(.+?)$#', $sort) ? SORT_DESC : SORT_ASC);
-            $field = str_replace('-', '', $sort);
-            $where_all .= " AND $field is not null ";
+            $sort_field = str_replace('-', '', $sort);
+            $where_all .= " AND $sort_field is not null ";
         }
 
         $params['client_id'] = $client->id;
@@ -267,7 +310,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             ],
         ]);
 
-        $dataProvider->sort->defaultOrder = [$field => $order];
+        $dataProvider->sort->defaultOrder = [$sort_field => $order];
 
         $result = $dataProvider->getModels();
         foreach ($result as $model) {
@@ -275,7 +318,27 @@ class DocumentWebApi extends \api_web\components\WebApi
             $documents[] = $modelClass::prepareModel($model['id']);
         }
 
-        return $documents;
+        $return = [
+            'documents' => $documents,
+            'pagination' => [
+            'page' => ($dataProvider->pagination->page + 1),
+            'page_size' => $dataProvider->pagination->pageSize,
+            'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ],
+            'sort' => $sort_field
+            ];
+
+        return $return;
+    }
+
+    private static function convertDate($date)
+    {
+        $result = \DateTime::createFromFormat('d.m.Y H:i:s', $date . " 00:00:00");
+        if ($result) {
+            return  $result>format('Y-m-d H:i:s');
+        }
+
+        return "";
     }
 
 

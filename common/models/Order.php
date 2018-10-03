@@ -638,6 +638,19 @@ class Order extends \yii\db\ActiveRecord
         }
     }
 
+    public function getOrganizationByUser($user)
+    {
+        $clientRelation = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $this->client_id]);
+        if (isset($clientRelation)) {
+            return $clientRelation->organization;
+        }
+        $vendorRelation = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $this->vendor_id]);
+        if (isset($vendorRelation)) {
+            return $vendorRelation->organization;
+        }
+        return null;
+    }
+    
     public function getCurrency()
     {
         return $this->hasOne(Currency::className(), ['id' => 'currency_id']);

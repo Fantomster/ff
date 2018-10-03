@@ -615,8 +615,9 @@ class Order extends \yii\db\ActiveRecord
                 ]);
             }
 
-            //Если получает заказчик, и он не работает в системе, добавляем токен
-            if (($user->organization_id == $this->vendor_id) && (($this->vendor->blacklisted == Organization::STATUS_BLACKISTED) || ($this->vendor->blacklisted == Organization::STATUS_UNSORTED))) {
+            //Если получает вендор, и он не работает в системе, добавляем токен
+            $relationExists = RelationUserOrganization::find()->where(['user_id' => $user->id, 'organization_id' => $this->vendor_id])->exists();
+            if ($relationExists && (($this->vendor->blacklisted == Organization::STATUS_BLACKISTED) || ($this->vendor->blacklisted == Organization::STATUS_UNSORTED))) {
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                     "/order/view",
                     "id" => $this->id,

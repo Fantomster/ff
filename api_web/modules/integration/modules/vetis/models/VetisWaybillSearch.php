@@ -144,6 +144,6 @@ class VetisWaybillSearch extends MercVsd
 
         $count = MercVsd::find()->leftJoin('merc_pconst b', 'b.const_id = 10 and b.value in (merc_vsd.recipient_guid,  merc_vsd.sender_guid)')->where(['b.org' => explode(',', $strOrgIds)])->count();
 
-        return ['uuids' => $arUuids, 'groups' => $arOrders, 'count' => $count];
+        return ['uuids' => $arUuids, 'groups' => $arOrders, 'count' => ceil($count / $pageSize)];
     }
 }

@@ -134,21 +134,7 @@ class AbstractDictionary extends WebApi
          */
         $result = [];
         foreach ($dataProvider->models as $model) {
-            $result[] = [
-                'id'            => $model->id,
-                'outer_uid'     => $model->outer_uid,
-                'name'          => $model->name,
-                'vendor_id'     => $model->vendor_id,
-                'vendor_name'   => $model->vendor->name ?? null,
-                'store_id'      => $model->store_id,
-                'store_name'    => $model->store->name ?? null,
-                'payment_delay' => $model->payment_delay,
-                'is_active'     => (int)!$model->is_deleted,
-                'name_waybill'  => array_map(function ($el) {
-                    return $el['name'];
-                }, $model->nameWaybills)
-
-            ];
+            $result[] = $this->prepareAgent($model);
         }
 
         $return = [
@@ -161,6 +147,28 @@ class AbstractDictionary extends WebApi
         ];
 
         return $return;
+    }
+
+    /**
+     * Информация по агенту
+     * @param $agent_uid
+     * @return array
+     */
+    public function agentInfo($agent_uid)
+    {
+        $model = OuterAgent::find()->joinWith(['vendor', 'store', 'nameWaybills'])
+            ->where([
+                '`outer_agent`.org_id'     => $this->user->organization->id,
+                '`outer_agent`.service_id' => $this->service_id,
+                '`outer_agent`.outer_uid' => $agent_uid,
+            ]);
+
+        if ($model === null)
+        {
+            return [];
+        }
+
+        return $this->prepareAgent($model);
     }
 
     /**
@@ -283,6 +291,30 @@ class AbstractDictionary extends WebApi
             'updated_at' => $model->updated_at,
             'is_active'  => (int)!$model->is_deleted,
             'childs'     => $child($model),
+        ];
+    }
+
+    /**
+     * Агент. Собираем необходимые данные из модели
+     * @param OuterAgent $model
+     * @return array
+     */
+    private function prepareAgent (OuterAgent $model)
+    {
+        return [
+            'id'            => $model->id,
+            'outer_uid'     => $model->outer_uid,
+            'name'          => $model->name,
+            'vendor_id'     => $model->vendor_id,
+            'vendor_name'   => $model->vendor->name ?? null,
+            'store_id'      => $model->store_id,
+            'store_name'    => $model->store->name ?? null,
+            'payment_delay' => $model->payment_delay,
+            'is_active'     => (int)!$model->is_deleted,
+            'name_waybill'  => array_map(function ($el) {
+                return $el['name'];
+            }, $model->nameWaybills)
+
         ];
     }
 }

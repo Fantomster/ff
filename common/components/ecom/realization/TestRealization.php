@@ -138,12 +138,12 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
         } else {
             return false;
         }
-//        $supplier = $this->xml->HEAD->SUPPLIER;
+        $supplier = $this->xml->HEAD->SUPPLIER;
         $message = "";
-//        $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
-//        if (!$ediOrganization) {
-//            throw new Exception('Dont find any edi org with gln' . $supplier);
-//        }
+        $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
+        if (!$ediOrganization) {
+            throw new Exception('Dont find any edi org with gln' . $supplier);
+        }
         $order = Order::findOne(['id' => $orderID]);
         if (!$order) {
             throw new Exception('No such order ID: ' . $orderID);
@@ -178,7 +178,8 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
             if ($price > 0 && (float)$position->PRICEWITHVAT == (float)$position->PRICE && $position->TAXRATE > 0) {
                 $price = $priceWithoutVat;
             }
-            $good = CatalogBaseGoods::findOne(['barcode' => $barcode]);
+            $good = CatalogBaseGoods::findOne(['barcode' => $barcode, 'supp_org_id' =>
+                $ediOrganization->organization_id]);
 
             if (array_key_exists($barcode, $arOrderContentBarCodes)) {
                 $ordCont = $arOrderContentBarCodes[$barcode];

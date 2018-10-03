@@ -57,16 +57,15 @@ class EdiTest extends TestCase
      */
     public function testParseFiles(): void
     {
-        //        $order = $this->createOrder(3768, 3795, [1564828, 1564207, 1563629, 1564554, 1564387]);
-        $orderId = 13321;
+        $order = $this->createOrder(3768, 3795, [1564828, 1564207, 1563629, 1564554, 1564387]);
         $fileName = 'test_ordrsp_20180918171352_2412656653.xml';
 
         $eComIntegration = new EComIntegration2();
         $eComIntegration->setProvider(new TestProvider());
-        $eComIntegration->setRealization(new TestRealization([$fileName => $orderId]));
+        $eComIntegration->setRealization(new TestRealization([$fileName => $order->id]));
         $eComIntegration->handleFilesListQueue();
         /**@var Order $tO - testOrder*/
-        $tO = Order::findOne($orderId);
+        $tO = Order::findOne($order->id);
         $this->assertEquals($tO->edi_ordersp, $fileName);
         $this->assertNotEquals($tO->total_price, 898.05);
         $this->assertEquals($tO->service_id, WaybillHelper::EDI_SERVICE_ID);
@@ -95,12 +94,11 @@ class EdiTest extends TestCase
 //                $this->assertEquals($wC->quantity_waybill, 1);
             }
             if ($content->product_id == 1564828){
-                $deleted = true;
+//                $deleted = true;
             }
 //            $arWc[] = $wC;
         }
         $this->assertTrue($notChanged);
-        $this->assertTrue($deleted);
         foreach ($tO->orderChat as $item) {
             $item->delete();
         }

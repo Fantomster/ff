@@ -15,7 +15,7 @@ class DocumentController extends \api_web\components\WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/Document"),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={
@@ -122,7 +122,7 @@ class DocumentController extends \api_web\components\WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/Document"),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={
@@ -344,4 +344,46 @@ class DocumentController extends \api_web\components\WebApiController
     {
         $this->response = $this->container->get('DocumentWebApi')->editWaybillDetail($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/document/reset-waybill-positions",
+     *     tags={"Documents/reset-waybill-positions"},
+     *     summary="Накладная - Сброс позиций ",
+     *     description="Накладная - Сброс позиций ",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "waybill_id": 1111
+     *                      }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *          @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     */
+    public function actionResetWaybillPositions()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->waybillResetPositions($this->request);
+    }
+
+
 }

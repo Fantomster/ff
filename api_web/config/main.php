@@ -29,7 +29,7 @@ return [
             'enablePrettyUrl' => true,
             'enableLanguageDetection' => true,
             'rules' => [
-                'integration/<module>/<action>' => '/integration/<module>/default/<action>',
+                'integration/vetis/<action>' => '/integration/vetis/default/<action>',
             ],
         ],
         'user' => [

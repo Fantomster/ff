@@ -31,9 +31,9 @@ class ServiceIiko extends AbstractSyncFactory
 
     /**
      * @return array
-     * @throws ServerErrorHttpException
+     * @throws \Exception
      */
-    public function sendRequest(): array
+    public function sendRequest(array $params = []): array
     {
         if (empty($this->queueName)) {
             throw new ServerErrorHttpException('Empty field $queueName in class ' . get_class($this), 500);
@@ -53,7 +53,7 @@ class ServiceIiko extends AbstractSyncFactory
      * @return array
      * @throws \Exception
      */
-    public function sendWaybill($request)
+    public function sendWaybill($request): array
     {
         if (!isset($request['ids']) && empty($request['ids'])) {
             throw new BadRequestHttpException('empty_param|ids');

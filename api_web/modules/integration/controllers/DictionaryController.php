@@ -17,7 +17,7 @@ class DictionaryController extends \api_web\components\WebApiController
 {
     /**
      * @SWG\Post(path="/integration/dictionary/product-list",
-     *     tags={"Integration/dictionary/product"},
+     *     tags={"Integration/dictionary"},
      *     summary="Список продуктов",
      *     description="Список продуктов",
      *     produces={"application/json"},

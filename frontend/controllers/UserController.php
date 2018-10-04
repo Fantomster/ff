@@ -453,7 +453,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController
         $currentOrganization = $user->organization;
         $organizationToDelete = Organization::findOne(['id' => $id]);
 
-        $relationUserOrg = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id']);
+        $relationUserOrg = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $id]);
 
         if (empty($relationUserOrg) && !(in_array($relationUserOrg->role_id, [
                     Role::ROLE_ADMIN,

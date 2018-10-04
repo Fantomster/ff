@@ -31,6 +31,7 @@ class RkwsAgent extends ServiceRkws
     {
 
         $myXML = simplexml_load_string($data);
+        SyncLog::trace('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);
 
         $gcount = 0;
         $array = [];

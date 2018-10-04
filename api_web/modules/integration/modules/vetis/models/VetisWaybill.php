@@ -265,7 +265,7 @@ class VetisWaybill extends WebApi
         $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
         $record = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
             ->andWhere(['uuid' => $request['uuid']])->indexBy('uuid')->all();
-        if ($record) {
+        if (!$record) {
             throw new BadRequestHttpException('Uuid not for this organization');
         }
         $params = [
@@ -303,7 +303,7 @@ class VetisWaybill extends WebApi
         $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
         $record = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
             ->andWhere(['uuid' => $request['uuid']])->indexBy('uuid')->all();
-        if ($record) {
+        if (!$record) {
             throw new BadRequestHttpException('Uuid not for this organization');
         }
         $params = [

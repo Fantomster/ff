@@ -331,6 +331,21 @@ class DocumentWebApi extends \api_web\components\WebApi
         return $return;
     }
 
+    /**
+     * Накладная - Детальная информация
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getWaybillDetail (array $post)
+    {
+        if (empty($post['document_id'])) {
+            throw new BadRequestHttpException("empty_param|document_id");
+        }
+
+        return Waybill::prepareDetail($post['waybill_id']);
+    }
+
     private static function convertDate($date)
     {
         $result = \DateTime::createFromFormat('d.m.Y H:i:s', $date . " 00:00:00");
@@ -340,6 +355,5 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         return "";
     }
-
 
 }

@@ -5,6 +5,7 @@ namespace api_web\components;
 use api_web\modules\integration\classes\sync\AbstractSyncFactory;
 use api_web\modules\integration\classes\SyncLog;
 use common\models\AllServiceOperation;
+use common\models\OuterTask;
 use \Yii;
 use yii\rest\Controller;
 
@@ -42,6 +43,12 @@ class WebApiNoAuthController extends Controller
     {
 
         $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
+        if ($task_id) {
+            $mcTask = OuterTask::findOne(['inner_guid' => $task_id]);
+            if ($task_id) {
+                $task_id = $mcTask->id;
+            }
+        }
         if (!$task_id) {
             $task_id = null;
         }

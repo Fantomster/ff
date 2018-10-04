@@ -200,9 +200,10 @@ abstract class AbstractSyncFactory extends WebApi
 
     /**
      * Метод отправки накладной
+     * @param array $request
      * @return array
      */
-    public function sendWaybill(): array
+    public function sendWaybill($request): array
     {
         return ['Не определена функция отправки накладной в классе: ' . get_class($this)];
     }

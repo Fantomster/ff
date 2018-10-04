@@ -258,7 +258,8 @@ class Realization extends AbstractRealization implements RealizationInterface
             $ediOrder->save();
         }
 
-        $createWaybill = (new WaybillHelper())->createWaybill($order, $arUploadedContents, $ediOrganization->organization_id);
+        $createWaybill = (new WaybillHelper())->createWaybill($order->id, $arUploadedContents,
+            $ediOrganization->organization_id);
 
         if ($message != '') {
             OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . \Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");

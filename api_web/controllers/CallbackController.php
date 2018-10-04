@@ -81,7 +81,7 @@ class CallbackController extends WebApiNoAuthController
             SyncLog::trace('Required variable "task_id" is wrong!');
             throw new BadRequestHttpException("empty_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
-        SyncLog::trace('Task_id" is wrong!');
+        SyncLog::trace('Task_id" is valid!');
 
 
         $mcTask = OuterTask::findOne(['inner_guid' => $task_id]);

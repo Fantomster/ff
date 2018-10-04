@@ -59,4 +59,53 @@ class WaybillController extends WebApiController
     {
         $this->response = (new WaybillHelper())->createWaybillForApi($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/waybill/move-order-content-to-waybill",
+     *     tags={"Waybill"},
+     *     summary="Привязка order content к waybill content",
+     *     description="Привязка order content к waybill content",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "waybill_id": 5,
+     *                      "order_content_id": 123
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                      "result": true
+     *                  }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionMoveOrderContentToWaybill()
+    {
+        $this->response = (new WaybillHelper())->moveOrderContentToWaybill($this->request);
+    }
+
+
 }

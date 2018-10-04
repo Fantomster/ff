@@ -188,7 +188,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
            WHERE          
            cbg.deleted = 0
            " . $where . "
-           AND cbg.deleted = 0";
+           AND cbg.deleted = 0".$where_all;
 
         /*$sql = "
         SELECT DISTINCT * FROM (

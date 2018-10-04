@@ -59,6 +59,8 @@ class ServiceRkws extends AbstractSyncFactory
 
     const COOK_AUTH_STR_BEGIN = 'Set-Cookie';
 
+    public static $OperDenom;
+
     /**
      * Basic service method "Send request"
      * @return array?

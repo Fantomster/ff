@@ -41,6 +41,7 @@ class OuterTask extends ActiveRecord
 {
 
     const STATUS_REQUESTED = 1;
+    const STATUS_CALLBACKED = 2;
 
     /**
      * {@inheritdoc}

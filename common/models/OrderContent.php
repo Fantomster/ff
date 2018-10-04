@@ -3,10 +3,12 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "order_content".
  *
+ * @property integer $id
  * @property integer $order_id
  * @property integer $product_id
  * @property string $quantity
@@ -25,6 +27,7 @@ use Yii;
  * @property string $edi_number
  * @property string $edi_recadv
  * @property string $edi_invoice
+ * @property string $updated_at
  *
  * @property Order $order
  * @property CatalogBaseGoods $product
@@ -53,8 +56,8 @@ class OrderContent extends \yii\db\ActiveRecord
             [['price', 'quantity', 'initial_quantity', 'units', 'plan_price', 'plan_quantity'], 'number'],
             [['merc_uuid', 'edi_desadv', 'edi_alcdes', 'edi_number', 'edi_recadv', 'edi_invoice'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
-            [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
-            [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],
+            [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['order_id' => 'id']],
+            [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::class, 'targetAttribute' => ['product_id' => 'id']],
         ];
     }
 
@@ -79,7 +82,7 @@ class OrderContent extends \yii\db\ActiveRecord
      */
     public function getOrder()
     {
-        return $this->hasOne(Order::className(), ['id' => 'order_id']);
+        return $this->hasOne(Order::class, ['id' => 'order_id']);
     }
 
 
@@ -88,7 +91,7 @@ class OrderContent extends \yii\db\ActiveRecord
      */
     public function getEdiOrderContent()
     {
-        return $this->hasOne(EdiOrderContent::className(), ['order_content_id' => 'id']);
+        return $this->hasOne(EdiOrderContent::class, ['order_content_id' => 'id']);
     }
 
 
@@ -97,13 +100,19 @@ class OrderContent extends \yii\db\ActiveRecord
      */
     public function getProduct()
     {
-        return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'product_id']);
+        return $this->hasOne(CatalogBaseGoods::class, ['id' => 'product_id']);
     }
-    
+
+    /**
+     * @return float|int
+     */
     public function getTotal() {
         return $this->quantity * $this->price;
     }
-    
+
+    /**
+     * @return array|null|\yii\db\ActiveRecord
+     */
     public function getProductFromCatalog() {
         $cgTable = CatalogGoods::tableName();
         $cbgTable = CatalogBaseGoods::tableName();
@@ -129,7 +138,10 @@ class OrderContent extends \yii\db\ActiveRecord
                 ->one();
         return $product;
     }
-    
+
+    /**
+     * @return array
+     */
     public function copyIfPossible() {
         $cgTable = CatalogGoods::tableName();
         $cbgTable = CatalogBaseGoods::tableName();
@@ -152,6 +164,7 @@ class OrderContent extends \yii\db\ActiveRecord
                     "$cbgTable.id" => $this->product_id,
                 ])
                 ->one();
+        /**@var \common\models\CatalogGoods $product*/
         if ($product) {
             return [
                 'product_id' => $product->baseProduct->id,
@@ -176,6 +189,7 @@ class OrderContent extends \yii\db\ActiveRecord
                     "$cbgTable.id" => $this->product_id,
                 ])
                 ->one();
+        /**@var CatalogBaseGoods $product*/
         if ($product) {
             return [
                 'product_id' => $product->id,
@@ -188,17 +202,26 @@ class OrderContent extends \yii\db\ActiveRecord
         }
         return [];
     }
-    
+
+    /**
+     * @return \common\models\GoodsNotes|null
+     */
     public function  getNote() {
         return GoodsNotes::findOne(['catalog_base_goods_id' => $this->product_id, 'rest_org_id' => $this->order->client_id]);
     }
-    
+
+    /**
+     * @return string
+     */
     public function formatPrice() {
         return $this->price . " " . $this->order->currency->symbol;
     }
 
 
-
+    /**
+     * @param bool $insert
+     * @return bool
+     */
     public function beforeSave($insert) {
         $result = parent::beforeSave($insert);
         /*if(!$insert){
@@ -215,6 +238,10 @@ class OrderContent extends \yii\db\ActiveRecord
     }
 
 
+    /**
+     * @param bool  $insert
+     * @param array $changedAttributes
+     */
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
@@ -240,10 +267,16 @@ class OrderContent extends \yii\db\ActiveRecord
     }
 
 
+    /**
+     * @return \common\models\Currency|null
+     */
     public function getCurrency() {
          return Currency::findOne($this->order->currency_id);
     }
 
+    /**
+     * @return bool
+     */
     public function beforeDelete() {
         $result = parent::beforeDelete();
 
@@ -253,5 +286,20 @@ class OrderContent extends \yii\db\ActiveRecord
         }
         
         return $result;
+    }
+
+    /**
+     * @return array
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => TimestampBehavior::class,
+                'updatedAtAttribute' => 'updated_at',
+                'createdAtAttribute' => false,
+                'value' => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
     }
 }

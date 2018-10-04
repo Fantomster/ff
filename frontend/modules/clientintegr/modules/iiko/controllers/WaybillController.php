@@ -643,21 +643,29 @@ SQL;
             die();
         }
 
-        $model = new iikoWaybill();
-        $model->setScenario('handMade');
-        $model->order_id = $order_id;
-        $model->status_id = 1;
-        $model->org = $ord->client_id;
+        $waybillModeIiko = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
-            $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
-            $model->save();
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
+        if ($waybillModeIiko !== '0') {
+            iikoWaybill::createWaybill($order_id);
+            return $this->redirect([$this->getLastUrl() . 'way=' . $order_id]);
+        }
+        else {
+            $model = new iikoWaybill();
+            $model->setScenario('handMade');
+            $model->order_id = $order_id;
+            $model->status_id = 1;
+            $model->org = $ord->client_id;
+
+            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+                $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
+                $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+                $model->save();
+                return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            } else {
+                return $this->render('create', [
+                    'model' => $model,
+                ]);
+            }
         }
     }
 

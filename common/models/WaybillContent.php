@@ -13,7 +13,6 @@ use Yii;
  * @property int $order_content_id
  * @property int $product_outer_id
  * @property double $quantity_waybill
- * @property double $price_waybill
  * @property double $vat_waybill
  * @property string $merc_uuid
  * @property int $unload_status
@@ -51,7 +50,7 @@ class WaybillContent extends yii\db\ActiveRecord
         return [
             [['waybill_id'], 'required'],
             [['waybill_id', 'order_content_id', 'product_outer_id', 'unload_status', 'sum_with_vat', 'sum_without_vat', 'price_with_vat', 'price_without_vat'], 'integer'],
-            [['quantity_waybill', 'price_waybill', 'vat_waybill'], 'number'],
+            [['quantity_waybill', 'vat_waybill', 'koef'], 'number'],
             [['merc_uuid'], 'string', 'max' => 255],
             [['waybill_id'], 'exist', 'skipOnError' => true, 'targetClass' => Waybill::className(), 'targetAttribute' => ['waybill_id' => 'id']],
         ];
@@ -68,10 +67,10 @@ class WaybillContent extends yii\db\ActiveRecord
             'order_content_id' => 'Order Content ID',
             'product_outer_id' => 'Product Outer ID',
             'quantity_waybill' => 'Quantity Waybill',
-            'price_waybill' => 'Price Waybill',
             'vat_waybill' => 'Vat Waybill',
             'merc_uuid' => 'Merc Uuid',
             'unload_status' => 'Unload Status',
+            'koef' => 'Коэффициент'
         ];
     }
 
@@ -90,7 +89,19 @@ class WaybillContent extends yii\db\ActiveRecord
         return $this->hasOne(MercVsd::className(), ['uuid' => 'merc_uuid']);
     }
 
-    public function getProduct(){
-        return $this->hasOne(OuterProduct::class, ['id' => 'product_outer_id']);
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrderContent()
+    {
+        return $this->hasOne(OrderContent::className(), ['id' => 'order_content_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductOuter()
+    {
+        return $this->hasOne(OuterProduct::className(), ['id' => 'product_outer_id']);
     }
 }

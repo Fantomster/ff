@@ -46,11 +46,7 @@ class OuterStore extends ActiveRecord
             ],
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
-                'attributes' => [
-                    ActiveRecord::EVENT_AFTER_UPDATE => ['updated_at'],
-                    ActiveRecord::EVENT_AFTER_INSERT => ['created_at'],
-                ],
-                'value' => new Expression('UTC_TIMESTAMP()')
+                'value' => \gmdate('Y-m-d H:i:s')
             ],
         ];
     }

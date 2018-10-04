@@ -40,7 +40,21 @@ class DefaultController extends Controller {
     }
 
     public function beforeAction($action) {
-        if (!Yii::$app->user->isGuest) {
+        if (Yii::$app->request->get("token")) {
+            $token = Yii::$app->request->get("token");
+            $order_id = Yii::$app->request->get("id");
+            $order = \common\models\Order::findOne(['id' => $order_id]);
+            $user = \common\models\User::findOne(['access_token' => $token]);
+            $organization = $order->getOrganizationByUser($user);
+            if ($user && isset($order) && isset($organization)) {
+                Yii::$app->user->logout();
+                Yii::$app->user->login($user, 0);
+                (new \api_web\classes\UserWebApi())->setOrganization(['organization_id' => $organization->id]);
+                Yii::$app->user->identity->refresh();
+                $this->loadCurrentUser();
+                $this->setLayout($organization->type_id);
+            }
+        } elseif (!Yii::$app->user->isGuest) {
             $this->loadCurrentUser();
             $this->currentUser->update();
             $organization = $this->currentUser->organization;
@@ -57,15 +71,6 @@ class DefaultController extends Controller {
 //            }
             if (($this->currentUser->status === \common\models\User::STATUS_UNCONFIRMED_EMAIL) && (Yii::$app->controller->id != 'order')) {
                 throw new \yii\web\HttpException(403, Yii::t('error', 'frontend.controllers.def.access_denied_two', ['ru'=>'Доступ запрещен']));
-            }
-        } elseif (Yii::$app->request->get("token")) {
-            $token = Yii::$app->request->get("token");
-            $user = \common\models\User::findOne(['access_token' => $token]);
-            if ($user) {
-                Yii::$app->user->login($user, 0);
-                $this->loadCurrentUser();
-                $organization = $this->currentUser->organization;
-                $this->setLayout($organization->type_id);
             }
         }
         if (!parent::beforeAction($action)) {

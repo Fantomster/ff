@@ -54,7 +54,7 @@ use yii\widgets\ActiveForm;
         </div>
         <div class="col-sm-3">
             <?php  echo $form->field($model, 'operation_code')->widget(\kartik\select2\Select2::classname(), [
-                'data' => \yii\helpers\ArrayHelper::map(\common\models\AllServiceOperation::find()->all(), 'code', 'denom'),
+                'data' => \yii\helpers\ArrayHelper::map(\common\models\AllServiceOperation::find()->select('code, ifnull(`comment`, `denom`) as denom')->all(), 'code', 'denom'),
                 'attribute' => 'operation_code',
                 'pluginOptions' => [
                     'selected' => \Yii::$app->request->get('code') ?? '',

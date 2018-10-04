@@ -28,18 +28,27 @@ class Dictionary
         $this->dict = $dict;
     }
 
-    public function productList($request)
-    {
-        return $this->dict->productList($request);
-    }
+//    public function productList($request)
+//    {
+//        return $this->dict->productList($request);
+//    }
+//
+//    public function agentList($request)
+//    {
+//        return $this->dict->agentList($request);
+//    }
+//
+//    public function agentUpdate($request)
+//    {
+//        return $this->dict->agentUpdate($request);
+//    }
+//
+//    public function storeList($request){
+//        return $this->dict->storeList($request);
+//    }
 
-    public function agentList($request)
+    public function __call($name, $arguments)
     {
-        return $this->dict->agentList($request);
-    }
-
-    public function agentUpdate($request)
-    {
-        return $this->dict->agentUpdate($request);
+        return $this->dict->{$name}(current($arguments));
     }
 }

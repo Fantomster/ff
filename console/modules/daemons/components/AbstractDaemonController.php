@@ -40,7 +40,7 @@ abstract class AbstractDaemonController extends DaemonController
     public $maxChildProcesses = 5;
 
     /**
-     * rabbit queues table name
+     * last_executed consumer time
      * @var \DateTime
      * */
     public $lastExec = null;

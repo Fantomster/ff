@@ -58,15 +58,13 @@ abstract class AbstractSyncFactory extends WebApi
         }
     }
 
-    public function getObjects(array $params):array {
-
-        $entity = $this->factory($params['dictionary']);
-        if (method_exists($entity, 'sendRequestForObjects')) {
-            return $entity->sendRequestForObjects();
+    public function getObjects(): array
+    {
+        if (method_exists($this, 'sendRequestForObjects')) {
+            return $this->sendRequestForObjects();
         }
         return [];
     }
-
 
     /**
      * Basic integration method "Load dictionary"
@@ -92,13 +90,22 @@ abstract class AbstractSyncFactory extends WebApi
         }
 
         # 2. Use entity class (by factory)
-        $entity = $this->factory($params['dictionary']);
+        $entity = $this->factory($params['dictionary'], $this->serviceId);
         SyncLog::trace('Initialized entity class: ' . get_class($entity));
 
         # 3. Make transaction "Send request"
         if (method_exists($entity, 'sendRequest')) {
             SyncLog::trace('Target method "sendRequest" in the dictionary class "' . get_class($entity) . '" exist');
-            return $entity->sendRequest();
+            $requestParams = [];
+            if (isset($params['product_group'])) {
+                SyncLog::trace('Found product grouping parameter: ' . $params['product_group']);
+                $requestParams['product_group'] = $params['product_group'];
+            }
+            if (isset($params['code'])) {
+                SyncLog::trace('Found object code parameter: ' . $params['code']);
+                $requestParams['code'] = $params['code'];
+            }
+            return $entity->sendRequest($requestParams);
         } else {
             SyncLog::trace('Target method "sendRequest" in the dictionary class does not exist!');
             throw new BadRequestHttpException("method_not_exist");
@@ -119,11 +126,11 @@ abstract class AbstractSyncFactory extends WebApi
         if ($sendUrl && $sendData) {
 
             # 1.1.1. Prepare curl headers
-            $headers = array(
+            $headers = [
                 "Content-type: application/xml; charset=utf-8",
                 "Content-length: " . strlen($sendData),
                 "Connection: close",
-            );
+            ];
             SyncLog::trace('Curl headers were just prepared (length: ' . strlen($sendData));
 
             # 1.1.2. Init curl
@@ -169,14 +176,15 @@ abstract class AbstractSyncFactory extends WebApi
     /**
      * ServiceMethod Class Factory
      * @param string $dictionary Dictionary name
+     * @param int $serviceId Service ID
      * @return AbstractSyncFactory?
      * @throws BadRequestHttpException
      */
-    public function factory(string $dictionary): ?AbstractSyncFactory
+    public function factory(string $dictionary, int $serviceId): ?AbstractSyncFactory
     {
         $className = __NAMESPACE__ . '\\' . $this->serviceName . ucfirst($dictionary);
         if (class_exists($className)) {
-            return new $className($this->serviceName);
+            return new $className($this->serviceName, $serviceId);
         } else {
             SyncLog::trace('The requested dictionary class "' . $this->serviceName . ucfirst($dictionary) . '"does not exist!');
             throw new BadRequestHttpException("class_not_exist");
@@ -185,8 +193,18 @@ abstract class AbstractSyncFactory extends WebApi
 
     /**
      * Отправка запроса, обязательный метод
-     * @return mixed
+     * @param $params array
+     * @return array
      */
-    abstract public function sendRequest();
+    abstract public function sendRequest(array $params = []): array;
+
+    /**
+     * Метод отправки накладной
+     * @return array
+     */
+    public function sendWaybill(): array
+    {
+        return ['Не определена функция отправки накладной в классе: ' . get_class($this)];
+    }
 
 }

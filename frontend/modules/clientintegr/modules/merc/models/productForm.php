@@ -88,7 +88,7 @@ class productForm extends VetisProductItem
                         $message = 'Префикс недействителен';
                         break;
                     default:
-                        $message = 'Неправильнаый номер (не сходится контрольная сумма)';
+                        $message = 'Неправильный номер (не сходится контрольная сумма)';
                         break;
                 }
                 $this->addError('globalID', $message);

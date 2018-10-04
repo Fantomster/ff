@@ -97,7 +97,7 @@ class MercuryCronController extends Controller
 
     public function actionTest2()
     {
-        $org_id = 5144;
+        $org_id = 0;
         echo "START" . PHP_EOL;
         echo "GET MercVSDList".PHP_EOL;
         MercVsd::getUpdateData($org_id);

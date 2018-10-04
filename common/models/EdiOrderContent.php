@@ -8,12 +8,22 @@ namespace common\models;
  *
  * @property integer $order_content_id
  * @property integer $doc_type
- * @property string $edi_supplier_article
+ * @property integer $barcode
+ * @property string  $edi_supplier_article
+ * @property string  $pricewithvat
+ * @property string  $taxrate
+ * @property string  $uuid
+ * @property string  $gtin
+ * @property string  $waybill_date
+ * @property string  $waybill_number
+ * @property string  $delivery_note_date
+ * @property string  $delivery_note_number
  */
 class EdiOrderContent extends \yii\db\ActiveRecord
 {
     const DESADV = 1;
     const ALCDES = 2;
+
     /**
      * @inheritdoc
      */

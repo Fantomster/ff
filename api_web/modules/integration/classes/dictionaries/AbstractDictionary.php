@@ -11,9 +11,12 @@ namespace api_web\modules\integration\classes\dictionaries;
 
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use common\helpers\DBNameHelper;
+use common\models\Organization;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
 use common\models\OuterProduct;
+use common\models\OuterStore;
 use common\models\OuterUnit;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
@@ -31,7 +34,7 @@ class AbstractDictionary extends WebApi
     }
 
     /**
-     * Список продуктов полученных из iiko
+     * Список продуктов полученных из внешней системы
      * @param $request
      * @return array
      */
@@ -104,13 +107,16 @@ class AbstractDictionary extends WebApi
         $page = (isset($pag['page']) ? $pag['page'] : 1);
         $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
 
+
         $search = OuterAgent::find()->joinWith(['vendor', 'store', 'nameWaybills'])
-            ->leftJoin('organization o', 'outer_agent.vendor_id = o.id')
-            ->where(['`outer_agent`.org_id' => $this->user->organization->id, '`outer_agent`.service_id' => $this->service_id]);
+            ->where([
+                '`outer_agent`.org_id'     => $this->user->organization->id,
+                '`outer_agent`.service_id' => $this->service_id
+            ]);
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
-                $search->andWhere(['like', 'name', $request['search']['name']]);
+                $search->andWhere(['like', '`outer_agent`.name', $request['search']['name']]);
             }
         }
 
@@ -128,21 +134,7 @@ class AbstractDictionary extends WebApi
          */
         $result = [];
         foreach ($dataProvider->models as $model) {
-            $result[] = [
-                'id'            => $model->id,
-                'outer_uid'     => $model->outer_uid,
-                'name'          => $model->name,
-                'vendor_id'     => $model->vendor_id,
-                'vendor_name'   => $model->vendor->name ?? null,
-                'store_id'      => $model->store_id,
-                'store_name'    => $model->store->name ?? null,
-                'payment_delay' => $model->payment_delay,
-                'is_active'     => (int)!$model->is_deleted,
-                'name_waybill'  => array_map(function ($el) {
-                    return $el['name'];
-                }, $model->nameWaybills)
-
-            ];
+            $result[] = $this->prepareAgent($model);
         }
 
         $return = [
@@ -155,6 +147,28 @@ class AbstractDictionary extends WebApi
         ];
 
         return $return;
+    }
+
+    /**
+     * Информация по агенту
+     * @param $agent_uid
+     * @return array
+     */
+    public function agentInfo($agent_uid)
+    {
+        $model = OuterAgent::find()->joinWith(['vendor', 'store', 'nameWaybills'])
+            ->where([
+                '`outer_agent`.org_id'     => $this->user->organization->id,
+                '`outer_agent`.service_id' => $this->service_id,
+                '`outer_agent`.outer_uid' => $agent_uid,
+            ]);
+
+        if ($model === null)
+        {
+            return [];
+        }
+
+        return $this->prepareAgent($model);
     }
 
     /**
@@ -219,6 +233,88 @@ class AbstractDictionary extends WebApi
                 },
                 $model->nameWaybills
             )
+        ];
+    }
+
+    /**
+     * Получение списка складов
+     * @param $request
+     * @return array
+     * */
+    public function storeList($request): array
+    {
+        $search = OuterStore::find()->where(['org_id' => $this->user->organization->id, 'service_id' => $this->service_id]);
+
+
+        if (isset($request['search'])) {
+            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+                $search->andWhere(['like', 'name', $request['search']['name']]);
+
+            }
+        }
+        $rootModels = $search->roots()->indexBy('id')->all();
+
+        $result = [];
+
+        foreach ($rootModels as $rootModel) {
+            $result = $this->prepareStore($rootModel);
+        }
+
+        $return = [
+            'stores' => $result,
+        ];
+
+        return $return;
+    }
+
+    /**
+     * Функция рекурсия от корневого склада
+     * @param OuterStore $model
+     * @return array
+     * */
+    private function prepareStore($model)
+    {
+        $child = function ($model) {
+            $childrens = $model->children()->all();
+            $arReturn = [];
+            foreach ($childrens as $children) {
+                $arReturn[] = $this->prepareStore($children);
+            }
+            return $arReturn;
+        };
+        return [
+            'id'         => $model->id,
+            'outer_uid'  => $model->outer_uid,
+            'name'       => $model->name,
+            'store_type' => $model->store_type,
+            'created_at' => $model->created_at,
+            'updated_at' => $model->updated_at,
+            'is_active'  => (int)!$model->is_deleted,
+            'childs'     => $child($model),
+        ];
+    }
+
+    /**
+     * Агент. Собираем необходимые данные из модели
+     * @param OuterAgent $model
+     * @return array
+     */
+    private function prepareAgent (OuterAgent $model)
+    {
+        return [
+            'id'            => $model->id,
+            'outer_uid'     => $model->outer_uid,
+            'name'          => $model->name,
+            'vendor_id'     => $model->vendor_id,
+            'vendor_name'   => $model->vendor->name ?? null,
+            'store_id'      => $model->store_id,
+            'store_name'    => $model->store->name ?? null,
+            'payment_delay' => $model->payment_delay,
+            'is_active'     => (int)!$model->is_deleted,
+            'name_waybill'  => array_map(function ($el) {
+                return $el['name'];
+            }, $model->nameWaybills)
+
         ];
     }
 }

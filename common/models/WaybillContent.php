@@ -88,4 +88,20 @@ class WaybillContent extends yii\db\ActiveRecord
     public function getMercVsd(){
         return $this->hasOne(MercVsd::className(), ['uuid' => 'merc_uuid']);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrderContent()
+    {
+        return $this->hasOne(OrderContent::className(), ['id' => 'order_content_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProductOuter()
+    {
+        return $this->hasOne(OuterProduct::className(), ['id' => 'product_outer_id']);
+    }
 }

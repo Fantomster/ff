@@ -6,6 +6,7 @@ use common\models\Organization;
 use Yii;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
+use api_web\modules\integration\interfaces\AgentInterface;
 
 /**
  * This is the model class for table "iiko_agent".
@@ -20,7 +21,7 @@ use yii\helpers\ArrayHelper;
  * @property string $updated_at
  * @property integer $payment_delay
  */
-class iikoAgent extends \yii\db\ActiveRecord
+class iikoAgent extends \yii\db\ActiveRecord implements AgentInterface
 {
     /**
      * @inheritdoc
@@ -127,5 +128,36 @@ class iikoAgent extends \yii\db\ActiveRecord
         }
         ksort($agents);
         return $agents;
+    }
+
+    /**
+     * Инфонрмация о контрагенте из учетной системы
+     * @return array
+     */
+    public function getAgentInfo()
+    {
+        return [
+            "uid" => $this->uuid,
+            "name" => $this->denom,
+            "difer" => false
+        ];
+    }
+
+    /**
+     * Инфонрмация о контрагенте из сопоставления с mixcart
+     * @return array
+     */
+    public function getVendorInfo()
+    {
+        $org = $this->vendor;
+        if (empty($org)) {
+            return [];
+        }
+
+        return [
+            "id" => $org->id,
+            "name" => $org->name,
+            "difer" => false
+        ];
     }
 }

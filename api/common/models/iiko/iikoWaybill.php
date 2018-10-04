@@ -3,11 +3,11 @@
 namespace api\common\models\iiko;
 
 use api\common\models\AllMaps;
+use api_web\modules\integration\classes\DocumentWebApi;
 use common\helpers\DBNameHelper;
 use common\models\Order;
 use common\models\OrderContent;
 use frontend\modules\clientintegr\components\CreateWaybillByOrderInterface;
-use frontend\modules\clientintegr\modules\iiko\controllers\WaybillController;
 use Yii;
 use frontend\controllers\ClientController;
 use yii\helpers\ArrayHelper;
@@ -36,7 +36,7 @@ use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
  * @property integer $payment_delay_date
  * @property Order $order;
  */
-class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface
+class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface, WaybillInterface
 {
 
     const AUTOSTATUS_NEW = 1;
@@ -306,7 +306,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         $db = Yii::$app->db_api;
         $sql = ' SELECT m.store_rid FROM `' . $dbName . '`.`order_content` o ' .
-            ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 2 AND m.org_id in (' . $client_id .') '.
+            ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 2 AND m.org_id in (' . $client_id . ') ' .
             ' WHERE o.order_id = ' . $order_id .
             ' GROUP BY store_rid';
 
@@ -417,13 +417,13 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             if ($this->store_id === null) {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2 and `' . $dbName . '`.all_map.org_id in (' . $client_id .')')
+                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2 and `' . $dbName . '`.all_map.org_id in (' . $client_id . ')')
                     ->andWhere('`' . $dbName . '`.all_map.store_rid is null')
                     ->all();
             } else {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2 and `' . $dbName . '`.all_map.org_id in (' . $client_id .')')
+                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2 and `' . $dbName . '`.all_map.org_id in (' . $client_id . ')')
                     ->andWhere('`' . $dbName . '`.all_map.store_rid =' . $this->store_id)
                     ->all();
             }

@@ -108,7 +108,7 @@ class AbstractDictionary extends WebApi
         $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
 
 
-        $search = OuterAgent::find()->joinWith(['vendor', 'store', 'nameWaybills'])
+        $search = OuterAgent::find()->with(['vendor', 'store', 'nameWaybills'])
             ->where([
                 '`outer_agent`.org_id' => $this->user->organization->id,
                 '`outer_agent`.service_id' => $this->service_id
@@ -271,7 +271,7 @@ class AbstractDictionary extends WebApi
      * @param $agent_uid
      * @return array
      */
-    public function soreInfo($agent_uid)
+    public function storeInfo($agent_uid)
     {
         $model = OuterStore::find()
             ->where([

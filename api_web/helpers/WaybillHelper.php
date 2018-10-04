@@ -298,7 +298,6 @@ class WaybillHelper
             $waybillContent->sum_without_vat = (int)($price * $quantity * 100);
             $waybillContent->price_with_vat = (int)(isset($priceWithVat) ? $priceWithVat * 100 : null);
             $waybillContent->price_without_vat = (int)($price * 100);
-//            var_dump($waybillContent);
             $waybillContent->save();
             if (!$waybillContent->validate() || !$waybillContent->save()) {
                 throw new ValidationException($waybillContent->getErrorSummary(true));

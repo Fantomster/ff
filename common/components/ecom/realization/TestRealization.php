@@ -280,7 +280,8 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
             $ediOrder->save();
         }
 
-        $createWaybill = (new WaybillHelper())->createWaybill($order, $arUploadedContents, $ediOrganization->organization_id);
+        $createWaybill = (new WaybillHelper())->createWaybill($order->id, $arUploadedContents,
+            $ediOrganization->organization_id);
 
 
         if ($message != '') {

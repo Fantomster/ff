@@ -14,10 +14,14 @@ namespace api_web\modules\integration\classes\sync;
 
 use api_web\components\WebApi;
 use api_web\modules\integration\classes\SyncLog;
+use common\models\OuterTask;
 use yii\web\BadRequestHttpException;
 
 abstract class AbstractSyncFactory extends WebApi
 {
+
+    const XML_LOAD_RESULT_FAULT = 'Error!';
+    const XML_LOAD_RESULT_SUCCESS = 'Success!';
 
     /** URL $_GET parameter for outer task_guuid */
     const CALLBACK_TASK_IDENTIFIER = 't';
@@ -56,6 +60,10 @@ abstract class AbstractSyncFactory extends WebApi
         if ($serviceId) {
             $this->serviceId = $serviceId;
         }
+    }
+
+    public function receiveXMLData(OuterTask $task, string $data = null) {
+
     }
 
     public function getObjects(): array
@@ -206,6 +214,19 @@ abstract class AbstractSyncFactory extends WebApi
     public function sendWaybill($request): array
     {
         return ['Не определена функция отправки накладной в классе: ' . get_class($this)];
+    }
+
+
+    public static function getAllSyncOperations(): array
+    {
+        return [
+            RkwsAgent::$OperDenom => RkwsAgent::class,
+            RkwsCategory::$OperDenom => RkwsCategory::class,
+            RkwsUnit::$OperDenom => RkwsUnit::class,
+            RkwsStore::$OperDenom => RkwsStore::class,
+            RkwsProduct::$OperDenom => RkwsProduct::class,
+
+        ];
     }
 
 }

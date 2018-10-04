@@ -71,10 +71,10 @@ class iikoWaybill extends Waybill
             $item = $items->addChild('item');
 
             $item->addChild('amount', $row->quantity_waybill);
-            $item->addChild('product', $row->product->outer_uid);
+            $item->addChild('product', $row->outer_product->outer_uid);
             $item->addChild('num', (++$i));
             $item->addChild('containerId');
-            $item->addChild('amountUnit', $row->product->unit->name);
+            $item->addChild('amountUnit', $row->outer_product->outer_unit->name);
             $item->addChild('discountSum', $discount);
             $item->addChild('sumWithoutNds', $row->sum_without_vat);
             $item->addChild('vatPercent', $row->vat_waybill / 100);

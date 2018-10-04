@@ -15,6 +15,7 @@ use common\models\OuterAgent;
 use common\models\OuterStore;
 use common\models\Waybill;
 use common\models\WaybillContent;
+use yii\web\BadRequestHttpException;
 
 /**
  * Waybills class for generate\update\delete\ actions
@@ -25,7 +26,6 @@ class WaybillHelper
     const MERC_SERVICE_ID = 4;
     /**@var int const for EDI service id in all_service table */
     const EDI_SERVICE_ID = 6;
-    //TODO:translate
     const WAYBILL_COMPARED = 'compared';
     const WAYBILL_FORMED = 'formed';
     const WAYBILL_ERROR = 'error';
@@ -75,18 +75,26 @@ class WaybillHelper
 
 
     /**
-     * @param \common\models\Order $order
-     * @param                      $arIdsForCreate
-     * @param                      $supplierOrgId
+     * @param      $order_id
+     * @param null $arOrderContentForCreate
+     * @param null $supplierOrgId
+     * @throws \Exception
      * @return array|bool
      */
-    public function createWaybill(Order $order, $arIdsForCreate, $supplierOrgId): array
+    public function createWaybill($order_id, $arOrderContentForCreate = null, $supplierOrgId = null): array
     {
+        $order = Order::findOne($order_id);
+        if (!$order){
+            throw new BadRequestHttpException('Not found order with id' . $order_id);
+        }
+        if (is_null($arOrderContentForCreate)) {
+            $arOrderContentForCreate = $order->orderContent;
+        }
         $settingsAuto = true;
         if ($settingsAuto) {
             $waybillContents = WaybillContent::find()->andWhere(['order_content_id' => array_keys
             ($order->orderContent)])->indexBy('order_content_id')->all();
-            $notInWaybillContent = array_diff_key($arIdsForCreate, $waybillContents);
+            $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
 
             if ($notInWaybillContent) {
                 $defaultAgent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id]);
@@ -104,7 +112,7 @@ class WaybillHelper
                         $hasDefaultStore, $hasDefaultServiceID);
                     return [$waybillId];
                 }
-
+                $waybillIds = [];
                 $integrations = ['iiko' => 2];
                 foreach ($integrations as $integration) {
                     $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
@@ -118,7 +126,6 @@ class WaybillHelper
                     $orderContForStore = [];
                     if (empty($waybillContents)) {
                         if (!empty($stories)) {
-                            $waybillIds = [];
                             foreach ($stories as $store) {
                                 $store_uuid = (OuterStore::findOne($store['store_rid']))->outer_uid;
                                 $prods = explode(',', $store['prd_ids']);
@@ -134,14 +141,14 @@ class WaybillHelper
                                 $waybillIds[] = $this->createWaybillAndContent($orderContForStore, $order->client_id,
                                     $store_uuid, $store_uuid);
                             }
-                            return $waybillIds;
                         }
                     }
                 }
                 $notInWaybillContent = array_diff_key($notInWaybillContent, $orderContForStore);
-                if (!empty($notInWaybillContent)){
+                if (!empty($notInWaybillContent)) {
                     $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id);
-                    return [$waybillId];
+                    $waybillIds[] = $waybillId;
+                    return $waybillIds;
                 }
             }
         }
@@ -175,14 +182,15 @@ class WaybillHelper
      * @param null $serviceId
      * @return bool|int
      */
-    private function createWaybillAndContent($orderContent, $orgId, $outerStoreUuid = null, $serviceId = null){
+    private function createWaybillAndContent($orderContent, $orgId, $outerStoreUuid = null, $serviceId = null)
+    {
         $model = $this->buildWaybill($orgId);
         $model->outer_store_uuid = $outerStoreUuid;
         $model->service_id = $serviceId;
         $tmp_ed_num = reset($orderContent)->edi_number;
         $existWaybill = Waybill::find()->where(['like', 'edi_number', $tmp_ed_num])->orderBy(['edi_number' => 'desc'])->limit(1);
-        if($existWaybill){
-            if(strpos('-', $existWaybill->edi_number)){
+        if ($existWaybill) {
+            if (strpos('-', $existWaybill->edi_number)) {
                 $ed_num = explode('-', $existWaybill->edi_number);
                 $ed_num[1] = (int)$ed_num[1] + 1;
                 $ed_num = implode('-', $ed_num);
@@ -230,5 +238,21 @@ class WaybillHelper
     public function checkWaybillForVsdUuid($uuid)
     {
         return WaybillContent::find()->where(['merc_uuid' => $uuid])->exists();
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws \Exception
+     */
+    public function createWaybillForApi($request){
+        if (empty($request['order_id'])) {
+            throw new BadRequestHttpException('empty_param|order_id');
+        }
+        $result = $this->createWaybill($request['order_id']);
+
+        return [
+            'result' => $result
+        ];
     }
 }

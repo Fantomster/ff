@@ -46,12 +46,14 @@ class CallbackController extends WebApiNoAuthController
      *     description="Загрузка справочников с помощью коллбека",
      *     produces={"application/xml"},
      *     @SWG\Parameter(
+     *         name="t",
+     *         in="body",
+     *         required=false,
      *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={{}}
-     *              )
+     *             @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
+     *             @SWG\Schema(
+     *                 default={{}}
+     *             )
      *         )
      *     ),
      *     @SWG\Response(

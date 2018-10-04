@@ -390,7 +390,7 @@ class ServiceRkws extends AbstractSyncFactory
      * Метод отправки накладной
      * @return array
      */
-    public function sendWaybill(): array
+    public function sendWaybill($request): array
     {
         return [];
     }

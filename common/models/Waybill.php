@@ -29,6 +29,9 @@ use Yii;
  * @property string $exported_at
  * @property int $payment_delay
  * @property string $payment_delay_date
+ * @property string $edi_number
+ * @property string $edi_recadv
+ * @property string $edi_invoice
  *
  *
  * @property WaybillContent[] $waybillContents

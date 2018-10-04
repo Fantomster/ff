@@ -110,8 +110,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('dont support this type');
         }
 
-        if(strtolower($post['type']) == self::TYPE_WAYBILL)
-        {
+        if (strtolower($post['type']) == self::TYPE_WAYBILL) {
             $modelClass = self::$modelsContent[self::TYPE_WAYBILL];
             return $modelClass::prepareModel($post['document_id']);
         }
@@ -123,43 +122,44 @@ class DocumentWebApi extends \api_web\components\WebApi
                             outer_number_code as waybill_number, null as doc_number, order_id 
                             FROM `$apiShema`.waybill";
 
-            switch (strtolower($post['type'])) {
-                case self::TYPE_ORDER :
-                    $sql = "
+        switch (strtolower($post['type'])) {
+            case self::TYPE_ORDER :
+                $sql = "
                                             SELECT * from (
                                                 $sql_waybill
                                             UNION ALL
-                                                SELECT id, '".self::TYPE_ORDER_EMAIL."' as type, organization_id as client_id, null as waybill_status, date as order_date, null as waybill_date,
+                                                SELECT id, '" . self::TYPE_ORDER_EMAIL . "' as type, organization_id as client_id, null as waybill_status, date as order_date, null as waybill_date,
                                                 null as waybill_number, number as doc_number, order_id 
                                                 FROM integration_invoice
                                             ) as c where c.order_id = " . $post['document_id'];
-                    $sql_positions = "
-                                            select order_content.id, '".self::TYPE_ORDER."' as type from order_content 
+                $sql_positions = "
+                                            select order_content.id, '" . self::TYPE_ORDER . "' as type from order_content 
                                             left join `$apiShema`.waybill_content as wc on wc.order_content_id = order_content.id
-                                            where order_id = ".$post['document_id']." and order_content_id is null
+                                            where order_id = " . $post['document_id'] . " and order_content_id is null
                     ";
-                    break;
-                case self::TYPE_ORDER_EMAIL:
-                    $sql = "$sql_waybill where order_id = " . $post['document_id'];
-                    break;
-                default: return $return;
-            }
+                break;
+            case self::TYPE_ORDER_EMAIL:
+                $sql = "$sql_waybill where order_id = " . $post['document_id'];
+                break;
+            default:
+                return $return;
+        }
 
-            $result = \Yii::$app->db->createCommand($sql)->queryAll();
+        $result = \Yii::$app->db->createCommand($sql)->queryAll();
+
+        foreach ($result as $model) {
+            $modelClass = self::$models[$model['type']];
+            $return['documents'][] = $modelClass::prepareModel($model['id']);;
+        }
+
+        if (isset($sql_positions)) {
+            $result = \Yii::$app->db->createCommand($sql_positions)->queryAll();
 
             foreach ($result as $model) {
-                $modelClass = self::$models[$model['type']];
-                $return['documents'][] = $modelClass::prepareModel($model['id']);;
+                $modelClass = self::$modelsContent[$model['type']];
+                $return['positions'][] = $modelClass::prepareModel($model['id']);;
             }
-
-            if(isset($sql_positions)) {
-                $result = \Yii::$app->db->createCommand($sql_positions)->queryAll();
-
-                foreach ($result as $model) {
-                    $modelClass = self::$modelsContent[$model['type']];
-                    $return['positions'][] = $modelClass::prepareModel($model['id']);;
-                }
-            }
+        }
 
         return $return;
     }
@@ -242,7 +242,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (isset($post['search']['vendor'])) {
             $where_all .= " AND vendor_id in (:vendors)";
             $vendors = implode("', '", $post['search']['vendor']);
-            $params_sql[':vendors'] = "'".$vendors."'";
+            $params_sql[':vendors'] = "'" . $vendors . "'";
         }
 
         if (isset($post['search']['store'])) {
@@ -265,16 +265,16 @@ class DocumentWebApi extends \api_web\components\WebApi
         $sql = "
         select * from (
         SELECT * from (
-            SELECT id, '".self::TYPE_ORDER."' as type, client_id, null as waybill_status, created_at as order_date, null as waybill_date, 
+            SELECT id, '" . self::TYPE_ORDER . "' as type, client_id, null as waybill_status, created_at as order_date, null as waybill_date, 
             null as waybill_number, id as doc_number, vendor_id as vendor, null as store 
             FROM `order`
             UNION ALL
-            SELECT id, '".self::TYPE_ORDER_EMAIL."' as type, organization_id as client_id, null as waybill_status, date as order_date, null as waybill_date,
+            SELECT id, '" . self::TYPE_ORDER_EMAIL . "' as type, organization_id as client_id, null as waybill_status, date as order_date, null as waybill_date,
             null as waybill_number, number as doc_number, vendor_id as vendor, null as store   
             FROM .integration_invoice WHERE order_id is null
         ) as c
         UNION ALL
-        SELECT id, '".self::TYPE_WAYBILL."' as type, acquirer_id as client_id, bill_status_id as waybill_status, null as order_date, doc_date as waybill_date, 
+        SELECT id, '" . self::TYPE_WAYBILL . "' as type, acquirer_id as client_id, bill_status_id as waybill_status, null as order_date, doc_date as waybill_date, 
         outer_number_code as waybill_number, null as doc_number,  outer_contractor_uuid as vendor, outer_store_uuid as store   
         FROM `$apiShema`.waybill WHERE order_id is null ) as documents
         WHERE id is not null $where_all
@@ -286,7 +286,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             'sql' => $query->sql,
             'params' => $params_sql,
             'pagination' => [
-                'page' => $page-1,
+                'page' => $page - 1,
                 'pageSize' => $pageSize,
                 /*'params' => [
                     'sort' => isset($params['sort']) ? $params['sort'] : 'product',
@@ -321,14 +321,46 @@ class DocumentWebApi extends \api_web\components\WebApi
         $return = [
             'documents' => $documents,
             'pagination' => [
-            'page' => ($dataProvider->pagination->page + 1),
-            'page_size' => $dataProvider->pagination->pageSize,
-            'total_page' => ceil($dataProvider->totalCount / $pageSize)
+                'page' => ($dataProvider->pagination->page + 1),
+                'page_size' => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ],
             'sort' => $sort_field
-            ];
+        ];
 
         return $return;
+    }
+
+    /**
+     * Накладная - Сброс позиций
+     * @param array $post
+     * @return bool
+     * @throws BadRequestHttpException
+     */
+    public function waybillResetPositions(array $post)
+    {
+        if (!isset($post['waybill_id'])) {
+            throw new BadRequestHttpException("empty_param|waybill_id");
+        }
+
+        $waybill = Waybill::findOne(['id' => $post['waybill_id']]);
+
+        if(!isset($waybill))
+        {
+            throw new BadRequestHttpException("Waybill not found");
+        }
+
+        if($waybill->bill_status_id == 3)
+        {
+            throw new BadRequestHttpException("Waybill in the state of \"reset\" or \"unloaded\"");
+        }
+
+        if($waybill->resetPositions() > 0)
+        {
+            return ['result' => true];
+        }
+
+        return ['result' => false];
     }
 
     private static function convertDate($date)

@@ -61,4 +61,9 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
         return $model->prepare();
     }
+
+    public function resetPositions ()
+    {
+        return WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = '.$this->id);
+    }
 }

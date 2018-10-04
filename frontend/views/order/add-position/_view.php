@@ -162,6 +162,7 @@ $this->registerJs('
                         'value' => function ($data) {
                             return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">' . Yii::t('message', 'frontend.views.order.add_to_order', ['ru'=>'Добавить в заказ']) . ' </span></i>', [
                                         'class' => 'add-to-cart btn btn-md btn-success pull-right disabled',
+                                        'disabled' => 'disabled',
                                         'data-id' => $data["cbg_id"],
                                         'data-cat' => $data["cat_id"],
                                         'title' => Yii::t('message', 'frontend.views.order.guides.add_to_order', ['ru'=>'Добавить в заказ']),

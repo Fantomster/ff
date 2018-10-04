@@ -203,8 +203,10 @@ $js = <<<JS
         var btnAddToCart = $(this).parent().parent().parent().find(".add-to-cart");
         if ($(this).val() > 0) {
             btnAddToCart.removeClass("disabled");
+            btnAddToCart.prop("disabled", false);
         } else {
             btnAddToCart.addClass("disabled");
+            btnAddToCart.prop("disabled", true);
         }
     });
         $(document).on("hidden.bs.modal", "#showProducts", function() {

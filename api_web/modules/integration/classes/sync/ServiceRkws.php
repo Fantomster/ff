@@ -13,6 +13,7 @@
 namespace api_web\modules\integration\classes\sync;
 
 use api\common\models\RkService;
+use common\models\AllServiceOperation;
 use Yii;
 use yii\db\mssql\PDO;
 use common\models\OuterTask;
@@ -111,6 +112,7 @@ class ServiceRkws extends AbstractSyncFactory
             $xml = (array)simplexml_load_string($xmlData);
             if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
                 $transaction = $this->createTransaction();
+                $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => static::$OperDenom]);
                 $task = new OuterTask([
                     'service_id' => $this->serviceId,
                     'retry' => 0,
@@ -120,7 +122,7 @@ class ServiceRkws extends AbstractSyncFactory
                     'int_status_id' => OuterTask::STATUS_REQUESTED,
                     'outer_guid' => $xml['@attributes']['taskguid'],
                     'broker_version' => $xml['@attributes']['version'],
-                    'oper_code' => $xml['@attributes']['code'],
+                    'oper_code' => $oper->id,
                 ]);
                 if ($task->save()) {
                     $transaction->commit();
@@ -390,7 +392,7 @@ class ServiceRkws extends AbstractSyncFactory
      * Метод отправки накладной
      * @return array
      */
-    public function sendWaybill(): array
+    public function sendWaybill($request): array
     {
         return [];
     }

@@ -310,7 +310,6 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
-            var_dump($e->getMessage());
         }
     }
 }

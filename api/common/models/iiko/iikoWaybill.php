@@ -36,7 +36,7 @@ use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
  * @property integer $payment_delay_date
  * @property Order $order;
  */
-class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface, WaybillInterface
+class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface
 {
 
     const AUTOSTATUS_NEW = 1;

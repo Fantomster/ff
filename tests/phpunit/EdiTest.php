@@ -20,7 +20,6 @@ use common\models\CatalogBaseGoods;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OrderStatus;
-use common\models\WaybillContent;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -34,22 +33,21 @@ class EdiTest extends TestCase
     /**
      *
      */
-//    public function testUploadEdiFilesListToTable(): void
-//    {
-//        $eComIntegration = new EComIntegration2();
-//        $eComIntegration->setProvider(new TestProvider());
-//        $eComIntegration->setRealization(new TestRealization([]));
-//        $eComIntegration->handleFilesList();
-//        $list = $eComIntegration->provider->getResponse('', '');
-//        $rows = (new \yii\db\Query())
-//            ->select(['id'])
-//            ->from('edi_files_queue')
-//            ->where(['name' => $list])
-//            ->indexBy('id')
-//            ->all();
-//        $this->assertEquals(count($list), count($rows));
-////        (new \yii\db\Query())->createCommand()->delete('edi_files_queue', ['id' => array_keys($rows)])->execute();
-//    }
+    public function testUploadEdiFilesListToTable(): void
+    {
+        $eComIntegration = new EComIntegration2();
+        $eComIntegration->setProvider(new TestProvider());
+        $eComIntegration->setRealization(new TestRealization([]));
+        $eComIntegration->handleFilesList();
+        $list = $eComIntegration->provider->getResponse('', '');
+        $rows = (new \yii\db\Query())
+            ->select(['id'])
+            ->from('edi_files_queue')
+            ->where(['name' => $list])
+            ->indexBy('id')
+            ->all();
+        $this->assertEquals(count($list), count($rows));
+    }
 
     /**
      * @throws \Throwable
@@ -60,9 +58,9 @@ class EdiTest extends TestCase
         $order = $this->createOrder(3768, 3795, [1564828, 1564207, 1563629, 1564554, 1564387]);
         $fileName = 'test_ordrsp_20180918171352_2412656653.xml';
 
-        $eComIntegration = new EComIntegration2();
-        $eComIntegration->setProvider(new TestProvider());
-        $eComIntegration->setRealization(new TestRealization([$fileName => $order->id]));
+        $eComIntegration = new EComIntegration2(['orgId' => 7777], ['TestRealization' => [$fileName =>
+                                                                                                  $order->id]]);
+
         $eComIntegration->handleFilesListQueue();
         /**@var Order $tO - testOrder*/
         $tO = Order::findOne($order->id);
@@ -113,6 +111,7 @@ class EdiTest extends TestCase
 //            $wC->delete();
 //        }
 //        $w->delete();
+        (new \yii\db\Query())->createCommand()->delete('edi_files_queue', ['like', 'name', 'test_'])->execute();
     }
 
 

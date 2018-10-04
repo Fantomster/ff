@@ -158,10 +158,8 @@ abstract class AbstractRealization
         $catalogID = $catalog->id;
 
         if (!$catalog->save()){
-//            throw new Exception($catalog->getErrorSummary(true));
-            file_put_contents('1.log', $catalog->getErrorSummary(true), FILE_APPEND);
+            throw new Exception($catalog->getErrorSummary(true));
         }
-        file_put_contents('1.log', $catalog->id, FILE_APPEND);
 
         $rel = new RelationSuppRest();
         $rel->rest_org_id = $rest->id;

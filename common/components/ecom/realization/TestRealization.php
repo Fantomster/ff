@@ -128,7 +128,6 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
      * @throws \Throwable
      * @throws \api_web\exceptions\ValidationException
      * @throws \yii\db\Exception
-     * @throws \yii\db\StaleObjectException
      */
     private function handleOrderResponse(bool $isAlcohol = false): bool
     {
@@ -161,16 +160,15 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
             $arOrderContentBarCodes[$orderContent->product->barcode] = $orderContent;
         }
 
-        $barcodeArray = [];
         $totalQuantity = 0;
         $totalPrice = 0;
         $sum = 0;
+        $arUploadedContents = [];
         foreach ($positions as $position) {
             $contID = (int)($position->PRODUCTIDBUYER ?? $position->PRODUCT);
             $quantity = (float)($position->DELIVEREDQUANTITY ?? $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY);
             $price = (float)($position->PRICEWITHVAT ?? $position->PRICE);
             $barcode = (int)$position->PRODUCT;
-            $barcodeArray[] = $barcode;
             $taxRate = (float)($position->TAXRATE ?? null);
             $priceWithVat = (float)($position->PRICEWITHVAT ?? $taxRate ? $position->PRICE + ($position->PRICE *
                         ($taxRate / 100)) : $price);
@@ -256,6 +254,7 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
             $totalQuantity += $quantity;
             $totalPrice += $price;
             $sum += $quantity * $price;
+            $arUploadedContents[$ordCont->id] = $ordCont;
         }
 
         if ($totalQuantity <= 0.00 || $totalPrice <= 0.00) {
@@ -281,7 +280,7 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
             $ediOrder->save();
         }
 
-
+        $createWaybill = (new WaybillHelper())->createWaybill($order, $arUploadedContents, $ediOrganization->organization_id);
 
 
         if ($message != '') {

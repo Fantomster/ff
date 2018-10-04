@@ -401,27 +401,21 @@ class CronController extends Controller
     //handle EDI integration files
     public function actionHandleFiles2()
     {
-        $eComIntegration = new EComIntegration2();
-        $eComIntegration->setProvider(new Provider());
-        $eComIntegration->setRealization(new Realization());
+        $eComIntegration = new EComIntegration2(['orgId' => 6666]);
         $eComIntegration->handleFilesList();
     }
 
     //handle EDI integration files queue
     public function actionHandleFilesQueue2()
     {
-        $eComIntegration = new EComIntegration2();
-        $eComIntegration->setProvider(new Provider());
-        $eComIntegration->setRealization(new Realization());
+        $eComIntegration = new EComIntegration2(['orgId' => 6666]);
         $eComIntegration->handleFilesListQueue();
     }
 
     //archieve EDI integration files
     public function actionArchiveFiles2()
     {
-        $eComIntegration = new EComIntegration2();
-        $eComIntegration->setProvider(new Provider());
-        $eComIntegration->setRealization(new Realization());
+        $eComIntegration = new EComIntegration2(['orgId' => 6666]);
         $eComIntegration->archiveFiles();
     }
 

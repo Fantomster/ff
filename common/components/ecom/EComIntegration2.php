@@ -3,6 +3,7 @@
 namespace common\components\ecom;
 
 use common\models\CatalogBaseGoods;
+use common\models\EcomIntegrationConfig;
 use common\models\EdiOrder;
 use common\models\EdiOrderContent;
 use common\models\EdiOrganization;
@@ -24,11 +25,52 @@ class EComIntegration2 extends Component
 //    const STATUS_PROCESSING = 2;
 //    const STATUS_ERROR = 3;
 //    const STATUS_HANDLED = 4;
-
+    /**
+     * @var
+     */
+    public $orgId;
+    /**
+     * @var array
+     */
+    public $obConf;
     /**@var ProviderInterface */
     public $provider;
     /**@var RealizationInterface*/
     public $realization;
+
+    /**
+     * EComIntegration2 constructor.
+     *
+     * @param array $config
+     */
+    public function __construct(array $config = [], $obConfig = [])
+    {
+        $this->obConf = $obConfig;
+        parent::__construct($config);
+    }
+
+    /**
+     *
+     */
+    public function init(){
+        $conf = EcomIntegrationConfig::findOne(['org_id' => $this->orgId]);
+        $this->setProvider($this->createClass('providers\\', $conf['provider']));
+        $this->setRealization($this->createClass('realization\\', $conf['realization']));
+    }
+
+    /**
+     * @param $dir
+     * @param $className
+     * @return mixed
+     */
+    private function createClass($dir, $className)
+    {
+        $strClassName = 'common\components\ecom\\'. $dir . $className;
+        if (array_key_exists($className, $this->obConf)){
+            return new $strClassName($this->obConf[$className]);
+        }
+        return new $strClassName();
+    }
 
     /**
      * @param \common\components\ecom\ProviderInterface $provider
@@ -228,4 +270,5 @@ class EComIntegration2 extends Component
     {
         Yii::$app->db->createCommand()->delete('edi_files_queue', 'updated_at <= DATE_SUB(CURDATE(),INTERVAL 30 DAY) AND updated_at IS NOT NULL')->execute();
     }
+
 }

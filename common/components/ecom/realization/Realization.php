@@ -141,6 +141,7 @@ class Realization extends AbstractRealization implements RealizationInterface
         $totalQuantity = 0;
         $totalPrice = 0;
         $sum = 0;
+        $arUploadedContents = [];
 
         foreach ($positions as $position) {
             $contID = (int)($position->PRODUCTIDBUYER ?? $position->PRODUCT);
@@ -162,7 +163,6 @@ class Realization extends AbstractRealization implements RealizationInterface
             } else {
                 if (!$good) {
                     continue;
-                    //TODO: if good is $deleted = 0 can buy || $deleted=1 set quantity 0 price 0 and cant buy
                 }
                 $ordCont = new OrderContent();
                 $ordCont->order_id = $order->id;
@@ -232,6 +232,7 @@ class Realization extends AbstractRealization implements RealizationInterface
             $totalQuantity += $quantity;
             $totalPrice += $price;
             $sum += $quantity * $price;
+            $arUploadedContents[$ordCont->id] = $ordCont;
         }
 
         if ($totalQuantity <= 0.00 || $totalPrice <= 0.00) {
@@ -256,6 +257,8 @@ class Realization extends AbstractRealization implements RealizationInterface
             $ediOrder->invoice_date = $this->xml->DELIVERYNOTEDATE ?? '';
             $ediOrder->save();
         }
+
+        $createWaybill = (new WaybillHelper())->createWaybill($order, $arUploadedContents, $ediOrganization->organization_id);
 
         if ($message != '') {
             OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . \Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");

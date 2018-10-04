@@ -62,6 +62,7 @@ class RkwsAgent extends ServiceRkws
 
         $saveResult = true;
         $saveCounts = 0;
+        $err = [];
         if ($array && $cmdguid) {
             foreach ($array as $a) {
                 $agent = RkAgent::findOne(['acc' => $task->org_id, 'rid' => $a['rid']]);
@@ -82,13 +83,19 @@ class RkwsAgent extends ServiceRkws
                     $task->retry++;
                     $saveCounts++;
                 } else {
+                    $err['agent'][$agent->id][] = $agent->errors;
                     $saveResult = false;
                 }
             }
             if (!$task->save()) {
+                $err['task'][] = $task->errors;
                 $saveResult = false;
             }
 
+        }
+
+        if ($err) {
+            SyncLog::trace('Save errors: '. json_encode($err));
         }
 
         if ($saveResult && $saveCounts) {

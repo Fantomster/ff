@@ -30,7 +30,7 @@ class RabbitController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={{"queue":"IikoProductsSync", "org_id":5144}}
+     *                  default={"queue":"IikoProductsSync", "org_id":5144}
      *              )
      *         )
      *     ),
@@ -50,6 +50,7 @@ class RabbitController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionAddToQueue()
     {

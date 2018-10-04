@@ -55,7 +55,7 @@ class WaybillController extends WebApiController
      * )
      * @throws \Exception
      */
-    public function actionSetCurrencyForPersonalCatalog()
+    public function actionCreateByOrder()
     {
         $this->response = (new WaybillHelper())->createWaybillForApi($this->request);
     }

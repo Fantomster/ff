@@ -13,6 +13,7 @@ use Yii;
  * @property int $order_content_id
  * @property int $product_outer_id
  * @property double $quantity_waybill
+ * @property double $price_waybill
  * @property double $vat_waybill
  * @property string $merc_uuid
  * @property int $unload_status

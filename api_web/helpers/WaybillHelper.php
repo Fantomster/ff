@@ -15,6 +15,7 @@ use common\models\OuterAgent;
 use common\models\OuterStore;
 use common\models\Waybill;
 use common\models\WaybillContent;
+use Exception;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -254,5 +255,57 @@ class WaybillHelper
         return [
             'result' => $result
         ];
+    }
+
+    /**
+     * @param $request
+     * @return bool
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function moveOrderContentToWaybill($request){
+        if (!isset($request['waybill_id']) && !isset($request['order_content_id'])){
+            throw new BadRequestHttpException('empty_param|waybill_id|order_content_id');
+        }
+        $waybill = Waybill::findOne([
+            'id' => $request['waybill_id'],
+            'bill_status_id' => [
+                self::$statuses[self::WAYBILL_COMPARED],
+                self::$statuses[self::WAYBILL_ERROR],
+                self::$statuses[self::WAYBILL_FORMED],
+            ]]);
+        if (!$waybill){
+            throw new BadRequestHttpException('waybill cannot adding waybill_content with id ' . $request['waybill_id']);
+        }
+        $orderContent = OrderContent::findOne($request['order_content_id']);
+        if (!$orderContent){
+            throw new BadRequestHttpException('OrderContent dont exists with id ' . $request['order_content_id']);
+        }
+        $taxRate = $orderContent->vat_product ?? null;
+        $quantity = $orderContent->quantity;
+        $price = $orderContent->price;
+        if ($taxRate){
+            $priceWithVat = (float)($price + ($price * ($taxRate / 100)));
+        }
+
+        try {
+            $waybillContent = new WaybillContent();
+            $waybillContent->waybill_id = $request['waybill_id'];
+            $waybillContent->order_content_id = $orderContent->id;
+            $waybillContent->product_outer_id = $orderContent->product_id;
+            $waybillContent->quantity_waybill = $quantity;
+            $waybillContent->price_waybill = $price;
+            $waybillContent->vat_waybill = $taxRate;
+            $waybillContent->merc_uuid = $orderContent->merc_uuid;
+            $waybillContent->sum_with_vat = $priceWithVat ? $priceWithVat * $quantity : null;
+            $waybillContent->sum_without_vat = $price * $quantity;
+            $waybillContent->price_with_vat = $priceWithVat ?? null;
+            $waybillContent->price_without_vat = $price;
+            $waybillContent->save();
+        } catch (\Throwable $t){
+            \Yii::error($t->getMessage());
+            return false;
+        }
+
+        return true;
     }
 }

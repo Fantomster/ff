@@ -2,7 +2,9 @@
 
 namespace api_web\components;
 
+use api_web\modules\integration\classes\sync\AbstractSyncFactory;
 use api_web\modules\integration\classes\SyncLog;
+use common\models\AllServiceOperation;
 use \Yii;
 use yii\rest\Controller;
 
@@ -38,7 +40,12 @@ class WebApiNoAuthController extends Controller
      */
     public function init()
     {
-        SyncLog::trace('Initialized init Controller as ' . __METHOD__, WebApiNoAuth::LOG_INDEX);
+
+        $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
+        if (!$task_id) {
+            $task_id = null;
+        }
+        SyncLog::trace('Initialized init Controller as ' . __METHOD__, WebApiNoAuth::LOG_INDEX, $task_id);
         SyncLog::trace('Try to initialized Controller->container as Component...');
         $this->container = (new WebApiNoAuth())->container;
     }

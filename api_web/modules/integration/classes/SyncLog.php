@@ -63,14 +63,17 @@ class SyncLog
      * Log microaction
      * @param $message string Log info message
      * @param $service string Service name
+     * @param $callbackTaskId string This is callback and that is Id
      */
-    public static function trace(string $message, string $service = null)
+    public static function trace(string $message, string $service = null, string $callbackTaskId = null)
     {
-
 
         $currentTime = (string)microtime(true);
         if (!self::$logIndex) {
             self::$logIndex = (string)microtime(true) . '--' . self::uuid4();
+            if ($callbackTaskId) {
+                self::$logIndex = $callbackTaskId;
+            }
             if (!is_dir(self::$logDir)) {
                 self::$logDir = \Yii::$app->getRuntimePath() . '/logs/sync';
                 if (!is_dir(self::$logDir)) {

@@ -31,7 +31,7 @@ class NoAuthWebApi
         # 2.1.2. Check oper_code
         $oper = AllServiceOperation::findOne($task->oper_code);
         if (!$oper) {
-            SyncLog::trace('Operation code is wrong!');
+            SyncLog::trace('Operation code ('.$task->oper_code.') is wrong!');
             throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
         $allOpers = AbstractSyncFactory::getAllSyncOperations();

@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
 use api\common\models\RkAgent;
+use api\common\models\RkDicconst;
 use api\common\models\RkPconst;
 use api\common\models\RkStore;
 use api\common\models\rkws\RkWaybilldataSearch;
@@ -834,21 +835,29 @@ SQL;
             die();
         }
 
-        $model = new RkWaybill();
-        $model->order_id = $order_id;
-        $model->status_id = 1;
-        $model->org = $ord->client_id;
+        $const = RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if ($model->getErrors()) {
-                var_dump($model->getErrors());
-                exit;
+        if ($const !== '0') {
+            RkWaybill::createWaybill($order_id);
+            return $this->redirect([$this->getLastUrl() . 'way=' . $order_id]);
+        }
+        else {
+            $model = new RkWaybill();
+            $model->order_id = $order_id;
+            $model->status_id = 1;
+            $model->org = $ord->client_id;
+
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                if ($model->getErrors()) {
+                    var_dump($model->getErrors());
+                    exit;
+                }
+                return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            } else {
+                return $this->render('create', [
+                    'model' => $model,
+                ]);
             }
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
         }
     }
 

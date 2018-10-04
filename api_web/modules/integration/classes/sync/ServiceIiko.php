@@ -13,16 +13,28 @@
 namespace api_web\modules\integration\classes\sync;
 
 use api_web\classes\RabbitWebApi;
+use api_web\helpers\WaybillHelper;
 use api_web\modules\integration\models\iikoWaybill;
 use common\models\Waybill;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use yii\web\BadRequestHttpException;
 use yii\web\ServerErrorHttpException;
 
+/**
+ * Class ServiceIiko
+ *
+ * @package api_web\modules\integration\classes\sync
+ */
 class ServiceIiko extends AbstractSyncFactory
 {
+    /**
+     * @var null
+     */
     public $queueName = null;
 
+    /**
+     * @var array
+     */
     public $dictionaryAvailable = [
         self::DICTIONARY_AGENT,
         self::DICTIONARY_PRODUCT,
@@ -61,7 +73,7 @@ class ServiceIiko extends AbstractSyncFactory
         $res = [];
         $records = iikoWaybill::find()
             ->andWhere(['id' => $request['ids'], 'service_id' => $this->serviceId])
-            ->andWhere('bill_status_id = :stat', [':stat' => 4])
+            ->andWhere('bill_status_id = :stat', [':stat' => WaybillHelper::$statuses[WaybillHelper::WAYBILL_COMPARED]])
             ->all();
 
         if (!isset($records)) {

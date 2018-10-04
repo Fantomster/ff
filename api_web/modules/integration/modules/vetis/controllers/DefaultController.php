@@ -5,14 +5,19 @@ namespace api_web\modules\integration\modules\vetis\controllers;
 use api_web\components\WebApiController;
 use api_web\modules\integration\modules\vetis\models\VetisWaybill;
 
-class WaybillController extends WebApiController
+/**
+ * Class DefaultController
+ *
+ * @package api_web\modules\integration\modules\vetis\controllers
+ */
+class DefaultController extends WebApiController
 {
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/groups-list",
-     *     tags={"Integration/vetis/waybill"},
-     *     summary="Список групп сертификатов",
-     *     description="Список групп сертификатов",
+     * @SWG\Post(path="/integration/vetis/groups-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Список групп и сертификатов",
+     *     description="Список групп и сертификатов",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -48,34 +53,36 @@ class WaybillController extends WebApiController
      *            @SWG\Schema(
      *              default={
      *                      "result": {
-     *                            "documents": {
-     *                                  "6777": {
-     *                                      "count": 1,
-     *                                      "date": "2018-09-04T10:08:18+03:00",
-     *                                      "vendor_name": "EL Поставщик",
-     *                                      "sender_name": "Поставщик №2(600021, обл.Владимирская, г.Муром, ул.Октябрьской Революции,д.2Б)",
-     *                                      "total_price": "76.88",
-     *                                      "uuids": {
-     *                                          "d50becf5-ad90-45dd-aebd-8bc36fe984e0"
-     *                                      },
-     *                                      "status": {
-     *                                          "id": "UTILIZED",
-     *                                          "text": "Сертификаты погашены"
-     *                                      }
-     *                                  }
+     *                            "items": {
+     *                                  {
+     *                                      "uuid": "774daf95-01ee-486c-ae05-4ab301a9b85d",
+     *                                      "sender_name": "Поставщик №1(600021, обл.Владимирская, г.Муром, ул.Октябрьской Революции,д.2Б)",
+     *                                      "product_name": "мясо верблюда",
+     *                                      "status": "CONFIRMED",
+     *                                      "status_date": "2018-08-30T13:11:02+03:00",
+     *                                      "amount": "55.000",
+     *                                      "unit": "кг",
+     *                                      "production_date": "2018-07-02T03:00:00+03:00",
+     *                                      "date_doc": "2018-08-30T15:00:00+03:00",
+     *                                      "document_id": null,
+     *                                      "status_text": "Статус"
+     *                                  },
      *                              },
-     *                              "order_not_installed": {
-     *                                  "uuids": {
-     *                                      "df618d56-67c5-4c89-8956-45f54ff7ebfd",
-     *                                      "6a781eb8-c314-4026-b40c-02fd80f12e57",
-     *                                      "1d7befcb-57c4-44fd-adc9-f058972739f9",
-     *                                      "1495e3f9-35ab-46e4-aeff-618921e4e168"
+     *                              "groups": {
+     *                                  "6776": {
+     *                                      "count": "3",
+     *                                      "created_at": "2018-09-04T09:55:22+03:00",
+     *                                      "total_price": "30.00",
+     *                                      "vendor_name": "EL Поставщик",
+     *                                      "statuses": {
+     *                                          "id": "CONFIRMED",
+     *                                          "text": "Сертификаты ожидают погашения"
+     *                                      }
      *                                  }
      *                              }
      *                      },
      *                      "pagination": {
      *                            "page": 1,
-     *                            "total_page": 17,
      *                            "page_size": 12
      *                      }
      *              }
@@ -90,6 +97,7 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionGroupsList()
     {
@@ -97,8 +105,8 @@ class WaybillController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/list",
-     *     tags={"Integration/vetis/waybill"},
+     * @SWG\Post(path="/integration/vetis/list",
+     *     tags={"Integration/vetis"},
      *     summary="Список сертификатов",
      *     description="Список сертификатов",
      *     produces={"application/json"},
@@ -165,6 +173,7 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \yii\web\BadRequestHttpException
      */
     public function actionList()
     {
@@ -172,8 +181,8 @@ class WaybillController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/filter-sender",
-     *     tags={"Integration/vetis/waybill"},
+     * @SWG\Post(path="/integration/vetis/filter-sender",
+     *     tags={"Integration/vetis"},
      *     summary="Список фильтров",
      *     description="Список фильтров по подрядчикам, если установлен search:sender_name ищет лайком по имени",
      *     produces={"application/json"},
@@ -218,8 +227,8 @@ class WaybillController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/filter-product",
-     *     tags={"Integration/vetis/waybill"},
+     * @SWG\Post(path="/integration/vetis/filter-product",
+     *     tags={"Integration/vetis"},
      *     summary="Список фильтров",
      *     description="Список фильтров по имени товара, если установлен search:product_name ищет лайком по имени",
      *     produces={"application/json"},
@@ -266,8 +275,8 @@ class WaybillController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/filter-status",
-     *     tags={"Integration/vetis/waybill"},
+     * @SWG\Post(path="/integration/vetis/filter-status",
+     *     tags={"Integration/vetis"},
      *     summary="Список фильтров",
      *     description="Список фильтров по статусу",
      *     produces={"application/json"},
@@ -313,8 +322,8 @@ class WaybillController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/filter-vsd",
-     *     tags={"Integration/vetis/waybill"},
+     * @SWG\Post(path="/integration/vetis/filter-vsd",
+     *     tags={"Integration/vetis"},
      *     summary="Список фильтров",
      *     description="Список фильтров по ВСД",
      *     produces={"application/json"},
@@ -359,8 +368,8 @@ class WaybillController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/filters",
-     *     tags={"Integration/vetis/waybill"},
+     * @SWG\Post(path="/integration/vetis/filters",
+     *     tags={"Integration/vetis"},
      *     summary="Список фильтров",
      *     description="Полный список фильтров",
      *     produces={"application/json"},
@@ -429,8 +438,8 @@ class WaybillController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/short-info-vsd",
-     *     tags={"Integration/vetis/waybill"},
+     * @SWG\Post(path="/integration/vetis/short-info-vsd",
+     *     tags={"Integration/vetis"},
      *     summary="Краткая информация о ВСД",
      *     description="Краткая информация о ВСД",
      *     produces={"application/json"},
@@ -476,6 +485,7 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \yii\web\BadRequestHttpException
      */
     public function actionShortInfoVsd()
     {
@@ -483,8 +493,8 @@ class WaybillController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/full-info-vsd",
-     *     tags={"Integration/vetis/waybill"},
+     * @SWG\Post(path="/integration/vetis/full-info-vsd",
+     *     tags={"Integration/vetis"},
      *     summary="Полная информация о ВСД",
      *     description="Полная информация о ВСД",
      *     produces={"application/json"},
@@ -545,6 +555,7 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \yii\web\BadRequestHttpException
      */
     public function actionFullInfoVsd()
     {
@@ -553,8 +564,8 @@ class WaybillController extends WebApiController
 
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/return-vsd",
-     *     tags={"Integration/vetis/waybill"},
+     * @SWG\Post(path="/integration/vetis/return-vsd",
+     *     tags={"Integration/vetis"},
      *     summary="Возврат ВСД",
      *     description="Возврат ВСД",
      *     produces={"application/json"},
@@ -594,6 +605,7 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \yii\web\BadRequestHttpException
      */
     public function actionReturnVsd()
     {
@@ -601,8 +613,8 @@ class WaybillController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/repay-vsd",
-     *     tags={"Integration/vetis/waybill"},
+     * @SWG\Post(path="/integration/vetis/repay-vsd",
+     *     tags={"Integration/vetis"},
      *     summary="Погашение ВСД",
      *     description="Погашение ВСД",
      *     produces={"application/json"},
@@ -646,6 +658,7 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \yii\web\BadRequestHttpException
      */
     public function actionRepayVsd()
     {
@@ -653,10 +666,10 @@ class WaybillController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/vetis/waybill/partial-acceptance",
-     *     tags={"Integration/vetis/waybill"},
-     *     summary="Частичное погашение ВСД",
-     *     description="Частичное погашение ВСД amount: 37, Не может быть больше merc_vsd.amount reason:Частичная приемка, Обязательное поле",
+     * @SWG\Post(path="/integration/vetis/acquirer-filter",
+     *     tags={"Integration/vetis"},
+     *     summary="Список фильтров имен бизнесов",
+     *     description="Список доступных бизнесов для юзеров",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -667,10 +680,7 @@ class WaybillController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "uuid": "93cdc45a-edc3-472f-bd70-99ffca18edc9",
-     *                      "amount": 37,
-     *                      "reason":"Частичная приемка",
-     *                      "description":"long string description"
+     *
      *                  }
      *              )
      *         )
@@ -681,7 +691,21 @@ class WaybillController extends WebApiController
      *            @SWG\Schema(
      *              default={
      *                  "result": {
-     *                      "ede52e76-6091-46bb-9349-87324ee1ae41":true,
+     *                      {
+     *                          "id": "4300",
+     *                          "parent_id": "4398",
+     *                          "name": "1йцу"
+     *                      },
+     *                      {
+     *                          "id": "4392",
+     *                          "parent_id": "4398",
+     *                          "name": "тест сортировка"
+     *                      },
+     *                      {
+     *                          "id": "4400",
+     *                          "parent_id": "4398",
+     *                          "name": "421"
+     *                      }
      *                  }
      *              }
      *          )
@@ -695,10 +719,11 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
-    public function actionPartialAcceptance()
+    public function actionAcquirerFilter()
     {
-        $this->response = (new VetisWaybill())->partialAcceptance($this->request);
+        $this->response = $this->container->get('UserWebApi')->getUserOrganizationBusinessList();
     }
 
 }

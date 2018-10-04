@@ -8,15 +8,25 @@ use api_web\components\WebApi;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentDone;
-use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
+/**
+ * Class VetisWaybill
+ *
+ * @package api_web\modules\integration\modules\vetis\models
+ */
 class VetisWaybill extends WebApi
 {
 
+    /**
+     * @var \api_web\modules\integration\modules\vetis\helpers\VetisHelper
+     */
     private $helper;
 
+    /**
+     * VetisWaybill constructor.
+     */
     public function __construct()
     {
         $this->helper = new VetisHelper();
@@ -25,67 +35,40 @@ class VetisWaybill extends WebApi
 
     /**
      * Список сертифитаков сгруппированный по номеру заказа
+     *
      * @param $request
+     * @throws \yii\web\BadRequestHttpException
      * @return array
      */
     public function getGroupsList($request)
     {
         $reqPag = $request['pagination'] ?? [];
         $reqSearch = $request['search'] ?? [];
-        $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
+        $page = $this->helper->isSetDef($reqPag['page'] ?? null, 0);
         $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
 
-        $acquirer_id = null;
-        if (isset($request['search']['acquirer_id'])) {
-            $acquirer_id = $request['search']['acquirer_id'];
-        }
-
-        $reqSearch['acquirer_id'] = $this->helper->isSetDef($acquirer_id, $this->user->organization->id);
-
-        /**
-         * Без этого GROUP_CONCAT возвращает только 1024 символа, и режет данные
-         */
-        \Yii::$app->db->createCommand('SET SESSION group_concat_max_len = 1000000')->execute();
-
+        //Поиск ВСД
         $search = new VetisWaybillSearch();
         $params = $this->helper->set($search, $reqSearch, ['acquirer_id', 'type', 'status', 'sender_guid', 'product_name', 'date']);
-        $dataProvider = $search->search($params);
+        $arResult = $search->search($params, $page, $pageSize);
 
-        $pagination = new Pagination();
-        $pagination->setPage($page - 1);
-        $pagination->setPageSize($pageSize);
-        $dataProvider->setPagination($pagination);
-
-        $result = [
-            'documents'           => [],
-            'order_not_installed' => []
-        ];
-
-        foreach ($dataProvider->models as $model) {
-            if ($model['group_name'] != 'order_not_installed') {
-                $result['documents'][$model['group_name']] = [
-                    'count'       => (int)$model['count'],
-                    'date'        => $model['created_at'],
-                    'vendor_name' => $model['vendor_name'],
-                    'sender_name' => $model['sender_name'],
-                    'total_price' => $model['total_price'],
-                    'uuids'       => explode(',', $model['uuids']),
-                    'status'      => $this->helper->getStatusForGroup($model['statuses'])
-                ];
-            } else {
-                $result['order_not_installed'] = [
-                    'uuids'  => explode(',', $model['uuids']),
-                    'status' => $this->helper->getStatusForGroup($model['statuses'])
-                ];
-            }
-
+        foreach ($arResult['groups'] as $group_id => &$v) {
+            $info = $this->helper->getGroupInfo((int)$group_id);
+            $v = $info;
         }
+
+        //Строим результат
+        $result = [
+            'items'  => $this->getList($arResult['uuids']),
+            'groups' => $arResult['groups']
+        ];
+        //Ответ для АПИ
         $return = [
             'result'     => $result,
             'pagination' => [
-                'page'       => ($dataProvider->pagination->page + 1),
-                'page_size'  => $dataProvider->pagination->pageSize,
-                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+                'page'       => $page,
+                'page_size'  => $pageSize,
+                'total_count' => $arResult['count'],
             ]
         ];
         return $return;
@@ -93,20 +76,18 @@ class VetisWaybill extends WebApi
 
     /**
      * Получение ВСД по uuids
-     * @throws BadRequestHttpException
+     *
      * @param array $uuids
+     * @return array
      * */
-    public function getList($request)
+    public function getList($uuids) : array
     {
-        if (!isset($request['uuids']) || empty($request['uuids'])) {
-            throw new BadRequestHttpException('uuids не заполнен или пуст');
-        }
-
-        $models = MercVsd::findAll(['uuid' => $request['uuids']]);
-        $result = [];
+        $result = $uuids;
+        $models = MercVsd::findAll(['uuid' => array_keys($uuids)]);
         foreach ($models as $model) {
-            $result[] = [
+            $result[$model->uuid] = [
                 'uuid'            => $model->uuid,
+                'document_id'     => $uuids[$model->uuid],
                 'product_name'    => $model->product_name,
                 'sender_name'     => $model->sender_name,
                 'status'          => $model->status,
@@ -119,11 +100,12 @@ class VetisWaybill extends WebApi
             ];
         }
 
-        return ['result' => $result];
+        return array_values($result);
     }
 
     /**
      * Формирование всех фильтров
+     *
      * @return array
      * */
     public function getFilters()
@@ -140,6 +122,7 @@ class VetisWaybill extends WebApi
 
     /**
      * Формирование массива для фильтра ВСД
+     *
      * @return array
      * */
     public function getFilterVsd()
@@ -158,6 +141,7 @@ class VetisWaybill extends WebApi
 
     /**
      * Формирование массива для фильтра статусы
+     *
      * @return array
      * */
     public function getFilterStatus()
@@ -165,10 +149,15 @@ class VetisWaybill extends WebApi
         return ['result' => array_merge(MercVsd::$statuses, ['' => 'Все'])];
     }
 
+
     /**
      * Формирование массива для фильтра "По продукции" или по "Фирма отправитель" так же выполняет "живой" поиск лайком
+     *
+     * @param $request
+     * @param $filterName
      * @return array
-     * */
+     * @throws \Exception
+     */
     public function getSenderOrProductFilter($request, $filterName)
     {
         $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
@@ -190,6 +179,7 @@ class VetisWaybill extends WebApi
 
     /**
      * Краткая информация о ВСД
+     *
      * @param $request
      * @throws BadRequestHttpException
      * @return array
@@ -206,6 +196,7 @@ class VetisWaybill extends WebApi
 
     /**
      * Полная информация о ВСД
+     *
      * @param $request
      * @throws BadRequestHttpException
      * @return array
@@ -222,6 +213,7 @@ class VetisWaybill extends WebApi
 
     /**
      * Погашение ВСД
+     *
      * @param $request
      * @throws BadRequestHttpException
      * @return array
@@ -245,7 +237,7 @@ class VetisWaybill extends WebApi
                 }
             }
         } catch (\Throwable $t) {
-            if($t->getCode() == 600){
+            if ($t->getCode() == 600) {
                 $result['error'] = 'Заявка отклонена';
             } else {
                 $result['error'] = $t->getMessage();
@@ -259,8 +251,9 @@ class VetisWaybill extends WebApi
 
     /**
      * Частичное погашение ВСД
+     *
      * @param $request
-     * @throws BadRequestHttpException
+     * @throws \Exception
      * @return array
      */
     public function partialAcceptance($request)
@@ -272,7 +265,7 @@ class VetisWaybill extends WebApi
         $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
         $record = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
             ->andWhere(['uuid' => $request['uuid']])->indexBy('uuid')->all();
-        if ($record) {
+        if (!$record) {
             throw new BadRequestHttpException('Uuid not for this organization');
         }
         $params = [
@@ -296,6 +289,7 @@ class VetisWaybill extends WebApi
 
     /**
      * Возврат ВСД
+     *
      * @param $request
      * @throws BadRequestHttpException
      * @return array
@@ -309,7 +303,7 @@ class VetisWaybill extends WebApi
         $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
         $record = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
             ->andWhere(['uuid' => $request['uuid']])->indexBy('uuid')->all();
-        if ($record) {
+        if (!$record) {
             throw new BadRequestHttpException('Uuid not for this organization');
         }
         $params = [

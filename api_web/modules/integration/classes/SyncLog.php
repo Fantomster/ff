@@ -12,8 +12,6 @@
 
 namespace api_web\modules\integration\classes;
 
-use yii\web\BadRequestHttpException;
-
 class SyncLog
 {
 
@@ -50,6 +48,17 @@ class SyncLog
         }
     }
 
+    public static function showLog(array $params)
+    {
+        if (isset($params['service_prefix']) && isset($params['log_index'])) {
+            $file = self::$logDir . '/' . $params['service_prefix'] . $params['log_index'] . '.log';
+            if (file_exists($file)) {
+                echo file_get_contents($file);
+                exit;
+            }
+        }
+    }
+
     /**
      * Log microaction
      * @param $message string Log info message
@@ -78,7 +87,7 @@ class SyncLog
                 if (!$i) {
                     $timePrev = 0;
                 } else {
-                    $timePrev = self::$logData[self::$logIndex][$k-1]['time'];
+                    $timePrev = self::$logData[self::$logIndex][$k - 1]['time'];
                 }
                 $i++;
                 $mess = $i . ') "' . $mess['mess'] . '" - [' .
@@ -93,7 +102,6 @@ class SyncLog
         $message = (count(self::$logData[self::$logIndex]) + 1) . ') "' . $message . '" - [' .
             round(($currentTime - self::$timePrev), 5) . '/' . round(($currentTime - self::$timeInit), 5) . '] ms' . PHP_EOL;
         file_put_contents(self::$logDir . '/' . self::$servicePrefix . self::$logIndex . '.log', $message, FILE_APPEND);
-
         self::$timePrev = $currentTime;
     }
 

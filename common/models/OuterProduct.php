@@ -92,8 +92,9 @@ class OuterProduct extends \yii\db\ActiveRecord
 
     /**
      * @return \yii\db\ActiveQuery
-     */
-    public function getUnit(){
-        return $this->hasOne(OuterUnit::class, ['id' => 'outer_unit_id']);
+     */     
+    public function getOuterUnit()
+    {
+        return $this->hasOne(OuterUnit::className(), ['id' => 'outer_unit_id']);
     }
 }

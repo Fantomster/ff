@@ -29,6 +29,11 @@ class Mailer extends \yii\mail\BaseMailer
 
     public function compose($view = null, array $params = [])
     {
+//        $message = $this->createMessage();
+        if ($view === null) {
+            return null;
+        }
+
         if (array_key_exists('order', $params)) {
             $this->order_id = isset($params['order']->id) ? $params['order']->id : null;
         }
@@ -62,7 +67,7 @@ class Mailer extends \yii\mail\BaseMailer
     {
         $this->defaultFrom = $from;
     }
-    
+
     public function send($message = null)
     {
         $newEmail = new EmailQueue();
@@ -83,11 +88,11 @@ class Mailer extends \yii\mail\BaseMailer
 
         $save = $newEmail->save();
         if ($save && !($newEmail->status == EmailQueue::STATUS_FAILED)) {
-            //try {
+            try {
                 $result = \Yii::$app->get('sqsQueue')->sendMessage($this->sqsQueueUrl, [$newEmail->id]);
-//            } catch (\Exception $e) {
-//                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
-//            }
+            } catch (\Exception $e) {
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
+            }
         }
 
         return $save;

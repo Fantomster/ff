@@ -39,7 +39,8 @@ class SyncController extends WebApiController
      *                  default={
      *                      "service_id": 1,
      *                      "params": {
-     *                          "dictionary": "agent"
+     *                          "dictionary": "agent",
+     *                          "product_group": 97
      *                      }
      *                  }
      *              )
@@ -80,8 +81,18 @@ class SyncController extends WebApiController
         # 2. Checkout other params and fix callback
         if ($task_id) {
 
-            # 2.2.1.Trace callback operation with task_id
+            # 2.1.1.Trace callback operation with task_id
             SyncLog::trace('Callback operation `task_id` params is ' . $task_id);
+
+            # 2.1.2. Check root script params
+            if (!isset($this->request['service_id'])) {
+                $this->request['service_id'] = null;
+            }
+            SyncLog::trace('Service ID is: ' . $this->request['service_id']);
+            if (!isset($this->request['params'])) {
+                $this->request['params'] = [];
+            }
+            SyncLog::trace('Request params are: ' . json_encode($this->request['params']));
 
         } else {
 
@@ -99,7 +110,6 @@ class SyncController extends WebApiController
         }
 
         # 3. Load integration script with env and post params
-        SyncLog::trace('Use global factory: ' . SyncServiceFactory::class);
         $this->response = (new SyncServiceFactory($this->request['service_id'], $this->request['params'], $task_id))->syncResult;
 
     }

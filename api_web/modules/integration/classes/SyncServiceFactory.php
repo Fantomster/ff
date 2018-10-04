@@ -33,14 +33,21 @@ class SyncServiceFactory extends WebApi
 
     public $syncResult = [];
 
+    const TASK_SYNC_GET_LOG = 'get-log';
+    const TASK_SYNC_GET_OBJECTS = 'get-rkws-objects';
+
+    const SYNC_TASK_SERVICE_MAPPING = [
+        self::TASK_SYNC_GET_OBJECTS => self::SERVICE_RKEEPER,
+    ];
+
     /**
      * Construct method for Class SyncServiceFactory
-     * @param int $service_id Service ID
+     * @param mixed $serviceId Service ID
      * @param array $params Transaction params
-     * @param string $callback_task_id Callback task id
+     * @param string $callbackTaskId Callback task id
      * @throws BadRequestHttpException
      */
-    public function __construct(int $service_id = 0, array $params, string $callback_task_id = null)
+    public function __construct($serviceId = 0, array $params = [], string $callbackTaskId = null)
     {
 
         # 1. Load integration script with application environment params
@@ -48,29 +55,54 @@ class SyncServiceFactory extends WebApi
         SyncLog::trace('Loaded integration script with env and post params');
 
         # 2. Identify Service ID or CALLLBACK
-        if (!$callback_task_id) {
+        if (!$callbackTaskId) {
 
             # 2.1.1. Identify Service ID
-            if (!array_key_exists($service_id, $this->allServicesMap)) {
-                SyncLog::trace('Invalid service_id: "' . $service_id . '"');
+            if (!array_key_exists($serviceId, $this->allServicesMap)) {
+                SyncLog::trace('Invalid service_id: "' . $serviceId . '"');
                 throw new BadRequestHttpException("empty_param|params");
             } else {
-                SyncLog::trace('Identified Service ID: ' . $service_id);
+                SyncLog::trace('Identified Service ID: ' . $serviceId);
             }
 
             # 2.1.2. Use entity class (by factory)
-            $entity = $this->factory((int)$service_id, (string)$this->allServicesMap[$service_id]);
-            SyncLog::trace('Initialized entity class: ' . get_class($entity), $this->allServicesMap[$service_id]);
+            $entity = $this->factory((int)$serviceId, (string)$this->allServicesMap[$serviceId]);
+            SyncLog::trace('Initialized entity class: ' . get_class($entity), $this->allServicesMap[$serviceId]);
 
             # 2.1.3. Load dictionary data
             /** AbstractSyncFactory $entity */
-            $this->syncResult = $entity->getObjects($params);
             $this->syncResult = $entity->loadDictionary($params);
+
+        } elseif ($callbackTaskId == self::TASK_SYNC_GET_LOG) {
+            SyncLog::trace('Show log!');
+            SyncLog::showLog($params);
 
         } else {
 
-            // сейчас дописываем коллбек
-            $this->syncResult = [];
+            # 2.2.1. Find service ID and other params by task_id
+            $serviceName = null;
+            if (isset(self::SYNC_TASK_SERVICE_MAPPING[$callbackTaskId])) {
+                $serviceName = self::SYNC_TASK_SERVICE_MAPPING[$callbackTaskId];
+            }
+            if (!$serviceName) {
+                SyncLog::trace('Invalid service!');
+                throw new BadRequestHttpException("Service was not recognized by task_id!");
+            }
+            $serviceId = array_search($serviceName, $this->allServicesMap);
+            if (!$serviceId) {
+                SyncLog::trace('Invalid service_id!');
+                throw new BadRequestHttpException("empty_param|service_id");
+            }
+
+            # 2.2.2. Use entity class (by factory)
+            $entity = $this->factory((int)$serviceId, $serviceName);
+            SyncLog::trace('Initialized entity class: ' . get_class($entity), $this->allServicesMap[$serviceId]);
+
+
+            # 2.1.3. Load dictionary data
+            /** AbstractSyncFactory $entity */
+            $this->syncResult = $entity->getObjects();
+
         }
 
     }
@@ -84,6 +116,7 @@ class SyncServiceFactory extends WebApi
      */
     public function factory(int $serviceId, string $serviceName): AbstractSyncFactory
     {
+
         $className = __NAMESPACE__ . '\\sync\\Service' . $serviceName;
         if (class_exists($className)) {
             return new $className($serviceName, $serviceId);

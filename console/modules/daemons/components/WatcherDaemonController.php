@@ -91,6 +91,7 @@ abstract class WatcherDaemonController extends DaemonController
                         'orgId'         => $job['orgId'] ?? null,
                         'consumerClass' => $job['consumerClass'] ?? null,
                         'storeId'       => $job['storeId'] ?? null,
+                        'lastExec'      => $job['lastExec'] ?? null,
                     ])
                         ? self::EXIT_CODE_NORMAL
                         : self::EXIT_CODE_ERROR

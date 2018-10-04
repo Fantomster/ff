@@ -13,7 +13,7 @@ if(is_a(Yii::$app,'yii\console\Application')){
         </div>
         <div class="direct-chat-text container-fluid">
             <div>
-                <i><?= $message ?></i>
+                <i><?= str_replace("{ul_style}", "display:list-item;margin-bottom:0;", str_replace("{li_style}", "margin-left:20px;", $message)) ?></i>
             </div>
         </div>
     </div>
@@ -25,7 +25,7 @@ if(is_a(Yii::$app,'yii\console\Application')){
             <span class="direct-chat-timestamp<?= $isSender ? " pull-left" : " pull-right" ?>"><?= Yii::$app->formatter->asTime($time, "php:j M Y, H:i:s") ?></span>
         </div>
         <div class="direct-chat-text">
-            <span><?= $message ?></span>
+            <span><?= str_replace("{ul_style}", "display:list-item;margin-bottom:0;", str_replace("{li_style}", "margin-left:20px;", $message)) ?></span>
         </div>
     </div>
 <?php } ?>

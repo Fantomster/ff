@@ -6,10 +6,9 @@ use common\components\EComIntegration;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
 use yii\behaviors\AttributesBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
-use api\common\models\iiko\iikoDicconst;
 
 /**
  * This is the model class for table "order".
@@ -30,6 +29,7 @@ use api\common\models\iiko\iikoDicconst;
  * @property string $discount
  * @property integer $discount_type
  * @property integer $currency_id
+ * @property string $waybill_number
  * @property integer $service_id
  * @property string $status_updated_at
  * @property string $edi_order
@@ -86,10 +86,10 @@ class Order extends \yii\db\ActiveRecord
     {
         return [
             'timestamp' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'value' => function ($event) {
-                    return gmdate("Y-m-d H:i:s");
-                },
+                'class' => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => \gmdate('Y-m-d H:i:s'),
             ],
             'attributes' => [
                 'class' => AttributesBehavior::class,
@@ -223,7 +223,7 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getOrderContent()
     {
-        return $this->hasMany(OrderContent::className(), ['order_id' => 'id']);
+        return $this->hasMany(OrderContent::className(), ['order_id' => 'id'])->indexBy('id');
     }
 
     /**
@@ -574,7 +574,7 @@ class Order extends \yii\db\ActiveRecord
             }
         }
         if ($this->status == OrderStatus::STATUS_DONE) {
-                AutoWaybillHelper::processWaybill($this->id);
+            AutoWaybillHelper::processWaybill($this->id);
         }
 
     }
@@ -615,8 +615,9 @@ class Order extends \yii\db\ActiveRecord
                 ]);
             }
 
-            //Если получает заказчик, и он не работает в системе, добавляем токен
-            if (($user->organization_id == $this->vendor_id) && (($this->vendor->blacklisted == Organization::STATUS_BLACKISTED) || ($this->vendor->blacklisted == Organization::STATUS_UNSORTED))) {
+            //Если получает вендор, и он не работает в системе, добавляем токен
+            $relationExists = RelationUserOrganization::find()->where(['user_id' => $user->id, 'organization_id' => $this->vendor_id])->exists();
+            if ($relationExists && (($this->vendor->blacklisted == Organization::STATUS_BLACKISTED) || ($this->vendor->blacklisted == Organization::STATUS_UNSORTED))) {
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                     "/order/view",
                     "id" => $this->id,
@@ -636,6 +637,19 @@ class Order extends \yii\db\ActiveRecord
         }
     }
 
+    public function getOrganizationByUser($user)
+    {
+        $clientRelation = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $this->client_id]);
+        if (isset($clientRelation)) {
+            return $clientRelation->organization;
+        }
+        $vendorRelation = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $this->vendor_id]);
+        if (isset($vendorRelation)) {
+            return $vendorRelation->organization;
+        }
+        return null;
+    }
+    
     public function getCurrency()
     {
         return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
@@ -671,12 +685,17 @@ class Order extends \yii\db\ActiveRecord
     {
         return $this->hasOne(OrderAssignment::className(), ['order_id' => 'id']);
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getRelatedEmails()
     {
         return $this->hasMany(EmailQueue::className(), ['order_id' => 'id']);
+    }
+    
+    public function getFormattedCreationDate()
+    {
+        return Yii::$app->formatter->asDatetime($this->created_at, "php:d.m.Y, H:i");
     }
 }

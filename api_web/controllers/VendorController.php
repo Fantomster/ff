@@ -15,7 +15,8 @@ class VendorController extends WebApiController
      * @var array
      */
     public $not_log_actions = [
-        'upload-main-catalog'
+        'upload-main-catalog',
+        'upload-personal-catalog'
     ];
 
     /**
@@ -434,7 +435,7 @@ class VendorController extends WebApiController
      *     }
      *
      *     Тогда в mapping мы передаем очередность полей как на фронте ее отмечает пользователь
-     *     mapping = {1:article, 3:units, 5:ed, 4:price, 2:product, 6:other}
+     *     mapping = {article:1, units:3, ed:5, price:4, product:2, other:6}
      * ",
      *     produces={"application/json"},
      *     @SWG\Parameter(
@@ -449,7 +450,7 @@ class VendorController extends WebApiController
      *                  default={
      *                      "vendor_id": 3010,
      *                      "index_field": "article",
-     *                      "mapping": {1:"article", 2:"product", 3:"units", 4:"price", 5:"ed", 6:"other"}
+     *                      "mapping": {"article":1, "product":2, "units":3, "price":4, "ed":5, "other":6}
      *                  }
      *              )
      *         )

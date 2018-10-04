@@ -72,11 +72,11 @@ class OrderCatalogSearch extends \yii\base\Model
         if (!empty($this->selectedVendor)) {
             if (is_array($this->selectedVendor)) {
                 foreach ($this->selectedVendor as $key => $supp_org_id) {
-                    $this->selectedVendor[$key] = (int) $supp_org_id;
+                    $this->selectedVendor[$key] = (int)$supp_org_id;
                 }
                 $this->selectedVendor = implode(', ', $this->selectedVendor);
             } else {
-                $this->selectedVendor = (int) $this->selectedVendor;
+                $this->selectedVendor = (int)$this->selectedVendor;
             }
             $where .= ' AND `org`.id IN (' . $this->selectedVendor . ') ';
         }
@@ -84,11 +84,11 @@ class OrderCatalogSearch extends \yii\base\Model
         if (!empty($this->searchCategory)) {
             if (is_array($this->searchCategory)) {
                 foreach ($this->searchCategory as $key => $category_id) {
-                    $this->searchCategory[$key] = (int) $category_id;
+                    $this->searchCategory[$key] = (int)$category_id;
                 }
                 $this->searchCategory = implode(', ', $this->searchCategory);
             } else {
-                $this->searchCategory = (int) $this->searchCategory;
+                $this->searchCategory = (int)$this->searchCategory;
             }
             $where .= ' AND category_id IN (' . $this->searchCategory . ') ';
         }
@@ -108,39 +108,37 @@ class OrderCatalogSearch extends \yii\base\Model
             }
         }
 
-        if($this->product_block)
-        {
+        if ($this->product_block) {
             $blockedList = CatalogGoodsBlocked::getBlockedList($this->client->id);
             $blockedItems = empty($blockedList) ? '0' : implode(",", $blockedList);
-            $where_all .= ' AND id NOT IN ('.$blockedItems.')';
+            $where_all .= ' AND id NOT IN (' . $blockedItems . ')';
         }
 
         $sql = "
         SELECT DISTINCT * FROM (
-           SELECT 
-              " . implode(',', $fieldsCBG) . "
-           FROM `catalog_base_goods` `cbg`
-             LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
-             LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
-             LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-           WHERE
-           cat_id IN (" . $this->catalogs . ")
-           " . $where . "
-           AND (cbg.status = 1 AND cbg.deleted = 0)
-        UNION ALL
-          SELECT 
-          " . implode(',', $fieldsCG) . "
-          FROM `catalog_goods` `cg`
-           LEFT JOIN `catalog_base_goods` `cbg` ON cg.base_goods_id = cbg.id
-           LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
-           LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
-           LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
-          WHERE 
-          cg.cat_id IN (" . $this->catalogs . ")
-          " . $where . "
-          AND (cbg.status = 1 AND cbg.deleted = 0)
-        ) as c WHERE id != 0 " . $where_all;
-
+            SELECT 
+              " . implode(',', $fieldsCG) . "
+              FROM `catalog_goods` `cg`
+               LEFT JOIN `catalog_base_goods` `cbg` ON cg.base_goods_id = cbg.id
+               LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
+               LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
+               LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+              WHERE 
+              cg.cat_id IN (" . $this->catalogs . ")
+              " . $where . "
+              AND (cbg.status = 1 AND cbg.deleted = 0)
+            UNION ALL
+              SELECT 
+                  " . implode(',', $fieldsCBG) . "
+               FROM `catalog_base_goods` `cbg`
+                 LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
+                 LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
+                 LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+               WHERE
+               cat_id IN (" . $this->catalogs . ")
+               " . $where . "
+               AND (cbg.status = 1 AND cbg.deleted = 0)
+        ) as c WHERE id != 0 " . $where_all . " group by c.id";
         $dataProvider = new SqlDataProvider([
             'sql' => $sql,
             'params' => $params_sql,

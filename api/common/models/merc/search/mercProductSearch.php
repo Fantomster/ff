@@ -54,6 +54,11 @@ class mercProductSearch extends VetisProductItem
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'name' => SORT_ASC,
+                ]
+            ],
         ]);
 
         $query->select(

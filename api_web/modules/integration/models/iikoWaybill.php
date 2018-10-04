@@ -24,7 +24,9 @@ class iikoWaybill extends Waybill
     {
         $model = $this;
         $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><document></document>');
-        $order_id = OrderContent::findOne(['id' => current($model->waybillContents)->order_content_id])->order_id;
+        $wc = reset($model->waybillContents);
+        $orderCon = OrderContent::findOne(['id' => $wc->order_content_id]);
+        $order_id = $orderCon->order_id;
         $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
         $doc_num = (Order::findOne($order_id))->waybill_number;
 
@@ -63,27 +65,27 @@ class iikoWaybill extends Waybill
          * @var $row WaybillContent
          */
         $records = WaybillContent::findAll(['waybill_id' => $model->id, 'unload_status' => 1]);
-        $discount = 0;iikoWaybillData::
+        $discount = 0;
 
-        foreach ($records as $i => $row) {
+        foreach($records as $i => $row) {
             $item = $items->addChild('item');
 
             $item->addChild('amount', $row->quantity_waybill);
-            $item->addChild('product', $row->product->uuid);
+            $item->addChild('product', $row->product->outer_uid);
             $item->addChild('num', (++$i));
             $item->addChild('containerId');
-            $item->addChild('amountUnit', $row->munit);
+            $item->addChild('amountUnit', $row->product->unit->name);
             $item->addChild('discountSum', $discount);
-            $item->addChild('sumWithoutNds', $row->sum);
-            $item->addChild('vatPercent', $row->vat / 100);
-            $item->addChild('ndsPercent', $row->vat / 100);
+            $item->addChild('sumWithoutNds', $row->sum_without_vat);
+            $item->addChild('vatPercent', $row->vat_waybill / 100);
+            $item->addChild('ndsPercent', $row->vat_waybill / 100);
 
-            $item->addChild('sum', round($row->sum + ($row->sum * $row->vat / 10000), 2));
+            $item->addChild('sum', $row->price_with_vat);
             //  $item->addChild('price', round($row->sum / $row->quant, 2));
-            $item->addChild('price', round(($row->sum + round($row->sum / 100 * $row->vat / 100)) / $row->quant, 2));
+            $item->addChild('price', $row->sum_with_vat);
 
             $item->addChild('isAdditionalExpense', false);
-            $item->addChild('store', $model->store->uuid);
+            $item->addChild('store', $model->outer_store_uuid);
 
         }
 

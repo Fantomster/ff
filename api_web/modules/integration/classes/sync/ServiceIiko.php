@@ -16,6 +16,7 @@ use api_web\classes\RabbitWebApi;
 use api_web\modules\integration\models\iikoWaybill;
 use common\models\Waybill;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
+use yii\web\BadRequestHttpException;
 use yii\web\ServerErrorHttpException;
 
 class ServiceIiko extends AbstractSyncFactory
@@ -43,24 +44,27 @@ class ServiceIiko extends AbstractSyncFactory
     }
 
     /**
+     * @param $request
+     * @return array
      * @throws \Exception
-     * */
+     */
     public function sendWaybill($request)
     {
-
-        $res = true;
+        if (!isset($request['ids']) && empty($request['ids'])) {
+            throw new BadRequestHttpException('empty_param|ids');
+        }
+        $res = [];
         $records = iikoWaybill::find()
-            ->andWhere(['id' => $request['ids'], 'service_id' => 2])
-            ->andWhere('status_id = :stat', [':stat' => 4])
+            ->andWhere(['id' => $request['ids'], 'service_id' => $this->serviceId])
+            ->andWhere('bill_status_id = :stat', [':stat' => 4])
             ->all();
 
         if (!isset($records)) {
             \Yii::error('Cant find waybills for export');
-            throw new \Exception('Ошибка при экспорте накладных в авторежиме');
+            throw new BadRequestHttpException('Ошибка при экспорте накладных в авторежиме');
         }
 
         $api = iikoApi::getInstance();
-
         if ($api->auth()) {
             /**@var Waybill $model */
             foreach ($records as $model) {
@@ -77,16 +81,20 @@ class ServiceIiko extends AbstractSyncFactory
 
                     $model->bill_status_id = 2;
                     $model->save();
+                    $res[$model->id] = true;
                     $transaction->commit();
                 } catch (\Exception $e) {
                     $transaction->rollBack();
                     \yii::error('Cant send waybill, rolled back' . $e);
-                    $res = false;
+                    $res[$model->id] = [
+                        $e->getTraceAsString(),
+                        $e->getMessage(),
+                    ];
                 }
             }
             $api->logout();
 
         }
-        return $res;
+        return ['result' => $res];
     }
 }

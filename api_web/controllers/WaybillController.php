@@ -1,36 +1,37 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: Fanto
- * Date: 9/13/2018
- * Time: 1:31 PM
+ * User: Konstantin Silukov
+ * Date: 04.10.2018
+ * Time: 11:56
  */
 
 namespace api_web\controllers;
 
-use api_web\components\WebApiController;
 
-/**
- * Class RabbitController
- * @package api_web\controllers
- */
-class RabbitController extends WebApiController
+use api_web\components\WebApiController;
+use api_web\helpers\WaybillHelper;
+
+class WaybillController extends WebApiController
 {
     /**
-     * @SWG\Post(path="/rabbit/add-to-queue",
-     *     tags={"Rabbit"},
-     *     summary="Добавить сообщение в очередь",
-     *     description="Добавить сообщение в очередь",
+     * @SWG\Post(path="/waybill/create-by-order",
+     *     tags={"Waybill"},
+     *     summary="Создание накладной по заказу",
+     *     description="Создание накладной по заказу",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
      *         in="body",
      *         required=true,
+     *         description="",
      *         @SWG\Schema (
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={"queue":"IikoProductsSync", "org_id":5144}
+     *                  default={
+     *                      "order_id": 3674
+     *                  }
      *              )
      *         )
      *     ),
@@ -38,8 +39,10 @@ class RabbitController extends WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *            default={"result":true}
-     *         )
+     *              default={
+     *                      "result": true
+     *                  }
+     *          ),
      *     ),
      *     @SWG\Response(
      *         response = 400,
@@ -52,8 +55,8 @@ class RabbitController extends WebApiController
      * )
      * @throws \Exception
      */
-    public function actionAddToQueue()
+    public function actionCreateByOrder()
     {
-        $this->response = $this->container->get('RabbitWebApi')->addToQueue($this->request);
+        $this->response = (new WaybillHelper())->createWaybillForApi($this->request);
     }
 }

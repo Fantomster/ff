@@ -362,6 +362,70 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         return ['result' => false];
     }
+      
+     /** 
+     * Накладная - Детальная информация
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getWaybillDetail (array $post)
+    {
+        if (empty($post['document_id'])) {
+            throw new BadRequestHttpException("empty_param|document_id");
+        }
+
+        return Waybill::prepareDetail($post['waybill_id']);
+    }
+
+    /**
+     * Накладная - Обновление детальной информации
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function editWaybillDetail(array $post)
+    {
+        if (empty($post['id'])) {
+            throw new BadRequestHttpException("EDIT CANCELED product id empty");
+        }
+
+        $waybill = Waybill::findOne(['id' => $post['id']]);
+
+        if(!isset($waybill)) {
+            throw new BadRequestHttpException("EDIT CANCELED the waybill - waybill not found");
+        }
+
+        if (!empty($post['agent_uid'])) {
+            $waybill->outer_contractor_uuid = $post['agent_uid'];
+        }
+
+        if (!empty($post['store_uid'])) {
+            $waybill->outer_store_uuid = $post['store_uid'];
+        }
+
+        if (!empty($post['doc_date'])) {
+            $waybill->doc_date = date("Y-m-d H:i:s", strtotime($post['doc_date']));
+        }
+
+        if (!empty($post['outer_number_additional'])) {
+            $waybill->outer_number_additional = $post['number_additional'];
+        }
+
+        if (!empty($post['outer_number_code'])) {
+            $waybill->outer_number_code = $post['number_code'];
+        }
+
+        if (!empty($post['outer_note'])) {
+            $waybill->outer_note = $post['note'];
+        }
+
+        if ($waybill->validate() && $waybill->save()) {
+            return $this->getWaybillDetail(['waybill_id' => $waybill->id]);
+        } else {
+            throw new ValidationException($waybill->getFirstErrors());
+        }
+    }
 
     private static function convertDate($date)
     {
@@ -369,9 +433,8 @@ class DocumentWebApi extends \api_web\components\WebApi
         if ($result) {
             return  $result>format('Y-m-d H:i:s');
         }
-
+      
         return "";
     }
-
 
 }

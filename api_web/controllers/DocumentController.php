@@ -221,6 +221,128 @@ class DocumentController extends \api_web\components\WebApiController
     public function actionDocumentsList()
     {
         $this->response = $this->container->get('DocumentWebApi')->getDocumentsList($this->request);
+
+    }
+
+    /**
+     * @SWG\Post(path="/document/waybill-detail",
+     *     tags={"Documents/waybill-detail"},
+     *     summary="Накладная - Детальная информация ",
+     *     description="Накладная - Детальная информация ",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"waybill_id":1}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                              "id": 226667,
+     *                              "code": 226667,
+     *                               "status_id": 1,
+     *                               "status_text": "Ожидают формирования",
+     *                               "agent": {
+     *                               "uid": "11232123",
+     *                               "name": "Опт Холод",
+     *                               },
+     *                               "store": {
+     *                               "uid": "3489",
+     *                               "name": "Горячий цех",
+     *                               },
+     *                               "doc_date": "2018-09-04T09:55:22+03:00"
+     *                               "outer_number_additional": 22666-111-1,
+     *                               "outer_number_code": 22666,
+     *                               "payment_delay_date": 2018-09-17T09:55:22+03:00,
+     *                               "outer_note": "Примечание"
+     *                  }
+     *         ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     */
+    public function actionWaybillDetail()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->getWaybillDetaill($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/document/update-waybill-detail",
+     *     tags={"Documents/update-waybill-detail"},
+     *     summary="Накладная - Обновление детальной информации",
+     *     description="Накладная - Обновление детальной информации",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 226667,
+     *                      "agent_uid": "11232123",
+     *                      "store_uid": "3489",
+     *                      "doc_date": "2018-09-04T09:55:22+03:00",
+     *                      "outer_number_additional": 22666-111-1,
+     *                      "outer_number_code": 22666,
+     *                      "payment_delay_date": 2018-09-17T09:55:22+03:00,
+     *                      "outer_note": "Примечание"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                              "id": 226667,
+     *                              "code": 226667,
+     *                               "status_id": 1,
+     *                               "status_text": "Ожидают формирования",
+     *                               "agent": {
+     *                               "uid": "11232123",
+     *                               "name": "Опт Холод",
+     *                               },
+     *                               "store": {
+     *                               "uid": "3489",
+     *                               "name": "Горячий цех",
+     *                               },
+     *                               "doc_date": "2018-09-04T09:55:22+03:00"
+     *                               "outer_number_additional": 22666-111-1,
+     *                               "outer_number_code": 22666,
+     *                               "payment_delay_date": 2018-09-17T09:55:22+03:00,
+     *                               "outer_note": "Примечание"
+     *                  }
+     *         ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionUpdateWaybillDetail()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->editWaybillDetail($this->request);
     }
 
     /**

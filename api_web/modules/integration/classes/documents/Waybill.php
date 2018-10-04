@@ -66,4 +66,49 @@ class Waybill extends BaseWaybill implements DocumentInterface
     {
         return WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = '.$this->id);
     }
+      
+    /**
+     * Накладная - Детальная информация
+     * @param $key
+     * @return array
+     */
+    public static function prepareDetail($key)
+    {
+        $model = self::findOne(['id' => $key]);
+        if($model === null ) {
+            return [];
+        }
+
+        $return = [
+            "id" => $model->id,
+            "code" => $model->id,
+            "status_id" => $model->bill_status_id,
+            "status_text" => "",
+        ];
+
+        $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_contractor_uuid);
+        $return ["agent"] = [
+            "uid" => $agent['outer_uid'],
+            "name" => $agent['name'],
+        ];
+
+        $return["vendor"] = [
+            "id" => $agent['vendor_id'],
+            "name" => $agent['vendor_name'],
+        ];
+
+        $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_uuid);
+        $return ["store"] = [
+            "uid" => $store['outer_uid'],
+            "name" => $store['name'],
+        ];
+
+        $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($model->doc_date));
+        $return["outer_number_additional"] = $model->outer_number_additional;
+        $return["outer_number_code"] = $model->outer_number_code;
+        $return["payment_delay_date"] = date("Y-m-d H:i:s T", strtotime($model->payment_delay_date));
+        $return["outer_note"] = $model->outer_note;
+
+        return $return;
+    }
 }

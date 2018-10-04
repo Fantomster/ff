@@ -26,7 +26,7 @@ class SyncServiceFactory extends WebApi
     const SERVICE_IIKO = 'Iiko';
 
     /** SERVICE "id - name" mapping */
-    public $allServicesMap = [
+    const ALL_SERVICE_MAP = [
         1 => self::SERVICE_RKEEPER,
         2 => self::SERVICE_IIKO,
     ];
@@ -58,7 +58,7 @@ class SyncServiceFactory extends WebApi
         if (!$callbackTaskId) {
 
             # 2.1.1. Identify Service ID
-            if (!array_key_exists($serviceId, $this->allServicesMap)) {
+            if (!array_key_exists($serviceId, self::ALL_SERVICE_MAP)) {
                 SyncLog::trace('Invalid service_id: "' . $serviceId . '"');
                 throw new BadRequestHttpException("empty_param|params");
             } else {
@@ -66,8 +66,8 @@ class SyncServiceFactory extends WebApi
             }
 
             # 2.1.2. Use entity class (by factory)
-            $entity = $this->factory((int)$serviceId, (string)$this->allServicesMap[$serviceId]);
-            SyncLog::trace('Initialized entity class: ' . get_class($entity), $this->allServicesMap[$serviceId]);
+            $entity = $this->factory((int)$serviceId, (string)self::ALL_SERVICE_MAP[$serviceId]);
+            SyncLog::trace('Initialized entity class: ' . get_class($entity), self::ALL_SERVICE_MAP[$serviceId]);
 
             # 2.1.3. Load dictionary data
             /** AbstractSyncFactory $entity */
@@ -88,7 +88,7 @@ class SyncServiceFactory extends WebApi
                 SyncLog::trace('Invalid service!');
                 throw new BadRequestHttpException("Service was not recognized by task_id!");
             }
-            $serviceId = array_search($serviceName, $this->allServicesMap);
+            $serviceId = array_search($serviceName, self::ALL_SERVICE_MAP);
             if (!$serviceId) {
                 SyncLog::trace('Invalid service_id!');
                 throw new BadRequestHttpException("empty_param|service_id");
@@ -96,7 +96,7 @@ class SyncServiceFactory extends WebApi
 
             # 2.2.2. Use entity class (by factory)
             $entity = $this->factory((int)$serviceId, $serviceName);
-            SyncLog::trace('Initialized entity class: ' . get_class($entity), $this->allServicesMap[$serviceId]);
+            SyncLog::trace('Initialized entity class: ' . get_class($entity), self::ALL_SERVICE_MAP[$serviceId]);
 
 
             # 2.1.3. Load dictionary data

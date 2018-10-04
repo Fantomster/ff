@@ -35,7 +35,9 @@ class SiteController extends Controller
             Yii::getAlias('@api_web/controllers/NotificationController.php'),
             Yii::getAlias('@api_web/controllers/EdiController.php'),
             Yii::getAlias('@api_web/controllers/SystemController.php'),
-            Yii::getAlias('@api_web/controllers/RabbitController.php')
+            Yii::getAlias('@api_web/controllers/RabbitController.php'),
+            Yii::getAlias('@api_web/controllers/WaybillController.php'),
+            Yii::getAlias('@api_web/controllers/CallbackController.php'),
         ];
 
         /**

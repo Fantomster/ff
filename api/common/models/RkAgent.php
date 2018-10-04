@@ -11,29 +11,22 @@ use yii\helpers\ArrayHelper;
  * This is the model class for table "rk_agent".
  *
  * @property integer $id
- * @property integer $fid
- * @property integer $org
- * @property string $login
- * @property string $password
- * @property string $token
- * @property string $lic
- * @property datetime $fd
- * @property datetime $td
- * @property integer $ver
- * @property integer $locked
- * @property string $usereq 
+ * @property integer $acc
+ * @property integer $rid
+ * @property string $denom
+ * @property string $agent_type
+ * @property string $created_at
+ * @property string $updated_at
  * @property string $comment
- * @property string $salespoint
- * 
- * 
+ * @property integer $vendor_id
  */
 class RkAgent extends \yii\db\ActiveRecord
 {
-    
+
     const STATUS_UNLOCKED = 0;
     const STATUS_LOCKED = 1;
-      
-    
+
+
     /**
      * @inheritdoc
      */
@@ -70,12 +63,12 @@ class RkAgent extends \yii\db\ActiveRecord
 
         ];
     }
-    
-    
+
+
     public static function getStatusArray() {
         return [
-        RkAccess::STATUS_UNLOCKED  => Yii::t('app', 'api.common.models.active_two', ['ru'=>'Активен']),
-        RkAccess::STATUS_LOCKED => Yii::t('app', 'api.common.models.off_two', ['ru'=>'Отключен']),
+            RkAccess::STATUS_UNLOCKED  => Yii::t('app', 'api.common.models.active_two', ['ru'=>'Активен']),
+            RkAccess::STATUS_LOCKED => Yii::t('app', 'api.common.models.off_two', ['ru'=>'Отключен']),
         ];
     }
 
@@ -85,20 +78,20 @@ class RkAgent extends \yii\db\ActiveRecord
     }
 
     public function getOrganization() {
-           return $this->hasOne(Organization_api::className(), ['id' => 'org']);          
-           
+        return $this->hasOne(Organization_api::className(), ['id' => 'org']);
+
     }
-    
+
     public function getOrganizationName()
-{
-    $org = $this->organization;
-    return $org ? $org->name : 'no';
-}
-    
-    
+    {
+        $org = $this->organization;
+        return $org ? $org->name : 'no';
+    }
+
+
     public static function getDb()
     {
-       return \Yii::$app->db_api;
+        return \Yii::$app->db_api;
     }
 
     /**

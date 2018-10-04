@@ -183,11 +183,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $massiv_post = Yii::$app->request->post('OneSWaybillData');
         while ($est == 0) {
             if (isset($massiv_post[$i]["koef"])) {
-                $koef = $massiv_post[$i]["koef"];
+                $koef_old = $massiv_post[$i]["koef"];
                 $est = 1;
             }
             $i++;
         }
+        $koef = str_replace(',', '.', $koef_old);
         $koef = round($koef, 6);
         $buttons = $massiv_post["koef_buttons"];
         $koef_id = Yii::$app->request->post('editableKey');

@@ -1,4 +1,5 @@
 <?php
+
 namespace api_web\modules\integration\classes\documents;
 
 use api\common\models\AllMaps;
@@ -6,6 +7,7 @@ use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use api_web\modules\integration\modules\iiko\models\iikoService;
+use common\models\Organization;
 use common\models\Waybill as BaseWaybill;
 
 class Waybill extends BaseWaybill implements DocumentInterface
@@ -30,18 +32,31 @@ class Waybill extends BaseWaybill implements DocumentInterface
         ];
 
         $agent = (new Dictionary($this->service_id, 'Agent'))->agentInfo($this->outer_contractor_uuid);
+        if (empty($agent)) {
+            $return ["agent"] = [];
+        } else {
+            $return ["agent"] = [
+                "uid" => $agent['outer_uid'],
+                "name" => $agent['name'],
+            ];
+        }
 
-        $return ["agent"] = [
-            "uid" => $agent['outer_uid'],
-            "name" => $agent['name'],
-            "difer" => false,
-        ];
+        $return ["agent"] = [];
+        if (empty($agent)) {
+            $order = $this->order;
+            if (isset($order)) {
+                $return ["agent"] = [
+                    "id" => $order->vendor_id,
+                    "name" => $order->vendor->name,
+                ];
+            }
+        } elseif (isset($agent['vendor_id'])) {
+            $return["vendor"] = [
+                "id" => $agent['vendor_id'],
+                "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
+            ];
+        }
 
-        $return["vendor"] = [
-            "id" => $agent['vendor_id'],
-            "name" => $agent['vendor_name'],
-            "difer" => false,
-        ];
         $return["is_mercury_cert"] = $this->getIsMercuryCert();
         $return["count"] = $this->getTotalCount();
         $return["total_price"] = $this->getTotalPrice();
@@ -58,7 +73,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
     public static function prepareModel($key)
     {
         $model = self::findOne(['id' => $key]);
-        if($model === null ) {
+        if ($model === null) {
             return [];
         }
         return $model->prepare();
@@ -68,9 +83,9 @@ class Waybill extends BaseWaybill implements DocumentInterface
      * Сброс привязки позиций накладной к заказу
      * @return int
      */
-    public function resetPositions ()
+    public function resetPositions()
     {
-        if(isset($this->order_id)) {
+        if (isset($this->order_id)) {
             $transaction = \Yii::$app->db->beginTransaction();
             try {
                 WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = ' . $this->id);
@@ -84,7 +99,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
         return true;
     }
-      
+
     /**
      * Накладная - Детальная информация
      * @param $key
@@ -93,7 +108,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
     public static function prepareDetail($key)
     {
         $model = self::findOne(['id' => $key]);
-        if($model === null ) {
+        if ($model === null) {
             return [];
         }
 
@@ -105,21 +120,40 @@ class Waybill extends BaseWaybill implements DocumentInterface
         ];
 
         $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_contractor_uuid);
-        $return ["agent"] = [
-            "uid" => $agent['outer_uid'],
-            "name" => $agent['name'],
-        ];
+        if (empty($agent)) {
+            $return ["agent"] = [];
+        } else {
+            $return ["agent"] = [
+                "uid" => $agent['outer_uid'],
+                "name" => $agent['name'],
+            ];
+        }
 
-        $return["vendor"] = [
-            "id" => $agent['vendor_id'],
-            "name" => $agent['vendor_name'],
-        ];
+        $return ["agent"] = [];
+        if (empty($agent)) {
+            $order = $model->order;
+            if (isset($order)) {
+                $return ["agent"] = [
+                    "id" => $order->vendor_id,
+                    "name" => $order->vendor->name,
+                ];
+            }
+        } elseif (isset($agent['vendor_id'])) {
+            $return["vendor"] = [
+                "id" => $agent['vendor_id'],
+                "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
+            ];
+        }
 
         $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_uuid);
-        $return ["store"] = [
-            "uid" => $store['outer_uid'],
-            "name" => $store['name'],
-        ];
+        if (empty($agent)) {
+            $return ["store"] = [];
+        } else {
+            $return ["store"] = [
+                "uid" => $store['outer_uid'],
+                "name" => $store['name'],
+            ];
+        }
 
         $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($model->doc_date));
         $return["outer_number_additional"] = $model->outer_number_additional;
@@ -134,35 +168,31 @@ class Waybill extends BaseWaybill implements DocumentInterface
      * Привязка накладной к заказу
      * @return int
      */
-    public function mapWaybill ($order_id)
+    public function mapWaybill($order_id)
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            if(isset($this->order_id))
-            {
+            if (isset($this->order_id)) {
                 $this->resetPositions();
-            }
-            else
-            {
+            } else {
                 $this->order_id = $order_id;
             }
-            
+
             $waybillContents = $this->waybillContents;
 
             if ($this->service_id == 2) {
                 $mainOrg_id = iikoService::getMainOrg($this->acquirer_id);
             }
 
-            foreach ($waybillContents as $row)
-            {
-                if(isset($row->product_outer_id)) {
+            foreach ($waybillContents as $row) {
+                if (isset($row->product_outer_id)) {
                     continue;
                 }
 
                 $client_id = $this->acquirer_id;
                 if ($this->service_id == 2) {
                     if ($mainOrg_id != $this->acquirer_id) {
-                        if((AllMaps::findOne("service_id = 2 AND org_id = $client_id AND serviceproduct_id = ".$row->product_outer_id) == null) && (!empty($mainOrg_id))) {
+                        if ((AllMaps::findOne("service_id = 2 AND org_id = $client_id AND serviceproduct_id = " . $row->product_outer_id) == null) && (!empty($mainOrg_id))) {
                             $client_id = $mainOrg_id;
                         }
                     }
@@ -170,17 +200,17 @@ class Waybill extends BaseWaybill implements DocumentInterface
 
                 $product_id = AllMaps::find()
                     ->select('product_id')
-                    ->where("service_id = :service_id AND serviceproduct_id = :serviceproduct_id AND org_id = :org_id",
+                    ->where("service_id = :service_id AND serviceproduct_id = :serviceproduct_id AND org_id = :org_id and is_active = 1",
                         [':service_id' => $this->service_id, ':serviceproduct_id' => $row->product_outer_id, ':org_id' => $client_id])
                     ->scalar();
 
-                if($product_id == null) {
+                if ($product_id == null) {
                     continue;
                 }
 
                 $row->order_content_id = \common\models\OrderContent::find()
                     ->select('id')
-                    ->where('order_id = :order_id and product_id = :product_id', [':order_id' => $order_id, ':product_id' => $product_id])
+                    ->where('order_id = :order_id and product_id = :product_id and is_active = 1', [':order_id' => $order_id, ':product_id' => $product_id])
                     ->scalar();
                 $row->save();
             }

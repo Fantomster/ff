@@ -131,7 +131,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
 
         if (!empty($this->searchString)) {
-            $where .= 'AND (cbg.product  LIKE :searchString OR cbg.article LIKE :searchString)';
+            $where .= ' AND (cbg.product  LIKE :searchString OR cbg.article LIKE :searchString)';
             $params_sql[':searchString'] = "%" . $this->searchString . "%";
         }
 
@@ -185,11 +185,11 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             $arrayVendorsId = array_keys($this->vendors);
             unset($arrayVendorsId[0]);
             $arrayVendorsId = implode(",", $arrayVendorsId);
-            $where_all .= "AND cbg.supp_org_id in ($arrayVendorsId)";
+            $where_all .= " AND cbg.supp_org_id in ($arrayVendorsId)";
         }
         else
         {
-            $where_all .= "AND cbg.supp_org_id in (".$this->selectedVendor.")";
+            $where_all .= " AND cbg.supp_org_id in (".$this->selectedVendor.")";
         }
 
         $sql = "SELECT " . implode(',', $fieldsCBG) . "

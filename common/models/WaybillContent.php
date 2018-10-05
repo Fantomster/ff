@@ -49,7 +49,7 @@ class WaybillContent extends yii\db\ActiveRecord
     {
         return [
             [['waybill_id'], 'required'],
-            [['waybill_id', 'order_content_id', 'product_outer_id', 'unload_status', 'sum_with_vat', 'sum_without_vat', 'price_with_vat', 'price_without_vat'], 'integer'],
+            [['waybill_id', 'order_content_id', 'product_outer_id', 'unload_status', 'sum_with_vat', 'sum_without_vat', 'price_with_vat', 'price_without_vat', 'outer_unit_id'], 'integer'],
             [['quantity_waybill', 'vat_waybill', 'koef'], 'number'],
             [['merc_uuid'], 'string', 'max' => 255],
             [['waybill_id'], 'exist', 'skipOnError' => true, 'targetClass' => Waybill::className(), 'targetAttribute' => ['waybill_id' => 'id']],
@@ -70,7 +70,8 @@ class WaybillContent extends yii\db\ActiveRecord
             'vat_waybill' => 'Vat Waybill',
             'merc_uuid' => 'Merc Uuid',
             'unload_status' => 'Unload Status',
-            'koef' => 'Коэффициент'
+            'koef' => 'Коэффициент',
+            'outer_unit_id' => 'ID единицы измерения'
         ];
     }
 
@@ -85,7 +86,8 @@ class WaybillContent extends yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      * */
-    public function getMercVsd(){
+    public function getMercVsd()
+    {
         return $this->hasOne(MercVsd::className(), ['uuid' => 'merc_uuid']);
     }
 

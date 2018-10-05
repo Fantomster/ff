@@ -1556,4 +1556,101 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('IntegrationWebApi')->updateWaybillContent($this->request);
     }
+
+
+    /**
+     * @SWG\Post(path="/order/create-waybill-content",
+     *     tags={"Order/Integration"},
+     *     summary="Накладная (привязана к заказу) - Добавление позиции",
+     *     description="Накладная (привязана к заказу) - Добавление позиции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                              "waybill_id": 5,
+     *                              "product_outer_id": 4352,
+     *                              "outer_unit_id": 8,
+     *                              "quantity_waybill": 1,
+     *                              "product_outer_id": 4822,
+     *                              "price_without_vat": 35000,
+     *                              "vat_waybill": 0.18
+     *                          }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                "success": true,
+     *                "waybill_content_id": 5
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionCreateWaybillContent()
+    {
+        $this->response = $this->container->get('IntegrationWebApi')->createWaybillContent($this->request);
+    }
+
+
+    /**
+     * @SWG\Post(path="/order/delete-waybill-content",
+     *     tags={"Order/Integration"},
+     *     summary="Накладная - Удалить/Убрать позицию",
+     *     description="Накладная - Удалить/Убрать позицию",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                              "waybill_content_id": 5
+     *                          }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                "success": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionDeleteWaybillContent()
+    {
+        $this->response = $this->container->get('IntegrationWebApi')->deleteWaybillContent($this->request);
+    }
 }

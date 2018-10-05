@@ -21,7 +21,7 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
         $productOuter = $this->productOuter;
         $unit = null;
         if(isset($orderContent)) {
-            $unit = $orderContent->product->unit;
+            $unit = $orderContent->product->ed;
         }
         elseif (isset($productOuter)) {
             $unit = isset($productOuter->outerUnit) ? $productOuter->outerUnit->name : null;

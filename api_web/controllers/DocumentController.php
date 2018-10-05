@@ -9,7 +9,7 @@ class DocumentController extends \api_web\components\WebApiController
 {
     /**
      * @SWG\Post(path="/document/document-content",
-     *     tags={"Documents/content"},
+     *     tags={"Documents"},
      *     summary="Детальная часть документа",
      *     description="Детальная часть документа",
      *     produces={"application/json"},
@@ -76,28 +76,28 @@ class DocumentController extends \api_web\components\WebApiController
      *                  },
      *                  "positions": {
      *                      {
-     *                               "id" => 2222,
-     *                               "product_id" => 3212,
-     *                               "product_name" => "Апелисны",
-     *                               "product_outer_id" => 456789,
-     *                               "quantity" => "Апелисны импортные",
-     *                               "unit" => "кг",
-     *                               "koef" => 1,
-     *                               "sum_without_vat" => 563789.05,
-     *                               "sum_with_vat" => 542364.25,
-     *                               "vat" => 18,
+     *                               "id": 2222,
+     *                               "product_id": 3212,
+     *                               "product_name": "Апелисны",
+     *                               "product_outer_id": 456789,
+     *                               "quantity": "Апелисны импортные",
+     *                               "unit": "кг",
+     *                               "koef": 1,
+     *                               "sum_without_vat": 563789.05,
+     *                               "sum_with_vat": 542364.25,
+     *                               "vat": 18,
      *                               },
      *                       {
-     *                               "id" => 2222,
-     *                               "product_id" => 3212,
-     *                               "product_name" => "Апелисны",
-     *                               "product_outer_id" => 456789,
-     *                               "quantity" => "Апелисны импортные",
-     *                               "unit" => "кг",
-     *                               "koef" => 1,
-     *                               "sum_without_vat" => 563789.05,
-     *                               "sum_with_vat" => 542364.25,
-     *                               "vat" => 18,
+     *                               "id": 2222,
+     *                               "product_id": 3212,
+     *                               "product_name": "Апелисны",
+     *                               "product_outer_id": 456789,
+     *                               "quantity": "Апелисны импортные",
+     *                               "unit": "кг",
+     *                               "koef": 1,
+     *                               "sum_without_vat": 563789.05,
+     *                               "sum_with_vat": 542364.25,
+     *                               "vat": 18,
      *                              },
      *                  }
      *              }
@@ -116,7 +116,7 @@ class DocumentController extends \api_web\components\WebApiController
 
     /**
      * @SWG\Post(path="/document/documents-list",
-     *     tags={"Documents/list"},
+     *     tags={"Documents"},
      *     summary="Список документов",
      *     description="Список документов",
      *     produces={"application/json"},
@@ -140,7 +140,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                         "order_date": {
      *                             "from": "23.08.2018",
      *                             "to": "24.08.2018"
-     *                         }
+     *                         },
      *                        "vendor" : {
      *                          1254,
      *                          3256
@@ -229,7 +229,7 @@ class DocumentController extends \api_web\components\WebApiController
 
     /**
      * @SWG\Post(path="/document/waybill-detail",
-     *     tags={"Documents/waybill-detail"},
+     *     tags={"Documents"},
      *     summary="Накладная - Детальная информация ",
      *     description="Накладная - Детальная информация ",
      *     produces={"application/json"},
@@ -262,10 +262,10 @@ class DocumentController extends \api_web\components\WebApiController
      *                               "uid": "3489",
      *                               "name": "Горячий цех",
      *                               },
-     *                               "doc_date": "2018-09-04T09:55:22+03:00"
-     *                               "outer_number_additional": 22666-111-1,
+     *                               "doc_date": "2018-09-04T09:55:22+03:00",
+     *                               "outer_number_additional": "22666-111-1",
      *                               "outer_number_code": 22666,
-     *                               "payment_delay_date": 2018-09-17T09:55:22+03:00,
+     *                               "payment_delay_date": "2018-09-17T09:55:22+03:00",
      *                               "outer_note": "Примечание"
      *                  }
      *         ),
@@ -283,7 +283,7 @@ class DocumentController extends \api_web\components\WebApiController
 
     /**
      * @SWG\Post(path="/document/update-waybill-detail",
-     *     tags={"Documents/update-waybill-detail"},
+     *     tags={"Documents"},
      *     summary="Накладная - Обновление детальной информации",
      *     description="Накладная - Обновление детальной информации",
      *     produces={"application/json"},
@@ -300,9 +300,9 @@ class DocumentController extends \api_web\components\WebApiController
      *                      "agent_uid": "11232123",
      *                      "store_uid": "3489",
      *                      "doc_date": "2018-09-04T09:55:22+03:00",
-     *                      "outer_number_additional": 22666-111-1,
+     *                      "outer_number_additional": "22666-111-1",
      *                      "outer_number_code": 22666,
-     *                      "payment_delay_date": 2018-09-17T09:55:22+03:00,
+     *                      "payment_delay_date": "2018-09-17T09:55:22+03:00",
      *                      "outer_note": "Примечание"
      *                  }
      *              )
@@ -325,10 +325,10 @@ class DocumentController extends \api_web\components\WebApiController
      *                               "uid": "3489",
      *                               "name": "Горячий цех",
      *                               },
-     *                               "doc_date": "2018-09-04T09:55:22+03:00"
-     *                               "outer_number_additional": 22666-111-1,
+     *                               "doc_date": "2018-09-04T09:55:22+03:00",
+     *                               "outer_number_additional": "22666-111-1",
      *                               "outer_number_code": 22666,
-     *                               "payment_delay_date": 2018-09-17T09:55:22+03:00,
+     *                               "payment_delay_date": "2018-09-17T09:55:22+03:00",
      *                               "outer_note": "Примечание"
      *                  }
      *         ),
@@ -350,7 +350,7 @@ class DocumentController extends \api_web\components\WebApiController
 
     /**
      * @SWG\Post(path="/document/reset-waybill-positions",
-     *     tags={"Documents/reset-waybill-positions"},
+     *     tags={"Documents"},
      *     summary="Накладная - Сброс позиций ",
      *     description="Накладная - Сброс позиций ",
      *     produces={"application/json"},
@@ -389,8 +389,8 @@ class DocumentController extends \api_web\components\WebApiController
     }
 
     /**
-     * @SWG\Post(path="/document/map-waybill_order",
-     *     tags={"Documents/map-waybill_order"},
+     * @SWG\Post(path="/document/map-waybill-order",
+     *     tags={"Documents"},
      *     summary="Накладная - Сопоставление с заказом ",
      *     description="Накладная - Сопоставление с заказом ",
      *     produces={"application/json"},

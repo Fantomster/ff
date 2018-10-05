@@ -80,13 +80,13 @@ class RkwsAgent extends ServiceRkws
                 if ($agent->save()) {
                     $task->callbacked_at = $ts;
                     $task->int_status_id = OuterTask::STATUS_CALLBACKED;
-                    $task->retry++;
                     $saveCounts++;
                 } else {
                     $err['agent'][$agent->id][] = $agent->errors;
                     $saveResult = false;
                 }
             }
+            $task->retry++;
             if (!$task->save()) {
                 $err['task'][] = $task->errors;
                 $saveResult = false;

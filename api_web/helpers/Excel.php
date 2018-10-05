@@ -84,7 +84,7 @@ class Excel
             $attributes['temp_id'] = $tmpCatId;
             $write = true;
             foreach ($cellIterator as $cell) {
-                if ($cellsCount > 6) {
+                if (!array_key_exists($cellsCount, $mapping) || $cellsCount > 6) {
                     break;
                 }
                 $value = $cell->getValue();

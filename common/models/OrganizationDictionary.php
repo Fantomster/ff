@@ -33,6 +33,9 @@ use yii\behaviors\TimestampBehavior;
 class OrganizationDictionary extends ActiveRecord
 {
 
+    const STATUS_ACTIVE = 1;
+    const STATUS_DISABLED = null;
+
     public static function tableName()
     {
         return 'organization_dictionary';

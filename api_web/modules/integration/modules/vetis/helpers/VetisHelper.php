@@ -188,9 +188,10 @@ class VetisHelper
 
     /**
      * @param int $id
+     * @param array $uuids
      * @return array|bool
      */
-    public function getGroupInfo(int $id)
+    public function getGroupInfo(int $id, $uuids)
     {
         $tableName = $this->getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
         $query = (new Query())
@@ -209,6 +210,7 @@ class VetisHelper
             ->leftJoin('`' . $tableName . '`.merc_vsd m', 'm.uuid = oc.merc_uuid COLLATE utf8_unicode_ci')
             ->where(['o.id' => $id])
             ->andWhere('oc.merc_uuid is not null')
+            ->andWhere(['m.uuid' => $uuids])
             ->one(\Yii::$app->db);
 
         if (!is_null($query['statuses'])) {

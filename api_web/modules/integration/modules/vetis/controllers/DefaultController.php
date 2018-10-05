@@ -33,7 +33,7 @@ class DefaultController extends WebApiController
      *                          "type": "INCOMING",
      *                          "status": "CONFIRMED",
      *                          "sender_guid": {"f8805c8f-1da4-4bda-aaca-a08b5d1cab1b"},
-     *                          "product_name": "мясо ягненка",
+     *                          "product_name": {"мясо ягненка"},
      *                          "date":{
      *                              "from":"22.22.1111",
      *                              "to":"22.22.1111"

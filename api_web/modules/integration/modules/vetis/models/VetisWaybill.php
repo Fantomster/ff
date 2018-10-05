@@ -53,7 +53,7 @@ class VetisWaybill extends WebApi
         $arResult = $search->search($params, $page, $pageSize);
 
         foreach ($arResult['groups'] as $group_id => &$v) {
-            $info = $this->helper->getGroupInfo((int)$group_id);
+            $info = $this->helper->getGroupInfo((int)$group_id, array_keys($arResult['uuids']));
             $v = $info;
         }
 

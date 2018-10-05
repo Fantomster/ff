@@ -18,4 +18,7 @@ class RkwsStore extends ServiceRkws
     /** @var string $index Символьный идентификатор справочника */
     public $index = 'store';
 
+    /** @var string $OperDenom Поле Denom в таблице all_service_operation */
+    public static $OperDenom = 'sh_get_stores';
+
 }

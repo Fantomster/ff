@@ -27,7 +27,10 @@ return [
             'enableLocaleUrls' => false,
             'showScriptName' => false,
             'enablePrettyUrl' => true,
-            'enableLanguageDetection' => true
+            'enableLanguageDetection' => true,
+            'rules' => [
+                'integration/vetis/<action>' => '/integration/vetis/default/<action>',
+            ],
         ],
         'user' => [
             'class' => \amnah\yii2\user\components\User::className(),

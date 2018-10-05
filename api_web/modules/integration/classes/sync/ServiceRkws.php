@@ -13,6 +13,7 @@
 namespace api_web\modules\integration\classes\sync;
 
 use api\common\models\RkService;
+use common\models\AllServiceOperation;
 use Yii;
 use yii\db\mssql\PDO;
 use common\models\OuterTask;
@@ -52,16 +53,22 @@ class ServiceRkws extends AbstractSyncFactory
     public $urlCmd;
     public $urlLogin;
 
+    public $dirResponseXml = '@api_web/modules/integration/views/sync/rkws/request';
+
     const COOK_AUTH_PREFIX_SESSION = '.ASPXAUTH';
     const COOK_AUTH_PREFIX_LOGIN = '_ASPXAUTH';
+
     const COOK_AUTH_STR_BEGIN = 'Set-Cookie';
+
+    public static $OperDenom;
 
     /**
      * Basic service method "Send request"
      * @return array?
      * @throws BadRequestHttpException
      */
-    public function sendRequestForObjects(): ?array {
+    public function sendRequestForObjects(): ?array
+    {
         # 1. Start "Send request" action
         SyncLog::trace('Initialized new procedure action "Send request" in ' . __METHOD__);
         $cook = $this->prepareServiceWithAuthCheck();
@@ -70,16 +77,21 @@ class ServiceRkws extends AbstractSyncFactory
         $xml = '<?xml version="1.0" encoding="utf-8"?>
         <RQ cmd="get_objects">
           <PARAM name="start" val="1"/>
-          <PARAM name="limit" val="100"/>
-          <PARAM name="onlyactive" val="0"/>
+          <PARAM name="limit" val="1000"/>
+          <PARAM name="onlyactive" val="0" />
         </RQ>';
         $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
 
-        print_r($xmlData); exit;
+        SyncLog::trace('Result XML-data for objects is: ' . PHP_EOL . $xmlData);
+
+        return [
+            'service_prefix' => SyncLog::$servicePrefix,
+            'log_index' => SyncLog::$logIndex,
+        ];
 
     }
 
-    public function sendRequest(): array
+    public function sendRequest(array $params = []): array
     {
 
         # 1. Start "Send request" action
@@ -94,12 +106,13 @@ class ServiceRkws extends AbstractSyncFactory
 
         $url = $this->getUrlCmd();
         $guid = UUID::uuid4();
-        $xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid);
+        $xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
         $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
         if ($xmlData) {
             $xml = (array)simplexml_load_string($xmlData);
             if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
                 $transaction = $this->createTransaction();
+                $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => static::$OperDenom]);
                 $task = new OuterTask([
                     'service_id' => $this->serviceId,
                     'retry' => 0,
@@ -109,7 +122,7 @@ class ServiceRkws extends AbstractSyncFactory
                     'int_status_id' => OuterTask::STATUS_REQUESTED,
                     'outer_guid' => $xml['@attributes']['taskguid'],
                     'broker_version' => $xml['@attributes']['version'],
-                    'oper_code' => $xml['@attributes']['code'],
+                    'oper_code' => $oper->id,
                 ]);
                 if ($task->save()) {
                     $transaction->commit();
@@ -118,6 +131,8 @@ class ServiceRkws extends AbstractSyncFactory
                     return [
                         'task_id' => $task->id,
                         'task_status' => $task->int_status_id,
+                        'service_prefix' => SyncLog::$servicePrefix,
+                        'log_index' => SyncLog::$logIndex,
                     ];
                 }
                 $transaction->rollBack();
@@ -146,7 +161,7 @@ class ServiceRkws extends AbstractSyncFactory
         # 3. Find license Rkeeper data
         $license = RkService::findOne([
             'id' => $licenseMixcart->service_id,
-            'org' => $this->user->organization_id,
+            // 'org' => $this->user->organization_id, поле не используется!
             'status_id' => 1,
             'is_deleted' => 0
         ]);
@@ -347,28 +362,38 @@ class ServiceRkws extends AbstractSyncFactory
     }
 
 
-    public function getCallbackURL($dictionary): string
+    public function getCallbackURL(): string
     {
-        return Yii::$app->params['rkeepCallBackURL'] . '/' . $dictionary;
+        return Yii::$app->params['rkeepCallBackURL'] . '?';
     }
 
-    public function prepareXmlWithTaskAndServiceCode($index, $code, $guid): string
+    public function prepareXmlWithTaskAndServiceCode($index, $code, $guid, array $params = []): string
     {
-        $cb = $this->getCallbackURL($index) . '/?' . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
-        $cb = 'http://bklv.ru/mc.php?' . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
-        SyncLog::trace('Callback url is: ' . $cb);
-        return '<?xml version="1.0" encoding="utf-8"?>
-<RQ cmd="sh_get_corrs" tasktype="any_call" callback="' . $cb . '">
-    <PARAM name="object_id" val="' . $code . '"/>
-</RQ>';
+        $cb = $this->getCallbackURL() . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
+        SyncLog::trace('Callback URL and salespoint code for the template are:' . $cb . ' (' . $code . ')');
+
+        $renderParams = [
+            'cb' => $cb,
+            'code' => $code,
+        ];
+        if (isset($params['product_group']) && $params['product_group']) {
+            $renderParams['productGroup'] = $params['product_group'];
+        }
+        if (isset($params['code']) && $params['code']) {
+            SyncLog::trace('Made object code replacement:' . $code . ' -> ' . $params['code']);
+            $renderParams['code'] = $params['code'];
+        }
+        $template = Yii::$app->view->render($this->dirResponseXml . '/' . ucfirst($index), $renderParams);
+        SyncLog::trace('Template result is:' . PHP_EOL . $template);
+        return $template;
     }
 
     /**
      * Метод отправки накладной
      * @return array
      */
-    public function sendWaybill(): array
+    public function sendWaybill($request): array
     {
-
+        return [];
     }
 }

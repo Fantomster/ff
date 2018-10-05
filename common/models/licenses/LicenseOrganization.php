@@ -2,8 +2,10 @@
 
 namespace common\models\licenses;
 
-use common\models\Organization;
 use Yii;
+use yii\db\ActiveRecord;
+use common\models\Organization;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "license_organization".
@@ -26,7 +28,7 @@ use Yii;
  *
  * @property License $license
  */
-class LicenseOrganization extends \yii\db\ActiveRecord
+class LicenseOrganization extends ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -55,7 +57,7 @@ class LicenseOrganization extends \yii\db\ActiveRecord
             [['object_id'], 'string', 'max' => 64],
             [['outer_user', 'outer_name', 'outer_address'], 'string', 'max' => 255],
             [['outer_phone'], 'string', 'max' => 32],
-            [['license_id'], 'exist', 'skipOnError' => true, 'targetClass' => License::className(), 'targetAttribute' => ['license_id' => 'id']],
+            [['license_id'], 'exist', 'skipOnError' => true, 'targetClass' => License::class, 'targetAttribute' => ['license_id' => 'id']],
         ];
     }
 
@@ -102,7 +104,7 @@ class LicenseOrganization extends \yii\db\ActiveRecord
      */
     public function getLicense()
     {
-        return $this->hasOne(License::className(), ['id' => 'license_id']);
+        return $this->hasOne(License::class, ['id' => 'license_id']);
     }
 
 
@@ -111,6 +113,6 @@ class LicenseOrganization extends \yii\db\ActiveRecord
      */
     public function getOrganization()
     {
-        return $this->hasOne(Organization::className(), ['id' => 'org_id']);
+        return $this->hasOne(Organization::class, ['id' => 'org_id']);
     }
 }

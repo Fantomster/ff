@@ -12,8 +12,6 @@
 
 namespace api_web\modules\integration\classes;
 
-use yii\web\BadRequestHttpException;
-
 class SyncLog
 {
 
@@ -50,17 +48,32 @@ class SyncLog
         }
     }
 
+    public static function showLog(array $params)
+    {
+        if (isset($params['service_prefix']) && isset($params['log_index'])) {
+            $file = self::$logDir . '/' . $params['service_prefix'] . $params['log_index'] . '.log';
+            if (file_exists($file)) {
+                echo file_get_contents($file);
+                exit;
+            }
+        }
+    }
+
     /**
      * Log microaction
      * @param $message string Log info message
      * @param $service string Service name
+     * @param $callbackTaskId string This is callback and that is Id
      */
-    public static function trace(string $message, string $service = null)
+    public static function trace(string $message, string $service = null, string $callbackTaskId = null)
     {
 
         $currentTime = (string)microtime(true);
         if (!self::$logIndex) {
             self::$logIndex = (string)microtime(true) . '--' . self::uuid4();
+            if ($callbackTaskId) {
+                self::$logIndex = $callbackTaskId;
+            }
             if (!is_dir(self::$logDir)) {
                 self::$logDir = \Yii::$app->getRuntimePath() . '/logs/sync';
                 if (!is_dir(self::$logDir)) {
@@ -74,16 +87,18 @@ class SyncLog
         }
         if ($service) {
             $i = 0;
-            foreach (self::$logData[self::$logIndex] as $k => $mess) {
-                if (!$i) {
-                    $timePrev = 0;
-                } else {
-                    $timePrev = self::$logData[self::$logIndex][$k-1]['time'];
+            if (isset(self::$logData[self::$logIndex])) {
+                foreach (self::$logData[self::$logIndex] as $k => $mess) {
+                    if (!$i) {
+                        $timePrev = 0;
+                    } else {
+                        $timePrev = self::$logData[self::$logIndex][$k - 1]['time'];
+                    }
+                    $i++;
+                    $mess = $i . ') "' . $mess['mess'] . '" - [' .
+                        round(($mess['time'] - $timePrev), 5) . '/' . round(($mess['time'] - self::$logData[self::$logIndex][0]['time']), 5) . '] ms' . PHP_EOL;
+                    file_put_contents(self::$logDir . '/' . self::$servicePrefix . self::$logIndex . '.log', $mess, FILE_APPEND);
                 }
-                $i++;
-                $mess = $i . ') "' . $mess['mess'] . '" - [' .
-                    round(($mess['time'] - $timePrev), 5) . '/' . round(($mess['time'] - self::$logData[self::$logIndex][0]['time']), 5) . '] ms' . PHP_EOL;
-                file_put_contents(self::$logDir . '/' . self::$servicePrefix . self::$logIndex . '.log', $mess, FILE_APPEND);
             }
         }
         self::$logData[self::$logIndex][] = [
@@ -93,7 +108,6 @@ class SyncLog
         $message = (count(self::$logData[self::$logIndex]) + 1) . ') "' . $message . '" - [' .
             round(($currentTime - self::$timePrev), 5) . '/' . round(($currentTime - self::$timeInit), 5) . '] ms' . PHP_EOL;
         file_put_contents(self::$logDir . '/' . self::$servicePrefix . self::$logIndex . '.log', $message, FILE_APPEND);
-
         self::$timePrev = $currentTime;
     }
 

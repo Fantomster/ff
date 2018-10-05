@@ -53,7 +53,7 @@ class WaybillHelper extends AuthHelper
             ' duedate="1" note="' . $wmodel->note .
             '" ' . $autoNumber . '>' . PHP_EOL;
         
-        $recs = \api\common\models\RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.rid as prid')->leftJoin('rk_product', 'rk_product.id = product_rid')
+        $recs = \api\common\models\RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.rid as prid, rk_product.unit_rid')->leftJoin('rk_product', 'rk_product.id = product_rid')
             ->andWhere('waybill_id = :wid', [':wid' => $id])
             ->andWhere(['unload_status' => 1])
             ->asArray(true)->all();
@@ -63,7 +63,7 @@ class WaybillHelper extends AuthHelper
         foreach ($recs as $rec) {
             
             // $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.$rec['vat'].'" />'.PHP_EOL;
-            $xml .= '<ITEM rid="' . $rec['prid'] . '" quant="' . ($rec["quant"] * 1000) . '" mu="' . $rec["munit_rid"] . '" sum="' . ($rec['sum'] * 100) . '" vatrate="' . ($rec['vat']) . '" />' . PHP_EOL;
+            $xml .= '<ITEM rid="' . $rec['prid'] . '" quant="' . ($rec["quant"] * 1000) . '" mu="' . $rec["unit_rid"] . '" sum="' . ($rec['sum'] * 100) . '" vatrate="' . ($rec['vat']) . '" />' . PHP_EOL;
             
         }
         

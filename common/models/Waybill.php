@@ -32,6 +32,7 @@ use Yii;
  * @property string $edi_number
  * @property string $edi_recadv
  * @property string $edi_invoice
+ * @property int $order_id
  *
  *
  * @property WaybillContent[] $waybillContents
@@ -122,4 +123,13 @@ class Waybill extends yii\db\ActiveRecord
     {
         return round(WaybillContent::find()->where(['waybill_id' => $this->id])->sum('sum_with_vat'),2);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrder()
+    {
+        return $this->hasOne(\api_web\modules\integration\classes\documents\Order::class, ['id' => 'order_id']);
+    }
+
 }

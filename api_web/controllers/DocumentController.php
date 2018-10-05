@@ -388,5 +388,44 @@ class DocumentController extends \api_web\components\WebApiController
         $this->response = $this->container->get('DocumentWebApi')->waybillResetPositions($this->request);
     }
 
-
+    /**
+     * @SWG\Post(path="/document/map-waybill_order",
+     *     tags={"Documents/map-waybill_order"},
+     *     summary="Накладная - Сопоставление с заказом ",
+     *     description="Накладная - Сопоставление с заказом ",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "order_id": 2525,
+     *                      "document_id": 1111
+     *                      }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *          @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     */
+    public function actionMapWaybillOrder()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->mapWaybillOrder($this->request);
+    }
 }

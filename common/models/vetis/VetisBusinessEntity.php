@@ -121,20 +121,20 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInte
             $instance = cerberApi::getInstance($org_id);
             $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
-            if (!empty($queue->organization_id)) {
-                $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
-            } else {
-                $queueName = $queue->consumer_class_name;
-            }
+//            if (!empty($queue->organization_id)) {
+//                $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
+//            } else {
+//                $queueName = $queue->consumer_class_name;
+//            }
 
             //ставим задачу в очередь
-            \Yii::$app->get('rabbit')
-                ->setQueue($queueName)
-                ->addRabbitQueue(json_encode($data));
+            \Yii::$app->get('sqsQueue')->sendMessage(Yii::$app->params['sqsQueues']['vetis']['enterprise'], $data);
+//            \Yii::$app->get('rabbit')
+//                ->setQueue($queueName)
+//                ->addRabbitQueue(json_encode($data));
 
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
-            echo $e->getMessage() . PHP_EOL;
         }
     }
 }

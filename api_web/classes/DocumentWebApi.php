@@ -405,15 +405,15 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (!empty($post['outer_number_additional'])) {
-            $waybill->outer_number_additional = $post['number_additional'];
+            $waybill->outer_number_additional = $post['outer_number_additional'];
         }
 
         if (!empty($post['outer_number_code'])) {
-            $waybill->outer_number_code = $post['number_code'];
+            $waybill->outer_number_code = $post['outer_number_code'];
         }
 
         if (!empty($post['outer_note'])) {
-            $waybill->outer_note = $post['note'];
+            $waybill->outer_note = $post['outer_note'];
         }
 
         if ($waybill->validate() && $waybill->save()) {

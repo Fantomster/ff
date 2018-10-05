@@ -367,7 +367,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function getWaybillDetail (array $post)
     {
-        if (empty($post['document_id'])) {
+        if (empty($post['waybill_id'])) {
             throw new BadRequestHttpException("empty_param|document_id");
         }
 

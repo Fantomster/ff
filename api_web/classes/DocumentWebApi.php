@@ -355,15 +355,11 @@ class DocumentWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("Waybill in the state of \"reset\" or \"unloaded\"");
         }
 
-        if($waybill->resetPositions() > 0)
-        {
-            return ['result' => true];
-        }
-
-        return ['result' => false];
+        $waybill->resetPositions();
+        return ['result' => true];
     }
       
-     /** 
+     /**
      * Накладная - Детальная информация
      * @param array $post
      * @return array
@@ -435,6 +431,32 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
       
         return "";
+    }
+
+    /**
+     * Накладная - Сопоставление с заказом
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function mapWaybillOrder (array $post)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException("empty_param|order_id");
+        }
+
+        if (empty($post['document_id'])) {
+            throw new BadRequestHttpException("empty_param|document_id");
+        }
+
+        $waybill = Waybill::findOne(['id' => $post['document_id']]);
+
+        if (!isset($waybill)) {
+            throw new BadRequestHttpException("waybill not found");
+        }
+
+        $waybill->mapWaybill($post['order_id']);
+        return ['result' => true];
     }
 
 }

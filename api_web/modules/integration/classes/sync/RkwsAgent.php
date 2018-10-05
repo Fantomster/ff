@@ -20,7 +20,6 @@ use common\models\OuterDictionary;
 use common\models\OuterTask;
 use api_web\modules\integration\classes\SyncLog;
 
-
 class RkwsAgent extends ServiceRkws
 {
 
@@ -35,7 +34,6 @@ class RkwsAgent extends ServiceRkws
 
     public function receiveXMLData(OuterTask $task, string $data = null, string $entityName = null)
     {
-
         $outerDic = OuterDictionary::findOne(['service_id' => $task->service_id, 'name' => $this->index]);
         if (!$outerDic) {
             SyncLog::trace('OuterDictionary not found!');
@@ -91,6 +89,7 @@ class RkwsAgent extends ServiceRkws
         $cmdguid = strval($myXML['cmdguid']) ? strval($myXML['cmdguid']) : strval($myXML['taskguid']);
 
         $agentToDisable = OuterAgent::findAll(['org_id' => $task->org_id, 'service_id' => $task->service_id]);
+
         if ($array && $cmdguid) {
             foreach ($array as $a) {
                 $agent = OuterAgent::findOne(['org_id' => $task->org_id, 'outer_uid' => $a['rid'],
@@ -101,11 +100,13 @@ class RkwsAgent extends ServiceRkws
                     $agent->outer_uid = $a['rid'];
                     $agent->service_id = $task->service_id;
                     $agent->created_at = \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+
                 } elseif(array_key_exists($agent->id, $agentToDisable)) {
                     unset($agentToDisable[$agent->id]);
                 }
                 $agent->name = $a['name'];
                 $agent->updated_at = \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+
                 $agent->is_deleted = 0;
                 if ($agent->save()) {
                     $task->callbacked_at = \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
@@ -133,6 +134,7 @@ class RkwsAgent extends ServiceRkws
                     }
                 }
             }
+
         }
 
         if ($err) {

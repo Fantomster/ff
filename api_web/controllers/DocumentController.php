@@ -428,4 +428,90 @@ class DocumentController extends \api_web\components\WebApiController
     {
         $this->response = $this->container->get('DocumentWebApi')->mapWaybillOrder($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/document/document-status",
+     *     tags={"Documents"},
+     *     summary="Статусы документов (групповые)",
+     *     description="Статусы документов (групповые)",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={{}}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "status": {
+     *                      "1": "Ожидают выгрузки",
+     *                      "2": "Ожидают формирования",
+     *                      "3": "Выгружена"
+     *                  }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     */
+    public function actionDocumentStatus()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->getDocumentStatus();
+    }
+
+    /**
+     * @SWG\Post(path="/document/waybill-status",
+     *     tags={"Documents"},
+     *     summary="Статусы накладных",
+     *     description="Статусы накладных",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={{}}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "status": {
+     *                      "1": "Сопоставлена",
+     *                      "2": "Сформирована",
+     *                      "3": "Ошибка",
+     *                      "4": "Сброшена",
+     *                      "5": "Выгружена"
+     *                  }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     */
+    public function actionWaybillStatus()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->getWaybillStatus();
+    }
 }

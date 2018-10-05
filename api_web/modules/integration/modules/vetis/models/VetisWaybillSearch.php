@@ -72,7 +72,7 @@ class VetisWaybillSearch extends MercVsd
                      @prev_order_id := order_id,
                      tb.*
                 FROM (
-                SELECT a.uuid, 
+                SELECT DISTINCT a.uuid, 
                 a.date_doc,
                 c.order_id,
                 a.product_name,
@@ -154,7 +154,7 @@ class VetisWaybillSearch extends MercVsd
             }
         }
 
-        $count = MercVsd::find()->leftJoin('merc_pconst b', 'b.const_id = 10 and b.value in (merc_vsd.recipient_guid,  merc_vsd.sender_guid)')->where(
+        $count = MercVsd::find()->distinct()->leftJoin('merc_pconst b', 'b.const_id = 10 and b.value in (merc_vsd.recipient_guid,  merc_vsd.sender_guid)')->where(
             array_merge(['b.org' => explode(',', $strOrgIds)], $arCount)
         );
         if ($between){

@@ -1,7 +1,10 @@
 <?php
 
 namespace api_web\controllers;
-
+/**
+ * Class DocumentController
+ * @package api_web\controllers
+ */
 class DocumentController extends \api_web\components\WebApiController
 {
     /**

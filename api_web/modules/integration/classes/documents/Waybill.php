@@ -62,6 +62,10 @@ class Waybill extends BaseWaybill implements DocumentInterface
         return $model->prepare();
     }
 
+    /**
+     * Сброс привязки позиций накладной к заказу
+     * @return int
+     */
     public function resetPositions ()
     {
         return WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = '.$this->id);
@@ -110,5 +114,24 @@ class Waybill extends BaseWaybill implements DocumentInterface
         $return["outer_note"] = $model->outer_note;
 
         return $return;
+    }
+
+    /**
+     * Привязка накладной к заказу
+     * @return int
+     */
+    public function mapWaybill ($order_id, $waybill_id)
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+
+            self::updateAll(['order_id' => $order_id], 'waybill_id = '.$waybill_id);
+
+
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 }

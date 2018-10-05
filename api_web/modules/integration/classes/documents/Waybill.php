@@ -5,6 +5,7 @@ use api\common\models\AllMaps;
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
+use api_web\modules\integration\modules\iiko\models\iikoService;
 use common\models\Waybill as BaseWaybill;
 
 class Waybill extends BaseWaybill implements DocumentInterface
@@ -145,11 +146,9 @@ class Waybill extends BaseWaybill implements DocumentInterface
             {
                 $this->order_id = $order_id;
             }
-
-
+            
             $waybillContents = $this->waybillContents;
 
-            $client_id = $this->acquirer_id;
             if ($this->service_id == 2) {
                 $mainOrg_id = iikoService::getMainOrg($this->acquirer_id);
             }

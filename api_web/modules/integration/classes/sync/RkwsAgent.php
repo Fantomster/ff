@@ -29,11 +29,13 @@ class RkwsAgent extends ServiceRkws
     /** @var string $OperDenom Поле Denom в таблице all_service_operation */
     public static $OperDenom = 'sh_get_corrs';
 
-    public $saveResult = true;
-    public $saveCounts = 0;
-
     public function receiveXMLData(OuterTask $task, string $data = null, string $entityName = null)
     {
+        
+        $saveResult = true;
+        $saveCounts = 0;
+            
+        
         $outerDic = OuterDictionary::findOne(['service_id' => $task->service_id, 'name' => $this->index]);
         if (!$outerDic) {
             SyncLog::trace('OuterDictionary not found!');
@@ -55,7 +57,7 @@ class RkwsAgent extends ServiceRkws
         $err = [];
         if(!$orgDic->save()) {
             $err['org_dic'][] = $orgDic->errors;
-            $this->saveResult = false;
+            $saveResult = false;
         }
 
         $myXML = simplexml_load_string($data);
@@ -107,25 +109,25 @@ class RkwsAgent extends ServiceRkws
                 $agent->is_deleted = 0;
                 if ($agent->save()) {
                     $task->int_status_id = OuterTask::STATUS_CALLBACKED;
-                    $this->saveCounts++;
+                    $saveCounts++;
                 } else {
                     $err['agent'][$agent->id][] = $agent->errors;
-                    $this->saveResult = false;
+                    $saveResult = false;
                 }
             }
             $task->retry++;
             if (!$task->save()) {
                 $err['task'][] = $task->errors;
-                $this->saveResult = false;
+                $saveResult = false;
             }
-            if ($this->saveCounts) {
+            if ($saveCounts) {
                 foreach($agentToDisable as $agent) {
                     $agent->is_deleted = 1;
                     if ($agent->save()) {
-                        $this->saveCounts++;
+                        $saveCounts++;
                     } else {
                         $err['agent'][$agent->id][] = $agent->errors;
-                        $this->saveResult = false;
+                        $saveResult = false;
                     }
                 }
             }
@@ -136,7 +138,7 @@ class RkwsAgent extends ServiceRkws
             SyncLog::trace('Save errors: '. json_encode($err));
         }
 
-        if ($this->saveResult && $this->saveCounts) {
+        if ($saveResult && $saveCounts) {
             return self::XML_LOAD_RESULT_SUCCESS;
         }
         return self::XML_LOAD_RESULT_FAULT;

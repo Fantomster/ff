@@ -31,17 +31,16 @@ class RkwsAgent extends ServiceRkws
 
     public function receiveXMLData(OuterTask $task, string $data = null, string $entityName = null)
     {
-
-        // метка времени
-
-        $ts = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        
+        $saveResult = true;
+        $saveCounts = 0;
+            
+        
         $outerDic = OuterDictionary::findOne(['service_id' => $task->service_id, 'name' => $this->index]);
         if (!$outerDic) {
             SyncLog::trace('OuterDictionary not found!');
             throw new BadRequestHttpException("outer_dic_not_found");
         }
-
-        $saveResult = true;
 
         $orgDic = OrganizationDictionary::findOne(['outer_dic_id' => $outerDic->id,
             'org_id' => $task->org_id, 'status_id' => OrganizationDictionary::STATUS_DISABLED]);
@@ -55,7 +54,6 @@ class RkwsAgent extends ServiceRkws
                     'org_id' => $task->org_id, 'status_id' => OrganizationDictionary::STATUS_ACTIVE, 'count' => 0]);
             }
         }
-        $orgDic->updated_at = $ts;
         $err = [];
         if(!$orgDic->save()) {
             $err['org_dic'][] = $orgDic->errors;
@@ -92,7 +90,7 @@ class RkwsAgent extends ServiceRkws
         $cmdguid = strval($myXML['cmdguid']) ? strval($myXML['cmdguid']) : strval($myXML['taskguid']);
 
         $agentToDisable = OuterAgent::findAll(['org_id' => $task->org_id, 'service_id' => $task->service_id]);
-        $saveCounts = 0;
+
         if ($array && $cmdguid) {
             foreach ($array as $a) {
                 $agent = OuterAgent::findOne(['org_id' => $task->org_id, 'outer_uid' => $a['rid'],
@@ -102,15 +100,14 @@ class RkwsAgent extends ServiceRkws
                     $agent->org_id = $task->org_id;
                     $agent->outer_uid = $a['rid'];
                     $agent->service_id = $task->service_id;
-                    $agent->created_at = $ts;
+
                 } elseif(array_key_exists($agent->id, $agentToDisable)) {
                     unset($agentToDisable[$agent->id]);
                 }
                 $agent->name = $a['name'];
-                $agent->updated_at = $ts;
+
                 $agent->is_deleted = 0;
                 if ($agent->save()) {
-                    $task->callbacked_at = $ts;
                     $task->int_status_id = OuterTask::STATUS_CALLBACKED;
                     $saveCounts++;
                 } else {
@@ -126,7 +123,6 @@ class RkwsAgent extends ServiceRkws
             if ($saveCounts) {
                 foreach($agentToDisable as $agent) {
                     $agent->is_deleted = 1;
-                    $agent->updated_at = $ts;
                     if ($agent->save()) {
                         $saveCounts++;
                     } else {
@@ -135,6 +131,7 @@ class RkwsAgent extends ServiceRkws
                     }
                 }
             }
+
         }
 
         if ($err) {

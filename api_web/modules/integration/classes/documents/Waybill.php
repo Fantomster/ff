@@ -1,6 +1,7 @@
 <?php
 namespace api_web\modules\integration\classes\documents;
 
+use api\common\models\AllMaps;
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
@@ -62,9 +63,25 @@ class Waybill extends BaseWaybill implements DocumentInterface
         return $model->prepare();
     }
 
+    /**
+     * Сброс привязки позиций накладной к заказу
+     * @return int
+     */
     public function resetPositions ()
     {
-        return WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = '.$this->id);
+        if(isset($this->order_id)) {
+            $transaction = \Yii::$app->db->beginTransaction();
+            try {
+                WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = ' . $this->id);
+                $this->order_id = null;
+                $this->save();
+                $transaction->commit();
+            } catch (\Exception $e) {
+                $transaction->rollBack();
+                throw $e;
+            }
+        }
+        return true;
     }
       
     /**
@@ -110,5 +127,68 @@ class Waybill extends BaseWaybill implements DocumentInterface
         $return["outer_note"] = $model->outer_note;
 
         return $return;
+    }
+
+    /**
+     * Привязка накладной к заказу
+     * @return int
+     */
+    public function mapWaybill ($order_id)
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            if(isset($this->order_id))
+            {
+                $this->resetPositions();
+            }
+            else
+            {
+                $this->order_id = $order_id;
+            }
+
+
+            $waybillContents = $this->waybillContents;
+
+            $client_id = $this->acquirer_id;
+            if ($this->service_id == 2) {
+                $mainOrg_id = iikoService::getMainOrg($this->acquirer_id);
+            }
+
+            foreach ($waybillContents as $row)
+            {
+                if(isset($row->product_outer_id)) {
+                    continue;
+                }
+
+                $client_id = $this->acquirer_id;
+                if ($this->service_id == 2) {
+                    if ($mainOrg_id != $this->acquirer_id) {
+                        if((AllMaps::findOne("service_id = 2 AND org_id = $client_id AND serviceproduct_id = ".$row->product_outer_id) == null) && (!empty($mainOrg_id))) {
+                            $client_id = $mainOrg_id;
+                        }
+                    }
+                }
+
+                $product_id = AllMaps::find()
+                    ->select('product_id')
+                    ->where("service_id = :service_id AND serviceproduct_id = :serviceproduct_id AND org_id = :org_id",
+                        [':service_id' => $this->service_id, ':serviceproduct_id' => $row->product_outer_id, ':org_id' => $client_id])
+                    ->scalar();
+
+                if($product_id == null) {
+                    continue;
+                }
+
+                $row->order_content_id = \common\models\OrderContent::find()
+                    ->select('id')
+                    ->where('order_id = :order_id and product_id = :product_id', [':order_id' => $order_id, ':product_id' => $product_id])
+                    ->scalar();
+                $row->save();
+            }
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 }

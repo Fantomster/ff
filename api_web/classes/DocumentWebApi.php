@@ -1,5 +1,5 @@
 <?php
-namespace api_web\modules\integration\classes;
+namespace api_web\classes;
 use api_web\modules\integration\classes\documents\EdiOrder;
 use api_web\modules\integration\classes\documents\Order;
 use api_web\modules\integration\classes\documents\OrderContent;

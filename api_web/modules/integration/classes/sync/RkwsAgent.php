@@ -32,7 +32,6 @@ class RkwsAgent extends ServiceRkws
     public function receiveXMLData(OuterTask $task, string $data = null, string $entityName = null)
     {
 
-        $saveResult = true;
         $err = [];
 
         $ts = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
@@ -55,6 +54,7 @@ class RkwsAgent extends ServiceRkws
             }
         }
         $orgDic->updated_at = $ts;
+        $saveResult = true;
         if(!$orgDic->save()) {
             $err['org_dic'][] = $orgDic->errors;
             $saveResult = false;

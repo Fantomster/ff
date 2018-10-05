@@ -54,8 +54,12 @@ class m181005_125413_add_sync_settings_countur extends Migration
 
     public function safeDown()
     {
+
+        $this->dropForeignKey('{{%integration_setting_value}}', '{{%org_id}}');
+        $this->dropForeignKey('{{%integration_setting_value}}', '{{%setting_id}}');
         $this->droptable('{{%integration_setting_value}}');
         $this->droptable('{{%integration_setting}}');
+
     }
 
 }

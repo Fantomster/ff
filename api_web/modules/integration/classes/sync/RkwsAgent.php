@@ -12,7 +12,6 @@
 
 namespace api_web\modules\integration\classes\sync;
 
-use Yii;
 use yii\web\BadRequestHttpException;
 use common\models\OrganizationDictionary;
 use common\models\OuterAgent;

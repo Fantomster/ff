@@ -32,7 +32,7 @@ class RkwsAgent extends ServiceRkws
     public function receiveXMLData(OuterTask $task, string $data = null, string $entityName = null)
     {
 
-        $err = [];
+        // метка времени
 
         $ts = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         $outerDic = OuterDictionary::findOne(['service_id' => $task->service_id, 'name' => $this->index]);
@@ -40,6 +40,8 @@ class RkwsAgent extends ServiceRkws
             SyncLog::trace('OuterDictionary not found!');
             throw new BadRequestHttpException("outer_dic_not_found");
         }
+
+        $saveResult = true;
 
         $orgDic = OrganizationDictionary::findOne(['outer_dic_id' => $outerDic->id,
             'org_id' => $task->org_id, 'status_id' => OrganizationDictionary::STATUS_DISABLED]);
@@ -54,7 +56,7 @@ class RkwsAgent extends ServiceRkws
             }
         }
         $orgDic->updated_at = $ts;
-        $saveResult = true;
+        $err = [];
         if(!$orgDic->save()) {
             $err['org_dic'][] = $orgDic->errors;
             $saveResult = false;

@@ -161,7 +161,7 @@ class AbstractDictionary extends WebApi
                 '`outer_agent`.org_id' => $this->user->organization->id,
                 '`outer_agent`.service_id' => $this->service_id,
                 '`outer_agent`.outer_uid' => $agent_uid,
-            ]);
+            ])->one();
 
         if ($model === null) {
             return [];

@@ -178,8 +178,8 @@ class VetisHelper
                     $this->set($var, $arParams[$label], ['from', 'to']);
                 } else {
                     $var->{$label} = $arParams[$label];
-                    $arGoodParams[$label] = $arParams[$label];
                 }
+                $arGoodParams[$label] = $arParams[$label];
             }
         }
 

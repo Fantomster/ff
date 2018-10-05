@@ -36,7 +36,6 @@ class RkwsAgent extends ServiceRkws
     public function receiveXMLData(OuterTask $task, string $data = null, string $entityName = null)
     {
 
-        $ts = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         $outerDic = OuterDictionary::findOne(['service_id' => $task->service_id, 'name' => $this->index]);
         if (!$outerDic) {
             SyncLog::trace('OuterDictionary not found!');
@@ -55,7 +54,7 @@ class RkwsAgent extends ServiceRkws
                     'org_id' => $task->org_id, 'status_id' => OrganizationDictionary::STATUS_ACTIVE, 'count' => 0]);
             }
         }
-        $orgDic->updated_at = $ts;
+        $orgDic->updated_at = \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         $err = [];
         if(!$orgDic->save()) {
             $err['org_dic'][] = $orgDic->errors;
@@ -101,15 +100,15 @@ class RkwsAgent extends ServiceRkws
                     $agent->org_id = $task->org_id;
                     $agent->outer_uid = $a['rid'];
                     $agent->service_id = $task->service_id;
-                    $agent->created_at = $ts;
+                    $agent->created_at = \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                 } elseif(array_key_exists($agent->id, $agentToDisable)) {
                     unset($agentToDisable[$agent->id]);
                 }
                 $agent->name = $a['name'];
-                $agent->updated_at = $ts;
+                $agent->updated_at = \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                 $agent->is_deleted = 0;
                 if ($agent->save()) {
-                    $task->callbacked_at = $ts;
+                    $task->callbacked_at = \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                     $task->int_status_id = OuterTask::STATUS_CALLBACKED;
                     $this->saveCounts++;
                 } else {
@@ -125,7 +124,7 @@ class RkwsAgent extends ServiceRkws
             if ($this->saveCounts) {
                 foreach($agentToDisable as $agent) {
                     $agent->is_deleted = 1;
-                    $agent->updated_at = $ts;
+                    $agent->updated_at = \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                     if ($agent->save()) {
                         $this->saveCounts++;
                     } else {

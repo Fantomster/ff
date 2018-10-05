@@ -28,7 +28,7 @@ class Mailer extends \yii\mail\BaseMailer
         }
 
         if (array_key_exists('order', $params)) {
-            $message->order_id = isset($params['order']->id) ? $params['order']->id : null;
+            $message->setOrderId(isset($params['order']->id) ? $params['order']->id : null);
         }
 
         if (is_array($view)) {

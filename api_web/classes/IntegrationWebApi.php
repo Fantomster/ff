@@ -297,4 +297,78 @@ class IntegrationWebApi extends WebApi
         return ['success' => true];
     }
 
+
+    /**
+     * integration: Накладная (привязана к заказу) - Добавление позиции
+     * @param array $post
+     * @return array
+     */
+    public function createWaybillContent(array $post): array
+    {
+        if (!isset($post['waybill_id'])) {
+            throw new BadRequestHttpException("empty_param|waybill_id");
+        }
+
+        $waybill = Waybill::findOne(['id' => $post['waybill_id']]);
+        if (!$waybill) {
+            throw new BadRequestHttpException("waybill not found");
+        }
+        if (!$waybill->order_id) {
+            throw new BadRequestHttpException("empty order_id");
+        }
+
+        $waybillContent = new WaybillContent();
+        if (isset($post['waybill_id'])) {
+            $waybillContent->waybill_id = $post['waybill_id'];
+        }
+        if (isset($post['vat_waybill'])) {
+            $waybillContent->vat_waybill = (float)$post['vat_waybill'];
+        }
+        if (isset($post['outer_unit_id'])) {
+            $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
+        }
+        if (isset($post['quantity_waybill'])) {
+            $waybillContent->quantity_waybill = (int)$post['quantity_waybill'];
+        }
+        if (isset($post['product_outer_id'])) {
+            $waybillContent->product_outer_id = $post['product_outer_id'];
+        }
+
+        if (isset($post['price_without_vat'])) {
+            $waybillContent->price_without_vat = (int)$post['price_without_vat'];
+            if (isset($post['vat_waybill'])) {
+                $waybillContent->price_with_vat = (int)($post['price_without_vat'] + ($post['price_without_vat'] * $post['vat_waybill']));
+                if (isset($post['quantity_waybill'])) {
+                    $waybillContent->sum_without_vat = (int)$post['price_without_vat'] * $post['quantity_waybill'];
+                    $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $post['quantity_waybill'];
+                }
+            }
+        }
+
+        $waybillContent->save();
+
+        return ['success' => true, 'waybill_content_id' => $waybillContent->id];
+    }
+
+
+    /**
+     * integration: Накладная - Удалить/Убрать позицию
+     * @param array $post
+     * @return array
+     */
+    public function deleteWaybillContent(array $post): array
+    {
+        if (!isset($post['waybill_content_id'])) {
+            throw new BadRequestHttpException("empty_param|waybill_content_id");
+        }
+
+        $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
+        if (!$waybillContent) {
+            throw new BadRequestHttpException("waybill content not found");
+        }
+
+        $waybillContent->delete();
+
+        return ['success' => true];
+    }
 }

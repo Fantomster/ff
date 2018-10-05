@@ -17,6 +17,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
     public $koef;
     public $pdenom;
     public $service_id;
+    public $vendors;
 
 
     /**
@@ -179,17 +180,27 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
 
         }
 
+        if(isset($this->vendors) && empty($this->selectedVendor))
+        {
+            $arrayVendorsId = array_keys($this->vendors);
+            unset($arrayVendorsId[0]);
+            $arrayVendorsId = implode(",", $arrayVendorsId);
+            $where_all .= "AND cbg.supp_org_id in ($arrayVendorsId)";
+        }
+        else
+        {
+            $where_all .= "AND cbg.supp_org_id in (".$this->selectedVendor.")";
+        }
+
         $sql = "SELECT " . implode(',', $fieldsCBG) . "
         FROM `catalog_base_goods` `cbg`
              LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
-             LEFT JOIN `catalog` `cat` ON  cbg.cat_id = cat.id AND cat.type = 1
              LEFT JOIN `$dbName`.`all_map` `fmap` ON cbg.id = fmap.product_id AND fmap.org_id = " . $client_id . " AND fmap.service_id = " . $this->service_id . "
              " . $joins[$this->service_id] . "
              LEFT JOIN `$dbName`.`all_service` `allservice` ON fmap.service_id = allservice.id       
            WHERE          
-           cbg.deleted = 0  AND cbg.cat_id IN (" . $this->catalogs . ")
-           " . $where . "
-           AND cbg.deleted = 0".$where_all;
+           cbg.deleted = 0
+           " . $where . $where_all;
 
         /*$sql = "
         SELECT DISTINCT * FROM (

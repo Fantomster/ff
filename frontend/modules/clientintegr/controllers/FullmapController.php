@@ -66,14 +66,15 @@ class FullmapController extends DefaultController
             $selectedVendor = !empty($params['OrderCatalogSearchMap']['selectedVendor']) ? (int)$params['OrderCatalogSearchMap']['selectedVendor'] : null;
         }
         $vendors = $client->getSuppliers($selectedCategory);
-        $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
+        //$catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
 
 
         $services = ArrayHelper::map(AllService::find()->andWhere('type_id = 1')->all(), 'id', 'denom'); // Add check license
         $services = ['0' => 'Выберите сервис'] + $services;
 
         $searchModel->client = $client;
-        $searchModel->catalogs = $catalogs;
+        $searchModel->vendors = $vendors;
+        //$searchModel->catalogs = $catalogs;
 
         $dataProvider = $searchModel->search($params);
 

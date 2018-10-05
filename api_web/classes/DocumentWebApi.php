@@ -17,6 +17,31 @@ use yii\web\BadRequestHttpException;
  */
 class DocumentWebApi extends \api_web\components\WebApi
 {
+
+    const DOC_GROUP_STATUS_WAIT_SENDING = 'Ожидают выгрузки';
+    const DOC_GROUP_STATUS_WAIT_FORMING = 'Ожидают формирования';
+    const DOC_GROUP_STATUS_SENT = 'Выгружена';
+
+    private static $doc_group_status = [
+        1 => self::DOC_GROUP_STATUS_WAIT_SENDING,
+        2 => self::DOC_GROUP_STATUS_WAIT_FORMING,
+        3 => self::DOC_GROUP_STATUS_SENT,
+    ];
+
+    const DOC_WAYBILL_STATUS_COLLATED = 'Сопоставлена';
+    const DOC_WAYBILL_STATUS_READY = 'Сформирована';
+    const DOC_WAYBILL_STATUS_ERROR = 'Ошибка';
+    const DOC_WAYBILL_STATUS_RESET = 'Сброшена';
+    const DOC_WAYBILL_STATUS_SENT = 'Выгружена';
+
+    private static $doc_waybill_status = [
+        1 => self::DOC_WAYBILL_STATUS_COLLATED,
+        2 => self::DOC_WAYBILL_STATUS_READY,
+        3 => self::DOC_WAYBILL_STATUS_ERROR,
+        4 => self::DOC_WAYBILL_STATUS_RESET,
+        5 => self::DOC_WAYBILL_STATUS_SENT,
+    ];
+
     /**константа типа документа - заказ*/
     const TYPE_ORDER = 'order';
     /**константа типа документа - накладная*/
@@ -439,6 +464,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      */
+
     public function mapWaybillOrder (array $post)
     {
         if (empty($post['order_id'])) {
@@ -457,6 +483,16 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         $waybill->mapWaybill($post['order_id']);
         return ['result' => true];
+    }
+
+    public function getDocumentStatus () {
+
+        return self::$doc_group_status;
+    }
+
+    public function getWaybillStatus () {
+
+        return self::$doc_waybill_status;
     }
 
 }

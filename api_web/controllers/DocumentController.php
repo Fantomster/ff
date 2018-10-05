@@ -278,7 +278,7 @@ class DocumentController extends \api_web\components\WebApiController
      */
     public function actionWaybillDetail()
     {
-        $this->response = $this->container->get('DocumentWebApi')->getWaybillDetaill($this->request);
+        $this->response = $this->container->get('DocumentWebApi')->getWaybillDetail($this->request);
     }
 
     /**

@@ -22,7 +22,7 @@ class PaymentWebApi extends \api_web\components\WebApi
     public function currencyList()
     {
         $list = Currency::find()
-            ->select(['id', 'symbol as iso_code'])
+            ->select(['id', 'symbol as iso_code', 'text'])
             ->where(['is_active' => true])
             ->asArray()
             ->all();

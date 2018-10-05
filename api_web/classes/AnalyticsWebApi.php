@@ -503,11 +503,12 @@ class AnalyticsWebApi extends WebApi
         $query->select(
             [
                 'order.currency_id',
-                'currency.symbol AS currency', // iso_code ???
+                'c.symbol as iso_code',
+                'c.text as name',
             ]
         )->from('order_content')
             ->leftJoin('order', 'order.id = order_content.order_id')
-            ->leftJoin('currency', 'currency.id = order.currency_id')
+            ->leftJoin('currency c', 'c.id = order.currency_id')
             ->andWhere(['order.client_id' => $this->user->organization->id])
             ->groupBy('order.currency_id')->orderBy(['SUM(order_content.quantity * order_content.price)' => SORT_DESC]);
 
@@ -515,7 +516,8 @@ class AnalyticsWebApi extends WebApi
         foreach ($query->all() as $data) {
             $result[] = [
                 'id' => round($data['currency_id'], 0),
-                'iso_code' => $data['currency'],
+                'iso_code' => $data['iso_code'],
+                'name' => $data['name'],
             ];
         }
 

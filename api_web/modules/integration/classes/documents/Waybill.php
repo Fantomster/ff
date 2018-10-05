@@ -1,4 +1,5 @@
 <?php
+
 namespace api_web\modules\integration\classes\documents;
 
 use api\common\models\AllMaps;
@@ -31,9 +32,9 @@ class Waybill extends BaseWaybill implements DocumentInterface
         ];
 
         $agent = (new Dictionary($this->service_id, 'Agent'))->agentInfo($this->outer_contractor_uuid);
-        if(empty($agent)) {
+        if (empty($agent)) {
             $return ["agent"] = [];
-        }else {
+        } else {
             $return ["agent"] = [
                 "uid" => $agent['outer_uid'],
                 "name" => $agent['name'],
@@ -41,17 +42,15 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
 
         $return ["agent"] = [];
-        if(empty($agent)) {
+        if (empty($agent)) {
             $order = $this->order;
-            if(isset($order)) {
+            if (isset($order)) {
                 $return ["agent"] = [
                     "id" => $order->vendor_id,
                     "name" => $order->vendor->name,
                 ];
             }
-        }
-        elseif(isset($agent['vendor_id']))
-        {
+        } elseif (isset($agent['vendor_id'])) {
             $return["vendor"] = [
                 "id" => $agent['vendor_id'],
                 "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
@@ -74,7 +73,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
     public static function prepareModel($key)
     {
         $model = self::findOne(['id' => $key]);
-        if($model === null ) {
+        if ($model === null) {
             return [];
         }
         return $model->prepare();
@@ -84,9 +83,9 @@ class Waybill extends BaseWaybill implements DocumentInterface
      * Сброс привязки позиций накладной к заказу
      * @return int
      */
-    public function resetPositions ()
+    public function resetPositions()
     {
-        if(isset($this->order_id)) {
+        if (isset($this->order_id)) {
             $transaction = \Yii::$app->db->beginTransaction();
             try {
                 WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = ' . $this->id);
@@ -100,7 +99,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
         return true;
     }
-      
+
     /**
      * Накладная - Детальная информация
      * @param $key
@@ -109,7 +108,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
     public static function prepareDetail($key)
     {
         $model = self::findOne(['id' => $key]);
-        if($model === null ) {
+        if ($model === null) {
             return [];
         }
 
@@ -121,9 +120,9 @@ class Waybill extends BaseWaybill implements DocumentInterface
         ];
 
         $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_contractor_uuid);
-        if(empty($agent)) {
+        if (empty($agent)) {
             $return ["agent"] = [];
-        }else {
+        } else {
             $return ["agent"] = [
                 "uid" => $agent['outer_uid'],
                 "name" => $agent['name'],
@@ -131,17 +130,15 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
 
         $return ["agent"] = [];
-        if(empty($agent)) {
+        if (empty($agent)) {
             $order = $model->order;
-            if(isset($order)) {
+            if (isset($order)) {
                 $return ["agent"] = [
                     "id" => $order->vendor_id,
                     "name" => $order->vendor->name,
                 ];
             }
-        }
-        elseif(isset($agent['vendor_id']))
-        {
+        } elseif (isset($agent['vendor_id'])) {
             $return["vendor"] = [
                 "id" => $agent['vendor_id'],
                 "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
@@ -149,9 +146,9 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
 
         $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_uuid);
-        if(empty($agent)) {
+        if (empty($agent)) {
             $return ["store"] = [];
-        }else {
+        } else {
             $return ["store"] = [
                 "uid" => $store['outer_uid'],
                 "name" => $store['name'],
@@ -171,35 +168,31 @@ class Waybill extends BaseWaybill implements DocumentInterface
      * Привязка накладной к заказу
      * @return int
      */
-    public function mapWaybill ($order_id)
+    public function mapWaybill($order_id)
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            if(isset($this->order_id))
-            {
+            if (isset($this->order_id)) {
                 $this->resetPositions();
-            }
-            else
-            {
+            } else {
                 $this->order_id = $order_id;
             }
-            
+
             $waybillContents = $this->waybillContents;
 
             if ($this->service_id == 2) {
                 $mainOrg_id = iikoService::getMainOrg($this->acquirer_id);
             }
 
-            foreach ($waybillContents as $row)
-            {
-                if(isset($row->product_outer_id)) {
+            foreach ($waybillContents as $row) {
+                if (isset($row->product_outer_id)) {
                     continue;
                 }
 
                 $client_id = $this->acquirer_id;
                 if ($this->service_id == 2) {
                     if ($mainOrg_id != $this->acquirer_id) {
-                        if((AllMaps::findOne("service_id = 2 AND org_id = $client_id AND serviceproduct_id = ".$row->product_outer_id) == null) && (!empty($mainOrg_id))) {
+                        if ((AllMaps::findOne("service_id = 2 AND org_id = $client_id AND serviceproduct_id = " . $row->product_outer_id) == null) && (!empty($mainOrg_id))) {
                             $client_id = $mainOrg_id;
                         }
                     }
@@ -211,7 +204,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
                         [':service_id' => $this->service_id, ':serviceproduct_id' => $row->product_outer_id, ':org_id' => $client_id])
                     ->scalar();
 
-                if($product_id == null) {
+                if ($product_id == null) {
                     continue;
                 }
 

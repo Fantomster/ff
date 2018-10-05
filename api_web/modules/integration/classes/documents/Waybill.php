@@ -6,6 +6,7 @@ use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use api_web\modules\integration\modules\iiko\models\iikoService;
+use common\models\Organization;
 use common\models\Waybill as BaseWaybill;
 
 class Waybill extends BaseWaybill implements DocumentInterface
@@ -36,15 +37,27 @@ class Waybill extends BaseWaybill implements DocumentInterface
             $return ["agent"] = [
                 "uid" => $agent['outer_uid'],
                 "name" => $agent['name'],
-                "difer" => false,
             ];
         }
 
-        $return["vendor"] = [
-            "id" => $agent['vendor_id'],
-            "name" => $agent['vendor_name'],
-            "difer" => false,
-        ];
+        $return ["agent"] = [];
+        if(empty($agent)) {
+            $order = $this->order;
+            if(isset($order)) {
+                $return ["agent"] = [
+                    "id" => $order->vendor_id,
+                    "name" => $order->vendor->name,
+                ];
+            }
+        }
+        elseif(isset($agent['vendor_id']))
+        {
+            $return["vendor"] = [
+                "id" => $agent['vendor_id'],
+                "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
+            ];
+        }
+
         $return["is_mercury_cert"] = $this->getIsMercuryCert();
         $return["count"] = $this->getTotalCount();
         $return["total_price"] = $this->getTotalPrice();
@@ -117,10 +130,23 @@ class Waybill extends BaseWaybill implements DocumentInterface
             ];
         }
 
-        $return["vendor"] = [
-            "id" => $agent['vendor_id'],
-            "name" => $agent['vendor_name'],
-        ];
+        $return ["agent"] = [];
+        if(empty($agent)) {
+            $order = $model->order;
+            if(isset($order)) {
+                $return ["agent"] = [
+                    "id" => $order->vendor_id,
+                    "name" => $order->vendor->name,
+                ];
+            }
+        }
+        elseif(isset($agent['vendor_id']))
+        {
+            $return["vendor"] = [
+                "id" => $agent['vendor_id'],
+                "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
+            ];
+        }
 
         $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_uuid);
         if(empty($agent)) {

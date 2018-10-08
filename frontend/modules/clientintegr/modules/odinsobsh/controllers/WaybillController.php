@@ -131,9 +131,33 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $sql = "SELECT COUNT(*) FROM one_s_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
         $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryScalar();
 
+        $sql = "SELECT agent_uuid,num_code,store_id FROM one_s_waybill WHERE id = :w_wid";
+        $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryAll();
+        $agent_uuid = $result[0]["agent_uuid"];
+        $num_code = $result[0]["num_code"];
+        $store_id = $result[0]["store_id"];
+        if (($agent_uuid === null) or ($num_code === null) or ($store_id === null)) {
+            $shapka = 0;
+        } else {
+            $shapka = 1;
+        }
+
         if ($kolvo_nesopost == 0) {
-            $sql = "UPDATE one_s_waybill SET readytoexport = 1, status_id = 3, updated_at = NOW() WHERE id = :w_wid";
-            $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            if ($shapka == 1) {
+                $sql = "UPDATE one_s_waybill SET readytoexport = 1, status_id = 3, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            } else {
+                $sql = "UPDATE one_s_waybill SET readytoexport = 0, status_id = 1, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            }
+        } else {
+            if ($shapka == 1) {
+                $sql = "UPDATE one_s_waybill SET readytoexport = 0, status_id = 1, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            } else {
+                $sql = "UPDATE one_s_waybill SET readytoexport = 0, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            }
         }
 
         if ($button == 'forever') {
@@ -564,6 +588,29 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             if ($model->getErrors()) {
                 var_dump($model->getErrors());
                 exit;
+            }
+            $sql = "SELECT COUNT(*) FROM one_s_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
+            $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
+            if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->store_id === null)) {
+                $shapka = 0;
+            } else {
+                $shapka = 1;
+            }
+            if ($kolvo_nesopost == 0) {
+                if ($shapka == 1) {
+                    $model->readytoexport = 1;
+                    $model->status_id = 3;
+                } else {
+                    $model->readytoexport = 0;
+                    $model->status_id = 1;
+                }
+            } else {
+                if ($shapka == 1) {
+                    $model->readytoexport = 0;
+                    $model->status_id = 1;
+                } else {
+                    $model->readytoexport = 0;
+                }
             }
             $model->save();
             return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);

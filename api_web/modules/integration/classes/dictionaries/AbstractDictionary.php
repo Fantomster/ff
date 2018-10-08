@@ -152,14 +152,13 @@ class AbstractDictionary extends WebApi
     /**
      * Информация по агенту
      * @param $agent_uid
-     * @param $service_id
      * @return array
      */
-    public function agentInfo($agent_uid, $service_id)
+    public function agentInfo($agent_uid)
     {
         $model = OuterAgent::find()
             ->where(['org_id' => $this->user->organization->id,
-                'service_id' => $service_id,
+                'service_id' => $this->service_id,
                 'outer_uid' => $agent_uid,
             ])->one();
 
@@ -269,16 +268,15 @@ class AbstractDictionary extends WebApi
     /***
      * Информация по складу
      * @param $agent_uid
-     * @param $service_id
      * @return array
      */
-    public function storeInfo($store_uid, $service_id)
+    public function storeInfo($store_uid)
     {
         $model = OuterStore::find()
             ->where([
                 'org_id' => $this->user->organization->id,  
                 'outer_uid' => $store_uid,
-                'service_id' => $service_id]);
+                'service_id' => $this->service_id]);
 
         if ($model === null) {
             return [];

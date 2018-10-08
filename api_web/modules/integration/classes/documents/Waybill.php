@@ -31,7 +31,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "status_text" => "",
         ];
 
-        $agent = (new Dictionary($this->service_id, 'Agent'))->agentInfo($this->outer_contractor_uuid, $this->service_id);
+        $agent = (new Dictionary($this->service_id, 'Agent'))->agentInfo($this->outer_contractor_uuid);
         if (empty($agent)) {
             $return ["agent"] = [];
         } else {
@@ -119,7 +119,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "status_text" => "",
         ];
 
-        $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_contractor_uuid, $model->service_id);
+        $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_contractor_uuid);
         if (empty($agent)) {
             $return ["agent"] = [];
         } else {
@@ -145,7 +145,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
             ];
         }
 
-        $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_uuid, $model->service_id);
+        $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_uuid);
         if (empty($agent)) {
             $return ["store"] = [];
         } else {

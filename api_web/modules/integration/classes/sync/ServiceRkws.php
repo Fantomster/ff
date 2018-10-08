@@ -439,7 +439,9 @@ class ServiceRkws extends AbstractSyncFactory
             }
             /** @noinspection PhpUndefinedFieldInspection */
             foreach ($this->additionalXmlFields as $k => $v) {
-                $entity->$v = $elementNew[$k];
+                if(isset($elementNew[$k])) {
+                    $entity->$v = $elementNew[$k];
+                }
             }
             /** @noinspection PhpUndefinedFieldInspection */
             $entity->is_deleted = 0;

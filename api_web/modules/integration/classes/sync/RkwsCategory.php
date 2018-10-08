@@ -41,9 +41,11 @@ class RkwsCategory extends ServiceRkws
             throw new BadRequestHttpException("empty_result_xml_data");
         }
         $array = [];
+        $ccount = 0;
         foreach ($myXML->ITEM as $category) {
+            $ccount++;
             foreach ($category->attributes() as $k => $v) {
-                $array[''][$k] = strval($v[0]);
+                $array[$ccount][$k] = strval($v[0]);
             }
         }
         if (!$array) {

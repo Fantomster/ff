@@ -9,6 +9,7 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property int $id
  * @property string $outer_uid Внешний ID
+ * @property string $parent_outer_uid ID родительской записи в источнике загрузки данных
  * @property int $service_id ID Сервиса
  * @property string $name Название продукта
  * @property string $iso_code ISO код
@@ -44,7 +45,7 @@ class OuterUnit extends \yii\db\ActiveRecord
         return [
             [['service_id', 'is_deleted'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['outer_uid'], 'string', 'max' => 45],
+            [['parent_outer_uid', 'outer_uid'], 'string', 'max' => 45],
             [['name'], 'string', 'max' => 255],
             [['iso_code'], 'string', 'max' => 12],
         ];
@@ -58,6 +59,7 @@ class OuterUnit extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'outer_uid' => 'Outer Uid',
+            'parent_outer_uid' => 'Parent Outer Uid',
             'service_id' => 'Service ID',
             'name' => 'Name',
             'iso_code' => 'Iso Code',

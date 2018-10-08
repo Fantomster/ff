@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\components\WebApiController;
 use api_web\controllers\OrderController;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
@@ -627,15 +628,9 @@ class OrderWebApi extends \api_web\components\WebApi
                     'accept_user' => $model->acceptedByProfile->full_name ?? ''
                 ];
             }
-            if (isset($orders[0])) {
-                foreach (array_keys($orders[0]) as $key) {
-                    $headers[$key] = (new Order())->getAttributeLabel($key);
-                }
-            }
         }
 
         $return = [
-            'headers' => $headers,
             'orders' => $orders,
             'pagination' => [
                 'page' => ($dataProvider->pagination->page + 1),
@@ -1062,7 +1057,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @return string
      * @throws BadRequestHttpException
      */
-    public function saveToPdf(array $post, OrderController $c)
+    public function saveToPdf(array $post, WebApiController $c)
     {
         if (empty($post['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');

@@ -130,7 +130,18 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $sql = "SELECT COUNT(*) FROM iiko_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
         $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryScalar();
 
-        if ($kolvo_nesopost == 0) {
+        $sql = "SELECT agent_uuid,num_code,text_code,store_id FROM iiko_waybill WHERE id = :w_wid";
+        $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryAll();
+        $agent_uuid = $result[0]["agent_uuid"];
+        $num_code = $result[0]["num_code"];
+        $text_code = $result[0]["text_code"];
+        $store_id = $result[0]["store_id"];
+        if (($agent_uuid === null) or ($num_code === null) or ($text_code === null) or ($store_id === null)) {
+            $shapka = 0;
+        } else {
+            $shapka = 1;
+        }
+        if (($kolvo_nesopost == 0) and ($shapka == 1)) {
             $sql = "UPDATE iiko_waybill SET readytoexport = 1, status_id = 4, updated_at = NOW() WHERE id = :w_wid";
             $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
         }
@@ -182,11 +193,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $massiv_post = Yii::$app->request->post('iikoWaybillData');
         while ($est == 0) {
             if (isset($massiv_post[$i]["koef"])) {
-                $koef = $massiv_post[$i]["koef"];
+                $koef_old = $massiv_post[$i]["koef"];
                 $est = 1;
             }
             $i++;
         }
+        $koef = str_replace(',', '.', $koef_old);
         $koef = round($koef, 6);
         $buttons = $massiv_post["koef_buttons"];
         $koef_id = Yii::$app->request->post('editableKey');
@@ -643,21 +655,29 @@ SQL;
             die();
         }
 
-        $model = new iikoWaybill();
-        $model->setScenario('handMade');
-        $model->order_id = $order_id;
-        $model->status_id = 1;
-        $model->org = $ord->client_id;
+        $waybillModeIiko = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
-            $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
-            $model->save();
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
+        if ($waybillModeIiko !== '0') {
+            iikoWaybill::createWaybill($order_id);
+            return $this->redirect([$this->getLastUrl() . 'way=' . $order_id]);
+        }
+        else {
+            $model = new iikoWaybill();
+            $model->setScenario('handMade');
+            $model->order_id = $order_id;
+            $model->status_id = 1;
+            $model->org = $ord->client_id;
+
+            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+                $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
+                $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+                $model->save();
+                return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            } else {
+                return $this->render('create', [
+                    'model' => $model,
+                ]);
+            }
         }
     }
 

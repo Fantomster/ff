@@ -45,6 +45,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
                         'roles' => [
                             Role::ROLE_RESTAURANT_BUYER,
                             Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                            Role::ROLE_RESTAURANT_ORDER_INITIATOR,
                         ],
                     ],
                     [
@@ -226,8 +227,9 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out =  ['results' => ['id' => '', 'text' => '']];
+        $res = [];
         if (!is_null($q)) {
-            if($c !== '72a84b51-5c5e-11e1-b9b7-001966f192f1' && $c != null) {
+            if($c !== '74a3cbb1-56fa-94f3-ab3f-e8db4940d96b' && $c != null) {
                 $res = [];
                 $list = cerberApi::getInstance()->getForeignEnterpriseList($q,$c);
                 if (isset($list)) {
@@ -243,9 +245,8 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
                 }
             }
 
-            if($c == '72a84b51-5c5e-11e1-b9b7-001966f192f1' || $c == null) {
+            if($c == '74a3cbb1-56fa-94f3-ab3f-e8db4940d96b' || $c == null) {
                 $list = cerberApi::getInstance()->getRussianEnterpriseList($q);
-                //var_dump($list);
                 if (isset($list)) {
 
                     foreach ($list as $item) {

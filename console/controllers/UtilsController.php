@@ -2,16 +2,21 @@
 
 namespace console\controllers;
 
+use api_web\helpers\Product;
+use common\models\vetis\VetisProductItem;
+use frontend\modules\clientintegr\modules\merc\helpers\api\products\Products;
 use yii\console\Controller;
 
-class UtilsController extends Controller {
+class UtilsController extends Controller
+{
 
-    public function actionAddDeliveries() {
+    public function actionAddDeliveries()
+    {
         $vendors = \common\models\Organization::find()
-                ->leftJoin('delivery', 'organization.id = delivery.vendor_id')
-                ->where(['type_id' => \common\models\Organization::TYPE_SUPPLIER])
-                ->andWhere('delivery.vendor_id IS NULL')
-                ->all();
+            ->leftJoin('delivery', 'organization.id = delivery.vendor_id')
+            ->where(['type_id' => \common\models\Organization::TYPE_SUPPLIER])
+            ->andWhere('delivery.vendor_id IS NULL')
+            ->all();
         foreach ($vendors as $vendor) {
             $delivery = new \common\models\Delivery();
             $delivery->vendor_id = $vendor->id;
@@ -20,14 +25,15 @@ class UtilsController extends Controller {
         }
     }
 
-    public function actionAddNotifications() {
+    public function actionAddNotifications()
+    {
         $users = \common\models\User::find()
-                ->leftJoin('email_notification', 'user.id = email_notification.user_id')
-                ->leftJoin('sms_notification', 'user.id = sms_notification.user_id')
-                ->where('email_notification.id IS NULL')
-                ->orWhere('sms_notification.id IS NULL')
-                ->limit(300)
-                ->all();
+            ->leftJoin('email_notification', 'user.id = email_notification.user_id')
+            ->leftJoin('sms_notification', 'user.id = sms_notification.user_id')
+            ->where('email_notification.id IS NULL')
+            ->orWhere('sms_notification.id IS NULL')
+            ->limit(300)
+            ->all();
         foreach ($users as $user) {
             if (empty($user->emailNotification)) {
                 $emailNotification = new \common\models\notifications\EmailNotification();
@@ -50,10 +56,11 @@ class UtilsController extends Controller {
         }
     }
 
-    public function actionFillChatRecipient() {
+    public function actionFillChatRecipient()
+    {
         $emptyRecipientMessages = \common\models\OrderChat::find()
-                ->where(['recipient_id' => 0])
-                ->all();
+            ->where(['recipient_id' => 0])
+            ->all();
         foreach ($emptyRecipientMessages as $message) {
             $order = $message->order;
             $senderId = $message->sentBy->organization_id;
@@ -68,11 +75,13 @@ class UtilsController extends Controller {
         }
     }
 
-    public function actionCreateNotifications() {
-        
+    public function actionCreateNotifications()
+    {
+
     }
 
-    public function actionCheckProductPictures() {
+    public function actionCheckProductPictures()
+    {
         $products = \common\models\CatalogBaseGoods::find()->where("image is not null")->andWhere("deleted = 0")->all();
         foreach ($products as $product) {
             if ($product->image) {
@@ -87,7 +96,8 @@ class UtilsController extends Controller {
         }
     }
 
-    public function actionCheckOrganizationPictures() {
+    public function actionCheckOrganizationPictures()
+    {
         $organizations = \common\models\Organization::find()->where("picture is not null")->all();
         foreach ($organizations as $organization) {
             if ($organization->picture) {
@@ -102,21 +112,24 @@ class UtilsController extends Controller {
         }
     }
 
-    public function actionTestRedis() {
+    public function actionTestRedis()
+    {
         \Yii::$app->redis->executeCommand('PUBLISH', [
             'channel' => 'test',
             'message' => 'ololo!'
         ]);
     }
 
-    public function actionUpdateMpCategories() {
+    public function actionUpdateMpCategories()
+    {
         $categories = \common\models\MpCategory::find()->all();
         foreach ($categories as $category) {
             $category->update();
         }
     }
 
-    public function actionEraseOrganization($orgId) {
+    public function actionEraseOrganization($orgId)
+    {
         $organization = \common\models\Organization::findOne(['id' => $orgId]);
         if (empty($organization)) {
             return;
@@ -150,9 +163,9 @@ class UtilsController extends Controller {
                 \common\models\CatalogGoods::deleteAll(['cat_id' => $catalog->id]);
             }
             $goodsNotes = \common\models\GoodsNotes::find()
-                    ->leftJoin('catalog_base_goods', 'catalog_base_goods.id = goods_notes.catalog_base_goods_id')
-                    ->where(['catalog_base_goods.supp_org_id' => $orgId])
-                    ->all();
+                ->leftJoin('catalog_base_goods', 'catalog_base_goods.id = goods_notes.catalog_base_goods_id')
+                ->where(['catalog_base_goods.supp_org_id' => $orgId])
+                ->all();
             foreach ($goodsNotes as $note) {
                 $note->delete();
             }
@@ -184,14 +197,16 @@ class UtilsController extends Controller {
         }
     }
 
-    public function actionMassErase() {
+    public function actionMassErase()
+    {
         $organizationsIds = [];
         foreach ($organizationsIds as $organizationId) {
             $this->actionEraseOrganization($organizationId);
         }
     }
 
-    public function actionMassDecode() {
+    public function actionMassDecode()
+    {
         set_time_limit(180);
         do {
             $products = \common\models\CatalogBaseGoods::find()->where("product like '%&#039;%' ")->limit(100)->all();
@@ -206,24 +221,24 @@ class UtilsController extends Controller {
     public function actionMigrateCart()
     {
         $transaction = \Yii::$app->db->beginTransaction();
-        try{
-            echo "Find order in cart...".PHP_EOL;
+        try {
+            echo "Find order in cart..." . PHP_EOL;
             $orders = \common\models\Order::findAll(['status' => 7]);
             $count = count($orders);
-            echo "Find ".$count." orders";
-            $i=1;
+            echo "Find " . $count . " orders";
+            $i = 1;
             foreach ($orders as $order) {
                 echo "Migrate " . $i . " of " . $count . PHP_EOL;
                 $cart = \common\models\Cart::findOne(['user_id' => $order->created_by_id, 'organization_id' => $order->client_id]);
-                if($cart == null) {
+                if ($cart == null) {
                     $cart = new \common\models\Cart();
                     $cart->user_id = $order->created_by_id;
                     $cart->organization_id = $order->client_id;
-                    if(!$cart->save())
-                        throw new \Exception ("Error create cart from order ID".$order->id.PHP_EOL);
+                    if (!$cart->save()) {
+                        throw new \Exception ("Error create cart from order ID" . $order->id . PHP_EOL);
+                    }
                 }
-                foreach ($order->orderContent as $position)
-                {
+                foreach ($order->orderContent as $position) {
                     $cartContent = new \common\models\CartContent();
                     $cartContent->cart_id = $cart->id;
                     $cartContent->vendor_id = $order->vendor_id;
@@ -235,19 +250,76 @@ class UtilsController extends Controller {
                     $cartContent->comment = $position->comment;
                     $cartContent->currency_id = $order->currency_id;
 
-                    if(!$cartContent->save())
-                    {
-                        throw new \Exception ("Error add to cart position from order_content ID".$position->id.PHP_EOL);
+                    if (!$cartContent->save()) {
+                        throw new \Exception ("Error add to cart position from order_content ID" . $position->id . PHP_EOL);
                     }
                 }
                 $i++;
             }
             $transaction->commit();
-        }catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             echo $e->getMessage();
             $transaction->rollBack();
         }
     }
 
+    public function actionUpdateVetisProductItem($count = 10000)
+    {
+        $product = new Products();
+        $all_count = VetisProductItem::find()->count();
+        echo "Update ".$all_count." rows".PHP_EOL;
+        $offset = 0;
+        $i=0;
+
+        do {
+            $query = (new \yii\db\Query())
+                ->select([
+                    'uuid',
+                    'data' //=> '(SELECT t2.data FROM ' . VetisProductItem::tableName() . ' t2 WHERE t2.uuid = t1.uuid)'
+                ])
+                ->from(VetisProductItem::tableName() . ' t1')
+                ->limit($count)
+                ->offset($offset)
+                ->indexBy('uuid');
+
+            echo "start SQL".PHP_EOL;
+            $rows = $query->all(\Yii::$app->get('db_api'));
+            echo "end SQL".PHP_EOL;
+            $this->vetisWork($rows, $i, $all_count);
+            $offset += $count;
+        } while ($i < $all_count);
+    }
+
+    private function vetisWork($rows, &$i, $all_count)
+    {
+        $generator = function ($items) {
+            foreach ($items as &$item) {
+                yield $item;
+            }
+        };
+
+        foreach ($generator($rows) as $row) {
+            $i++;
+            $dataPackaging = (unserialize($row['data']))->packaging;
+            if (isset($dataPackaging)) {
+                $params = ['packagingType_guid' => isset($dataPackaging->packagingType->guid) ? $dataPackaging->packagingType->guid : null,
+                    'packagingType_uuid' => isset($dataPackaging->packagingType->uuid) ? $dataPackaging->packagingType->uuid : null,
+                    'unit_uuid' => isset($dataPackaging->unit->uuid) ? $dataPackaging->unit->uuid : null,
+                    'unit_guid' => isset($dataPackaging->unit->guid) ? $dataPackaging->unit->guid : null,
+                    'packagingQuantity' => isset($dataPackaging->quantity) ? $dataPackaging->quantity : null,
+                    'packagingVolume' => isset($dataPackaging->volumne) ? $dataPackaging->volumne : null
+                ];
+                $arWhere['uuid'] = $row['uuid'];
+                (new \yii\db\Query())->createCommand(\Yii::$app->db_api)->update(VetisProductItem::tableName(),$params, $arWhere)->execute();
+            }
+            echo $i . "/" . $all_count . PHP_EOL;
+        }
+    }
+    
+    public function actionCloudWatchTest()
+    {
+        \Yii::$app->get('cloudWatchLog')->writeLog("testCWL", "id_102", "test 3");
+        \Yii::$app->get('cloudWatchLog')->writeLog("testCWL", "id_108", "test 8");
+        \Yii::$app->get('cloudWatchLog')->writeLog("testCWL2", "id_99", "test 12");
+    }
 }

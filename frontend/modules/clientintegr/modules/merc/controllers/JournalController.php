@@ -33,6 +33,7 @@ class JournalController extends Controller
                         'roles' => [
                             Role::ROLE_RESTAURANT_BUYER,
                             Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                            Role::ROLE_RESTAURANT_ORDER_INITIATOR,
                         ],
                     ],
                     [

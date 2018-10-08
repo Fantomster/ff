@@ -81,7 +81,7 @@ class iikoDicconst extends \yii\db\ActiveRecord
     {
         $model = self::findOne(['denom' => $denom]);
         if ($model) {
-            $pConst = iikoPconst::findOne(['const_id' => $model->id, 'org' => Yii::$app->user->identity->organization_id]);
+            $pConst = iikoPconst::findOne(['const_id' => $model->id, 'org' => $orgId ?? \Yii::$app->user->identity->organization_id]);
             if (isset($pConst->value)) {
                 return $pConst->value;
             } else {

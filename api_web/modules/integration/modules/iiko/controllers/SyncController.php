@@ -3,6 +3,7 @@
 namespace api_web\modules\integration\modules\iiko\controllers;
 
 use api_web\components\WebApiController;
+use api_web\modules\integration\classes\sync\ServiceIiko;
 use api_web\modules\integration\modules\iiko\models\iikoSync;
 use yii\web\BadRequestHttpException;
 
@@ -11,7 +12,7 @@ class SyncController extends WebApiController
      #Синхронизация iiko
      /**
      * @SWG\Post(path="/integration/iiko/sync/run",
-     *     tags={"Integration/iiko/sync"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Запуск синхронизации",
      *     description="Запуск синхронизации",
      *     produces={"application/json"},
@@ -49,7 +50,7 @@ class SyncController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/iiko/sync/list",
-     *     tags={"Integration/iiko/sync"},
+     *     tags={"OLD  Integration_iiko"},
      *     summary="Список синхронизируемых справочников",
      *     description="Список синхронизируемых справочников",
      *     produces={"application/json"},
@@ -82,10 +83,10 @@ class SyncController extends WebApiController
 
 
     /**
-     * @SWG\Post(path="/integration/iiko/sync/create-waybill-data",
-     *     tags={"Integration/iiko/sync"},
-     *     summary="Создание сопоставлений номенклатуры накладной с продуктами MixCart",
-     *     description="Создание сопоставлений номенклатуры накладной с продуктами MixCart",
+     * @SWG\Post(path="/integration/iiko/sync/send-waybill",
+     *     tags={"/integration/iiko/"},
+     *     summary="Метод отправки накладных в Iiko",
+     *     description="Метод отправки накладных в Iiko",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -96,30 +97,23 @@ class SyncController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                              "waybill_id": 1,
-     *                              "product_id": 2222,
-     *                              "product_rid": 2222,
-     *                              "munit": "кг",
-     *                              "org": 2222,
-     *                              "vat": 1000,
-     *                              "vat_included": 1180,
-     *                              "sum": "10000,00",
-     *                              "quant": "5,67",
-     *                              "defsum": 10000.00,
-     *                              "defquant": 12000.00,
-     *                              "koef": "1,00",
-     *                              "linked_at": "2018-06-20 18:09:01"
-     *                          }
+     *                      "ids": {
+     *                          1,
+     *                          2,
+     *                          3,
+     *                      }
+     *                  }
      *              )
      *         )
      *     ),
-     *     @SWG\Response(
+     *    @SWG\Response(
      *         response = 200,
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                "success": true,
-     *                "waybill_data_id": 1,
+     *                       "1": true,
+     *                       "2": true,
+     *                       "3": false,
      *              }
      *          )
      *     ),
@@ -132,9 +126,12 @@ class SyncController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
-    public function actionCreateWaybillData()
+    public function actionSendWaybill()
     {
-        $this->response = $this->container->get('IikoWebApi')->handleWaybillData($this->request);
+        $this->response = (new ServiceIiko('iiko', 2))->sendWaybill($this->request);
     }
+
+
 }

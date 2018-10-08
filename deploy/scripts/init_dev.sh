@@ -9,4 +9,6 @@ sudo rm -rf /var/www/html/dev.mixcart.ru/market/web/assets/*
 sudo rm -rf /var/www/html/dev.mixcart.ru/franchise/web/assets/*
 sudo rm -rf /var/www/html/dev.mixcart.ru/api_web/web/assets/*
 
+chmod 777 /var/www/html/dev.mixcart.ru/frontend/web/upload/temp
+
 echo "assets erased"

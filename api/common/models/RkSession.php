@@ -36,8 +36,8 @@ class RkSession extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id','fid','acc','cook','status','ver'], 'required'],
-            [['id','fid','org','ver'], 'integer'],
+            [['fid','acc','cook','status','ver'], 'required'],
+            [['id','fid','ver'], 'integer'],
             [['comment'], 'string', 'max' => 255],
         ];
     }

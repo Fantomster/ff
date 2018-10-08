@@ -503,8 +503,8 @@ Modal::end();
                         'label' => Yii::t('message', 'frontend.views.vendor.curr_cat', ['ru' => 'Текущий каталог']),
                         'format' => 'raw',
                         'value' => function ($data) {
-                            $catalog_name = $data->cat_id == 0 ? '' :
-                                    common\models\Catalog::find()->where(['id' => $data->cat_id])->one()->name;
+                            $catalog = common\models\Catalog::find()->where(['id' => $data->cat_id])->one();
+                            $catalog_name = ($data->cat_id == 0 || !$catalog) ? '' : $catalog->name;
                             return Yii::t('app', $catalog_name);
                         }
                     ],

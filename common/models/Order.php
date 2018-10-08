@@ -6,10 +6,9 @@ use common\components\EComIntegration;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
 use yii\behaviors\AttributesBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
-use api\common\models\iiko\iikoDicconst;
 
 /**
  * This is the model class for table "order".
@@ -30,6 +29,7 @@ use api\common\models\iiko\iikoDicconst;
  * @property string $discount
  * @property integer $discount_type
  * @property integer $currency_id
+ * @property string $waybill_number
  * @property integer $service_id
  * @property string $status_updated_at
  * @property string $edi_order
@@ -86,10 +86,10 @@ class Order extends \yii\db\ActiveRecord
     {
         return [
             'timestamp' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'value' => function ($event) {
-                    return gmdate("Y-m-d H:i:s");
-                },
+                'class' => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => \gmdate('Y-m-d H:i:s'),
             ],
             'attributes' => [
                 'class' => AttributesBehavior::class,
@@ -223,7 +223,7 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getOrderContent()
     {
-        return $this->hasMany(OrderContent::className(), ['order_id' => 'id']);
+        return $this->hasMany(OrderContent::className(), ['order_id' => 'id'])->indexBy('id');
     }
 
     /**
@@ -323,9 +323,9 @@ class Order extends \yii\db\ActiveRecord
                 'common.models.order_status.status_awaiting_accept_from_vendor', ['ru' => 'Ожидает подтверждения']),
             OrderStatus::STATUS_PROCESSING => Yii::t('app',
                 'common.models.order_status.status_processing', ['ru' => 'Выполняются']),
-            OrderStatus::STATUS_EDO_SENT_BY_VENDOR => Yii::t('app',
+            OrderStatus::STATUS_EDI_SENT_BY_VENDOR => Yii::t('app',
                 'common.models.order_status.status_edo_sent_by_vendor', ['ru' => 'Отправлен поставщиком']),
-            OrderStatus::STATUS_EDO_ACCEPTANCE_FINISHED => Yii::t('app',
+            OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED => Yii::t('app',
                 'common.models.order_status.status_edo_acceptance_finished', ['ru' => 'Приемка завершена']),
             OrderStatus::STATUS_DONE => Yii::t('app',
                 'common.models.order_status.status_done', ['ru' => 'Завершен']),
@@ -574,7 +574,7 @@ class Order extends \yii\db\ActiveRecord
             }
         }
         if ($this->status == OrderStatus::STATUS_DONE) {
-                AutoWaybillHelper::processWaybill($this->id);
+            AutoWaybillHelper::processWaybill($this->id);
         }
 
     }
@@ -685,12 +685,17 @@ class Order extends \yii\db\ActiveRecord
     {
         return $this->hasOne(OrderAssignment::className(), ['order_id' => 'id']);
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getRelatedEmails()
     {
         return $this->hasMany(EmailQueue::className(), ['order_id' => 'id']);
+    }
+    
+    public function getFormattedCreationDate()
+    {
+        return Yii::$app->formatter->asDatetime($this->created_at, "php:d.m.Y, H:i");
     }
 }

@@ -16,13 +16,13 @@ use common\models\Organization;
  * @property string $password
  * @property string $token
  * @property string $lic
- * @property datetime $fd
- * @property datetime $td
+ * @property string $fd
+ * @property string $td
  * @property integer $ver
  * @property integer $locked
  * @property string $usereq 
  * @property string $comment
- * @property string $salespoint
+ * @property string $code
  * 
  * 
  */

@@ -75,6 +75,9 @@ class OuterProduct extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return array
+     */
     public function behaviors()
     {
         return [
@@ -85,5 +88,13 @@ class OuterProduct extends \yii\db\ActiveRecord
                 'value' => \gmdate('Y-m-d H:i:s'),
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */     
+    public function getOuterUnit()
+    {
+        return $this->hasOne(OuterUnit::className(), ['id' => 'outer_unit_id']);
     }
 }

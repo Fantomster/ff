@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
 use api\common\models\RkAgent;
+use api\common\models\RkDicconst;
 use api\common\models\RkPconst;
 use api\common\models\RkStore;
 use api\common\models\rkws\RkWaybilldataSearch;
@@ -194,11 +195,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $massiv_post = Yii::$app->request->post('RkWaybilldata');
         while ($est == 0) {
             if (isset($massiv_post[$i]["koef"])) {
-                $koef = $massiv_post[$i]["koef"];
+                $koef_old = $massiv_post[$i]["koef"];
                 $est = 1;
             }
             $i++;
         }
+        $koef = str_replace(',', '.', $koef_old);
         $koef = round($koef, 6);
         $buttons = $massiv_post["koef_buttons"];
         $koef_id = Yii::$app->request->post('editableKey');
@@ -834,21 +836,29 @@ SQL;
             die();
         }
 
-        $model = new RkWaybill();
-        $model->order_id = $order_id;
-        $model->status_id = 1;
-        $model->org = $ord->client_id;
+        $const = RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if ($model->getErrors()) {
-                var_dump($model->getErrors());
-                exit;
+        if ($const !== '0') {
+            RkWaybill::createWaybill($order_id);
+            return $this->redirect([$this->getLastUrl() . 'way=' . $order_id]);
+        }
+        else {
+            $model = new RkWaybill();
+            $model->order_id = $order_id;
+            $model->status_id = 1;
+            $model->org = $ord->client_id;
+
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                if ($model->getErrors()) {
+                    var_dump($model->getErrors());
+                    exit;
+                }
+                return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            } else {
+                return $this->render('create', [
+                    'model' => $model,
+                ]);
             }
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
         }
     }
 

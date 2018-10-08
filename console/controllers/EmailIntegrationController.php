@@ -138,7 +138,7 @@ class EmailIntegrationController extends Controller
             print_r("Result price_without_tax_sum:" . $result[$i - 1]['invoice']['price_without_tax_sum'] . PHP_EOL);
             print_r("Result price_with_tax_sum:" . $result[$i - 1]['invoice']['price_with_tax_sum'] . PHP_EOL);
             print_r("=================================" . PHP_EOL);
-            //print_r($result[$i - 1]['invoice']['rows']);
+            print_r($result[$i - 1]['invoice']['rows']);
 
             //file_put_contents('result_'.$i.'.txt', $filet.PHP_EOL,true);
             //file_put_contents('result_'.$i.'.txt', print_r($result[$i-1],true));

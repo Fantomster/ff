@@ -17,14 +17,16 @@ use api\common\models\RkService;
  * @property string $password
  * @property string $token
  * @property string $lic
- * @property datetime $fd
- * @property datetime $td
+ * @property string $fd
+ * @property string $td
  * @property integer $ver
  * @property integer $locked
  * @property string $usereq 
  * @property string $comment
  * @property string $salespoint
- * 
+ * @property string $status_id
+ * @property string $service_id
+ *
  * 
  */
 class RkServicedata extends \yii\db\ActiveRecord {

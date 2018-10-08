@@ -2,8 +2,10 @@
 
 namespace common\models;
 
+use common\helpers\DBNameHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "outer_agent".
@@ -22,6 +24,9 @@ use yii\behaviors\TimestampBehavior;
  * @property string $updated_at Изменено по GMT-0
  * @property string $inn ИНН
  * @property string $kpp КПП
+ * @property Organization $vendor
+ * @property OuterStore $store
+ * @property OuterAgentNameWaybill|array $nameWaybills
  */
 class OuterAgent extends \yii\db\ActiveRecord
 {
@@ -61,20 +66,20 @@ class OuterAgent extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'outer_uid' => 'Outer Uid',
-            'service_id' => 'Service ID',
-            'name' => 'Name',
-            'comment' => 'Comment',
-            'vendor_id' => 'Vendor ID',
-            'store_id' => 'Store ID',
+            'id'            => 'ID',
+            'outer_uid'     => 'Outer Uid',
+            'service_id'    => 'Service ID',
+            'name'          => 'Name',
+            'comment'       => 'Comment',
+            'vendor_id'     => 'Vendor ID',
+            'store_id'      => 'Store ID',
             'payment_delay' => 'Payment Delay',
-            'org_id' => 'Org ID',
-            'is_deleted' => 'Is Deleted',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
-            'inn' => 'Inn',
-            'kpp' => 'Kpp',
+            'org_id'        => 'Org ID',
+            'is_deleted'    => 'Is Deleted',
+            'created_at'    => 'Created At',
+            'updated_at'    => 'Updated At',
+            'inn'           => 'Inn',
+            'kpp'           => 'Kpp',
         ];
     }
 
@@ -82,11 +87,40 @@ class OuterAgent extends \yii\db\ActiveRecord
     {
         return [
             [
-                'class' => TimestampBehavior::class,
+                'class'              => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',
-                'value' => \gmdate('Y-m-d H:i:s'),
+                'value'              => \gmdate('Y-m-d H:i:s'),
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getVendor()
+    {
+        $db_instance = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        return (new ActiveQuery(Organization::class))
+            ->from($db_instance . '.' . Organization::tableName() . ' o')
+            ->onCondition([
+                'o.`id`' => '`outer_agent`.`vendor_id`'
+            ]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getStore()
+    {
+        return $this->hasOne(OuterStore::class, ['id' => 'store_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getNameWaybills()
+    {
+        return $this->hasMany(OuterAgentNameWaybill::class, ['agent_id' => 'id']);
     }
 }

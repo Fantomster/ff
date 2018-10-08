@@ -517,7 +517,6 @@ $this->registerJs(
                                     'editableOptions' => [
                                         'asPopover' => true,
                                         'name' => 'pdenom',
-
                                         'formOptions' => ['action' => ['editpdenom', 'service_id' => $searchModel->service_id] ],
                                         'header' => 'Продукт в интеграции',
                                         'size' => 'md',
@@ -612,6 +611,7 @@ $this->registerJs(
                                         'formOptions' => ['action' => ['editstore', 'service_id' => $searchModel->service_id]],
                                         'header' => 'Склад интеграции',
                                         'size' => 'md',
+                                        'placement' => "left",
                                         'inputType' => \kartik\editable\Editable::INPUT_DROPDOWN_LIST,
                                         'options' => [
                                             'options' => ['placeholder' => 'Выберите склад из списка',

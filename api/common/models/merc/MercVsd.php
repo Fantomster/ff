@@ -47,6 +47,9 @@ use Yii;
  */
 class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
+    const INCOME_VSD = 1;
+    const OUTCOME_VSD = 2;
+
     const DOC_TYPE_INCOMMING = 'INCOMING';
     const DOC_TYPE_OUTGOING = 'OUTGOING';
     const DOC_TYPE_PRODUCTIVE = 'PRODUCTIVE';
@@ -195,7 +198,7 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 
         $vsd = self::findOne(['uuid' => $uuid]);
 
-        return ($guid == $vsd->sender_guid) ? 2 : 1;
+        return ($guid == $vsd->sender_guid) ? self::OUTCOME_VSD : self::INCOME_VSD;
     }
 
     public static function getNumber($series, $number)
@@ -307,7 +310,6 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
-            var_dump($e->getMessage());
         }
     }
 }

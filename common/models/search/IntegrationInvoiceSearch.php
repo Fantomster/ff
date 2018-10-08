@@ -26,6 +26,7 @@ use common\models\User;
  * @property string $updated_at
  * @property string $name_postav
  * @property string $consignee
+ * @property int $vendor_id
  *
  * @property IntegrationInvoiceContent[] $Content
  * @property Organization $organization
@@ -35,6 +36,7 @@ class IntegrationInvoiceSearch extends IntegrationInvoice
 {
     public $date_from;
     public $date_to;
+
     /**
      * @inheritdoc
      */
@@ -50,7 +52,7 @@ class IntegrationInvoiceSearch extends IntegrationInvoice
     public function rules()
     {
         return [
-          [['date', 'created_at', 'total', 'updated_at', 'date_from', 'date_to', 'number', 'name_postav', 'consignee'], 'safe'],
+            [['date', 'created_at', 'total', 'updated_at', 'date_from', 'date_to', 'number', 'name_postav', 'consignee'], 'safe'],
 
         ];
     }
@@ -97,8 +99,8 @@ class IntegrationInvoiceSearch extends IntegrationInvoice
         }
 
         if (isset($this->name_postav)) {
-            if (strlen($this->name_postav)>0) {
-                $query->andWhere($this->tableName() . '.name_postav like "%'.$this->name_postav.'%"');
+            if (strlen($this->name_postav) > 0) {
+                $query->andWhere($this->tableName() . '.name_postav like "%' . $this->name_postav . '%"');
             }
         }
         $dataProvider = new ActiveDataProvider([

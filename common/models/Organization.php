@@ -8,8 +8,6 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 use api\common\models\RkServicedata;
-use backend\controllers\OdinsobshController;
-use Mpdf\Tag\Q;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
@@ -120,7 +118,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'organization';
+        return '{{%organization}}';
     }
 
     /**

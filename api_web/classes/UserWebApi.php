@@ -21,6 +21,7 @@ use api_web\exceptions\ValidationException;
 
 /**
  * Class UserWebApi
+ *
  * @package api_web\classes
  */
 class UserWebApi extends \api_web\components\WebApi
@@ -28,6 +29,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Информация о пользователе
+     *
      * @param $post
      * @return array
      * @throws BadRequestHttpException
@@ -46,17 +48,18 @@ class UserWebApi extends \api_web\components\WebApi
         }
 
         return [
-            'id' => $model->id,
-            'email' => $model->email,
-            'phone' => $model->profile->phone,
-            'name' => $model->profile->full_name,
+            'id'      => $model->id,
+            'email'   => $model->email,
+            'phone'   => $model->profile->phone,
+            'name'    => $model->profile->full_name,
             'role_id' => $model->role->id,
-            'role' => $model->role->name,
+            'role'    => $model->role->name,
         ];
     }
 
     /**
      * Часовой пояс пользователя
+     *
      * @return array
      */
     public function getGmt()
@@ -66,6 +69,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Создание пользователя
+     *
      * @param array $post
      * @return string
      * @throws ValidationException
@@ -109,13 +113,14 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Создание пользователя
-     * @param array $post
-     * @param $role_id
+     *
+     * @param array   $post
+     * @param integer $role_id
      * @return User
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function createUser(array $post, $role_id)
+    public function createUser(array $post, $role_id, $status = null)
     {
         if (User::findOne(['email' => $post['user']['email']])) {
             throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
@@ -129,15 +134,16 @@ class UserWebApi extends \api_web\components\WebApi
         if (!$user->validate()) {
             throw new ValidationException($user->getFirstErrors());
         }
-        $user->setRegisterAttributes($role_id, User::STATUS_ACTIVE);
+        $user->setRegisterAttributes($role_id, $status);
         $user->save();
         return $user;
     }
 
     /**
      * Создание профиля пользователя
+     *
      * @param array $post
-     * @param User $user
+     * @param User  $user
      * @return Profile
      * @throws ValidationException
      */
@@ -163,6 +169,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Повторная отправка СМС с кодом активации пользователя
+     *
      * @param $post
      * @return array
      * @throws BadRequestHttpException
@@ -214,6 +221,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Подтверждение регистрации
+     *
      * @param array $post
      * @return string
      * @throws \Exception
@@ -252,6 +260,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Выбор бизнеса
+     *
      * @param array $post
      * @param array $post
      * @return bool
@@ -287,7 +296,7 @@ class UserWebApi extends \api_web\components\WebApi
                     }
                 }
                 $this->user->organization_id = $organization->id;
-            } else if (in_array($this->user->role_id, Role::getFranchiseeEditorRoles())) {
+            } elseif (in_array($this->user->role_id, Role::getFranchiseeEditorRoles())) {
                 $this->user->organization_id = $organization->id;
             } else {
                 throw new \Exception('access denied.');
@@ -307,6 +316,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Список бизнесов пользователя
+     *
      * @return array
      * @throws BadRequestHttpException
      */
@@ -328,6 +338,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Список поставщиков пользователя
+     *
      * @param array $post
      * @return array
      */
@@ -399,14 +410,14 @@ class UserWebApi extends \api_web\components\WebApi
         //$dataProvider->query->andWhere('1=0');
         //Ответ
         $return = [
-            'headers' => [],
-            'vendors' => [],
+            'headers'    => [],
+            'vendors'    => [],
             'pagination' => [
-                'page' => $page,
-                'page_size' => $pageSize,
+                'page'       => $page,
+                'page_size'  => $pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ],
-            'sort' => $sort
+            'sort'       => $sort
         ];
 
         //Сортировка
@@ -458,6 +469,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Список статусов поставщиков
+     *
      * @return array
      */
     public function getVendorStatusList()
@@ -471,6 +483,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Список географического расположения поставщиков ресторана
+     *
      * @return array
      */
     public function getVendorLocationList()
@@ -523,6 +536,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Отключить поставщика
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -565,6 +579,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Смена пароля пользователя
+     *
      * @param $post
      * @return array
      * @throws BadRequestHttpException
@@ -617,6 +632,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Смена мобильного номера
+     *
      * @param $post
      * @return array
      * @throws BadRequestHttpException
@@ -693,8 +709,59 @@ class UserWebApi extends \api_web\components\WebApi
         return ['result' => true];
     }
 
+
+    /**
+     * Смена телефона неподтвержденным пользователем
+     *
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function changeUnconfirmedUsersPhone($post)
+    {
+        WebApiHelper::clearRequest($post);
+
+        if (empty($post['user']['id'])) {
+            throw new BadRequestHttpException('empty_param|id');
+        }
+
+        if (empty($post['profile']['phone'])) {
+            throw new BadRequestHttpException('empty_param|phone');
+        }
+
+        $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
+        if (mb_substr($phone, 0, 1) == '8') {
+            $phone = preg_replace('#^8(\d.+?)#', '+7$1', $phone);
+        }
+        //Проверяем телефон
+        if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
+            throw new ValidationException(['phone' => 'bad_format_phone']);
+        }
+
+        $user = User::findOne(['id' => $post['user']['id']]);
+        if (!$user) {
+            throw new BadRequestHttpException('no such user');
+        }
+
+        if ($user->status == User::STATUS_ACTIVE) {
+            throw new BadRequestHttpException('you have no rights for this action');
+        }
+
+        $profile = Profile::findOne(['user_id' => $user->id]);
+        if (!$profile) {
+            throw new BadRequestHttpException('no such users profile');
+        }
+        $profile->phone = $post['profile']['phone'];
+        $profile->save();
+
+        return ['result' => true];
+    }
+
+
     /**
      * Информация о поставщике
+     *
      * @param RelationSuppRest $model
      * @return array
      */
@@ -726,23 +793,24 @@ class UserWebApi extends \api_web\components\WebApi
         }
 
         return [
-            'id' => (int)$model->vendor->id,
-            'name' => $model->vendor->name ?? "",
-            'contact_name' => $model->vendor->contact_name ?? "",
-            'inn' => $model->vendor->inn ?? null,
-            'cat_id' => (int)$model->cat_id,
-            'email' => $model->vendor->email ?? "",
-            'phone' => $model->vendor->phone ?? "",
-            'status' => $status,
-            'picture' => $model->vendor->getPictureUrl() ?? "",
-            'address' => implode(', ', $locality),
-            'rating' => $model->vendor->rating ?? 0,
+            'id'            => (int)$model->vendor->id,
+            'name'          => $model->vendor->name ?? "",
+            'contact_name'  => $model->vendor->contact_name ?? "",
+            'inn'           => $model->vendor->inn ?? null,
+            'cat_id'        => (int)$model->cat_id,
+            'email'         => $model->vendor->email ?? "",
+            'phone'         => $model->vendor->phone ?? "",
+            'status'        => $status,
+            'picture'       => $model->vendor->getPictureUrl() ?? "",
+            'address'       => implode(', ', $locality),
+            'rating'        => $model->vendor->rating ?? 0,
             'allow_editing' => $model->vendor->allow_editing
         ];
     }
 
     /**
      * Генератор случайного пароля
+     *
      * @return string
      */
     private function randomPassword()
@@ -760,6 +828,7 @@ class UserWebApi extends \api_web\components\WebApi
 
     /**
      * Возвращает GMT из базы, если его нет сохраняет из headers, добавляет плюс к не отрицательному таймзону
+     *
      * @return string $gmt
      * */
     public function checkGMTFromDb()
@@ -784,5 +853,26 @@ class UserWebApi extends \api_web\components\WebApi
         }
 
         return $return;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUserOrganizationBusinessList()
+    {
+        $res = (new Query())->select(['a.id', 'a.name'])->from('organization a')
+            ->leftJoin('relation_user_organization b', 'a.id = b.organization_id')
+            ->where([
+                'b.user_id'   => $this->user->id,
+                'a.type_id'   => 1,
+                'b.role_id'   => [
+                    Role::ROLE_RESTAURANT_MANAGER,
+                    Role::ROLE_RESTAURANT_EMPLOYEE,
+                    Role::ROLE_RESTAURANT_BUYER,
+                    Role::ROLE_ADMIN,
+                ]
+            ])->all();
+
+        return ['result' => $res];
     }
 }

@@ -141,7 +141,7 @@ class AllMaps extends \yii\db\ActiveRecord
         $stores = [-1 => 'Нет'];
         switch ($service_id) {
             case 1 : // R-keeper
-                $stores += ArrayHelper::map(RkStoretree::find()->andWhere('acc=:acc',[':acc' => $org_id])->
+                $stores += ArrayHelper::map(RkStoretree::find()->andWhere('acc=:acc and active = 1',[':acc' => $org_id])->
                 andWhere('type = 2')->all(), 'id', 'name');
                 break;
 

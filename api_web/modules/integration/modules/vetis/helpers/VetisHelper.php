@@ -9,12 +9,14 @@
 namespace api_web\modules\integration\modules\vetis\helpers;
 
 use api\common\models\merc\MercVsd;
+use common\helpers\DBNameHelper;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use yii\db\Query;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -50,6 +52,7 @@ class VetisHelper
 
     /**
      * Получение краткой информации о ВСД
+     *
      * @param string $uuid
      * @throws BadRequestHttpException
      * */
@@ -79,6 +82,7 @@ class VetisHelper
 
     /**
      * Получение полной информации о ВСД
+     *
      * @param $uuid
      * @throws BadRequestHttpException
      * */
@@ -112,7 +116,7 @@ class VetisHelper
                     $labResearch->referencedDocument->issueDate . ' ( ' . $labResearch->indicator->name . ' - ' .
                     $labResearch->conclusion . ' )';
             }
-        } catch (\Throwable $t){
+        } catch (\Throwable $t) {
             // too many errors in VSD
         }
         $this->transport_type = isset($this->doc->certifiedConsignment->transportInfo->transportType) ?
@@ -132,6 +136,7 @@ class VetisHelper
 
     /**
      * Парсит $doc->referencedDocument и записывает в экземпляр класса
+     *
      * @param object $refDoc
      * */
     public function setTransportWaybill($refDoc): void
@@ -182,61 +187,110 @@ class VetisHelper
     }
 
     /**
-     * @return Query
-     * */
-    public function getOrdersQueryVetis()
+     * @param int $id
+     * @return array|bool
+     */
+    public function getGroupInfo(int $id)
     {
         $tableName = $this->getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
         $query = (new Query())
             ->select(
                 [
-                    'COALESCE(o.id, \'order_not_installed\' ) as group_name',
-                    'COUNT(m.id) as count',
+                    'COUNT(oc.id) as count',
                     'o.created_at',
                     'o.total_price',
-                    'GROUP_CONCAT(`wc`.`merc_uuid` SEPARATOR \',\') AS `uuids`',
+                    'vendor.name as vendor_name',
                     'GROUP_CONCAT(DISTINCT `m`.`status` SEPARATOR \',\') AS `statuses`',
                 ]
             )
-            ->from('`' . $tableName . '`.merc_vsd m')
-            ->leftJoin('`' . $tableName . '`.waybill_content wc', 'wc.merc_uuid = m.uuid COLLATE utf8_unicode_ci')
-            ->leftJoin('`' . $tableName . '`.waybill w', 'w.id = wc.waybill_id')
-            ->leftJoin('order_content oc', 'oc.id = wc.order_content_id')
-            ->leftJoin('order o', 'o.id = oc.order_id')
-            ->where('w.service_id = 4')
-            ->groupBy('group_name')
-            ->orderBy(['group_name' => SORT_DESC]);
+            ->from('order o')
+            ->innerJoin('order_content oc', 'oc.order_id = o.id')
+            ->innerJoin('organization vendor', 'o.vendor_id = vendor.id')
+            ->leftJoin('`' . $tableName . '`.merc_vsd m', 'm.uuid = oc.merc_uuid COLLATE utf8_unicode_ci')
+            ->where(['o.id' => $id])
+            ->andWhere('oc.merc_uuid is not null')
+            ->one(\Yii::$app->db);
+
+        if (!is_null($query['statuses'])) {
+            $query['statuses'] = $this->getStatusForGroup($query['statuses']);
+        }
+
+        if ($query['count'] == 0) {
+            return null;
+        }
 
         return $query;
     }
 
     /**
      * Get database name from config
+     *
      * @param string $name
      * @param string $dsn dsn string from config
      * @return string database name
      * */
-    private function getDsnAttribute($name, $dsn)
+    public function getDsnAttribute($name, $dsn)
     {
-        if (preg_match('/' . $name . '=([^;]*)/', $dsn, $match)) {
-            return $match[1];
-        } else {
-            return null;
-        }
+        return DBNameHelper::getDsnAttribute($name, $dsn);
     }
 
     /**
      * Get group status from array statuses
+     *
      * @param string $strStatuses
-     * @return string status
+     * @return array
      * */
     public function getStatusForGroup($strStatuses)
     {
         $statuses = explode(',', $strStatuses);
         if (count($statuses) > 1) {
-            return \Yii::t('api_web', self::$ordersStatuses['CONFIRMED']);
+            return [
+                'id'   => 'CONFIRMED',
+                'text' => \Yii::t('api_web', self::$ordersStatuses['CONFIRMED'])
+            ];
         } else {
-            return \Yii::t('api_web', self::$ordersStatuses[current($statuses)]);
+            $status = current($statuses);
+            if ($status) {
+                return [
+                    'id'   => $status,
+                    'text' => \Yii::t('api_web', self::$ordersStatuses[$status])
+                ];
+            }
         }
+    }
+
+    /**
+     * @param       $models
+     * @param array $order_ids
+     * @return array
+     */
+    public function attachModelsInDocument($models, array $order_ids)
+    {
+        $tableName = $this->getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+        $query = (new Query())
+            ->select("
+                `m`.uuid,
+                `m`.`sender_name`,
+                `m`.`product_name`,
+                `m`.`status`,
+                `m`.`last_update_date` as status_date,
+                `m`.`amount`,
+                `m`.`unit`,
+                `m`.`production_date`,
+                `m`.`date_doc`,
+                `o`.id as document_id
+            ")
+            ->from('order o')
+            ->leftJoin('order_content oc', 'oc.order_id = o.id')
+            ->leftJoin('`' . $tableName . '`.merc_vsd m', 'm.uuid = oc.merc_uuid')
+            ->where(['in', 'o.id', $order_ids])
+            ->andWhere('oc.merc_uuid is not null')
+            ->all();
+
+        $query = ArrayHelper::index($query, 'uuid');
+
+        $models = ArrayHelper::merge($models, $query);
+
+        return $models;
     }
 }

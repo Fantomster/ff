@@ -5,6 +5,7 @@ namespace frontend\modules\clientintegr\modules\iiko\helpers;
 use api\common\models\iiko\iikoDicconst;
 use api\common\models\iiko\iikoWaybill;
 use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
+use common\models\Waybill;
 use yii\helpers\ArrayHelper;
 
 class iikoApi
@@ -130,13 +131,16 @@ class iikoApi
     }
 
     /**
-     * @param iikoWaybill $model
+     * @param iikoWaybill|Waybill $model
      * @return mixed
      */
-    public function sendWaybill(iikoWaybill $model)
+    public function sendWaybill($model)
     {
-        $url = '/documents/import/incomingInvoice';
-        return $this->sendXml($url, $model->getXmlDocument());
+        if ($model instanceof iikoWaybill || $model instanceof \api_web\modules\integration\models\iikoWaybill){
+            $url = '/documents/import/incomingInvoice';
+            return $this->sendXml($url, $model->getXmlDocument());
+        }
+        return false;
     }
 
     /**

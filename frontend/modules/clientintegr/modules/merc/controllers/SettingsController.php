@@ -31,6 +31,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
                         'roles' => [
                             Role::ROLE_RESTAURANT_BUYER,
                             Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                            Role::ROLE_RESTAURANT_ORDER_INITIATOR,
                         ],
                     ],
                     [

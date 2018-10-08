@@ -42,7 +42,7 @@ Modal::widget([
         ])
         ?>
     </section>
-    <section class="content-header">
+    <section class="content">
         <?=
         $this->render('/default/_license_no_active.php', ['lic' => $lic]);
         ?>
@@ -115,12 +115,22 @@ Modal::widget([
                 },
             ],
             [
+                'attribute' => 'recipient_name',
+                'label' => 'Фирма-получатель',
+                'format' => 'raw',
+                'value' => function ($data) {
+                    return $data['recipient_name'];
+                },
+                'visible' => ($searchModel->type == 2),
+            ],
+            [
                 'attribute' => 'sender_name',
-                'label' => Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отправитель']),
+                'label' => 'Фирма-отправитель',
                 'format' => 'raw',
                 'value' => function ($data) {
                     return $data['sender_name'];
                 },
+                'visible' => ($searchModel->type != 2),
             ],
             [
                 'class' => 'yii\grid\ActionColumn',
@@ -200,14 +210,10 @@ Modal::widget([
             unset($columns[7]['buttons']['rejected']);
         }
         ?>
-    </section>
-    <section class="content-header">
         <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
-    </section>
-    <section class="content-header">
+
         <h4><?= Yii::t('message', 'frontend.client.integration.mercury.vsd_list', ['ru' => 'Список ВСД"']) ?>:</h4>
-    </section>
-    <section class="content-header">
+
         <div class="box box-info">
             <div class="box-header with-border">
                 <div class="panel-body">
@@ -251,7 +257,7 @@ Modal::widget([
                                 <div class="form-group field-statusFilter">
                                     <?=
                                     $form->field($searchModel, 'type')
-                                        ->dropDownList([1 => 'Входящие', 2 => 'Исходящие'], ['id' => 'typeFilter'], ['options' =>
+                                        ->dropDownList([MercVsd::INCOME_VSD => 'Входящие', MercVsd::OUTCOME_VSD => 'Исходящие'], ['id' => 'typeFilter'], ['options' =>
                                             [
                                                 1 => ['selected' => true]
                                             ]
@@ -271,10 +277,17 @@ Modal::widget([
                             </div>
                             <div class="col-sm-3 col-md-2">
                                 <div class="form-group field-statusFilter">
-                                    <?=
-                                    $form->field($searchModel, 'sender_name')
+                                    <?php
+                                    if ($searchModel->type == 2) {
+                                        echo $form->field($searchModel, 'recipient_guid')
                                         ->dropDownList($searchModel->getRecipientList(), ['id' => 'recipientFilter'])
-                                        ->label(Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']), ['class' => 'label', 'style' => 'color:#555'])
+                                        ->label('фиома-получатель', ['class' => 'label', 'style' => 'color:#555']);
+                                    }
+                                    else {
+                                        echo $form->field($searchModel, 'sender_guid')
+                                            ->dropDownList($searchModel->getRecipientList(), ['id' => 'senderFilter'])
+                                            ->label('Фирма-отравитель', ['class' => 'label', 'style' => 'color:#555']);
+                                    }
                                     ?>
                                 </div>
                             </div>
@@ -421,7 +434,12 @@ $("#ajax-load").on("click", ".save-form", function() {
         $(".box-body").on("change", "#recipientFilter", function() {
             $("#search-form").submit();
         });
-     });   
+     });
+ $("document").ready(function(){
+        $(".box-body").on("change", "#senderFilter", function() {
+            $("#search-form").submit();
+        });
+     }); 
  
  $(document).on("click", ".clear_filters", function () {
            $('#product_name').val(''); 
@@ -430,6 +448,7 @@ $("#ajax-load").on("click", ".save-form", function() {
            $('#dateFrom').val('');
            $('#dateTo').val('');
            $("#recipientFilter option:selected").removeAttr("selected");
+           $("#senderFilter option:selected").removeAttr("selected");
            $("#search-form").submit();
     });
  

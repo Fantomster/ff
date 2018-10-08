@@ -458,7 +458,7 @@ class DocumentWebApi extends \api_web\components\WebApi
     {
         $result = \DateTime::createFromFormat('d.m.Y H:i:s', $date . " 00:00:00");
         if ($result) {
-            return  $result>format('Y-m-d H:i:s');
+            return  $result->format('Y-m-d H:i:s');
         }
       
         return "";

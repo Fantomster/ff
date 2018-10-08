@@ -82,7 +82,7 @@ abstract class AbstractSyncFactory extends WebApi
             throw new BadRequestHttpException("org_dic_disabled");
         } else {
             $orgDic = OrganizationDictionary::findOne(['outer_dic_id' => $outerDic->id, 'org_id' => $org_id]);
-            if ($orgDic->status_id != OrganizationDictionary::STATUS_ACTIVE) {
+            if ($orgDic && $orgDic->status_id != OrganizationDictionary::STATUS_ACTIVE) {
                 SyncLog::trace('OrganizationDictionary status wrong!');
                 throw new BadRequestHttpException("org_dic_status_wrong");
             } elseif (!$orgDic) {

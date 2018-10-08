@@ -45,6 +45,9 @@ class ServiceRkws extends AbstractSyncFactory
     /** @var $now string */
     public $now;
 
+    /** @var $entityTableName string */
+    public $entityTableName;
+
     public $index;
 
     public $urlCmdInit = 'http://ws.ucs.ru/WSClient/api/Client/Cmd';
@@ -406,7 +409,7 @@ class ServiceRkws extends AbstractSyncFactory
     }
 
 
-    public function receiveXMLData(OuterTask $task, string $data = null, string $entityName = null)
+    public function receiveXMLData(OuterTask $task, string $data = null)
     {
 
         # 1. Проверяем что данный типа справочника для организации доступен
@@ -414,8 +417,10 @@ class ServiceRkws extends AbstractSyncFactory
 
         # 2. Получаем новые и уже существующие данные
         $arrayNew = $this->makeArrayFromReceivedDictionaryXmlData($data);
-        /** @var yii\db\ActiveRecord $entityName */
-        $arrayInit = $entityName::findAll(['org_id' => $task->org_id, 'service_id' => $task->service_id]);
+
+        $entityTableName = $this->entityTableName;
+        /** @var yii\db\ActiveRecord $entityTableName */
+        $arrayInit = $entityTableName::findAll(['org_id' => $task->org_id, 'service_id' => $task->service_id]);
 
         # 3. Фиксируем вспомагательные переменные для контроля ошибок записи/обновления данных в БД
         $transaction = $this->createTransaction();
@@ -424,10 +429,10 @@ class ServiceRkws extends AbstractSyncFactory
 
         # 4. Перебираем новые данные и пробуем добавить/обновить записи в БД
         foreach ($arrayNew as $elementNew) {
-            $entity = $entityName::findOne(['org_id' => $task->org_id, 'outer_uid' => $elementNew['rid'],
+            $entity = $entityTableName::findOne(['org_id' => $task->org_id, 'outer_uid' => $elementNew['rid'],
                 'service_id' => $task->service_id]);
             if (!$entity) {
-                $entity = new $entityName();
+                $entity = new $entityTableName();
                 $entity->org_id = $task->org_id;
                 $entity->outer_uid = $elementNew['rid'];
                 $entity->service_id = $task->service_id;

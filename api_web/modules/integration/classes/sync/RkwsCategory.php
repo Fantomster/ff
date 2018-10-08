@@ -14,6 +14,7 @@
 namespace api_web\modules\integration\classes\sync;
 
 use yii\web\BadRequestHttpException;
+use common\models\OuterCategory;
 use api_web\modules\integration\classes\SyncLog;
 
 class RkwsCategory extends ServiceRkws
@@ -22,11 +23,14 @@ class RkwsCategory extends ServiceRkws
     /** @var string $index Символьный идентификатор справочника */
     public $index = 'category';
 
+    /** @var string $entityTableName Класс таблицы для записи данных */
+    public $entityTableName = OuterCategory::class;
+
     /** @var string $OperDenom Поле Denom в таблице all_service_operation */
     public static $OperDenom = 'sh_get_goodgroups';
 
     /** @var array $additionalXmlFields Поле во входящем xml -> поле в нашей модели данных */
-    public $additionalXmlFields = ['name' => 'name', 'parent' => 'parent_outer_id'];
+    public $additionalXmlFields = ['name' => 'name', 'parent' => 'parent_outer_uid'];
 
     public function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
     {
@@ -39,7 +43,7 @@ class RkwsCategory extends ServiceRkws
         $array = [];
         foreach ($myXML->ITEM as $category) {
             foreach ($category->attributes() as $k => $v) {
-                $array['no_cat_group'][$k] = strval($v[0]);
+                $array[''][$k] = strval($v[0]);
             }
         }
         if (!$array) {

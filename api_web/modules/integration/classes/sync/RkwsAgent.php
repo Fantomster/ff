@@ -13,6 +13,7 @@
 namespace api_web\modules\integration\classes\sync;
 
 use yii\web\BadRequestHttpException;
+use common\models\OuterAgent;
 use api_web\modules\integration\classes\SyncLog;
 
 class RkwsAgent extends ServiceRkws
@@ -20,6 +21,9 @@ class RkwsAgent extends ServiceRkws
 
     /** @var string $index Символьный идентификатор справочника */
     public $index = 'agent';
+
+    /** @var string $entityTableName Класс таблицы для записи данных */
+    public $entityTableName = OuterAgent::class;
 
     /** @var string $OperDenom Поле Denom в таблице all_service_operation */
     public static $OperDenom = 'sh_get_corrs';

@@ -218,34 +218,42 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 
     public static function getDate($date_raw)
     {
-        if (!isset($date_raw))
+        if (!isset($date_raw)) {
             return null;
+        }
 
-        if (isset($date_raw->informalDate))
+        if (isset($date_raw->informalDate)) {
             return $date_raw->informalDate;
+        }
 
-        $first_date = $date_raw->firstDate->year . '-' . (($date_raw->firstDate->month < 10) ? "0" : "" ).$date_raw->firstDate->month;
+        $first_date = $date_raw->firstDate->year . '-' . (($date_raw->firstDate->month < 10) ? "0" : "") . $date_raw->firstDate->month;
 
-        if (isset($date_raw->firstDate->day))
+        if (isset($date_raw->firstDate->day)) {
             $first_date .= '-' . $date_raw->firstDate->day;
+        }
 
-        if (!empty($date_raw->firstDate->hour))
-            $first_date .= " ".$date_raw->firstDate->hour . ":00:00";
+        if (!empty($date_raw->firstDate->hour)) {
+            $first_date .= " " . $date_raw->firstDate->hour . ":00:00";
+        }
 
-        if (!empty($date_raw->firstDate->minute))
-            $first_date .= " ".$date_raw->firstDate->hour . ":00:00";
+        if (!empty($date_raw->firstDate->minute)) {
+            $first_date .= " " . $date_raw->firstDate->hour . ":00:00";
+        }
 
         if ($date_raw->secondDate) {
             $second_date = $date_raw->secondDate->year . '-' . $date_raw->secondDate->month;
 
-            if (isset($date_raw->secondDate->day))
+            if (isset($date_raw->secondDate->day)) {
                 $second_date .= '-' . $date_raw->secondDate->day;
+            }
 
-            if (!empty($date_raw->secondDate->hour))
-                $second_date .= " ".$date_raw->secondDate->hour . ":00:00";
+            if (!empty($date_raw->secondDate->hour)) {
+                $second_date .= " " . $date_raw->secondDate->hour . ":00:00";
+            }
 
-            if (!empty($date_raw->secondDate->minute))
-                $second_date .= " ".$date_raw->secondDate->minute . ":00:00";
+            if (!empty($date_raw->secondDate->minute)) {
+                $second_date .= " " . $date_raw->secondDate->minute . ":00:00";
+            }
             return 'с ' . $first_date . ' до ' . $second_date;
         }
 

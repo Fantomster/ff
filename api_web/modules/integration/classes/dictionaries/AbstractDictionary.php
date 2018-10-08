@@ -23,10 +23,23 @@ use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
 use yii\web\BadRequestHttpException;
 
+/**
+ * Class AbstractDictionary
+ *
+ * @package api_web\modules\integration\classes\dictionaries
+ */
 class AbstractDictionary extends WebApi
 {
+    /**
+     * @var
+     */
     public $service_id;
 
+    /**
+     * AbstractDictionary constructor.
+     *
+     * @param $serviceId
+     */
     public function __construct($serviceId)
     {
         parent::__construct();
@@ -108,7 +121,7 @@ class AbstractDictionary extends WebApi
         $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
 
 
-        $search = OuterAgent::find()->with(['vendor', 'store', 'nameWaybills'])
+        $search = OuterAgent::find()->joinWith(['store', 'nameWaybills'])
             ->where([
                 '`outer_agent`.org_id' => $this->user->organization->id,
                 '`outer_agent`.service_id' => $this->service_id
@@ -129,9 +142,6 @@ class AbstractDictionary extends WebApi
         $pagination->setPageSize($pageSize);
         $dataProvider->setPagination($pagination);
 
-        /**
-         * @var $model OuterAgent
-         */
         $result = [];
         foreach ($dataProvider->models as $model) {
             $result[] = $this->prepareAgent($model);
@@ -156,7 +166,7 @@ class AbstractDictionary extends WebApi
      */
     public function agentInfo($agent_uid)
     {
-        $model = OuterAgent::find()->joinWith(['vendor', 'store', 'nameWaybills'])
+        $model = OuterAgent::find()->joinWith(['store', 'nameWaybills'])
             ->where([
                 '`outer_agent`.org_id' => $this->user->organization->id,
                 '`outer_agent`.service_id' => $this->service_id,
@@ -317,17 +327,19 @@ class AbstractDictionary extends WebApi
 
     /**
      * Агент. Собираем необходимые данные из модели
-     * @param OuterAgent $model
+     * @param \yii\db\ActiveRecord $model
      * @return array
      */
-    private function prepareAgent(OuterAgent $model)
+    private function prepareAgent(\yii\db\ActiveRecord $model)
     {
+        /**@var OuterAgent $model*/
+        $orgModel = Organization::findOne($model->vendor_id);
         return [
             'id' => $model->id,
             'outer_uid' => $model->outer_uid,
             'name' => $model->name,
             'vendor_id' => $model->vendor_id,
-            'vendor_name' => $model->vendor->name ?? null,
+            'vendor_name' => $orgModel->name ?? null,
             'store_id' => $model->store_id,
             'store_name' => $model->store->name ?? null,
             'payment_delay' => $model->payment_delay,

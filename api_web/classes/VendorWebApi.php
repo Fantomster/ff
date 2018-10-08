@@ -580,9 +580,11 @@ class VendorWebApi extends \api_web\components\WebApi
             $tempCatalog->cat->mapping = $tempCatalog->mapping;
             $tempCatalog->cat->save();
             $tempCatalog->save();
+
+            return ['result' => true];
         }
 
-        return ['result' => true];
+        return ['result' => false];
     }
 
     /**

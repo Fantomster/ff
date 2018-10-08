@@ -524,8 +524,8 @@ class StatisticsController extends Controller {
     public function actionMercury()
     {
         $today = new \DateTime();
-        $dateFilterFrom = !empty(Yii::$app->request->post("date")) ? Yii::$app->request->post("date") : "01.12.2016";
-        $dateFilterTo = !empty(Yii::$app->request->post("date2")) ? Yii::$app->request->post("date2") : $today->format('d.m.Y');
+        $dateFilterFrom = !empty(Yii::$app->request->get("date")) ? Yii::$app->request->get("date") : "01.12.2016";
+        $dateFilterTo = !empty(Yii::$app->request->get("date2")) ? Yii::$app->request->get("date2") : $today->format('d.m.Y');
 
         $searchModel = new MercuryReportSearch();
 

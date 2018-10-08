@@ -58,7 +58,7 @@ $gridColumns = [
             'data-pjax' => true,
             'id' => 'orderStatForm',
         ],
-        'method' => 'post',
+        'method' => 'get',
     ]);
     ?>
 

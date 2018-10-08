@@ -143,4 +143,27 @@ class iikoService extends WebApi implements ServiceInterface
             'not_formed' => $result
         ];
     }
+
+    /**
+     * Получение главного бизнеса для данной организации
+     * @param $org_id
+     * @return string
+     */
+    public static function getMainOrg($org_id)
+    {
+        $obDicConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+        $obConstModel = iikoPconst::findOne(['const_id' => $obDicConstModel->id, 'org' => $org_id]);
+        return isset($obConstModel->value) ? $obConstModel->value : $org_id;
+    }
+
+    /**
+     * Получение дочерних бизнесов для заданной
+     * @param $org_id
+     * @return array
+     */
+    public static function getChildOrgsId($org_id)
+    {
+        $obDicConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+        return iikoPconst::find()->select('org')->where(['const_id' => $obDicConstModel->id, 'value' => $org_id])->column();
+    }
 }

@@ -15,11 +15,11 @@ $waybillMode = RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPcons
 
 if (empty($model)) {
     echo "<div  style=\"text-align:right;\">";
-    if ($waybillMode === "0") {
+    //if ($waybillMode === "0") {
         echo Html::a('Создать накладную', ['create', 'order_id' => $order_id], ['class' => 'btn btn-md fk-button']);
-    } else {
+    /*} else {
         echo "Включен автоматический режим создания накладных.";
-    }
+    }*/
     echo "</div>";
 } else {
     $columns = array(

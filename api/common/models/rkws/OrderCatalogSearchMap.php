@@ -17,6 +17,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
     public $koef;
     public $pdenom;
     public $service_id;
+    public $vendors;
 
 
     /**
@@ -130,7 +131,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
 
         if (!empty($this->searchString)) {
-            $where .= 'AND (cbg.product  LIKE :searchString OR cbg.article LIKE :searchString)';
+            $where .= ' AND (cbg.product  LIKE :searchString OR cbg.article LIKE :searchString)';
             $params_sql[':searchString'] = "%" . $this->searchString . "%";
         }
 
@@ -179,6 +180,18 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
 
         }
 
+        if(isset($this->vendors) && empty($this->selectedVendor))
+        {
+            $arrayVendorsId = array_keys($this->vendors);
+            unset($arrayVendorsId[0]);
+            $arrayVendorsId = implode(",", $arrayVendorsId);
+            $where_all .= " AND cbg.supp_org_id in ($arrayVendorsId)";
+        }
+        else
+        {
+            $where_all .= " AND cbg.supp_org_id in (".$this->selectedVendor.")";
+        }
+
         $sql = "SELECT " . implode(',', $fieldsCBG) . "
         FROM `catalog_base_goods` `cbg`
              LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
@@ -187,8 +200,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
              LEFT JOIN `$dbName`.`all_service` `allservice` ON fmap.service_id = allservice.id       
            WHERE          
            cbg.deleted = 0
-           " . $where . "
-           AND cbg.deleted = 0";
+           " . $where . $where_all;
 
         /*$sql = "
         SELECT DISTINCT * FROM (

@@ -62,7 +62,7 @@ abstract class AbstractSyncFactory extends WebApi
         }
     }
 
-    public function receiveXMLData(OuterTask $task, string $data = null) {
+    public function receiveXMLData(OuterTask $task, string $data = null, string $entityName = null) {
 
     }
 

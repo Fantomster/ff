@@ -58,6 +58,7 @@ class SiteController extends Controller {
                             Role::ROLE_RESTAURANT_ACCOUNTANT,
                             Role::ROLE_RESTAURANT_BUYER,
                             Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                            Role::ROLE_RESTAURANT_ORDER_INITIATOR,
                         ],
                         'denyCallback' => function ($rule, $action) {
                             $user = Yii::$app->user->identity;

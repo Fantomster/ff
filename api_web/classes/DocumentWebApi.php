@@ -1,5 +1,5 @@
 <?php
-namespace api_web\modules\integration\classes;
+namespace api_web\classes;
 use api_web\modules\integration\classes\documents\EdiOrder;
 use api_web\modules\integration\classes\documents\Order;
 use api_web\modules\integration\classes\documents\OrderContent;
@@ -17,6 +17,31 @@ use yii\web\BadRequestHttpException;
  */
 class DocumentWebApi extends \api_web\components\WebApi
 {
+
+    const DOC_GROUP_STATUS_WAIT_SENDING = 'Ожидают выгрузки';
+    const DOC_GROUP_STATUS_WAIT_FORMING = 'Ожидают формирования';
+    const DOC_GROUP_STATUS_SENT = 'Выгружена';
+
+    private static $doc_group_status = [
+        1 => self::DOC_GROUP_STATUS_WAIT_SENDING,
+        2 => self::DOC_GROUP_STATUS_WAIT_FORMING,
+        3 => self::DOC_GROUP_STATUS_SENT,
+    ];
+
+    const DOC_WAYBILL_STATUS_COLLATED = 'Сопоставлена';
+    const DOC_WAYBILL_STATUS_READY = 'Сформирована';
+    const DOC_WAYBILL_STATUS_ERROR = 'Ошибка';
+    const DOC_WAYBILL_STATUS_RESET = 'Сброшена';
+    const DOC_WAYBILL_STATUS_SENT = 'Выгружена';
+
+    private static $doc_waybill_status = [
+        1 => self::DOC_WAYBILL_STATUS_COLLATED,
+        2 => self::DOC_WAYBILL_STATUS_READY,
+        3 => self::DOC_WAYBILL_STATUS_ERROR,
+        4 => self::DOC_WAYBILL_STATUS_RESET,
+        5 => self::DOC_WAYBILL_STATUS_SENT,
+    ];
+
     /**константа типа документа - заказ*/
     const TYPE_ORDER = 'order';
     /**константа типа документа - накладная*/
@@ -355,15 +380,11 @@ class DocumentWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("Waybill in the state of \"reset\" or \"unloaded\"");
         }
 
-        if($waybill->resetPositions() > 0)
-        {
-            return ['result' => true];
-        }
-
-        return ['result' => false];
+        $waybill->resetPositions();
+        return ['result' => true];
     }
       
-     /** 
+     /**
      * Накладная - Детальная информация
      * @param array $post
      * @return array
@@ -371,7 +392,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function getWaybillDetail (array $post)
     {
-        if (empty($post['document_id'])) {
+        if (empty($post['waybill_id'])) {
             throw new BadRequestHttpException("empty_param|document_id");
         }
 
@@ -409,15 +430,15 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (!empty($post['outer_number_additional'])) {
-            $waybill->outer_number_additional = $post['number_additional'];
+            $waybill->outer_number_additional = $post['outer_number_additional'];
         }
 
         if (!empty($post['outer_number_code'])) {
-            $waybill->outer_number_code = $post['number_code'];
+            $waybill->outer_number_code = $post['outer_number_code'];
         }
 
         if (!empty($post['outer_note'])) {
-            $waybill->outer_note = $post['note'];
+            $waybill->outer_note = $post['outer_note'];
         }
 
         if ($waybill->validate() && $waybill->save()) {
@@ -435,6 +456,43 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
       
         return "";
+    }
+
+    /**
+     * Накладная - Сопоставление с заказом
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+
+    public function mapWaybillOrder (array $post)
+    {
+        if (empty($post['order_id'])) {
+            throw new BadRequestHttpException("empty_param|order_id");
+        }
+
+        if (empty($post['document_id'])) {
+            throw new BadRequestHttpException("empty_param|document_id");
+        }
+
+        $waybill = Waybill::findOne(['id' => $post['document_id']]);
+
+        if (!isset($waybill)) {
+            throw new BadRequestHttpException("waybill not found");
+        }
+
+        $waybill->mapWaybill($post['order_id']);
+        return ['result' => true];
+    }
+
+    public function getDocumentStatus () {
+
+        return self::$doc_group_status;
+    }
+
+    public function getWaybillStatus () {
+
+        return self::$doc_waybill_status;
     }
 
 }

@@ -53,7 +53,7 @@ class VetisWaybill extends WebApi
         $arResult = $search->search($params, $page, $pageSize);
 
         foreach ($arResult['groups'] as $group_id => &$v) {
-            $info = $this->helper->getGroupInfo((int)$group_id);
+            $info = $this->helper->getGroupInfo((int)$group_id, array_keys($arResult['uuids']));
             $v = $info;
         }
 
@@ -231,11 +231,12 @@ class VetisWaybill extends WebApi
             $api = mercuryApi::getInstance();
             foreach ($request['uuids'] as $uuid) {
                 if (array_key_exists($uuid, $records)) {
-                    $result[$uuid] = $api->getVetDocumentDone($uuid);
+                    $api->getVetDocumentDone($uuid);
                 } else {
-                    $result[$uuid] = 'ВСД не принадлежит данной организации';
+                    throw new BadRequestHttpException('ВСД не принадлежит данной организации' . $uuid);
                 }
             }
+            $result = MercVsd::findAll(['uuid' => $request['uuids']]);
         } catch (\Throwable $t) {
             if ($t->getCode() == 600) {
                 $result['error'] = 'Заявка отклонена';
@@ -277,7 +278,8 @@ class VetisWaybill extends WebApi
 
         try {
             $api = mercuryApi::getInstance();
-            $result[$uuid] = $api->getVetDocumentDone($uuid, $params);
+            $api->getVetDocumentDone($uuid, $params);
+            $result = MercVsd::findOne(['uuid' => $uuid]);
         } catch (\Throwable $t) {
             $result['error'] = $t->getMessage();
             $result['trace'] = $t->getTraceAsString();
@@ -314,7 +316,8 @@ class VetisWaybill extends WebApi
 
         try {
             $api = mercuryApi::getInstance();
-            $result[$uuid] = $api->getVetDocumentDone($uuid, $params);
+            $api->getVetDocumentDone($uuid, $params);
+            $result = MercVsd::findOne(['uuid' => $uuid]);
         } catch (\Throwable $t) {
             $result['error'] = $t->getMessage();
             $result['trace'] = $t->getTraceAsString();

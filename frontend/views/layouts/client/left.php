@@ -19,20 +19,21 @@ $disabled_roles = [
     \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT,
     \common\models\Role::ROLE_RESTAURANT_BUYER,
     \common\models\Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+    \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR,
 ];
 
 $franchiseeManager = $user->organization->getFranchiseeManagerInfo();
 if ($franchiseeManager && $franchiseeManager->phone_manager) {
     if ($franchiseeManager->additional_number_manager) {
         $phoneUrl = $franchiseeManager->phone_manager . "p" . $franchiseeManager->additional_number_manager;
-        $phone = $franchiseeManager->phone_manager . Yii::t('message', 'frontend.views.layouts.client.left.add', ['ru'=>" доб. "]) . $franchiseeManager->additional_number_manager;
+        $phone = $franchiseeManager->phone_manager . Yii::t('message', 'frontend.views.layouts.client.left.add', ['ru' => " доб. "]) . $franchiseeManager->additional_number_manager;
     } else {
         $phoneUrl = $franchiseeManager->phone_manager;
         $phone = $franchiseeManager->phone_manager;
     }
 } else {
     $phoneUrl = "+7-499-404-10-18p202";
-    $phone = Yii::t('message', 'frontend.views.layouts.client.left.phone', ['ru'=>"+7-499-404-10-18 доб. 202"]);
+    $phone = Yii::t('message', 'frontend.views.layouts.client.left.phone', ['ru' => "+7-499-404-10-18 доб. 202"]);
 }
 
 $newOrdersCount = $user->organization->getNewOrdersCount();
@@ -52,78 +53,77 @@ $licenses = $user->organization->getLicenseList();
                     'options' => ['class' => 'sidebar-menu tree', 'data-widget' => "tree"],
                     'encodeLabels' => false,
                     'items' => [
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.navigation', ['ru'=>'НАВИГАЦИЯ']), 'options' => ['class' => 'header']],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.desktop', ['ru'=>'Рабочий стол']), 'icon' => 'home', 'url' => ['/client/index']],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.navigation', ['ru' => 'НАВИГАЦИЯ']), 'options' => ['class' => 'header']],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.desktop', ['ru' => 'Рабочий стол']), 'icon' => 'home', 'url' => ['/client/index']],
                         [
-                            'label' => Yii::t('message', 'frontend.views.layouts.client.left.set_order', ['ru'=>'Разместить заказ']),
+                            'label' => Yii::t('message', 'frontend.views.layouts.client.left.set_order', ['ru' => 'Разместить заказ']),
                             'icon' => 'opencart',
                             'url' => ['/order/create'],
                             'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label label-primary pull-right cartCount">' . $cartCount . '</span></span></a>',
                         ],
                         [
-                            'label' => Yii::t('message', 'frontend.views.layouts.client.left.orders', ['ru'=>'Заказы']),
+                            'label' => Yii::t('message', 'frontend.views.layouts.client.left.orders', ['ru' => 'Заказы']),
                             'icon' => 'history',
                             'url' => ['/order/index'],
                             'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">' . ($newOrdersCount ? $newOrdersCount : '') . '</span></span></a>',
                         ],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.vendors', ['ru'=>'Поставщики']), 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs step-vendor'], 'visible' => (!in_array($user->role_id, $disabled_roles) || $user->role_id != \common\models\Role::ROLE_RESTAURANT_JUNIOR_BUYER)],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.vendors', ['ru' => 'Поставщики']), 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs step-vendor'], 'visible' => (!in_array($user->role_id, $disabled_roles) || $user->role_id != \common\models\Role::ROLE_RESTAURANT_JUNIOR_BUYER)],
 //                        [
 //                            'label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']),
 //                            'icon' => 'envelope',
 //                            'url' => ['client/messages'],
 //                            ],
                         ['label' => 'MARKET', 'icon' => 'shopping-cart', 'url' => Yii::$app->params['staticUrl'][Yii::$app->language]['market'], 'options' => ['class' => 'l-fmarket']],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.requests', ['ru'=>'Заявки']), 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket'], 'visible' => !in_array($user->role_id, $disabled_roles)],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.anal', ['ru'=>'Аналитика']), 'icon' => 'signal', 'url' => ['/client/analytics'], 'options' => ['class' => 'hidden-xs'], 'visible' => !in_array($user->role_id, $disabled_roles)],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.fullmap', ['ru'=>'Сопоставление']), 'icon' => 'signal',
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.requests', ['ru' => 'Заявки']), 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket'], 'visible' => !in_array($user->role_id, $disabled_roles)],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.anal', ['ru' => 'Аналитика']), 'icon' => 'signal', 'url' => ['/client/analytics'], 'options' => ['class' => 'hidden-xs'], 'visible' => !in_array($user->role_id, $disabled_roles)],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.fullmap', ['ru' => 'Сопоставление']), 'icon' => 'signal',
                             'url' => ['/clientintegr/fullmap'],
                             'options' => ['class' => 'hidden-xs'],
                             'visible' => (!in_array($user->role_id, $disabled_roles) && !empty(Organization::getLicenseList()))],
 //                        ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/client/tutorial', 'video' => 'video']],
                         // ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
-                     //   ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.mercury', ['ru'=>'ВЕТИС "Меркурий"']),
+                        //   ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.mercury', ['ru' => 'ВЕТИС "Меркурий"']),
                             'url' => ['/clientintegr/merc/default'],
                             'options' => ['class' => 'hidden-xs'],
-                            'template' => '<a href="{url}"><img src="'.Yii::$app->request->baseUrl.'/img/mercuriy_icon.png" style="width: 18px; margin-right: 8px;">{label}<span class="pull-right-container"><span class="label label-primary pull-right">' . $vsdCount . '</span></span></a>',
+                            'template' => '<a href="{url}"><img src="' . Yii::$app->request->baseUrl . '/img/mercuriy_icon.png" style="width: 18px; margin-right: 8px;">{label}<span class="pull-right-container"><span class="label label-primary pull-right">' . $vsdCount . '</span></span></a>',
                             'visible' => (!in_array($user->role_id, $disabled_roles) || $user->role_id == \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT),
-                            /*'items' => [
-                                [
-                                    'label' => Yii::t('message', 'frontend.views.layouts.client.left.store_entry', ['ru'=>'Журнал продукции']),
-                                    'icon' => 'circle-o',
-                                    'url' => ['/clientintegr/merc/stock-entry'],
-                                    //'visible' => in_array($user->role_id,$roles)
-                                ],
-                            ],*/
+                        /* 'items' => [
+                          [
+                          'label' => Yii::t('message', 'frontend.views.layouts.client.left.store_entry', ['ru'=>'Журнал продукции']),
+                          'icon' => 'circle-o',
+                          'url' => ['/clientintegr/merc/stock-entry'],
+                          //'visible' => in_array($user->role_id,$roles)
+                          ],
+                          ], */
                         ],
-
                         [
-                            'label' => Yii::t('message', 'frontend.views.layouts.client.left.settings', ['ru'=>'Настройки']),
+                            'label' => Yii::t('message', 'frontend.views.layouts.client.left.settings', ['ru' => 'Настройки']),
                             'icon' => 'gears',
                             'url' => '#', //['client/settings'],
                             'options' => ['class' => "hidden-xs"],
                             'visible' => (!in_array($user->role_id, $disabled_roles) || $user->role_id == \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT),
                             'items' => [
                                 [
-                                    'label' => Yii::t('message', 'frontend.views.layouts.client.left.custom', ['ru'=>'Общие']),
+                                    'label' => Yii::t('message', 'frontend.views.layouts.client.left.custom', ['ru' => 'Общие']),
                                     'icon' => 'circle-o',
                                     'url' => ['/client/settings'],
                                     'visible' => !($user->role_id == \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT)//in_array($user->role_id,$roles)
                                 ],
                                 [
-                                    'label' => Yii::t('message', 'frontend.views.layouts.client.left.integrations', ['ru'=>'Интеграции']),
+                                    'label' => Yii::t('message', 'frontend.views.layouts.client.left.integrations', ['ru' => 'Интеграции']),
                                     'icon' => 'circle-o',
                                     'url' => ['/clientintegr/default'],
                                     'visible' => (!empty($licenses))
                                 ],
                                 [
-                                    'label' => Yii::t('message', 'frontend.views.layouts.client.left.employees', ['ru'=>'Сотрудники']),
+                                    'label' => Yii::t('message', 'frontend.views.layouts.client.left.employees', ['ru' => 'Сотрудники']),
                                     'icon' => 'circle-o',
                                     'url' => ['/client/employees'],
                                     'visible' => !($user->role_id == \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT)//in_array($user->role_id,$roles)
                                 ],
                                 [
-                                    'label' => Yii::t('message', 'frontend.views.layouts.client.left.notifications', ['ru'=>'Уведомления']),
+                                    'label' => Yii::t('message', 'frontend.views.layouts.client.left.notifications', ['ru' => 'Уведомления']),
                                     'icon' => 'circle-o',
                                     'url' => ['/settings/notifications'],
                                     'visible' => !($user->role_id == \common\models\Role::ROLE_RESTAURANT_ACCOUNTANT) //in_array($user->role_id,$roles)
@@ -137,13 +137,13 @@ $licenses = $user->organization->getLicenseList();
                             ]
                         ],
                         // ['label' => 'Поддержка', 'icon' => 'support', 'url' => ['client/support']],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.send_notification', ['ru'=>'ОТПРАВИТЬ ПРИГЛАШЕНИЕ']), 'options' => ['class' => 'header']],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.send_notification', ['ru' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ']), 'options' => ['class' => 'header']],
                     ],
                 ]
         )
         ?>
         <form action="<?= Url::to(['/user/ajax-invite-friend']) ?>" method="post" style="margin: 15px;" id="inviteForm">
-            <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="bottom" title="" style="color: rgb(255, 255, 255);font-size: 20px;" data-original-title="<?= Yii::t('message', 'frontend.views.layouts.client.left.invite', ['ru'=>'Пригласите партнеров и друзей']) ?>">
+            <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="bottom" title="" style="color: rgb(255, 255, 255);font-size: 20px;" data-original-title="<?= Yii::t('message', 'frontend.views.layouts.client.left.invite', ['ru' => 'Пригласите партнеров и друзей']) ?>">
                 <input type="text" class="form-control" placeholder="Email" name="email" id="email">
                 <span class="input-group-btn">
                     <button type="submit" class="btn btn-success btn-flat" id="inviteFriend">
@@ -154,7 +154,7 @@ $licenses = $user->organization->getLicenseList();
         </form>
 
         <ul class="sidebar-menu personal-manager">
-            <li class="header"><span style="text-transform: uppercase;"><?= Yii::t('message', 'frontend.views.layouts.client.left.techno', ['ru'=>'ТЕХНИЧЕСКАЯ ПОДДЕРЖКА']) ?></span></li>
+            <li class="header"><span style="text-transform: uppercase;"><?= Yii::t('message', 'frontend.views.layouts.client.left.techno', ['ru' => 'ТЕХНИЧЕСКАЯ ПОДДЕРЖКА']) ?></span></li>
             <div style="text-align: center; color: #d8d7d7;padding-top:10px">
                 <p>
                     <a href="tel:<?php echo $phoneUrl; ?>">

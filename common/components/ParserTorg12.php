@@ -325,11 +325,10 @@ class ParserTorg12
 
                 }
                 $attributeValue = str_replace(",", ".", $attributeValue);
-
-                $leftSide = trim(preg_replace("/.от.*/", "", $attributeValue));
+                $leftSide = /*trim*/
+                    (preg_replace("/.от.*/", "", $attributeValue));
                 $rightSide = trim(str_replace($leftSide . " от", "", $attributeValue));
                 $leftSide = trim(preg_replace("/.*№/", "", $leftSide));
-
                 $check = substr($rightSide, 0, strpos($rightSide, " "));
                 if (is_numeric($check) && (int)$check > 30000) {
                     $rightSide = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP/*Date::excelToTimestamp*/
@@ -1529,7 +1528,7 @@ class ParserTorg12
                 ->setTo($email)
                 ->setFrom(['noreply@mixcart.ru' => 'noreply@mixcart.ru'])
                 ->setSubject($subject)
-                ->setTextBody($viev)
+                ->setHtmlBody($viev)
                 ->send();
         }
     }

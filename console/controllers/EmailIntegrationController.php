@@ -51,7 +51,7 @@ class EmailIntegrationController extends Controller
         //$temp_file[8] = '/app/console/runtime/testnac13.xlsx';
         //$temp_file[9] = '/app/console/runtime/testnac22.xlsx';
         //$temp_file[10] = '/app/console/runtime/testnac23.xls';
-        //$temp_file[11] = '/app/console/runtime/testnac24.xls';
+        $temp_file[11] = '/app/console/runtime/testnac24.xls';
         //$temp_file[12] = '/app/console/runtime/testnac25.xlsx';
         //$temp_file[13] = '/app/console/runtime/testnac26.xlsx';
         //$temp_file[14] = '/app/console/runtime/testnac27.xlsx';
@@ -98,9 +98,14 @@ class EmailIntegrationController extends Controller
         //$temp_file[55] = '/app/console/runtime/testnac52.xls';
         //$temp_file[56] = '/app/console/runtime/testnac53.xls';
         //$temp_file[57] = '/app/console/runtime/testnac54.xlsx';
-        $temp_file[58] = '/app/console/runtime/testnac55.xlsx';
-        $temp_file[59] = '/app/console/runtime/testnac56.xlsx';
-        $temp_file[60] = '/app/console/runtime/testnac57.xlsx';
+        //$temp_file[58] = '/app/console/runtime/testnac55.xlsx';
+        //$temp_file[59] = '/app/console/runtime/testnac56.xlsx';
+        //$temp_file[60] = '/app/console/runtime/testnac57.xlsx';
+        //$temp_file[61] = '/app/console/runtime/testnac58.xls';
+        //$temp_file[62] = '/app/console/runtime/testnac59.xls';
+        //$temp_file[63] = '/app/console/runtime/testnac60.xls';
+        //$temp_file[64] = '/app/console/runtime/testnac61.xls';
+        //$temp_file[65] = '/app/console/runtime/testnac62.xlsx';
 
 
         $i = 1;

@@ -134,7 +134,7 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInte
 //                ->addRabbitQueue(json_encode($data));
 
         } catch (\Exception $e) {
-            Yii::error($e->getMessage());
+            \Yii::error($e->getMessage());
         }
     }
 }

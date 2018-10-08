@@ -40,6 +40,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                         'roles' => [
                             Role::ROLE_RESTAURANT_BUYER,
                             Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                            Role::ROLE_RESTAURANT_ORDER_INITIATOR,
                         ],
                     ],
                     [

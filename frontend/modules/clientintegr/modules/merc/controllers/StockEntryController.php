@@ -45,6 +45,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
                         'roles' => [
                             Role::ROLE_RESTAURANT_BUYER,
                             Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                            Role::ROLE_RESTAURANT_ORDER_INITIATOR,
                         ],
                     ],
                     [

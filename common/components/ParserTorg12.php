@@ -1513,22 +1513,11 @@ class ParserTorg12
     {
         /** @var \yii\swiftmailer\Mailer $mailer */
         /** @var \yii\swiftmailer\Message $message */
-        /*$mailer = Yii::$app->mailer;
-        Yii::$app->language = $language;
-        $subject = Yii::t('app', 'common.mail.error.subject', ['ru' => 'В вашей накладной ошибка!']);*/
-        Yii::$app->mailer->htmlLayout = '@common/mail/layouts/empty';
         $mailer = Yii::$app->mailer;
         Yii::$app->language = $language;
         $subject = Yii::t('app', 'common.mail.error.subject', ['ru' => 'В вашей накладной ошибка!']);
 
         if (!empty($email)) {
-            $mailer->compose('@common/mail/empty', compact("user"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
-        }
-
-        /*if (!empty($email)) {
             $viev = 'Возможно, в Вашей накладной ошибка. Просим проверить. ';
             $viev .= 'В вашем письме, отправленном  ' . $this->invoice->nameConsignee . ' во вложенном файле накладной ';
             $viev .= $name_file . ' есть ошибки. Суммы, указанные в итоге накладной, не совпадают с подсчитанной суммой всех строк накладной. ';
@@ -1541,7 +1530,7 @@ class ParserTorg12
                 ->setSubject($subject)
                 ->setHtmlBody($viev)
                 ->send();
-        }*/
+        }
     }
 
 }

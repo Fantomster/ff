@@ -66,8 +66,8 @@ class VetisWaybill extends WebApi
         $return = [
             'result'     => $result,
             'pagination' => [
-                'page'       => $page,
-                'page_size'  => $pageSize,
+                'page'        => $page,
+                'page_size'   => $pageSize,
                 'total_count' => $arResult['count'],
             ]
         ];
@@ -80,7 +80,7 @@ class VetisWaybill extends WebApi
      * @param array $uuids
      * @return array
      * */
-    public function getList($uuids) : array
+    public function getList($uuids): array
     {
         $result = $uuids;
         $models = MercVsd::findAll(['uuid' => array_keys($uuids)]);
@@ -215,7 +215,7 @@ class VetisWaybill extends WebApi
      * Погашение ВСД
      *
      * @param $request
-     * @throws BadRequestHttpException
+     * @throws \Exception
      * @return array
      */
     public function repayVsd($request)
@@ -224,9 +224,7 @@ class VetisWaybill extends WebApi
             throw new BadRequestHttpException('Uuids is required and must be array');
         }
         $result = [];
-        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
-        $records = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
-            ->andWhere(['uuid' => $request['uuids']])->indexBy('uuid')->all();
+        $records = $this->helper->getAvailableVsd($request['uuids']);
         try {
             $api = mercuryApi::getInstance();
             foreach ($request['uuids'] as $uuid) {
@@ -263,9 +261,7 @@ class VetisWaybill extends WebApi
         if (!isset($uuid) || !isset($request['reason'])) {
             throw new BadRequestHttpException('Uuid and reason is required and must be array');
         }
-        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
-        $record = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
-            ->andWhere(['uuid' => $request['uuid']])->indexBy('uuid')->all();
+        $record = $this->helper->getAvailableVsd($request['uuid']);
         if (!$record) {
             throw new BadRequestHttpException('Uuid not for this organization');
         }
@@ -281,9 +277,13 @@ class VetisWaybill extends WebApi
             $api->getVetDocumentDone($uuid, $params);
             $result = MercVsd::findOne(['uuid' => $uuid]);
         } catch (\Throwable $t) {
-            $result['error'] = $t->getMessage();
-            $result['trace'] = $t->getTraceAsString();
-            $result['code'] = $t->getCode();
+            if ($t->getCode() == 600) {
+                $result['error'] = 'Заявка отклонена';
+            } else {
+                $result['error'] = $t->getMessage();
+                $result['trace'] = $t->getTraceAsString();
+                $result['code'] = $t->getCode();
+            }
         }
 
         return ['result' => $result];
@@ -293,7 +293,7 @@ class VetisWaybill extends WebApi
      * Возврат ВСД
      *
      * @param $request
-     * @throws BadRequestHttpException
+     * @throws \Exception
      * @return array
      */
     public function returnVsd($request)
@@ -302,9 +302,7 @@ class VetisWaybill extends WebApi
         if (!isset($uuid) || !isset($request['reason'])) {
             throw new BadRequestHttpException('Uuid and reason is required and must be array');
         }
-        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
-        $record = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
-            ->andWhere(['uuid' => $request['uuid']])->indexBy('uuid')->all();
+        $record = $this->helper->getAvailableVsd($request['uuid']);
         if (!$record) {
             throw new BadRequestHttpException('Uuid not for this organization');
         }
@@ -319,9 +317,13 @@ class VetisWaybill extends WebApi
             $api->getVetDocumentDone($uuid, $params);
             $result = MercVsd::findOne(['uuid' => $uuid]);
         } catch (\Throwable $t) {
-            $result['error'] = $t->getMessage();
-            $result['trace'] = $t->getTraceAsString();
-            $result['code'] = $t->getCode();
+            if ($t->getCode() == 600) {
+                $result['error'] = 'Заявка отклонена';
+            } else {
+                $result['error'] = $t->getMessage();
+                $result['trace'] = $t->getTraceAsString();
+                $result['code'] = $t->getCode();
+            }
         }
 
         return ['result' => $result];

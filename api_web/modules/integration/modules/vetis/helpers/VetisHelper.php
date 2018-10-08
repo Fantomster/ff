@@ -306,8 +306,8 @@ class VetisHelper
     public function getAvailableVsd($uuids){
         $enterpriseGuids = [];
         $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
-        foreach ($orgIds as $orgId) {
-            $enterpriseGuids[] = mercDicconst::getSetting('enterprise_guid', $orgId);
+        foreach ($orgIds['result'] as $orgId) {
+            $enterpriseGuids[] = mercDicconst::getSetting('enterprise_guid', $orgId['id']);
         }
 
         return MercVsd::find()->select(['uuid', 'recipient_guid', 'sender_guid'])

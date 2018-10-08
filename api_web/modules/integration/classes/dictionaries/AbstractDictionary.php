@@ -152,15 +152,15 @@ class AbstractDictionary extends WebApi
     /**
      * Информация по агенту
      * @param $agent_uid
+     * @param $service_id
      * @return array
      */
-    public function agentInfo($agent_uid)
+    public function agentInfo($agent_uid, $service_id)
     {
-        $model = OuterAgent::find()->joinWith(['vendor', 'store', 'nameWaybills'])
-            ->where([
-                '`outer_agent`.org_id' => $this->user->organization->id,
-                '`outer_agent`.service_id' => $this->service_id,
-                '`outer_agent`.outer_uid' => $agent_uid,
+        $model = OuterAgent::find()
+            ->where(['org_id' => $this->user->organization->id,
+                'service_id' => $service_id,
+                'outer_uid' => $agent_uid,
             ])->one();
 
         if ($model === null) {
@@ -267,18 +267,18 @@ class AbstractDictionary extends WebApi
     }
 
     /***
-     * Информация по агенту
+     * Информация по складу
      * @param $agent_uid
+     * @param $service_id
      * @return array
      */
-    public function storeInfo($agent_uid)
+    public function storeInfo($store_uid, $service_id)
     {
         $model = OuterStore::find()
             ->where([
-                '`outer_agent`.org_id' => $this->user->organization->id,
-                '`outer_agent`.service_id' => $this->service_id,
-                '`outer_agent`.outer_uid' => $agent_uid,
-            ]);
+                'org_id' => $this->user->organization->id,  
+                'outer_uid' => $store_uid,
+                'service_id' => $service_id]);
 
         if ($model === null) {
             return [];

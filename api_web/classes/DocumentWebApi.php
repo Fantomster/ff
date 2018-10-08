@@ -229,38 +229,43 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (isset($post['search']['waybill_date']) && !empty($post['search']['waybill_date'])) {
-            if (isset($post['search']['waybill_date']['start']) && !empty($post['search']['waybill_date']['start'])) {
-                $from = self::convertDate($post['search']['waybill_date']['start']);
+            if (isset($post['search']['waybill_date']['from']) && !empty($post['search']['waybill_date']['from'])) {
+                $from = self::convertDate($post['search']['waybill_date']['from']);
             }
 
-            if (isset($post['search']['waybill_date']['end']) && !empty($post['search']['waybill_date']['end'])) {
-                $to = self::convertDate($post['search']['waybill_date']['end']);
+            if (isset($post['search']['waybill_date']['to']) && !empty($post['search']['waybill_date']['to'])) {
+                $to = self::convertDate($post['search']['waybill_date']['to']);
             }
 
-            $where_all .= " AND waybill_date BETWEEN :waybill_date_from AND :waybill_date_to";
-            $params_sql[':waybill_date_from'] = $from;
-            $params_sql[':waybill_date_to'] = $to;
+            if(isset($form) && isset($to)) {
+                $where_all .= " AND waybill_date BETWEEN :waybill_date_from AND :waybill_date_to";
+                $params_sql[':waybill_date_from'] = $from;
+                $params_sql[':waybill_date_to'] = $to;
+            }
 
         }
 
+        $from = null;
+        $to = null;
         if (isset($post['search']['order_date'])) {
             $where_all .= " AND order_date = :order_date";
             $params_sql[':order_date'] = $post['search']['order_date'];
         }
 
         if (isset($post['search']['order_date']) && !empty($post['search']['order_date'])) {
-            if (isset($post['search']['order_date']['start']) && !empty($post['search']['order_date']['start'])) {
-                $from = self::convertDate($post['search']['order_date']['start']);
+            if (isset($post['search']['order_date']['from']) && !empty($post['search']['order_date']['from'])) {
+                $from = self::convertDate($post['search']['order_date']['from']);
             }
 
-            if (isset($post['search']['order_date']['end']) && !empty($post['search']['order_date']['end'])) {
-                $to = self::convertDate($post['search']['order_date']['end']);
+            if (isset($post['search']['order_date']['to']) && !empty($post['search']['order_date']['to'])) {
+                $to = self::convertDate($post['search']['order_date']['to']);
             }
 
-            $where_all .= " AND order_date BETWEEN :order_date_from AND :order_date_to";
-            $params_sql[':order_date_from'] = $from;
-            $params_sql[':order_date_to'] = $to;
-
+            if(isset($form) && isset($to)) {
+                $where_all .= " AND order_date BETWEEN :order_date_from AND :order_date_to";
+                $params_sql[':order_date_from'] = $from;
+                $params_sql[':order_date_to'] = $to;
+            }
         }
 
 

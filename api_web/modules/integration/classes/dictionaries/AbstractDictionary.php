@@ -287,7 +287,8 @@ class AbstractDictionary extends WebApi
             ->where([
                 'org_id' => $this->user->organization->id,  
                 'outer_uid' => $store_uid,
-                'service_id' => $this->service_id]);
+                'service_id' => $this->service_id])
+            ->one();
 
         if ($model === null) {
             return [];

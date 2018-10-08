@@ -46,7 +46,7 @@ class MercuryReportSearch extends mercLog {
 
         $organizationTable = Organization::tableName();
         $db = \Yii::$app->db;
-        $dbName = $this->getDsnAttribute('dbname', $db->dsn);
+        $dbName = "`".$this->getDsnAttribute('dbname', $db->dsn)."`";
 
         $query->select('org.`name` as orgName, log.organization_id, SUM(case when log.`status` = \'COMPLETED\' then 1 else 0 end) as succCount, SUM(case when log.`status` <> \'COMPLETED\' then 1 else 0 end) as errorCount');
         $query->from('merc_log as log');

@@ -767,7 +767,10 @@ class OrderController extends DefaultController
         if (Yii::$app->request->isPjax && $pjax == '#vendorList') {
             return $this->renderPartial('guides/_vendor-list', ['selectedVendor' => $params['selectedVendor']]);
         } elseif (Yii::$app->request->isPjax && $pjax == '#productList') {
-            return $this->renderPartial('guides/_product-list', ['productDataProvider' => $productDataProvider]);
+            return $this->renderPartial('guides/_product-list', [
+                        'productDataProvider' => $productDataProvider,
+                        'guideProductList' => $guideItems,
+            ]);
         } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
             return $this->renderPartial('guides/_guide-product-list', [
                         'show_sorting' => $params['show_sorting'],

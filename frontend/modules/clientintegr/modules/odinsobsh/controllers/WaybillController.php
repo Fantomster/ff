@@ -471,10 +471,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $model->sum = $model->defsum;
         }
 
-        if (!$model->save()) {
+        /*if (!$model->save()) {
             var_dump($model->getErrors());
             exit;
-        }
+        }*/
 
         return $this->redirect(['map', 'waybill_id' => $wayModel->id]);
     }
@@ -585,10 +585,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $lic = OneSService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post())) {
-            if ($model->getErrors()) {
+            /*if ($model->getErrors()) {
                 var_dump($model->getErrors());
                 exit;
-            }
+            }*/
             $sql = "SELECT COUNT(*) FROM one_s_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
             $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
             if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->store_id === null)) {
@@ -645,10 +645,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model->is_invoice = $is_invoice;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if ($model->getErrors()) {
+            /*if ($model->getErrors()) {
                 var_dump($model->getErrors());
                 exit;
-            }
+            }*/
             return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
             $model->num_code = $order_id;

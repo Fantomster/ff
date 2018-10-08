@@ -472,7 +472,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
 
         if (!$model->save()) {
-            var_dump($model->getErrors());
+            /*var_dump($model->getErrors());*/
             exit;
         }
 

@@ -836,16 +836,11 @@ SQL;
         $lic = $this->checkLic();
         $vi = $lic ? 'update' : '/default/_nolic';
 
-        /*print "<pre>";
-        print_r($model);
-        print "</pre>";
-        die();*/
-
         if ($model->load(Yii::$app->request->post())) {
-            if ($model->getErrors()) {
+            /*if ($model->getErrors()) {
                 var_dump($model->getErrors());
                 exit;
-            }
+            }*/
             $sql = "SELECT COUNT(*) FROM rk_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
             $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
             if (($model->corr_rid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_rid === null)) {
@@ -902,10 +897,10 @@ SQL;
             $model->org = $ord->client_id;
 
             if ($model->load(Yii::$app->request->post()) && $model->save()) {
-                if ($model->getErrors()) {
+                /*if ($model->getErrors()) {
                     var_dump($model->getErrors());
                     exit;
-                }
+                }*/
                 return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
             } else {
                 return $this->render('create', [

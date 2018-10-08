@@ -21,6 +21,7 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property int $id ID записи данных о категории
  * @property string $outer_uid ID записи категории в источнике загрузки данных
+ * @property string $parent_outer_uid ID записи родительской категории в источнике загрузки данных
  * @property int $service_id ID сервиса, с помощью которого была произведена загрузка данной категории
  * @property int $org_id ID организации, к которой относится данная категория
  * @property string $name Наименование категории
@@ -60,7 +61,7 @@ class OuterCategory extends ActiveRecord
         return [
             [['service_id', 'org_id', 'is_deleted', 'selected', 'collapsed', 'tree', 'left', 'right', 'level'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['outer_uid'], 'string', 'max' => 45],
+            [['parent_outer_uid', 'outer_uid'], 'string', 'max' => 45],
             [['name'], 'string', 'max' => 255],
         ];
     }
@@ -73,6 +74,7 @@ class OuterCategory extends ActiveRecord
         return [
             'id' => 'ID',
             'outer_uid' => 'Outer Uid',
+            'parent_outer_uid' => 'Parent Outer Uid',
             'service_id' => 'Service ID',
             'org_id' => 'Org ID',
             'name' => 'Name',

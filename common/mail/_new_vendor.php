@@ -15,17 +15,17 @@
     </tr>
     <tr>
         <td align="left" valign="top" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #8c8f8d;">
-            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #8c8f8d;"><?= $manager->profile->full_name ?></span>
+            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #8c8f8d;"><?= isset($manager->profile->full_name) ?  $manager->profile->full_name : ""?></span>
         </td>
     </tr>
     <tr>
         <td align="left" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #8c8f8d;">
-            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #8c8f8d;"><?= $manager->profile->phone ?></span>
+            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #8c8f8d;"><?= isset($manager->profile->phone) ?  $manager->profile->phone : ""?></span>
         </td>
     </tr>
     <tr>
         <td align="left" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #8c8f8d;">
-            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #8c8f8d;"><?= $manager->email ?></span>
+            <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;color: #8c8f8d;"><?= isset($manager->email) ?  $manager->email : ""?></span>
         </td>
     </tr>
     <tr>

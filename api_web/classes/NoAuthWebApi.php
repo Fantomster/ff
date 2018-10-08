@@ -42,7 +42,7 @@ class NoAuthWebApi
             $entity = new $entityName(SyncServiceFactory::ALL_SERVICE_MAP[$oper->service_id], $oper->service_id);
             /** @var $entity AbstractSyncFactory */
             if (method_exists($entity, 'receiveXmlData')) {
-                $res = $entity->receiveXmlData($task, Yii::$app->request->getRawBody(), $entityName);
+                $res = $entity->receiveXmlData($task, Yii::$app->request->getRawBody());
                 SyncLog::trace($res);
                 return $res;
             }

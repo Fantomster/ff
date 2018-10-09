@@ -3,8 +3,6 @@
 namespace common\models\vetis;
 
 use console\modules\daemons\components\UpdateDictInterface;
-use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\Dicts;
-use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\ListOptions;
 use api\common\models\RabbitQueues;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use Yii;
@@ -117,8 +115,6 @@ class VetisPurpose extends \yii\db\ActiveRecord implements UpdateDictInterface
     public static function getUpdateData($org_id)
     {
         try {
-            $load = new Dicts();
-
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercPurposeList'])->one();
             if($queue == null) {
@@ -133,9 +129,8 @@ class VetisPurpose extends \yii\db\ActiveRecord implements UpdateDictInterface
                 'listItemName' => 'purpose'
             ];
 
-            $listOptions = new ListOptions();
-            $listOptions->count = 1000;
-            $listOptions->offset = 0;
+            $listOptions['count'] = 1000;
+            $listOptions['offset'] = 0;
 
             $queueDate = $queue->last_executed ?? $queue->start_executing;
 

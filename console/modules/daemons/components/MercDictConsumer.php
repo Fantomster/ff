@@ -14,6 +14,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
 use yii\db\Expression;
 use yii\helpers\BaseStringHelper;
+use api_web\components\FireBase;
 
 /**
  * Class consumer with realization ConsumerInterface
@@ -173,5 +174,16 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
     public function saveData()
     {
         return true;
+    }
+
+    public function addFCMMessage($operation, $enterpriseGuid)
+    {
+        FireBase::getInstance()->update([
+            'mercury',
+            'operation' => $operation,
+            'enterpriseGuid' => $enterpriseGuid,
+        ], [
+            'update_date' => strtotime(gmdate("M d Y H:i:s")),
+        ]);
     }
 }

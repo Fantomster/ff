@@ -3,9 +3,7 @@
 namespace common\models\vetis;
 
 use console\modules\daemons\components\UpdateDictInterface;
-use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\Ikar;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ListOptions;
 use api\common\models\RabbitQueues;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -128,7 +126,6 @@ class VetisCountry extends \yii\db\ActiveRecord implements  UpdateDictInterface
     public static function getUpdateData($org_id)
     {
         try {
-            $load = new Ikar();
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercCountryList'])->one();
             if($queue == null) {
@@ -143,9 +140,8 @@ class VetisCountry extends \yii\db\ActiveRecord implements  UpdateDictInterface
                 'listItemName' => 'country'
             ];
 
-            $listOptions = new ListOptions();
-            $listOptions->count = 1000;
-            $listOptions->offset = 0;
+            $listOptions['count'] = 1000;
+            $listOptions['offset'] = 0;
 
             $queueDate = $queue->last_executed ?? $queue->start_executing;
 

@@ -4,6 +4,7 @@ namespace api_web\modules\integration\modules\vetis\models;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
+use api_web\classes\UserWebApi;
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
@@ -160,17 +161,28 @@ class VetisWaybill extends WebApi
      */
     public function getSenderOrProductFilter($request, $filterName)
     {
-        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
+        if (isset($request['acquirer_id']) && !empty($request['acquirer_id'])){
+            $enterpriseGuids = mercDicconst::getSetting('enterprise_guid', $request['acquirer_id']);
+        } else {
+            $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
+            foreach ($orgIds['result'] as $orgId) {
+                $entGuid = mercDicconst::getSetting('enterprise_guid', $orgId['id']);
+                $enterpriseGuids[$entGuid] = $entGuid;
+            }
+        }
         $query = MercVsd::find();
-        if (isset($request['search'][$filterName])) {
+        if (isset($request['search'][$filterName]) && !empty($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);
         }
 
         if ($filterName == 'product_name') {
-            $arResult = $query->andWhere(['or', ['sender_guid' => $enterpriseGuid], ['recipient_guid' => $enterpriseGuid]])->groupBy('product_name')->all();
+            $arResult = $query->andWhere(['or',
+                ['sender_guid' => $enterpriseGuids],
+                ['recipient_guid' => $enterpriseGuids]])
+                ->groupBy('product_name')->all();
             $result = ArrayHelper::map($arResult, 'product_name', 'product_name');
         } else {
-            $arResult = $query->andWhere(['recipient_guid' => $enterpriseGuid])->groupBy('sender_name')->all();
+            $arResult = $query->andWhere(['recipient_guid' => $enterpriseGuids])->groupBy('sender_name')->all();
             $result = ArrayHelper::map($arResult, 'sender_guid', 'sender_name');
         }
 

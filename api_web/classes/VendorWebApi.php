@@ -581,8 +581,6 @@ class VendorWebApi extends \api_web\components\WebApi
                 $tempCatalog->cat->mapping = $tempCatalog->mapping;
                 $tempCatalog->cat->save();
                 $tempCatalog->save();
-
-                return ['result' => true];
             }
         }
         $dubles = $this->container->get('CatalogWebApi')->getTempDuplicatePosition($request);

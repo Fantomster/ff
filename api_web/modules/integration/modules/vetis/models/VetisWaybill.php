@@ -227,14 +227,16 @@ class VetisWaybill extends WebApi
         $records = $this->helper->getAvailableVsd($request['uuids']);
         try {
             $api = mercuryApi::getInstance();
+            $arVsd = [];
             foreach ($request['uuids'] as $uuid) {
                 if (array_key_exists($uuid, $records)) {
                     $api->getVetDocumentDone($uuid);
                 } else {
-                    throw new BadRequestHttpException('ВСД не принадлежит данной организации' . $uuid);
+                    throw new BadRequestHttpException('ВСД не принадлежит данной организации: ' . $uuid);
                 }
+                $arVsd[$uuid] = null;
             }
-            $result = MercVsd::findAll(['uuid' => $request['uuids']]);
+            $result = $this->getList($arVsd);
         } catch (\Throwable $t) {
             if ($t->getCode() == 600) {
                 $result['error'] = 'Заявка отклонена';
@@ -275,7 +277,7 @@ class VetisWaybill extends WebApi
         try {
             $api = mercuryApi::getInstance();
             $api->getVetDocumentDone($uuid, $params);
-            $result = MercVsd::findOne(['uuid' => $uuid]);
+            $result = $this->getList([$uuid => null]);
         } catch (\Throwable $t) {
             if ($t->getCode() == 600) {
                 $result['error'] = 'Заявка отклонена';
@@ -315,7 +317,7 @@ class VetisWaybill extends WebApi
         try {
             $api = mercuryApi::getInstance();
             $api->getVetDocumentDone($uuid, $params);
-            $result = MercVsd::findOne(['uuid' => $uuid]);
+            $result = $this->getList([$uuid => null]);
         } catch (\Throwable $t) {
             if ($t->getCode() == 600) {
                 $result['error'] = 'Заявка отклонена';

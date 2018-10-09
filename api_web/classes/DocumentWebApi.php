@@ -9,6 +9,7 @@ use api_web\modules\integration\classes\documents\OrderEmail;
 use api_web\modules\integration\classes\documents\Waybill;
 use api_web\modules\integration\classes\documents\WaybillContent;
 use common\helpers\DBNameHelper;
+use common\models\RelationUserOrganization;
 use yii\data\SqlDataProvider;
 use yii\web\BadRequestHttpException;
 
@@ -207,11 +208,19 @@ class DocumentWebApi extends \api_web\components\WebApi
         $documents = [];
 
         $params_sql = [];
-        $where_all = '';
-
+        $where_all = " AND client_id  = :business_id";
         if (isset($post['search']['business_id'])) {
-            $where_all .= " AND client_id  = :business_id";
-            $params_sql[':business_id'] = $post['search']['business_id'];
+            if(RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
+                $params_sql[':business_id'] = $post['search']['business_id'];
+            }
+            else
+            {
+                throw new BadRequestHttpException("business unavailable to current user");
+            }
+        }
+        else
+        {
+            $params_sql[':business_id'] = $this->user->organization_id;
         }
 
         if (isset($post['search']['waybill_status'])) {
@@ -224,11 +233,6 @@ class DocumentWebApi extends \api_web\components\WebApi
             $params_sql[':doc_number'] = $post['search']['doc_number'];
         }
 
-        if (isset($post['search']['waybill_date'])) {
-            $where_all .= " AND waybill_date = :waybill_date";
-            $params_sql[':waybill_date'] = $post['search']['waybill_date'];
-        }
-
         if (isset($post['search']['waybill_date']) && !empty($post['search']['waybill_date'])) {
             if (isset($post['search']['waybill_date']['from']) && !empty($post['search']['waybill_date']['from'])) {
                 $from = self::convertDate($post['search']['waybill_date']['from']);
@@ -238,7 +242,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 $to = self::convertDate($post['search']['waybill_date']['to']);
             }
 
-            if(isset($form) && isset($to)) {
+            if(isset($from) && isset($to)) {
                 $where_all .= " AND waybill_date BETWEEN :waybill_date_from AND :waybill_date_to";
                 $params_sql[':waybill_date_from'] = $from;
                 $params_sql[':waybill_date_to'] = $to;
@@ -248,10 +252,6 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         $from = null;
         $to = null;
-        if (isset($post['search']['order_date'])) {
-            $where_all .= " AND order_date = :order_date";
-            $params_sql[':order_date'] = $post['search']['order_date'];
-        }
 
         if (isset($post['search']['order_date']) && !empty($post['search']['order_date'])) {
             if (isset($post['search']['order_date']['from']) && !empty($post['search']['order_date']['from'])) {
@@ -262,7 +262,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 $to = self::convertDate($post['search']['order_date']['to']);
             }
 
-            if(isset($form) && isset($to)) {
+            if(isset($from) && isset($to)) {
                 $where_all .= " AND order_date BETWEEN :order_date_from AND :order_date_to";
                 $params_sql[':order_date_from'] = $from;
                 $params_sql[':order_date_to'] = $to;
@@ -311,17 +311,14 @@ class DocumentWebApi extends \api_web\components\WebApi
         WHERE id is not null $where_all
        ";
 
-        $query = \Yii::$app->db->createCommand($sql);
-
+        //$count = \Yii::$app->db->createCommand("select COUNT(*) from ($sql) as cc",$params_sql)->queryScalar();
         $dataProvider = new SqlDataProvider([
-            'sql' => $query->sql,
+            'sql' => $sql,
             'params' => $params_sql,
+            //'totalCount' => $count,
             'pagination' => [
                 'page' => $page - 1,
                 'pageSize' => $pageSize,
-                /*'params' => [
-                    'sort' => isset($params['sort']) ? $params['sort'] : 'product',
-                ]*/
             ],
             'key' => 'id',
             'sort' => [
@@ -333,11 +330,6 @@ class DocumentWebApi extends \api_web\components\WebApi
                     'waybill_number',
                     'doc_number',
                 ],
-                /*'defaultOrder' => [
-                    'product' => ,
-                    // 'c_article_1' => SORT_ASC,
-                    // 'c_article' => SORT_ASC
-                ]*/
             ],
         ]);
 
@@ -352,7 +344,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         $return = [
             'documents' => $documents,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
+                'page' => $dataProvider->pagination->page+1,
                 'page_size' => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ],

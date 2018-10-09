@@ -1252,8 +1252,9 @@ class OrderController extends DefaultController
                 'message' => '',
             ];
 
-            if (!empty($data))
+            if (!empty($data)) {
                 $res = (new CartWebApi())->registration($data);
+            }
 
 
             $res['error'] += $err;

@@ -161,16 +161,17 @@ class VetisWaybill extends WebApi
      */
     public function getSenderOrProductFilter($request, $filterName)
     {
-        $enterpriseGuids = [];
-        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
-        foreach ($orgIds['result'] as $orgId) {
-            $entGuid = mercDicconst::getSetting('enterprise_guid', $orgId['id']);
-            $enterpriseGuids[$entGuid] = $entGuid;
+        if (isset($request['acquirer_id']) && !empty($request['acquirer_id'])){
+            $enterpriseGuids = mercDicconst::getSetting('enterprise_guid', $request['acquirer_id']);
+        } else {
+            $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
+            foreach ($orgIds['result'] as $orgId) {
+                $entGuid = mercDicconst::getSetting('enterprise_guid', $orgId['id']);
+                $enterpriseGuids[$entGuid] = $entGuid;
+            }
         }
-        var_dump($enterpriseGuids);
-        exit();
         $query = MercVsd::find();
-        if (isset($request['search'][$filterName])) {
+        if (isset($request['search'][$filterName]) && !empty($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);
         }
 
@@ -181,7 +182,6 @@ class VetisWaybill extends WebApi
                 ->groupBy('product_name')->all();
             $result = ArrayHelper::map($arResult, 'product_name', 'product_name');
         } else {
-
             $arResult = $query->andWhere(['recipient_guid' => $enterpriseGuids])->groupBy('sender_name')->all();
             $result = ArrayHelper::map($arResult, 'sender_guid', 'sender_name');
         }

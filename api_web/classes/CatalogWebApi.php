@@ -447,9 +447,6 @@ class CatalogWebApi extends WebApi
         $dataProvider->setPagination($pagination);
 
         $result = $dataProvider->models;
-        foreach ($result as &$item) {
-            $item['index_field'] = $tempCatalog->index_column;
-        }
 
         return [
             'result' => $result,

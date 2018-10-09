@@ -475,8 +475,10 @@ class ServiceRkws extends AbstractSyncFactory
                     if (!$model->id) {
                         $model->makeRoot();
                     }
-                } else {
+                } elseif (!$v['parent']) {
                     $model->prependTo($list[$root_rid]);
+                } else {
+                    $model->prependTo($list[$v['parent']]);
                 }
                 /** @var yii\db\ActiveRecord $model */
                 if ($model->validate() && $model->save()) {
@@ -485,8 +487,6 @@ class ServiceRkws extends AbstractSyncFactory
                     /** @noinspection PhpUndefinedFieldInspection */
                     $saveErr['dicElement'][$model->id][] = $model->errors;
                 }
-
-
             }
 
         } else {

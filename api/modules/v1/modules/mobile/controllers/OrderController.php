@@ -358,6 +358,7 @@ class OrderController extends ActiveController {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@common/mail/layouts/order';
         // send email
         $senderOrg = $sender->organization;
         $subject = "Заказ №" . $order->id . " выполнен!";
@@ -404,6 +405,7 @@ class OrderController extends ActiveController {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@common/mail/layouts/order';
         // send email
         $subject = "Заказ №" . $order->id . " подтвержден!";
 
@@ -440,6 +442,7 @@ class OrderController extends ActiveController {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@common/mail/layouts/order';
         // send email
         $senderOrg = $sender->organization;
         $subject = "Новый заказ №" . $order->id . "!";
@@ -489,6 +492,7 @@ class OrderController extends ActiveController {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@common/mail/layouts/order';
         // send email
         $subject = "Заказ №" . $order->id . " отменен!";
 

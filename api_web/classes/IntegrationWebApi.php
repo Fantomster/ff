@@ -273,7 +273,8 @@ class IntegrationWebApi extends WebApi
     }
 
 
-    private function handleWaybillContent($waybillContent, $post, $quan, $koef){
+    private function handleWaybillContent($waybillContent, $post, $quan, $koef)
+    {
         if (isset($post['product_outer_id'])) {
             $waybillContent->product_outer_id = $post['product_outer_id'];
             $allMap = AllMaps::findOne(['product_id' => $post['product_outer_id']]);

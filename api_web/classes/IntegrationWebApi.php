@@ -268,6 +268,12 @@ class IntegrationWebApi extends WebApi
         if (isset($post['quantity_waybill'])) {
             $quan = (int)$post['quantity_waybill'];
         }
+
+        return $this->handleWaybillContent($waybillContent, $post, $quan, $koef);
+    }
+
+
+    private function handleWaybillContent($waybillContent, $post, $quan, $koef){
         if (isset($post['product_outer_id'])) {
             $waybillContent->product_outer_id = $post['product_outer_id'];
             $allMap = AllMaps::findOne(['product_id' => $post['product_outer_id']]);

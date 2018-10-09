@@ -250,7 +250,6 @@ class IntegrationWebApi extends WebApi
         if (!isset($post['waybill_content_id'])) {
             throw new BadRequestHttpException("empty_param|waybill_content_id");
         }
-
         $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
         if (!$waybillContent) {
             throw new BadRequestHttpException("waybill content not found");
@@ -266,7 +265,6 @@ class IntegrationWebApi extends WebApi
         if (isset($post['koef'])) {
             $koef = (float)$post['koef'];
         }
-
         if (isset($post['quantity_waybill'])) {
             $quan = (int)$post['quantity_waybill'];
         }
@@ -284,7 +282,6 @@ class IntegrationWebApi extends WebApi
                 }
             }
         }
-
         $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
         if (!$orderContent) {
             if (isset($post['price_without_vat'])) {
@@ -308,7 +305,6 @@ class IntegrationWebApi extends WebApi
         $waybillContent->quantity_waybill = $quan;
         $waybillContent->koef = $koef;
         $waybillContent->save();
-
         return ['success' => true, 'koef' => $koef, 'quantity' => $quan];
     }
 

@@ -210,6 +210,7 @@ class CartWebApi extends \api_web\components\WebApi
         } catch (\Exception $e) {
             $result['error'] += 1;
             $result['message'] = $e->getMessage();
+            \Yii::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
         return $result;
     }
@@ -246,6 +247,7 @@ class CartWebApi extends \api_web\components\WebApi
             }
 
             if (!$order->validate() || !$order->save()) {
+                \Yii::error(\yii\helpers\Json::encode($order->getErrors()));
                 throw new ValidationException($order->getFirstErrors());
             }
             /**
@@ -269,6 +271,7 @@ class CartWebApi extends \api_web\components\WebApi
                 if ($orderContent->validate() && $orderContent->save()) {
                     $cartContent->delete();
                 } else {
+                    \Yii::error(\yii\helpers\Json::encode($orderContent->getErrors()));
                     throw new ValidationException($orderContent->getFirstErrors());
                 }
             }
@@ -290,7 +293,7 @@ class CartWebApi extends \api_web\components\WebApi
                 //Сообщение в очередь, Изменение количества товара в корзине
                 Notice::init('Order')->sendOrderToTurnClient($this->user);
             } catch (\Exception $e) {
-                \Yii::error($e->getMessage());
+                \Yii::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
             }
             return true;
         }

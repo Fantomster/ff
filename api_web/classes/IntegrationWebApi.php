@@ -258,11 +258,17 @@ class IntegrationWebApi extends WebApi
         if (isset($post['vat_waybill'])) {
             $waybillContent->vat_waybill = (float)$post['vat_waybill'];
         }
-        if (isset($post['koef'])) {
-            $waybillContent->koef = (float)$post['koef'];
+        if (isset($post['outer_unit_id'])) {
+            $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
         }
+        $koef = null;
+        $quan = null;
+        if (isset($post['koef'])) {
+            $koef = (float)$post['koef'];
+        }
+
         if (isset($post['quantity_waybill'])) {
-            $waybillContent->quantity_waybill = (int)$post['quantity_waybill'];
+            $quan = (int)$post['quantity_waybill'];
         }
         if (isset($post['product_outer_id'])) {
             $waybillContent->product_outer_id = $post['product_outer_id'];
@@ -291,11 +297,19 @@ class IntegrationWebApi extends WebApi
                     }
                 }
             }
+        } else {
+            if (isset($post['quantity_waybill']) && !isset($post['koef'])) {
+                $koef = $post['quantity_waybill'] / $orderContent->quantity;
+            }
+            if (isset($post['koef']) && !isset($post['quantity_waybill'])) {
+                $quan = $orderContent->quantity * $post['koef'];
+            }
         }
-
+        $waybillContent->quantity_waybill = $quan;
+        $waybillContent->koef = $koef;
         $waybillContent->save();
 
-        return ['success' => true];
+        return ['success' => true, 'koef' => $koef, 'quantity' => $quan];
     }
 
 

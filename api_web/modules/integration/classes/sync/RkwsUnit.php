@@ -29,7 +29,7 @@ class RkwsUnit extends ServiceRkws
     public static $OperDenom = 'sh_get_munits';
 
     /** @var array $additionalXmlFields Поле во входящем xml -> поле в нашей модели данных */
-    public $additionalXmlFields = ['name' => 'name', 'parent' => 'parent_outer_uid', 'ratio' => 'ratio'];
+    public $additionalXmlFields = ['name' => 'name', 'ratio' => 'ratio'];
 
     public function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
     {
@@ -43,16 +43,16 @@ class RkwsUnit extends ServiceRkws
         foreach ($myXML->ITEM as $unit_group) {
             $parent = $unit_group->attributes()['rid'];
             foreach ($unit_group->attributes() as $k => $v) {
-                $array['_'.$parent][$k] = strval($v[0]);
+                $array['_' . $parent][$k] = strval($v[0]);
             }
-            $array['_'.$parent]['parent'] = '';
+            $array['_' . $parent]['parent'] = '';
             foreach ($unit_group->MUNITS_LIST as $list) {
                 foreach ($list->ITEM as $item) {
                     $i = $item->attributes()['rid'];
                     foreach ($item->attributes() as $k => $v) {
-                        $array[(string)$parent.'_'.(string)$i][$k] = strval($v[0]);
+                        $array[(string)$parent . '_' . (string)$i][$k] = strval($v[0]);
                     }
-                    $array[(string)$parent.'_'.(string)$i]['parent'] = (string)$parent;
+                    $array[(string)$parent . '_' . (string)$i]['parent'] = (string)$parent;
                 }
             }
         }

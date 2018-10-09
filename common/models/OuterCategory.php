@@ -13,8 +13,10 @@
 namespace common\models;
 
 use Yii;
-use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
+use \yii\db\ActiveRecord;
+use creocoder\nestedsets\NestedSetsBehavior;
+use common\components\NestedSetsQuery;
 
 /**
  * This is the model class for table "outer_category".
@@ -37,6 +39,36 @@ use yii\behaviors\TimestampBehavior;
  */
 class OuterCategory extends ActiveRecord
 {
+
+    /**
+     * NestedSets model
+     * https://yiigist.com/package/creocoder/yii2-nested-sets#!?tab=readme
+     * ------------------------------------------------------
+     */
+    public function behaviors()
+    {
+        return [
+            'tree' => [
+                'class' => NestedSetsBehavior::class,
+                'treeAttribute' => 'tree',
+                'leftAttribute' => 'left',
+                'rightAttribute' => 'right',
+                'depthAttribute' => 'level'
+            ],
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
+    }
+
+    public static function find()
+    {
+        return new NestedSetsQuery(get_called_class());
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -87,18 +119,6 @@ class OuterCategory extends ActiveRecord
             'left' => 'Left',
             'right' => 'Right',
             'level' => 'Level',
-        ];
-    }
-
-    public function behaviors()
-    {
-        return [
-            [
-                'class' => TimestampBehavior::class,
-                'createdAtAttribute' => 'created_at',
-                'updatedAtAttribute' => 'updated_at',
-                'value' => \gmdate('Y-m-d H:i:s'),
-            ],
         ];
     }
 

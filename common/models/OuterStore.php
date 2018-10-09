@@ -7,7 +7,6 @@ use yii\behaviors\TimestampBehavior;
 use \yii\db\ActiveRecord;
 use creocoder\nestedsets\NestedSetsBehavior;
 use common\components\NestedSetsQuery;
-use yii\db\Expression;
 
 /**
  * This is the model class for table "outer_store".
@@ -38,7 +37,14 @@ class OuterStore extends ActiveRecord
     public function behaviors()
     {
         return [
-            [
+            'tree' => [
+                'class' => NestedSetsBehavior::class,
+                'treeAttribute' => 'tree',
+                'leftAttribute' => 'left',
+                'rightAttribute' => 'right',
+                'depthAttribute' => 'level'
+            ],
+            'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',

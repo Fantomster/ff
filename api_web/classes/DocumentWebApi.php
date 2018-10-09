@@ -277,7 +277,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (isset($post['search']['store'])) {
-            $where_all .= " AND store_id in (:store)";
+            $where_all .= " AND store_id in (:stories)";
             $stories = implode(",", $post['search']['store']);
             $params_sql[':stories'] = $stories;
         }

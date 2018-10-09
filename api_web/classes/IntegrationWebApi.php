@@ -8,6 +8,7 @@ use api_web\modules\integration\interfaces\ServiceInterface;
 use api_web\modules\integration\modules\one_s\models\one_sService;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperService;
 use api_web\modules\integration\modules\iiko\models\iikoService;
+use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OuterAgent;
@@ -370,5 +371,49 @@ class IntegrationWebApi extends WebApi
         $waybillContent->delete();
 
         return ['success' => true];
+    }
+
+
+    /**
+     * integration: Метод проверки лицензии по организации и service_id
+     * @param array $post
+     * @return array
+     */
+    public function checkLicenseByService(array $post): array
+    {
+        return License::checkLicenseByService($post);
+    }
+
+
+    /**
+     * integration: Метод проверки лицензии по организации и license_id
+     * @param array $post
+     * @return array
+     */
+    public function checkLicenseByLicenseID(array $post): array
+    {
+        return License::checkLicenseByLicenseID($post);
+    }
+
+
+    /**
+     * integration: Метод получения лицензии по сервису
+     * @param array $post
+     * @return array
+     */
+    public function getLicensesByServiceId(array $post): array
+    {
+        return License::getLicensesByServiceId($post);
+    }
+
+
+    /**
+     * integration: Метод получения сервисов по лицензии
+     * @param array $post
+     * @return array
+     */
+    public function getLicensesByLicenseId(array $post): array
+    {
+        return License::getLicensesByLicenseId($post);
     }
 }

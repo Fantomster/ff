@@ -98,13 +98,13 @@ class Excel
                     break;
                 }
 
-                if ($mapping[$cellsCount] == 'units' && !empty($value)){
-                    $value = (float)(str_replace(',', '.', $value));
-                }
-
                 if ($mapping[$cellsCount] == $index && empty($value)) {
                     $write = false;
                     break;
+                }
+
+                if ($mapping[$cellsCount] == 'units' && !empty($value)){
+                    $value = (float)(str_replace(',', '.', $value));
                 }
 
                 $attributes[$mapping[$cellsCount]] = $value;

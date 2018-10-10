@@ -140,7 +140,10 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
                     $selectedProduct = new iikoSelectedProduct();
                     $selectedProduct->product_id = $productID;
                     $selectedProduct->organization_id = $org;
-                    $selectedProduct->save();
+                    //$selectedProduct->save();
+                    if (!$selectedProduct->save()) {
+                        var_dump($selectedProduct->getErrors()); die();
+                    }
                 }
             }
             $count = iikoSelectedProduct::find()->where(['organization_id' => $org])->count();

@@ -16,7 +16,7 @@ use Yii;
  *
  * @property IntegrationSetting $setting
  */
-class IntegrationSettingValue extends yii\db\ActiveRecord
+class IntegrationSettingValue extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -76,10 +76,10 @@ class IntegrationSettingValue extends yii\db\ActiveRecord
     {
         return [
             'timestamp' => [
-                'class' => yii\behaviors\TimestampBehavior::class,
+                'class' => \yii\behaviors\TimestampBehavior::class,
                 'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
-                    yii\db\ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
+                    \yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    \yii\db\ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
                 ],
                 'value' => \gmdate('Y-m-d H:i:s'),
             ],

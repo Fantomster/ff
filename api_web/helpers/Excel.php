@@ -89,11 +89,20 @@ class Excel
             $attributes['temp_id'] = $tmpCatId;
             $write = true;
             foreach ($cellIterator as $cell) {
-                if (!array_key_exists($cellsCount, $mapping) || $cellsCount > count($mapping)) {
+                if($cellsCount > 6){
                     break;
+                }
+                if (!array_key_exists($cellsCount, $mapping)) {
+                    $cellsCount++;
+                    continue;
                 }
                 $value = $cell->getValue();
                 if ($mapping[$cellsCount] == 'article' && $value == 'Артикул') {
+                    $write = false;
+                    break;
+                }
+
+                if ($mapping[$cellsCount] == 'price' && !is_numeric($value)){
                     $write = false;
                     break;
                 }

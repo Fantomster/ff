@@ -3,10 +3,10 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 use \yii\db\ActiveRecord;
 use creocoder\nestedsets\NestedSetsBehavior;
 use common\components\NestedSetsQuery;
-use yii\db\Expression;
 
 /**
  * This is the model class for table "outer_store".
@@ -45,8 +45,10 @@ class OuterStore extends ActiveRecord
                 'depthAttribute' => 'level'
             ],
             'timestamp' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'value' => \gmdate('Y-m-d H:i:s')
+                'class' => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => \gmdate('Y-m-d H:i:s'),
             ],
         ];
     }
@@ -55,10 +57,6 @@ class OuterStore extends ActiveRecord
     {
         return new NestedSetsQuery(get_called_class());
     }
-
-    /**
-     * ------------------------------------------------------
-     */
 
     /**
      * {@inheritdoc}

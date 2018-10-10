@@ -4,6 +4,7 @@ namespace api_web\modules\integration\modules\vetis\models;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
+use api_web\classes\UserWebApi;
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
@@ -66,8 +67,8 @@ class VetisWaybill extends WebApi
         $return = [
             'result'     => $result,
             'pagination' => [
-                'page'       => $page,
-                'page_size'  => $pageSize,
+                'page'        => $page,
+                'page_size'   => $pageSize,
                 'total_count' => $arResult['count'],
             ]
         ];
@@ -80,7 +81,7 @@ class VetisWaybill extends WebApi
      * @param array $uuids
      * @return array
      * */
-    public function getList($uuids) : array
+    public function getList($uuids): array
     {
         $result = $uuids;
         $models = MercVsd::findAll(['uuid' => array_keys($uuids)]);
@@ -160,17 +161,28 @@ class VetisWaybill extends WebApi
      */
     public function getSenderOrProductFilter($request, $filterName)
     {
-        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
+        if (isset($request['acquirer_id']) && !empty($request['acquirer_id'])){
+            $enterpriseGuids = mercDicconst::getSetting('enterprise_guid', $request['acquirer_id']);
+        } else {
+            $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
+            foreach ($orgIds['result'] as $orgId) {
+                $entGuid = mercDicconst::getSetting('enterprise_guid', $orgId['id']);
+                $enterpriseGuids[$entGuid] = $entGuid;
+            }
+        }
         $query = MercVsd::find();
-        if (isset($request['search'][$filterName])) {
+        if (isset($request['search'][$filterName]) && !empty($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);
         }
 
         if ($filterName == 'product_name') {
-            $arResult = $query->andWhere(['or', ['sender_guid' => $enterpriseGuid], ['recipient_guid' => $enterpriseGuid]])->groupBy('product_name')->all();
+            $arResult = $query->andWhere(['or',
+                ['sender_guid' => $enterpriseGuids],
+                ['recipient_guid' => $enterpriseGuids]])
+                ->groupBy('product_name')->all();
             $result = ArrayHelper::map($arResult, 'product_name', 'product_name');
         } else {
-            $arResult = $query->andWhere(['recipient_guid' => $enterpriseGuid])->groupBy('sender_name')->all();
+            $arResult = $query->andWhere(['recipient_guid' => $enterpriseGuids])->groupBy('sender_name')->all();
             $result = ArrayHelper::map($arResult, 'sender_guid', 'sender_name');
         }
 
@@ -215,7 +227,7 @@ class VetisWaybill extends WebApi
      * Погашение ВСД
      *
      * @param $request
-     * @throws BadRequestHttpException
+     * @throws \Exception
      * @return array
      */
     public function repayVsd($request)
@@ -224,19 +236,19 @@ class VetisWaybill extends WebApi
             throw new BadRequestHttpException('Uuids is required and must be array');
         }
         $result = [];
-        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
-        $records = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
-            ->andWhere(['uuid' => $request['uuids']])->indexBy('uuid')->all();
+        $records = $this->helper->getAvailableVsd($request['uuids']);
         try {
             $api = mercuryApi::getInstance();
+            $arVsd = [];
             foreach ($request['uuids'] as $uuid) {
                 if (array_key_exists($uuid, $records)) {
                     $api->getVetDocumentDone($uuid);
                 } else {
-                    throw new BadRequestHttpException('ВСД не принадлежит данной организации' . $uuid);
+                    throw new BadRequestHttpException('ВСД не принадлежит данной организации: ' . $uuid);
                 }
+                $arVsd[$uuid] = null;
             }
-            $result = MercVsd::findAll(['uuid' => $request['uuids']]);
+            $result = $this->getList($arVsd);
         } catch (\Throwable $t) {
             if ($t->getCode() == 600) {
                 $result['error'] = 'Заявка отклонена';
@@ -263,9 +275,7 @@ class VetisWaybill extends WebApi
         if (!isset($uuid) || !isset($request['reason'])) {
             throw new BadRequestHttpException('Uuid and reason is required and must be array');
         }
-        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
-        $record = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
-            ->andWhere(['uuid' => $request['uuid']])->indexBy('uuid')->all();
+        $record = $this->helper->getAvailableVsd($request['uuid']);
         if (!$record) {
             throw new BadRequestHttpException('Uuid not for this organization');
         }
@@ -279,11 +289,15 @@ class VetisWaybill extends WebApi
         try {
             $api = mercuryApi::getInstance();
             $api->getVetDocumentDone($uuid, $params);
-            $result = MercVsd::findOne(['uuid' => $uuid]);
+            $result = $this->getList([$uuid => null]);
         } catch (\Throwable $t) {
-            $result['error'] = $t->getMessage();
-            $result['trace'] = $t->getTraceAsString();
-            $result['code'] = $t->getCode();
+            if ($t->getCode() == 600) {
+                $result['error'] = 'Заявка отклонена';
+            } else {
+                $result['error'] = $t->getMessage();
+                $result['trace'] = $t->getTraceAsString();
+                $result['code'] = $t->getCode();
+            }
         }
 
         return ['result' => $result];
@@ -293,7 +307,7 @@ class VetisWaybill extends WebApi
      * Возврат ВСД
      *
      * @param $request
-     * @throws BadRequestHttpException
+     * @throws \Exception
      * @return array
      */
     public function returnVsd($request)
@@ -302,9 +316,7 @@ class VetisWaybill extends WebApi
         if (!isset($uuid) || !isset($request['reason'])) {
             throw new BadRequestHttpException('Uuid and reason is required and must be array');
         }
-        $enterpriseGuid = mercDicconst::getSetting('enterprise_guid');
-        $record = MercVsd::find()->select(['uuid', 'recipient_guid'])->where(['recipient_guid' => $enterpriseGuid])
-            ->andWhere(['uuid' => $request['uuid']])->indexBy('uuid')->all();
+        $record = $this->helper->getAvailableVsd($request['uuid']);
         if (!$record) {
             throw new BadRequestHttpException('Uuid not for this organization');
         }
@@ -317,11 +329,15 @@ class VetisWaybill extends WebApi
         try {
             $api = mercuryApi::getInstance();
             $api->getVetDocumentDone($uuid, $params);
-            $result = MercVsd::findOne(['uuid' => $uuid]);
+            $result = $this->getList([$uuid => null]);
         } catch (\Throwable $t) {
-            $result['error'] = $t->getMessage();
-            $result['trace'] = $t->getTraceAsString();
-            $result['code'] = $t->getCode();
+            if ($t->getCode() == 600) {
+                $result['error'] = 'Заявка отклонена';
+            } else {
+                $result['error'] = $t->getMessage();
+                $result['trace'] = $t->getTraceAsString();
+                $result['code'] = $t->getCode();
+            }
         }
 
         return ['result' => $result];

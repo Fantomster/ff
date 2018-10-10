@@ -68,7 +68,7 @@ use kartik\grid\GridView;
                                         if ($model->denom == 'auth_login') {
                                             return $res;
                                         }
-                                        
+
                                         // В случае отображения логина
                                         if ($model->denom == 'main_org') {
                                             return $res;
@@ -113,7 +113,19 @@ use kartik\grid\GridView;
                                             if ($model->denom == 'main_org') {
                                                 return false;
                                             }
-                                            $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/settings/change-const', 'id' => $model->id]);
+                                            if ($model->id == 7) {
+                                                $page = Yii::$app->request->post('page');
+                                                $sort = Yii::$app->request->post('sort');
+                                                if (!$page) {
+                                                    $page = 1;
+                                                }
+                                                if (!$sort) {
+                                                    $sort = 'denom';
+                                                }
+                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/settings/change-const', 'id' => $model->id, 'page' => $page, 'sort' => $sort]);
+                                            } else {
+                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/settings/change-const', 'id' => $model->id]);
+                                            }
                                             return \yii\helpers\Html::a('<i class="fa fa-wrench" aria-hidden="true"></i>', $customurl,
                                                 ['title' => 'Изменить значение', 'data-pjax' => "0"]);
                                         },

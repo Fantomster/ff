@@ -85,7 +85,7 @@ class mercDicconst extends \yii\db\ActiveRecord
                     $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => $org]);
                 }
                 if (isset($pConst) || (key_exists($denom, $iskl))) {
-                    return key_exists($denom, $iskl) ? $iskl[$denom] : $pConst->value;
+                    return isset($pConst) ? $pConst->value : $iskl[$denom];
                 } else {
                     throw new \Exception('Не заполнено свойство в настройках ' . $denom);
                 }

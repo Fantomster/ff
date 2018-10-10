@@ -339,6 +339,13 @@ Modal::widget([
                             </div>
                         </div>
                         <div class="col-sm-3 col-md-2 col-lg-1">
+                            <?= Html::label('Просрочено', null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                                <?=
+                                $form->field($searchModel, "is_expiry", ['template' => '{input}{error}'])
+                                    ->checkbox([], false)->label(false);
+                                ?>
+                        </div>
+                        <div class="col-sm-3 col-md-2 col-lg-1">
                             <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
                             <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
                         </div>
@@ -438,13 +445,13 @@ $("#ajax-load").on("click", ".save-form", function() {
             $("#search-form").submit();
         });
      });  
- 
+ */
  $("document").ready(function(){
-        $(".box-body").on("change", "#recipientFilter", function() {
+        $(".box-body").on("change", "#mercstockentrysearch-is_expiry", function() {
             $("#search-form").submit();
         });
      });   
- */
+ 
  $(document).on("click", ".clear_filters", function () {
            $('#product_name').val(''); 
            $('#producer_name').val('');
@@ -452,6 +459,7 @@ $("#ajax-load").on("click", ".save-form", function() {
            $('#dateToProductionDate').val('');
            $('#dateFromExpiryDate').val('');
            $('#dateToExpiryDate').val('');
+           $('#mercstockentrysearch-is_expiry').prop('checked', false);
            $("#search-form").submit();
     });
  

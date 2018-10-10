@@ -28,19 +28,19 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         $vi = $lic ? 'index' : '/default/_nolic';
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
-                'searchModel'  => $searchModel,
+                'searchModel' => $searchModel,
                 'dataProvider' => $dataProvider,
-                'lic'          => $lic,
+                'lic' => $lic,
             ]);
         } else {
             return $this->render($vi, [
-                'searchModel'  => $searchModel,
+                'searchModel' => $searchModel,
                 'dataProvider' => $dataProvider,
-                'lic'          => $lic,
+                'lic' => $lic,
             ]);
         }
     }
-    
+
     /**
      * @param $id
      * @return string|\yii\web\Response
@@ -49,7 +49,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
     {
         $org = Yii::$app->user->identity->organization_id;
         $pConst = iikoPconst::findOne(['const_id' => $id, 'org' => $org]);
-        
+
         if (empty($pConst)) {
             $pConst = new iikoPconst();
             $pConst->org = $org;
@@ -59,20 +59,46 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
                 die();
             }
         }
-        
+
         $lic = iikoService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
-        
+
         $post = Yii::$app->request->post();
+        if (isset($post['sort'])) {
+            $sort = $post['sort'];
+        } else {
+            $sort = 'denom';
+        }
+        if (isset($post['page'])) {
+            $page = $post['page'];
+        } else {
+            $page = 1;
+        }
+        if (isset($post['iikoProductSearch']['product_type'])) {
+            $productSearch = $post['iikoProductSearch']['product_type'];
+        } else {
+            $productSearch = 'all';
+        }
+        if (isset($post['iikoProductSearch']['cooking_place_type'])) {
+            $cookingPlaceSearch = $post['iikoProductSearch']['cooking_place_type'];
+        } else {
+            $cookingPlaceSearch = 'all';
+        }
+        if (isset($post['iikoProductSearch']['unit'])) {
+            $unitSearch = $post['iikoProductSearch']['unit'];
+        } else {
+            $unitSearch = 'all';
+        }
+
         if (isset($post['selection']) || isset($post['selected_goods'])) {
             $post['iikoPconst']['value'] = $this->handleSelectedProducts($post, $org);
         }
-        
+
         if (isset($post['Stores'])) {
             $post['iikoPconst']['value'] = $this->handleSelectedStores($post, $org);
         }
-        
-        if ($pConst->load($post) && $pConst->save()) {
+
+        if ($pConst->load($post) && $pConst->save() && $id != 7) {
             if ($pConst->getErrors()) {
                 var_dump($pConst->getErrors());
                 exit;
@@ -81,22 +107,27 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         } else {
             $dicConst = iikoDicconst::findOne(['id' => $pConst->const_id]);
             return $this->render($vi, [
-                'model'    => $pConst,
+                'model' => $pConst,
                 'dicConst' => $dicConst,
-                'id'       => $id
+                'id' => $id,
+                'sort' => $sort,
+                'productSearch' => $productSearch,
+                'cookingPlaceSearch' => $cookingPlaceSearch,
+                'unitSearch' => $unitSearch,
+                'page' => $page,
             ]);
         }
-        
+
     }
-    
-    
+
+
     private function handleSelectedProducts($post, $org)
     {
         if (isset($post['goods'])) {
             $products = $post['goods'];
             $allSelectedProducts = iikoSelectedProduct::findAll(['organization_id' => $org]);
             foreach ($allSelectedProducts as $product) {
-                if (isset($products[$product->product_id]) &&  $products[$product->product_id] == 0) {
+                if (isset($products[$product->product_id]) && $products[$product->product_id] == 0) {
                     $product->delete();
                 }
             }
@@ -124,8 +155,8 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         }
         return $count;
     }
-    
-    
+
+
     private function handleSelectedStores($post, $org)
     {
         $stores = $post['Stores'];
@@ -146,15 +177,15 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         }
         return iikoSelectedStore::find()->where(['organization_id' => $org])->count();
     }
-    
-    
+
+
     public function actionAjaxAddProductToSession()
     {
         $productID = Yii::$app->request->post('productID');
         $session = Yii::$app->session;
         $session['SelectedProduct.' . $productID] = $productID;
     }
-    
+
     /**
      * Render collation table
      * @var iikoPconst->const_id $const_id
@@ -165,35 +196,35 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         /** @var $currentUser User */
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentUserRole = User::findOne(Yii::$app->user->id);
-        /**@var $roles array Available roles ids*/
+        /**@var $roles array Available roles ids */
         $roles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_ADMIN, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_FRANCHISEE_LEADER];
         if (in_array($currentUserRole->role_id, $roles)) {
             $arOrgsObj = $currentUser->getAllOrganization();
             $provider = new ArrayDataProvider([
-                'allModels'  => $arOrgsObj,
+                'allModels' => $arOrgsObj,
                 'pagination' => [
                     'pageSize' => 999,
                 ],
-                'key'        => 'id'
+                'key' => 'id'
             ]);
-            
+
             $arIdsOrgs = [];
             foreach ($arOrgsObj as $org) {
                 $arIdsOrgs[] = $org->id;
             }
-            
+
             $pConst = iikoPconst::findOne(['const_id' => $obConstModel->id, 'org' => $arIdsOrgs]);
-            
+
             return $this->render('collations', [
                     'provider' => $provider,
                     'parentId' => $pConst,
                 ]
             );
         }
-        
+
         return $this->redirect('index');
     }
-    
+
     /**
      * Создаем сопоставления в дочерних бизнесах
      * @var iikoPconst->const_id $const_id
@@ -206,33 +237,33 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         $ids = Yii::$app->request->post('ids');
         $mainId = Yii::$app->request->post('main');
         $arModels = [];
-        
+
         $arPconstModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'org' => $ids])->indexBy('org')->all();
         $arDeletedIds = array_keys($arPconstModels);
-        
+
         foreach ($ids as $id) {
-                $pConst = new iikoPconst();
-                $pConst->org = $id;
-                $pConst->const_id = $obConstModel->id;
-                $pConst->value = $mainId;
-                $arModels[] = $pConst;
+            $pConst = new iikoPconst();
+            $pConst->org = $id;
+            $pConst->const_id = $obConstModel->id;
+            $pConst->value = $mainId;
+            $arModels[] = $pConst;
         }
-        
+
         if (!empty($arDeletedIds)) {
             $resDel = $this->actionCancelCollation($arDeletedIds);
         }
-        
+
         if (empty($arModels) && !empty($arDeletedIds)) {
             return $resDel;
         } elseif (empty($arModels) && empty($arDeletedIds)) {
             return ['success' => false, 'error' => 'Невозможно выполнить данную операцию'];
         }
-        
+
         $modelCollection = new ModelsCollection();
-        
+
         return $modelCollection->saveMultiple($arModels);
     }
-    
+
     /**
      * Удаляем сопоставления в дочерних бизнесах
      *
@@ -252,7 +283,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         } catch (\Throwable $throwable) {
             return ['success' => false, 'error' => $throwable->getMessage()];
         }
-        
+
         return ['success' => true];
     }
 }

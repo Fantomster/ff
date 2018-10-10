@@ -195,7 +195,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                  "search": {"sender_name":"часть имени"}
+     *                  "search": {"sender_name":"часть имени", "acquirer_id": 7}
      *                  }
      *              )
      *         )
@@ -241,7 +241,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                  "search": {"product_name":"часть имени"}
+     *                  "search": {"product_name":"часть имени", "acquirer_id": 7}
      *                  }
      *              )
      *         )
@@ -610,6 +610,56 @@ class DefaultController extends WebApiController
     public function actionReturnVsd()
     {
         $this->response = (new VetisWaybill())->returnVsd($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/partial-acceptance",
+     *     tags={"Integration/vetis"},
+     *     summary="Частичный возврат ВСД",
+     *     description="Частичный возврат ВСД",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "93cdc45a-edc3-472f-bd70-99ffca18edc9",
+     *                      "reason":"Nulla in gravida ex. In hac habitasse platea dictumst.",
+     *                      "amount":"40",
+     *                      "description":"long string description"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      "ede52e76-6091-46bb-9349-87324ee1ae41":true,
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionPartialAcceptance()
+    {
+        $this->response = (new VetisWaybill())->partialAcceptance($this->request);
     }
 
     /**

@@ -35,7 +35,12 @@ use yii\widgets\Breadcrumbs;
                         <?php echo $this->render('_form', [
                             'model' => $model,
                             'dicConst' => $dicConst,
-                            'id' => $id
+                            'id' => $id,
+                            'productSearch' => $productSearch,
+                            'cookingPlaceSearch' => $cookingPlaceSearch,
+                            'unitSearch' => $unitSearch,
+                            'sort' => $sort,
+                            'page' => $page,
                         ]) ?>
                     </div>
                 </div>

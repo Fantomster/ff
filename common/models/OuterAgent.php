@@ -103,15 +103,12 @@ class OuterAgent extends \yii\db\ActiveRecord
      */
     public function getVendor()
     {
-        //Изменено Михаил Нарзяев в ревизии 3b11135bd70ae8edfbd8d5b6be1f855554081371 по сути одно и тоже но моя
-        // реализация полностью отвалилась после этой правки
-//        $db_instance = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
-//        return (new ActiveQuery(Organization::class))
-//            ->from($db_instance . '.' . Organization::tableName() . ' `o`')
-//            ->onCondition([
-//                '`o`.`id`' => '`outer_agent`.`vendor_id`'
-//            ]);
-        return $this->hasOne(Organization::class, ['id' => 'vendor_id']);
+        $db_instance = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        return (new ActiveQuery(Organization::class))
+            ->from($db_instance . '.' . Organization::tableName() . ' `o`')
+            ->onCondition([
+                '`o`.`id`' => '`outer_agent`.`vendor_id`'
+            ]);
     }
 
     /**

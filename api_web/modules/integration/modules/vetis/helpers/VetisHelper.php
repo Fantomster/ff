@@ -8,7 +8,9 @@
 
 namespace api_web\modules\integration\modules\vetis\helpers;
 
+use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
+use api_web\classes\UserWebApi;
 use common\helpers\DBNameHelper;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
@@ -294,5 +296,22 @@ class VetisHelper
         $models = ArrayHelper::merge($models, $query);
 
         return $models;
+    }
+
+    /**
+     * @param $uuids
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws \Exception
+     */
+    public function getAvailableVsd($uuids){
+        $enterpriseGuids = [];
+        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
+        foreach ($orgIds['result'] as $orgId) {
+            $enterpriseGuids[] = mercDicconst::getSetting('enterprise_guid', $orgId['id']);
+        }
+
+        return MercVsd::find()->select(['uuid', 'recipient_guid', 'sender_guid'])
+            ->andWhere(['recipient_guid' =>$enterpriseGuids])
+            ->andWhere(['uuid' => $uuids])->indexBy('uuid')->all();
     }
 }

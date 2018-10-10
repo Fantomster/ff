@@ -68,7 +68,7 @@ class Logger
      */
     public static function response($response)
     {
-        if (empty(self::get()['response_at']) || self::get()['response_at'] == '0000-00-00 00:00:00') {
+        if (empty(self::get()['response_at']) || self::get()['response_at'] == '0000-00-00 00:00:00' || self::get()['response_at'] == null) {
             self::update([
                 'response' => mb_substr(\json_encode($response, JSON_UNESCAPED_UNICODE), 0, 1000),
                 'response_at' => new Expression('NOW()')

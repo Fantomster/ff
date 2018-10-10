@@ -144,9 +144,34 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $sql = "SELECT COUNT(*) FROM rk_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
         $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryScalar();
 
+        $sql = "SELECT corr_rid,num_code,text_code,store_rid FROM rk_waybill WHERE id = :w_wid";
+        $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryAll();
+        $agent_uuid = $result[0]["corr_rid"];
+        $num_code = $result[0]["num_code"];
+        $text_code = $result[0]["text_code"];
+        $store_id = $result[0]["store_rid"];
+        if (($agent_uuid === null) or ($num_code === null) or ($text_code === null) or ($store_id === null)) {
+            $shapka = 0;
+        } else {
+            $shapka = 1;
+        }
+
         if ($kolvo_nesopost == 0) {
-            $sql = "UPDATE rk_waybill SET readytoexport = 1, status_id = 5, updated_at = NOW() WHERE id = :w_wid";
-            $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            if ($shapka == 1) {
+                $sql = "UPDATE rk_waybill SET readytoexport = 1, status_id = 5, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            } else {
+                $sql = "UPDATE rk_waybill SET readytoexport = 0, status_id = 1, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            }
+        } else {
+            if ($shapka == 1) {
+                $sql = "UPDATE rk_waybill SET readytoexport = 0, status_id = 1, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            } else {
+                $sql = "UPDATE rk_waybill SET readytoexport = 0, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            }
         }
 
         if ($button == 'forever') {
@@ -811,11 +836,35 @@ SQL;
         $lic = $this->checkLic();
         $vi = $lic ? 'update' : '/default/_nolic';
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if ($model->getErrors()) {
+        if ($model->load(Yii::$app->request->post())) {
+            /*if ($model->getErrors()) {
                 var_dump($model->getErrors());
                 exit;
+            }*/
+            $sql = "SELECT COUNT(*) FROM rk_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
+            $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
+            if (($model->corr_rid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_rid === null)) {
+                $shapka = 0;
+            } else {
+                $shapka = 1;
             }
+            if ($kolvo_nesopost == 0) {
+                if ($shapka == 1) {
+                    $model->readytoexport = 1;
+                    $model->status_id = 5;
+                } else {
+                    $model->readytoexport = 0;
+                    $model->status_id = 1;
+                }
+            } else {
+                if ($shapka == 1) {
+                    $model->readytoexport = 0;
+                    $model->status_id = 1;
+                } else {
+                    $model->readytoexport = 0;
+                }
+            }
+            $model->save();
             return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
             return $this->render($vi, [
@@ -841,18 +890,17 @@ SQL;
         if ($const !== '0') {
             RkWaybill::createWaybill($order_id);
             return $this->redirect([$this->getLastUrl() . 'way=' . $order_id]);
-        }
-        else {
+        } else {
             $model = new RkWaybill();
             $model->order_id = $order_id;
             $model->status_id = 1;
             $model->org = $ord->client_id;
 
             if ($model->load(Yii::$app->request->post()) && $model->save()) {
-                if ($model->getErrors()) {
+                /*if ($model->getErrors()) {
                     var_dump($model->getErrors());
                     exit;
-                }
+                }*/
                 return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
             } else {
                 return $this->render('create', [

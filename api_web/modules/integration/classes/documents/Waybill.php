@@ -3,8 +3,8 @@
 namespace api_web\modules\integration\classes\documents;
 
 use api\common\models\AllMaps;
+use api_web\classes\DocumentWebApi;
 use api_web\modules\integration\classes\Dictionary;
-use api_web\modules\integration\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use api_web\modules\integration\modules\iiko\models\iikoService;
 use common\models\Organization;

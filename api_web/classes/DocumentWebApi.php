@@ -1,5 +1,6 @@
 <?php
 namespace api_web\classes;
+use api_web\exceptions\ValidationException;
 use api_web\modules\integration\classes\documents\EdiOrder;
 use api_web\modules\integration\classes\documents\Order;
 use api_web\modules\integration\classes\documents\OrderContent;
@@ -8,6 +9,7 @@ use api_web\modules\integration\classes\documents\OrderEmail;
 use api_web\modules\integration\classes\documents\Waybill;
 use api_web\modules\integration\classes\documents\WaybillContent;
 use common\helpers\DBNameHelper;
+use common\models\RelationUserOrganization;
 use yii\data\SqlDataProvider;
 use yii\web\BadRequestHttpException;
 
@@ -206,72 +208,76 @@ class DocumentWebApi extends \api_web\components\WebApi
         $documents = [];
 
         $params_sql = [];
-        $where_all = '';
-
-        if (isset($post['search']['business_id'])) {
-            $where_all .= " AND client_id  = :business_id";
-            $params_sql[':business_id'] = $post['search']['business_id'];
+        $where_all = " AND client_id  = :business_id";
+        if (isset($post['search']['business_id']) && !empty($post['search']['business_id'])) {
+           if(RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
+                $params_sql[':business_id'] = $post['search']['business_id'];
+            }
+            else
+            {
+                throw new BadRequestHttpException("business unavailable to current user");
+            }
+        }
+        else
+        {
+            $params_sql[':business_id'] = $this->user->organization_id;
         }
 
-        if (isset($post['search']['waybill_status'])) {
+        if (isset($post['search']['waybill_status']) && !empty($post['search']['waybill_status'])) {
             $where_all .= " AND waybill_status = :waybill_status";
             $params_sql[':waybill_status'] = $post['search']['waybill_status'];
         }
 
-        if (isset($post['search']['doc_number'])) {
+        if (isset($post['search']['doc_number']) && !empty($post['search']['doc_number'])) {
             $where_all .= " AND doc_number = :doc_number";
             $params_sql[':doc_number'] = $post['search']['doc_number'];
         }
 
-        if (isset($post['search']['waybill_date'])) {
-            $where_all .= " AND waybill_date = :waybill_date";
-            $params_sql[':waybill_date'] = $post['search']['waybill_date'];
-        }
-
         if (isset($post['search']['waybill_date']) && !empty($post['search']['waybill_date'])) {
-            if (isset($post['search']['waybill_date']['start']) && !empty($post['search']['waybill_date']['start'])) {
-                $from = self::convertDate($post['search']['waybill_date']['start']);
+            if (isset($post['search']['waybill_date']['from']) && !empty($post['search']['waybill_date']['from'])) {
+                $from = self::convertDate($post['search']['waybill_date']['from']);
             }
 
-            if (isset($post['search']['waybill_date']['end']) && !empty($post['search']['waybill_date']['end'])) {
-                $to = self::convertDate($post['search']['waybill_date']['end']);
+            if (isset($post['search']['waybill_date']['to']) && !empty($post['search']['waybill_date']['to'])) {
+                $to = self::convertDate($post['search']['waybill_date']['to']);
             }
 
-            $where_all .= " AND waybill_date BETWEEN :waybill_date_from AND :waybill_date_to";
-            $params_sql[':waybill_date_from'] = $from;
-            $params_sql[':waybill_date_to'] = $to;
+            if(isset($from) && isset($to)) {
+                $where_all .= " AND waybill_date BETWEEN :waybill_date_from AND :waybill_date_to";
+                $params_sql[':waybill_date_from'] = $from;
+                $params_sql[':waybill_date_to'] = $to;
+            }
 
         }
 
-        if (isset($post['search']['order_date'])) {
-            $where_all .= " AND order_date = :order_date";
-            $params_sql[':order_date'] = $post['search']['order_date'];
-        }
+        $from = null;
+        $to = null;
 
         if (isset($post['search']['order_date']) && !empty($post['search']['order_date'])) {
-            if (isset($post['search']['order_date']['start']) && !empty($post['search']['order_date']['start'])) {
-                $from = self::convertDate($post['search']['order_date']['start']);
+            if (isset($post['search']['order_date']['from']) && !empty($post['search']['order_date']['from'])) {
+                $from = self::convertDate($post['search']['order_date']['from']);
             }
 
-            if (isset($post['search']['order_date']['end']) && !empty($post['search']['order_date']['end'])) {
-                $to = self::convertDate($post['search']['order_date']['end']);
+            if (isset($post['search']['order_date']['to']) && !empty($post['search']['order_date']['to'])) {
+                $to = self::convertDate($post['search']['order_date']['to']);
             }
 
-            $where_all .= " AND order_date BETWEEN :order_date_from AND :order_date_to";
-            $params_sql[':order_date_from'] = $from;
-            $params_sql[':order_date_to'] = $to;
-
+            if(isset($from) && isset($to)) {
+                $where_all .= " AND order_date BETWEEN :order_date_from AND :order_date_to";
+                $params_sql[':order_date_from'] = $from;
+                $params_sql[':order_date_to'] = $to;
+            }
         }
 
 
-        if (isset($post['search']['vendor'])) {
-            $where_all .= " AND vendor_id in (:vendors)";
+        if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
+            $where_all .= " AND vendor in (:vendors)";
             $vendors = implode("', '", $post['search']['vendor']);
             $params_sql[':vendors'] = "'" . $vendors . "'";
         }
 
-        if (isset($post['search']['store'])) {
-            $where_all .= " AND store_id in (:store)";
+        if (isset($post['search']['store']) && !empty($post['search']['store'])) {
+            $where_all .= " AND store in (:stories)";
             $stories = implode(",", $post['search']['store']);
             $params_sql[':stories'] = $stories;
         }
@@ -305,17 +311,14 @@ class DocumentWebApi extends \api_web\components\WebApi
         WHERE id is not null $where_all
        ";
 
-        $query = \Yii::$app->db->createCommand($sql);
-
+        //$count = \Yii::$app->db->createCommand("select COUNT(*) from ($sql) as cc",$params_sql)->queryScalar();
         $dataProvider = new SqlDataProvider([
-            'sql' => $query->sql,
+            'sql' => $sql,
             'params' => $params_sql,
+            //'totalCount' => $count,
             'pagination' => [
                 'page' => $page - 1,
                 'pageSize' => $pageSize,
-                /*'params' => [
-                    'sort' => isset($params['sort']) ? $params['sort'] : 'product',
-                ]*/
             ],
             'key' => 'id',
             'sort' => [
@@ -327,11 +330,6 @@ class DocumentWebApi extends \api_web\components\WebApi
                     'waybill_number',
                     'doc_number',
                 ],
-                /*'defaultOrder' => [
-                    'product' => ,
-                    // 'c_article_1' => SORT_ASC,
-                    // 'c_article' => SORT_ASC
-                ]*/
             ],
         ]);
 
@@ -346,7 +344,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         $return = [
             'documents' => $documents,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
+                'page' => $dataProvider->pagination->page+1,
                 'page_size' => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ],
@@ -452,7 +450,7 @@ class DocumentWebApi extends \api_web\components\WebApi
     {
         $result = \DateTime::createFromFormat('d.m.Y H:i:s', $date . " 00:00:00");
         if ($result) {
-            return  $result>format('Y-m-d H:i:s');
+            return  $result->format('Y-m-d H:i:s');
         }
       
         return "";

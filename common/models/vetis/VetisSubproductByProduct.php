@@ -4,9 +4,7 @@ namespace common\models\vetis;
 
 use api\common\models\RabbitQueues;
 use console\modules\daemons\components\UpdateDictInterface;
-use frontend\modules\clientintegr\modules\merc\helpers\api\products\ListOptions;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\products\Products;
 use Yii;
 use yii\helpers\ArrayHelper;
 
@@ -106,7 +104,6 @@ class VetisSubproductByProduct extends \yii\db\ActiveRecord implements UpdateDic
     public static function getUpdateData($org_id)
     {
         try {
-            $load = new Products();
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercSubProductList'])->one();
             if($queue == null) {
@@ -121,9 +118,8 @@ class VetisSubproductByProduct extends \yii\db\ActiveRecord implements UpdateDic
                 'listItemName' => 'subProduct'
             ];
 
-            $listOptions = new ListOptions();
-            $listOptions->count = 1000;
-            $listOptions->offset = 0;
+            $listOptions['count'] = 1000;
+            $listOptions['offset'] = 0;
 
             $queueDate = $queue->last_executed ?? $queue->start_executing;
 

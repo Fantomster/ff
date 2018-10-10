@@ -1,7 +1,7 @@
 <?php
 namespace api_web\modules\integration\classes\documents;
 
-use api_web\modules\integration\classes\DocumentWebApi;
+use api_web\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\EdiOrder as BaseOrder;
 

@@ -9,6 +9,15 @@ use yii\web\View;
 use yii\helpers\Url;
 use kartik\form\ActiveForm;
 use kartik\widgets\DatePicker;
+
+$this->registerCss('
+#mercstockentrysearch-is_expiry {
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 0%;
+        left: 40%;
+        }
+');
 ?>
 
 <?=
@@ -22,7 +31,7 @@ Modal::widget([
 <section class="content-header">
     <h1>
         <img src="<?= Yii::$app->request->baseUrl ?>/img/mercuriy_icon.png" style="width: 32px;">
-        <?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?>
+        <?= Yii::t('message', 'frontend.client.integration.mercury', ['ru' => 'Интеграция с системой ВЕТИС "Меркурий"']) ?>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -31,10 +40,10 @@ Modal::widget([
         ],
         'links' => [
             [
-                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru'=>'Интеграция']),
+                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru' => 'Интеграция']),
                 'url' => ['/clientintegr/default'],
             ],
-            Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']),
+            Yii::t('message', 'frontend.client.integration.mercury', ['ru' => 'Интеграция с системой ВЕТИС "Меркурий"']),
         ],
     ])
     ?>
@@ -44,15 +53,15 @@ Modal::widget([
     $this->render('/default/_license_no_active.php', ['lic' => $lic]);
     ?>
     <?php
-    $timestamp_now=time();
-    ($lic->status_id==1) && ($timestamp_now<=(strtotime($lic->td))) ? $lic_merc=1 : $lic_merc=0;
-    $columns = array (
+    $timestamp_now = time();
+    ($lic->status_id == 1) && ($timestamp_now <= (strtotime($lic->td))) ? $lic_merc = 1 : $lic_merc = 0;
+    $columns = array(
         [
             'class' => 'yii\grid\CheckboxColumn',
-            'contentOptions'   =>   ['class' => 'small_cell_checkbox'],
-            'headerOptions'    =>   ['style' => 'text-align:center; '],
-            'checkboxOptions' => function($model, $key, $index, $widget) use ($searchModel){
-                return ['value' => $model->uuid,'class'=>'checkbox-group_operations'];
+            'contentOptions' => ['class' => 'small_cell_checkbox'],
+            'headerOptions' => ['style' => 'text-align:center; '],
+            'checkboxOptions' => function ($model, $key, $index, $widget) use ($searchModel) {
+                return ['value' => $model->uuid, 'class' => 'checkbox-group_operations'];
             }
         ],
         [
@@ -83,7 +92,7 @@ Modal::widget([
             'label' => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
             'format' => 'raw',
             'value' => function ($data) {
-                return $data['amount']." ".$data['unit'];
+                return $data['amount'] . " " . $data['unit'];
             },
         ],
         [
@@ -92,11 +101,9 @@ Modal::widget([
             'format' => 'raw',
             'value' => function ($data) {
                 $res = $data['production_date'];
-                try{
+                try {
                     $res = Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
-                }
-                catch (Exception $e)
-                {
+                } catch (Exception $e) {
                     $res = $data['production_date'];
                 }
                 return $res;
@@ -108,11 +115,9 @@ Modal::widget([
             'format' => 'raw',
             'value' => function ($data) {
                 $res = $data['expiry_date'];
-                try{
+                try {
                     $res = Yii::$app->formatter->asDatetime($data['expiry_date'], "php:j M Y");
-                }
-                catch (Exception $e)
-                {
+                } catch (Exception $e) {
                     $res = $data['expiry_date'];
                 }
                 return $res;
@@ -185,15 +190,15 @@ Modal::widget([
                         //'data-pjax' => '0',
                     ];
                     $icon = Html::tag('img', '', [
-                        'src'=>Yii::$app->request->baseUrl.'/img/view_vsd.png',
+                        'src' => Yii::$app->request->baseUrl . '/img/view_vsd.png',
                         'style' => 'width: 16px'
                     ]);
                     return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                 },
-                'create' =>  function ($url, $model) {
-                    $customurl = Url::to(['transport-vsd/step-1','selected'=>$model->id]);
-                    return \yii\helpers\Html::a( '<i class="fa fa-truck" aria-hidden="true"></i>', $customurl,
-                        ['title' => Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), 'data-pjax'=>"0"]);
+                'create' => function ($url, $model) {
+                    $customurl = Url::to(['transport-vsd/step-1', 'selected' => $model->id]);
+                    return \yii\helpers\Html::a('<i class="fa fa-truck" aria-hidden="true"></i>', $customurl,
+                        ['title' => Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), 'data-pjax' => "0"]);
                 },
                 'inventory' => function ($url, $model, $key) use ($searchModel) {
                     $options = [
@@ -207,7 +212,7 @@ Modal::widget([
                         ],
                     ];
                     $icon = Html::tag('img', '', [
-                        'src'=>Yii::$app->request->baseUrl.'/img/partial_confirmed.png',
+                        'src' => Yii::$app->request->baseUrl . '/img/partial_confirmed.png',
                         'style' => 'width: 24px'
                     ]);
                     return Html::a($icon, ['inventory', 'id' => $model->id], $options);
@@ -217,7 +222,8 @@ Modal::widget([
     );
     ?>
     <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
-    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.store_entry_list', ['ru'=>'Журнал входной продукци']) ?>:</h4>
+    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.store_entry_list', ['ru' => 'Журнал входной продукци']) ?>
+        :</h4>
     <div class="box box-info">
         <div class="box-header with-border">
             <div class="panel-body">
@@ -290,12 +296,12 @@ Modal::widget([
                                     ],
                                 ])
                                     ->textInput(['prompt' => 'Производитель', 'class' => 'form-control', 'id' => 'producer_name'])
-                                    ->label( 'Производитель', ['class' => 'label search_string', 'style' => 'color:#555'])
+                                    ->label('Производитель', ['class' => 'label search_string', 'style' => 'color:#555'])
                                 ?>
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-6">
-                            <?= Html::label( Yii::t('message', 'frontend.client.integration.production_date', ['ru' => 'Дата производства']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                            <?= Html::label(Yii::t('message', 'frontend.client.integration.production_date', ['ru' => 'Дата производства']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
                             <div class="form-group" style="height: 44px;">
                                 <?=
                                 DatePicker::widget([
@@ -340,17 +346,17 @@ Modal::widget([
                         </div>
                         <div class="col-sm-3 col-md-2 col-lg-1">
                             <?= Html::label('Просрочено', null, ['class' => 'label', 'style' => 'color:#555']) ?>
-                                <?=
-                                $form->field($searchModel, "is_expiry", ['template' => '{input}{error}'])
-                                    ->checkbox([], false)->label(false);
-                                ?>
+                            <?=
+                            $form->field($searchModel, "is_expiry", ['template' => '{input}{error}'])
+                                ->checkbox([], false)->label(false);
+                            ?>
                         </div>
                         <div class="col-sm-3 col-md-2 col-lg-1">
                             <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
                             <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
                         </div>
                     </div>
-                    <?php ActiveForm::end();?>
+                    <?php ActiveForm::end(); ?>
                     <div class="col-md-12">
                         <?php
                         //$checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";

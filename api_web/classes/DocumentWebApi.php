@@ -209,8 +209,8 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         $params_sql = [];
         $where_all = " AND client_id  = :business_id";
-        if (isset($post['search']['business_id'])) {
-            if(RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
+        if (isset($post['search']['business_id']) && !empty($post['search']['business_id'])) {
+           if(RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
                 $params_sql[':business_id'] = $post['search']['business_id'];
             }
             else
@@ -223,12 +223,12 @@ class DocumentWebApi extends \api_web\components\WebApi
             $params_sql[':business_id'] = $this->user->organization_id;
         }
 
-        if (isset($post['search']['waybill_status'])) {
+        if (isset($post['search']['waybill_status']) && !empty($post['search']['waybill_status'])) {
             $where_all .= " AND waybill_status = :waybill_status";
             $params_sql[':waybill_status'] = $post['search']['waybill_status'];
         }
 
-        if (isset($post['search']['doc_number'])) {
+        if (isset($post['search']['doc_number']) && !empty($post['search']['doc_number'])) {
             $where_all .= " AND doc_number = :doc_number";
             $params_sql[':doc_number'] = $post['search']['doc_number'];
         }
@@ -270,14 +270,14 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
 
-        if (isset($post['search']['vendor'])) {
-            $where_all .= " AND vendor_id in (:vendors)";
+        if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
+            $where_all .= " AND vendor in (:vendors)";
             $vendors = implode("', '", $post['search']['vendor']);
             $params_sql[':vendors'] = "'" . $vendors . "'";
         }
 
-        if (isset($post['search']['store'])) {
-            $where_all .= " AND store_id in (:stories)";
+        if (isset($post['search']['store']) && !empty($post['search']['store'])) {
+            $where_all .= " AND store in (:stories)";
             $stories = implode(",", $post['search']['store']);
             $params_sql[':stories'] = $stories;
         }

@@ -47,6 +47,9 @@ class VetisHelper
         'UTILIZED'  => 'vsd_status_utilized', //'Сертификаты погашены',
     ];
 
+    /**
+     * VetisHelper constructor.
+     */
     public function __construct()
     {
         $this->org_id = \Yii::$app->user->identity->organization_id;
@@ -163,6 +166,11 @@ class VetisHelper
         }
     }
 
+    /**
+     * @param      $param
+     * @param null $default
+     * @return null
+     */
     public function isSetDef($param, $default = null)
     {
         if (isset($param) && !empty($param)) {
@@ -171,6 +179,12 @@ class VetisHelper
         return $default;
     }
 
+    /**
+     * @param $var
+     * @param $arParams
+     * @param $arLabels
+     * @return array
+     */
     public function set(&$var, $arParams, $arLabels)
     {
         $arGoodParams = [];
@@ -189,7 +203,7 @@ class VetisHelper
     }
 
     /**
-     * @param int $id
+     * @param int   $id
      * @param array $uuids
      * @return array|bool
      */
@@ -303,15 +317,47 @@ class VetisHelper
      * @return array|\yii\db\ActiveRecord[]
      * @throws \Exception
      */
-    public function getAvailableVsd($uuids){
-        $enterpriseGuids = [];
-        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
-        foreach ($orgIds['result'] as $orgId) {
-            $enterpriseGuids[] = mercDicconst::getSetting('enterprise_guid', $orgId['id']);
-        }
+    public function getAvailableVsd($uuids)
+    {
+        $enterpriseGuids = $this->getEnterpriseGuids();
 
         return MercVsd::find()->select(['uuid', 'recipient_guid', 'sender_guid'])
-            ->andWhere(['recipient_guid' =>$enterpriseGuids])
+            ->andWhere(['recipient_guid' => $enterpriseGuids])
             ->andWhere(['uuid' => $uuids])->indexBy('uuid')->all();
+    }
+
+
+    /**
+     * @param null $enterpriseGuids
+     * @return array
+     * @throws \Exception
+     */
+    public function getNotConfirmedVsd($enterpriseGuids = null)
+    {
+        if (!$enterpriseGuids) {
+            $enterpriseGuids = $this->getEnterpriseGuids();
+        }
+        $query = (new Query())->select(['GROUP_CONCAT(uuid) as uuids', 'COUNT(*) as count'])->from('merc_vsd')
+            ->where(['status' => 'CONFIRMED', 'recipient_guid' => $enterpriseGuids])->one(\Yii::$app->db_api);
+
+        return [
+            'uuids' => explode(',', $query['uuids']),
+            'count' => $query['count'],
+        ];
+    }
+
+    /**
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getEnterpriseGuids()
+    {
+        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
+        foreach ($orgIds['result'] as $orgId) {
+            $entGuid = mercDicconst::getSetting('enterprise_guid', $orgId['id']);
+            $enterpriseGuids[$entGuid] = $entGuid;
+        }
+
+        return $enterpriseGuids;
     }
 }

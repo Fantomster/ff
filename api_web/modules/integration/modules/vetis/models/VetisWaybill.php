@@ -161,14 +161,10 @@ class VetisWaybill extends WebApi
      */
     public function getSenderOrProductFilter($request, $filterName)
     {
-        if (isset($request['acquirer_id']) && !empty($request['acquirer_id'])){
+        if (isset($request['acquirer_id']) && !empty($request['acquirer_id'])) {
             $enterpriseGuids = mercDicconst::getSetting('enterprise_guid', $request['acquirer_id']);
         } else {
-            $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
-            foreach ($orgIds['result'] as $orgId) {
-                $entGuid = mercDicconst::getSetting('enterprise_guid', $orgId['id']);
-                $enterpriseGuids[$entGuid] = $entGuid;
-            }
+            $enterpriseGuids = $this->helper->getEnterpriseGuids();
         }
         $query = MercVsd::find();
         if (isset($request['search'][$filterName]) && !empty($request['search'][$filterName])) {
@@ -341,5 +337,19 @@ class VetisWaybill extends WebApi
         }
 
         return ['result' => $result];
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws \Exception
+     */
+    public function getNotConfirmedVsd($request)
+    {
+        $enterpraiseGuid = $request['enterpraise_guid'] ?? null;
+
+        return [
+            'result' => $this->helper->getNotConfirmedVsd($enterpraiseGuid),
+        ];
     }
 }

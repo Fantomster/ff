@@ -241,16 +241,16 @@ $("document").ready(function(){
         } else {
             sortirov='-'+sortirov;
         } //и меняем на противоположный порядок сортировки
-        //var filter1 = $("#iikoproductsearch-product_type").val(); //узнаём значение фильтра НДС
-        //var filter2 = $("#iikoproductsearch-cooking_place_type").val(); //узнаём значение фильтра НДС
-        //var filter3 = $("#iikoproductsearch-unit").val(); //узнаём значение фильтра НДС
+        var filter1 = $("#iikoproductsearch-product_type").val(); //узнаём значение фильтра НДС
+        var filter2 = $("#iikoproductsearch-cooking_place_type").val(); //узнаём значение фильтра НДС
+        var filter3 = $("#iikoproductsearch-unit").val(); //узнаём значение фильтра НДС
         $('input[name="page"]').val(page);
         $('input[name="sort"]').val(sortirov);
         //$('input[name="filter1"]').val(filter1);
         //$('input[name="filter2"]').val(filter2);
         //$('input[name="filter3"]').val(filter3);
         var vr = $("#w0").attr('action');
-        var act = '/ru/clientintegr/iiko/settings/change-const?id=7&page='+page+'&sort='+sortirov;
+        var act = '/ru/clientintegr/iiko/settings/change-const?id=7&page='+page+'&sort='+sortirov+'&productSearch='+filter1+'&cookingPlaceSearch='+filter2+'&unitSearch='+filter3;
         $("#w0").attr('action', act);
         $("#w0").submit();
     })

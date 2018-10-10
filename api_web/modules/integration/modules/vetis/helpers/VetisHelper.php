@@ -319,10 +319,14 @@ class VetisHelper
      */
     public function getAvailableVsd($uuids)
     {
-        $enterpriseGuids = $this->getEnterpriseGuids();
+        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
+        $arOrgIds = array_map(function($el){
+            return $el['id'];
+        }, $orgIds['result']);
 
         return MercVsd::find()->select(['uuid', 'recipient_guid', 'sender_guid'])
-            ->andWhere(['recipient_guid' => $enterpriseGuids])
+            ->leftJoin('merc_pconst mc', 'mc.const_id=10 and mc.value=merc_vsd.recipient_guid')
+            ->where(['mc.org' => $arOrgIds])
             ->andWhere(['uuid' => $uuids])->indexBy('uuid')->all();
     }
 

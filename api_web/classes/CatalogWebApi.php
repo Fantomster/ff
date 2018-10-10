@@ -401,7 +401,7 @@ class CatalogWebApi extends WebApi
         }
 
         return [
-            'result' => $result,
+            'result' => array_values($result),
             'pagination' => [
                 'page' => ($dataProvider->pagination->page + 1),
                 'page_size' => $dataProvider->pagination->pageSize,

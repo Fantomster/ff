@@ -342,7 +342,7 @@ Modal::widget([
                             <?= Html::label('Просрочено', null, ['class' => 'label', 'style' => 'color:#555']) ?>
                                 <?=
                                 $form->field($searchModel, "is_expiry", ['template' => '{input}{error}'])
-                                    ->checkbox([], false);
+                                    ->checkbox([], false)->label(false);
                                 ?>
                         </div>
                         <div class="col-sm-3 col-md-2 col-lg-1">

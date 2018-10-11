@@ -356,4 +356,29 @@ class VetisWaybill extends WebApi
             'result' => $this->helper->getNotConfirmedVsd($enterpraiseGuid),
         ];
     }
+
+    /**
+     * Получение ВСД в PDF
+     *
+     * @param $request
+     * @throws BadRequestHttpException
+     * @return string
+     */
+    public function getVsdPdf($request)
+    {
+        if (!isset($request['uuid'])) {
+            throw new BadRequestHttpException('Uuid is required');
+        }
+        
+        $vsdHttp = $this->helper->generateVsdHttp();
+        $check = $vsdHttp->checkAuthData();
+        
+        if (!$check['result']) {
+            throw new BadRequestHttpException('Vetis authorization failed');
+        }
+        
+        $data = $vsdHttp->getPdfData($request['uuid']);
+        $base64 = (isset($post['base64_encode']) && $post['base64_encode'] == 1 ? true : false);
+        return ($base64 ? base64_encode($data) : $data);
+    }
 }

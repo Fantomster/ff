@@ -839,7 +839,7 @@ class DefaultController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/order/get-vsd-pdf",
+     * @SWG\Post(path="/integration/vetis/get-vsd-pdf",
      *     tags={"Integration/vetis"},
      *     summary="Получить ВСД в PDF",
      *     description="Получить ВСД в PDF",

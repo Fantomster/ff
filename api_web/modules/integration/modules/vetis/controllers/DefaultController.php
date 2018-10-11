@@ -853,7 +853,8 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41"
+     *                      "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
+     *                      "base64_encode":1
      *                  }
      *              )
      *         )

@@ -212,7 +212,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (isset($post['search']['business_id']) && !empty($post['search']['business_id'])) {
            if(RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
                 $params_sql[':business_id'] = $post['search']['business_id'];
-            }
+           }
             else
             {
                 throw new BadRequestHttpException("business unavailable to current user");
@@ -271,15 +271,13 @@ class DocumentWebApi extends \api_web\components\WebApi
 
 
         if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
-            $where_all .= " AND vendor in (:vendors)";
             $vendors = implode("', '", $post['search']['vendor']);
-            $params_sql[':vendors'] = "'" . $vendors . "'";
+            $where_all .= " AND vendor in ($vendors)";
         }
 
         if (isset($post['search']['store']) && !empty($post['search']['store'])) {
-            $where_all .= " AND store in (:stories)";
             $stories = implode(",", $post['search']['store']);
-            $params_sql[':stories'] = $stories;
+            $where_all .= " AND store in ($stories)";
         }
 
         $sort_field = "";
@@ -302,7 +300,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             UNION ALL
             SELECT id, '" . self::TYPE_ORDER_EMAIL . "' as type, organization_id as client_id, null as waybill_status, date as order_date, null as waybill_date,
             null as waybill_number, number as doc_number, vendor_id as vendor, null as store   
-            FROM .integration_invoice WHERE order_id is null
+            FROM integration_invoice WHERE order_id is null
         ) as c
         UNION ALL
         SELECT id, '" . self::TYPE_WAYBILL . "' as type, acquirer_id as client_id, bill_status_id as waybill_status, null as order_date, doc_date as waybill_date, 

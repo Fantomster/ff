@@ -200,7 +200,8 @@ class InvoiceController extends Controller
             $invoice->order_id = $order->id;
             $invoice->save();
             $transaction->commit();
-            return ['status' => true, 'order_id' => $order->id, 'us' => $link];
+            $page = \common\models\IntegrationInvoice::pageOrder($order->id);
+            return ['status' => true, 'order_id' => $order->id, 'us' => $link, 'page' => $page];
         } catch (\Exception $e) {
             $transaction->rollBack();
             return ['status' => false, 'error' => $e->getMessage()];

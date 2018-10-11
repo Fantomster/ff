@@ -70,9 +70,9 @@ class EdiWebApi extends WebApi
      * Завершение заказа
      * @param array $post
      * @throws BadRequestHttpException
-     * @return bool
+     * @return array
      */
-    public function finishOrder(array $post): bool
+    public function finishOrder(array $post): array
     {
 
         if (!isset($post['order_id'])) {
@@ -94,7 +94,7 @@ class EdiWebApi extends WebApi
 
         $order->status = OrderStatus::STATUS_DONE;
         $order->save();
-        return true;
+        return ['result' => true];
 
     }
 

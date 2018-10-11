@@ -51,7 +51,7 @@ class m181004_065039_insert_info_in_licenses_tables extends Migration
                 $licenseOrganization->org_id = $item->org ?? null;
                 $licenseOrganization->fd = $item->fd ?? null;
                 $licenseOrganization->td = $item->td ?? null;
-                $licenseOrganization->object_id = $item->object_id ?? null;
+                $licenseOrganization->object_id = $item->code ?? null;
                 $licenseOrganization->outer_user = $item->name ?? null;
                 $licenseOrganization->outer_name = $item->name ?? null;
                 $licenseOrganization->outer_address = $item->address ?? null;

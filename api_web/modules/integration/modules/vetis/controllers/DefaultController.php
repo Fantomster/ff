@@ -791,7 +791,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "enterpraise_guid": ""
+     *                      "org_id": "1234"
      *                  }
      *              )
      *         )

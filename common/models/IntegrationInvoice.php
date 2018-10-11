@@ -307,4 +307,25 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         return true;
     }
 
+    public function pageOrder($id)
+    {
+        $user = \Yii::$app->user->identity;
+        $rest_id = $user->organization_id;
+        $zakazi = Order::find()->andWhere(['status' => 4, 'client_id' => $rest_id])->orderBy('id DESC')->all();
+        $i = 0;
+        foreach ($zakazi as $zakaz) {
+            $i++;
+            $orders[$i] = $zakaz['id'];
+        }
+        $key = array_search($id, $orders);
+        $page_size = 20;
+        $ostatok = $key % $page_size;
+        if ($ostatok == 0) {
+            $page = $key / $page_size;
+        } else {
+            $page = intdiv($key, $page_size) + 1;
+        }
+        return $page;
+    }
+
 }

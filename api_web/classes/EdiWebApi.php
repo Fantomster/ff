@@ -28,9 +28,9 @@ class EdiWebApi extends WebApi
      * Завершение приемки товаров по заказу
      * @param array $post
      * @throws BadRequestHttpException
-     * @return bool
+     * @return array
      */
-    public function acceptProducts(array $post): bool
+    public function acceptProducts(array $post): array
     {
 
         if (!isset($post['order_id'])) {
@@ -59,7 +59,7 @@ class EdiWebApi extends WebApi
             Organization::findOne($order->client_id), $eComAccess->login, $eComAccess->pass, true)) {
             $order->status = OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED;
             $order->save();
-            return true;
+            return ['result' => true];
         }
 
         throw new BadRequestHttpException("В процессе отправки данных возникла ошибка");

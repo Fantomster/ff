@@ -7,31 +7,29 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use yii\helpers\Url;
-use common\components\UrlPjax;
 
-/*function renderButton($id)
-{
-    return \yii\helpers\Html::tag('a', 'Задать', [
-        'class' => 'actions_icon view-relations',
-        'data-toggle' => "modal",
-        'data-target' => "#myModal",
-        'data-invoice_id' => $id,
-        'style' => 'cursor:pointer;align:center;color:red;',
-        'href' => '#'
-    ]);
-}*/
+/* function renderButton($id)
+  {
+  return \yii\helpers\Html::tag('a', 'Задать', [
+  'class' => 'actions_icon view-relations',
+  'data-toggle' => "modal",
+  'data-target' => "#myModal",
+  'data-invoice_id' => $id,
+  'style' => 'cursor:pointer;align:center;color:red;',
+  'href' => '#'
+  ]);
+  } */
 
 Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
 $form = ActiveForm::begin([
-    'options' => [
-        'data-pjax' => false,
-        'id' => 'search-form',
-        'role' => 'search',
-
-    ],
-    'enableClientValidation' => false,
-    'method' => 'get',
-]);
+            'options' => [
+                'data-pjax' => false,
+                'id' => 'search-form',
+                'role' => 'search',
+            ],
+            'enableClientValidation' => false,
+            'method' => 'get',
+        ]);
 
 $this->title = 'Список накладных';
 $this->registerJs('
@@ -66,8 +64,6 @@ $this->registerJs('
 });
     });
 ');
-
-
 ?>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet"/>
 <style>
@@ -119,8 +115,8 @@ $this->registerJs('
                     <div class="col-lg-2 col-md-3 col-sm-6">
                         <?php
                         echo $form->field($searchModel, 'number')
-                            ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'number'])
-                            ->label(Yii::t('message', 'frontend.views.torg12.number', ['ru' => 'Номер накладной']), ['class' => 'label', 'style' => 'color:#555']);
+                                ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'number'])
+                                ->label(Yii::t('message', 'frontend.views.torg12.number', ['ru' => 'Номер накладной']), ['class' => 'label', 'style' => 'color:#555']);
                         ?>
                     </div>
                     <div class="col-lg-3 col-md-5 col-sm-9">
@@ -147,14 +143,15 @@ $this->registerJs('
                     <div class="col-lg-2 col-md-3 col-sm-6">
                         <?php
                         echo $form->field($searchModel, 'name_postav')
-                            ->textInput(['prompt' => 'Поиск', 'class' => 'form-control fa fa-search', 'id' => 'name_postav_filter'])
-                            ->label(Yii::t('message', 'frontend.views.supplier.denome', ['ru' => 'Наименование поставщика']), ['class' => 'label', 'style' => 'color:#555']);
+                                ->textInput(['prompt' => 'Поиск', 'class' => 'form-control fa fa-search', 'id' => 'name_postav_filter'])
+                                ->label(Yii::t('message', 'frontend.views.supplier.denome', ['ru' => 'Наименование поставщика']), ['class' => 'label', 'style' => 'color:#555']);
                         ?>
                     </div>
                 </div>
                 <?php ActiveForm::end(); ?>
                 <div class="col-sm-12">
-                    <?php try {
+                    <?php
+                    try {
                         $dataProvider->pagination->pageParam = 'page_outer';
                         echo GridView::widget([
                             'dataProvider' => $dataProvider,
@@ -168,7 +165,7 @@ $this->registerJs('
                             'columns' => [
                                 [
                                     'header' =>
-                                        'выбрать / ' . \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-close clear_invoice_radio', 'style' => 'cursor:pointer;color:red']),
+                                    'выбрать / ' . \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-close clear_invoice_radio', 'style' => 'cursor:pointer;color:red']),
                                     'format' => 'raw',
                                     'attribute' => 'number',
                                     'filterInputOptions' => [
@@ -176,8 +173,10 @@ $this->registerJs('
                                         'placeholder' => '№ накладной'
                                     ],
                                     'value' => function ($model) {
-                                        if ($model->order_id) return ' ';
-                                        if (!($model->vendor_id)) return '';
+                                        if ($model->order_id)
+                                            return ' ';
+                                        if (!($model->vendor_id))
+                                            return '';
                                         //return \yii\helpers\Html::input('radio', 'invoice_id', $model->id, ['class' => 'invoice_radio']);
                                         //return '<button type="button" class="btn-primary invoice_radio" id="'.$model->id.'" title="Применить"><i class="glyphicon glyphicon-ok"></i></button>';
                                         return '<a href="#" class="btn btn-secondary btn-lg invoice_radio" role="button" aria-disabled="true" id="' . $model->id . '">☐</a>';
@@ -208,15 +207,19 @@ $this->registerJs('
                                             $sub0 = explode(' ', $licenses['rkws']->td);
                                             $sub1 = explode('-', $sub0[0]);
                                             $licenses['rkws']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-                                            if ($licenses['rkws']->status_id == 0) $rk_us = 0;
-                                            if (($licenses['rkws']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws']->td)))) $link = 'rkws';
+                                            if ($licenses['rkws']->status_id == 0)
+                                                $rk_us = 0;
+                                            if (($licenses['rkws']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['rkws']->td))))
+                                                $link = 'rkws';
                                         }
                                         if (isset($licenses['iiko'])) {
                                             $sub0 = explode(' ', $licenses['iiko']->td);
                                             $sub1 = explode('-', $sub0[0]);
                                             $licenses['iiko']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-                                            if ($licenses['iiko']->status_id == 0) $lic_iiko = 0;
-                                            if (($licenses['iiko']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['iiko']->td)))) $link = 'iiko';
+                                            if ($licenses['iiko']->status_id == 0)
+                                                $lic_iiko = 0;
+                                            if (($licenses['iiko']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['iiko']->td))))
+                                                $link = 'iiko';
                                         }
                                         if (!isset($link)) {
                                             return $data->number;
@@ -246,8 +249,10 @@ $this->registerJs('
                                 [
                                     'attribute' => 'consignee',
                                     'value' => function ($data) {
-                                        if ($data->consignee) return $data->consignee;
-                                        else return $data->organization->name;
+                                        if ($data->consignee)
+                                            return $data->consignee;
+                                        else
+                                            return $data->organization->name;
                                     }
                                 ],
                                 [
@@ -270,8 +275,7 @@ $this->registerJs('
                                         return ["id" => "oid" . $data->id];
                                     },
                                     'value' => function ($data) {
-                                        return UrlPjax::make($data->order_id, '/order/view', $data->order_id);
-
+                                        return Html::a($data->order_id, Url::to(['/order/view', 'id' => $data->order_id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
                                     },
                                 ],
                                 [
@@ -290,15 +294,15 @@ $this->registerJs('
                                         return ["id" => "way" . $data->id,
                                             "data-vendor" => $data->vendor_id];
                                     },
-                                    /*'buttons' => [
-                                        'view_relations' => function ($url, $model) {
-                                            if (isset($model->order->vendor)) {
-                                                return $model->order->vendor->name;
-                                            } else {
-                                                return 'Задать'renderButton($model->id);
-                                            }
-                                        }
-                                    ],*/
+                                    /* 'buttons' => [
+                                      'view_relations' => function ($url, $model) {
+                                      if (isset($model->order->vendor)) {
+                                      return $model->order->vendor->name;
+                                      } else {
+                                      return 'Задать'renderButton($model->id);
+                                      }
+                                      }
+                                      ], */
                                     'value' => function ($model) {
                                         if (isset($model->vendor_id)) {
                                             return $model->vendor->name;
@@ -323,7 +327,9 @@ $this->registerJs('
                             ]
                         ]);
                     } catch (Exception $e) {
-                    } ?>
+                        
+                    }
+                    ?>
                 </div>
             </div>
         </div>
@@ -363,8 +369,8 @@ if (!empty($integration)) {
     ];
     foreach ($integration as $key => $row) {
         $list_integration .= '<br>' . \yii\helpers\Html::a($links[$key]['title'], \Yii::$app->urlManager->createUrl($links[$key]['url']), [
-                'class' => 'btn btn-primary'
-            ]);
+                    'class' => 'btn btn-primary'
+        ]);
     }
 }
 
@@ -836,8 +842,6 @@ $js = <<<JS
 JS;
 $this->registerJs($js);
 $this->registerJsFile(
-    'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js',
-    ['depends' => [\yii\web\JqueryAsset::className()]]
+        'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js', ['depends' => [\yii\web\JqueryAsset::className()]]
 );
 ?>
-</div>

@@ -30,6 +30,8 @@ class VetisHelper
     private $doc;
     /**@var MercVsd model */
     private $vsdModel;
+    /**@var int organization id */
+    private $org_id;
     /**@var array $expertizeList расшифровки статусов экспертиз */
     public static $expertizeList = [
         'UNKNOWN'     => 'the_result_is_unknown', //Результат неизвестен
@@ -363,5 +365,18 @@ class VetisHelper
         }
 
         return $enterpriseGuids;
+    }
+    
+    public function generateVsdHttp()
+    {
+        return new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
+            'authLink'       => Yii::$app->params['vtsHttp']['authLink'],
+            'vsdLink'        => Yii::$app->params['vtsHttp']['vsdLink'],
+            'pdfLink'        => Yii::$app->params['vtsHttp']['pdfLink'],
+            'chooseFirmLink' => Yii::$app->params['vtsHttp']['chooseFirmLink'],
+            'username'       => mercDicconst::getSetting("vetis_login", $this->org_id),
+            'password'       => mercDicconst::getSetting("vetis_password", $this->org_id),
+            'firmGuid'       => mercDicconst::getSetting("issuer_id", $this->org_id),
+        ]);
     }
 }

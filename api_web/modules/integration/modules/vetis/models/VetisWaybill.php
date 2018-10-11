@@ -378,7 +378,7 @@ class VetisWaybill extends WebApi
         }
         
         $data = $vsdHttp->getPdfData($request['uuid']);
-        $base64 = (isset($post['base64_encode']) && $post['base64_encode'] == 1 ? true : false);
+        $base64 = (isset($request['base64_encode']) && $request['base64_encode'] == 1 ? true : false);
         return ($base64 ? base64_encode($data) : $data);
     }
 }

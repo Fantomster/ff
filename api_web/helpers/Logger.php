@@ -54,9 +54,13 @@ class Logger
      */
     public static function request($request)
     {
+        $serializedRequest = \json_encode($request, JSON_UNESCAPED_UNICODE);
+        if (mb_strlen($serializedRequest) > 65535){
+            $serializedRequest = mb_substr($serializedRequest, 0, 65534);
+        }
         if (empty(self::get()['request_at']) || self::get()['request_at'] == '0000-00-00 00:00:00') {
             self::update([
-                'request' => \json_encode($request, JSON_UNESCAPED_UNICODE),
+                'request' => $serializedRequest,
                 'request_at' => new Expression('NOW()')
             ]);
         }

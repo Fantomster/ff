@@ -23,7 +23,7 @@ class Order extends BaseOrder implements DocumentInterface
             "id" => $this->id,
             "mumber" => $this->id,
             "type" => DocumentWebApi::TYPE_ORDER,
-            "status_id" => $this->status_id,
+            "status_id" => $this->status,
             "status_text" => $this->statusText,
         ];
 
@@ -39,7 +39,7 @@ class Order extends BaseOrder implements DocumentInterface
         ];
         $return["is_mercury_cert"] = $this->getIsMercuryCert();
         $return["count"] = $this->positionCount;
-        $return["total_price"] = $this->totalPrice;
+        $return["total_price"] = $this->total_price;
         $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->doc_date));
 
         return $return;

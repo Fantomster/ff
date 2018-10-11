@@ -55,6 +55,14 @@ class VetisWaybillSearch extends MercVsd
             }, $orgIds['result']);
             $strOrgIds = implode(',', $strOrgIds);
         }
+
+        $queryParams = [
+            ':page'     => $page,
+            ':pageSize' => $pageSize,
+        ];
+        $arWhereAndCount = $this->generateWhereStatementAndCount($params, $strOrgIds, $queryParams);
+        $mercPconst = $arWhereAndCount['merc_pconst'] ?? 'a.recipient_guid, a.sender_guid';
+
         $sql = 'SELECT * FROM (
                 SELECT 
                      @page := case 
@@ -90,24 +98,49 @@ class VetisWaybillSearch extends MercVsd
                 else null end ort
                 FROM (SELECT @row := 0, @page_size := :pageSize, @page := 0, @offset := 0, @prev_order_id := NULL) x,
                        merc_vsd a
-                join merc_pconst b on b.const_id = 10 and b.value in (a.recipient_guid,  a.sender_guid)
+                join merc_pconst b on b.const_id = 10 and b.value in ('.$mercPconst.')
                 left join `' . $tableName . '`.order_content c on a.uuid = c.merc_uuid
                 where 
-                b.org in (' . $strOrgIds . ')';
-        $query_params = [
-            ':page'     => $page,
-            ':pageSize' => $pageSize,
-        ];
+                b.org in (' . $strOrgIds . ') '.$arWhereAndCount['sql'].'
+                order by coalesce(ort, a.date_doc) desc, order_id, a.date_doc desc
+                ) tb 
+              ) tb2 where pg=:page
+             ';
+
+        $result = \Yii::$app->db_api->createCommand($sql, $queryParams)->queryAll();
+
+        $arUuids = $arOrders = [];
+        foreach ($result as $row) {
+            $arUuids[$row['uuid']] = $row['order_id'];
+            if (!is_null($row['order_id'])) {
+                $arOrders[$row['order_id']] = $row['order_id'];
+            }
+        }
+
+
+        return ['uuids' => $arUuids, 'groups' => $arOrders, 'count' => ceil($arWhereAndCount['count'] / $pageSize)];
+    }
+
+    /**
+     * Cant separate method, count depends on where
+     * @param $params
+     * @param $strOrgIds
+     * @param $queryParams
+     * @return array
+     */
+    private function generateWhereStatementAndCount($params, $strOrgIds, &$queryParams){
+        $sql = '';
         $arCount = [];
+        $mercPconst = null;
         foreach ($params as $key => $param) {
             if ($key == 'date') {
-                $start_date = date('Y-m-d 00:00:00', strtotime($this->from));
-                $end_date = date('Y-m-d 23:59:59', strtotime($this->to));
+                $startDate = date('Y-m-d 00:00:00', strtotime($this->from));
+                $endDate = date('Y-m-d 23:59:59', strtotime($this->to));
             } elseif ($key == 'product_name') {
                 $sql .= " and a.product_name in (";
                 for ($i=0; $i < count($this->product_name); $i++){
                     $sql .=  ($i==0 ? '' : ",") . ":product_name" . $i;
-                    $query_params[':product_name' . $i] = $this->product_name[$i];
+                    $queryParams[':product_name' . $i] = $this->product_name[$i];
                 }
                 $arCount['product_name'] = $this->product_name;
                 $sql .= ")";
@@ -121,40 +154,31 @@ class VetisWaybillSearch extends MercVsd
                 $sql .= " and a.sender_guid in ('$sender') ";
                 $arCount['sender_guid'] = $this->sender_guid;
             } elseif ($key == 'type') {
-                $sql .= ' and a.type=:type';
-                $query_params[':type'] = $this->type;
-                $arCount['type'] = $this->type;
+                if ($this->type == 'INCOMING'){
+                    $mercPconst = 'recipient_guid';
+                } elseif ($this->type == 'OUTGOING'){
+                    $mercPconst = 'sender_guid';
+                }
             } elseif ($key == 'status') {
                 $sql .= ' and a.status=:status';
-                $query_params[':status'] = $this->status;
+                $queryParams[':status'] = $this->status;
                 $arCount['status'] = $this->status;
             }
         }
         $between = null;
-        if (isset($start_date) && isset($end_date)) {
-            $query_params[':start_date'] = $start_date;
-            $query_params[':end_date'] = $end_date;
+        if (isset($startDate) && isset($endDate)) {
+            $queryParams[':start_date'] = $startDate;
+            $queryParams[':end_date'] = $endDate;
             $sql .= ' and (a.date_doc >= :start_date and a.date_doc <= :end_date) ';
-            $between = ['between', "date_doc", $start_date, $end_date];
+            $between = ['between', "date_doc", $startDate, $endDate];
         }
 
-        $sql .= '
-                order by coalesce(ort, a.date_doc) desc, order_id, a.date_doc desc
-                ) tb 
-              ) tb2 where pg=:page
-             ';
-
-        $result = \Yii::$app->db_api->createCommand($sql, $query_params)->queryAll();
-
-        $arUuids = $arOrders = [];
-        foreach ($result as $row) {
-            $arUuids[$row['uuid']] = $row['order_id'];
-            if (!is_null($row['order_id'])) {
-                $arOrders[$row['order_id']] = $row['order_id'];
-            }
+        $pConstForCount = 'merc_vsd.recipient_guid,  merc_vsd.sender_guid';
+        if ($mercPconst){
+            $pConstForCount = 'merc_vsd.' . $mercPconst;
         }
-
-        $count = MercVsd::find()->distinct()->leftJoin('merc_pconst b', 'b.const_id = 10 and b.value in (merc_vsd.recipient_guid,  merc_vsd.sender_guid)')->where(
+        $count = MercVsd::find()->distinct()->leftJoin('merc_pconst b', 'b.const_id = 10 and b.value in ('
+            .$pConstForCount.')')->where(
             array_merge(['b.org' => explode(',', $strOrgIds)], $arCount)
         );
         if ($between){
@@ -162,6 +186,6 @@ class VetisWaybillSearch extends MercVsd
         }
         $count = $count->count();
 
-        return ['uuids' => $arUuids, 'groups' => $arOrders, 'count' => ceil($count / $pageSize)];
+        return ['sql' => $sql, 'count' => $count, 'merc_pconst' => $mercPconst ? 'a.'. $mercPconst : null];
     }
 }

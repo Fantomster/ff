@@ -54,6 +54,9 @@ class EComIntegration2 extends Component
      */
     public function init(){
         $conf = EcomIntegrationConfig::findOne(['org_id' => $this->orgId]);
+        if (!$conf) {
+            throw new BadRequestHttpException("Config not set for this vendor");
+        }
         $this->setProvider($this->createClass('providers\\', $conf['provider']));
         $this->setRealization($this->createClass('realization\\', $conf['realization']));
     }
@@ -195,7 +198,7 @@ class EComIntegration2 extends Component
                 $item->edi_recadv = $remoteFile;
                 $item->save();
             }
-            $result = $this->sendDoc($vendor, $string, $remoteFile, $login, $pass);
+            $result = $this->provider->sendDoc($string, $remoteFile, $login, $pass);
             $transaction->commit();
         } catch (Exception $e) {
             Yii::error($e);

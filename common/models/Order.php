@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\ecom\EComIntegration2;
 use common\components\EComIntegration;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
@@ -63,6 +64,8 @@ class Order extends \yii\db\ActiveRecord
     const STATUS_REJECTED = 5;
     const STATUS_CANCELLED = 6;
     const STATUS_FORMING = 7;
+    const STATUS_EDI_SENDING_TO_VENDOR = 10;
+    const STATUS_EDI_SENDING_ERROR = 11;
 
     const DISCOUNT_NO_DISCOUNT = null;
     const DISCOUNT_FIXED = 1;
@@ -557,7 +560,12 @@ class Order extends \yii\db\ActiveRecord
             $client = Organization::findOne(['id' => $this->client_id]);
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
             if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
-                $eComIntegration = new EComIntegration();
+                if(strpos($vendor->name, 'est_Korus_Organization')){
+                    $eComIntegration = new EComIntegration2(['orgId' => $vendor->id]);
+                }else{
+                    $eComIntegration = new EComIntegration();
+                }
+
                 $login = $vendor->ediOrganization->login;
                 $pass = $vendor->ediOrganization->pass;
                 if ($this->status == OrderStatus::STATUS_DONE) {

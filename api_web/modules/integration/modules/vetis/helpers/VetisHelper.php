@@ -370,10 +370,10 @@ class VetisHelper
     public function generateVsdHttp()
     {
         return new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
-            'authLink'       => Yii::$app->params['vtsHttp']['authLink'],
-            'vsdLink'        => Yii::$app->params['vtsHttp']['vsdLink'],
-            'pdfLink'        => Yii::$app->params['vtsHttp']['pdfLink'],
-            'chooseFirmLink' => Yii::$app->params['vtsHttp']['chooseFirmLink'],
+            'authLink'       => \Yii::$app->params['vtsHttp']['authLink'],
+            'vsdLink'        => \Yii::$app->params['vtsHttp']['vsdLink'],
+            'pdfLink'        => \Yii::$app->params['vtsHttp']['pdfLink'],
+            'chooseFirmLink' => \Yii::$app->params['vtsHttp']['chooseFirmLink'],
             'username'       => mercDicconst::getSetting("vetis_login", $this->org_id),
             'password'       => mercDicconst::getSetting("vetis_password", $this->org_id),
             'firmGuid'       => mercDicconst::getSetting("issuer_id", $this->org_id),

@@ -373,7 +373,7 @@ class VetisWaybill extends WebApi
         $vsdHttp = $this->helper->generateVsdHttp();
         $check = $vsdHttp->checkAuthData();
         
-        if (!$check['result']) {
+        if (!$check['success']) {
             throw new BadRequestHttpException('Vetis authorization failed');
         }
         

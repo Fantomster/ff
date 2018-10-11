@@ -346,7 +346,10 @@ class VetisWaybill extends WebApi
      */
     public function getNotConfirmedVsd($request)
     {
-        $enterpraiseGuid = $request['enterpraise_guid'] ?? null;
+        $orgId = $request['org_id'] ?? null;
+        if ($orgId){
+            $enterpraiseGuid = mercDicconst::getSetting('enterprise_guid', $orgId);
+        }
 
         return [
             'result' => $this->helper->getNotConfirmedVsd($enterpraiseGuid),

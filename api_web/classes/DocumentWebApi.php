@@ -311,7 +311,8 @@ class DocumentWebApi extends \api_web\components\WebApi
         WHERE id is not null $where_all
        ";
 
-        //$count = \Yii::$app->db->createCommand("select COUNT(*) from ($sql) as cc",$params_sql)->queryScalar();
+       //$count = \Yii::$app->db->createCommand("select COUNT(*) from ($sql) as cc",$params_sql);
+        //var_dump($count->rawSql); die();
         $dataProvider = new SqlDataProvider([
             'sql' => $sql,
             'params' => $params_sql,

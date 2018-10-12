@@ -10,7 +10,9 @@ namespace common\components\ecom\providers;
 
 
 use common\components\ecom\AbstractProvider;
+use common\components\ecom\EdiClass;
 use common\components\ecom\ProviderInterface;
+use common\components\ecom\SendInput;
 use common\models\Organization;
 use yii\base\Exception;
 
@@ -99,22 +101,59 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
     {
         //da(base64_encode($string));
         //da($string);
-        $client = $this->client;
-        //da(get_class_methods($client));
-        //$client2 = new \SoapClient('https://www.ecod.pl/webserv2/EDIservice.asmx?op=Send');
+        //$client = $this->client;
 
-        $relation = $this->getRelation($client, 0, $login, $pass);
+        //$client2 = new \SoapClient('https://edi-ws.esphere.ru/edi.wsdl');
 
-        $array = [
+        //$relation = $this->getRelation($client, 0, $login, $pass);
+        $edi = new EdiClass();
+        $sendInp = new SendInput();
+        $sendInp->Name = $login;
+        $sendInp->Password = $pass;
+        $sendInp->RelationId = 156541035152131;
+        $sendInp->DocumentContent = 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48T1JERVI+CiAgICA8RE9DVU1FTlROQU1FPjIyMDwvRE9DVU1FTlROQU1FPgogICAgPE5VTUJFUj4xMzgwODwvTlVNQkVSPgogICAgPERBVEU+MjAxOC0xMC0xMjwvREFURT4KICAgIDxERUxJVkVSWURBVEU+MjAxOC0xMC0xMjwvREVMSVZFUllEQVRFPgogICAgPENVUlJFTkNZPlJVQjwvQ1VSUkVOQ1k+CiAgICA8U1VQT1JERVI+MTM4MDg8L1NVUE9SREVSPgogICAgPERPQ1RZUEU+TzwvRE9DVFlQRT4KICAgIDxDQU1QQUlHTk5VTUJFUj4xMzgwODwvQ0FNUEFJR05OVU1CRVI+CiAgICA8T1JEUlRZUEU+T1JJR0lOQUw8L09SRFJUWVBFPgogICAgPEhFQUQ+CiAgICAgICAgPFNVUFBMSUVSPjIwMDAwMDAwMDAxMzY8L1NVUFBMSUVSPgogICAgICAgIDxCVVlFUj4yMDAwMDAwMDAwNzc3PC9CVVlFUj4KICAgICAgICA8REVMSVZFUllQTEFDRT4yMDAwMDAwMDAwNzc3PC9ERUxJVkVSWVBMQUNFPgogICAgICAgIDxTRU5ERVI+MjAwMDAwMDAwMDc3NzwvU0VOREVSPgogICAgICAgIDxSRUNJUElFTlQ+MjAwMDAwMDAwMDEzNjwvUkVDSVBJRU5UPgogICAgICAgIDxFRElJTlRFUkNIQU5HRUlEPjEzODA4PC9FRElJTlRFUkNIQU5HRUlEPgogICAgICAgICAgICAgICAgICAgICAgICA8L0hFQUQ+CjwvT1JERVI+Cg==';
+
+
+        $array =[
             "Name" => $login,
             'Password' => $pass,
             "RelationId" => 156541035152131,
-            "DocumentContent" => 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48T1JERVI+CiAgICA8RE9DVU1FTlROQU1FPjIyMDwvRE9DVU1FTlROQU1FPgogICAgPE5VTUJFUj4xMzgwODwvTlVNQkVSPgogICAgPERBVEU+MjAxOC0xMC0xMjwvREFURT4KICAgIDxERUxJVkVSWURBVEU+MjAxOC0xMC0xMjwvREVMSVZFUllEQVRFPgogICAgPENVUlJFTkNZPlJVQjwvQ1VSUkVOQ1k+CiAgICA8U1VQT1JERVI+MTM4MDg8L1NVUE9SREVSPgogICAgPERPQ1RZUEU+TzwvRE9DVFlQRT4KICAgIDxDQU1QQUlHTk5VTUJFUj4xMzgwODwvQ0FNUEFJR05OVU1CRVI+CiAgICA8T1JEUlRZUEU+T1JJR0lOQUw8L09SRFJUWVBFPgogICAgPEhFQUQ+CiAgICAgICAgPFNVUFBMSUVSPjIwMDAwMDAwMDAxMzY8L1NVUFBMSUVSPgogICAgICAgIDxCVVlFUj4yMDAwMDAwMDAwNzc3PC9CVVlFUj4KICAgICAgICA8REVMSVZFUllQTEFDRT4yMDAwMDAwMDAwNzc3PC9ERUxJVkVSWVBMQUNFPgogICAgICAgIDxTRU5ERVI+MjAwMDAwMDAwMDc3NzwvU0VOREVSPgogICAgICAgIDxSRUNJUElFTlQ+MjAwMDAwMDAwMDEzNjwvUkVDSVBJRU5UPgogICAgICAgIDxFRElJTlRFUkNIQU5HRUlEPjEzODA4PC9FRElJTlRFUkNIQU5HRUlEPgogICAgICAgICAgICAgICAgICAgICAgICA8L0hFQUQ+CjwvT1JERVI+Cg==',
-            "SendInput"
+            "DocumentContent" => 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48T1JERVI+CiAgICA8RE9DVU1FTlROQU1FPjIyMDwvRE9DVU1FTlROQU1FPgogICAgPE5VTUJFUj4xMzgwODwvTlVNQkVSPgogICAgPERBVEU+MjAxOC0xMC0xMjwvREFURT4KICAgIDxERUxJVkVSWURBVEU+MjAxOC0xMC0xMjwvREVMSVZFUllEQVRFPgogICAgPENVUlJFTkNZPlJVQjwvQ1VSUkVOQ1k+CiAgICA8U1VQT1JERVI+MTM4MDg8L1NVUE9SREVSPgogICAgPERPQ1RZUEU+TzwvRE9DVFlQRT4KICAgIDxDQU1QQUlHTk5VTUJFUj4xMzgwODwvQ0FNUEFJR05OVU1CRVI+CiAgICA8T1JEUlRZUEU+T1JJR0lOQUw8L09SRFJUWVBFPgogICAgPEhFQUQ+CiAgICAgICAgPFNVUFBMSUVSPjIwMDAwMDAwMDAxMzY8L1NVUFBMSUVSPgogICAgICAgIDxCVVlFUj4yMDAwMDAwMDAwNzc3PC9CVVlFUj4KICAgICAgICA8REVMSVZFUllQTEFDRT4yMDAwMDAwMDAwNzc3PC9ERUxJVkVSWVBMQUNFPgogICAgICAgIDxTRU5ERVI+MjAwMDAwMDAwMDc3NzwvU0VOREVSPgogICAgICAgIDxSRUNJUElFTlQ+MjAwMDAwMDAwMDEzNjwvUkVDSVBJRU5UPgogICAgICAgIDxFRElJTlRFUkNIQU5HRUlEPjEzODA4PC9FRElJTlRFUkNIQU5HRUlEPgogICAgICAgICAgICAgICAgICAgICAgICA8L0hFQUQ+CjwvT1JERVI+Cg=='
         ];
 
-        $result = $client->process($array);
-        da($result);
+        $soap_request = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:edi="http://edi-express.esphere.ru/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <edi:SendInput>
+         <edi:Name>2000000000777</edi:Name>
+         <edi:Password>hgf8rt1c4</edi:Password>
+         <edi:RelationId>156541035152131</edi:RelationId>
+         <edi:DocumentContent>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48T1JERVI+CiAgICA8RE9DVU1FTlROQU1FPjIyMDwvRE9DVU1FTlROQU1FPgogICAgPE5VTUJFUj4xMzgwODwvTlVNQkVSPgogICAgPERBVEU+MjAxOC0xMC0xMjwvREFURT4KICAgIDxERUxJVkVSWURBVEU+MjAxOC0xMC0xMjwvREVMSVZFUllEQVRFPgogICAgPENVUlJFTkNZPlJVQjwvQ1VSUkVOQ1k+CiAgICA8U1VQT1JERVI+MTM4MDg8L1NVUE9SREVSPgogICAgPERPQ1RZUEU+TzwvRE9DVFlQRT4KICAgIDxDQU1QQUlHTk5VTUJFUj4xMzgwODwvQ0FNUEFJR05OVU1CRVI+CiAgICA8T1JEUlRZUEU+T1JJR0lOQUw8L09SRFJUWVBFPgogICAgPEhFQUQ+CiAgICAgICAgPFNVUFBMSUVSPjIwMDAwMDAwMDAxMzY8L1NVUFBMSUVSPgogICAgICAgIDxCVVlFUj4yMDAwMDAwMDAwNzc3PC9CVVlFUj4KICAgICAgICA8REVMSVZFUllQTEFDRT4yMDAwMDAwMDAwNzc3PC9ERUxJVkVSWVBMQUNFPgogICAgICAgIDxTRU5ERVI+MjAwMDAwMDAwMDc3NzwvU0VOREVSPgogICAgICAgIDxSRUNJUElFTlQ+MjAwMDAwMDAwMDEzNjwvUkVDSVBJRU5UPgogICAgICAgIDxFRElJTlRFUkNIQU5HRUlEPjEzODA4PC9FRElJTlRFUkNIQU5HRUlEPgogICAgICAgICAgICAgICAgICAgICAgICA8L0hFQUQ+CjwvT1JERVI+Cg==</edi:DocumentContent>
+      </edi:SendInput>
+   </soapenv:Body>
+</soapenv:Envelope>';
+        $header = array(
+            "Content-type: text/xml;charset=\"utf-8\"",
+            "Accept: text/xml",
+            "Cache-Control: no-cache",
+            "Pragma: no-cache",
+            "SOAPAction: \"run\"",
+            "Content-length: ".strlen($soap_request),
+        );
+
+        $soap_do = curl_init();
+        curl_setopt($soap_do, CURLOPT_URL, "https://edi-ws.esphere.ru/send" );
+        curl_setopt($soap_do, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($soap_do, CURLOPT_TIMEOUT,        10);
+        curl_setopt($soap_do, CURLOPT_RETURNTRANSFER, true );
+        curl_setopt($soap_do, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($soap_do, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($soap_do, CURLOPT_POST,           true );
+        curl_setopt($soap_do, CURLOPT_POSTFIELDS,     $soap_request);
+        curl_setopt($soap_do, CURLOPT_HTTPHEADER,     $header);
+        da(curl_exec($soap_do));
+
+
 
 //        $obj = $client->sendDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $remoteFile, 'content' => $string]);
 //        if (isset($obj) && isset($obj->result->errorCode) && $obj->result->errorCode == 0) {

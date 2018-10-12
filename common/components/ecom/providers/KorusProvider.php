@@ -98,24 +98,22 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
     public function sendDoc(String $string, String $remoteFile, String $login, String $pass): bool
     {
         //da(base64_encode($string));
+        //da($string);
         $client = $this->client;
         //da(get_class_methods($client));
-        $client2 = new \SoapClient('https://www.ecod.pl/webserv2/EDIservice.asmx?op=Send');
+        //$client2 = new \SoapClient('https://www.ecod.pl/webserv2/EDIservice.asmx?op=Send');
 
         $relation = $this->getRelation($client, 0, $login, $pass);
-        da($relation);
+
         $array = [
             "Name" => $login,
             'Password' => $pass,
-            "PartnerIln" => $relation['partner-iln'],
-            "DocumentType" => $relation['document-type'],
-            "DocumentVersion" => $relation['document-version'],
-            "DocumentStandard" => $relation["document-standard"],
-            "DocumentTest" => $relation['document-test'],
-            "RelationId" => $relation['relation-id'],
-            "DocumentContent" => $string,
+            "RelationId" => 156541035152131,
+            "DocumentContent" => 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48T1JERVI+CiAgICA8RE9DVU1FTlROQU1FPjIyMDwvRE9DVU1FTlROQU1FPgogICAgPE5VTUJFUj4xMzgwODwvTlVNQkVSPgogICAgPERBVEU+MjAxOC0xMC0xMjwvREFURT4KICAgIDxERUxJVkVSWURBVEU+MjAxOC0xMC0xMjwvREVMSVZFUllEQVRFPgogICAgPENVUlJFTkNZPlJVQjwvQ1VSUkVOQ1k+CiAgICA8U1VQT1JERVI+MTM4MDg8L1NVUE9SREVSPgogICAgPERPQ1RZUEU+TzwvRE9DVFlQRT4KICAgIDxDQU1QQUlHTk5VTUJFUj4xMzgwODwvQ0FNUEFJR05OVU1CRVI+CiAgICA8T1JEUlRZUEU+T1JJR0lOQUw8L09SRFJUWVBFPgogICAgPEhFQUQ+CiAgICAgICAgPFNVUFBMSUVSPjIwMDAwMDAwMDAxMzY8L1NVUFBMSUVSPgogICAgICAgIDxCVVlFUj4yMDAwMDAwMDAwNzc3PC9CVVlFUj4KICAgICAgICA8REVMSVZFUllQTEFDRT4yMDAwMDAwMDAwNzc3PC9ERUxJVkVSWVBMQUNFPgogICAgICAgIDxTRU5ERVI+MjAwMDAwMDAwMDc3NzwvU0VOREVSPgogICAgICAgIDxSRUNJUElFTlQ+MjAwMDAwMDAwMDEzNjwvUkVDSVBJRU5UPgogICAgICAgIDxFRElJTlRFUkNIQU5HRUlEPjEzODA4PC9FRElJTlRFUkNIQU5HRUlEPgogICAgICAgICAgICAgICAgICAgICAgICA8L0hFQUQ+CjwvT1JERVI+Cg==',
+            "SendInput"
         ];
-        $result = $client2->Send($array);
+
+        $result = $client->process($array);
         da($result);
 
 //        $obj = $client->sendDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $remoteFile, 'content' => $string]);

@@ -225,7 +225,7 @@ return [
         ],
         'siteApiKorus' => [
             'class' => 'mongosoft\soapclient\Client',
-            'url' => 'https://www.ecod.pl/webserv2/EDIservice.asmx',
+            'url' => 'https://edi-ws.esphere.ru/edi.wsdl',
             'options' => [
                 'cache_wsdl' => WSDL_CACHE_BOTH,
             ],

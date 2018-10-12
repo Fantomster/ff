@@ -2,10 +2,13 @@
 
 namespace backend\models;
 
+use common\models\licenses\LicenseOrganization;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Organization;
+use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 
 /**
  * OrganizationSearch represents the model behind the search form about `common\models\Organization`.
@@ -37,8 +40,21 @@ class OrganizationSearch extends Organization {
      *
      * @return ActiveDataProvider
      */
-    public function search($params) {
-        $query = Organization::find();
+    public function search($params, bool $isForLicenses = false) {
+        if($isForLicenses){
+            $dbApiName = $this->getDbName('db_api');
+            $dbName = $this->getDbName('db');
+            $now = new Expression('NOW()');
+            $tenDaysAgo = new Expression('NOW() - INTERVAL 10 DAY');
+            $query1 = Organization::find()->innerJoin($dbApiName.'.license_organization', "`$dbApiName`.license_organization.org_id=`$dbName`.organization.id")->andWhere(['between', 'td', $tenDaysAgo, $now])->orderBy('td', 'desc')->groupBy('td');
+            $query2 = Organization::find()->innerJoin($dbApiName.'.license_organization', "`$dbApiName`.license_organization.org_id=`$dbName`.organization.id")->andWhere(['<', 'td', $now])->orderBy('td', 'desc')->groupBy('td');
+            $allLicenseOrganizations = ArrayHelper::getColumn(LicenseOrganization::find()->where(['not', ['org_id' => null]])->groupBy('org_id')->all(), 'org_id');
+            $query3 = Organization::find()->where(['not in', 'id', $allLicenseOrganizations]);
+            $query = $query1->union($query2);
+        }else{
+            $query = Organization::find();
+        }
+
 
         // add conditions that should always apply here
 
@@ -76,8 +92,15 @@ class OrganizationSearch extends Organization {
                 ->andFilterWhere(['like', 'website', $this->website])
                 ->andFilterWhere(['white_list' => $this->white_list])
                 ->andFilterWhere(['partnership' => $this->partnership]);
-
+            $query->union($query3);
         return $dataProvider;
     }
 
+
+    private function getDbName($db){
+        $db = Yii::$app->get($db);
+        $dbNameArr = explode(';dbname=', $db->dsn);
+        $dbName = $dbNameArr[1];
+        return $dbName;
+    }
 }

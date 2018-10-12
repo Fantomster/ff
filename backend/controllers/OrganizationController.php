@@ -307,7 +307,7 @@ class OrganizationController extends Controller
     public function actionListOrganizationsForLicenses()
     {
         $searchModel = new OrganizationSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, true);
 
         return $this->render('list-organizations-for-licenses', [
             'searchModel' => $searchModel,

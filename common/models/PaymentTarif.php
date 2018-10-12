@@ -58,7 +58,7 @@ class PaymentTarif extends \yii\db\ActiveRecord
             'organization_type_id' => Yii::t('app', 'Organization Type ID'),
             'price' => Yii::t('app', 'Price'),
             'status' => Yii::t('app', 'Status'),
-            'organization_id' => Yii::t('app', 'Индивидуальная цена для организации'),
+            'organization_id' => Yii::t('app', 'Организация'),
             'individual' => Yii::t('app', 'Индивидуальный прайс'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),

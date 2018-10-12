@@ -238,7 +238,9 @@ class VetisWaybill extends WebApi
             $arVsd = [];
             foreach ($request['uuids'] as $uuid) {
                 if (array_key_exists($uuid, $records)) {
-                    $api->getVetDocumentDone($uuid);
+                    if($api->getVetDocumentDone($uuid)) {
+                        $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_EXTINGUISHED, $uuid);
+                    }
                 } else {
                     throw new BadRequestHttpException('ВСД не принадлежит данной организации: ' . $uuid);
                 }
@@ -284,7 +286,9 @@ class VetisWaybill extends WebApi
 
         try {
             $api = mercuryApi::getInstance();
-            $api->getVetDocumentDone($uuid, $params);
+            if($api->getVetDocumentDone($uuid, $params)) {
+                $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_PARTIALLY_ACCEPTED, $uuid);
+            }
             $result = $this->getList([$uuid => null]);
         } catch (\Throwable $t) {
             if ($t->getCode() == 600) {
@@ -324,7 +328,9 @@ class VetisWaybill extends WebApi
 
         try {
             $api = mercuryApi::getInstance();
-            $api->getVetDocumentDone($uuid, $params);
+            if ($api->getVetDocumentDone($uuid, $params)) {
+                $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_RETURNED, $uuid);
+            }
             $result = $this->getList([$uuid => null]);
         } catch (\Throwable $t) {
             if ($t->getCode() == 600) {

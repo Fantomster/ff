@@ -389,48 +389,4 @@ class IntegrationWebApi extends WebApi
 
         return ['success' => true];
     }
-
-
-    /**
-     * integration: Метод проверки лицензии по организации и service_id
-     * @param array $post
-     * @return array
-     */
-    public function checkLicenseByService(array $post): array
-    {
-        return License::checkLicenseByService($post);
-    }
-
-
-    /**
-     * integration: Метод проверки лицензии по организации и license_id
-     * @param array $post
-     * @return array
-     */
-    public function checkLicenseByLicenseID(array $post): array
-    {
-        return License::checkLicenseByLicenseID($post);
-    }
-
-
-    /**
-     * integration: Метод получения лицензии по сервису
-     * @param array $post
-     * @return array
-     */
-    public function getLicensesByServiceId(array $post): array
-    {
-        return License::getLicensesByServiceId($post);
-    }
-
-
-    /**
-     * integration: Метод получения сервисов по лицензии
-     * @param array $post
-     * @return array
-     */
-    public function getLicensesByLicenseId(array $post): array
-    {
-        return License::getLicensesByLicenseId($post);
-    }
 }

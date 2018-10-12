@@ -100,9 +100,10 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
         //da(base64_encode($string));
         $client = $this->client;
         //da(get_class_methods($client));
-        $client2 = new \SoapClient('https://edi-ws.esphere.ru/edi.wsdl');
+        $client2 = new \SoapClient('https://www.ecod.pl/webserv2/EDIservice.asmx?op=Send');
 
         $relation = $this->getRelation($client, 0, $login, $pass);
+        da($relation);
         $array = [
             "Name" => $login,
             'Password' => $pass,
@@ -113,10 +114,8 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
             "DocumentTest" => $relation['document-test'],
             "RelationId" => $relation['relation-id'],
             "DocumentContent" => $string,
-            "action" => "send",
-            "type" => "SendResponse"
         ];
-        $result = $client->process($array);
+        $result = $client2->Send($array);
         da($result);
 
 //        $obj = $client->sendDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $remoteFile, 'content' => $string]);

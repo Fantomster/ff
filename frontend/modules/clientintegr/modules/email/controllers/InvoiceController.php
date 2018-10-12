@@ -30,7 +30,7 @@ class InvoiceController extends Controller
 
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
-        $searchModel->date_from = Yii::$app->formatter->asTime($this->getEarliestOrder($organization->id), "php:d.m.Y");
+        $searchModel->date_from = Yii::$app->formatter->asTime($this->getEarliestInvoice($organization->id), "php:d.m.Y");
 
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $dataProvider->pagination->pageParam = 'page_outer';
@@ -200,7 +200,8 @@ class InvoiceController extends Controller
             $invoice->order_id = $order->id;
             $invoice->save();
             $transaction->commit();
-            return ['status' => true, 'order_id' => $order->id, 'us' => $link];
+            $page = \common\models\IntegrationInvoice::pageOrder($order->id);
+            return ['status' => true, 'order_id' => $order->id, 'us' => $link, 'page' => $page];
         } catch (\Exception $e) {
             $transaction->rollBack();
             return ['status' => false, 'error' => $e->getMessage()];
@@ -231,12 +232,12 @@ class InvoiceController extends Controller
         return $res;
     }
 
-    protected function getEarliestOrder($org_id)
+    protected function getEarliestInvoice($org_id)
     {
 
-        $eDate = Order::find()->andWhere(['client_id' => $org_id])->orderBy('updated_at ASC')->one();
+        $eDate = IntegrationInvoice::find()->andWhere(['organization_id' => $org_id])->orderBy('date ASC')->one();
 
-        return isset($eDate) ? $eDate->updated_at : null;
+        return isset($eDate) ? $eDate->date : null;
 
     }
 

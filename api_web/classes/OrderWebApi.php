@@ -476,7 +476,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     $model->quantity = $wbContent->quantity_waybill;
                     $model->price = $wbContent->price_waybill;
                 }
-                $productsEdo[$model->edi_number][$k] = $model;
+                $productsEdo[$k] = $model;
             }
             $products = $productsEdo;
         }

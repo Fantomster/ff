@@ -838,4 +838,54 @@ class DefaultController extends WebApiController
         $this->response = (new VetisWaybill())->getNotConfirmedVsd($this->request);
     }
 
+    /**
+     * @SWG\Post(path="/integration/vetis/get-vsd-pdf",
+     *     tags={"Integration/vetis"},
+     *     summary="Получить ВСД в PDF",
+     *     description="Получить ВСД в PDF",
+     *     produces={"application/json", "application/pdf"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
+     *                      "base64_encode":1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description="Если все прошло хорошо вернет файл закодированый в base64",
+     *         @SWG\Schema(
+     *              default="JVBERi0xLjQKJeLjz9MKMyAwIG9iago8PC9UeXBlIC9QYWdlCi9QYXJlbnQgMSAwIFIKL01lZGlhQm94IFswIDAgNTk1LjI4MCA4NDEuOD"
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionGetVsdPdf()
+    {
+        $result = (new VetisWaybill())->getVsdPdf($this->request);
+        if (is_array($result)) {
+            $this->response = $result;
+        } else {
+            header('Access-Control-Allow-Origin:*');
+            header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
+            header('Access-Control-Allow-Headers:Content-Type, Authorization');
+            exit($result);
+        }
+    }
 }

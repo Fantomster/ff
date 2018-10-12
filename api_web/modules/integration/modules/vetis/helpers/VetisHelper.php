@@ -30,21 +30,23 @@ class VetisHelper
     private $doc;
     /**@var MercVsd model */
     private $vsdModel;
+    /**@var int organization id */
+    private $org_id;
     /**@var array $expertizeList расшифровки статусов экспертиз */
     public static $expertizeList = [
-        'UNKNOWN'     => 'the_result_is_unknown', //Результат неизвестен
-        'UNDEFINED'   => 'the_result_can_not_be_determined', //Результат невозможно определить (не нормируется)
-        'POSITIVE'    => 'positive_result', //Положительный результат
-        'NEGATIVE'    => 'negative_result', //Отрицательный результат
+        'UNKNOWN' => 'the_result_is_unknown', //Результат неизвестен
+        'UNDEFINED' => 'the_result_can_not_be_determined', //Результат невозможно определить (не нормируется)
+        'POSITIVE' => 'positive_result', //Положительный результат
+        'NEGATIVE' => 'negative_result', //Отрицательный результат
         'UNFULFILLED' => 'not_conducted', //Не проводилось
-        'VSERAW'      => 'VSE_subjected_the_raw_materials_from_which_the_products_were_manufactured', // ВСЭ подвергнуто сырьё, из которого произведена продукция
-        'VSEFULL'     => 'the_products_are_fully', // Продукция подвергнута ВСЭ в полном объеме
+        'VSERAW' => 'VSE_subjected_the_raw_materials_from_which_the_products_were_manufactured', // ВСЭ подвергнуто сырьё, из которого произведена продукция
+        'VSEFULL' => 'the_products_are_fully', // Продукция подвергнута ВСЭ в полном объеме
     ];
     /**@var array $ordersStatuses статусы для заказов */
     public static $ordersStatuses = [
         'WITHDRAWN' => 'vsd_status_withdrawn', //'Сертификаты аннулированы',
         'CONFIRMED' => 'vsd_status_confirmed', //'Сертификаты ожидают погашения',
-        'UTILIZED'  => 'vsd_status_utilized', //'Сертификаты погашены',
+        'UTILIZED' => 'vsd_status_utilized', //'Сертификаты погашены',
     ];
 
     /**
@@ -203,7 +205,7 @@ class VetisHelper
     }
 
     /**
-     * @param int   $id
+     * @param int $id
      * @param array $uuids
      * @return array|bool
      */
@@ -263,14 +265,14 @@ class VetisHelper
         $statuses = explode(',', $strStatuses);
         if (count($statuses) > 1) {
             return [
-                'id'   => 'CONFIRMED',
+                'id' => 'CONFIRMED',
                 'text' => \Yii::t('api_web', self::$ordersStatuses['CONFIRMED'])
             ];
         } else {
             $status = current($statuses);
             if ($status) {
                 return [
-                    'id'   => $status,
+                    'id' => $status,
                     'text' => \Yii::t('api_web', self::$ordersStatuses[$status])
                 ];
             }
@@ -320,7 +322,7 @@ class VetisHelper
     public function getAvailableVsd($uuids)
     {
         $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
-        $arOrgIds = array_map(function($el){
+        $arOrgIds = array_map(function ($el) {
             return $el['id'];
         }, $orgIds['result']);
 
@@ -365,9 +367,23 @@ class VetisHelper
         return $enterpriseGuids;
     }
 
-    public function setMercVsdUserStatus($userStatus,$uuid)
+
+    public function setMercVsdUserStatus($userStatus, $uuid)
     {
         $where = ['uuid' => $uuid];
         return MercVsd::updateAll(['user_status' => $userStatus], $where);
+    }
+    
+    public function generateVsdHttp()
+    {
+        return new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
+            'authLink'       => \Yii::$app->params['vtsHttp']['authLink'],
+            'vsdLink'        => \Yii::$app->params['vtsHttp']['vsdLink'],
+            'pdfLink'        => \Yii::$app->params['vtsHttp']['pdfLink'],
+            'chooseFirmLink' => \Yii::$app->params['vtsHttp']['chooseFirmLink'],
+            'username'       => mercDicconst::getSetting("vetis_login", $this->org_id),
+            'password'       => mercDicconst::getSetting("vetis_password", $this->org_id),
+            'firmGuid'       => mercDicconst::getSetting("issuer_id", $this->org_id),
+        ]);
     }
 }

@@ -34,15 +34,15 @@ class MercuryCronController extends Controller
     public function actionVetDocumentsChangeList()
     {
         $organizations = (new \yii\db\Query)
-            ->from(mercService::tableName())
-            ->where('status_id = 1 and now() between fd and td')
-            ->createCommand(Yii::$app->db_api)
-            ->queryColumn();
+                ->from(mercService::tableName())
+                ->where('status_id = 1 and now() between fd and td')
+                ->createCommand(Yii::$app->db_api)
+                ->queryColumn();
         try {
-        foreach ($organizations as $org) {
-            $org_id = $org->org;
+            foreach ($organizations as $org) {
+                $org_id = $org->org;
 
-            $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
+                $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
 
                 if (!isset($locations->activityLocationList->location)) {
                     continue;
@@ -53,15 +53,15 @@ class MercuryCronController extends Controller
                         continue;
                     }
 
-                    echo "GET MercVSDList ".$item->enterprise->guid.PHP_EOL;
+                    echo "GET MercVSDList " . $item->enterprise->guid . PHP_EOL;
                     MercVsd::getUpdateData($org_id, $item->enterprise->guid);
 
-                    if($org->code == mercService::EXTENDED_LICENSE_CODE) {
+                    if ($org->code == mercService::EXTENDED_LICENSE_CODE) {
                         echo "GET MercStockEntryList" . $item->enterprise->guid . PHP_EOL;
                         MercStockEntry::getUpdateData($org_id, $item->enterprise->guid);
                     }
                 }
-        }
+            }
         } catch (\Exception $e) {
             \Yii::error($e->getMessage());
         }
@@ -99,10 +99,10 @@ class MercuryCronController extends Controller
     {
         $org_id = 0;
         echo "START" . PHP_EOL;
-        echo "GET MercVSDList".PHP_EOL;
+        echo "GET MercVSDList" . PHP_EOL;
         MercVsd::getUpdateData($org_id);
 
-        echo "GET MercStockEntryList".PHP_EOL;
+        echo "GET MercStockEntryList" . PHP_EOL;
         MercStockEntry::getUpdateData($org_id);
         echo "FINISH" . PHP_EOL;
     }
@@ -129,7 +129,7 @@ class MercuryCronController extends Controller
         $listOptions->count = 1000;
         $listOptions->offset = 0;
 
-        $startDate =  ($queue === null) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queue->last_executed;
+        $startDate = ($queue === null) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queue->last_executed;
         $instance = cerberApi::getInstance($org_id);
         $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
@@ -164,8 +164,9 @@ class MercuryCronController extends Controller
             'mercury',
             'operation' => 'MercVSDList',
             'enterpriseGuid' => 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b',
-        ], [
+                ], [
             'update_date' => strtotime(gmdate("M d Y H:i:s")),
         ]);
     }
+
 }

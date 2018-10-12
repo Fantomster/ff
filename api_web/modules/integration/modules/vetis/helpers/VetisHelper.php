@@ -364,4 +364,10 @@ class VetisHelper
 
         return $enterpriseGuids;
     }
+
+    public function setMercVsdUserStatus($userStatus,$uuid)
+    {
+        $where = ['uuid' => $uuid];
+        return MercVsd::updateAll(['user_status' => $userStatus], $where);
+    }
 }

@@ -80,6 +80,10 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
         self::DOC_STATUS_UTILIZED => 'done',
     ];
 
+    const USER_STATUS_RETURNED = 'RETURNED';//возврат
+    const USER_STATUS_EXTINGUISHED = 'EXTINGUISHED'; //погашен
+    const USER_STATUS_PARTIALLY_ACCEPTED = 'PARTIALLY ACCEPTED';//частичный возврат
+
     public static $forms = [
         'CERTCU1' => 'Форма 1 ветеринарного сертификата ТС',
         'LIC1' => 'Форма 1 ветеринарного свидетельства',
@@ -189,6 +193,7 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
             'producer_name' => 'Producer Name',
             'producer_guid' => 'Producer Guid',
             'low_grade_cargo' => 'Low Grade Cargo',
+            'user_status' => 'User Status',
         ];
     }
 

@@ -1,20 +1,24 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: Fanto
+ * User: Konstantin Silukov
  * Date: 9/26/2018
  * Time: 1:37 PM
  */
 
 namespace api_web\modules\integration\models;
 
-use api\common\models\iiko\iikoDicconst;
-use api\common\models\iiko\iikoWaybillData;
+use common\models\IntegrationSettingValue;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\Waybill;
 use common\models\WaybillContent;
 
+/**
+ * Class iikoWaybill add for back compatible with legacy methods
+ *
+ * @package api_web\modules\integration\models
+ */
 class iikoWaybill extends Waybill
 {
     /**
@@ -27,7 +31,7 @@ class iikoWaybill extends Waybill
         $wc = reset($wbContent);
         $orderCon = OrderContent::findOne(['id' => $wc->order_content_id]);
         $order_id = $orderCon->order_id;
-        $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+        $waybillMode = IntegrationSettingValue::getSettingsForOrg(null, ['iiko_auto_unload_invoice']);
         $doc_num = (Order::findOne($order_id))->waybill_number;
 
         if ($waybillMode !== '0') {
@@ -49,7 +53,6 @@ class iikoWaybill extends Waybill
             } else {
                 $xml->addChild('incomingDocumentNumber', $this->outer_number_code);
             }
-
         }
 
         $xml->addChild('comment', $this->outer_note);
@@ -62,14 +65,13 @@ class iikoWaybill extends Waybill
 
         $items = $xml->addChild('items');
         /**
-         * @var $row WaybillContent
+         * @var WaybillContent $row
          */
         $records = WaybillContent::findAll(['waybill_id' => $this->id, 'unload_status' => 1]);
         $discount = 0;
 
         foreach($records as $i => $row) {
             $item = $items->addChild('item');
-
             $item->addChild('amount', $row->quantity_waybill);
             $item->addChild('product', $row->productOuter->outer_uid);
             $item->addChild('num', (++$i));
@@ -79,18 +81,12 @@ class iikoWaybill extends Waybill
             $item->addChild('sumWithoutNds', $row->sum_without_vat);
             $item->addChild('vatPercent', $row->vat_waybill / 100);
             $item->addChild('ndsPercent', $row->vat_waybill / 100);
-
             $item->addChild('sum', $row->price_with_vat);
-            //  $item->addChild('price', round($row->sum / $row->quant, 2));
             $item->addChild('price', $row->sum_with_vat);
-
             $item->addChild('isAdditionalExpense', false);
             $item->addChild('store', $this->outer_store_uuid);
 
         }
-
-//        var_dump($xml);
-//        die();
 
         return $xml->asXML();
     }

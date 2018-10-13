@@ -8,31 +8,56 @@
 
 namespace console\modules\daemons\classes;
 
-
-use api\common\models\iiko\iikoDictype;
 use api_web\exceptions\ValidationException;
 use common\models\OuterStore;
 use console\modules\daemons\components\IikoSyncConsumer;
 use console\modules\daemons\components\ConsumerInterface;
-use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
+use api_web\helpers\iikoApi;
 use yii\web\BadRequestHttpException;
 
+/**
+ * Class IikoStoreSync
+ *
+ * @package console\modules\daemons\classes
+ */
 class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
 {
+    /**
+     * @var array
+     */
     public $updates_uuid = [];
 
+    /**
+     * @var
+     */
     public $success;
 
+    /**
+     * @var int
+     */
     public static $timeout = 600;
 
+    /**
+     * @var int
+     */
     public static $timeoutExecuting = 300;
 
+    /**
+     * @var string
+     */
+    public $type = 'store';
+
+    /**
+     * @throws \yii\web\BadRequestHttpException
+     */
     public function getData()
     {
-        $model = iikoDictype::findOne(['method' => 'store']);
-        $this->success = $this->run($model->id);
+        $this->success = $this->run();
     }
 
+    /**
+     * @return mixed
+     */
     public function saveData()
     {
         return $this->success['success'];
@@ -48,7 +73,7 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
     {
         //Получаем список складов
         $stores = iikoApi::getInstance($this->orgId)->getStores();
-        /**/
+        /** Вставляем корневой склад для iiko потому что там таких нет*/
         array_unshift($stores['corporateItemDto'], ['id' => md5($this->orgId), 'name' => 'Все склады', 'type' => 'rootnode']);
         if (!empty($stores['corporateItemDto'])) {
             //поскольку мы не можем отследить изменения на стороне провайдера
@@ -65,9 +90,11 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
 
                     if (!empty($store['type'])) {
                         if($store['type'] == 'rootnode'){
+
                             $model->makeRoot();
                             $rootNode = $model;
                         } else {
+                            /** @var OuterStore $rootNode */
                             $model->prependTo($rootNode);
                             $model->store_type = $store['type'];
                         }

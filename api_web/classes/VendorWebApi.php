@@ -162,10 +162,12 @@ class VendorWebApi extends \api_web\components\WebApi
                     $organization->save();
                     $user->setOrganization($organization)->save();
                     $user->setRelationUserOrganization($user->organization->id, $user->role_id);
-                    $managerAssociate = new ManagerAssociate();
-                    $managerAssociate->manager_id = $user->id;
-                    $managerAssociate->organization_id = $user->organization->id;
-                    $managerAssociate->save();
+                    if (!ManagerAssociate::find()->where(['manager_id' => $user->id, 'organization_id' => $user->organization->id])->exists()) {
+                        $managerAssociate = new ManagerAssociate();
+                        $managerAssociate->manager_id = $user->id;
+                        $managerAssociate->organization_id = $user->organization->id;
+                        $managerAssociate->save();
+                    }
                     $get_supp_org_id = $organization->id;
                     $currentOrganization = $currentUser->organization;
                     if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {

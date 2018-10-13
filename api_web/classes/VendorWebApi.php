@@ -160,6 +160,7 @@ class VendorWebApi extends \api_web\components\WebApi
                     }
                     $organization->save();
                     $user->setOrganization($organization)->save();
+                    $user->setRelationUserOrganization($user->organization->id, $user->role_id);
                     $get_supp_org_id = $organization->id;
                     $currentOrganization = $currentUser->organization;
                     if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {

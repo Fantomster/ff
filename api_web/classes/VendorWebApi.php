@@ -169,15 +169,6 @@ class VendorWebApi extends \api_web\components\WebApi
                         $managerAssociate->organization_id = $user->organization->id;
                         $managerAssociate->save();
                     }
-                    $emailModel = new EmailNotification();
-                    $emailModel->user_id = $user->id;
-                    $emailModel->rel_user_org_id = $relId;
-                    $emailModel->order_created = 1;
-                    $emailModel->order_canceled = 1;
-                    $emailModel->order_changed = 1;
-                    $emailModel->order_processing = 1;
-                    $emailModel->order_done = 1;
-                    $emailModel->save();
                     $get_supp_org_id = $organization->id;
                     $currentOrganization = $currentUser->organization;
                     if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {

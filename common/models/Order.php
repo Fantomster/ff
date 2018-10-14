@@ -494,7 +494,6 @@ class Order extends \yii\db\ActiveRecord
         $result = [];
         foreach ($recipients as $recipient) {
             $result[] = $recipient;
-            $result['emails'][] = $recipient->email;
         }
 
         return $result;

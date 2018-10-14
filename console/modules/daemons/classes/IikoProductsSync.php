@@ -1,40 +1,65 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: Fanto
+ * User: Silukov Konstantin
  * Date: 9/12/2018
  * Time: 3:24 PM
  */
 
 namespace console\modules\daemons\classes;
 
-use api\common\models\iiko\iikoDictype;
-use api_web\exceptions\ValidationException;
 use common\models\OuterProduct;
 use common\models\OuterUnit;
 use console\modules\daemons\components\ConsumerInterface;
 use console\modules\daemons\components\IikoSyncConsumer;
-use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
+use api_web\helpers\iikoApi;
 
+/**
+ * Class IikoProductsSync
+ *
+ * @package console\modules\daemons\classes
+ */
 class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
 {
-    /**@var $items array */
+    /**@var array $items  */
     private $items;
 
+    /**
+     * @var array
+     */
     public $updates_uuid = [];
 
+    /**
+     * @var
+     */
     public $success;
 
+    /**
+     * @var int
+     */
     public static $timeout = 600;
 
+    /**
+     * @var int
+     */
     public static $timeoutExecuting = 300;
 
+    /**
+     * @var string
+     */
+    public $type = 'product';
+
+    /**
+     * @throws \yii\web\BadRequestHttpException
+     */
     public function getData()
     {
-        $model = iikoDictype::findOne(['method' => 'goods']);
-        $this->success = $this->run($model->id);
+        $this->success = $this->run();
     }
 
+    /**
+     * @return mixed
+     */
     public function saveData()
     {
         return $this->success['success'];
@@ -43,7 +68,7 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
     /**
      * Синхронизация продуктов
      * @return int
-     * @throws ValidationException
+     * @throws \Exception
      */
     protected function goods()
     {

@@ -11,7 +11,6 @@ namespace api_web\modules\integration\classes\dictionaries;
 
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
-use common\helpers\DBNameHelper;
 use common\models\Organization;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;

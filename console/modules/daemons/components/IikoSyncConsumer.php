@@ -1,19 +1,23 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: Fanto
+ * User: Konstantin Silukov
  * Date: 9/12/2018
  * Time: 4:04 PM
  */
 
 namespace console\modules\daemons\components;
 
-use api\common\models\iiko\iikoDic;
-use api\common\models\iiko\iikoDictype;
 use api\common\models\RabbitQueues;
-use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
+use common\models\OuterDictionary;
+use api_web\helpers\iikoApi;
 use yii\web\BadRequestHttpException;
 
+/**
+ * Class IikoSyncConsumer
+ *
+ * @package console\modules\daemons\components
+ */
 class IikoSyncConsumer extends AbstractConsumer
 {
     /**@property int|null $orgId Id организации */
@@ -21,31 +25,36 @@ class IikoSyncConsumer extends AbstractConsumer
     /**@var integer */
     const SERVICE_ID = 2;
 
+    /**
+     * @var
+     */
+    public $type;
+
+    /**
+     * IikoSyncConsumer constructor.
+     *
+     * @param null $orgId
+     */
     public function __construct($orgId = null)
     {
         $this->orgId = $orgId;
     }
 
     /**
-     * Запуск синфронизации определенного типа
-     * @param $type
+     * Запуск синхронизации определенного типа
      * @return array
      * @throws BadRequestHttpException
      * @throws \Exception
      */
-    public function run($type)
+    public function run()
     {
-        $model = iikoDictype::findOne($type);
+        $model = OuterDictionary::findOne(['name' => $this->type, 'service_id' => self::SERVICE_ID]);
 
         if (empty($model)) {
-            throw new BadRequestHttpException('Not found type ' . $type);
+            throw new BadRequestHttpException('Not found type ' . $this->type);
         }
 
-        if (empty($model->method)) {
-            throw new BadRequestHttpException('Empty [iko_dictype.method] in DB');
-        }
-
-        if (method_exists($this, $model->method) === true) {
+        if (method_exists($this, $model->name) === true) {
             try {
                 //Пробуем пролезть в iko
                 if (!iikoApi::getInstance($this->orgId)->auth()) {
@@ -53,23 +62,16 @@ class IikoSyncConsumer extends AbstractConsumer
                 }
                 //Синхронизируем нужное нам и
                 //ответ получим, сколько записей у нас в боевом состоянии
-                $count = $this->{$model->method}();
+                $this->{$model->name}();
                 //Убиваем сессию, а то закончатся на сервере iiko
                 iikoApi::getInstance($this->orgId)->logout();
-                //Обновляем данные
-                $dicModel = iikoDic::findOne(['dictype_id' => $model->id, 'org_id' => $this->orgId]);
-                if (!$dicModel->updateSuccessSync($count)) {
-                    throw new BadRequestHttpException($dicModel->getFirstErrors());
-                }
-                //Сохраняем данные
                 return ['success' => true];
             } catch (\Exception $e) {
                 iikoApi::getInstance($this->orgId)->logout();
-                iikoDic::errorSync($model->id);
                 throw $e;
             }
         } else {
-            throw new BadRequestHttpException('Not found method [iikoSync->' . $model->method . '()]');
+            throw new BadRequestHttpException('Not found method [iikoSync->' . $model->name . '()]');
         }
     }
 

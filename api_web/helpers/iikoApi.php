@@ -55,11 +55,11 @@ class iikoApi
     public static function getInstance($orgId = null)
     {
         if (self::$_instance === null) {
-            $settings = IntegrationSettingValue::getSettingsForOrg($orgId, ['iiko_URL', 'iiko_auth_login', 'iiko_auth_password']);
+            $settings = IntegrationSettingValue::getSettingsByServiceId(WaybillHelper::IIKO_SERVICE_ID, $orgId, ['URL', 'auth_login', 'auth_password']);
             self::$_instance = new self;
-            self::$_instance->host = $settings['iiko_URL'];
-            self::$_instance->login = $settings['iiko_auth_login'];
-            self::$_instance->pass = $settings['iiko_auth_password'];
+            self::$_instance->host = $settings['URL'];
+            self::$_instance->login = $settings['auth_login'];
+            self::$_instance->pass = $settings['auth_password'];
         }
 
         return self::$_instance;

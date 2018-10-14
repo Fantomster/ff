@@ -10,12 +10,17 @@ namespace api_web\helpers;
 
 use api_web\exceptions\ValidationException;
 use common\helpers\DBNameHelper;
+use common\models\IntegrationSetting;
+use common\models\IntegrationSettingValue;
+use common\models\licenses\License;
+use common\models\licenses\LicenseOrganization;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OuterAgent;
 use common\models\OuterStore;
 use common\models\Waybill;
 use common\models\WaybillContent;
+use Exception;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -23,6 +28,8 @@ use yii\web\BadRequestHttpException;
  * */
 class WaybillHelper
 {
+    const RK_SERVICE_ID = 1;
+    const IIKO_SERVICE_ID = 2;
     /**@var int const for mercuriy service id in all_service table */
     const MERC_SERVICE_ID = 4;
     /**@var int const for EDI service id in all_service table */

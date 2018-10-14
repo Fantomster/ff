@@ -76,7 +76,7 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
     /**
      * Get settings for organization Id, make filtering by integration_settings.name in array $settingsNames parameter.
      * Usage:
-     *        IntegrationSettingValue::getSettingsForOrg($order->client_id, [
+     *        IntegrationSettingValue::getSettingsForOrg(1, $order->client_id, [
      *            'rkws_useWinEncoding',
      *            'iiko_auto_unload_invoice',
      *            'rkws_outer_address',
@@ -89,14 +89,14 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
      * @param array    $settingNames for filtering by needed setting name
      * @return array|string [key = integration_setting.name => value] | if count($settingNames) == 1 -> return string
      */
-    public static function getSettingsForOrg(int $orgId = null, array $settingNames = [])
+    public static function getSettingsByServiceId(int $serviceId, int $orgId = null, array $settingNames = [])
     {
         $orgId = $orgId ?? \Yii::$app->user->identity->organization_id;
         $settingNames = $settingNames ?? ['*'];
         $dbResult = (new Query())->select(['isv.value', 'is.name name'])->from(self::tableName() . ' isv')->leftJoin
         (IntegrationSetting::tableName() . ' is', '`is`.`id`=`isv`.`setting_id`')
             ->where(['isv.org_id' => $orgId])
-            ->andFilterWhere(['is.name' => $settingNames])
+            ->andFilterWhere(['is.name' => $settingNames, 'is.service_id' => $serviceId])
             /*->createCommand()->getRawSql();*/
             ->all(\Yii::$app->db_api);
         if (count($dbResult) > 1 && count($settingNames) > 1) {

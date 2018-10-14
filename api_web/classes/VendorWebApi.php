@@ -162,7 +162,7 @@ class VendorWebApi extends \api_web\components\WebApi
                     }
                     $organization->save();
                     $user->setOrganization($organization)->save();
-                    $user->setRelationUserOrganization($user->organization->id, $user->role_id);
+                    $relId = $user->createRelationUserOrganization($user->organization->id, $user->role_id);
                     if (!ManagerAssociate::find()->where(['manager_id' => $user->id, 'organization_id' => $user->organization->id])->exists()) {
                         $managerAssociate = new ManagerAssociate();
                         $managerAssociate->manager_id = $user->id;
@@ -170,6 +170,8 @@ class VendorWebApi extends \api_web\components\WebApi
                         $managerAssociate->save();
                     }
                     $emailModel = new EmailNotification();
+                    $emailModel->user_id = $user->id;
+                    $emailModel->rel_user_org_id = $relId;
                     $emailModel->order_created = 1;
                     $emailModel->order_canceled = 1;
                     $emailModel->order_changed = 1;

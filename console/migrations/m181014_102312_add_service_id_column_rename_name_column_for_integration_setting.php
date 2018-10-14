@@ -19,7 +19,7 @@ class m181014_102312_add_service_id_column_rename_name_column_for_integration_se
      */
     public function safeUp()
     {
-//        $this->addColumn('{{%integration_setting}}', 'service_id', $this->integer());
+        $this->addColumn('{{%integration_setting}}', 'service_id', $this->integer());
         $settings = IntegrationSetting::find()->all();
         /**@var IntegrationSetting $setting*/
         foreach ($settings as $setting){

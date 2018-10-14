@@ -115,7 +115,6 @@ class EComIntegration2 extends Component
             foreach ($ediOrganizations as $ediOrganization) {
                 $login = $ediOrganization['login'];
                 $pass = $ediOrganization['pass'];
-
                 try {
                     $objectList = $this->provider->getResponse($login, $pass);
                 } catch (\Throwable $e) {
@@ -124,26 +123,83 @@ class EComIntegration2 extends Component
                 }
 
                 if (!empty($objectList)) {
-                    $this->provider->insertFilesInQueue($objectList);
+                    $this->insertFilesInQueue($objectList);
                 }
             }
         }
     }
+
+
+    /**
+     * @param array $list
+     * @throws \yii\db\Exception
+     */
+    public function insertFilesInQueue(array $list)
+    {
+        $batch = [];
+        $files = (new \yii\db\Query())
+            ->select(['name'])
+            ->from('edi_files_queue')
+            ->where(['name' => $list])
+            ->indexBy('name')
+            ->all();
+
+        foreach ($list as $name) {
+            if(isset($name['ns2tracking-id'])){
+                $name = $name['ns2tracking-id'];
+            }
+            if (!array_key_exists($name, $files)) {
+                $batch[] = [$name, $this->orgId];
+            }
+        }
+
+        if (!empty($batch)) {
+            $transaction = \Yii::$app->db->beginTransaction();
+            try {
+                \Yii::$app->db->queryBuilder->batchInsert('edi_files_queue', ['name', 'organization_id'], $batch)->execute();
+                $transaction->commit();
+            } catch (\Throwable $e) {
+                $transaction->rollback();
+                \Yii::error($e->getMessage());
+            }
+        }
+    }
+
+
+    public function updateQueue(int $ediFilesQueueID, int $status, String $errorText): void
+    {
+        Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText], 'id=' . $ediFilesQueueID)->execute();
+    }
+
 
     /**
      * Get all files on edi_files_queue table and parse it
      */
     public function handleFilesListQueue(): void
     {
-        $rows = $this->realization->getFileList();
+        $rows = $this->getFileList();
         $ediOrganizations = $this->getOrganizations();
 
         foreach ($ediOrganizations as $ediOrganization) {
             foreach ($rows as $item) {
-                $this->realization->getDoc($this->provider->client, $item['name'], $ediOrganization['login'], $ediOrganization['pass'], $item['id']);
+                $this->provider->getDoc($this->provider->client, $item['name'], $ediOrganization['login'], $ediOrganization['pass'], $item['id']);
             }
         }
     }
+
+
+    /**
+     * @return array
+     */
+    public function getFileList(): array
+    {
+        return (new \yii\db\Query())
+            ->select(['id', 'name'])
+            ->from('edi_files_queue')
+            ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
+            ->all();
+    }
+
 
     /**
      * @param \common\models\Order        $order

@@ -23,9 +23,5 @@ interface ProviderInterface
      */
     public function getResponse($login, $pass);
 
-    /**
-     * @param array $list
-     * @return mixed
-     */
-    public function insertFilesInQueue(array $list);
+
 }

@@ -166,7 +166,7 @@ class VendorWebApi extends \api_web\components\WebApi
                     if (!ManagerAssociate::find()->where(['manager_id' => $user->id, 'organization_id' => $user->organization->id])->exists()) {
                         $managerAssociate = new ManagerAssociate();
                         $managerAssociate->manager_id = $user->id;
-                        $managerAssociate->organization_id = $user->organization->id;
+                        $managerAssociate->organization_id = $this->user->organization->id;
                         $managerAssociate->save();
                     }
                     $get_supp_org_id = $organization->id;

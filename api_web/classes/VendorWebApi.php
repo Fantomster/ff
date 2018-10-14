@@ -5,6 +5,7 @@ namespace api_web\classes;
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogTempContent;
 use common\models\ManagerAssociate;
+use common\models\notifications\EmailNotification;
 use common\models\RelationUserOrganization;
 use Yii;
 use api_web\exceptions\ValidationException;
@@ -168,6 +169,13 @@ class VendorWebApi extends \api_web\components\WebApi
                         $managerAssociate->organization_id = $user->organization->id;
                         $managerAssociate->save();
                     }
+                    $emailModel = new EmailNotification();
+                    $emailModel->order_created = 1;
+                    $emailModel->order_canceled = 1;
+                    $emailModel->order_changed = 1;
+                    $emailModel->order_processing = 1;
+                    $emailModel->order_done = 1;
+                    $emailModel->save();
                     $get_supp_org_id = $organization->id;
                     $currentOrganization = $currentUser->organization;
                     if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {

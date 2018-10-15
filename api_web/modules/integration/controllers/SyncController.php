@@ -20,13 +20,33 @@ use api_web\modules\integration\classes\SyncServiceFactory;
 use api_web\modules\integration\classes\sync\AbstractSyncFactory;
 use api_web\components\WebApiController;
 
+/**
+ * Class SyncController
+ * Routing R-keeper synchronization for different dictionaries
+ *
+ * @package api_web\modules\integration\controllers
+ */
 class SyncController extends WebApiController
 {
     /**
      * @SWG\Post(path="/integration/sync/run",
      *     tags={"Integration/sync/run"},
      *     summary="Универсальный метод интеграционных действий",
-     *     description="Универсальный метод интеграционных действий по синхронизации данных с внешней системой",
+     *     description="Универсальный метод интеграционных действий по синхронизации данных с внешней системой
+     * Доступные значения:
+     *     service_id: 1, //Сделано только для R-keeper
+     *         params: {
+     *             dictionary: {
+     *                              agent,
+     *                              category,
+     *                              product,
+     *                              store,
+     *                              unit,
+     *                           }
+     *             product_group: 97 // Группа выбранная пользователем,
+     *         }
+     *
+     *     ",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -69,7 +89,6 @@ class SyncController extends WebApiController
      * )
      *
      * Multifunctoinal integration method
-     * @throws UnauthorizedHttpException
      * @throws BadRequestHttpException
      */
     public function actionRun()

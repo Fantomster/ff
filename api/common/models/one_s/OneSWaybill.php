@@ -29,6 +29,7 @@ use Yii;
  */
 class OneSWaybill extends \yii\db\ActiveRecord
 {
+
     /**
      * @inheritdoc
      */
@@ -88,7 +89,7 @@ class OneSWaybill extends \yii\db\ActiveRecord
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
-            
+
             if ($this->doc_date) {
                 $datetime = new \DateTime($this->doc_date);
                 $this->doc_date = $datetime->format('Y-m-d H:i:s');
@@ -120,20 +121,28 @@ class OneSWaybill extends \yii\db\ActiveRecord
                     $wdmodel = new OneSWaybillData();
                     $wdmodel->waybill_id = $this->id;
                     $wdmodel->product_id = $record->product_id;
-                    $wdmodel->quant = $record->quantity;
-                    $wdmodel->sum = round($record->price * $record->quantity, 2);
-                    $wdmodel->defquant = $record->quantity;
-                    $wdmodel->defsum = round($record->price * $record->quantity, 2);
-                    $wdmodel->vat = $taxVat;
+                    if (isset($record->invoiceContent)) {
+                        $wdmodel->quant = $record->invoiceContent->quantity;
+                        $wdmodel->sum = $record->invoiceContent->sum_without_nds;
+                        $wdmodel->defquant = $record->invoiceContent->quantity;
+                        $wdmodel->defsum = $record->invoiceContent->sum_without_nds;
+                        $wdmodel->vat = $record->invoiceContent->percent_nds * 100;
+                    } else {
+                        $wdmodel->quant = $record->quantity;
+                        $wdmodel->sum = round($record->price * $record->quantity, 2);
+                        $wdmodel->defquant = $record->quantity;
+                        $wdmodel->defsum = round($record->price * $record->quantity, 2);
+                        $wdmodel->vat = $taxVat;
+                    }
                     $wdmodel->org = $this->org;
                     $wdmodel->koef = 1;
                     // Check previous
                     $ch = OneSWaybillData::find()
-                        ->andWhere('product_id = :prod', ['prod' => $wdmodel->product_id])
-                        ->andWhere('org = :org', ['org' => $wdmodel->org])
-                        ->andWhere('product_rid is not null')
-                        //->orderBy(['linked_at' => SORT_DESC])
-                        ->one();
+                            ->andWhere('product_id = :prod', ['prod' => $wdmodel->product_id])
+                            ->andWhere('org = :org', ['org' => $wdmodel->org])
+                            ->andWhere('product_rid is not null')
+                            //->orderBy(['linked_at' => SORT_DESC])
+                            ->one();
                     if ($ch) {
                         $wdmodel->product_rid = $ch->product_rid;
                         $wdmodel->munit = $ch->munit;
@@ -229,7 +238,7 @@ class OneSWaybill extends \yii\db\ActiveRecord
 
             $item->addChild('amount', $row->quant);
             $item->addChild('product', $row->product->uuid);
-            $item->addChild('num', (++$i));
+            $item->addChild('num', ( ++$i));
             $item->addChild('containerId');
             $item->addChild('amountUnit', $row->munit);
             $item->addChild('discountSum', $discount);
@@ -240,7 +249,6 @@ class OneSWaybill extends \yii\db\ActiveRecord
             $item->addChild('price', round($row->sum / $row->quant, 2));
             $item->addChild('isAdditionalExpense', false);
             $item->addChild('store', $model->store->uuid);
-
         }
 
 //        var_dump($xml);
@@ -248,4 +256,5 @@ class OneSWaybill extends \yii\db\ActiveRecord
 
         return $xml->asXML();
     }
+
 }

@@ -198,12 +198,13 @@ class InvoiceController extends Controller
                 $model->product_name = $value['product_name'];
                 $model->units = $value['units'];
                 $model->article = $value['article'];
+                $model->invoice_content_id = $value['invoice_content_id'];
                 if (!$model->save()) {
                     throw new Exception('Часть заказа не сохранилась, давайте попробуем снова.');
                 }
             }
             //Пересчитаем заказ
-            $order->calculateTotalPrice(true, $invoice->total_sum_withtax);
+            $order->calculateTotalPrice(true, $invoice->total_sum_withouttax);
             $invoice->order_id = $order->id;
             $invoice->save();
             $transaction->commit();

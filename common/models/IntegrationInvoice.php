@@ -202,7 +202,6 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
                     'price_without_nds' => round($row['price_without_tax'], 2),
                     'quantity' => $row['cnt'],
                     'sum_without_nds' => $row['sum_without_tax'],
-                        // 'quantity' => ceil($row['cnt']) Hotfix 1.5.12
                 ]);
                 if (!$content->save()) {
                     throw new Exception(implode(' ', $content->getFirstErrors()));
@@ -250,10 +249,11 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
             $models[] = [
                 'id' => $model->id,
                 'quantity' => $row->quantity,
-                'price' => round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds / 100), 2),
+                'price' => $row->price_without_nds, //round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds / 100), 2),
                 'units' => 1,
                 'product_name' => $model->product,
-                'article' => $model->article
+                'article' => $model->article,
+                'invoice_content_id' => $row->id,
             ];
         }
 
@@ -297,7 +297,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
                     $model2 = new CatalogGoods();
                     $model2->cat_id = $catalog['cat_id'];
                     $model2->base_goods_id = $model->id;
-                    $model2->price = $row->price_nds;
+                    $model2->price = $row->price_without_nds;
                     if (!$model2->save()) {
                         throw new \yii\db\Exception(print_r($model2->getFirstErrors(), 1));
                     }

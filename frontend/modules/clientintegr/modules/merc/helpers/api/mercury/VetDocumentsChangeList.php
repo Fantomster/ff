@@ -13,14 +13,14 @@ class VetDocumentsChangeList extends Model
 {
     public $org_id;
 
-    public function updateDocumentsList($list) {
+    public function updateDocumentsList($list)
+    {
         $list = is_array($list) ? $list : [$list];
         $count = count($list);
-        $i=0;
-        foreach ($list as $item)
-        {
-            $i ++;
-            if($item->vetDType == MercVsd::DOC_TYPE_PRODUCTIVE)
+        $i = 0;
+        foreach ($list as $item) {
+            $i++;
+            if ($item->vetDType == MercVsd::DOC_TYPE_PRODUCTIVE)
                 continue;
 
             $unit = VetisUnit::findOne(['guid' => $item->certifiedConsignment->batch->unit->guid, 'active' => true, 'last' => true]);
@@ -32,22 +32,23 @@ class VetDocumentsChangeList extends Model
 
             $model = MercVsd::findOne(['uuid' => $item->uuid]);
 
-            if($model == null)
+            if ($model == null) {
                 $model = new MercVsd();
+            }
 
             $model->setAttributes([
                 'uuid' => $item->uuid,
                 'number' => (isset($item->issueSeries) && (isset($item->issueNumber))) ? MercVsd::getNumber($item->issueSeries, $item->issueNumber) : null,
-                'date_doc' => date('Y-m-d h:i:s',strtotime($item->issueDate)),
+                'date_doc' => date('Y-m-d h:i:s', strtotime($item->issueDate)),
                 'type' => $item->vetDType,
                 'form' => $item->vetDForm,
                 'status' => $item->vetDStatus,
-                'recipient_name' => !isset($recipient) ? null : $recipient->name.' ('. $recipient->address->addressView .')',
+                'recipient_name' => !isset($recipient) ? null : $recipient->name . ' (' . $recipient->address->addressView . ')',
                 'recipient_guid' => $item->certifiedConsignment->consignee->enterprise->guid,
                 'sender_guid' => $item->certifiedConsignment->consignor->enterprise->guid,
-                'sender_name' =>  !isset($sender) ? null : $sender->name.' ('. $sender->address->addressView .')',
+                'sender_name' => !isset($sender) ? null : $sender->name . ' (' . $sender->address->addressView . ')',
                 'finalized' => $item->finalized,
-                'last_update_date' => ($item->lastUpdateDate != "-") ? date('Y-m-d h:i:s',strtotime($item->lastUpdateDate)) : null,
+                'last_update_date' => ($item->lastUpdateDate != "-") ? date('Y-m-d h:i:s', strtotime($item->lastUpdateDate)) : null,
                 /*'vehicle_number' => isset($item->certifiedConsignment->transportInfo->transportNumber->vehicleNumber) ? $item->certifiedConsignment->transportInfo->transportNumber->vehicleNumber : null,
                 'trailer_number' => isset($item->certifiedConsignment->transportInfo->transportNumber->trailerNumber) ? $item->certifiedConsignment->transportInfo->transportNumber->trailerNumber : null,
                 'container_number' => isset($item->certifiedConsignment->transportInfo->transportNumber->containerNumber) ? $item->certifiedConsignment->transportInfo->transportNumber->containerNumber : null,*/
@@ -61,10 +62,10 @@ class VetDocumentsChangeList extends Model
                 'production_date' => MercVsd::getDate($item->certifiedConsignment->batch->dateOfProduction),
                 'expiry_date' => MercVsd::getDate($item->certifiedConsignment->batch->expiryDate),
                 'batch_id' => !is_array($item->certifiedConsignment->batch->batchID) ? $item->certifiedConsignment->batch->batchID : implode(", ", $item->certifiedConsignment->batch->batchID),
-                'perishable' =>  (int)$item->certifiedConsignment->batch->perishable,
+                'perishable' => (int)$item->certifiedConsignment->batch->perishable,
                 'producer_name' => isset($producer) ? $producer['name'][0] : null,
                 'producer_guid' => isset($producer) ? $producer['guid'][0] : null,
-                'low_grade_cargo' =>  (int)$item->certifiedConsignment->batch->lowGradeCargo,
+                'low_grade_cargo' => (int)$item->certifiedConsignment->batch->lowGradeCargo,
                 'raw_data' => serialize($item),
 
                 'owner_guid' => isset($item->certifiedConsignment->batch->owner) ? $item->certifiedConsignment->batch->owner->guid : null,
@@ -83,12 +84,13 @@ class VetDocumentsChangeList extends Model
                 'unit_guid' => isset($item->certifiedConsignment->batch->unit->guid) ? $item->certifiedConsignment->batch->unit->guid : null
             ]);
 
-            if(isset($item->referencedDocument)) {
+            if (isset($item->referencedDocument)) {
                 $docs = null;
-                if (!is_array($item->referencedDocument))
+                if (!is_array($item->referencedDocument)) {
                     $docs[] = $item->referencedDocument;
-                else
+                } else {
                     $docs = $item->referencedDocument;
+                }
 
                 foreach ($docs as $item) {
                     if (($item->type >= 1) && ($item->type <= 5)) {
@@ -110,18 +112,18 @@ class VetDocumentsChangeList extends Model
         $listOptions->count = 100;
         $listOptions->offset = 0;
         $count = 0;
-        $this->log('Load'.PHP_EOL);
+        $this->log('Load' . PHP_EOL);
 
         do {
-                $result = $api->getVetDocumentChangeList($last_visit, $listOptions);
-                $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
+            $result = $api->getVetDocumentChangeList($last_visit, $listOptions);
+            $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
             $count += $vetDocumentList->count;
-            $this->log('Load '.$count.' / '. $vetDocumentList->total.PHP_EOL);
+            $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
 
             if ($vetDocumentList->count > 0)
                 $this->updateDocumentsList($vetDocumentList->vetDocument);
 
-            if($vetDocumentList->count < $vetDocumentList->total)
+            if ($vetDocumentList->count < $vetDocumentList->total)
                 $listOptions->offset += $vetDocumentList->count;
 
         } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
@@ -132,13 +134,12 @@ class VetDocumentsChangeList extends Model
         $mask = '/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/';
         preg_match_all($mask, $vsd_uuid_list, $list);
         $list = $list[0];
-        if(count($list) == 0)
+        if (count($list) == 0)
             return false;
 
         $api = mercuryApi::getInstance($this->org_id);
 
-        foreach ($list as $item)
-        {
+        foreach ($list as $item) {
             $vsd = trim($item);
             $result[] = $api->getVetDocumentByUUID($vsd);
             $this->updateDocumentsList($result);

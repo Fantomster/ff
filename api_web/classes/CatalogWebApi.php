@@ -223,11 +223,13 @@ class CatalogWebApi extends WebApi
 
         $product = CatalogGoods::findOne([
             'base_goods_id' => $request['product_id'],
-            'supp_org_id' => $this->user->organization_id,
             'cat_id' => $catalog->id]);
+        if (!$product){
+            throw new BadRequestHttpException('product_not_found');
+        }
         $success = $product->delete();
 
-        return ['result' => $success];
+        return ['result' => (bool)$success];
     }
 
     /**

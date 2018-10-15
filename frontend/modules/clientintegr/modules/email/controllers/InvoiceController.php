@@ -138,19 +138,23 @@ class InvoiceController extends Controller
                 $sub0 = explode(' ', $licenses['rkws']->td);
                 $sub1 = explode('-', $sub0[0]);
                 $licenses['rkws']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-                if ($licenses['rkws']->status_id == 0)
+                if ($licenses['rkws']->status_id == 0) {
                     $rk_us = 0;
-                if (($licenses['rkws']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['rkws']->td))))
+                }
+                if (($licenses['rkws']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['rkws']->td)))) {
                     $link = 'rkws';
+                }
             }
             if (isset($licenses['iiko'])) {
                 $sub0 = explode(' ', $licenses['iiko']->td);
                 $sub1 = explode('-', $sub0[0]);
                 $licenses['iiko']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-                if ($licenses['iiko']->status_id == 0)
+                if ($licenses['iiko']->status_id == 0) {
                     $lic_iiko = 0;
-                if (($licenses['iiko']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['iiko']->td))))
+                }
+                if (($licenses['iiko']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['iiko']->td)))) {
                     $link = 'iiko';
+                }
             }
 
             /**

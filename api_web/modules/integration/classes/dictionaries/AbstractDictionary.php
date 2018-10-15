@@ -14,6 +14,7 @@ use api_web\exceptions\ValidationException;
 use common\models\Organization;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
+use common\models\OuterCategory;
 use common\models\OuterProduct;
 use common\models\OuterStore;
 use common\models\OuterUnit;
@@ -48,6 +49,7 @@ class AbstractDictionary extends WebApi
     /**
      * Список продуктов полученных из внешней системы
      * @param $request
+     * @throws \Exception
      * @return array
      */
     public function productList($request)
@@ -111,6 +113,7 @@ class AbstractDictionary extends WebApi
     /**
      * Список агентов
      * @param $request
+     * @throws \Exception
      * @return array
      */
     public function agentList($request)
@@ -253,13 +256,12 @@ class AbstractDictionary extends WebApi
     {
         $search = OuterStore::find()->where(['org_id' => $this->user->organization->id, 'service_id' => $this->service_id]);
 
-
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', 'name', $request['search']['name']]);
-
             }
         }
+
         $rootModels = $search->roots()->indexBy('id')->all();
 
         $result = [];
@@ -268,16 +270,12 @@ class AbstractDictionary extends WebApi
             $result = $this->prepareStore($rootModel);
         }
 
-        $return = [
-            'stores' => $result,
-        ];
-
-        return $return;
+        return ['stores' => $result];
     }
 
     /***
      * Информация по складу
-     * @param $agent_uid
+     * @param $store_uid
      * @return array
      */
     public function storeInfo($store_uid)
@@ -295,7 +293,6 @@ class AbstractDictionary extends WebApi
 
         return $this->prepareStore($model);
     }
-
 
     /**
      * Функция рекурсия от корневого склада
@@ -347,6 +344,83 @@ class AbstractDictionary extends WebApi
                 return $el['name'];
             }, $model->nameWaybills)
 
+        ];
+    }
+
+    /**
+     * Получение списка единиц измерения
+     * @param $request
+     * @return array
+     * */
+    public function unitList($request): array
+    {
+        $search = OuterUnit::find()->where(['org_id' => $this->user->organization->id, 'service_id' => $this->service_id]);
+
+        if (isset($request['search'])) {
+            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+                $search->andWhere(['like', 'name', $request['search']['name']]);
+            }
+        }
+
+        $result = [];
+        foreach ($search->all() as $model) {
+            $result[] = $model;
+        }
+
+        return ['units' => $result];
+    }
+
+    /**
+     * Получение списка категорий
+     * @param $request
+     * @return array
+     * */
+    public function categoryList($request): array
+    {
+        $search = OuterCategory::find()->where(['org_id' => $this->user->organization->id, 'service_id' =>
+            $this->service_id]);
+
+
+        if (isset($request['search'])) {
+            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+                $search->andWhere(['like', 'name', $request['search']['name']]);
+            }
+        }
+
+        $rootModels = $search->roots()->indexBy('id')->all();
+
+        $result = [];
+
+        foreach ($rootModels as $rootModel) {
+            $result = $this->prepareCategory($rootModel);
+        }
+
+        return ['categories' => $result];
+    }
+
+    /**
+     * Функция рекурсия от корневой категории
+     * @param OuterCategory $model
+     * @return array
+     * */
+    private function prepareCategory($model)
+    {
+        $child = function ($model) {
+            $childrens = $model->children()->all();
+            $arReturn = [];
+            foreach ($childrens as $children) {
+                $arReturn[] = $this->prepareCategory($children);
+            }
+            return $arReturn;
+        };
+        return [
+            'id' => $model->id,
+            'outer_uid' => $model->outer_uid,
+            'name' => $model->name,
+            'created_at' => $model->created_at,
+            'updated_at' => $model->updated_at,
+            'is_active' => (int)!$model->is_deleted,
+            'childs' => $child($model),
         ];
     }
 }

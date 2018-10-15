@@ -3,10 +3,14 @@
 namespace backend\controllers;
 
 use backend\models\TestVendorsSearch;
+use common\models\AllService;
 use common\models\EdiOrganization;
 use common\models\Franchisee;
 use common\models\FranchiseeAssociate;
 use common\models\guides\Guide;
+use common\models\licenses\License;
+use common\models\licenses\LicenseOrganization;
+use common\models\licenses\LicenseService;
 use common\models\RelationSuppRest;
 use common\models\RelationUserOrganization;
 use common\models\TestVendors;
@@ -16,7 +20,9 @@ use common\models\Organization;
 use common\models\Role;
 use backend\models\OrganizationSearch;
 use yii\data\ArrayDataProvider;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -48,7 +54,7 @@ class OrganizationController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'test-vendors', 'create-test-vendor', 'update-test-vendor', 'start-test-vendors-updating', 'notifications', 'ajax-update-status'],
+                        'actions' => ['index', 'view', 'test-vendors', 'create-test-vendor', 'update-test-vendor', 'start-test-vendors-updating', 'notifications', 'ajax-update-status', 'list-organizations-for-licenses', 'add-license'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -293,4 +299,70 @@ class OrganizationController extends Controller
         }
     }
 
+
+    /**
+     * Lists all Organization models.
+     * @return mixed
+     */
+    public function actionListOrganizationsForLicenses()
+    {
+        $searchModel = new OrganizationSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, true);
+
+        return $this->render('list-organizations-for-licenses', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+
+    /**
+     * Lists all Organization models.
+     * @return mixed
+     */
+    public function actionAddLicense(int $id)
+    {
+        $organizationObject = Organization::findOne(['id' => $id]);
+        if (!$organizationObject) {
+            throw new BadRequestHttpException();
+        }
+        $organizations = ArrayHelper::map([$organizationObject->toArray()], 'id', 'name');
+        if (!$organizations) {
+            throw new BadRequestHttpException();
+        }
+        $parentOrganizationObject = Organization::findOne(['id' => $organizationObject->parent_id]);
+        if ($parentOrganizationObject) {
+            $parentOrganization = ArrayHelper::map([$parentOrganizationObject->toArray()], 'id', 'name');
+            $organizations = ArrayHelper::merge($organizations, $parentOrganization);
+        }
+        $childOrganizations = ArrayHelper::map(Organization::findAll(['parent_id' => $id]), 'id', 'name');
+        $organizations = ArrayHelper::merge($organizations, $childOrganizations);
+        $services = ArrayHelper::map(AllService::findAll(['is_active' => true]), 'id', 'denom');
+        if (Yii::$app->request->isPost && !empty(Yii::$app->request->post())) {
+            $post = Yii::$app->request->post();
+            foreach ($post['organizations'] as $organizationID) {
+                foreach ($post['services'] as $serviceID) {
+                    $service = AllService::findOne(['id' => $serviceID]);
+                    $license = new License();
+                    $license->name = $service->denom;
+                    $license->is_active = true;
+                    $license->save();
+                    $licenseOrganization = new LicenseOrganization();
+                    $licenseOrganization->license_id = $license->id;
+                    $licenseOrganization->org_id = $organizationID;
+                    $licenseOrganization->fd = new Expression('NOW()');
+                    $licenseOrganization->td = date("Y-m-d H:i:s", strtotime($post['td'][$serviceID]));
+                    $licenseOrganization->save();
+                    $licenseService = new LicenseService();
+                    $licenseService->license_id = $license->id;
+                    $licenseService->service_id = $serviceID;
+                    $licenseService->save();
+                }
+            }
+            Yii::$app->session->setFlash('licenses-added', 'Лицензии добавлены');
+            return $this->redirect('/organization/list-organizations-for-licenses');
+        }
+
+        return $this->render('add-license', ['services' => $services, 'organizations' => $organizations]);
+    }
 }

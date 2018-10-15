@@ -12,7 +12,7 @@ class m181015_142204_add_invoice_content_id_field_to_order_content_table extends
      */
     public function safeUp()
     {
-        $this->alterColumn('{{%order_content}}', 'invoice_content_id', $this->integer()->null());
+        $this->addColumn('{{%order_content}}', 'invoice_content_id', $this->integer()->null());
     }
 
     /**

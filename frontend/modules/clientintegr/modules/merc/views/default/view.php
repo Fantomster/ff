@@ -121,7 +121,7 @@ $timestamp_now=time();
                             ],
                         ],
                     ]) ?>
-                    <h4>Информация о продукции: </h4>
+                                      <h4>Информация о продукции: </h4>
                     <?php
                     $attributes = [];
 
@@ -188,6 +188,12 @@ $timestamp_now=time();
                     <h4>Прочая информация: </h4>
                     <?php
                     $attributes = [];
+
+                    if(isset($document->laboratory_research))
+                        $attributes[] = [
+                            'label' => 'Результат лабораторного исследования',
+                            'value' => implode(", ",$document->laboratory_research)
+                        ];
 
                     if(isset($document->broker))
                         $attributes[] = $document->broker;

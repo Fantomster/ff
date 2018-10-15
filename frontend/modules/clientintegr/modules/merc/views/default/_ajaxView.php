@@ -162,6 +162,12 @@ $timestamp_now=time();
                     <?php
                     $attributes = [];
 
+                    if(isset($document->laboratory_research))
+                        $attributes[] = [
+                            'label' => 'Результат лабораторного исследования',
+                            'value' => implode(", ",$document->laboratory_research)
+                        ];
+
                     if(isset($document->broker))
                         $attributes[] = $document->broker;
 

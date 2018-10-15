@@ -26,12 +26,14 @@ use common\components\AccessRule;
 /**
  * OrganizationController implements the CRUD actions for Organization model.
  */
-class OrganizationController extends Controller {
+class OrganizationController extends Controller
+{
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             'verbs' => [
                 'class' => VerbFilter::className(),
@@ -69,7 +71,8 @@ class OrganizationController extends Controller {
      * Lists all Organization models.
      * @return mixed
      */
-    public function actionIndex() {
+    public function actionIndex()
+    {
         $searchModel = new OrganizationSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -84,7 +87,8 @@ class OrganizationController extends Controller {
      * Lists all TestVendors models.
      * @return mixed
      */
-    public function actionTestVendors() {
+    public function actionTestVendors()
+    {
         $searchModel = new TestVendorsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -99,7 +103,8 @@ class OrganizationController extends Controller {
      * @param integer $id
      * @return mixed
      */
-    public function actionView($id) {
+    public function actionView($id)
+    {
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
@@ -131,7 +136,7 @@ class OrganizationController extends Controller {
      */
     public function actionUpdateTestVendor($id)
     {
-        $model = TestVendors::findOne(['id'=>$id]);
+        $model = TestVendors::findOne(['id' => $id]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['test-vendors']);
@@ -150,13 +155,12 @@ class OrganizationController extends Controller {
      */
     public function actionStartTestVendorsUpdating()
     {
-        $clients = Organization::findAll(['type_id'=>Organization::TYPE_RESTAURANT]);
-        foreach ($clients as $client){
+        $clients = Organization::findAll(['type_id' => Organization::TYPE_RESTAURANT]);
+        foreach ($clients as $client) {
             TestVendors::setGuides($client);
         }
         return $this->redirect(['test-vendors']);
     }
-
 
 
     /**
@@ -165,18 +169,19 @@ class OrganizationController extends Controller {
      * @param integer $id
      * @return mixed
      */
-    public function actionUpdate($id) {
+    public function actionUpdate($id)
+    {
         $model = $this->findModel($id);
         $franchiseeModel = $this->findFranchiseeAssociateModel($id);
         $ediModel = EdiOrganization::findOne(['organization_id' => $id]);
-        if(!$ediModel){
+        if (!$ediModel) {
             $ediModel = new EdiOrganization();
             $ediModel->organization_id = $id;
             $ediModel->save();
         }
-        $franchiseeList = ArrayHelper::map(Franchisee::find()->all(),'id','legal_entity');
+        $franchiseeList = ArrayHelper::map(Franchisee::find()->all(), 'id', 'legal_entity');
         if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save() && $ediModel->load(Yii::$app->request->post())) {
-            if(strlen($ediModel->pass) < 20){
+            if (strlen($ediModel->pass) < 20) {
                 $ediModel->pass = md5($ediModel->pass);
             }
             $ediModel->save();
@@ -207,11 +212,12 @@ class OrganizationController extends Controller {
      * @return Organization the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id) {
+    protected function findModel($id)
+    {
         if (($model = Organization::findOne($id)) !== null) {
             return $model;
         } else {
-            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.organization_page_error', ['ru'=>'The requested page does not exist.']));
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.organization_page_error', ['ru' => 'The requested page does not exist.']));
         }
     }
 
@@ -223,8 +229,9 @@ class OrganizationController extends Controller {
      * @return Organization the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findFranchiseeAssociateModel($id) {
-        if (($model = FranchiseeAssociate::findOne(['organization_id'=>$id])) == null) {
+    protected function findFranchiseeAssociateModel($id)
+    {
+        if (($model = FranchiseeAssociate::findOne(['organization_id' => $id])) == null) {
             $model = new FranchiseeAssociate();
         }
         return $model;
@@ -239,28 +246,28 @@ class OrganizationController extends Controller {
     public function actionNotifications(int $id)
     {
         Yii::$app->language = 'ru';
-        $users = User::find()->leftJoin('relation_user_organization', 'relation_user_organization.user_id = user.id')->where('relation_user_organization.organization_id='.$id)->all();
+        $users = User::find()->leftJoin('relation_user_organization', 'relation_user_organization.user_id = user.id')->where('relation_user_organization.organization_id=' . $id)->all();
         if (count(Yii::$app->request->post())) {
             $post = Yii::$app->request->post();
             $emails = $post['Email'];
-            foreach ($emails as $userId => $fields){
+            foreach ($emails as $userId => $fields) {
                 $user = User::findOne(['id' => $userId]);
-                if(isset($post['User'][$userId]['subscribe'])){
+                if (isset($post['User'][$userId]['subscribe'])) {
                     $user->subscribe = $post['User'][$userId]['subscribe'];
                     $user->save();
                 }
                 $emailNotification = $user->emailNotification;
-                foreach ($fields as $key => $value){
+                foreach ($fields as $key => $value) {
                     $emailNotification->$key = $value;
                 }
                 $emailNotification->save();
                 unset($user);
             }
             $sms = $post['Sms'];
-            foreach ($sms as $userId => $fields){
+            foreach ($sms as $userId => $fields) {
                 $user = User::findOne(['id' => $userId]);
                 $smsNotification = $user->smsNotification;
-                foreach ($fields as $key => $value){
+                foreach ($fields as $key => $value) {
                     $smsNotification->$key = $value;
                 }
                 $smsNotification->save();
@@ -272,7 +279,8 @@ class OrganizationController extends Controller {
     }
 
 
-    public function actionAjaxUpdateStatus(){
+    public function actionAjaxUpdateStatus()
+    {
         if (Yii::$app->request->isAjax) {
             $status = Yii::$app->request->post('value');
             $organizationId = str_replace('blacklisted_', '', Yii::$app->request->post('id'));
@@ -280,7 +288,7 @@ class OrganizationController extends Controller {
             $organization->blacklisted = $status;
             $organization->save();
             return true;
-        }else{
+        } else {
             return false;
         }
     }

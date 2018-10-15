@@ -207,7 +207,7 @@ abstract class AbstractProvider
             } else {
                 $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
             }
-            $arr[$contID]['PRICE'] = (float)$position->PRICEWITHVAT ?? (float)$position->PRICE;
+            $arr[$contID]['PRICE'] = (float)$position->PRICE[0] ?? (float)$position->PRICEWITHVAT;
             $arr[$contID]['PRICEWITHVAT'] = (float)$position->PRICEWITHVAT ?? 0.00;
             $arr[$contID]['TAXRATE'] = (float)$position->TAXRATE ?? 0.00;
             $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
@@ -220,16 +220,15 @@ abstract class AbstractProvider
             $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
             $totalPrice += $arr[$contID]['PRICE'];
         }
-
         if ($totalQuantity == 0.00 || $totalPrice == 0.00) {
-            //OrderController::sendOrderCanceled($order->client, $order);
+            OrderController::sendOrderCanceled($order->client, $order);
             $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
             OrderController::sendSystemMessage($user, $order->id, $message);
             $order->status = OrderStatus::STATUS_REJECTED;
             $order->save();
             return true;
         }
-        dd($arr);
+
         $summ = 0;
         $ordContArr = [];
         foreach ($order->orderContent as $orderContent) {

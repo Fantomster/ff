@@ -251,7 +251,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
                         $wdmodel->munit_rid = $ch->unit_rid;
                     }
 
-                    if (isset($ch->vat)) {
+                    if (isset($ch->vat) && !isset($record->invoiceContent)) {
                         $wdmodel->vat = $ch->vat;
                     }
                 }

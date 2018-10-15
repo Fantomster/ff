@@ -147,8 +147,10 @@ class OneSWaybill extends \yii\db\ActiveRecord
                         $wdmodel->product_rid = $ch->product_rid;
                         $wdmodel->munit = $ch->munit;
                         $wdmodel->koef = $ch->koef;
-                        $wdmodel->vat = $ch->vat;
                         $wdmodel->quant = $wdmodel->quant * $ch->koef;
+                    }
+                    if ($ch && !isset($record->invoiceContent)) {
+                        $wdmodel->vat = $ch->vat;
                     }
                     if (!$wdmodel->save()) {
                         var_dump($wdmodel->getErrors());

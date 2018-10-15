@@ -469,7 +469,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                         $wdmodel->munit = $ch->unit_rid;
                     }
 
-                    if (isset($ch->vat)) {
+                    if (isset($ch->vat) && !isset($record->invoiceContent)) {
                         $wdmodel->vat = $ch->vat;
                     }
                 }

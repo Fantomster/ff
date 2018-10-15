@@ -299,11 +299,11 @@ class getVetDocumentByUUID extends Model
         $this->expertiseInfo = $doc->authentication->cargoInspected;
 
         $this->confirmedBy = [
-            ['label' => 'ФИО',
-                'value' => isset($doc->statusChange->specifiedPerson->fio) ? $doc->statusChange->specifiedPerson->fio : "-"],
-            ['label' => 'Должность',
-                'value' => isset($doc->statusChange->specifiedPerson->post) ? $doc->statusChange->specifiedPerson->post : ""]
-        ];
+        ['label' => 'ФИО',
+            'value' => isset($doc->statusChange->specifiedPerson->fio) ? $doc->statusChange->specifiedPerson->fio : "-"],
+        ['label' => 'Должность',
+            'value' => isset($doc->statusChange->specifiedPerson->post) ? $doc->statusChange->specifiedPerson->post : ""]
+    ];
         $this->locationProsperity = $doc->authentication->locationProsperity;
         $this->specialMarks = isset($doc->authentication->specialMarks) ? $doc->authentication->specialMarks : null;
     }

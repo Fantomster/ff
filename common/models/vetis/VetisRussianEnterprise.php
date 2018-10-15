@@ -131,7 +131,6 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
 
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
-            echo $e->getMessage().PHP_EOL;
         }
     }
 }

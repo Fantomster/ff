@@ -568,10 +568,11 @@ class Order extends \yii\db\ActiveRecord
 
                 $login = $vendor->ediOrganization->login;
                 $pass = $vendor->ediOrganization->pass;
+                $glnCode = $vendor->ediOrganization->gln_code;
                 if ($this->status == OrderStatus::STATUS_DONE) {
-                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, $login, $pass, true);
+                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, $login, $pass, true, $glnCode);
                 } else {
-                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, $login, $pass);
+                    $result = $eComIntegration->sendOrderInfo($this, $vendor, $client, $login, $pass, false, $glnCode);
                 }
                 if (!$result) {
                     Yii::error(Yii::t('app', 'common.models.order.edi_error'));

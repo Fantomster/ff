@@ -21,7 +21,7 @@ interface ProviderInterface
      * @param $pass
      * @return mixed
      */
-    public function getResponse($login, $pass);
+    //public function getFilesList($login, $pass, $glnCode);
 
 
 }

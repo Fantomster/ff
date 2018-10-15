@@ -39,7 +39,8 @@ class Provider extends AbstractProvider implements ProviderInterface
      * @return null
      * @throws \yii\base\Exception
      */
-    public function getResponse($login, $pass){
+    public function getResponse($login, $pass)
+    {
         $object = $this->client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
 
         if ($object->result->errorCode != 0) {
@@ -88,10 +89,10 @@ class Provider extends AbstractProvider implements ProviderInterface
 
     /**
      * @param \common\models\Organization $vendor
-     * @param String                      $string
-     * @param String                      $remoteFile
-     * @param String                      $login
-     * @param String                      $pass
+     * @param String $string
+     * @param String $remoteFile
+     * @param String $login
+     * @param String $pass
      * @return bool
      */
     public function sendDoc(String $string, String $remoteFile, String $login, String $pass): bool
@@ -112,7 +113,7 @@ class Provider extends AbstractProvider implements ProviderInterface
      * @param String $fileName
      * @param String $login
      * @param String $pass
-     * @param int    $fileId
+     * @param int $fileId
      * @return bool
      * @throws \yii\db\Exception
      */
@@ -248,17 +249,17 @@ class Provider extends AbstractProvider implements ProviderInterface
             }
             if ($ordCont->quantity != $quantity) {
                 $message .= \Yii::t('message', 'frontend.controllers.order.change',
-                        ['ru'      => "<br/>изменил количество {prod} с {oldQuan} {ed} на ",
-                            'prod'    => $ordCont->product_name,
+                        ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ",
+                            'prod' => $ordCont->product_name,
                             'oldQuan' => $ordCont->quantity,
-                            'ed'      => $good->ed]
+                            'ed' => $good->ed]
                     ) . " $quantity" . $good->ed;
             }
             if ($ordCont->price != $price) {
                 $message .= \Yii::t('message', 'frontend.controllers.order.change_price',
-                        ['ru'             => "<br/>изменил цену {prod} с {productPrice} руб на ",
-                            'prod'           => $ordCont->product_name,
-                            'productPrice'   => $ordCont->price,
+                        ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ",
+                            'prod' => $ordCont->product_name,
+                            'productPrice' => $ordCont->price,
                             'currencySymbol' => $order->currency->iso_code]
                     ) . $price . " руб";
 
@@ -414,28 +415,28 @@ class Provider extends AbstractProvider implements ProviderInterface
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
             if (!$catalogBaseGood) {
                 $res = \Yii::$app->db->createCommand()->insert('catalog_base_goods', [
-                    'cat_id'               => $baseCatalog->id,
-                    'article'              => $good['article'],
-                    'product'              => $good['name'],
-                    'status'               => CatalogBaseGoods::STATUS_ON,
-                    'supp_org_id'          => $organization->id,
-                    'price'                => $good['price'],
-                    'units'                => $good['units'],
-                    'ed'                   => $good['ed'],
-                    'created_at'           => new Expression('NOW()'),
-                    'category_id'          => null,
-                    'deleted'              => 0,
-                    'barcode'              => $barcode,
+                    'cat_id' => $baseCatalog->id,
+                    'article' => $good['article'],
+                    'product' => $good['name'],
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                    'supp_org_id' => $organization->id,
+                    'price' => $good['price'],
+                    'units' => $good['units'],
+                    'ed' => $good['ed'],
+                    'created_at' => new Expression('NOW()'),
+                    'category_id' => null,
+                    'deleted' => 0,
+                    'barcode' => $barcode,
                     'edi_supplier_article' => $good['edi_supplier_article']
                 ])->execute();
                 if (!$res) continue;
                 $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
-                $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price']);
+                $res2 = parent::insertGood($relationCatalogID, $catalogBaseGood->id, $good['price']);
                 if (!$res2) continue;
             } else {
                 $catalogGood = CatalogGoods::findOne(['cat_id' => $relationCatalogID, 'base_goods_id' => $catalogBaseGood->id]);
                 if (!$catalogGood) {
-                    $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price']);
+                    $res2 = parent::insertGood($relationCatalogID, $catalogBaseGood->id, $good['price']);
                     if (!$res2) continue;
                 } else {
                     $catalogGood->price = $good['price'];

@@ -13,6 +13,7 @@ use common\models\Organization;
 use Yii;
 use yii\base\Component;
 use yii\db\Exception;
+use yii\db\Expression;
 
 /**
  * Class for E-COM integration methods
@@ -21,10 +22,6 @@ use yii\db\Exception;
 class EComIntegration2 extends Component
 {
 
-//    const STATUS_NEW = 1;
-//    const STATUS_PROCESSING = 2;
-//    const STATUS_ERROR = 3;
-//    const STATUS_HANDLED = 4;
     /**
      * @var
      */
@@ -35,7 +32,7 @@ class EComIntegration2 extends Component
     public $obConf;
     /**@var ProviderInterface */
     public $provider;
-    /**@var RealizationInterface*/
+    /**@var RealizationInterface */
     public $realization;
 
     /**
@@ -52,7 +49,8 @@ class EComIntegration2 extends Component
     /**
      *
      */
-    public function init(){
+    public function init()
+    {
         $conf = EcomIntegrationConfig::findOne(['org_id' => $this->orgId]);
         if (!$conf) {
             throw new BadRequestHttpException("Config not set for this vendor");
@@ -68,8 +66,8 @@ class EComIntegration2 extends Component
      */
     private function createClass($dir, $className)
     {
-        $strClassName = 'common\components\ecom\\'. $dir . $className;
-        if (array_key_exists($className, $this->obConf)){
+        $strClassName = 'common\components\ecom\\' . $dir . $className;
+        if (array_key_exists($className, $this->obConf)) {
             return new $strClassName($this->obConf[$className]);
         }
         return new $strClassName();
@@ -109,22 +107,19 @@ class EComIntegration2 extends Component
      */
     public function handleFilesList(): void
     {
-        $ediOrganizations = $this->getOrganizations();
-
-        if (is_iterable($ediOrganizations)) {
-            foreach ($ediOrganizations as $ediOrganization) {
-                $login = $ediOrganization['login'];
-                $pass = $ediOrganization['pass'];
-                try {
-                    $objectList = $this->provider->getResponse($login, $pass);
-                } catch (\Throwable $e) {
-                    Yii::error($e->getMessage());
-                    continue;
-                }
-
-                if (!empty($objectList)) {
-                    $this->insertFilesInQueue($objectList);
-                }
+        $orgId = $this->orgId;
+        $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
+        if ($ediOrganization) {
+            $login = $ediOrganization['login'];
+            $pass = $ediOrganization['pass'];
+            $glnCode = $ediOrganization['gln_code'];
+            try {
+                $objectList = $this->provider->getFilesList($login, $pass, $glnCode);
+            } catch (\Throwable $e) {
+                Yii::error($e->getMessage());
+            }
+            if (!empty($objectList)) {
+                $this->insertFilesInQueue($objectList, $orgId);
             }
         }
     }
@@ -134,7 +129,7 @@ class EComIntegration2 extends Component
      * @param array $list
      * @throws \yii\db\Exception
      */
-    public function insertFilesInQueue(array $list)
+    public function insertFilesInQueue(array $list, $orgId)
     {
         $batch = [];
         $files = (new \yii\db\Query())
@@ -145,23 +140,16 @@ class EComIntegration2 extends Component
             ->all();
 
         foreach ($list as $name) {
-            if(isset($name['ns2tracking-id'])){
+            if (isset($name['ns2tracking-id'])) {
                 $name = $name['ns2tracking-id'];
             }
             if (!array_key_exists($name, $files)) {
-                $batch[] = [$name, $this->orgId];
+                $batch[] = ['name' => $name, 'organization_id' => $orgId];
             }
         }
 
         if (!empty($batch)) {
-            $transaction = \Yii::$app->db->beginTransaction();
-            try {
-                \Yii::$app->db->queryBuilder->batchInsert('edi_files_queue', ['name', 'organization_id'], $batch)->execute();
-                $transaction->commit();
-            } catch (\Throwable $e) {
-                $transaction->rollback();
-                \Yii::error($e->getMessage());
-            }
+            \Yii::$app->db->createCommand()->batchInsert('edi_files_queue', ['name', 'organization_id'], $batch)->execute();
         }
     }
 
@@ -177,12 +165,12 @@ class EComIntegration2 extends Component
      */
     public function handleFilesListQueue(): void
     {
-        $rows = $this->getFileList();
         $ediOrganizations = $this->getOrganizations();
 
         foreach ($ediOrganizations as $ediOrganization) {
+            $rows = $this->getFileList($ediOrganization['organization_id']);
             foreach ($rows as $item) {
-                $this->provider->getDoc($this->provider->client, $item['name'], $ediOrganization['login'], $ediOrganization['pass'], $item['id']);
+                $this->provider->getDoc($this->provider->client, $item['name'], $ediOrganization['login'], $ediOrganization['pass'], $item['id'], $ediOrganization['gln_code']);
             }
         }
     }
@@ -191,27 +179,28 @@ class EComIntegration2 extends Component
     /**
      * @return array
      */
-    public function getFileList(): array
+    public function getFileList(int $organizationId): array
     {
         return (new \yii\db\Query())
             ->select(['id', 'name'])
             ->from('edi_files_queue')
             ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
+            ->andWhere(['organization_id' => $organizationId])
             ->all();
     }
 
 
     /**
-     * @param \common\models\Order        $order
+     * @param \common\models\Order $order
      * @param \common\models\Organization $vendor
      * @param \common\models\Organization $client
-     * @param String                      $login
-     * @param String                      $pass
-     * @param bool                        $done
+     * @param String $login
+     * @param String $pass
+     * @param bool $done
      * @return bool
      * @throws \yii\base\InvalidArgumentException
      */
-    public function sendOrderInfo(Order $order, Organization $vendor, Organization $client, String $login, String $pass, bool $done = false): bool
+    public function sendOrderInfo(Order $order, Organization $vendor, Organization $client, String $login, String $pass, bool $done = false, $glnCode): bool
     {
         $transaction = Yii::$app->db_api->beginTransaction();
         $result = false;
@@ -220,7 +209,7 @@ class EComIntegration2 extends Component
             if (!$ediOrder) {
                 Yii::$app->db->createCommand()->insert('edi_order', [
                     'order_id' => $order->id,
-                    'lang'     => Yii::$app->language ?? 'ru'
+                    'lang' => Yii::$app->language ?? 'ru'
                 ])->execute();
             }
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);
@@ -230,9 +219,9 @@ class EComIntegration2 extends Component
                     $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $one->id]);
                     if (!$ediOrderContent) {
                         Yii::$app->db->createCommand()->insert('edi_order_content', [
-                            'order_content_id'     => $one->id,
+                            'order_content_id' => $one->id,
                             'edi_supplier_article' => $catGood->edi_supplier_article ?? null,
-                            'barcode'              => $catGood->barcode ?? null
+                            'barcode' => $catGood->barcode ?? null
                         ])->execute();
                     }
                 }
@@ -254,7 +243,7 @@ class EComIntegration2 extends Component
                 $item->edi_recadv = $remoteFile;
                 $item->save();
             }
-            $result = $this->provider->sendDoc($string, $remoteFile, $login, $pass);
+            $result = $this->provider->sendDoc($string, $remoteFile, $login, $pass, $glnCode);
             $transaction->commit();
         } catch (Exception $e) {
             Yii::error($e);
@@ -301,26 +290,6 @@ class EComIntegration2 extends Component
         return $arr;
     }
 
-
-    /**
-     * @param \common\models\Organization $vendor
-     * @param String                      $string
-     * @param String                      $remoteFile
-     * @param String                      $login
-     * @param String                      $pass
-     * @return bool
-     */
-    private function sendDoc(Organization $vendor, String $string, String $remoteFile, String $login, String $pass): bool
-    {
-        $client = Yii::$app->siteApi;
-        $obj = $client->sendDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $remoteFile, 'content' => $string]);
-        if (isset($obj) && isset($obj->result->errorCode) && $obj->result->errorCode == 0) {
-            return true;
-        } else {
-            Yii::error("Ecom returns error code");
-            return false;
-        }
-    }
 
     /**
      * @throws \yii\db\Exception

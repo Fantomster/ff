@@ -4,6 +4,7 @@ namespace common\models;
 
 use Yii;
 use yii\db\Exception;
+use yii\helpers\HtmlPurifier;
 
 /**
  * This is the model class for table "integration_invoice".
@@ -201,7 +202,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
                     'price_without_nds' => round($row['price_without_tax'], 2),
                     'quantity' => $row['cnt'],
                     'sum_without_nds' => $row['sum_without_tax'],
-                    // 'quantity' => ceil($row['cnt']) Hotfix 1.5.12
+                        // 'quantity' => ceil($row['cnt']) Hotfix 1.5.12
                 ]);
                 if (!$content->save()) {
                     throw new Exception(implode(' ', $content->getFirstErrors()));
@@ -229,8 +230,8 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         //Если не нашли, создаём
         foreach ($this->content as $row) {
             $model = CatalogBaseGoods::find()->where(['supp_org_id' => $vendor->id])
-                ->andWhere('product LIKE :product', [':product' => $row->title])
-                ->one();
+                    ->andWhere(['like', 'product', HtmlPurifier::process($row->title)])
+                    ->one();
 
             if (empty($model)) {
                 $model = new CatalogBaseGoods();
@@ -285,12 +286,12 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         }
         foreach ($this->content as $row) {
             $model = CatalogBaseGoods::find()->where(['supp_org_id' => $vendor->id])
-                ->andWhere('product LIKE :product', [':product' => $row->title])
-                ->one();
+                    ->andWhere(['like', 'product', HtmlPurifier::process($row->title)])
+                    ->one();
             foreach ($catalogs as $catalog) {
                 $model2 = CatalogGoods::find()->where(['cat_id' => $catalog['cat_id']])
-                    ->andWhere(['base_goods_id' => $model->id])
-                    ->one();
+                        ->andWhere(['base_goods_id' => $model->id])
+                        ->one();
 
                 if (empty($model2)) {
                     $model2 = new CatalogGoods();

@@ -10,79 +10,39 @@ use Yii;
 
 class OrgUseMercFrequently extends Model
 {
-    public $db;
-    public $db_api;
+    private $db;
+    private $db_api;
+
     public function __construct(array $config = [])
     {
         parent::__construct($config);
-        $this->setDbNames();
+        $this->db = $this->dbName(Yii::$app->db->dsn);
+        $this->db_api = $this->dbName(Yii::$app->db_api->dsn);
     }
 
-    private function setDbNames()
+    private function dbName(string $dns)
     {
-        $temp1 = explode(';', Yii::$app->db->dsn);
+        $temp1 = explode(';', $dns);
         $temp2 = explode('=', $temp1[1]);
-        $this->db=$temp2[1];
-
-        $temp3 = explode(';', Yii::$app->db_api->dsn);
-        $temp4 = explode('=', $temp3[1]);
-        $this->db_api=$temp4[1];
+        return $temp2[1];
     }
 
-    public function getOrgListIn()
+    public function getOrgList(bool $flag = false)
     {
-        $sql1 = "SELECT COUNT(name) FROM `".$this->db."`.`organization` WHERE id in
-(
-SELECT org FROM `".$this->db_api."`.`merc_pconst` where VALUE in (
-SELECT DISTINCT recipient_guid FROM `".$this->db_api."`.`merc_vsd` WHERE status = :status AND  last_update_date >= DATE(NOW()) - INTERVAL 30 DAY)
-)";
-        $sql2 = "SELECT id, name FROM `".$this->db."`.`organization` WHERE id in
-(
-SELECT org FROM `".$this->db_api."`.`merc_pconst` where VALUE in (
-SELECT DISTINCT recipient_guid FROM `".$this->db_api."`.`merc_vsd` WHERE status = :status AND  last_update_date >= DATE(NOW()) - INTERVAL 30 DAY)
-)";
+        $not = '';
+        if ($flag) {
+            $not = 'not';
+        }
+        $sql = "SELECT id, name FROM `{$this->db}`.`organization` WHERE id $not in
+       (
+           SELECT org FROM `{$this->db_api}`.`merc_pconst` where VALUE in (
+           SELECT DISTINCT recipient_guid FROM `{$this->db_api}`.`merc_vsd` WHERE status = :status AND  last_update_date >= DATE(NOW()) - INTERVAL 30 DAY)
+       )";
 
-//        print_r(Yii::$app->db2->dsn);
-        $count = Yii::$app->db->createCommand($sql1, [':status' => 'UTILIZED'])->queryScalar();
-
+        $count = Yii::$app->db->createCommand($sql, [':status' => 'UTILIZED'])->execute();
 
         $provider = new SqlDataProvider([
-            'sql' => $sql2,
-            'params' => [':status' => 'UTILIZED'],
-            'totalCount' => $count,
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'name',
-                ],
-            ],
-        ]);
-
-        return $provider;
-    }
-
-    public function getOrgListNotIn()
-    {
-
-        $sql1 = "SELECT COUNT(name) FROM `".$this->db."`.`organization` WHERE id not in
-(
-SELECT org FROM `".$this->db_api."`.`merc_pconst` where VALUE in (
-SELECT DISTINCT recipient_guid FROM `".$this->db_api."`.`merc_vsd` WHERE status = :status AND  last_update_date >= DATE(NOW()) - INTERVAL 30 DAY)
-)";
-        $sql2 = "SELECT id, name FROM `".$this->db."`.`organization` WHERE id not in
-(
-SELECT org FROM `".$this->db_api."`.`merc_pconst` where VALUE in (
-SELECT DISTINCT recipient_guid FROM `".$this->db_api."`.`merc_vsd` WHERE status = :status AND  last_update_date >= DATE(NOW()) - INTERVAL 30 DAY)
-)";
-
-//        print_r(Yii::$app->db2->dsn);
-        $count = Yii::$app->db->createCommand($sql1, [':status' => 'UTILIZED'])->queryScalar();
-
-
-        $provider = new SqlDataProvider([
-            'sql' => $sql2,
+            'sql' => $sql,
             'params' => [':status' => 'UTILIZED'],
             'totalCount' => $count,
             'pagination' => [

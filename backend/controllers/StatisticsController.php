@@ -35,7 +35,7 @@ class StatisticsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc','dynamics','mercury'],
+                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc','dynamics','mercury', 'merc-active-org'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -544,7 +544,7 @@ class StatisticsController extends Controller {
     public function actionMercActiveOrg()
     {
         $mercOrg = new OrgUseMercFrequently();
-        $dataProviderIn = $mercOrg->getOrgListIn();
+        $dataProviderIn = $mercOrg->getOrgList();
         $dataProviderIn->setSort([
             'attributes' => [
                 'name' => [
@@ -553,7 +553,7 @@ class StatisticsController extends Controller {
                 'id'
             ]
         ]);
-        $dataProviderNotIn = $mercOrg->getOrgListNotIn();
+        $dataProviderNotIn = $mercOrg->getOrgList(true);
         $dataProviderNotIn->setSort([
             'attributes' => [
                 'name' => [

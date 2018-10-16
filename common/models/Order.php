@@ -53,6 +53,7 @@ use yii\web\BadRequestHttpException;
  * @property OrderAttachment[] $attachments
  * @property OrderAssignment $assignment
  * @property EmailQueue[] $relatedEmails
+ * @property Waybill[] $waybills
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -63,6 +64,8 @@ class Order extends \yii\db\ActiveRecord
     const STATUS_REJECTED = 5;
     const STATUS_CANCELLED = 6;
     const STATUS_FORMING = 7;
+    const STATUS_EDI_SENT_BY_VENDOR = 8;
+    const STATUS_EDI_ACCEPTANCE_FINISHED = 9;
 
     const DISCOUNT_NO_DISCOUNT = null;
     const DISCOUNT_FIXED = 1;
@@ -312,7 +315,11 @@ class Order extends \yii\db\ActiveRecord
 
     public function getStatusText()
     {
-        $statusList = self::getStatusList();
+        if ($this->edi_order){
+            $statusList = self::getStatusListEdo();
+        } else {
+            $statusList = self::getStatusList();
+        }
         return $statusList[$this->status];
     }
 
@@ -343,6 +350,10 @@ class Order extends \yii\db\ActiveRecord
             OrderStatus::STATUS_DONE => Yii::t('app', 'common.models.done_two', ['ru' => 'Завершен']),
             OrderStatus::STATUS_REJECTED => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
             OrderStatus::STATUS_CANCELLED => Yii::t('app', 'common.models.client_canceled', ['ru' => 'Отменен клиентом']),
+            OrderStatus::STATUS_EDI_SENT_BY_VENDOR => Yii::t('app',
+                'common.models.order_status.status_edo_sent_by_vendor', ['ru' => 'Отправлен поставщиком']),
+            OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED => Yii::t('app',
+                'common.models.order_status.status_edo_acceptance_finished', ['ru' => 'Приемка завершена']),
         ];
         if (!$short) {
             $result[OrderStatus::STATUS_FORMING] = Yii::t('app', 'common.models.forming', ['ru' => 'Формируется']);
@@ -697,5 +708,12 @@ class Order extends \yii\db\ActiveRecord
     public function getFormattedCreationDate()
     {
         return Yii::$app->formatter->asDatetime($this->created_at, "php:d.m.Y, H:i");
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getWaybills(){
+        return $this->hasMany(Waybill::class, ['order_id' => 'id']);
     }
 }

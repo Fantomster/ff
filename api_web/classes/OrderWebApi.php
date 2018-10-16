@@ -21,6 +21,7 @@ use common\models\search\OrderSearch;
 use common\models\Order;
 use common\models\Organization;
 use api_web\components\Notice;
+use common\models\Waybill;
 use common\models\WaybillContent;
 use kartik\mpdf\Pdf;
 use yii\data\Pagination;
@@ -599,10 +600,9 @@ class OrderWebApi extends \api_web\components\WebApi
         $models = $dataProvider->models;
         if (!empty($models)) {
             /**
-             * @var $model Order
+             * @var Order $model
              */
             foreach ($models as $model) {
-
                 if ($model->status == OrderStatus::STATUS_DONE) {
                     $date = $model->completion_date ?? $model->actual_delivery;
                 } else {
@@ -613,10 +613,12 @@ class OrderWebApi extends \api_web\components\WebApi
                     $model->completion_date = $date;
                     $model->save(false);
                 }
-
-                $date = (!empty($date) ? \Yii::$app->formatter->asDate($date, "dd.MM.yyyy") : null);
-
-                $orders[] = [
+                if (!empty($date)){
+                    $obDateTime = new \DateTime($date);
+                    $date = $obDateTime->format("d.m.Y H:i:s");
+                }
+                $obCreateAt = new \DateTime($model->created_at);
+                $orderInfo = [
                     'id' => (int)$model->id,
                     'created_at' => \Yii::$app->formatter->asDate($model->created_at, "dd.MM.yyyy"),
                     'completion_date' => $date,
@@ -627,6 +629,13 @@ class OrderWebApi extends \api_web\components\WebApi
                     'create_user' => $model->createdByProfile->full_name ?? '',
                     'accept_user' => $model->acceptedByProfile->full_name ?? ''
                 ];
+                if (!empty($model->orderContent)){
+                    $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el){
+                        return $el->edi_number;
+                    }, $model->orderContent)));
+                    $orderInfo = array_merge($orderInfo, ['edi_number' => $arWaybillNames]);
+                }
+                $orders[] = $orderInfo;
             }
         }
 

@@ -70,14 +70,20 @@ class EdiController extends WebApiController
      *              default={
      *                  "orders": {
      *                      {
-     *                          "id": 12,
-     *                          "created_at": "10.10.2016",
-     *                          "status_updated_at": "10.10.2016",
-     *                          "status": 1,
-     *                          "status_text": "Ожидает подтверждения поставщика",
-     *                          "vendor": "POSTAVOK.NET CORPORATION",
-     *                          "create_user": "Admin",
-     *                          "comment": "Коментарий утерян в ящике стола"
+     *                          "id": 6064,
+     *                          "created_at": "2017-09-27T03:00:00+03:00",
+     *                          "completion_date": "2018-10-16T10:05:24+03:00",
+     *                          "status": 8,
+     *                          "status_text": "Отправлен поставщиком",
+     *                          "vendor": "vasilkai2017@mail.ru",
+     *                          "currency_id": 1,
+     *                          "create_user": "Капотник",
+     *                          "accept_user": "",
+     *                          "edi_number": {
+     *                              "1",
+     *                              "2",
+     *                              "3"
+     *                          }
      *                      },
      *                      {
      *                          "id": 14,
@@ -108,6 +114,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderHistory()
     {

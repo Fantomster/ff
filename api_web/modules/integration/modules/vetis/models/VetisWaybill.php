@@ -4,7 +4,6 @@ namespace api_web\modules\integration\modules\vetis\models;
 
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
-use api_web\classes\UserWebApi;
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
@@ -38,7 +37,7 @@ class VetisWaybill extends WebApi
      * Список сертифитаков сгруппированный по номеру заказа
      *
      * @param $request
-     * @throws \yii\web\BadRequestHttpException
+     * @throws \Exception
      * @return array
      */
     public function getGroupsList($request)
@@ -60,7 +59,7 @@ class VetisWaybill extends WebApi
 
         //Строим результат
         $result = [
-            'items'  => $this->getList($arResult['uuids']),
+            'items'  => $this->getList($arResult['uuids'], $arResult['arIncOut']),
             'groups' => $arResult['groups']
         ];
         //Ответ для АПИ
@@ -79,9 +78,11 @@ class VetisWaybill extends WebApi
      * Получение ВСД по uuids
      *
      * @param array $uuids
+     * @param array $arIncOut
+     * @throws \Exception
      * @return array
      * */
-    public function getList($uuids): array
+    public function getList($uuids, $arIncOut = []): array
     {
         $result = $uuids;
         $models = MercVsd::findAll(['uuid' => array_keys($uuids)]);
@@ -98,6 +99,8 @@ class VetisWaybill extends WebApi
                 'unit'            => $model->unit,
                 'production_date' => $model->production_date,
                 'date_doc'        => $model->date_doc,
+                'vsd_direction'   => $arIncOut[$model->uuid] ?? null,
+                'last_error'      => $model->last_error,
             ];
         }
 
@@ -231,33 +234,27 @@ class VetisWaybill extends WebApi
         if (!isset($request['uuids']) || !is_array($request['uuids'])) {
             throw new BadRequestHttpException('Uuids is required and must be array');
         }
-        $result = [];
         $records = $this->helper->getAvailableVsd($request['uuids']);
         try {
             $api = mercuryApi::getInstance();
-            $arVsd = [];
-            foreach ($request['uuids'] as $uuid) {
-                if (array_key_exists($uuid, $records)) {
-                    if($api->getVetDocumentDone($uuid)) {
-                        $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_EXTINGUISHED, $uuid);
-                    }
-                } else {
-                    throw new BadRequestHttpException('ВСД не принадлежит данной организации: ' . $uuid);
+            if (array_key_exists($request['uuids'], $records)) {
+                if ($api->getVetDocumentDone($request['uuids'])) {
+                    $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_EXTINGUISHED, $request['uuids']);
                 }
-                $arVsd[$uuid] = null;
+            } else {
+                throw new BadRequestHttpException('ВСД не принадлежит данной организации: ' . $request['uuids']);
             }
-            $result = $this->getList($arVsd);
         } catch (\Throwable $t) {
             if ($t->getCode() == 600) {
-                $result['error'] = 'Заявка отклонена';
+                $error = 'Заявка отклонена';
             } else {
-                $result['error'] = $t->getMessage();
-                $result['trace'] = $t->getTraceAsString();
-                $result['code'] = $t->getCode();
+                $error = $t->getMessage();
             }
+            $this->helper->setLastError($error, $request['uuids']);
         }
+        $vsd_direction = $this->helper->getVsdDirection($request['uuids'], $this->user->organization_id);
 
-        return ['result' => $result];
+        return ['result' => $this->getList([$request['uuids'] => null]), [$request['uuids'] => $vsd_direction]];
     }
 
     /**
@@ -286,21 +283,20 @@ class VetisWaybill extends WebApi
 
         try {
             $api = mercuryApi::getInstance();
-            if($api->getVetDocumentDone($uuid, $params)) {
+            if ($api->getVetDocumentDone($uuid, $params)) {
                 $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_PARTIALLY_ACCEPTED, $uuid);
             }
-            $result = $this->getList([$uuid => null]);
         } catch (\Throwable $t) {
             if ($t->getCode() == 600) {
-                $result['error'] = 'Заявка отклонена';
+                $error = 'Заявка отклонена';
             } else {
-                $result['error'] = $t->getMessage();
-                $result['trace'] = $t->getTraceAsString();
-                $result['code'] = $t->getCode();
+                $error = $t->getMessage();
             }
+            $this->helper->setLastError($error, $uuid);
         }
+        $vsd_direction = $this->helper->getVsdDirection($uuid, $this->user->organization_id);
 
-        return ['result' => $result];
+        return ['result' => $this->getList([$uuid => null], [$uuid => $vsd_direction])];
     }
 
     /**
@@ -316,7 +312,7 @@ class VetisWaybill extends WebApi
         if (!isset($uuid) || !isset($request['reason'])) {
             throw new BadRequestHttpException('Uuid and reason is required and must be array');
         }
-        $record = $this->helper->getAvailableVsd($request['uuid']);
+        $record = $this->helper->getAvailableVsd($uuid);
         if (!$record) {
             throw new BadRequestHttpException('Uuid not for this organization');
         }
@@ -331,18 +327,17 @@ class VetisWaybill extends WebApi
             if ($api->getVetDocumentDone($uuid, $params)) {
                 $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_RETURNED, $uuid);
             }
-            $result = $this->getList([$uuid => null]);
         } catch (\Throwable $t) {
             if ($t->getCode() == 600) {
-                $result['error'] = 'Заявка отклонена';
+                $error = 'Заявка отклонена';
             } else {
-                $result['error'] = $t->getMessage();
-                $result['trace'] = $t->getTraceAsString();
-                $result['code'] = $t->getCode();
+                $error = $t->getMessage();
             }
+            $this->helper->setLastError($error, $uuid);
         }
+        $vsd_direction = $this->helper->getVsdDirection($uuid, $this->user->organization_id);
 
-        return ['result' => $result];
+        return ['result' => $this->getList([$uuid => null], [$uuid => $vsd_direction])];
     }
 
     /**
@@ -354,7 +349,7 @@ class VetisWaybill extends WebApi
     {
         $enterpraiseGuid = null;
         $orgId = $request['org_id'] ?? null;
-        if ($orgId){
+        if ($orgId) {
             $enterpraiseGuid = mercDicconst::getSetting('enterprise_guid', $orgId);
         }
 
@@ -375,14 +370,14 @@ class VetisWaybill extends WebApi
         if (!isset($request['uuid'])) {
             throw new BadRequestHttpException('Uuid is required');
         }
-        
+
         $vsdHttp = $this->helper->generateVsdHttp();
         $check = $vsdHttp->checkAuthData();
-        
+
         if (!$check['success']) {
             throw new BadRequestHttpException('Vetis authorization failed');
         }
-        
+
         $data = $vsdHttp->getPdfData($request['uuid']);
         $base64 = (isset($request['base64_encode']) && $request['base64_encode'] == 1 ? true : false);
         return ($base64 ? base64_encode($data) : $data);

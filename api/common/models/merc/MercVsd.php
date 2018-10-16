@@ -44,6 +44,7 @@ use Yii;
  * @property string $producer_guid
  * @property int $low_grade_cargo
  * @property string $raw_data
+ * @property string $last_error
  * @property string $owner_guid
  * @property string $product_guid
  * @property string $sub_product_guid

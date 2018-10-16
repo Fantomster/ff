@@ -52,10 +52,10 @@ class RabbitService extends Component
         );
 
         try {
-            $clientIp = isset(Yii::$app->request->userIP) ? Yii::$app->request->userIP : "undefined";
-            $requestUrl = isset(Yii::$app->request->url) ? Yii::$app->request->url : "undefined";
+            $clientIp = isset(\Yii::$app->request->userIP) ? \Yii::$app->request->userIP : "undefined";
+            $requestUrl = isset(\Yii::$app->request->url) ? \Yii::$app->request->url : "undefined";
             $logMessage = "client ip: " . $clientIp . "; request url: " . $requestUrl;
-            \Yii::$app->get('cloudWatchLog')->writeLog(Yii::$app->params['rabbitLogGroup'], $this->queue, $logMessage);
+            \Yii::$app->get('cloudWatchLog')->writeLog(\Yii::$app->params['rabbitLogGroup'], $this->queue, $logMessage);
         } catch (\Exception $e) {
             \Yii::error($e->getMessage());
         }

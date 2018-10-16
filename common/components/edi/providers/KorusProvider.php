@@ -33,6 +33,8 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
     public $realization;
     public $content;
     public $ediFilesQueueID;
+    private $schema;
+    private $wsdl;
 
     /**
      * Provider constructor.
@@ -40,6 +42,8 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
     public function __construct()
     {
         $this->client = \Yii::$app->siteApiKorus;
+        $this->schema = "http://schemas.xmlsoap.org/soap/envelope/";
+        $this->wsdl = "http://edi-express.esphere.ru/";
     }
 
 
@@ -129,7 +133,7 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
     {
         $relationId = $this->getRelation($type, $login, $pass, $glnCode);
         $soap_request = <<<EOXML
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:edi="http://edi-express.esphere.ru/">
+<soapenv:Envelope xmlns:soapenv="$this->schema" xmlns:edi="$this->wsdl">
    <soapenv:Header/>
    <soapenv:Body>
       <edi:ListMBInput>
@@ -203,7 +207,7 @@ EOXML;
         $pass = $ediOrganization['pass'];
         $relationId = $this->getRelation('ORDERS', $login, $pass, $ediOrganization['gln_code']);
         $soap_request = <<<EOXML
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:edi="http://edi-express.esphere.ru/">
+<soapenv:Envelope xmlns:soapenv="$this->schema" xmlns:edi="$this->wsdl">
    <soapenv:Header/>
    <soapenv:Body>
       <edi:SendInput>
@@ -291,7 +295,7 @@ EOXML;
             throw new BadRequestHttpException('no relation');
         }
         $soap_request = <<<EOXML
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:edi="http://edi-express.esphere.ru/">
+<soapenv:Envelope xmlns:soapenv="$this->schema" xmlns:edi="$this->wsdl">
    <soapenv:Header/>
    <soapenv:Body>
       <edi:ReceiveInput>

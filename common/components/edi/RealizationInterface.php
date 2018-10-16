@@ -6,12 +6,12 @@
  * Time: 12:24 PM
  */
 
-namespace common\components\ecom;
+namespace common\components\edi;
 
 /**
  * Interface RealizationInterface
  *
- * @package common\components\ecom
+ * @package common\components\edi
  */
 interface RealizationInterface
 {
@@ -23,10 +23,9 @@ interface RealizationInterface
      * @param int    $ediFilesQueueID
      * @return mixed
      */
-    public function getDoc($client, String $fileName, String $login, String $pass, int $ediFilesQueueID);
 
-    /**
-     * @return array
-     */
-    public function getFileList();
+
+    public function parseFile($content);
+
+    public function getSendingOrderContent($order, $done, $dateArray, $orderContent);
 }

@@ -6,7 +6,7 @@
  * Time: 12:08 PM
  */
 
-namespace common\components\ecom;
+namespace common\components\edi;
 
 
 use common\models\Catalog;
@@ -19,7 +19,7 @@ use yii\db\Expression;
 /**
  * Class AbstractRealization
  *
- * @package common\components\ecom
+ * @package common\components\edi
  */
 abstract class AbstractRealization
 {

@@ -6,106 +6,41 @@
  * Time: 12:10 PM
  */
 
-namespace common\components\ecom\providers;
+namespace common\components\edi\realization;
 
 
-use common\components\ecom\AbstractProvider;
-use common\components\ecom\ProviderInterface;
-use yii\base\Exception;
+use api_web\exceptions\ValidationException;
+use api_web\helpers\WaybillHelper;
+use common\components\ecom\AbstractRealization;
+use common\components\ecom\RealizationInterface;
+use common\models\Catalog;
+use common\models\CatalogBaseGoods;
+use common\models\CatalogGoods;
+use common\models\Currency;
+use common\models\EdiOrder;
+use common\models\EdiOrderContent;
+use common\models\EdiOrganization;
+use common\models\Order;
+use common\models\OrderContent;
+use common\models\OrderStatus;
+use common\models\Organization;
+use common\models\RelationSuppRest;
+use common\models\User;
+use frontend\controllers\OrderController;
+use yii\db\Exception;
+use yii\db\Expression;
 
 /**
- * Class Provider
+ * Class Realization
  *
- * @package common\components\ecom\providers
+ * @package common\components\edi\realization
  */
-class Provider extends AbstractProvider implements ProviderInterface
+class Realization extends AbstractRealization implements RealizationInterface
 {
     /**
-     * @var mixed
+     * @var \SimpleXMLElement
      */
-    public $client;
-
-    /**
-     * Provider constructor.
-     */
-    public function __construct()
-    {
-        $this->client = \Yii::$app->siteApi;
-    }
-
-    /**
-     * @param $login
-     * @param $pass
-     * @return null
-     * @throws \yii\base\Exception
-     */
-    public function getResponse($login, $pass)
-    {
-        $object = $this->client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
-
-        if ($object->result->errorCode != 0) {
-            throw new Exception('EComIntegration getList Error №' . $object->result->errorCode);
-        }
-        $list = $object->result->list ?? null;
-        if (!$list) {
-            throw new Exception('No files for ' . $login);
-        }
-
-        return $list;
-    }
-
-    /**
-     * @param array $list
-     * @throws \yii\db\Exception
-     */
-    public function insertFilesInQueue(array $list)
-    {
-        $batch = [];
-        $files = (new \yii\db\Query())
-            ->select(['name'])
-            ->from('edi_files_queue')
-            ->where(['name' => $list])
-            ->indexBy('name')
-            ->all();
-
-        foreach ($list as $name) {
-            if (!array_key_exists($name, $files)) {
-                $batch[] = [$name];
-            }
-        }
-
-        if (!empty($batch)) {
-            $transaction = \Yii::$app->db->beginTransaction();
-            try {
-                \Yii::$app->db->createCommand()->batchInsert('edi_files_queue', ['name'], $batch)->execute();
-                $transaction->commit();
-            } catch (\Throwable $e) {
-                $transaction->rollback();
-                \Yii::error($e->getMessage());
-            }
-        }
-    }
-
-
-    /**
-     * @param \common\models\Organization $vendor
-     * @param String $string
-     * @param String $remoteFile
-     * @param String $login
-     * @param String $pass
-     * @return bool
-     */
-    public function sendDoc(String $string, String $remoteFile, String $login, String $pass): bool
-    {
-        $client = Yii::$app->siteApi;
-        $obj = $client->sendDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $remoteFile, 'content' => $string]);
-        if (isset($obj) && isset($obj->result->errorCode) && $obj->result->errorCode == 0) {
-            return true;
-        } else {
-            Yii::error("Ecom returns error code");
-            return false;
-        }
-    }
+    public $xml;
 
 
     /**
@@ -113,7 +48,7 @@ class Provider extends AbstractProvider implements ProviderInterface
      * @param String $fileName
      * @param String $login
      * @param String $pass
-     * @param int $fileId
+     * @param int    $fileId
      * @return bool
      * @throws \yii\db\Exception
      */
@@ -249,18 +184,18 @@ class Provider extends AbstractProvider implements ProviderInterface
             }
             if ($ordCont->quantity != $quantity) {
                 $message .= \Yii::t('message', 'frontend.controllers.order.change',
-                        ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ",
-                            'prod' => $ordCont->product_name,
-                            'oldQuan' => $ordCont->quantity,
-                            'ed' => $good->ed]
+                        ['ru'      => "<br/>изменил количество {prod} с {oldQuan} {ed} на ",
+                         'prod'    => $ordCont->product_name,
+                         'oldQuan' => $ordCont->quantity,
+                         'ed'      => $good->ed]
                     ) . " $quantity" . $good->ed;
             }
             if ($ordCont->price != $price) {
                 $message .= \Yii::t('message', 'frontend.controllers.order.change_price',
-                        ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ",
-                            'prod' => $ordCont->product_name,
-                            'productPrice' => $ordCont->price,
-                            'currencySymbol' => $order->currency->iso_code]
+                        ['ru'             => "<br/>изменил цену {prod} с {productPrice} руб на ",
+                         'prod'           => $ordCont->product_name,
+                         'productPrice'   => $ordCont->price,
+                         'currencySymbol' => $order->currency->iso_code]
                     ) . $price . " руб";
 
             }
@@ -415,28 +350,28 @@ class Provider extends AbstractProvider implements ProviderInterface
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
             if (!$catalogBaseGood) {
                 $res = \Yii::$app->db->createCommand()->insert('catalog_base_goods', [
-                    'cat_id' => $baseCatalog->id,
-                    'article' => $good['article'],
-                    'product' => $good['name'],
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'supp_org_id' => $organization->id,
-                    'price' => $good['price'],
-                    'units' => $good['units'],
-                    'ed' => $good['ed'],
-                    'created_at' => new Expression('NOW()'),
-                    'category_id' => null,
-                    'deleted' => 0,
-                    'barcode' => $barcode,
+                    'cat_id'               => $baseCatalog->id,
+                    'article'              => $good['article'],
+                    'product'              => $good['name'],
+                    'status'               => CatalogBaseGoods::STATUS_ON,
+                    'supp_org_id'          => $organization->id,
+                    'price'                => $good['price'],
+                    'units'                => $good['units'],
+                    'ed'                   => $good['ed'],
+                    'created_at'           => new Expression('NOW()'),
+                    'category_id'          => null,
+                    'deleted'              => 0,
+                    'barcode'              => $barcode,
                     'edi_supplier_article' => $good['edi_supplier_article']
                 ])->execute();
                 if (!$res) continue;
                 $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
-                $res2 = parent::insertGood($relationCatalogID, $catalogBaseGood->id, $good['price']);
+                $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price']);
                 if (!$res2) continue;
             } else {
                 $catalogGood = CatalogGoods::findOne(['cat_id' => $relationCatalogID, 'base_goods_id' => $catalogBaseGood->id]);
                 if (!$catalogGood) {
-                    $res2 = parent::insertGood($relationCatalogID, $catalogBaseGood->id, $good['price']);
+                    $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price']);
                     if (!$res2) continue;
                 } else {
                     $catalogGood->price = $good['price'];

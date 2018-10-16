@@ -3,15 +3,19 @@
  * Created by PhpStorm.
  * User: Fanto
  * Date: 9/20/2018
- * Time: 12:08 PM
+ * Time: 12:10 PM
  */
 
-namespace common\components\ecom;
+namespace common\components\edi\realization;
 
 
+use api_web\exceptions\ValidationException;
+use api_web\helpers\WaybillHelper;
+use common\components\edi\AbstractRealization;
+use common\components\edi\RealizationInterface;
 use common\models\Catalog;
-use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
+use common\models\CatalogGoods;
 use common\models\Currency;
 use common\models\EdiOrder;
 use common\models\EdiOrderContent;
@@ -23,22 +27,38 @@ use common\models\Organization;
 use common\models\RelationSuppRest;
 use common\models\User;
 use frontend\controllers\OrderController;
+use yii\db\Exception;
 use yii\db\Expression;
 use Yii;
 
-abstract class AbstractProvider
+/**
+ * Class Realization
+ *
+ * @package common\components\edi\realization
+ */
+class KorusRealization extends AbstractRealization implements RealizationInterface
 {
+    /**
+     * @var \SimpleXMLElement
+     */
+    public $xml;
 
-    const STATUS_NEW = 1;
-    const STATUS_PROCESSING = 2;
-    const STATUS_ERROR = 3;
-    const STATUS_HANDLED = 4;
 
-    public function updateQueue(int $ediFilesQueueID, int $status, String $errorText): void
-    {
-        Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText], 'id=' . $ediFilesQueueID)->execute();
+    public function parseFile($content){
+        $dom = new \DOMDocument();
+        $dom->loadXML($content);
+        $simpleXMLElement = simplexml_import_dom($dom);
+
+        $success = false;
+        if (strpos($content, 'PRICAT>')) {
+            $success = $this->handlePriceListUpdating($simpleXMLElement);
+        } elseif (strpos($content, 'ORDRSP>') || strpos($content, 'DESADV>')) {
+            $success = $this->handleOrderResponse($simpleXMLElement);
+        } elseif (strpos($content, 'ALCDES>')) {
+            $success = $this->handleOrderResponse($simpleXMLElement, true);
+        }
+        return $success;
     }
-
 
     /**
      * @return bool
@@ -334,7 +354,6 @@ abstract class AbstractProvider
             $ediOrder->save();
         }
 
-
         if ($message != '') {
             OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
         }
@@ -344,5 +363,25 @@ abstract class AbstractProvider
 
         OrderController::sendOrderProcessing($order->client, $order);
         return true;
+    }
+
+
+    public function getSendingOrderContent($order, $done, $dateArray, $orderContent){
+        $vendor = $order->vendor;
+        $client = $order->client;
+        $string = Yii::$app->controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'vendor', 'client', 'dateArray', 'orderContent'));
+        return $string;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFileList(): array
+    {
+        return (new \yii\db\Query())
+            ->select(['id', 'name'])
+            ->from('edi_files_queue')
+            ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
+            ->all();
     }
 }

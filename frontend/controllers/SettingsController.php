@@ -2,7 +2,7 @@
 
 namespace frontend\controllers;
 
-use common\components\ecom\EComIntegration2;
+use common\components\edi\EDIIntegration;
 use common\components\EComIntegration;
 use common\models\EcomIntegrationConfig;
 use common\models\notifications\EmailNotification;
@@ -69,9 +69,9 @@ class SettingsController extends DefaultController
         if ($conf) {
             foreach ($conf as $one) {
                 $orgId = $one->org_id;
-                $eComIntegration = new EComIntegration2(['orgId' => $orgId]);
+                $eComIntegration = new EDIIntegration(['orgId' => $orgId]);
                 $eComIntegration->handleFilesList();
-                $eComIntegration = new EComIntegration2(['orgId' => $orgId]);
+                $eComIntegration = new EDIIntegration(['orgId' => $orgId]);
                 $eComIntegration->handleFilesListQueue();
             }
         }

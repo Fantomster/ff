@@ -1,6 +1,6 @@
 <?php
 
-namespace common\components\ecom;
+namespace common\components\edi;
 
 class RelationsInput{
     var $Name;//string

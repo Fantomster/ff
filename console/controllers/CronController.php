@@ -5,7 +5,7 @@ namespace console\controllers;
 use common\components\ecom\providers\Provider;
 use common\components\ecom\realization\Realization;
 use common\components\EComIntegration;
-use common\components\ecom\EComIntegration2;
+use common\components\ecom\EDIIntegration;
 use common\models\EcomIntegrationConfig;
 use Yii;
 use yii\web\View;
@@ -406,7 +406,7 @@ class CronController extends Controller
         if ($conf) {
             foreach ($conf as $one) {
                 $orgId = $one->org_id;
-                $eComIntegration = new EComIntegration2(['orgId' => $orgId]);
+                $eComIntegration = new EDIIntegration(['orgId' => $orgId]);
                 $eComIntegration->handleFilesList();
             }
         }
@@ -419,7 +419,7 @@ class CronController extends Controller
         if ($conf) {
             foreach ($conf as $one) {
                 $orgId = $one->org_id;
-                $eComIntegration = new EComIntegration2(['orgId' => $orgId]);
+                $eComIntegration = new EDIIntegration(['orgId' => $orgId]);
                 $eComIntegration->handleFilesListQueue();
             }
         }
@@ -428,7 +428,7 @@ class CronController extends Controller
     //archieve EDI integration files
     public function actionArchiveFiles2()
     {
-        $eComIntegration = new EComIntegration2(['orgId' => 6666]);
+        $eComIntegration = new EDIIntegration(['orgId' => 6666]);
         $eComIntegration->archiveFiles();
     }
 

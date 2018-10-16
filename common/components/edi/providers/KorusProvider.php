@@ -6,11 +6,15 @@
  * Time: 12:10 PM
  */
 
-namespace common\components\ecom\providers;
+namespace common\components\edi\providers;
 
 
-use common\components\ecom\AbstractProvider;
-use common\components\ecom\ProviderInterface;
+use common\components\edi\AbstractProvider;
+use common\components\edi\AbstractRealization;
+use common\components\edi\ProviderInterface;
+use common\models\EdiOrder;
+use common\models\EdiOrganization;
+use common\models\OrderContent;
 use yii\base\Exception;
 use yii\web\BadRequestHttpException;
 use Yii;
@@ -18,7 +22,7 @@ use Yii;
 /**
  * Class Provider
  *
- * @package common\components\ecom\providers
+ * @package common\components\edi\providers
  */
 class KorusProvider extends AbstractProvider implements ProviderInterface
 {
@@ -27,6 +31,8 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
      */
     public $client;
     public $realization;
+    public $content;
+    public $ediFilesQueueID;
 
     /**
      * Provider constructor.
@@ -36,13 +42,36 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
         $this->client = \Yii::$app->siteApiKorus;
     }
 
+
+    /**
+     * Get files list from provider and insert to table
+     */
+    public function handleFilesList($orgId): void
+    {
+        $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
+        if ($ediOrganization) {
+            $login = $ediOrganization['login'];
+            $pass = $ediOrganization['pass'];
+            $glnCode = $ediOrganization['gln_code'];
+            try {
+                $objectList = $this->getFilesListForInsertingInQueue($login, $pass, $glnCode);
+            } catch (\Throwable $e) {
+                Yii::error($e->getMessage());
+            }
+            if (!empty($objectList)) {
+                $this->insertFilesInQueue($objectList, $orgId);
+            }
+        }
+    }
+
+
     /**
      * @param $login
      * @param $pass
      * @return null
      * @throws \yii\base\Exception
      */
-    public function getFilesList($login, $pass, $glnCode)
+    public function getFilesListForInsertingInQueue($login, $pass, $glnCode)
     {
         $action = 'listmb';
         $pricatList = $this->getOneTypeFilesList('PRICAT', $login, $pass, $glnCode, $action);
@@ -53,6 +82,46 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
             throw new Exception('No files for ' . $login);
         }
         return $list;
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getFilesList($organizationId): array
+    {
+        return (new \yii\db\Query())
+            ->select(['id', 'name'])
+            ->from('edi_files_queue')
+            ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
+            ->andWhere(['organization_id' => $organizationId])
+            ->all();
+    }
+
+
+    /**
+     * @param array $list
+     * @throws \yii\db\Exception
+     */
+    public function insertFilesInQueue(array $list, $orgId)
+    {
+        $batch = [];
+        $files = (new \yii\db\Query())
+            ->select(['name'])
+            ->from('edi_files_queue')
+            ->where(['name' => $list])
+            ->indexBy('name')
+            ->all();
+
+        foreach ($list as $name) {
+            if (!array_key_exists($name, $files)) {
+                $batch[] = ['name' => $name, 'organization_id' => $orgId];
+            }
+        }
+
+        if (!empty($batch)) {
+            \Yii::$app->db->createCommand()->batchInsert('edi_files_queue', ['name', 'organization_id'], $batch)->execute();
+        }
     }
 
 
@@ -85,6 +154,39 @@ EOXML;
     }
 
 
+    public function sendOrderInfo($order, $orgId, $done = false): bool
+    {
+        $transaction = Yii::$app->db_api->beginTransaction();
+        $result = false;
+        try {
+            $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
+            if (!$ediOrder) {
+                Yii::$app->db->createCommand()->insert('edi_order', [
+                    'order_id' => $order->id,
+                    'lang' => Yii::$app->language ?? 'ru'
+                ])->execute();
+            }
+
+            $orderContent = OrderContent::findAll(['order_id' => $order->id]);
+            $dateArray = $this->getDateData($order);
+            if (!count($orderContent)) {
+                Yii::error("Empty order content");
+                $transaction->rollback();
+                return $result;
+            }
+
+            $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
+            $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
+            $result = $this->sendDoc($string, $ediOrganization);
+            $transaction->commit();
+        } catch (Exception $e) {
+            Yii::error($e);
+            $transaction->rollback();
+        }
+        return $result;
+    }
+
+
     /**
      * @param \common\models\Organization $vendor
      * @param String $string
@@ -93,11 +195,13 @@ EOXML;
      * @param String $pass
      * @return bool
      */
-    public function sendDoc(String $string, String $action, String $login, String $pass, $glnCode): bool
+    public function sendDoc(String $string, $ediOrganization): bool
     {
         $action = 'send';
         $string = base64_encode($string);
-        $relationId = $this->getRelation('ORDERS', $login, $pass, $glnCode);
+        $login = $ediOrganization['login'];
+        $pass = $ediOrganization['pass'];
+        $relationId = $this->getRelation('ORDERS', $login, $pass, $ediOrganization['gln_code']);
         $soap_request = <<<EOXML
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:edi="http://edi-express.esphere.ru/">
    <soapenv:Header/>
@@ -210,31 +314,66 @@ EOXML;
     }
 
 
-    public function getDoc($client, String $fileName, String $login, String $pass, int $ediFilesQueueID, $glnCode): bool
+    public function getFile($item, $orgId)
     {
         try {
-            $this->updateQueue($ediFilesQueueID, self::STATUS_PROCESSING, '');
+            $this->ediFilesQueueID = $item['id'];
+            $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
+            $this->updateQueue($this->ediFilesQueueID, self::STATUS_PROCESSING, '');
             try {
-                $content = $this->getDocContent($fileName, $login, $pass, $glnCode);
+                $content = $this->getDocContent($item['name'], $ediOrganization['login'], $ediOrganization['pass'], $ediOrganization['gln_code']);
             } catch (\Throwable $e) {
-                $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, $e->getMessage());
+                $this->updateQueue($this->ediFilesQueueID, self::STATUS_ERROR, $e->getMessage());
                 Yii::error($e->getMessage());
                 return false;
             }
 
             if ($content == '') {
-                $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'No such file');
+                $this->updateQueue($this->ediFilesQueueID, self::STATUS_ERROR, 'No such file');
                 return false;
             }
-            $dom = new \DOMDocument();
-            $dom->loadXML($content);
-            $simpleXMLElement = simplexml_import_dom($dom);
-
         } catch (\Exception $e) {
             Yii::error($e);
-            $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'Error handling file 2');
+            $this->updateQueue($this->ediFilesQueueID, self::STATUS_ERROR, 'Error handling file 2');
             return false;
         }
-        return $simpleXMLElement;
+        return $content;
+    }
+
+
+    public function parseFile($content)
+    {
+        $success = $this->realization->parseFile($content);
+        if ($success) {
+            $this->updateQueue($this->ediFilesQueueID, parent::STATUS_HANDLED, '');
+        } else {
+            $this->updateQueue($this->ediFilesQueueID, parent::STATUS_ERROR, 'Error handling file 1');
+        }
+    }
+
+
+    private function getDateData($order): array
+    {
+        $arr = [];
+        $arr['created_at'] = $this->formatDate($order->created_at ?? '');
+        $arr['requested_delivery_date'] = $this->formatDate($order->requested_delivery ?? '');
+        $arr['requested_delivery_time'] = $this->formatTime($order->requested_delivery ?? '');
+        $arr['actual_delivery_date'] = $this->formatDate($order->actual_delivery ?? '');
+        $arr['actual_delivery_time'] = $this->formatTime($order->actual_delivery ?? '');
+        return $arr;
+    }
+
+
+    private function formatDate(String $dateString): String
+    {
+        $date = new \DateTime($dateString);
+        return $date->format('Y-m-d');
+    }
+
+
+    private function formatTime(String $dateString): String
+    {
+        $date = new \DateTime($dateString);
+        return $date->format('H:i');
     }
 }

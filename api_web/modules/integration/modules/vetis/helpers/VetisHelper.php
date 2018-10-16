@@ -36,19 +36,19 @@ class VetisHelper
     private $org_id;
     /**@var array $expertizeList расшифровки статусов экспертиз */
     public static $expertizeList = [
-        'UNKNOWN' => 'the_result_is_unknown', //Результат неизвестен
-        'UNDEFINED' => 'the_result_can_not_be_determined', //Результат невозможно определить (не нормируется)
-        'POSITIVE' => 'positive_result', //Положительный результат
-        'NEGATIVE' => 'negative_result', //Отрицательный результат
+        'UNKNOWN'     => 'the_result_is_unknown', //Результат неизвестен
+        'UNDEFINED'   => 'the_result_can_not_be_determined', //Результат невозможно определить (не нормируется)
+        'POSITIVE'    => 'positive_result', //Положительный результат
+        'NEGATIVE'    => 'negative_result', //Отрицательный результат
         'UNFULFILLED' => 'not_conducted', //Не проводилось
-        'VSERAW' => 'VSE_subjected_the_raw_materials_from_which_the_products_were_manufactured', // ВСЭ подвергнуто сырьё, из которого произведена продукция
-        'VSEFULL' => 'the_products_are_fully', // Продукция подвергнута ВСЭ в полном объеме
+        'VSERAW'      => 'VSE_subjected_the_raw_materials_from_which_the_products_were_manufactured', // ВСЭ подвергнуто сырьё, из которого произведена продукция
+        'VSEFULL'     => 'the_products_are_fully', // Продукция подвергнута ВСЭ в полном объеме
     ];
     /**@var array $ordersStatuses статусы для заказов */
     public static $ordersStatuses = [
         'WITHDRAWN' => 'vsd_status_withdrawn', //'Сертификаты аннулированы',
         'CONFIRMED' => 'vsd_status_confirmed', //'Сертификаты ожидают погашения',
-        'UTILIZED' => 'vsd_status_utilized', //'Сертификаты погашены',
+        'UTILIZED'  => 'vsd_status_utilized', //'Сертификаты погашены',
     ];
 
     /**
@@ -207,7 +207,7 @@ class VetisHelper
     }
 
     /**
-     * @param int $id
+     * @param int   $id
      * @param array $uuids
      * @return array|bool
      */
@@ -267,14 +267,14 @@ class VetisHelper
         $statuses = explode(',', $strStatuses);
         if (count($statuses) > 1) {
             return [
-                'id' => 'CONFIRMED',
+                'id'   => 'CONFIRMED',
                 'text' => \Yii::t('api_web', self::$ordersStatuses['CONFIRMED'])
             ];
         } else {
             $status = current($statuses);
             if ($status) {
                 return [
-                    'id' => $status,
+                    'id'   => $status,
                     'text' => \Yii::t('api_web', self::$ordersStatuses[$status])
                 ];
             }
@@ -407,7 +407,7 @@ class VetisHelper
     public function setLastError($error, $uuid)
     {
         $where = ['uuid' => $uuid];
-        return MercVsd::updateAll(['last_error' => $error], $where);
+        return MercVsd::updateAll(['last_error' => $error, 'user_status' => 'operation error'], $where);
     }
 
     /**
@@ -415,11 +415,12 @@ class VetisHelper
      * @param $orgId
      * @return string
      */
-    public function getVsdDirection($uuid, $orgId){
+    public function getVsdDirection($uuid, $orgId)
+    {
         $guid = IntegrationSettingValue::getSettingsByServiceId(WaybillHelper::MERC_SERVICE_ID,
             $orgId, ['enterprise_guid']);
         $model = MercVsd::findOne(['uuid' => $uuid]);
-        if ($guid == $model->recipient_guid){
+        if ($guid == $model->recipient_guid) {
             return 'incoming';
         }
 

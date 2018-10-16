@@ -409,6 +409,79 @@ class ServiceRkws extends AbstractSyncFactory
      */
     public function sendWaybill($request): array
     {
+        # 1. Проверяем наличие id накладной
+        if (!isset($request['waybill_id'])) {
+            throw new BadRequestHttpException('empty waybill id');
+        }
+
+        $waybill_id = $request['waybill_id'];
+
+        # 2. Ищем накладную
+        $waybill = \api\common\models\RkWaybill::findOne(['id' => $waybill_id]);
+        if (!isset($waybill)) {
+            throw new BadRequestHttpException('Waybill not found');
+        }
+
+        # 3. Выбираем даные по накладной для отправки
+        $records = \api\common\models\RkWaybilldata::find()
+            ->select('rk_waybill_data.*, rk_product.rid as prid, rk_product.unit_rid')
+            ->leftJoin('rk_product', 'rk_product.id = product_rid')
+            ->andWhere('waybill_id = :wid', [':wid' => $waybill_id])
+            ->andWhere(['unload_status' => 1])
+            ->asArray(true)->all();
+
+        if (!isset($records)) {
+            throw new BadRequestHttpException('No records found to be sent');
+        }
+
+        # 4. Start "Send waybill" action
+        SyncLog::trace('Initialized new procedure action "Send request" in ' . __METHOD__);
+        $cook = $this->prepareServiceWithAuthCheck();
+
+        # 2. Если нет сессии - завершаем с ошибкой
+        if (!$cook) {
+            SyncLog::trace('Cannot authorize with session or login data');
+            throw new BadRequestHttpException('Cannot authorize with curl');
+        }
+
+        $url = $this->getUrlCmd();
+        $guid = UUID::uuid4();
+        $xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
+        $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
+        if ($xmlData) {
+            $xml = (array)simplexml_load_string($xmlData);
+            if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
+                $transaction = $this->createTransaction();
+                $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => static::$OperDenom]);
+                $task = new OuterTask([
+                    'service_id' => $this->serviceId,
+                    'retry' => 0,
+                    'org_id' => $this->user->organization_id,
+                    'inner_guid' => $guid,
+                    'salespoint_id' => (string)$this->licenseMixcartId,
+                    'int_status_id' => OuterTask::STATUS_REQUESTED,
+                    'outer_guid' => $xml['@attributes']['taskguid'],
+                    'broker_version' => $xml['@attributes']['version'],
+                    'oper_code' => $oper->id,
+                ]);
+                if ($task->save()) {
+                    $transaction->commit();
+                    SyncLog::trace('SUCCESS. json-response-data: ' .
+                        str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
+                    return [
+                        'task_id' => $task->id,
+                        'task_status' => $task->int_status_id,
+                        'service_prefix' => SyncLog::$servicePrefix,
+                        'log_index' => SyncLog::$logIndex,
+                    ];
+                }
+                $transaction->rollBack();
+                SyncLog::trace('Cannot save task!');
+                throw new BadRequestHttpException('rkws_task_save_error');
+            }
+        }
+        SyncLog::trace('Service connection parameters for final transaction are wrong');
+        throw new BadRequestHttpException('empty_service_response_for_transaction');
         return [];
     }
 

@@ -446,8 +446,24 @@ class ServiceRkws extends AbstractSyncFactory
 
         $url = $this->getUrlCmd();
         $guid = UUID::uuid4();
-        $xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
+
+        //$xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
+
+        $cb = $this->getCallbackURL() . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
+        SyncLog::trace('Callback URL and salespoint code for the template are:' . $cb . ' (' . $this->licenseCode . ')');
+
+        $exportApproved = (RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() : 0;
+
+        $xml = Yii::$app->view->render($this->dirResponseXml . '/' . ucfirst($this->index),
+            [
+                'waybill' => $waybill,
+                'records' => $records,
+                'exportApproved' => $exportApproved,
+                'code' => $this->licenseCode,
+            ]);
+
         $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
+
         if ($xmlData) {
             $xml = (array)simplexml_load_string($xmlData);
             if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {

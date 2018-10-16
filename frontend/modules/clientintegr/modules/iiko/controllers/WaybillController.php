@@ -558,7 +558,7 @@ SQL;
             }
 
             $sql = <<<SQL
-            SELECT id, CONCAT(`denom`, ' (' ,unit, ')') FROM (
+            SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as `text` FROM (
                   (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
                     UNION
                   (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 15)
@@ -596,7 +596,7 @@ SQL;
                 $andWhere = ' AND id in (' . implode(',', $arr) . ')';
             }
 
-            $sql = "SELECT id, CONCAT(`denom`, ' (' ,unit, ')') FROM iiko_product WHERE is_active = 1 AND org_id = " . $organizationID . $andWhere . ' ORDER BY denom LIMIT 100';
+            $sql = "SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as `text` FROM iiko_product WHERE is_active = 1 AND org_id = " . $organizationID . $andWhere . ' ORDER BY denom LIMIT 100';
 
             /**
              * @var $db Connection

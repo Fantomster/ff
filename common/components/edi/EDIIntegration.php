@@ -2,9 +2,9 @@
 
 namespace common\components\edi;
 
-
 use common\models\EcomIntegrationConfig;
 use yii\base\Component;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class for E-COM integration methods
@@ -12,23 +12,18 @@ use yii\base\Component;
  */
 class EDIIntegration extends Component
 {
-
-    /**
-     * @var
-     */
     public $orgId;
+
     /**
      * @var array
      */
     public $obConf;
-    /**@var ProviderInterface */
+
+    /**@var AbstractProvider|ProviderInterface */
     public $provider;
-    /**@var RealizationInterface */
-    public $realization;
 
     /**
      * EDIIntegration constructor.
-     *
      * @param array $config
      */
     public function __construct(array $config = [], $obConfig = [])
@@ -80,12 +75,17 @@ class EDIIntegration extends Component
         $this->provider->realization = $realization;
     }
 
-
+    /**
+     * Обработка файлов
+     */
     public function handleFilesList()
     {
         $this->provider->handleFilesList($this->orgId);
     }
 
+    /**
+     * Массовая обработка
+     */
     public function handleFilesListQueue()
     {
         $items = $this->provider->getFilesList($this->orgId);
@@ -95,7 +95,11 @@ class EDIIntegration extends Component
         }
     }
 
-
+    /**
+     * Отправляем информацию о заказе
+     * @param $order
+     * @param $isNewOrder
+     */
     public function sendOrderInfo($order, $isNewOrder)
     {
         $this->provider->sendOrderInfo($order, $this->orgId, $isNewOrder);

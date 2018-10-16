@@ -8,9 +8,6 @@
 
 namespace common\components\edi\realization;
 
-
-use api_web\exceptions\ValidationException;
-use api_web\helpers\WaybillHelper;
 use common\components\edi\AbstractRealization;
 use common\components\edi\RealizationInterface;
 use common\models\Catalog;
@@ -27,7 +24,6 @@ use common\models\Organization;
 use common\models\RelationSuppRest;
 use common\models\User;
 use frontend\controllers\OrderController;
-use yii\db\Exception;
 use yii\db\Expression;
 use Yii;
 
@@ -44,7 +40,8 @@ class KorusRealization extends AbstractRealization implements RealizationInterfa
     public $xml;
 
 
-    public function parseFile($content){
+    public function parseFile($content)
+    {
         $dom = new \DOMDocument();
         $dom->loadXML($content);
         $simpleXMLElement = simplexml_import_dom($dom);
@@ -137,18 +134,18 @@ class KorusRealization extends AbstractRealization implements RealizationInterfa
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
             if (!$catalogBaseGood) {
                 $res = \Yii::$app->db->createCommand()->insert('catalog_base_goods', [
-                    'cat_id' => $baseCatalog->id,
-                    'article' => $good['article'],
-                    'product' => $good['name'],
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'supp_org_id' => $organization->id,
-                    'price' => $good['price'],
-                    'units' => $good['units'],
-                    'ed' => $good['ed'],
-                    'created_at' => new Expression('NOW()'),
-                    'category_id' => null,
-                    'deleted' => 0,
-                    'barcode' => $barcode,
+                    'cat_id'               => $baseCatalog->id,
+                    'article'              => $good['article'],
+                    'product'              => $good['name'],
+                    'status'               => CatalogBaseGoods::STATUS_ON,
+                    'supp_org_id'          => $organization->id,
+                    'price'                => $good['price'],
+                    'units'                => $good['units'],
+                    'ed'                   => $good['ed'],
+                    'created_at'           => new Expression('NOW()'),
+                    'category_id'          => null,
+                    'deleted'              => 0,
+                    'barcode'              => $barcode,
                     'edi_supplier_article' => $good['edi_supplier_article']
                 ])->execute();
                 if (!$res) continue;
@@ -174,11 +171,11 @@ class KorusRealization extends AbstractRealization implements RealizationInterfa
     protected function insertGood(int $catID, int $catalogBaseGoodID, float $price): bool
     {
         $res = Yii::$app->db->createCommand()->insert('catalog_goods', [
-            'cat_id' => $catID,
+            'cat_id'        => $catID,
             'base_goods_id' => $catalogBaseGoodID,
-            'created_at' => new Expression('NOW()'),
-            'updated_at' => new Expression('NOW()'),
-            'price' => $price,
+            'created_at'    => new Expression('NOW()'),
+            'updated_at'    => new Expression('NOW()'),
+            'price'         => $price,
         ])->execute();
         if ($res) {
             return true;
@@ -330,16 +327,16 @@ class KorusRealization extends AbstractRealization implements RealizationInterfa
                         $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
                     }
                     Yii::$app->db->createCommand()->insert('order_content', [
-                        'order_id' => $order->id,
-                        'product_id' => $good->id,
-                        'quantity' => $quan,
-                        'price' => (float)$position->PRICE,
+                        'order_id'         => $order->id,
+                        'product_id'       => $good->id,
+                        'quantity'         => $quan,
+                        'price'            => (float)$position->PRICE,
                         'initial_quantity' => $quan,
-                        'product_name' => $good->product,
-                        'plan_quantity' => $quan,
-                        'plan_price' => (float)$position->PRICE,
-                        'units' => $good->units,
-                        'updated_at' => new Expression('NOW()'),
+                        'product_name'     => $good->product,
+                        'plan_quantity'    => $quan,
+                        'plan_price'       => (float)$position->PRICE,
+                        'units'            => $good->units,
+                        'updated_at'       => new Expression('NOW()'),
                     ])->execute();
                     $message .= Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
                     $summ += $quan * $position->PRICE;
@@ -366,7 +363,8 @@ class KorusRealization extends AbstractRealization implements RealizationInterfa
     }
 
 
-    public function getSendingOrderContent($order, $done, $dateArray, $orderContent){
+    public function getSendingOrderContent($order, $done, $dateArray, $orderContent)
+    {
         $vendor = $order->vendor;
         $client = $order->client;
         $string = Yii::$app->controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'vendor', 'client', 'dateArray', 'orderContent'));

@@ -48,7 +48,7 @@ class Realization extends AbstractRealization implements RealizationInterface
      * @param String $fileName
      * @param String $login
      * @param String $pass
-     * @param int    $fileId
+     * @param int $fileId
      * @return bool
      * @throws \yii\db\Exception
      */

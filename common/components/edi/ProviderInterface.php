@@ -16,11 +16,6 @@ namespace common\components\edi;
  */
 interface ProviderInterface
 {
-    /**
-     * @param $login
-     * @param $pass
-     * @return mixed
-     */
     public function handleFilesList($orgId);
 
     public function sendOrderInfo($order, $orgId, $done);
@@ -28,6 +23,4 @@ interface ProviderInterface
     public function getFilesList($organizationId);
 
     public function getFile($item, $orgId);
-
-
 }

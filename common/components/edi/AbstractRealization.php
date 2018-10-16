@@ -52,7 +52,7 @@ abstract class AbstractRealization
     public $fileType;
 
     /**
-     * @param int    $status
+     * @param int $status
      * @param String $errorText
      * @throws \yii\db\Exception
      */
@@ -97,7 +97,7 @@ abstract class AbstractRealization
     /**
      * add org id to file in queue table
      * @var integer $id
-     * @var string  $glnCode
+     * @var string $glnCode
      * @return boolean
      * */
     private function addOrgIdToFile($id, $glnCode)
@@ -139,10 +139,11 @@ abstract class AbstractRealization
     }
 
     /**
-     * @param \common\models\Organization $organization
-     * @param \common\models\Currency     $currency
-     * @param \common\models\Organization $rest
+     * @param Organization $organization
+     * @param Currency $currency
+     * @param Organization $rest
      * @return int
+     * @throws \Exception
      */
     protected function createCatalog(Organization $organization, Currency $currency, Organization $rest): int
     {
@@ -157,8 +158,8 @@ abstract class AbstractRealization
         $catalog->save();
         $catalogID = $catalog->id;
 
-        if (!$catalog->save()){
-            throw new Exception($catalog->getErrorSummary(true));
+        if (!$catalog->save()) {
+            throw new \Exception($catalog->getErrorSummary(true));
         }
 
         $rel = new RelationSuppRest();
@@ -175,8 +176,8 @@ abstract class AbstractRealization
 
 
     /**
-     * @param int   $catID
-     * @param int   $catalogBaseGoodID
+     * @param int $catID
+     * @param int $catalogBaseGoodID
      * @param float $price
      * @return bool
      * @throws \yii\db\Exception

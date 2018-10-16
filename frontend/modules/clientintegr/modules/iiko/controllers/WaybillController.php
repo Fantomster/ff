@@ -765,6 +765,7 @@ SQL;
         } catch (\Exception $e) {
             $transaction->rollBack();
             $api->logout();
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }

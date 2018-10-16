@@ -44,6 +44,18 @@ use Yii;
  * @property string $producer_guid
  * @property int $low_grade_cargo
  * @property string $raw_data
+ * @property string $owner_guid
+ * @property string $product_guid
+ * @property string $sub_product_guid
+ * @property string $product_item_guid
+ * @property string $origin_country_guid
+ * @property string $waybill_number
+ * @property string $waybill_date
+ * @property string $confirmed_by
+ * @property string $other_info
+ * @property string $laboratory_research
+ * @property string $transport_info
+ * @property string $unit_guid
  */
 class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
@@ -149,10 +161,12 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     public function rules()
     {
         return [
-            [['date_doc', 'last_update_date', 'raw_data'], 'safe'],
+            [['date_doc', 'last_update_date', 'raw_data', 'waybill_date', 'confirmed_by', 'other_info', 'laboratory_research', 'transport_info'], 'safe'],
             [['finalized', 'product_type', 'perishable',  'low_grade_cargo'], 'integer'],
             [['amount'], 'number'],
-            [['uuid', 'number', 'type', 'status', 'recipient_name', 'recipient_guid', 'sender_guid', 'sender_name', 'product_name', 'unit', 'production_date', 'expiry_date', 'producer_name', 'producer_guid'], 'string', 'max' => 255],
+            [['uuid', 'number', 'type', 'status', 'recipient_name', 'recipient_guid', 'sender_guid',
+              'sender_name', 'product_name', 'unit', 'production_date', 'expiry_date',
+              'producer_name', 'producer_guid', 'owner_guid', 'product_guid', 'sub_product_guid', 'product_item_guid', 'origin_country_guid', 'waybill_number', 'unit_guid'], 'string', 'max' => 255],
             [['form', 'vehicle_number', 'trailer_number', 'container_number', 'transport_storage_type', 'gtin', 'article', 'batch_id'], 'string', 'max' => 45],
         ];
     }

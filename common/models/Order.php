@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api_web\helpers\WaybillHelper;
 use common\components\EComIntegration;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
@@ -315,7 +316,7 @@ class Order extends \yii\db\ActiveRecord
 
     public function getStatusText()
     {
-        if ($this->edi_order){
+        if ($this->service_id == WaybillHelper::EDI_SERVICE_ID){
             $statusList = self::getStatusListEdo();
         } else {
             $statusList = self::getStatusList();
@@ -327,17 +328,19 @@ class Order extends \yii\db\ActiveRecord
     {
         return [
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app',
-                'common.models.order_status.status_awaiting_accept_from_vendor', ['ru' => 'Ожидает подтверждения']),
+                'common.models.waiting', ['ru' => 'Ожидает подтверждения']),
             OrderStatus::STATUS_PROCESSING => Yii::t('app',
-                'common.models.order_status.status_processing', ['ru' => 'Выполняются']),
+                'common.models.in_process_two', ['ru' => 'Выполняются']),
             OrderStatus::STATUS_EDI_SENT_BY_VENDOR => Yii::t('app',
                 'common.models.order_status.status_edo_sent_by_vendor', ['ru' => 'Отправлен поставщиком']),
             OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED => Yii::t('app',
                 'common.models.order_status.status_edo_acceptance_finished', ['ru' => 'Приемка завершена']),
             OrderStatus::STATUS_DONE => Yii::t('app',
-                'common.models.order_status.status_done', ['ru' => 'Завершен']),
+                'common.models.done_two', ['ru' => 'Завершен']),
             OrderStatus::STATUS_CANCELLED => Yii::t('app',
-                'common.models.order_status.status_cancelled', ['ru' => 'Отменен']),
+                'common.models.vendor_canceled', ['ru' => 'Отменен']),
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru' => 'Ожидает подтверждения клиента']),
+            OrderStatus::STATUS_REJECTED => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
         ];
     }
 
@@ -350,10 +353,6 @@ class Order extends \yii\db\ActiveRecord
             OrderStatus::STATUS_DONE => Yii::t('app', 'common.models.done_two', ['ru' => 'Завершен']),
             OrderStatus::STATUS_REJECTED => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
             OrderStatus::STATUS_CANCELLED => Yii::t('app', 'common.models.client_canceled', ['ru' => 'Отменен клиентом']),
-            OrderStatus::STATUS_EDI_SENT_BY_VENDOR => Yii::t('app',
-                'common.models.order_status.status_edo_sent_by_vendor', ['ru' => 'Отправлен поставщиком']),
-            OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED => Yii::t('app',
-                'common.models.order_status.status_edo_acceptance_finished', ['ru' => 'Приемка завершена']),
         ];
         if (!$short) {
             $result[OrderStatus::STATUS_FORMING] = Yii::t('app', 'common.models.forming', ['ru' => 'Формируется']);

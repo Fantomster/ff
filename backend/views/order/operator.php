@@ -2,6 +2,7 @@
 
 $this->title = Yii::t('app', 'Оператор заказов');
 $this->params['breadcrumbs'][] = $this->title;
+Yii::$app->language = 'ru';
 
 $wait_second = \common\models\OperatorTimeout::getTimeoutOperator($user_id);
 

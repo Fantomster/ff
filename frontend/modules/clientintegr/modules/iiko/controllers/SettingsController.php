@@ -17,7 +17,7 @@ use yii\web\Response;
 
 class SettingsController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
-    /** @var integer Количество строк (и чекбоксов) в таблице показа Списка доступных товаров в IIKO*/
+    /** @var integer Количество строк (и чекбоксов) в таблице показа Списка доступных товаров в IIKO */
     const SELECTED_PRODUCTS_PAGE_SIZE = 20;
     /** @var integer Индекс, заведомо больший количества строк в таблице показа Списка доступных товаров, используется для передачи информации о состоянии флажка "Выделить все" */
     const SELECTED_PRODUCTS_ALL_INDEX = 101;
@@ -329,7 +329,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
                 $izmen[$i]['val'] = 0; //записываем в массив изменений значение действия, которое предстоит сделать с чекбоксом (0 - снять выделение, 1 - выделить)
             }
         }
-        if (count($izmen) == SELECTED_PRODUCTS_PAGE_SIZE) { //если количество чекбоксов равно количеству строк в таблице-гриде, то есть изменены все чекбоксы на странице, то
+        if (count($izmen) == self::SELECTED_PRODUCTS_PAGE_SIZE) { //если количество чекбоксов равно количеству строк в таблице-гриде, то есть изменены все чекбоксы на странице, то
             if ((!in_array(0, $izmen)) or (!in_array(1, $izmen))) { //если все чекбоксы содержат одинаковое значение (или все выделены, или все "сняты"),
                 (in_array(0, $izmen)) ? $all = 0 : $all = 1; //узнаём значение всех чекбоксов и записываем его в переменную, отвечающую за состояние флажка "Выделить все"
             }
@@ -340,8 +340,8 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             $pConst->value = $count;
             $pConst->save(); //и сохраняем это значение в таблице iiko_pconst
         }
-        $izmen[SELECTED_PRODUCTS_ALL_INDEX]['id'] = $uspeh; //записываем в массив изменений значение успешности операций добавления и удаления товаров
-        $izmen[SELECTED_PRODUCTS_ALL_INDEX]['val'] = $all; //записываем в массив изменений значение переменной, отвечающей за состояние флажка "Выделить все"
+        $izmen[self::SELECTED_PRODUCTS_ALL_INDEX]['id'] = $uspeh; //записываем в массив изменений значение успешности операций добавления и удаления товаров
+        $izmen[self::SELECTED_PRODUCTS_ALL_INDEX]['val'] = $all; //записываем в массив изменений значение переменной, отвечающей за состояние флажка "Выделить все"
         $izmen = json_encode($izmen); //кодируем массив изменений в JSON
         return $izmen;
     }

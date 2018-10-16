@@ -62,8 +62,6 @@ $form = ActiveForm::begin([
         </div>
     </div>
 <?php echo Html::hiddenInput('selected_goods'); ?>
-<?php echo Html::hiddenInput('page'); ?>
-<?php echo Html::hiddenInput('sort'); ?>
 <?php
 echo \kartik\grid\GridView::widget([
     'dataProvider' => $dataProvider,
@@ -80,7 +78,7 @@ echo \kartik\grid\GridView::widget([
                     $checked = false;
                 }
                 echo Html::hiddenInput('goods[' . $model->id . ']', (int)$checked, ['id' => 'goods_' . $model->id, 'class' => 'alHiddenInput']);
-                return ['value' => $model->id, 'class' => 'checkbox-group_operations', 'checked' => $checked];
+                return ['value' => (int)$checked, 'id' => $model->id, 'class' => 'checkbox-group_operations alHiddenInput', 'checked' => $checked];
             }
         ],
         'id',
@@ -113,13 +111,14 @@ echo \kartik\grid\GridView::widget([
 ActiveForm::end();
 Pjax::end();
 $sessionUrl = \yii\helpers\Url::to('ajax-add-product-to-session');
+$url = \Yii::$app->urlManager->createUrl('/clientintegr/iiko/settings');
 $customJs = <<< JS
 
- $("document").ready(function(){
+ /*$("document").ready(function(){
         $(".dict-agent-form").on("click", "button[type='submit']", function() {
             $("#w0").submit();
         });
-     });
+     });*/
 
  $("document").ready(function(){
         $(".dict-agent-form").on("change", "#iikoproductsearch-product_type", function() {
@@ -146,7 +145,7 @@ $customJs = <<< JS
         });
      }); 
  
-  $("document").ready(function(){
+/*  $("document").ready(function(){
         $(".box-body").on("change", "#filterProductType", function() {
             $("#search-form").submit();
         });
@@ -187,11 +186,11 @@ $customJs = <<< JS
             $("#search-form").submit();
         }, 700);
     });
- 
+*/ 
 $("document").ready(function(){
         $(".dict-agent-form").on("click", ".checkbox-group_operations", function() { 
             var productID = $(this).val();
-            var idName = 'goods_' + productID;
+            var idName = /*'goods_' +*/ productID;
             if ($(this).prop('checked')){
                 $.ajax({
                     url : '$sessionUrl',
@@ -217,42 +216,102 @@ $("document").ready(function(){
 
 $("document").ready(function(){
     $(".btn-primary").on("click", function() {
-        var pos0 = $(".summary").text();
-        var pos1 = pos0.split('-');
-        var pos2 = pos1[1];
-        var pos3 = pos2.split(' ');
-        var pos = pos3[0];
-        var ostatok = pos % 20;
-        if (ostatok == 0) {
-            var page = pos / 20;
-        } else {
-            var page = Math.floor(pos/20) + 1;
-        }
-        var qasc=$('.asc').attr('data-sort'); //узнаём порядок сортировки с классом asc
-        var qdesc=$('.desc').attr('data-sort'); //узнаём порядок сортировки с классом desc                                                    
-        if (typeof qdesc === 'undefined') {
-            var sortirov=qasc;
-        } else {
-            var sortirov=qdesc;
-        } //из двух возможных сортировок существует всегда только одна
-        var sortirov0=sortirov.substring(0,1); //узнаём первый символ сортировки
-        if (sortirov0=='-') {
-            sortirov=sortirov.substring(1);
-        } else {
-            sortirov='-'+sortirov;
-        } //и меняем на противоположный порядок сортировки
-        var filter1 = $("#iikoproductsearch-product_type").val(); //узнаём значение фильтра НДС
-        var filter2 = $("#iikoproductsearch-cooking_place_type").val(); //узнаём значение фильтра НДС
-        var filter3 = $("#iikoproductsearch-unit").val(); //узнаём значение фильтра НДС
-        $('input[name="page"]').val(page);
-        $('input[name="sort"]').val(sortirov);
+        //var pos0 = $(".summary").text();
+        //var pos1 = pos0.split('-');
+        //var pos2 = pos1[1];
+        //var pos3 = pos2.split(' ');
+        //var pos = pos3[0];
+        //var ostatok = pos % 20;
+        //if (ostatok == 0) {
+        //    var page = pos / 20;
+        //} else {
+        //    var page = Math.floor(pos/20) + 1;
+        //}
+        //var qasc=$('.asc').attr('data-sort'); //узнаём порядок сортировки с классом asc
+        //var qdesc=$('.desc').attr('data-sort'); //узнаём порядок сортировки с классом desc                                                    
+        //if (typeof qdesc === 'undefined') {
+        //    var sortirov=qasc;
+        //} else {
+        //    var sortirov=qdesc;
+        //} //из двух возможных сортировок существует всегда только одна
+        //var sortirov0=sortirov.substring(0,1); //узнаём первый символ сортировки
+        //if (sortirov0=='-') {
+        //    sortirov=sortirov.substring(1);
+        //} else {
+        //    sortirov='-'+sortirov;
+        //} //и меняем на противоположный порядок сортировки
+        //var filter1 = $("#iikoproductsearch-product_type").val(); //узнаём значение фильтра НДС
+        //var filter2 = $("#iikoproductsearch-cooking_place_type").val(); //узнаём значение фильтра НДС
+        //var filter3 = $("#iikoproductsearch-unit").val(); //узнаём значение фильтра НДС
+        //$('input[name="page"]').val(page);
+        //$('input[name="sort"]').val(sortirov);
         //$('input[name="filter1"]').val(filter1);
         //$('input[name="filter2"]').val(filter2);
         //$('input[name="filter3"]').val(filter3);
-        var vr = $("#w0").attr('action');
+        /*var vr = $("#w0").attr('action');
         var act = '/ru/clientintegr/iiko/settings/change-const?id=7&page='+page+'&sort='+sortirov+'&productSearch='+filter1+'&cookingPlaceSearch='+filter2+'&unitSearch='+filter3;
         $("#w0").attr('action', act);
-        $("#w0").submit();
+        $("#w0").submit();*/
+        var a = new Map();
+        var b,c;
+        $('.checkbox-group_operations').each(function() {
+            b = $(this).attr('id');
+            c = $(this).val();
+            a[b] = c;
+        });
+        $.post('$url/change-selected-products', {goods:a}).done(
+            function(data){
+                var arr = JSON.parse(data);
+                var uspeh = arr[101]['id'];
+                var all = arr[101]['val'];
+                var s = Object.keys(arr).length;
+                delete arr[101];
+                if (uspeh=='false') {
+                    if (all==0) {
+                        $('.alHiddenInput').each(function() {
+                            $(this).val(0);
+                            $(this).prop('checked', false);
+                        })
+                        $('tbody tr').each(function() {
+                            $(this).removeClass('danger');
+                        })
+                        $('thead tr th input').val(0);
+                        $('thead tr th input').prop('checked', false);
+                    }
+                    if (all==1) {
+                        $('.alHiddenInput').each(function() {
+                            $(this).val(1);
+                            $(this).prop('checked', true);
+                        })
+                        $('tbody tr').each(function() {
+                            $(this).addClass('danger');
+                        })
+                        $('thead tr th input').val(1);
+                        $('thead tr th input').prop('checked', true);
+                    }
+                    if (all==2) {
+                        $('thead tr th input').val(0);
+                        $('thead tr th input').prop('checked', false);
+                        var s = Object.keys(arr).length+1;
+                        var i;
+                        for(i=1; i<s; i++) {
+                            var id = arr[i]['id'];
+                            var value = arr[i]['val'];
+                            $('#'+id).val(value);
+                            if (value==1) {
+                                $('[data-key='+id+']').addClass('danger');
+                                $('#'+id).val(1);
+                                $('#'+id).prop('checked', true);
+                            } else {
+                                $('[data-key='+id+']').removeClass('danger');
+                                $('#'+id).val(0);
+                                $('#'+id).prop('checked', false);
+                            }
+                        }
+                    }
+                }
+            }
+        )
     })
 });
 

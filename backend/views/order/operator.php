@@ -228,8 +228,6 @@ $wait_second = \common\models\OperatorTimeout::getTimeoutOperator($user_id);
     </div>
 
 <?php ob_start(); ?>
-    
-        $(function () {
 
             var t = setInterval(function () {
                 var val = $('.timeout_set').html() - 1;
@@ -240,18 +238,6 @@ $wait_second = \common\models\OperatorTimeout::getTimeoutOperator($user_id);
                     $('.timeout_set').html(val);
                 }
             }, 1000);
-
-            $('.save-comment').click(function () {
-                var id = $(this).data('order_id');
-                var value = $('#comment_' + id).val();
-                $.post('<?= \yii\helpers\Url::to('/ru/order/operator-change-attribute') ?>', {
-                    id: id,
-                    name: 'comment',
-                    value: value
-                }, function () {
-                    return false;
-                });
-            });
 
             $('.change-status').on('change', function (e) {
                 var this_ = $(this);
@@ -268,26 +254,35 @@ $wait_second = \common\models\OperatorTimeout::getTimeoutOperator($user_id);
                         $('#comment_button_' + id).attr('disabled', 'disabled');
                         $('#set_button_' + id).attr('disabled', 'disabled');
                     }
-                    return false;
+                    return true;
                 });
             });
 
-
-            $('.operator-set-to-order').click(function () {
-                var id = $(this).data('order_id');
-                $.post('<?= \yii\helpers\Url::to('/ru/order/operator-set-to-order') ?>', {
-                    id: id
-                }, function (data) {
-                    if (data) {
-                        alert(data);
-                    } else {
-                        location.reload();
-                    }
-                    return false;
+            $('.wrap')
+                .on('click', '.save-comment', function () {
+                    var id = $(this).data('order_id');
+                    var value = $('#comment_' + id).val();
+                    $.post('<?= \yii\helpers\Url::to('/ru/order/operator-change-attribute') ?>', {
+                        id: id,
+                        name: 'comment',
+                        value: value
+                    }, function () {
+                        return true;
+                    });
+                })
+                .on("click", '.operator-set-to-order', function () {
+                    var id = $(this).data('order_id');
+                    $.post('<?= \yii\helpers\Url::to('/ru/order/operator-set-to-order') ?>', {
+                        id: id
+                    }, function (data) {
+                        if (data) {
+                            alert(data);
+                        } else {
+                            location.reload();
+                        }
+                        return true;
+                    });
                 });
-            })
-        });
-
 <?php
-$this->registerJs(ob_get_clean());
+$this->registerJs(ob_get_clean(), \yii\web\View::POS_LOAD);
 ?>

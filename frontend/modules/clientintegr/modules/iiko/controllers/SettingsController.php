@@ -17,6 +17,11 @@ use yii\web\Response;
 
 class SettingsController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
+    /** @var integer Количество строк (и чекбоксов) в таблице показа Списка доступных товаров в IIKO*/
+    const SELECTED_PRODUCTS_PAGE_SIZE = 20;
+    /** @var integer Индекс, заведомо больший количества строк в таблице показа Списка доступных товаров, используется для передачи информации о состоянии флажка "Выделить все" */
+    const SELECTED_PRODUCTS_ALL_INDEX = 101;
+
     /**
      * @return string
      */
@@ -99,10 +104,10 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         }
 
         if ($pConst->load($post) && $pConst->save() && $id != 7) {
-            if ($pConst->getErrors()) {
+            /*if ($pConst->getErrors()) {
                 var_dump($pConst->getErrors());
                 exit;
-            }
+            }*/
             return $this->redirect(['index']);
         } else {
             $dicConst = iikoDicconst::findOne(['id' => $pConst->const_id]);
@@ -140,10 +145,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
                     $selectedProduct = new iikoSelectedProduct();
                     $selectedProduct->product_id = $productID;
                     $selectedProduct->organization_id = $org;
-                    //$selectedProduct->save();
-                    if (!$selectedProduct->save()) {
-                        var_dump($selectedProduct->getErrors()); die();
-                    }
+                    $selectedProduct->save();
                 }
             }
             $count = iikoSelectedProduct::find()->where(['organization_id' => $org])->count();
@@ -229,7 +231,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
     }
 
     /**
-     * Создаем сопоставления в дочерних бизнесах
+     * Создаём сопоставления в дочерних бизнесах
      * @var iikoPconst->const_id $const_id
      * @return array
      */
@@ -289,4 +291,59 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
 
         return ['success' => true];
     }
+
+    /**
+     * Вносит изменения в список доступных товаров
+     * @return array
+     */
+    public function actionChangeSelectedProducts()
+    {
+        $izmen = array(); //создаём массив, в который будут записаны изменения (он понадобится, если что-то пойдёт не так и все изменения в таблице-гриде нужно будет "откатить")
+        $uspeh = 'true'; //задаём изначальное значение переменной, отвечающей за состояние успешности операций сохранения и удаления
+        $i = 0; //задаём начальное значение переменной-итератору цикла
+        $all = 2; //задаём начальное значение переменной, отвечающей за состояние флажка "Выделить все" (0 - снять выделения всех чекбоксов, 1 - установить выделения всех чекбоксов, 2 - вариант, когда в таблице есть и выделенные и невыделенные чекбоксы)
+        $org = Yii::$app->user->identity->organization_id; //узнаём идентификатор организации
+        $post = Yii::$app->request->post(); //узнаём параметры POST
+        $goods = $post['goods']; //выделяем из POST значения чекбоксовь и записываем их в отдельный массив
+        $ids = array_keys($goods); //также выделяем в отдельный массив ключи чекбоксов (ключи содержат в себе идентификаторы из столбца ID)
+        foreach ($ids as $id) { //в цикле проверяем наличие в таблице iiko_selected_products наличие данных товаров
+            $SelectedProduct = iikoSelectedProduct::findOne(['product_id' => $id]);
+            (isset($SelectedProduct)) ? $est = 1 : $est = 0; //если данный товар в таблице уже есть $est=1 иначе $est=0
+            if (($est == 1) and ($goods[$id]) == 0) { //если товар в таблице БД уже есть, а флажок в таблице-гриде "снят", то пытаемся удалить товар из таблицы БД
+                if (!$SelectedProduct->delete()) { //если не удалось удалить товар, то переменная, отвечающая за состояние успешности операций сохранения и удаления, получает значение false
+                    $uspeh = false;
+                }
+                $i++; //увеличиваем на единицу переменную-итератор
+                $izmen[$i]['id'] = $id; //записываем в массив изменений значение ключа строки ID
+                $izmen[$i]['val'] = 1; //записываем в массив изменений значение действия, которое предстоит сделать с чекбоксом (0 - снять выделение, 1 - выделить)
+            }
+            if (($est == 0) and ($goods[$id]) == 1) { //если товара в таблице БД нет, а флажок в таблице-гриде "установлен", то пытаемся добавить товар в таблицу БД
+                $selectedProduct = new iikoSelectedProduct(); //создаём новый экземпляр класса Доступных товаров
+                $selectedProduct->product_id = $id; //устанавливаем значение product_id (идентификатор продукта)
+                $selectedProduct->organization_id = $org; //устанавливаем значение organization_id (идентификатор организации)
+                if (!$selectedProduct->save()) { //если не удалось сохранить товар, то переменная, отвечающая за состояние успешности операций сохранения и удаления, получает значение false
+                    $uspeh = 'false';
+                };
+                $i++; //увеличиваем на единицу переменную-итератор
+                $izmen[$i]['id'] = $id; //записываем в массив изменений значение ключа строки ID
+                $izmen[$i]['val'] = 0; //записываем в массив изменений значение действия, которое предстоит сделать с чекбоксом (0 - снять выделение, 1 - выделить)
+            }
+        }
+        if (count($izmen) == SELECTED_PRODUCTS_PAGE_SIZE) { //если количество чекбоксов равно количеству строк в таблице-гриде, то есть изменены все чекбоксы на странице, то
+            if ((!in_array(0, $izmen)) or (!in_array(1, $izmen))) { //если все чекбоксы содержат одинаковое значение (или все выделены, или все "сняты"),
+                (in_array(0, $izmen)) ? $all = 0 : $all = 1; //узнаём значение всех чекбоксов и записываем его в переменную, отвечающую за состояние флажка "Выделить все"
+            }
+        }
+        if ($uspeh == 'true') { //если все операции добавления новых значений и удаления ненужных в таблицу БД прошли успешно, то
+            $pConst = iikoPconst::findOne(['const_id' => 7, 'org' => $org]);
+            $count = iikoSelectedProduct::find()->where(['organization_id' => $org])->count(); //узнаём количество доступных товаров для данной организации
+            $pConst->value = $count;
+            $pConst->save(); //и сохраняем это значение в таблице iiko_pconst
+        }
+        $izmen[SELECTED_PRODUCTS_ALL_INDEX]['id'] = $uspeh; //записываем в массив изменений значение успешности операций добавления и удаления товаров
+        $izmen[SELECTED_PRODUCTS_ALL_INDEX]['val'] = $all; //записываем в массив изменений значение переменной, отвечающей за состояние флажка "Выделить все"
+        $izmen = json_encode($izmen); //кодируем массив изменений в JSON
+        return $izmen;
+    }
+
 }

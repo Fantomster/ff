@@ -130,7 +130,8 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
                 ->addRabbitQueue(json_encode($data));
 
         } catch (\Exception $e) {
-            Yii::error($e->getMessage());
+            \Yii::error($e->getMessage());
+            echo $e->getMessage().PHP_EOL;
         }
     }
 }

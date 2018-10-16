@@ -307,7 +307,7 @@ class OrganizationController extends Controller
     public function actionListOrganizationsForLicenses()
     {
         $searchModel = new OrganizationSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, true);
 
         return $this->render('list-organizations-for-licenses', [
             'searchModel' => $searchModel,
@@ -362,7 +362,8 @@ class OrganizationController extends Controller
             Yii::$app->session->setFlash('licenses-added', 'Лицензии добавлены');
             return $this->redirect('/organization/list-organizations-for-licenses');
         }
-
-        return $this->render('add-license', ['services' => $services, 'organizations' => $organizations]);
+        $date = new \DateTime('+10 day');
+        $tenDaysAfter = $date->format('Y-m-d H:i:s');
+        return $this->render('add-license', ['services' => $services, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter]);
     }
 }

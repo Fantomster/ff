@@ -5,6 +5,7 @@ namespace api_web\classes;
 use api_web\components\WebApiController;
 use api_web\controllers\OrderController;
 use api_web\helpers\Product;
+use api_web\helpers\WaybillHelper;
 use api_web\helpers\WebApiHelper;
 use common\models\AllService;
 use api_web\models\User;
@@ -516,7 +517,7 @@ class OrderWebApi extends \api_web\components\WebApi
             if (isset($post['search']['service_id']) && !empty($post['search']['service_id'])) {
                 $search->service_id = $post['search']['service_id'];
             } else {
-                $search->service_id_excluded = [];
+                $search->service_id_excluded = [WaybillHelper::EDI_SERVICE_ID, WaybillHelper::VENDOR_DOC_MAIL_SERVICE_ID];
             }
 
             if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
@@ -607,10 +608,6 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $model->updated_at;
                 }
 
-                if ($model->completion_date != $date) {
-                    $model->completion_date = $date;
-                    $model->save(false);
-                }
                 if (!empty($date)){
                     $obDateTime = new \DateTime($date);
                     $date = $obDateTime->format("d.m.Y H:i:s");
@@ -627,11 +624,13 @@ class OrderWebApi extends \api_web\components\WebApi
                     'create_user' => $model->createdByProfile->full_name ?? '',
                     'accept_user' => $model->acceptedByProfile->full_name ?? ''
                 ];
-                if (!empty($model->orderContent)){
-                    $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el){
-                        return $el->edi_number;
-                    }, $model->orderContent)));
-                    $orderInfo = array_merge($orderInfo, ['edi_number' => $arWaybillNames]);
+                if ($model->service_id == WaybillHelper::EDI_SERVICE_ID) {
+                    if (!empty($model->orderContent)) {
+                        $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
+                            return $el->edi_number;
+                        }, $model->orderContent)));
+                        $orderInfo = array_merge($orderInfo, ['edi_number' => $arWaybillNames]);
+                    }
                 }
                 $orders[] = $orderInfo;
             }

@@ -52,11 +52,11 @@ class getVetDocumentByUUID extends Model
     {
         return [
             [['UUID', 'issueSeries',
-        'issueNumber', 'issueDate', 'form', 'type', 'status', 'consignor',
-        'consignee', 'batch', 'purpose', 'broker', 'transportInfo',
-        'transportStorageType', 'cargoReloadingPointList', 'waybillSeries',
-        'waybillNumber', 'waybillDate', 'cargoExpertized', 'expertiseInfo',
-        'confirmedBy', 'locationProsperity', 'specialMarks', 'public $laboratory_research'], 'safe'],
+                'issueNumber', 'issueDate', 'form', 'type', 'status', 'consignor',
+                'consignee', 'batch', 'purpose', 'broker', 'transportInfo',
+                'transportStorageType', 'cargoReloadingPointList', 'waybillSeries',
+                'waybillNumber', 'waybillDate', 'cargoExpertized', 'expertiseInfo',
+                'confirmedBy', 'locationProsperity', 'specialMarks', 'public $laboratory_research'], 'safe'],
         ];
     }
 
@@ -98,7 +98,7 @@ class getVetDocumentByUUID extends Model
 
         $doc = MercVsd::findOne(['uuid' => $UUID]);
 
-        if($raw) {
+        if ($raw) {
             return unserialize($doc->raw_data);
         }
 
@@ -109,34 +109,34 @@ class getVetDocumentByUUID extends Model
         $this->status = $doc->status;
 
         $hc = cerberApi::getInstance()->getEnterpriseByGuid($doc->sender_guid);
-        if(isset($hc)) {
-            if(isset($hc->owner)) {
+        if (isset($hc)) {
+            if (isset($hc->owner)) {
                 $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
             }
         }
 
         $this->consignor = [
-            [ 'label' => 'Название предприятия',
-              'value' => isset($doc->sender_name) ? $doc->sender_name : null,
+            ['label' => 'Название предприятия',
+                'value' => isset($doc->sender_name) ? $doc->sender_name : null,
             ],
-            [ 'label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => isset($hc) ? $hc->name.', ИНН:'.$hc->inn : null,
+            ['label' => 'Хозяйствующий субъект (владелец продукции):',
+                'value' => isset($hc) ? $hc->name . ', ИНН:' . $hc->inn : null,
             ]
         ];
 
         $hc = cerberApi::getInstance()->getEnterpriseByGuid($doc->recipient_guid);
-        if(isset($hc)) {
-            if(isset($hc->owner)) {
+        if (isset($hc)) {
+            if (isset($hc->owner)) {
                 $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
             }
         }
 
         $this->consignee = [
-            [ 'label' => 'Название предприятия',
+            ['label' => 'Название предприятия',
                 'value' => isset($doc->recipient_name) ? $doc->recipient_name : null,
             ],
-            [ 'label' => 'Хозяйствующий субъект (владелец продукции):',
-                'value' => isset($hc) ? $hc->name.', ИНН:'.$hc->inn : null,
+            ['label' => 'Хозяйствующий субъект (владелец продукции):',
+                'value' => isset($hc) ? $hc->name . ', ИНН:' . $hc->inn : null,
             ]
         ];
 
@@ -148,7 +148,7 @@ class getVetDocumentByUUID extends Model
             ];
         }*/
 
-        if(isset($doc->owner_guid)) {
+        if (isset($doc->owner_guid)) {
             $owner = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getBusinessEntityByUuid($doc->owner_guid);
         }
 
@@ -175,69 +175,69 @@ class getVetDocumentByUUID extends Model
         }*/
 
         $this->batch =
-        [
             [
-                'label' => 'Тип продукции',
-                'value' => MercVsd::$product_types[$doc->product_type],
-            ],
-            [
-                'label' => 'Продукция',
-                'value' => $product,
-            ],
-            [
-                'label' => 'Вид продукции',
-                'value' => $sub_product,
-            ],
-            [
-                'label' => 'Наименование произведенной продукции в номенклатуре производителя',
-                'value' => isset($doc->product_name) ? $doc->product_name : null,
-            ],
-            [
-                'label' => 'Объем',
-                'value' => $doc->amount." ".(isset($unit) ? $unit->name : ''),
-            ],
-            /*[
-                'label' => 'Список видов упаковки, которые используются для производственной партии',
-                'value' => isset($doc->certifiedConsignment->batch->packingList) ? $doc->certifiedConsignment->batch->packingList->packingForm->name : null,
+                [
+                    'label' => 'Тип продукции',
+                    'value' => MercVsd::$product_types[$doc->product_type],
+                ],
+                [
+                    'label' => 'Продукция',
+                    'value' => $product,
+                ],
+                [
+                    'label' => 'Вид продукции',
+                    'value' => $sub_product,
+                ],
+                [
+                    'label' => 'Наименование произведенной продукции в номенклатуре производителя',
+                    'value' => isset($doc->product_name) ? $doc->product_name : null,
+                ],
+                [
+                    'label' => 'Объем',
+                    'value' => $doc->amount . " " . (isset($unit) ? $unit->name : ''),
+                ],
+                /*[
+                    'label' => 'Список видов упаковки, которые используются для производственной партии',
+                    'value' => isset($doc->certifiedConsignment->batch->packingList) ? $doc->certifiedConsignment->batch->packingList->packingForm->name : null,
 
-            ],
-            [
-                'label' => 'Общее количество единиц упаковки для производственной партии',
-                'value' => isset($doc->certifiedConsignment->batch->packingAmount) ? $doc->certifiedConsignment->batch->packingAmount : null,
-            ],*/
-            [
-                'label' => 'Дата выработки продукции',
-                'value' => $doc->production_date,
-            ],
-            [
-                'label' => 'Дата окончания срока годности продукции',
-                'value' => $doc->expiry_date,
-            ],
-            [
-                'label' => 'Описывает, является ли продукция скоропортящейся',
-                'value' => isset($doc->perishable) ? (($doc->perishable == 'true') ? 'Да' : 'Нет') : null,
-            ],
-            [
-                'label' => 'Страна происхождения продукции',
-                'value' => $country,
-            ],
-            [
-                'label' => 'Список производителей продукции',
-                'value' => $doc->producer_name,
-            ],
-            /*[
-                'label' => 'Список маркировки, доступный для данного производителя',
-                'value' => isset($doc->certifiedConsignment->batch->productMarkingList) ? $doc->certifiedConsignment->batch->productMarkingList->productMarking : null,
-            ],*/
-            [
-                'label' => 'Является ли продукция некачественной',
-                'value' => ($doc->low_grade_cargo == 'true') ? 'Да' : 'Нет',
-            ],
-            [
-                'label' => 'Собственник продукции',
-                'value' =>  (isset($owner)) ? ($owner->name.', ИНН:'.$owner->inn) : "-",
-            ],
-        ];
+                ],
+                [
+                    'label' => 'Общее количество единиц упаковки для производственной партии',
+                    'value' => isset($doc->certifiedConsignment->batch->packingAmount) ? $doc->certifiedConsignment->batch->packingAmount : null,
+                ],*/
+                [
+                    'label' => 'Дата выработки продукции',
+                    'value' => $doc->production_date,
+                ],
+                [
+                    'label' => 'Дата окончания срока годности продукции',
+                    'value' => $doc->expiry_date,
+                ],
+                [
+                    'label' => 'Описывает, является ли продукция скоропортящейся',
+                    'value' => isset($doc->perishable) ? (($doc->perishable == 'true') ? 'Да' : 'Нет') : null,
+                ],
+                [
+                    'label' => 'Страна происхождения продукции',
+                    'value' => $country,
+                ],
+                [
+                    'label' => 'Список производителей продукции',
+                    'value' => $doc->producer_name,
+                ],
+                /*[
+                    'label' => 'Список маркировки, доступный для данного производителя',
+                    'value' => isset($doc->certifiedConsignment->batch->productMarkingList) ? $doc->certifiedConsignment->batch->productMarkingList->productMarking : null,
+                ],*/
+                [
+                    'label' => 'Является ли продукция некачественной',
+                    'value' => ($doc->low_grade_cargo == 'true') ? 'Да' : 'Нет',
+                ],
+                [
+                    'label' => 'Собственник продукции',
+                    'value' => (isset($owner)) ? ($owner->name . ', ИНН:' . $owner->inn) : "-",
+                ],
+            ];
         /*$this->purpose = [
             'label' => 'Цель. Назначение груза',
             'value' => $purpose,
@@ -248,8 +248,8 @@ class getVetDocumentByUUID extends Model
             'type' => MercVsd::$transport_types[$transportInfo['transportType']],
             'numbers' => [
                 [
-                'label' => 'Номер контейнера (при автомобильной перевозке)',
-                'number' => isset($transportInfo['transportNumber']['containerNumber']) ? $transportInfo['transportNumber']['containerNumber'] : null,
+                    'label' => 'Номер контейнера (при автомобильной перевозке)',
+                    'number' => isset($transportInfo['transportNumber']['containerNumber']) ? $transportInfo['transportNumber']['containerNumber'] : null,
                 ],
                 [
                     'label' => 'Номер вагона',
@@ -305,32 +305,35 @@ class getVetDocumentByUUID extends Model
         $confirmed_by = json_decode($doc->confirmed_by, true);
 
         $this->confirmedBy = [
-        ['label' => 'ФИО',
-            'value' => isset($confirmed_by['fio']) ? $confirmed_by['fio'] : "-"],
-        ['label' => 'Должность',
-            'value' => isset($confirmed_by['post']) ? $confirmed_by['post'] : ""]
-    ];
+            ['label' => 'ФИО',
+                'value' => isset($confirmed_by['fio']) ? $confirmed_by['fio'] : "-"],
+            ['label' => 'Должность',
+                'value' => isset($confirmed_by['post']) ? $confirmed_by['post'] : ""]
+        ];
 
         $laboratory_research = [json_decode($doc->laboratory_research, true)];
         foreach ($laboratory_research as $item) {
             $this->laboratory_research = [
-                $item['operator']['name']." эксп №".$item['expertiseID']." от ".date("Y-m-d h:i:s", strtotime($item['actualDateTime']))." ( ".$item['conclusion']." )"
+                $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($item['actualDateTime'])) . " ( " . $item['conclusion'] . " )"
             ];
         }
 
     }
 
-    public function getWaybillNumber ()
+    public function getWaybillNumber()
     {
-        if(empty($this->waybillNumber) && empty($this->waybillSeries))
+        if (empty($this->waybillNumber) && empty($this->waybillSeries)) {
             return null;
+        }
 
         $res = '';
-        if(isset($this->waybillSeries))
-            $res =  $this->waybillSeries.' ';
+        if (isset($this->waybillSeries)) {
+            $res = $this->waybillSeries . ' ';
+        }
 
-        if(isset($this->waybillNumber))
-            $res .=  $this->waybillNumber;
+        if (isset($this->waybillNumber)) {
+            $res .= $this->waybillNumber;
+        }
 
         return $res;
     }

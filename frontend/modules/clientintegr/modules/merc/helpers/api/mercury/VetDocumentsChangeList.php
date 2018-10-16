@@ -20,8 +20,9 @@ class VetDocumentsChangeList extends Model
         $i = 0;
         foreach ($list as $item) {
             $i++;
-            if ($item->vetDType == MercVsd::DOC_TYPE_PRODUCTIVE)
+            if ($item->vetDType == MercVsd::DOC_TYPE_PRODUCTIVE) {
                 continue;
+            }
 
             $unit = VetisUnit::findOne(['guid' => $item->certifiedConsignment->batch->unit->guid, 'active' => true, 'last' => true]);
             VetisUnit::getUpdateData(0);
@@ -120,11 +121,13 @@ class VetDocumentsChangeList extends Model
             $count += $vetDocumentList->count;
             $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
 
-            if ($vetDocumentList->count > 0)
+            if ($vetDocumentList->count > 0) {
                 $this->updateDocumentsList($vetDocumentList->vetDocument);
+            }
 
-            if ($vetDocumentList->count < $vetDocumentList->total)
+            if ($vetDocumentList->count < $vetDocumentList->total) {
                 $listOptions->offset += $vetDocumentList->count;
+            }
 
         } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
     }
@@ -134,8 +137,9 @@ class VetDocumentsChangeList extends Model
         $mask = '/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/';
         preg_match_all($mask, $vsd_uuid_list, $list);
         $list = $list[0];
-        if (count($list) == 0)
+        if (count($list) == 0) {
             return false;
+        }
 
         $api = mercuryApi::getInstance($this->org_id);
 

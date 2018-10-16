@@ -44,24 +44,38 @@ class OrganizationSearch extends Organization {
      * @return ActiveDataProvider
      */
     public function search($params, bool $isForLicenses = false) {
+        $this->load($params);
         if ($isForLicenses) {
             $dbApiName = $this->getDbName('db_api');
             $dbName = $this->getDbName('db');
             $now = new Expression('NOW()');
             $tenDaysAgo = new Expression('NOW() - INTERVAL 10 DAY');
 
-            $query1 = Organization::find()->innerJoin($dbApiName.'.license_organization', "`$dbApiName`.license_organization.org_id=`$dbName`.organization.id")->where(['between', 'td', $tenDaysAgo, $now])->orderBy('td', 'desc')->groupBy('td');
-            $query2 = Organization::find()->innerJoin($dbApiName.'.license_organization', "`$dbApiName`.license_organization.org_id=`$dbName`.organization.id")->where(['<', 'td', $now])->orderBy('td', 'desc')->groupBy('td');
+            $query1 = Organization::find()->innerJoin($dbApiName.'.license_organization', "`$dbApiName`.license_organization.org_id=`$dbName`.organization.id")->where(['between', 'td', $tenDaysAgo, $now])->orderBy('td', 'desc')->groupBy('td')->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
+            $query2 = Organization::find()->innerJoin($dbApiName.'.license_organization', "`$dbApiName`.license_organization.org_id=`$dbName`.organization.id")->where(['<', 'td', $now])->orderBy('td', 'desc')->groupBy('td')->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
             $allLicenseOrganizations = ArrayHelper::getColumn(LicenseOrganization::find()->where(['not', ['org_id' => null]])->groupBy('org_id')->all(), 'org_id');
-            $query3 = Organization::find()->where(['not in', 'id', $allLicenseOrganizations]);
+            $query3 = Organization::find()->where(['not in', 'id', $allLicenseOrganizations])->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
 
             $query1->union($query2)->union($query3);
             $sql = $query1->createCommand()->getRawSql();
-
             $dataProvider = new SqlDataProvider([
                 'sql' => $sql,
                 'key' => 'id',
-                'pagination' => ['pageSize' => 20]
+                'pagination' => ['pageSize' => 20],
+                'sort' => [
+                    'attributes' => [
+                        'id' => [
+                            'asc' => ['id' => SORT_ASC], // от А до Я
+                            'desc' => ['id' => SORT_DESC], // от Я до А
+                            'default' => SORT_DESC
+                        ],
+                        'name' => [
+                            'asc' => ['name' => SORT_ASC], // от А до Я
+                            'desc' => ['name' => SORT_DESC], // от Я до А
+                            'default' => SORT_DESC
+                        ],
+                    ],
+                ],
             ]);
         } else {
             $query = Organization::find();
@@ -78,7 +92,7 @@ class OrganizationSearch extends Organization {
                 'pagination' => ['pageSize' => 20]
             ]);
 
-            $this->load($params);
+
 
             if (!$this->validate()) {
 // uncomment the following line if you do not want to return any records when validation fails

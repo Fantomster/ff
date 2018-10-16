@@ -16,6 +16,7 @@ $gridColumns = [
     [
         'format' => 'raw',
         'attribute' => 'id',
+        'filter'=> false,
         'value' => function ($data) {
             return Html::a($data['id'], ['organization/view', 'id' => $data['id']]);
         },
@@ -55,7 +56,7 @@ $gridColumns = [
     <?=
     GridView::widget([
         'dataProvider' => $dataProvider,
-        //'filterModel' => $searchModel,
+        'filterModel' => $searchModel,
         'columns' => $gridColumns,
     ]);
     ?>

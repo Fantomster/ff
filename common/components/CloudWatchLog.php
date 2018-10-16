@@ -88,7 +88,7 @@ class CloudWatchLog extends Component
         $client = $this->getClient();
 
         if (!$this->checkGroup($groupName)) {
-            throw new Exception('Checking log group failed!');
+            throw new \Exception('Checking log group failed!');
         }
 
         $result = $client->describeLogStreams([
@@ -98,7 +98,7 @@ class CloudWatchLog extends Component
         ]);
 
         if ($result['@metadata']['statusCode'] != 200) {
-            throw new Exception('Checking log stream failed!');
+            throw new \Exception('Checking log stream failed!');
         }
 
         $result = $this->streamExists($streamName, $result['logStreams']);

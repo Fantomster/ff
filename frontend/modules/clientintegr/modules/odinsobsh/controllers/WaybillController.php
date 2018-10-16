@@ -499,9 +499,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                  $data = $command->queryAll();
                  $out['results'] = array_values($data);
             */
-            $sql = "( select id, name as `text` from one_s_good where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name = '" . $term . "' )" .
-                " union ( select id, name as `text` from one_s_good  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '" . $term . "%' limit 15 )" .
-                "union ( select id, name as `text` from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
+            $sql = "( select id, CONCAT(`name`, ' (' ,measure, ')') as `text` from one_s_good where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name = '" . $term . "' )" .
+                " union ( select id, CONCAT(`name`, ' (' ,measure, ')') as `text` from one_s_good  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '" . $term . "%' limit 15 )" .
+                "union ( select id, CONCAT(`name`, ' (' ,measure, ')') as `text` from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
                 "order by case when length(trim(`text`)) = length('" . $term . "') then 1 else 2 end, `text`; ";
 
             $db = Yii::$app->db_api;
@@ -525,9 +525,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
         $out = [];
         if (!is_null($term)) {
-            $sql = "( select `id`, `name` from `one_s_good` where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and `name` = '" . $term . "' )" .
-                " union ( select `id`, `name` from `one_s_good`  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and `name` like '" . $term . "%' limit 15 )" .
-                "union ( select id, name from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
+            $sql = "( select `id`, CONCAT(`name`, ' (' ,measure, ')') as `text` from `one_s_good` where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and `name` = '" . $term . "' )" .
+                " union ( select `id`, CONCAT(`name`, ' (' ,measure, ')') as `text` from `one_s_good`  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and `name` like '" . $term . "%' limit 15 )" .
+                "union ( select id, CONCAT(`name`, ' (' ,measure, ')') as `text` from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
                 "order by case when length(trim(`name`)) = length('" . $term . "') then 1 else 2 end, `name`; ";
 
             $db = Yii::$app->db_api;
@@ -538,7 +538,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             //$constId = OneSDicconst::findOne(['denom' => 'main_org']);
             //$parentId = OneSPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
             //$organizationID = !is_null($parentId) ? $parentId->value : $orgId;
-            $sql = 'SELECT id, name FROM one_s_good WHERE org_id = ' . $orgId . ' ORDER BY name LIMIT 100';
+            $sql = "SELECT id, CONCAT(`name`, ' (' ,measure, ')') as `text` FROM one_s_good WHERE org_id = " . $orgId . ' ORDER BY name LIMIT 100';
 
             /**
              * @var $db Connection

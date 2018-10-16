@@ -39,16 +39,15 @@ class InvoiceController extends Controller
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
-                'searchModel' => $searchModel,
-                'dataProvider' => $dataProvider,
+                        'searchModel' => $searchModel,
+                        'dataProvider' => $dataProvider,
             ]);
         } else {
             return $this->render($vi, [
-                'searchModel' => $searchModel,
-                'dataProvider' => $dataProvider,
+                        'searchModel' => $searchModel,
+                        'dataProvider' => $dataProvider,
             ]);
         }
-
     }
 
     public function actionGetContent()
@@ -94,11 +93,11 @@ class InvoiceController extends Controller
 
         $dataProvider->pagination->pageParam = 'page_order';
         return $this->renderAjax('_orders', [
-            'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
-            'vendor_id' => $params['OrderSearch']['vendor_id'],
-            'invoice_id' => $params['invoice_id'],
-            'show_waybill' => $showAll
+                    'dataProvider' => $dataProvider,
+                    'searchModel' => $searchModel,
+                    'vendor_id' => $params['OrderSearch']['vendor_id'],
+                    'invoice_id' => $params['invoice_id'],
+                    'show_waybill' => $showAll
         ]);
     }
 
@@ -139,15 +138,23 @@ class InvoiceController extends Controller
                 $sub0 = explode(' ', $licenses['rkws']->td);
                 $sub1 = explode('-', $sub0[0]);
                 $licenses['rkws']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-                if ($licenses['rkws']->status_id == 0) $rk_us = 0;
-                if (($licenses['rkws']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws']->td)))) $link = 'rkws';
+                if ($licenses['rkws']->status_id == 0) {
+                    $rk_us = 0;
+                }
+                if (($licenses['rkws']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['rkws']->td)))) {
+                    $link = 'rkws';
+                }
             }
             if (isset($licenses['iiko'])) {
                 $sub0 = explode(' ', $licenses['iiko']->td);
                 $sub1 = explode('-', $sub0[0]);
                 $licenses['iiko']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-                if ($licenses['iiko']->status_id == 0) $lic_iiko = 0;
-                if (($licenses['iiko']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['iiko']->td)))) $link = 'iiko';
+                if ($licenses['iiko']->status_id == 0) {
+                    $lic_iiko = 0;
+                }
+                if (($licenses['iiko']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['iiko']->td)))) {
+                    $link = 'iiko';
+                }
             }
 
             /**
@@ -191,12 +198,13 @@ class InvoiceController extends Controller
                 $model->product_name = $value['product_name'];
                 $model->units = $value['units'];
                 $model->article = $value['article'];
+                $model->invoice_content_id = $value['invoice_content_id'];
                 if (!$model->save()) {
                     throw new Exception('Часть заказа не сохранилась, давайте попробуем снова.');
                 }
             }
             //Пересчитаем заказ
-            $order->calculateTotalPrice(true, $invoice->total_sum_withtax);
+            $order->calculateTotalPrice(true, $invoice->total_sum_withouttax);
             $invoice->order_id = $order->id;
             $invoice->save();
             $transaction->commit();
@@ -204,6 +212,7 @@ class InvoiceController extends Controller
             return ['status' => true, 'order_id' => $order->id, 'us' => $link, 'page' => $page];
         } catch (\Exception $e) {
             $transaction->rollBack();
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             return ['status' => false, 'error' => $e->getMessage()];
         }
     }
@@ -238,7 +247,6 @@ class InvoiceController extends Controller
         $eDate = IntegrationInvoice::find()->andWhere(['organization_id' => $org_id])->orderBy('date ASC')->one();
 
         return isset($eDate) ? $eDate->date : null;
-
     }
 
     public function actionSetVendor()
@@ -285,11 +293,12 @@ class InvoiceController extends Controller
 
         $dataProvider->pagination->pageParam = 'page_order';
         return $this->renderAjax('_orders', [
-            'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
-            'vendor_id' => $params['OrderSearch']['vendor_id'],
-            'invoice_id' => $params['invoice_id'],
-            'show_waybill' => $params['show_waybill']
+                    'dataProvider' => $dataProvider,
+                    'searchModel' => $searchModel,
+                    'vendor_id' => $params['OrderSearch']['vendor_id'],
+                    'invoice_id' => $params['invoice_id'],
+                    'show_waybill' => $params['show_waybill']
         ]);
     }
+
 }

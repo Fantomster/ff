@@ -362,7 +362,8 @@ class OrganizationController extends Controller
             Yii::$app->session->setFlash('licenses-added', 'Лицензии добавлены');
             return $this->redirect('/organization/list-organizations-for-licenses');
         }
-
-        return $this->render('add-license', ['services' => $services, 'organizations' => $organizations]);
+        $date = new \DateTime('+10 day');
+        $tenDaysAfter = $date->format('Y-m-d H:i:s');
+        return $this->render('add-license', ['services' => $services, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter]);
     }
 }

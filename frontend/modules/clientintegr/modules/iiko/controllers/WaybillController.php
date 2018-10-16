@@ -499,12 +499,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             }
 
             $sql = <<<SQL
-            SELECT id, denom as text FROM (
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
+            SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as text FROM (
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 15)
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 15)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 10)
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 10)
                   ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
                      THEN 1
                      ELSE 2
@@ -558,12 +558,12 @@ SQL;
             }
 
             $sql = <<<SQL
-            SELECT id, denom FROM (
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
+            SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as `text` FROM (
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 15)
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 15)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 10)
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 10)
                   ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
                      THEN 1
                      ELSE 2
@@ -596,7 +596,7 @@ SQL;
                 $andWhere = ' AND id in (' . implode(',', $arr) . ')';
             }
 
-            $sql = 'SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = ' . $organizationID . $andWhere . ' ORDER BY denom LIMIT 100';
+            $sql = "SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as `text` FROM iiko_product WHERE is_active = 1 AND org_id = " . $organizationID . $andWhere . ' ORDER BY denom LIMIT 100';
 
             /**
              * @var $db Connection
@@ -765,6 +765,7 @@ SQL;
         } catch (\Exception $e) {
             $transaction->rollBack();
             $api->logout();
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }
@@ -793,6 +794,7 @@ SQL;
             } catch (\Throwable $e) {
                 //Выставляем статус обратно
                 $transaction->rollBack();
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
                 return ['success' => false, 'error' => $e->getMessage()];
             }
         }

@@ -114,8 +114,11 @@ class SyncServiceFactory extends WebApi
      * @return AbstractSyncFactory
      * @throws BadRequestHttpException
      */
-    public function factory(int $serviceId, string $serviceName): AbstractSyncFactory
+    public function factory(int $serviceId, string $serviceName = null): AbstractSyncFactory
     {
+        if (!$serviceName) {
+            $serviceName = (string)self::ALL_SERVICE_MAP[$serviceId];
+        }
 
         $className = __NAMESPACE__ . '\\sync\\Service' . $serviceName;
         if (class_exists($className)) {

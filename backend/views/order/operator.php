@@ -2,7 +2,6 @@
 
 $this->title = Yii::t('app', 'Оператор заказов');
 $this->params['breadcrumbs'][] = $this->title;
-Yii::$app->language = 'ru';
 
 $wait_second = \common\models\OperatorTimeout::getTimeoutOperator($user_id);
 
@@ -244,7 +243,7 @@ $wait_second = \common\models\OperatorTimeout::getTimeoutOperator($user_id);
                 var this_ = $(this);
                 var id = $(this).data('order_id');
                 var value = $(this).val();
-                $.post('<?= \yii\helpers\Url::to('/ru/order/operator-change-attribute') ?>', {
+                $.post('<?= \yii\helpers\Url::to('/order/operator-change-attribute') ?>', {
                     id: id,
                     name: 'status_call_id',
                     value: value
@@ -263,7 +262,7 @@ $wait_second = \common\models\OperatorTimeout::getTimeoutOperator($user_id);
                 .on('click', '.save-comment', function () {
                     var id = $(this).data('order_id');
                     var value = $('#comment_' + id).val();
-                    $.post('<?= \yii\helpers\Url::to('/ru/order/operator-change-attribute') ?>', {
+                    $.post('<?= \yii\helpers\Url::to('/order/operator-change-attribute') ?>', {
                         id: id,
                         name: 'comment',
                         value: value
@@ -273,7 +272,7 @@ $wait_second = \common\models\OperatorTimeout::getTimeoutOperator($user_id);
                 })
                 .on("click", '.operator-set-to-order', function () {
                     var id = $(this).data('order_id');
-                    $.post('<?= \yii\helpers\Url::to('/ru/order/operator-set-to-order') ?>', {
+                    $.post('<?= \yii\helpers\Url::to('/order/operator-set-to-order') ?>', {
                         id: id
                     }, function (data) {
                         if (data) {

@@ -31,7 +31,7 @@ if (is_array($arrSession)) {
     $arr = array_merge($arr, $arrSession);
 }
 
-Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]);
+Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => true]);
 $form = ActiveForm::begin([
     'options' => [
         'data-pjax' => true,
@@ -45,23 +45,25 @@ $form = ActiveForm::begin([
     <div class="row">
         <div class="col-md-3">
             <?php
-            echo $form->field($searchModel, 'product_type')->dropDownList(array_merge(['all' => 'Все'], $searchModel->getProductType()))->label(Yii::t('app', 'Тип продукта'), ['class' => 'label', 'style' => 'color:#555']);
+            echo $form->field($searchModel, 'product_type')->dropDownList(array_merge(['all' => 'Все'], $searchModel->getProductType()), ['value' => $productSearch])->label(Yii::t('app', 'Тип продукта'), ['class' => 'label', 'style' => 'color:#555']);
             ?>
         </div>
         <div class="col-md-3">
             <?php
-            echo $form->field($searchModel, 'cooking_place_type')->dropDownList(array_merge(['all' => 'Все'], $searchModel->getCoockingPlaceType()))
+            echo $form->field($searchModel, 'cooking_place_type')->dropDownList(array_merge(['all' => 'Все'], $searchModel->getCoockingPlaceType()), ['value' => $cookingPlaceSearch])
                 ->label(Yii::t('app', 'Тип места приготовления продукта'), ['class' => 'label', 'style' => 'color:#555']);
             ?>
         </div>
         <div class="col-md-3">
             <?php
             echo $form->field($searchModel, 'unit')
-                ->dropDownList(array_merge(['all' => 'Все'], $searchModel->getUnit()))->label(Yii::t('app', 'Единица измерения товара в системе IIKO'), ['class' => 'label', 'style' => 'color:#555']);
+                ->dropDownList(array_merge(['all' => 'Все'], $searchModel->getUnit()), ['value' => $unitSearch])->label(Yii::t('app', 'Единица измерения товара в системе IIKO'), ['class' => 'label', 'style' => 'color:#555']);
             ?>
         </div>
     </div>
 <?php echo Html::hiddenInput('selected_goods'); ?>
+<?php echo Html::hiddenInput('page'); ?>
+<?php echo Html::hiddenInput('sort'); ?>
 <?php
 echo \kartik\grid\GridView::widget([
     'dataProvider' => $dataProvider,
@@ -211,6 +213,47 @@ $("document").ready(function(){
                 $('.alHiddenInput').val(0);
             }
         });
+});
+
+$("document").ready(function(){
+    $(".btn-primary").on("click", function() {
+        var pos0 = $(".summary").text();
+        var pos1 = pos0.split('-');
+        var pos2 = pos1[1];
+        var pos3 = pos2.split(' ');
+        var pos = pos3[0];
+        var ostatok = pos % 20;
+        if (ostatok == 0) {
+            var page = pos / 20;
+        } else {
+            var page = Math.floor(pos/20) + 1;
+        }
+        var qasc=$('.asc').attr('data-sort'); //узнаём порядок сортировки с классом asc
+        var qdesc=$('.desc').attr('data-sort'); //узнаём порядок сортировки с классом desc                                                    
+        if (typeof qdesc === 'undefined') {
+            var sortirov=qasc;
+        } else {
+            var sortirov=qdesc;
+        } //из двух возможных сортировок существует всегда только одна
+        var sortirov0=sortirov.substring(0,1); //узнаём первый символ сортировки
+        if (sortirov0=='-') {
+            sortirov=sortirov.substring(1);
+        } else {
+            sortirov='-'+sortirov;
+        } //и меняем на противоположный порядок сортировки
+        var filter1 = $("#iikoproductsearch-product_type").val(); //узнаём значение фильтра НДС
+        var filter2 = $("#iikoproductsearch-cooking_place_type").val(); //узнаём значение фильтра НДС
+        var filter3 = $("#iikoproductsearch-unit").val(); //узнаём значение фильтра НДС
+        $('input[name="page"]').val(page);
+        $('input[name="sort"]').val(sortirov);
+        //$('input[name="filter1"]').val(filter1);
+        //$('input[name="filter2"]').val(filter2);
+        //$('input[name="filter3"]').val(filter3);
+        var vr = $("#w0").attr('action');
+        var act = '/ru/clientintegr/iiko/settings/change-const?id=7&page='+page+'&sort='+sortirov+'&productSearch='+filter1+'&cookingPlaceSearch='+filter2+'&unitSearch='+filter3;
+        $("#w0").attr('action', act);
+        $("#w0").submit();
+    })
 });
 
 JS;

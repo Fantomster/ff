@@ -167,6 +167,7 @@ class CartWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     public function registration(array $post)
     {
@@ -222,6 +223,7 @@ class CartWebApi extends \api_web\components\WebApi
      * @param array $post ['id', 'delivery_date', 'comment']
      * @return bool
      * @throws \Exception
+     * @throws \Throwable
      */
     private function createOrder(Cart $cart, Organization $vendor, array $post)
     {
@@ -251,7 +253,7 @@ class CartWebApi extends \api_web\components\WebApi
                 throw new ValidationException($order->getFirstErrors());
             }
             /**
-             * @var $cartContent CartContent
+             * @var CartContent $cartContent
              */
             //Получаем записи только нужного нам поставщика
             $contents = $cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->all();
@@ -331,6 +333,7 @@ class CartWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
      * @throws ValidationException
      */
     public function productComment(array $post)

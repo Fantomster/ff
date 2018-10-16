@@ -2,6 +2,7 @@
 
 namespace common\models\licenses;
 
+use Exception;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
@@ -11,13 +12,13 @@ use yii\web\BadRequestHttpException;
 /**
  * This is the model class for table "license".
  *
- * @property int $id Уникальный ID
- * @property string $name Наименование лицензии
- * @property int $is_active Флаг активности
- * @property string $created_at Дата создания
- * @property string $updated_at Дата обновления
+ * @property int                   $id         Уникальный ID
+ * @property string                $name       Наименование лицензии
+ * @property int                   $is_active  Флаг активности
+ * @property string                $created_at Дата создания
+ * @property string                $updated_at Дата обновления
  *
- * @property LicenseService[] $licenseServices
+ * @property LicenseService[]      $licenseServices
  * @property LicenseOrganization[] $licenseOrganizations
  */
 class License extends ActiveRecord
@@ -56,9 +57,9 @@ class License extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'Уникальный ID',
-            'name' => 'Наименование лицензии',
-            'is_active' => 'Флаг активности',
+            'id'         => 'Уникальный ID',
+            'name'       => 'Наименование лицензии',
+            'is_active'  => 'Флаг активности',
             'created_at' => 'Дата создания',
             'updated_at' => 'Дата обновления',
         ];
@@ -69,10 +70,10 @@ class License extends ActiveRecord
     {
         return [
             [
-                'class' => TimestampBehavior::class,
+                'class'              => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',
-                'value' => \gmdate('Y-m-d H:i:s'),
+                'value'              => \gmdate('Y-m-d H:i:s'),
             ],
         ];
     }
@@ -95,96 +96,28 @@ class License extends ActiveRecord
         return $this->hasOne(LicenseOrganization::class, ['license_id' => 'id']);
     }
 
-
-    public static function checkLicenseByService(array $post): array
+    /**
+     * @param $orgId
+     * @param $serviceId
+     * @return array
+     * @throws \Exception
+     */
+    public static function checkByServiceId($orgId, $serviceId)
     {
-        return self::checkLicense($post, true);
-    }
+        $now = new \DateTime();
+        $license = (new Query())->select(['license.id', 'license.name','license.is_active', 'license.created_at', 'license.updated_at', 'license.login_allowed', 'max(lo.td) as td'])->from(self::tableName())
+            ->leftJoin('license_organization lo', 'lo.license_id=license.id')
+            ->leftJoin('license_service ls', 'ls.license_id=license.id')
+            ->where(['lo.org_id' => $orgId, 'ls.service_id' => $serviceId, 'license.is_active' => 1])
+            ->andWhere(['>', 'lo.td', $now->format('Y-m-d h:s:i')])
+            ->groupBy(['license.id', 'license.name','license.is_active', 'license.created_at', 'license.updated_at', 'license.login_allowed'])
+            ->indexBy('id')
+            ->all(\Yii::$app->db_api);
 
-
-    public static function checkLicenseByLicenseID(array $post): array
-    {
-        return self::checkLicense($post);
-    }
-
-
-    public static function checkLicense(array $post, bool $byServiceID = false): array
-    {
-        if ($byServiceID) {
-            if (!isset($post['service_id'])) {
-                throw new BadRequestHttpException("empty_param|service_id");
-            }
-        } else {
-            if (!isset($post['license_id'])) {
-                throw new BadRequestHttpException("empty_param|license_id");
-            }
+        if (count($license) > 1){
+            throw new Exception('Organization having more than one different licenses');
         }
 
-        if (!isset($post['org_id'])) {
-            throw new BadRequestHttpException("empty_param|org_id");
-        }
-
-        $licenses = License::find()->
-        leftJoin('license_organization', 'license_organization.license_id=license.id')->
-        leftJoin('license_service', 'license_service.license_id=license.id');
-        if ($byServiceID) {
-            $licenses = $licenses->where(['license_service.service_id' => $post['service_id']]);
-        } else {
-            $licenses = $licenses->where(['license.id' => $post['license_id']]);
-        }
-
-        $licenses = $licenses->andWhere(['license_organization.org_id' => $post['org_id']])->with('licenseOrganizations')->all();
-
-        if (!$licenses) {
-            throw new BadRequestHttpException("licenses not found");
-        }
-
-        $arr = [];
-        $i = 0;
-        foreach ($licenses as $license) {
-            if ($license->licenseOrganizations) {
-                $arr[$i]['license_id'] = $license->licenseOrganizations->license_id;
-                $arr[$i]['td'] = $license->licenseOrganizations->td;
-                $arr[$i]['object_id'] = $license->licenseOrganizations->object_id;
-                $arr[$i]['status_id'] = $license->licenseOrganizations->status_id;
-                $i++;
-            }
-        }
-
-        return $arr;
-    }
-
-
-    public function getLicensesByServiceId(array $post): array
-    {
-        if (!isset($post['service_id'])) {
-            throw new BadRequestHttpException("empty_param|service_id");
-        }
-
-        $licenses = License::find()->
-        leftJoin('license_organization', 'license_organization.license_id=license.id')->
-        leftJoin('license_service', 'license_service.license_id=license.id');
-        $licenses = $licenses->where(['license_service.service_id' => $post['service_id']]);
-        $licenses = $licenses->with('licenseOrganizations')->with('licenseServices')->asArray()->all();
-
-        if (!$licenses) {
-            throw new BadRequestHttpException("licenses not found");
-        }
-        return $licenses;
-    }
-
-
-    public function getLicensesByLicenseId(array $post): array
-    {
-        if (!isset($post['license_id'])) {
-            throw new BadRequestHttpException("empty_param|license_id");
-        }
-        $db = Yii::$app->get('db_api');
-        $services = (new Query())->select(['service_id'])
-            ->from(['license_service'])->where(['license_id' => $post['license_id']])->all($db);
-        if (!$services) {
-            throw new BadRequestHttpException("licenses not found");
-        }
-        return $services;
+        return $license;
     }
 }

@@ -20,6 +20,8 @@ use Yii;
  * @property int $sum_without_vat
  * @property int $price_with_vat
  * @property int $price_without_vat
+ * @property int $outer_unit_id
+ * @property int $koef
  *
  *
  * @property Waybill $waybill

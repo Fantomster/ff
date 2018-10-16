@@ -2,7 +2,9 @@
 
 namespace common\models;
 
+
 use common\components\ecom\EComIntegration2;
+use api_web\helpers\WaybillHelper;
 use common\components\EComIntegration;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
@@ -14,46 +16,47 @@ use yii\web\BadRequestHttpException;
 /**
  * This is the model class for table "order".
  *
- * @property integer $id
- * @property integer $client_id
- * @property integer $vendor_id
- * @property integer $created_by_id
- * @property integer $accepted_by_id
- * @property integer $status
- * @property string $total_price
- * @property string $created_at
- * @property string $updated_at
- * @property string $completion_date
- * @property string $requested_delivery
- * @property string $actual_delivery
- * @property string $comment
- * @property string $discount
- * @property integer $discount_type
- * @property integer $currency_id
- * @property string $waybill_number
- * @property integer $service_id
- * @property string $status_updated_at
- * @property string $edi_order
- * @property string $edi_ordersp
+ * @property integer           $id
+ * @property integer           $client_id
+ * @property integer           $vendor_id
+ * @property integer           $created_by_id
+ * @property integer           $accepted_by_id
+ * @property integer           $status
+ * @property string            $total_price
+ * @property string            $created_at
+ * @property string            $updated_at
+ * @property string            $completion_date
+ * @property string            $requested_delivery
+ * @property string            $actual_delivery
+ * @property string            $comment
+ * @property string            $discount
+ * @property integer           $discount_type
+ * @property integer           $currency_id
+ * @property string            $waybill_number
+ * @property integer           $service_id
+ * @property string            $status_updated_at
+ * @property string            $edi_order
+ * @property string            $edi_ordersp
  *
- * @property User $acceptedBy
- * @property User $createdBy
- * @property Profile $createdByProfile
- * @property Profile $acceptedByProfile
- * @property Organization $client
- * @property Organization $vendor
- * @property OrderContent[] $orderContent
- * @property OrderChat[] $orderChat
- * @property integer positionCount
- * @property integer invoice_relation
- * @property string $statusText
- * @property bool $isObsolete
- * @property string $rawPrice
- * @property User[] $recipientsList
- * @property Currency $currency
+ * @property User              $acceptedBy
+ * @property User              $createdBy
+ * @property Profile           $createdByProfile
+ * @property Profile           $acceptedByProfile
+ * @property Organization      $client
+ * @property Organization      $vendor
+ * @property OrderContent[]    $orderContent
+ * @property OrderChat[]       $orderChat
+ * @property integer           positionCount
+ * @property integer           invoice_relation
+ * @property string            $statusText
+ * @property bool              $isObsolete
+ * @property string            $rawPrice
+ * @property User[]            $recipientsList
+ * @property Currency          $currency
  * @property OrderAttachment[] $attachments
- * @property OrderAssignment $assignment
- * @property EmailQueue[] $relatedEmails
+ * @property OrderAssignment   $assignment
+ * @property EmailQueue[]      $relatedEmails
+ * @property Waybill[]         $waybills
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -66,6 +69,9 @@ class Order extends \yii\db\ActiveRecord
     const STATUS_FORMING = 7;
     const STATUS_EDI_SENDING_TO_VENDOR = 10;
     const STATUS_EDI_SENDING_ERROR = 11;
+    const STATUS_EDI_SENT_BY_VENDOR = 8;
+    const STATUS_EDI_ACCEPTANCE_FINISHED = 9;
+
 
     const DISCOUNT_NO_DISCOUNT = null;
     const DISCOUNT_FIXED = 1;
@@ -88,14 +94,14 @@ class Order extends \yii\db\ActiveRecord
     public function behaviors(): array
     {
         return [
-            'timestamp' => [
-                'class' => TimestampBehavior::class,
+            'timestamp'  => [
+                'class'              => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',
-                'value' => \gmdate('Y-m-d H:i:s'),
+                'value'              => \gmdate('Y-m-d H:i:s'),
             ],
             'attributes' => [
-                'class' => AttributesBehavior::class,
+                'class'      => AttributesBehavior::class,
                 'attributes' => [
                     'status_updated_at' => [
                         ActiveRecord::EVENT_BEFORE_UPDATE => function ($event, $attribute) {
@@ -134,19 +140,19 @@ class Order extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'id' => Yii::t('app', 'Номер заказа'),
-            'client_id' => 'Client ID',
-            'vendor_id' => 'Vendor ID',
-            'created_by_id' => 'Created By ID',
+            'id'             => Yii::t('app', 'Номер заказа'),
+            'client_id'      => 'Client ID',
+            'vendor_id'      => 'Vendor ID',
+            'created_by_id'  => 'Created By ID',
             'accepted_by_id' => 'Accepted By ID',
-            'status' => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
-            'status_text' => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
-            'total_price' => Yii::t('app', 'common.models.total_price', ['ru' => 'Итоговая цена']),
-            'created_at' => Yii::t('app', 'Дата создания'),
-            'updated_at' => 'Updated At',
-            'vendor' => Yii::t('app', 'Поставщик'),
-            'create_user' => Yii::t('app', 'Заказ создал'),
-            'plan_price' => Yii::t('app', 'План'),
+            'status'         => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'status_text'    => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'total_price'    => Yii::t('app', 'common.models.total_price', ['ru' => 'Итоговая цена']),
+            'created_at'     => Yii::t('app', 'Дата создания'),
+            'updated_at'     => 'Updated At',
+            'vendor'         => Yii::t('app', 'Поставщик'),
+            'create_user'    => Yii::t('app', 'Заказ создал'),
+            'plan_price'     => Yii::t('app', 'План'),
             'waybill_number' => Yii::t('app', 'Номер накладной'),
         ];
     }
@@ -307,7 +313,7 @@ class Order extends \yii\db\ActiveRecord
     public function discountDropDown()
     {
         return [
-            '' => Yii::t('app', 'common.models.no_discount', ['ru' => 'Без скидки']),
+            ''  => Yii::t('app', 'common.models.no_discount', ['ru' => 'Без скидки']),
             '1' => Yii::t('app', 'common.models.discount_rouble_two', ['ru' => 'Скидка ({symbol})', 'symbol' => $this->currency->symbol]),
             '2' => Yii::t('app', 'common.models.discount_percent_two', ['ru' => 'Скидка (%)']),
         ];
@@ -315,7 +321,11 @@ class Order extends \yii\db\ActiveRecord
 
     public function getStatusText()
     {
-        $statusList = self::getStatusList();
+        if ($this->service_id == WaybillHelper::EDI_SERVICE_ID || $this->service_id == WaybillHelper::VENDOR_DOC_MAIL_SERVICE_ID) {
+            $statusList = self::getStatusListEdo();
+        } else {
+            $statusList = self::getStatusList();
+        }
         return $statusList[$this->status];
     }
 
@@ -323,17 +333,19 @@ class Order extends \yii\db\ActiveRecord
     {
         return [
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app',
-                'common.models.order_status.status_awaiting_accept_from_vendor', ['ru' => 'Ожидает подтверждения']),
-            OrderStatus::STATUS_PROCESSING => Yii::t('app',
-                'common.models.order_status.status_processing', ['ru' => 'Выполняются']),
-            OrderStatus::STATUS_EDI_SENT_BY_VENDOR => Yii::t('app',
+                'common.models.waiting', ['ru' => 'Ожидает подтверждения']),
+            OrderStatus::STATUS_PROCESSING                  => Yii::t('app',
+                'common.models.in_process_two', ['ru' => 'Выполняются']),
+            OrderStatus::STATUS_EDI_SENT_BY_VENDOR          => Yii::t('app',
                 'common.models.order_status.status_edo_sent_by_vendor', ['ru' => 'Отправлен поставщиком']),
-            OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED => Yii::t('app',
+            OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED     => Yii::t('app',
                 'common.models.order_status.status_edo_acceptance_finished', ['ru' => 'Приемка завершена']),
-            OrderStatus::STATUS_DONE => Yii::t('app',
-                'common.models.order_status.status_done', ['ru' => 'Завершен']),
-            OrderStatus::STATUS_CANCELLED => Yii::t('app',
-                'common.models.order_status.status_cancelled', ['ru' => 'Отменен']),
+            OrderStatus::STATUS_DONE                        => Yii::t('app',
+                'common.models.done_two', ['ru' => 'Завершен']),
+            OrderStatus::STATUS_CANCELLED                   => Yii::t('app',
+                'common.models.vendor_canceled', ['ru' => 'Отменен']),
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru' => 'Ожидает подтверждения клиента']),
+            OrderStatus::STATUS_REJECTED                    => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
         ];
     }
 
@@ -342,10 +354,10 @@ class Order extends \yii\db\ActiveRecord
         $result = [
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app', 'common.models.waiting', ['ru' => 'Ожидает подтверждения поставщика']),
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru' => 'Ожидает подтверждения клиента']),
-            OrderStatus::STATUS_PROCESSING => Yii::t('app', 'common.models.in_process_two', ['ru' => 'Выполняется']),
-            OrderStatus::STATUS_DONE => Yii::t('app', 'common.models.done_two', ['ru' => 'Завершен']),
-            OrderStatus::STATUS_REJECTED => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
-            OrderStatus::STATUS_CANCELLED => Yii::t('app', 'common.models.client_canceled', ['ru' => 'Отменен клиентом']),
+            OrderStatus::STATUS_PROCESSING                  => Yii::t('app', 'common.models.in_process_two', ['ru' => 'Выполняется']),
+            OrderStatus::STATUS_DONE                        => Yii::t('app', 'common.models.done_two', ['ru' => 'Завершен']),
+            OrderStatus::STATUS_REJECTED                    => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
+            OrderStatus::STATUS_CANCELLED                   => Yii::t('app', 'common.models.client_canceled', ['ru' => 'Отменен клиентом']),
         ];
         if (!$short) {
             $result[OrderStatus::STATUS_FORMING] = Yii::t('app', 'common.models.forming', ['ru' => 'Формируется']);
@@ -358,11 +370,11 @@ class Order extends \yii\db\ActiveRecord
         return [
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR => '#368CBF',
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT => '#f39c12',
-            OrderStatus::STATUS_PROCESSING => '#ccc',
-            OrderStatus::STATUS_DONE => '#7EBC59',
-            OrderStatus::STATUS_REJECTED => '#FB3640',
-            OrderStatus::STATUS_CANCELLED => '#FF1111',
-            OrderStatus::STATUS_FORMING => '#999999',
+            OrderStatus::STATUS_PROCESSING                  => '#ccc',
+            OrderStatus::STATUS_DONE                        => '#7EBC59',
+            OrderStatus::STATUS_REJECTED                    => '#FB3640',
+            OrderStatus::STATUS_CANCELLED                   => '#FF1111',
+            OrderStatus::STATUS_FORMING                     => '#999999',
         ];
     }
 
@@ -619,7 +631,7 @@ class Order extends \yii\db\ActiveRecord
             if ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                     "/order/view",
-                    "id" => $this->id,
+                    "id"    => $this->id,
                     "token" => $user->access_token
                 ]);
             }
@@ -629,7 +641,7 @@ class Order extends \yii\db\ActiveRecord
             if ($relationExists && (($this->vendor->blacklisted == Organization::STATUS_BLACKISTED) || ($this->vendor->blacklisted == Organization::STATUS_UNSORTED))) {
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                     "/order/view",
-                    "id" => $this->id,
+                    "id"    => $this->id,
                     "token" => $user->access_token
                 ]);
             }
@@ -658,7 +670,7 @@ class Order extends \yii\db\ActiveRecord
         }
         return null;
     }
-    
+
     public function getCurrency()
     {
         return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
@@ -702,9 +714,17 @@ class Order extends \yii\db\ActiveRecord
     {
         return $this->hasMany(EmailQueue::className(), ['order_id' => 'id']);
     }
-    
+
     public function getFormattedCreationDate()
     {
         return Yii::$app->formatter->asDatetime($this->created_at, "php:d.m.Y, H:i");
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getWaybills()
+    {
+        return $this->hasMany(Waybill::class, ['order_id' => 'id']);
     }
 }

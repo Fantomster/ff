@@ -28,8 +28,7 @@ class RkwsStore extends ServiceRkws
     /** @var string $OperDenom Поле Denom в таблице all_service_operation */
     public static $OperDenom = 'sh_get_stores';
 
-    /** @var array $additionalXmlFields Поле во входящем xml -> поле в нашей модели данных */
-    public $additionalXmlFields = ['name' => 'name'];
+    public $useNestedSets = true;
 
     public function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
     {
@@ -42,10 +41,16 @@ class RkwsStore extends ServiceRkws
         $array = [];
         $scount = 0;
         foreach ($myXML->STOREGROUP as $storegroup) {
+            $scount++;
+            $grid = (string)$storegroup->attributes()->rid;
+            $array[$scount]['rid'] = $grid;
+            $array[$scount]['name'] = (string)$storegroup->attributes()->name;
+            $array[$scount]['parent'] = null;
             foreach ($storegroup->STORE as $store) {
                 $scount++;
                 foreach ($store->attributes() as $k => $v) {
                     $array[$scount][$k] = strval($v[0]);
+                    $array[$scount]['parent'] = (string)$storegroup->attributes()->rid;
                 }
             }
         }

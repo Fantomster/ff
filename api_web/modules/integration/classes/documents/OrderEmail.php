@@ -1,7 +1,7 @@
 <?php
 namespace api_web\modules\integration\classes\documents;
 
-use api_web\modules\integration\classes\DocumentWebApi;
+use api_web\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\IntegrationInvoice as BaseOrder;
 
@@ -18,7 +18,7 @@ class OrderEmail extends BaseOrder implements DocumentInterface
             return [];
         }
 
-        $order = $this->order();
+        $order = (isset($this->order_id)) ? $this->order() : null;
 
         $return = [
             "id" => $this->id,

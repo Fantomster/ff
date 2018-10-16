@@ -3,6 +3,7 @@
 namespace api_web\controllers;
 
 use api_web\components\WebApiController;
+use common\models\Order;
 
 /**
  * Class CartController
@@ -156,6 +157,39 @@ class CartController extends WebApiController
     public function actionRegistration()
     {
         $this->response = $this->container->get('CartWebApi')->registration($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/cart/check-recipient",
+     *     tags={"Cart"},
+     *     summary="проверка емейлов, подписанных на заказ",
+     *     description="проверка емейлов, подписанных на заказ",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default= {"o":1}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={"success":1, "error":0}
+     *          ),
+     *     )
+     * )
+     */
+    public function actionCheckRecipient()
+    {
+        $o = Order::findOne($this->request['o']);
+        $_ = $o->getRecipientsList();
+        var_dump($_['emails']);exit();
     }
 
     /**

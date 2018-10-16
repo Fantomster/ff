@@ -29,8 +29,7 @@ class RkwsCategory extends ServiceRkws
     /** @var string $OperDenom Поле Denom в таблице all_service_operation */
     public static $OperDenom = 'sh_get_goodgroups';
 
-    /** @var array $additionalXmlFields Поле во входящем xml -> поле в нашей модели данных */
-    public $additionalXmlFields = ['name' => 'name', 'parent' => 'parent_outer_uid'];
+    public $useNestedSets = true;
 
     public function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
     {

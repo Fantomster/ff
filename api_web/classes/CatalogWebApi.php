@@ -223,11 +223,13 @@ class CatalogWebApi extends WebApi
 
         $product = CatalogGoods::findOne([
             'base_goods_id' => $request['product_id'],
-            'supp_org_id' => $this->user->organization_id,
             'cat_id' => $catalog->id]);
+        if (!$product){
+            throw new BadRequestHttpException('product_not_found');
+        }
         $success = $product->delete();
 
-        return ['result' => $success];
+        return ['result' => (bool)$success];
     }
 
     /**
@@ -401,7 +403,7 @@ class CatalogWebApi extends WebApi
         }
 
         return [
-            'result' => $result,
+            'result' => array_values($result),
             'pagination' => [
                 'page' => ($dataProvider->pagination->page + 1),
                 'page_size' => $dataProvider->pagination->pageSize,
@@ -447,9 +449,6 @@ class CatalogWebApi extends WebApi
         $dataProvider->setPagination($pagination);
 
         $result = $dataProvider->models;
-        foreach ($result as &$item) {
-            $item['index_field'] = $tempCatalog->index_column;
-        }
 
         return [
             'result' => $result,

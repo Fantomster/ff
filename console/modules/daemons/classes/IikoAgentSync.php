@@ -8,30 +8,55 @@
 
 namespace console\modules\daemons\classes;
 
-
-use api\common\models\iiko\iikoDictype;
 use api_web\exceptions\ValidationException;
 use common\models\OuterAgent;
 use console\modules\daemons\components\IikoSyncConsumer;
 use console\modules\daemons\components\ConsumerInterface;
-use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
+use api_web\helpers\iikoApi;
 
+/**
+ * Class IikoAgentSync
+ *
+ * @package console\modules\daemons\classes
+ */
 class IikoAgentSync extends IikoSyncConsumer implements ConsumerInterface
 {
+    /**
+     * @var array
+     */
     public $updates_uuid = [];
 
+    /**
+     * @var
+     */
     public $success;
 
+    /**
+     * @var int
+     */
     public static $timeout = 600;
 
+    /**
+     * @var int
+     */
     public static $timeoutExecuting = 300;
 
+    /**
+     * @var string
+     */
+    public $type = 'agent';
+
+    /**
+     * @throws \yii\web\BadRequestHttpException
+     */
     public function getData()
     {
-        $model = iikoDictype::findOne(['method' => 'agent']);
-        $this->success = $this->run($model->id);
+        $this->success = $this->run();
     }
 
+    /**
+     * @return mixed
+     */
     public function saveData()
     {
         return $this->success['success'];
@@ -52,7 +77,7 @@ class IikoAgentSync extends IikoSyncConsumer implements ConsumerInterface
                 $model = OuterAgent::findOne(['outer_uid' => $agent['id'], 'org_id' => $this->orgId, 'service_id' => self::SERVICE_ID]);
                 //Если нет у нас, создаем
                 if (empty($model)) {
-                    $model = new outerAgent(['outer_uid' => $agent['id']]);
+                    $model = new OuterAgent(['outer_uid' => $agent['id']]);
                     $model->org_id = $this->orgId;
                     $model->service_id = self::SERVICE_ID;
                 }

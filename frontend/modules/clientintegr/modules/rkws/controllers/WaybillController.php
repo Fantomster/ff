@@ -721,9 +721,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         if (!is_null($term)) {
             $organization_id = User::findOne(Yii::$app->user->id)->organization_id;
 
-            $sql = "( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where acc = " . $organization_id . " and denom = '" . $term . "' )" .
-                "union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product  where acc = " . $organization_id . " and denom like '" . $term . "%' limit 15 )" .
-                "union ( select id, CONCAT(`denom`, '(' ,unitname, ')') as `text` from rk_product where  acc = " . $organization_id . " and denom like '%" . $term . "%' limit 10 )" .
+            $sql = "( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product where acc = " . $organization_id . " and denom = '" . $term . "' )" .
+                "union ( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product  where acc = " . $organization_id . " and denom like '" . $term . "%' limit 15 )" .
+                "union ( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product where  acc = " . $organization_id . " and denom like '%" . $term . "%' limit 10 )" .
                 "order by case when length(trim(`text`)) = length('" . $term . "') then 1 else 2 end, `text`; ";
 
             $data = Yii::$app->get('db_api')->createCommand($sql)->queryAll();
@@ -758,7 +758,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             //}
 
             $sql = <<<SQL
-            SELECT id, CONCAT(`denom`, '(' ,unitname, ')') as `text` FROM (
+            SELECT id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` FROM (
                   (SELECT id, denom, unitname FROM rk_product WHERE acc = :org_id AND denom = :term)
                     UNION
                   (SELECT id, denom, unitname FROM rk_product WHERE acc = :org_id AND denom LIKE :term_ LIMIT 15)
@@ -789,7 +789,7 @@ SQL;
             //$constId = RkDicconst::findOne(['denom' => 'main_org']);
             //$parentId = RkPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
             //$organizationID = !is_null($parentId) ? $parentId->value : $orgId;
-            $sql = "SELECT id, CONCAT(`denom`, '(' ,unitname, ')') as `text` FROM rk_product WHERE acc = " . $orgId . ' ORDER BY denom LIMIT 100';
+            $sql = "SELECT id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` FROM rk_product WHERE acc = " . $orgId . ' ORDER BY denom LIMIT 100';
 
             /**
              * @var $db Connection

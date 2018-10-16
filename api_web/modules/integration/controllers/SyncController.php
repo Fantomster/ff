@@ -149,7 +149,11 @@ class SyncController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "id": 415
+     *                      "ids": [
+     *                          1,
+     *                          2,
+     *                          3
+     *                      ]
      *                  }
      *              )
      *         )

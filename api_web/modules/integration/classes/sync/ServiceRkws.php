@@ -13,6 +13,9 @@
 namespace api_web\modules\integration\classes\sync;
 
 use api\common\models\RkDicconst;
+use api_web\modules\integration\classes\documents\WaybillContent;
+use common\models\AllService;
+use common\models\Waybill;
 use Yii;
 use yii\db\Transaction;
 use yii\db\mssql\PDO;
@@ -411,97 +414,102 @@ class ServiceRkws extends AbstractSyncFactory
     public function sendWaybill($request): array
     {
         # 1. Проверяем наличие id накладной
-        if (!isset($request['id'])) {
-            throw new BadRequestHttpException('empty waybill id');
+        if (!isset($request['ids'])) {
+            throw new BadRequestHttpException('empty ids');
         }
 
-        $waybill_id = $request['id'];
+        $result = [];
+        foreach ($request['ids'] as $waybill_id) {
+            # 2. Ищем накладную
+            $waybill = Waybill::findOne(['id' => $waybill_id, 'service_id' => $this->serviceId]);
+            if (!isset($waybill)) {
+                $result[$waybill_id] = false;
+                SyncLog::trace('Waybill not found in ' . __METHOD__);
+                continue;
+            }
 
-        # 2. Ищем накладную
-        $waybill = \api\common\models\RkWaybill::findOne(['id' => $waybill_id]);
-        if (!isset($waybill)) {
-            throw new BadRequestHttpException('Waybill not found');
-        }
+            # 3. Выбираем даные по накладной для отправки
+            $records = WaybillContent::find()
+                ->select('waybill_content.*, outer_product.outer_uid as product_rid, outer_unit.outer_uid as unit_rid')
+                ->leftJoin('outer_product', 'outer_product.id = product_outer_id')
+                ->leftJoin('outer_unit', 'outer_unit.id = outer_product.outer_unit_id')
+                ->andWhere('waybill_id = :wid', [':wid' => $waybill_id])
+                ->andWhere(['unload_status' => 1])
+                ->asArray(true)->all();
 
-        # 3. Выбираем даные по накладной для отправки
-        $records = \api\common\models\RkWaybilldata::find()
-            ->select('rk_waybill_data.*, rk_product.rid as prid, rk_product.unit_rid')
-            ->leftJoin('rk_product', 'rk_product.id = product_rid')
-            ->andWhere('waybill_id = :wid', [':wid' => $waybill_id])
-            ->andWhere(['unload_status' => 1])
-            ->asArray(true)->all();
+            if (!isset($records)) {
+                $result[$waybill_id] = false;
+                SyncLog::trace('No records found to be sent in ' . __METHOD__);
+                continue;
+            }
 
-        if (!isset($records)) {
-            throw new BadRequestHttpException('No records found to be sent');
-        }
+            # 4. Start "Send waybill" action
+            SyncLog::trace('Initialized new procedure action "Send request" in ' . __METHOD__);
+            $cook = $this->prepareServiceWithAuthCheck();
 
-        # 4. Start "Send waybill" action
-        SyncLog::trace('Initialized new procedure action "Send request" in ' . __METHOD__);
-        $cook = $this->prepareServiceWithAuthCheck();
+            # 2. Если нет сессии - завершаем с ошибкой
+            if (!$cook) {
+                SyncLog::trace('Cannot authorize with session or login data');
+                throw new BadRequestHttpException('Cannot authorize with curl');
+            }
 
-        # 2. Если нет сессии - завершаем с ошибкой
-        if (!$cook) {
-            SyncLog::trace('Cannot authorize with session or login data');
-            throw new BadRequestHttpException('Cannot authorize with curl');
-        }
+            $url = $this->getUrlCmd();
+            $guid = UUID::uuid4();
 
-        $url = $this->getUrlCmd();
-        $guid = UUID::uuid4();
+            //$xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
 
-        //$xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
+            $cb = $this->getCallbackURL() . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
+            SyncLog::trace('Callback URL and salespoint code for the template are:' . $cb . ' (' . $this->licenseCode . ')');
 
-        $cb = $this->getCallbackURL() . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
-        SyncLog::trace('Callback URL and salespoint code for the template are:' . $cb . ' (' . $this->licenseCode . ')');
+            $exportApproved = (RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() : 0;
 
-        $exportApproved = (RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() : 0;
-
-        $xml = Yii::$app->view->render($this->dirResponseXml . '/' . ucfirst('Waybill'),
-            [
-                'waybill' => $waybill,
-                'records' => $records,
-                'exportApproved' => $exportApproved,
-                'code' => $this->licenseCode,
-                'guid' => $guid,
-                'cb' => $cb,
-            ]);
-        
-        $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
-
-        if ($xmlData) {
-            $xml = (array)simplexml_load_string($xmlData);
-            if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
-                $transaction = $this->createTransaction();
-                $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => static::$OperDenom]);
-                $task = new OuterTask([
-                    'service_id' => $this->serviceId,
-                    'retry' => 0,
-                    'org_id' => $this->user->organization_id,
-                    'inner_guid' => $guid,
-                    'salespoint_id' => (string)$this->licenseMixcartId,
-                    'int_status_id' => OuterTask::STATUS_REQUESTED,
-                    'outer_guid' => $xml['@attributes']['taskguid'],
-                    'broker_version' => $xml['@attributes']['version'],
-                    'oper_code' => 34//$oper->id,
+            $xml = Yii::$app->view->render($this->dirResponseXml . '/' . ucfirst('Waybill'),
+                [
+                    'waybill' => $waybill,
+                    'records' => $records,
+                    'exportApproved' => $exportApproved,
+                    'code' => $this->licenseCode,
+                    'guid' => $guid,
+                    'cb' => $cb,
                 ]);
-                if ($task->save()) {
-                    $transaction->commit();
-                    SyncLog::trace('SUCCESS. json-response-data: ' .
-                        str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
-                    return [
-                        'task_id' => $task->id,
-                        'task_status' => $task->int_status_id,
-                        'service_prefix' => SyncLog::$servicePrefix,
-                        'log_index' => SyncLog::$logIndex,
-                    ];
+
+            $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
+
+            if ($xmlData) {
+                $xml = (array)simplexml_load_string($xmlData);
+                if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
+                    $transaction = $this->createTransaction();
+                    $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => 'sh_doc_receiving_report']);
+                    $task = new OuterTask([
+                        'service_id' => $this->serviceId,
+                        'retry' => 0,
+                        'org_id' => $this->user->organization_id,
+                        'inner_guid' => $guid,
+                        'salespoint_id' => (string)$this->licenseMixcartId,
+                        'int_status_id' => OuterTask::STATUS_REQUESTED,
+                        'outer_guid' => $xml['@attributes']['taskguid'],
+                        'broker_version' => $xml['@attributes']['version'],
+                        'oper_code' => $oper->id,
+                    ]);
+                    if ($task->save()) {
+                        $transaction->commit();
+                        SyncLog::trace('SUCCESS. json-response-data: ' .
+                            str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
+                        $result[$waybill_id] = true;
+                    } else {
+                        $transaction->rollBack();
+                        SyncLog::trace('Cannot save task!');
+                        $result[$waybill_id] = false;
+                        //throw new BadRequestHttpException('rkws_task_save_error');
+                    }
                 }
-                $transaction->rollBack();
-                SyncLog::trace('Cannot save task!');
-                throw new BadRequestHttpException('rkws_task_save_error');
+            } else {
+                SyncLog::trace('Service connection parameters for final transaction are wrong');
+                $result[$waybill_id] = false;
             }
         }
-        SyncLog::trace('Service connection parameters for final transaction are wrong');
-        throw new BadRequestHttpException('empty_service_response_for_transaction');
-        return [];
+
+        return $result;
     }
 
 

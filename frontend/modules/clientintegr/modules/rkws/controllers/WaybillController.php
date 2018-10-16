@@ -758,12 +758,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             //}
 
             $sql = <<<SQL
-            SELECT id, denom FROM (
-                  (SELECT id, denom FROM rk_product WHERE acc = :org_id AND denom = :term)
+            SELECT id, CONCAT(`denom`, '(' ,unitname, ')') as `text` FROM (
+                  (SELECT id, denom, unitname FROM rk_product WHERE acc = :org_id AND denom = :term)
                     UNION
-                  (SELECT id, denom FROM rk_product WHERE acc = :org_id AND denom LIKE :term_ LIMIT 15)
+                  (SELECT id, denom, unitname FROM rk_product WHERE acc = :org_id AND denom LIKE :term_ LIMIT 15)
                     UNION
-                  (SELECT id, denom FROM rk_product WHERE acc = :org_id AND denom LIKE :_term_ LIMIT 10)
+                  (SELECT id, denom, unitname FROM rk_product WHERE acc = :org_id AND denom LIKE :_term_ LIMIT 10)
                   ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
                      THEN 1
                      ELSE 2
@@ -789,7 +789,7 @@ SQL;
             //$constId = RkDicconst::findOne(['denom' => 'main_org']);
             //$parentId = RkPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
             //$organizationID = !is_null($parentId) ? $parentId->value : $orgId;
-            $sql = 'SELECT id, denom FROM rk_product WHERE acc = ' . $orgId . ' ORDER BY denom LIMIT 100';
+            $sql = "SELECT id, CONCAT(`denom`, '(' ,unitname, ')') as `text` FROM rk_product WHERE acc = " . $orgId . ' ORDER BY denom LIMIT 100';
 
             /**
              * @var $db Connection

@@ -688,7 +688,7 @@ $js = <<< JS
                                             sel = sel+'<select id="selpos" name="list_tovar" class="swal2-input">';
                                             var index;
                                             for (index = 0; index < data.length; ++index) {
-                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['denom']+'</option>';
+                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['text']+'</option>';
                                             }
                                             sel = sel+'</select></div>';
                                     } else {
@@ -713,7 +713,7 @@ $js = <<< JS
                                             sel = sel+'<select id="selpos" name="list_postav" class="swal2-input">';
                                             var index;
                                             for (index = 0; index < data.length; ++index) {
-                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['denom']+'</option>';
+                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['text']+'</option>';
                                             }
                                             sel = sel+'</select></div>';
                                         } else {

@@ -52,8 +52,6 @@ class LicenseOrganization extends ActiveRecord
             [['license_id', 'org_id', 'status_id', 'is_deleted'], 'integer'],
             [['fd', 'td', 'created_at', 'updated_at', 'outer_last_active'], 'safe'],
             [['object_id'], 'string', 'max' => 64],
-            [['outer_user', 'outer_name', 'outer_address'], 'string', 'max' => 255],
-            [['outer_phone'], 'string', 'max' => 32],
             [['license_id'], 'exist', 'skipOnError' => true, 'targetClass' => License::class, 'targetAttribute' => ['license_id' => 'id']],
         ];
     }
@@ -72,10 +70,6 @@ class LicenseOrganization extends ActiveRecord
             'created_at'        => 'Дата создания',
             'updated_at'        => 'Дата обновления',
             'object_id'         => '(Идентификатор объекта во внешней системе',
-            'outer_user'        => 'Имя пользователя во внешней системе',
-            'outer_name'        => 'Имя внешнего объекта - название ресторана внутри UCS, например',
-            'outer_address'     => 'Адрес внешнего объекта - по данным UCS, например',
-            'outer_phone'       => 'Телефон(ы) внешнего объекта лицензии',
             'outer_last_active' => 'Время последней зарегистрированной активности',
             'status_id'         => 'Статус лицензии - идентификатор',
             'is_deleted'        => 'Признак soft-delete',

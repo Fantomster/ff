@@ -16,7 +16,7 @@ use Yii;
  * @property int $percent_nds
  * @property float $price_nds
  * @property float $price_without_nds
- * @property int $quantity
+ * @property float $quantity
  * @property string $created_at
  * @property string $updated_at
  * @property double $sum_without_nds

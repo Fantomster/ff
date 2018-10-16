@@ -28,12 +28,14 @@ use yii\behaviors\TimestampBehavior;
  * @property string $edi_recadv
  * @property string $edi_invoice
  * @property string $updated_at
+ * @property integer $invoice_content_id
  *
  * @property Order $order
  * @property CatalogBaseGoods $product
  * @property string $total
  * @property string $note
  * @property CatalogGoods $productFromCatalog
+ * @property IntegrationInvoiceContent $invoiceContent
  */
 class OrderContent extends \yii\db\ActiveRecord
 {
@@ -52,7 +54,7 @@ class OrderContent extends \yii\db\ActiveRecord
     {
         return [
             [['order_id', 'product_id', 'quantity', 'price', 'product_name'], 'required'],
-            [['order_id', 'product_id', 'updated_user_id', 'vat_product'], 'integer'],
+            [['order_id', 'product_id', 'updated_user_id', 'vat_product', 'invoice_content_id'], 'integer'],
             [['price', 'quantity', 'initial_quantity', 'units', 'plan_price', 'plan_quantity'], 'number'],
             [['merc_uuid', 'edi_desadv', 'edi_alcdes', 'edi_number', 'edi_recadv', 'edi_invoice'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -101,6 +103,14 @@ class OrderContent extends \yii\db\ActiveRecord
     public function getProduct()
     {
         return $this->hasOne(CatalogBaseGoods::class, ['id' => 'product_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getInvoiceContent()
+    {
+        return $this->hasOne(IntegrationInvoiceContent::class, ['id' => 'invoice_content_id']);
     }
 
     /**

@@ -163,7 +163,7 @@ class ParserTorg12
         // читаем файл в формате Excel по форме ТОРГ12
         try {
             $objPHPExcel = /* \PHPExcel_IOFactory */
-                    IOFactory::load($this->filePath);
+                IOFactory::load($this->filePath);
             //$objPHPExcel = \PHPExcel_IOFactory::load($this->filePath);
         } catch (\Exception $e) {
             $errorMsg = 'Невозможно прочитать загруженный файл: ' . $e->getMessage();
@@ -230,7 +230,7 @@ class ParserTorg12
      * @param \PHPExcel_Worksheet $worksheet
      */
     private function setWorksheet(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $worksheet)
-    //private function setWorksheet(\PHPExcel_Worksheet $worksheet)
+        //private function setWorksheet(\PHPExcel_Worksheet $worksheet)
     {
         $this->worksheet = $worksheet;
         $this->rowsToProcess = [];
@@ -311,28 +311,36 @@ class ParserTorg12
      */
     private function parseHeader()
     {
-        $checkSell = function ($col, $row, $attribute) {
-            $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue());
+        $checkSell = function ($col, $row, $attribute) { //функция для поиска атрибута в заданной столццом и строкой ячейке
+            $cellValue = $this->normalizeHeaderCellValue($this->worksheet->getCellByColumnAndRow($col, $row)->getValue()); //получаем значение ячейки
 
             if (strpos($cellValue, 'счет-фактура №') !== false) {
 
                 $attributeValue = "";
 
+                $temp = 0;
                 for ($i = $col; $i < $this->highestColumn; $i++) {
-                    if (!empty($this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($i, $row)->getValue())))
+                    if (!empty($this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($i, $row)->getValue()))) {
+                        $temp++;
+                        if ($temp == 3) {
+                            if ($this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($i, $row)->getValue()) != 'от') {
+                                $attributeValue .= ' от';
+                            }
+                        }
                         $attributeValue .= ' ' . $this->normalizeCellValue($this->worksheet->getCellByColumnAndRow($i, $row)->getValue());
+                    }
                 }
                 $attributeValue = str_replace(",", ".", $attributeValue);
                 $leftSide = /* trim */
-                        (preg_replace("/.от.*/", "", $attributeValue));
+                    (preg_replace("/.от.*/", "", $attributeValue));
                 $rightSide = trim(str_replace($leftSide . " от", "", $attributeValue));
                 $leftSide = trim(preg_replace("/.*№/", "", $leftSide));
                 $check = substr($rightSide, 0, strpos($rightSide, " "));
-                if (is_numeric($check) && (int) $check > 30000) {
+                if (is_numeric($check) && (int)$check > 30000) {
                     $rightSide = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP/* Date::excelToTimestamp */
-                                    ($check));
+                    ($check));
                 } else {
-                    // года для распознавания даты документа
+                    // года для распознавания даты документа (только предыдущий, нынешний и следующий))
                     $years = [date('Y', strtotime('-1 year')), date('Y'), date('Y', strtotime('+1 year'))];
 
                     foreach ($years as $year) {
@@ -363,15 +371,7 @@ class ParserTorg12
                     $rightSide = date('Y-m-d', strtotime($rightSide));
                 }
 
-
-                // var_dump("left:".$leftSide);
-                // var_dump("right:".$rightSide);
-
                 $attributeValue = $leftSide . "%%%%" . $rightSide;
-
-                //    $attributeValue = trim(preg_replace("/.*Счет-фактура/", "", $attributeValue));
-                //    $attributeValue = trim(preg_replace("/.2018.*/", ".2018", $attributeValue));
-                //    $attributeValue = trim(preg_replace("/.*№/", "", $attributeValue));
 
                 return $attributeValue;
             }
@@ -389,8 +389,9 @@ class ParserTorg12
                 if (strpos($attributeValue, '.') !== false)
                     $value_is_string = 1;
                 if ($value_is_string == 0) {
-                    if ($cellValue == 'дата составления' && (int) $attributeValue) {
-                        $attributeValue = date('Y-m-d', /* Date::excelToTimestamp */ PHPExcel_Shared_Date::ExcelToPHP($attributeValue));
+                    if ($cellValue == 'дата составления' && (int)$attributeValue) {
+                        $attributeValue = date('Y-m-d', /* Date::excelToTimestamp */
+                            PHPExcel_Shared_Date::ExcelToPHP($attributeValue));
                     }
                 } else {
                     if ($cellValue == 'дата составления') {
@@ -639,7 +640,7 @@ class ParserTorg12
             $cellValue = trim($cellValue); //убираем пробелы
             $cellValuePrev = trim($cellValuePrev);
             $cellValueNext = trim($cellValueNext);
-            if ((strpos($cellValue, $inn_kpp_prodav) === false) and ( $cellValuePrev != $postav))
+            if ((strpos($cellValue, $inn_kpp_prodav) === false) and ($cellValuePrev != $postav))
                 continue;
             else {//если ячейка не содержит "ИНН/КПП продавца" и ячейка слева не содержит "Поставщик", переходим к следующей итерации цикла
                 if ($cellValuePrev == $postav) { //если ячейка слева содержит "Поставщик", то работаем с текущей ячейкой
@@ -793,13 +794,13 @@ class ParserTorg12
         $temp = explode('(', $as); //разбиваем строку по открывающей скобке, удаляя из наименования грузополучателя указание подразделения, если оно указано в скобках
         $as = trim($temp[0]);
         $asstrlen = strlen($as);
-        if (($as[0] == '"') and ( $as[$asstrlen - 1] == '"'))
+        if (($as[0] == '"') and ($as[$asstrlen - 1] == '"'))
             $as = substr($as, 1, $asstrlen - 2); //если наименование грузополучателя заключено в кавычках, избавляемся от них
-        if (($as[0] == '`') and ( $as[$asstrlen - 1] == '`'))
+        if (($as[0] == '`') and ($as[$asstrlen - 1] == '`'))
             $as = substr($as, 1, $asstrlen - 2);
-        if (($as[0] == '«') and ( $as[$asstrlen - 1] == '»'))
+        if (($as[0] == '«') and ($as[$asstrlen - 1] == '»'))
             $as = substr($as, 1, $asstrlen - 2);
-        if (($as[0] == "'") and ( $as[$asstrlen - 1] == "'"))
+        if (($as[0] == "'") and ($as[$asstrlen - 1] == "'"))
             $as = substr($as, 1, $asstrlen - 2);
         $forma = ''; //временная переменная, которая будет содержать наименование формы собственности
         $ooo_has = 0; //временная переменная, сигнализирующая, найдена ли форма собственности
@@ -865,7 +866,7 @@ class ParserTorg12
                     $isTrue = false;
 
                     foreach ($setting['reg'][0] as $is) {
-                        $isTrue = (bool) preg_match('#' . $is . '#siu', $cellValue);
+                        $isTrue = (bool)preg_match('#' . $is . '#siu', $cellValue);
                         if ($isTrue === true)
                             break;
                     }
@@ -873,7 +874,7 @@ class ParserTorg12
                 } else
                     return in_array($cellValue, $setting);
             } elseif (is_string($setting)) {
-                return (bool) preg_match('#' . $setting . '#siu', $cellValue);
+                return (bool)preg_match('#' . $setting . '#siu', $cellValue);
             } else {
                 return false;
             }
@@ -980,7 +981,7 @@ class ParserTorg12
         } elseif (!isset($this->columnList['cnt']) && !isset($this->columnList['cnt_place'])) {
 
             $msg = 'Необходимо добавить столбец, содержащий количество товара ("%s")';
-            $headErrors[] = sprintf($msg, implode('"; "', array_merge($this->settingsRow['cnt'], (array) $this->settingsRow['cnt_place'])));
+            $headErrors[] = sprintf($msg, implode('"; "', array_merge($this->settingsRow['cnt'], (array)$this->settingsRow['cnt_place'])));
         } elseif (!isset($this->columnList['price_without_tax'])) {
 
             $msg = 'Необходимо добавить столбец, содержащий цену товара без НДС ("%s")';
@@ -1065,7 +1066,7 @@ class ParserTorg12
 
         // пропускаем строку с номерами столбцов
         if (
-                count($row) > 2 && ($row[1] == 1 && $row[2] == 2 && $row[3] == 3)
+            count($row) > 2 && ($row[1] == 1 && $row[2] == 2 && $row[3] == 3)
         ) {
             return false;
         }
@@ -1120,7 +1121,7 @@ class ParserTorg12
 
             // порядковый номер
             if (isset($this->columnList['num'])) {
-                $invoiceRow->num = (int) $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['num']['col'], $row)->getValue());
+                $invoiceRow->num = (int)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['num']['col'], $row)->getValue());
             } else {
                 $numberRow++;
                 $invoiceRow->num = $numberRow;
@@ -1137,7 +1138,7 @@ class ParserTorg12
             $invoiceRow->name = $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['name']['col'], $row)->getValue());
             // количество
             if (isset($this->columnList['cnt'])) {
-                $invoiceRow->cnt = (double) $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['cnt']['col'], $row)->getValue(), true);
+                $invoiceRow->cnt = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['cnt']['col'], $row)->getValue(), true);
             }
 
             // еденицы измерения
@@ -1146,14 +1147,14 @@ class ParserTorg12
             }
 
             if (!$invoiceRow->cnt && isset($this->columnList['cnt_place'])) {
-                $invoiceRow->cnt = (int) $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['cnt_place']['col'], $row)->getValue(), true);
+                $invoiceRow->cnt = (int)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['cnt_place']['col'], $row)->getValue(), true);
             }
 
 
-            if (($invoiceRow->name != '') and ( $invoiceRow->num != 0)) {
+            if (($invoiceRow->name != '') and ($invoiceRow->num != 0)) {
                 // сумма без НДС
                 if (isset($this->columnList['sum_without_tax']))
-                    $invoiceRow->sum_without_tax = (double) $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_without_tax']['col'], $row)->getValue(), true);
+                    $invoiceRow->sum_without_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_without_tax']['col'], $row)->getValue(), true);
                 if ($invoiceRow->sum_without_tax) {
                     $this->invoice->price_without_tax_sum += $invoiceRow->sum_without_tax;
                     $this->invoice->price_without_tax_sum = round($this->invoice->price_without_tax_sum, 2);
@@ -1161,7 +1162,7 @@ class ParserTorg12
 
                 // сумма  c НДС
                 if (isset($this->columnList['sum_with_tax']))
-                    $invoiceRow->sum_with_tax = (double) $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_with_tax']['col'], $row)->getValue(), true);
+                    $invoiceRow->sum_with_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_with_tax']['col'], $row)->getValue(), true);
                 if ($invoiceRow->sum_with_tax) {
                     $this->invoice->price_with_tax_sum += $invoiceRow->sum_with_tax;
                     $this->invoice->price_with_tax_sum = round($this->invoice->price_with_tax_sum, 2);
@@ -1186,7 +1187,7 @@ class ParserTorg12
               }
              */
             // цена без НДС
-            $invoiceRow->price_without_tax = (float) $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['price_without_tax']['col'], $row)->getValue(), true);
+            $invoiceRow->price_without_tax = (float)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['price_without_tax']['col'], $row)->getValue(), true);
 
             /* if (!$invoiceRow->price_with_tax) {
               $invoiceRow->errors['price_with_tax'] = 'Не указана цена с учетом НДС';
@@ -1223,7 +1224,7 @@ class ParserTorg12
               $invoiceRow->price_without_tax = round($invoiceRow->price_without_tax / $invoiceRow->cnt,2);
               }
              */
-            if (($invoiceRow->name != '') and ( $invoiceRow->num != 0)) {
+            if (($invoiceRow->name != '') and ($invoiceRow->num != 0)) {
                 if ($invoiceRow->cnt > 0)
                     $invoiceRow->price_with_tax = round($invoiceRow->sum_with_tax / $invoiceRow->cnt, 2);
 
@@ -1266,7 +1267,7 @@ class ParserTorg12
                 $ret .= $str[$i];
                 continue;
             }
-            if (($sim > 127) and ( $sim < 194)) {
+            if (($sim > 127) and ($sim < 194)) {
                 $ret .= $str[$i];
                 $i++;
                 $ret .= $str[$i];
@@ -1278,24 +1279,24 @@ class ParserTorg12
                 $ret .= $str[$i];
                 continue;
             }
-            if (($sim == 194) and ( ord($str[$i + 1]) == 185)) {
+            if (($sim == 194) and (ord($str[$i + 1]) == 185)) {
                 $i++;
                 $ret .= '№';
                 continue;
             }
-            if (($sim == 194) and ( ord($str[$i + 1]) != 185)) {
+            if (($sim == 194) and (ord($str[$i + 1]) != 185)) {
                 $ret .= $str[$i];
                 $i++;
                 $ret .= $str[$i];
                 continue;
             }
-            if (($sim == 195) and ( ord($str[$i + 1]) > 191)) {
+            if (($sim == 195) and (ord($str[$i + 1]) > 191)) {
                 $ret .= $str[$i];
                 $i++;
                 $ret .= $str[$i];
                 continue;
             }
-            if (($sim == 195) and ( ord($str[$i + 1]) < 192)) {
+            if (($sim == 195) and (ord($str[$i + 1]) < 192)) {
                 $i++;
                 $sim = ord($str[$i]);
                 switch ($sim) {
@@ -1534,14 +1535,14 @@ class ParserTorg12
 
         if (!empty($email)) {
             $mailer->compose('torg12', [
-                        'invoice' => $this->invoice,
-                        'name_file' => $name_file,
-                        'sumWithoutTaxExcel' => $sumWithoutTaxExcel,
-                        'sumWithTaxExcel' => $sumWithTaxExcel,
-                    ])
-                    ->setTo($email)
-                    ->setSubject($subject)
-                    ->send();
+                'invoice' => $this->invoice,
+                'name_file' => $name_file,
+                'sumWithoutTaxExcel' => $sumWithoutTaxExcel,
+                'sumWithTaxExcel' => $sumWithTaxExcel,
+            ])
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
         }
 
         /* if (!empty($email)) {

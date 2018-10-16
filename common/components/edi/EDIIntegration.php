@@ -2,18 +2,9 @@
 
 namespace common\components\edi;
 
-use common\models\CatalogBaseGoods;
+
 use common\models\EcomIntegrationConfig;
-use common\models\EdiOrder;
-use common\models\EdiOrderContent;
-use common\models\EdiOrganization;
-use common\models\Order;
-use common\models\OrderContent;
-use common\models\Organization;
-use Yii;
 use yii\base\Component;
-use yii\db\Exception;
-use yii\db\Expression;
 
 /**
  * Class for E-COM integration methods

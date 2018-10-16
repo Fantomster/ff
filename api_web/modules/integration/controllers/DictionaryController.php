@@ -350,6 +350,180 @@ class DictionaryController extends \api_web\components\WebApiController
     }
 
     /**
+     * @SWG\Post(path="/integration/dictionary/unit-list",
+     *     tags={"Integration/dictionary"},
+     *     summary="Список единиц измерения",
+     *     description="Полный список единиц измерения",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 2,
+     *                      "search": {
+     *                          "name": "наименование"
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "units": {
+     *                      {
+     *                          "id": 1,
+     *                            "outer_uid": "1",
+     *                            "ratio": 1,
+     *                            "org_id": 3768,
+     *                            "service_id": 1,
+     *                            "name": "123",
+     *                            "iso_code": null,
+     *                            "is_deleted": null,
+     *                            "created_at": null,
+     *                            "updated_at": null
+     *                      },
+     *                      {
+     *                          "id": 2,
+     *                            "outer_uid": "2",
+     *                            "ratio": 1,
+     *                            "org_id": 3768,
+     *                            "service_id": 1,
+     *                            "name": "123",
+     *                            "iso_code": null,
+     *                            "is_deleted": null,
+     *                            "created_at": null,
+     *                            "updated_at": null
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     */
+
+    public function actionUnitList()
+    {
+        if (!isset($this->request['service_id'])){
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+        $this->response = (new Dictionary($this->request['service_id'], 'Unit'))->unitList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/category-list",
+     *     tags={"Integration/dictionary"},
+     *     summary="Список категорий",
+     *     description="Полный список категорий (для айко не доступно)",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 2,
+     *                      "search": {
+     *                          "name": "наименование"
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "stores": {
+     *                      "id": 5,
+     *                      "outer_uid": "c9319967c038f9b923068dabdf60cfe3",
+     *                      "name": "Каталог",
+     *                      "created_at": "2018-09-14T11:31:07-02:00",
+     *                      "updated_at": null,
+     *                      "is_active": 1,
+     *                      "childs": {
+     *                          {
+     *                              "id": 9,
+     *                              "name": "Алкоголь",
+     *                              "outer_uid": "91e0dd93-0923-4509-9435-6cc6224768af",
+     *                              "created_at": "2018-09-14T11:31:07-02:00",
+     *                              "updated_at": null,
+     *                              "is_active": 1,
+     *                              "childs": {}
+     *                          },
+     *                          {
+     *                              "id": 8,
+     *                              "outer_uid": "73045059-5e4f-4358-90a4-23b2c0641e0f",
+     *                              "name": "Алкоголь",
+     *                              "created_at": "2018-09-14T11:31:07-02:00",
+     *                              "updated_at": null,
+     *                              "is_active": 1,
+     *                              "childs": {}
+     *                          },
+     *                          {
+     *                              "id": 7,
+     *                              "outer_uid": "a3acc051-bfbb-45a9-9e1a-87d2f605f76e",
+     *                              "name": "Алкоголь",
+     *                              "created_at": "2018-09-14T11:31:07-02:00",
+     *                              "updated_at": null,
+     *                              "is_active": 1,
+     *                              "childs": {}
+     *                          },
+     *                          {
+     *                              "id": 6,
+     *                              "outer_uid": "1239d270-1bbe-f64f-b7ea-5f00518ef508",
+     *                              "name": "Алкоголь",
+     *                              "created_at": "2018-09-14T11:31:07-02:00",
+     *                              "updated_at": null,
+     *                              "is_active": 1,
+     *                              "childs": {}
+     *                          }
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     */
+
+    public function actionCategoryList()
+    {
+        if (!isset($this->request['service_id'])){
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+        $this->response = (new Dictionary($this->request['service_id'], 'Unit'))->categoryList($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/integration/dictionary/check-agent-name",
      *     tags={"Integration/dictionary"},
      *     summary="Проверка: имеется ли такое название накладной",

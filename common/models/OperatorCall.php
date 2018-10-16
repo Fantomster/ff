@@ -3,6 +3,9 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\AttributesBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "{{%operator_call}}".
@@ -15,8 +18,39 @@ use Yii;
  * @property string $updated_at
  * @property string $closed_at
  */
-class OperatorCall extends \yii\db\ActiveRecord
+class OperatorCall extends ActiveRecord
 {
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ]
+        ];
+    }
+
+    public static function primaryKey()
+    {
+        return ['order_id'];
+    }
+
+    /**
+     * @param bool $runValidation
+     * @param null $attributeNames
+     * @return bool
+     */
+    public function save($runValidation = true, $attributeNames = null)
+    {
+        if ($this->status_call_id == 3) {
+            $this->setAttribute('closed_at', \gmdate("Y-m-d H:i:s"));
+        }
+
+        return parent::save($runValidation, $attributeNames);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -44,13 +78,34 @@ class OperatorCall extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'order_id' => Yii::t('app', 'Order ID'),
-            'operator_id' => Yii::t('app', 'Operator ID'),
+            'order_id'       => Yii::t('app', 'Order ID'),
+            'operator_id'    => Yii::t('app', 'Operator ID'),
             'status_call_id' => Yii::t('app', 'Status Call ID'),
-            'comment' => Yii::t('app', 'Comment'),
-            'created_at' => Yii::t('app', 'Created At'),
-            'updated_at' => Yii::t('app', 'Updated At'),
-            'closed_at' => Yii::t('app', 'Closed At'),
+            'comment'        => Yii::t('app', 'Comment'),
+            'created_at'     => Yii::t('app', 'Created At'),
+            'updated_at'     => Yii::t('app', 'Updated At'),
+            'closed_at'      => Yii::t('app', 'Closed At'),
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public static function getStatus()
+    {
+        return [
+            '1' => 'Открыто',
+            '2' => 'Перезвонить',
+            '3' => 'Завершено',
+        ];
+    }
+
+    /**
+     * @param $id
+     * @return string
+     */
+    public static function getStatusText($id)
+    {
+        return self::getStatus()[$id] ?? '';
     }
 }

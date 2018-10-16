@@ -13,12 +13,32 @@ use Yii;
  */
 class OperatorTimeout extends \yii\db\ActiveRecord
 {
+    public static function primaryKey()
+    {
+        return ['operator_id'];
+    }
+
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
         return '{{%operator_timeout}}';
+    }
+
+    public static function getTimeoutOperator($id) {
+        $model = self::findOne(['operator_id' => $id]);
+        if(empty($model)) {
+            return 0;
+        } else {
+            $time_end = strtotime($model->timeout_at) + $model->timeout;
+            $result = $time_end - strtotime(\gmdate('Y-m-d H:i:s'));
+            if($result > 0) {
+                return $result;
+            } else {
+                return 0;
+            }
+        }
     }
 
     /**

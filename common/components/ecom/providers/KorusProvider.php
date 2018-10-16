@@ -26,6 +26,7 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
      * @var mixed
      */
     public $client;
+    public $realization;
 
     /**
      * Provider constructor.
@@ -212,7 +213,7 @@ EOXML;
     public function getDoc($client, String $fileName, String $login, String $pass, int $ediFilesQueueID, $glnCode): bool
     {
         try {
-            //$this->updateQueue($ediFilesQueueID, self::STATUS_PROCESSING, '');
+            $this->updateQueue($ediFilesQueueID, self::STATUS_PROCESSING, '');
             try {
                 $content = $this->getDocContent($fileName, $login, $pass, $glnCode);
             } catch (\Throwable $e) {
@@ -228,25 +229,12 @@ EOXML;
             $dom = new \DOMDocument();
             $dom->loadXML($content);
             $simpleXMLElement = simplexml_import_dom($dom);
-            $success = false;
-            if (strpos($content, 'PRICAT>')) {
-                $success = $this->handlePriceListUpdating($simpleXMLElement);
-            } elseif (strpos($content, 'ORDRSP>') || strpos($content, 'DESADV>')) {
-                $success = parent::handleOrderResponse($simpleXMLElement);
-            } elseif (strpos($content, 'ALCDES>')) {
-                $success = parent::handleOrderResponse($simpleXMLElement, true);
-            }
 
-            if ($success) {
-                $this->updateQueue($ediFilesQueueID, self::STATUS_HANDLED, '');
-            } else {
-                $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'Error handling file 1');
-            }
         } catch (\Exception $e) {
             Yii::error($e);
             $this->updateQueue($ediFilesQueueID, self::STATUS_ERROR, 'Error handling file 2');
             return false;
         }
-        return true;
+        return $simpleXMLElement;
     }
 }

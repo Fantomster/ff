@@ -86,21 +86,9 @@ class EComIntegration2 extends Component
      */
     public function setRealization(RealizationInterface $realization)
     {
-        $this->realization = $realization;
+        $this->provider->realization = $realization;
     }
 
-    /**
-     * get distinct organization
-     *
-     * @return \yii\db\ActiveRecord[]
-     * */
-    private function getOrganizations()
-    {
-        return EdiOrganization::find()->where(['and', ['not', ['gln_code' => null]], ['not', ['gln_code' => '']]])
-            ->andWhere(['and', ['not', ['login' => null]], ['not', ['login' => '']]])
-            ->andWhere(['and', ['not', ['pass' => null]], ['not', ['pass' => '']]])
-            ->groupBy('login')->distinct()->all();
-    }
 
     /**
      * Get files list from provider and insert to table
@@ -165,13 +153,10 @@ class EComIntegration2 extends Component
      */
     public function handleFilesListQueue(): void
     {
-        $ediOrganizations = $this->getOrganizations();
-
-        foreach ($ediOrganizations as $ediOrganization) {
-            $rows = $this->getFileList($ediOrganization['organization_id']);
-            foreach ($rows as $item) {
-                $this->provider->getDoc($this->provider->client, $item['name'], $ediOrganization['login'], $ediOrganization['pass'], $item['id'], $ediOrganization['gln_code']);
-            }
+        $ediOrganization = EdiOrganization::findOne(['organization_id' => $this->orgId]);
+        $fileList = $this->getFileList($this->orgId);
+        foreach ($fileList as $file) {
+            $this->provider->getDoc($file, $ediOrganization);
         }
     }
 

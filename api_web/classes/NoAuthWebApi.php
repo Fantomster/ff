@@ -50,4 +50,34 @@ class NoAuthWebApi
         SyncLog::trace('Fail!');
         return 'false';
     }
+
+    public function sendWaybill(OuterTask $task)
+    {
+
+        # 2.1.1. Trace callback operation with task_id
+        SyncLog::trace('Callback operation `task_id` params is ' . $task->id);
+
+        # 2.1.2. Check oper_code
+        $oper = AllServiceOperation::findOne($task->oper_code);
+        if (!$oper) {
+            SyncLog::trace('Operation code ('.$task->oper_code.') is wrong!');
+            throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
+        }
+
+        $allOpers = AbstractSyncFactory::getAllSyncOperations();
+
+        SyncLog::trace('Try to receive XML data...');
+        if (array_key_exists($oper->denom, $allOpers) && isset($allOpers[$oper->denom])) {
+            $entityName = $allOpers[$oper->denom];
+            $entity = new $entityName(SyncServiceFactory::ALL_SERVICE_MAP[$oper->service_id], $oper->service_id);
+            /** @var $entity AbstractSyncFactory */
+            if (method_exists($entity, 'receiveXmlData')) {
+                $res = $entity->receiveXMLDataWaybill($task, Yii::$app->request->getRawBody());
+                SyncLog::trace($res);
+                return $res;
+            }
+        }
+        SyncLog::trace('Fail!');
+        return 'false';
+    }
 }

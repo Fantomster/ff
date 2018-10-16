@@ -458,7 +458,7 @@ class ServiceRkws extends AbstractSyncFactory
 
             //$xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
 
-            $cb = $this->getCallbackURL() . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
+            $cb = Yii::$app->params['rkeepCallBackURL'] ."/send-waybill?" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
             SyncLog::trace('Callback URL and salespoint code for the template are:' . $cb . ' (' . $this->licenseCode . ')');
 
             $exportApproved = (RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() : 0;
@@ -662,6 +662,31 @@ class ServiceRkws extends AbstractSyncFactory
         }
 
         $transaction->rollback();
+        SyncLog::trace('Fixed save errors: ' . json_encode($saveErr));
+        return self::XML_LOAD_RESULT_FAULT;
+    }
+
+    public function receiveXMLDataWaybill(OuterTask $task, string $data = null)
+    {
+        # 1. Получаем массив входящих данных
+        $arrayNew = $this->makeArrayFromReceivedDictionaryXmlData($data);
+
+        # 2. Фиксируем изменения в текущей задаче
+        if (!empty($arrayNew['0'])) {
+            $task->int_status_id = OuterTask::STATUS_CALLBACKED;
+            $task->retry++;
+            if (!$task->save()) {
+                $saveErr['task'][] = $task->errors;
+                /** @noinspection PhpUndefinedFieldInspection */
+                $saveErr['waybill'] = $arrayNew[0];
+            } else {
+                SyncLog::trace('Waybill successfully send');
+                return self::XML_LOAD_RESULT_SUCCESS;
+            }
+        } else {
+            SyncLog::trace('No rows were inserted or updated!');
+            $saveErr = ['save' => 'no_save_data'];
+        }
         SyncLog::trace('Fixed save errors: ' . json_encode($saveErr));
         return self::XML_LOAD_RESULT_FAULT;
     }

@@ -9,6 +9,7 @@ use yii\base\ErrorException;
 
 class RabbitService extends Component
 {
+
     public $host;           #host - имя хоста, на котором запущен сервер RabbitMQ
     public $port = 5672;    #port - номер порта сервиса, по умолчанию - 5672
     public $user;           #user - имя пользователя для соединения с сервером
@@ -34,21 +35,30 @@ class RabbitService extends Component
         $channel = $connection->channel();
 
         $channel->queue_declare(
-            $this->queue,       #queue name - Имя очереди может содержать до 255 байт UTF-8 символов
-            false,              #passive - может использоваться для проверки того, инициирован ли обмен, без того, чтобы изменять состояние сервера
-            true,               #durable - убедимся, что RabbitMQ никогда не потеряет очередь при падении - очередь переживёт перезагрузку брокера
-            false,              #exclusive - используется только одним соединением, и очередь будет удалена при закрытии соединения
-            false               #autodelete - очередь удаляется, когда отписывается последний подписчик
+                $this->queue, #queue name - Имя очереди может содержать до 255 байт UTF-8 символов
+                false, #passive - может использоваться для проверки того, инициирован ли обмен, без того, чтобы изменять состояние сервера
+                true, #durable - убедимся, что RabbitMQ никогда не потеряет очередь при падении - очередь переживёт перезагрузку брокера
+                false, #exclusive - используется только одним соединением, и очередь будет удалена при закрытии соединения
+                false               #autodelete - очередь удаляется, когда отписывается последний подписчик
         );
 
         $channel->queue_bind($this->queue, $this->exchange, $this->queue);
 
         //Публикуем сообщение
         $channel->basic_publish(
-            new AMQPMessage($message),  #message
-            $this->exchange,            #exchange
-            $this->queue                #routing key
+                new AMQPMessage($message), #message
+                $this->exchange, #exchange
+                $this->queue                #routing key
         );
+
+        try {
+            $clientIp = isset(Yii::$app->request->userIP) ? Yii::$app->request->userIP : "undefined";
+            $requestUrl = isset(Yii::$app->request->url) ? Yii::$app->request->url : "undefined";
+            $logMessage = "client ip: " . $clientIp . "; request url: " . $requestUrl;
+            \Yii::$app->get('cloudWatchLog')->writeLog(Yii::$app->params['rabbitLogGroup'], $this->queue, $logMessage);
+        } catch (\Exception $e) {
+            \Yii::error($e->getMessage());
+        }
 
         //Разрыв соединения
         $channel->close();
@@ -115,11 +125,12 @@ class RabbitService extends Component
     public function connect()
     {
         return new AMQPStreamConnection(
-            $this->host,        #host - имя хоста, на котором запущен сервер RabbitMQ
-            $this->port,        #port - номер порта сервиса, по умолчанию - 5672
-            $this->user,        #user - имя пользователя для соединения с сервером
-            $this->password,    #password
-            $this->vhost
+                $this->host, #host - имя хоста, на котором запущен сервер RabbitMQ
+                $this->port, #port - номер порта сервиса, по умолчанию - 5672
+                $this->user, #user - имя пользователя для соединения с сервером
+                $this->password, #password
+                $this->vhost
         );
     }
+
 }

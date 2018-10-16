@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "waybill".
@@ -32,6 +33,7 @@ use Yii;
  * @property string $edi_number
  * @property string $edi_recadv
  * @property string $edi_invoice
+ * @property int $order_id
  *
  *
  * @property WaybillContent[] $waybillContents
@@ -52,6 +54,21 @@ class Waybill extends yii\db\ActiveRecord
     public static function getDb()
     {
         return Yii::$app->get('db_api');
+    }
+
+    /**
+     * @return array
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
     }
 
     /**
@@ -120,6 +137,15 @@ class Waybill extends yii\db\ActiveRecord
      */
     public function getTotalPrice()
     {
-        return round(WaybillContent::find()->where(['waybill_id' => $this->id])->sum('sum_with_vat'),2);
+        return round(WaybillContent::find()->where(['waybill_id' => $this->id])->sum('sum_with_vat'), 2);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrder()
+    {
+        return $this->hasOne(\api_web\modules\integration\classes\documents\Order::class, ['id' => 'order_id']);
+    }
+
 }

@@ -13,14 +13,17 @@
 namespace common\models;
 
 use Yii;
-use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
+use \yii\db\ActiveRecord;
+use creocoder\nestedsets\NestedSetsBehavior;
+use common\components\NestedSetsQuery;
 
 /**
  * This is the model class for table "outer_category".
  *
  * @property int $id ID записи данных о категории
  * @property string $outer_uid ID записи категории в источнике загрузки данных
+ * @property string $parent_outer_uid ID записи родительской категории в источнике загрузки данных
  * @property int $service_id ID сервиса, с помощью которого была произведена загрузка данной категории
  * @property int $org_id ID организации, к которой относится данная категория
  * @property string $name Наименование категории
@@ -36,6 +39,36 @@ use yii\behaviors\TimestampBehavior;
  */
 class OuterCategory extends ActiveRecord
 {
+
+    /**
+     * NestedSets model
+     * https://yiigist.com/package/creocoder/yii2-nested-sets#!?tab=readme
+     * ------------------------------------------------------
+     */
+    public function behaviors()
+    {
+        return [
+            'tree' => [
+                'class' => NestedSetsBehavior::class,
+                'treeAttribute' => 'tree',
+                'leftAttribute' => 'left',
+                'rightAttribute' => 'right',
+                'depthAttribute' => 'level'
+            ],
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
+    }
+
+    public static function find()
+    {
+        return new NestedSetsQuery(get_called_class());
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -60,7 +93,7 @@ class OuterCategory extends ActiveRecord
         return [
             [['service_id', 'org_id', 'is_deleted', 'selected', 'collapsed', 'tree', 'left', 'right', 'level'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['outer_uid'], 'string', 'max' => 45],
+            [['parent_outer_uid', 'outer_uid'], 'string', 'max' => 45],
             [['name'], 'string', 'max' => 255],
         ];
     }
@@ -73,6 +106,7 @@ class OuterCategory extends ActiveRecord
         return [
             'id' => 'ID',
             'outer_uid' => 'Outer Uid',
+            'parent_outer_uid' => 'Parent Outer Uid',
             'service_id' => 'Service ID',
             'org_id' => 'Org ID',
             'name' => 'Name',
@@ -85,18 +119,6 @@ class OuterCategory extends ActiveRecord
             'left' => 'Left',
             'right' => 'Right',
             'level' => 'Level',
-        ];
-    }
-
-    public function behaviors()
-    {
-        return [
-            [
-                'class' => TimestampBehavior::class,
-                'createdAtAttribute' => 'created_at',
-                'updatedAtAttribute' => 'updated_at',
-                'value' => \gmdate('Y-m-d H:i:s'),
-            ],
         ];
     }
 

@@ -12,17 +12,19 @@
 
 namespace api_web\modules\integration\classes\sync;
 
-use api\common\models\RkService;
 use Yii;
+use yii\db\Transaction;
 use yii\db\mssql\PDO;
+use yii\web\BadRequestHttpException;
+use creocoder\nestedsets\NestedSetsBehavior;
+use common\models\AllServiceOperation;
 use common\models\OuterTask;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
+use api\common\models\RkService;
 use api\common\models\RkAccess;
 use api\common\models\RkSession;
 use api\common\models\RkServicedata;
 use api_web\modules\integration\classes\SyncLog;
-use yii\db\Transaction;
-use yii\web\BadRequestHttpException;
 
 class ServiceRkws extends AbstractSyncFactory
 {
@@ -44,6 +46,9 @@ class ServiceRkws extends AbstractSyncFactory
     /** @var $now string */
     public $now;
 
+    /** @var $entityTableName string */
+    public $entityTableName;
+
     public $index;
 
     public $urlCmdInit = 'http://ws.ucs.ru/WSClient/api/Client/Cmd';
@@ -60,6 +65,12 @@ class ServiceRkws extends AbstractSyncFactory
     const COOK_AUTH_STR_BEGIN = 'Set-Cookie';
 
     public static $OperDenom;
+
+    public $useNestedSets = false;
+    public $nestedSetsSpecialValuesForElements = [];
+
+    /** @var array $additionalXmlFields Поле во входящем xml -> поле в нашей модели данных */
+    public $additionalXmlFields = [];
 
     /**
      * Basic service method "Send request"
@@ -90,6 +101,11 @@ class ServiceRkws extends AbstractSyncFactory
 
     }
 
+    function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
+    {
+        return [];
+    }
+
     public function sendRequest(array $params = []): array
     {
 
@@ -111,6 +127,7 @@ class ServiceRkws extends AbstractSyncFactory
             $xml = (array)simplexml_load_string($xmlData);
             if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
                 $transaction = $this->createTransaction();
+                $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => static::$OperDenom]);
                 $task = new OuterTask([
                     'service_id' => $this->serviceId,
                     'retry' => 0,
@@ -120,7 +137,7 @@ class ServiceRkws extends AbstractSyncFactory
                     'int_status_id' => OuterTask::STATUS_REQUESTED,
                     'outer_guid' => $xml['@attributes']['taskguid'],
                     'broker_version' => $xml['@attributes']['version'],
-                    'oper_code' => $xml['@attributes']['code'],
+                    'oper_code' => $oper->id,
                 ]);
                 if ($task->save()) {
                     $transaction->commit();
@@ -390,8 +407,163 @@ class ServiceRkws extends AbstractSyncFactory
      * Метод отправки накладной
      * @return array
      */
-    public function sendWaybill(): array
+    public function sendWaybill($request): array
     {
         return [];
     }
+
+
+    public function receiveXMLData(OuterTask $task, string $data = null)
+    {
+
+        # 1. Проверяем что данный типа справочника для организации доступен
+        $orgDic = $this->getOrganizationDictionary($task->service_id, $task->org_id);
+
+        # 2. Получаем массив входящих данных
+        $arrayNew = $this->makeArrayFromReceivedDictionaryXmlData($data);
+
+        # 3. Таблица справочника
+        $entityTableName = $this->entityTableName;
+        /** @var yii\db\ActiveRecord $entityTableName */
+
+        # 4. Фиксируем вспомагательные переменные для контроля ошибок записи/обновления данных в БД
+        $transaction = $this->createTransaction();
+        $saveCount = 0;
+        $saveErr = [];
+
+        if ($this->useNestedSets) {
+
+            # 5.1.1. Обнуляем все существующие данные
+            $entityTableName::updateAll(['is_deleted' => 1], ['org_id' => $task->org_id, 'service_id' => $this->serviceId]);
+
+            # 5.1.2. Получаем сведения о существовании записи root для nestedSets
+            $rootModel = $entityTableName::findOne(['org_id' => $task->org_id, 'service_id' => $this->serviceId, 'level' => 0]);
+            if ($rootModel && isset($rootModel->outer_uid)) {
+                $root_rid = $rootModel->outer_uid;
+            } else {
+                $root_rid = md5($task->org_id . $this->serviceId . microtime(true));
+            }
+            array_unshift($arrayNew, ['rid' => $root_rid, 'name' => 'Все', 'parent' => null]);
+
+            # 5.1.3. Перебираем данные
+            $list = [];
+
+            foreach ($arrayNew as $k => $v) {
+                $model = $entityTableName::findOne(['outer_uid' => $v['rid'], 'org_id' => $task->org_id, 'service_id' => $this->serviceId]);
+                if (!$model) {
+                    $model = new $entityTableName([
+                        'outer_uid' => $v['rid'],
+                        'org_id' => $task->org_id,
+                        'service_id' => $this->serviceId,
+                    ]);
+                }
+                if (!$v['parent']) {
+                    $v['parent'] = $root_rid;
+                } elseif ($this->nestedSetsSpecialValuesForElements) {
+                    foreach ($this->nestedSetsSpecialValuesForElements as $kk => $vv) {
+                        $model->$kk = $vv;
+                    }
+                }
+                $list[$v['rid']] = $model;
+                /** @noinspection PhpUndefinedFieldInspection */
+                $model->is_deleted = 0;
+                /** @noinspection PhpUndefinedFieldInspection */
+                $model->name = $v['name'];
+                /** @var $model NestedSetsBehavior */
+                if ($v['rid'] == $root_rid) {
+                    /** @noinspection PhpUndefinedFieldInspection */
+                    if (!$model->id) {
+                        $model->makeRoot();
+                    }
+                } elseif (!$v['parent']) {
+                    $model->prependTo($list[$root_rid]);
+                } else {
+                    $model->prependTo($list[$v['parent']]);
+                }
+                /** @var yii\db\ActiveRecord $model */
+                if ($model->validate() && $model->save()) {
+                    $saveCount++;
+                } else {
+                    /** @noinspection PhpUndefinedFieldInspection */
+                    $saveErr['dicElement'][$model->id][] = $model->errors;
+                }
+            }
+
+        } else {
+
+            # 5.2.1. Надохим все имеющиеся данные
+            $arrayInit = $entityTableName::findAll(['org_id' => $task->org_id, 'service_id' => $task->service_id]);
+
+            # 5.2.2. Перебираем новые данные и пробуем добавить/обновить записи в БД
+            foreach ($arrayNew as $elementNew) {
+                $entity = $entityTableName::findOne(['org_id' => $task->org_id, 'outer_uid' => $elementNew['rid'],
+                    'service_id' => $task->service_id]);
+                if (!$entity) {
+                    $entity = new $entityTableName();
+                    $entity->org_id = $task->org_id;
+                    $entity->outer_uid = $elementNew['rid'];
+                    $entity->service_id = $task->service_id;
+                }
+                /** @noinspection PhpUndefinedFieldInspection */
+                foreach ($this->additionalXmlFields as $k => $v) {
+                    if (isset($elementNew[$k])) {
+                        $entity->$v = $elementNew[$k];
+                    }
+                }
+                /** @noinspection PhpUndefinedFieldInspection */
+                $entity->is_deleted = 0;
+                if ($entity->save()) {
+                    $saveCount++;
+                } else {
+                    /** @noinspection PhpUndefinedFieldInspection */
+                    $saveErr['dicElement'][$entity->id][] = $entity->errors;
+                }
+                if (/** @noinspection PhpUndefinedFieldInspection */
+                array_key_exists($entity->id, $arrayInit)) {
+                    /** @noinspection PhpUndefinedFieldInspection */
+                    unset($arrayInit[$entity->id]);
+                }
+            }
+
+            # 5.2.3. Перебираем существующие данные которые подлежат удалению
+            foreach ($arrayInit as $element) {
+                /** @noinspection PhpUndefinedFieldInspection */
+                $element->is_deleted = 1;
+                if ($element->save()) {
+                    $saveCount++;
+                } else {
+                    /** @noinspection PhpUndefinedFieldInspection */
+                    $saveErr['dicElement'][$element->id][] = $element->errors;
+                }
+            }
+
+        }
+
+        # 6. Фиксируем изменения в текущей задаче
+        if ($saveCount && !$saveErr) {
+            $task->int_status_id = OuterTask::STATUS_CALLBACKED;
+            $task->retry++;
+            $orgDic->count = count($arrayNew);
+            if (!$task->save() || !$orgDic->save()) {
+                $saveErr['task'][] = $task->errors;
+                /** @noinspection PhpUndefinedFieldInspection */
+                $saveErr['orgDic'][$orgDic->id][] = $orgDic->errors;
+            }
+        }
+
+        # 7. Если были запросы и нет ошибок сохранения
+        if ($saveCount && !$saveErr) {
+            $transaction->commit();
+            SyncLog::trace('Number of save counts while there were no errors is ' . $saveCount);
+            return self::XML_LOAD_RESULT_SUCCESS;
+        } elseif (!$saveErr) {
+            SyncLog::trace('No rows were inserted or updated!');
+            $saveErr = ['save' => 'no_save_data'];
+        }
+
+        $transaction->rollback();
+        SyncLog::trace('Fixed save errors: ' . json_encode($saveErr));
+        return self::XML_LOAD_RESULT_FAULT;
+    }
+
 }

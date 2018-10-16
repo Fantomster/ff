@@ -4,6 +4,8 @@ namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogTempContent;
+use common\models\ManagerAssociate;
+use common\models\notifications\EmailNotification;
 use common\models\RelationUserOrganization;
 use Yii;
 use api_web\exceptions\ValidationException;
@@ -160,6 +162,13 @@ class VendorWebApi extends \api_web\components\WebApi
                     }
                     $organization->save();
                     $user->setOrganization($organization)->save();
+                    $relId = $user->createRelationUserOrganization($user->organization->id, $user->role_id);
+                    if (!ManagerAssociate::find()->where(['manager_id' => $user->id, 'organization_id' => $user->organization->id])->exists()) {
+                        $managerAssociate = new ManagerAssociate();
+                        $managerAssociate->manager_id = $user->id;
+                        $managerAssociate->organization_id = $this->user->organization->id;
+                        $managerAssociate->save();
+                    }
                     $get_supp_org_id = $organization->id;
                     $currentOrganization = $currentUser->organization;
                     if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
@@ -485,7 +494,7 @@ class VendorWebApi extends \api_web\components\WebApi
      * @throws BadRequestHttpException
      * @throws \yii\base\Exception
      */
-    public function uploadPersonalCatalog(array $request)
+    public function uploadFile(array $request)
     {
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException('empty_param|vendor_id');
@@ -536,13 +545,13 @@ class VendorWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Валидация и импорт уже загруженного инд. каталога
+     * Валидация и импорт уже загруженного файла инд. каталога
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function importPersonalCatalog(array $request)
+    public function prepareTemporary(array $request)
     {
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException('empty_param|vendor_id');
@@ -555,34 +564,40 @@ class VendorWebApi extends \api_web\components\WebApi
         if (empty($tempCatalog)) {
             throw new BadRequestHttpException("Temp catalog not found");
         }
-
-        if (empty($request['index_field']) && empty($tempCatalog->cat->main_index)) {
+        $index = $request['index_field'] ?? $tempCatalog->cat->main_index ?? null;
+        if (empty($index)) {
             throw new BadRequestHttpException('empty_param|index_field');
         }
-        $index = $request['index_field'] ?? $tempCatalog->cat->main_index;
 
         if (empty($request['mapping']) && empty($tempCatalog->cat->mapping)) {
             throw new BadRequestHttpException('empty_param|mapping');
         }
-        $request['mapping'] = isset($request['mapping']) ? array_flip($request['mapping']) : null;
-        $mapping = $request['mapping'] ?? $tempCatalog->cat->mapping;
-        if (is_string($mapping)) {
-            $mapping = \json_decode($mapping);
+
+        if (!CatalogTempContent::find()->where(['temp_id' => $tempCatalog->id])->exists()){
+            $request['mapping'] = isset($request['mapping']) ? array_flip($request['mapping']) : null;
+            $mapping = $request['mapping'] ?? $tempCatalog->cat->mapping;
+            if (is_string($mapping)) {
+                $mapping = \json_decode($mapping);
+            }
+
+            $excelUrl = Yii::$app->get('resourceManager')->getUrl(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
+            $file = \api_web\helpers\File::getFromUrl($excelUrl);
+
+            if (Excel::writeToTempTable($file->tempName, $tempCatalog->id, $mapping, $index)) {
+                $tempCatalog->index_column = $index;
+                $tempCatalog->cat->main_index = $tempCatalog->index_column;
+                $tempCatalog->mapping = \json_encode($mapping);
+                $tempCatalog->cat->mapping = $tempCatalog->mapping;
+                $tempCatalog->cat->save();
+                $tempCatalog->save();
+            }
+        }
+        $dubles = $this->container->get('CatalogWebApi')->getTempDuplicatePosition($request);
+        if ($dubles){
+            return ['duplicates' => $dubles];
         }
 
-        $excelUrl = Yii::$app->get('resourceManager')->getUrl(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
-        $file = \api_web\helpers\File::getFromUrl($excelUrl);
-
-        if (Excel::writeToTempTable($file->tempName, $tempCatalog->id, $mapping, $index)) {
-            $tempCatalog->index_column = $index;
-            $tempCatalog->cat->main_index = $tempCatalog->index_column;
-            $tempCatalog->mapping = \json_encode($mapping);
-            $tempCatalog->cat->mapping = $tempCatalog->mapping;
-            $tempCatalog->cat->save();
-            $tempCatalog->save();
-        }
-
-        return ['result' => true];
+        return ['products' => $this->container->get('CatalogWebApi')->getGoodsInTempCatalog($request)];
     }
 
     /**
@@ -652,15 +667,16 @@ class VendorWebApi extends \api_web\components\WebApi
      * Удаление загруженного необработанного каталога
      * @param array $request
      * @return array
-     * @throws BadRequestHttpException
+     * @throws \Exception
      */
-    public function deleteTempMainCatalog(array $request)
+    public function cancelTemporary(array $request)
     {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
+        if (empty($request['vendor_id'])) {
+            throw new BadRequestHttpException('empty_param|vendor_id');
         }
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
 
-        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
+        $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
             Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
             CatalogTempContent::deleteAll(['temp_id' => $tempCatalog->id]);

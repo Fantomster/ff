@@ -9,6 +9,11 @@ namespace api_web\helpers;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use common\models\CatalogTempContent;
 
+/**
+ * Class Excel
+ *
+ * @package api_web\helpers
+ */
 class Excel
 {
 
@@ -84,8 +89,12 @@ class Excel
             $attributes['temp_id'] = $tmpCatId;
             $write = true;
             foreach ($cellIterator as $cell) {
-                if ($cellsCount > 6) {
+                if($cellsCount > 6){
                     break;
+                }
+                if (!array_key_exists($cellsCount, $mapping)) {
+                    $cellsCount++;
+                    continue;
                 }
                 $value = $cell->getValue();
                 if ($mapping[$cellsCount] == 'article' && $value == 'Артикул') {
@@ -93,9 +102,18 @@ class Excel
                     break;
                 }
 
+                if ($mapping[$cellsCount] == 'price' && !is_numeric($value)){
+                    $write = false;
+                    break;
+                }
+
                 if ($mapping[$cellsCount] == $index && empty($value)) {
                     $write = false;
                     break;
+                }
+
+                if ($mapping[$cellsCount] == 'units' && !empty($value)){
+                    $value = (float)(str_replace(',', '.', $value));
                 }
 
                 $attributes[$mapping[$cellsCount]] = $value;

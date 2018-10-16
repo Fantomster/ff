@@ -10,23 +10,20 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "license_organization".
  *
- * @property int $id
- * @property int $license_id Указатель на ID лицензии
- * @property int $org_id Указатель на организацию
- * @property string $fd Начало действия услуги
- * @property string $td Окончание действия услуги
- * @property string $created_at Дата создания
- * @property string $updated_at Дата обновления
- * @property string $object_id (Идентификатор объекта во внешней системе
- * @property string $outer_user Имя пользователя во внешней системе
- * @property string $outer_name Имя внешнего объекта - название ресторана внутри UCS, например
- * @property string $outer_address Адрес внешнего объекта - по данным UCS, например
- * @property string $outer_phone Телефон(ы) внешнего объекта лицензии
- * @property string $outer_last_active Время последней зарегистрированной активности
- * @property int $status_id Статус лицензии - идентификатор
- * @property int $is_deleted Признак soft-delete
+ * @property int     $id
+ * @property int     $license_id        Указатель на ID лицензии
+ * @property int     $org_id            Указатель на организацию
+ * @property string  $fd                Начало действия услуги
+ * @property string  $td                Окончание действия услуги
+ * @property string  $created_at        Дата создания
+ * @property string  $updated_at        Дата обновления
+ * @property string  $object_id         (Идентификатор объекта во внешней системе
+ * @property string  $outer_last_active Время последней зарегистрированной активности
+ * @property int     $status_id         Статус лицензии - идентификатор
+ * @property int     $is_deleted        Признак soft-delete
  *
  * @property License $license
+ * @property LicenseService $licenseService
  */
 class LicenseOrganization extends ActiveRecord
 {
@@ -67,21 +64,21 @@ class LicenseOrganization extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'license_id' => 'Указатель на ID лицензии',
-            'org_id' => 'Указатель на организацию',
-            'fd' => 'Начало действия услуги',
-            'td' => 'Окончание действия услуги',
-            'created_at' => 'Дата создания',
-            'updated_at' => 'Дата обновления',
-            'object_id' => '(Идентификатор объекта во внешней системе',
-            'outer_user' => 'Имя пользователя во внешней системе',
-            'outer_name' => 'Имя внешнего объекта - название ресторана внутри UCS, например',
-            'outer_address' => 'Адрес внешнего объекта - по данным UCS, например',
-            'outer_phone' => 'Телефон(ы) внешнего объекта лицензии',
+            'id'                => 'ID',
+            'license_id'        => 'Указатель на ID лицензии',
+            'org_id'            => 'Указатель на организацию',
+            'fd'                => 'Начало действия услуги',
+            'td'                => 'Окончание действия услуги',
+            'created_at'        => 'Дата создания',
+            'updated_at'        => 'Дата обновления',
+            'object_id'         => '(Идентификатор объекта во внешней системе',
+            'outer_user'        => 'Имя пользователя во внешней системе',
+            'outer_name'        => 'Имя внешнего объекта - название ресторана внутри UCS, например',
+            'outer_address'     => 'Адрес внешнего объекта - по данным UCS, например',
+            'outer_phone'       => 'Телефон(ы) внешнего объекта лицензии',
             'outer_last_active' => 'Время последней зарегистрированной активности',
-            'status_id' => 'Статус лицензии - идентификатор',
-            'is_deleted' => 'Признак soft-delete',
+            'status_id'         => 'Статус лицензии - идентификатор',
+            'is_deleted'        => 'Признак soft-delete',
         ];
     }
 
@@ -90,10 +87,10 @@ class LicenseOrganization extends ActiveRecord
     {
         return [
             [
-                'class' => TimestampBehavior::class,
+                'class'              => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',
-                'value' => \gmdate('Y-m-d H:i:s'),
+                'value'              => \gmdate('Y-m-d H:i:s'),
             ],
         ];
     }
@@ -114,5 +111,13 @@ class LicenseOrganization extends ActiveRecord
     public function getOrganization()
     {
         return $this->hasOne(Organization::class, ['id' => 'org_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLicenseService()
+    {
+        return $this->hasOne(LicenseService::class, ['license_id' => 'license_id']);
     }
 }

@@ -1,12 +1,15 @@
 <?php
 
 namespace api_web\controllers;
-
+/**
+ * Class DocumentController
+ * @package api_web\controllers
+ */
 class DocumentController extends \api_web\components\WebApiController
 {
     /**
      * @SWG\Post(path="/document/document-content",
-     *     tags={"Documents/content"},
+     *     tags={"Documents"},
      *     summary="Детальная часть документа",
      *     description="Детальная часть документа",
      *     produces={"application/json"},
@@ -15,7 +18,7 @@ class DocumentController extends \api_web\components\WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/Document"),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={
@@ -73,28 +76,28 @@ class DocumentController extends \api_web\components\WebApiController
      *                  },
      *                  "positions": {
      *                      {
-     *                               "id" => 2222,
-     *                               "product_id" => 3212,
-     *                               "product_name" => "Апелисны",
-     *                               "product_outer_id" => 456789,
-     *                               "quantity" => "Апелисны импортные",
-     *                               "unit" => "кг",
-     *                               "koef" => 1,
-     *                               "sum_without_vat" => 563789.05,
-     *                               "sum_with_vat" => 542364.25,
-     *                               "vat" => 18,
+     *                               "id": 2222,
+     *                               "product_id": 3212,
+     *                               "product_name": "Апелисны",
+     *                               "product_outer_id": 456789,
+     *                               "quantity": "Апелисны импортные",
+     *                               "unit": "кг",
+     *                               "koef": 1,
+     *                               "sum_without_vat": 563789.05,
+     *                               "sum_with_vat": 542364.25,
+     *                               "vat": 18,
      *                               },
      *                       {
-     *                               "id" => 2222,
-     *                               "product_id" => 3212,
-     *                               "product_name" => "Апелисны",
-     *                               "product_outer_id" => 456789,
-     *                               "quantity" => "Апелисны импортные",
-     *                               "unit" => "кг",
-     *                               "koef" => 1,
-     *                               "sum_without_vat" => 563789.05,
-     *                               "sum_with_vat" => 542364.25,
-     *                               "vat" => 18,
+     *                               "id": 2222,
+     *                               "product_id": 3212,
+     *                               "product_name": "Апелисны",
+     *                               "product_outer_id": 456789,
+     *                               "quantity": "Апелисны импортные",
+     *                               "unit": "кг",
+     *                               "koef": 1,
+     *                               "sum_without_vat": 563789.05,
+     *                               "sum_with_vat": 542364.25,
+     *                               "vat": 18,
      *                              },
      *                  }
      *              }
@@ -113,7 +116,7 @@ class DocumentController extends \api_web\components\WebApiController
 
     /**
      * @SWG\Post(path="/document/documents-list",
-     *     tags={"Documents/list"},
+     *     tags={"Documents"},
      *     summary="Список документов",
      *     description="Список документов",
      *     produces={"application/json"},
@@ -122,7 +125,7 @@ class DocumentController extends \api_web\components\WebApiController
      *         in="body",
      *         required=true,
      *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/Document"),
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
      *                  default={
@@ -137,7 +140,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                         "order_date": {
      *                             "from": "23.08.2018",
      *                             "to": "24.08.2018"
-     *                         }
+     *                         },
      *                        "vendor" : {
      *                          1254,
      *                          3256
@@ -221,5 +224,294 @@ class DocumentController extends \api_web\components\WebApiController
     public function actionDocumentsList()
     {
         $this->response = $this->container->get('DocumentWebApi')->getDocumentsList($this->request);
+
+    }
+
+    /**
+     * @SWG\Post(path="/document/waybill-detail",
+     *     tags={"Documents"},
+     *     summary="Накладная - Детальная информация ",
+     *     description="Накладная - Детальная информация ",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"waybill_id":1}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                              "id": 226667,
+     *                              "code": 226667,
+     *                               "status_id": 1,
+     *                               "status_text": "Ожидают формирования",
+     *                               "agent": {
+     *                               "uid": "11232123",
+     *                               "name": "Опт Холод",
+     *                               },
+     *                               "store": {
+     *                               "uid": "3489",
+     *                               "name": "Горячий цех",
+     *                               },
+     *                               "doc_date": "2018-09-04T09:55:22+03:00",
+     *                               "outer_number_additional": "22666-111-1",
+     *                               "outer_number_code": 22666,
+     *                               "payment_delay_date": "2018-09-17T09:55:22+03:00",
+     *                               "outer_note": "Примечание"
+     *                  }
+     *         ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     */
+    public function actionWaybillDetail()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->getWaybillDetail($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/document/update-waybill-detail",
+     *     tags={"Documents"},
+     *     summary="Накладная - Обновление детальной информации",
+     *     description="Накладная - Обновление детальной информации",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 226667,
+     *                      "agent_uid": "11232123",
+     *                      "store_uid": "3489",
+     *                      "doc_date": "2018-09-04T09:55:22+03:00",
+     *                      "outer_number_additional": "22666-111-1",
+     *                      "outer_number_code": 22666,
+     *                      "payment_delay_date": "2018-09-17T09:55:22+03:00",
+     *                      "outer_note": "Примечание"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                              "id": 226667,
+     *                              "code": 226667,
+     *                               "status_id": 1,
+     *                               "status_text": "Ожидают формирования",
+     *                               "agent": {
+     *                               "uid": "11232123",
+     *                               "name": "Опт Холод",
+     *                               },
+     *                               "store": {
+     *                               "uid": "3489",
+     *                               "name": "Горячий цех",
+     *                               },
+     *                               "doc_date": "2018-09-04T09:55:22+03:00",
+     *                               "outer_number_additional": "22666-111-1",
+     *                               "outer_number_code": 22666,
+     *                               "payment_delay_date": "2018-09-17T09:55:22+03:00",
+     *                               "outer_note": "Примечание"
+     *                  }
+     *         ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionUpdateWaybillDetail()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->editWaybillDetail($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/document/reset-waybill-positions",
+     *     tags={"Documents"},
+     *     summary="Накладная - Сброс позиций ",
+     *     description="Накладная - Сброс позиций ",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "waybill_id": 1111
+     *                      }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *          @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     */
+    public function actionResetWaybillPositions()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->waybillResetPositions($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/document/map-waybill-order",
+     *     tags={"Documents"},
+     *     summary="Накладная - Сопоставление с заказом ",
+     *     description="Накладная - Сопоставление с заказом ",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "order_id": 2525,
+     *                      "document_id": 1111
+     *                      }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *          @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     */
+    public function actionMapWaybillOrder()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->mapWaybillOrder($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/document/document-status",
+     *     tags={"Documents"},
+     *     summary="Статусы документов (групповые)",
+     *     description="Статусы документов (групповые)",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={{}}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "status": {
+     *                      "1": "Ожидают выгрузки",
+     *                      "2": "Ожидают формирования",
+     *                      "3": "Выгружена"
+     *                  }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     */
+    public function actionDocumentStatus()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->getDocumentStatus();
+    }
+
+    /**
+     * @SWG\Post(path="/document/waybill-status",
+     *     tags={"Documents"},
+     *     summary="Статусы накладных",
+     *     description="Статусы накладных",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={{}}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "status": {
+     *                      "1": "Сопоставлена",
+     *                      "2": "Сформирована",
+     *                      "3": "Ошибка",
+     *                      "4": "Сброшена",
+     *                      "5": "Выгружена"
+     *                  }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     */
+    public function actionWaybillStatus()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->getWaybillStatus();
     }
 }

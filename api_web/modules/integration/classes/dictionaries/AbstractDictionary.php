@@ -11,7 +11,6 @@ namespace api_web\modules\integration\classes\dictionaries;
 
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
-use common\helpers\DBNameHelper;
 use common\models\Organization;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
@@ -23,10 +22,23 @@ use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
 use yii\web\BadRequestHttpException;
 
+/**
+ * Class AbstractDictionary
+ *
+ * @package api_web\modules\integration\classes\dictionaries
+ */
 class AbstractDictionary extends WebApi
 {
+    /**
+     * @var
+     */
     public $service_id;
 
+    /**
+     * AbstractDictionary constructor.
+     *
+     * @param $serviceId
+     */
     public function __construct($serviceId)
     {
         parent::__construct();
@@ -70,10 +82,10 @@ class AbstractDictionary extends WebApi
         }
 
         $return = [
-            'products'   => $result,
+            'products' => $result,
             'pagination' => [
-                'page'       => ($dataProvider->pagination->page + 1),
-                'page_size'  => $dataProvider->pagination->pageSize,
+                'page' => ($dataProvider->pagination->page + 1),
+                'page_size' => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -89,9 +101,9 @@ class AbstractDictionary extends WebApi
     private function prepareProduct(OuterProduct $model)
     {
         return [
-            'id'        => (int)$model->id,
-            'name'      => $model->name,
-            'unit'      => (OuterUnit::findOne($model->outer_unit_id))->name,
+            'id' => (int)$model->id,
+            'name' => $model->name,
+            'unit' => (OuterUnit::findOne($model->outer_unit_id))->name,
             'is_active' => (int)!$model->is_deleted
         ];
     }
@@ -108,9 +120,9 @@ class AbstractDictionary extends WebApi
         $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
 
 
-        $search = OuterAgent::find()->joinWith(['vendor', 'store', 'nameWaybills'])
+        $search = OuterAgent::find()->joinWith(['store', 'nameWaybills'])
             ->where([
-                '`outer_agent`.org_id'     => $this->user->organization->id,
+                '`outer_agent`.org_id' => $this->user->organization->id,
                 '`outer_agent`.service_id' => $this->service_id
             ]);
 
@@ -129,19 +141,16 @@ class AbstractDictionary extends WebApi
         $pagination->setPageSize($pageSize);
         $dataProvider->setPagination($pagination);
 
-        /**
-         * @var $model OuterAgent
-         */
         $result = [];
         foreach ($dataProvider->models as $model) {
             $result[] = $this->prepareAgent($model);
         }
 
         $return = [
-            'agents'     => $result,
+            'agents' => $result,
             'pagination' => [
-                'page'       => ($dataProvider->pagination->page + 1),
-                'page_size'  => $dataProvider->pagination->pageSize,
+                'page' => ($dataProvider->pagination->page + 1),
+                'page_size' => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -156,15 +165,14 @@ class AbstractDictionary extends WebApi
      */
     public function agentInfo($agent_uid)
     {
-        $model = OuterAgent::find()->joinWith(['vendor', 'store', 'nameWaybills'])
+        $model = OuterAgent::find()->joinWith(['store', 'nameWaybills'])
             ->where([
-                '`outer_agent`.org_id'     => $this->user->organization->id,
+                '`outer_agent`.org_id' => $this->user->organization->id,
                 '`outer_agent`.service_id' => $this->service_id,
                 '`outer_agent`.outer_uid' => $agent_uid,
-            ]);
+            ])->one();
 
-        if ($model === null)
-        {
+        if ($model === null) {
             return [];
         }
 
@@ -218,16 +226,16 @@ class AbstractDictionary extends WebApi
         }
 
         return [
-            'id'            => $model->id,
-            'outer_uid'     => $model->outer_uid,
-            'name'          => $model->name,
-            'vendor_id'     => $model->vendor_id,
-            'vendor_name'   => $model->vendor->name ?? null,
-            'store_id'      => $model->store_id,
-            'store_name'    => $model->store->name ?? null,
+            'id' => $model->id,
+            'outer_uid' => $model->outer_uid,
+            'name' => $model->name,
+            'vendor_id' => $model->vendor_id,
+            'vendor_name' => $model->vendor->name ?? null,
+            'store_id' => $model->store_id,
+            'store_name' => $model->store->name ?? null,
             'payment_delay' => $model->payment_delay,
-            'is_active'     => (int)!$model->is_deleted,
-            'name_waybill'  => array_map(
+            'is_active' => (int)!$model->is_deleted,
+            'name_waybill' => array_map(
                 function ($el) {
                     return $el['name'];
                 },
@@ -267,6 +275,28 @@ class AbstractDictionary extends WebApi
         return $return;
     }
 
+    /***
+     * Информация по складу
+     * @param $agent_uid
+     * @return array
+     */
+    public function storeInfo($store_uid)
+    {
+        $model = OuterStore::find()
+            ->where([
+                'org_id' => $this->user->organization->id,  
+                'outer_uid' => $store_uid,
+                'service_id' => $this->service_id])
+            ->one();
+
+        if ($model === null) {
+            return [];
+        }
+
+        return $this->prepareStore($model);
+    }
+
+
     /**
      * Функция рекурсия от корневого склада
      * @param OuterStore $model
@@ -283,35 +313,37 @@ class AbstractDictionary extends WebApi
             return $arReturn;
         };
         return [
-            'id'         => $model->id,
-            'outer_uid'  => $model->outer_uid,
-            'name'       => $model->name,
+            'id' => $model->id,
+            'outer_uid' => $model->outer_uid,
+            'name' => $model->name,
             'store_type' => $model->store_type,
             'created_at' => $model->created_at,
             'updated_at' => $model->updated_at,
-            'is_active'  => (int)!$model->is_deleted,
-            'childs'     => $child($model),
+            'is_active' => (int)!$model->is_deleted,
+            'childs' => $child($model),
         ];
     }
 
     /**
      * Агент. Собираем необходимые данные из модели
-     * @param OuterAgent $model
+     * @param \yii\db\ActiveRecord $model
      * @return array
      */
-    private function prepareAgent (OuterAgent $model)
+    private function prepareAgent(\yii\db\ActiveRecord $model)
     {
+        /**@var OuterAgent $model*/
+        $orgModel = Organization::findOne($model->vendor_id);
         return [
-            'id'            => $model->id,
-            'outer_uid'     => $model->outer_uid,
-            'name'          => $model->name,
-            'vendor_id'     => $model->vendor_id,
-            'vendor_name'   => $model->vendor->name ?? null,
-            'store_id'      => $model->store_id,
-            'store_name'    => $model->store->name ?? null,
+            'id' => $model->id,
+            'outer_uid' => $model->outer_uid,
+            'name' => $model->name,
+            'vendor_id' => $model->vendor_id,
+            'vendor_name' => $orgModel->name ?? null,
+            'store_id' => $model->store_id,
+            'store_name' => $model->store->name ?? null,
             'payment_delay' => $model->payment_delay,
-            'is_active'     => (int)!$model->is_deleted,
-            'name_waybill'  => array_map(function ($el) {
+            'is_active' => (int)!$model->is_deleted,
+            'name_waybill' => array_map(function ($el) {
                 return $el['name'];
             }, $model->nameWaybills)
 

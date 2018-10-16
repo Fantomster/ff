@@ -476,7 +476,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     $model->quantity = $wbContent->quantity_waybill;
                     $model->price = $wbContent->price_waybill;
                 }
-                $productsEdo[$model->edi_number][$k] = $model;
+                $productsEdo[$k] = $model;
             }
             $products = $productsEdo;
         }
@@ -943,9 +943,9 @@ class OrderWebApi extends \api_web\components\WebApi
                 $organization = $order->vendor;
             }
 
+            $t->commit();
             Notice::init('Order')->cancelOrder($this->user, $organization, $order);
 
-            $t->commit();
             return $this->getInfo(['order_id' => $order->id]);
         } catch (\Exception $e) {
             $t->rollBack();
@@ -1038,11 +1038,11 @@ class OrderWebApi extends \api_web\components\WebApi
                 } catch (\Throwable $e) {
                     throw $e;
                 }
-                Notice::init('Order')->doneOrder($order, $this->user);
             } else {
                 throw new ValidationException($order->getFirstErrors());
             }
             $t->commit();
+            Notice::init('Order')->doneOrder($order, $this->user);
             return $this->getInfo(['order_id' => $order->id]);
         } catch (\Throwable $e) {
             $t->rollBack();

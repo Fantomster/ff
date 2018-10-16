@@ -131,9 +131,33 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $sql = "SELECT COUNT(*) FROM one_s_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
         $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryScalar();
 
+        $sql = "SELECT agent_uuid,num_code,store_id FROM one_s_waybill WHERE id = :w_wid";
+        $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryAll();
+        $agent_uuid = $result[0]["agent_uuid"];
+        $num_code = $result[0]["num_code"];
+        $store_id = $result[0]["store_id"];
+        if (($agent_uuid === null) or ($num_code === null) or ($store_id === null)) {
+            $shapka = 0;
+        } else {
+            $shapka = 1;
+        }
+
         if ($kolvo_nesopost == 0) {
-            $sql = "UPDATE one_s_waybill SET readytoexport = 1, status_id = 3, updated_at = NOW() WHERE id = :w_wid";
-            $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            if ($shapka == 1) {
+                $sql = "UPDATE one_s_waybill SET readytoexport = 1, status_id = 3, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            } else {
+                $sql = "UPDATE one_s_waybill SET readytoexport = 0, status_id = 1, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            }
+        } else {
+            if ($shapka == 1) {
+                $sql = "UPDATE one_s_waybill SET readytoexport = 0, status_id = 1, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            } else {
+                $sql = "UPDATE one_s_waybill SET readytoexport = 0, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            }
         }
 
         if ($button == 'forever') {
@@ -447,10 +471,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $model->sum = $model->defsum;
         }
 
-        if (!$model->save()) {
+        /*if (!$model->save()) {
             var_dump($model->getErrors());
             exit;
-        }
+        }*/
 
         return $this->redirect(['map', 'waybill_id' => $wayModel->id]);
     }
@@ -475,9 +499,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                  $data = $command->queryAll();
                  $out['results'] = array_values($data);
             */
-            $sql = "( select id, name as `text` from one_s_good where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name = '" . $term . "' )" .
-                " union ( select id, name as `text` from one_s_good  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '" . $term . "%' limit 15 )" .
-                "union ( select id, name as `text` from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
+            $sql = "( select id, CONCAT(`name`, ' (' ,measure, ')') as `text` from one_s_good where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name = '" . $term . "' )" .
+                " union ( select id, CONCAT(`name`, ' (' ,measure, ')') as `text` from one_s_good  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '" . $term . "%' limit 15 )" .
+                "union ( select id, CONCAT(`name`, ' (' ,measure, ')') as `text` from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
                 "order by case when length(trim(`text`)) = length('" . $term . "') then 1 else 2 end, `text`; ";
 
             $db = Yii::$app->db_api;
@@ -501,9 +525,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
         $out = [];
         if (!is_null($term)) {
-            $sql = "( select `id`, `name` from `one_s_good` where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and `name` = '" . $term . "' )" .
-                " union ( select `id`, `name` from `one_s_good`  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and `name` like '" . $term . "%' limit 15 )" .
-                "union ( select id, name from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
+            $sql = "( select `id`, CONCAT(`name`, ' (' ,measure, ')') as `text` from `one_s_good` where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and `name` = '" . $term . "' )" .
+                " union ( select `id`, CONCAT(`name`, ' (' ,measure, ')') as `text` from `one_s_good`  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and `name` like '" . $term . "%' limit 15 )" .
+                "union ( select id, CONCAT(`name`, ' (' ,measure, ')') as `text` from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
                 "order by case when length(trim(`name`)) = length('" . $term . "') then 1 else 2 end, `name`; ";
 
             $db = Yii::$app->db_api;
@@ -514,7 +538,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             //$constId = OneSDicconst::findOne(['denom' => 'main_org']);
             //$parentId = OneSPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
             //$organizationID = !is_null($parentId) ? $parentId->value : $orgId;
-            $sql = 'SELECT id, name FROM one_s_good WHERE org_id = ' . $orgId . ' ORDER BY name LIMIT 100';
+            $sql = "SELECT id, CONCAT(`name`, ' (' ,measure, ')') as `text` FROM one_s_good WHERE org_id = " . $orgId . ' ORDER BY name LIMIT 100';
 
             /**
              * @var $db Connection
@@ -561,9 +585,32 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $lic = OneSService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post())) {
-            if ($model->getErrors()) {
+            /*if ($model->getErrors()) {
                 var_dump($model->getErrors());
                 exit;
+            }*/
+            $sql = "SELECT COUNT(*) FROM one_s_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
+            $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
+            if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->store_id === null)) {
+                $shapka = 0;
+            } else {
+                $shapka = 1;
+            }
+            if ($kolvo_nesopost == 0) {
+                if ($shapka == 1) {
+                    $model->readytoexport = 1;
+                    $model->status_id = 3;
+                } else {
+                    $model->readytoexport = 0;
+                    $model->status_id = 1;
+                }
+            } else {
+                if ($shapka == 1) {
+                    $model->readytoexport = 0;
+                    $model->status_id = 1;
+                } else {
+                    $model->readytoexport = 0;
+                }
             }
             $model->save();
             return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
@@ -598,10 +645,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model->is_invoice = $is_invoice;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            if ($model->getErrors()) {
+            /*if ($model->getErrors()) {
                 var_dump($model->getErrors());
                 exit;
-            }
+            }*/
             return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {
             $model->num_code = $order_id;

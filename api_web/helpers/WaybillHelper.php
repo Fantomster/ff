@@ -8,13 +8,19 @@
 
 namespace api_web\helpers;
 
+use api_web\exceptions\ValidationException;
 use common\helpers\DBNameHelper;
+use common\models\IntegrationSetting;
+use common\models\IntegrationSettingValue;
+use common\models\licenses\License;
+use common\models\licenses\LicenseOrganization;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OuterAgent;
 use common\models\OuterStore;
 use common\models\Waybill;
 use common\models\WaybillContent;
+use Exception;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -22,6 +28,8 @@ use yii\web\BadRequestHttpException;
  * */
 class WaybillHelper
 {
+    const RK_SERVICE_ID = 1;
+    const IIKO_SERVICE_ID = 2;
     /**@var int const for mercuriy service id in all_service table */
     const MERC_SERVICE_ID = 4;
     /**@var int const for EDI service id in all_service table */
@@ -218,7 +226,6 @@ class WaybillHelper
             $modelWaybillContent->merc_uuid = $ordCont->merc_uuid;
             $modelWaybillContent->product_outer_id = $ordCont->product_id;
             $modelWaybillContent->quantity_waybill = $quantity;
-            $modelWaybillContent->price_waybill = $price;
             $modelWaybillContent->vat_waybill = $taxRate;
             $modelWaybillContent->sum_with_vat = $quantity * $priceWithVat;
             $modelWaybillContent->sum_without_vat = $quantity * $price;
@@ -254,5 +261,59 @@ class WaybillHelper
         return [
             'result' => $result
         ];
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function moveOrderContentToWaybill($request){
+        if (!isset($request['waybill_id']) && !isset($request['order_content_id'])){
+            throw new BadRequestHttpException('empty_param|waybill_id|order_content_id');
+        }
+        $waybill = Waybill::findOne([
+            'id' => $request['waybill_id'],
+            'bill_status_id' => [
+                self::$statuses[self::WAYBILL_COMPARED],
+                self::$statuses[self::WAYBILL_ERROR],
+                self::$statuses[self::WAYBILL_FORMED],
+            ]]);
+        if (!$waybill){
+            throw new BadRequestHttpException('waybill cannot adding waybill_content with id ' . $request['waybill_id']);
+        }
+        $orderContent = OrderContent::findOne($request['order_content_id']);
+        if (!$orderContent){
+            throw new BadRequestHttpException('OrderContent dont exists with id ' . $request['order_content_id']);
+        }
+        $taxRate = $orderContent->vat_product ?? null;
+        $quantity = $orderContent->quantity;
+        $price = $orderContent->price;
+        if ($taxRate){
+            $priceWithVat = $price + ($price * ($taxRate / 100));
+        }
+
+        try {
+            $waybillContent = new WaybillContent();
+            $waybillContent->waybill_id = $request['waybill_id'];
+            $waybillContent->order_content_id = $orderContent->id;
+            $waybillContent->product_outer_id = $orderContent->product_id;
+            $waybillContent->quantity_waybill = (float)$quantity;
+            $waybillContent->vat_waybill = $taxRate;
+            $waybillContent->merc_uuid = $orderContent->merc_uuid;
+            $waybillContent->sum_with_vat = (int)(isset($priceWithVat) ? $priceWithVat * $quantity * 100 : null);
+            $waybillContent->sum_without_vat = (int)($price * $quantity * 100);
+            $waybillContent->price_with_vat = (int)(isset($priceWithVat) ? $priceWithVat * 100 : null);
+            $waybillContent->price_without_vat = (int)($price * 100);
+            $waybillContent->save();
+            if (!$waybillContent->validate() || !$waybillContent->save()) {
+                throw new ValidationException($waybillContent->getErrorSummary(true));
+            }
+        } catch (\Throwable $t){
+            \Yii::error($t->getMessage());
+            return ['result' => $t->getMessage()];
+        }
+
+        return ['result' => true];
     }
 }

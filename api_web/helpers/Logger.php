@@ -54,9 +54,13 @@ class Logger
      */
     public static function request($request)
     {
+        $serializedRequest = \json_encode($request, JSON_UNESCAPED_UNICODE);
+        if (mb_strlen($serializedRequest) > 65535){
+            $serializedRequest = mb_substr($serializedRequest, 0, 65534);
+        }
         if (empty(self::get()['request_at']) || self::get()['request_at'] == '0000-00-00 00:00:00') {
             self::update([
-                'request' => \json_encode($request, JSON_UNESCAPED_UNICODE),
+                'request' => $serializedRequest,
                 'request_at' => new Expression('NOW()')
             ]);
         }
@@ -68,7 +72,7 @@ class Logger
      */
     public static function response($response)
     {
-        if (empty(self::get()['response_at']) || self::get()['response_at'] == '0000-00-00 00:00:00') {
+        if (empty(self::get()['response_at']) || self::get()['response_at'] == '0000-00-00 00:00:00' || self::get()['response_at'] == null) {
             self::update([
                 'response' => mb_substr(\json_encode($response, JSON_UNESCAPED_UNICODE), 0, 1000),
                 'response_at' => new Expression('NOW()')

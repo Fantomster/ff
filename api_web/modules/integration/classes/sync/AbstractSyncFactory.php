@@ -14,7 +14,8 @@ namespace api_web\modules\integration\classes\sync;
 
 use api_web\components\WebApi;
 use api_web\modules\integration\classes\SyncLog;
-use common\models\OuterTask;
+use common\models\OrganizationDictionary;
+use common\models\OuterDictionary;
 use yii\web\BadRequestHttpException;
 
 abstract class AbstractSyncFactory extends WebApi
@@ -43,6 +44,9 @@ abstract class AbstractSyncFactory extends WebApi
     /** List of dictionaries awailable for a service - By default it is an empty array */
     public $dictionaryAvailable = [];
 
+    /** @var string $index Символьный идентификатор справочника */
+    public $index;
+
     /** service_id $_POST params */
     public $serviceId;
     /** Service Name identified by service_id in $_POST params and SyncServiceFactory->$allServicesMap */
@@ -62,8 +66,36 @@ abstract class AbstractSyncFactory extends WebApi
         }
     }
 
-    public function receiveXMLData(OuterTask $task, string $data = null) {
+    public function getOrganizationDictionary(int $service_id, int $org_id): OrganizationDictionary
+    {
 
+        $outerDic = OuterDictionary::findOne(['service_id' => $service_id, 'name' => $this->index]);
+        if (!$outerDic) {
+            SyncLog::trace('OuterDictionary not found!');
+            throw new BadRequestHttpException("outer_dic_not_found");
+        }
+
+        $orgDic = OrganizationDictionary::findOne(['outer_dic_id' => $outerDic->id,
+            'org_id' => $org_id, 'status_id' => OrganizationDictionary::STATUS_DISABLED]);
+        if ($orgDic) {
+            SyncLog::trace('OrganizationDictionary was diabled!');
+            throw new BadRequestHttpException("org_dic_disabled");
+        } else {
+            $orgDic = OrganizationDictionary::findOne(['outer_dic_id' => $outerDic->id, 'org_id' => $org_id]);
+            if ($orgDic && $orgDic->status_id != OrganizationDictionary::STATUS_ACTIVE) {
+                SyncLog::trace('OrganizationDictionary status wrong!');
+                throw new BadRequestHttpException("org_dic_status_wrong");
+            } elseif (!$orgDic) {
+                $orgDic = new OrganizationDictionary(['outer_dic_id' => $outerDic->id,
+                    'org_id' => $org_id, 'status_id' => OrganizationDictionary::STATUS_ACTIVE, 'count' => 0]);
+                if (!$orgDic->save()) {
+                    SyncLog::trace('OrganizationDictionary cannot be updated!');
+                    throw new BadRequestHttpException("org_dic_not_accessible");
+                }
+            }
+        }
+
+        return $orgDic;
     }
 
     public function getObjects(): array

@@ -13,49 +13,46 @@ use yii\helpers\Json;
 
 class RabbitHelper
 {
-    public function callback($mess) {
-
-        var_dump($mess);
-
+    public function callback($mess)
+    {
         if (call_user_func([$this, $mess['action']], $mess['body'])) {
-            $query = "UPDATE rabbit_journal SET success_count = success_count + 1 WHERE id =".$mess['id'];
+            $query = "UPDATE rabbit_journal SET success_count = success_count + 1 WHERE id =" . $mess['id'];
         } else {
-            $query = "UPDATE rabbit_journal SET fail_count = fail_count + 1 WHERE id =".$mess['id'];
+            $query = "UPDATE rabbit_journal SET fail_count = fail_count + 1 WHERE id =" . $mess['id'];
         }
 
         \Yii::$app->db_api->createCommand($query)->execute();
 
-        $sel = "SELECT total_count, success_count, fail_count from rabbit_journal where id = ".$mess['id'];
+        $sel = "SELECT total_count, success_count, fail_count from rabbit_journal where id = " . $mess['id'];
 
-        $curr =  \Yii::$app->db_api->createCommand($sel)->queryOne();
+        $curr = \Yii::$app->db_api->createCommand($sel)->queryOne();
 
 
         $cache = \Yii::$app->cache;
-        $clientUsers = $cache->get('clientUsers_'.$mess['id']);
+        $clientUsers = $cache->get('clientUsers_' . $mess['id']);
 
-        if(!$clientUsers) {
-           //  $clientUsers = (Organization::findOne(['id' => $mess['body']['org_id']]))->users;
+        if (!$clientUsers) {
+            //  $clientUsers = (Organization::findOne(['id' => $mess['body']['org_id']]))->users;
 
-                $sel2 = "SELECT id from user where organization_id = ".$mess['body']['org_id'];
+            $sel2 = "SELECT id from user where organization_id = " . $mess['body']['org_id'];
 
-                $clientUsers =  \Yii::$app->db->createCommand($sel2)->queryAll();
+            $clientUsers = \Yii::$app->db->createCommand($sel2)->queryAll();
 
-                if(isset($clientUsers))
-                    $cache->set('clientUsers_'.$mess['id'], $clientUsers, 60*10);
+            if (isset($clientUsers))
+                $cache->set('clientUsers_' . $mess['id'], $clientUsers, 60 * 10);
         }
 
         foreach ($clientUsers as $clientUser) {
             $channel = 'user' . $clientUser['id'];
-            var_dump($channel);
             \Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
                 'message' => Json::encode([
                     'isRabbit' => 1,
-                    'channel' => $channel,
-                    'action' => $mess['action'],
-                    'total'  => $curr['total_count'],
-                    'success' => $curr['success_count'],
-                    'failed' => $curr['fail_count']
+                    'channel'  => $channel,
+                    'action'   => $mess['action'],
+                    'total'    => $curr['total_count'],
+                    'success'  => $curr['success_count'],
+                    'failed'   => $curr['fail_count']
                 ])
             ]);
         }
@@ -64,10 +61,11 @@ class RabbitHelper
         \Yii::$app->db_api->close();
     }
 
-    private function fullmap($data) {
+    private function fullmap($data)
+    {
 
-        $query = "INSERT into all_map (service_id, supp_id, cat_id, product_id, org_id, koef, is_active)".
-        " values (1, ".$data["supp_id"].", ".$data["cat_id"].", ".$data["product_id"].", ".$data["org_id"].",1,1)";
+        $query = "INSERT into all_map (service_id, supp_id, cat_id, product_id, org_id, koef, is_active)" .
+            " values (1, " . $data["supp_id"] . ", " . $data["cat_id"] . ", " . $data["product_id"] . ", " . $data["org_id"] . ",1,1)";
 
         \Yii::$app->db_api->createCommand($query)->execute();
 

@@ -20,12 +20,14 @@ use yii\web\BadRequestHttpException;
 /**
  * OrderController implements the CRUD actions for Order model.
  */
-class OrderController extends Controller {
+class OrderController extends Controller
+{
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             'verbs' => [
                 'class' => VerbFilter::className(),
@@ -49,6 +51,7 @@ class OrderController extends Controller {
                             'ajax-show-products',
                             'ajax-add-to-order',
                             'assign',
+                            'operator'
                         ],
                         'allow' => true,
                         'roles' => [
@@ -61,7 +64,8 @@ class OrderController extends Controller {
         ];
     }
 
-    public function actionAjaxAddToOrder() {
+    public function actionAjaxAddToOrder()
+    {
         $post = Yii::$app->request->post();
 
         if (OrderContent::findOne(['order_id' => $post['order_id'], 'product_id' => $post['product_id']]) != null)
@@ -112,14 +116,15 @@ class OrderController extends Controller {
      * Lists all Order models.
      * @return mixed
      */
-    public function actionIndex() {
+    public function actionIndex()
+    {
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         //$dataProvider->sort = ['defaultOrder' => ['created_at' => SORT_DESC]];
 
         return $this->render('index', [
-                    'searchModel' => $searchModel,
-                    'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -128,7 +133,8 @@ class OrderController extends Controller {
      * @param integer $id
      * @return mixed
      */
-    public function actionView($id) {
+    public function actionView($id)
+    {
         $model = $this->findModel($id);
         $searchModel = new OrderContentSearch();
         $params = Yii::$app->request->getQueryParams();
@@ -136,12 +142,13 @@ class OrderController extends Controller {
         $dataProvider = $searchModel->search($params);
 
         return $this->render('view', [
-                    'model' => $model,
-                    'dataProvider' => $dataProvider
+            'model' => $model,
+            'dataProvider' => $dataProvider
         ]);
     }
 
-    public function actionEdit($id, $attachment_id = null) {
+    public function actionEdit($id, $attachment_id = null)
+    {
         $editableOrders = [
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
@@ -209,7 +216,8 @@ class OrderController extends Controller {
         }
     }
 
-    public function actionAjaxShowProducts($order_id) {
+    public function actionAjaxShowProducts($order_id)
+    {
         $order = Order::findOne(['id' => $order_id]);
 
         $params = Yii::$app->request->getQueryParams();
@@ -225,28 +233,31 @@ class OrderController extends Controller {
         }
     }
 
-    public function actionGetAttachment($id) {
+    public function actionGetAttachment($id)
+    {
         $attachment = OrderAttachment::findOne(['id' => $id]);
         $attachment->getFile();
     }
 
-    public function actionWithAttachments() {
+    public function actionWithAttachments()
+    {
         $searchModel = new \backend\models\OrderWithAttachmentsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         if (Yii::$app->request->isPjax) {
             return $this->renderAjax('with-attachments', [
-                        'searchModel' => $searchModel,
-                        'dataProvider' => $dataProvider,
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
             ]);
         } else {
             return $this->render('with-attachments', [
-                        'searchModel' => $searchModel,
-                        'dataProvider' => $dataProvider,
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
             ]);
         }
     }
 
-    public function actionAssign($id) {
+    public function actionAssign($id)
+    {
         $assignment = \common\models\OrderAssignment::findOne(['order_id' => $id]);
         if (empty($assignment)) {
             $assignment = new \common\models\OrderAssignment(['order_id' => $id, 'assigned_by' => Yii::$app->user->id]);
@@ -256,59 +267,18 @@ class OrderController extends Controller {
         if ($assignment->save()) {
             return true;
         } else {
-            return ['output'=>'', 'message'=>''];
+            return ['output' => '', 'message' => ''];
         }
     }
-    
-//    /**
-//     * Creates a new Order model.
-//     * If creation is successful, the browser will be redirected to the 'view' page.
-//     * @return mixed
-//     */
-//    public function actionCreate()
-//    {
-//        $model = new Order();
-//
-//        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-//            return $this->redirect(['view', 'id' => $model->id]);
-//        } else {
-//            return $this->render('create', [
-//                'model' => $model,
-//            ]);
-//        }
-//    }
-//
-//    /**
-//     * Updates an existing Order model.
-//     * If update is successful, the browser will be redirected to the 'view' page.
-//     * @param integer $id
-//     * @return mixed
-//     */
-//    public function actionUpdate($id)
-//    {
-//        $model = $this->findModel($id);
-//
-//        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-//            return $this->redirect(['view', 'id' => $model->id]);
-//        } else {
-//            return $this->render('update', [
-//                'model' => $model,
-//            ]);
-//        }
-//    }
-//
-//    /**
-//     * Deletes an existing Order model.
-//     * If deletion is successful, the browser will be redirected to the 'index' page.
-//     * @param integer $id
-//     * @return mixed
-//     */
-//    public function actionDelete($id)
-//    {
-//        $this->findModel($id)->delete();
-//
-//        return $this->redirect(['index']);
-//    }
+
+    /**
+     * Страница оператора заказов
+     * @return string
+     */
+    public function actionOperator()
+    {
+        return $this->render('operator');
+    }
 
     /**
      * Finds the Order model based on its primary key value.
@@ -317,7 +287,8 @@ class OrderController extends Controller {
      * @return Order the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id) {
+    protected function findModel($id)
+    {
         if (($model = Order::findOne($id)) !== null) {
             return $model;
         } else {

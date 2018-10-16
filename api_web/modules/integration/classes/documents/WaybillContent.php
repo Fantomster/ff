@@ -1,4 +1,5 @@
 <?php
+
 namespace api_web\modules\integration\classes\documents;
 
 use api_web\modules\integration\interfaces\DocumentInterface;
@@ -20,10 +21,9 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
         $orderContent = $this->orderContent;
         $productOuter = $this->productOuter;
         $unit = null;
-        if(isset($orderContent)) {
-            $unit = $orderContent->product->unit;
-        }
-        elseif (isset($productOuter)) {
+        if (isset($orderContent)) {
+            $unit = $orderContent->product->ed;
+        } elseif (isset($productOuter)) {
             $unit = isset($productOuter->outerUnit) ? $productOuter->outerUnit->name : null;
         }
 
@@ -51,7 +51,7 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
     public static function prepareModel($key)
     {
         $model = self::findOne(['id' => $key]);
-        if($model === null ) {
+        if ($model === null) {
             return [];
         }
         return $model->prepare();

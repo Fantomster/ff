@@ -8,6 +8,7 @@ use api_web\modules\integration\interfaces\ServiceInterface;
 use api_web\modules\integration\modules\one_s\models\one_sService;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperService;
 use api_web\modules\integration\modules\iiko\models\iikoService;
+use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OuterAgent;
@@ -249,7 +250,6 @@ class IntegrationWebApi extends WebApi
         if (!isset($post['waybill_content_id'])) {
             throw new BadRequestHttpException("empty_param|waybill_content_id");
         }
-
         $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
         if (!$waybillContent) {
             throw new BadRequestHttpException("waybill content not found");
@@ -257,12 +257,24 @@ class IntegrationWebApi extends WebApi
         if (isset($post['vat_waybill'])) {
             $waybillContent->vat_waybill = (float)$post['vat_waybill'];
         }
+        if (isset($post['outer_unit_id'])) {
+            $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
+        }
+        $koef = null;
+        $quan = null;
         if (isset($post['koef'])) {
-            $waybillContent->koef = (float)$post['koef'];
+            $koef = (float)$post['koef'];
         }
         if (isset($post['quantity_waybill'])) {
-            $waybillContent->quantity_waybill = (int)$post['quantity_waybill'];
+            $quan = (int)$post['quantity_waybill'];
         }
+
+        return $this->handleWaybillContent($waybillContent, $post, $quan, $koef);
+    }
+
+
+    private function handleWaybillContent($waybillContent, $post, $quan, $koef)
+    {
         if (isset($post['product_outer_id'])) {
             $waybillContent->product_outer_id = $post['product_outer_id'];
             $allMap = AllMaps::findOne(['product_id' => $post['product_outer_id']]);
@@ -277,7 +289,6 @@ class IntegrationWebApi extends WebApi
                 }
             }
         }
-
         $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
         if (!$orderContent) {
             if (isset($post['price_without_vat'])) {
@@ -290,11 +301,92 @@ class IntegrationWebApi extends WebApi
                     }
                 }
             }
+        } else {
+            if (isset($post['quantity_waybill']) && !isset($post['koef'])) {
+                $koef = $post['quantity_waybill'] / $orderContent->quantity;
+            }
+            if (isset($post['koef']) && !isset($post['quantity_waybill'])) {
+                $quan = $orderContent->quantity * $post['koef'];
+            }
+        }
+        $waybillContent->quantity_waybill = $quan;
+        $waybillContent->koef = $koef;
+        $waybillContent->save();
+        return ['success' => true, 'koef' => $koef, 'quantity' => $quan];
+    }
+
+
+    /**
+     * integration: Накладная (привязана к заказу) - Добавление позиции
+     * @param array $post
+     * @return array
+     */
+    public function createWaybillContent(array $post): array
+    {
+        if (!isset($post['waybill_id'])) {
+            throw new BadRequestHttpException("empty_param|waybill_id");
+        }
+
+        $waybill = Waybill::findOne(['id' => $post['waybill_id']]);
+        if (!$waybill) {
+            throw new BadRequestHttpException("waybill not found");
+        }
+        if (!$waybill->order_id) {
+            throw new BadRequestHttpException("empty order_id");
+        }
+
+        $waybillContent = new WaybillContent();
+        if (isset($post['waybill_id'])) {
+            $waybillContent->waybill_id = $post['waybill_id'];
+        }
+        if (isset($post['vat_waybill'])) {
+            $waybillContent->vat_waybill = (float)$post['vat_waybill'];
+        }
+        if (isset($post['outer_unit_id'])) {
+            $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
+        }
+        if (isset($post['quantity_waybill'])) {
+            $waybillContent->quantity_waybill = (int)$post['quantity_waybill'];
+        }
+        if (isset($post['product_outer_id'])) {
+            $waybillContent->product_outer_id = $post['product_outer_id'];
+        }
+
+        if (isset($post['price_without_vat'])) {
+            $waybillContent->price_without_vat = (int)$post['price_without_vat'];
+            if (isset($post['vat_waybill'])) {
+                $waybillContent->price_with_vat = (int)($post['price_without_vat'] + ($post['price_without_vat'] * $post['vat_waybill']));
+                if (isset($post['quantity_waybill'])) {
+                    $waybillContent->sum_without_vat = (int)$post['price_without_vat'] * $post['quantity_waybill'];
+                    $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $post['quantity_waybill'];
+                }
+            }
         }
 
         $waybillContent->save();
 
-        return ['success' => true];
+        return ['success' => true, 'waybill_content_id' => $waybillContent->id];
     }
 
+
+    /**
+     * integration: Накладная - Удалить/Убрать позицию
+     * @param array $post
+     * @return array
+     */
+    public function deleteWaybillContent(array $post): array
+    {
+        if (!isset($post['waybill_content_id'])) {
+            throw new BadRequestHttpException("empty_param|waybill_content_id");
+        }
+
+        $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
+        if (!$waybillContent) {
+            throw new BadRequestHttpException("waybill content not found");
+        }
+
+        $waybillContent->delete();
+
+        return ['success' => true];
+    }
 }

@@ -78,6 +78,7 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionCreate()
     {
@@ -118,6 +119,7 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionSearch()
     {
@@ -177,6 +179,7 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionUpdate()
     {
@@ -220,6 +223,7 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionUploadLogo()
     {
@@ -227,7 +231,7 @@ class VendorController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/vendor/get-goods-in-catalog",
+     * @SWG\Post(path="/vendor/personal-catalog-list",
      *     tags={"Vendor/Catalog"},
      *     summary="Список товаров в индивидуальном каталоге",
      *     description="Список товаров в индивидуальном каталоге",
@@ -264,17 +268,62 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
-    public function actionGetGoodsInCatalog()
+    public function actionPersonalCatalogList()
     {
         $this->response = $this->container->get('CatalogWebApi')->getGoodsInCatalog($this->request);
     }
+    /**
+     * @SWG\Post(path="/vendor/temp-catalog-list",
+     *     tags={"Vendor/Catalog"},
+     *     summary="Список товаров во временном каталоге",
+     *     description="Список товаров во временном каталоге",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vendor_id": 3010,
+     *                      "pagination":{
+     *                          "page":1,
+     *                          "page_size":12
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(ref="#/definitions/VendorCatalogGoods"),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionTempCatalogList()
+    {
+        $this->response = $this->container->get('CatalogWebApi')->getGoodsInTempCatalog($this->request);
+    }
 
     /**
-     * @SWG\Post(path="/vendor/upload-personal-catalog",
+     * @SWG\Post(path="/vendor/upload-file",
      *     tags={"Vendor/Catalog"},
      *     summary="Загрузка индивидуального каталога",
-     *     description="Загрузка индивидуального каталога на файловый сервер.
+     *     description="Загрузка файла на файловый сервер.
      * Ответ возвращает 20 строк файла, для предпросмотра, и выбора колонок
      * На этом этапе, в базе не хранится ничего, кроме названия файла
      * vendor_id = ID вендора каталога в который происходит загрузка
@@ -340,10 +389,11 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
-    public function actionUploadPersonalCatalog()
+    public function actionUploadFile()
     {
-        $this->response = $this->container->get('VendorWebApi')->uploadPersonalCatalog($this->request);
+        $this->response = $this->container->get('VendorWebApi')->uploadFile($this->request);
     }
 
     /**
@@ -393,7 +443,7 @@ class VendorController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/vendor/import-personal-catalog",
+     * @SWG\Post(path="/vendor/prepare-temporary",
      *     tags={"Vendor/Catalog"},
      *     summary="Маппинг, валидация и импорт индивидуального каталога",
      *     description="Метод Импортирует файл с сервера во временную таблицу БД, по правилам которые переданы в параметре mapping
@@ -473,14 +523,15 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
-    public function actionImportPersonalCatalog()
+    public function actionPrepareTemporary()
     {
-        $this->response = $this->container->get('VendorWebApi')->importPersonalCatalog($this->request);
+        $this->response = $this->container->get('VendorWebApi')->prepareTemporary($this->request);
     }
 
     /**
-     * @SWG\Post(path="/vendor/update-personal-catalog",
+     * @SWG\Post(path="/vendor/upload-temporary",
      *     tags={"Vendor/Catalog"},
      *     summary="Обновление индивидуального каталога",
      *     description="Обновление индивидуального каталога",
@@ -518,14 +569,15 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
-    public function actionUpdatePersonalCatalog()
+    public function actionUploadTemporary()
     {
-        $this->response = $this->container->get('CatalogWebApi')->updatePersonalCatalog($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->uploadTemporary($this->request);
     }
 
     /**
-     * @SWG\Post(path="/vendor/delete-position-temp-catalog",
+     * @SWG\Post(path="/vendor/delete-item-temporary",
      *     tags={"Vendor/Catalog"},
      *     summary="Удаление позиции из временного каталога при загрузке",
      *     description="Удаление позиции из временного каталога при загрузке",
@@ -541,7 +593,7 @@ class VendorController extends WebApiController
      *                  property="request",
      *                  default={
      *                      "temp_id": 4,
-     *                      "position_id": 10
+     *                      "id": 10
      *                  }
      *              )
      *         )
@@ -564,10 +616,58 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
-    public function actionDeletePositionTempCatalog()
+    public function actionDeleteItemTemporary()
     {
-        $this->response = $this->container->get('CatalogWebApi')->deletePositionTempCatalog($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->deleteItemTemporary($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/vendor/delete-item-personal-catalog",
+     *     tags={"Vendor/Catalog"},
+     *     summary="Удаление позиции из каталога",
+     *     description="Удаление позиции из каталога",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vendor_id": 4,
+     *                      "product_id": 10
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionDeleteItemPersonalCatalog()
+    {
+        $this->response = $this->container->get('CatalogWebApi')->deleteItemPersonalCatalog($this->request);
     }
 
     public function actionImportCustomCatalog()
@@ -585,9 +685,50 @@ class VendorController extends WebApiController
         $this->response = $this->container->get('VendorWebApi')->changeMainIndex($this->request);
     }
 
-    public function actionDeleteTempMainCatalog()
+    /**
+     * @SWG\Post(path="/vendor/cancel-temporary",
+     *     tags={"Vendor/Catalog"},
+     *     summary="Удаление загруженного необработанного каталога",
+     *     description="Удаление загруженного необработанного каталога",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         description="",
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vendor_id": 3674
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                      "result": true
+     *                  }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionCancelTemporary()
     {
-        $this->response = $this->container->get('VendorWebApi')->deleteTempMainCatalog($this->request);
+        $this->response = $this->container->get('VendorWebApi')->cancelTemporary($this->request);
     }
 
     public function actionGetTempMainCatalog()
@@ -657,6 +798,7 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionGetTempDuplicatePosition()
     {
@@ -664,7 +806,7 @@ class VendorController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/vendor/auto-clear-temp-duplicate-position",
+     * @SWG\Post(path="/vendor/auto-delete-duplicate-temporary",
      *     tags={"Vendor/Catalog"},
      *     summary="Автоматическое удаление дублей в каталоге",
      *     description="Автоматическое удаление дублей в каталоге",
@@ -702,10 +844,11 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
-    public function actionAutoClearTempDuplicatePosition()
+    public function actionAutoDeleteDuplicateTemporary()
     {
-        $this->response = $this->container->get('CatalogWebApi')->autoClearTempDuplicatePosition($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->autoDeleteDuplicateTemporary($this->request);
     }
 
 
@@ -749,6 +892,7 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionSetCurrencyForPersonalCatalog()
     {

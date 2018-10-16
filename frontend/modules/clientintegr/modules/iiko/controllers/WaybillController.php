@@ -141,9 +141,22 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         } else {
             $shapka = 1;
         }
-        if (($kolvo_nesopost == 0) and ($shapka == 1)) {
-            $sql = "UPDATE iiko_waybill SET readytoexport = 1, status_id = 4, updated_at = NOW() WHERE id = :w_wid";
-            $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+        if ($kolvo_nesopost == 0) {
+            if ($shapka == 1) {
+                $sql = "UPDATE iiko_waybill SET readytoexport = 1, status_id = 4, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            } else {
+                $sql = "UPDATE iiko_waybill SET readytoexport = 0, status_id = 1, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            }
+        } else {
+            if ($shapka == 1) {
+                $sql = "UPDATE iiko_waybill SET readytoexport = 0, status_id = 1, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            } else {
+                $sql = "UPDATE iiko_waybill SET readytoexport = 0, updated_at = NOW() WHERE id = :w_wid";
+                $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->execute();
+            }
         }
 
         if ($button == 'forever') {
@@ -459,7 +472,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
 
         if (!$model->save()) {
-            var_dump($model->getErrors());
+            /*var_dump($model->getErrors());*/
             exit;
         }
 
@@ -486,12 +499,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             }
 
             $sql = <<<SQL
-            SELECT id, denom as text FROM (
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
+            SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as text FROM (
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 15)
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 15)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 10)
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 10)
                   ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
                      THEN 1
                      ELSE 2
@@ -545,12 +558,12 @@ SQL;
             }
 
             $sql = <<<SQL
-            SELECT id, denom FROM (
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
+            SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as `text` FROM (
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term  $andWhere)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 15)
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 15)
                     UNION
-                  (SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 10)
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 10)
                   ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
                      THEN 1
                      ELSE 2
@@ -583,7 +596,7 @@ SQL;
                 $andWhere = ' AND id in (' . implode(',', $arr) . ')';
             }
 
-            $sql = 'SELECT id, denom FROM iiko_product WHERE is_active = 1 AND org_id = ' . $organizationID . $andWhere . ' ORDER BY denom LIMIT 100';
+            $sql = "SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as `text` FROM iiko_product WHERE is_active = 1 AND org_id = " . $organizationID . $andWhere . ' ORDER BY denom LIMIT 100';
 
             /**
              * @var $db Connection
@@ -631,6 +644,29 @@ SQL;
         $lic = iikoService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $sql = "SELECT COUNT(*) FROM iiko_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
+            $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
+            if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_id === null)) {
+                $shapka = 0;
+            } else {
+                $shapka = 1;
+            }
+            if ($kolvo_nesopost == 0) {
+                if ($shapka == 1) {
+                    $model->readytoexport = 1;
+                    $model->status_id = 4;
+                } else {
+                    $model->readytoexport = 0;
+                    $model->status_id = 1;
+                }
+            } else {
+                if ($shapka == 1) {
+                    $model->readytoexport = 0;
+                    $model->status_id = 1;
+                } else {
+                    $model->readytoexport = 0;
+                }
+            }
             $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');
             $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
             $model->save();
@@ -660,8 +696,7 @@ SQL;
         if ($waybillModeIiko !== '0') {
             iikoWaybill::createWaybill($order_id);
             return $this->redirect([$this->getLastUrl() . 'way=' . $order_id]);
-        }
-        else {
+        } else {
             $model = new iikoWaybill();
             $model->setScenario('handMade');
             $model->order_id = $order_id;

@@ -33,7 +33,7 @@ class DefaultController extends WebApiController
      *                          "type": "INCOMING",
      *                          "status": "CONFIRMED",
      *                          "sender_guid": {"f8805c8f-1da4-4bda-aaca-a08b5d1cab1b"},
-     *                          "product_name": "мясо ягненка",
+     *                          "product_name": {"мясо ягненка"},
      *                          "date":{
      *                              "from":"22.22.1111",
      *                              "to":"22.22.1111"
@@ -195,7 +195,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                  "search": {"sender_name":"часть имени"}
+     *                  "search": {"sender_name":"часть имени", "acquirer_id": 7}
      *                  }
      *              )
      *         )
@@ -241,7 +241,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                  "search": {"product_name":"часть имени"}
+     *                  "search": {"product_name":"часть имени", "acquirer_id": 7}
      *                  }
      *              )
      *         )
@@ -613,6 +613,56 @@ class DefaultController extends WebApiController
     }
 
     /**
+     * @SWG\Post(path="/integration/vetis/partial-acceptance",
+     *     tags={"Integration/vetis"},
+     *     summary="Частичный возврат ВСД",
+     *     description="Частичный возврат ВСД",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "93cdc45a-edc3-472f-bd70-99ffca18edc9",
+     *                      "reason":"Nulla in gravida ex. In hac habitasse platea dictumst.",
+     *                      "amount":"40",
+     *                      "description":"long string description"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      "ede52e76-6091-46bb-9349-87324ee1ae41":true,
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionPartialAcceptance()
+    {
+        $this->response = (new VetisWaybill())->partialAcceptance($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/integration/vetis/repay-vsd",
      *     tags={"Integration/vetis"},
      *     summary="Погашение ВСД",
@@ -726,4 +776,116 @@ class DefaultController extends WebApiController
         $this->response = $this->container->get('UserWebApi')->getUserOrganizationBusinessList();
     }
 
+    /**
+     * @SWG\Post(path="/integration/vetis/get-not-confirmed-vsd",
+     *     tags={"Integration/vetis"},
+     *     summary="Список непогашенных ВСД",
+     *     description="Список непогашенных ВСД",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "org_id": "1234"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      "uuids": {
+     *                          "6e8e9f51-69f8-4c9c-9117-88d5698eb641",
+     *                          "e9d0b1ef-d70a-403c-a76b-0b330c1556d6",
+     *                          "0207005d-2bad-43d9-af69-fc8a54470114",
+     *                          "73dd6fc8-7d07-4e4c-ac21-4707f3611512",
+     *                          "08a8b8ed-0e42-42fd-8528-49d6c215f446",
+     *                          "c79b0223-9136-417f-b41b-a251b01b483f",
+     *                          "6c1e09c9-a109-4e86-90b2-4128b47a17d9",
+     *                          "cda6ac61-f5c9-4783-a257-a674463f57c6",
+     *                          "89558ffc-887a-4d5c-a153-98939855993c",
+     *                          "72aac45f-b082-477d-9d36-ff108ae327b9",
+     *                          "4914f8ff-0c85-494b-a3a5-614509f4e21d",
+     *                          "18eb0b57-82eb-4738-83ff-2ee120be4f8a",
+     *                          "6a781eb8-c314-4026-b40c-02fd80f12e57"
+     *                          },
+     *                      "count": "13"
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionGetNotConfirmedVsd()
+    {
+        $this->response = (new VetisWaybill())->getNotConfirmedVsd($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/get-vsd-pdf",
+     *     tags={"Integration/vetis"},
+     *     summary="Получить ВСД в PDF",
+     *     description="Получить ВСД в PDF",
+     *     produces={"application/json", "application/pdf"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
+     *                      "base64_encode":1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description="Если все прошло хорошо вернет файл закодированый в base64",
+     *         @SWG\Schema(
+     *              default="JVBERi0xLjQKJeLjz9MKMyAwIG9iago8PC9UeXBlIC9QYWdlCi9QYXJlbnQgMSAwIFIKL01lZGlhQm94IFswIDAgNTk1LjI4MCA4NDEuOD"
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionGetVsdPdf()
+    {
+        $result = (new VetisWaybill())->getVsdPdf($this->request);
+        if (is_array($result)) {
+            $this->response = $result;
+        } else {
+            header('Access-Control-Allow-Origin:*');
+            header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
+            header('Access-Control-Allow-Headers:Content-Type, Authorization');
+            exit($result);
+        }
+    }
 }

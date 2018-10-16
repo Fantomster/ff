@@ -64,7 +64,7 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
 
     public static $statuses = [
         self::CREATED => 'Запись создана',
-        self::CREATED_WHEN_QUENCH_VETCERTIFICATE =>  'Запись создана путем гашения ВС (импорт)',
+        self::CREATED_WHEN_QUENCH_VETCERTIFICATE => 'Запись создана путем гашения ВС (импорт)',
         self::CREATED_WHEN_QUENCH_VETDOCUMENT => 'Запись создана путем гашения ВСД',
         self::CREATED_BY_OPERATION => 'Запись создана в результате производственной операции',
         self::CREATED_WHEN_MERGE => 'Запись создана в результате объединения двух или более других',
@@ -168,28 +168,42 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
 
     public static function getDate($date_raw)
     {
-        if (!isset($date_raw))
+        if (!isset($date_raw)) {
             return null;
+        }
 
-        if (isset($date_raw->informalDate))
+        if (isset($date_raw->informalDate)) {
             return $date_raw->informalDate;
+        }
 
-        $first_date = $date_raw->firstDate->year . '-' . $date_raw->firstDate->month;
+        $first_date = $date_raw->firstDate->year . '-' . (($date_raw->firstDate->month < 10) ? "0" : "") . $date_raw->firstDate->month;
 
-        if (isset($date_raw->firstDate->day))
+        if (isset($date_raw->firstDate->day)) {
             $first_date .= '-' . $date_raw->firstDate->day;
+        }
 
-        if (isset($date_raw->firstDate->hour))
-            $first_date .= " ".$date_raw->firstDate->hour . ":00:00";
+        if (!empty($date_raw->firstDate->hour)) {
+            $first_date .= " " . $date_raw->firstDate->hour . ":00:00";
+        }
+
+        if (!empty($date_raw->firstDate->minute)) {
+            $first_date .= " " . $date_raw->firstDate->hour . ":00:00";
+        }
 
         if ($date_raw->secondDate) {
             $second_date = $date_raw->secondDate->year . '-' . $date_raw->secondDate->month;
 
-            if (isset($date_raw->secondDate->day))
+            if (isset($date_raw->secondDate->day)) {
                 $second_date .= '-' . $date_raw->secondDate->day;
+            }
 
-            if (isset($date_raw->secondDate->hour))
-                $second_date .= " ".$date_raw->secondDate->hour . ":00:00";
+            if (!empty($date_raw->secondDate->hour)) {
+                $second_date .= " " . $date_raw->secondDate->hour . ":00:00";
+            }
+
+            if (!empty($date_raw->secondDate->minute)) {
+                $second_date .= " " . $date_raw->secondDate->minute . ":00:00";
+            }
             return 'с ' . $first_date . ' до ' . $second_date;
         }
 
@@ -205,7 +219,7 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
             $enterpriseGuid = $enterpriseGuid ?? mercDicconst::getSetting('enterprise_guid', $org_id);
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercStockEntryList', 'organization_id' => $org_id, 'store_id' => $enterpriseGuid])->one();
-            if($queue == null) {
+            if ($queue == null) {
                 $queue = new RabbitQueues();
                 $queue->consumer_class_name = 'MercStockEntryList';
                 $queue->organization_id = $org_id;
@@ -214,20 +228,18 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
 
             if (!empty($queue->organization_id)) {
                 $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
-            }
-            else {
+            } else {
                 $queueName = $queue->consumer_class_name;
             }
 
-            if(!isset($queue->data_request)) {
+            if (!isset($queue->data_request)) {
                 $data['startDate'] = MercVisits::getLastVisit($org_id, 'MercStockEntryList', $enterpriseGuid);
                 $data['listOptions']['count'] = 100;
                 $data['listOptions']['offset'] = 0;
                 $data['enterpriseGuid'] = $enterpriseGuid;
                 $queue->data_request = json_encode($data);
                 $queue->save();
-            }
-            else {
+            } else {
                 $data = json_decode($queue->data_request, true);
             }
 

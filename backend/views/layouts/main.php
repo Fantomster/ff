@@ -125,6 +125,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'label' => 'Тестовая почта',
                                     'url' => ['/site/send-test-mail'],
                                 ],
+                                [
+                                    'label' => 'Оператор заказов',
+                                    'url' => ['/order/operator'],
+                                ],
                             ],
                         ],
                         [

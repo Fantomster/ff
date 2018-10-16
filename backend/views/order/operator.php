@@ -50,9 +50,9 @@ $wait_second = \common\models\OperatorTimeout::getTimeoutOperator($user_id);
                     'attribute'      => 'created_at',
                     'filter'         => \kartik\date\DatePicker::widget([
                         'attribute' => 'created_at',
-                        'model' => $searchModel,
-                        'language' => 'ru',
-                        'type' => 1
+                        'model'     => $searchModel,
+                        'language'  => 'ru',
+                        'type'      => 1
                     ]),
                     'value'          => function ($data) {
                         return \Yii::$app->formatter->asDatetime($data['created_at'], 'php:d M Y, H:i:s');
@@ -211,9 +211,9 @@ $wait_second = \common\models\OperatorTimeout::getTimeoutOperator($user_id);
                     'attribute'      => 'operator_updated_at',
                     'filter'         => \kartik\date\DatePicker::widget([
                         'attribute' => 'operator_updated_at',
-                        'model' => $searchModel,
-                        'language' => 'ru',
-                        'type' => 1
+                        'model'     => $searchModel,
+                        'language'  => 'ru',
+                        'type'      => 1
                     ]),
                     'value'          => function ($data) {
                         return \Yii::$app->formatter->asDatetime($data['operator_updated_at'], 'php:d M Y, H:i:s');
@@ -228,63 +228,65 @@ $wait_second = \common\models\OperatorTimeout::getTimeoutOperator($user_id);
     </div>
 
 <?php ob_start(); ?>
+    
+        $(function () {
 
-    $(function () {
+            var t = setInterval(function () {
+                var val = $('.timeout_set').html() - 1;
+                if (val <= 0) {
+                    clearInterval(t);
+                    $('.timeout_set').parent().remove();
+                } else {
+                    $('.timeout_set').html(val);
+                }
+            }, 1000);
 
-    var t = setInterval(function () {
-    var val = $('.timeout_set').html() - 1;
-    if (val <= 0) {
-    clearInterval(t);
-    $('.timeout_set').parent().remove();
-    } else {
-    $('.timeout_set').html(val);
-    }
-    }, 1000);
+            $('.save-comment').click(function () {
+                var id = $(this).data('order_id');
+                var value = $('#comment_' + id).val();
+                $.post('<?= \yii\helpers\Url::to('/ru/order/operator-change-attribute') ?>', {
+                    id: id,
+                    name: 'comment',
+                    value: value
+                }, function () {
+                    return false;
+                });
+            });
 
-    $('.save-comment').click(function () {
-    var id = $(this).data('order_id');
-    var value = $('#comment_' + id).val();
-    $.post('<?= \yii\helpers\Url::to('/ru/order/operator-change-attribute') ?>', {
-    id: id,
-    name: 'comment',
-    value: value
-    }, function () {
-    return false;
-    });
-    });
-
-    $('.change-status').on('change', function (e) {
-    var this_ = $(this);
-    var id = $(this).data('order_id');
-    var value = $(this).val();
-    $.post('<?= \yii\helpers\Url::to('/ru/order/operator-change-attribute') ?>', {
-    id: id,
-    name: 'status_call_id',
-    value: value
-    }, function () {
-    if (value == 3) {
-    this_.attr('disabled', 'disabled');
-    $('#comment_' + id).attr('disabled', 'disabled');
-    $('#comment_button_' + id).attr('disabled', 'disabled');
-    $('#set_button_' + id).attr('disabled', 'disabled');
-    }
-    });
-    });
+            $('.change-status').on('change', function (e) {
+                var this_ = $(this);
+                var id = $(this).data('order_id');
+                var value = $(this).val();
+                $.post('<?= \yii\helpers\Url::to('/ru/order/operator-change-attribute') ?>', {
+                    id: id,
+                    name: 'status_call_id',
+                    value: value
+                }, function () {
+                    if (value == 3) {
+                        this_.attr('disabled', 'disabled');
+                        $('#comment_' + id).attr('disabled', 'disabled');
+                        $('#comment_button_' + id).attr('disabled', 'disabled');
+                        $('#set_button_' + id).attr('disabled', 'disabled');
+                    }
+                    return false;
+                });
+            });
 
 
-    $('.operator-set-to-order').click(function () {
-    var id = $(this).data('order_id');
-    $.post('<?= \yii\helpers\Url::to('/ru/order/operator-set-to-order') ?>', {
-    id: id
-    }, function (data) {
-    if (data) {
-    alert(data);
-    } else {
-    location.reload();
-    }
-    });
-    })
-    });
+            $('.operator-set-to-order').click(function () {
+                var id = $(this).data('order_id');
+                $.post('<?= \yii\helpers\Url::to('/ru/order/operator-set-to-order') ?>', {
+                    id: id
+                }, function (data) {
+                    if (data) {
+                        alert(data);
+                    } else {
+                        location.reload();
+                    }
+                    return false;
+                });
+            })
+        });
 
 <?php
 $this->registerJs(ob_get_clean());

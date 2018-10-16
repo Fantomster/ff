@@ -8,9 +8,9 @@ use common\models\User;
 use frontend\modules\clientintegr\components\CreateWaybillByOrderInterface;
 use common\helpers\DBNameHelper;
 use yii\helpers\ArrayHelper;
-
 use Yii;
 use common\models\OrderContent;
+
 // use common\models\User;
 
 /**
@@ -38,33 +38,34 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
 
     const STATUS_UNLOCKED = 0;
     const STATUS_LOCKED = 1;
-    
-
 
     /**
      * @inheritdoc
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return 'rk_waybill';
     }
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['order_id', 'doc_date'], 'required'],
-            [['corr_rid', 'store_rid', 'status_id','num_code'], 'integer'],
+            [['corr_rid', 'store_rid', 'status_id', 'num_code'], 'integer'],
             [['store_rid'], 'number', 'min' => 0],
-                //     [['comment'], 'string', 'max' => 255],
-            [['store_rid', 'org','vat_included','text_code','num_code','note'],'safe']
+            //     [['comment'], 'string', 'max' => 255],
+            [['store_rid', 'org', 'vat_included', 'text_code', 'num_code', 'note'], 'safe']
         ];
     }
 
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
             'id' => 'ID',
             'order_id' => 'Заказ',
@@ -77,14 +78,16 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
         ];
     }
 
-    public static function getStatusArray() {
+    public static function getStatusArray()
+    {
         return [
             RkAccess::STATUS_UNLOCKED => 'Активен',
             RkAccess::STATUS_LOCKED => 'Отключен',
         ];
     }
 
-    public function getCorr() {
+    public function getCorr()
+    {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         $acc = ($this->org === null) ? Yii::$app->user->identity->organization_id : $this->org;
@@ -93,19 +96,21 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
 
-    public function getStore() {
+    public function getStore()
+    {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         $acc = ($this->org === null) ? Yii::$app->user->identity->organization_id : $this->org;
         return RkStoretree::find()
-            ->andWhere('id = :store_rid and acc = :acc', [':store_rid' => $this->store_rid, ':acc' => $acc])
-            // ->andWhere('type = 2')
-            ->one();
+                        ->andWhere('id = :store_rid and acc = :acc', [':store_rid' => $this->store_rid, ':acc' => $acc])
+                        // ->andWhere('type = 2')
+                        ->one();
 
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
-    
-    public function getStatus() {
+
+    public function getStatus()
+    {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         return RkWaybillstatus::find()->andWhere('id = :id', [':id' => $this->status_id])->one();
@@ -116,7 +121,8 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
     /**
      * @return Order
      */
-    public function getOrder() {
+    public function getOrder()
+    {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         return Order::find()->andWhere('id = :id', [':id' => $this->order_id])->one();
@@ -124,10 +130,11 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
     }
 
-    public function getFinalDate() {
+    public function getFinalDate()
+    {
 
         $fdate = $this->order->actual_delivery ? $this->order->actual_delivery :
-            ( $this->order->requested_delivery ? $this->order->requested_delivery :
+                ( $this->order->requested_delivery ? $this->order->requested_delivery :
                 $this->order->updated_at);
 
         // return Yii::$app->formatter->asDatetime($fdate, "php:j M Y");
@@ -141,39 +148,38 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
     {
         return $this->hasMany(RkWaybilldata::className(), ['waybill_id' => 'id']);
     }
-    
+
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
-    
-            if ($this->doc_date){
-            $this->doc_date = Yii::$app->formatter->asDate($this->doc_date, 'yyyy-MM-dd');
+
+            if ($this->doc_date) {
+                $this->doc_date = Yii::$app->formatter->asDate($this->doc_date, 'yyyy-MM-dd');
             } else {
-            $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd');    
+                $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd');
             }
 
             if (empty($this->text_code))
-                    $this->text_code = 'mixcart';
+                $this->text_code = 'mixcart';
 
             if (empty($this->num_code))
-                    $this->num_code = $this->order_id;
+                $this->num_code = $this->order_id;
 
             return true;
         }
     }
 
-    
-    public function afterSave($insert, $changedAttributes) {
+    public function afterSave($insert, $changedAttributes)
+    {
         parent::afterSave($insert, $changedAttributes);
-        
-         if ($insert) {
-             $this->createWaybillData();
+
+        if ($insert) {
+            $this->createWaybillData();
         }
-        
     }
 
-
-    protected function createWaybillData() {
+    protected function createWaybillData()
+    {
 
         $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
 
@@ -183,17 +189,17 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
 
             if ($this->store_rid === null) {
                 $records = OrderContent::find()
-                    ->where(['order_id' => $this->order_id])
-                    ->leftJoin('`'.$dbName.'`.all_map','order_content.product_id = `'.$dbName.'`.`all_map`.`product_id` and `'.$dbName.'`.all_map.service_id = 1')
-                  //  ->andWhere('product_id in ( select product_id from ' . $dbName . '.all_map where service_id = 1 and store_rid is null)')
-                    ->andWhere('`'.$dbName.'`.all_map.store_rid is null')
-                    ->all();
+                        ->where(['order_id' => $this->order_id])
+                        ->leftJoin('`' . $dbName . '`.all_map', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 1')
+                        //  ->andWhere('product_id in ( select product_id from ' . $dbName . '.all_map where service_id = 1 and store_rid is null)')
+                        ->andWhere('`' . $dbName . '`.all_map.store_rid is null')
+                        ->all();
             } else {
                 $records = OrderContent::find()
-                    ->where(['order_id' => $this->order_id])
-                    ->leftJoin('`'.$dbName.'`.`all_map`','order_content.product_id = `'.$dbName.'`.`all_map`.`product_id` and `'.$dbName.'`.all_map.service_id = 2')
-                    ->andWhere('`'.$dbName.'`.all_map.store_rid ='.$this->store_rid)
-                    ->all();
+                        ->where(['order_id' => $this->order_id])
+                        ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2')
+                        ->andWhere('`' . $dbName . '`.all_map.store_rid =' . $this->store_rid)
+                        ->all();
             }
         } else {
             $records = OrderContent::findAll(['order_id' => $this->order_id]);
@@ -202,26 +208,34 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
 
         $transaction = \Yii::$app->db_api->beginTransaction();
         try {
-            $taxVat =  RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() ??  1800;
+            $taxVat = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() ?? 1800;
 
             foreach ($records as $record) {
                 $wdmodel = new RkWaybilldata();
                 ///$wdmodel->setScenario('autoWaybill');
                 $wdmodel->waybill_id = $this->id;
                 $wdmodel->product_id = $record->product_id;
-                $wdmodel->quant = $record->quantity;
-                $wdmodel->sum = round($record->price * $record->quantity, 2);
-                $wdmodel->defquant = $record->quantity;
-                $wdmodel->defsum = round($record->price * $record->quantity, 2);
-                $wdmodel->vat = $taxVat;
+                if (isset($record->invoiceContent)) {
+                    $wdmodel->quant = $record->invoiceContent->quantity;
+                    $wdmodel->sum = $record->invoiceContent->sum_without_nds;
+                    $wdmodel->defquant = $record->invoiceContent->quantity;
+                    $wdmodel->defsum = $record->invoiceContent->sum_without_nds;
+                    $wdmodel->vat = $record->invoiceContent->percent_nds * 100;
+                } else {
+                    $wdmodel->quant = $record->quantity;
+                    $wdmodel->sum = round($record->price * $record->quantity, 2);
+                    $wdmodel->defquant = $record->quantity;
+                    $wdmodel->defsum = round($record->price * $record->quantity, 2);
+                    $wdmodel->vat = $taxVat;
+                }
                 $wdmodel->org = $this->org;
                 $wdmodel->koef = 1;
                 // New check mapping
                 $ch = AllMaps::find()
-                    ->andWhere('product_id = :prod', ['prod' => $record->product_id])
-                    ->andWhere('org_id = :org', ['org' => $this->org])
-                    ->andWhere('service_id = 1')
-                    ->one();
+                        ->andWhere('product_id = :prod', ['prod' => $record->product_id])
+                        ->andWhere('org_id = :org', ['org' => $this->org])
+                        ->andWhere('service_id = 1')
+                        ->one();
 
                 if ($ch) {
                     if (isset($ch->serviceproduct_id)) {
@@ -237,7 +251,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
                         $wdmodel->munit_rid = $ch->unit_rid;
                     }
 
-                    if (isset($ch->vat)) {
+                    if (isset($ch->vat) && !isset($record->invoiceContent)) {
                         $wdmodel->vat = $ch->vat;
                     }
                 }
@@ -250,17 +264,14 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
                 }
             }
             $transaction->commit();
-
         } catch (\Exception $ex) {
             \yii::error($ex->getTraceAsString());
             $transaction->rollback();
         }
-
-
     }
-    
 
-    public static function getDb() {
+    public static function getDb()
+    {
         return \Yii::$app->db_api;
     }
 
@@ -278,15 +289,15 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
 
         $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
 
-       /* $stories2 = AllMaps::find()->select('store_rid')->andWhere('org_id = :org and service_id = 1 and product_id in (
-        SELECT product_id from '.$dbName.'.order_content where order_id = :order  
-        ) and is_active = 1 ',[':org' => $order->client_id, ':order' => $order_id])->groupBy('store_rid')->column(); */
+        /* $stories2 = AllMaps::find()->select('store_rid')->andWhere('org_id = :org and service_id = 1 and product_id in (
+          SELECT product_id from '.$dbName.'.order_content where order_id = :order
+          ) and is_active = 1 ',[':org' => $order->client_id, ':order' => $order_id])->groupBy('store_rid')->column(); */
 
         $db = Yii::$app->db_api;
-        $sql = ' SELECT m.store_rid FROM `'.$dbName.'`.`order_content` o '.
-               ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 1 AND m.org_id = '.$order->client_id.
-               ' WHERE o.order_id = '.$order_id.
-               ' GROUP BY store_rid';
+        $sql = ' SELECT m.store_rid FROM `' . $dbName . '`.`order_content` o ' .
+                ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 1 AND m.org_id = ' . $order->client_id .
+                ' WHERE o.order_id = ' . $order_id .
+                ' GROUP BY store_rid';
 
         $stories = $db->createCommand($sql)->queryAll();
         $stories = ArrayHelper::getColumn($stories, 'store_rid');
@@ -301,13 +312,13 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
             $model->order_id = $order_id;
             $model->status_id = 1;
             $model->org = $order->client_id;
-            $model->text_code = $num.'-mixcart';
+            $model->text_code = $num . '-mixcart';
             $model->num_code = $order_id;
             $model->store_rid = $store;
             $model->corr_rid = isset($contra) ? $contra->id : null;
 
-            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
-         //   $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s'); //date('d.m.Y', strtotime($model->doc_date));
+            //   $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
 
             if (!$model->save()) {
                 $num++;
@@ -316,7 +327,6 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
             }
 
             $num++;
-
         }
         return $res;
     }
@@ -325,4 +335,5 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
     {
         // TODO: Implement exportWaybill() method.
     }
+
 }

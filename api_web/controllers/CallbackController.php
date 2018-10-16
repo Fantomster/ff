@@ -94,4 +94,58 @@ class CallbackController extends WebApiNoAuthController
 
     }
 
+    /**
+     * @SWG\Post(path="/callback/send-waybill",
+     *     tags={"Callback"},
+     *     summary="Колбек на выгрузку накладной",
+     *     description="Колбек на выгрузку накладной",
+     *     produces={"application/xml"},
+     *     @SWG\Parameter(
+     *         name="t",
+     *         in="body",
+     *         required=false,
+     *         @SWG\Schema (
+     *             @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
+     *             @SWG\Schema(
+     *                 default={{}}
+     *             )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *             default={{}}
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionSendWaybill()
+    {
+
+        $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
+        if (!$task_id) {
+            SyncLog::trace('Required variable "task_id" is wrong!');
+            throw new BadRequestHttpException("empty_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
+        }
+        SyncLog::trace('Task_id" is valid!');
+
+        $mcTask = OuterTask::findOne(['inner_guid' => $task_id]);
+        if (!$mcTask || $mcTask->int_status_id != OuterTask::STATUS_REQUESTED) {
+            SyncLog::trace('Required variable "task_id" is wrong!');
+            throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
+        }
+
+        $this->response = $this->container->get('NoAuthWebApi')->sendWaybill($mcTask);
+
+    }
+
 }

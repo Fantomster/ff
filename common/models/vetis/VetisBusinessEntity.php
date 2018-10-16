@@ -129,7 +129,6 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInte
 
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
-            echo $e->getMessage() . PHP_EOL;
         }
     }
 }

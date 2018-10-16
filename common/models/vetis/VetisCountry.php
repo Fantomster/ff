@@ -162,7 +162,6 @@ class VetisCountry extends \yii\db\ActiveRecord implements  UpdateDictInterface
                 ->addRabbitQueue(json_encode($data));
 
         } catch (\Exception $e) {
-            Yii::error($e->getMessage());
         }
     }
 }

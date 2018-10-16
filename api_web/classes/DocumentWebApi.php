@@ -332,7 +332,9 @@ class DocumentWebApi extends \api_web\components\WebApi
             ],
         ]);
 
-        $dataProvider->sort->defaultOrder = [$sort_field => $order];
+        if(isset($order)) {
+            $dataProvider->sort->defaultOrder = [$sort_field => $order];
+        }
 
         $result = $dataProvider->getModels();
         foreach ($result as $model) {

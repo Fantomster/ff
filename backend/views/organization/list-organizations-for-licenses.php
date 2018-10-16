@@ -21,12 +21,6 @@ $gridColumns = [
         },
     ],
     [
-        'attribute' => 'type_id',
-        'value' => 'type.name',
-        'label' => 'Тип',
-        'filter' => common\models\OrganizationType::getList(),
-    ],
-    [
         'format' => 'raw',
         'attribute' => 'name',
         'value' => function ($data) {
@@ -40,7 +34,7 @@ $gridColumns = [
         'format' => 'raw',
         'filter' => common\models\Organization::getStatusList(),
         'value' => function ($data) {
-            return Html::a('<span class="btn btn-sm btn-warning">Добавить лицензии</span>', ['organization/add-license', 'id' => $data->id]);
+            return Html::a('<span class="btn btn-sm btn-warning">Добавить лицензии</span>', ['organization/add-license', 'id' => $data['id']]);
         },
     ],
 ];
@@ -61,7 +55,7 @@ $gridColumns = [
     <?=
     GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
+        //'filterModel' => $searchModel,
         'columns' => $gridColumns,
     ]);
     ?>

@@ -793,6 +793,7 @@ SQL;
             } catch (\Throwable $e) {
                 //Выставляем статус обратно
                 $transaction->rollBack();
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
                 return ['success' => false, 'error' => $e->getMessage()];
             }
         }

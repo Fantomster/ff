@@ -87,6 +87,10 @@ class VetisWaybillSearch extends MercVsd
                 a.sender_guid,
                 a.status,
                 a.type,
+                case when a.recipient_guid = b.value then \'incoming\'
+                     when a.sender_guid = b.value  then \'outgoing\'
+                     else \'nevedomaya\'
+                end vsd_direction,
                 case when c.id is not null then 
                   (
                   select max(date_doc) 
@@ -115,10 +119,16 @@ class VetisWaybillSearch extends MercVsd
             if (!is_null($row['order_id'])) {
                 $arOrders[$row['order_id']] = $row['order_id'];
             }
+            $arIncomingOutgoing[$row['uuid']] = $row['vsd_direction'];
         }
 
 
-        return ['uuids' => $arUuids, 'groups' => $arOrders, 'count' => ceil($arWhereAndCount['count'] / $pageSize)];
+        return [
+            'uuids' => $arUuids,
+            'groups' => $arOrders,
+            'count' => ceil($arWhereAndCount['count'] / $pageSize),
+            'arIncOut' => $arIncomingOutgoing,
+        ];
     }
 
     /**

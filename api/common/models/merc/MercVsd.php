@@ -44,6 +44,7 @@ use Yii;
  * @property string $producer_guid
  * @property int $low_grade_cargo
  * @property string $raw_data
+ * @property string $last_error
  */
 class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 {

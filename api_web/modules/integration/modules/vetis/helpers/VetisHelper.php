@@ -11,7 +11,9 @@ namespace api_web\modules\integration\modules\vetis\helpers;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
 use api_web\classes\UserWebApi;
+use api_web\helpers\WaybillHelper;
 use common\helpers\DBNameHelper;
+use common\models\IntegrationSettingValue;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use yii\db\Query;
@@ -368,12 +370,21 @@ class VetisHelper
     }
 
 
+    /**
+     * @param $userStatus
+     * @param $uuid
+     * @return int
+     */
     public function setMercVsdUserStatus($userStatus, $uuid)
     {
         $where = ['uuid' => $uuid];
         return MercVsd::updateAll(['user_status' => $userStatus], $where);
     }
-    
+
+    /**
+     * @return \frontend\modules\clientintegr\modules\merc\components\VsdHttp
+     * @throws \Exception
+     */
     public function generateVsdHttp()
     {
         return new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
@@ -385,5 +396,33 @@ class VetisHelper
             'password'       => mercDicconst::getSetting("vetis_password", $this->org_id),
             'firmGuid'       => mercDicconst::getSetting("issuer_id", $this->org_id),
         ]);
+    }
+
+
+    /**
+     * @param $error
+     * @param $uuid
+     * @return int
+     */
+    public function setLastError($error, $uuid)
+    {
+        $where = ['uuid' => $uuid];
+        return MercVsd::updateAll(['last_error' => $error], $where);
+    }
+
+    /**
+     * @param $uuid
+     * @param $orgId
+     * @return string
+     */
+    public function getVsdDirection($uuid, $orgId){
+        $guid = IntegrationSettingValue::getSettingsByServiceId(WaybillHelper::MERC_SERVICE_ID,
+            $orgId, ['enterprise_guid']);
+        $model = MercVsd::findOne(['uuid' => $uuid]);
+        if ($guid == $model->recipient_guid){
+            return 'incoming';
+        }
+
+        return 'outgoing';
     }
 }

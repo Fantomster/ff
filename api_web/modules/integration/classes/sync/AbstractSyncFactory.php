@@ -257,6 +257,7 @@ abstract class AbstractSyncFactory extends WebApi
             RkwsUnit::$OperDenom => RkwsUnit::class,
             RkwsStore::$OperDenom => RkwsStore::class,
             RkwsProduct::$OperDenom => RkwsProduct::class,
+            RkwsWaybill::$OperDenom => RkwsWaybill::class
 
         ];
     }

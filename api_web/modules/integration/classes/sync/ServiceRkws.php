@@ -12,6 +12,7 @@
 
 namespace api_web\modules\integration\classes\sync;
 
+use api\common\models\RkDicconst;
 use Yii;
 use yii\db\Transaction;
 use yii\db\mssql\PDO;
@@ -410,11 +411,11 @@ class ServiceRkws extends AbstractSyncFactory
     public function sendWaybill($request): array
     {
         # 1. Проверяем наличие id накладной
-        if (!isset($request['waybill_id'])) {
+        if (!isset($request['id'])) {
             throw new BadRequestHttpException('empty waybill id');
         }
 
-        $waybill_id = $request['waybill_id'];
+        $waybill_id = $request['id'];
 
         # 2. Ищем накладную
         $waybill = \api\common\models\RkWaybill::findOne(['id' => $waybill_id]);
@@ -454,14 +455,16 @@ class ServiceRkws extends AbstractSyncFactory
 
         $exportApproved = (RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() : 0;
 
-        $xml = Yii::$app->view->render($this->dirResponseXml . '/' . ucfirst($this->index),
+        $xml = Yii::$app->view->render($this->dirResponseXml . '/' . ucfirst('Waybill'),
             [
                 'waybill' => $waybill,
                 'records' => $records,
                 'exportApproved' => $exportApproved,
                 'code' => $this->licenseCode,
+                'guid' => $guid,
+                'cb' => $cb,
             ]);
-
+        
         $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
 
         if ($xmlData) {
@@ -478,7 +481,7 @@ class ServiceRkws extends AbstractSyncFactory
                     'int_status_id' => OuterTask::STATUS_REQUESTED,
                     'outer_guid' => $xml['@attributes']['taskguid'],
                     'broker_version' => $xml['@attributes']['version'],
-                    'oper_code' => $oper->id,
+                    'oper_code' => 34//$oper->id,
                 ]);
                 if ($task->save()) {
                     $transaction->commit();

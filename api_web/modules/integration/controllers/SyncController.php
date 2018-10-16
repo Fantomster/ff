@@ -12,6 +12,7 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\modules\integration\classes\sync\ServiceRkws;
 use Yii;
 use yii\web\BadRequestHttpException;
 use yii\web\UnauthorizedHttpException;
@@ -131,6 +132,53 @@ class SyncController extends WebApiController
         # 3. Load integration script with env and post params
         $this->response = (new SyncServiceFactory($this->request['service_id'], $this->request['params'], $task_id))->syncResult;
 
+    }
+
+    /**
+     * @SWG\Post(path="/integration/sync/send-waybill",
+     *     tags={"/integration/sync/send-waybill"},
+     *     summary="Метод отправки накладных в R-keeper",
+     *     description="Метод отправки накладных в R-keeper",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 415
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                       "1": true,
+     *                       "2": true,
+     *                       "3": false,
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionSendWaybill()
+    {
+        $this->response = (new ServiceRkws('rkws', 1))->sendWaybill($this->request);
     }
 
 }

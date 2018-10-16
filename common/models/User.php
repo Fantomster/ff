@@ -720,7 +720,7 @@ class User extends \amnah\yii2\user\models\User
         $roleID = self::getRelationRole($roleID, $organizationID);
         $rel->role_id = $roleID;
         $rel->save();
-        return true;
+        return $rel->id;
     }
 
     /**

@@ -209,10 +209,10 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         $params_sql = [];
         $where_all = " AND client_id  = :business_id";
-        if (isset($post['search']['business_id'])) {
-            if(RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
+        if (isset($post['search']['business_id']) && !empty($post['search']['business_id'])) {
+           if(RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
                 $params_sql[':business_id'] = $post['search']['business_id'];
-            }
+           }
             else
             {
                 throw new BadRequestHttpException("business unavailable to current user");
@@ -223,12 +223,12 @@ class DocumentWebApi extends \api_web\components\WebApi
             $params_sql[':business_id'] = $this->user->organization_id;
         }
 
-        if (isset($post['search']['waybill_status'])) {
+        if (isset($post['search']['waybill_status']) && !empty($post['search']['waybill_status'])) {
             $where_all .= " AND waybill_status = :waybill_status";
             $params_sql[':waybill_status'] = $post['search']['waybill_status'];
         }
 
-        if (isset($post['search']['doc_number'])) {
+        if (isset($post['search']['doc_number']) && !empty($post['search']['doc_number'])) {
             $where_all .= " AND doc_number = :doc_number";
             $params_sql[':doc_number'] = $post['search']['doc_number'];
         }
@@ -270,16 +270,14 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
 
-        if (isset($post['search']['vendor'])) {
-            $where_all .= " AND vendor_id in (:vendors)";
+        if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
             $vendors = implode("', '", $post['search']['vendor']);
-            $params_sql[':vendors'] = "'" . $vendors . "'";
+            $where_all .= " AND vendor in ($vendors)";
         }
 
-        if (isset($post['search']['store'])) {
-            $where_all .= " AND store_id in (:store)";
+        if (isset($post['search']['store']) && !empty($post['search']['store'])) {
             $stories = implode(",", $post['search']['store']);
-            $params_sql[':stories'] = $stories;
+            $where_all .= " AND store in ($stories)";
         }
 
         $sort_field = "";
@@ -302,7 +300,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             UNION ALL
             SELECT id, '" . self::TYPE_ORDER_EMAIL . "' as type, organization_id as client_id, null as waybill_status, date as order_date, null as waybill_date,
             null as waybill_number, number as doc_number, vendor_id as vendor, null as store   
-            FROM .integration_invoice WHERE order_id is null
+            FROM integration_invoice WHERE order_id is null
         ) as c
         UNION ALL
         SELECT id, '" . self::TYPE_WAYBILL . "' as type, acquirer_id as client_id, bill_status_id as waybill_status, null as order_date, doc_date as waybill_date, 
@@ -311,7 +309,8 @@ class DocumentWebApi extends \api_web\components\WebApi
         WHERE id is not null $where_all
        ";
 
-        //$count = \Yii::$app->db->createCommand("select COUNT(*) from ($sql) as cc",$params_sql)->queryScalar();
+       //$count = \Yii::$app->db->createCommand("select COUNT(*) from ($sql) as cc",$params_sql);
+        //var_dump($count->rawSql); die();
         $dataProvider = new SqlDataProvider([
             'sql' => $sql,
             'params' => $params_sql,

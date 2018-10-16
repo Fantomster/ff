@@ -4,6 +4,8 @@ namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogTempContent;
+use common\models\ManagerAssociate;
+use common\models\notifications\EmailNotification;
 use common\models\RelationUserOrganization;
 use Yii;
 use api_web\exceptions\ValidationException;
@@ -160,6 +162,13 @@ class VendorWebApi extends \api_web\components\WebApi
                     }
                     $organization->save();
                     $user->setOrganization($organization)->save();
+                    $relId = $user->createRelationUserOrganization($user->organization->id, $user->role_id);
+                    if (!ManagerAssociate::find()->where(['manager_id' => $user->id, 'organization_id' => $user->organization->id])->exists()) {
+                        $managerAssociate = new ManagerAssociate();
+                        $managerAssociate->manager_id = $user->id;
+                        $managerAssociate->organization_id = $this->user->organization->id;
+                        $managerAssociate->save();
+                    }
                     $get_supp_org_id = $organization->id;
                     $currentOrganization = $currentUser->organization;
                     if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
@@ -564,7 +573,7 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|mapping');
         }
 
-        if (!CatalogTempContent::find()->where(['temp_id' => $catalog->id])->exists()){
+        if (!CatalogTempContent::find()->where(['temp_id' => $tempCatalog->id])->exists()){
             $request['mapping'] = isset($request['mapping']) ? array_flip($request['mapping']) : null;
             $mapping = $request['mapping'] ?? $tempCatalog->cat->mapping;
             if (is_string($mapping)) {
@@ -581,8 +590,6 @@ class VendorWebApi extends \api_web\components\WebApi
                 $tempCatalog->cat->mapping = $tempCatalog->mapping;
                 $tempCatalog->cat->save();
                 $tempCatalog->save();
-
-                return ['result' => true];
             }
         }
         $dubles = $this->container->get('CatalogWebApi')->getTempDuplicatePosition($request);

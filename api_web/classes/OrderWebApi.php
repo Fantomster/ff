@@ -352,6 +352,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
+     * @throws \yii\base\InvalidArgumentException
      */
     public function addProductComment(array $post)
     {
@@ -400,13 +401,14 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Exception
      */
     public function getInfo(array $post)
     {
         if (empty($post['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');
         }
-
+        /**@var Order $order*/
         $order = Order::find()->where(['id' => $post['order_id']])->one();
 
         if (empty($order)) {
@@ -464,19 +466,15 @@ class OrderWebApi extends \api_web\components\WebApi
         # корректируем данные заказа на данные из накладной если это документ EDI
         # editedBy Basil A Konakov 2018-09-17 [DEV-1872]
         if ($order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
-            $deltaTotalSumm = 0;
-            $deltaQuantity = 0;
             $productsEdo = [];
+            /**@var OrderContent $model*/
             foreach ($products as $k => $model) {
                 $wbContent = WaybillContent::findOne(['order_content_id' => $model->id]);
                 if ($wbContent) {
-                    $deltaTotalSumm += (($wbContent->quantity_waybill * $wbContent->price_waybill)
-                        - ($model->quantity * $model->price));
-                    $deltaQuantity += $wbContent->quantity_waybill - $model->quantity;
                     $model->quantity = $wbContent->quantity_waybill;
-                    $model->price = $wbContent->price_waybill;
+                    $model->price = $wbContent->price_with_vat;
                 }
-                $productsEdo[$model->edi_number][$k] = $model;
+                $productsEdo[$k] = $model;
             }
             $products = $productsEdo;
         }
@@ -499,6 +497,7 @@ class OrderWebApi extends \api_web\components\WebApi
     /**
      * История заказов
      * @param array $post
+     * @throws \Exception
      * @return array
      */
     public function getHistory(array $post)
@@ -599,10 +598,9 @@ class OrderWebApi extends \api_web\components\WebApi
         $models = $dataProvider->models;
         if (!empty($models)) {
             /**
-             * @var $model Order
+             * @var Order $model
              */
             foreach ($models as $model) {
-
                 if ($model->status == OrderStatus::STATUS_DONE) {
                     $date = $model->completion_date ?? $model->actual_delivery;
                 } else {
@@ -613,13 +611,15 @@ class OrderWebApi extends \api_web\components\WebApi
                     $model->completion_date = $date;
                     $model->save(false);
                 }
-
-                $date = (!empty($date) ? \Yii::$app->formatter->asDate($date, "dd.MM.yyyy") : null);
-
-                $orders[] = [
+                if (!empty($date)){
+                    $obDateTime = new \DateTime($date);
+                    $date = $obDateTime->format("d.m.Y H:i:s");
+                }
+                $obCreateAt = new \DateTime($model->created_at);
+                $orderInfo = [
                     'id' => (int)$model->id,
-                    'created_at' => \Yii::$app->formatter->asDate($model->created_at, "dd.MM.yyyy"),
-                    'completion_date' => $date,
+                    'created_at' => $obCreateAt->format("d.m.Y H:i:s"),
+                    'completion_date' => $date ?? null,
                     'status' => (int)$model->status,
                     'status_text' => $model->statusText,
                     'vendor' => $model->vendor->name,
@@ -627,6 +627,13 @@ class OrderWebApi extends \api_web\components\WebApi
                     'create_user' => $model->createdByProfile->full_name ?? '',
                     'accept_user' => $model->acceptedByProfile->full_name ?? ''
                 ];
+                if (!empty($model->orderContent)){
+                    $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el){
+                        return $el->edi_number;
+                    }, $model->orderContent)));
+                    $orderInfo = array_merge($orderInfo, ['edi_number' => $arWaybillNames]);
+                }
+                $orders[] = $orderInfo;
             }
         }
 

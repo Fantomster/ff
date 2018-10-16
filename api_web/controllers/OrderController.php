@@ -1528,7 +1528,8 @@ class OrderController extends WebApiController
      *                              "quantity_waybill": 1,
      *                              "product_outer_id": 4822,
      *                              "price_without_vat": 35000,
-     *                              "vat_waybill": 0.18
+     *                              "vat_waybill": 0.18,
+     *                              "outer_unit_id": 5
      *                          }
      *              )
      *         )
@@ -1538,7 +1539,9 @@ class OrderController extends WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                "success": true
+     *                "success": true,
+     *                "koef": 0.2,
+     *                "quantity": 1
      *              }
      *          )
      *     ),

@@ -14,11 +14,23 @@ use Yii;
  * @property string $type Тип настройки - вып. список, полее ввода и т.п.
  * @property int $is_active Флаг активности объекта
  * @property string $item_list Список значение по умолчанию в формате JSON, для отображения при начальном выборе, например { 1: "Включено", 2: "Выключено"}
+ * @property int $service_id Идентификатор сервиса в таблице all_service
  *
  * @property IntegrationSettingValue[] $integrationSettingValues
  */
-class IntegrationSetting extends yii\db\ActiveRecord
+class IntegrationSetting extends \yii\db\ActiveRecord
 {
+
+    const TYPE_LIST = [
+        1 => 'dropdown_list',
+        2 => 'input_text',
+        3 => 'password',
+        4 => 'dropdown_list',
+        5 => 'radio',
+        6 => 'input_text',
+        7 => 'checkbox',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -60,7 +72,7 @@ class IntegrationSetting extends yii\db\ActiveRecord
             'comment' => 'Комментарий - подробное описание настройки, отображается на фронт',
             'type' => 'Тип настройки - вып. список, полее ввода и т.п.',
             'is_active' => 'Флаг активности объекта',
-            'item_list' => 'Список значение по умолчанию в формате JSON, для отображения при начальном выборе, '.
+            'item_list' => 'Список значение по умолчанию в формате JSON, для отображения при начальном выборе, ' .
                 'например { 1: \"Включено\", 2: \"Выключено\"}',
         ];
     }
@@ -71,20 +83,6 @@ class IntegrationSetting extends yii\db\ActiveRecord
     public function getIntegrationSettingValues()
     {
         return $this->hasMany(IntegrationSettingValue::class, ['setting_id' => 'id']);
-    }
-
-    public function behaviors()
-    {
-        return [
-            'timestamp' => [
-                'class' => yii\behaviors\TimestampBehavior::class,
-                'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
-                    yii\db\ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
-                ],
-                'value' => \gmdate('Y-m-d H:i:s'),
-            ],
-        ];
     }
 
 }

@@ -70,14 +70,20 @@ class EdiController extends WebApiController
      *              default={
      *                  "orders": {
      *                      {
-     *                          "id": 12,
-     *                          "created_at": "10.10.2016",
-     *                          "status_updated_at": "10.10.2016",
-     *                          "status": 1,
-     *                          "status_text": "Ожидает подтверждения поставщика",
-     *                          "vendor": "POSTAVOK.NET CORPORATION",
-     *                          "create_user": "Admin",
-     *                          "comment": "Коментарий утерян в ящике стола"
+     *                          "id": 6064,
+     *                          "created_at": "2017-09-27T03:00:00+03:00",
+     *                          "completion_date": "2018-10-16T10:05:24+03:00",
+     *                          "status": 8,
+     *                          "status_text": "Отправлен поставщиком",
+     *                          "vendor": "vasilkai2017@mail.ru",
+     *                          "currency_id": 1,
+     *                          "create_user": "Капотник",
+     *                          "accept_user": "",
+     *                          "edi_number": {
+     *                              "1",
+     *                              "2",
+     *                              "3"
+     *                          }
      *                      },
      *                      {
      *                          "id": 14,
@@ -108,6 +114,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderHistory()
     {
@@ -710,5 +717,81 @@ class EdiController extends WebApiController
     public function actionOrderCreateGuide()
     {
         $this->response = $this->container->get('GuideWebApi')->createFromOrder($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/edi/status-list",
+     *     tags={"edi"},
+     *     summary="Статусы заказа EDI",
+     *     description="Статусы заказа EDI",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "id": 1,
+     *                      "title": "Ожидает подтверждения поставщика"
+     *                  },
+     *                  {
+     *                      "id": 3,
+     *                      "title": "Выполняется"
+     *                  },
+     *                  {
+     *                      "id": 8,
+     *                      "title": "Отправлен поставщиком"
+     *                  },
+     *                  {
+     *                      "id": 9,
+     *                      "title": "Приемка завершена"
+     *                  },
+     *                  {
+     *                      "id": 4,
+     *                      "title": "Завершен"
+     *                  },
+     *                  {
+     *                      "id": 6,
+     *                      "title": "Отклонен поставщиком"
+     *                  },
+     *                  {
+     *                      "id": 2,
+     *                      "title": "Ожидает подтверждения клиента"
+     *                  },
+     *                  {
+     *                      "id": 5,
+     *                      "title": "Отклонен поставщиком"
+     *                  }
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException||ValidationException"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionStatusList()
+    {
+        $result = [];
+        foreach ((new \common\models\Order)->getStatusListEdo() as $key => $value) {
+            $result[] = ['id' => (int)$key, 'title' => $value];
+        }
+        $this->response = $result;
     }
 }

@@ -30,23 +30,28 @@ class VetisHelper
     private $doc;
     /**@var MercVsd model */
     private $vsdModel;
+    /**@var int organization id */
+    private $org_id;
     /**@var array $expertizeList расшифровки статусов экспертиз */
     public static $expertizeList = [
-        'UNKNOWN'     => 'the_result_is_unknown', //Результат неизвестен
-        'UNDEFINED'   => 'the_result_can_not_be_determined', //Результат невозможно определить (не нормируется)
-        'POSITIVE'    => 'positive_result', //Положительный результат
-        'NEGATIVE'    => 'negative_result', //Отрицательный результат
+        'UNKNOWN' => 'the_result_is_unknown', //Результат неизвестен
+        'UNDEFINED' => 'the_result_can_not_be_determined', //Результат невозможно определить (не нормируется)
+        'POSITIVE' => 'positive_result', //Положительный результат
+        'NEGATIVE' => 'negative_result', //Отрицательный результат
         'UNFULFILLED' => 'not_conducted', //Не проводилось
-        'VSERAW'      => 'VSE_subjected_the_raw_materials_from_which_the_products_were_manufactured', // ВСЭ подвергнуто сырьё, из которого произведена продукция
-        'VSEFULL'     => 'the_products_are_fully', // Продукция подвергнута ВСЭ в полном объеме
+        'VSERAW' => 'VSE_subjected_the_raw_materials_from_which_the_products_were_manufactured', // ВСЭ подвергнуто сырьё, из которого произведена продукция
+        'VSEFULL' => 'the_products_are_fully', // Продукция подвергнута ВСЭ в полном объеме
     ];
     /**@var array $ordersStatuses статусы для заказов */
     public static $ordersStatuses = [
         'WITHDRAWN' => 'vsd_status_withdrawn', //'Сертификаты аннулированы',
         'CONFIRMED' => 'vsd_status_confirmed', //'Сертификаты ожидают погашения',
-        'UTILIZED'  => 'vsd_status_utilized', //'Сертификаты погашены',
+        'UTILIZED' => 'vsd_status_utilized', //'Сертификаты погашены',
     ];
 
+    /**
+     * VetisHelper constructor.
+     */
     public function __construct()
     {
         $this->org_id = \Yii::$app->user->identity->organization_id;
@@ -163,6 +168,11 @@ class VetisHelper
         }
     }
 
+    /**
+     * @param      $param
+     * @param null $default
+     * @return null
+     */
     public function isSetDef($param, $default = null)
     {
         if (isset($param) && !empty($param)) {
@@ -171,6 +181,12 @@ class VetisHelper
         return $default;
     }
 
+    /**
+     * @param $var
+     * @param $arParams
+     * @param $arLabels
+     * @return array
+     */
     public function set(&$var, $arParams, $arLabels)
     {
         $arGoodParams = [];
@@ -249,14 +265,14 @@ class VetisHelper
         $statuses = explode(',', $strStatuses);
         if (count($statuses) > 1) {
             return [
-                'id'   => 'CONFIRMED',
+                'id' => 'CONFIRMED',
                 'text' => \Yii::t('api_web', self::$ordersStatuses['CONFIRMED'])
             ];
         } else {
             $status = current($statuses);
             if ($status) {
                 return [
-                    'id'   => $status,
+                    'id' => $status,
                     'text' => \Yii::t('api_web', self::$ordersStatuses[$status])
                 ];
             }
@@ -303,15 +319,71 @@ class VetisHelper
      * @return array|\yii\db\ActiveRecord[]
      * @throws \Exception
      */
-    public function getAvailableVsd($uuids){
-        $enterpriseGuids = [];
+    public function getAvailableVsd($uuids)
+    {
         $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
-        foreach ($orgIds['result'] as $orgId) {
-            $enterpriseGuids[] = mercDicconst::getSetting('enterprise_guid', $orgId['id']);
-        }
+        $arOrgIds = array_map(function ($el) {
+            return $el['id'];
+        }, $orgIds['result']);
 
         return MercVsd::find()->select(['uuid', 'recipient_guid', 'sender_guid'])
-            ->andWhere(['recipient_guid' =>$enterpriseGuids])
+            ->leftJoin('merc_pconst mc', 'mc.const_id=10 and mc.value=merc_vsd.recipient_guid')
+            ->where(['mc.org' => $arOrgIds])
             ->andWhere(['uuid' => $uuids])->indexBy('uuid')->all();
+    }
+
+
+    /**
+     * @param null $enterpriseGuids
+     * @return array
+     * @throws \Exception
+     */
+    public function getNotConfirmedVsd($enterpriseGuids = null)
+    {
+        if (!$enterpriseGuids) {
+            $enterpriseGuids = $this->getEnterpriseGuids();
+        }
+        $query = (new Query())->select(['GROUP_CONCAT(uuid) as uuids', 'COUNT(*) as count'])->from('merc_vsd')
+            ->where(['status' => 'CONFIRMED', 'recipient_guid' => $enterpriseGuids])->one(\Yii::$app->db_api);
+
+        return [
+            'uuids' => explode(',', $query['uuids']),
+            'count' => $query['count'],
+        ];
+    }
+
+    /**
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getEnterpriseGuids()
+    {
+        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
+        foreach ($orgIds['result'] as $orgId) {
+            $entGuid = mercDicconst::getSetting('enterprise_guid', $orgId['id']);
+            $enterpriseGuids[$entGuid] = $entGuid;
+        }
+
+        return $enterpriseGuids;
+    }
+
+
+    public function setMercVsdUserStatus($userStatus, $uuid)
+    {
+        $where = ['uuid' => $uuid];
+        return MercVsd::updateAll(['user_status' => $userStatus], $where);
+    }
+    
+    public function generateVsdHttp()
+    {
+        return new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
+            'authLink'       => \Yii::$app->params['vtsHttp']['authLink'],
+            'vsdLink'        => \Yii::$app->params['vtsHttp']['vsdLink'],
+            'pdfLink'        => \Yii::$app->params['vtsHttp']['pdfLink'],
+            'chooseFirmLink' => \Yii::$app->params['vtsHttp']['chooseFirmLink'],
+            'username'       => mercDicconst::getSetting("vetis_login", $this->org_id),
+            'password'       => mercDicconst::getSetting("vetis_password", $this->org_id),
+            'firmGuid'       => mercDicconst::getSetting("issuer_id", $this->org_id),
+        ]);
     }
 }

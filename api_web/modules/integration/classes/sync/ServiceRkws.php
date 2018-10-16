@@ -13,8 +13,10 @@
 namespace api_web\modules\integration\classes\sync;
 
 use Yii;
-use yii\db\mssql\PDO;
 use yii\db\Transaction;
+use yii\db\mssql\PDO;
+use yii\web\BadRequestHttpException;
+use creocoder\nestedsets\NestedSetsBehavior;
 use common\models\AllServiceOperation;
 use common\models\OuterTask;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
@@ -23,7 +25,6 @@ use api\common\models\RkAccess;
 use api\common\models\RkSession;
 use api\common\models\RkServicedata;
 use api_web\modules\integration\classes\SyncLog;
-use yii\web\BadRequestHttpException;
 
 class ServiceRkws extends AbstractSyncFactory
 {
@@ -64,6 +65,9 @@ class ServiceRkws extends AbstractSyncFactory
     const COOK_AUTH_STR_BEGIN = 'Set-Cookie';
 
     public static $OperDenom;
+
+    public $useNestedSets = false;
+    public $nestedSetsSpecialValuesForElements = [];
 
     /** @var array $additionalXmlFields Поле во входящем xml -> поле в нашей модели данных */
     public $additionalXmlFields = [];
@@ -415,59 +419,124 @@ class ServiceRkws extends AbstractSyncFactory
         # 1. Проверяем что данный типа справочника для организации доступен
         $orgDic = $this->getOrganizationDictionary($task->service_id, $task->org_id);
 
-        # 2. Получаем новые и уже существующие данные
+        # 2. Получаем массив входящих данных
         $arrayNew = $this->makeArrayFromReceivedDictionaryXmlData($data);
 
+        # 3. Таблица справочника
         $entityTableName = $this->entityTableName;
         /** @var yii\db\ActiveRecord $entityTableName */
-        $arrayInit = $entityTableName::findAll(['org_id' => $task->org_id, 'service_id' => $task->service_id]);
 
-        # 3. Фиксируем вспомагательные переменные для контроля ошибок записи/обновления данных в БД
+        # 4. Фиксируем вспомагательные переменные для контроля ошибок записи/обновления данных в БД
         $transaction = $this->createTransaction();
         $saveCount = 0;
         $saveErr = [];
 
-        # 4. Перебираем новые данные и пробуем добавить/обновить записи в БД
-        foreach ($arrayNew as $elementNew) {
-            $entity = $entityTableName::findOne(['org_id' => $task->org_id, 'outer_uid' => $elementNew['rid'],
-                'service_id' => $task->service_id]);
-            if (!$entity) {
-                $entity = new $entityTableName();
-                $entity->org_id = $task->org_id;
-                $entity->outer_uid = $elementNew['rid'];
-                $entity->service_id = $task->service_id;
+        if ($this->useNestedSets) {
+
+            # 5.1.1. Обнуляем все существующие данные
+            $entityTableName::updateAll(['is_deleted' => 1], ['org_id' => $task->org_id, 'service_id' => $this->serviceId]);
+
+            # 5.1.2. Получаем сведения о существовании записи root для nestedSets
+            $rootModel = $entityTableName::findOne(['org_id' => $task->org_id, 'service_id' => $this->serviceId, 'level' => 0]);
+            if ($rootModel && isset($rootModel->outer_uid)) {
+                $root_rid = $rootModel->outer_uid;
+            } else {
+                $root_rid = md5($task->org_id . $this->serviceId . microtime(true));
             }
-            /** @noinspection PhpUndefinedFieldInspection */
-            foreach ($this->additionalXmlFields as $k => $v) {
-                if(isset($elementNew[$k])) {
-                    $entity->$v = $elementNew[$k];
+            array_unshift($arrayNew, ['rid' => $root_rid, 'name' => 'Все', 'parent' => null]);
+
+            # 5.1.3. Перебираем данные
+            $list = [];
+
+            foreach ($arrayNew as $k => $v) {
+                $model = $entityTableName::findOne(['outer_uid' => $v['rid'], 'org_id' => $task->org_id, 'service_id' => $this->serviceId]);
+                if (!$model) {
+                    $model = new $entityTableName([
+                        'outer_uid' => $v['rid'],
+                        'org_id' => $task->org_id,
+                        'service_id' => $this->serviceId,
+                    ]);
+                }
+                if (!$v['parent']) {
+                    $v['parent'] = $root_rid;
+                } elseif ($this->nestedSetsSpecialValuesForElements) {
+                    foreach ($this->nestedSetsSpecialValuesForElements as $kk => $vv) {
+                        $model->$kk = $vv;
+                    }
+                }
+                $list[$v['rid']] = $model;
+                /** @noinspection PhpUndefinedFieldInspection */
+                $model->is_deleted = 0;
+                /** @noinspection PhpUndefinedFieldInspection */
+                $model->name = $v['name'];
+                /** @var $model NestedSetsBehavior */
+                if ($v['rid'] == $root_rid) {
+                    /** @noinspection PhpUndefinedFieldInspection */
+                    if (!$model->id) {
+                        $model->makeRoot();
+                    }
+                } elseif (!$v['parent']) {
+                    $model->prependTo($list[$root_rid]);
+                } else {
+                    $model->prependTo($list[$v['parent']]);
+                }
+                /** @var yii\db\ActiveRecord $model */
+                if ($model->validate() && $model->save()) {
+                    $saveCount++;
+                } else {
+                    /** @noinspection PhpUndefinedFieldInspection */
+                    $saveErr['dicElement'][$model->id][] = $model->errors;
                 }
             }
-            /** @noinspection PhpUndefinedFieldInspection */
-            $entity->is_deleted = 0;
-            if ($entity->save()) {
-                $saveCount++;
-            } else {
-                /** @noinspection PhpUndefinedFieldInspection */
-                $saveErr['dicElement'][$entity->id][] = $entity->errors;
-            }
-            if (/** @noinspection PhpUndefinedFieldInspection */
-            array_key_exists($entity->id, $arrayInit)) {
-                /** @noinspection PhpUndefinedFieldInspection */
-                unset($arrayInit[$entity->id]);
-            }
-        }
 
-        # 5. Перебираем существующие данные которые подлежат удалению
-        foreach ($arrayInit as $element) {
-            /** @noinspection PhpUndefinedFieldInspection */
-            $element->is_deleted = 1;
-            if ($element->save()) {
-                $saveCount++;
-            } else {
+        } else {
+
+            # 5.2.1. Надохим все имеющиеся данные
+            $arrayInit = $entityTableName::findAll(['org_id' => $task->org_id, 'service_id' => $task->service_id]);
+
+            # 5.2.2. Перебираем новые данные и пробуем добавить/обновить записи в БД
+            foreach ($arrayNew as $elementNew) {
+                $entity = $entityTableName::findOne(['org_id' => $task->org_id, 'outer_uid' => $elementNew['rid'],
+                    'service_id' => $task->service_id]);
+                if (!$entity) {
+                    $entity = new $entityTableName();
+                    $entity->org_id = $task->org_id;
+                    $entity->outer_uid = $elementNew['rid'];
+                    $entity->service_id = $task->service_id;
+                }
                 /** @noinspection PhpUndefinedFieldInspection */
-                $saveErr['dicElement'][$element->id][] = $element->errors;
+                foreach ($this->additionalXmlFields as $k => $v) {
+                    if (isset($elementNew[$k])) {
+                        $entity->$v = $elementNew[$k];
+                    }
+                }
+                /** @noinspection PhpUndefinedFieldInspection */
+                $entity->is_deleted = 0;
+                if ($entity->save()) {
+                    $saveCount++;
+                } else {
+                    /** @noinspection PhpUndefinedFieldInspection */
+                    $saveErr['dicElement'][$entity->id][] = $entity->errors;
+                }
+                if (/** @noinspection PhpUndefinedFieldInspection */
+                array_key_exists($entity->id, $arrayInit)) {
+                    /** @noinspection PhpUndefinedFieldInspection */
+                    unset($arrayInit[$entity->id]);
+                }
             }
+
+            # 5.2.3. Перебираем существующие данные которые подлежат удалению
+            foreach ($arrayInit as $element) {
+                /** @noinspection PhpUndefinedFieldInspection */
+                $element->is_deleted = 1;
+                if ($element->save()) {
+                    $saveCount++;
+                } else {
+                    /** @noinspection PhpUndefinedFieldInspection */
+                    $saveErr['dicElement'][$element->id][] = $element->errors;
+                }
+            }
+
         }
 
         # 6. Фиксируем изменения в текущей задаче
@@ -495,7 +564,6 @@ class ServiceRkws extends AbstractSyncFactory
         $transaction->rollback();
         SyncLog::trace('Fixed save errors: ' . json_encode($saveErr));
         return self::XML_LOAD_RESULT_FAULT;
-
     }
 
 }

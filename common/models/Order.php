@@ -316,7 +316,7 @@ class Order extends \yii\db\ActiveRecord
 
     public function getStatusText()
     {
-        if ($this->service_id == WaybillHelper::EDI_SERVICE_ID) {
+        if ($this->service_id == WaybillHelper::EDI_SERVICE_ID || $this->service_id == WaybillHelper::VENDOR_DOC_MAIL_SERVICE_ID) {
             $statusList = self::getStatusListEdo();
         } else {
             $statusList = self::getStatusList();

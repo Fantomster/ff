@@ -34,6 +34,7 @@ class WaybillHelper
     const MERC_SERVICE_ID = 4;
     /**@var int const for EDI service id in all_service table */
     const EDI_SERVICE_ID = 6;
+    const VENDOR_DOC_MAIL_SERVICE_ID = 3;
     const WAYBILL_COMPARED = 'compared';
     const WAYBILL_FORMED = 'formed';
     const WAYBILL_ERROR = 'error';

@@ -137,8 +137,8 @@ class SyncController extends WebApiController
     /**
      * @SWG\Post(path="/integration/sync/send-waybill",
      *     tags={"/integration/sync/send-waybill"},
-     *     summary="Метод отправки накладных в R-keeper",
-     *     description="Метод отправки накладных в R-keeper",
+     *     summary="Метод выгрузки накладных во внешнюю систему",
+     *     description="Метод выгрузки накладных во внешнюю систему",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -149,6 +149,7 @@ class SyncController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
+     *                      "service_id": 1,
      *                      "ids": {
      *                          1,
      *                          2,
@@ -182,7 +183,21 @@ class SyncController extends WebApiController
      */
     public function actionSendWaybill()
     {
-        $this->response = (new ServiceRkws('rkws', 1))->sendWaybill($this->request);
+            # 2.2.1. Check root script params
+            if (!isset($this->request['service_id']) || !$this->request['service_id'] || !is_int($this->request['service_id'])) {
+                SyncLog::trace('"Service ID" is required and empty!');
+                throw new BadRequestHttpException("empty_param|service_id");
+            }
+            if (!isset($this->request['ids']) || !is_array($this->request['ids']) || !$this->request['ids']) {
+                SyncLog::trace('Required variable "ids" is empty!');
+                throw new BadRequestHttpException("empty_param|ids");
+            }
+            SyncLog::trace('Fix non-callback operation scenario');
+
+        # 3. Load integration script with env and post params
+        $factory = (new SyncServiceFactory($this->request['service_id'], [],SyncServiceFactory::TASK_SYNC_GET_LOG))->factory($this->request['service_id']);
+
+        $this->response = $factory->sendWaybill($this->request);
     }
 
 }

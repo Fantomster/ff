@@ -598,10 +598,9 @@ class OrderWebApi extends \api_web\components\WebApi
         $models = $dataProvider->models;
         if (!empty($models)) {
             /**
-             * @var  Order $model
+             * @var Order $model
              */
             foreach ($models as $model) {
-
                 if ($model->status == OrderStatus::STATUS_DONE) {
                     $date = $model->completion_date ?? $model->actual_delivery;
                 } else {
@@ -617,7 +616,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $obDateTime->format("d.m.Y H:i:s");
                 }
                 $obCreateAt = new \DateTime($model->created_at);
-                $orders[] = [
+                $orderInfo = [
                     'id' => (int)$model->id,
                     'created_at' => $obCreateAt->format("d.m.Y H:i:s"),
                     'completion_date' => $date ?? null,
@@ -628,6 +627,13 @@ class OrderWebApi extends \api_web\components\WebApi
                     'create_user' => $model->createdByProfile->full_name ?? '',
                     'accept_user' => $model->acceptedByProfile->full_name ?? ''
                 ];
+                if (!empty($model->orderContent)){
+                    $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el){
+                        return $el->edi_number;
+                    }, $model->orderContent)));
+                    $orderInfo = array_merge($orderInfo, ['edi_number' => $arWaybillNames]);
+                }
+                $orders[] = $orderInfo;
             }
         }
 

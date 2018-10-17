@@ -3,6 +3,7 @@
 namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 
 use api\common\models\merc\MercVsd;
+use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use console\modules\daemons\classes\MercProductItemList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
@@ -272,6 +273,8 @@ class mercuryApi extends baseApi
 
             //Пишем лог
             mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+
+            (new VetisHelper())->setLastError($result, $UUID);
 
             if ($status == 'COMPLETED') {
                 $doc[] = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;

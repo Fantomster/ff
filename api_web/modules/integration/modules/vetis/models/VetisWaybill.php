@@ -246,7 +246,7 @@ class VetisWaybill extends WebApi
                 throw new BadRequestHttpException('ВСД не принадлежит данной организации: ' . $request['uuids']);
             }
         } catch (\Throwable $t) {
-            $this->helper->setLastError($t->getMessage(), $request['uuids']);
+//            $this->helper->setLastError($t->getMessage(), $request['uuids']);
         }
         $vsd_direction = $this->helper->getVsdDirection($request['uuids'], $this->user->organization_id);
 
@@ -283,7 +283,7 @@ class VetisWaybill extends WebApi
                 $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_PARTIALLY_ACCEPTED, $uuid);
             }
         } catch (\Throwable $t) {
-            $this->helper->setLastError($t->getMessage(), $uuid);
+//            $this->helper->setLastError($t->getMessage(), $uuid);
         }
         $vsd_direction = $this->helper->getVsdDirection($uuid, $this->user->organization_id);
 
@@ -319,7 +319,7 @@ class VetisWaybill extends WebApi
                 $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_RETURNED, $uuid);
             }
         } catch (\Throwable $t) {
-            $this->helper->setLastError($t->getMessage(), $uuid);
+//            $this->helper->setLastError($t->getMessage(), $uuid);
         }
         $vsd_direction = $this->helper->getVsdDirection($uuid, $this->user->organization_id);
 

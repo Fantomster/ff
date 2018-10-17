@@ -2,14 +2,23 @@
 
 namespace backend\controllers;
 
+use common\models\OperatorCall;
+use common\models\OperatorTimeout;
 use common\models\OrderStatus;
+use common\models\Organization;
 use common\models\search\OrderContentSearch;
+use common\models\search\OrderOperatorSearch;
+use common\models\User;
 use Yii;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\Role;
 use common\models\OrderAttachment;
 use backend\models\OrderSearch;
+use yii\data\ActiveDataProvider;
+use yii\data\SqlDataProvider;
+use yii\db\ActiveQuery;
+use yii\db\Query;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -29,18 +38,18 @@ class OrderController extends Controller
     public function behaviors()
     {
         return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
+            'verbs'  => [
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
                         'actions' => [
                             'index',
@@ -51,10 +60,13 @@ class OrderController extends Controller
                             'ajax-show-products',
                             'ajax-add-to-order',
                             'assign',
-                            'operator'
+                            'operator',
+                            'operator-check-timeout',
+                            'operator-change-attribute',
+                            'operator-set-to-order'
                         ],
-                        'allow' => true,
-                        'roles' => [
+                        'allow'   => true,
+                        'roles'   => [
                             Role::ROLE_ADMIN,
 //                            Role::ROLE_FKEEPER_OBSERVER,
                         ],
@@ -123,7 +135,7 @@ class OrderController extends Controller
         //$dataProvider->sort = ['defaultOrder' => ['created_at' => SORT_DESC]];
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
@@ -142,7 +154,7 @@ class OrderController extends Controller
         $dataProvider = $searchModel->search($params);
 
         return $this->render('view', [
-            'model' => $model,
+            'model'        => $model,
             'dataProvider' => $dataProvider
         ]);
     }
@@ -245,12 +257,12 @@ class OrderController extends Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         if (Yii::$app->request->isPjax) {
             return $this->renderAjax('with-attachments', [
-                'searchModel' => $searchModel,
+                'searchModel'  => $searchModel,
                 'dataProvider' => $dataProvider,
             ]);
         } else {
             return $this->render('with-attachments', [
-                'searchModel' => $searchModel,
+                'searchModel'  => $searchModel,
                 'dataProvider' => $dataProvider,
             ]);
         }
@@ -277,7 +289,73 @@ class OrderController extends Controller
      */
     public function actionOperator()
     {
-        return $this->render('operator');
+        $searchModel = new OrderOperatorSearch();
+        $searchModel->user_id = \Yii::$app->user->getId();
+        $searchModel->load(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        return $this->render('operator', ['dataProvider' => $dataProvider, 'searchModel' => $searchModel, 'user_id' => $searchModel->user_id]);
+    }
+
+    /**
+     * Изменение атрибутов звонка
+     * @return string
+     */
+    public function actionOperatorChangeAttribute()
+    {
+        if (\Yii::$app->request->isAjax) {
+            $id = Yii::$app->request->post('id');
+            $nameAttribute = Yii::$app->request->post('name');
+            $valueAttribute = Yii::$app->request->post('value');
+            $model = OperatorCall::findOne($id);
+            $model->{$nameAttribute} = $valueAttribute;
+            if (!$model->save()) {
+                print_r($model->getFirstErrors());
+            }
+        }
+    }
+
+    /**
+     * Установить оператора к заказу
+     * @return string
+     */
+    public function actionOperatorSetToOrder()
+    {
+        if (\Yii::$app->request->isAjax) {
+
+            $wait = OperatorTimeout::getTimeoutOperator(Yii::$app->user->getId());
+            if($wait > 0) {
+                exit("Нужно подождать {$wait} секунд.");
+            }
+
+            $id = Yii::$app->request->post('id');
+            $model = OperatorCall::findOne($id);
+            if (empty($model)) {
+                $model = new OperatorCall([
+                    'order_id'       => $id,
+                    'operator_id'    => Yii::$app->user->getId(),
+                    'status_call_id' => 1
+                ]);
+
+                if (!$model->save()) {
+                    exit('ERROR save OrderController->actionOperatorSetToOrder!');
+                }
+
+                $countCall = OperatorCall::find()
+                    ->where(['operator_id' => Yii::$app->user->getId()])
+                    ->andWhere('status_call_id != 3')->count();
+
+                $modelTimeout = OperatorTimeout::findOne(['operator_id' => Yii::$app->user->getId()]);
+                if (empty($modelTimeout)) {
+                    $modelTimeout = new OperatorTimeout(['operator_id' => Yii::$app->user->getId()]);
+                }
+                $modelTimeout->timeout_at = \gmdate('Y-m-d H:i:s');
+                $modelTimeout->timeout = $countCall * (10 + $countCall);
+                $modelTimeout->save();
+            } else {
+                $user = User::findOne($model->operator_id);
+                exit('Оператор уже установлен: ' . $user->profile->full_name);
+            }
+        }
     }
 
     /**

@@ -2,12 +2,13 @@
 
 /**
  * Class ServiceIiko
- * @package api_web\module\integration\sync
+ *
+ * @package   api_web\module\integration\sync
  * @createdBy Basil A Konakov
  * @createdAt 2018-09-20
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
+ * @author    Mixcart
+ * @module    WEB-API
+ * @version   2.0
  */
 
 namespace api_web\modules\integration\classes\sync;
@@ -61,6 +62,7 @@ class ServiceIiko extends AbstractSyncFactory
 
     /**
      * Метод отправки накладной
+     *
      * @param $request
      * @return array
      * @throws \Exception
@@ -85,9 +87,8 @@ class ServiceIiko extends AbstractSyncFactory
         if ($api->auth()) {
             /**@var Waybill $model */
             foreach ($records as $model) {
+                $transaction = \Yii::$app->db_api->beginTransaction();
                 try {
-                    $transaction = \Yii::$app->db_api->beginTransaction();
-
                     $response = $api->sendWaybill($model);
                     if ($response !== true) {
                         \Yii::error('Error during sending waybill');

@@ -148,41 +148,41 @@ class CronController extends Controller
 
                         $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
                         $es_product->attributes = [
-                            "product_id" => $product_id,
-                            "product_image" => $product_image,
-                            "product_name" => $product_name,
-                            "product_supp_id" => $product_supp_id,
-                            "product_supp_name" => $product_supp_name,
-                            "product_price" => $product_price,
-                            "product_currency" => $product_currency,
-                            "product_category_id" => $product_category_id,
-                            "product_category_name" => $product_category_name,
-                            "product_category_sub_id" => $product_category_sub_id,
+                            "product_id"                => $product_id,
+                            "product_image"             => $product_image,
+                            "product_name"              => $product_name,
+                            "product_supp_id"           => $product_supp_id,
+                            "product_supp_name"         => $product_supp_name,
+                            "product_price"             => $product_price,
+                            "product_currency"          => $product_currency,
+                            "product_category_id"       => $product_category_id,
+                            "product_category_name"     => $product_category_name,
+                            "product_category_sub_id"   => $product_category_sub_id,
                             "product_category_sub_name" => $product_category_sub_name,
-                            "product_show_price" => $product_show_price,
-                            "product_created_at" => $product_created_at,
-                            "product_rating" => $product_rating,
-                            "product_partnership" => $product_partnership
+                            "product_show_price"        => $product_show_price,
+                            "product_created_at"        => $product_created_at,
+                            "product_rating"            => $product_rating,
+                            "product_partnership"       => $product_partnership
                         ];
                         $es_product->save();
                     } else {
                         $es_product = new \common\models\ES\Product();
                         $es_product->attributes = [
-                            "product_id" => $product_id,
-                            "product_image" => $product_image,
-                            "product_name" => $product_name,
-                            "product_supp_id" => $product_supp_id,
-                            "product_supp_name" => $product_supp_name,
-                            "product_price" => $product_price,
-                            "product_currency" => $product_currency,
-                            "product_category_id" => $product_category_id,
-                            "product_category_name" => $product_category_name,
-                            "product_category_sub_id" => $product_category_sub_id,
+                            "product_id"                => $product_id,
+                            "product_image"             => $product_image,
+                            "product_name"              => $product_name,
+                            "product_supp_id"           => $product_supp_id,
+                            "product_supp_name"         => $product_supp_name,
+                            "product_price"             => $product_price,
+                            "product_currency"          => $product_currency,
+                            "product_category_id"       => $product_category_id,
+                            "product_category_name"     => $product_category_name,
+                            "product_category_sub_id"   => $product_category_sub_id,
                             "product_category_sub_name" => $product_category_sub_name,
-                            "product_show_price" => $product_show_price,
-                            "product_created_at" => $product_created_at,
-                            "product_rating" => $product_rating,
-                            "product_partnership" => $product_partnership
+                            "product_show_price"        => $product_show_price,
+                            "product_created_at"        => $product_created_at,
+                            "product_rating"            => $product_rating,
+                            "product_partnership"       => $product_partnership
                         ];
                         $es_product->save();
                     }
@@ -229,10 +229,10 @@ class CronController extends Controller
 //            $category->save();    
 //            }else{
             $category->attributes = [
-                "category_id" => $category_id,
-                "category_slug" => $category_slug,
+                "category_id"     => $category_id,
+                "category_slug"   => $category_slug,
                 "category_sub_id" => $category_sub_id,
-                "category_name" => $category_name
+                "category_name"   => $category_name
             ];
             $category->save();
 //            }
@@ -243,7 +243,7 @@ class CronController extends Controller
     {
         $suppliers = Organization::find()
             ->where([
-                'type_id' => Organization::TYPE_SUPPLIER,
+                'type_id'    => Organization::TYPE_SUPPLIER,
                 'white_list' => Organization::WHITE_LIST_ON])
             ->andWhere(['in', 'es_status', [
                 Organization::ES_UPDATED,
@@ -280,10 +280,10 @@ class CronController extends Controller
                 if (\common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->count() == 0) {
                     $es_supplier = new \common\models\ES\Supplier();
                     $es_supplier->attributes = [
-                        "supplier_id" => $supplier->id,
-                        "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                        "supplier_name" => $supplier->name,
-                        "supplier_rating" => $rating,
+                        "supplier_id"          => $supplier->id,
+                        "supplier_image"       => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                        "supplier_name"        => $supplier->name,
+                        "supplier_rating"      => $rating,
                         "supplier_partnership" => $supplier->partnership
                     ];
                     $es_supplier->save();
@@ -291,9 +291,9 @@ class CronController extends Controller
                 if (\common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->count() > 0) {
                     $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->one();
                     $es_supplier->attributes = [
-                        "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                        "supplier_name" => $supplier->name,
-                        "supplier_rating" => $rating,
+                        "supplier_image"       => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                        "supplier_name"        => $supplier->name,
+                        "supplier_rating"      => $rating,
                         "supplier_partnership" => $supplier->partnership
                     ];
                     $es_supplier->save();
@@ -339,7 +339,7 @@ class CronController extends Controller
             $address_json = json_decode(file_get_contents($address_url));
             if (!empty($address_json->results[0]->address_components)) {
                 $address_data = $address_json->results[0]->address_components;
-                $location = array();
+                $location = [];
                 $location['locality'] = '';
                 $location['admin_1'] = '';
                 $location['country'] = '';
@@ -448,8 +448,8 @@ class CronController extends Controller
                 $recipients = [];
                 $relatedUsers = \common\models\RelationUserOrganization::findAll([
                     'organization_id' => $organization_id,
-                    'is_active' => true,
-                    'role_id' => [
+                    'is_active'       => true,
+                    'role_id'         => [
                         \common\models\Role::ROLE_RESTAURANT_MANAGER,
                         \common\models\Role::ROLE_SUPPLIER_MANAGER,
                         \common\models\Role::ROLE_ADMIN,
@@ -472,6 +472,55 @@ class CronController extends Controller
                     $mailer = Yii::$app->mailer;
                     $subject = Yii::t('app', 'common.mail.merc_vsd.subject', ['ru' => 'Уведомление о непогашенных ВСД для'], 'ru') . '  ' . $organization->name;
                     $mailer->compose('merc_vsd', compact("vsd_count"))
+                        ->setTo($recipient)
+                        ->setSubject($subject)
+                        ->send();
+                }
+            }
+        }
+    }
+
+    public function actionProcessMercStockExpiry()
+    {
+        $organizations = Yii::$app->db_api->CreateCommand("
+            SELECT mpconst.org AS organization_id
+            FROM merc_stock_entry AS stock 
+            LEFT JOIN merc_pconst AS mpconst ON stock.owner_guid = mpconst.value AND mpconst.const_id = 10
+            WHERE stock.expiry_date < now()
+            GROUP BY mpconst.org;
+        ")->queryColumn();
+        var_dump($organizations);
+
+        foreach ($organizations as $organization_id) {
+            $organization = Organization::findOne(['id' => $organization_id]);
+            if (isset($organization)) {
+                $recipients = [];
+                $relatedUsers = \common\models\RelationUserOrganization::findAll([
+                    'organization_id' => $organization_id,
+                    'is_active'       => true,
+                    'role_id'         => [
+                        \common\models\Role::ROLE_RESTAURANT_MANAGER,
+                        \common\models\Role::ROLE_SUPPLIER_MANAGER,
+                        \common\models\Role::ROLE_ADMIN,
+                        \common\models\Role::ROLE_FKEEPER_MANAGER,
+                    ],
+                ]);
+                foreach ($relatedUsers as $relatedUser) {
+                    if ($relatedUser->user->emailNotification->merc_vsd) {
+                        $recipients[] = $relatedUser->user->email;
+                    }
+                }
+                foreach ($organization->additionalEmail as $addEmail) {
+                    if ($addEmail->merc_vsd) {
+                        $recipients[] = $addEmail->email;
+                    }
+                }
+                var_dump($recipients);
+                foreach ($recipients as $recipient) {
+                    Yii::$app->mailer->htmlLayout = '@common/mail/layouts/mail';
+                    $mailer = Yii::$app->mailer;
+                    $subject = Yii::t('app', 'common.mail.merc_stock_expiry.subject', ['ru' => 'Уведомление о проблемной продукции'], 'ru') . '  ' . $organization->name;
+                    $mailer->compose('merc_stock_expiry')
                         ->setTo($recipient)
                         ->setSubject($subject)
                         ->send();

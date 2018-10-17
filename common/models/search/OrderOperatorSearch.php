@@ -15,6 +15,7 @@ class OrderOperatorSearch extends Order
 {
     /**
      * Description
+     *
      * @var
      */
     public $user_id;
@@ -94,7 +95,23 @@ class OrderOperatorSearch extends Order
                 WHEN vendor.legal_entity is null THEN vendor.name 
                 ELSE vendor.legal_entity 
               END) as vendor_name',
-            'CONCAT(vendor.contact_name, \' \', vendor.phone)  as vendor_contact',
+            'REPLACE(CONCAT(
+                  vendor.contact_name,
+                  \' \',
+                  vendor.phone,
+                  \', \',
+                  (
+                    SELECT
+                      GROUP_CONCAT(\' \', pm.full_name, \' \', pm.phone)
+                    FROM relation_user_organization m
+                      LEFT JOIN `user` um ON um.id = m.user_id
+                      LEFT JOIN `profile` pm ON pm.user_id = m.user_id
+                    WHERE
+                      m.organization_id = vendor.id
+                      AND
+                      um.status = 1
+                  )
+              ), \' ,  \', \'\') AS vendor_contact',
             'op.operator_id as operator',
             'profile.full_name as operator_name',
             'op.status_call_id',
@@ -225,8 +242,8 @@ class OrderOperatorSearch extends Order
          */
         if (!empty($params['OrderOperatorSearch']['created_at'])) {
             $created_at = trim($params['OrderOperatorSearch']['created_at']);
-            $query->andWhere('CAST(order.created_at as DATE) = CAST(:created_at as DATE)' ,[
-                ':created_at'  => date('Y-m-d', strtotime($created_at))
+            $query->andWhere('CAST(order.created_at as DATE) = CAST(:created_at as DATE)', [
+                ':created_at' => date('Y-m-d', strtotime($created_at))
             ]);
         }
 
@@ -235,8 +252,8 @@ class OrderOperatorSearch extends Order
          */
         if (!empty($params['OrderOperatorSearch']['operator_updated_at'])) {
             $operator_updated_at = trim($params['OrderOperatorSearch']['operator_updated_at']);
-            $query->andWhere('CAST(op.updated_at as DATE) = CAST(:operator_updated_at as DATE)' ,[
-                ':operator_updated_at'  => date('Y-m-d', strtotime($operator_updated_at))
+            $query->andWhere('CAST(op.updated_at as DATE) = CAST(:operator_updated_at as DATE)', [
+                ':operator_updated_at' => date('Y-m-d', strtotime($operator_updated_at))
             ]);
         }
 

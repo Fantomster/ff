@@ -132,9 +132,14 @@ $wait_second = \common\models\OperatorTimeout::getTimeoutOperator($user_id);
                     ]
                 ],
                 [
+                    'format'         => 'raw',
                     'attribute'      => 'vendor_contact',
+                    'value'          => function ($data) {
+                        $items = explode(',', $data['vendor_contact']);
+                        return implode('<hr style="margin: 2px">', $items);
+                    },
                     'contentOptions' => [
-                        'style' => 'width:180px'
+                        'style' => 'width:180px;font-size:10px;'
                     ]
                 ],
                 [

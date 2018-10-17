@@ -16,12 +16,14 @@ use yii\helpers\ArrayHelper;
 /**
  * OrganizationSearch represents the model behind the search form about `common\models\Organization`.
  */
-class OrganizationSearch extends Organization {
+class OrganizationSearch extends Organization
+{
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['id', 'type_id', 'step', 'blacklisted'], 'integer'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'created_at', 'updated_at', 'white_list', 'partnership', 'locality'], 'safe'],
@@ -31,7 +33,8 @@ class OrganizationSearch extends Organization {
     /**
      * @inheritdoc
      */
-    public function scenarios() {
+    public function scenarios()
+    {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
@@ -43,7 +46,8 @@ class OrganizationSearch extends Organization {
      *
      * @return ActiveDataProvider
      */
-    public function search($params, bool $isForLicenses = false) {
+    public function search($params, bool $isForLicenses = false)
+    {
         $this->load($params);
         if ($isForLicenses) {
             $dbApiName = $this->getDbName('db_api');
@@ -51,8 +55,8 @@ class OrganizationSearch extends Organization {
             $now = new Expression('NOW()');
             $tenDaysAgo = new Expression('NOW() - INTERVAL 10 DAY');
 
-            $query1 = Organization::find()->innerJoin($dbApiName.'.license_organization', "`$dbApiName`.license_organization.org_id=`$dbName`.organization.id")->where(['between', 'td', $tenDaysAgo, $now])->orderBy('td', 'desc')->groupBy('td')->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
-            $query2 = Organization::find()->innerJoin($dbApiName.'.license_organization', "`$dbApiName`.license_organization.org_id=`$dbName`.organization.id")->where(['<', 'td', $now])->orderBy('td', 'desc')->groupBy('td')->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
+            $query1 = Organization::find()->innerJoin($dbApiName . '.license_organization', "`$dbApiName`.license_organization.org_id=`$dbName`.organization.id")->where(['between', 'td', $tenDaysAgo, $now])->orderBy('td', 'desc')->groupBy('td')->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
+            $query2 = Organization::find()->innerJoin($dbApiName . '.license_organization', "`$dbApiName`.license_organization.org_id=`$dbName`.organization.id")->where(['<', 'td', $now])->orderBy('td', 'desc')->groupBy('td')->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
             $allLicenseOrganizations = ArrayHelper::getColumn(LicenseOrganization::find()->where(['not', ['org_id' => null]])->groupBy('org_id')->all(), 'org_id');
             $query3 = Organization::find()->where(['not in', 'id', $allLicenseOrganizations])->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
 
@@ -85,13 +89,12 @@ class OrganizationSearch extends Organization {
                 'query' => $query,
                 'sort' => [
                     'attributes' => [
-                    'id',
-                    'name',
-                ]
+                        'id',
+                        'name',
+                    ]
                 ],
                 'pagination' => ['pageSize' => 20]
             ]);
-
 
 
             if (!$this->validate()) {
@@ -126,7 +129,8 @@ class OrganizationSearch extends Organization {
     }
 
 
-    private function getDbName($db){
+    private function getDbName($db)
+    {
         $db = Yii::$app->get($db);
         $dbNameArr = explode(';dbname=', $db->dsn);
         $dbName = $dbNameArr[1];

@@ -92,12 +92,12 @@ class LoadStockEntryList extends Model
             $stockEntryList = $result->application->result->any['getStockEntryChangesListResponse']->stockEntryList;
             $count += $stockEntryList->count;
             $this->log('Load ' . $count . ' / ' . $stockEntryList->total . PHP_EOL);
-            if ($stockEntryList->count > 0)
+            if ($stockEntryList->count > 0) {
                 $this->updateDocumentsList($stockEntryList->stockEntry);
-
-            if ($stockEntryList->count < $stockEntryList->total)
+            }
+            if ($stockEntryList->count < $stockEntryList->total) {
                 $listOptions->offset += $stockEntryList->count;
-
+            }
         } while ($stockEntryList->total > ($stockEntryList->count + $stockEntryList->offset));
     }
 

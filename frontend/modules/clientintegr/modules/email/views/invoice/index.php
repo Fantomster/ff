@@ -22,13 +22,13 @@ use yii\helpers\Url;
 
 Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
 $form = ActiveForm::begin([
-    'options' => [
+    'options'                => [
         'data-pjax' => false,
-        'id' => 'search-form',
-        'role' => 'search',
+        'id'        => 'search-form',
+        'role'      => 'search',
     ],
     'enableClientValidation' => false,
-    'method' => 'get',
+    'method'                 => 'get',
 ]);
 
 $this->title = 'Список накладных';
@@ -82,14 +82,14 @@ $this->registerJs('
             'options' => [
                 'class' => 'breadcrumb',
             ],
-            'links' => [
+            'links'   => [
                 [
                     'label' => 'Интеграция',
-                    'url' => ['/clientintegr/default'],
+                    'url'   => ['/clientintegr/default'],
                 ],
                 [
                     'label' => 'Интеграция Email: ТОРГ - 12',
-                    'url' => ['/clientintegr/email/default'],
+                    'url'   => ['/clientintegr/email/default'],
                 ],
                 $this->title,
             ],
@@ -124,17 +124,17 @@ $this->registerJs('
                             <div class="form-group" style="width: 300px; height: 44px;">
                                 <?=
                                 DatePicker::widget([
-                                    'model' => $searchModel,
-                                    'attribute' => 'date_from',
-                                    'attribute2' => 'date_to',
-                                    'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFrom'],
-                                    'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateTo'],
-                                    'separator' => '-',
-                                    'type' => DatePicker::TYPE_RANGE,
+                                    'model'         => $searchModel,
+                                    'attribute'     => 'date_from',
+                                    'attribute2'    => 'date_to',
+                                    'options'       => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFrom'],
+                                    'options2'      => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateTo'],
+                                    'separator'     => '-',
+                                    'type'          => DatePicker::TYPE_RANGE,
                                     'pluginOptions' => [
-                                        'format' => 'dd.mm.yyyy', //'d M yyyy',//
+                                        'format'    => 'dd.mm.yyyy', //'d M yyyy',//
                                         'autoclose' => true,
-                                        'endDate' => "0d",
+                                        'endDate'   => "0d",
                                     ]
                                 ])
                                 ?>
@@ -155,24 +155,24 @@ $this->registerJs('
                             $dataProvider->pagination->pageParam = 'page_outer';
                             echo GridView::widget([
                                 'dataProvider' => $dataProvider,
-                                'summary' => false,
-                                'striped' => false,
-                                'condensed' => true,
-                                'hover' => false,
-                                'options' => [
+                                'summary'      => false,
+                                'striped'      => false,
+                                'condensed'    => true,
+                                'hover'        => false,
+                                'options'      => [
                                     'style' => 'min-height:300px;max-height:300px;height:300px;overflow-y:scroll;'
                                 ],
-                                'columns' => [
+                                'columns'      => [
                                     [
-                                        'header' =>
+                                        'header'             =>
                                             'выбрать / ' . \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-close clear_invoice_radio', 'style' => 'cursor:pointer;color:red']),
-                                        'format' => 'raw',
-                                        'attribute' => 'number',
+                                        'format'             => 'raw',
+                                        'attribute'          => 'number',
                                         'filterInputOptions' => [
-                                            'class' => 'form-control',
+                                            'class'       => 'form-control',
                                             'placeholder' => '№ накладной'
                                         ],
-                                        'value' => function ($model) {
+                                        'value'              => function ($model) {
                                             if ($model->order_id)
                                                 return ' ';
                                             if (!($model->vendor_id))
@@ -182,23 +182,23 @@ $this->registerJs('
                                             return '<a href="#" class="btn btn-secondary btn-lg invoice_radio" role="button" aria-disabled="true" id="' . $model->id . '">☐</a>';
                                         },
                                         //'contentOptions' => ['class' => 'text-center'],
-                                        'contentOptions' => function ($model) {
+                                        'contentOptions'     => function ($model) {
                                             return ["id" => "rbutton" . $model->id];
                                         },
-                                        'headerOptions' => ['style' => 'width: 100px;'],
+                                        'headerOptions'      => ['style' => 'width: 100px;'],
                                     ],
                                     [
-                                        'format' => 'raw',
-                                        'header' => 'Номер накладной',
-                                        'attribute' => 'invoice_id',
+                                        'format'             => 'raw',
+                                        'header'             => 'Номер накладной',
+                                        'attribute'          => 'invoice_id',
                                         'filterInputOptions' => [
-                                            'class' => 'form-control',
+                                            'class'       => 'form-control',
                                             'placeholder' => 'Наименование поставщика'
                                         ],
-                                        'contentOptions' => function ($model) {
+                                        'contentOptions'     => function ($model) {
                                             return ["id" => "nn" . $model->id];
                                         },
-                                        'value' => function ($data) {
+                                        'value'              => function ($data) {
 
                                             $user = Yii::$app->user->identity;
                                             $licenses = $user->organization->getLicenseList();
@@ -226,26 +226,26 @@ $this->registerJs('
                                         }
                                     ],
                                     [
-                                        'attribute' => 'date',
-                                        'format' => 'raw',
+                                        'attribute'          => 'date',
+                                        'format'             => 'raw',
                                         'filterInputOptions' => [
-                                            'class' => 'form-control',
+                                            'class'       => 'form-control',
                                             'placeholder' => 'Дата'
                                         ],
-                                        'value' => function ($row) {
+                                        'value'              => function ($row) {
                                             return \Yii::$app->formatter->asDatetime(new DateTime($row->date), 'php:Y-m-d');
                                         }
                                     ],
                                     [
                                         'format' => 'raw',
                                         'header' => 'Наименование поставщика',
-                                        'value' => function ($data) {
+                                        'value'  => function ($data) {
                                             return $data->name_postav;
                                         }
                                     ],
                                     [
                                         'attribute' => 'consignee',
-                                        'value' => function ($data) {
+                                        'value'     => function ($data) {
                                             if ($data->consignee)
                                                 return $data->consignee;
                                             else
@@ -254,42 +254,42 @@ $this->registerJs('
                                     ],
                                     [
                                         'attribute' => 'count',
-                                        'value' => function ($data) {
+                                        'value'     => function ($data) {
                                             return count($data->content);
                                         }
                                     ],
                                     [
-                                        'format' => 'raw',
+                                        'format'    => 'raw',
                                         'attribute' => 'created_at',
-                                        'value' => function ($data) {
+                                        'value'     => function ($data) {
                                             return Yii::$app->formatter->asDatetime($data->created_at, "php:Y-m-d H:i:s");
                                         },
                                     ],
                                     [
-                                        'format' => 'raw',
-                                        'attribute' => 'order_id',
+                                        'format'         => 'raw',
+                                        'attribute'      => 'order_id',
                                         'contentOptions' => function ($data) {
                                             return ["id" => "oid" . $data->id];
                                         },
-                                        'value' => function ($data) {
+                                        'value'          => function ($data) {
                                             return Html::a($data->order_id, Url::to(['/order/view', 'id' => $data->order_id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
                                         },
                                     ],
                                     [
                                         'attribute' => 'total_sum_withtax',
-                                        'value' => function ($data) {
+                                        'value'     => function ($data) {
                                             return number_format($data->total_sum_withtax, 2, '.', ' ');
                                         }
                                     ],
                                     [
-                                        'header' => 'Связь с поставщиком',
+                                        'header'         => 'Связь с поставщиком',
                                         //'class' => 'yii\grid\ActionColumn',
                                         //'template' => '{view_relations}',
                                         //'contentOptions' => ['style' => 'text-align:center'],
-                                        'hAlign' => 'center',
+                                        'hAlign'         => 'center',
                                         'contentOptions' => function ($data) {
-                                            return ["id" => "way" . $data->id,
-                                                "data-vendor" => $data->vendor_id];
+                                            return ["id"          => "way" . $data->id,
+                                                    "data-vendor" => $data->vendor_id];
                                         },
                                         /* 'buttons' => [
                                           'view_relations' => function ($url, $model) {
@@ -300,7 +300,7 @@ $this->registerJs('
                                           }
                                           }
                                           ], */
-                                        'value' => function ($model) {
+                                        'value'          => function ($model) {
                                             if (isset($model->vendor_id)) {
                                                 return $model->vendor->name;
                                             } else {
@@ -309,17 +309,20 @@ $this->registerJs('
                                         }
                                     ],
                                     [
-                                        'class' => 'kartik\grid\ExpandRowColumn',
-                                        'width' => '50px',
-                                        'value' => function ($model, $key, $index, $column) {
+                                        'class'            => 'kartik\grid\ExpandRowColumn',
+                                        'width'            => '50px',
+                                        'value'            => function ($model, $key, $index, $column) {
                                             return GridView::ROW_COLLAPSED;
                                         },
-                                        'detail' => function ($model, $key, $index, $column) {
+                                        'detail'           => function ($model, $key, $index, $column) {
                                             return \Yii::$app->controller->renderPartial('_content', ['model' => $model]);
                                         },
-                                        'expandOneOnly' => true,
-                                        'enableRowClick' => false,
-                                        'allowBatchToggle' => false
+                                        'expandOneOnly'    => false,
+                                        'enableRowClick'   => false,
+                                        'allowBatchToggle' => false,
+                                        'contentOptions'   => function ($data) {
+                                            return ["id" => "triangle" . $data->id];
+                                        }
                                     ],
                                 ]
                             ]);
@@ -355,13 +358,13 @@ $list_integration = '';
 
 if (!empty($integration)) {
     $links = [
-        'rk' => [
+        'rk'   => [
             'title' => 'R_keeper',
-            'url' => '/clientintegr/rkws/waybill/index'
+            'url'   => '/clientintegr/rkws/waybill/index'
         ],
         'iiko' => [
             'title' => 'iiko Office',
-            'url' => '/clientintegr/iiko/waybill/index'
+            'url'   => '/clientintegr/iiko/waybill/index'
         ]
     ];
     foreach ($integration as $key => $row) {
@@ -457,17 +460,14 @@ $js = <<<JS
         ).then(function (result) {
             if(result.value) {
                 var selectd = $("#selpos").val();
-                console.log(selectd);
                 if (selectd) {
                     var selected_name = $("#selpos option:selected").text();
-                    console.log(selected_name);
-                    if (selectd!=-1) {console.log(invoice_id);console.log(selectd);
+                    if (selectd!=-1) {
                         $.post('$url/set-vendor', {
                             vendor_search_id: selectd,
                             vendor_id: selectd,
                             invoice_id: invoice_id
                         }, function (data) {
-                            console.log(idnumber);
                             $('#but'+idnumber).html('<i>'+selected_name+'</i>');
                             $('#way'+idnumber).attr('data-vendor',selectd);
                             $('#rbutton'+idnumber).html('<a href="#" class="btn btn-secondary btn-lg invoice_radio" role="button" aria-disabled="true" id="'+idnumber+'">☐</a>');
@@ -551,7 +551,6 @@ $js = <<<JS
                                 return false;
                             }
                             $.post('$url/create-order', params, function (data) {
-                                console.log(params);
                                 if (data.status === true) {
                                 $('.catalog-index.orders').hide();
                                 var number_order = data.order_id;
@@ -620,6 +619,43 @@ $js = <<<JS
             });
         }
         
+        function triangle () {
+            $('[data-col-seq='+10+']').each(function() {
+                $(this).on('click', function () {
+                    var id_td = $(this).attr('id');
+                    var number = id_td.substring(8);
+                    var est_raskr = $('td').hasClass('raskr');
+                    if (est_raskr===true) {
+                        var id_td_raskr = $('.raskr').attr('id');
+                        if (id_td==id_td_raskr) {
+                            var ht_raskr = $('#vrem2').html();
+                            $('#'+id_td+' div .kv-expand-detail').html(ht_raskr);
+                            $('#vrem').remove();
+                            $(this).removeClass('raskr');
+                        } else {
+                            var ht_raskr = $('#vrem2').html();
+                            $('#'+id_td_raskr+' div .kv-expand-detail').html(ht_raskr);
+                            $('#vrem').remove();
+                            $('#'+id_td_raskr).removeClass('raskr');
+                            var ht2 = $('#'+id_td+' div .kv-expand-detail').html();
+                            var num_str = $('#triangle'+number+' .kv-expanded-row').attr('data-index');
+                            var tabl = '<tr id="vrem" class="kv-expand-detail-row info skip-export" data-key="'+number+'" data-index="'+num_str+'"><td id="vrem2" colspan="11">'+ht2+'</td></tr>';
+                            $('#'+id_td+' div .kv-expand-detail').html('');
+                            $(this).addClass('raskr');
+                            $(this).parents('tr').after(tabl);
+                        }
+                    } else {
+                        var ht2 = $('#'+id_td+' div .kv-expand-detail').html();
+                        var num_str = $('#triangle'+number+' .kv-expanded-row').attr('data-index');
+                        var tabl = '<tr id="vrem" class="kv-expand-detail-row info skip-export" data-key="'+number+'" data-index="'+num_str+'"><td id="vrem2" colspan="11">'+ht2+'</td></tr>';
+                        $('#'+id_td+' div .kv-expand-detail').html('');
+                        $(this).addClass('raskr');
+                        $(this).parents('tr').after(tabl);
+                    }
+                });
+            });
+        }
+        
     $(document).ready(function() {
         links_column9();
         radio_column1();
@@ -645,6 +681,7 @@ $js = <<<JS
         links_column9();
         radio_column1();
         krestik();
+        triangle();
     });
     
     /*$('#save-button').click(function () {

@@ -6,7 +6,7 @@
  * Time: 12:10 PM
  */
 
-namespace common\components\ecom\realization;
+namespace common\components\edi\realization;
 
 
 use api_web\exceptions\ValidationException;
@@ -33,7 +33,7 @@ use yii\db\Expression;
 /**
  * Class Realization
  *
- * @package common\components\ecom\realization
+ * @package common\components\edi\realization
  */
 class Realization extends AbstractRealization implements RealizationInterface
 {
@@ -48,7 +48,7 @@ class Realization extends AbstractRealization implements RealizationInterface
      * @param String $fileName
      * @param String $login
      * @param String $pass
-     * @param int    $fileId
+     * @param int $fileId
      * @return bool
      * @throws \yii\db\Exception
      */

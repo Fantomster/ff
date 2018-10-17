@@ -16,7 +16,7 @@ use common\components\ecom\TestClient;
 /**
  * Class TestProvider for unit tests
  *
- * @package common\components\ecom\providers
+ * @package common\components\edi\providers
  */
 class TestProvider extends AbstractProvider implements ProviderInterface
 {

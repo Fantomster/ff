@@ -155,7 +155,6 @@ class VetisWaybill extends WebApi
         return ['result' => array_merge(MercVsd::$statuses, ['' => 'Все'])];
     }
 
-
     /**
      * Формирование массива для фильтра "По продукции" или по "Фирма отправитель" так же выполняет "живой" поиск лайком
      *
@@ -233,27 +232,30 @@ class VetisWaybill extends WebApi
      */
     public function repayVsd($request)
     {
-        if (!isset($request['uuids']) || !is_array($request['uuids'])) {
-            throw new BadRequestHttpException('Uuids is required and must be array');
+        if (!isset($request['uuid']) && empty($request['uuid'])) {
+            throw new BadRequestHttpException('Uuid is required and must be array');
         }
-        $records = $this->helper->getAvailableVsd($request['uuids']);
+        $records = $this->helper->getAvailableVsd($request['uuid']);
         try {
             $api = mercuryApi::getInstance();
-            if (array_key_exists($request['uuids'], $records)) {
-                if ($api->getVetDocumentDone($request['uuids'])) {
-                    $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_EXTINGUISHED, $request['uuids']);
+            if (array_key_exists($request['uuid'], $records)) {
+                if ($api->getVetDocumentDone($request['uuid'])) {
+                    $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_EXTINGUISHED, $request['uuid']);
                 }
             } else {
-                throw new BadRequestHttpException('ВСД не принадлежит данной организации: ' . $request['uuids']);
+                throw new BadRequestHttpException('ВСД не принадлежит данной организации: ' . $request['uuid']);
             }
         } catch (\Throwable $t) {
-            $mercLogId = $t->getMessage();
-            $model = mercLog::findOne($mercLogId);
-            $this->helper->setLastError($model->description, $request['uuids']);
+            $error = $t->getMessage();
+            $model = mercLog::findOne($error);
+            if ($model) {
+                $error = $model->description;
+            }
+            $this->helper->setLastError($error, $request['uuid']);
         }
-        $vsd_direction = $this->helper->getVsdDirection($request['uuids'], $this->user->organization_id);
+        $vsd_direction = $this->helper->getVsdDirection($request['uuid'], $this->user->organization_id);
 
-        return ['result' => $this->getList([$request['uuids'] => null]), [$request['uuids'] => $vsd_direction]];
+        return ['result' => $this->getList([$request['uuid'] => null], [$request['uuid'] => $vsd_direction])];
     }
 
     /**
@@ -286,9 +288,12 @@ class VetisWaybill extends WebApi
                 $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_PARTIALLY_ACCEPTED, $uuid);
             }
         } catch (\Throwable $t) {
-            $mercLogId = $t->getMessage();
-            $model = mercLog::findOne($mercLogId);
-            $this->helper->setLastError($model->description, $uuid);
+            $error = $t->getMessage();
+            $model = mercLog::findOne($error);
+            if ($model) {
+                $error = $model->description;
+            }
+            $this->helper->setLastError($error, $uuid);
         }
         $vsd_direction = $this->helper->getVsdDirection($uuid, $this->user->organization_id);
 
@@ -324,9 +329,12 @@ class VetisWaybill extends WebApi
                 $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_RETURNED, $uuid);
             }
         } catch (\Throwable $t) {
-            $mercLogId = $t->getMessage();
-            $model = mercLog::findOne($mercLogId);
-            $this->helper->setLastError($model->description, $uuid);
+            $error = $t->getMessage();
+            $model = mercLog::findOne($error);
+            if ($model) {
+                $error = $model->description;
+            }
+            $this->helper->setLastError($error, $uuid);
         }
         $vsd_direction = $this->helper->getVsdDirection($uuid, $this->user->organization_id);
 

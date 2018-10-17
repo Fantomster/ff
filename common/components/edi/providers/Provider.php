@@ -9,6 +9,7 @@
 namespace common\components\edi\providers;
 
 
+use api_web\components\Registry;
 use common\components\ecom\AbstractProvider;
 use common\components\ecom\ProviderInterface;
 use yii\base\Exception;
@@ -311,7 +312,7 @@ class Provider extends AbstractProvider implements ProviderInterface
 
         $order->status = OrderStatus::STATUS_PROCESSING;
         $order->total_price = $sum; //TODOO:wtf decimal
-        $order->service_id = WaybillHelper::EDI_SERVICE_ID;
+        $order->service_id = Registry::EDI_SERVICE_ID;
         if ($this->fileType == 'ordrsp') {
             $order->edi_ordersp = $this->xml->filename;
         }

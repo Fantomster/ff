@@ -1,9 +1,9 @@
 <?php
-namespace frontend\modules\clientintegr\modules\merc\helpers\api\cerber;
+namespace api_web\modules\integration\modules\vetis\api\cerber;
 
 /**
  * Class GenericEntity
- * @package frontend\modules\clientintegr\modules\merc\helpers\api\cerber
+ * @package api_web\modules\integration\modules\vetis\api\cerber
  * v 2.0
  */
 class GenericEntity{

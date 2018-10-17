@@ -8,6 +8,7 @@
 
 namespace common\components\ecom\realization;
 
+use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WaybillHelper;
 use common\components\ecom\AbstractRealization;
@@ -268,7 +269,7 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
 
         $order->status = OrderStatus::STATUS_PROCESSING;
         $order->total_price = $sum; //TODOO:wtf decimal
-        $order->service_id = WaybillHelper::EDI_SERVICE_ID;
+        $order->service_id = Registry::EDI_SERVICE_ID;
         if ($this->fileType == 'ordrsp') {
             $order->edi_ordersp = $this->xml->filename;
         }

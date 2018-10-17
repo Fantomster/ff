@@ -8,6 +8,7 @@
 
 namespace tests\phpunit;
 
+use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WaybillHelper;
 use common\components\ecom\EDIIntegration;
@@ -66,7 +67,7 @@ class EdiTest extends TestCase
         $tO = Order::findOne($order->id);
         $this->assertEquals($tO->edi_ordersp, $fileName);
         $this->assertNotEquals($tO->total_price, 898.05);
-        $this->assertEquals($tO->service_id, WaybillHelper::EDI_SERVICE_ID);
+        $this->assertEquals($tO->service_id, Registry::EDI_SERVICE_ID);
         foreach ($tO->orderContent as $content){
 //            $wC = WaybillContent::findOne(['order_content_id' => $content->id]);
 //            $this->assertTrue($wC);

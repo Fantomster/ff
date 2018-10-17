@@ -8,7 +8,7 @@
 
 namespace api_web\modules\integration\models;
 
-use api_web\helpers\WaybillHelper;
+use api_web\components\Registry;
 use common\models\IntegrationSettingValue;
 use common\models\Order;
 use common\models\OrderContent;
@@ -34,7 +34,7 @@ class iikoWaybill extends Waybill
         $order_id = $orderCon->order_id;
         $order = Order::findOne($order_id);
         $doc_num = $order->waybill_number;
-        $waybillMode = IntegrationSettingValue::getSettingsByServiceId(WaybillHelper::IIKO_SERVICE_ID, $order->client_id, ['auto_unload_invoice']);
+        $waybillMode = IntegrationSettingValue::getSettingsByServiceId(Registry::IIKO_SERVICE_ID, $order->client_id, ['auto_unload_invoice']);
 
         if ($waybillMode !== '0') {
             $xml->addChild('documentNumber', $order_id . '-' . $this->outer_number_code);

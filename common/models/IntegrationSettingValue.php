@@ -99,7 +99,7 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
             ->andFilterWhere(['is.name' => $settingNames, 'is.service_id' => $serviceId])
             /*->createCommand()->getRawSql();*/
             ->all(\Yii::$app->db_api);
-        if (count($dbResult) > 1 && count($settingNames) > 1) {
+        if (count($dbResult) > 1 && (count($settingNames) > 1 || empty($settingNames))) {
             foreach ($dbResult as $item) {
                 $result[$item['name']] = $item['value'];
             }

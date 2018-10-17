@@ -13,6 +13,7 @@
 namespace api_web\modules\integration\classes\sync;
 
 use api_web\classes\RabbitWebApi;
+use api_web\components\Registry;
 use api_web\helpers\WaybillHelper;
 use api_web\modules\integration\models\iikoWaybill;
 use common\models\Waybill;
@@ -73,7 +74,7 @@ class ServiceIiko extends AbstractSyncFactory
         $res = [];
         $records = iikoWaybill::find()
             ->andWhere(['id' => $request['ids'], 'service_id' => $this->serviceId])
-            ->andWhere('bill_status_id = :stat', [':stat' => WaybillHelper::$statuses[WaybillHelper::WAYBILL_COMPARED]])
+            ->andWhere('bill_status_id = :stat', [':stat' => Registry::$waybill_statuses[Registry::WAYBILL_COMPARED]])
             ->all();
 
         if (!isset($records)) {

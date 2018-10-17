@@ -8,6 +8,7 @@
 
 namespace api_web\helpers;
 
+use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use common\helpers\DBNameHelper;
 use common\models\IntegrationSetting;
@@ -28,30 +29,6 @@ use yii\web\BadRequestHttpException;
  * */
 class WaybillHelper
 {
-    const RK_SERVICE_ID = 1;
-    const IIKO_SERVICE_ID = 2;
-    /**@var int const for mercuriy service id in all_service table */
-    const MERC_SERVICE_ID = 4;
-    /**@var int const for EDI service id in all_service table */
-    const EDI_SERVICE_ID = 6;
-    const VENDOR_DOC_MAIL_SERVICE_ID = 3;
-    const WAYBILL_COMPARED = 'compared';
-    const WAYBILL_FORMED = 'formed';
-    const WAYBILL_ERROR = 'error';
-    const WAYBILL_RESET = 'reset';
-    const WAYBILL_UNLOADED = 'unloaded';
-    const WAYBILL_UNLOADING = 'unloading';
-
-    /**@var array $statuses */
-    static $statuses = [
-        self::WAYBILL_COMPARED  => 1,
-        self::WAYBILL_FORMED    => 2,
-        self::WAYBILL_ERROR     => 3,
-        self::WAYBILL_RESET     => 4,
-        self::WAYBILL_UNLOADED  => 5,
-        self::WAYBILL_UNLOADING => 6,
-    ];
-
     /**
      * Create waybill and waybill_content and binding VSD
      *
@@ -64,7 +41,7 @@ class WaybillHelper
         $orgId = (\Yii::$app->user->identity)->organization_id;
         $modelWaybill = new Waybill();
         $modelWaybill->acquirer_id = $orgId;
-        $modelWaybill->service_id = self::MERC_SERVICE_ID;
+        $modelWaybill->service_id = Registry::MERC_SERVICE_ID;
 
         $modelWaybillContent = new WaybillContent();
         $modelWaybillContent->merc_uuid = $uuid;
@@ -81,7 +58,6 @@ class WaybillHelper
 
         return true;
     }
-
 
     /**
      * @param      $order_id
@@ -172,8 +148,8 @@ class WaybillHelper
     {
         $model = new Waybill();
         $model->acquirer_id = $orgId;
-        $model->service_id = WaybillHelper::EDI_SERVICE_ID;
-        $model->bill_status_id = self::$statuses[self::WAYBILL_FORMED]; //TODO: bill_status_id ???
+        $model->service_id = Registry::EDI_SERVICE_ID;
+        $model->bill_status_id = Registry::$waybill_statuses[Registry::WAYBILL_FORMED];
         $model->readytoexport = 0;
         $model->is_deleted = 0;
         $datetime = new \DateTime();
@@ -185,8 +161,8 @@ class WaybillHelper
     }
 
     /**
-     * @param $orderContent
-     * @param $orgId
+     * @param      $orderContent
+     * @param      $orgId
      * @param null $outerStoreUuid
      * @param null $serviceId
      * @return int
@@ -294,9 +270,9 @@ class WaybillHelper
         $waybill = Waybill::findOne([
             'id'             => $request['waybill_id'],
             'bill_status_id' => [
-                self::$statuses[self::WAYBILL_COMPARED],
-                self::$statuses[self::WAYBILL_ERROR],
-                self::$statuses[self::WAYBILL_FORMED],
+                Registry::$waybill_statuses[Registry::WAYBILL_COMPARED],
+                Registry::$waybill_statuses[Registry::WAYBILL_ERROR],
+                Registry::$waybill_statuses[Registry::WAYBILL_FORMED],
             ]]);
         if (!$waybill) {
             throw new BadRequestHttpException('waybill cannot adding waybill_content with id ' . $request['waybill_id']);

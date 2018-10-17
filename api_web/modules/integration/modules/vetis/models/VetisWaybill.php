@@ -6,8 +6,8 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentDone;
+use api_web\modules\integration\modules\vetis\api\mercury\mercuryApi;
+use api_web\modules\integration\modules\vetis\api\mercury\VetDocumentDone;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -348,7 +348,7 @@ class VetisWaybill extends WebApi
      * Получение ВСД в PDF
      *
      * @param $request
-     * @throws BadRequestHttpException
+     * @throws \Exception
      * @return string
      */
     public function getVsdPdf($request)
@@ -361,7 +361,7 @@ class VetisWaybill extends WebApi
         $check = $vsdHttp->checkAuthData();
 
         if (!$check['success']) {
-            throw new BadRequestHttpException('Vetis authorization failed');
+            throw new BadRequestHttpException($check['error']);
         }
 
         $data = $vsdHttp->getPdfData($request['uuid']);

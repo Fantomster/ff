@@ -101,6 +101,7 @@ class VetisWaybill extends WebApi
                 'date_doc'        => $model->date_doc,
                 'vsd_direction'   => $arIncOut[$model->uuid] ?? null,
                 'last_error'      => $model->last_error,
+                'user_status'     => $model->user_status,
             ];
         }
 

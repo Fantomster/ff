@@ -16,6 +16,7 @@ use common\helpers\DBNameHelper;
 use common\models\IntegrationSettingValue;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
+use yii\db\Expression;
 use yii\db\Query;
 use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
@@ -378,7 +379,7 @@ class VetisHelper
     public function setMercVsdUserStatus($userStatus, $uuid)
     {
         $where = ['uuid' => $uuid];
-        return MercVsd::updateAll(['user_status' => $userStatus], $where);
+        return MercVsd::updateAll(['user_status' => $userStatus, 'last_error' => new Expression('NULL')], $where);
     }
 
     /**

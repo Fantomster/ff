@@ -14,27 +14,47 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [
     [
-        'format' => 'raw',
+        'format'    => 'raw',
         'attribute' => 'id',
-        'filter'=> false,
-        'value' => function ($data) {
+        'filter'    => false,
+        'value'     => function ($data) {
             return Html::a($data['id'], ['organization/view', 'id' => $data['id']]);
         },
     ],
     [
-        'format' => 'raw',
+        'format'    => 'raw',
         'attribute' => 'name',
-        'value' => function ($data) {
+        'value'     => function ($data) {
             return Html::a($data['name'], ['organization/view', 'id' => $data['id']]);
         },
     ],
-    'address',
+    [
+        'format' => 'raw',
+        'label'  => 'Крайняя лицензия',
+        'value'  => function ($data) use ($dbName, $tenDaysAfter) {
+            $license = (new \yii\db\Query())
+                ->select(['td', 'name'])
+                ->from("$dbName.license_organization")
+                ->leftJoin("$dbName.license", "$dbName.license_organization.license_id=$dbName.license.id")
+                ->where(['org_id' => $data['id']])
+                ->orderBy('td DESC')
+                ->limit(1)
+                ->one();
+            $text = '';
+            if ($license) {
+                $text .= "<span ";
+                if ($license['td'] < $tenDaysAfter) $text .= 'style ="color: red;"';
+                $text .= ">{$license['name']} : {$license['td']} </span>";
+            }
+            return $text;
+        },
+    ],
     [
         'attribute' => '',
-        'label' => 'Создать лицензии',
-        'format' => 'raw',
-        'filter' => common\models\Organization::getStatusList(),
-        'value' => function ($data) {
+        'label'     => 'Создать лицензии',
+        'format'    => 'raw',
+        'filter'    => common\models\Organization::getStatusList(),
+        'value'     => function ($data) {
             return Html::a('<span class="btn btn-sm btn-warning">Добавить лицензии</span>', ['organization/add-license', 'id' => $data['id']]);
         },
     ],
@@ -56,8 +76,8 @@ $gridColumns = [
     <?=
     GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => $gridColumns,
+        'filterModel'  => $searchModel,
+        'columns'      => $gridColumns,
     ]);
     ?>
     <?php Pjax::end(); ?></div>

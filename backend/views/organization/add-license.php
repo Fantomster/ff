@@ -17,7 +17,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <h3>Выберите организации</h3>
     <?php $i = 0; ?>
     <?php foreach ($organizations as $id => $name): ?>
-        <?php $allLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->with('license')->asArray()->all(); ?>
+        <?php $maxLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->andWhere(['>', 'td', $tenDaysBefore])->with('license')->orderBy('td ASC')->asArray()->one();
+        ?>
         <div class="row">
             <div class="col-md-3">
                 <div class="checkbox">
@@ -40,9 +41,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             </div>
             <div class="col-md-9">
-                <?php foreach ($allLicenseOrganization as $value): ?>
-                    <p <?php if($value['td'] < $tenDaysAfter) echo 'style ="color: red;"' ?>><?= $value['license']['name'] . " : " . $value['td'] ?></p>
-                <?php endforeach; ?>
+                <p <?php if ($maxLicenseOrganization){
+                if ($maxLicenseOrganization['td'] < $tenDaysAfter) echo 'style ="color: red;"' ?>><?= $maxLicenseOrganization['license']['name'] . " : " . $maxLicenseOrganization['td'];
+                    } ?></p>
             </div>
         </div>
         <hr>
@@ -67,19 +68,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 <p>Дата окончания</p>
                 <div>
                     <?= DatePicker::widget([
-                        'name' => 'td[' . $id . ']',
-                        'value' => date('d.m.Y'),
-                        'options' => [
+                        'name'          => 'td[' . $id . ']',
+                        'value'         => date('d.m.Y'),
+                        'options'       => [
                             'placeholder' => 'Дата окончания',
-                            'class' => 'delivery-date',
-                            'label' => 'Дата окончания'
+                            'class'       => 'delivery-date',
+                            'label'       => 'Дата окончания'
                         ],
-                        'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                        'layout' => '{picker}{input}{remove}',
+                        'type'          => DatePicker::TYPE_COMPONENT_APPEND,
+                        'layout'        => '{picker}{input}{remove}',
                         'pluginOptions' => [
-                            'format' => 'dd.mm.yyyy',
-                            'autoclose' => true,
-                            'startDate' => "0d",
+                            'format'         => 'dd.mm.yyyy',
+                            'autoclose'      => true,
+                            'startDate'      => "0d",
                             'todayHighlight' => true,
                         ]
                     ]) ?>

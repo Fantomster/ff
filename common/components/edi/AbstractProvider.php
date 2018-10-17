@@ -8,21 +8,6 @@
 
 namespace common\components\edi;
 
-
-use common\models\Catalog;
-use common\models\CatalogGoods;
-use common\models\CatalogBaseGoods;
-use common\models\Currency;
-use common\models\EdiOrder;
-use common\models\EdiOrderContent;
-use common\models\EdiOrganization;
-use common\models\Order;
-use common\models\OrderContent;
-use common\models\OrderStatus;
-use common\models\Organization;
-use common\models\RelationSuppRest;
-use common\models\User;
-use frontend\controllers\OrderController;
 use yii\db\Expression;
 use Yii;
 
@@ -33,6 +18,9 @@ abstract class AbstractProvider
     const STATUS_PROCESSING = 2;
     const STATUS_ERROR = 3;
     const STATUS_HANDLED = 4;
+
+    /**@var RealizationInterface|AbstractRealization */
+    public $realization;
 
     /**
      * Подключение к провайдеру, подключать в __construct

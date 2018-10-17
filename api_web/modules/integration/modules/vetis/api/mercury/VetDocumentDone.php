@@ -111,14 +111,14 @@ class VetDocumentDone extends Component
 
         $consigment->unit = $this->doc->certifiedConsignment->batch->unit;
 
-        if (isset($doc->certifiedConsignment->batch->packingList))
+        if (isset($doc->certifiedConsignment->batch->packingList)) {
             $consigment->packageList = $this->doc->certifiedConsignment->batch->packingList;
-
+        }
         $consigment->dateOfProduction = $this->doc->certifiedConsignment->batch->dateOfProduction;
 
-        if (isset($this->doc->certifiedConsignment->batch->expiryDate))
+        if (isset($this->doc->certifiedConsignment->batch->expiryDate)) {
             $consigment->expiryDate = $this->doc->certifiedConsignment->batch->expiryDate;
-
+        }
         $consigment->batchID = $this->doc->certifiedConsignment->batch->batchID;
         $consigment->perishable = $this->doc->certifiedConsignment->batch->perishable;
 
@@ -131,20 +131,20 @@ class VetDocumentDone extends Component
 
         $data->delivery->consignment = $consigment;
 
-        if (isset($doc->certifiedConsignment->broker))
+        if (isset($doc->certifiedConsignment->broker)) {
             $data->delivery->broker = $this->doc->certifiedConsignment->broker;
-
+        }
         $data->delivery->transportInfo = $this->doc->certifiedConsignment->transportInfo;
         $data->delivery->transportStorageType = $this->doc->certifiedConsignment->transportStorageType;
 
         $accompanyingForms = new ConsignmentDocumentList();
         if (isset($this->doc->referencedDocument)) {
             $docs = null;
-            if (!is_array($this->doc->referencedDocument))
+            if (!is_array($this->doc->referencedDocument)) {
                 $docs[] = $this->doc->referencedDocument;
-            else
+            } else {
                 $docs = $this->doc->referencedDocument;
-
+            }
             foreach ($docs as $item) {
                 if (($item->type >= 1) && ($item->type <= 5)) {
                     $accompanyingForms->waybill = new Waybill();
@@ -236,14 +236,14 @@ class VetDocumentDone extends Component
 
         $consigment->unit = $doc->certifiedConsignment->batch->unit;
 
-        if (isset($doc->certifiedConsignment->batch->packingList))
+        if (isset($doc->certifiedConsignment->batch->packingList)) {
             $consigment->packageList = $doc->certifiedConsignment->batch->packingList;
-
+        }
         $consigment->dateOfProduction = $doc->certifiedConsignment->batch->dateOfProduction;
 
-        if (isset($doc->certifiedConsignment->batch->expiryDate))
+        if (isset($doc->certifiedConsignment->batch->expiryDate)) {
             $consigment->expiryDate = $doc->certifiedConsignment->batch->expiryDate;
-
+        }
         $consigment->batchID = $doc->certifiedConsignment->batch->batchID;
         $consigment->perishable = $doc->certifiedConsignment->batch->perishable;
         $consigment->origin = $doc->certifiedConsignment->batch->origin;
@@ -251,20 +251,20 @@ class VetDocumentDone extends Component
 
         $retuned->consignment = $consigment;
 
-        if (isset($doc->certifiedConsignment->broker))
+        if (isset($doc->certifiedConsignment->broker)) {
             $retuned->broker = $doc->certifiedConsignment->broker;
-
+        }
         $retuned->transportInfo = $doc->certifiedConsignment->transportInfo;
         $retuned->transportStorageType = $doc->certifiedConsignment->transportStorageType;
 
         $accompanyingForms = new ConsignmentDocumentList();
         if (isset($doc->referencedDocument)) {
             $docs = null;
-            if (!is_array($doc->referencedDocument))
+            if (!is_array($doc->referencedDocument)) {
                 $docs[] = $doc->referencedDocument;
-            else
+            } else {
                 $docs = $doc->referencedDocument;
-
+            }
             foreach ($docs as $item) {
                 if (($item->type >= 1) && ($item->type <= 5)) {
                     $accompanyingForms->waybill = new Waybill();

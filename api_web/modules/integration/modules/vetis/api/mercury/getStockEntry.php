@@ -1,4 +1,5 @@
 <?php
+
 namespace api_web\modules\integration\modules\vetis\api\mercury;
 
 use api\common\models\merc\MercStockEntry;
@@ -100,25 +101,25 @@ class getStockEntry extends Model
     public function attributeLabels()
     {
         return [
-            'UUID' => 'Идентификатор версии записи журнала',
-            'GUID' => 'Глобальный идентификатор записи журнала',
-            'status' => 'Статус версии записи журнала',
-            'createDate' => 'Дата создания записи журнала',
-            'entryNumber' => 'Номер записи журнала',
-            'productType' => 'Тип продукции',
-            'product' => 'Продукция',
-            'subProduct' => 'Вид продукции',
-            'globalID' => ' (GTIN) - идентификационный номер продукции производителя',
-            'productName' => 'Наименование продукции',
-            'article' => 'Артикул',
-            'volume' => 'Объем продукции',
-            'unit' => 'Единица измерения объема партии продукции',
+            'UUID'             => 'Идентификатор версии записи журнала',
+            'GUID'             => 'Глобальный идентификатор записи журнала',
+            'status'           => 'Статус версии записи журнала',
+            'createDate'       => 'Дата создания записи журнала',
+            'entryNumber'      => 'Номер записи журнала',
+            'productType'      => 'Тип продукции',
+            'product'          => 'Продукция',
+            'subProduct'       => 'Вид продукции',
+            'globalID'         => ' (GTIN) - идентификационный номер продукции производителя',
+            'productName'      => 'Наименование продукции',
+            'article'          => 'Артикул',
+            'volume'           => 'Объем продукции',
+            'unit'             => 'Единица измерения объема партии продукции',
             'dateOfProduction' => 'Дата выработки продукции',
-            'expiryDate' => 'Дата окончания срока годности продукции',
-            'owner' => 'Хозяйствующий субъект (владелец продукции)',
-            'owner_firm' => 'Название предприятия',
-            'uuid_vsd' => 'Идентификатор связанного с записью журнала ВСД',
-            'producer' => 'Производитель',
+            'expiryDate'       => 'Дата окончания срока годности продукции',
+            'owner'            => 'Хозяйствующий субъект (владелец продукции)',
+            'owner_firm'       => 'Название предприятия',
+            'uuid_vsd'         => 'Идентификатор связанного с записью журнала ВСД',
+            'producer'         => 'Производитель',
             'producer_country' => 'Страна происхождения'
         ];
     }
@@ -135,12 +136,13 @@ class getStockEntry extends Model
         $stockEntry = MercStockEntry::findOne(['uuid' => $UUID]);
 
         if ($stockEntry != null) {
-            if ($last)
+            if ($last) {
                 $stockEntry = MercStockEntry::findOne(['guid' => $stockEntry->guid, 'last' => 1, 'active' => 1]);
+            }
         } else
             return null;
 
-        require_once (__DIR__ ."/Mercury.php");
+        require_once(__DIR__ . "/Mercury.php");
         $data_raw = unserialize($stockEntry->raw_data);
 
         if ($raw) {

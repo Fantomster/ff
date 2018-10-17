@@ -313,8 +313,8 @@ class GuideWebApi extends \api_web\components\WebApi
         foreach ($order->orderContent as $orderContent) {
             $request['products'][] = $orderContent->product_id;
         }
-
-        return $this->create($request);
+        $array = $this->create($request);
+        return $array;
     }
 
     /**
@@ -586,13 +586,12 @@ class GuideWebApi extends \api_web\components\WebApi
     {
         $model = Guide::findOne($id);
         if ($model) {
-
             $return = [
                 'id' => (int)$model->id,
                 'name' => $model->name,
                 'color' => $model->color,
-                'created_at' => \Yii::$app->formatter->asDate($model->created_at),
-                'updated_at' => \Yii::$app->formatter->asDate($model->updated_at),
+                'created_at' => $model->created_at,
+                'updated_at' => $model->updated_at,
                 'product_count' => (int)$model->productCount,
             ];
 

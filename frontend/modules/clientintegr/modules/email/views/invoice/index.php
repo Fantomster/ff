@@ -173,10 +173,12 @@ $this->registerJs('
                                             'placeholder' => '№ накладной'
                                         ],
                                         'value'              => function ($model) {
-                                            if ($model->order_id)
+                                            if ($model->order_id) {
                                                 return ' ';
-                                            if (!($model->vendor_id))
+                                            }
+                                            if (!($model->vendor_id)) {
                                                 return '';
+                                            }
                                             //return \yii\helpers\Html::input('radio', 'invoice_id', $model->id, ['class' => 'invoice_radio']);
                                             //return '<button type="button" class="btn-primary invoice_radio" id="'.$model->id.'" title="Применить"><i class="glyphicon glyphicon-ok"></i></button>';
                                             return '<a href="#" class="btn btn-secondary btn-lg invoice_radio" role="button" aria-disabled="true" id="' . $model->id . '">☐</a>';
@@ -246,10 +248,11 @@ $this->registerJs('
                                     [
                                         'attribute' => 'consignee',
                                         'value'     => function ($data) {
-                                            if ($data->consignee)
+                                            if ($data->consignee) {
                                                 return $data->consignee;
-                                            else
+                                            } else {
                                                 return $data->organization->name;
+                                            }
                                         }
                                     ],
                                     [

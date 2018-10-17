@@ -57,6 +57,7 @@ use Yii;
  * @property string $laboratory_research
  * @property string $transport_info
  * @property string $unit_guid
+ * @property string $user_status
  */
 class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 {

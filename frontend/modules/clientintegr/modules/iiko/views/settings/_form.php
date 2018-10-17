@@ -68,8 +68,13 @@ use yii\widgets\Pjax;
         }
         ?>
         <div class="form-group">
-            <?php echo Html::/*submitButton*/
-            buttonInput($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+            <?php
+            if ($id == 7) {
+                echo Html::buttonInput($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
+            } else {
+                echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']);
+            }
+            ?>
             <?= Html::a('Вернуться', ['index'], ['class' => 'btn btn-success btn-export']); ?>
         </div>
         <?php ActiveForm::end(); ?>

@@ -8,6 +8,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 use api\common\models\RkServicedata;
+use common\models\licenses\LicenseOrganization;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
@@ -237,6 +238,16 @@ class Organization extends \yii\db\ActiveRecord
     {
         return $this->hasMany(RelationUserOrganization::className(), ['organization_id' => 'id']);
     }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLicenseOrganization()
+    {
+        return $this->hasMany(LicenseOrganization::className(), ['org_id' => 'id']);
+    }
+
 
     public function getEdiOrganization(): ActiveQuery
     {

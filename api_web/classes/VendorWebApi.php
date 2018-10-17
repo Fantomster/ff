@@ -4,6 +4,8 @@ namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogTempContent;
+use common\models\ManagerAssociate;
+use common\models\notifications\EmailNotification;
 use common\models\RelationUserOrganization;
 use Yii;
 use api_web\exceptions\ValidationException;
@@ -160,6 +162,13 @@ class VendorWebApi extends \api_web\components\WebApi
                     }
                     $organization->save();
                     $user->setOrganization($organization)->save();
+                    $relId = $user->createRelationUserOrganization($user->organization->id, $user->role_id);
+                    if (!ManagerAssociate::find()->where(['manager_id' => $user->id, 'organization_id' => $user->organization->id])->exists()) {
+                        $managerAssociate = new ManagerAssociate();
+                        $managerAssociate->manager_id = $user->id;
+                        $managerAssociate->organization_id = $this->user->organization->id;
+                        $managerAssociate->save();
+                    }
                     $get_supp_org_id = $organization->id;
                     $currentOrganization = $currentUser->organization;
                     if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {

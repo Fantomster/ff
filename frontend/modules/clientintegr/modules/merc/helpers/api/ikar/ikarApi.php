@@ -65,7 +65,7 @@ class ikarApi extends baseApi
         }
 
         if (!array_key_exists('listOptions', $options)) {
-            throw new Exception('startDate field is not specified');
+            throw new \Exception('startDate field is not specified');
         }
 
         $request->updateDateInterval = new DateInterval();

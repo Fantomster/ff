@@ -78,6 +78,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                             'url' => ['/statistics/mercury'],
                         ],
                         [
+                            'label' => 'Использование Меркурия за последний месяц',
+                            'url' => ['/statistics/merc-active-org'],
+                        ],
+                        [
                             'label' => 'Разное',
                             'url' => ['/statistics/misc'],
                         ],
@@ -124,6 +128,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                 [
                                     'label' => 'Тестовая почта',
                                     'url' => ['/site/send-test-mail'],
+                                ],
+                                [
+                                    'label' => 'Оператор заказов',
+                                    'url' => ['/order/operator'],
                                 ],
                             ],
                         ],

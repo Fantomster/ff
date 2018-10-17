@@ -6,13 +6,13 @@
  * Time: 23:38
  */
 
-namespace common\components\ecom;
+namespace common\components\edi;
 
 
 /**
  * Class TestClient
  *
- * @package common\components\ecom
+ * @package common\components\edi
  */
 class TestClient
 {

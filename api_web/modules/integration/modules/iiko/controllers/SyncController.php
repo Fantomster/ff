@@ -9,8 +9,8 @@ use yii\web\BadRequestHttpException;
 
 class SyncController extends WebApiController
 {
-     #Синхронизация iiko
-     /**
+    #Синхронизация iiko
+    /**
      * @SWG\Post(path="/integration/iiko/sync/run",
      *     tags={"OLD  Integration_iiko"},
      *     summary="Запуск синхронизации",
@@ -47,7 +47,6 @@ class SyncController extends WebApiController
         $this->response = (new iikoSync())->run($this->request['type']);
     }
 
-
     /**
      * @SWG\Post(path="/integration/iiko/sync/list",
      *     tags={"OLD  Integration_iiko"},
@@ -81,10 +80,9 @@ class SyncController extends WebApiController
         $this->response = (new iikoSync())->list();
     }
 
-
     /**
      * @SWG\Post(path="/integration/iiko/sync/send-waybill",
-     *     tags={"/integration/iiko/"},
+     *     tags={"OLD Integration_iiko"},
      *     summary="Метод отправки накладных в Iiko",
      *     description="Метод отправки накладных в Iiko",
      *     produces={"application/json"},
@@ -132,6 +130,5 @@ class SyncController extends WebApiController
     {
         $this->response = (new ServiceIiko('iiko', 2))->sendWaybill($this->request);
     }
-
 
 }

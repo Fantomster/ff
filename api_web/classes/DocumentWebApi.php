@@ -136,12 +136,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
             throw new BadRequestHttpException('dont support this type');
         }
-
-        if (strtolower($post['type']) == self::TYPE_WAYBILL) {
-            $modelClass = self::$modelsContent[self::TYPE_WAYBILL];
-            return $modelClass::prepareModel($post['document_id']);
-        }
-
+        
         $return = [];
 
         $apiShema = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
@@ -168,8 +163,12 @@ class DocumentWebApi extends \api_web\components\WebApi
             case self::TYPE_ORDER_EMAIL:
                 $sql = "$sql_waybill where order_id = " . $post['document_id'];
                 break;
+            case self::TYPE_WAYBILL:
+                $sql = "$sql_waybill where id = " . $post['document_id']; //"SELECT id from `$apiShema`.waybill_content WHERE waybill_id = " . $post['document_id'];
+                $sql_positions = "SELECT id, 'waybill' as type FROM `$apiShema`.waybill_content WHERE waybill_id = " . $post['document_id'];
+                break;
             default:
-                return $return;
+                throw new BadRequestHttpException('dont support this type');
         }
 
         $result = \Yii::$app->db->createCommand($sql)->queryAll();
@@ -332,7 +331,9 @@ class DocumentWebApi extends \api_web\components\WebApi
             ],
         ]);
 
-        $dataProvider->sort->defaultOrder = [$sort_field => $order];
+        if(isset($order)) {
+            $dataProvider->sort->defaultOrder = [$sort_field => $order];
+        }
 
         $result = $dataProvider->getModels();
         foreach ($result as $model) {

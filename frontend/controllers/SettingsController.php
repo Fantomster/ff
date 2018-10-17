@@ -2,7 +2,9 @@
 
 namespace frontend\controllers;
 
+use common\components\edi\EDIIntegration;
 use common\components\EComIntegration;
+use common\models\EcomIntegrationConfig;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
 use Yii;
@@ -21,12 +23,14 @@ use yii\web\HttpException;
  *
  * @author sharaf
  */
-class SettingsController extends DefaultController {
+class SettingsController extends DefaultController
+{
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             'access' => [
                 'class' => AccessControl::className(),
@@ -59,21 +63,30 @@ class SettingsController extends DefaultController {
         ];
     }
 
-    public function actionTest(){
-        $eComIntegration = new EComIntegration();
-        $eComIntegration->handleFilesList();
-        sleep(3);
-        $eComIntegration = new EComIntegration();
-        $eComIntegration->handleFilesListQueue();
+    public function actionTest()
+    {
+        $conf = EcomIntegrationConfig::find()->all();
+        if ($conf) {
+            foreach ($conf as $one) {
+                $orgId = $one->org_id;
+                $eComIntegration = new EDIIntegration(['orgId' => $orgId]);
+                $eComIntegration->handleFilesList();
+                $eComIntegration = new EDIIntegration(['orgId' => $orgId]);
+                $eComIntegration->handleFilesListQueue();
+            }
+        }
+        echo 'success';
     }
 
 
-    public function actionUser() {
+    public function actionUser()
+    {
         $profile = $this->currentUser->profile;
         return $this->render("user", compact('profile'));
     }
 
-    public function actionAjaxChangeAvatar() {
+    public function actionAjaxChangeAvatar()
+    {
         $profile = $this->currentUser->profile;
 
         $loadedPost = $profile->load(Yii::$app->request->post());
@@ -86,7 +99,8 @@ class SettingsController extends DefaultController {
         return $this->renderAjax('/settings/user/_change-avatar', compact('profile'));
     }
 
-    public function actionAjaxDeleteAvatar() {
+    public function actionAjaxDeleteAvatar()
+    {
         $profile = $this->currentUser->profile;
         $profile->avatar = 'delete';
         if ($profile->save()) {
@@ -94,7 +108,8 @@ class SettingsController extends DefaultController {
         }
     }
 
-    public function actionNotifications() {
+    public function actionNotifications()
+    {
         $emailNotification = $this->currentUser->emailNotification;
         $smsNotification = $this->currentUser->smsNotification;
 
@@ -138,7 +153,8 @@ class SettingsController extends DefaultController {
      * @return false|int
      * @throws HttpException
      */
-    public function actionAjaxDeleteEmail($id) {
+    public function actionAjaxDeleteEmail($id)
+    {
         try {
             if (!Yii::$app->request->isAjax) {
                 throw new \Exception('Ajax only');
@@ -157,7 +173,8 @@ class SettingsController extends DefaultController {
      * Добавляем дополнительный Емайл
      * @throws HttpException
      */
-    public function actionAjaxAddEmail() {
+    public function actionAjaxAddEmail()
+    {
         try {
             if (!Yii::$app->request->isAjax) {
                 throw new \Exception('Ajax only');
@@ -182,7 +199,8 @@ class SettingsController extends DefaultController {
      * Меняем значения флагов у дополнительного емайла
      * @throws HttpException
      */
-    public function actionAjaxChangeEmailNotification() {
+    public function actionAjaxChangeEmailNotification()
+    {
         try {
             if (!Yii::$app->request->isAjax) {
                 throw new \Exception('Ajax only');

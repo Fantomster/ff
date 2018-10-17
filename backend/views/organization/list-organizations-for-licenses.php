@@ -16,15 +16,10 @@ $gridColumns = [
     [
         'format' => 'raw',
         'attribute' => 'id',
+        'filter'=> false,
         'value' => function ($data) {
             return Html::a($data['id'], ['organization/view', 'id' => $data['id']]);
         },
-    ],
-    [
-        'attribute' => 'type_id',
-        'value' => 'type.name',
-        'label' => 'Тип',
-        'filter' => common\models\OrganizationType::getList(),
     ],
     [
         'format' => 'raw',
@@ -40,7 +35,7 @@ $gridColumns = [
         'format' => 'raw',
         'filter' => common\models\Organization::getStatusList(),
         'value' => function ($data) {
-            return Html::a('<span class="btn btn-sm btn-warning">Добавить лицензии</span>', ['organization/add-license', 'id' => $data->id]);
+            return Html::a('<span class="btn btn-sm btn-warning">Добавить лицензии</span>', ['organization/add-license', 'id' => $data['id']]);
         },
     ],
 ];

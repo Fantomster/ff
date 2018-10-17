@@ -14,6 +14,7 @@ use Yii;
  * @property string $type Тип настройки - вып. список, полее ввода и т.п.
  * @property int $is_active Флаг активности объекта
  * @property string $item_list Список значение по умолчанию в формате JSON, для отображения при начальном выборе, например { 1: "Включено", 2: "Выключено"}
+ * @property int $service_id Идентификатор сервиса в таблице all_service
  *
  * @property IntegrationSettingValue[] $integrationSettingValues
  */

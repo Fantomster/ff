@@ -17,24 +17,35 @@ $this->params['breadcrumbs'][] = $this->title;
     <h3>Выберите организации</h3>
     <?php $i = 0; ?>
     <?php foreach ($organizations as $id => $name): ?>
-        <div class="checkbox">
-            <?php if ($i == 0): ?>
-        <p style="font-weight: bold">
-        <?php else: ?>
-            <p style="padding-left: 15px;">
+        <?php $allLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->with('license')->asArray()->all(); ?>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="checkbox">
+                    <?php if ($i == 0): ?>
+                <p style="font-weight: bold">
+                <?php else: ?>
+                    <p style="padding-left: 15px;">
+                        <?php endif; ?>
+                        <?= Html::checkbox('organizations[]', true, [
+                            'value' => $id,
+                            'label' => $name,
+                            'class' => 'checkbox',
+                        ]);
+                        ?>
+                        <?php if ($i == 0): ?>
+                    </p>
+                <?php else: ?>
+                    </p>
                 <?php endif; ?>
-                <?= Html::checkbox('organizations[]', true, [
-                    'value' => $id,
-                    'label' => $name,
-                    'class' => 'checkbox',
-                ]);
-                ?>
-                <?php if ($i == 0): ?>
-            </p>
-        <?php else: ?>
-            </p>
-        <?php endif; ?>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <?php foreach ($allLicenseOrganization as $value): ?>
+                    <p <?php if($value['td'] < $tenDaysAfter) echo 'style ="color: red;"' ?>><?= $value['license']['name'] . " : " . $value['td'] ?></p>
+                <?php endforeach; ?>
+            </div>
         </div>
+        <hr>
         <?php $i++; ?>
     <?php endforeach; ?>
     <hr>

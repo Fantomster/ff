@@ -33,7 +33,7 @@ use yii\db\Expression;
 /**
  * Class TestRealization for unit tests
  *
- * @package common\components\ecom\realization
+ * @package common\components\edi\realization
  */
 class TestRealization extends AbstractRealization implements RealizationInterface
 {

@@ -25,6 +25,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
  */
 class MercVSDList extends MercDictConsumer
 {
+    const DEFAULT_STEP = 100;
     public static $timeout = 60 * 15;
     public static $timeoutExecuting = 60 * 60;
     private $result = true;
@@ -60,6 +61,7 @@ class MercVSDList extends MercDictConsumer
         $vsd->org_id = $this->org_id;
         $api = mercuryApi::getInstance($this->org_id);
         $api->setEnterpriseGuid($this->data['enterpriseGuid']);
+        $step = $this->data['listOptions']['count'];
         try {
             do {
                 try {
@@ -77,26 +79,45 @@ class MercVSDList extends MercDictConsumer
 
                     $count += $vetDocumentList->count;
                     $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
+                    echo 'Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL;
 
                     if ($vetDocumentList->count > 0) {
                         $vsd->updateDocumentsList($vetDocumentList->vetDocument);
                     }
 
                     if ($vetDocumentList->count < $vetDocumentList->total) {
-                        $this->data['listOptions']['offset'] += $vetDocumentList->count;
+                        $this->data['listOptions']['offset'] += $step;
+                        $step = self::DEFAULT_STEP;
+                        $this->data['listOptions']['count'] = $step;
                     }
+
                     $error = 0;
                 } catch (\Throwable $e) {
                     $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
-                    //mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
+                    mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
                     $error++;
                     if ($error == 3) {
+                        //throw new \Exception('Error operation');
+                        if ($step > 1) {
+                            $step = round($step / 2);
+                            $this->data['listOptions']['count'] = $step;
+                            //$this->request['listOptions']['offset'] += $this->request['listOptions']['count'];
+                        }
+                        else
+                        {
+                            $this->log('ERROR RECORD' . json_encode($this->request, true) . PHP_EOL);
+                            $step = self::DEFAULT_STEP;
+                            $this->data['listOptions']['count'] = $step;
+                            $this->data['listOptions']['offset'] += 1;
+                            $error = 0;
+                        }
+                    }elseif ($error > 3) {
                         throw new \Exception('Error operation');
                     }
                 }
-                $total = $vetDocumentList->total ?? ($this->request['listOptions']['count'] + $this->request['listOptions']['offset'] +1);
+                $total = $vetDocumentList->total ?? ($this->data['listOptions']['count'] + $this->data['listOptions']['offset'] +1);
                 sleep(60);
-            } while ($total > ($this->request['listOptions']['count'] + $this->request['listOptions']['offset']));
+            } while ($total > ($this->data['listOptions']['count'] + $this->data['listOptions']['offset']));
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
             mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());

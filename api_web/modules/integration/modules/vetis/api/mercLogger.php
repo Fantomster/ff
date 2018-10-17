@@ -29,18 +29,18 @@ class mercLogger extends Component
      * @var array
      */
     static $opertionsList = [
-        'getVetDocumentList' => ['code' => '8', 'comment' => 'получение всех ВСД предприятия'],
-        'getVetDocumentChangeList' => ['code' => '7', 'comment' => 'получение ВСД (получение истории изменений)'],
-        'getVetDocumentByUUID' => ['code' => '6', 'comment' => 'получение ВСД по его идентификатору'],
-        'getVetDocumentDone' => ['code' => '3', 'comment' => 'оформление входящей партии'],
-        'getStockEntryList' => ['code' => '12', 'comment' => 'получение актуального списка записей журнала'],
-        'getStockEntryVersionList' => ['code' => '11', 'comment' => 'получение всех версий записи складского журнала по ее идентификатору'],
-        'getStockEntryChangesList' => ['code' => '13', 'comment' => 'получение списка версий записей журнала (получение истории изменений)'],
-        'getStockEntryByGuid' => ['code' => '10', 'comment' => 'получение последней (актуальной) версии записи складского журнала по ее идентификатору'],
-        'getStockEntryByUuid' => ['code' => '9', 'comment' => 'получение конкретной версии записи складского журнала по ее идентификатору'],
-        'resolveDiscrepancyOperation' => ['code' => '4', 'comment' => 'оформление результатов инвентаризации'],
+        'getVetDocumentList'                  => ['code' => '8', 'comment' => 'получение всех ВСД предприятия'],
+        'getVetDocumentChangeList'            => ['code' => '7', 'comment' => 'получение ВСД (получение истории изменений)'],
+        'getVetDocumentByUUID'                => ['code' => '6', 'comment' => 'получение ВСД по его идентификатору'],
+        'getVetDocumentDone'                  => ['code' => '3', 'comment' => 'оформление входящей партии'],
+        'getStockEntryList'                   => ['code' => '12', 'comment' => 'получение актуального списка записей журнала'],
+        'getStockEntryVersionList'            => ['code' => '11', 'comment' => 'получение всех версий записи складского журнала по ее идентификатору'],
+        'getStockEntryChangesList'            => ['code' => '13', 'comment' => 'получение списка версий записей журнала (получение истории изменений)'],
+        'getStockEntryByGuid'                 => ['code' => '10', 'comment' => 'получение последней (актуальной) версии записи складского журнала по ее идентификатору'],
+        'getStockEntryByUuid'                 => ['code' => '9', 'comment' => 'получение конкретной версии записи складского журнала по ее идентификатору'],
+        'resolveDiscrepancyOperation'         => ['code' => '4', 'comment' => 'оформление результатов инвентаризации'],
         'prepareOutgoingConsignmentOperation' => ['code' => '2', 'comment' => 'оформление транспортной партии'],
-        'registerProductionOperation' => ['code' => '1', 'comment' => 'оформление производственной партии'],
+        'registerProductionOperation'         => ['code' => '1', 'comment' => 'оформление производственной партии'],
     ];
 
     //private $service;
@@ -75,20 +75,18 @@ class mercLogger extends Component
         $operation = $this->getServiceOperation($method);
         $journal = new Journal();
         $journal->service_id = self::service_id;
-        $journal->operation_code = $operation->code."";
+        $journal->operation_code = $operation->code . "";
         if (\Yii::$app instanceof \Yii\web\Application) {
             $journal->user_id = \Yii::$app->user->id;
             $journal->organization_id = (\Yii::$app->user->identity)->organization_id;
-        }
-        else {
+        } else {
             $journal->organization_id = $org_id;
         }
         $journal->log_guide = $localTransactionId;
         $journal->type = ($response->application->status == 'COMPLETED') ? 'success' : 'error';
-        $journal->response = ($journal->type == 'success') ? 'COMPLETE' :  serialize($response);
+        $journal->response = ($journal->type == 'success') ? 'COMPLETE' : serialize($response);
 
         $journal->save();
-
 
         $this->addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml, $org_id = null);
 
@@ -125,7 +123,6 @@ class mercLogger extends Component
         }
 
         $log->save();
-        //var_dump($log->getErrors());
 
         if ($log->status == mercLog::REJECTED) {
             throw new \Exception($log->id, 600);
@@ -140,9 +137,9 @@ class mercLogger extends Component
     {
         $operation = AllServiceOperation::findOne(['service_id' => self::service_id, 'denom' => $denom]);
 
-        if($operation != null)
+        if ($operation != null) {
             return $operation;
-
+        }
         $operation = new AllServiceOperation();
         $operation->service_id = self::service_id;
         $operation->denom = $denom;
@@ -158,15 +155,15 @@ class mercLogger extends Component
      * @param $localTransactionId
      * @param $response
      */
-    public function addMercLogDict ($result, $localTransactionId, $response)
+    public function addMercLogDict($result, $localTransactionId, $response)
     {
         $operation = $this->getServiceOperation($localTransactionId);
         $journal = new Journal();
         $journal->service_id = self::service_id;
-        $journal->operation_code = $operation->code."";
+        $journal->operation_code = $operation->code . "";
         $journal->log_guide = $localTransactionId;
         $journal->type = $result;
-        $journal->response = ($journal->type == 'COMPLETE') ? 'COMPLETE' :  $response;
+        $journal->response = ($journal->type == 'COMPLETE') ? 'COMPLETE' : $response;
 
         $journal->save();
 
@@ -175,28 +172,4 @@ class mercLogger extends Component
         //$this->addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml);
 
     }
-
-    /*public function addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml)
-    {
-        //Пишем лог
-        $log = new mercLog();
-        $log->applicationId = $response->application->applicationId;
-        $log->status = $response->application->status;
-        $log->action = $method;
-        $log->localTransactionId = $localTransactionId;
-        $log->request = $request_xml;
-        $log->response = $response_xml;
-
-        if ($log->status == mercLog::REJECTED) {
-            $log->description = json_encode($response->application->errors, JSON_UNESCAPED_UNICODE);
-        }
-
-        $log->save();
-        //var_dump($log->getErrors());
-
-        /*if ($log->status == mercLog::REJECTED) {
-            throw new \Exception($log->id, 600);
-        }
-    }*/
-
 }

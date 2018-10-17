@@ -3,6 +3,7 @@
 namespace api_web\modules\integration\modules\vetis\models;
 
 use api\common\models\merc\mercDicconst;
+use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVsd;
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
@@ -246,7 +247,9 @@ class VetisWaybill extends WebApi
                 throw new BadRequestHttpException('ВСД не принадлежит данной организации: ' . $request['uuids']);
             }
         } catch (\Throwable $t) {
-//            $this->helper->setLastError($t->getMessage(), $request['uuids']);
+            $mercLogId = $t->getMessage();
+            $model = mercLog::findOne($mercLogId);
+            $this->helper->setLastError($model->description, $request['uuids']);
         }
         $vsd_direction = $this->helper->getVsdDirection($request['uuids'], $this->user->organization_id);
 
@@ -283,7 +286,9 @@ class VetisWaybill extends WebApi
                 $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_PARTIALLY_ACCEPTED, $uuid);
             }
         } catch (\Throwable $t) {
-//            $this->helper->setLastError($t->getMessage(), $uuid);
+            $mercLogId = $t->getMessage();
+            $model = mercLog::findOne($mercLogId);
+            $this->helper->setLastError($model->description, $uuid);
         }
         $vsd_direction = $this->helper->getVsdDirection($uuid, $this->user->organization_id);
 
@@ -319,7 +324,9 @@ class VetisWaybill extends WebApi
                 $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_RETURNED, $uuid);
             }
         } catch (\Throwable $t) {
-//            $this->helper->setLastError($t->getMessage(), $uuid);
+            $mercLogId = $t->getMessage();
+            $model = mercLog::findOne($mercLogId);
+            $this->helper->setLastError($model->description, $uuid);
         }
         $vsd_direction = $this->helper->getVsdDirection($uuid, $this->user->organization_id);
 

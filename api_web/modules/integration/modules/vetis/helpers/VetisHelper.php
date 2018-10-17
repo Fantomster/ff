@@ -404,7 +404,7 @@ class VetisHelper
      */
     public function generateVsdHttp()
     {
-        $settings = $this->getSettings($this->org_id, ['vetis_login','vetis_password','issuer_id']);
+        $settings = $this->getSettings($this->org_id, ['vetis_login', 'vetis_password', 'issuer_id']);
         return new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
             'authLink'       => \Yii::$app->params['vtsHttp']['authLink'],
             'vsdLink'        => \Yii::$app->params['vtsHttp']['vsdLink'],
@@ -423,7 +423,7 @@ class VetisHelper
      */
     public function setLastError($error, $uuid)
     {
-        if (mb_strlen($error) > 255){
+        if (mb_strlen($error) > 255) {
             $error = mb_substr($error, 0, 254);
         }
         $where = ['uuid' => $uuid];
@@ -451,7 +451,8 @@ class VetisHelper
      * @param array $settingNames
      * @return array|string
      */
-    public function getSettings($orgId, $settingNames = []){
+    public function getSettings($orgId, $settingNames = [])
+    {
         return IntegrationSettingValue::getSettingsByServiceId(WaybillHelper::MERC_SERVICE_ID,
             $orgId, $settingNames);
     }

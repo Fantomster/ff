@@ -41,30 +41,30 @@ class OrganizationController extends Controller
     public function behaviors()
     {
         return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
+            'verbs'  => [
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
                         'actions' => ['index', 'view', 'test-vendors', 'create-test-vendor', 'update-test-vendor', 'start-test-vendors-updating', 'notifications', 'ajax-update-status', 'list-organizations-for-licenses', 'add-license'],
-                        'allow' => true,
-                        'roles' => [
+                        'allow'   => true,
+                        'roles'   => [
                             Role::ROLE_ADMIN,
 //                            Role::ROLE_FKEEPER_OBSERVER,
                         ],
                     ],
                     [
                         'actions' => ['update'],
-                        'allow' => true,
-                        'roles' => [
+                        'allow'   => true,
+                        'roles'   => [
                             Role::ROLE_ADMIN,
                         ],
                     ],
@@ -75,6 +75,7 @@ class OrganizationController extends Controller
 
     /**
      * Lists all Organization models.
+     *
      * @return mixed
      */
     public function actionIndex()
@@ -83,14 +84,14 @@ class OrganizationController extends Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
-
     /**
      * Lists all TestVendors models.
+     *
      * @return mixed
      */
     public function actionTestVendors()
@@ -99,13 +100,14 @@ class OrganizationController extends Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('test-vendors', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
      * Displays a single Organization model.
+     *
      * @param integer $id
      * @return mixed
      */
@@ -119,6 +121,7 @@ class OrganizationController extends Controller
     /**
      * Creates a new TestVendors model.
      * If creation is successful, the browser will be redirected to the 'view' page.
+     *
      * @return mixed
      */
     public function actionCreateTestVendor()
@@ -134,10 +137,10 @@ class OrganizationController extends Controller
         }
     }
 
-
     /**
      * Updates TestVendors model.
      * If creation is successful, the browser will be redirected to the 'view' page.
+     *
      * @return mixed
      */
     public function actionUpdateTestVendor($id)
@@ -153,10 +156,10 @@ class OrganizationController extends Controller
         }
     }
 
-
     /**
      * Updates TestVendors.
      * If creation is successful, the browser will be redirected to the 'view' page.
+     *
      * @return mixed
      */
     public function actionStartTestVendorsUpdating()
@@ -168,10 +171,10 @@ class OrganizationController extends Controller
         return $this->redirect(['test-vendors']);
     }
 
-
     /**
      * Updates an existing Organization model.
      * If update is successful, the browser will be redirected to the 'view' page.
+     *
      * @param integer $id
      * @return mixed
      */
@@ -187,9 +190,6 @@ class OrganizationController extends Controller
         }
         $franchiseeList = ArrayHelper::map(Franchisee::find()->all(), 'id', 'legal_entity');
         if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save() && $ediModel->load(Yii::$app->request->post())) {
-            if (strlen($ediModel->pass) < 20) {
-                $ediModel->pass = md5($ediModel->pass);
-            }
             $ediModel->save();
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
@@ -214,6 +214,7 @@ class OrganizationController extends Controller
     /**
      * Finds the Organization model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
      * @return Organization the loaded model
      * @throws NotFoundHttpException if the model cannot be found
@@ -227,10 +228,10 @@ class OrganizationController extends Controller
         }
     }
 
-
     /**
      * Finds the Organization model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
      * @return Organization the loaded model
      * @throws NotFoundHttpException if the model cannot be found
@@ -243,9 +244,9 @@ class OrganizationController extends Controller
         return $model;
     }
 
-
     /**
      * Edit notifications.
+     *
      * @param integer $id
      * @return mixed
      */
@@ -284,7 +285,6 @@ class OrganizationController extends Controller
         return $this->render('notifications', compact('users'));
     }
 
-
     public function actionAjaxUpdateStatus()
     {
         if (Yii::$app->request->isAjax) {
@@ -299,25 +299,32 @@ class OrganizationController extends Controller
         }
     }
 
-
     /**
      * Lists all Organization models.
+     *
      * @return mixed
      */
     public function actionListOrganizationsForLicenses()
     {
         $searchModel = new OrganizationSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, true);
+        $db = Yii::$app->get('db_api');
+        $dbNameArr = explode(';dbname=', $db->dsn);
+        $dbName = $dbNameArr[1];
+        $date = new \DateTime('+10 day');
+        $tenDaysAfter = $date->format('Y-m-d H:i:s');
 
         return $this->render('list-organizations-for-licenses', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
+            'dbName'       => $dbName,
+            'tenDaysAfter' => $tenDaysAfter
         ]);
     }
 
-
     /**
      * Lists all Organization models.
+     *
      * @return mixed
      */
     public function actionAddLicense(int $id)
@@ -326,15 +333,18 @@ class OrganizationController extends Controller
         if (!$organizationObject) {
             throw new BadRequestHttpException();
         }
+
         $organizations = ArrayHelper::map([$organizationObject->toArray()], 'id', 'name');
         if (!$organizations) {
             throw new BadRequestHttpException();
         }
+
         $parentOrganizationObject = Organization::findOne(['id' => $organizationObject->parent_id]);
         if ($parentOrganizationObject) {
             $parentOrganization = ArrayHelper::map([$parentOrganizationObject->toArray()], 'id', 'name');
             $organizations = ArrayHelper::merge($organizations, $parentOrganization);
         }
+
         $childOrganizations = ArrayHelper::map(Organization::findAll(['parent_id' => $id]), 'id', 'name');
         $organizations = ArrayHelper::merge($organizations, $childOrganizations);
         $services = ArrayHelper::map(AllService::findAll(['is_active' => true]), 'id', 'denom');
@@ -362,8 +372,12 @@ class OrganizationController extends Controller
             Yii::$app->session->setFlash('licenses-added', 'Лицензии добавлены');
             return $this->redirect('/organization/list-organizations-for-licenses');
         }
+
         $date = new \DateTime('+10 day');
         $tenDaysAfter = $date->format('Y-m-d H:i:s');
-        return $this->render('add-license', ['services' => $services, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter]);
+        $date = new \DateTime('-10 month');
+        $tenDaysBefore = $date->format('Y-m-d H:i:s');
+
+        return $this->render('add-license', ['services' => $services, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'tenDaysBefore' => $tenDaysBefore]);
     }
 }

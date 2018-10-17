@@ -946,4 +946,43 @@ class UserWebApi extends \api_web\components\WebApi
 
         return $notification;
     }
+
+    /**
+     * @param      $user_id
+     * @param      $organization_id
+     * @param      $profile
+     * @param null $associate_org_id
+     * @throws BadRequestHttpException
+     */
+    public function initUserOptions($user_id, $organization_id, $profile, $associate_org_id = null)
+    {
+        $user = \common\models\User::findOne(['id' => $user_id]);
+
+        if (!user) {
+            throw new BadRequestHttpException('user not found');
+        }
+
+        $transaction = \Yii::$app->db_api->beginTransaction();
+        try {
+            $user->setOrganization($organization_id, true);
+            $user->setRelationUserOrganization($organization_id, $user->role_id);
+
+            if ($associate_org_id) {
+                if (!ManagerAssociate::find()->where(['manager_id' => $user->id, 'organization_id' => $associate_org_id])->exists()) {
+                    $managerAssociate = new ManagerAssociate();
+                    $managerAssociate->manager_id = $user->id;
+                    $managerAssociate->organization_id = $associate_org_id;
+                    $managerAssociate->save();
+                }
+            }
+
+            $this->setDefaultEmailNotification($user->id, $organization_id);
+            $this->setDefaultSmsNotification($user->id, $organization_id);
+            $this->createProfile($profile);
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollback();
+            throw $e;
+        }
+    }
 }

@@ -362,7 +362,6 @@ class VetisHelper
             ->andWhere(['uuid' => $uuids])->indexBy('uuid')->all();
     }
 
-
     /**
      * @param null $enterpriseGuids
      * @return array
@@ -396,7 +395,6 @@ class VetisHelper
 
         return $enterpriseGuids;
     }
-
 
     /**
      * @param $userStatus

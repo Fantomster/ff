@@ -283,11 +283,11 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 
     public static function getProduccerData($producer, $org_id)
     {
-        if (!is_array($producer))
+        if (!is_array($producer)) {
             $data[] = $producer;
-        else
+        } else {
             $data = $producer;
-
+        }
         $result = null;
         foreach ($data as $item) {
             $res = isset($item->enterprise->uuid) ? cerberApi::getInstance($org_id)->getEnterpriseByUuid($item->enterprise->uuid) : null;

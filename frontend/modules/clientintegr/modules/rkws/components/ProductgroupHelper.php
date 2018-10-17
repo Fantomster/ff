@@ -131,10 +131,12 @@ class ProductgroupHelper extends AuthHelper {
 
         $acc = $tmodel->acc;
         $tmodel->isactive = 0;
+        $isLog->logAppendString('-- after setCallbackStart()!!!');
         $tmodel->setCallbackStart();
 
         // Parsing XML for errors
 
+        $isLog->logAppendString('-- check XML ERROR!');
         foreach ($myXML->ERROR as $err) {
 
             foreach ($err->attributes() as $e => $h) {
@@ -144,6 +146,7 @@ class ProductgroupHelper extends AuthHelper {
 
         }
 
+        $isLog->logAppendString('-- check code!');
         if (isset($array['code'])) {  // We got external error
 
             $tmodel->intstatus_id = RkTasks::INTSTATUS_EXTERROR;
@@ -167,8 +170,10 @@ class ProductgroupHelper extends AuthHelper {
 
         $gcount =0;
 
+        $isLog->logAppendString('-- UPDATE rk_category SET active=0');
         $rress = Yii::$app->db_api->createCommand('UPDATE rk_category SET active=0 WHERE acc=:acc', [':acc' => $acc])->execute();
 
+        $isLog->logAppendString('-- parsing XML!');
         foreach ($myXML->ITEM as $item) {
 
             $gcount++;
@@ -208,6 +213,7 @@ class ProductgroupHelper extends AuthHelper {
 
         }
 
+        $isLog->logAppendString('-- END parsing XML!');
 
 /*
             foreach($storegroup->attributes() as $c => $d) {
@@ -274,6 +280,7 @@ class ProductgroupHelper extends AuthHelper {
 */
         // Update task after XML
 
+        $isLog->logAppendString('-- after setCallbackXML!');
         if (!$tmodel->setCallbackXML()) {
             $isLog->logAppendString('ERROR:: Task after XML parsing cannot be saved!!');
             exit;

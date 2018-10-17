@@ -176,8 +176,10 @@ class ProductgroupHelper extends AuthHelper {
         $isLog->logAppendString('-- parsing XML!');
         foreach ($myXML->ITEM as $item) {
 
+            $isLog->logAppendString(print_r($item, true));
             $gcount++;
 
+            $isLog->logAppendString('-- check attributes!');
             foreach($item->attributes() as $c => $d) {
                 if ($c == 'rid')  $arr[$gcount]['rid'] = strval($d[0]);
                 if ($c == 'name') $arr[$gcount]['name'] = strval($d[0]);
@@ -185,6 +187,7 @@ class ProductgroupHelper extends AuthHelper {
             }
 
             if ($arr[$gcount]['parent'] === '') { // Корень дерева
+                $isLog->logAppendString('-- check parent!');
                 $rtree = new RkCategory(['name'=>$arr[$gcount]['name']]);
                 $rtree->disabled =0;
                 $rtree->rid = $arr[$gcount]['rid'];
@@ -193,7 +196,7 @@ class ProductgroupHelper extends AuthHelper {
                 $rtree->makeRoot();
 
             } else {
-
+                $isLog->logAppendString('-- check ne parent!');
                 ${'rid'.$arr[$gcount]['rid']} = new RkCategory(['name'=>$arr[$gcount]['name']]);
                 ${'rid'.$arr[$gcount]['rid']}->type = 1;
                 ${'rid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];

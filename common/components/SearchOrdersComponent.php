@@ -251,8 +251,8 @@ class SearchOrdersComponent extends Component
             $this->currentPage = $this->searchParams['page'];
         }
         $selectedFromSession = Yii::$app->session->get('selected', []);
-        if (isset($selectedFromSession[$this->currentPage])) {
-            $this->selected = $selectedFromSession[$this->currentPage];
+        if (isset($selectedFromSession)) {
+            $this->selected = $selectedFromSession;
         }
         if (!$this->totalPrice) {
             $this->totalPrice = 0;

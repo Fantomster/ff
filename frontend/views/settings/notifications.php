@@ -211,6 +211,24 @@ $mercLicense = $user->organization->getMercLicense();
                         ]
                     ])->label(false) : ''
                     ?>
+                    <?= isset($mercLicense) ?
+                        $form->field($emailNotification, 'merc_stock_expiry')->widget(CheckboxX::classname(), [
+                            'autoLabel' => true,
+                            'model' => $emailNotification,
+                            'attribute' => 'merc_stock_expiry',
+                            'pluginOptions' => [
+                                'threeState' => false,
+                                'theme' => 'krajee-flatblue',
+                                'enclosedLabel' => false,
+                                'size' => 'md',
+                            ],
+                            'labelSettings' => [
+                                'label' => Yii::t('app', 'frontend.views.settings.stock_expiry_notification', ['ru'=>'Рассылки о проблемной продукции']),
+                                'position' => CheckboxX::LABEL_RIGHT,
+                                'options' => ['style' => '']
+                            ]
+                        ])->label(false) : ''
+                    ?>
 
                     <?= ''
 //                    $form->field($emailNotification, 'requests')->widget(CheckboxX::classname(), [

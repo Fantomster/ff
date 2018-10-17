@@ -127,7 +127,7 @@ class OrderOperatorSearch extends Order
             ->leftJoin(Currency::tableName() . ' as c', 'c.id = order.currency_id')
             ->where([
                 'OR',
-                'order.status = ' . Order::STATUS_DONE . ' AND op.status_call_id != 3',
+                'order.status in (' . Order::STATUS_DONE . ', ' . Order::STATUS_PROCESSING . ') AND op.status_call_id != 3',
                 [
                     'AND',
                     ['in', 'order.status', $status],

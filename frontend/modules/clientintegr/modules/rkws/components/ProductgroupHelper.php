@@ -21,6 +21,7 @@ use api\common\models\RkDic;
 
 class ProductgroupHelper extends AuthHelper
 {
+    public $result = [];
 
     //  const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/store";
 
@@ -206,88 +207,103 @@ class ProductgroupHelper extends AuthHelper
     }
 
     /**
+     * @param $item
+     * @param $acc
+     * @return RkCategory|null|static
+     */
+    private function createItem($item, $acc)
+    {
+        $parent = empty($item['parent']) ? 0 : $item['parent'];
+
+        $model = RkCategory::findOne([
+            'acc'  => $acc,
+            'rid'  => $item['rid'],
+            'prnt' => $parent
+        ]);
+
+        if (empty($model)) {
+            $model = new RkCategory([
+                'name' => $item['name'],
+                'rid'  => $item['rid'],
+                'prnt' => $parent,
+                'acc'  => $acc
+            ]);
+
+            if ($parent == 0) {
+                $model->makeRoot();
+            } else {
+                $parentModel = RkCategory::findOne([
+                    'acc' => $acc,
+                    'rid' => $parent
+                ]);
+
+                if (empty($parentModel)) {
+                    $this->createItem($this->result[$parent], $acc);
+                } else {
+                    //Тип для подкатегорий
+                    $model->type = 1;
+                    $model->prependTo($parentModel);
+                }
+            }
+        } else {
+            //Если изменили имя
+            if ($model->name != $item['name']) {
+                $model->name = $item['name'];
+            }
+            //Тип для подкатегорий
+            if ($parent !== 0) {
+                $model->type = 1;
+            }
+            $model->active = 1;
+            $model->save();
+        }
+
+        return $model;
+    }
+
+    /**
      * @param \SimpleXMLElement $myXML
      * @param                   $acc
      * @param DebugHelper       $isLog
      * @return int
      */
-    private function handleFile(\SimpleXMLElement $myXML, $acc, DebugHelper $isLog)
+    public function handleFile(\SimpleXMLElement $myXML, $acc, DebugHelper $isLog)
     {
         $count = 0;
-        $isLog->logAppendString('-- parsing XML!');
-        $result = [];
         //Раскладываем XML в массив
-        foreach ($myXML->ITEM as $item) {
-            $parent_id = 'root';
-            if (!empty($item->attributes()->parent)) {
-                $parent_id = trim((string)$item->attributes()->parent);
-            }
+        $isLog->logAppendString("-- parsing XML start: [" . date("d.m.Y H:i:s") . "]");
 
-            $result[(string)$parent_id][] = [
-                'rid'    => (string)$item->attributes()->rid,
+        foreach ($this->iterator($myXML->ITEM) as $item) {
+            $rid = (string)$item->attributes()->rid;
+            $this->result[$rid] = [
+                'rid'    => $rid,
                 'name'   => (string)$item->attributes()->name,
-                'parent' => trim((string)$item->attributes()->parent),
+                'parent' => trim((string)$item->attributes()->parent)
             ];
             $count++;
         }
 
+        $isLog->logAppendString("-- parsing XML   end: [" . date("d.m.Y H:i:s") . "]");
         $isLog->logAppendString("-- found {$count}!");
+        $isLog->logAppendString("-- create items! start: [" . date("d.m.Y H:i:s") . "]");
 
-        foreach ($result['root'] as $item) {
-            //Проверка главных категорий
-            $rootModel = RkCategory::findOne([
-                'name' => $item['name'],
-                'acc'  => $acc,
-                'rid'  => $item['rid']
-            ]);
-            //Если нет, создаем
-            if (empty($rootModel)) {
-                $rootModel = new RkCategory([
-                    'name'     => $item['name'],
-                    'rid'      => $item['rid'],
-                    'disabled' => 0,
-                    'acc'      => $acc
-                ]);
-                $rootModel->makeRoot();
-            } else {
-                //Обновляем, если нашли
-                $rootModel->active = 1;
-                $rootModel->disabled = 0;
-                $rootModel->save();
-            }
-
-            //Смотрим, есть ли дети в категории
-            if (isset($result[$rootModel->rid]) && !empty($result[$rootModel->rid])) {
-                $children = $result[$rootModel->rid];
-                //Создание/обновление дочерних категорий
-                foreach ($children as $child) {
-                    $childModel = RkCategory::findOne([
-                        'name' => $child['name'],
-                        'rid'  => $child['rid'],
-                        'prnt' => $child['parent'],
-                        'acc'  => $rootModel->acc
-                    ]);
-                    //Если не нашли в базе, создаем подкатегорию
-                    if (empty($childModel)) {
-                        $childModel = new RkCategory([
-                            'name'     => $child['name'],
-                            'rid'      => $child['rid'],
-                            'prnt'     => $child['parent'],
-                            'type'     => 1,
-                            'disabled' => 0,
-                            'acc'      => $rootModel->acc
-                        ]);
-                        $childModel->prependTo($rootModel);
-                    } else {
-                        //Если нашли ее, обновляем
-                        $childModel->active = 1;
-                        $childModel->disabled = 0;
-                        $childModel->save();
-                    }
-                }
-            }
+        foreach ($this->iterator($this->result) as $item) {
+            $this->createItem($item, $acc);
         }
-        $isLog->logAppendString('-- END parsing XML!');
+
+        $isLog->logAppendString("-- create items!   end: [" . date("d.m.Y H:i:s") . "]");
+
         return $count;
+    }
+
+    /**
+     * @param $items
+     * @return \Generator
+     */
+    private function iterator($items)
+    {
+        foreach ($items as $item) {
+            yield $item;
+        }
     }
 }

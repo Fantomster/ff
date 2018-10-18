@@ -144,7 +144,7 @@ class Organization extends \yii\db\ActiveRecord
             [['email'], 'email'],
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
-            [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => EdiOrganization::className(), 'targetAttribute' => ['id' => 'organization_id']],
+            [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationGln::className(), 'targetAttribute' => ['id' => 'org_id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
             [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
             [['inn'], 'integer', 'min' => 1000000000, 'max' => 999999999999, 'message' => Yii::t('app', 'Поле ИНН должно быть числом'), 'tooSmall' => Yii::t('app', 'Поле должно состоять из 10 или 12 символов'), 'tooBig' => Yii::t('app', 'Поле должно состоять из 10 или 12 символов')],
@@ -254,9 +254,16 @@ class Organization extends \yii\db\ActiveRecord
         return $this->hasOne(EdiOrganization::className(), ['organization_id' => 'id']);
     }
 
+
+    public function getOrganizationGln(): ActiveQuery
+    {
+        return $this->hasOne(OrganizationGln::className(), ['org_id' => 'id']);
+    }
+
+
     public function getGlnCode()
     {
-        return $this->ediOrganization->gln_code;
+        return $this->organizationGln->gln_number;
     }
 
     public function beforeSave($insert)

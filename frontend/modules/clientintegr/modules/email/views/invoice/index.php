@@ -102,11 +102,11 @@ $this->registerJs('
                 <div class="box-header with-border">
                     <?= \Yii::$app->controller->module->renderMenu() ?>
                     <span id="button_save">
-                    <a href="#"
-                       class="btn btn-success pull-right" id="save-button" disabled>
-                        <i class="fa fa-save"></i> Сохранить
-                    </a>
-                </span>
+                        <a href="#"
+                            class="btn btn-success pull-right" id="save-button" disabled>
+                            <i class="fa fa-save"></i> Сохранить
+                        </a>
+                    </span>
                 </div>
 
                 <div class="box-body">
@@ -882,5 +882,5 @@ $this->registerJs($js);
 $this->registerJsFile(
     'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js', ['depends' => [\yii\web\JqueryAsset::className()]]
 );
-Pjax::end();
 ?>
+</div>

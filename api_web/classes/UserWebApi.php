@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
+use common\models\notifications\EmailNotification;
 use common\models\RelationSuppRest;
 use common\models\RelationUserOrganization;
 use common\models\Role;
@@ -709,7 +710,6 @@ class UserWebApi extends \api_web\components\WebApi
         return ['result' => true];
     }
 
-
     /**
      * Смена телефона неподтвержденным пользователем
      *
@@ -757,7 +757,6 @@ class UserWebApi extends \api_web\components\WebApi
 
         return ['result' => true];
     }
-
 
     /**
      * Информация о поставщике
@@ -863,9 +862,9 @@ class UserWebApi extends \api_web\components\WebApi
         $res = (new Query())->select(['a.id', 'a.name'])->from('organization a')
             ->leftJoin('relation_user_organization b', 'a.id = b.organization_id')
             ->where([
-                'b.user_id'   => $this->user->id,
-                'a.type_id'   => 1,
-                'b.role_id'   => [
+                'b.user_id' => $this->user->id,
+                'a.type_id' => 1,
+                'b.role_id' => [
                     Role::ROLE_RESTAURANT_MANAGER,
                     Role::ROLE_RESTAURANT_EMPLOYEE,
                     Role::ROLE_RESTAURANT_BUYER,
@@ -874,5 +873,116 @@ class UserWebApi extends \api_web\components\WebApi
             ])->all();
 
         return ['result' => $res];
+    }
+
+    /**
+     * @param $user_id
+     * @param $organization_id
+     * @return array|EmailNotification|null|\yii\db\ActiveRecord
+     * @throws BadRequestHttpException
+     */
+    public function setDefaultEmailNotification($user_id, $organization_id)
+    {
+        $relation = RelationUserOrganization::find()
+            ->select('id')
+            ->where(['user_id'         => $user_id,
+                     'organization_id' => $organization_id,
+                     'is_active'       => 1])
+            ->scalar();
+
+        if (!$relation) {
+            throw new BadRequestHttpException('no such user relation');
+        }
+
+        $notification = EmailNotification::findOne(['user_id' => $user_id, 'rel_user_org_id' => $relation]);
+
+        if (!$notification) {
+            $notification = new EmailNotification();
+            $notification->user_id = $user_id;
+            $notification->rel_user_org_id = $relation;
+        }
+
+        $notification->orders = true;
+        $notification->requests = true;
+        $notification->changes = true;
+        $notification->invites = true;
+        $notification->order_done = isset($organization) ? (($organization->type_id == Organization::TYPE_SUPPLIER) ? 0 : 1) : 0;
+        $notification->save();
+
+        return $notification;
+    }
+
+    /**
+     * @param $user_id
+     * @param $organization_id
+     * @return notifications\SmsNotification
+     * @throws BadRequestHttpException
+     */
+    public function setDefaultSmsNotification($user_id, $organization_id)
+    {
+        $relation = RelationUserOrganization::find()
+            ->select('id')
+            ->where(['user_id'         => $user_id,
+                     'organization_id' => $organization_id,
+                     'is_active'       => 1])
+            ->scalar();
+
+        if (!$relation) {
+            throw new BadRequestHttpException('no such user relation');
+        }
+
+        $notification = notifications\SmsNotification::findOne(['user_id' => $user_id, 'rel_user_org_id' => $relation]);
+
+        if (!$notification) {
+            $notification = new notifications\SmsNotification();
+            $notification->user_id = $user_id;
+            $notification->rel_user_org_id = $relation;
+        }
+        $notification->orders = true;
+        $notification->requests = true;
+        $notification->changes = true;
+        $notification->invites = true;
+        $notification->save();
+
+        return $notification;
+    }
+
+    /**
+     * @param      $user_id
+     * @param      $organization_id
+     * @param      $profile
+     * @param null $associate_org_id
+     * @throws BadRequestHttpException
+     */
+    public function initUserOptions($user_id, $organization_id, $profile, $associate_org_id = null)
+    {
+        $user = \common\models\User::findOne(['id' => $user_id]);
+
+        if (!user) {
+            throw new BadRequestHttpException('user not found');
+        }
+
+        $transaction = \Yii::$app->db_api->beginTransaction();
+        try {
+            $user->setOrganization($organization_id, true);
+            $user->setRelationUserOrganization($organization_id, $user->role_id);
+
+            if ($associate_org_id) {
+                if (!ManagerAssociate::find()->where(['manager_id' => $user->id, 'organization_id' => $associate_org_id])->exists()) {
+                    $managerAssociate = new ManagerAssociate();
+                    $managerAssociate->manager_id = $user->id;
+                    $managerAssociate->organization_id = $associate_org_id;
+                    $managerAssociate->save();
+                }
+            }
+
+            $this->setDefaultEmailNotification($user->id, $organization_id);
+            $this->setDefaultSmsNotification($user->id, $organization_id);
+            $this->createProfile($profile);
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollback();
+            throw $e;
+        }
     }
 }

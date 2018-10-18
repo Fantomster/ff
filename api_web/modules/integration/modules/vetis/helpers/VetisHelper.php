@@ -14,11 +14,12 @@ use api_web\components\Registry;
 use common\helpers\DBNameHelper;
 use common\models\IntegrationSettingValue;
 use api_web\modules\integration\modules\vetis\api\cerber\cerberApi;
-use api_web\modules\integration\modules\vetis\api\dicts\dictsApi;
 use common\models\vetis\VetisCountry;
+use common\models\vetis\VetisProductByType;
+use common\models\vetis\VetisSubproductByProduct;
+use common\models\vetis\VetisUnit;
 use yii\db\Expression;
 use yii\db\Query;
-use api_web\modules\integration\modules\vetis\api\products\productApi;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -111,14 +112,14 @@ class VetisHelper
         $this->consignor_business = isset($hc) ? $hc->name . ', ИНН:' . $hc->inn : null;
         $this->product_type = isset($this->vsdModel->product_type) ?
             MercVsd::$product_types[$this->vsdModel->product_type] : null;
-        $product_raw = productApi::getInstance($this->orgId)->getProductByGuid($this->vsdModel->product_guid);
-        $this->product = isset($product_raw) ? $product_raw->name : null;
-        $sub_product_raw = productApi::getInstance($this->orgId)->getSubProductByGuid($this->vsdModel->sub_product_guid);
-        $this->sub_product = isset($sub_product_raw) ? $sub_product_raw->name : null;
+        $product = VetisProductByType::findOne(['guid' => $this->vsdModel->product_guid]);
+        $this->product = isset($product) ? $product->name : null;
+        $sub_product = VetisSubproductByProduct::findOne(['guid' => $this->vsdModel->sub_product_guid]);;
+        $this->sub_product = isset($sub_product) ? $sub_product->name : null;
 
         $this->product_in_numenclature = $this->vsdModel->product_name ?? null;
 
-        $unit = dictsApi::getInstance($this->orgId)->getUnitByGuid($this->vsdModel->unit_guid);
+        $unit = VetisUnit::findOne(['guid' => $this->vsdModel->unit_guid]);;
         $this->volume = $this->vsdModel->amount . (isset($unit) ? " " . $unit->name : '');
 
         $this->date_of_production = $this->vsdModel->production_date;
@@ -126,10 +127,6 @@ class VetisHelper
         $this->perishable_products = isset($this->vsdModel->perishable) ? (($this->vsdModel->perishable == 'true') ? 'Да' :
             'Нет') : null;
 
-//        $producer = isset($this->doc->certifiedConsignment->batch->origin->producer) ?
-//            MercVsd::getProduccerData($this->doc->certifiedConsignment->batch->origin->producer, $this->orgId) : null;
-//        $this->producers = isset($producer) ? implode(", ", $producer['name']) : null;
-        $this->producers = $this->vsdModel->producer_name;
         $laboratory_research = [json_decode($this->vsdModel->laboratory_research, true)];
         $this->expertiseInfo = 'Экспертиза не проводилась';
         try {

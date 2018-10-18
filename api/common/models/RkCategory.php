@@ -12,6 +12,8 @@ use common\models\Organization;
  * @property integer $id
  * @property integer $fid
  * @property integer $org
+ * @property string $rid
+ * @property string $acc
  * @property string $login
  * @property string $password
  * @property string $token
@@ -23,7 +25,8 @@ use common\models\Organization;
  * @property string $usereq 
  * @property string $comment
  * @property string $salespoint
- * 
+ *
+ * @method prependTo() prependTo(\kartik\tree\models\Tree $node)
  * 
  */
 class RkCategory extends \kartik\tree\models\Tree

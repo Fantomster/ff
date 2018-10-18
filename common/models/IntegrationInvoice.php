@@ -229,7 +229,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         //Если не нашли, создаём
         foreach ($this->content as $row) {
             $model = CatalogBaseGoods::find()->where(['supp_org_id' => $vendor->id])
-                    ->andWhere(['like', 'product', HtmlPurifier::process($row->title)])
+                    ->andWhere(['product' => HtmlPurifier::process($row->title)])
                     ->one();
 
             if (empty($model)) {

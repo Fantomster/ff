@@ -131,7 +131,7 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
             }
 
             if (!empty($item['mainUnit'])) {
-                $obUnitModel = OuterUnit::findOne(['name' => $item['mainUnit'], 'service_id' => self::SERVICE_ID]);
+                $obUnitModel = OuterUnit::findOne(['name' => $item['mainUnit'], 'service_id' => self::SERVICE_ID, 'org_id' => $this->orgId]);
                 if (!$obUnitModel) {
                     $obUnitModel = new OuterUnit();
                     $obUnitModel->name = $item['mainUnit'];

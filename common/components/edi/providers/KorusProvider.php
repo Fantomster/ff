@@ -8,7 +8,6 @@
 
 namespace common\components\edi\providers;
 
-
 use common\components\edi\AbstractProvider;
 use common\components\edi\AbstractRealization;
 use common\components\edi\ProviderInterface;
@@ -46,7 +45,6 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
         $this->wsdl = "http://edi-express.esphere.ru/";
     }
 
-
     /**
      * Get files list from provider and insert to table
      */
@@ -68,7 +66,6 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
         }
     }
 
-
     /**
      * @param $login
      * @param $pass
@@ -88,7 +85,6 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
         return $list;
     }
 
-
     /**
      * @return array
      */
@@ -101,7 +97,6 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
             ->andWhere(['organization_id' => $organizationId])
             ->all();
     }
-
 
     /**
      * @param array $list
@@ -128,7 +123,6 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
         }
     }
 
-
     private function getOneTypeFilesList($type, $login, $pass, $glnCode, $action)
     {
         $relationId = $this->getRelation($type, $login, $pass, $glnCode);
@@ -151,14 +145,13 @@ EOXML;
             foreach ($list as $key => $value) {
                 if (isset($value['ns2tracking-id'])) {
                     $trackingIdList[] = $value['ns2tracking-id'];
-                }elseif ($key == 'ns2tracking-id'){
+                } elseif ($key == 'ns2tracking-id') {
                     $trackingIdList[] = $value;
                 }
             }
         }
         return $trackingIdList;
     }
-
 
     public function sendOrderInfo($order, $orgId, $done = false): bool
     {
@@ -169,7 +162,7 @@ EOXML;
             if (!$ediOrder) {
                 Yii::$app->db->createCommand()->insert('edi_order', [
                     'order_id' => $order->id,
-                    'lang' => Yii::$app->language ?? 'ru'
+                    'lang'     => Yii::$app->language ?? 'ru'
                 ])->execute();
             }
 
@@ -192,13 +185,12 @@ EOXML;
         return $result;
     }
 
-
     /**
      * @param \common\models\Organization $vendor
-     * @param String $string
-     * @param String $remoteFile
-     * @param String $login
-     * @param String $pass
+     * @param String                      $string
+     * @param String                      $remoteFile
+     * @param String                      $login
+     * @param String                      $pass
      * @return bool
      */
     public function sendDoc(String $string, $ediOrganization): bool
@@ -231,17 +223,16 @@ EOXML;
         }
     }
 
-
     private function executeCurl($soap_request, $action)
     {
-        $header = array(
+        $header = [
             "Content-type: text/xml;charset=\"utf-8\"",
             "Accept: text/xml",
             "Cache-Control: no-cache",
             "Pragma: no-cache",
             "SOAPAction: \"run\"",
             "Content-length: " . strlen($soap_request),
-        );
+        ];
 
         $soap_do = curl_init();
         curl_setopt($soap_do, CURLOPT_URL, "https://edi-ws.esphere.ru/$action");
@@ -258,10 +249,9 @@ EOXML;
         $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $res);
         $xml = new \SimpleXMLElement($response);
         $body = $xml->xpath('//SOAP-ENV:Body')[0];
-        $array = json_decode(json_encode((array)$body), TRUE);
+        $array = json_decode(json_encode((array)$body), true);
         return $array;
     }
-
 
     private function getRelation($documentType, $login, $pass, $glnCode)
     {
@@ -280,7 +270,6 @@ EOXML;
         }
         return $relationId;
     }
-
 
     /**
      * @param String $fileName
@@ -319,7 +308,6 @@ EOXML;
         return base64_decode($array['ns2ReceiveResponse']['ns2Cnt']);
     }
 
-
     public function getFile($item, $orgId)
     {
         try {
@@ -346,7 +334,6 @@ EOXML;
         return $content;
     }
 
-
     public function parseFile($content)
     {
         $success = $this->realization->parseFile($content);
@@ -356,7 +343,6 @@ EOXML;
             $this->updateQueue($this->ediFilesQueueID, parent::STATUS_ERROR, 'Error handling file 1');
         }
     }
-
 
     private function getDateData($order): array
     {
@@ -369,13 +355,11 @@ EOXML;
         return $arr;
     }
 
-
     private function formatDate(String $dateString): String
     {
         $date = new \DateTime($dateString);
         return $date->format('Y-m-d');
     }
-
 
     private function formatTime(String $dateString): String
     {

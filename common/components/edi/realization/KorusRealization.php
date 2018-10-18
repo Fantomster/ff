@@ -39,7 +39,6 @@ class KorusRealization extends AbstractRealization implements RealizationInterfa
      */
     public $xml;
 
-
     public function parseFile($content)
     {
         $dom = new \DOMDocument();
@@ -167,7 +166,6 @@ class KorusRealization extends AbstractRealization implements RealizationInterfa
         return true;
     }
 
-
     protected function insertGood(int $catID, int $catalogBaseGoodID, float $price): bool
     {
         $res = Yii::$app->db->createCommand()->insert('catalog_goods', [
@@ -183,7 +181,6 @@ class KorusRealization extends AbstractRealization implements RealizationInterfa
             return false;
         }
     }
-
 
     protected function handleOrderResponse(\SimpleXMLElement $simpleXMLElement, $isAlcohol = false)
     {
@@ -297,7 +294,7 @@ class KorusRealization extends AbstractRealization implements RealizationInterfa
 
                 $docType = ($isAlcohol) ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
                 $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $orderContent->id]);
-                if($ediOrderContent){
+                if ($ediOrderContent) {
                     $ediOrderContent->doc_type = $docType;
                     $ediOrderContent->pricewithvat = $arr[$index]['PRICEWITHVAT'] ?? 0.00;
                     $ediOrderContent->taxrate = $arr[$index]['TAXRATE'] ?? 0.00;
@@ -363,7 +360,6 @@ class KorusRealization extends AbstractRealization implements RealizationInterfa
         OrderController::sendOrderProcessing($order->client, $order);
         return true;
     }
-
 
     public function getSendingOrderContent($order, $done, $dateArray, $orderContent)
     {

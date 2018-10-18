@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h3>Выберите организации</h3>
     <?php $i = 0; ?>
     <?php foreach ($organizations as $id => $name): ?>
-        <?php $maxLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->andWhere(['>', 'td', $tenDaysBefore])->with('license')->orderBy('td ASC')->asArray()->one();
+        <?php $maxLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->andWhere(['>', 'td', $tenDaysBefore])->with('license')->orderBy('td DESC')->asArray()->one();
         ?>
         <div class="row">
             <div class="col-md-3">

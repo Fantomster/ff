@@ -14,7 +14,7 @@ use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 
 /**
- * OrganizationSearch represents the model behind the search form about `common\models\Organization`.
+ * OrganizationSearch represents the model behind the search form about common\models\Organization.
  */
 class OrganizationSearch extends Organization
 {
@@ -61,11 +61,11 @@ class OrganizationSearch extends Organization
 
             $maxSelect = (new \yii\db\Query())
                 ->select('MAX(td)')
-                ->from("`$this->dbApiName`.`license_organization` AS lo")
-                ->where("lo.org_id = `$this->dbName`.organization.id");
+                ->from("$this->dbApiName.license_organization AS lo")
+                ->where("lo.org_id = $this->dbName.organization.id");
             $maxSelectSQL = $maxSelect->createCommand()->getRawSql();
 
-            $this->maxQuery = "`$this->dbApiName`.`license_organization`.td = ($maxSelectSQL)";
+            $this->maxQuery = "$this->dbApiName.license_organization.td = ($maxSelectSQL)";
             $query1 = $this->getSQLQuery(1);
 
             $query2 = $this->getSQLQuery(2);
@@ -147,13 +147,13 @@ class OrganizationSearch extends Organization
         $db = Yii::$app->get($db);
         $dbNameArr = explode(';dbname=', $db->dsn);
         $dbName = $dbNameArr[1];
-        return $dbName;
+        return "`" . $dbName . "`";
     }
 
     private function getSQLQuery($queue)
     {
         $query = Organization::find()
-            ->innerJoin($this->dbApiName . '.license_organization', "`$this->dbApiName`.license_organization.org_id=`$this->dbName`.organization.id");
+            ->innerJoin("$this->dbApiName.license_organization", "$this->dbApiName.license_organization.org_id=$this->dbName.organization.id");
         if ($queue == 1 || $queue == 2) {
             $query = $query->where($this->maxQuery);
         }

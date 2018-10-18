@@ -310,7 +310,7 @@ class OrganizationController extends Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, true);
         $db = Yii::$app->get('db_api');
         $dbNameArr = explode(';dbname=', $db->dsn);
-        $dbName = $dbNameArr[1];
+        $dbName = "`" . $dbNameArr[1] . "`";
         $date = new \DateTime('+10 day');
         $tenDaysAfter = $date->format('Y-m-d H:i:s');
 

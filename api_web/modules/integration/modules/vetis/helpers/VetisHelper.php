@@ -66,14 +66,12 @@ class VetisHelper
     public function getShortInfoVsd($uuid)
     {
         $this->uuid = $uuid;
-//        $this->doc = mercuryApi::getInstance()->getVetDocumentByUUID($uuid);
 
         $this->vsdModel = MercVsd::findOne(['uuid' => $uuid]);
         if (!$this->vsdModel) {
             throw new BadRequestHttpException('Uuid is bad');
         }
-        $arProducerName = unserialize($this->vsdModel->producer_name);
-        $this->producer_name = is_array($arProducerName) ? reset($arProducerName) : $arProducerName;
+        $this->producer_name = $this->vsdModel->producer_name;
         $country_raw = ikarApi::getInstance($this->orgId)->getCountryByGuid($this->vsdModel->origin_country_guid);
         $this->country_name = isset($country_raw) ? $country_raw->name : null;
 

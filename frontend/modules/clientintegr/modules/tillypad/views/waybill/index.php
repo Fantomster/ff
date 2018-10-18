@@ -1,7 +1,7 @@
 <?php
 
 /**
- * IIKO integration service - order list view [basic]
+ * Tillypad integration service - order list view [basic]
  *
  * @createdBy Basil A Konakov
  * @createdAt 2018-08-17
@@ -19,7 +19,7 @@ use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 use kartik\date\DatePicker;
 use kartik\select2\Select2;
-use frontend\modules\clientintegr\modules\iiko\controllers\WaybillController;
+use frontend\modules\clientintegr\modules\tillypad\controllers\WaybillController;
 use kartik\grid\CheckboxColumn;
 use api\common\models\iiko\iikoWaybill;
 use kartik\grid\ExpandRowColumn;
@@ -101,7 +101,7 @@ if (isset($searchParams['OrderSearch2']['id']) && (int)$searchParams['OrderSearc
 }
 #-----------------------------------------------------------------------------------------------------------------------
 
-$this->title = Yii::t('message', 'frontend.clientintegr.iiko.waybill', ['ru' => 'Интеграция с iiko Office']);
+$this->title = Yii::t('message', 'frontend.clientintegr.tillypad.waybill', ['ru' => 'Интеграция с Tillypad']);
 
 $columns = [
     // 1. ЧЕКБОКС
@@ -195,7 +195,7 @@ $columns = [
                 ' <a class="ajax-popover" data-container="body" data-content="Loading..."
                     data-html="data-html" data-placement="bottom" data-title="' . $msg['entries'] . '"
                     data-toggle="popover"  data-trigger="focus" data-url="' .
-                Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/']) .
+                Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/tillypad/waybill/']) .
                 '/getpopover"
                     role="button" tabindex="0" data-original-title="" title="" data-model="' .
                 $data->id . '"><i class="fa fa-info-circle"></i></a>';
@@ -256,7 +256,7 @@ $columns = [
     ]
 ];
 
-$url = Url::to('clientintegr/iiko/waybill/index');
+$url = Url::to('clientintegr/tillypad/waybill/index');
 
 $this->registerJs('
 function js_cookie_set(c, y) {var d = new Date (); d.setTime (d.getTime()+(60*60*24*365));
@@ -341,7 +341,7 @@ $this->registerCss($css);
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-history"></i> <?= Yii::t('message', 'frontend.clientintegr.iiko.waybill', ['ru' => 'Интеграция с iiko Office']) ?>
+        <i class="fa fa-history"></i> <?= Yii::t('message', 'frontend.clientintegr.tillypad.waybill', ['ru' => 'Интеграция с Tillypad']) ?>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -351,7 +351,7 @@ $this->registerCss($css);
                 'label' => Yii::t('app', 'frontend.clientintegr.index', ['ru' => 'Интеграция']),
                 'url'   => '/clientintegr/default'
             ],
-            Yii::t('message', 'frontend.clientintegr.iiko.waybill', ['ru' => 'Интеграция с iiko Office']),
+            Yii::t('message', 'frontend.clientintegr.tillypad.waybill', ['ru' => 'Интеграция с Tillypad']),
         ],
     ]);
     ?>
@@ -429,7 +429,7 @@ $this->registerCss($css);
                             </div>
                             <div class="col-lg-2 col-md-3 col-sm-6">
                                 <label class="label" style="color:#555" for="statusFilter">&nbsp;</label><br/>
-                                <a class="btn btn-warning" href="<?= Url::to(['/clientintegr/iiko/waybill']) ?>">Сбросить
+                                <a class="btn btn-warning" href="<?= Url::to(['/clientintegr/tillypad/waybill']) ?>">Сбросить
                                     фильтры</a>
                             </div>
                             <div class="col-lg-5 col-md-6 col-sm-6">
@@ -627,7 +627,7 @@ $('.ajax-popover').click(function() {
         $.ajax({
       url: e.data('url'),
       type: "POST",
-      data: {key: e.data('model')}, // данные, которые передаем на сервер
+      data: {key: e.data('model')}, // данные, которые передаём на сервер
       dataType: 'html',
       // dataType: "json", // тип ожидаемых данных в ответе
       success: function(data) {

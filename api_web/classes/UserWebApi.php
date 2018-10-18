@@ -933,7 +933,7 @@ class UserWebApi extends \api_web\components\WebApi
 
         $notification = notifications\SmsNotification::findOne(['user_id' => $user_id, 'rel_user_org_id' => $relation]);
 
-        if ($notification) {
+        if (!$notification) {
             $notification = new notifications\SmsNotification();
             $notification->user_id = $user_id;
             $notification->rel_user_org_id = $relation;

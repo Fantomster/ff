@@ -53,12 +53,17 @@ class ServiceIiko extends AbstractSyncFactory
             throw new ServerErrorHttpException('Empty field $queueName in class ' . get_class($this), 500);
         }
 
-        (new RabbitWebApi())->addToQueue([
-            "queue"  => $this->queueName,
-            "org_id" => $this->user->organization->id
-        ]);
+        try {
+            (new RabbitWebApi())->addToQueue([
+                "queue"  => $this->queueName,
+                "org_id" => $this->user->organization->id
+            ]);
 
-        return ['success' => true];
+            return ['success' => true];
+        } catch (\Throwable $e) {
+            \Yii::error($e->getMessage());
+            return ['success' => false];
+        }
     }
 
     /**

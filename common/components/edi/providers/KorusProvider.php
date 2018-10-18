@@ -176,7 +176,7 @@ EOXML;
 
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
             $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
-            $result = $this->sendDoc($string, $ediOrganization);
+            $result = $this->sendDoc($string, $ediOrganization, $done);
             $transaction->commit();
         } catch (Exception $e) {
             Yii::error($e);
@@ -193,13 +193,14 @@ EOXML;
      * @param String                      $pass
      * @return bool
      */
-    public function sendDoc(String $string, $ediOrganization): bool
+    public function sendDoc(String $string, $ediOrganization, $done = false): bool
     {
         $action = 'send';
         $string = base64_encode($string);
         $login = $ediOrganization['login'];
         $pass = $ediOrganization['pass'];
-        $relationId = $this->getRelation('ORDERS', $login, $pass, $ediOrganization['gln_code']);
+        $documentType = ($done) ? 'RECADV' : 'ORDERS';
+        $relationId = $this->getRelation($documentType, $login, $pass, $ediOrganization['gln_code']);
         $soap_request = <<<EOXML
 <soapenv:Envelope xmlns:soapenv="$this->schema" xmlns:edi="$this->wsdl">
    <soapenv:Header/>

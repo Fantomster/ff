@@ -212,6 +212,13 @@ class OrderController extends ActiveController {
         }
 
         $OrderContents = $newOrder->orderContent;
+
+        $contents = [];
+
+        foreach ($OrderContents as $item) {
+            $contents[] = $item;
+        }
+        $OrderContents = $contents;
         $Order = \common\models\Order::findOne(['id' => $newOrder->id]);
         $GoodsNotes = $res;
         /* $result = [ 'Order'=> compact('Order'),

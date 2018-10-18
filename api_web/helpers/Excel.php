@@ -120,7 +120,7 @@ class Excel
                 $cellsCount++;
             }
 
-            if (!array_search('units', $mapping)){
+            if (!array_search('units', $mapping) || empty($attributes['units'])){
                 $attributes['units'] = 0;
             }
 

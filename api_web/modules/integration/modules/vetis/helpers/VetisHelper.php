@@ -15,9 +15,9 @@ use common\helpers\DBNameHelper;
 use common\models\IntegrationSettingValue;
 use api_web\modules\integration\modules\vetis\api\cerber\cerberApi;
 use api_web\modules\integration\modules\vetis\api\dicts\dictsApi;
+use common\models\vetis\VetisCountry;
 use yii\db\Expression;
 use yii\db\Query;
-use api_web\modules\integration\modules\vetis\api\ikar\ikarApi;
 use api_web\modules\integration\modules\vetis\api\products\productApi;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
@@ -72,20 +72,22 @@ class VetisHelper
             throw new BadRequestHttpException('Uuid is bad');
         }
         $this->producer_name = $this->vsdModel->producer_name;
-        $country_raw = ikarApi::getInstance($this->orgId)->getCountryByGuid($this->vsdModel->origin_country_guid);
-        $this->country_name = isset($country_raw) ? $country_raw->name : null;
+        $country = VetisCountry::findOne(['guid' => $this->vsdModel->origin_country_guid]);
+        $this->country_name = isset($country) ? $country->name : null;
 
         if (isset($this->vsdModel->referencedDocument)) {
             $this->setTransportWaybill($this->vsdModel->referencedDocument);
         }
-        $this->cargo_expertized = isset($this->vsdModel->authentication->cargoExpertized) ?
-            \Yii::t('api_web', self::$expertizeList[$this->vsdModel->authentication->cargoExpertized]) : null;
         $this->vehicle_number = $this->vsdModel->vehicle_number;
         $other = json_decode($this->vsdModel->other_info, true);
         $this->cargo_expertized = $other['cargoExpertized'];
         $this->location_prosperity = $other['locationProsperity'];
         $this->special_marks = $other['specialMarks'];
-
+        $this->issueNumber = (isset($this->vsdModel->number)) ? $this->vsdModel->number : null;
+        $this->issueDate = $this->vsdModel->date_doc;
+        $this->form = $this->vsdModel->form;
+        $this->type = $this->vsdModel->type;
+        $this->status = $this->vsdModel->status;
         return $this;
     }
 
@@ -99,11 +101,7 @@ class VetisHelper
     public function getFullInfoVsd($uuid)
     {
         $this->getShortInfoVsd($uuid);
-        $this->issueNumber = (isset($this->vsdModel->number)) ? $this->vsdModel->number : null;
-        $this->issueDate = $this->vsdModel->date_doc;
-        $this->form = $this->vsdModel->form;
-        $this->type = $this->vsdModel->type;
-        $this->status = $this->vsdModel->status;
+
         $hc = cerberApi::getInstance()->getEnterpriseByGuid($this->vsdModel->sender_guid);
         if (isset($hc)) {
             if (isset($hc->owner)) {
@@ -167,33 +165,6 @@ class VetisHelper
         $this->waybillSeries = $this->vsdModel->waybill_number;
         $this->waybillDate = $this->vsdModel->waybill_date;
         return $this;
-    }
-
-    /**
-     * Парсит $doc->referencedDocument и записывает в экземпляр класса
-     *
-     * @param object $refDoc
-     * */
-    public function setTransportWaybill($refDoc): void
-    {
-        $docs = [];
-        if (!is_array($refDoc)) {
-            $docs[] = $refDoc;
-        } else {
-            $docs = $refDoc;
-        }
-        $this->referenced_document = null;
-        $this->referenced_date = null;
-        foreach ($docs as $item) {
-            if (($item->type >= 1) && ($item->type <= 5)) {
-                $str = '';
-                $str .= isset($item->issueSeries) && !empty($item->issueSeries) ? $item->issueSeries . ' ' : '';
-                $str .= $item->issueNumber;
-                $this->referenced_document = $str;
-                $this->referenced_date = $item->issueDate;
-                break;
-            }
-        }
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\modules\clientintegr\modules\iiko\controllers;
+namespace frontend\modules\clientintegr\modules\tillypad\controllers;
 
 use api\common\models\iiko\iikoAgent;
 use api\common\models\iiko\iikoDicconst;
@@ -28,7 +28,7 @@ use yii\web\BadRequestHttpException;
 use common\components\SearchOrdersComponent;
 use yii\helpers\Json;
 
-class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
+class WaybillController extends \frontend\modules\clientintegr\modules\iiko\controllers\WaybillController
 {
 
     /** @var string Все заказы без учета привязанных к ним накладных */
@@ -44,16 +44,16 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     /** @var string Все заказы, по которым есть накладные со статусом 2 */
     const ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS = 'completed';
 
-    /**
+    /*
      * @return array
      */
-    public function actions()
+    /*public function actions()
     {
         return ArrayHelper::merge(parent::actions(), [
-            'edit'               => [
-                'class'         => EditableColumnAction::className(),
-                'modelClass'    => iikoWaybillData::className(),
-                'outputValue'   => function ($model, $attribute) {
+            'edit' => [
+                'class' => EditableColumnAction::className(),
+                'modelClass' => iikoWaybillData::className(),
+                'outputValue' => function ($model, $attribute) {
                     $value = $model->$attribute;
                     if ($attribute === 'pdenom') {
                         if (is_numeric($model->pdenom)) {
@@ -73,9 +73,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 },
             ],
             'change-coefficient' => [
-                'class'           => EditableColumnAction::className(),
-                'modelClass'      => iikoWaybillData::className(),
-                'outputValue'     => function ($model, $attribute) {
+                'class' => EditableColumnAction::className(),
+                'modelClass' => iikoWaybillData::className(),
+                'outputValue' => function ($model, $attribute) {
                     if ($attribute === 'vat') {
                         return $model->$attribute / 100;
                     } else {
@@ -84,16 +84,16 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         return round($model->$attribute, 6);
                     }
                 },
-                'outputMessage'   => function () {
+                'outputMessage' => function () {
                     return '';
                 },
                 'showModelErrors' => true,
-                'errorOptions'    => ['header' => '']
+                'errorOptions' => ['header' => '']
             ]
         ]);
-    }
+    }*/
 
-    public function actionEditNew()
+    /*public function actionEditNew()
     {
         $page_size = 20;
 
@@ -178,15 +178,15 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), NOW(), NOW())";
                 $result = Yii::$app->db_api->createCommand($sql, [
-                    ':w_s'       => 2,
-                    ':w_org'     => $org_id,
+                    ':w_s' => 2,
+                    ':w_org' => $org_id,
                     ':w_product' => $product_id,
-                    ':w_supp'    => $agent,
-                    ':w_spid'    => $product_rid,
-                    ':w_unitr'   => null,
-                    ':w_store'   => $store,
-                    ':w_koef'    => $koef,
-                    ':w_vat'     => $vat,
+                    ':w_supp' => $agent,
+                    ':w_spid' => $product_rid,
+                    ':w_unitr' => null,
+                    ':w_store' => $store,
+                    ':w_koef' => $koef,
+                    ':w_vat' => $vat,
                 ])->execute();
             } else {
                 $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
@@ -196,9 +196,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             }
         }
         return $munit;
-    }
+    }*/
 
-    public function actionChangeCoefficientNew()
+    /*public function actionChangeCoefficientNew()
     {
         $page_size = 20;
         $est = 0;
@@ -252,15 +252,15 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
                 $result = Yii::$app->db_api->createCommand($sql, [
-                    ':w_s'       => 2,
-                    ':w_org'     => $org_id,
+                    ':w_s' => 2,
+                    ':w_org' => $org_id,
                     ':w_product' => $product_id,
-                    ':w_supp'    => $agent,
-                    ':w_spid'    => $product_rid,
-                    ':w_unitr'   => null,
-                    ':w_store'   => $store,
-                    ':w_koef'    => $koef,
-                    ':w_vat'     => $vat,
+                    ':w_supp' => $agent,
+                    ':w_spid' => $product_rid,
+                    ':w_unitr' => null,
+                    ':w_store' => $store,
+                    ':w_koef' => $koef,
+                    ':w_vat' => $vat,
                 ])->execute();
                 if (!(is_null($product_rid))) {
                     $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
@@ -285,138 +285,140 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             } else {
                 $page = intdiv($last_row, $page_size) + 1;
             }
-            //$ssilka = '/clientintegr/iiko/waybill/map?waybill_id='.$waybill_id.'&way='.$koef_id.'&sort='.$sort.'&iikoWaybillDataSearch[vat]='.$vat_filter.'&page='.$page;
+            //$ssilka = '/clientintegr/tillypad/waybill/map?waybill_id='.$waybill_id.'&way='.$koef_id.'&sort='.$sort.'&iikoWaybillDataSearch[vat]='.$vat_filter.'&page='.$page;
             //return $this->redirect($ssilka);
             return $this->redirect(['map', 'waybill_id' => $waybill_id, 'way' => $koef_id, 'sort' => $sort, 'iikoWaybillDataSearch[vat]' => $vat_filter, 'page' => $page]);
         }
         return $koef;
-    }
+    }*/
 
-    /**
+    /*
      * @return string
      */
-    public function actionIndex()
+    /*public function actionIndex()
     {
 
         $organization = $this->currentUser->organization;
 
-        Url::remember();
+        Url::remember();*/
 
-        //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
-        //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
-        //  $dataProvider->pagination->pageSize=3;
+    //  $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 0;
+    //  $perPage = Yii::$app->request->get('per-page') ? Yii::$app->request->get('per-page') : 0;
+    //  $dataProvider->pagination->pageSize=3;
 
-        /** @var array $wbStatuses Статусы заказов в соответствии со статусами привязанных к ним накладных!
-         * Статусы накладных в таблице iiko_waybill_status */
-        $wbStatuses = [
-            self::ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS,
-            self::ORDER_STATUS_READY_DEFINEDBY_WB_STATUS,
-            self::ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS,
-            self::ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS,
-            // self::ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS,
-            self::ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS,
-        ];
+    /*@var array $wbStatuses Статусы заказов в соответствии со статусами привязанных к ним накладных!
+     * Статусы накладных в таблице iiko_waybill_status */
+    /*$wbStatuses = [
+        self::ORDER_STATUS_ALL_DEFINEDBY_WB_STATUS,
+        self::ORDER_STATUS_READY_DEFINEDBY_WB_STATUS,
+        self::ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS,
+        self::ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS,
+        // self::ORDER_STATUS_OUTGOING_DEFINEDBY_WB_STATUS,
+        self::ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS,
+    ];
 
-        $searchModel = new OrderSearch2();
-        $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
 
-        if ($organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('Access denied');
-        }
-        $search = new SearchOrdersComponent();
-        $search->getRestaurantIntegration(SearchOrdersComponent::INTEGRATION_TYPE_IIKO, $searchModel,
-            $organization->id, $this->currentUser->organization_id, $wbStatuses, ['pageSize' => 20],
-            ['defaultOrder' => ['id' => SORT_DESC]]);
-        $lisences = $organization->getLicenseList();
-        // $lisences = iikoService::getLicense();
-        if (isset($lisences['iiko']) && $lisences['iiko']) {
-            $lisences = $lisences['iiko'];
-            $view = 'index';
-            //$view = '/../../iiko/views/waybill/index';
-        } else {
-            $view = '/default/_nolic';
-            $lisences = null;
-        }
-        //$search->dataProvider->pagination->pageParam = 'page_tovar';
+    $searchModel = new OrderSearch2();
+    $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
 
-        $renderParams = [
-            'searchModel'  => $searchModel,
-            'affiliated'   => $search->affiliated,
-            'dataProvider' => $search->dataProvider,
-            'searchParams' => $search->searchParams,
-            'businessType' => $search->businessType,
-            'lic'          => $lisences,
-            'visible'      => iikoPconst::getSettingsColumn($organization->id),
-            'wbStatuses'   => $wbStatuses,
-            'way'          => Yii::$app->request->get('way', 0),
-        ];
+    if ($organization->type_id != Organization::TYPE_RESTAURANT) {
+        throw new BadRequestHttpException('Access denied');
+    }
+    $search = new SearchOrdersComponent();
+    $search->getRestaurantIntegration(SearchOrdersComponent::INTEGRATION_TYPE_IIKO, $searchModel,
+        $organization->id, $this->currentUser->organization_id, $wbStatuses, ['pageSize' => 20],
+        ['defaultOrder' => ['id' => SORT_DESC]]);
+    $lisences = $organization->getLicenseList();
+    // $lisences = iikoService::getLicense();
+    if (isset($lisences['iiko']) && $lisences['iiko']) {
+        $lisences = $lisences['iiko'];
+        $view = 'index';
+        //$view = '/../../tillypad/views/waybill/index';
+    } else {
+        $view = '/default/_nolic';
+        $lisences = NULL;
+    }
+    //$search->dataProvider->pagination->pageParam = 'page_tovar';
 
-        if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($view, $renderParams);
-        } else {
-            return $this->render($view, $renderParams);
-        }
 
+    $renderParams = [
+        'searchModel' => $searchModel,
+        'affiliated' => $search->affiliated,
+        'dataProvider' => $search->dataProvider,
+        'searchParams' => $search->searchParams,
+        'businessType' => $search->businessType,
+        'lic' => $lisences,
+        'visible' => iikoPconst::getSettingsColumn($organization->id),
+        'wbStatuses' => $wbStatuses,
+        'way' => Yii::$app->request->get('way', 0),
+    ];
+
+    if (Yii::$app->request->isPjax) {
+        return $this->renderPartial($view, $renderParams);
+    } else {
+        return $this->render($view, $renderParams);
     }
 
-    /**
+}*/
+
+    /*
      * @param $waybill_id
      * @return string
      */
-    public function actionMap()
+    /*public function actionMap()
     {
         $model = iikoWaybill::findOne(Yii::$app->request->get('waybill_id'));
         $vatData = VatData::getVatList();
         if (!$model) {
-            die("Cant find wmodel in map controller");
+            die("Can't find wmodel in map controller");
         }
 
         $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
 
         // Используем определение браузера и платформы для лечения бага с клавиатурой Android с помощью USER_AGENT (YT SUP-3)
-        $userAgent = \xj\ua\UserAgent::model();
+        $userAgent = \xj\ua\UserAgent::model();*/
 
-        /* @var \xj\ua\UserAgent $userAgent */
-        $platform = $userAgent->platform;
-        $browser = $userAgent->browser;
-        $isAndroid = false;
-        if (stristr($platform, 'android') OR stristr($browser, 'android')) {
-            $isAndroid = true;
-        }
-
-        $searchModel = new iikoWaybillDataSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        $agentModel = iikoAgent::findOne(['uuid' => $model->agent_uuid, 'org_id' => $model->org]);
-        $storeModel = iikoStore::findOne(['id' => $model->store_id]);
-
-        $lic = iikoService::getLicense();
-        $view = $lic ? 'indexmap' : '/default/_nolic';
-        $vatFilter = [];
-        $vatFilter["vat"] = 1;
-        $params = [
-            'dataProvider'          => $dataProvider,
-            'wmodel'                => $model,
-            'agentName'             => isset($agentModel->denom) ? $agentModel->denom : 'Не указан',
-            'storeName'             => isset($storeModel->denom) ? $storeModel->denom : 'Не указан',
-            'isAndroid'             => $isAndroid,
-            'searchModel'           => $searchModel,
-            'vatData'               => $vatData,
-            'parentBusinessId'      => $obConstModel->getPconstValue(),
-            'iikoWaybillDataSearch' => $vatFilter,
-        ];
-
-        if (Yii::$app->request->isPjax) {
-            return $this->renderPartial($view, $params);
-        } else {
-            return $this->render($view, $params);
-        }
+    /*@var \xj\ua\UserAgent $userAgent */
+    /*$platform = $userAgent->platform;
+    $browser = $userAgent->browser;
+    $isAndroid = false;
+    if (stristr($platform, 'android') OR stristr($browser, 'android')) {
+        $isAndroid = true;
     }
 
-    /**
+    $searchModel = new iikoWaybillDataSearch();
+    $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+    $agentModel = iikoAgent::findOne(['uuid' => $model->agent_uuid, 'org_id' => $model->org]);
+    $storeModel = iikoStore::findOne(['id' => $model->store_id]);
+
+    $lic = iikoService::getLicense();
+    $view = $lic ? 'indexmap' : '/default/_nolic';
+    $vatFilter = array();
+    $vatFilter["vat"] = 1;
+    $params = [
+        'dataProvider' => $dataProvider,
+        'wmodel' => $model,
+        'agentName' => isset($agentModel->denom) ? $agentModel->denom : 'Не указан',
+        'storeName' => isset($storeModel->denom) ? $storeModel->denom : 'Не указан',
+        'isAndroid' => $isAndroid,
+        'searchModel' => $searchModel,
+        'vatData' => $vatData,
+        'parentBusinessId' => $obConstModel->getPconstValue(),
+        'iikoWaybillDataSearch' => $vatFilter,
+    ];
+
+    if (Yii::$app->request->isPjax) {
+        return $this->renderPartial($view, $params);
+    } else {
+        return $this->render($view, $params);
+    }
+}*/
+
+    /*
      * @return mixed
      */
-    public function actionChangeVat()
+    /*public function actionChangeVat()
     {
         $checked = Yii::$app->request->post('key');
 
@@ -443,17 +445,17 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $wmodel->vat_included = $vat;
         if (!$wmodel->save()) {
-            die('Cant save wmodel where vat = ' . $wmodel->vat_included);
+            die("Can't save wmodel where vat = " . $wmodel->vat_included);
         }
 
         return $result;
-    }
+    }*/
 
-    /**
+    /*
      * @param $id
      * @return \yii\web\Response
      */
-    public function actionClearData($id)
+    /*public function actionClearData($id)
     {
         $model = $this->findDataModel($id);
         $model->quant = $model->defquant;
@@ -461,7 +463,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $wayModel = iikoWaybill::findOne($model->waybill_id);
         if (!$wayModel) {
-            die("Cant find wmodel in map controller cleardata");
+            die("Can't find wmodel in map controller cleardata");
         }
 
         if ($wayModel->vat_included) {
@@ -471,18 +473,17 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
 
         if (!$model->save()) {
-            /*var_dump($model->getErrors());*/
             exit;
         }
 
         return $this->redirect(['map', 'waybill_id' => $wayModel->id]);
-    }
+    }*/
 
-    /**
+    /*
      * @param null $term
      * @return mixed
      */
-    public function actionAutoComplete($term = null)
+    /*public function actionAutoComplete($term = null)
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = [];
@@ -509,30 +510,30 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                      ELSE 2
                   END
             ) as t
-SQL;
+SQL;*/
 
-            /**
-             * @var $db Connection
-             */
-            $db = Yii::$app->db_api;
-            $data = $db->createCommand($sql)
-                ->bindValues([
-                    'term'   => $term,
-                    'term_'  => $term . '%',
-                    '_term_' => '%' . $term . '%',
-                    'org_id' => $organizationID
-                ])
-                ->queryAll();
-            $out['results'] = array_values($data);
-        }
-        return $out;
-    }
+    /*
+     * @var $db Connection
+     */
+    /*$db = Yii::$app->db_api;
+    $data = $db->createCommand($sql)
+        ->bindValues([
+            'term' => $term,
+            'term_' => $term . '%',
+            '_term_' => '%' . $term . '%',
+            'org_id' => $organizationID
+        ])
+        ->queryAll();
+    $out['results'] = array_values($data);
+}
+return $out;
+}*/
 
-    /**
+    /*
      * @param null $term
      * @return mixed
      */
-    public function actionAutoCompleteNew($term = null)
+    /*public function actionAutoCompleteNew($term = null)
     {
         $term = Yii::$app->request->post('stroka');
 
@@ -568,51 +569,51 @@ SQL;
                      ELSE 2
                   END
             ) as t
-SQL;
+SQL;*/
 
-            /**
-             * @var $db Connection
-             */
-            $db = Yii::$app->db_api;
-            $data = $db->createCommand($sql)
-                ->bindValues([
-                    'term'   => $term,
-                    'term_'  => $term . '%',
-                    '_term_' => '%' . $term . '%',
-                    'org_id' => $organizationID
-                ])
-                ->queryAll();
-            $out = array_values($data);
-        } else {
-            $orgId = User::findOne(Yii::$app->user->id)->organization_id;
-            $constId = iikoDicconst::findOne(['denom' => 'main_org']);
-            $parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
-            $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
+    /*
+     * @var $db Connection
+     */
+    /*$db = Yii::$app->db_api;
+    $data = $db->createCommand($sql)
+        ->bindValues([
+            'term' => $term,
+            'term_' => $term . '%',
+            '_term_' => '%' . $term . '%',
+            'org_id' => $organizationID
+        ])
+        ->queryAll();
+    $out = array_values($data);
+} else {
+    $orgId = User::findOne(Yii::$app->user->id)->organization_id;
+    $constId = iikoDicconst::findOne(['denom' => 'main_org']);
+    $parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
+    $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
 
-            $andWhere = '';
-            $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $organizationID])->all(), 'id', 'product_id');
-            if (count($arr)) {
-                $andWhere = ' AND id in (' . implode(',', $arr) . ')';
-            }
-
-            $sql = "SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as `text` FROM iiko_product WHERE is_active = 1 AND org_id = " . $organizationID . $andWhere . ' ORDER BY denom LIMIT 100';
-
-            /**
-             * @var $db Connection
-             */
-            $db = Yii::$app->db_api;
-            $data = $db->createCommand($sql)->queryAll();
-            $out = array_values($data);
-        }
-        return $out;
+    $andWhere = '';
+    $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $organizationID])->all(), 'id', 'product_id');
+    if (count($arr)) {
+        $andWhere = ' AND id in (' . implode(',', $arr) . ')';
     }
 
-    /**
+    $sql = "SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as `text` FROM iiko_product WHERE is_active = 1 AND org_id = " . $organizationID . $andWhere . ' ORDER BY denom LIMIT 100';
+*/
+    /*
+     * @var $db Connection
+     */
+    /*$db = Yii::$app->db_api;
+    $data = $db->createCommand($sql)->queryAll();
+    $out = array_values($data);
+}
+return $out;
+}*/
+
+    /*
      * @param null $term
-     * @param      $org
+     * @param $org
      * @return mixed
      */
-    public function actionAutoCompleteAgent($term = null, $org)
+    /*public function actionAutoCompleteAgent($term = null, $org)
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out['results'] = [];
@@ -631,13 +632,13 @@ SQL;
             $out = array_values($data);
         }
         return $out;
-    }
+    }*/
 
-    /**
+    /*
      * @param $id
      * @return string|\yii\web\Response
      */
-    public function actionUpdate($id)
+    /*public function actionUpdate($id)
     {
         $model = $this->findModel($id);
         $lic = iikoService::getLicense();
@@ -675,13 +676,13 @@ SQL;
                 'model' => $model,
             ]);
         }
-    }
+    }*/
 
-    /**
+    /*
      * @param $order_id
      * @return string|\yii\web\Response
      */
-    public function actionCreate($order_id)
+    /*public function actionCreate($order_id)
     {
         $ord = \common\models\Order::findOne(['id' => $order_id]);
 
@@ -713,67 +714,66 @@ SQL;
                 ]);
             }
         }
-    }
+    }*/
 
-    /**
+    /*
      * Отправляем накладную
-     *
      * @var $id int|null
      * @return array
      */
-    public function actionSend($id = null)
+    /*public function actionSend($id = null)
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
-        $transaction = Yii::$app->db_api->beginTransaction();
+        $transaction = Yii::$app->db_api->beginTransaction();*/
 
-        /**
-         * header ("Content-Type:text/xml");
-         * $id = Yii::$app->request->get('id');
-         * $model = $this->findModel($id);
-         * echo $model->getXmlDocument();
-         * exit;
-         */
+    /*
+     * header ("Content-Type:text/xml");
+     * $id = Yii::$app->request->get('id');
+     * $model = $this->findModel($id);
+     * echo $model->getXmlDocument();
+     * exit;
+     */
 
-        $api = iikoApi::getInstance();
-        try {
-            if (!Yii::$app->request->isAjax) {
-                throw new \Exception('Only ajax method');
-            }
+    /*$api = iikoApi::getInstance();
+     try {
+         if (!Yii::$app->request->isAjax) {
+             throw new \Exception('Only ajax method');
+         }
 
-            if (is_null($id)) {
-                $id = Yii::$app->request->post('id');
-            }
-            $model = $this->findModel($id);
+         if (is_null($id)) {
+             $id = Yii::$app->request->post('id');
+         }
+         $model = $this->findModel($id);
 
-            if (!$model) {
-                throw new \Exception('Не удалось найти накладную');
-            }
+         if (!$model) {
+             throw new \Exception('Не удалось найти накладную');
+         }
 
-            if ($api->auth()) {
-                $response = $api->sendWaybill($model);
-                if ($response !== true) {
-                    throw new \Exception('Ошибка при отправке. ' . $response);
-                }
-                $model->status_id = 2;
-                $model->save();
-            } else {
-                throw new \Exception('Не удалось авторизоваться');
-            }
-            $transaction->commit();
-            $api->logout();
-            return ['success' => true];
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            $api->logout();
-            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
-            return ['success' => false, 'error' => $e->getMessage()];
-        }
-    }
+         if ($api->auth()) {
+             $response = $api->sendWaybill($model);
+             if ($response !== true) {
+                 throw new \Exception('Ошибка при отправке. ' . $response);
+             }
+             $model->status_id = 2;
+             $model->save();
+         } else {
+             throw new \Exception('Не удалось авторизоваться');
+         }
+         $transaction->commit();
+         $api->logout();
+         return ['success' => true];
+     } catch (\Exception $e) {
+         $transaction->rollBack();
+         $api->logout();
+         \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+         return ['success' => false, 'error' => $e->getMessage()];
+     }
+ }*/
 
-    /**
+    /*
      *  Отправка нескольких накладных
      */
-    public function actionMultiSend()
+    /*public function actionMultiSend()
     {
         $ids = Yii::$app->request->post('ids');
         $scsCount = 0;
@@ -802,63 +802,63 @@ SQL;
             return ['success' => true, 'count' => $scsCount];
         }
         return ['success' => false, 'error' => 'Выгруженно только ' . $scsCount . ' накладных'];
-    }
+    }*/
 
-    /**
+    /*
      * Отправляем накладную
      */
-    public function actionSendByButton()
+    /*public function actionSendByButton()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
-        $transaction = Yii::$app->db_api->beginTransaction();
+        $transaction = Yii::$app->db_api->beginTransaction();*/
 
-        /**
-         * header ("Content-Type:text/xml");
-         * $id = Yii::$app->request->get('id');
-         * $model = $this->findModel($id);
-         * echo $model->getXmlDocument();
-         * exit;
-         */
+    /*
+     * header ("Content-Type:text/xml");
+     * $id = Yii::$app->request->get('id');
+     * $model = $this->findModel($id);
+     * echo $model->getXmlDocument();
+     * exit;
+     */
 
-        $api = iikoApi::getInstance();
-        try {
-            if (!Yii::$app->request->isAjax) {
-                throw new \Exception('Only ajax method');
-            }
-
-            $id = Yii::$app->request->post('id');
-            $model = $this->findModel($id);
-
-            if (!$model) {
-                throw new \Exception('Не удалось найти накладную');
-            }
-
-            if ($model->readytoexport == 0) {
-                throw new \Exception('Не все товары сопоставлены!');
-            }
-
-            if ($api->auth()) {
-                $response = $api->sendWaybill($model);
-                if ($response !== true) {
-                    throw new \Exception('Ошибка при отправке. ' . $response);
-                }
-                $model->status_id = 2;
-                $model->save();
-            } else {
-                throw new \Exception('Не удалось авторизоваться');
-            }
-            $transaction->commit();
-            $api->logout();
-            Yii::$app->session->set("iiko_waybill", $model->order_id);
-            return ['success' => true];
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            $api->logout();
-            return ['success' => false, 'error' => $e->getMessage()];
+    /*$api = iikoApi::getInstance();
+    try {
+        if (!Yii::$app->request->isAjax) {
+            throw new \Exception('Only ajax method');
         }
-    }
 
-    public function actionMakevat($waybill_id, $vat, $vatf, $sort, $page)
+        $id = Yii::$app->request->post('id');
+        $model = $this->findModel($id);
+
+        if (!$model) {
+            throw new \Exception('Не удалось найти накладную');
+        }
+
+        if ($model->readytoexport == 0) {
+            throw new \Exception('Не все товары сопоставлены!');
+        }
+
+        if ($api->auth()) {
+            $response = $api->sendWaybill($model);
+            if ($response !== true) {
+                throw new \Exception('Ошибка при отправке. ' . $response);
+            }
+            $model->status_id = 2;
+            $model->save();
+        } else {
+            throw new \Exception('Не удалось авторизоваться');
+        }
+        $transaction->commit();
+        $api->logout();
+        Yii::$app->session->set("iiko_waybill", $model->order_id);
+        return ['success' => true];
+    } catch (\Exception $e) {
+        $transaction->rollBack();
+        $api->logout();
+        return ['success' => false, 'error' => $e->getMessage()];
+    }
+}*/
+
+    /*public function actionMakevat($waybill_id, $vat, $vatf, $sort, $page)
     {
         $page_size = 20;
         $model = $this->findModel($waybill_id);
@@ -914,15 +914,15 @@ SQL;
                     $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                                 VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
                     $result = Yii::$app->db_api->createCommand($sql, [
-                        ':w_s'       => 2,
-                        ':w_org'     => $org_id,
+                        ':w_s' => 2,
+                        ':w_org' => $org_id,
                         ':w_product' => $product_id,
-                        ':w_supp'    => $agent,
-                        ':w_spid'    => $product_rid,
-                        ':w_unitr'   => null,
-                        ':w_store'   => $store,
-                        ':w_koef'    => $koef,
-                        ':w_vat'     => $vat,
+                        ':w_supp' => $agent,
+                        ':w_spid' => $product_rid,
+                        ':w_unitr' => null,
+                        ':w_store' => $store,
+                        ':w_koef' => $koef,
+                        ':w_vat' => $vat,
                     ])->execute();
                     if (!(is_null($product_rid))) {
                         $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
@@ -942,9 +942,9 @@ SQL;
             ->createCommand($sql, [':vat' => $vat, ':id' => $waybill_id])->execute();
 
         return $this->redirect(['map', 'waybill_id' => $model->id, 'way' => 0, 'iikoWaybillDataSearch[vat]' => $vatf, 'sort' => $sort, 'page' => $page]);
-    }
+    }*/
 
-    public function actionChvat($id, $koef, $vatf, $sort = 'fproductnameProduct', $vat, $page, $way)
+    /*public function actionChvat($id, $koef, $vatf, $sort = 'fproductnameProduct', $vat, $page, $way)
     {
         $model = $this->findDataModel($id);
 
@@ -976,15 +976,15 @@ SQL;
             $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
             $result = Yii::$app->db_api->createCommand($sql, [
-                ':w_s'       => 2,
-                ':w_org'     => $org_id,
+                ':w_s' => 2,
+                ':w_org' => $org_id,
                 ':w_product' => $product_id,
-                ':w_supp'    => $agent,
-                ':w_spid'    => $product_rid,
-                ':w_unitr'   => null,
-                ':w_store'   => $store,
-                ':w_koef'    => $koef,
-                ':w_vat'     => $vat,
+                ':w_supp' => $agent,
+                ':w_spid' => $product_rid,
+                ':w_unitr' => null,
+                ':w_store' => $store,
+                ':w_koef' => $koef,
+                ':w_vat' => $vat,
             ])->execute();
             if (!(is_null($product_rid))) {
                 $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
@@ -997,9 +997,9 @@ SQL;
             $result = Yii::$app->db_api->createCommand($sql, [':w_vat' => $vat, ':w_id' => $id_all_map])->execute();
         }
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id, 'page' => $page, 'way' => $way, 'iikoWaybillDataSearch[vat]' => $vatf, 'sort' => $sort]);
-    }
+    }*/
 
-    public function getLastUrl()
+    /*public function getLastUrl()
     {
 
         $lastUrl = Url::previous();
@@ -1013,9 +1013,9 @@ SQL;
             $lastUrl .= "&";
         }
         return $lastUrl;
-    }
+    }*/
 
-    public function deleteGET($url, $name, $amp = true)
+    /*public function deleteGET($url, $name, $amp = true)
     {
         $url = str_replace("&amp;", "&", $url); // Заменяем сущности на амперсанд, если требуется
         list($url_part, $qs_part) = array_pad(explode("?", $url), 2, ""); // Разбиваем URL на 2 части: до знака ? и после
@@ -1026,28 +1026,28 @@ SQL;
             if ($amp) $url = str_replace("&", "&amp;", $url); // Заменяем амперсанды обратно на сущности, если требуется
         } else $url = $url_part; // Если параметров не осталось, то просто берём всё, что идёт до знака ?
         return $url; // Возвращаем итоговый URL
-    }
+    }*/
 
-    /**
+    /*
      * @param $id ИД накладной
      * @return iikoWaybill
      * @throws NotFoundHttpException
      */
-    protected function findModel($id)
+    /*protected function findModel($id)
     {
         if (($model = iikoWaybill::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
-    }
+    }*/
 
-    /**
+    /*
      * @param $id
      * @return iikoWaybillData
      * @throws NotFoundHttpException
      */
-    protected function findDataModel($id)
+    /*protected function findDataModel($id)
     {
         $model = iikoWaybillData::findOne($id);
         if (!empty($model)) {
@@ -1055,12 +1055,12 @@ SQL;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
-    }
+    }*/
 
-    /**
+    /*
      * Make unload_status -> 0 or unload_status -> 1
      */
-    public function actionMapTriggerWaybillDataStatus()
+    /*public function actionMapTriggerWaybillDataStatus()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $transaction = Yii::$app->db_api->beginTransaction();
@@ -1080,9 +1080,9 @@ SQL;
         }
 
         return ['success' => true, 'action' => $action];
-    }
+    }*/
 
-    public function actionVatFilter()
+    /*public function actionVatFilter()
     {
         $hr = Yii::$app->request->post('hr');
         $vatf = Yii::$app->request->post('vatf');
@@ -1090,7 +1090,7 @@ SQL;
 
         $temp0 = explode('?', $hr);
         $temp1 = explode('&', $temp0[1]);
-        $arr = [];
+        $arr = array();
         foreach ($temp1 as $para) {
             $temp2 = explode('=', $para);
             $arr[$temp2[0]] = $temp2[1];
@@ -1098,9 +1098,9 @@ SQL;
         $waybill_id = $arr["waybill_id"];
 
         return $this->redirect(['map', 'waybill_id' => $waybill_id, 'way' => 0, 'sort' => $sort, 'iikoWaybillDataSearch[vat]' => $vatf, 'page' => 1]);
-    }
+    }*/
 
-    public function actionAutoCompleteSelectedProducts()
+    /*public function actionAutoCompleteSelectedProducts()
     {
         $orgId = User::findOne(Yii::$app->user->id)->organization_id;
         $constId = iikoDicconst::findOne(['denom' => 'main_org']);
@@ -1113,5 +1113,5 @@ SQL;
         $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $organizationID])->queryScalar();
 
         return $result;
-    }
+    }*/
 }

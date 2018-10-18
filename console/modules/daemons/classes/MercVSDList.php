@@ -61,63 +61,62 @@ class MercVSDList extends MercDictConsumer
         $vsd->org_id = $this->org_id;
         $api = mercuryApi::getInstance($this->org_id);
         $api->setEnterpriseGuid($this->data['enterpriseGuid']);
-        $step = $this->data['listOptions']['count'];
+        $curr_step = $this->data['listOptions']['count']; //Текущий шаг
+        $curr_offset = $this->data['listOptions']['offset']; //Текущий отступ
         try {
             do {
                 try {
                     //Записываем в базу данные о текущем шаге
+                    $this->data['listOptions']['offset'] += $curr_step;
+                    $curr_step = ($curr_step == 1) ? self::DEFAULT_STEP : $curr_step;
+                    $this->data['listOptions']['count'] = $curr_step;
                     $this->data['listOptions'] = $this->data['listOptions'];
                     $this->queue->data_request = json_encode($this->data);
                     $this->queue->save();
                     //Выполняем запрос и обработку полученных данных
                     $result = $api->getVetDocumentChangeList($this->data['startDate'], $this->data['listOptions']);
-                    if ($result->application->status == mercLog::REJECTED) {
-                        sleep(5);
-                        continue;
+
+                    //Проверяем результат запроса
+                    if ($result->application->status != mercLog::COMPLETED) {
+                        throw new \Exception(json_encode($result));
                     }
+
+                    //Запрос успешный разбираем его
                     $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
 
                     $count += $vetDocumentList->count;
                     $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
                     echo 'Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL;
 
-                    if ($vetDocumentList->count > 0) {
-                        $vsd->updateDocumentsList($vetDocumentList->vetDocument);
-                    }
-
-                    if ($vetDocumentList->count < $vetDocumentList->total) {
-                        $this->data['listOptions']['offset'] += $step;
-                        $step = self::DEFAULT_STEP;
-                        $this->data['listOptions']['count'] = $step;
-                    }
-
+                    //Готовимся к следующей итерации
+                    $curr_step = self::DEFAULT_STEP;
+                    $curr_offset += $curr_step;
                     $error = 0;
                 } catch (\Throwable $e) {
                     $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
                     mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
                     $error++;
                     if ($error == 3) {
-                        //throw new \Exception('Error operation');
-                        if ($step > 1) {
-                            $step = round($step / 2);
-                            $this->data['listOptions']['count'] = $step;
-                            //$this->request['listOptions']['offset'] += $this->request['listOptions']['count'];
+                        if ($curr_step > 1) {
+                            $curr_step = round($curr_step / 2);
                         }
                         else
                         {
                             $this->log('ERROR RECORD' . json_encode($this->request, true) . PHP_EOL);
-                            $step = self::DEFAULT_STEP;
-                            $this->data['listOptions']['count'] = $step;
-                            $this->data['listOptions']['offset'] += 1;
+                            $curr_step ++;
                             $error = 0;
                         }
                     }elseif ($error > 3) {
                         throw new \Exception('Error operation');
                     }
                 }
-                $total = $vetDocumentList->total ?? ($this->data['listOptions']['count'] + $this->data['listOptions']['offset'] +1);
-                sleep(60);
-            } while ($total > ($this->data['listOptions']['count'] + $this->data['listOptions']['offset']));
+                $total = $vetDocumentList->total ?? 0;
+                $curr_count = $vetDocumentList->count ?? 0;
+                $offset = $vetDocumentList->offset ?? $curr_offset;
+                //sleep(60);
+                echo $total.PHP_EOL;
+                echo ($offset + $curr_count).PHP_EOL;
+            } while ($total > ($offset + $curr_count));
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
             mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());

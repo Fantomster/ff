@@ -151,6 +151,8 @@ EOXML;
             foreach ($list as $key => $value) {
                 if (isset($value['ns2tracking-id'])) {
                     $trackingIdList[] = $value['ns2tracking-id'];
+                }elseif ($key == 'ns2tracking-id'){
+                    $trackingIdList[] = $value;
                 }
             }
         }

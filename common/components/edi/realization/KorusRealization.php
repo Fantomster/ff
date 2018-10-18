@@ -297,16 +297,18 @@ class KorusRealization extends AbstractRealization implements RealizationInterfa
 
                 $docType = ($isAlcohol) ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
                 $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $orderContent->id]);
-                $ediOrderContent->doc_type = $docType;
-                $ediOrderContent->pricewithvat = $arr[$index]['PRICEWITHVAT'] ?? 0.00;
-                $ediOrderContent->taxrate = $arr[$index]['TAXRATE'] ?? 0.00;
-                $ediOrderContent->uuid = $arr[$index]['UUID'];
-                $ediOrderContent->gtin = $arr[$index]['GTIN'];
-                $ediOrderContent->waybill_date = $arr[$index]['WAYBILLDATE'];
-                $ediOrderContent->waybill_number = $arr[$index]['WAYBILLNUMBER'];
-                $ediOrderContent->delivery_note_date = $arr[$index]['DELIVERYNOTEDATE'];
-                $ediOrderContent->delivery_note_number = $arr[$index]['DELIVERYNOTENUMBER'];
-                $ediOrderContent->save();
+                if($ediOrderContent){
+                    $ediOrderContent->doc_type = $docType;
+                    $ediOrderContent->pricewithvat = $arr[$index]['PRICEWITHVAT'] ?? 0.00;
+                    $ediOrderContent->taxrate = $arr[$index]['TAXRATE'] ?? 0.00;
+                    $ediOrderContent->uuid = $arr[$index]['UUID'];
+                    $ediOrderContent->gtin = $arr[$index]['GTIN'];
+                    $ediOrderContent->waybill_date = $arr[$index]['WAYBILLDATE'];
+                    $ediOrderContent->waybill_number = $arr[$index]['WAYBILLNUMBER'];
+                    $ediOrderContent->delivery_note_date = $arr[$index]['DELIVERYNOTEDATE'];
+                    $ediOrderContent->delivery_note_number = $arr[$index]['DELIVERYNOTENUMBER'];
+                    $ediOrderContent->save();
+                }
             }
         }
         if (!$isDesadv) {

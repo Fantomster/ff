@@ -26,10 +26,10 @@ class ProductgroupHelper extends AuthHelper
 
     public function getCategory()
     {
+        $isLog = new DebugHelper();
         if (!$this->Authorizer()) {
-
-            echo "Can't perform authorization";
-            return;
+            $isLog->logAppendString('Can\'t perform authorization ');
+            exit();
         }
 
         $guid = UUID::uuid4();
@@ -41,13 +41,11 @@ class ProductgroupHelper extends AuthHelper
     </RQ>';
 
         $res = ApiHelper::sendCurl($xml, $this->restr);
-
         $isLog = new DebugHelper();
 
         $isLog->setLogFile('../runtime/logs/rk_request_prodgroup_' . date("Y-m-d_H-i-s") . '.log');
 
         $tmodel = new RkTasks();
-
         $tmodel->tasktype_id = 11;
         $tmodel->acc = $this->org;
         $tmodel->fid = 1;
@@ -59,35 +57,27 @@ class ProductgroupHelper extends AuthHelper
         $tmodel->intstatus_id = 1;
 
         if (!$tmodel->save()) {
-            echo "Ошибка валидации<br>";
-            var_dump($tmodel->getErrors());
+            $isLog->logAppendString('Error: ' . print_r($tmodel->getFirstErrors(), true));
         }
 
         // Обновление словаря RkDic
-
         $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $this->org])->andWhere('dictype_id = 5')->one();
 
         if (!$rmodel) {
             $isLog->logAppendString('RKDIC TMODEL NOT FOUND. Nothing has been saved.');
-
         } else {
-
             $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $rmodel->dicstatus_id = 2;
             $rmodel->obj_count = 0;
-
             if (!$rmodel->save()) {
-                $er3 = $rmodel->getErrors();
+                $isLog->logAppendString('Error: ' . print_r($rmodel->getFirstErrors(), true));
             } else {
-                $er3 = "Данные справочника успешно сохранены.(ID:" . $rmodel->id . " )";
                 $isLog->logAppendString('Данные справочника DIC успешно сохранены.');
             }
         }
 
-        // var_dump($res);
-
+        $isLog->logAppendString('Response API: ' . print_r($res, true));
         return true;
-
     }
 
     public function callback()
@@ -261,6 +251,7 @@ class ProductgroupHelper extends AuthHelper
                 $rootModel->makeRoot();
             } else {
                 //Обновляем, если нашли
+                $rootModel->active = 1;
                 $rootModel->disabled = 0;
                 $rootModel->save();
             }
@@ -289,6 +280,7 @@ class ProductgroupHelper extends AuthHelper
                         $childModel->prependTo($rootModel);
                     } else {
                         //Если нашли ее, обновляем
+                        $childModel->active = 1;
                         $childModel->disabled = 0;
                         $childModel->save();
                     }

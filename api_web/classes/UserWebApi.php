@@ -861,7 +861,10 @@ class UserWebApi extends \api_web\components\WebApi
     {
         $res = (new Query())->select(['a.id', 'a.name'])->distinct()->from('organization a')
             ->leftJoin('relation_user_organization b', 'a.id = b.organization_id')
-            ->where(['coalesce(a.parent_id, a.id)' => $this->user->organization_id])
+            ->where(['or',
+                ['a.parent_id'=>$this->user->organization_id],
+                ['a.id'=>$this->user->organization_id]
+            ])
             ->andWhere([
                 'b.user_id' => $this->user->id,
                 'a.type_id' => 1,

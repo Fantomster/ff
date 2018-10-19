@@ -91,7 +91,7 @@ class WaybillHelper
                 }
 
                 $hasDefaultStore = 1234;
-                $hasDefaultServiceID = 1234;
+                $hasDefaultServiceID = 2;
                 if ($hasDefaultStore) {
                     $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
                         $hasDefaultStore, $hasDefaultServiceID);

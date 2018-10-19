@@ -325,7 +325,7 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
             //ставим задачу в очередь
             \Yii::$app->get('rabbit')
                 ->setQueue($queueName)
-                ->addRabbitQueue($data['enterpriseGuid']);
+                ->addRabbitQueue(json_encode($data));
 
         } catch (\Exception $e) {
             Yii::error($e->getMessage());

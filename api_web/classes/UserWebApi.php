@@ -2,9 +2,9 @@
 
 namespace api_web\classes;
 
+use api_web\components\Registry;
 use api_web\helpers\WebApiHelper;
 use common\models\licenses\License;
-use common\models\licenses\LicenseOrganization;
 use common\models\notifications\EmailNotification;
 use common\models\RelationSuppRest;
 use common\models\RelationUserOrganization;
@@ -16,8 +16,6 @@ use common\models\UserToken;
 use api_web\components\Notice;
 use common\models\RelationSuppRestPotential;
 use common\models\Organization;
-use yii\data\ArrayDataProvider;
-use yii\db\Expression;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -35,7 +33,7 @@ class UserWebApi extends \api_web\components\WebApi
      *
      * @param $post
      * @return array
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|\Exception
      */
     public function get($post)
     {
@@ -49,8 +47,14 @@ class UserWebApi extends \api_web\components\WebApi
         if (empty($model)) {
             throw new BadRequestHttpException('user_not_found');
         }
-        foreach  as $item) {
-
+        if (empty($model->integration_service_id)) {
+            foreach ([Registry::RK_SERVICE_ID, Registry::IIKO_SERVICE_ID] as $serviceId) {
+                if (!empty(License::checkByServiceId($this->user->organization_id, $serviceId))) {
+                    $model->integration_service_id = $serviceId;
+                    $model->save();
+                    break;
+                }
+            }
         }
 
         return [
@@ -60,7 +64,7 @@ class UserWebApi extends \api_web\components\WebApi
             'name'                   => $model->profile->full_name,
             'role_id'                => $model->role->id,
             'role'                   => $model->role->name,
-            'integration_service_id' => $model->integration_service_id ?? ,
+            'integration_service_id' => $model->integration_service_id,
         ];
     }
 

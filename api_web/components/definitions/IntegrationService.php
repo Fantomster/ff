@@ -8,45 +8,45 @@ namespace api_web\components\definitions;
 class IntegrationService
 {
     /**
-     * @SWG\Property(@SWG\Xml(name="service"), example="iiko")
+     * @SWG\Property(@SWG\Xml(name="id"), example="1")
      * @var string
      */
-    public $service;
+    public $id;
 
     /**
-     * @SWG\Property(@SWG\Xml(name="image"), example="http://local/iiko.jpg")
+     * @SWG\Property(@SWG\Xml(name="name"), example="R-keeper")
      * @var string
      */
-    public $image;
+    public $name;
 
     /**
-     * @SWG\Property(@SWG\Xml(name="not_formed"), example=4)
-     * @var integer
+     * @SWG\Property(@SWG\Xml(name="is_active"), example="1")
+     * @var string
      */
-    public $not_formed;
+    public $is_active;
 
     /**
-     * @SWG\Property(@SWG\Xml(name="awaiting"), example=4)
-     * @var integer
+     * @SWG\Property(@SWG\Xml(name="created_at"), example="2018-10-15T10:17:45+03:00")
+     * @var string
      */
-    public $awaiting;
+    public $created_at;
 
     /**
-     * @SWG\Property(@SWG\Xml(name="license"), type="object", example={
-        "iiko": {
-            "status": "Активна",
-            "from": "01.08.2017",
-            "to": "31.01.2018",
-            "number": "111222333"
-        },
-        "mixcart": {
-            "status": "Активна",
-            "from": "01.08.2017",
-            "to": "31.01.2018",
-            "number": "111222333"
-        }
-     })
+     * @SWG\Property(@SWG\Xml(name="updated_at"), example="2018-10-15T10:17:45+03:00")
+     * @var string
      */
-    public $license;
+    public $updated_at;
+
+    /**
+     * @SWG\Property(@SWG\Xml(name="login_allowed"), example="1")
+     * @var string
+     */
+    public $login_allowed;
+
+    /**
+     * @SWG\Property(@SWG\Xml(name="to_date"), example="2022-07-20T14:41:44+03:00")
+     * @var string
+     */
+    public $to_date;
 
 }

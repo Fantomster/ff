@@ -18,7 +18,8 @@ class DefaultController extends \api_web\components\WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={}
+     *                  default={
+     *                  }
      *              )
      *         )
      *     ),

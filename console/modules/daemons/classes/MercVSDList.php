@@ -160,6 +160,7 @@ class MercVSDList extends MercDictConsumer
                 }
                 echo "Cond " . var_dump($condition) . PHP_EOL;
                 echo "============================" . PHP_EOL;
+                sleep(60);
             } while ($condition);
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);

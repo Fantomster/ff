@@ -1,5 +1,7 @@
 <?php
+
 namespace api_web\classes;
+
 use api_web\exceptions\ValidationException;
 use api_web\modules\integration\classes\documents\EdiOrder;
 use api_web\modules\integration\classes\documents\Order;
@@ -15,6 +17,7 @@ use yii\web\BadRequestHttpException;
 
 /**
  * Class DocumentWebApi
+ *
  * @package api_web\modules\integration\classes
  */
 class DocumentWebApi extends \api_web\components\WebApi
@@ -57,21 +60,22 @@ class DocumentWebApi extends \api_web\components\WebApi
     public static $TYPE_LIST = [self::TYPE_ORDER, self::TYPE_WAYBILL, self::TYPE_ORDER_EMAIL, self::TYPE_ORDER_EDI];
 
     private static $models = [
-        self::TYPE_WAYBILL => Waybill::class,
-        self::TYPE_ORDER => Order::class,
+        self::TYPE_WAYBILL     => Waybill::class,
+        self::TYPE_ORDER       => Order::class,
         self::TYPE_ORDER_EMAIL => OrderEmail::class,
-        self::TYPE_ORDER_EDI => EdiOrder::class,
+        self::TYPE_ORDER_EDI   => EdiOrder::class,
     ];
 
     private static $modelsContent = [
-        self::TYPE_WAYBILL => WaybillContent::class,
-        self::TYPE_ORDER => OrderContent::class,
+        self::TYPE_WAYBILL     => WaybillContent::class,
+        self::TYPE_ORDER       => OrderContent::class,
         self::TYPE_ORDER_EMAIL => OrderContentEmail::class,
-        self::TYPE_ORDER_EDI => EdiOrderContent::class,
+        self::TYPE_ORDER_EDI   => EdiOrderContent::class,
     ];
 
     /**
      * Метод получения шапки документа
+     *
      * @param $document_id
      * @param $type
      * @return mixed
@@ -96,6 +100,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
     /**
      * Метод получения детальной части документа
+     *
      * @param $document_id
      * @param $type
      * @return mixed
@@ -120,6 +125,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
     /**
      * Получение состава документа
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -136,7 +142,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
             throw new BadRequestHttpException('dont support this type');
         }
-        
+
         $return = [];
 
         $apiShema = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
@@ -192,6 +198,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
     /**
      * Получение списка документов
+     *
      * @param array $post
      * @return array
      */
@@ -209,16 +216,12 @@ class DocumentWebApi extends \api_web\components\WebApi
         $params_sql = [];
         $where_all = " AND client_id  = :business_id";
         if (isset($post['search']['business_id']) && !empty($post['search']['business_id'])) {
-           if(RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
+            if (RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
                 $params_sql[':business_id'] = $post['search']['business_id'];
-           }
-            else
-            {
+            } else {
                 throw new BadRequestHttpException("business unavailable to current user");
             }
-        }
-        else
-        {
+        } else {
             $params_sql[':business_id'] = $this->user->organization_id;
         }
 
@@ -241,7 +244,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 $to = self::convertDate($post['search']['waybill_date']['to']);
             }
 
-            if(isset($from) && isset($to)) {
+            if (isset($from) && isset($to)) {
                 $where_all .= " AND waybill_date BETWEEN :waybill_date_from AND :waybill_date_to";
                 $params_sql[':waybill_date_from'] = $from;
                 $params_sql[':waybill_date_to'] = $to;
@@ -261,13 +264,12 @@ class DocumentWebApi extends \api_web\components\WebApi
                 $to = self::convertDate($post['search']['order_date']['to']);
             }
 
-            if(isset($from) && isset($to)) {
+            if (isset($from) && isset($to)) {
                 $where_all .= " AND order_date BETWEEN :order_date_from AND :order_date_to";
                 $params_sql[':order_date_from'] = $from;
                 $params_sql[':order_date_to'] = $to;
             }
         }
-
 
         if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
             $vendors = implode("', '", $post['search']['vendor']);
@@ -308,18 +310,18 @@ class DocumentWebApi extends \api_web\components\WebApi
         WHERE id is not null $where_all
        ";
 
-       //$count = \Yii::$app->db->createCommand("select COUNT(*) from ($sql) as cc",$params_sql);
+        //$count = \Yii::$app->db->createCommand("select COUNT(*) from ($sql) as cc",$params_sql);
         //var_dump($count->rawSql); die();
         $dataProvider = new SqlDataProvider([
-            'sql' => $sql,
-            'params' => $params_sql,
+            'sql'        => $sql,
+            'params'     => $params_sql,
             //'totalCount' => $count,
             'pagination' => [
-                'page' => $page - 1,
+                'page'     => $page - 1,
                 'pageSize' => $pageSize,
             ],
-            'key' => 'id',
-            'sort' => [
+            'key'        => 'id',
+            'sort'       => [
                 'attributes' => [
                     'id',
                     'client_id',
@@ -331,7 +333,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             ],
         ]);
 
-        if(isset($order)) {
+        if (isset($order)) {
             $dataProvider->sort->defaultOrder = [$sort_field => $order];
         }
 
@@ -342,13 +344,13 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         $return = [
-            'documents' => $documents,
+            'documents'  => $documents,
             'pagination' => [
-                'page' => $dataProvider->pagination->page+1,
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => $dataProvider->pagination->page + 1,
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ],
-            'sort' => $sort_field
+            'sort'       => $sort_field
         ];
 
         return $return;
@@ -356,6 +358,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
     /**
      * Накладная - Сброс позиций
+     *
      * @param array $post
      * @return bool
      * @throws BadRequestHttpException
@@ -368,27 +371,26 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         $waybill = Waybill::findOne(['id' => $post['waybill_id']]);
 
-        if(!isset($waybill))
-        {
+        if (!isset($waybill)) {
             throw new BadRequestHttpException("Waybill not found");
         }
 
-        if($waybill->bill_status_id == 3)
-        {
+        if ($waybill->bill_status_id == 3) {
             throw new BadRequestHttpException("Waybill in the state of \"reset\" or \"unloaded\"");
         }
 
         $waybill->resetPositions();
         return ['result' => true];
     }
-      
-     /**
+
+    /**
      * Накладная - Детальная информация
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
      */
-    public function getWaybillDetail (array $post)
+    public function getWaybillDetail(array $post)
     {
         if (empty($post['waybill_id'])) {
             throw new BadRequestHttpException("empty_param|document_id");
@@ -399,6 +401,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
     /**
      * Накладная - Обновление детальной информации
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -411,7 +414,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         $waybill = Waybill::findOne(['id' => $post['id']]);
 
-        if(!isset($waybill)) {
+        if (!isset($waybill)) {
             throw new BadRequestHttpException("EDIT CANCELED the waybill - waybill not found");
         }
 
@@ -450,20 +453,21 @@ class DocumentWebApi extends \api_web\components\WebApi
     {
         $result = \DateTime::createFromFormat('d.m.Y H:i:s', $date . " 00:00:00");
         if ($result) {
-            return  $result->format('Y-m-d H:i:s');
+            return $result->format('Y-m-d H:i:s');
         }
-      
+
         return "";
     }
 
     /**
      * Накладная - Сопоставление с заказом
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
      */
 
-    public function mapWaybillOrder (array $post)
+    public function mapWaybillOrder(array $post)
     {
         if (empty($post['order_id'])) {
             throw new BadRequestHttpException("empty_param|order_id");
@@ -483,12 +487,14 @@ class DocumentWebApi extends \api_web\components\WebApi
         return ['result' => true];
     }
 
-    public function getDocumentStatus () {
+    public function getDocumentStatus()
+    {
 
         return self::$doc_group_status;
     }
 
-    public function getWaybillStatus () {
+    public function getWaybillStatus()
+    {
 
         return self::$doc_waybill_status;
     }

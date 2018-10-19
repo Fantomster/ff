@@ -75,84 +75,75 @@ class WaybillHelper
             $arOrderContentForCreate = $order->orderContent;
         }
         $licenses = License::getAllLicense($order->client_id, [Registry::RK_SERVICE_ID, Registry::IIKO_SERVICE_ID], true);
+        foreach ($licenses as $license) {
+            $serviceId = $license['service_id'];
+            var_dump($order->client_id);
+            $settingAuto = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id, ['auto_unload_invoice']);
+            var_dump((bool)$settingAuto);exit();
+            $settingAuto = $settings[$settingID->id] ?? null;
 
-        License::checkByServiceId($order->client_id, 2);
-        $license = LicenseOrganization::findOne(['org_id' => $order->client_id]);
-        $serviceId = $license->licenseService->service_id;
-        if (!$serviceId) {
-            throw new \Exception('No one service available for organization with id: ' . $order->client_id);
-        }
-        if ($serviceId == Registry::RK_SERVICE_ID) {
-            $settingName = 'rkws_auto_unload_invoice';
-        } elseif ($serviceId == Registry::IIKO_SERVICE_ID) {
-            $settingName = 'iiko_auto_unload_invoice';
-        }
-        $settingID = IntegrationSetting::findOne(['name' => $settingName]);
-        $settings = IntegrationSettingValue::find()->where(['org_id' => $order->client_id])->indexBy('setting_id')
-            ->all();
-        $settingAuto = $settings[$settingID->id] ?? null;
+            if ($settingAuto->value) {
+                $waybillContents = WaybillContent::find()->andWhere(['order_content_id' => array_keys
+                ($order->orderContent)])->indexBy('order_content_id')->all();
+                $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
 
-        if ($settingAuto->value) {
-            $waybillContents = WaybillContent::find()->andWhere(['order_content_id' => array_keys
-            ($order->orderContent)])->indexBy('order_content_id')->all();
-            $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
+                if ($notInWaybillContent) {
+                    //Agent default store
+                    if ($supplierOrgId) {
+                        $defaultAgent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id]);
+                        if ($defaultAgent && $defaultAgent->store_id) {
+                            $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
+                                $defaultAgent->store_id, $defaultAgent->service_id);
+                            return [$waybillId];
 
-            if ($notInWaybillContent) {
-                //Agent default store
-                if ($supplierOrgId) {
-                    $defaultAgent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id]);
-                    if ($defaultAgent && $defaultAgent->store_id) {
-                        $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
-                            $defaultAgent->store_id, $defaultAgent->service_id);
-                        return [$waybillId];
-
+                        }
                     }
-                }
-                $hasDefaultStore = 1234;
-                $hasDefaultServiceID = 2;
-                if ($hasDefaultStore) {
-                    $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
-                        $hasDefaultStore, $hasDefaultServiceID);
-                    return [$waybillId];
-                }
+                    $hasDefaultStore = 1234;
+                    $hasDefaultServiceID = 2;
+                    if ($hasDefaultStore) {
+                        $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
+                            $hasDefaultStore, $hasDefaultServiceID);
+                        return [$waybillId];
+                    }
 
-                $waybillIds = [];
-                $integrations = ['iiko' => 2];
-                foreach ($integrations as $integration) {
-                    $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
-                    $stories = OrderContent::find()->select([
-                        'm.store_rid as store_id',
-                        'GROUP_CONCAT(order_content.product_id) as prd_ids'])
-                        ->leftJoin('`' . $dbName . '`.all_map m', 'order_content.product_id = m.product_id AND m.service_id = ' . $integration . ' AND m.org_id = ' . $order->client_id)
-                        ->where(['order_content.order_id' => $order->id])
-                        ->andWhere(['not', ['m.store_rid' => null]])
-                        ->groupBy('m.store_rid')->indexBy('m.store_rid')->all();
-                    $orderContForStore = [];
-                    if (empty($waybillContents)) {
-                        if (!empty($stories)) {
-                            foreach ($stories as $store) {
-                                $store_uuid = (OuterStore::findOne($store['store_rid']))->outer_uid;
-                                $prods = explode(',', $store['prd_ids']);
+                    $waybillIds = [];
+                    $integrations = ['iiko' => 2];
+                    foreach ($integrations as $integration) {
+                        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+                        $stories = OrderContent::find()->select([
+                            'm.store_rid as store_id',
+                            'GROUP_CONCAT(order_content.product_id) as prd_ids'])
+                            ->leftJoin('`' . $dbName . '`.all_map m', 'order_content.product_id = m.product_id AND m.service_id = ' . $integration . ' AND m.org_id = ' . $order->client_id)
+                            ->where(['order_content.order_id' => $order->id])
+                            ->andWhere(['not', ['m.store_rid' => null]])
+                            ->groupBy('m.store_rid')->indexBy('m.store_rid')->all();
+                        $orderContForStore = [];
+                        if (empty($waybillContents)) {
+                            if (!empty($stories)) {
+                                foreach ($stories as $store) {
+                                    $store_uuid = (OuterStore::findOne($store['store_rid']))->outer_uid;
+                                    $prods = explode(',', $store['prd_ids']);
 
-                                foreach ($prods as $prod) {
-                                    /**@var OrderContent $ordCont */
-                                    foreach ($notInWaybillContent as $ordCont) {
-                                        if ($ordCont->product_id == $prod) {
-                                            $orderContForStore[$ordCont->id] = $ordCont;
+                                    foreach ($prods as $prod) {
+                                        /**@var OrderContent $ordCont */
+                                        foreach ($notInWaybillContent as $ordCont) {
+                                            if ($ordCont->product_id == $prod) {
+                                                $orderContForStore[$ordCont->id] = $ordCont;
+                                            }
                                         }
                                     }
+                                    $waybillIds[] = $this->createWaybillAndContent($orderContForStore, $order->client_id,
+                                        $store_uuid, $store_uuid);
                                 }
-                                $waybillIds[] = $this->createWaybillAndContent($orderContForStore, $order->client_id,
-                                    $store_uuid, $store_uuid);
                             }
                         }
                     }
-                }
-                $notInWaybillContent = array_diff_key($notInWaybillContent, $orderContForStore);
-                if (!empty($notInWaybillContent)) {
-                    $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id);
-                    $waybillIds[] = $waybillId;
-                    return $waybillIds;
+                    $notInWaybillContent = array_diff_key($notInWaybillContent, $orderContForStore);
+                    if (!empty($notInWaybillContent)) {
+                        $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id);
+                        $waybillIds[] = $waybillId;
+                        return $waybillIds;
+                    }
                 }
             }
         }

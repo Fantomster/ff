@@ -51,7 +51,7 @@ class VetisWaybillSearch extends MercVsd
             }
         } else {
             $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
-            if (empty($orgIds)){
+            if (empty($orgIds['result'])){
                 throw new BadRequestHttpException('You dont have available businesses, plz add relation to organization for your user');
             }
             $strOrgIds = array_map(function ($el) {

@@ -74,6 +74,7 @@ class WaybillHelper
         if (is_null($arOrderContentForCreate)) {
             $arOrderContentForCreate = $order->orderContent;
         }
+        $licenses = License::getAllLicense($order->client_id, [Registry::RK_SERVICE_ID, Registry::IIKO_SERVICE_ID], true);
 
         License::checkByServiceId($order->client_id, 2);
         $license = LicenseOrganization::findOne(['org_id' => $order->client_id]);

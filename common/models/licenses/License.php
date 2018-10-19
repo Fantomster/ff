@@ -122,9 +122,10 @@ class License extends ActiveRecord
      *
      * @param       $orgId
      * @param array $service_ids
+     * @param bool  $is_active вывести активные
      * @return array
      */
-    public static function getAllLicense($orgId, $service_ids = [])
+    public static function getAllLicense($orgId, $service_ids = [], $is_active = false)
     {
         $license = (new Query())
             ->select([
@@ -152,6 +153,9 @@ class License extends ActiveRecord
 
         if (!empty($service_ids)) {
             $license->andWhere(['in', 'ls.service_id', $service_ids]);
+        }
+        if ($is_active){
+            $license->andWhere(['is_active' => 1]);
         }
 
         return $license->all(\Yii::$app->db_api);

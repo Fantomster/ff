@@ -34,7 +34,6 @@ class VetisWaybillSearch extends MercVsd
     public $acquirer_id;
 
     /**
-     * @api search
      * @param $params
      * @param $page
      * @param $pageSize

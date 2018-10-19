@@ -394,6 +394,7 @@ class ServiceRkws extends AbstractSyncFactory
         $renderParams = [
             'cb' => $cb,
             'code' => $code,
+            'guid' => $guid
         ];
         if (isset($params['product_group']) && $params['product_group']) {
             $renderParams['productGroup'] = $params['product_group'];

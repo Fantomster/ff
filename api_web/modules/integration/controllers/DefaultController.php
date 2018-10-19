@@ -39,8 +39,8 @@ class DefaultController extends \api_web\components\WebApiController
     /**
      * @SWG\Post(path="/integration/default/user-service-set",
      *     tags={"Integration"},
-     *     summary="Список сервисов интерграции",
-     *     description="Список сервисов интерграции",
+     *     summary="Установить ИД интеграции по умолчанию для юзера",
+     *     description="Установить ИД интеграцию по умолчанию для юзера",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -54,11 +54,24 @@ class DefaultController extends \api_web\components\WebApiController
      *              )
      *         )
      *     ),
-     *     @SWG\Response(
+     *    @SWG\Response(
      *         response = 200,
      *         description = "success",
-     *         @SWG\Schema(ref="#/definitions/IntegrationServiceList"),
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
      *     )
+     * )
      * )
      * @throws \Exception
      */

@@ -33,7 +33,6 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
     public $content;
     public $ediFilesQueueID;
 
-
     /**
      * Provider constructor.
      */
@@ -126,36 +125,6 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
         }
     }
 
-    private function getOneTypeFilesList($type, $login, $pass, $glnCode, $action)
-    {
-        $relationId = $this->getRelation($type, $login, $pass, $glnCode);
-        $soap_request = <<<EOXML
-<soapenv:Envelope xmlns:soapenv="$this->schema" xmlns:edi="$this->wsdl">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <edi:ListMBInput>
-         <edi:Name>$login</edi:Name>
-         <edi:Password>$pass</edi:Password>
-         <edi:RelationId>$relationId</edi:RelationId>
-      </edi:ListMBInput>
-   </soapenv:Body>
-</soapenv:Envelope>
-EOXML;
-        $array = $this->executeCurl($soap_request, $action);
-        $list = $array['ns2ListMBResponse']['ns2Cnt']['ns2mailbox-response']['ns2document-info'] ?? null;
-        $trackingIdList = [];
-        if (is_iterable($list)) {
-            foreach ($list as $key => $value) {
-                if (isset($value['ns2tracking-id'])) {
-                    $trackingIdList[] = $value['ns2tracking-id'];
-                } elseif ($key == 'ns2tracking-id') {
-                    $trackingIdList[] = $value;
-                }
-            }
-        }
-        return $trackingIdList;
-    }
-
     public function sendOrderInfo($order, $orgId, $done = false): bool
     {
         $transaction = Yii::$app->db_api->beginTransaction();
@@ -179,7 +148,7 @@ EOXML;
 
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
             $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
-            $result = $this->sendDoc($string, $ediOrganization, $done);
+            $result = $this->sendDoc($string, $ediOrganization, $done, $order);
             $transaction->commit();
         } catch (Exception $e) {
             Yii::error($e);
@@ -196,83 +165,19 @@ EOXML;
      * @param String                      $pass
      * @return bool
      */
-    public function sendDoc(String $string, $ediOrganization, $done = false): bool
+    public function sendDoc(String $string, $ediOrganization, $done = false, $order): bool
     {
-        $action = 'send';
-        $string = base64_encode($string);
-        $login = $ediOrganization['login'];
-        $pass = $ediOrganization['pass'];
-        $documentType = ($done) ? 'RECADV' : 'ORDERS';
-        $relationId = $this->getRelation($documentType, $login, $pass, $ediOrganization['gln_code']);
-        $soap_request = <<<EOXML
-<soapenv:Envelope xmlns:soapenv="$this->schema" xmlns:edi="$this->wsdl">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <edi:SendInput>
-         <edi:Name>$login</edi:Name>
-         <edi:Password>$pass</edi:Password>
-         <edi:RelationId>$relationId</edi:RelationId>
-         <edi:DocumentContent>$string</edi:DocumentContent>
-      </edi:SendInput>
-   </soapenv:Body>
-</soapenv:Envelope>
-EOXML;
-        $array = $this->executeCurl($soap_request, $action);
+        $currentDate = date("Ymdhis");
+        $fileName = $done ? 'recadv_' : 'order_';
+        $remoteFile = $fileName . $currentDate . '_' . $order->id . '.xml';
 
-        if ($array['ns2SendResponse']['ns2Res'] == 1) {
+        $obj = $this->client->sendDoc(['user' => ['login' => $ediOrganization['login'], 'pass' => $ediOrganization['pass']], 'fileName' => $remoteFile, 'content' => $string]);
+        if (isset($obj) && isset($obj->result->errorCode) && $obj->result->errorCode == 0) {
             return true;
         } else {
             Yii::error("Ecom returns error code");
             return false;
         }
-    }
-
-    private function executeCurl($soap_request, $action)
-    {
-        $header = [
-            "Content-type: text/xml;charset=\"utf-8\"",
-            "Accept: text/xml",
-            "Cache-Control: no-cache",
-            "Pragma: no-cache",
-            "SOAPAction: \"run\"",
-            "Content-length: " . strlen($soap_request),
-        ];
-
-        $soap_do = curl_init();
-        curl_setopt($soap_do, CURLOPT_URL, "https://edi-ws.esphere.ru/$action");
-        curl_setopt($soap_do, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($soap_do, CURLOPT_TIMEOUT, 10);
-        curl_setopt($soap_do, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($soap_do, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($soap_do, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($soap_do, CURLOPT_POST, true);
-        curl_setopt($soap_do, CURLOPT_POSTFIELDS, $soap_request);
-        curl_setopt($soap_do, CURLOPT_HTTPHEADER, $header);
-        $res = curl_exec($soap_do);
-        curl_close($soap_do);
-        $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $res);
-        $xml = new \SimpleXMLElement($response);
-        $body = $xml->xpath('//SOAP-ENV:Body')[0];
-        $array = json_decode(json_encode((array)$body), true);
-        return $array;
-    }
-
-    private function getRelation($documentType, $login, $pass, $glnCode)
-    {
-        $relationId = 0;
-        $client = $this->client;
-        $res = $client->process(["Name" => $login, 'Password' => $pass]);
-        $cnt = $res->Cnt;
-        $arr = (array)$cnt;
-        $relations = $arr['relation-response'];
-        $relations = $relations->relation;
-        foreach ($relations as $relation) {
-            $rel = (array)$relation;
-            if (isset($rel['document-type']) && $rel['document-type'] == $documentType && $rel['partner-iln'] == $glnCode) {
-                $relationId = $rel['relation-id'];
-            }
-        }
-        return $relationId;
     }
 
     /**
@@ -297,9 +202,6 @@ EOXML;
             return false;
         }
 
-//        if(!$this->checkOrgIdAndOrderId($doc->result->content, $this->ediFilesQueueID, $fileName)){
-//            return false;
-//        }
         $content = $doc->result->content;
         return $content;
     }
@@ -308,6 +210,7 @@ EOXML;
     {
         try {
             $this->ediFilesQueueID = $item['id'];
+            $this->realization->fileName = $item['name'];
             $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
             $this->updateQueue($this->ediFilesQueueID, self::STATUS_PROCESSING, '');
             try {

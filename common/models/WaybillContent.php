@@ -24,7 +24,7 @@ use Yii;
  * @property int     $koef
  * @property Waybill $waybill
  */
-class WaybillContent extends yii\db\ActiveRecord
+class WaybillContent extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}

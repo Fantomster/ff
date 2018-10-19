@@ -3,6 +3,8 @@
 namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
+use common\models\licenses\License;
+use common\models\licenses\LicenseOrganization;
 use common\models\notifications\EmailNotification;
 use common\models\RelationSuppRest;
 use common\models\RelationUserOrganization;
@@ -47,14 +49,18 @@ class UserWebApi extends \api_web\components\WebApi
         if (empty($model)) {
             throw new BadRequestHttpException('user_not_found');
         }
+        foreach  as $item) {
+
+        }
 
         return [
-            'id'      => $model->id,
-            'email'   => $model->email,
-            'phone'   => $model->profile->phone,
-            'name'    => $model->profile->full_name,
-            'role_id' => $model->role->id,
-            'role'    => $model->role->name,
+            'id'                     => $model->id,
+            'email'                  => $model->email,
+            'phone'                  => $model->profile->phone,
+            'name'                   => $model->profile->full_name,
+            'role_id'                => $model->role->id,
+            'role'                   => $model->role->name,
+            'integration_service_id' => $model->integration_service_id ?? ,
         ];
     }
 
@@ -862,8 +868,8 @@ class UserWebApi extends \api_web\components\WebApi
         $res = (new Query())->select(['a.id', 'a.name'])->distinct()->from('organization a')
             ->leftJoin('relation_user_organization b', 'a.id = b.organization_id')
             ->where(['or',
-                ['a.parent_id'=>$this->user->organization_id],
-                ['a.id'=>$this->user->organization_id]
+                ['a.parent_id' => $this->user->organization_id],
+                ['a.id' => $this->user->organization_id]
             ])
             ->andWhere([
                 'b.user_id' => $this->user->id,

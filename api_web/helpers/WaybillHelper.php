@@ -21,7 +21,6 @@ use common\models\OuterAgent;
 use common\models\OuterStore;
 use common\models\Waybill;
 use common\models\WaybillContent;
-use Exception;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -61,7 +60,7 @@ class WaybillHelper
 
     /**
      * @param      $order_id
-     * @param null $arOrderContentForCreate
+     * @param null $arOrderContentForCreate С EDI может приходить несколькими файлами orderContent для одного заказа
      * @param null $supplierOrgId
      * @throws \Exception
      * @return mixed
@@ -75,21 +74,39 @@ class WaybillHelper
         if (is_null($arOrderContentForCreate)) {
             $arOrderContentForCreate = $order->orderContent;
         }
-        $settingsAuto = true;
-        if ($settingsAuto) {
+
+        License::checkByServiceId($order->client_id, 2);
+        $license = LicenseOrganization::findOne(['org_id' => $order->client_id]);
+        $serviceId = $license->licenseService->service_id;
+        if (!$serviceId) {
+            throw new \Exception('No one service available for organization with id: ' . $order->client_id);
+        }
+        if ($serviceId == Registry::RK_SERVICE_ID) {
+            $settingName = 'rkws_auto_unload_invoice';
+        } elseif ($serviceId == Registry::IIKO_SERVICE_ID) {
+            $settingName = 'iiko_auto_unload_invoice';
+        }
+        $settingID = IntegrationSetting::findOne(['name' => $settingName]);
+        $settings = IntegrationSettingValue::find()->where(['org_id' => $order->client_id])->indexBy('setting_id')
+            ->all();
+        $settingAuto = $settings[$settingID->id] ?? null;
+
+        if ($settingAuto->value) {
             $waybillContents = WaybillContent::find()->andWhere(['order_content_id' => array_keys
             ($order->orderContent)])->indexBy('order_content_id')->all();
             $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
 
             if ($notInWaybillContent) {
-                $defaultAgent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id]);
-                if ($defaultAgent && $defaultAgent->store_id) {
-                    $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
-                        $defaultAgent->store_id, $defaultAgent->service_id);
-                    return [$waybillId];
+                //Agent default store
+                if ($supplierOrgId) {
+                    $defaultAgent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id]);
+                    if ($defaultAgent && $defaultAgent->store_id) {
+                        $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
+                            $defaultAgent->store_id, $defaultAgent->service_id);
+                        return [$waybillId];
 
+                    }
                 }
-
                 $hasDefaultStore = 1234;
                 $hasDefaultServiceID = 2;
                 if ($hasDefaultStore) {
@@ -97,6 +114,7 @@ class WaybillHelper
                         $hasDefaultStore, $hasDefaultServiceID);
                     return [$waybillId];
                 }
+
                 $waybillIds = [];
                 $integrations = ['iiko' => 2];
                 foreach ($integrations as $integration) {
@@ -166,7 +184,7 @@ class WaybillHelper
      * @param null $outerStoreUuid
      * @param null $serviceId
      * @return int
-     * @throws Exception
+     * @throws \Exception
      */
     private function createWaybillAndContent($orderContent, $orgId, $outerStoreUuid = null, $serviceId = null)
     {

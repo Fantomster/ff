@@ -37,6 +37,7 @@ use yii\web\BadRequestHttpException;
  * @property string $language
  * @property integer $job_id
  * @property string $email
+ * @property integer $integration_service_id
  *
  * @property Organization $organization
  * @property FranchiseeUser $franchiseeUser

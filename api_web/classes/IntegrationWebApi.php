@@ -5,10 +5,6 @@ namespace api_web\classes;
 use api\common\models\AllMaps;
 use api_web\components\Registry;
 use api_web\components\WebApi;
-use api_web\modules\integration\interfaces\ServiceInterface;
-use api_web\modules\integration\modules\one_s\models\one_sService;
-use api_web\modules\integration\modules\rkeeper\models\rkeeperService;
-use api_web\modules\integration\modules\iiko\models\iikoService;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
@@ -18,16 +14,38 @@ use common\models\OuterStore;
 use common\models\OuterUnit;
 use common\models\Waybill;
 use common\models\WaybillContent;
-use yii\base\Exception;
 use yii\web\BadRequestHttpException;
 
+/**
+ * Class IntegrationWebApi
+ *
+ * @package api_web\classes
+ */
 class IntegrationWebApi extends WebApi
 {
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException|\Exception
+     */
+    public function userServiceSet($request)
+    {
+        $this->validateRequest($request, ['service_id']);
+        $license = License::checkByServiceId($this->user->id, $request['service_id']);
+        if ($license) {
+            $this->user->integration_service_id = $request['service_id'];
+            $this->user->save();
+            return ['result' => true];
+        } else {
+            throw new BadRequestHttpException('Dont have license for this service');
+        }
+    }
+
     /**
      * Список интеграторов и лицензий
      *
      * @return array
-     * @throws Exception
+     * @throws \Exception
      */
     public function list()
     {
@@ -41,6 +59,7 @@ class IntegrationWebApi extends WebApi
      * integration: Создание накладной к заказу
      *
      * @param array $post
+     * @throws \Exception
      * @return array
      */
     public function handleWaybill(array $post): array
@@ -107,6 +126,7 @@ class IntegrationWebApi extends WebApi
      * integration: Сброс данных позиции, на значения из заказа
      *
      * @param array $post
+     * @throws \Exception
      * @return array
      */
     public function resetWaybillContent(array $post): array
@@ -145,6 +165,7 @@ class IntegrationWebApi extends WebApi
      * integration: Позиция накладной - Детальная информация
      *
      * @param array $post
+     * @throws \Exception
      * @return array
      */
     public function showWaybillContent(array $post): array
@@ -197,6 +218,7 @@ class IntegrationWebApi extends WebApi
      * integration: Накладные - Обновление детальной информации позиции накладной
      *
      * @param array $post
+     * @throws \Exception
      * @return array
      */
     public function updateWaybillContent(array $post): array
@@ -226,6 +248,13 @@ class IntegrationWebApi extends WebApi
         return $this->handleWaybillContent($waybillContent, $post, $quan, $koef);
     }
 
+    /**
+     * @param WaybillContent $waybillContent
+     * @param                $post
+     * @param                $quan
+     * @param                $koef
+     * @return array
+     */
     private function handleWaybillContent($waybillContent, $post, $quan, $koef)
     {
         if (isset($post['product_outer_id'])) {
@@ -272,6 +301,7 @@ class IntegrationWebApi extends WebApi
      * integration: Накладная (привязана к заказу) - Добавление позиции
      *
      * @param array $post
+     * @throws \Exception
      * @return array
      */
     public function createWaybillContent(array $post): array
@@ -325,6 +355,7 @@ class IntegrationWebApi extends WebApi
      * integration: Накладная - Удалить/Убрать позицию
      *
      * @param array $post
+     * @throws \Exception|\Throwable
      * @return array
      */
     public function deleteWaybillContent(array $post): array

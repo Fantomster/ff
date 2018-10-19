@@ -119,6 +119,7 @@ class License extends ActiveRecord
 
     /**
      * Список всех лицензий, активных и просроченных
+     *
      * @param       $orgId
      * @param array $service_ids
      * @return array

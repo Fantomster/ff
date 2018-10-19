@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api\common\models\AllMaps;
+use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\modules\integration\interfaces\ServiceInterface;
 use api_web\modules\integration\modules\one_s\models\one_sService;
@@ -22,70 +23,23 @@ use yii\web\BadRequestHttpException;
 
 class IntegrationWebApi extends WebApi
 {
-
-    private static $service = [
-        iikoService::class,
-        rkeeperService::class,
-        one_sService::class
-    ];
-
     /**
      * Список интеграторов и лицензий
+     *
      * @return array
      * @throws Exception
      */
     public function list()
     {
-        $result = [];
-        foreach (self::$service as $service_class) {
-            /**
-             * @var $service ServiceInterface
-             */
-            $service = new $service_class();
-
-            if (!($service instanceof ServiceInterface)) {
-                throw new Exception(get_class($service) . ' not implements ServiceInterface');
-            }
-
-            $license = $this->prepareLicense($service->getLicenseMixCart());
-            $license['status'] = $service->getLicenseMixCartActive() === true ? 'Активна' : "Не активна";
-
-            $result[] = [
-                'service' => $service->getServiceName(),
-                'image' => \Yii::$app->params['web'] . 'images/' . $service->getServiceName() . '.jpg',
-                'license' => $license,
-                'options' => $service->getOptions()
-            ];
-
-
-        }
-        return ['services' => $result];
-    }
-
-    /**
-     * Лицензии к выдаче
-     * @param $model
-     * @return array
-     */
-    private function prepareLicense($model)
-    {
-        if (!empty($model)) {
-            return [
-                "from" => date('d.m.Y', strtotime($model->fd)),
-                "to" => date('d.m.Y', strtotime($model->td)),
-                "number" => $model->id
-            ];
-        }
+        $result = array_values(License::getAllLicense($this->user->organization_id, Registry::$integration_services));
         return [
-            "from" => null,
-            "to" => null,
-            "number" => null
+            'services' => $result
         ];
     }
 
-
     /**
      * integration: Создание накладной к заказу
+     *
      * @param array $post
      * @return array
      */
@@ -149,9 +103,9 @@ class IntegrationWebApi extends WebApi
         return ['success' => true, 'waybill_id' => $waybill->id];
     }
 
-
     /**
      * integration: Сброс данных позиции, на значения из заказа
+     *
      * @param array $post
      * @return array
      */
@@ -187,9 +141,9 @@ class IntegrationWebApi extends WebApi
         return ['success' => true];
     }
 
-
     /**
      * integration: Позиция накладной - Детальная информация
+     *
      * @param array $post
      * @return array
      */
@@ -239,9 +193,9 @@ class IntegrationWebApi extends WebApi
         return $arr;
     }
 
-
     /**
      * integration: Накладные - Обновление детальной информации позиции накладной
+     *
      * @param array $post
      * @return array
      */
@@ -271,7 +225,6 @@ class IntegrationWebApi extends WebApi
 
         return $this->handleWaybillContent($waybillContent, $post, $quan, $koef);
     }
-
 
     private function handleWaybillContent($waybillContent, $post, $quan, $koef)
     {
@@ -315,9 +268,9 @@ class IntegrationWebApi extends WebApi
         return ['success' => true, 'koef' => $koef, 'quantity' => $quan];
     }
 
-
     /**
      * integration: Накладная (привязана к заказу) - Добавление позиции
+     *
      * @param array $post
      * @return array
      */
@@ -368,9 +321,9 @@ class IntegrationWebApi extends WebApi
         return ['success' => true, 'waybill_content_id' => $waybillContent->id];
     }
 
-
     /**
      * integration: Накладная - Удалить/Убрать позицию
+     *
      * @param array $post
      * @return array
      */

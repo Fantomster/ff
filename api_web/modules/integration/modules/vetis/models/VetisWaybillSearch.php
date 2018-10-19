@@ -11,7 +11,7 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api_web\classes\UserWebApi;
 use api\common\models\merc\MercVsd;
 use common\helpers\DBNameHelper;
-use yii\db\Query;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class VetisWaybillSearch
@@ -37,6 +37,7 @@ class VetisWaybillSearch extends MercVsd
      * @param $params
      * @param $page
      * @param $pageSize
+     * @throws BadRequestHttpException
      * @return array
      */
     public function search($params, $page, $pageSize)
@@ -50,6 +51,9 @@ class VetisWaybillSearch extends MercVsd
             }
         } else {
             $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
+            if (empty($orgIds)){
+                throw new BadRequestHttpException('You dont have available businesses, plz add relation to organization for your user');
+            }
             $strOrgIds = array_map(function ($el) {
                 return $el['id'];
             }, $orgIds['result']);

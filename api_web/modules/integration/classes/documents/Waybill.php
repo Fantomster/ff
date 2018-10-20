@@ -37,7 +37,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "number"      => $this->outer_number_code ? [$this->outer_number_code] : null,
             "type"        => DocumentWebApi::TYPE_WAYBILL,
             "status_id"   => $this->bill_status_id,
-            "status_text" => \Yii::t('web_api', 'waybill.'.Registry::$waybill_statuses[$this->bill_status_id]),
+            "status_text" => \Yii::t('api_web', 'waybill.compared'),
             "service_id"  => $this->service_id,
         ];
 

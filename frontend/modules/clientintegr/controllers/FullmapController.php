@@ -233,13 +233,13 @@ class FullmapController extends DefaultController
         $attr = Yii::$app->request->post('editableAttribute');
         $prod = Yii::$app->request->post('editableKey');
         $store = Yii::$app->request->post('store');
-
         $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $this->currentUser->organization->id,])
             ->andWhere('service_id = ' . $service_id . ' and is_active =1')
             ->andWhere('product_id = :prod', [':prod' => $prod])->one();
+        /**@var AllMaps $hasProduct */
 
         if (!empty($hasProduct)) { // Product link already mapped in table
-            $hasProduct->store_rid = $store;
+            $hasProduct->outer_store_id = $store;
             $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
             if (!$hasProduct->save()) {
@@ -266,7 +266,7 @@ class FullmapController extends DefaultController
             $newProduct->org_id = $this->currentUser->organization->id;
             $newProduct->product_id = $prod;
             $newProduct->is_active = 1;
-            $newProduct->store_rid = $store;
+            $newProduct->outer_store_id = $store;
             $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
@@ -420,7 +420,7 @@ class FullmapController extends DefaultController
         $valModel->org_id = 1;
         $valModel->product_id = 1;
         $valModel->service_id = $service_id;
-        $valModel->store_rid = $store;
+        $valModel->outer_store_id = $store;
         $valModel->vat = $vat;
         $valModel->koef = $koef;
 
@@ -484,7 +484,7 @@ class FullmapController extends DefaultController
 
         if ($store != -1) {
             $ress = Yii::$app->db_api
-                ->createCommand('UPDATE all_map set store_rid = :store, updated_at = now() where service_id = ' . $service_id . ' and org_id = :org and product_id in (' . $selected . ')', [':store' => $store, ':org' => $organization])->execute();
+                ->createCommand('UPDATE all_map set outer_store_id = :store, updated_at = now() where service_id = ' . $service_id . ' and org_id = :org and product_id in (' . $selected . ')', [':store' => $store, ':org' => $organization])->execute();
         }
 
 

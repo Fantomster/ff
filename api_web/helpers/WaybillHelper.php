@@ -90,13 +90,13 @@ class WaybillHelper
                     $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
                     try {
                         $stories = (new Query())->select([
-                            'm.store_rid as store_id',
+                            'm.outer_store_id as outer_store_id',
                             'GROUP_CONCAT(oc.product_id) as prd_ids'])
                             ->from('order_content oc')
                             ->leftJoin('`' . $dbName . '`.all_map m', 'oc.product_id = m.product_id AND m.service_id = ' . $serviceId . ' AND m.org_id = ' . $order->client_id)
                             ->where(['oc.order_id' => $order->id])
-                            ->andWhere(['not', ['m.store_rid' => null]])
-                            ->groupBy('m.store_rid')->all();
+                            ->andWhere(['not', ['m.outer_store_id' => null]])
+                            ->groupBy('m.outer_store_id')->all();
                     } catch (\Throwable $t){
                         var_dump($t->getTraceAsString());exit();
                     }
@@ -107,7 +107,7 @@ class WaybillHelper
                     if (empty($waybillContents)) {
                         if (!empty($stories)) {
                             foreach ($stories as $store) {
-                                $store_uuid = (OuterStore::findOne($store['store_rid']))->outer_uid;
+                                $store_uuid = (OuterStore::findOne($store['outer_store_id']))->outer_uid;
                                 $prods = explode(',', $store['prd_ids']);
 
                                 foreach ($prods as $prod) {

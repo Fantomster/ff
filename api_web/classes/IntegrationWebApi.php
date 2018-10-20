@@ -186,7 +186,7 @@ class IntegrationWebApi extends WebApi
             if ($allMap) {
                 $arr['koef'] = $allMap->koef;
                 $arr['serviceproduct_id'] = $allMap->serviceproduct_id;
-                $arr['store_rid'] = $allMap->store_rid;
+                $arr['store_rid'] = $allMap->outer_store_id;
                 $outerProduct = OuterProduct::findOne(['id' => $allMap->serviceproduct_id]);
                 if ($outerProduct) {
                     $arr['outer_product_name'] = $outerProduct->name;
@@ -195,7 +195,7 @@ class IntegrationWebApi extends WebApi
                 } else {
                     $arr['product_id_equality'] = false;
                 }
-                $outerStore = OuterStore::findOne(['outer_uid' => $allMap->store_rid]);
+                $outerStore = OuterStore::findOne(['outer_uid' => $allMap->outer_store_id]);
                 if ($outerStore) {
                     $arr['outer_store_name'] = $outerStore->name;
                     $arr['outer_store_id'] = $outerStore->id;
@@ -261,7 +261,7 @@ class IntegrationWebApi extends WebApi
             $waybillContent->product_outer_id = $post['product_outer_id'];
             $allMap = AllMaps::findOne(['product_id' => $post['product_outer_id']]);
             if ($allMap) {
-                $outerStore = OuterStore::findOne(['id' => $allMap->store_rid]);
+                $outerStore = OuterStore::findOne(['id' => $allMap->outer_store_id]);
                 if ($outerStore) {
                     $waybill = Waybill::findOne(['id' => $waybillContent->waybill_id]);
                     if ($waybill) {

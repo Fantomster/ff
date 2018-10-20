@@ -85,7 +85,8 @@ class AllMaps extends \yii\db\ActiveRecord
             'vat' => 'Ставка НДС',
             'vat_included' => 'НДС включен в цену',
             'koef' => 'Коэффициент пересчета',
-            'store_rid' => 'Склад',
+            'outer_store_id' => 'Склад',
+            'outer_unit_id' => 'Единица измерения',
             'is_active' => 'Активность',
             'created_at' => 'Дата создания',
             'updated_at' => 'Дата обновления',
@@ -165,13 +166,13 @@ class AllMaps extends \yii\db\ActiveRecord
         switch ($this->service_id) {
 
             case 1:  // R-keeper
-                return RkStoretree::find()->andWhere('id = :rid', [':rid' => $this->store_rid])->
+                return RkStoretree::find()->andWhere('id = :rid', [':rid' => $this->outer_store_id])->
                 andWhere('acc = :acc', [':acc' => $acc])->one();
             case 2:  // iiko
-                return iikoStore::find()->andWhere('id = :id', [':id' => $this->store_rid])->
+                return iikoStore::find()->andWhere('id = :id', [':id' => $this->outer_store_id])->
                 andWhere('org_id = :acc', [':acc' => $acc])->one();
             case 8:  // 1C
-                return OneSStore::find()->andWhere('id = :id', [':id' => $this->store_rid])->
+                return OneSStore::find()->andWhere('id = :id', [':id' => $this->outer_store_id])->
                 andWhere('org_id = :acc', [':acc' => $acc])->one();
             default:
                 return null;

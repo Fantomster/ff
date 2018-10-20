@@ -48,10 +48,10 @@ class OrderEmail extends BaseOrder implements DocumentInterface
                 "difer" => false,
             ];
             $agent = OuterAgent::findOne(['vendor_id' => $vendor->id]);
-            $return ["agent"] = [
+            $return ["agent"] = !empty($agent) ? [
                 'name' => $agent->name,
-                'id' => $agent->id,
-            ];
+                'id'   => $agent->id,
+            ] : null;
         } else {
             $return["vendor"] = null;
         }

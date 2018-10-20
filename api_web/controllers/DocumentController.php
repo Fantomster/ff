@@ -220,6 +220,7 @@ class DocumentController extends \api_web\components\WebApiController
      *         description = "BadRequestHttpException"
      *     ),
      * )
+     * @throws \Exception
      */
     public function actionDocumentsList()
     {

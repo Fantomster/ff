@@ -59,7 +59,7 @@ class OrderEmail extends BaseOrder implements DocumentInterface
         $return["count"] = (int)count($this->content);
         $return["total_price"] = $this->totalSumm;
         $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->date));
-        $return["store"] = null;
+        $return["store"] = null; //todo_refactoring
 
         return $return;
     }

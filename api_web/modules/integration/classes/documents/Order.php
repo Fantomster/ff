@@ -49,7 +49,7 @@ class Order extends BaseOrder implements DocumentInterface
         $return["count"] = (int)$this->positionCount;
         $return["total_price"] = $this->total_price;
         $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->created_at));
-        $return["store"] = null;
+        $return["store"] = null; //todo_refactoring
 
         return $return;
     }

@@ -16,6 +16,7 @@ namespace api_web\modules\integration\classes\sync;
 use api\common\models\RkDicconst;
 use api_web\modules\integration\classes\documents\WaybillContent;
 use common\models\AllService;
+use common\models\OuterCategory;
 use common\models\Waybill;
 use Yii;
 use yii\db\Transaction;
@@ -112,19 +113,53 @@ class ServiceRkws extends AbstractSyncFactory
         return [];
     }
 
+    /**
+     * Отправка запроса
+     *
+     * @param array $params
+     * @return array
+     * @throws BadRequestHttpException
+     */
     public function sendRequest(array $params = []): array
     {
-
         # 1. Start "Send request" action
         SyncLog::trace('Initialized new procedure action "Send request" in ' . __METHOD__);
         $cook = $this->prepareServiceWithAuthCheck();
-
         # 2. Если нет сессии - завершаем с ошибкой
         if (!$cook) {
             SyncLog::trace('Cannot authorize with session or login data');
             throw new BadRequestHttpException('Cannot authorize with curl');
         }
 
+        $result = [];
+        #Если пришел запрос на обновление продуктов, и нет конкретной группы, обновляем все группы
+        # которые не выключены
+        if ($params['dictionary'] == 'product' && empty($params['product_group'])) {
+            $models = OuterCategory::find()->where([
+                'org_id'     => $this->user->organization_id,
+                'is_deleted' => 0
+            ])->all();
+
+            foreach ($models as $model) {
+                $params['product_group'] = $model->outer_uid;
+                $result[] = $this->sendRequestPrivate($params, $cook);
+            }
+        } else {
+            $result = $this->sendRequestPrivate($params, $cook);
+        }
+        return $result;
+    }
+
+    /**
+     * Приватный метод отправки запроса
+     *
+     * @param array $params
+     * @param       $cook
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    private function sendRequestPrivate(array $params = [], $cook): array
+    {
         $url = $this->getUrlCmd();
         $guid = UUID::uuid4();
         $xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);

@@ -217,7 +217,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         $documents = [];
 
         $params_sql = [];
-        $where_all = " AND client_id  = :business_id AND service_id = :service_id";
+        $where_all = " AND client_id  = :business_id";
         $params_sql[':service_id'] = $post['service_id'];
         if (isset($post['search']['business_id']) && !empty($post['search']['business_id'])) {
             if (RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
@@ -311,7 +311,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         UNION ALL
         SELECT id, '" . self::TYPE_WAYBILL . "' as type, acquirer_id as client_id, bill_status_id as waybill_status, null as order_date, doc_date as waybill_date, 
         outer_number_code as waybill_number, null as doc_number,  outer_contractor_uuid as vendor, outer_store_uuid as store, service_id 
-        FROM `$apiShema`.waybill WHERE order_id is null ) as documents
+        FROM `$apiShema`.waybill WHERE order_id is null AND service_id = :service_id) as documents
         WHERE id is not null $where_all
        ";
 

@@ -24,7 +24,7 @@ class OrderContent extends BaseOrderContent implements DocumentInterface
             "product_id" => $this->product_id,
             "product_name" => $this->product->product,
             "quantity" => $this->quantity,
-            "unit" => $this->product->units,
+            "unit" => $this->product->ed,
             "price" => $this->price,
             "is_fullmap" => $this->isFullmap(),
 

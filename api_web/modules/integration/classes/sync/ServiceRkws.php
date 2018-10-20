@@ -139,7 +139,7 @@ class ServiceRkws extends AbstractSyncFactory
             $models = OuterCategory::find()->where([
                 'service_id' => Registry::RK_SERVICE_ID,
                 'org_id'     => $this->user->organization_id,
-                'is_deleted' => 0
+                'selected'   => 1
             ])->all();
 
             foreach ($models as $model) {

@@ -73,6 +73,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         $return["count"] = (int)$this->getTotalCount();
         $return["total_price"] = $this->getTotalPrice();
         $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->doc_date));
+        $return["store"] = null;
 
         return $return;
     }

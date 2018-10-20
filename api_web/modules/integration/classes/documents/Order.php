@@ -3,6 +3,7 @@
 namespace api_web\modules\integration\classes\documents;
 
 use api_web\classes\DocumentWebApi;
+use api_web\components\Registry;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\Order as BaseOrder;
 use common\models\OrderContent;
@@ -22,9 +23,17 @@ class Order extends BaseOrder implements DocumentInterface
             return [];
         }
 
+        if ($this->service_id == Registry::EDI_SERVICE_ID) {
+            if (!empty($this->orderContent)) {
+                $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
+                    return $el->edi_number;
+                }, $this->orderContent)));
+            }
+        }
+
         $return = [
             "id"          => $this->id,
-            "number"      => $this->id,
+            "number"      => $arWaybillNames,
             "type"        => DocumentWebApi::TYPE_ORDER,
             "status_id"   => $this->status,
             "status_text" => $this->statusText,

@@ -33,10 +33,11 @@ class Waybill extends BaseWaybill implements DocumentInterface
 
         $return = [
             "id"          => $this->id,
-            "number"      => $this->outer_number_code,
+            "number"      => [$this->outer_number_code],
             "type"        => DocumentWebApi::TYPE_WAYBILL,
             "status_id"   => $this->bill_status_id,
             "status_text" => "",
+            "service_id"  => $this->service_id,
         ];
 
         try {

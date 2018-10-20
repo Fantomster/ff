@@ -25,7 +25,7 @@ class OrderEmail extends BaseOrder implements DocumentInterface
 
         $return = [
             "id"          => $this->id,
-            "number"      => $this->number,
+            "number"      => [$this->number],
             "type"        => DocumentWebApi::TYPE_ORDER_EMAIL,
             "status_id"   => isset($order) ? $order->status_id : null,
             "status_text" => isset($order) ? $order->statusText : null,

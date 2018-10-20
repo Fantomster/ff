@@ -134,7 +134,7 @@ class ServiceRkws extends AbstractSyncFactory
 
         $result = [];
         #Если пришел запрос на обновление продуктов, и нет конкретной группы, обновляем все группы
-        # которые не выключены
+        # которые выбраны
         if ($params['dictionary'] == 'product' && empty($params['product_group'])) {
             $models = OuterCategory::find()->where([
                 'service_id' => Registry::RK_SERVICE_ID,

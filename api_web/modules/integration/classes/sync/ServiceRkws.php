@@ -14,6 +14,7 @@
 namespace api_web\modules\integration\classes\sync;
 
 use api\common\models\RkDicconst;
+use api_web\components\Registry;
 use api_web\modules\integration\classes\documents\WaybillContent;
 use common\models\AllService;
 use common\models\OuterCategory;
@@ -136,13 +137,21 @@ class ServiceRkws extends AbstractSyncFactory
         # которые не выключены
         if ($params['dictionary'] == 'product' && empty($params['product_group'])) {
             $models = OuterCategory::find()->where([
+                'service_id' => Registry::RK_SERVICE_ID,
                 'org_id'     => $this->user->organization_id,
                 'is_deleted' => 0
             ])->all();
 
             foreach ($models as $model) {
                 $params['product_group'] = $model->outer_uid;
-                $result[] = $this->sendRequestPrivate($params, $cook);
+                try {
+                    $result[] = $this->sendRequestPrivate($params, $cook);
+                } catch (\Throwable $e) {
+                    $result[$model->outer_uid] = [
+                        'error' => $e->getMessage()
+                    ];
+                    continue;
+                }
             }
         } else {
             $result = $this->sendRequestPrivate($params, $cook);

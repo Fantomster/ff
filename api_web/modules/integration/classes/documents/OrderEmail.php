@@ -57,8 +57,9 @@ class OrderEmail extends BaseOrder implements DocumentInterface
         }
         $return["is_mercury_cert"] = isset($order) ? $order->getIsMercuryCert() : null;
         $return["count"] = (int)count($this->content);
-        $return["total_price"] = (float)$this->totalSumm;
+        $return["total_price"] = $this->totalSumm;
         $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->date));
+        $return["store"] = null; //todo_refactoring
 
         return $return;
     }

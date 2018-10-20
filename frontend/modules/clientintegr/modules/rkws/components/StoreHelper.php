@@ -176,6 +176,7 @@ class StoreHelper extends AuthHelper
                 if ($arr[$gcount]['parent'] === '') {
                     $rtree = new RkStoretree(['name' => $arr[$gcount]['name']]);
                     $rtree->rid = 0;
+                    $rtree->prnt = 0;
                     $rtree->disabled = 1;
                     $rtree->acc = $acc;
                     $rtree->makeRoot();

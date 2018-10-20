@@ -39,12 +39,12 @@ class Registry
 
     /**@var array $statuses */
     static $waybill_statuses = [
-        self::WAYBILL_COMPARED  => 1,
-        self::WAYBILL_FORMED    => 2,
-        self::WAYBILL_ERROR     => 3,
-        self::WAYBILL_RESET     => 4,
-        self::WAYBILL_UNLOADED  => 5,
-        self::WAYBILL_UNLOADING => 6,
+        1 => self::WAYBILL_COMPARED,
+        2 => self::WAYBILL_FORMED,
+        3 => self::WAYBILL_ERROR,
+        4 => self::WAYBILL_RESET,
+        5 => self::WAYBILL_UNLOADED,
+        6 => self::WAYBILL_UNLOADING,
     ];
 
     /**@var array интеграционные сервисы */

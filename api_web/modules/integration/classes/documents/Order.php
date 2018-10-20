@@ -34,7 +34,7 @@ class Order extends BaseOrder implements DocumentInterface
 
         $return = [
             "id"          => $this->id,
-            "number"      => $arWaybillNames,
+            "number"      => $arWaybillNames ?? null,
             "type"        => DocumentWebApi::TYPE_ORDER,
             "status_id"   => $this->status,
             "status_text" => $this->statusText,

@@ -236,7 +236,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
                         ->andWhere('org_id = :org', ['org' => $this->org])
                         ->andWhere('service_id = 1')
                         ->one();
-
+                /**@var AllMaps $ch*/
                 if ($ch) {
                     if (isset($ch->serviceproduct_id)) {
                         $wdmodel->product_rid = $ch->serviceproduct_id;
@@ -247,8 +247,8 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
                         $wdmodel->quant = $wdmodel->quant * $ch->koef;
                     }
 
-                    if (isset($ch->unit_rid)) {
-                        $wdmodel->munit_rid = $ch->unit_rid;
+                    if (isset($ch->outer_unit_id)) {
+                        $wdmodel->munit_rid = $ch->outer_unit_id;
                     }
 
                     if (isset($ch->vat) && !isset($record->invoiceContent)) {
@@ -259,7 +259,6 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
 
 
                 if (!$wdmodel->save()) {
-                    \yii::error($ex->getTraceAsString());
                     throw new \Exception();
                 }
             }

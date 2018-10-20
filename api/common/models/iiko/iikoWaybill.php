@@ -454,7 +454,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                         ->andWhere("org_id in ($client_id)")
                         ->andWhere('service_id = 2')
                         ->one();
-
+                /**@var AllMaps $ch*/
                 if ($ch) {
                     if (isset($ch->serviceproduct_id)) {
                         $wdmodel->product_rid = $ch->serviceproduct_id;
@@ -465,8 +465,8 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                         $wdmodel->quant = $wdmodel->quant * $ch->koef;
                     }
 
-                    if (isset($ch->unit_rid)) {
-                        $wdmodel->munit = $ch->unit_rid;
+                    if (isset($ch->outer_unit_id)) {
+                        $wdmodel->munit = $ch->outer_unit_id;
                     }
 
                     if (isset($ch->vat) && !isset($record->invoiceContent)) {

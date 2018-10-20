@@ -22,14 +22,14 @@ use yii\helpers\ArrayHelper;
  * @property  integer $product_id
  * @property  integer $supp_id
  * @property  integer $serviceproduct_id
- * @property  integer $unit_rid
- * @property  integer $store_rid
+ * @property  integer $outer_unit_id
+ * @property  integer $outer_store_id
  * @property  double $koef
  * @property  integer $vat
  * @property  integer $is_active
- * @property  datetime $created_at
- * @property  datetime $linked_at
- * @property  datetime $updated_at
+ * @property  string $created_at
+ * @property  string $linked_at
+ * @property  string $updated_at
  *
  */
 class AllMaps extends \yii\db\ActiveRecord
@@ -63,7 +63,7 @@ class AllMaps extends \yii\db\ActiveRecord
             //  [['koef'], 'number', 'min' => 0.0001],
             //   [['comment'], 'string', 'max' => 255],
             [['serviceproduct_id', 'product_id', 'updated_at', 'vat', 'koef', 'org_id', 'supp_id',
-                'vat_included', 'linked_at', 'pdenom', 'munit_rid', 'store_rid'], 'safe']
+                'vat_included', 'linked_at', 'pdenom', 'outer_unit_id', 'outer_store_id'], 'safe']
         ];
 
         // test git

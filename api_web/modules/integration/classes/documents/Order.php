@@ -47,7 +47,7 @@ class Order extends BaseOrder implements DocumentInterface
 
         $return["is_mercury_cert"] = $this->getIsMercuryCert();
         $return["count"] = (int)$this->positionCount;
-        $return["total_price"] = (float)$this->total_price;
+        $return["total_price"] = $this->total_price;
         $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->created_at));
 
         return $return;

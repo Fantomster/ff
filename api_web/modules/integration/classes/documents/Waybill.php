@@ -8,13 +8,21 @@ use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use api_web\modules\integration\modules\iiko\models\iikoService;
 use common\models\Organization;
+use common\models\OuterAgent;
 use common\models\Waybill as BaseWaybill;
 
+/**
+ * Class Waybill
+ *
+ * @package api_web\modules\integration\classes\documents
+ */
 class Waybill extends BaseWaybill implements DocumentInterface
 {
 
     /**
      * Порлучение данных из модели
+     *
+     * @throws \Exception
      * @return mixed
      */
     public function prepare()
@@ -24,41 +32,45 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
 
         $return = [
-            "id" => $this->id,
-            "number" => $this->outer_number_code,
-            "type" => DocumentWebApi::TYPE_WAYBILL,
-            "status_id" => $this->bill_status_id,
+            "id"          => $this->id,
+            "number"      => $this->outer_number_code,
+            "type"        => DocumentWebApi::TYPE_WAYBILL,
+            "status_id"   => $this->bill_status_id,
             "status_text" => "",
         ];
 
-        $agent = (new Dictionary($this->service_id, 'Agent'))->agentInfo($this->outer_contractor_uuid);
+        try {
+            $agent = OuterAgent::findOne($this->outer_contractor_id);
+        } catch (\Throwable $t) {
+            // Все нормально, пока что не зарефакторили waybill, потом убрать try{}catch(){} todo_refactoring
+            $agent = null;
+        }
+
         if (empty($agent)) {
-            $return ["agent"] = [];
+            $return ["agent"] = null;
         } else {
             $return ["agent"] = [
-                "uid" => $agent['outer_uid'],
-                "name" => $agent['name'],
+                "id"   => $agent->id,
+                "name" => $agent->name,
             ];
         }
 
-        $return ["agent"] = [];
         if (empty($agent)) {
-            $order = $this->order;
-            if (isset($order)) {
+            if (!empty($this->order)) {
                 $return ["agent"] = [
-                    "id" => $order->vendor_id,
-                    "name" => $order->vendor->name,
+                    "id"   => $this->order->vendor_id,
+                    "name" => $this->order->vendor->name,
                 ];
             }
         } elseif (isset($agent['vendor_id'])) {
             $return["vendor"] = [
-                "id" => $agent['vendor_id'],
-                "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
+                "id"   => $agent->vendor_id,
+                "name" => Organization::findOne(['id' => $agent->vendor_id])->name,
             ];
         }
 
         $return["is_mercury_cert"] = $this->getIsMercuryCert();
-        $return["count"] = $this->getTotalCount();
+        $return["count"] = (int)$this->getTotalCount();
         $return["total_price"] = $this->getTotalPrice();
         $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->doc_date));
 
@@ -67,8 +79,10 @@ class Waybill extends BaseWaybill implements DocumentInterface
 
     /**
      * Загрузка модели и получение данных
+     *
      * @param $key
-     * @return $array
+     * @throws \Exception
+     * @return array
      */
     public static function prepareModel($key)
     {
@@ -81,7 +95,9 @@ class Waybill extends BaseWaybill implements DocumentInterface
 
     /**
      * Сброс привязки позиций накладной к заказу
-     * @return int
+     *
+     * @throws \Exception
+     * @return mixed
      */
     public function resetPositions()
     {
@@ -102,7 +118,9 @@ class Waybill extends BaseWaybill implements DocumentInterface
 
     /**
      * Накладная - Детальная информация
+     *
      * @param $key
+     * @throws \Exception
      * @return array
      */
     public static function prepareDetail($key)
@@ -113,9 +131,9 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
 
         $return = [
-            "id" => $model->id,
-            "code" => $model->id,
-            "status_id" => $model->bill_status_id,
+            "id"          => $model->id,
+            "code"        => $model->id,
+            "status_id"   => $model->bill_status_id,
             "status_text" => "",
         ];
 
@@ -124,7 +142,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
             $return ["agent"] = [];
         } else {
             $return ["agent"] = [
-                "uid" => $agent['outer_uid'],
+                "uid"  => $agent['outer_uid'],
                 "name" => $agent['name'],
             ];
         }
@@ -134,13 +152,13 @@ class Waybill extends BaseWaybill implements DocumentInterface
             $order = $model->order;
             if (isset($order)) {
                 $return ["agent"] = [
-                    "id" => $order->vendor_id,
+                    "id"   => $order->vendor_id,
                     "name" => $order->vendor->name,
                 ];
             }
         } elseif (isset($agent['vendor_id'])) {
             $return["vendor"] = [
-                "id" => $agent['vendor_id'],
+                "id"   => $agent['vendor_id'],
                 "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
             ];
         }
@@ -150,7 +168,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
             $return ["store"] = [];
         } else {
             $return ["store"] = [
-                "uid" => $store['outer_uid'],
+                "uid"  => $store['outer_uid'],
                 "name" => $store['name'],
             ];
         }
@@ -166,7 +184,9 @@ class Waybill extends BaseWaybill implements DocumentInterface
 
     /**
      * Привязка накладной к заказу
-     * @return int
+     *
+     * @param $order_id
+     * @throws \Exception
      */
     public function mapWaybill($order_id)
     {

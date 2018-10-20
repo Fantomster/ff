@@ -27,6 +27,9 @@ class Order extends BaseOrder implements DocumentInterface
             $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
                 return $el->edi_number;
             }, $this->orderContent)));
+            if (is_null(reset($arWaybillNames))){
+                $arWaybillNames = null;
+            }
         }
 
         $return = [

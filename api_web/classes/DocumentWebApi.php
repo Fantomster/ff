@@ -147,7 +147,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         $return = [];
 
         $apiShema = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
-        $sql_waybill = "SELECT id, 'waybill' as type, acquirer_id as client_id, bill_status_id as waybill_status, null as order_date, doc_date as waybill_date, 
+        $sql_waybill = "SELECT id, 'waybill' as type, acquirer_id as client_id, status_id as waybill_status, null as order_date, doc_date as waybill_date, 
                             outer_number_code as waybill_number, null as doc_number, order_id 
                             FROM `$apiShema`.waybill";
 
@@ -305,7 +305,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             FROM integration_invoice WHERE order_id is null
         ) as c
         UNION ALL
-        SELECT id, '" . self::TYPE_WAYBILL . "' as type, acquirer_id as client_id, bill_status_id as waybill_status, null as order_date, doc_date as waybill_date, 
+        SELECT id, '" . self::TYPE_WAYBILL . "' as type, acquirer_id as client_id, status_id as waybill_status, null as order_date, doc_date as waybill_date, 
         outer_number_code as waybill_number, null as doc_number,  outer_contractor_uuid as vendor, outer_store_uuid as store   
         FROM `$apiShema`.waybill WHERE order_id is null ) as documents
         WHERE id is not null $where_all
@@ -376,7 +376,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("Waybill not found");
         }
 
-        if ($waybill->bill_status_id == 3) {
+        if ($waybill->status_id == 3) {
             throw new BadRequestHttpException("Waybill in the state of \"reset\" or \"unloaded\"");
         }
 

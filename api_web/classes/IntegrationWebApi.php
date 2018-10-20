@@ -103,8 +103,8 @@ class IntegrationWebApi extends WebApi
                     $ediNumber = $orderContent->edi_number . "-1";
                 }
             } else {
-                $waybillsCount = Waybill::find()->where(['order_id' => $post['order_id']])->count();
-                if (!$waybillsCount) {
+                $waybillsCount = count($order->getWaybills());
+                if ($waybillsCount == 0) {
                     $waybillsCount = 1;
                 }
                 $ediNumber = $post['order_id'] . "-" . $waybillsCount;

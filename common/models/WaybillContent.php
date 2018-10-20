@@ -15,7 +15,6 @@ use Yii;
  * @property double  $quantity_waybill
  * @property double  $vat_waybill
  * @property string  $merc_uuid
- * @property int     $unload_status
  * @property int     $sum_with_vat
  * @property int     $sum_without_vat
  * @property int     $price_with_vat
@@ -49,7 +48,7 @@ class WaybillContent extends \yii\db\ActiveRecord
     {
         return [
             [['waybill_id'], 'required'],
-            [['waybill_id', 'order_content_id', 'product_outer_id', 'unload_status', 'outer_unit_id'], 'integer'],
+            [['waybill_id', 'order_content_id', 'product_outer_id', 'outer_unit_id'], 'integer'],
             [['sum_with_vat', 'sum_without_vat', 'price_with_vat', 'price_without_vat', 'quantity_waybill', 'vat_waybill', 'koef'], 'number'],
             [['merc_uuid'], 'string', 'max' => 255],
             [['waybill_id'], 'exist', 'skipOnError' => true, 'targetClass' => Waybill::className(), 'targetAttribute' => ['waybill_id' => 'id']],

@@ -149,9 +149,7 @@ class WaybillHelper
         $model = new Waybill();
         $model->acquirer_id = $orgId;
         $model->service_id = Registry::EDI_SERVICE_ID;
-        $model->bill_status_id = Registry::$waybill_statuses[Registry::WAYBILL_FORMED];
-        $model->readytoexport = 0;
-        $model->is_deleted = 0;
+        $model->status_id = Registry::$waybill_statuses[Registry::WAYBILL_FORMED];
         $datetime = new \DateTime();
         $model->doc_date = $datetime->format('Y-m-d H:i:s');
         $model->created_at = $datetime->format('Y-m-d H:i:s');
@@ -269,7 +267,7 @@ class WaybillHelper
         }
         $waybill = Waybill::findOne([
             'id'             => $request['waybill_id'],
-            'bill_status_id' => [
+            'status_id' => [
                 Registry::$waybill_statuses[Registry::WAYBILL_COMPARED],
                 Registry::$waybill_statuses[Registry::WAYBILL_ERROR],
                 Registry::$waybill_statuses[Registry::WAYBILL_FORMED],

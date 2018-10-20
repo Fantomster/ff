@@ -5,10 +5,12 @@ namespace common\models;
 use api_web\components\Registry;
 use common\components\edi\EDIIntegration;
 use common\components\EComIntegration;
+use common\helpers\DBNameHelper;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
 use yii\behaviors\AttributesBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\web\BadRequestHttpException;
 
@@ -710,10 +712,21 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return array|Waybill[]|ActiveRecord[]
      */
     public function getWaybills()
     {
-        return $this->hasMany(Waybill::class, ['order_id' => 'id']);
+        $db_instance = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        $sql = <<<SQL
+            SELECT DISTINCT
+              w.id
+            FROM waybill w
+            LEFT JOIN waybill_content wc ON wc.waybill_id = w.id
+            JOIN {$db_instance}.order_content oc ON oc.id = wc.order_content_id
+            JOIN {$db_instance}.`order` o ON o.id = oc.order_id
+            WHERE o.id = {$this->id}
+SQL;
+        $waybill_ids = Yii::$app->db_api->createCommand($sql)->queryColumn();
+        return Waybill::find()->where(['in', 'id', $waybill_ids])->all() ?? [];
     }
 }

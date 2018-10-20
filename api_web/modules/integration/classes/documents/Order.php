@@ -23,12 +23,10 @@ class Order extends BaseOrder implements DocumentInterface
             return [];
         }
 
-        if ($this->service_id == Registry::EDI_SERVICE_ID) {
-            if (!empty($this->orderContent)) {
-                $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
-                    return $el->edi_number;
-                }, $this->orderContent)));
-            }
+        if (!empty($this->orderContent)) {
+            $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
+                return $el->edi_number;
+            }, $this->orderContent)));
         }
 
         $return = [

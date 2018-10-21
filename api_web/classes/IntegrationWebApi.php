@@ -73,10 +73,11 @@ class IntegrationWebApi extends WebApi
         }
 
         $organizationID = $this->user->organization_id;
+        $acquirerID = $organizationID;
         $ediNumber = '';
         $outerAgentUUID = '';
         $outerStoreUUID = '';
-        $acquirerID = 0;
+
 
         if (isset($post['order_id'])) {
             $order = Order::findOne(['id' => (int)$post['order_id'], 'client_id' => $this->user->organization_id]);

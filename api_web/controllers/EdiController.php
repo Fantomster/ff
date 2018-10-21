@@ -436,51 +436,6 @@ class EdiController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/edi/order-acceptance",
-     *     tags={"edi"},
-     *     summary="Приемка завершена",
-     *     description="Приемка завершена",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=false,
-     *         @SWG\Schema (
-     *             @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                      "order_id": 1
-     *                  }
-     *              )
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *         @SWG\Schema(
-     *              default={
-     *                      true
-     *              }
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "error"
-     *     )
-     * )
-     * @throws \Exception
-     */
-    public function actionOrderAcceptance()
-    {
-        $this->response = $this->container->get('EdiWebApi')->orderAcceptance($this->request);
-    }
-
-    /**
      * @SWG\Post(path="/edi/history-count",
      *     tags={"edi"},
      *     summary="История заказов EDI в цифрах",

@@ -125,35 +125,6 @@ class EdiWebApi extends WebApi
     }
 
     /**
-     * Отмена заказа
-     * @param array $post
-     * @throws BadRequestHttpException
-     * @return array
-     */
-    public function orderAcceptance(array $post): array
-    {
-        $this->validateRequest($post, ['order_id']);
-
-        $order = Order::findOne([
-            'id' => $post['order_id'],
-            'client_id' => $this->user->organization_id,
-        ]);
-
-        if (empty($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found'));
-        } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
-        } elseif ($order->status != OrderStatus::STATUS_EDI_SENT_BY_VENDOR) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order.status_must_be') .  \Yii::t('app', 'common.models.order_status.status_edo_sent_by_vendor'));
-        }
-
-        $order->status = OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED;
-        $order->save();
-
-        return ['result' => true];
-    }
-
-    /**
      * История заказов
      * @param array $post
      * @return array

@@ -2,9 +2,7 @@
 
 namespace frontend\controllers;
 
-use api_web\components\Notice;
 use common\models\CatalogBaseGoods;
-use common\models\Order;
 use Yii;
 use yii\web\Controller;
 use yii\filters\VerbFilter;

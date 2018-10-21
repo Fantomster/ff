@@ -144,7 +144,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("empty_param|document_id");
         }
 
-        if (empty($post['service_id']) && $post['type'] == self::TYPE_ORDER) {
+        if (empty($post['service_id'])) {
             throw new BadRequestHttpException("empty_param|service_id");
         }
 

@@ -208,14 +208,14 @@ class Waybill extends BaseWaybill implements DocumentInterface
             }
 
             foreach ($waybillContents as $row) {
-                if (isset($row->product_outer_id)) {
+                if (isset($row->outer_product_id)) {
                     continue;
                 }
 
                 $client_id = $this->acquirer_id;
                 if ($this->service_id == 2) {
                     if ($mainOrg_id != $this->acquirer_id) {
-                        if ((AllMaps::findOne("service_id = 2 AND org_id = $client_id AND serviceproduct_id = " . $row->product_outer_id) == null) && (!empty($mainOrg_id))) {
+                        if ((AllMaps::findOne("service_id = 2 AND org_id = $client_id AND serviceproduct_id = " . $row->outer_product_id) == null) && (!empty($mainOrg_id))) {
                             $client_id = $mainOrg_id;
                         }
                     }
@@ -224,7 +224,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
                 $product_id = AllMaps::find()
                     ->select('product_id')
                     ->where("service_id = :service_id AND serviceproduct_id = :serviceproduct_id AND org_id = :org_id and is_active = 1",
-                        [':service_id' => $this->service_id, ':serviceproduct_id' => $row->product_outer_id, ':org_id' => $client_id])
+                        [':service_id' => $this->service_id, ':serviceproduct_id' => $row->outer_product_id, ':org_id' => $client_id])
                     ->scalar();
 
                 if ($product_id == null) {

@@ -207,7 +207,9 @@ class WaybillHelper
                 $modelWaybillContent->order_content_id = $ordCont->id;
                 $modelWaybillContent->waybill_id = $model->id;
                 $modelWaybillContent->merc_uuid = $ordCont->merc_uuid;
-                $modelWaybillContent->product_outer_id = $ordCont->product_id;
+                #TODO refactor
+                #Тут должен браться id продукта из у.с.
+                $modelWaybillContent->outer_product_id = $ordCont->product_id;
                 $modelWaybillContent->quantity_waybill = $quantity;
                 $modelWaybillContent->vat_waybill = $taxRate;
                 $modelWaybillContent->sum_with_vat = $quantity * $priceWithVat;
@@ -290,7 +292,9 @@ class WaybillHelper
             $waybillContent = new WaybillContent();
             $waybillContent->waybill_id = $request['waybill_id'];
             $waybillContent->order_content_id = $orderContent->id;
-            $waybillContent->product_outer_id = $orderContent->product_id;
+            #TODO refactor
+            #Тут должен быть id продукта у.с. а не наш продукт
+            $waybillContent->outer_product_id = $orderContent->product_id;
             $waybillContent->quantity_waybill = (float)$quantity;
             $waybillContent->vat_waybill = $taxRate;
             $waybillContent->merc_uuid = $orderContent->merc_uuid;

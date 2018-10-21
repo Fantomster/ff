@@ -492,7 +492,7 @@ class ServiceRkws extends AbstractSyncFactory
             # 3. Выбираем даные по накладной для отправки
             $records = WaybillContent::find()
                 ->select('waybill_content.*, outer_product.outer_uid as product_rid, outer_unit.outer_uid as unit_rid')
-                ->leftJoin('outer_product', 'outer_product.id = product_outer_id')
+                ->leftJoin('outer_product', 'outer_product.id = outer_product_id')
                 ->leftJoin('outer_unit', 'outer_unit.id = outer_product.outer_unit_id')
                 ->andWhere('waybill_id = :wid', [':wid' => $waybill_id])
                 ->andWhere(['unload_status' => 1])

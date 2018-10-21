@@ -32,7 +32,7 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property WaybillContent[] $waybillContents
  */
-class Waybill extends yii\db\ActiveRecord
+class Waybill extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}

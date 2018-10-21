@@ -12,6 +12,7 @@ use yii\behaviors\AttributesBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -712,21 +713,25 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param null $service_id
      * @return array|Waybill[]|ActiveRecord[]
      */
-    public function getWaybills()
+    public function getWaybills($service_id = null)
     {
         $db_instance = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
-        $sql = <<<SQL
-            SELECT DISTINCT
-              w.id
-            FROM waybill w
-            LEFT JOIN waybill_content wc ON wc.waybill_id = w.id
-            JOIN {$db_instance}.order_content oc ON oc.id = wc.order_content_id
-            JOIN {$db_instance}.`order` o ON o.id = oc.order_id
-            WHERE o.id = {$this->id}
-SQL;
-        $waybill_ids = Yii::$app->db_api->createCommand($sql)->queryColumn();
-        return Waybill::find()->where(['in', 'id', $waybill_ids])->all() ?? [];
+
+        $query = (new Query())
+            ->distinct()
+            ->select(['w.id'])
+            ->from(Waybill::tableName() . ' as w')
+            ->leftJoin(WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
+            ->innerJoin($db_instance . '.' . OrderContent::tableName() . ' as oc', 'oc.id = wc.order_content_id')
+            ->where('oc.order_id = :id', [':id' => $this->id]);
+
+        if ($service_id) {
+            $query->andWhere('w.service_id = :s_id', [':s_id' => $service_id]);
+        }
+
+        return Waybill::find()->where(['in', 'id', $query->createCommand(\Yii::$app->db_api)->queryColumn()])->all() ?? [];
     }
 }

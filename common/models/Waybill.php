@@ -130,7 +130,7 @@ class Waybill extends yii\db\ActiveRecord
      */
     public function getTotalPrice()
     {
-        return round(WaybillContent::find()->where(['waybill_id' => $this->id])->sum('sum_with_vat'), 2);
+        return WaybillContent::find()->where(['waybill_id' => $this->id])->sum('sum_with_vat');
     }
 
     /**

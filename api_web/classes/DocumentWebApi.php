@@ -33,13 +33,14 @@ class DocumentWebApi extends \api_web\components\WebApi
         2 => self::DOC_GROUP_STATUS_WAIT_FORMING,
         3 => self::DOC_GROUP_STATUS_SENT,
     ];
-
+    //todo_refactoring to Registry class
     const DOC_WAYBILL_STATUS_COLLATED = 'Сопоставлена';
     const DOC_WAYBILL_STATUS_READY = 'Сформирована';
     const DOC_WAYBILL_STATUS_ERROR = 'Ошибка';
     const DOC_WAYBILL_STATUS_RESET = 'Сброшена';
     const DOC_WAYBILL_STATUS_SENT = 'Выгружена';
 
+    //todo_refactoring to Registry class
     private static $doc_waybill_status = [
         1 => self::DOC_WAYBILL_STATUS_COLLATED,
         2 => self::DOC_WAYBILL_STATUS_READY,
@@ -201,11 +202,12 @@ class DocumentWebApi extends \api_web\components\WebApi
      * Получение списка документов
      *
      * @param array $post
+     * @throws \Exception
      * @return array
      */
-
     public function getDocumentsList(array $post)
     {
+        $this->validateRequest($post, ['service_id']);
         $client = $this->user->organization;
 
         $sort = (isset($post['sort']) ? $post['sort'] : null);
@@ -216,6 +218,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         $params_sql = [];
         $where_all = " AND client_id  = :business_id";
+        $params_sql[':service_id'] = $post['service_id'];
         if (isset($post['search']['business_id']) && !empty($post['search']['business_id'])) {
             if (RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
                 $params_sql[':business_id'] = $post['search']['business_id'];
@@ -225,6 +228,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         } else {
             $params_sql[':business_id'] = $this->user->organization_id;
         }
+
 
         if (isset($post['search']['waybill_status']) && !empty($post['search']['waybill_status'])) {
             $where_all .= " AND waybill_status = :waybill_status";
@@ -297,19 +301,23 @@ class DocumentWebApi extends \api_web\components\WebApi
         select * from (
         SELECT * from (
             SELECT id, '" . self::TYPE_ORDER . "' as type, client_id, null as waybill_status, created_at as order_date, null as waybill_date, 
-            null as waybill_number, id as doc_number, vendor_id as vendor, null as store 
+            null as waybill_number, id as doc_number, vendor_id as vendor, null as store, service_id
             FROM `order`
             UNION ALL
             SELECT id, '" . self::TYPE_ORDER_EMAIL . "' as type, organization_id as client_id, null as waybill_status, date as order_date, null as waybill_date,
-            null as waybill_number, number as doc_number, vendor_id as vendor, null as store   
+            null as waybill_number, number as doc_number, vendor_id as vendor, null as store, null as service_id   
             FROM integration_invoice WHERE order_id is null
         ) as c
         UNION ALL
         SELECT id, '" . self::TYPE_WAYBILL . "' as type, acquirer_id as client_id, status_id as waybill_status, null as order_date, doc_date as waybill_date, 
-        outer_number_code as waybill_number, null as doc_number,  outer_contractor_uuid as vendor, outer_store_uuid as store   
-        FROM `$apiShema`.waybill WHERE order_id is null ) as documents
+        outer_number_code as waybill_number, null as doc_number,  outer_contractor_uuid as vendor, outer_store_uuid as store, service_id 
+        FROM `$apiShema`.waybill WHERE order_id is null AND service_id = :service_id) as documents
         WHERE id is not null $where_all
        ";
+
+        if (is_null($sort)){
+            $sql .= 'ORDER BY coalesce(documents.order_date,documents.waybill_date) DESC';
+        }
 
         //$count = \Yii::$app->db->createCommand("select COUNT(*) from ($sql) as cc",$params_sql);
         //var_dump($count->rawSql); die();

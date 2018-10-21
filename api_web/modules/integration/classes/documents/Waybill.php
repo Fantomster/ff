@@ -4,6 +4,7 @@ namespace api_web\modules\integration\classes\documents;
 
 use api\common\models\AllMaps;
 use api_web\classes\DocumentWebApi;
+use api_web\components\Registry;
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use api_web\modules\integration\modules\iiko\models\iikoService;
@@ -33,10 +34,10 @@ class Waybill extends BaseWaybill implements DocumentInterface
 
         $return = [
             "id"          => $this->id,
-            "number"      => [$this->outer_number_code],
+            "number"      => $this->outer_number_code ? [$this->outer_number_code] : null,
             "type"        => DocumentWebApi::TYPE_WAYBILL,
             "status_id"   => $this->status_id,
-            "status_text" => "",
+            "status_text" => \Yii::t('api_web', 'waybill.compared'),
             "service_id"  => $this->service_id,
         ];
 

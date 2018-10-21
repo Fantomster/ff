@@ -277,7 +277,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
-            $vendors = implode("', '", $post['search']['vendor']);
+            $vendors = implode(",", $post['search']['vendor']);
             $where_all .= " AND vendor in ($vendors)";
         }
 

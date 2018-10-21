@@ -11,7 +11,7 @@ class DocumentController extends \api_web\components\WebApiController
      * @SWG\Post(path="/document/document-content",
      *     tags={"Documents"},
      *     summary="Детальная часть документа",
-     *     description="Детальная часть документа, для типа order необходимо передавать service_id",
+     *     description="Детальная часть документа",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",

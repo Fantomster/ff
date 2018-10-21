@@ -149,7 +149,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
-            throw new BadRequestHttpException('dont support this type');
+            throw new BadRequestHttpException('document.not_support_type');
         }
 
         switch (strtolower($post['type'])) {
@@ -157,10 +157,10 @@ class DocumentWebApi extends \api_web\components\WebApi
                 return $this->getDocumentOrder($post['document_id'], $post['service_id']);
                 break;
             case self::TYPE_WAYBILL:
-                return $this->getDocumentWaybill($post['document_id']);
+                return $this->getDocumentWaybill($post['document_id'], $post['service_id']);
                 break;
             default:
-                throw new BadRequestHttpException('dont support this type');
+                throw new BadRequestHttpException('document.not_support_type');
         }
     }
 
@@ -217,26 +217,30 @@ class DocumentWebApi extends \api_web\components\WebApi
     /**
      * Возвращаем информацию по докумнту типа waybill
      *
-     * @param $document_id
+     * @param      $document_id
+     * @param null $service_id
      * @return array
+     * @throws BadRequestHttpException
      */
-    private function getDocumentWaybill($document_id)
+    private function getDocumentWaybill($document_id, $service_id = null)
     {
         $result = [
             'documents' => [],
             'positions' => []
         ];
 
-        $positions = (new Query())
-            ->select('id')
-            ->from(\common\models\WaybillContent::tableName())
-            ->where('waybill_id = :doc_id', [':doc_id' => (int)$document_id])
-            ->all(\Yii::$app->db_api);
+        if (\common\models\Waybill::find()->where(['id' => $document_id, 'service_id' => $service_id])->exists()) {
+            $positions = (new Query())
+                ->select('id')
+                ->from(\common\models\WaybillContent::tableName())
+                ->where('waybill_id = :doc_id', [':doc_id' => (int)$document_id])
+                ->all(\Yii::$app->db_api);
 
-        if (!empty($positions)) {
-            $modelClass = self::$modelsContent[self::TYPE_WAYBILL];
-            foreach ($this->iterator($positions) as $key => $position) {
-                $result['positions'][$key] = $modelClass::prepareModel($position);
+            if (!empty($positions)) {
+                $modelClass = self::$modelsContent[self::TYPE_WAYBILL];
+                foreach ($this->iterator($positions) as $key => $position) {
+                    $result['positions'][$key] = $modelClass::prepareModel($position);
+                }
             }
         }
 
@@ -343,33 +347,51 @@ class DocumentWebApi extends \api_web\components\WebApi
         $apiShema = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
 
         $sql = "
-        select * from (
-        SELECT * from (
-            SELECT id, '" . self::TYPE_ORDER . "' as type, client_id, null as waybill_status, created_at as order_date, null as waybill_date, 
-            null as waybill_number, id as doc_number, vendor_id as vendor, null as store, service_id
-            FROM `order`
-            UNION ALL
-            SELECT id, '" . self::TYPE_ORDER_EMAIL . "' as type, organization_id as client_id, null as waybill_status, date as order_date, null as waybill_date,
-            null as waybill_number, number as doc_number, vendor_id as vendor, null as store, null as service_id   
-            FROM integration_invoice WHERE order_id is null
-        ) as c
+        SELECT * FROM (
+            SELECT 
+                id, 
+                '" . self::TYPE_ORDER . "' as type, 
+                client_id, 
+                null as waybill_status_id, 
+                created_at as order_date, 
+                null as waybill_date, 
+                null as waybill_number, 
+                id as doc_number, 
+                vendor_id as vendor, 
+                null as store
+            FROM `order` 
+            WHERE client_id = {$client->id}
         UNION ALL
-        SELECT id, '" . self::TYPE_WAYBILL . "' as type, acquirer_id as client_id, status_id as waybill_status, null as order_date, doc_date as waybill_date, 
-        outer_number_code as waybill_number, null as doc_number,  outer_contractor_uuid as vendor, outer_store_uuid as store, service_id 
-        FROM `$apiShema`.waybill WHERE order_id is null AND service_id = :service_id) as documents
-        WHERE id is not null $where_all
+            SELECT
+                w.id, 
+                '" . self::TYPE_WAYBILL . "' as type, 
+                acquirer_id as client_id, 
+                status_id as waybill_status_id, 
+                null as order_date, 
+                doc_date as waybill_date, 
+                outer_number_code as waybill_number, 
+                null as doc_number,  
+                outer_contractor_uuid as vendor, 
+                outer_store_uuid as store
+            FROM `$apiShema`.waybill w
+            LEFT JOIN `$apiShema`.waybill_content wc ON wc.waybill_id = w.id
+            LEFT JOIN order_content oc ON oc.id = wc.order_content_id
+            WHERE 
+                oc.order_id is null 
+            AND 
+                service_id = :service_id
+        ) as documents
+        WHERE 
+        id is not null $where_all
        ";
 
         if (is_null($sort)) {
             $sql .= 'ORDER BY coalesce(documents.order_date,documents.waybill_date) DESC';
         }
 
-        //$count = \Yii::$app->db->createCommand("select COUNT(*) from ($sql) as cc",$params_sql);
-        //var_dump($count->rawSql); die();
         $dataProvider = new SqlDataProvider([
             'sql'        => $sql,
             'params'     => $params_sql,
-            //'totalCount' => $count,
             'pagination' => [
                 'page'     => $page - 1,
                 'pageSize' => $pageSize,
@@ -392,9 +414,11 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         $result = $dataProvider->getModels();
-        foreach ($result as $model) {
-            $modelClass = self::$models[$model['type']];
-            $documents[] = $modelClass::prepareModel($model['id']);
+        if (!empty($result)) {
+            foreach ($this->iterator($result) as $model) {
+                $modelClass = self::$models[$model['type']];
+                $documents[] = $modelClass::prepareModel($model['id']);
+            }
         }
 
         $return = [
@@ -403,10 +427,12 @@ class DocumentWebApi extends \api_web\components\WebApi
                 'page'       => $dataProvider->pagination->page + 1,
                 'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
-            ],
-            'sort'       => $sort_field
+            ]
         ];
 
+        if (!empty($sort_field)) {
+            $return['sort'] = $sort_field;
+        }
         return $return;
     }
 
@@ -426,11 +452,11 @@ class DocumentWebApi extends \api_web\components\WebApi
         $waybill = Waybill::findOne(['id' => $post['waybill_id']]);
 
         if (!isset($waybill)) {
-            throw new BadRequestHttpException("Waybill not found");
+            throw new BadRequestHttpException("waybill_not_found");
         }
 
         if ($waybill->status_id == 3) {
-            throw new BadRequestHttpException("Waybill in the state of \"reset\" or \"unloaded\"");
+            throw new BadRequestHttpException("document.waybill_in_the_state_of_reset_or_unloaded");
         }
 
         $waybill->resetPositions();
@@ -464,13 +490,12 @@ class DocumentWebApi extends \api_web\components\WebApi
     public function editWaybillDetail(array $post)
     {
         if (empty($post['id'])) {
-            throw new BadRequestHttpException("EDIT CANCELED product id empty");
+            throw new BadRequestHttpException("empty_param|id");
         }
 
         $waybill = Waybill::findOne(['id' => $post['id']]);
-
         if (!isset($waybill)) {
-            throw new BadRequestHttpException("EDIT CANCELED the waybill - waybill not found");
+            throw new BadRequestHttpException("waybill_not_found");
         }
 
         if (!empty($post['agent_uid'])) {
@@ -535,13 +560,21 @@ class DocumentWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("empty_param|document_id");
         }
 
-        $waybill = Waybill::findOne(['id' => $post['document_id']]);
-
+        $waybill = Waybill::findOne(['id' => (int)$post['document_id']]);
         if (!isset($waybill)) {
-            throw new BadRequestHttpException("waybill not found");
+            throw new BadRequestHttpException("waybill_not_found");
         }
 
-        $waybill->mapWaybill($post['order_id']);
+        $order = \common\models\Order::find()->where([
+            'id'        => (int)$post['order_id'],
+            'client_id' => $this->user->organization_id
+        ])->one();
+
+        if (empty($order)) {
+            throw new BadRequestHttpException('order_not_found');
+        }
+
+        $waybill->mapWaybill($order->id);
         return ['result' => true];
     }
 

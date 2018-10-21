@@ -171,7 +171,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @param null $service_id
      * @return array
      */
-    private function getDocumentOrder($document_id, $service_id = null)
+    private function getDocumentOrder($document_id, $service_id)
     {
         $apiDb = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
 
@@ -222,7 +222,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      */
-    private function getDocumentWaybill($document_id, $service_id = null)
+    private function getDocumentWaybill($document_id, $service_id)
     {
         $result = [
             'documents' => [],

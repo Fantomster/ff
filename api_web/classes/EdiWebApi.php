@@ -114,12 +114,42 @@ class EdiWebApi extends WebApi
             throw new BadRequestHttpException("order_not_found");
         } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
             throw new BadRequestHttpException("Доступно только для документов ЭДО");
-        } elseif ($order->status != OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED) {
-            throw new BadRequestHttpException("Должен быть статус \"Приемка завершена\"");
+        } elseif ($order->status != OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
+            throw new BadRequestHttpException("Должен быть статус \"Ожидает подтверждения поставщика\"");
         }
 
         $order->status = OrderStatus::STATUS_CANCELLED;
         $order->save();
+
+        return ['result' => true];
+    }
+
+    /**
+     * Отмена заказа
+     * @param array $post
+     * @throws BadRequestHttpException
+     * @return array
+     */
+    public function orderAcceptance(array $post): array
+    {
+        $this->validateRequest($post, ['order_id']);
+
+        $order = Order::findOne([
+            'id' => $post['order_id'],
+            'client_id' => $this->user->organization_id,
+        ]);
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("order_not_found");
+        } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
+            throw new BadRequestHttpException("Доступно только для документов ЭДО");
+        } elseif ($order->status != OrderStatus::STATUS_EDI_SENT_BY_VENDOR) {
+            throw new BadRequestHttpException("Должен быть статус \"Отправлен поставщиком\"");
+        }
+
+        $order->status = OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED;
+        $order->save();
+
         return ['result' => true];
     }
 

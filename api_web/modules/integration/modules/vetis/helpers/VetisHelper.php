@@ -414,7 +414,7 @@ class VetisHelper
     {
         $guid = $this->getSettings($orgId, ['enterprise_guid']);
         $model = MercVsd::findOne(['uuid' => $uuid]);
-        if ($guid == $model->recipient_guid) {
+        if ($guid == $model->recipient_guid && $guid != $model->sender_guid) {
             return 'incoming';
         }
 

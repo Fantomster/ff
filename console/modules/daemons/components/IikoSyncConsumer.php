@@ -9,6 +9,7 @@
 namespace console\modules\daemons\components;
 
 use api\common\models\RabbitQueues;
+use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
 use api_web\helpers\iikoApi;
 use yii\web\BadRequestHttpException;
@@ -42,6 +43,7 @@ class IikoSyncConsumer extends AbstractConsumer
 
     /**
      * Запуск синхронизации определенного типа
+     *
      * @return array
      * @throws BadRequestHttpException
      * @throws \Exception
@@ -49,6 +51,19 @@ class IikoSyncConsumer extends AbstractConsumer
     public function run()
     {
         $model = OuterDictionary::findOne(['name' => $this->type, 'service_id' => self::SERVICE_ID]);
+
+        $dictionary = OrganizationDictionary::findOne([
+            'org_id' => $this->orgId,
+            'outer_dic_id' => $model->id
+        ]);
+
+        if(empty($dictionary)) {
+            $dictionary = new OrganizationDictionary([
+                'org_id' => $this->orgId,
+                'outer_dic_id' => $model->id,
+                'status_id' => OrganizationDictionary::STATUS_DISABLED
+            ]);
+        }
 
         if (empty($model)) {
             throw new BadRequestHttpException('Not found type ' . $this->type);
@@ -62,11 +77,13 @@ class IikoSyncConsumer extends AbstractConsumer
                 }
                 //Синхронизируем нужное нам и
                 //ответ получим, сколько записей у нас в боевом состоянии
-                $this->{$model->name}();
+                $count = $this->{$model->name}();
+                $dictionary->successSync($count);
                 //Убиваем сессию, а то закончатся на сервере iiko
                 iikoApi::getInstance($this->orgId)->logout();
                 return ['success' => true];
             } catch (\Exception $e) {
+                $dictionary->errorSync();
                 iikoApi::getInstance($this->orgId)->logout();
                 throw $e;
             }
@@ -77,6 +94,7 @@ class IikoSyncConsumer extends AbstractConsumer
 
     /**
      * Запрос на постановку в очередь обновлений справочника
+     *
      * @param integer $org_id
      */
     public static function getUpdateData($org_id): void

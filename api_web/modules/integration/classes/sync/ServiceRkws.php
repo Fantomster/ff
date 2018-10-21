@@ -2,19 +2,22 @@
 
 /**
  * Class ServiceRkws
- * @package api_web\module\integration\sync
+ *
+ * @package   api_web\module\integration\sync
  * @createdBy Basil A Konakov
  * @createdAt 2018-09-20
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
+ * @author    Mixcart
+ * @module    WEB-API
+ * @version   2.0
  */
 
 namespace api_web\modules\integration\classes\sync;
 
 use api\common\models\RkDicconst;
+use api_web\components\Registry;
 use api_web\modules\integration\classes\documents\WaybillContent;
 use common\models\AllService;
+use common\models\OuterCategory;
 use common\models\Waybill;
 use Yii;
 use yii\db\Transaction;
@@ -78,6 +81,7 @@ class ServiceRkws extends AbstractSyncFactory
 
     /**
      * Basic service method "Send request"
+     *
      * @return array?
      * @throws BadRequestHttpException
      */
@@ -100,7 +104,7 @@ class ServiceRkws extends AbstractSyncFactory
 
         return [
             'service_prefix' => SyncLog::$servicePrefix,
-            'log_index' => SyncLog::$logIndex,
+            'log_index'      => SyncLog::$logIndex,
         ];
 
     }
@@ -110,19 +114,61 @@ class ServiceRkws extends AbstractSyncFactory
         return [];
     }
 
+    /**
+     * Отправка запроса
+     *
+     * @param array $params
+     * @return array
+     * @throws BadRequestHttpException
+     */
     public function sendRequest(array $params = []): array
     {
-
         # 1. Start "Send request" action
         SyncLog::trace('Initialized new procedure action "Send request" in ' . __METHOD__);
         $cook = $this->prepareServiceWithAuthCheck();
-
         # 2. Если нет сессии - завершаем с ошибкой
         if (!$cook) {
             SyncLog::trace('Cannot authorize with session or login data');
             throw new BadRequestHttpException('Cannot authorize with curl');
         }
 
+        $result = [];
+        #Если пришел запрос на обновление продуктов, и нет конкретной группы, обновляем все группы
+        # которые выбраны
+        if ($params['dictionary'] == 'product' && empty($params['product_group'])) {
+            $models = OuterCategory::find()->where([
+                'service_id' => Registry::RK_SERVICE_ID,
+                'org_id'     => $this->user->organization_id,
+                'selected'   => 1
+            ])->all();
+
+            foreach ($models as $model) {
+                $params['product_group'] = $model->outer_uid;
+                try {
+                    $result[] = $this->sendRequestPrivate($params, $cook);
+                } catch (\Throwable $e) {
+                    $result[$model->outer_uid] = [
+                        'error' => $e->getMessage()
+                    ];
+                    continue;
+                }
+            }
+        } else {
+            $result = $this->sendRequestPrivate($params, $cook);
+        }
+        return $result;
+    }
+
+    /**
+     * Приватный метод отправки запроса
+     *
+     * @param array $params
+     * @param       $cook
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    private function sendRequestPrivate(array $params = [], $cook): array
+    {
         $url = $this->getUrlCmd();
         $guid = UUID::uuid4();
         $xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
@@ -133,25 +179,25 @@ class ServiceRkws extends AbstractSyncFactory
                 $transaction = $this->createTransaction();
                 $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => static::$OperDenom]);
                 $task = new OuterTask([
-                    'service_id' => $this->serviceId,
-                    'retry' => 0,
-                    'org_id' => $this->user->organization_id,
-                    'inner_guid' => $guid,
-                    'salespoint_id' => (string)$this->licenseMixcartId,
-                    'int_status_id' => OuterTask::STATUS_REQUESTED,
-                    'outer_guid' => $xml['@attributes']['taskguid'],
+                    'service_id'     => $this->serviceId,
+                    'retry'          => 0,
+                    'org_id'         => $this->user->organization_id,
+                    'inner_guid'     => $guid,
+                    'salespoint_id'  => (string)$this->licenseMixcartId,
+                    'int_status_id'  => OuterTask::STATUS_REQUESTED,
+                    'outer_guid'     => $xml['@attributes']['taskguid'],
                     'broker_version' => $xml['@attributes']['version'],
-                    'oper_code' => $oper->id,
+                    'oper_code'      => $oper->id,
                 ]);
                 if ($task->save()) {
                     $transaction->commit();
                     SyncLog::trace('SUCCESS. json-response-data: ' .
                         str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
                     return [
-                        'task_id' => $task->id,
-                        'task_status' => $task->int_status_id,
+                        'task_id'        => $task->id,
+                        'task_status'    => $task->int_status_id,
                         'service_prefix' => SyncLog::$servicePrefix,
-                        'log_index' => SyncLog::$logIndex,
+                        'log_index'      => SyncLog::$logIndex,
                     ];
                 }
                 $transaction->rollBack();
@@ -179,9 +225,9 @@ class ServiceRkws extends AbstractSyncFactory
 
         # 3. Find license Rkeeper data
         $license = RkService::findOne([
-            'id' => $licenseMixcart->service_id,
+            'id'         => $licenseMixcart->service_id,
             // 'org' => $this->user->organization_id, поле не используется!
-            'status_id' => 1,
+            'status_id'  => 1,
             'is_deleted' => 0
         ]);
         if (!$license || !$license->code || ($license->td <= $this->now)) {
@@ -240,7 +286,7 @@ class ServiceRkws extends AbstractSyncFactory
             if ($xmlData) {
 
                 preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $xmlData, $matches);
-                $cookList = array();
+                $cookList = [];
                 foreach ($matches[1] as $item) {
                     parse_str($item, $cook);
                     $cookList = array_merge($cookList, $cook);
@@ -312,6 +358,7 @@ class ServiceRkws extends AbstractSyncFactory
 
     /**
      * Prepare URL to test service connection with session is active
+     *
      * @return string?
      */
     public function getUrlCmd(): ?string
@@ -333,6 +380,7 @@ class ServiceRkws extends AbstractSyncFactory
 
     /**
      * Prepare URL to test service connection with login params
+     *
      * @return string?
      */
     public function getUrlLogin(): string
@@ -354,6 +402,7 @@ class ServiceRkws extends AbstractSyncFactory
 
     /**
      * Prepare Xml to test service connection with session is active
+     *
      * @param string $code
      * @return string
      */
@@ -368,32 +417,42 @@ class ServiceRkws extends AbstractSyncFactory
 
     /**
      * Prepare Xml to test service connection session with login params
+     *
      * @param $access RkAccess
      * @return string
      */
     public function prepareXmlWithAuthParams(RkAccess $access): string
     {
         SyncLog::trace('Prepare XML-data type "Service new login and password connection" in ' . __METHOD__);
-        return '<?xml version="1.0" encoding="UTF-8"?><AUTHCMD key="' .
-            $access->lic . '" usr="' . base64_encode($access->login . ';' .
-                strtolower(md5($access->login . $access->password)) . ';' .
-                strtolower(md5($access->token))) . '" />';
-    }
+        $key = $access->lic;
+        $usr = $access->login . ';';
+        $usr .= strtolower(md5($access->login . $access->password)) . ';';
+        $usr .= strtolower(md5($access->token));
 
+        return '<?xml version="1.0" encoding="UTF-8"?><AUTHCMD key="' . $key . '" usr="' . base64_encode($usr) . '" />';
+    }
 
     public function getCallbackURL(): string
     {
         return Yii::$app->params['rkeepCallBackURL'] . '?';
     }
 
+    /**
+     * @param       $index
+     * @param       $code
+     * @param       $guid
+     * @param array $params
+     * @return string
+     */
     public function prepareXmlWithTaskAndServiceCode($index, $code, $guid, array $params = []): string
     {
         $cb = $this->getCallbackURL() . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
         SyncLog::trace('Callback URL and salespoint code for the template are:' . $cb . ' (' . $code . ')');
 
         $renderParams = [
-            'cb' => $cb,
+            'cb'   => $cb,
             'code' => $code,
+            'guid' => $guid
         ];
         if (isset($params['product_group']) && $params['product_group']) {
             $renderParams['productGroup'] = $params['product_group'];
@@ -403,12 +462,14 @@ class ServiceRkws extends AbstractSyncFactory
             $renderParams['code'] = $params['code'];
         }
         $template = Yii::$app->view->render($this->dirResponseXml . '/' . ucfirst($index), $renderParams);
+        $template = trim($template);
         SyncLog::trace('Template result is:' . PHP_EOL . $template);
         return $template;
     }
 
     /**
      * Метод отправки накладной
+     *
      * @return array
      */
     public function sendWaybill($request): array
@@ -431,7 +492,7 @@ class ServiceRkws extends AbstractSyncFactory
             # 3. Выбираем даные по накладной для отправки
             $records = WaybillContent::find()
                 ->select('waybill_content.*, outer_product.outer_uid as product_rid, outer_unit.outer_uid as unit_rid')
-                ->leftJoin('outer_product', 'outer_product.id = product_outer_id')
+                ->leftJoin('outer_product', 'outer_product.id = outer_product_id')
                 ->leftJoin('outer_unit', 'outer_unit.id = outer_product.outer_unit_id')
                 ->andWhere('waybill_id = :wid', [':wid' => $waybill_id])
                 ->andWhere(['unload_status' => 1])
@@ -458,19 +519,19 @@ class ServiceRkws extends AbstractSyncFactory
 
             //$xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
 
-            $cb = Yii::$app->params['rkeepCallBackURL'] ."/send-waybill?" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
+            $cb = Yii::$app->params['rkeepCallBackURL'] . "/send-waybill?" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
             SyncLog::trace('Callback URL and salespoint code for the template are:' . $cb . ' (' . $this->licenseCode . ')');
 
             $exportApproved = (RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() : 0;
 
             $xml = Yii::$app->view->render($this->dirResponseXml . '/' . ucfirst('Waybill'),
                 [
-                    'waybill' => $waybill,
-                    'records' => $records,
+                    'waybill'        => $waybill,
+                    'records'        => $records,
                     'exportApproved' => $exportApproved,
-                    'code' => $this->licenseCode,
-                    'guid' => $guid,
-                    'cb' => $cb,
+                    'code'           => $this->licenseCode,
+                    'guid'           => $guid,
+                    'cb'             => $cb,
                 ]);
 
             $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
@@ -481,15 +542,15 @@ class ServiceRkws extends AbstractSyncFactory
                     $transaction = $this->createTransaction();
                     $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => 'sh_doc_receiving_report']);
                     $task = new OuterTask([
-                        'service_id' => $this->serviceId,
-                        'retry' => 0,
-                        'org_id' => $this->user->organization_id,
-                        'inner_guid' => $guid,
-                        'salespoint_id' => (string)$this->licenseMixcartId,
-                        'int_status_id' => OuterTask::STATUS_REQUESTED,
-                        'outer_guid' => $xml['@attributes']['taskguid'],
+                        'service_id'     => $this->serviceId,
+                        'retry'          => 0,
+                        'org_id'         => $this->user->organization_id,
+                        'inner_guid'     => $guid,
+                        'salespoint_id'  => (string)$this->licenseMixcartId,
+                        'int_status_id'  => OuterTask::STATUS_REQUESTED,
+                        'outer_guid'     => $xml['@attributes']['taskguid'],
                         'broker_version' => $xml['@attributes']['version'],
-                        'oper_code' => $oper->id,
+                        'oper_code'      => $oper->id,
                     ]);
                     if ($task->save()) {
                         $transaction->commit();
@@ -511,7 +572,6 @@ class ServiceRkws extends AbstractSyncFactory
 
         return $result;
     }
-
 
     public function receiveXMLData(OuterTask $task, string $data = null)
     {
@@ -552,8 +612,8 @@ class ServiceRkws extends AbstractSyncFactory
                 $model = $entityTableName::findOne(['outer_uid' => $v['rid'], 'org_id' => $task->org_id, 'service_id' => $this->serviceId]);
                 if (!$model) {
                     $model = new $entityTableName([
-                        'outer_uid' => $v['rid'],
-                        'org_id' => $task->org_id,
+                        'outer_uid'  => $v['rid'],
+                        'org_id'     => $task->org_id,
                         'service_id' => $this->serviceId,
                     ]);
                 }
@@ -596,8 +656,8 @@ class ServiceRkws extends AbstractSyncFactory
 
             # 5.2.2. Перебираем новые данные и пробуем добавить/обновить записи в БД
             foreach ($arrayNew as $elementNew) {
-                $entity = $entityTableName::findOne(['org_id' => $task->org_id, 'outer_uid' => $elementNew['rid'],
-                    'service_id' => $task->service_id]);
+                $entity = $entityTableName::findOne(['org_id'     => $task->org_id, 'outer_uid' => $elementNew['rid'],
+                                                     'service_id' => $task->service_id]);
                 if (!$entity) {
                     $entity = new $entityTableName();
                     $entity->org_id = $task->org_id;

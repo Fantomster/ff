@@ -31,7 +31,7 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
             "id" => $this->id,
             "product_id" => isset($orderContent) ? $orderContent->product_id : null,
             "product_name" => isset($orderContent) ? $orderContent->product->product : null,
-            "product_outer_id" => isset($this->productOuter) ? $productOuter->name : null,
+            "outer_product_id" => isset($this->productOuter) ? $productOuter->name : null,
             "quantity" => $this->quantity_waybill,
             "unit" => $unit,
             "koef" => $this->koef,

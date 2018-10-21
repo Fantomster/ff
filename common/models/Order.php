@@ -2,13 +2,17 @@
 
 namespace common\models;
 
+use api_web\components\Registry;
 use common\components\edi\EDIIntegration;
 use common\components\EComIntegration;
+use common\helpers\DBNameHelper;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
 use yii\behaviors\AttributesBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -63,6 +67,8 @@ class Order extends \yii\db\ActiveRecord
     const STATUS_REJECTED = 5;
     const STATUS_CANCELLED = 6;
     const STATUS_FORMING = 7;
+    const STATUS_EDI_SENT_BY_VENDOR = 8;
+    const STATUS_EDI_ACCEPTANCE_FINISHED = 9;
     const STATUS_EDI_SENDING_TO_VENDOR = 10;
     const STATUS_EDI_SENDING_ERROR = 11;
 
@@ -311,7 +317,11 @@ class Order extends \yii\db\ActiveRecord
 
     public function getStatusText()
     {
-        $statusList = self::getStatusList();
+        if (in_array($this->service_id, [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID])) {
+            $statusList = self::getStatusListEdo();
+        } else {
+            $statusList = self::getStatusList();
+        }
         return $statusList[$this->status];
     }
 
@@ -321,7 +331,7 @@ class Order extends \yii\db\ActiveRecord
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app',
                 'common.models.order_status.status_awaiting_accept_from_vendor', ['ru' => 'Ожидает подтверждения']),
             OrderStatus::STATUS_PROCESSING                  => Yii::t('app',
-                'common.models.order_status.status_processing', ['ru' => 'Выполняются']),
+                'common.models.in_process_two', ['ru' => 'Выполняются']),
             OrderStatus::STATUS_EDI_SENT_BY_VENDOR          => Yii::t('app',
                 'common.models.order_status.status_edo_sent_by_vendor', ['ru' => 'Отправлен поставщиком']),
             OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED     => Yii::t('app',
@@ -330,6 +340,8 @@ class Order extends \yii\db\ActiveRecord
                 'common.models.order_status.status_done', ['ru' => 'Завершен']),
             OrderStatus::STATUS_CANCELLED                   => Yii::t('app',
                 'common.models.order_status.status_cancelled', ['ru' => 'Отменен']),
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru' => 'Ожидает подтверждения клиента']),
+            OrderStatus::STATUS_REJECTED                    => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
         ];
     }
 
@@ -699,5 +711,28 @@ class Order extends \yii\db\ActiveRecord
     public function getFormattedCreationDate()
     {
         return Yii::$app->formatter->asDatetime($this->created_at, "php:d.m.Y, H:i");
+    }
+
+    /**
+     * @param null $service_id
+     * @return array|Waybill[]|ActiveRecord[]
+     */
+    public function getWaybills($service_id = null)
+    {
+        $db_instance = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+
+        $query = (new Query())
+            ->distinct()
+            ->select(['w.id'])
+            ->from(Waybill::tableName() . ' as w')
+            ->leftJoin(WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
+            ->innerJoin($db_instance . '.' . OrderContent::tableName() . ' as oc', 'oc.id = wc.order_content_id')
+            ->where('oc.order_id = :id', [':id' => $this->id]);
+
+        if ($service_id) {
+            $query->andWhere('w.service_id = :s_id', [':s_id' => $service_id]);
+        }
+
+        return Waybill::find()->where(['in', 'id', $query->createCommand(\Yii::$app->db_api)->queryColumn()])->all() ?? [];
     }
 }

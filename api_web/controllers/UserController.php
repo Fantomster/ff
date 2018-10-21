@@ -54,6 +54,7 @@ class UserController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionGet()
     {

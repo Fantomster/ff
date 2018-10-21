@@ -338,6 +338,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionAcceptProducts()
     {
@@ -345,7 +346,7 @@ class EdiController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/edi/finish-order",
+     * @SWG\Post(path="/edi/order-complete",
      *     tags={"edi"},
      *     summary="Завершение заказа",
      *     description="Завершение заказа",
@@ -382,10 +383,56 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
-    public function actionFinishOrder()
+    public function actionOrderComplete()
     {
-        $this->response = $this->container->get('EdiWebApi')->finishOrder($this->request);
+        $this->response = $this->container->get('EdiWebApi')->orderComplete($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/edi/order-cancel",
+     *     tags={"edi"},
+     *     summary="Отмена заказа",
+     *     description="Отмена заказа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=false,
+     *         @SWG\Schema (
+     *             @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "order_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                      true
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionCancelOrder()
+    {
+        $this->response = $this->container->get('EdiWebApi')->cancelOrder($this->request);
     }
 
     /**

@@ -26,6 +26,8 @@ class Registry
     const MERC_SERVICE_ID = 4;
     /**@var int const for EDI service id in all_service table */
     const EDI_SERVICE_ID = 6;
+    /**@var int const for 1C (rest) service id in all_service table */
+    const ONE_S_CLIENT_SERVICE_ID = 8;
 
     /** - Waybill section - */
     const WAYBILL_COMPARED = 'compared';
@@ -37,11 +39,20 @@ class Registry
 
     /**@var array $statuses */
     static $waybill_statuses = [
-        self::WAYBILL_COMPARED  => 1,
-        self::WAYBILL_FORMED    => 2,
-        self::WAYBILL_ERROR     => 3,
-        self::WAYBILL_RESET     => 4,
-        self::WAYBILL_UNLOADED  => 5,
-        self::WAYBILL_UNLOADING => 6,
+        1 => self::WAYBILL_COMPARED,
+        2 => self::WAYBILL_FORMED,
+        3 => self::WAYBILL_ERROR,
+        4 => self::WAYBILL_RESET,
+        5 => self::WAYBILL_UNLOADED,
+        6 => self::WAYBILL_UNLOADING,
+    ];
+
+    /**@var array интеграционные сервисы */
+    static $integration_services = [
+        self::RK_SERVICE_ID,
+        self::IIKO_SERVICE_ID,
+        self::MERC_SERVICE_ID,
+        self::VENDOR_DOC_MAIL_SERVICE_ID,
+        self::ONE_S_CLIENT_SERVICE_ID
     ];
 }

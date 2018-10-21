@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\components\Registry;
 use common\models\EdiOrganization;
 use common\models\Organization;
 use api_web\components\WebApi;
@@ -72,12 +73,9 @@ class EdiWebApi extends WebApi
      * @throws BadRequestHttpException
      * @return array
      */
-    public function finishOrder(array $post): array
+    public function orderComplete(array $post): array
     {
-
-        if (!isset($post['order_id'])) {
-            throw new BadRequestHttpException("empty_param|order_id");
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $order = Order::findOne([
             'id' => $post['order_id'],
@@ -85,17 +83,45 @@ class EdiWebApi extends WebApi
         ]);
 
         if (empty($order)) {
-            throw new BadRequestHttpException("order_not_found");
-        } elseif ($order->service_id != (AllService::findOne(['denom' => 'EDI']))->id) {
-            throw new BadRequestHttpException("Доступно только для документов ЭДО");
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found'));
+        } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
         } elseif ($order->status != OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED) {
-            throw new BadRequestHttpException("Должен быть статус \"Приемка завершена\"");
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order.status_must_be') .  \Yii::t('app', 'common.models.order_status.status_edo_acceptance_finished'));
         }
 
         $order->status = OrderStatus::STATUS_DONE;
         $order->save();
         return ['result' => true];
+    }
 
+    /**
+     * Отмена заказа
+     * @param array $post
+     * @throws BadRequestHttpException
+     * @return array
+     */
+    public function orderCancel(array $post): array
+    {
+        $this->validateRequest($post, ['order_id']);
+
+        $order = Order::findOne([
+            'id' => $post['order_id'],
+            'client_id' => $this->user->organization_id,
+        ]);
+
+        if (empty($order)) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found'));
+        } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
+        } elseif ($order->status != OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order.status_must_be') .  \Yii::t('app', 'common.models.order_status.status_awaiting_accept_from_vendor'));
+        }
+
+        $order->status = OrderStatus::STATUS_CANCELLED;
+        $order->save();
+
+        return ['result' => true];
     }
 
     /**

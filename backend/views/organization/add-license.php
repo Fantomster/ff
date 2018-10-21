@@ -17,8 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h3>Выберите организации</h3>
     <?php $i = 0; ?>
     <?php foreach ($organizations as $id => $name): ?>
-        <?php $maxLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->andWhere(['>', 'td', $tenDaysBefore])->with('license')->orderBy('td DESC')->asArray()->one();
-        ?>
+        <?php $allLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->with('license')->asArray()->all(); ?>
         <div class="row">
             <div class="col-md-3">
                 <div class="checkbox">
@@ -41,9 +40,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             </div>
             <div class="col-md-9">
-                <p <?php if ($maxLicenseOrganization){
-                if ($maxLicenseOrganization['td'] < $tenDaysAfter) echo 'style ="color: red;"' ?>><?= $maxLicenseOrganization['license']['name'] . " : " . $maxLicenseOrganization['td'];
-                    } ?></p>
+                <?php foreach ($allLicenseOrganization as $value): ?>
+                    <p <?php if ($value['td'] < $tenDaysAfter) echo 'style ="color: red;"' ?>><?= $value['license']['name'] . " : " . $value['td'] ?></p>
+                <?php endforeach; ?>
             </div>
         </div>
         <hr>

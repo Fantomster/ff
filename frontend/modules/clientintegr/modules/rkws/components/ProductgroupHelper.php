@@ -28,6 +28,7 @@ class ProductgroupHelper extends AuthHelper
     public function getCategory()
     {
         $isLog = new DebugHelper();
+        $isLog->setLogFile('../runtime/logs/rk_request_prodgroup_' . date("Y-m-d_H-i-s") . '.log');
         if (!$this->Authorizer()) {
             $isLog->logAppendString('Can\'t perform authorization ');
             exit();
@@ -44,7 +45,7 @@ class ProductgroupHelper extends AuthHelper
         $res = ApiHelper::sendCurl($xml, $this->restr);
         $isLog = new DebugHelper();
 
-        $isLog->setLogFile('../runtime/logs/rk_request_prodgroup_' . date("Y-m-d_H-i-s") . '.log');
+
 
         $tmodel = new RkTasks();
         $tmodel->tasktype_id = 11;
@@ -83,21 +84,20 @@ class ProductgroupHelper extends AuthHelper
 
     public function callback()
     {
+        ini_set('MAX_EXECUTION_TIME', -1);
+        $getr = Yii::$app->request->getRawBody();
+        $myXML = simplexml_load_string($getr);
+        $cmdguid = $myXML['cmdguid'] ? $myXML['cmdguid'] : $myXML['taskguid']; // Try to find guid in cmdguid or taskguid
+        $posid = $myXML['posid'] ? $myXML['posid'] : '-нет POSID-';
+        $isLog = new DebugHelper();
+        $isLog->setLogFile('../runtime/logs/rk_callback_pgroup_' . date("Y-m-d_H-i-s") . '_' . $cmdguid . '.log');
+
         $array = [];
         try {
-            ini_set('MAX_EXECUTION_TIME', -1);
-            $isLog = new DebugHelper();
-            $getr = Yii::$app->request->getRawBody();
-            $myXML = simplexml_load_string($getr);
-
-            $cmdguid = $myXML['cmdguid'] ? $myXML['cmdguid'] : $myXML['taskguid']; // Try to find guid in cmdguid or taskguid
-            $posid = $myXML['posid'] ? $myXML['posid'] : '-нет POSID-';
 
             if (!$cmdguid) {
                 $cmdguid = 'noGUID';
             }
-
-            $isLog->setLogFile('../runtime/logs/rk_callback_pgroup_' . date("Y-m-d_H-i-s") . '_' . $cmdguid . '.log');
 
             $isLog->logAppendString('=========================================');
             $isLog->logAppendString(date("Y-m-d H:i:s") . ' : Store callback received... ');

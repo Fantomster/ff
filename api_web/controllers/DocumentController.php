@@ -23,7 +23,9 @@ class DocumentController extends \api_web\components\WebApiController
      *                  property="request",
      *                  default={
      *                      "document_id": 2,
-     *                      "type": "order"}
+     *                      "type": "order",
+     *                      "service_id": 2
+     *                  }
      *              )
      *         )
      *     ),
@@ -79,7 +81,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                               "id": 2222,
      *                               "product_id": 3212,
      *                               "product_name": "Апелисны",
-     *                               "product_outer_id": 456789,
+     *                               "outer_product_id": 456789,
      *                               "quantity": "Апелисны импортные",
      *                               "unit": "кг",
      *                               "koef": 1,
@@ -91,7 +93,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                               "id": 2222,
      *                               "product_id": 3212,
      *                               "product_name": "Апелисны",
-     *                               "product_outer_id": 456789,
+     *                               "outer_product_id": 456789,
      *                               "quantity": "Апелисны импортные",
      *                               "unit": "кг",
      *                               "koef": 1,
@@ -108,6 +110,7 @@ class DocumentController extends \api_web\components\WebApiController
      *         description = "BadRequestHttpException"
      *     ),
      * )
+     * @throws \Exception
      */
     public function actionDocumentContent()
     {
@@ -129,6 +132,7 @@ class DocumentController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
+     *                      "service_id": 2,
      *                      "search": {
      *                         "business_id": 124,
      *                         "waybill_status": 1,
@@ -167,6 +171,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                  "documents": {
      *                      {
      *                              "id": 22666,
+     *                               "service_id": 2,
      *                               "type": "order",
      *                               "status_id": 1,
      *                               "status_text": "Ожидают формирования",
@@ -187,6 +192,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                      },
      *                      {
      *                               "id": 22666,
+     *                               "service_id": 2,
      *                               "type": "order",
      *                               "status_id": 1,
      *                               "status_text": "Ожидают формирования",
@@ -220,6 +226,7 @@ class DocumentController extends \api_web\components\WebApiController
      *         description = "BadRequestHttpException"
      *     ),
      * )
+     * @throws \Exception
      */
     public function actionDocumentsList()
     {

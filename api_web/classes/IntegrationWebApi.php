@@ -259,6 +259,8 @@ class IntegrationWebApi extends WebApi
     {
         if (isset($post['outer_product_id'])) {
             $waybillContent->outer_product_id = $post['outer_product_id'];
+            //TODO refactor
+            // поиск должен осуществляться по орг_ид
             $allMap = AllMaps::findOne(['product_id' => $post['outer_product_id']]);
             if ($allMap) {
                 $outerStore = OuterStore::findOne(['id' => $allMap->store_rid]);

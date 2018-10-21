@@ -5,11 +5,14 @@ namespace common\models;
 use api_web\components\Registry;
 use common\components\edi\EDIIntegration;
 use common\components\EComIntegration;
+use common\helpers\DBNameHelper;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
 use yii\behaviors\AttributesBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -710,10 +713,25 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @param null $service_id
+     * @return array|Waybill[]|ActiveRecord[]
      */
-    public function getWaybills()
+    public function getWaybills($service_id = null)
     {
-        return $this->hasMany(Waybill::class, ['order_id' => 'id']);
+        $db_instance = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+
+        $query = (new Query())
+            ->distinct()
+            ->select(['w.id'])
+            ->from(Waybill::tableName() . ' as w')
+            ->leftJoin(WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
+            ->innerJoin($db_instance . '.' . OrderContent::tableName() . ' as oc', 'oc.id = wc.order_content_id')
+            ->where('oc.order_id = :id', [':id' => $this->id]);
+
+        if ($service_id) {
+            $query->andWhere('w.service_id = :s_id', [':s_id' => $service_id]);
+        }
+
+        return Waybill::find()->where(['in', 'id', $query->createCommand(\Yii::$app->db_api)->queryColumn()])->all() ?? [];
     }
 }

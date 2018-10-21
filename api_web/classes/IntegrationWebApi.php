@@ -103,8 +103,8 @@ class IntegrationWebApi extends WebApi
                     $ediNumber = $orderContent->edi_number . "-1";
                 }
             } else {
-                $waybillsCount = Waybill::find()->where(['order_id' => $post['order_id']])->count();
-                if (!$waybillsCount) {
+                $waybillsCount = count($order->getWaybills($post['service_id']));
+                if ($waybillsCount == 0) {
                     $waybillsCount = 1;
                 }
                 $ediNumber = $post['order_id'] . "-" . $waybillsCount;
@@ -150,7 +150,7 @@ class IntegrationWebApi extends WebApi
             $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $orderContent->quantity;
             $allMap = AllMaps::findOne(['product_id' => $orderContent->product_id]);
             if ($allMap) {
-                $waybillContent->product_outer_id = $allMap->serviceproduct_id;
+                $waybillContent->outer_product_id = $allMap->serviceproduct_id;
             }
         } else {
             throw new BadRequestHttpException("order content not found");
@@ -257,9 +257,11 @@ class IntegrationWebApi extends WebApi
      */
     private function handleWaybillContent($waybillContent, $post, $quan, $koef)
     {
-        if (isset($post['product_outer_id'])) {
-            $waybillContent->product_outer_id = $post['product_outer_id'];
-            $allMap = AllMaps::findOne(['product_id' => $post['product_outer_id']]);
+        if (isset($post['outer_product_id'])) {
+            $waybillContent->outer_product_id = $post['outer_product_id'];
+            //TODO refactor
+            // поиск должен осуществляться по орг_ид
+            $allMap = AllMaps::findOne(['product_id' => $post['outer_product_id']]);
             if ($allMap) {
                 $outerStore = OuterStore::findOne(['id' => $allMap->store_rid]);
                 if ($outerStore) {
@@ -331,8 +333,8 @@ class IntegrationWebApi extends WebApi
         if (isset($post['quantity_waybill'])) {
             $waybillContent->quantity_waybill = (int)$post['quantity_waybill'];
         }
-        if (isset($post['product_outer_id'])) {
-            $waybillContent->product_outer_id = $post['product_outer_id'];
+        if (isset($post['outer_product_id'])) {
+            $waybillContent->outer_product_id = $post['outer_product_id'];
         }
 
         if (isset($post['price_without_vat'])) {

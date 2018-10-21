@@ -23,7 +23,9 @@ class DocumentController extends \api_web\components\WebApiController
      *                  property="request",
      *                  default={
      *                      "document_id": 2,
-     *                      "type": "order"}
+     *                      "type": "order",
+     *                      "service_id": 2
+     *                  }
      *              )
      *         )
      *     ),
@@ -79,7 +81,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                               "id": 2222,
      *                               "product_id": 3212,
      *                               "product_name": "Апелисны",
-     *                               "product_outer_id": 456789,
+     *                               "outer_product_id": 456789,
      *                               "quantity": "Апелисны импортные",
      *                               "unit": "кг",
      *                               "koef": 1,
@@ -91,7 +93,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                               "id": 2222,
      *                               "product_id": 3212,
      *                               "product_name": "Апелисны",
-     *                               "product_outer_id": 456789,
+     *                               "outer_product_id": 456789,
      *                               "quantity": "Апелисны импортные",
      *                               "unit": "кг",
      *                               "koef": 1,

@@ -149,9 +149,7 @@ class WaybillHelper
         $model = new Waybill();
         $model->acquirer_id = $orgId;
         $model->service_id = Registry::EDI_SERVICE_ID;
-        $model->bill_status_id = Registry::$waybill_statuses[Registry::WAYBILL_FORMED];
-        $model->readytoexport = 0;
-        $model->is_deleted = 0;
+        $model->status_id = Registry::$waybill_statuses[Registry::WAYBILL_FORMED];
         $datetime = new \DateTime();
         $model->doc_date = $datetime->format('Y-m-d H:i:s');
         $model->created_at = $datetime->format('Y-m-d H:i:s');
@@ -209,7 +207,9 @@ class WaybillHelper
                 $modelWaybillContent->order_content_id = $ordCont->id;
                 $modelWaybillContent->waybill_id = $model->id;
                 $modelWaybillContent->merc_uuid = $ordCont->merc_uuid;
-                $modelWaybillContent->product_outer_id = $ordCont->product_id;
+                #TODO refactor
+                #Тут должен браться id продукта из у.с.
+                $modelWaybillContent->outer_product_id = $ordCont->product_id;
                 $modelWaybillContent->quantity_waybill = $quantity;
                 $modelWaybillContent->vat_waybill = $taxRate;
                 $modelWaybillContent->sum_with_vat = $quantity * $priceWithVat;
@@ -269,7 +269,7 @@ class WaybillHelper
         }
         $waybill = Waybill::findOne([
             'id'             => $request['waybill_id'],
-            'bill_status_id' => [
+            'status_id' => [
                 Registry::$waybill_statuses[Registry::WAYBILL_COMPARED],
                 Registry::$waybill_statuses[Registry::WAYBILL_ERROR],
                 Registry::$waybill_statuses[Registry::WAYBILL_FORMED],
@@ -292,7 +292,9 @@ class WaybillHelper
             $waybillContent = new WaybillContent();
             $waybillContent->waybill_id = $request['waybill_id'];
             $waybillContent->order_content_id = $orderContent->id;
-            $waybillContent->product_outer_id = $orderContent->product_id;
+            #TODO refactor
+            #Тут должен быть id продукта у.с. а не наш продукт
+            $waybillContent->outer_product_id = $orderContent->product_id;
             $waybillContent->quantity_waybill = (float)$quantity;
             $waybillContent->vat_waybill = $taxRate;
             $waybillContent->merc_uuid = $orderContent->merc_uuid;

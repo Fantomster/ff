@@ -83,11 +83,11 @@ class EdiWebApi extends WebApi
         ]);
 
         if (empty($order)) {
-            throw new BadRequestHttpException("order_not_found");
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found'));
         } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
-            throw new BadRequestHttpException("Доступно только для документов ЭДО");
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
         } elseif ($order->status != OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED) {
-            throw new BadRequestHttpException("Должен быть статус \"Приемка завершена\"");
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order.status_must_be') .  \Yii::t('app', 'common.models.order_status.status_edo_acceptance_finished'));
         }
 
         $order->status = OrderStatus::STATUS_DONE;
@@ -111,15 +111,16 @@ class EdiWebApi extends WebApi
         ]);
 
         if (empty($order)) {
-            throw new BadRequestHttpException("order_not_found");
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found'));
         } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
-            throw new BadRequestHttpException("Доступно только для документов ЭДО");
-        } elseif ($order->status != OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED) {
-            throw new BadRequestHttpException("Должен быть статус \"Приемка завершена\"");
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
+        } elseif ($order->status != OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order.status_must_be') .  \Yii::t('app', 'common.models.order_status.status_awaiting_accept_from_vendor'));
         }
 
         $order->status = OrderStatus::STATUS_CANCELLED;
         $order->save();
+
         return ['result' => true];
     }
 

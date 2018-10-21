@@ -129,7 +129,7 @@ class OrderWebApi extends \api_web\components\WebApi
                                 $this->addProduct($order, $product);
                                 break;
                             case 'edit':
-                                if ($order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
+                                if ($order->service_id == Registry::EDI_SERVICE_ID) {
                                     $this->editProductEdo($order, $product);
                                 } else {
                                     $this->editProduct($order, $product);
@@ -197,9 +197,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $orderContent->quantity = $product['quantity'];
         }
 
-        if (!empty($product['comment'])) {
-            $orderContent->comment = $product['comment'];
-        }
+        $orderContent->comment = $product['comment'];
 
         if (!empty($product['price'])) {
             $orderContent->price = $product['price'];

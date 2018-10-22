@@ -2,6 +2,7 @@
 <RECADV>
     <NUMBER><?= $order->id ?></NUMBER>
     <DATE><?= $dateArray['created_at'] ?></DATE>
+    <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?></RECEPTIONDATE>
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>
     <ORDERNUMBER><?= $order->id ?></ORDERNUMBER>
     <ORDERDATE><?= $dateArray['created_at'] ?></ORDERDATE>
@@ -40,6 +41,8 @@
                     <PRICE><?= $position['price'] ?></PRICE>
                     <PRICEWITHVAT><?= $position['price'] ?></PRICEWITHVAT>
                     <TAXRATE>0</TAXRATE>
+                    <ACCEPTEDQUANTITY><?= $position['quantity'] ?></ACCEPTEDQUANTITY>
+                    <BUYERPARTNUMBER><?= $article ?></BUYERPARTNUMBER>
                 </POSITION>
             <?php endforeach; ?>
         </PACKINGSEQUENCE>

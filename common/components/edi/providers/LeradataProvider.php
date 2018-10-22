@@ -128,7 +128,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         $requestArray = [
             "token" => "yN2XiNfSMmNGA6bLtlHKo21bxtbWAx3",
             "varGln" => $glnCode,
-            "intUserID" => 13904,
+            "intUserID" => 13902,
             "params" => [
                 "docType" => $type,
                 "GLNs" => [$glnCode]

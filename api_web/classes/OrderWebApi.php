@@ -79,7 +79,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if (!$this->accessAllow($order)) {
             throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
         }
-        OrderStatus::checkEdiOrderPermissions($order, 'edit');
+        //OrderStatus::checkEdiOrderPermissions($order, 'edit');
 
         //Проверим статус заказа
         if (in_array($order->status, [OrderStatus::STATUS_CANCELLED, OrderStatus::STATUS_REJECTED])) {
@@ -241,7 +241,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $wbContent->quantity_waybill = $product['quantity'];
         }
         if (!empty($product['price'])) {
-            $wbContent->price_waybill = $product['price'];
+            $wbContent->price_without_vat = $product['price'];
         }
 
         if ($wbContent->validate() && $wbContent->save()) {

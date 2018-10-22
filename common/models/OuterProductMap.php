@@ -25,6 +25,7 @@ use yii\behaviors\TimestampBehavior;
  * @property OuterProduct $outerProduct
  * @property OuterStore $outerStore
  * @property OuterUnit $outerUnit
+* @property Product $product
  */
 class OuterProductMap extends \yii\db\ActiveRecord
 {
@@ -109,6 +110,14 @@ class OuterProductMap extends \yii\db\ActiveRecord
     public function getOuterProduct()
     {
         return $this->hasOne(OuterProduct::className(), ['id' => 'outer_product_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProduct()
+    {
+        return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'product_id']);
     }
 
     /**

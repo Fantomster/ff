@@ -22,6 +22,7 @@ use Yii;
  * @property int     $outer_unit_id
  * @property int     $koef
  * @property Waybill $waybill
+ * @property OrderContent $orderContent
  */
 class WaybillContent extends \yii\db\ActiveRecord
 {

@@ -9,7 +9,7 @@
     <DELIVERYNOTEDATE><?= $order->ediOrder->invoice_date ?? $dateArray['requested_delivery_date'] ?></DELIVERYNOTEDATE>
     <WAYBILLNUMBER><?= $order->id ?></WAYBILLNUMBER>
     <WAYBILLDATE><?= $dateArray['requested_delivery_date'] ?></WAYBILLDATE>
-    <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?></RECEPTIONDATE>
+    <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?? '' ?></RECEPTIONDATE>
     <HEAD>
         <SUPPLIER><?= $vendor->ediOrganization->gln_code ?></SUPPLIER>
         <BUYER><?= $client->ediOrganization->gln_code ?></BUYER>

@@ -337,9 +337,9 @@ class Order extends \yii\db\ActiveRecord
             OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED     => Yii::t('app',
                 'common.models.order_status.status_edo_acceptance_finished', ['ru' => 'Приемка завершена']),
             OrderStatus::STATUS_DONE                        => Yii::t('app',
-                'common.models.order_status.status_done', ['ru' => 'Завершен']),
+                'common.models.done_two', ['ru' => 'Завершен']),
             OrderStatus::STATUS_CANCELLED                   => Yii::t('app',
-                'common.models.order_status.status_cancelled', ['ru' => 'Отменен']),
+                'common.models.canceled', ['ru' => 'Отменен']),
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru' => 'Ожидает подтверждения клиента']),
             OrderStatus::STATUS_REJECTED                    => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
         ];

@@ -376,4 +376,11 @@ class IntegrationWebApi extends WebApi
 
         return ['success' => true];
     }
+
+    public function getMapList(array $post): array
+    {
+        $rows = OuterProductMap::find()
+            ->with([''])
+            ->where
+    }
 }

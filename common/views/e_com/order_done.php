@@ -43,7 +43,7 @@
                     <PRICEWITHVAT><?= $position['price'] ?></PRICEWITHVAT>
                     <TAXRATE>0</TAXRATE>
                     <ACCEPTEDQUANTITY><?= $position['quantity'] ?></ACCEPTEDQUANTITY>
-                    <BUYERPARTNUMBER><?= $article ?></BUYERPARTNUMBER>
+                    <BUYERPARTNUMBER><?= $article ?? '' ?></BUYERPARTNUMBER>
                 </POSITION>
             <?php endforeach; ?>
         </PACKINGSEQUENCE>

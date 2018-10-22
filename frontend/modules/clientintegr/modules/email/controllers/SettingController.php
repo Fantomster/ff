@@ -65,7 +65,7 @@ class SettingController extends Controller
         }
 
         $model = IntegrationSettingFromEmail::find()->where(['id' => $id, 'organization_id' => $organization->id])->one();
-        if ($model) {
+        if (isset($model) && isset($user)) {
 
             if (isset($post)) {
                 $model->load($post);

@@ -9,6 +9,7 @@
     <DELIVERYNOTEDATE><?= $order->ediOrder->invoice_date ?? $dateArray['requested_delivery_date'] ?></DELIVERYNOTEDATE>
     <WAYBILLNUMBER><?= $order->id ?></WAYBILLNUMBER>
     <WAYBILLDATE><?= $dateArray['requested_delivery_date'] ?></WAYBILLDATE>
+    <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?></RECEPTIONDATE>
     <HEAD>
         <SUPPLIER><?= $vendor->ediOrganization->gln_code ?></SUPPLIER>
         <BUYER><?= $client->ediOrganization->gln_code ?></BUYER>
@@ -33,6 +34,7 @@
                     <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
                     <DELIVEREDQUANTITY><?= $position['quantity'] ?></DELIVEREDQUANTITY>
                     <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
+                    <ACCEPTEDQUANTITY><?= $position['quantity'] ?></ACCEPTEDQUANTITY>
                     <DELIVEREDUNIT><?= $position['units'] ?></DELIVEREDUNIT>
                     <ORDERUNIT><?= $position['units'] ?></ORDERUNIT>
                     <EGAISCODE><?= $position['id'] ?></EGAISCODE>

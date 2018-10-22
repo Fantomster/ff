@@ -2,6 +2,7 @@
 <RECADV>
     <NUMBER><?= $order->id ?></NUMBER>
     <DATE><?= $dateArray['created_at'] ?></DATE>
+    <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?></RECEPTIONDATE>
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>
     <ORDERNUMBER><?= $order->id ?></ORDERNUMBER>
     <ORDERDATE><?= $dateArray['created_at'] ?></ORDERDATE>
@@ -9,7 +10,6 @@
     <DELIVERYNOTEDATE><?= $order->ediOrder->invoice_date ?? $dateArray['requested_delivery_date'] ?></DELIVERYNOTEDATE>
     <WAYBILLNUMBER><?= $order->id ?></WAYBILLNUMBER>
     <WAYBILLDATE><?= $dateArray['requested_delivery_date'] ?></WAYBILLDATE>
-    <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?></RECEPTIONDATE>
     <HEAD>
         <SUPPLIER><?= $vendor->ediOrganization->gln_code ?></SUPPLIER>
         <BUYER><?= $client->ediOrganization->gln_code ?></BUYER>
@@ -34,7 +34,6 @@
                     <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
                     <DELIVEREDQUANTITY><?= $position['quantity'] ?></DELIVEREDQUANTITY>
                     <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
-                    <ACCEPTEDQUANTITY><?= $position['quantity'] ?></ACCEPTEDQUANTITY>
                     <DELIVEREDUNIT><?= $position['units'] ?></DELIVEREDUNIT>
                     <ORDERUNIT><?= $position['units'] ?></ORDERUNIT>
                     <EGAISCODE><?= $position['id'] ?></EGAISCODE>
@@ -42,6 +41,8 @@
                     <PRICE><?= $position['price'] ?></PRICE>
                     <PRICEWITHVAT><?= $position['price'] ?></PRICEWITHVAT>
                     <TAXRATE>0</TAXRATE>
+                    <ACCEPTEDQUANTITY><?= $position['quantity'] ?></ACCEPTEDQUANTITY>
+                    <BUYERPARTNUMBER><?= $article ?></BUYERPARTNUMBER>
                 </POSITION>
             <?php endforeach; ?>
         </PACKINGSEQUENCE>

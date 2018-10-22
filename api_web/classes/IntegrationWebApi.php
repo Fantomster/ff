@@ -452,6 +452,7 @@ class IntegrationWebApi extends WebApi
                $this->editProductMap($item);
                $result[$item['id']] = ['success' => true];
            }catch (\Exception $e) {
+               var_dump($e->getTraceAsString()); die();
                $result[$item['id']] = ['success' => false, 'error' => $e->getMessage()];
            }
         }
@@ -469,25 +470,74 @@ class IntegrationWebApi extends WebApi
             throw new BadRequestHttpException("empty_param|id");
         }
 
-        if(isset($request['outer_product_id'])) {
-            $check = OuterProduct::find()->where(['id' => $request['outer_product_id'], 'org_id' => $this->user->organization_id])->one();
+        $model = OuterProductMap::findOne(['id' => $request['id']]);
+        if (!$model) {
+            throw new Exception('Product map not found');
+        }
 
-            if(!$check) {
-                throw new Exception('outer product not found');
+        $mainOrg = OuterProductMap::getMainOrg($this->user->organization_id);
+        $orgs = OuterProductMap::getChildOrgsId($this->user->organization_id);
+        $orgs[] = $this->user->organization_id;
+
+        /*if(isset($request['outer_product_id'])) {
+            if($mainOrg) {
+                unset($request['outer_product_id']);
+            }
+            else
+            {
+                $check = OuterProduct::find()
+                    ->where(['id' => $request['outer_product_id']])
+                    ->andWhere(['in','org_id', $orgs])
+                    ->one();
+
+                if(!$check) {
+                    throw new Exception('outer product not found');
+                }
             }
         }
 
         if(isset($request['outer_store_id'])) {
-            $check = OuterStore::find()->where(['id' => $request['outer_store_id'], 'org_id' => $this->user->organization_id])->one();
-
-            if(!$check) {
-                throw new Exception('outer store not found');
+            if($mainOrg) {
+                unset($request['outer_store_id']);
             }
+            else {
+                $check = OuterStore::find()->where(['id' => $request['outer_store_id']])
+                    ->andWhere(['in','org_id', $orgs])
+                    ->one();
+
+                if(!$check) {
+                    throw new Exception('outer store not found');
+                }
+            }
+        }*/
+
+        if(isset($request['outer_product_id']) && count($orgs) > 1 && !$mainOrg)
+        {
+            $condition = [
+                    'and',
+                        ['service_id' => $model->service_id],
+                        ['product_id' => $model->product_id],
+                        ['in','organization_id', $orgs]
+            ];
+
+            OuterProductMap::updateAll(['outer_product_id' => $request['outer_product_id']], $condition);
         }
 
-        $model = OuterProductMap::findOne(['id' => $request['id']]);
-        if (!$model) {
-            throw new Exception('Product map not found');
+        //Создаем дубликат запииси для дочерней организации при необходимости
+        if($mainOrg) {
+            if($model->organization_id != $this->user->organization_id) {
+                $mainAttributes = $model->attributes();
+                $model = new OuterProductMap();
+                $model->service_id = $mainAttributes['service_id'];
+                $model->organization_id = $this->user->organization_id;
+                $model->vendor_id = $mainAttributes['vendor_id'];
+                $model->product_id = $mainAttributes['product_id'];
+                $model->outer_product_id = $mainAttributes['outer_product_id'];
+                $model->outer_unit_id = $mainAttributes['outer_unit_id'];
+                $model->outer_store_id = $mainAttributes['outer_store_id'];
+                $model->coefficient = $mainAttributes['coefficient'];
+                $model->vat = $mainAttributes['vat'];
+            }
         }
 
         $model->attributes = $request;

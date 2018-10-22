@@ -376,4 +376,30 @@ class IntegrationWebApi extends WebApi
 
         return ['success' => true];
     }
+
+    public function editOuterProductMap(array $post) {
+        $resultIds = [];
+        foreach ($post as $item) {
+            if (!isset($item['id'])) {
+                throw new BadRequestHttpException("empty_param|id");
+            }
+
+            $row = OuterProductMap::findOne(['id' => $item['id']]);
+            if(!$row) {
+                continue;
+            }
+
+            $row->attributes = $item;
+
+            if(!$row->save()) {
+
+            }
+            else
+            {
+                $resultIds[] = $item['id'];
+            }
+        }
+
+        return [];
+    }
 }

@@ -479,7 +479,7 @@ class IntegrationWebApi extends WebApi
         $orgs = OuterProductMap::getChildOrgsId($this->user->organization_id);
         $orgs[] = $this->user->organization_id;
 
-        /*if(isset($request['outer_product_id'])) {
+        if(isset($request['outer_product_id'])) {
             if($mainOrg) {
                 unset($request['outer_product_id']);
             }
@@ -509,7 +509,7 @@ class IntegrationWebApi extends WebApi
                     throw new Exception('outer store not found');
                 }
             }
-        }*/
+        }
 
         if(isset($request['outer_product_id']) && count($orgs) > 1 && !$mainOrg)
         {

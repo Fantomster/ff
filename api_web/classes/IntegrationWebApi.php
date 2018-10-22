@@ -5,15 +5,22 @@ namespace api_web\classes;
 use api\common\models\AllMaps;
 use api_web\components\Registry;
 use api_web\components\WebApi;
+use api_web\exceptions\ValidationException;
+use common\helpers\DBNameHelper;
+use common\models\CatalogBaseGoods;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OuterAgent;
 use common\models\OuterProduct;
+use common\models\OuterProductMap;
 use common\models\OuterStore;
 use common\models\OuterUnit;
 use common\models\Waybill;
 use common\models\WaybillContent;
+use yii\base\Exception;
+use yii\data\ActiveDataProvider;
+use yii\data\Pagination;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -77,7 +84,6 @@ class IntegrationWebApi extends WebApi
         $ediNumber = '';
         $outerAgentUUID = '';
         $outerStoreUUID = '';
-
 
         if (isset($post['order_id'])) {
             $order = Order::findOne(['id' => (int)$post['order_id'], 'client_id' => $this->user->organization_id]);
@@ -377,29 +383,181 @@ class IntegrationWebApi extends WebApi
         return ['success' => true];
     }
 
-    public function editOuterProductMap(array $post) {
-        $resultIds = [];
-        foreach ($post as $item) {
-            if (!isset($item['id'])) {
-                throw new BadRequestHttpException("empty_param|id");
+    /**
+     * integration: список сопоставления со всеми связями
+     *
+     * @param array $post
+     * @return array
+     */
+
+    public function getProductMapList(array $post): array
+    {
+
+        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        $query = OuterProductMap::find()
+            ->joinWith(['outerProduct', 'outerUnit', 'outerStore'])
+            ->leftJoin("$dbName.catalog_base_goods", "$dbName.catalog_base_goods.id = outer_product_map.product_id")
+            ->where(['organization_id' => $this->user->organization_id]);
+
+        $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
+        $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
+
+        if (isset($post['search'])) {
+            /**
+             * фильтр по продукту
+             */
+            if (!empty($post['search']['product'])) {
+                $outerProductTableName = OuterProduct::tableName();
+                $catalogBaseGoodsTableNme = CatalogBaseGoods::tableName();
+                $query->andFilterWhere(['like', "`$outerProductTableName`.`name`", $post['search']['product']]);
+                $query->orFilterWhere(['like', "$dbName.`$catalogBaseGoodsTableNme`.`product`", $post['search']['product']]);
             }
-
-            $row = OuterProductMap::findOne(['id' => $item['id']]);
-            if(!$row) {
-                continue;
-            }
-
-            $row->attributes = $item;
-
-            if(!$row->save()) {
-
-            }
-            else
-            {
-                $resultIds[] = $item['id'];
+            /**
+             * фильтр по поставщику
+             */
+            if (!empty($post['search']['vendor'])) {
+                $query->andWhere(['vendor_id' => $post['search']['vendor']]);
             }
         }
 
-        return [];
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+
+        $result = [];
+        foreach ($dataProvider->models as $model) {
+            $result[] = $this->prepareOutProductMap($model);
+        }
+
+        return [
+            'products'   => $result,
+            'pagination' => [
+                'page'       => $dataProvider->pagination->page + 1,
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
+    }
+
+    public function mapUpdate(array $post)
+    {
+        $result = [];
+        foreach ($post as $item) {
+           try {
+               $this->editProductMap($item);
+               $result[$item['id']] = ['success' => true];
+           }catch (\Exception $e) {
+               $result[$item['id']] = ['success' => false, 'error' => $e->getMessage()];
+           }
+        }
+        return $result;
+    }
+
+    /**
+     * Изменение атрибутов сопоставления
+     *
+     * @param $request
+     * @return array
+     */
+    private function editProductMap($request) {
+        if (!isset($request['id'])) {
+            throw new BadRequestHttpException("empty_param|id");
+        }
+
+        if(isset($request['outer_product_id'])) {
+            $check = OuterProduct::find()->where(['id' => $request['outer_product_id'], 'org_id' => $this->user->organization_id])->one();
+
+            if(!$check) {
+                throw new Exception('outer product not found');
+            }
+        }
+
+        if(isset($request['outer_store_id'])) {
+            $check = OuterStore::find()->where(['id' => $request['outer_store_id'], 'org_id' => $this->user->organization_id])->one();
+
+            if(!$check) {
+                throw new Exception('outer store not found');
+            }
+        }
+
+        $model = OuterProductMap::findOne(['id' => $request['id']]);
+        if (!$model) {
+            throw new Exception('Product map not found');
+        }
+
+        $model->attributes = $request;
+        $model->outer_unit_id = $model->outerProduct->outer_unit_id;
+
+        if (!$model->save()) {
+            throw new ValidationException($model->getFirstErrors());
+        }
+    }
+
+    /**
+     * Информация по сопоставлению продукта
+     *
+     * @param OuterProductMap $model
+     * @return array
+     */
+    private function prepareOutProductMap(OuterProductMap $model)
+    {
+        $result = [
+            "id"              => $model->id,
+            "service_id"      => $model->service_id,
+            "organization_id" => $model->organization_id,
+            "vendor_id"       => $model->vendor_id,
+        ];
+
+        if (isset($model->product)) {
+            $result ["product"] = [
+                "id"   => $model->product->id,
+                "name" => $model->product->product,
+            ];
+            $result["unit"] = [
+                "name" => $model->product->ed,
+            ];
+        } else {
+            $result ["product"] = null;
+            $result["unit"] = null;
+        }
+
+        if (isset($model->outerProduct)) {
+
+            $result ["outer_product"] = [
+                "id"   => $model->outerProduct->id,
+                "name" => $model->outerProduct->name
+            ];
+        } else {
+            $result ["outer_product"] = null;
+        }
+
+        if (isset($model->outerUnit)) {
+            $result["outer_unit"] = [
+                "id"   => $model->outerUnit->id,
+                "name" => $model->outerUnit->name
+            ];
+        } else {
+            $result["outer_unit"] = null;
+        }
+
+        if (isset($model->outerStore)) {
+            $result["outer_store"] = [
+                "id"   => $model->outerStore->id,
+                "name" => $model->outerStore->name
+            ];
+        } else {
+            $result["outer_store"] = null;
+        }
+
+        $result["coefficient"] = $model->coefficient;
+        $result["vat"] = $model->vat;
+        $result["created_at"] = date("Y-m-d H:i:s T", strtotime($model->created_at));
+        $result["updated_at"] = date("Y-m-d H:i:s T", strtotime($model->updated_at));
+        return $result;
     }
 }

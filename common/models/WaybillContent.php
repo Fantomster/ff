@@ -21,6 +21,8 @@ use Yii;
  * @property int     $price_without_vat
  * @property int     $outer_unit_id
  * @property int     $koef
+ * @property OrderContent $orderContent
+ * @property OuterProduct $productOuter
  * @property Waybill $waybill
  */
 class WaybillContent extends \yii\db\ActiveRecord

@@ -487,7 +487,7 @@ class IntegrationWebApi extends WebApi
             {
                 $check = OuterProduct::find()
                     ->where(['id' => $request['outer_product_id']])
-                    ->andWhere(['in','org_id', $orgs])
+                    ->andWhere(['org_id' => $this->user->organization_id])
                     ->one();
 
                 if(!$check) {
@@ -497,18 +497,13 @@ class IntegrationWebApi extends WebApi
         }
 
         if(isset($request['outer_store_id'])) {
-            if($mainOrg) {
-                unset($request['outer_store_id']);
-            }
-            else {
                 $check = OuterStore::find()->where(['id' => $request['outer_store_id']])
-                    ->andWhere(['in','org_id', $orgs])
+                    ->andWhere(['org_id' => $this->user->organization_id])
                     ->one();
 
                 if(!$check) {
                     throw new Exception('outer store not found');
                 }
-            }
         }
 
         if(isset($request['outer_product_id']) && count($orgs) > 1 && !$mainOrg)

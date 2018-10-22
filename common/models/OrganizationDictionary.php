@@ -25,6 +25,7 @@ use yii\behaviors\TimestampBehavior;
  * @property int             $outer_dic_id Код словаря
  * @property int             $org_id       Код организации
  * @property int             $status_id    ID статуса - выгружен, ошибка, не выгружался
+ * @property int             $statusText   Статус текстом
  * @property int             $count        Количество записей в словаре
  * @property string          $created_at   Дата создания
  * @property string          $updated_at   Дата обновления
@@ -33,10 +34,10 @@ use yii\behaviors\TimestampBehavior;
  */
 class OrganizationDictionary extends ActiveRecord
 {
-
+    const STATUS_DISABLED = 0;
     const STATUS_ACTIVE = 1;
     const STATUS_ERROR = 2;
-    const STATUS_DISABLED = null;
+    const STATUS_SEND_REQUEST = 3;
     const IIKO_UNIT_DICT_ID = 9;
 
     public function behaviors()
@@ -144,5 +145,30 @@ class OrganizationDictionary extends ActiveRecord
         } else {
             $dictionary->errorSync();
         }
+    }
+
+    /**
+     * Статус справочника текстом
+     *
+     * @return mixed
+     */
+    public function getStatusText()
+    {
+        return self::getStatusTextList()[$this->status_id ?? 0];
+    }
+
+    /**
+     * Список статусов справочников
+     *
+     * @return array
+     */
+    public static function getStatusTextList()
+    {
+        return [
+            self::STATUS_DISABLED     => \Yii::t('app', 'organization_dictionary.status.disabled'),
+            self::STATUS_ACTIVE       => \Yii::t('app', 'organization_dictionary.status.active'),
+            self::STATUS_ERROR        => \Yii::t('app', 'organization_dictionary.status.error'),
+            self::STATUS_SEND_REQUEST => \Yii::t('app', 'organization_dictionary.status.send_request')
+        ];
     }
 }

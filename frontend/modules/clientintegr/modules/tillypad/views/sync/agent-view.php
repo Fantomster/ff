@@ -9,7 +9,6 @@ use yii\web\View;
 use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
-use api\common\models\RkAccess;
 use frontend\controllers\ClientController;
 use \yii\web\JsExpression;
 
@@ -128,7 +127,7 @@ $('i').filter('[data-action="changeIikoAgentAttributes"]').on('click', function 
                 "success": function (result) {
                     var json = result;
                     if (json['error'] == undefined) {
-                        json['error'] = "Во время работы скрипта произошла ошибка! Пожалуйста к администратору";
+                        json['error'] = "Во время работы скрипта произошла ошибка! Пожалуйста, обратитесь к администратору";
                     }
                     if (json['status'] == 'Y') {
                         $('tr[data-key="' + agentId + '"] td[data-col-seq="' + x + '"]').html(val);
@@ -145,7 +144,7 @@ $('i').filter('[data-action="changeIikoAgentAttributes"]').on('click', function 
                     swal({
                         title: 'Ошибка!',
                         showCancelButton: false,
-                        html: "Во время работы скрипта произошла ошибка! Пожалуйста к администратору",
+                        html: "Во время работы скрипта произошла ошибка! Пожалуйста, обратитесь к администратору",
                         confirmButtonText: "Закрыть",
                     })
                 }

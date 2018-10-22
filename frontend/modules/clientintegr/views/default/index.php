@@ -32,7 +32,7 @@ use backend\controllers\RkwsController;
 <section class="content-header">
     <h1>
         <i class="fa fa-upload"></i> Интеграция с внешними системами
-        <small>Обменивайтесь номенклатурой и приходными документами с Вашей учетной системой автоматически</small>
+        <small>Обменивайтесь номенклатурой и приходными документами с Вашей учётной системой автоматически</small>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -76,6 +76,15 @@ if (isset($licenses['iiko'])) {
     if (($licenses['iiko']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['iiko']->td)))) $lic_iiko = 3;
     if (($licenses['iiko']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['iiko']->td)))) $lic_iiko = 2;
     if (($licenses['iiko']->status_id == 1) and ($timestamp_now > (strtotime($licenses['iiko']->td)))) $lic_iiko = 1;
+}
+if (isset($licenses['tillypad'])) {
+    $sub0 = explode(' ', $licenses['tillypad']->td);
+    $sub1 = explode('-', $sub0[0]);
+    $licenses['tillypad']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
+    if ($licenses['tillypad']->status_id == 0) $lic_tilly = 0;
+    if (($licenses['tillypad']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['tillypad']->td)))) $lic_tilly = 3;
+    if (($licenses['tillypad']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['tillypad']->td)))) $lic_tilly = 2;
+    if (($licenses['tillypad']->status_id == 1) and ($timestamp_now > (strtotime($licenses['tillypad']->td)))) $lic_tilly = 1;
 }
 if (isset($licenses['mercury'])) {
     $sub0 = explode(' ', $licenses['mercury']->td);
@@ -237,7 +246,7 @@ if (isset($licenses['odinsobsh'])) {
                     </div>
                 </div>
             <?php endif; ?>
-            <?php if (isset($licenses['iiko'])): ?>
+            <?php if (isset($licenses['tillypad'])): ?>
                 <div class="box-body">
                     <div class="hpanel">
                         <div class="panel-body">
@@ -247,21 +256,21 @@ if (isset($licenses['odinsobsh'])) {
                             </div>
                             <div class="col-md-3 text-left">
                                 <?php
-                                switch ($lic_iiko) {
+                                switch ($lic_tilly) {
                                     case 0:
-                                        print "<p class=\"small\"> Лицензия IIKO: ID " . $licenses['iiko']->id . " <strong><span style=\"color:#dd4b39\">Не активна</span></strong>.</br>";
+                                        print "<p class=\"small\"> Лицензия Tillypad: ID " . $licenses['tillypad']->id . " <strong><span style=\"color:#dd4b39\">Не активна</span></strong>.</br>";
                                         print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>";
                                         break;
                                     case 1:
-                                        print "<p class=\"small\"> Лицензия IIKO: ID " . $licenses['iiko']->id . " <strong><span style=\"color:#dd4b39\">Не активна </span></strong>с " . $licenses['iiko']->td . ".</br>";
+                                        print "<p class=\"small\"> Лицензия Tillypad: ID " . $licenses['tillypad']->id . " <strong><span style=\"color:#dd4b39\">Не активна </span></strong>с " . $licenses['tillypad']->td . ".</br>";
                                         print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>";
                                         break;
                                     case 2:
-                                        print "<p class=\"small\"> Лицензия IIKO: ID " . $licenses['iiko']->id . " <strong><span style=\"color:#dd4b39\">Истекает срок </span></strong>(по " . $licenses['iiko']->td . "). </br>";
+                                        print "<p class=\"small\"> Лицензия Tillypad: ID " . $licenses['tillypad']->id . " <strong><span style=\"color:#dd4b39\">Истекает срок </span></strong>(по " . $licenses['tillypad']->td . "). </br>";
                                         print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>";
                                         break;
                                     case 3:
-                                        print "<p class=\"small\"> Лицензия IIKO: ID " . $licenses['iiko']->id . " <strong><span style=\"color:#6ea262\">Активна </span></strong>(по " . $licenses['iiko']->td . "). </br>";
+                                        print "<p class=\"small\"> Лицензия Tillypad: ID " . $licenses['tillypad']->id . " <strong><span style=\"color:#6ea262\">Активна </span></strong>(по " . $licenses['tillypad']->td . "). </br>";
                                         print "</p></br>";
                                         break;
                                 }

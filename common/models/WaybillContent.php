@@ -24,6 +24,7 @@ use Yii;
  * @property OrderContent $orderContent
  * @property OuterProduct $productOuter
  * @property Waybill $waybill
+ * @property OrderContent $orderContent
  */
 class WaybillContent extends \yii\db\ActiveRecord
 {

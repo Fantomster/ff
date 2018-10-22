@@ -10,6 +10,7 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
 
     /**
      * Порлучение данных из модели
+     *
      * @return mixed
      */
     public function prepare()
@@ -28,23 +29,42 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
         }
 
         $return = [
-            "id" => $this->id,
-            "product_id" => isset($orderContent) ? $orderContent->product_id : null,
-            "product_name" => isset($orderContent) ? $orderContent->product->product : null,
-            "outer_product_id" => isset($this->productOuter) ? $productOuter->name : null,
-            "quantity" => $this->quantity_waybill,
-            "unit" => $unit,
-            "koef" => $this->koef,
+            "id"              => $this->id,
+            "product_id"      => isset($orderContent) ? $orderContent->product_id : null,
+            "product_name"    => isset($orderContent) ? $orderContent->product->product : null,
+            "outer_product"   => $this->getOuterProduct(),
+            "quantity"        => $this->quantity_waybill,
+            "unit"            => $unit,
+            "koef"            => $this->koef,
+            "merc_uuid"       => isset($orderContent) ? $orderContent->merc_uuid : null,
             "sum_without_vat" => $this->sum_without_vat,
-            "sum_with_vat" => $this->sum_with_vat,
-            "vat" => $this->vat_waybill,
+            "sum_with_vat"    => $this->sum_with_vat,
+            "vat"             => $this->vat_waybill,
         ];
 
         return $return;
     }
 
     /**
+     * Информация о внешнем продукте
+     *
+     * @return array|null
+     */
+    private function getOuterProduct()
+    {
+        if (empty($this->productOuter)) {
+            return null;
+        }
+
+        return [
+            'id'   => $this->productOuter->id,
+            'name' => $this->productOuter->name
+        ];
+    }
+
+    /**
      * Загрузка модели и получение данных
+     *
      * @param $key
      * @return $array
      */

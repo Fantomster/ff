@@ -1,8 +1,10 @@
 <?php
 
 namespace api_web\controllers;
+
 /**
  * Class DocumentController
+ *
  * @package api_web\controllers
  */
 class DocumentController extends \api_web\components\WebApiController
@@ -11,7 +13,10 @@ class DocumentController extends \api_web\components\WebApiController
      * @SWG\Post(path="/document/document-content",
      *     tags={"Documents"},
      *     summary="Детальная часть документа",
-     *     description="Детальная часть документа",
+     *     description="Детальная часть документа
+     *     Типы возвращаемых данных:
+     *     https://goo.gl/VSWoBC
+     * ",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -27,82 +32,6 @@ class DocumentController extends \api_web\components\WebApiController
      *                      "service_id": 2
      *                  }
      *              )
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *         @SWG\Schema(
-     *              default={
-     *                  "documents": {
-     *                      {
-     *                              "id": 22666,
-     *                               "type": "order",
-     *                               "status_id": 1,
-     *                               "status_text": "Ожидают формирования",
-     *                               "agent": {
-     *                               "uid": "11232123",
-     *                               "name": "Опт Холод",
-     *                               "difer": false
-     *                               },
-     *                               "vendor": {
-     *                               "id": 3489,
-     *                               "name": "Halal Organic Food",
-     *                               "difer": false
-     *                               },
-     *                               "is_mercury_cert": true,
-     *                               "count": 134,
-     *                               "total_price": 3214222.95,
-     *                               "doc_date": "2018-09-04T09:55:22+03:00"
-     *                      },
-     *                      {
-     *                               "id": 22666,
-     *                               "type": "order",
-     *                               "status_id": 1,
-     *                               "status_text": "Ожидают формирования",
-     *                               "agent": {
-     *                               "uid": "11232123",
-     *                               "name": "Опт Холод",
-     *                               "difer": false
-     *                               },
-     *                               "vendor": {
-     *                               "id": 3489,
-     *                               "name": "Halal Organic Food",
-     *                               "difer": false
-     *                               },
-     *                               "is_mercury_cert": true,
-     *                               "count": 134,
-     *                               "total_price": 3214222.95,
-     *                               "doc_date": "2018-09-04T09:55:22+03:00"
-     *                     }
-     *                  },
-     *                  "positions": {
-     *                      {
-     *                               "id": 2222,
-     *                               "product_id": 3212,
-     *                               "product_name": "Апелисны",
-     *                               "outer_product_id": 456789,
-     *                               "quantity": "Апелисны импортные",
-     *                               "unit": "кг",
-     *                               "koef": 1,
-     *                               "sum_without_vat": 563789.05,
-     *                               "sum_with_vat": 542364.25,
-     *                               "vat": 18,
-     *                               },
-     *                       {
-     *                               "id": 2222,
-     *                               "product_id": 3212,
-     *                               "product_name": "Апелисны",
-     *                               "outer_product_id": 456789,
-     *                               "quantity": "Апелисны импортные",
-     *                               "unit": "кг",
-     *                               "koef": 1,
-     *                               "sum_without_vat": 563789.05,
-     *                               "sum_with_vat": 542364.25,
-     *                               "vat": 18,
-     *                              },
-     *                  }
-     *              }
      *         )
      *     ),
      *     @SWG\Response(

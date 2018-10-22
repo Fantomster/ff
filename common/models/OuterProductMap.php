@@ -8,24 +8,23 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "outer_product_map".
  *
- * @property int $id первичный ключ
- * @property string $created_at Дата создания записи
- * @property string $updated_at Дата последнего изменения записи
- * @property int $service_id id сервиса из таблицы all_service
- * @property int $organization_id id ресторана
- * @property int $vendor_id id поставщика
- * @property int $product_id id продукта в MC
- * @property int $outer_product_id id продукта из у.с. таблицы outer_product
- * @property int $outer_unit_id id единицы измерения у.с. таблицы outer_unit
- * @property int $outer_store_id id склада у.с. таблицы outer_store
- * @property double $coefficient коэффициент
- * @property double $vat НДС
- *
- * @property AllService $service
+ * @property int          $id               первичный ключ
+ * @property string       $created_at       Дата создания записи
+ * @property string       $updated_at       Дата последнего изменения записи
+ * @property int          $service_id       id сервиса из таблицы all_service
+ * @property int          $organization_id  id ресторана
+ * @property int          $vendor_id        id поставщика
+ * @property int          $product_id       id продукта в MC
+ * @property int          $outer_product_id id продукта из у.с. таблицы outer_product
+ * @property int          $outer_unit_id    id единицы измерения у.с. таблицы outer_unit
+ * @property int          $outer_store_id   id склада у.с. таблицы outer_store
+ * @property double       $coefficient      коэффициент
+ * @property double       $vat              НДС
+ * @property AllService   $service
  * @property OuterProduct $outerProduct
- * @property OuterStore $outerStore
- * @property OuterUnit $outerUnit
-* @property Product $product
+ * @property OuterStore   $outerStore
+ * @property OuterUnit    $outerUnit
+ * @property Product      $product
  */
 class OuterProductMap extends \yii\db\ActiveRecord
 {
@@ -33,14 +32,13 @@ class OuterProductMap extends \yii\db\ActiveRecord
     {
         return [
             'timestamp' => [
-                'class' => TimestampBehavior::class,
+                'class'              => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',
-                'value' => \gmdate('Y-m-d H:i:s'),
+                'value'              => \gmdate('Y-m-d H:i:s'),
             ],
         ];
     }
-
 
     /**
      * {@inheritdoc}
@@ -81,18 +79,18 @@ class OuterProductMap extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'created_at' => Yii::t('app', 'Created At'),
-            'updated_at' => Yii::t('app', 'Updated At'),
-            'service_id' => Yii::t('app', 'Service ID'),
-            'organization_id' => Yii::t('app', 'Rest ID'),
-            'vendor_id' => Yii::t('app', 'Vendor ID'),
-            'product_id' => Yii::t('app', 'Product ID in MC'),
+            'id'               => Yii::t('app', 'ID'),
+            'created_at'       => Yii::t('app', 'Created At'),
+            'updated_at'       => Yii::t('app', 'Updated At'),
+            'service_id'       => Yii::t('app', 'Service ID'),
+            'organization_id'  => Yii::t('app', 'Rest ID'),
+            'vendor_id'        => Yii::t('app', 'Vendor ID'),
+            'product_id'       => Yii::t('app', 'Product ID in MC'),
             'outer_product_id' => Yii::t('app', 'Ooter product ID'),
-            'outer_unit_id' => Yii::t('app', 'Outer unit ID'),
-            'outer_store_id' => Yii::t('app', 'Outer store ID'),
-            'coefficient' => Yii::t('app', 'Coefficient'),
-            'vat' => Yii::t('app', 'Vat'),
+            'outer_unit_id'    => Yii::t('app', 'Outer unit ID'),
+            'outer_store_id'   => Yii::t('app', 'Outer store ID'),
+            'coefficient'      => Yii::t('app', 'Coefficient'),
+            'vat'              => Yii::t('app', 'Vat'),
         ];
     }
 

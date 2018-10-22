@@ -127,15 +127,15 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     {
         $requestArray = [
             "token" => "yN2XiNfSMmNGA6bLtlHKo21bxtbWAx3",
-            "varGln" => 9879870002282,
-            "intUserID" => 13902,
+            "varGln" => $glnCode,
+            "intUserID" => 13904,
             "params" => [
-/*                "docType" => $type,
-                "GLNs" => [$glnCode]*/
+                "docType" => $type,
+                "GLNs" => [$glnCode]
             ]
         ];
 
-        $array = $this->executeCurl($requestArray, $action);
+        $array = $this->executeCurl($requestArray, 'edi_getDocument');
         dd($array);
         $list = $array['ns2ListMBResponse']['ns2Cnt']['ns2mailbox-response']['ns2document-info'] ?? null;
         $trackingIdList = [];
@@ -224,16 +224,17 @@ EOXML;
 
     private function executeCurl($requestArray, $action)
     {
-        $url = 'https://leradata.pro/api/vetis/api.php?МЕТОД=getDocType';
         $payload = json_encode($requestArray);
+        $url = "https://leradata.pro/api/vetis/api.php?$action=$payload";
+
 
         $ch = curl_init($url);
 # Setup request to send json via POST.
 
-        curl_setopt( $ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, "$action=$payload");
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt( $ch, CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
+        //curl_setopt( $ch, CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
 # Return response instead of printing.
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 # Send request.
@@ -241,7 +242,7 @@ EOXML;
 
         curl_close($ch);
         $array = json_decode($result);
-        dd($result);
+        dd($array);
         return $array;
     }
 

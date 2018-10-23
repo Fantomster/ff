@@ -168,7 +168,7 @@ class License extends ActiveRecord
      * Проверка на активную лицензию микскарта
      *
      * @param $orgId
-     * @return bool|mixed
+     * @return string
      */
     public static function getDateMixCartLicense($orgId)
     {

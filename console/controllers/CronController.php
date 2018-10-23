@@ -506,12 +506,12 @@ class CronController extends Controller
                     ],
                 ]);
                 foreach ($relatedUsers as $relatedUser) {
-                    if ($relatedUser->user->emailNotification->merc_vsd) {
+                    if ($relatedUser->user->emailNotification->merc_stock_expiry) {
                         $recipients[] = $relatedUser->user->email;
                     }
                 }
                 foreach ($organization->additionalEmail as $addEmail) {
-                    if ($addEmail->merc_vsd) {
+                    if ($addEmail->merc_stock_expiry) {
                         $recipients[] = $addEmail->email;
                     }
                 }

@@ -141,9 +141,11 @@ class WebApiController extends \yii\rest\Controller
             $this->user = $this->container->get('UserWebApi')->getUser();
             $this->request = \Yii::$app->request->getBodyParam('request');
             #Проверка лицензии
-            $licenseDate = License::getDateMixCartLicense($this->user->organization_id);
-            $headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
-            $headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
+            if(!empty($this->user)) {
+                $licenseDate = License::getDateMixCartLicense($this->user->organization_id);
+                $headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
+                $headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
+            }
 
             \Yii::$app->setTimeZone('Etc/GMT' . $this->container->get('UserWebApi')->checkGMTFromDb());
 

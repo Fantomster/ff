@@ -16,7 +16,6 @@ namespace api_web\modules\integration\classes\sync;
 use api\common\models\RkDicconst;
 use api_web\components\Registry;
 use api_web\modules\integration\classes\documents\WaybillContent;
-use common\models\AllService;
 use common\models\OuterCategory;
 use common\models\Waybill;
 use Yii;

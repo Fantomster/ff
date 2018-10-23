@@ -224,21 +224,24 @@ class IntegrationWebApi extends WebApi
      */
     public function updateWaybillContent(array $post): array
     {
-        if (!isset($post['waybill_content_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_content_id");
-        }
+        $this->validateRequest($post, ['waybill_content_id']);
+
         $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
         if (!$waybillContent) {
             throw new BadRequestHttpException("waybill content not found");
         }
+
         if (isset($post['vat_waybill'])) {
             $waybillContent->vat_waybill = (float)$post['vat_waybill'];
         }
+
         if (isset($post['outer_unit_id'])) {
             $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
         }
+
         $koef = null;
         $quan = null;
+
         if (isset($post['koef'])) {
             $koef = (float)$post['koef'];
         }
@@ -356,9 +359,7 @@ class IntegrationWebApi extends WebApi
      */
     public function deleteWaybillContent(array $post): array
     {
-        if (!isset($post['waybill_content_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_content_id");
-        }
+        $this->validateRequest($post, ['waybill_content_id']);
 
         $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
         if (!$waybillContent) {

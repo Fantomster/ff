@@ -7,7 +7,6 @@ use api_web\components\WebApiController;
 use api_web\controllers\OrderController;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
-use common\models\AllService;
 use api_web\models\User;
 use common\models\CatalogBaseGoods;
 use common\models\Delivery;
@@ -673,7 +672,7 @@ class OrderWebApi extends \api_web\components\WebApi
             ])
             ->andWhere(
                 ['OR',
-                    ['not in', 'service_id', [(AllService::findOne(['denom' => 'EDI']))->id]],
+                    ['not in', 'service_id', [Registry::EDI_SERVICE_ID]],
                     ['service_id' => null]
                 ]
             )

@@ -7,7 +7,6 @@ use common\models\EdiOrganization;
 use common\models\Organization;
 use api_web\components\WebApi;
 use common\components\EComIntegration;
-use common\models\AllService;
 use common\models\Order;
 use common\models\OrderStatus;
 use yii\db\Query;
@@ -35,10 +34,7 @@ class EdiWebApi extends WebApi
      */
     public function acceptProducts(array $post): array
     {
-
-        if (!isset($post['order_id'])) {
-            throw new BadRequestHttpException("empty_param|order_id");
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $order = Order::findOne([
             'id'        => $post['order_id'],
@@ -47,7 +43,7 @@ class EdiWebApi extends WebApi
 
         if (empty($order)) {
             throw new BadRequestHttpException("order_not_found");
-        } elseif ($order->service_id != (AllService::findOne(['denom' => 'EDI']))->id) {
+        } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
             throw new BadRequestHttpException("Доступно только для документов ЭДО");
         } elseif ($order->status != OrderStatus::STATUS_EDI_SENT_BY_VENDOR) {
             throw new BadRequestHttpException("Должен быть статус \"Отправлено поставщиком\"");
@@ -136,7 +132,7 @@ class EdiWebApi extends WebApi
      */
     public function getOrderHistory(array $post)
     {
-        $post['search']['service_id'] = (AllService::findOne(['denom' => 'EDI']))->id;
+        $post['search']['service_id'] = Registry::EDI_SERVICE_ID;
         return $this->container->get('OrderWebApi')->getHistory($post);
     }
 
@@ -149,10 +145,8 @@ class EdiWebApi extends WebApi
      */
     public function getOrderInfo(array $post)
     {
+        $this->validateRequest($post, ['order_id']);
 
-        if (!isset($post['order_id'])) {
-            throw new BadRequestHttpException("empty_param|order_id");
-        }
         $order = Order::findOne([
             'id'        => $post['order_id'],
             'client_id' => $this->user->organization->id,
@@ -175,8 +169,8 @@ class EdiWebApi extends WebApi
                 ->from('order_content oc')
                 ->leftJoin('order', 'order.id = oc.order_id')
                 ->andWhere([
-                    'oc.product_id' => $productIds,
-                    'order.client_id'          => $this->user->organization->id,
+                    'oc.product_id'   => $productIds,
+                    'order.client_id' => $this->user->organization->id,
                 ])
                 ->andWhere(['<', 'order.created_at', $order->created_at])
                 ->orderBy(['`order`.created_at' => SORT_DESC])
@@ -233,7 +227,7 @@ class EdiWebApi extends WebApi
                 ['client_id' => $this->user->organization->id],
                 ['vendor_id' => $this->user->organization->id],
             ])
-            ->andWhere(['service_id' => (AllService::findOne(['denom' => 'EDI']))->id])
+            ->andWhere(['service_id' => Registry::EDI_SERVICE_ID])
             ->groupBy('status')
             ->all();
 

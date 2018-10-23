@@ -40,7 +40,8 @@ class iikoDicconstSearch extends iikoDicconst
 
     public function searchTillypad($params)
     {
-        $query = iikoDicconst::find()->andWhere(['is_active' => 1])->andWhere('denom != :denom', ['denom' => 'URL_iiko']);
+        $query = iikoDicconst::find()->andWhere(['is_active' => 1])->andWhere('denom != :denom', ['denom' => 'URL_iiko'])
+            ->andWhere('denom != :denom2', ['denom2' => 'main_org'])->andWhere('denom != :denom3', ['denom3' => 'auto_unload_invoice']);
 
         // add conditions that should always apply here
 

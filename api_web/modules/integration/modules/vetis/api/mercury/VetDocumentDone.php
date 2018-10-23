@@ -77,6 +77,7 @@ class VetDocumentDone extends Component
      */
     public function getProcessIncomingConsignmentRequest()
     {
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
         $this->doc = (new getVetDocumentByUUID())->getDocumentByUUID($this->UUID, true);
 
         $data = new ProcessIncomingConsignmentRequest();

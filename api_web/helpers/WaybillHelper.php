@@ -156,9 +156,7 @@ class WaybillHelper
         $model = new Waybill();
         $model->acquirer_id = $orgId;
         $model->service_id = Registry::EDI_SERVICE_ID;
-        $model->bill_status_id = Registry::$waybill_statuses[Registry::WAYBILL_FORMED];
-        $model->readytoexport = 0;
-        $model->is_deleted = 0;
+        $model->status_id = Registry::WAYBILL_FORMED;
         $datetime = new \DateTime();
         $model->doc_date = $datetime->format('Y-m-d H:i:s');
         $model->created_at = $datetime->format('Y-m-d H:i:s');
@@ -217,7 +215,9 @@ class WaybillHelper
                 $modelWaybillContent->order_content_id = $ordCont->id;
                 $modelWaybillContent->waybill_id = $model->id;
                 $modelWaybillContent->merc_uuid = $ordCont->merc_uuid;
-                $modelWaybillContent->product_outer_id = $ordCont->product_id;
+                #TODO refactor
+                #Тут должен браться id продукта из у.с.
+                $modelWaybillContent->outer_product_id = $ordCont->product_id;
                 $modelWaybillContent->quantity_waybill = $quantity;
                 $modelWaybillContent->vat_waybill = $taxRate;
                 $modelWaybillContent->sum_with_vat = $quantity * $priceWithVat;
@@ -276,11 +276,11 @@ class WaybillHelper
             throw new BadRequestHttpException('empty_param|waybill_id|order_content_id');
         }
         $waybill = Waybill::findOne([
-            'id'             => $request['waybill_id'],
-            'bill_status_id' => [
-                Registry::$waybill_statuses[Registry::WAYBILL_COMPARED],
-                Registry::$waybill_statuses[Registry::WAYBILL_ERROR],
-                Registry::$waybill_statuses[Registry::WAYBILL_FORMED],
+            'id'        => $request['waybill_id'],
+            'status_id' => [
+                Registry::WAYBILL_COMPARED,
+                Registry::WAYBILL_ERROR,
+                Registry::WAYBILL_FORMED,
             ]]);
         if (!$waybill) {
             throw new BadRequestHttpException('waybill cannot adding waybill_content with id ' . $request['waybill_id']);
@@ -289,6 +289,9 @@ class WaybillHelper
         if (!$orderContent) {
             throw new BadRequestHttpException('OrderContent dont exists with id ' . $request['order_content_id']);
         }
+
+        $this->checkOrderForWaybillContent($waybill, $orderContent);
+
         $taxRate = $orderContent->vat_product ?? null;
         $quantity = $orderContent->quantity;
         $price = $orderContent->price;
@@ -300,7 +303,9 @@ class WaybillHelper
             $waybillContent = new WaybillContent();
             $waybillContent->waybill_id = $request['waybill_id'];
             $waybillContent->order_content_id = $orderContent->id;
-            $waybillContent->product_outer_id = $orderContent->product_id;
+            #todo_refactoring
+            #Тут должен быть id продукта у.с. а не наш продукт
+            $waybillContent->outer_product_id = $orderContent->product_id;
             $waybillContent->quantity_waybill = (float)$quantity;
             $waybillContent->vat_waybill = $taxRate;
             $waybillContent->merc_uuid = $orderContent->merc_uuid;
@@ -318,5 +323,29 @@ class WaybillHelper
         }
 
         return ['result' => true];
+    }
+
+    /**
+     * Проверка на правильность добавления позиции заказа к накладной
+     * Нельзя добавить к накладной, имеющей позиции из одного заказа, позиции из другой заказа
+     * Так же нельзя добавить позицию заказа, уже имеющую позицию в накладной
+     *
+     * @param Waybill      $waybill
+     * @param OrderContent $orderContent
+     * @throws BadRequestHttpException
+     */
+    private function checkOrderForWaybillContent(Waybill $waybill, OrderContent $orderContent)
+    {
+        if ($orderContent->waybillContent){
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_allready_has_waybill_content') . '-' . $orderContent->waybillContent->id);
+        }
+        $waybillContent = WaybillContent::find()->where(['waybill_id' => $waybill->id])
+            ->andWhere(['not', ['order_content_id' => null]])->one();
+        if ($waybillContent) {
+            $orderContentFromWaybill = $waybillContent->orderContent;
+            if ($orderContent->order_id != $orderContentFromWaybill->order_id) {
+                throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_not_for_this_waybill'));
+            }
+        }
     }
 }

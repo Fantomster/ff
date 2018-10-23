@@ -5,6 +5,7 @@ namespace api_web\classes;
 use api\common\models\AllMaps;
 use api_web\components\Registry;
 use api_web\components\WebApi;
+use api_web\exceptions\ValidationException;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
@@ -64,22 +65,18 @@ class IntegrationWebApi extends WebApi
      */
     public function handleWaybill(array $post): array
     {
-        if (!isset($post)) {
-            throw new BadRequestHttpException("empty_param|post");
-        }
-
         if (!isset($post['service_id'])) {
             throw new BadRequestHttpException("empty_param|service_id");
         }
 
         $organizationID = $this->user->organization_id;
+        $acquirerID = $organizationID;
         $ediNumber = '';
         $outerAgentUUID = '';
         $outerStoreUUID = '';
-        $acquirerID = 0;
 
         if (isset($post['order_id'])) {
-            $order = Order::findOne(['id' => $post['order_id']]);
+            $order = Order::findOne(['id' => (int)$post['order_id'], 'client_id' => $this->user->organization_id]);
 
             if (!$order) {
                 throw new BadRequestHttpException("order_not_found");
@@ -103,8 +100,8 @@ class IntegrationWebApi extends WebApi
                     $ediNumber = $orderContent->edi_number . "-1";
                 }
             } else {
-                $waybillsCount = Waybill::find()->where(['order_id' => $post['order_id']])->count();
-                if (!$waybillsCount) {
+                $waybillsCount = count($order->getWaybills($post['service_id']));
+                if ($waybillsCount == 0) {
                     $waybillsCount = 1;
                 }
                 $ediNumber = $post['order_id'] . "-" . $waybillsCount;
@@ -112,12 +109,16 @@ class IntegrationWebApi extends WebApi
         }
 
         $waybill = new Waybill();
-        $waybill->service_id = (int)$post['service_id'] ?? null;
+        $waybill->service_id = (int)$post['service_id'];
+        $waybill->status_id = Registry::WAYBILL_FORMED;
         $waybill->outer_number_code = $ediNumber;
         $waybill->outer_contractor_uuid = $outerAgentUUID;
         $waybill->outer_store_uuid = $outerStoreUUID;
         $waybill->acquirer_id = $acquirerID;
-        $waybill->save();
+
+        if (!$waybill->save()) {
+            throw new ValidationException($waybill->getFirstErrors());
+        }
 
         return ['success' => true, 'waybill_id' => $waybill->id];
     }
@@ -150,7 +151,7 @@ class IntegrationWebApi extends WebApi
             $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $orderContent->quantity;
             $allMap = AllMaps::findOne(['product_id' => $orderContent->product_id]);
             if ($allMap) {
-                $waybillContent->product_outer_id = $allMap->serviceproduct_id;
+                $waybillContent->outer_product_id = $allMap->serviceproduct_id;
             }
         } else {
             throw new BadRequestHttpException("order content not found");
@@ -257,9 +258,11 @@ class IntegrationWebApi extends WebApi
      */
     private function handleWaybillContent($waybillContent, $post, $quan, $koef)
     {
-        if (isset($post['product_outer_id'])) {
-            $waybillContent->product_outer_id = $post['product_outer_id'];
-            $allMap = AllMaps::findOne(['product_id' => $post['product_outer_id']]);
+        if (isset($post['outer_product_id'])) {
+            $waybillContent->outer_product_id = $post['outer_product_id'];
+            //TODO refactor
+            // поиск должен осуществляться по орг_ид
+            $allMap = AllMaps::findOne(['product_id' => $post['outer_product_id']]);
             if ($allMap) {
                 $outerStore = OuterStore::findOne(['id' => $allMap->outer_store_id]);
                 if ($outerStore) {
@@ -306,46 +309,39 @@ class IntegrationWebApi extends WebApi
      */
     public function createWaybillContent(array $post): array
     {
-        if (!isset($post['waybill_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_id");
+        $this->validateRequest($post, ['waybill_id', 'outer_product_id', 'outer_unit_id']);
+
+        $waybill = Waybill::findOne(['id' => $post['waybill_id'], 'acquirer_id' => $this->user->organization_id]);
+        if (!$waybill) {
+            throw new BadRequestHttpException("waybill_not_found");
         }
 
-        $waybill = Waybill::findOne(['id' => $post['waybill_id']]);
-        if (!$waybill) {
-            throw new BadRequestHttpException("waybill not found");
-        }
-        if (!$waybill->order_id) {
-            throw new BadRequestHttpException("empty order_id");
+        $exists = WaybillContent::find()
+            ->where([
+                'waybill_id'       => $waybill->id,
+                'outer_product_id' => $post['outer_product_id']
+            ])->exists();
+
+        if ($exists) {
+            throw new BadRequestHttpException("waybill.content_exists");
         }
 
         $waybillContent = new WaybillContent();
-        if (isset($post['waybill_id'])) {
-            $waybillContent->waybill_id = $post['waybill_id'];
-        }
-        if (isset($post['vat_waybill'])) {
-            $waybillContent->vat_waybill = (float)$post['vat_waybill'];
-        }
-        if (isset($post['outer_unit_id'])) {
-            $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
-        }
-        if (isset($post['quantity_waybill'])) {
-            $waybillContent->quantity_waybill = (int)$post['quantity_waybill'];
-        }
-        if (isset($post['product_outer_id'])) {
-            $waybillContent->product_outer_id = $post['product_outer_id'];
-        }
+        $waybillContent->waybill_id = $post['waybill_id'];
+        $waybillContent->outer_product_id = $post['outer_product_id'];
+        $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
+        $waybillContent->vat_waybill = (int)$post['vat_waybill'] ?? 0;
+        $waybillContent->quantity_waybill = $post['quantity_waybill'] ?? 1;
 
-        if (isset($post['price_without_vat'])) {
-            $waybillContent->price_without_vat = (int)$post['price_without_vat'];
-            if (isset($post['vat_waybill'])) {
-                $waybillContent->price_with_vat = (int)($post['price_without_vat'] + ($post['price_without_vat'] * $post['vat_waybill']));
-                if (isset($post['quantity_waybill'])) {
-                    $waybillContent->sum_without_vat = (int)$post['price_without_vat'] * $post['quantity_waybill'];
-                    $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $post['quantity_waybill'];
-                }
+        if (!empty($post['price_without_vat'])) {
+            $waybillContent->price_without_vat = round($post['price_without_vat'], 2);
+            $waybillContent->sum_without_vat = round($post['price_without_vat'] * $waybillContent->quantity_waybill, 2);
+            if ($waybillContent->vat_waybill != 0) {
+                $waybillContent->price_with_vat = round(($post['price_without_vat'] + (($post['price_without_vat'] / 100) * $post['vat_waybill'])), 2);
             }
         }
 
+        $waybillContent->sum_with_vat = round($waybillContent->price_with_vat * $waybillContent->quantity_waybill, 2);
         $waybillContent->save();
 
         return ['success' => true, 'waybill_content_id' => $waybillContent->id];

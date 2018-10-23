@@ -107,6 +107,10 @@ class FullmapController extends DefaultController
             $mainOrg = iikoService::getMainOrg($client->id);
         }
 
+        if ($session['service_id'] == 10) {
+            $mainOrg = iikoService::getMainOrg($client->id);
+        }
+
 
         if (Yii::$app->request->isAjax || Yii::$app->request->isPjax) {
             return $this->renderAjax($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services', 'mainOrg'));
@@ -287,6 +291,9 @@ class FullmapController extends DefaultController
             case 8 :
                 $res = $res->name;
                 break;
+            case 10 :
+                $res = $res->denom;
+                break;
         }
 
         return Json::encode(['output' => $res, 'message' => '']);
@@ -312,6 +319,18 @@ class FullmapController extends DefaultController
             $newProduct = new AllMaps();
 
             if ($service_id == 2) {
+                $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
+                if(isset($mainOrg)) {
+                    $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
+                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
+                        ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
+                    if(isset($hasProduct)) {
+                        $newProduct->setAttributes($hasProduct->attributes);
+                    }
+                }
+            }
+
+            if ($service_id == 10) {
                 $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
                 if(isset($mainOrg)) {
                     $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
@@ -390,6 +409,13 @@ class FullmapController extends DefaultController
                     $orgField = 'org_id';
                     $where = ' and is_category = 0 ';
                     break;
+
+                case 10: // tillypad
+                    $sourceTable = 'iiko_product';
+                    $denomField = 'denom';
+                    $unitField = 'unit';
+                    $orgField = 'org_id';
+                    break;
             }
 
             $sql = "( select id, CONCAT(`" . $denomField . "`, ' (' ," . $unitField . ", ')') as `text` from " . $sourceTable . " where " . $orgField . " = " . User::findOne(Yii::$app->user->id)->organization_id . " and " . $denomField . " = '" . $term . "' " . $where . " )" .
@@ -451,10 +477,25 @@ class FullmapController extends DefaultController
             $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
         }
 
+        if ($service_id == 10) {
+            $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
+        }
+
         foreach ($noProducts as $prod) {
 
             $model = new AllMaps();
             if ($service_id == 2) {
+                if(isset($mainOrg)) {
+                    $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
+                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
+                        ->andWhere('product_id = :prod', [':prod' => $prod])->one();
+                    if(isset($hasProduct)) {
+                        $model->setAttributes($hasProduct->attributes);
+                    }
+                }
+            }
+
+            if ($service_id == 10) {
                 if(isset($mainOrg)) {
                     $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
                         ->andWhere('service_id = ' . $service_id . ' and is_active =1')

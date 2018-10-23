@@ -20,8 +20,8 @@ class VetDocumentsChangeList extends Model
                 continue;
 
             $unit = dictsApi::getInstance($this->org_id)->getUnitByGuid($item->certifiedConsignment->batch->unit->guid);
-            $sender= cerberApi::getInstance($this->org_id)->getEnterpriseByUuid($item->certifiedConsignment->consignor->enterprise->uuid);
-            $recipient = cerberApi::getInstance($this->org_id)->getEnterpriseByUuid($item->certifiedConsignment->consignee->enterprise->uuid);
+            $sender= cerberApi::getInstance($this->org_id)->getEnterpriseByGuid($item->certifiedConsignment->consignor->enterprise->guid);
+            $recipient = cerberApi::getInstance($this->org_id)->getEnterpriseByGuid($item->certifiedConsignment->consignee->enterprise->guid);
 
 
             $producer = isset($item->certifiedConsignment->batch->origin->producer) ? MercVsd::getProduccerData($item->certifiedConsignment->batch->origin->producer, $this->org_id) : null;

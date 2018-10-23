@@ -662,7 +662,6 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function getHistoryCount()
     {
-
         $result = (new Query())->from(Order::tableName())
             ->select(['status', 'COUNT(status) as count'])
             ->where([
@@ -711,13 +710,10 @@ class OrderWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Список доступных для заказа продуктов
-     *
      * @param      $post
      * @param bool $isUnconfirmedVendor
      * @return array
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws BadRequestHttpException
      */
     public function products($post, bool $isUnconfirmedVendor = false)
     {
@@ -914,9 +910,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function cancel(array $post, bool $isUnconfirmedVendor = false)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $query = Order::find()->where(['id' => $post['order_id']]);
         if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
@@ -979,9 +973,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function repeat(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $order = Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
 
@@ -1021,9 +1013,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function complete(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $query = Order::find()->where(['id' => $post['order_id']]);
         if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
@@ -1078,9 +1068,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function saveToPdf(array $post, WebApiController $c)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $order = Order::findOne(['id' => $post['order_id']]);
         if (empty($order)) {

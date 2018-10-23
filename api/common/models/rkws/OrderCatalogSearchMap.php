@@ -67,6 +67,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             1 => ["fprod.denom as pdenom", "fstore.name as store", "fprod.unitname as unitname"], // R-keeper
             2 => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // iiko
             8 => ["fprod.name as pdenom", "fstore.name as store", "fprod.measure as unitname"], // 1C
+            10 => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // tillypad
         ];
 
         $joins = [
@@ -79,6 +80,9 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
 
             8 => " LEFT JOIN `$dbName`.`one_s_good` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`one_s_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id ",
+
+            10 => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
+                   LEFT JOIN `$dbName`.`iiko_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
 
         ];
 
@@ -168,6 +172,19 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
 
         $client_id = $this->client->id;
         if ($this->service_id == 2) {
+            $mainOrg_id = iikoService::getMainOrg($this->client->id);
+            if ($mainOrg_id != $this->client->id) {
+                $client_id = "IF(product_id in (select product_id from `$dbName`.all_map where service_id = 2 and org_id = $client_id), $client_id";
+
+                if (!empty($mainOrg_id)) {
+                    $client_id .= ", $mainOrg_id";
+                }
+                $client_id .= ")";
+            }
+
+        }
+
+        if ($this->service_id == 10) {
             $mainOrg_id = iikoService::getMainOrg($this->client->id);
             if ($mainOrg_id != $this->client->id) {
                 $client_id = "IF(product_id in (select product_id from `$dbName`.all_map where service_id = 2 and org_id = $client_id), $client_id";

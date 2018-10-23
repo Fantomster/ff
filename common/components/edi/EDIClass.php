@@ -245,9 +245,10 @@ class EDIClass extends Component
      * @return bool
      * @throws \yii\db\Exception
      */
-    public function handlePriceListUpdating($xml): bool
+    public function handlePriceListUpdating($xml, $isLeradata = false): bool
     {
-        $supplierGLN = $xml->SUPPLIER;
+        $supplierGLN = ($isLeradata) ? $xml->BUYER : $xml->SUPPLIER;
+        $buyerGLN = ($isLeradata) ? $xml->SUPPLIER : $xml->BUYER;
         $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplierGLN]);
         if (!$ediOrganization) {
             \Yii::error('No EDI organization');
@@ -270,7 +271,7 @@ class EDIClass extends Component
         $baseCatalog->currency_id = $currency->id ?? 1;
         $baseCatalog->updated_at = new Expression('NOW()');
         $baseCatalog->save();
-        $goods = $xml->CATALOGUE->POSITION;
+        $goods = $xml->CATALOGUE->POSITION ?? $xml->CATALOGUE[0]->POSITION;
         $goodsArray = [];
         $barcodeArray = [];
         foreach ($goods as $good) {
@@ -297,7 +298,6 @@ class EDIClass extends Component
             }
         }
 
-        $buyerGLN = $xml->BUYER;
         $ediRest = EdiOrganization::findOne(['gln_code' => $buyerGLN]);
         if (!$ediRest) {
             return false;

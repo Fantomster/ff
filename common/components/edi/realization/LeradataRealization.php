@@ -41,9 +41,9 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
      * @return bool
      * @throws \yii\db\Exception
      */
-    protected function handlePriceListUpdating($xml): bool
+    public function handlePriceListUpdating($xml): bool
     {
-        return $this->edi->handlePriceListUpdating($xml);
+        return $this->edi->handlePriceListUpdating($xml, true);
     }
 
     protected function insertGood(int $catID, int $catalogBaseGoodID, float $price): bool
@@ -51,7 +51,7 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
         return $this->edi->insertGood($catID, $catalogBaseGoodID, $price);
     }
 
-    protected function handleOrderResponse(\SimpleXMLElement $simpleXMLElement, $isAlcohol = false)
+    public function handleOrderResponse(\SimpleXMLElement $simpleXMLElement, $isAlcohol = false)
     {
         return $this->edi->handleOrderResponse($simpleXMLElement, $isAlcohol);
     }

@@ -32,7 +32,6 @@ use yii\behaviors\TimestampBehavior;
  * @property string $edi_recadv
  * @property string $edi_invoice
  *
- *
  * @property WaybillContent[] $waybillContents
  */
 class Waybill extends \yii\db\ActiveRecord
@@ -89,11 +88,11 @@ class Waybill extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'acquirer_id' => 'Acquirer ID',
-            'status_id' => 'Bill Status ID',
-            'service_id' => 'Service ID',
-            'outer_number_code' => 'Outer Number Code',
+            'id'                      => 'ID',
+            'acquirer_id'             => 'Acquirer ID',
+            'status_id'               => 'Bill Status ID',
+            'service_id'              => 'Service ID',
+            'outer_number_code'       => 'Outer Number Code',
             'outer_number_additional' => 'Outer Number Additional',
             'outer_store_id' => 'Outer Store Id',
             'outer_duedate' => 'Outer Duedate',
@@ -133,7 +132,7 @@ class Waybill extends \yii\db\ActiveRecord
      */
     public function getTotalPrice()
     {
-        return WaybillContent::find()->where(['waybill_id' => $this->id])->sum('sum_with_vat');
+        return round(WaybillContent::find()->where(['waybill_id' => $this->id])->sum('sum_with_vat'), 2);
     }
 
 }

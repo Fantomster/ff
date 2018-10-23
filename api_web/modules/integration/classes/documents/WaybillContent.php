@@ -2,6 +2,7 @@
 
 namespace api_web\modules\integration\classes\documents;
 
+use api_web\helpers\CurrencyHelper;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\WaybillContent as BaseWaybillContent;
 
@@ -37,8 +38,8 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
             "unit"            => $unit,
             "koef"            => $this->koef,
             "merc_uuid"       => isset($orderContent) ? $orderContent->merc_uuid : null,
-            "sum_without_vat" => $this->sum_without_vat,
-            "sum_with_vat"    => $this->sum_with_vat,
+            "sum_without_vat" => CurrencyHelper::asDecimal($this->sum_without_vat),
+            "sum_with_vat"    => CurrencyHelper::asDecimal($this->sum_with_vat),
             "vat"             => $this->vat_waybill,
         ];
 

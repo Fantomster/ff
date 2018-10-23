@@ -4,6 +4,7 @@ namespace api_web\modules\integration\classes\documents;
 
 use api_web\classes\DocumentWebApi;
 use api_web\components\Registry;
+use api_web\helpers\CurrencyHelper;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\Order as BaseOrder;
 use common\models\OrderContent;
@@ -57,7 +58,7 @@ class Order extends BaseOrder implements DocumentInterface
 
         $return["is_mercury_cert"] = $this->getIsMercuryCert();
         $return["count"] = (int)$this->positionCount;
-        $return["total_price"] = $this->total_price;
+        $return["total_price"] = CurrencyHelper::asDecimal($this->total_price);
         $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->created_at));
         $return["store"] = null; //todo_refactoring
 

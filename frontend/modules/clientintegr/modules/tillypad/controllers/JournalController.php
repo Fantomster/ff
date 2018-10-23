@@ -2,7 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\tillypad\controllers;
 
-use api_web\modules\integration\modules\iiko\models\iikoService;
+use api_web\modules\integration\modules\tillypad\models\TillypadService;
 use common\models\User;
 use yii\web\Controller;
 use common\models\Journal;
@@ -13,11 +13,11 @@ use yii\web\NotFoundHttpException;
 class JournalController extends \frontend\modules\clientintegr\modules\iiko\controllers\JournalController
 {
 
-    /*public function actionIndex()
+    public function actionIndex()
     {
         $user = User::findOne(\Yii::$app->user->getId());
         $searchModel = new JournalSearch();
-        $searchModel->service_id = iikoService::getServiceId();
+        $searchModel->service_id = TillypadService::getServiceId();
         $searchModel->organizations = array_keys(\yii\helpers\ArrayHelper::map($user->getAllOrganization(null, 1), 'id', 'name'));
         $dataProvider = $searchModel->search(\Yii::$app->request->queryParams);
 
@@ -30,7 +30,7 @@ class JournalController extends \frontend\modules\clientintegr\modules\iiko\cont
             'dataProvider' => $dataProvider,
             'user' => $user
         ]);
-    }*/
+    }
 
     /*
      * Displays a single Journal model.

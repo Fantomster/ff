@@ -12,10 +12,7 @@ class NotificationWebApi extends WebApi
 
     public function get(array $post)
     {
-        if (empty($post['id'])) {
-            throw new BadRequestHttpException('empty_param|id');
-        }
-
+        $this->validateRequest($post, ['id']);
         $path = $this->getPath();
         $path['notifications'] = $post['id'];
         $r = FireBase::getInstance()->get($path);
@@ -29,10 +26,7 @@ class NotificationWebApi extends WebApi
 
     public function push(array $post)
     {
-        if (empty($post['body'])) {
-            throw new BadRequestHttpException('empty_param|body');
-        }
-
+        $this->validateRequest($post, ['body']);
         $path = $this->getPath();
         $path['notifications'] = $this->generateId();
         FireBase::getInstance()->update($path, ['body' => $post['body']]);
@@ -41,20 +35,14 @@ class NotificationWebApi extends WebApi
 
     public function pushAnyUser(array $post)
     {
-        if (empty($post['body'])) {
-            throw new BadRequestHttpException('empty_param|body');
-        }
-
-        if (empty($post['user_id'])) {
-            throw new BadRequestHttpException('empty_param|user_id');
-        }
+        $this->validateRequest($post, ['body', 'user_id']);
 
         if (!User::findOne($post['user_id'])) {
             throw new BadRequestHttpException('user_not_found');
         }
 
         $path = [
-            'user' => $post['user_id'],
+            'user'          => $post['user_id'],
             'notifications' => $this->generateId()
         ];
 
@@ -64,9 +52,7 @@ class NotificationWebApi extends WebApi
 
     public function delete(array $post)
     {
-        if (empty($post['id'])) {
-            throw new BadRequestHttpException('empty_param|id');
-        }
+        $this->validateRequest($post, ['id']);
 
         $path = $this->getPath();
 
@@ -87,7 +73,7 @@ class NotificationWebApi extends WebApi
     private function getPath()
     {
         $path = [
-            'user' => $this->user->id,
+            'user'         => $this->user->id,
             'organization' => $this->user->organization->id
         ];
 

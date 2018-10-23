@@ -6,8 +6,6 @@ use api\common\models\AllMaps;
 use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
-use common\helpers\DBNameHelper;
-use common\models\CatalogBaseGoods;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
@@ -20,8 +18,6 @@ use common\models\search\OuterProductMapSearch;
 use common\models\Waybill;
 use common\models\WaybillContent;
 use yii\base\Exception;
-use yii\data\ActiveDataProvider;
-use yii\data\Pagination;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -72,10 +68,6 @@ class IntegrationWebApi extends WebApi
      */
     public function handleWaybill(array $post): array
     {
-        if (!isset($post)) {
-            throw new BadRequestHttpException("empty_param|post");
-        }
-
         if (!isset($post['service_id'])) {
             throw new BadRequestHttpException("empty_param|service_id");
         }
@@ -121,11 +113,15 @@ class IntegrationWebApi extends WebApi
 
         $waybill = new Waybill();
         $waybill->service_id = (int)$post['service_id'];
+        $waybill->status_id = Registry::WAYBILL_FORMED;
         $waybill->outer_number_code = $ediNumber;
         $waybill->outer_contractor_uuid = $outerAgentUUID;
         $waybill->outer_store_uuid = $outerStoreUUID;
         $waybill->acquirer_id = $acquirerID;
-        $waybill->save();
+
+        if (!$waybill->save()) {
+            throw new ValidationException($waybill->getFirstErrors());
+        }
 
         return ['success' => true, 'waybill_id' => $waybill->id];
     }
@@ -231,21 +227,24 @@ class IntegrationWebApi extends WebApi
      */
     public function updateWaybillContent(array $post): array
     {
-        if (!isset($post['waybill_content_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_content_id");
-        }
+        $this->validateRequest($post, ['waybill_content_id']);
+
         $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
         if (!$waybillContent) {
             throw new BadRequestHttpException("waybill content not found");
         }
+
         if (isset($post['vat_waybill'])) {
             $waybillContent->vat_waybill = (float)$post['vat_waybill'];
         }
+
         if (isset($post['outer_unit_id'])) {
             $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
         }
+
         $koef = null;
         $quan = null;
+
         if (isset($post['koef'])) {
             $koef = (float)$post['koef'];
         }
@@ -316,46 +315,39 @@ class IntegrationWebApi extends WebApi
      */
     public function createWaybillContent(array $post): array
     {
-        if (!isset($post['waybill_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_id");
+        $this->validateRequest($post, ['waybill_id', 'outer_product_id', 'outer_unit_id']);
+
+        $waybill = Waybill::findOne(['id' => $post['waybill_id'], 'acquirer_id' => $this->user->organization_id]);
+        if (!$waybill) {
+            throw new BadRequestHttpException("waybill_not_found");
         }
 
-        $waybill = Waybill::findOne(['id' => $post['waybill_id']]);
-        if (!$waybill) {
-            throw new BadRequestHttpException("waybill not found");
-        }
-        if (!$waybill->order_id) {
-            throw new BadRequestHttpException("empty order_id");
+        $exists = WaybillContent::find()
+            ->where([
+                'waybill_id'       => $waybill->id,
+                'outer_product_id' => $post['outer_product_id']
+            ])->exists();
+
+        if ($exists) {
+            throw new BadRequestHttpException("waybill.content_exists");
         }
 
         $waybillContent = new WaybillContent();
-        if (isset($post['waybill_id'])) {
-            $waybillContent->waybill_id = $post['waybill_id'];
-        }
-        if (isset($post['vat_waybill'])) {
-            $waybillContent->vat_waybill = (float)$post['vat_waybill'];
-        }
-        if (isset($post['outer_unit_id'])) {
-            $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
-        }
-        if (isset($post['quantity_waybill'])) {
-            $waybillContent->quantity_waybill = (int)$post['quantity_waybill'];
-        }
-        if (isset($post['outer_product_id'])) {
-            $waybillContent->outer_product_id = $post['outer_product_id'];
-        }
+        $waybillContent->waybill_id = $post['waybill_id'];
+        $waybillContent->outer_product_id = $post['outer_product_id'];
+        $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
+        $waybillContent->vat_waybill = (int)$post['vat_waybill'] ?? 0;
+        $waybillContent->quantity_waybill = $post['quantity_waybill'] ?? 1;
 
-        if (isset($post['price_without_vat'])) {
-            $waybillContent->price_without_vat = (int)$post['price_without_vat'];
-            if (isset($post['vat_waybill'])) {
-                $waybillContent->price_with_vat = (int)($post['price_without_vat'] + ($post['price_without_vat'] * $post['vat_waybill']));
-                if (isset($post['quantity_waybill'])) {
-                    $waybillContent->sum_without_vat = (int)$post['price_without_vat'] * $post['quantity_waybill'];
-                    $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $post['quantity_waybill'];
-                }
+        if (!empty($post['price_without_vat'])) {
+            $waybillContent->price_without_vat = round($post['price_without_vat'], 2);
+            $waybillContent->sum_without_vat = round($post['price_without_vat'] * $waybillContent->quantity_waybill, 2);
+            if ($waybillContent->vat_waybill != 0) {
+                $waybillContent->price_with_vat = round(($post['price_without_vat'] + (($post['price_without_vat'] / 100) * $post['vat_waybill'])), 2);
             }
         }
 
+        $waybillContent->sum_with_vat = round($waybillContent->price_with_vat * $waybillContent->quantity_waybill, 2);
         $waybillContent->save();
 
         return ['success' => true, 'waybill_content_id' => $waybillContent->id];
@@ -370,9 +362,7 @@ class IntegrationWebApi extends WebApi
      */
     public function deleteWaybillContent(array $post): array
     {
-        if (!isset($post['waybill_content_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_content_id");
-        }
+        $this->validateRequest($post, ['waybill_content_id']);
 
         $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
         if (!$waybillContent) {

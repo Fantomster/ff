@@ -8,7 +8,6 @@ use Yii;
 use common\models\Organization;
 use yii\db\Query;
 
-
 /**
  * This is the model class for table "rk_access".
  *
@@ -32,12 +31,11 @@ use yii\db\Query;
 class RkTasks extends \yii\db\ActiveRecord
 {
 
-    const INTSTATUS_SENT = 1;
+    const INTSTATUS_SENT     = 1;
     const INTSTATUS_EXTERROR = 2;
-    const INTSTATUS_XMLOK = 3;
-    const INTSTATUS_DICOK = 4;
-    const INTSTATUS_FULLOK = 5;
-
+    const INTSTATUS_XMLOK    = 3;
+    const INTSTATUS_DICOK    = 4;
+    const INTSTATUS_FULLOK   = 5;
 
     /**
      * @inheritdoc
@@ -56,7 +54,7 @@ class RkTasks extends \yii\db\ActiveRecord
             [['fid', 'acc', 'guid'], 'required'],
             [['id', 'fid', 'acc'], 'integer'],
             [['guid', 'acc', 'created_at', 'updated_at', 'callback_at', 'intstatus_id', 'wsstatus_id',
-                'wsclientstatus_id', 'tasktype_id', 'fid', 'fcode', 'version', 'isactive', 'callback_xml', 'callback_end', 'rcount', 'total_parts', 'current_part', 'req_uid'], 'safe'],
+            'wsclientstatus_id', 'tasktype_id', 'fid', 'fcode', 'version', 'isactive', 'callback_xml', 'callback_end', 'rcount', 'total_parts', 'current_part', 'req_uid'], 'safe'],
         ];
     }
 
@@ -66,51 +64,29 @@ class RkTasks extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'fid' => 'FID',
-            'guid' => 'GUID',
+            'id'    => 'ID',
+            'fid'   => 'FID',
+            'guid'  => 'GUID',
             'Nonce' => 'Nonce'
         ];
     }
 
-    /*
-     public static function getStatusArray() {
-         return [
-         RkAccess::STATUS_UNLOCKED  => 'Активен',
-         RkAccess::STATUS_LOCKED => 'Отключен',
-         ];
-     }
-
-     public function getOrganization() {
-            return $this->hasOne(Organization_api::className(), ['id' => 'org']);
-
-     }
-
-     public function getOrganizationName()
- {
-     $org = $this->organization;
-     return $org ? $org->name : 'no';
- }
-
-     */
-
-
     public function afterSave($insert, $changedAttributes)
     {
-        if($insert) {
-            $journal = new Journal();
-            $journal->user_id = \Yii::$app->user->getId();
+        if ($insert) {
+            $journal                  = new Journal();
+            $journal->user_id         = \Yii::$app->user->getId();
             $journal->organization_id = $this->acc;
-            $journal->operation_code = $this->getTaskType()['code'];
-            $journal->log_guide = $this->guid;
-            $journal->service_id = rkeeperService::getServiceId();
+            $journal->operation_code  = $this->getTaskType()['code'];
+            $journal->log_guide       = $this->guid;
+            $journal->service_id      = rkeeperService::getServiceId();
         } else {
             $journal = Journal::findOne(['service_id' => rkeeperService::getServiceId(), 'log_guide' => $this->guid]);
         }
 
-        $journal->type = ($this->intstatus_id == self::INTSTATUS_EXTERROR ? 'error' : 'success');
+        $journal->type     = ($this->intstatus_id == self::INTSTATUS_EXTERROR ? 'error' : 'success');
         $journal->response = 'code: ' . $this->fcode;
-        if(!$journal->save()) {
+        if (!$journal->save()) {
             var_dump($journal->getErrors());
         }
 
@@ -122,22 +98,24 @@ class RkTasks extends \yii\db\ActiveRecord
 
         $this->callback_xml = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-        if (!$this->save())
+        if (!$this->save()) {
             return false;
-        else
+        } else {
             return true;
+        }
     }
 
     public function setCallbackStart()
     {
 
-        $this->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        $this->callback_at  = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         $this->intstatus_id = self::INTSTATUS_XMLOK;
 
-        if (!$this->save())
+        if (!$this->save()) {
             return false;
-        else
+        } else {
             return true;
+        }
     }
 
     public function setCallbackEnd()
@@ -145,10 +123,11 @@ class RkTasks extends \yii\db\ActiveRecord
 
         $this->callback_end = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
-        if (!$this->save())
+        if (!$this->save()) {
             return false;
-        else
+        } else {
             return true;
+        }
     }
 
     public function isAllPartsReady($uid)
@@ -167,10 +146,10 @@ class RkTasks extends \yii\db\ActiveRecord
     /**
      * @return array|bool
      */
-    public function getTaskType() {
+    public function getTaskType()
+    {
         $taskType = (new Query())->select('*')->from('{{%rk_tasktype}}')->where(['id' => $this->tasktype_id])->one(\Yii::$app->db_api);
         return $taskType;
     }
-
 
 }

@@ -6,7 +6,6 @@ use Yii;
 use common\models\Organization;
 use yii\helpers\ArrayHelper;
 
-
 /**
  * This is the model class for table "rk_agent".
  *
@@ -24,8 +23,7 @@ class RkAgent extends \yii\db\ActiveRecord
 {
 
     const STATUS_UNLOCKED = 0;
-    const STATUS_LOCKED = 1;
-
+    const STATUS_LOCKED   = 1;
 
     /**
      * @inheritdoc
@@ -41,10 +39,10 @@ class RkAgent extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['acc','rid','denom'], 'required'],
-            [['acc','rid','vendor_id'], 'integer'],
+            [['acc', 'rid', 'denom'], 'required'],
+            [['acc', 'rid', 'vendor_id'], 'integer'],
             [['comment'], 'string', 'max' => 255],
-            [['acc','rid','denom','agent_type','updated_at'],'safe']
+            [['acc', 'rid', 'denom', 'agent_type', 'updated_at'], 'safe']
         ];
     }
 
@@ -54,21 +52,20 @@ class RkAgent extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'fid' => 'FID',
-            'rid' => 'RID Store House',
-            'denom' => Yii::t('app', 'api.common.models.store', ['ru'=>'Наименование Store House']),
-            'vendor_id' => Yii::t('app', 'api.common.models.vendor_id', ['ru'=>'Поставщик MixCart']),
-            'updated_at' => Yii::t('app', 'api.common.models.updated', ['ru'=>'Обновлено']),
-
+            'id'         => 'ID',
+            'fid'        => 'FID',
+            'rid'        => 'RID Store House',
+            'denom'      => Yii::t('app', 'api.common.models.store', ['ru' => 'Наименование Store House']),
+            'vendor_id'  => Yii::t('app', 'api.common.models.vendor_id', ['ru' => 'Поставщик MixCart']),
+            'updated_at' => Yii::t('app', 'api.common.models.updated', ['ru' => 'Обновлено']),
         ];
     }
 
-
-    public static function getStatusArray() {
+    public static function getStatusArray()
+    {
         return [
-            RkAccess::STATUS_UNLOCKED  => Yii::t('app', 'api.common.models.active_two', ['ru'=>'Активен']),
-            RkAccess::STATUS_LOCKED => Yii::t('app', 'api.common.models.off_two', ['ru'=>'Отключен']),
+            RkAccess::STATUS_UNLOCKED => Yii::t('app', 'api.common.models.active_two', ['ru' => 'Активен']),
+            RkAccess::STATUS_LOCKED   => Yii::t('app', 'api.common.models.off_two', ['ru' => 'Отключен']),
         ];
     }
 
@@ -77,9 +74,9 @@ class RkAgent extends \yii\db\ActiveRecord
         return $this->hasOne(Organization::className(), ['id' => 'vendor_id']);
     }
 
-    public function getOrganization() {
-        return $this->hasOne(Organization_api::className(), ['id' => 'org']);
-
+    public function getOrganization()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'org']);
     }
 
     public function getOrganizationName()
@@ -87,7 +84,6 @@ class RkAgent extends \yii\db\ActiveRecord
         $org = $this->organization;
         return $org ? $org->name : 'no';
     }
-
 
     public static function getDb()
     {
@@ -99,18 +95,19 @@ class RkAgent extends \yii\db\ActiveRecord
      *
      * @return array
      */
-    public function getAgents($org_id, $all = true, $notMap=true) {
+    public function getAgents($org_id, $all = true, $notMap = true)
+    {
         $query = RkAgent::find()
-            ->select(['rid', 'denom'])->where(['acc' => $org_id]);
+                        ->select(['rid', 'denom'])->where(['acc' => $org_id]);
 
-        if($notMap){
+        if ($notMap) {
             $agents = ArrayHelper::map($query->orderBy(['denom' => SORT_ASC])
-                ->asArray()
-                ->all(), 'rid', 'denom');
-        }else{
+                                    ->asArray()
+                                    ->all(), 'rid', 'denom');
+        } else {
             $agents = $query->orderBy(['denom' => SORT_ASC])
-                ->asArray()
-                ->all();
+                    ->asArray()
+                    ->all();
         }
 
         if ($all) {
@@ -119,4 +116,5 @@ class RkAgent extends \yii\db\ActiveRecord
         ksort($agents);
         return $agents;
     }
+
 }

@@ -180,7 +180,7 @@ class iikoApi
         if ($info['http_code'] != 200) {
             $logger->setType('error');
             $logger->response(['info' => $info, 'response' => $response]);
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ' . curl_error($ch));
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . PHP_EOL . curl_error($ch));
         }
         $logger->response($response);
         return $response;

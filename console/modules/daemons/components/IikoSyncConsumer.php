@@ -9,6 +9,7 @@
 namespace console\modules\daemons\components;
 
 use api\common\models\RabbitQueues;
+use api_web\components\Registry;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
 use api_web\helpers\iikoApi;
@@ -24,7 +25,7 @@ class IikoSyncConsumer extends AbstractConsumer
     /**@property int|null $orgId Id организации */
     public $orgId;
     /**@var integer */
-    const SERVICE_ID = 2;
+    const SERVICE_ID = Registry::IIKO_SERVICE_ID;
 
     /**
      * @var
@@ -53,15 +54,15 @@ class IikoSyncConsumer extends AbstractConsumer
         $model = OuterDictionary::findOne(['name' => $this->type, 'service_id' => self::SERVICE_ID]);
 
         $dictionary = OrganizationDictionary::findOne([
-            'org_id' => $this->orgId,
+            'org_id'       => $this->orgId,
             'outer_dic_id' => $model->id
         ]);
 
-        if(empty($dictionary)) {
+        if (empty($dictionary)) {
             $dictionary = new OrganizationDictionary([
-                'org_id' => $this->orgId,
+                'org_id'       => $this->orgId,
                 'outer_dic_id' => $model->id,
-                'status_id' => OrganizationDictionary::STATUS_DISABLED
+                'status_id'    => OrganizationDictionary::STATUS_DISABLED
             ]);
         }
 

@@ -80,19 +80,13 @@ class DocumentWebApi extends \api_web\components\WebApi
     /**
      * Метод получения шапки документа
      *
-     * @param $document_id
-     * @param $type
+     * @param array $post
      * @return mixed
      * @throws BadRequestHttpException
      */
     public function getHeader(array $post)
     {
-        if (!isset($post['type'])) {
-            throw new BadRequestHttpException("empty_param|type");
-        }
-        if (empty($post['document_id'])) {
-            throw new BadRequestHttpException("empty_param|document_id");
-        }
+        $this->validateRequest($post, ['type', 'document_id']);
 
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
             throw new BadRequestHttpException('dont support this type');
@@ -105,19 +99,13 @@ class DocumentWebApi extends \api_web\components\WebApi
     /**
      * Метод получения детальной части документа
      *
-     * @param $document_id
-     * @param $type
+     * @param array $post
      * @return mixed
      * @throws BadRequestHttpException
      */
     public function getContent(array $post)
     {
-        if (!isset($post['type'])) {
-            throw new BadRequestHttpException("empty_param|type");
-        }
-        if (empty($post['document_id'])) {
-            throw new BadRequestHttpException("empty_param|document_id");
-        }
+        $this->validateRequest($post, ['type', 'document_id']);
 
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
             throw new BadRequestHttpException('dont support this type');
@@ -136,17 +124,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function getDocumentContents(array $post)
     {
-        if (!isset($post['type'])) {
-            throw new BadRequestHttpException("empty_param|type");
-        }
-
-        if (empty($post['document_id'])) {
-            throw new BadRequestHttpException("empty_param|document_id");
-        }
-
-        if (empty($post['service_id'])) {
-            throw new BadRequestHttpException("empty_param|service_id");
-        }
+        $this->validateRequest($post, ['type', 'document_id', 'service_id']);
 
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
             throw new BadRequestHttpException('document.not_support_type');
@@ -445,9 +423,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function waybillResetPositions(array $post)
     {
-        if (!isset($post['waybill_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_id");
-        }
+        $this->validateRequest($post, ['waybill_id']);
 
         $waybill = Waybill::findOne(['id' => $post['waybill_id']]);
 
@@ -472,9 +448,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function getWaybillDetail(array $post)
     {
-        if (empty($post['waybill_id'])) {
-            throw new BadRequestHttpException("empty_param|document_id");
-        }
+        $this->validateRequest($post, ['waybill_id']);
 
         return Waybill::prepareDetail($post['waybill_id']);
     }
@@ -489,9 +463,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function editWaybillDetail(array $post)
     {
-        if (empty($post['id'])) {
-            throw new BadRequestHttpException("empty_param|id");
-        }
+        $this->validateRequest($post, ['id']);
 
         $waybill = Waybill::findOne(['id' => $post['id']]);
         if (!isset($waybill)) {
@@ -552,13 +524,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function mapWaybillOrder(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException("empty_param|order_id");
-        }
-
-        if (empty($post['document_id'])) {
-            throw new BadRequestHttpException("empty_param|document_id");
-        }
+        $this->validateRequest($post, ['order_id', 'document_id']);
 
         $waybill = Waybill::findOne(['id' => (int)$post['document_id']]);
         if (!isset($waybill)) {

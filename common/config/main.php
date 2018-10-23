@@ -14,6 +14,10 @@ return [
     'timeZone' => 'Asia/Baghdad',
     'charset' => 'utf-8',
     'components' => [
+        'formatter' => [
+            'decimalSeparator' => '.',
+            'thousandSeparator' => '',
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],

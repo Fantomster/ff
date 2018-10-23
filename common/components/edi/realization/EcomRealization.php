@@ -12,13 +12,12 @@ use common\components\edi\AbstractRealization;
 use common\components\edi\EDIClass;
 use common\components\edi\RealizationInterface;
 
-
 /**
  * Class Realization
  *
  * @package common\components\edi\realization
  */
-class KorusRealization extends AbstractRealization implements RealizationInterface
+class EcomRealization extends AbstractRealization implements RealizationInterface
 {
     /**
      * @var \SimpleXMLElement

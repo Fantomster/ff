@@ -46,6 +46,12 @@ abstract class AbstractRealization
      */
     public $fileId;
 
+
+    /**
+     * @var
+     */
+    public $fileName;
+
     /**
      * @var
      */

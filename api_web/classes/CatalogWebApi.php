@@ -181,13 +181,7 @@ class CatalogWebApi extends WebApi
      */
     public function deleteItemTemporary($request)
     {
-        if (empty($request['temp_id'])) {
-            throw new BadRequestHttpException("empty_param|temp_id");
-        }
-
-        if (empty($request['id'])) {
-            throw new BadRequestHttpException("empty_param|position_id");
-        }
+        $this->validateRequest($request, ['temp_id', 'id']);
 
         $model = CatalogTempContent::findOne(['temp_id' => (int)$request['temp_id'], 'id' => (int)$request['id']]);
         if (empty($model)) {
@@ -209,12 +203,8 @@ class CatalogWebApi extends WebApi
      * @throws \yii\web\BadRequestHttpException
      */
     public function deleteItemPersonalCatalog($request){
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
-        if (empty($request['product_id'])) {
-            throw new BadRequestHttpException('empty_param|product_id');
-        }
+
+        $this->validateRequest($request, ['vendor_id', 'product_id']);
 
         $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
         if (empty($catalog)) {
@@ -240,9 +230,8 @@ class CatalogWebApi extends WebApi
      */
     public function getTempDuplicatePosition(array $request)
     {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($request, ['vendor_id']);
+
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
         $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($catalogTemp)) {
@@ -347,9 +336,7 @@ class CatalogWebApi extends WebApi
         $page = (isset($request['pagination']['page']) ? $request['pagination']['page'] : 1);
         $pageSize = (isset($request['pagination']['page_size']) ? $request['pagination']['page_size'] : 12);
 
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($request, ['vendor_id']);
 
         $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
 
@@ -427,9 +414,8 @@ class CatalogWebApi extends WebApi
         $page = (isset($request['pagination']['page']) ? $request['pagination']['page'] : 1);
         $pageSize = (isset($request['pagination']['page_size']) ? $request['pagination']['page_size'] : 12);
 
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($request, ['vendor_id']);
+
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
         if (!$catalog) {
             throw new BadRequestHttpException("Catalog not found");
@@ -462,16 +448,14 @@ class CatalogWebApi extends WebApi
 
     /**
      * Список товаров в каталоге
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
      */
     public function setCurrencyForPersonalCatalog($request)
     {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
-
-        if (empty($request['currency_id'])) {
-            throw new BadRequestHttpException('empty_param|currency_id');
-        }
+        $this->validateRequest($request, ['vendor_id', 'currency_id']);
 
         $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
 

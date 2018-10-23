@@ -164,7 +164,7 @@ class WaybillHelper
      * @return int
      * @throws \Exception
      */
-    private function createWaybillAndContent($arOuterMappedProducts, $orgId, $outerStoreId = null, $serviceId = null)
+    private function createWaybillAndContent($arOuterMappedProducts, $orgId, $outerStoreId, $serviceId)
     {
         $model = $this->buildWaybill($orgId);
         $model->outer_store_id = (string)$outerStoreId;
@@ -172,7 +172,7 @@ class WaybillHelper
         $model->status_id = Registry::WAYBILL_COMPARED;
 
         //для каждого может быть разный
-        $model->edi_number = $this->generateEdiNumber($arOuterMappedProducts);
+        $model->edi_number = $this->generateEdiNumber($arOuterMappedProducts, $serviceId);
 
         $transaction = \Yii::$app->db_api->beginTransaction();
 
@@ -352,9 +352,10 @@ class WaybillHelper
 
     /**
      * @param $arOuterStoreProducts
+     * @param $serviceId
      * @return array|string
      */
-    private function generateEdiNumber($arOuterStoreProducts)
+    private function generateEdiNumber($arOuterStoreProducts, $serviceId)
     {
         /**@var OrderContent $orderContent */
         $orderContent = current($arOuterStoreProducts)['orderContent'];
@@ -365,9 +366,10 @@ class WaybillHelper
 
         $existWaybill = OrderContent::find()->where(['like', 'edi_number', $tmp_ed_num])
             ->andWhere(['order_id' => $orderContent->order_id])
-            ->orderBy(['edi_number' => 'desc'])->limit(1)->one();
+            ->orderBy(['edi_number' => SORT_DESC])->limit(1)->one();
         if (!$existWaybill) {
             $existWaybill = Waybill::find()->where(['like', 'edi_number', $tmp_ed_num])
+                ->andWhere(['service_id' => $serviceId])
                 ->orderBy(['edi_number' => SORT_DESC])->limit(1)->one();
         }
         $ed_num = $tmp_ed_num . '-1';

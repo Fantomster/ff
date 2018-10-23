@@ -119,6 +119,15 @@ Modal::widget([
                 'label' => 'Фирма-получатель',
                 'format' => 'raw',
                 'value' => function ($data) {
+                    $enterprise = \common\models\vetis\VetisRussianEnterprise::findOne(['guid' => $data['recipient_guid'], 'active' => true, 'last' => true]);
+
+                    if (empty($enterprise)) {
+                        $enterprise = \common\models\vetis\VetisForeignEnterprise::findOne(['guid' => $data['recipient_guid'], 'active' => true, 'last' => true]);
+                    }
+
+                    if (!empty($enterprise)) {
+                        return $enterprise->name.'('. $enterprise->addressView .')';
+                    }
                     return $data['recipient_name'];
                 },
                 'visible' => ($searchModel->type == 2),
@@ -128,7 +137,16 @@ Modal::widget([
                 'label' => 'Фирма-отправитель',
                 'format' => 'raw',
                 'value' => function ($data) {
-                    return $data['sender_name'];
+                    $enterprise = \common\models\vetis\VetisRussianEnterprise::findOne(['guid' => $data['sender_guid'], 'active' => true, 'last' => true]);
+
+                    if (empty($enterprise)) {
+                        $enterprise = \common\models\vetis\VetisForeignEnterprise::findOne(['guid' => $data['sender_guid'], 'active' => true, 'last' => true]);
+                    }
+
+                    if (!empty($enterprise)) {
+                        return $enterprise->name.'('. $enterprise->addressView .')';
+                    }
+                    return $data['recipient_name'];
                 },
                 'visible' => ($searchModel->type != 2),
             ],

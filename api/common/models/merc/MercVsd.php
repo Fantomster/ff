@@ -303,7 +303,7 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     /**
      * Запрос обновлений справочника
      */
-    public static function getUpdateData($org_id, $enterpriseGuid = null)
+    public static function getUpdateData($org_id, $enterpriseGuid = null, $start_date = null)
     {
         try {
             $enterpriseGuid = $enterpriseGuid ?? mercDicconst::getSetting('enterprise_guid', $org_id);
@@ -314,6 +314,7 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $queue->consumer_class_name = 'MercVSDList';
                 $queue->organization_id = $org_id;
                 $queue->store_id = $enterpriseGuid;
+                $queue->save();
             }
 
             if (!empty($queue->organization_id)) {
@@ -322,18 +323,10 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $queueName = $queue->consumer_class_name;
             }
 
-            if (!isset($queue->data_request)) {
-
-                $data['startDate'] = MercVisits::getLastVisit($org_id, 'MercVSDList', $enterpriseGuid);
-
-                $data['listOptions']['count'] = 100;
-                $data['listOptions']['offset'] = 0;
-                $data['enterpriseGuid'] = $enterpriseGuid;
-                $queue->data_request = json_encode($data);
-                $queue->save();
-            } else {
-                $data = json_decode($queue->data_request, true);
-            }
+            $data['startDate'] = $start_date ?? MercVisits::getLastVisit($org_id, 'MercVSDList', $enterpriseGuid);
+            $data['listOptions']['count'] = 100;
+            $data['listOptions']['offset'] = 0;
+            $data['enterpriseGuid'] = $enterpriseGuid;
 
             //ставим задачу в очередь
             \Yii::$app->get('rabbit')

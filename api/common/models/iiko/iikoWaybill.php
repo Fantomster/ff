@@ -405,13 +405,13 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             if ($this->store_id === null) {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2 and `' . $dbName . '`.all_map.org_id in (' . $client_id . ')')
+                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = ' . $this->service_id . ' and `' . $dbName . '`.all_map.org_id in (' . $client_id . ')')
                     ->andWhere('`' . $dbName . '`.all_map.store_rid is null')
                     ->all();
             } else {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2 and `' . $dbName . '`.all_map.org_id in (' . $client_id . ')')
+                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = ' . $this->service_id . ' and `' . $dbName . '`.all_map.org_id in (' . $client_id . ')')
                     ->andWhere('`' . $dbName . '`.all_map.store_rid =' . $this->store_id)
                     ->all();
             }
@@ -445,13 +445,13 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 // New check mapping
                 $client_id = $this->org;
                 if ($wdmodel->org != $this->org) {
-                    $client_id = "IF(product_id in (select product_id from all_map where service_id = 2 and org_id = $client_id), $client_id, $wdmodel->org)";
+                    $client_id = "IF(product_id in (select product_id from all_map where service_id = $this->service_id and org_id = $client_id), $client_id, $wdmodel->org)";
                 }
 
                 $ch = AllMaps::find()
                     ->andWhere('product_id = :prod', ['prod' => $record->product_id])
                     ->andWhere("org_id in ($client_id)")
-                    ->andWhere('service_id = 2')
+                    ->andWhere('service_id = :service_id', ['service_id' => $this->service_id])
                     ->one();
 
                 if ($ch) {

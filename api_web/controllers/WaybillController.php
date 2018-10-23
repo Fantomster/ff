@@ -342,7 +342,7 @@ class WaybillController extends WebApiController
      *                              "quantity_waybill": 1,
      *                              "outer_product_id": 4822,
      *                              "price_without_vat": 35000,
-     *                              "vat_waybill": 0.18
+     *                              "vat_waybill": 18
      *                          }
      *              )
      *         )

@@ -5,6 +5,7 @@ namespace api_web\classes;
 use api\common\models\AllMaps;
 use api_web\components\Registry;
 use api_web\components\WebApi;
+use api_web\exceptions\ValidationException;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
@@ -64,10 +65,6 @@ class IntegrationWebApi extends WebApi
      */
     public function handleWaybill(array $post): array
     {
-        if (!isset($post)) {
-            throw new BadRequestHttpException("empty_param|post");
-        }
-
         if (!isset($post['service_id'])) {
             throw new BadRequestHttpException("empty_param|service_id");
         }
@@ -113,11 +110,15 @@ class IntegrationWebApi extends WebApi
 
         $waybill = new Waybill();
         $waybill->service_id = (int)$post['service_id'];
+        $waybill->status_id = Registry::WAYBILL_FORMED;
         $waybill->outer_number_code = $ediNumber;
         $waybill->outer_contractor_uuid = $outerAgentUUID;
         $waybill->outer_store_uuid = $outerStoreUUID;
         $waybill->acquirer_id = $acquirerID;
-        $waybill->save();
+
+        if (!$waybill->save()) {
+            throw new ValidationException($waybill->getFirstErrors());
+        }
 
         return ['success' => true, 'waybill_id' => $waybill->id];
     }

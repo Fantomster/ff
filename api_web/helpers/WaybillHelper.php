@@ -142,11 +142,10 @@ class WaybillHelper
      */
     private function buildWaybill($orgId)
     {
-        $arFlipedWaybillStatuses = array_flip(Registry::$waybill_statuses);
         $model = new Waybill();
         $model->acquirer_id = $orgId;
         $model->service_id = Registry::EDI_SERVICE_ID;
-        $model->status_id = $arFlipedWaybillStatuses[Registry::WAYBILL_FORMED];
+        $model->status_id = Registry::WAYBILL_FORMED;
         $datetime = new \DateTime();
         $model->doc_date = $datetime->format('Y-m-d H:i:s');
         $model->created_at = $datetime->format('Y-m-d H:i:s');
@@ -264,13 +263,12 @@ class WaybillHelper
         if (!isset($request['waybill_id']) && !isset($request['order_content_id'])) {
             throw new BadRequestHttpException('empty_param|waybill_id|order_content_id');
         }
-        $arFlipedWaybillStatuses = array_flip(Registry::$waybill_statuses);
         $waybill = Waybill::findOne([
             'id'        => $request['waybill_id'],
             'status_id' => [
-                $arFlipedWaybillStatuses[Registry::WAYBILL_COMPARED],
-                $arFlipedWaybillStatuses[Registry::WAYBILL_ERROR],
-                $arFlipedWaybillStatuses[Registry::WAYBILL_FORMED],
+                Registry::WAYBILL_COMPARED,
+                Registry::WAYBILL_ERROR,
+                Registry::WAYBILL_FORMED,
             ]]);
         if (!$waybill) {
             throw new BadRequestHttpException('waybill cannot adding waybill_content with id ' . $request['waybill_id']);

@@ -81,7 +81,7 @@ class ServiceIiko extends AbstractSyncFactory
         $res = [];
         $records = iikoWaybill::find()
             ->andWhere(['id' => $request['ids'], 'service_id' => $this->serviceId])
-            ->andWhere('status_id = :stat', [':stat' => Registry::$waybill_statuses[Registry::WAYBILL_COMPARED]])
+            ->andWhere('status_id = :stat', [':stat' => Registry::WAYBILL_COMPARED])
             ->all();
 
         if (!isset($records)) {

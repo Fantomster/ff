@@ -16,6 +16,7 @@ use common\models\OuterProduct;
 use common\models\OuterProductMap;
 use common\models\OuterStore;
 use common\models\OuterUnit;
+use common\models\search\OuterProductMapSearch;
 use common\models\Waybill;
 use common\models\WaybillContent;
 use yii\base\Exception;
@@ -392,42 +393,8 @@ class IntegrationWebApi extends WebApi
 
     public function getProductMapList(array $post): array
     {
-
-        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
-        $query = OuterProductMap::find()
-            ->joinWith(['outerProduct', 'outerUnit', 'outerStore'])
-            ->leftJoin("$dbName.catalog_base_goods", "$dbName.catalog_base_goods.id = outer_product_map.product_id")
-            ->where(['organization_id' => $this->user->organization_id]);
-
-        $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
-
-        if (isset($post['search'])) {
-            /**
-             * фильтр по продукту
-             */
-            if (!empty($post['search']['product'])) {
-                $outerProductTableName = OuterProduct::tableName();
-                $catalogBaseGoodsTableNme = CatalogBaseGoods::tableName();
-                $query->andFilterWhere(['like', "`$outerProductTableName`.`name`", $post['search']['product']]);
-                $query->orFilterWhere(['like', "$dbName.`$catalogBaseGoodsTableNme`.`product`", $post['search']['product']]);
-            }
-            /**
-             * фильтр по поставщику
-             */
-            if (!empty($post['search']['vendor'])) {
-                $query->andWhere(['vendor_id' => $post['search']['vendor']]);
-            }
-        }
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query
-        ]);
-
-        $pagination = new Pagination();
-        $pagination->setPage($page - 1);
-        $pagination->setPageSize($pageSize);
-        $dataProvider->setPagination($pagination);
+        $dataProvider = (new OuterProductMapSearch())->search($this->user->organization, $post);
 
         $result = [];
         foreach ($dataProvider->models as $model) {
@@ -549,60 +516,59 @@ class IntegrationWebApi extends WebApi
      * @param OuterProductMap $model
      * @return array
      */
-    private function prepareOutProductMap(OuterProductMap $model)
+    private function prepareOutProductMap(array $model)
     {
         $result = [
-            "id"              => $model->id,
-            "service_id"      => $model->service_id,
-            "organization_id" => $model->organization_id,
-            "vendor_id"       => $model->vendor_id,
+            "id"              => $model['id'],
+            "service_id"      => $model['service_id'],
+            "organization_id" => $model['organization_id'],
+            "vendor_id"       => $model['vendor_id'],
         ];
 
-        if (isset($model->product)) {
+        if (isset($model['product_id'])) {
             $result ["product"] = [
-                "id"   => $model->product->id,
-                "name" => $model->product->product,
+                "id"   => $model['product_id'],
+                "name" => $model['product_name'],
             ];
             $result["unit"] = [
-                "name" => $model->product->ed,
+                "name" => $model['unit'],
             ];
         } else {
             $result ["product"] = null;
             $result["unit"] = null;
         }
 
-        if (isset($model->outerProduct)) {
-
+        if (isset($model['outer_product_id'])) {
             $result ["outer_product"] = [
-                "id"   => $model->outerProduct->id,
-                "name" => $model->outerProduct->name
+                "id"   => $model['outer_product_id'],
+                "name" => $model['outer_product_name']
             ];
         } else {
             $result ["outer_product"] = null;
         }
 
-        if (isset($model->outerUnit)) {
+        if (isset($model["outer_unit_id"])) {
             $result["outer_unit"] = [
-                "id"   => $model->outerUnit->id,
-                "name" => $model->outerUnit->name
+                "id"   => $model['outer_unit_id'],
+                "name" => $model['outer_unit_name']
             ];
         } else {
             $result["outer_unit"] = null;
         }
 
-        if (isset($model->outerStore)) {
+        if (isset($model['outer_store_id'])) {
             $result["outer_store"] = [
-                "id"   => $model->outerStore->id,
-                "name" => $model->outerStore->name
+                "id"   => $model['outer_store_id'],
+                "name" => $model['outer_store_name']
             ];
         } else {
             $result["outer_store"] = null;
         }
 
-        $result["coefficient"] = $model->coefficient;
-        $result["vat"] = $model->vat;
-        $result["created_at"] = date("Y-m-d H:i:s T", strtotime($model->created_at));
-        $result["updated_at"] = date("Y-m-d H:i:s T", strtotime($model->updated_at));
+        $result["coefficient"] = $model['coefficient'];
+        $result["vat"] = $model['vat'];
+        $result["created_at"] = isset ($model['created_at']) ? date("Y-m-d H:i:s T", strtotime($model['created_at'])) : null;
+        $result["updated_at"] = isset($model['updated_at']) ? date("Y-m-d H:i:s T", strtotime($model['updated_at'])) : null;
         return $result;
     }
 }

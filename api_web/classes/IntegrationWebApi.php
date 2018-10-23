@@ -410,13 +410,7 @@ class IntegrationWebApi extends WebApi
      */
     public function mapUpdate(array $post)
     {
-        if (!isset($post['service_id'])) {
-            throw new BadRequestHttpException("empty_param|service_id");
-        }
-
-        if (!isset($post['map'])) {
-            throw new BadRequestHttpException("empty_param|map");
-        }
+        $this->validateRequest($post, ['service_id', 'map']);
 
         $result = [];
         foreach ($post['map'] as $item) {
@@ -439,9 +433,7 @@ class IntegrationWebApi extends WebApi
      */
     private function editProductMap(int $service_id, $request)
     {
-        if (!isset($request['product_id'])) {
-            throw new BadRequestHttpException("empty_param|product__id");
-        }
+        $this->validateRequest($request, ['product__id']);
 
         //Загружаем данные по базовому и дочерним бизнесам (если бизнес главный)
         $mainOrg = OuterProductMap::getMainOrg($this->user->organization_id);

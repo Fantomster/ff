@@ -15,7 +15,7 @@ class DocumentController extends \api_web\components\WebApiController
      *     summary="Детальная часть документа",
      *     description="Детальная часть документа
      *     Типы возвращаемых данных:
-     *     https://goo.gl/Nm9Kt3
+     *     https://goo.gl/VSWoBC
      * ",
      *     produces={"application/json"},
      *     @SWG\Parameter(

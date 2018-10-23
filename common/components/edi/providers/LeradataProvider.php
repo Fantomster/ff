@@ -152,7 +152,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         $dataArray = new \SimpleXMLElement($string);
         $documentType = ($done) ? 'recadv' : 'order';
         $paramsArray = [
-            "docType" => "desadv",
+            "docType" => "order",
             "doc" =>  $dataArray
         ];
         $array = $this->executeCurl($paramsArray, $action);
@@ -174,7 +174,6 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             "params"    => $paramsArray
         ];
         $payload = json_encode($requestArray);
-        //da($payload);
         $ch = curl_init($this->url);
         curl_setopt($ch, CURLOPT_POSTFIELDS, "$action=$payload");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

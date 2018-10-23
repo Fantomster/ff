@@ -411,17 +411,31 @@ class IntegrationWebApi extends WebApi
         ];
     }
 
+    /**
+     * Редактирование записи сопоставления
+     *
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
     public function mapUpdate(array $post)
     {
+        if (!isset($post['service_id'])) {
+            throw new BadRequestHttpException("empty_param|service_id");
+        }
+
+        if (!isset($post['map'])) {
+            throw new BadRequestHttpException("empty_param|map");
+        }
+
         $result = [];
-        foreach ($post as $item) {
-           try {
-               $this->editProductMap($item);
-               $result[$item['id']] = ['success' => true];
-           }catch (\Exception $e) {
-               var_dump($e->getTraceAsString()); die();
-               $result[$item['id']] = ['success' => false, 'error' => $e->getMessage()];
-           }
+        foreach ($post['map'] as $item) {
+            try {
+                $this->editProductMap($post['service_id'], $item);
+                $result[$item['product_id']] = ['success' => true];
+            } catch (\Exception $e) {
+                $result[$item['product_id']] = ['success' => false, 'error' => $e->getMessage()];
+            }
         }
         return $result;
     }
@@ -429,65 +443,72 @@ class IntegrationWebApi extends WebApi
     /**
      * Изменение атрибутов сопоставления
      *
-     * @param $request
+     * @param int $service_id
+     * @param     $request
      * @return array
      */
-    private function editProductMap($request) {
-        if (!isset($request['id'])) {
-            throw new BadRequestHttpException("empty_param|id");
+    private function editProductMap(int $service_id, $request)
+    {
+        if (!isset($request['product_id'])) {
+            throw new BadRequestHttpException("empty_param|product__id");
         }
 
-        $model = OuterProductMap::findOne(['id' => $request['id']]);
-        if (!$model) {
-            throw new Exception('Product map not found');
-        }
-
+        //Загружаем данные по базовому и дочерним бизнесам (если бизнес главный)
         $mainOrg = OuterProductMap::getMainOrg($this->user->organization_id);
         $orgs = OuterProductMap::getChildOrgsId($this->user->organization_id);
         $orgs[] = $this->user->organization_id;
 
-        if(isset($request['outer_product_id'])) {
-            if($mainOrg) {
+        if (isset($request['outer_product_id'])) {
+            //Если бизнес не главный то менять соспоставление с продуктом нельзя
+            if ($mainOrg) {
                 unset($request['outer_product_id']);
-            }
-            else
-            {
+            } else {
+                //Проверяем что сопоставляемый продукт свзан с нашей организацией
                 $check = OuterProduct::find()
                     ->where(['id' => $request['outer_product_id']])
                     ->andWhere(['org_id' => $this->user->organization_id])
                     ->one();
 
-                if(!$check) {
+                if (!$check) {
                     throw new Exception('outer product not found');
                 }
             }
         }
 
-        if(isset($request['outer_store_id'])) {
-                $check = OuterStore::find()->where(['id' => $request['outer_store_id']])
-                    ->andWhere(['org_id' => $this->user->organization_id])
-                    ->one();
+        //Проверяем что сопоставляемый склад свзан с нашей организацией
+        if (isset($request['outer_store_id'])) {
+            $check = OuterStore::find()->where(['id' => $request['outer_store_id']])
+                ->andWhere(['org_id' => $this->user->organization_id])
+                ->one();
 
-                if(!$check) {
-                    throw new Exception('outer store not found');
-                }
+            if (!$check) {
+                throw new Exception('outer store not found');
+            }
         }
 
-        if(isset($request['outer_product_id']) && count($orgs) > 1 && !$mainOrg)
-        {
+        //Если меняется сопоставление с продуктом, и бищнес главнй и есть дочерние бизнесы, то обновляем соспоставление в их записях
+        if (isset($request['outer_product_id']) && count($orgs) > 1 && !$mainOrg) {
             $condition = [
-                    'and',
-                        ['service_id' => $model->service_id],
-                        ['product_id' => $model->product_id],
-                        ['in','organization_id', $orgs]
+                'and',
+                ['service_id' => $service_id],
+                ['product_id' => $request['product_id']],
+                ['in', 'organization_id', $orgs]
             ];
 
             OuterProductMap::updateAll(['outer_product_id' => $request['outer_product_id']], $condition);
         }
 
-        //Создаем дубликат запииси для дочерней организации при необходимости
-        if($mainOrg) {
-            if($model->organization_id != $this->user->organization_id) {
+        //Ищем запись для редактирования
+        $model = OuterProductMap::findOne(['product_id' => $request['product_id'], 'service_id' => $service_id, 'organization_id' => $this->user->organization_id]);
+        if (!$mainOrg) {
+            if (!$model) {
+                $model = new OuterProductMap();
+                $model->service_id = $service_id;
+                $model->organization_id = $this->user->organization_id;
+            }
+        } else {
+            //Создаем дубликат запииси для дочерней организации при необходимости или новую запись
+            if ($model->organization_id != $this->user->organization_id) {
                 $mainAttributes = $model->attributes();
                 $model = new OuterProductMap();
                 $model->service_id = $mainAttributes['service_id'];
@@ -504,7 +525,7 @@ class IntegrationWebApi extends WebApi
 
         $model->attributes = $request;
         $model->outer_unit_id = $model->outerProduct->outer_unit_id;
-
+        $model->vendor_id = $model->product->supp_org_id;
         if (!$model->save()) {
             throw new ValidationException($model->getFirstErrors());
         }

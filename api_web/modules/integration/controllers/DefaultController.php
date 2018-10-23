@@ -95,6 +95,7 @@ class DefaultController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
+     *                      "service_id": 1,
      *                      "search": {
      *                              "product": "Апельсины",
      *                               "vendor": 1,
@@ -183,20 +184,23 @@ class DefaultController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                           {
-     *                               "id": 2234,
-     *                               "outer_product_id": 102,
-     *                               "outer_store_id": 1056,
-     *                               "coefficient": 2,
-     *                               "vat": 10
-     *                           },
-     *                           {
-     *                               "id": 4234,
-     *                               "outer_product_id": 132,
-     *                               "outer_store_id": 2076,
-     *                               "coefficient": 1,
-     *                               "vat": 18
-     *                           }
+     *                          "service_id": 2,
+     *                          "map": {
+     *                              {
+     *                                  "product_id": 2234,
+     *                                  "outer_product_id": 102,
+     *                                  "outer_store_id": 1056,
+     *                                  "coefficient": 2,
+     *                                  "vat": 10
+     *                              },
+     *                              {
+     *                                  "product_id": 4234,
+     *                                  "outer_product_id": 132,
+     *                                  "outer_store_id": 2076,
+     *                                  "coefficient": 1,
+     *                                  "vat": 18
+     *                              }
+     *                          }
      *                       }
      *              )
      *         )

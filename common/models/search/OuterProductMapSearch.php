@@ -14,7 +14,6 @@ use yii\data\SqlDataProvider;
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-
 class OuterProductMapSearch extends OuterProductMap
 {
     /**
@@ -37,13 +36,13 @@ class OuterProductMapSearch extends OuterProductMap
 
         $query = CatalogBaseGoods::find()
             ->select(["$dbName.$outerProductMapTableName.id as id", "IFNULL($dbName.$outerProductMapTableName.id, :service_id) as service_id",
-            "IFNULL($dbName.$outerProductMapTableName.organization_id, :client_id) as organization_id, $catalogBaseGoodsTableName.supp_org_id as vendor_id",
-            "$catalogBaseGoodsTableName.id as product_id", "$catalogBaseGoodsTableName.product as product_name", "$catalogBaseGoodsTableName.ed as unit",
-            "$dbName.$outerProductTableName.id as outer_product_id", "$dbName.$outerProductTableName.name as outer_product_name",
-            "$dbName.$outerUnitTableName.id as outer_unit_id", "$dbName.$outerUnitTableName.name as outer_unit_name",
-            "$dbName.$outerStoreTableName.id as outer_store_id", "$dbName.$outerStoreTableName.name as outer_store_name",
-            "$dbName.$outerProductMapTableName.coefficient as coefficient", "$dbName.$outerProductMapTableName.vat as vat",
-            "$dbName.$outerProductMapTableName.created_at as created_at", "$dbName.$outerProductMapTableName.updated_at as updated_at"])
+                "IFNULL($dbName.$outerProductMapTableName.organization_id, :client_id) as organization_id, $catalogBaseGoodsTableName.supp_org_id as vendor_id",
+                "$catalogBaseGoodsTableName.id as product_id", "$catalogBaseGoodsTableName.product as product_name", "$catalogBaseGoodsTableName.ed as unit",
+                "$dbName.$outerProductTableName.id as outer_product_id", "$dbName.$outerProductTableName.name as outer_product_name",
+                "$dbName.$outerUnitTableName.id as outer_unit_id", "$dbName.$outerUnitTableName.name as outer_unit_name",
+                "$dbName.$outerStoreTableName.id as outer_store_id", "$dbName.$outerStoreTableName.name as outer_store_name",
+                "$dbName.$outerProductMapTableName.coefficient as coefficient", "$dbName.$outerProductMapTableName.vat as vat",
+                "$dbName.$outerProductMapTableName.created_at as created_at", "$dbName.$outerProductMapTableName.updated_at as updated_at"])
             ->leftJoin("$dbName.$outerProductMapTableName", "$dbName.$outerProductMapTableName.product_id = $catalogBaseGoodsTableName.id 
             and $dbName.$outerProductMapTableName.service_id = :service_id and $dbName.$outerProductMapTableName.organization_id = IF(product_id in 
             (select product_id from `$dbName`.$outerProductMapTableName where service_id = :service_id and organization_id = :client_id), :client_id, :mainOrgId)")
@@ -52,7 +51,6 @@ class OuterProductMapSearch extends OuterProductMap
             ->leftJoin("$dbName.$outerStoreTableName", "$dbName.$outerStoreTableName.id = $dbName.$outerProductMapTableName.outer_store_id")
             ->where(["$catalogBaseGoodsTableName.deleted" => 0])
             ->params([':service_id' => $this->service_id, ':client_id' => $client->id, ':mainOrgId' => $mainOrgId]);
-
 
         if (!$this->service_id) {
             $query->andWhere("service_id = :service_id", [':service_id' => $this->service_id]);
@@ -82,12 +80,12 @@ class OuterProductMapSearch extends OuterProductMap
         $query->andWhere(['in', "$catalogBaseGoodsTableName.supp_org_id", $vendors]);
 
         $dataProvider = new SqlDataProvider([
-            'sql'      => $query->createCommand()->getRawSql(),
+            'sql'        => $query->createCommand()->getRawSql(),
             'pagination' => [
                 'page'     => $page - 1,
                 'pageSize' => $pageSize
             ],
-            'key' => 'product_id',
+            'key'        => 'product_id',
         ]);
 
         return $dataProvider;

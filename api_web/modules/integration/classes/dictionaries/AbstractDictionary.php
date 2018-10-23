@@ -11,9 +11,11 @@ namespace api_web\modules\integration\classes\dictionaries;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use common\models\Organization;
+use common\models\OrganizationDictionary;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
 use common\models\OuterCategory;
+use common\models\OuterDictionary;
 use common\models\OuterProduct;
 use common\models\OuterStore;
 use common\models\OuterUnit;
@@ -43,6 +45,50 @@ class AbstractDictionary extends WebApi
     {
         parent::__construct();
         $this->service_id = $serviceId;
+    }
+
+    /**
+     * Список справочников
+     *
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getList()
+    {
+        $models = OuterDictionary::find()
+            ->where([
+                'service_id' => (int)$this->service_id
+            ])
+            ->leftJoin(
+                OrganizationDictionary::tableName(),
+                'outer_dictionary.id = organization_dictionary.outer_dic_id AND organization_dictionary.org_id = :org_id'
+            )
+            ->addParams([
+                ':org_id' => $this->user->organization_id
+            ])
+            ->all();
+
+        $return = [];
+        /**
+         * Статус по умолчанию = "Синхронизация не проводилась"
+         */
+        $defaultStatusText = OrganizationDictionary::getStatusTextList()[OrganizationDictionary::STATUS_DISABLED];
+        foreach ($models as $model) {
+            /** @var \common\models\OrganizationDictionary $d */
+            $d = current($model->organizationDictionaries);
+            $return[] = [
+                'id'          => $model->id,
+                'name'        => $model->name,
+                'title'       => \Yii::t('api_web', 'dictionary.' . $model->name),
+                'count'       => $d->count ?? 0,
+                'status_id'   => $d->status_id ?? 0,
+                'status_text' => $d->statusText ?? $defaultStatusText,
+                'created_at'  => $d->created_at ?? null,
+                'updated_at'  => $d->updated_at ?? null
+            ];
+        }
+
+        return $return;
     }
 
     /**

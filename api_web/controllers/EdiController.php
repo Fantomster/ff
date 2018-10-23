@@ -294,6 +294,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderInfo()
     {

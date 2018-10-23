@@ -73,13 +73,14 @@ class IntegrationWebApi extends WebApi
         }
 
         $organizationID = $this->user->organization_id;
+        $acquirerID = $organizationID;
         $ediNumber = '';
         $outerAgentUUID = '';
         $outerStoreUUID = '';
-        $acquirerID = 0;
+
 
         if (isset($post['order_id'])) {
-            $order = Order::findOne(['id' => $post['order_id']]);
+            $order = Order::findOne(['id' => (int)$post['order_id'], 'client_id' => $this->user->organization_id]);
 
             if (!$order) {
                 throw new BadRequestHttpException("order_not_found");
@@ -112,7 +113,7 @@ class IntegrationWebApi extends WebApi
         }
 
         $waybill = new Waybill();
-        $waybill->service_id = (int)$post['service_id'] ?? null;
+        $waybill->service_id = (int)$post['service_id'];
         $waybill->outer_number_code = $ediNumber;
         $waybill->outer_contractor_uuid = $outerAgentUUID;
         $waybill->outer_store_uuid = $outerStoreUUID;

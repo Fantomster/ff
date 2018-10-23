@@ -36,6 +36,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string $note
  * @property CatalogGoods $productFromCatalog
  * @property IntegrationInvoiceContent $invoiceContent
+ * @property WaybillContent $waybillContent
  */
 class OrderContent extends \yii\db\ActiveRecord
 {
@@ -311,5 +312,12 @@ class OrderContent extends \yii\db\ActiveRecord
                 'value' => \gmdate('Y-m-d H:i:s'),
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getWaybillContent(){
+        return $this->hasOne(WaybillContent::class, ['order_content_id' => 'id']);
     }
 }

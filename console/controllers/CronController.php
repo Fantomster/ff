@@ -485,7 +485,7 @@ class CronController extends Controller
         $organizations = Yii::$app->db_api->CreateCommand("
             SELECT mpconst.org AS organization_id
             FROM merc_stock_entry AS stock 
-            LEFT JOIN merc_pconst AS mpconst ON stock.owner_guid = mpconst.value AND mpconst.const_id = 10
+            LEFT JOIN merc_pconst AS mpconst ON stock.owner_guid COLLATE utf8_unicode_ci = mpconst.value COLLATE utf8_unicode_ci AND mpconst.const_id = 10
             WHERE stock.expiry_date < now()
             GROUP BY mpconst.org;
         ")->queryColumn();

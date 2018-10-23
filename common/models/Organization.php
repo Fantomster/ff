@@ -127,12 +127,12 @@ class Organization extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            ['name', 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'Пожалуйста, напишите название вашей организации')],
-            ['name', 'required', 'on' => 'invite', 'message' => Yii::t('app', 'Пожалуйста, напишите название организации')],
-            ['type_id', 'required', 'on' => 'register', 'message' => Yii::t('app', 'Укажите, Вы покупаете или продаете?')],
+            ['name', 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'common.models.organization_name_error', ['ru' => 'Пожалуйста, напишите название вашей организации'])],
+            ['name', 'required', 'on' => 'invite', 'message' => Yii::t('app', 'common.models.organization_name_error2', ['ru' => 'Пожалуйста, напишите название организации'])],
+            ['type_id', 'required', 'on' => 'register', 'message' => Yii::t('app', 'common.models.organization_type_id_error', ['ru' => 'Укажите, Вы покупаете или продаете?'])],
             [['type_id'], 'required'],
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
-            [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'Установите точку на карте, путем ввода адреса в поисковую строку.')],
+            [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'common.models.organization_address_error', ['ru' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'])],
             [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id', 'blacklisted', 'gmt'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership', 'inn', 'kpp'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1', 'action'], 'string', 'max' => 255],
@@ -146,11 +146,26 @@ class Organization extends \yii\db\ActiveRecord
             [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => EdiOrganization::className(), 'targetAttribute' => ['id' => 'organization_id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
             [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
-            [['inn'], 'integer', 'min' => 1000000000, 'max' => 999999999999, 'message' => Yii::t('app', 'Поле ИНН должно быть числом'), 'tooSmall' => Yii::t('app', 'Поле должно состоять из 10 или 12 символов'), 'tooBig' => Yii::t('app', 'Поле должно состоять из 10 или 12 символов')],
-            [['kpp'], 'integer', 'min' => 100000000, 'max' => 999999999, 'message' => Yii::t('app', 'Поле КПП должно быть числом'), 'tooSmall' => Yii::t('app', 'Поле должно состоять из 9 символов'), 'tooBig' => Yii::t('app', 'Поле должно состоять из 9 символов')],
+            [['inn'], 'isInn'],
+            [['kpp'], 'isKpp'],
         ];
     }
 
+    public function isInn($attribute)
+    {
+        if (preg_match('/^[0-9]{10}$/', $this->$attribute) || preg_match('/^[0-9]{12}$/', $this->$attribute)) {
+            return;
+        }
+        $this->addError($attribute, Yii::t('app', 'common.models.organization_inn_error', ['ru' => 'Поле должно состоять из 10 или 12 цифр']));
+    }
+    
+    public function isKpp($attribute)
+    {
+        if (!preg_match('/^[0-9]{9}$/', $this->$attribute)) {
+            $this->addError($attribute, Yii::t('app', 'common.models.organization_kpp_error', ['ru' => 'Поле должно состоять из 9 цифр']));
+        }
+    }
+    
     /**
      * @inheritdoc
      */

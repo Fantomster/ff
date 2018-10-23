@@ -5,6 +5,7 @@ namespace api_web\modules\integration\classes\documents;
 use api\common\models\AllMaps;
 use api_web\classes\DocumentWebApi;
 use api_web\components\Registry;
+use api_web\helpers\CurrencyHelper;
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use api_web\modules\integration\modules\iiko\models\iikoService;
@@ -73,7 +74,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
 
         $return["is_mercury_cert"] = $this->getIsMercuryCert();
         $return["count"] = (int)$this->getTotalCount();
-        $return["total_price"] = $this->getTotalPrice();
+        $return["total_price"] = CurrencyHelper::asDecimal($this->getTotalPrice());
         $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->doc_date));
         $return["store"] = null; //todo_refactoring
 

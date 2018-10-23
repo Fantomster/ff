@@ -13,7 +13,7 @@ use Yii;
 /**
  * This is the model class for table "merc_vsd".
  *
- * @property int $id
+ * @property int    $id
  * @property string $uuid
  * @property string $number
  * @property string $date_doc
@@ -24,13 +24,13 @@ use Yii;
  * @property string $recipient_guid
  * @property string $sender_guid
  * @property string $sender_name
- * @property int $finalized
+ * @property int    $finalized
  * @property string $last_update_date
  * @property string $vehicle_number
  * @property string $trailer_number
  * @property string $container_number
  * @property string $transport_storage_type
- * @property int $product_type
+ * @property int    $product_type
  * @property string $product_name
  * @property string $amount
  * @property string $unit
@@ -39,10 +39,10 @@ use Yii;
  * @property string $production_date
  * @property string $expiry_date
  * @property string $batch_id
- * @property int $perishable
+ * @property int    $perishable
  * @property string $producer_name
  * @property string $producer_guid
- * @property int $low_grade_cargo
+ * @property int    $low_grade_cargo
  * @property string $raw_data
  */
 class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
@@ -57,11 +57,11 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     const DOC_TYPE_TRANSPORT = 'TRANSPORT';
 
     public static $types = [
-        self::DOC_TYPE_INCOMMING => 'Входящий ВСД',
-        self::DOC_TYPE_OUTGOING => 'Исходящий ВСД',
+        self::DOC_TYPE_INCOMMING  => 'Входящий ВСД',
+        self::DOC_TYPE_OUTGOING   => 'Исходящий ВСД',
         self::DOC_TYPE_PRODUCTIVE => 'Производственный ВСД',
         self::DOC_TYPE_RETURNABLE => 'Возвратный ВСД',
-        self::DOC_TYPE_TRANSPORT => 'Транспортный ВСД',
+        self::DOC_TYPE_TRANSPORT  => 'Транспортный ВСД',
     ];
 
     const DOC_STATUS_CONFIRMED = 'CONFIRMED';
@@ -71,13 +71,13 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     public static $statuses = [
         self::DOC_STATUS_CONFIRMED => 'Оформлен',
         self::DOC_STATUS_WITHDRAWN => 'Аннулирован',
-        self::DOC_STATUS_UTILIZED => 'Погашен',
+        self::DOC_STATUS_UTILIZED  => 'Погашен',
     ];
 
     public static $status_color = [
         self::DOC_STATUS_CONFIRMED => '',
         self::DOC_STATUS_WITHDRAWN => 'cancelled',
-        self::DOC_STATUS_UTILIZED => 'done',
+        self::DOC_STATUS_UTILIZED  => 'done',
     ];
 
     const USER_STATUS_RETURNED = 'RETURNED';//возврат
@@ -85,17 +85,17 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     const USER_STATUS_PARTIALLY_ACCEPTED = 'PARTIALLY ACCEPTED';//частичный возврат
 
     public static $forms = [
-        'CERTCU1' => 'Форма 1 ветеринарного сертификата ТС',
-        'LIC1' => 'Форма 1 ветеринарного свидетельства',
-        'CERTCU2' => 'Форма 2 ветеринарного сертификата ТС',
-        'LIC2' => 'Форма 2 ветеринарного свидетельства',
-        'CERTCU3' => 'Форма 3 ветеринарного сертификата ТС',
-        'LIC3' => 'Форма 3 ветеринарного свидетельства',
-        'NOTE4' => 'Форма 4 ветеринарной справки',
-        'CERT5I' => 'Форма 5i ветеринарного сертификата',
-        'CERT61' => 'Форма 6.1 ветеринарного сертификата',
-        'CERT62' => 'Форма 6.2 ветеринарного сертификата',
-        'CERT63' => 'Форма 6.3 ветеринарного сертификата',
+        'CERTCU1'    => 'Форма 1 ветеринарного сертификата ТС',
+        'LIC1'       => 'Форма 1 ветеринарного свидетельства',
+        'CERTCU2'    => 'Форма 2 ветеринарного сертификата ТС',
+        'LIC2'       => 'Форма 2 ветеринарного свидетельства',
+        'CERTCU3'    => 'Форма 3 ветеринарного сертификата ТС',
+        'LIC3'       => 'Форма 3 ветеринарного свидетельства',
+        'NOTE4'      => 'Форма 4 ветеринарной справки',
+        'CERT5I'     => 'Форма 5i ветеринарного сертификата',
+        'CERT61'     => 'Форма 6.1 ветеринарного сертификата',
+        'CERT62'     => 'Форма 6.2 ветеринарного сертификата',
+        'CERT63'     => 'Форма 6.3 ветеринарного сертификата',
         'PRODUCTIVE' => 'Производственный сертификат',
     ];
 
@@ -121,9 +121,9 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     ];
 
     public static $storage_types = [
-        'FROZEN' => 'Замороженный',
-        'CHILLED' => 'Охлажденный',
-        'COOLED' => 'Охлаждаемый',
+        'FROZEN'     => 'Замороженный',
+        'CHILLED'    => 'Охлажденный',
+        'COOLED'     => 'Охлаждаемый',
         'VENTILATED' => 'Вентилируемый'
     ];
 
@@ -150,7 +150,7 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     {
         return [
             [['date_doc', 'last_update_date', 'raw_data'], 'safe'],
-            [['finalized', 'product_type', 'perishable',  'low_grade_cargo'], 'integer'],
+            [['finalized', 'product_type', 'perishable', 'low_grade_cargo'], 'integer'],
             [['amount'], 'number'],
             [['uuid', 'number', 'type', 'status', 'recipient_name', 'recipient_guid', 'sender_guid', 'sender_name', 'product_name', 'unit', 'production_date', 'expiry_date', 'producer_name', 'producer_guid'], 'string', 'max' => 255],
             [['form', 'vehicle_number', 'trailer_number', 'container_number', 'transport_storage_type', 'gtin', 'article', 'batch_id'], 'string', 'max' => 45],
@@ -163,37 +163,37 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'uuid' => 'Uuid',
-            'number' => Yii::t('message', 'frontend.client.integration.number_vsd', ['ru' => 'Номер ВСД']),
-            'date_doc' => Yii::t('message', 'frontend.client.integration.date_doc', ['ru' => 'Дата оформления']),
-            'status' => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
-            'product_name' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
-            'amount' => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объем']),
-            'unit' => 'Unit',
-            'production_date' => Yii::t('message', 'frontend.client.integration.created_at', ['ru' => 'Дата изготовления']),
-            'sender_name' => Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']),
-            'type' => 'Type',
-            'form' => 'Form',
-            'recipient_name' => 'Recipient Name',
-            'recipient_guid' => 'Recipient Guid',
-            'sender_guid' => 'Sender Guid',
-            'finalized' => 'Finalized',
-            'last_update_date' => 'Last Update Date',
-            'vehicle_number' => 'Vehicle Number',
-            'trailer_number' => 'Trailer Number',
-            'container_number' => 'Container Number',
+            'id'                     => 'ID',
+            'uuid'                   => 'Uuid',
+            'number'                 => Yii::t('message', 'frontend.client.integration.number_vsd', ['ru' => 'Номер ВСД']),
+            'date_doc'               => Yii::t('message', 'frontend.client.integration.date_doc', ['ru' => 'Дата оформления']),
+            'status'                 => Yii::t('message', 'frontend.views.order.status', ['ru' => 'Статус']),
+            'product_name'           => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
+            'amount'                 => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объем']),
+            'unit'                   => 'Unit',
+            'production_date'        => Yii::t('message', 'frontend.client.integration.created_at', ['ru' => 'Дата изготовления']),
+            'sender_name'            => Yii::t('message', 'frontend.client.integration.recipient', ['ru' => 'Фирма-отравитель']),
+            'type'                   => 'Type',
+            'form'                   => 'Form',
+            'recipient_name'         => 'Recipient Name',
+            'recipient_guid'         => 'Recipient Guid',
+            'sender_guid'            => 'Sender Guid',
+            'finalized'              => 'Finalized',
+            'last_update_date'       => 'Last Update Date',
+            'vehicle_number'         => 'Vehicle Number',
+            'trailer_number'         => 'Trailer Number',
+            'container_number'       => 'Container Number',
             'transport_storage_type' => 'Transport Storage Type',
-            'product_type' => 'Product Type',
-            'gtin' => 'Gtin',
-            'article' => 'Article',
-            'expiry_date' => 'Expiry Date',
-            'batch_id' => 'Batch ID',
-            'perishable' => 'Perishable',
-            'producer_name' => 'Producer Name',
-            'producer_guid' => 'Producer Guid',
-            'low_grade_cargo' => 'Low Grade Cargo',
-            'user_status' => 'User Status',
+            'product_type'           => 'Product Type',
+            'gtin'                   => 'Gtin',
+            'article'                => 'Article',
+            'expiry_date'            => 'Expiry Date',
+            'batch_id'               => 'Batch ID',
+            'perishable'             => 'Perishable',
+            'producer_name'          => 'Producer Name',
+            'producer_guid'          => 'Producer Guid',
+            'low_grade_cargo'        => 'Low Grade Cargo',
+            'user_status'            => 'User Status',
         ];
     }
 
@@ -267,17 +267,16 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 
     public static function getProduccerData($producer, $org_id)
     {
-        if(!is_array($producer))
+        if (!is_array($producer))
             $data[] = $producer;
         else
             $data = $producer;
 
         $result = null;
-        foreach ($data as $item)
-        {
+        foreach ($data as $item) {
             $res = isset($item->enterprise->uuid) ? cerberApi::getInstance($org_id)->getEnterpriseByUuid($item->enterprise->uuid) : null;
 
-            $result['name'][] = isset($res) ? ($res->name.'('. $res->address->addressView .')') : null;
+            $result['name'][] = isset($res) ? ($res->name . '(' . $res->address->addressView . ')') : null;
             $result['guid'][] = $item->enterprise->guid;
 
         }
@@ -288,39 +287,30 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     /**
      * Запрос обновлений справочника
      */
-    public static function getUpdateData($org_id, $enterpriseGuid = null)
+    public static function getUpdateData($org_id, $enterpriseGuid = null, $start_date = null)
     {
         try {
             $enterpriseGuid = $enterpriseGuid ?? mercDicconst::getSetting('enterprise_guid', $org_id);
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList', 'organization_id' => $org_id, 'store_id' => $enterpriseGuid])->one();
-            if($queue == null) {
+            if ($queue == null) {
                 $queue = new RabbitQueues();
                 $queue->consumer_class_name = 'MercVSDList';
                 $queue->organization_id = $org_id;
                 $queue->store_id = $enterpriseGuid;
+                $queue->save();
             }
 
             if (!empty($queue->organization_id)) {
                 $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
-            }
-            else {
+            } else {
                 $queueName = $queue->consumer_class_name;
             }
 
-            if(!isset($queue->data_request)) {
-
-                $data['startDate'] = MercVisits::getLastVisit($org_id, 'MercVSDList', $enterpriseGuid);
-
-                $data['listOptions']['count'] = 100;
-                $data['listOptions']['offset'] = 0;
-                $data['enterpriseGuid'] = $enterpriseGuid;
-                $queue->data_request = json_encode($data);
-                $queue->save();
-            }
-            else {
-                $data = json_decode($queue->data_request, true);
-            }
+            $data['startDate'] = $start_date ?? MercVisits::getLastVisit($org_id, 'MercVSDList', $enterpriseGuid);
+            $data['listOptions']['count'] = 100;
+            $data['listOptions']['offset'] = 0;
+            $data['enterpriseGuid'] = $enterpriseGuid;
 
             //ставим задачу в очередь
             \Yii::$app->get('rabbit')

@@ -2,9 +2,8 @@
 
 namespace api_web\modules\integration\classes\documents;
 
-use api\common\models\AllMaps;
+use api_web\helpers\CurrencyHelper;
 use api_web\modules\integration\interfaces\DocumentInterface;
-use api_web\modules\integration\modules\iiko\models\iikoService;
 use common\models\OrderContent as BaseOrderContent;
 
 class OrderContent extends BaseOrderContent implements DocumentInterface
@@ -22,14 +21,14 @@ class OrderContent extends BaseOrderContent implements DocumentInterface
         }
 
         $return = [
-            "id"            => $this->id,
-            "product_id"    => $this->product_id,
-            "edi_number"    => $this->edi_number,
-            "product_name"  => $this->product->product,
-            "quantity"      => $this->quantity,
-            "unit"          => $this->product->ed,
-            "price"         => $this->price,
-            "merc_uuid"     => $this->merc_uuid ?? null
+            "id"           => $this->id,
+            "product_id"   => $this->product_id,
+            "edi_number"   => $this->edi_number,
+            "product_name" => $this->product->product,
+            "quantity"     => $this->quantity,
+            "unit"         => $this->product->ed,
+            "sum_with_vat" => CurrencyHelper::asDecimal($this->price),
+            "merc_uuid"    => $this->merc_uuid ?? null
         ];
 
         return $return;

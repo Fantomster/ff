@@ -327,12 +327,18 @@ class Order extends \yii\db\ActiveRecord
     public static function getStatusListEdo()
     {
         return [
-            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app', 'common.models.waiting', ['ru' => 'Ожидает подтверждения']),
-            OrderStatus::STATUS_PROCESSING                  => Yii::t('app', 'common.models.in_process_two', ['ru' => 'Выполняются']),
-            OrderStatus::STATUS_EDI_SENT_BY_VENDOR          => Yii::t('app', 'common.models.order_status.status_edo_sent_by_vendor', ['ru' => 'Отправлен поставщиком']),
-            OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED     => Yii::t('app', 'common.models.order_status.status_edo_acceptance_finished', ['ru' => 'Приемка завершена']),
-            OrderStatus::STATUS_DONE                        => Yii::t('app', 'common.models.done_two', ['ru' => 'Завершен']),
-            OrderStatus::STATUS_CANCELLED                   => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отменен']),
+            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR => Yii::t('app',
+                'common.models.order_status.status_awaiting_accept_from_vendor', ['ru' => 'Ожидает подтверждения']),
+            OrderStatus::STATUS_PROCESSING                  => Yii::t('app',
+                'common.models.in_process_two', ['ru' => 'Выполняются']),
+            OrderStatus::STATUS_EDI_SENT_BY_VENDOR          => Yii::t('app',
+                'common.models.order_status.status_edo_sent_by_vendor', ['ru' => 'Отправлен поставщиком']),
+            OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED     => Yii::t('app',
+                'common.models.order_status.status_edo_acceptance_finished', ['ru' => 'Приемка завершена']),
+            OrderStatus::STATUS_DONE                        => Yii::t('app',
+                'common.models.done_two', ['ru' => 'Завершен']),
+            OrderStatus::STATUS_CANCELLED                   => Yii::t('app',
+                'common.models.canceled', ['ru' => 'Отменен']),
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru' => 'Ожидает подтверждения клиента']),
             OrderStatus::STATUS_REJECTED                    => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
         ];
@@ -561,6 +567,7 @@ class Order extends \yii\db\ActiveRecord
             $client    = Organization::findOne(['id' => $this->client_id]);
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
             if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
+                $this->service_id = 6;
                 if (strpos($vendor->name, 'est_Korus_Organization')) {
                     $eComIntegration = new EDIIntegration(['orgId' => $vendor->id]);
                 } else {

@@ -313,6 +313,7 @@ EOXML;
     {
         try {
             $this->ediFilesQueueID = $item['id'];
+            $this->realization->fileName = $item['name'];
             $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
             $this->updateQueue($this->ediFilesQueueID, self::STATUS_PROCESSING, '');
             try {

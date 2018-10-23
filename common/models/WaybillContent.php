@@ -24,7 +24,6 @@ use Yii;
  * @property OrderContent $orderContent
  * @property OuterProduct $productOuter
  * @property Waybill $waybill
- * @property OrderContent $orderContent
  */
 class WaybillContent extends \yii\db\ActiveRecord
 {
@@ -107,6 +106,14 @@ class WaybillContent extends \yii\db\ActiveRecord
     public function getProductOuter()
     {
         return $this->hasOne(OuterProduct::className(), ['id' => 'outer_product_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOuterUnit()
+    {
+        return $this->hasOne(OuterUnit::className(), ['id' => 'outer_unit_id']);
     }
 
     public function beforeSave($insert)

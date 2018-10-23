@@ -19,6 +19,7 @@ use Yii;
  * @property integer $order_done
  * @property integer $request_accept
  * @property integer $merc_vsd
+* @property integer $merc_stock_expiry
  * @property integer $confirmed
  * @property string $token
  *
@@ -41,7 +42,7 @@ class AdditionalEmail extends \yii\db\ActiveRecord
     {
         return [
             [['email', 'organization_id'], 'required'],
-            [['organization_id', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done', 'request_accept', 'merc_vsd', 'confirmed'], 'integer'],
+            [['organization_id', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done', 'request_accept', 'merc_vsd', 'confirmed', 'merc_stock_expiry'], 'integer'],
             [['email', 'token'], 'string', 'max' => 255],
             ['email', 'filter', 'filter' => 'trim'],
             ['email', 'required'],
@@ -66,6 +67,7 @@ class AdditionalEmail extends \yii\db\ActiveRecord
             'order_done' => Yii::t('app', 'common.models.additional_email.ready', ['ru' => 'Выполнен']),
             'request_accept' => Yii::t('app', 'common.models.additional_email.ready.accepted_two', ['ru' => 'Принятие заявки']),
             'merc_vsd' => Yii::t('app', 'common.models.additional_email.vsd_short', ['ru' => 'ВСД']),
+            'merc_stock_expiry' =>  Yii::t('app', 'frontend.views.settings.stock_expiry_notification', ['ru'=>'Рассылки о проблемной продукции']),
         ];
     }
 

@@ -16,9 +16,10 @@ use yii\web\BadRequestHttpException;
 class RabbitWebApi extends WebApi
 {
     /**
-     *
-     * @throws
-     * */
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
     public function addToQueue($request)
     {
         if (!empty($request['queue']) && !empty($request['org_id'])) {

@@ -14,6 +14,10 @@ return [
     'timeZone' => 'Asia/Baghdad',
     'charset' => 'utf-8',
     'components' => [
+        'formatter' => [
+            'decimalSeparator' => '.',
+            'thousandSeparator' => '',
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
@@ -59,10 +63,12 @@ return [
         ],
         'resourceManagerStatic' => [
             'class' => 'common\components\resourcemanager\AmazonS3ResourceManager',
-            'key' => 'AKIAJZH26ZXTQSLVFT6A',
-            'secret' => '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',
-            'bucket' => 'static.mixcart.ru',
+            'bucket' => 'fkeeper',
             'region' => 'eu-west-1',
+            'credentials' => [
+                'key' => 'AKIAJZH26ZXTQSLVFT6A',
+                'secret' => '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',
+            ],
         ],
         'i18n' => [
             'translations' => [

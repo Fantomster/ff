@@ -133,4 +133,17 @@ class OuterProductMap extends \yii\db\ActiveRecord
     {
         return $this->hasOne(OuterUnit::className(), ['id' => 'outer_unit_id']);
     }
+
+    public static function getMainOrg($org_id)
+    {
+        $obDicConstModel = IntegrationSetting::findOne(['name' => 'main_org']);
+        $obConstModel = IntegrationSettingValue::findOne(['setting_id' => $obDicConstModel->id, 'org_id' => $org_id]);
+        return $obConstModel->value ?? null;
+    }
+
+    public static function getChildOrgsId($org_id)
+    {
+        $obDicConstModel = IntegrationSetting::findOne(['name' => 'main_org']);
+        return IntegrationSettingValue::find()->select('org_id')->where(['setting_id' => $obDicConstModel->id, 'value' => $org_id])->column();
+    }
 }

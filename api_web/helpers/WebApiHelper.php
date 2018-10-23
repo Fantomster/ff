@@ -34,7 +34,7 @@ class WebApiHelper
      * Форматирование всех дат в ATOM
      * @var array
      */
-    private static $formatDate = 'php:' . \DateTime::ATOM;
+    public static $formatDate = 'php:' . \DateTime::ATOM;
 
     private static function formatDate(&$response)
     {

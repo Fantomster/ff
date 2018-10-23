@@ -8,6 +8,8 @@ namespace api_web\components;
  */
 
 use api_web\helpers\Logger;
+use api_web\helpers\WebApiHelper;
+use common\models\licenses\License;
 
 /**
  * @SWG\Swagger(
@@ -138,6 +140,12 @@ class WebApiController extends \yii\rest\Controller
         if (parent::beforeAction($action)) {
             $this->user = $this->container->get('UserWebApi')->getUser();
             $this->request = \Yii::$app->request->getBodyParam('request');
+            #Проверка лицензии
+            if(!empty($this->user)) {
+                $licenseDate = License::getDateMixCartLicense($this->user->organization_id);
+                $headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
+                $headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
+            }
 
             \Yii::$app->setTimeZone('Etc/GMT' . $this->container->get('UserWebApi')->checkGMTFromDb());
 

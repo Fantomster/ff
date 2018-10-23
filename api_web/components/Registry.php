@@ -17,6 +17,12 @@ namespace api_web\components;
 class Registry
 {
 
+    /** MixCart services */
+    #TODO заменить на нормальные значения, когда будем делать лицензии
+    #заполнить ими переменную self::$mc_services
+    const MC_LITE_SERVICE_ID = 100;
+    const MC_BUSINESS_SERVICE_ID = 101;
+    const MC_ENTERPRICE_SERVICE_ID = 102;
     /** - Services section - */
     const RK_SERVICE_ID = 1;
     const IIKO_SERVICE_ID = 2;
@@ -54,5 +60,9 @@ class Registry
         self::MERC_SERVICE_ID,
         self::VENDOR_DOC_MAIL_SERVICE_ID,
         self::ONE_S_CLIENT_SERVICE_ID
+    ];
+
+    /**@var array сервисы MixCart*/
+    static $mc_services = [
     ];
 }

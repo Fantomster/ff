@@ -14,8 +14,10 @@ use common\models\OuterProduct;
 use common\models\OuterProductMap;
 use common\models\OuterStore;
 use common\models\OuterUnit;
+use common\models\search\OuterProductMapSearch;
 use common\models\Waybill;
 use common\models\WaybillContent;
+use yii\base\Exception;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -225,21 +227,24 @@ class IntegrationWebApi extends WebApi
      */
     public function updateWaybillContent(array $post): array
     {
-        if (!isset($post['waybill_content_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_content_id");
-        }
+        $this->validateRequest($post, ['waybill_content_id']);
+
         $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
         if (!$waybillContent) {
             throw new BadRequestHttpException("waybill content not found");
         }
+
         if (isset($post['vat_waybill'])) {
             $waybillContent->vat_waybill = (float)$post['vat_waybill'];
         }
+
         if (isset($post['outer_unit_id'])) {
             $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
         }
+
         $koef = null;
         $quan = null;
+
         if (isset($post['koef'])) {
             $koef = (float)$post['koef'];
         }
@@ -349,9 +354,7 @@ class IntegrationWebApi extends WebApi
      */
     public function deleteWaybillContent(array $post): array
     {
-        if (!isset($post['waybill_content_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_content_id");
-        }
+        $this->validateRequest($post, ['waybill_content_id']);
 
         $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
         if (!$waybillContent) {
@@ -361,5 +364,206 @@ class IntegrationWebApi extends WebApi
         $waybillContent->delete();
 
         return ['success' => true];
+    }
+
+    /**
+     * integration: список сопоставления со всеми связями
+     *
+     * @param array $post
+     * @return array
+     */
+
+    public function getProductMapList(array $post): array
+    {
+        $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
+        $dataProvider = (new OuterProductMapSearch())->search($this->user->organization, $post);
+
+        $result = [];
+        foreach ($dataProvider->models as $model) {
+            $result[] = $this->prepareOutProductMap($model);
+        }
+
+        return [
+            'products'   => $result,
+            'pagination' => [
+                'page'       => $dataProvider->pagination->page + 1,
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
+    }
+
+    /**
+     * Редактирование записи сопоставления
+     *
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function mapUpdate(array $post)
+    {
+        $this->validateRequest($post, ['service_id', 'map']);
+
+        $result = [];
+        foreach ($post['map'] as $item) {
+            try {
+                $this->editProductMap($post['service_id'], $item);
+                $result[$item['product_id']] = ['success' => true];
+            } catch (\Exception $e) {
+                $result[$item['product_id']] = ['success' => false, 'error' => $e->getMessage()];
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Изменение атрибутов сопоставления
+     *
+     * @param int $service_id
+     * @param     $request
+     * @return array
+     */
+    private function editProductMap(int $service_id, $request)
+    {
+        $this->validateRequest($request, ['product__id']);
+
+        //Загружаем данные по базовому и дочерним бизнесам (если бизнес главный)
+        $mainOrg = OuterProductMap::getMainOrg($this->user->organization_id);
+        $orgs = OuterProductMap::getChildOrgsId($this->user->organization_id);
+        $orgs[] = $this->user->organization_id;
+
+        if (isset($request['outer_product_id'])) {
+            //Если бизнес не главный то менять соспоставление с продуктом нельзя
+            if ($mainOrg) {
+                unset($request['outer_product_id']);
+            } else {
+                //Проверяем что сопоставляемый продукт свзан с нашей организацией
+                $check = OuterProduct::find()
+                    ->where(['id' => $request['outer_product_id']])
+                    ->andWhere(['org_id' => $this->user->organization_id])
+                    ->one();
+
+                if (!$check) {
+                    throw new Exception('outer product not found');
+                }
+            }
+        }
+
+        //Проверяем что сопоставляемый склад свзан с нашей организацией
+        if (isset($request['outer_store_id'])) {
+            $check = OuterStore::find()->where(['id' => $request['outer_store_id']])
+                ->andWhere(['org_id' => $this->user->organization_id])
+                ->one();
+
+            if (!$check) {
+                throw new Exception('outer store not found');
+            }
+        }
+
+        //Если меняется сопоставление с продуктом, и бищнес главнй и есть дочерние бизнесы, то обновляем соспоставление в их записях
+        if (isset($request['outer_product_id']) && count($orgs) > 1 && !$mainOrg) {
+            $condition = [
+                'and',
+                ['service_id' => $service_id],
+                ['product_id' => $request['product_id']],
+                ['in', 'organization_id', $orgs]
+            ];
+
+            OuterProductMap::updateAll(['outer_product_id' => $request['outer_product_id']], $condition);
+        }
+
+        //Ищем запись для редактирования
+        $model = OuterProductMap::findOne(['product_id' => $request['product_id'], 'service_id' => $service_id, 'organization_id' => $this->user->organization_id]);
+        if (!$mainOrg) {
+            if (!$model) {
+                $model = new OuterProductMap();
+                $model->service_id = $service_id;
+                $model->organization_id = $this->user->organization_id;
+            }
+        } else {
+            //Создаем дубликат запииси для дочерней организации при необходимости или новую запись
+            if ($model->organization_id != $this->user->organization_id) {
+                $mainAttributes = $model->attributes();
+                $model = new OuterProductMap();
+                $model->service_id = $mainAttributes['service_id'];
+                $model->organization_id = $this->user->organization_id;
+                $model->vendor_id = $mainAttributes['vendor_id'];
+                $model->product_id = $mainAttributes['product_id'];
+                $model->outer_product_id = $mainAttributes['outer_product_id'];
+                $model->outer_unit_id = $mainAttributes['outer_unit_id'];
+                $model->outer_store_id = $mainAttributes['outer_store_id'];
+                $model->coefficient = $mainAttributes['coefficient'];
+                $model->vat = $mainAttributes['vat'];
+            }
+        }
+
+        $model->attributes = $request;
+        $model->outer_unit_id = $model->outerProduct->outer_unit_id;
+        $model->vendor_id = $model->product->supp_org_id;
+        if (!$model->save()) {
+            throw new ValidationException($model->getFirstErrors());
+        }
+    }
+
+    /**
+     * Информация по сопоставлению продукта
+     *
+     * @param OuterProductMap $model
+     * @return array
+     */
+    private function prepareOutProductMap(array $model)
+    {
+        $result = [
+            "id"              => $model['id'],
+            "service_id"      => $model['service_id'],
+            "organization_id" => $model['organization_id'],
+            "vendor_id"       => $model['vendor_id'],
+        ];
+
+        if (isset($model['product_id'])) {
+            $result ["product"] = [
+                "id"   => $model['product_id'],
+                "name" => $model['product_name'],
+            ];
+            $result["unit"] = [
+                "name" => $model['unit'],
+            ];
+        } else {
+            $result ["product"] = null;
+            $result["unit"] = null;
+        }
+
+        if (isset($model['outer_product_id'])) {
+            $result ["outer_product"] = [
+                "id"   => $model['outer_product_id'],
+                "name" => $model['outer_product_name']
+            ];
+        } else {
+            $result ["outer_product"] = null;
+        }
+
+        if (isset($model["outer_unit_id"])) {
+            $result["outer_unit"] = [
+                "id"   => $model['outer_unit_id'],
+                "name" => $model['outer_unit_name']
+            ];
+        } else {
+            $result["outer_unit"] = null;
+        }
+
+        if (isset($model['outer_store_id'])) {
+            $result["outer_store"] = [
+                "id"   => $model['outer_store_id'],
+                "name" => $model['outer_store_name']
+            ];
+        } else {
+            $result["outer_store"] = null;
+        }
+
+        $result["coefficient"] = $model['coefficient'];
+        $result["vat"] = $model['vat'];
+        $result["created_at"] = isset ($model['created_at']) ? date("Y-m-d H:i:s T", strtotime($model['created_at'])) : null;
+        $result["updated_at"] = isset($model['updated_at']) ? date("Y-m-d H:i:s T", strtotime($model['updated_at'])) : null;
+        return $result;
     }
 }

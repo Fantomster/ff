@@ -163,7 +163,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         /*'editableOptions' => [
                                             'asPopover' => $isAndroid ? false : true,
                                             'formOptions' => ['action' => ['edit']],
-                                            'header' => 'Продукт iiko',
+                                            'header' => 'Продукт Tillypad',
                                             'size' => 'md',
                                             'inputType' => \kartik\editable\Editable::INPUT_SELECT2,
                                             'options' => [
@@ -592,7 +592,6 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 $url = Url::toRoute('waybill/send-by-button');
 $url2 = Url::toRoute('waybill/auto-complete-new');
 $query_string = Yii::$app->session->get('query_string');
-//var_dump($query_string);
 $js = <<< JS
     $(function () {
         function links_column3 () {

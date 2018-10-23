@@ -2,6 +2,7 @@
 
 namespace common\models\licenses;
 
+use api_web\components\Registry;
 use Exception;
 use Yii;
 use yii\db\ActiveRecord;
@@ -122,10 +123,10 @@ class License extends ActiveRecord
      *
      * @param       $orgId
      * @param array $service_ids
-     * @param bool  $is_active вывести активные
+     * @param null  $is_active
      * @return array
      */
-    public static function getAllLicense($orgId, $service_ids = [], $is_active = false)
+    public static function getAllLicense($orgId, $service_ids = [], $is_active = null)
     {
         $license = (new Query())
             ->select([
@@ -156,10 +157,28 @@ class License extends ActiveRecord
         if (!empty($service_ids)) {
             $license->andWhere(['in', 'ls.service_id', $service_ids]);
         }
-        if ($is_active){
-            $license->andWhere(['is_active' => 1]);
+
+        if (!is_null($is_active)) {
+            $license->andWhere(['=', 'ls.service_id', (int)$is_active]);
+            $license->orderBy('to_date');
         }
 
         return $license->all(\Yii::$app->db_api);
+    }
+
+    /**
+     * Проверка на активную лицензию микскарта
+     *
+     * @param $orgId
+     * @return string
+     */
+    public static function getDateMixCartLicense($orgId)
+    {
+        $license = self::getAllLicense($orgId, Registry::$mc_services, true);
+        if (!empty($license)) {
+            return current($license)['to_date'];
+        } else {
+            return date('Y-m-d H:i:s', strtotime("-1 day"));
+        }
     }
 }

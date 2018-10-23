@@ -165,7 +165,7 @@ class ParserTorg12
             $objPHPExcel = /* \PHPExcel_IOFactory */
                 IOFactory::load($this->filePath);
             //$objPHPExcel = \PHPExcel_IOFactory::load($this->filePath);
-        } catch (\Exception $e) {
+        } catch (\Error $e) {
             $errorMsg = 'Невозможно прочитать загруженный файл: ' . $e->getMessage();
             throw new ParseTorg12Exception($errorMsg);
         }

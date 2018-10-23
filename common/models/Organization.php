@@ -1624,6 +1624,10 @@ class Organization extends \yii\db\ActiveRecord
             $return['iiko'] = true;
         }
 
+        if (!empty(TillypadService::getLicense())) {
+            $return['tillypad'] = true;
+        }
+
         return $return;
     }
 

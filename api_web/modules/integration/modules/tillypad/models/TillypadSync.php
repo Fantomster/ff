@@ -49,7 +49,7 @@ class TillypadSync extends WebApi
 
         if (method_exists($this, $model->method) === true) {
             try {
-                //Пробуем пролезть в iko
+                //Пробуем пролезть в Tillypad
                 if (!TillypadApi::getInstance()->auth()) {
                     throw new BadRequestHttpException('Не удалось авторизоваться в Tillypad');
                 }

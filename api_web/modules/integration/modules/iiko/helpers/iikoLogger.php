@@ -19,7 +19,7 @@ class iikoLogger
     {
         self::$guide = md5(uniqid(microtime(), 1));
         self::insert(['guide' => self::$guide]);
-        if(!(\Yii::$app instanceof yii\console\Application)){
+        if (!(\Yii::$app instanceof yii\console\Application)) {
             $this->setUser(\Yii::$app->user->getId());
             self::update(['ip' => \Yii::$app->request->getUserIP()]);
         }
@@ -41,7 +41,7 @@ class iikoLogger
         if (!empty($operation)) {
             self::update(['operation_code' => $operation['code']]);
         } else {
-            throw new \Exception('Not found operation service_id:' . iikoService::getServiceId() . ' demon:' . $denom, 999);
+            throw new \Exception('Not found operation service_id:' . iikoService::getServiceId() . ' denom:' . $denom, 999);
         }
     }
 
@@ -52,7 +52,7 @@ class iikoLogger
     public function request($request)
     {
         self::update([
-            'request' => mb_substr(\json_encode($request, JSON_UNESCAPED_UNICODE), 0, 1000),
+            'request'    => mb_substr(\json_encode($request, JSON_UNESCAPED_UNICODE), 0, 1000),
             'request_at' => date('Y-m-d H:i:s', time())
         ]);
     }
@@ -64,7 +64,7 @@ class iikoLogger
     public function response($response)
     {
         self::update([
-            'response' => mb_substr(\json_encode($response, JSON_UNESCAPED_UNICODE), 0, 1000),
+            'response'    => mb_substr(\json_encode($response, JSON_UNESCAPED_UNICODE), 0, 1000),
             'response_at' => date('Y-m-d H:i:s', time())
         ]);
 
@@ -72,7 +72,7 @@ class iikoLogger
             \Yii::$app->get('rabbit')
                 ->setQueue(self::getNameQueue())
                 ->addRabbitQueue(\json_encode(self::$row[self::$guide]));
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             Yii::error($e->getMessage());
         }
     }
@@ -99,7 +99,7 @@ class iikoLogger
                 throw new \Exception('User already recorded.', 999);
             }
             self::update([
-                'user_id' => $user->id,
+                'user_id'         => $user->id,
                 'organization_id' => $user->organization->id ?? null
             ]);
         }

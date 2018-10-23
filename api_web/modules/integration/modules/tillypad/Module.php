@@ -1,16 +1,16 @@
 <?php
 
-namespace api_web\modules\integration\modules\iiko;
+namespace api_web\modules\integration\modules\tillypad;
 
 /**
- * iiko module definition class
+ * tillypad module definition class
  */
 class Module extends \yii\base\Module
 {
     /**
      * {@inheritdoc}
      */
-    public $controllerNamespace = 'api_web\modules\integration\modules\iiko\controllers';
+    public $controllerNamespace = 'api_web\modules\integration\modules\tillypad\controllers';
 
     /**
      * {@inheritdoc}

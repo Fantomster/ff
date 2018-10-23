@@ -22,14 +22,14 @@ class OrderContent extends BaseOrderContent implements DocumentInterface
         }
 
         $return = [
-            "id"            => $this->id,
-            "product_id"    => $this->product_id,
-            "edi_number"    => $this->edi_number,
-            "product_name"  => $this->product->product,
-            "quantity"      => $this->quantity,
-            "unit"          => $this->product->ed,
-            "price"         => $this->price,
-            "merc_uuid"     => $this->merc_uuid ?? null
+            "id"           => $this->id,
+            "product_id"   => $this->product_id,
+            "edi_number"   => $this->edi_number,
+            "product_name" => $this->product->product,
+            "quantity"     => $this->quantity,
+            "unit"         => $this->product->ed,
+            "sum_with_vat" => $this->price,
+            "merc_uuid"    => $this->merc_uuid ?? null
         ];
 
         return $return;

@@ -175,8 +175,8 @@ class EdiWebApi extends WebApi
                 ->from('order_content oc')
                 ->leftJoin('order', 'order.id = oc.order_id')
                 ->andWhere([
-                    'oc.product_id' => $productIds,
-                    'order.client_id'          => $this->user->organization->id,
+                    'oc.product_id'   => $productIds,
+                    'order.client_id' => $this->user->organization->id,
                 ])
                 ->andWhere(['<', 'order.created_at', $order->created_at])
                 ->orderBy(['`order`.created_at' => SORT_DESC])
@@ -198,12 +198,13 @@ class EdiWebApi extends WebApi
                         $priceChangeDirection = 'up';
                         if ($priceChangeValue < 0) {
                             $priceChangeDirection = 'down';
-                            $priceChangeValue = -1 * $priceChangeValue;
                         }
                         if ($priceChangeValue) {
                             $difference = [
-                                'class' => $priceChangeDirection,
-                                'price' => $oldPrice,
+                                'class'       => $priceChangeDirection,
+                                'price'       => $oldPrice,
+                                'priceChange' => $priceChangeValue,
+                                'percent'     => $v['price'] * 100 / $oldPrice - 100,
                             ];
                         }
                     }

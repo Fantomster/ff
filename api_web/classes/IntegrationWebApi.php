@@ -11,6 +11,7 @@ use common\models\Order;
 use common\models\OrderContent;
 use common\models\OuterAgent;
 use common\models\OuterProduct;
+use common\models\OuterProductMap;
 use common\models\OuterStore;
 use common\models\OuterUnit;
 use common\models\Waybill;
@@ -72,8 +73,8 @@ class IntegrationWebApi extends WebApi
         $organizationID = $this->user->organization_id;
         $acquirerID = $organizationID;
         $ediNumber = '';
-        $outerAgentUUID = '';
-        $outerStoreUUID = '';
+        $outerAgentId = '';
+        $outerStoreId = '';
 
         if (isset($post['order_id'])) {
             $order = Order::findOne(['id' => (int)$post['order_id'], 'client_id' => $this->user->organization_id]);
@@ -83,11 +84,11 @@ class IntegrationWebApi extends WebApi
             }
             $outerAgent = OuterAgent::findOne(['vendor_id' => $order->vendor_id]);
             if ($outerAgent) {
-                $outerAgentUUID = $outerAgent->outer_uid;
+                $outerAgentId = $outerAgent->id;
             }
             $outerStore = OuterStore::findOne(['org_id' => $organizationID]);
             if ($outerStore) {
-                $outerStoreUUID = $outerStore->outer_uid;
+                $outerStoreId = $outerStore->id;
             }
 
             $orderContent = OrderContent::findOne(['order_id' => $order->id]);
@@ -112,8 +113,8 @@ class IntegrationWebApi extends WebApi
         $waybill->service_id = (int)$post['service_id'];
         $waybill->status_id = Registry::WAYBILL_FORMED;
         $waybill->outer_number_code = $ediNumber;
-        $waybill->outer_contractor_uuid = $outerAgentUUID;
-        $waybill->outer_store_uuid = $outerStoreUUID;
+        $waybill->outer_agent_id = $outerAgentId;
+        $waybill->outer_store_id = $outerStoreId;
         $waybill->acquirer_id = $acquirerID;
 
         if (!$waybill->save()) {
@@ -254,26 +255,18 @@ class IntegrationWebApi extends WebApi
      * @param                $post
      * @param                $quan
      * @param                $koef
+     * @throws \Exception
      * @return array
      */
     private function handleWaybillContent($waybillContent, $post, $quan, $koef)
     {
+        if (!OuterProduct::find()->where(['id' => $post['outer_product_id']])->exists()){
+            throw new BadRequestHttpException('outer_product_not_found');
+        }
         if (isset($post['outer_product_id'])) {
             $waybillContent->outer_product_id = $post['outer_product_id'];
-            //TODO refactor
-            // поиск должен осуществляться по орг_ид
-            $allMap = AllMaps::findOne(['product_id' => $post['outer_product_id']]);
-            if ($allMap) {
-                $outerStore = OuterStore::findOne(['id' => $allMap->outer_store_id]);
-                if ($outerStore) {
-                    $waybill = Waybill::findOne(['id' => $waybillContent->waybill_id]);
-                    if ($waybill) {
-                        $waybill->outer_store_uuid = $outerStore->outer_uid;
-                        $waybill->save();
-                    }
-                }
-            }
         }
+
         $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
         if (!$orderContent) {
             if (isset($post['price_without_vat'])) {

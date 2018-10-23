@@ -14,11 +14,11 @@ use yii\behaviors\TimestampBehavior;
  * @property int $service_id
  * @property string $outer_number_code
  * @property string $outer_number_additional
- * @property string $outer_store_uuid
+ * @property string $outer_store_id
  * @property string $outer_duedate
  * @property string $outer_note
  * @property string $outer_order_date
- * @property string $outer_contractor_uuid
+ * @property string $outer_agent_id
  * @property int $vat_included
  *
  * @property string $doc_date
@@ -28,6 +28,9 @@ use yii\behaviors\TimestampBehavior;
  * @property string $exported_at
  * @property int $payment_delay
  * @property string $payment_delay_date
+ * @property string $edi_number
+ * @property string $edi_recadv
+ * @property string $edi_invoice
  *
  *
  * @property WaybillContent[] $waybillContents
@@ -43,6 +46,7 @@ class Waybill extends \yii\db\ActiveRecord
     }
 
     /**
+     * @throws \Exception
      * @return \yii\db\Connection the database connection used by this AR class.
      */
     public static function getDb()
@@ -75,7 +79,7 @@ class Waybill extends \yii\db\ActiveRecord
             [['acquirer_id', 'status_id', 'service_id', 'vat_included', 'is_duedate', 'payment_delay'], 'integer'],
             [['outer_duedate', 'doc_date', 'created_at', 'updated_at', 'exported_at', 'payment_delay_date'], 'safe'],
             [['outer_number_code', 'outer_number_additional', 'outer_note', 'outer_order_date'], 'string', 'max' => 45],
-            [['outer_store_uuid', 'outer_contractor_uuid'], 'string', 'max' => 36],
+            [['outer_store_id', 'outer_agent_id'], 'integer'],
         ];
     }
 
@@ -91,11 +95,11 @@ class Waybill extends \yii\db\ActiveRecord
             'service_id' => 'Service ID',
             'outer_number_code' => 'Outer Number Code',
             'outer_number_additional' => 'Outer Number Additional',
-            'outer_store_uuid' => 'Outer Store Uuid',
+            'outer_store_id' => 'Outer Store Id',
             'outer_duedate' => 'Outer Duedate',
             'outer_note' => 'Outer Note',
             'outer_order_date' => 'Outer Order Date',
-            'outer_contractor_uuid' => 'Outer Contractor Uuid',
+            'outer_agent_id' => 'Outer Agent Id',
             'vat_included' => 'Vat Included'
         ];
     }

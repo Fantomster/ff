@@ -1,14 +1,14 @@
 <?php
 
-namespace api_web\modules\integration\modules\iiko\helpers;
+namespace api_web\modules\integration\modules\tillypad\helpers;
 
-use api_web\modules\integration\modules\iiko\models\iikoService;
+use api_web\modules\integration\modules\tillypad\models\TillypadService;
 use Yii;
 use yii\db\Query;
 use common\models\User;
 use yii\helpers\ArrayHelper;
 
-class iikoLogger
+class TillypadLogger
 {
 
     public static $tableName = '{{%iiko_log}}';
@@ -35,13 +35,13 @@ class iikoLogger
         $operation = (new Query())
             ->select('code')
             ->from('all_service_operation')
-            ->where(['service_id' => iikoService::getServiceId(), 'denom' => $denom])
+            ->where(['service_id' => TillypadService::getServiceId(), 'denom' => $denom])
             ->one(Yii::$app->db_api);
 
         if (!empty($operation)) {
             self::update(['operation_code' => $operation['code']]);
         } else {
-            throw new \Exception('Not found operation service_id:' . iikoService::getServiceId() . ' denom:' . $denom, 999);
+            throw new \Exception('Not found operation service_id:' . TillypadService::getServiceId() . ' demon:' . $denom, 999);
         }
     }
 
@@ -134,6 +134,6 @@ class iikoLogger
      */
     public static function getNameQueue()
     {
-        return 'log_service_' . iikoService::getServiceId();
+        return 'log_service_' . TillypadService::getServiceId();
     }
 }

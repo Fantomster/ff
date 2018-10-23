@@ -5,7 +5,7 @@ namespace frontend\modules\clientintegr\modules\tillypad\controllers;
 use api\common\models\iiko\iikoWaybill;
 use api\common\models\iiko\iikoWaybillData;
 use api\common\models\iiko\search\iikoDicSearch;
-use api\common\models\iiko\iikoService;
+use api\common\models\tillypad\TillypadService;
 use Yii;
 use yii\httpclient\Response;
 
@@ -18,7 +18,7 @@ class DefaultController extends \frontend\modules\clientintegr\modules\iiko\cont
     {
         $searchModel = new iikoDicSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $license = iikoService::getLicense();
+        $license = TillypadService::getLicense();
         $view = $license ? 'index' : '/default/_nolic';
         $params = ['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'lic' => $license];
         $spravoch_zagruzhen = iikoDicSearch::getDicsLoad();
@@ -33,11 +33,11 @@ class DefaultController extends \frontend\modules\clientintegr\modules\iiko\cont
         //}
     }
 
-    /*public function actionMain()
+    public function actionMain()
     {
         $searchModel = new iikoDicSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $license = iikoService::getLicense();
+        $license = TillypadService::getLicense();
         $view = $license ? 'index' : '/default/_nolic';
         $params = ['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'lic' => $license];
             if (Yii::$app->request->isPjax) {
@@ -45,7 +45,7 @@ class DefaultController extends \frontend\modules\clientintegr\modules\iiko\cont
             } else {
                 return $this->render($view, $params);
             }
-    }*/
+    }
 
     /*public function actionTest() {
         $model = iikoWaybill::findOne(7);

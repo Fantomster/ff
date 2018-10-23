@@ -1,14 +1,14 @@
 <?php
 
-namespace frontend\modules\clientintegr\modules\iiko\helpers;
+namespace frontend\modules\clientintegr\modules\tillypad\helpers;
 
 use api\common\models\iiko\iikoDicconst;
 use api\common\models\iiko\iikoWaybill;
-use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
+use api_web\modules\integration\modules\tillypad\helpers\TillypadLogger;
 use common\models\Waybill;
 use yii\helpers\ArrayHelper;
 
-class iikoApi
+class TillypadApi
 {
     private $host = 'http://192.168.100.39:8080/resto/api';
     private $login;
@@ -23,7 +23,7 @@ class iikoApi
     {
         if (self::$_instance === null) {
             self::$_instance = new self;
-            self::$_instance->host = iikoDicconst::getSetting('URL_iiko', $orgId);
+            self::$_instance->host = iikoDicconst::getSetting('URL_tillypad', $orgId);
             self::$_instance->login = iikoDicconst::getSetting('auth_login', $orgId);
             self::$_instance->pass = iikoDicconst::getSetting('auth_password', $orgId);
         }
@@ -160,7 +160,7 @@ class iikoApi
      */
     private function sendAuth($url, $params = [], $method = 'GET', $headers = [])
     {
-        $logger = new iikoLogger();
+        $logger = new TillypadLogger();
         $logger->setOperation($url);
         $logger->request($params);
 
@@ -185,7 +185,7 @@ class iikoApi
         if ($info['http_code'] != 200) {
             $logger->setType('error');
             $logger->response(['info' => $info, 'response' => $response]);
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . PHP_EOL . curl_error($ch));
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ' . curl_error($ch));
         }
         $logger->response($response);
         return $response;
@@ -201,7 +201,7 @@ class iikoApi
      */
     private function send($url, $params = [], $method = 'GET', $headers = [])
     {
-        $logger = new iikoLogger();
+        $logger = new TillypadLogger();
         $logger->setOperation($url);
         $logger->request($params);
 
@@ -299,7 +299,7 @@ class iikoApi
      */
     private function sendXml($url, $body, $headers = [])
     {
-        $logger = new iikoLogger();
+        $logger = new TillypadLogger();
         $logger->setOperation($url);
         $logger->request($body);
 

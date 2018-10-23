@@ -65,288 +65,307 @@ $this->registerJs('
     });
 ');
 ?>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet"/>
-    <style>
-        .actions_icon {
-            margin-right: 5px;
-            text-decoration: underline;
-        }
-    </style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet"/>
+<style>
+    .actions_icon {
+        margin-right: 5px;
+        text-decoration: underline;
+    }
+</style>
 
-    <section class="content-header">
-        <h1>
-            <i class="fa fa-upload"></i> <?= $this->title ?>
-        </h1>
-        <?=
-        \yii\widgets\Breadcrumbs::widget([
-            'options' => [
-                'class' => 'breadcrumb',
+<section class="content-header">
+    <h1>
+        <i class="fa fa-upload"></i> <?= $this->title ?>
+    </h1>
+    <?=
+    \yii\widgets\Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links'   => [
+            [
+                'label' => 'Интеграция',
+                'url'   => ['/clientintegr/default'],
             ],
-            'links'   => [
-                [
-                    'label' => 'Интеграция',
-                    'url'   => ['/clientintegr/default'],
-                ],
-                [
-                    'label' => 'Интеграция Email: ТОРГ - 12',
-                    'url'   => ['/clientintegr/email/default'],
-                ],
-                $this->title,
+            [
+                'label' => 'Интеграция Email: ТОРГ - 12',
+                'url'   => ['/clientintegr/email/default'],
             ],
-        ])
-        ?>
-    </section>
-    <section class="content">
-        <div class="catalog-index">
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    <?= \Yii::$app->controller->module->renderMenu() ?>
-                    <span id="button_save">
+            $this->title,
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
+    <div class="catalog-index">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <?= \Yii::$app->controller->module->renderMenu() ?>
+                <span id="button_save">
                         <a href="#"
-                            class="btn btn-success pull-right" id="save-button" disabled>
+                           class="btn btn-success pull-right" id="save-button" disabled>
                             <i class="fa fa-save"></i> Сохранить
                         </a>
                     </span>
-                </div>
+            </div>
 
-                <div class="box-body">
+            <div class="box-body">
 
-                    <div class="row">
-                        <div class="col-lg-2 col-md-3 col-sm-6">
-                            <?php
-                            echo $form->field($searchModel, 'number')
-                                ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'number'])
-                                ->label(Yii::t('message', 'frontend.views.torg12.number', ['ru' => 'Номер накладной']), ['class' => 'label', 'style' => 'color:#555']);
-                            ?>
-                        </div>
-                        <div class="col-lg-3 col-md-5 col-sm-9">
-                            <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru' => 'Дата: Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
-                            <div class="form-group" style="width: 300px; height: 44px;">
-                                <?=
-                                DatePicker::widget([
-                                    'model'         => $searchModel,
-                                    'attribute'     => 'date_from',
-                                    'attribute2'    => 'date_to',
-                                    'options'       => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFrom'],
-                                    'options2'      => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateTo'],
-                                    'separator'     => '-',
-                                    'type'          => DatePicker::TYPE_RANGE,
-                                    'pluginOptions' => [
-                                        'format'    => 'dd.mm.yyyy', //'d M yyyy',//
-                                        'autoclose' => true,
-                                        'endDate'   => "0d",
-                                    ]
-                                ])
-                                ?>
-                            </div>
-                        </div>
-                        <div class="col-lg-2 col-md-3 col-sm-6">
-                            <?php
-                            echo $form->field($searchModel, 'name_postav')
-                                ->textInput(['prompt' => 'Поиск', 'class' => 'form-control fa fa-search', 'id' => 'name_postav_filter'])
-                                ->label(Yii::t('message', 'frontend.views.supplier.denome', ['ru' => 'Наименование поставщика']), ['class' => 'label', 'style' => 'color:#555']);
+                <div class="row">
+                    <div class="col-lg-2 col-md-3 col-sm-6">
+                        <?php
+                        echo $form->field($searchModel, 'number')
+                            ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'number'])
+                            ->label(Yii::t('message', 'frontend.views.torg12.number', ['ru' => 'Номер накладной']), ['class' => 'label', 'style' => 'color:#555']);
+                        ?>
+                    </div>
+                    <div class="col-lg-3 col-md-5 col-sm-9">
+                        <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru' => 'Дата: Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                        <div class="form-group" style="width: 300px; height: 44px;">
+                            <?=
+                            DatePicker::widget([
+                                'model'         => $searchModel,
+                                'attribute'     => 'date_from',
+                                'attribute2'    => 'date_to',
+                                'options'       => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFrom'],
+                                'options2'      => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateTo'],
+                                'separator'     => '-',
+                                'type'          => DatePicker::TYPE_RANGE,
+                                'pluginOptions' => [
+                                    'format'    => 'dd.mm.yyyy', //'d M yyyy',//
+                                    'autoclose' => true,
+                                    'endDate'   => "0d",
+                                ]
+                            ])
                             ?>
                         </div>
                     </div>
-                    <?php ActiveForm::end(); ?>
-                    <div class="col-sm-12">
+                    <div class="col-lg-2 col-md-3 col-sm-6">
                         <?php
-                        try {
-                            $dataProvider->pagination->pageParam = 'page_outer';
-                            echo GridView::widget([
-                                'dataProvider' => $dataProvider,
-                                'summary'      => false,
-                                'striped'      => false,
-                                'condensed'    => true,
-                                'hover'        => false,
-                                'options'      => [
-                                    'style' => 'min-height:300px;max-height:300px;height:300px;overflow-y:scroll;'
-                                ],
-                                'columns'      => [
-                                    [
-                                        'header'             =>
-                                            'выбрать / ' . \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-close clear_invoice_radio', 'style' => 'cursor:pointer;color:red']),
-                                        'format'             => 'raw',
-                                        'attribute'          => 'number',
-                                        'filterInputOptions' => [
-                                            'class'       => 'form-control',
-                                            'placeholder' => '№ накладной'
-                                        ],
-                                        'value'              => function ($model) {
-                                            if ($model->order_id) {
-                                                return ' ';
-                                            }
-                                            if (!($model->vendor_id)) {
-                                                return '';
-                                            }
-                                            //return \yii\helpers\Html::input('radio', 'invoice_id', $model->id, ['class' => 'invoice_radio']);
-                                            //return '<button type="button" class="btn-primary invoice_radio" id="'.$model->id.'" title="Применить"><i class="glyphicon glyphicon-ok"></i></button>';
-                                            return '<a href="#" class="btn btn-secondary btn-lg invoice_radio" role="button" aria-disabled="true" id="' . $model->id . '">☐</a>';
-                                        },
-                                        //'contentOptions' => ['class' => 'text-center'],
-                                        'contentOptions'     => function ($model) {
-                                            return ["id" => "rbutton" . $model->id];
-                                        },
-                                        'headerOptions'      => ['style' => 'width: 100px;'],
-                                    ],
-                                    [
-                                        'format'             => 'raw',
-                                        'header'             => 'Номер накладной',
-                                        'attribute'          => 'invoice_id',
-                                        'filterInputOptions' => [
-                                            'class'       => 'form-control',
-                                            'placeholder' => 'Наименование поставщика'
-                                        ],
-                                        'contentOptions'     => function ($model) {
-                                            return ["id" => "nn" . $model->id];
-                                        },
-                                        'value'              => function ($data) {
-
-                                            $user = Yii::$app->user->identity;
-                                            $licenses = $user->organization->getLicenseList();
-                                            $timestamp_now = time();
-                                            if (isset($licenses['rkws'])) {
-                                                $sub0 = explode(' ', $licenses['rkws']->td);
-                                                $sub1 = explode('-', $sub0[0]);
-                                                $licenses['rkws']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-                                                if ($licenses['rkws']->status_id == 0) $rk_us = 0;
-                                                if (($licenses['rkws']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws']->td)))) $link = 'rkws';
-                                            }
-                                            if (isset($licenses['iiko'])) {
-                                                $sub0 = explode(' ', $licenses['iiko']->td);
-                                                $sub1 = explode('-', $sub0[0]);
-                                                $licenses['iiko']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-                                                if ($licenses['iiko']->status_id == 0) $lic_iiko = 0;
-                                                if (($licenses['iiko']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['iiko']->td)))) $link = 'iiko';
-                                            }
-                                            if (!isset($link)) {
-                                                return $data->number;
-                                            } else {
-                                                $page = \common\models\IntegrationInvoice::pageOrder($data->order_id);
-                                                return (!empty($data->order_id)) ? \yii\helpers\Html::a($data->number, ['/clientintegr/' . $link . '/waybill/index', 'way' => $data->order_id, 'page' => $page]) : $data->number;
-                                            }
-                                        }
-                                    ],
-                                    [
-                                        'attribute'          => 'date',
-                                        'format'             => 'raw',
-                                        'filterInputOptions' => [
-                                            'class'       => 'form-control',
-                                            'placeholder' => 'Дата'
-                                        ],
-                                        'value'              => function ($row) {
-                                            return \Yii::$app->formatter->asDatetime(new DateTime($row->date), 'php:Y-m-d');
-                                        }
-                                    ],
-                                    [
-                                        'format' => 'raw',
-                                        'header' => 'Наименование поставщика',
-                                        'value'  => function ($data) {
-                                            return $data->name_postav;
-                                        }
-                                    ],
-                                    [
-                                        'attribute' => 'consignee',
-                                        'value'     => function ($data) {
-                                            if ($data->consignee) {
-                                                return $data->consignee;
-                                            } else {
-                                                return $data->organization->name;
-                                            }
-                                        }
-                                    ],
-                                    [
-                                        'attribute' => 'count',
-                                        'value'     => function ($data) {
-                                            return count($data->content);
-                                        }
-                                    ],
-                                    [
-                                        'format'    => 'raw',
-                                        'attribute' => 'created_at',
-                                        'value'     => function ($data) {
-                                            return Yii::$app->formatter->asDatetime($data->created_at, "php:Y-m-d H:i:s");
-                                        },
-                                    ],
-                                    [
-                                        'format'         => 'raw',
-                                        'attribute'      => 'order_id',
-                                        'contentOptions' => function ($data) {
-                                            return ["id" => "oid" . $data->id];
-                                        },
-                                        'value'          => function ($data) {
-                                            return Html::a($data->order_id, Url::to(['/order/view', 'id' => $data->order_id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
-                                        },
-                                    ],
-                                    [
-                                        'attribute' => 'total_sum_withtax',
-                                        'value'     => function ($data) {
-                                            return number_format($data->total_sum_withtax, 2, '.', ' ');
-                                        }
-                                    ],
-                                    [
-                                        'header'         => 'Связь с поставщиком',
-                                        //'class' => 'yii\grid\ActionColumn',
-                                        //'template' => '{view_relations}',
-                                        //'contentOptions' => ['style' => 'text-align:center'],
-                                        'hAlign'         => 'center',
-                                        'contentOptions' => function ($data) {
-                                            return ["id"          => "way" . $data->id,
-                                                    "data-vendor" => $data->vendor_id];
-                                        },
-                                        /* 'buttons' => [
-                                          'view_relations' => function ($url, $model) {
-                                          if (isset($model->order->vendor)) {
-                                          return $model->order->vendor->name;
-                                          } else {
-                                          return 'Задать'renderButton($model->id);
-                                          }
-                                          }
-                                          ], */
-                                        'value'          => function ($model) {
-                                            if (isset($model->vendor_id)) {
-                                                return $model->vendor->name;
-                                            } else {
-                                                return 'Задать';
-                                            }
-                                        }
-                                    ],
-                                    [
-                                        'class'            => 'kartik\grid\ExpandRowColumn',
-                                        'width'            => '50px',
-                                        'value'            => function ($model, $key, $index, $column) {
-                                            return GridView::ROW_COLLAPSED;
-                                        },
-                                        'detail'           => function ($model, $key, $index, $column) {
-                                            return \Yii::$app->controller->renderPartial('_content', ['model' => $model]);
-                                        },
-                                        'expandOneOnly'    => false,
-                                        'enableRowClick'   => false,
-                                        'allowBatchToggle' => false,
-                                        'contentOptions'   => function ($data) {
-                                            return ["id" => "triangle" . $data->id];
-                                        }
-                                    ],
-                                ]
-                            ]);
-                        } catch (Exception $e) {
-
-                        }
+                        echo $form->field($searchModel, 'name_postav')
+                            ->textInput(['prompt' => 'Поиск', 'class' => 'form-control fa fa-search', 'id' => 'name_postav_filter'])
+                            ->label(Yii::t('message', 'frontend.views.supplier.denome', ['ru' => 'Наименование поставщика']), ['class' => 'label', 'style' => 'color:#555']);
                         ?>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="catalog-index orders" style="display:none">
-            <div class="box box-info">
-                <div class="box-body">
-                    <div class="col-sm-12">
-                        <div id="invoice-orders"></div>
-                    </div>
+                <?php ActiveForm::end(); ?>
+                <div class="col-sm-12">
+                    <?php
+                    try {
+                        $dataProvider->pagination->pageParam = 'page_outer';
+                        echo GridView::widget([
+                            'dataProvider' => $dataProvider,
+                            'summary'      => false,
+                            'striped'      => false,
+                            'condensed'    => true,
+                            'hover'        => false,
+                            'options'      => [
+                                'style' => 'min-height:300px;max-height:300px;height:300px;overflow-y:scroll;'
+                            ],
+                            'columns'      => [
+                                [
+                                    'header'             =>
+                                        'выбрать / ' . \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-close clear_invoice_radio', 'style' => 'cursor:pointer;color:red']),
+                                    'format'             => 'raw',
+                                    'attribute'          => 'number',
+                                    'filterInputOptions' => [
+                                        'class'       => 'form-control',
+                                        'placeholder' => '№ накладной'
+                                    ],
+                                    'value'              => function ($model) {
+                                        if ($model->order_id) {
+                                            return ' ';
+                                        }
+                                        if (!($model->vendor_id)) {
+                                            return '';
+                                        }
+                                        //return \yii\helpers\Html::input('radio', 'invoice_id', $model->id, ['class' => 'invoice_radio']);
+                                        //return '<button type="button" class="btn-primary invoice_radio" id="'.$model->id.'" title="Применить"><i class="glyphicon glyphicon-ok"></i></button>';
+                                        return '<a href="#" class="btn btn-secondary btn-lg invoice_radio" role="button" aria-disabled="true" id="' . $model->id . '">☐</a>';
+                                    },
+                                    //'contentOptions' => ['class' => 'text-center'],
+                                    'contentOptions'     => function ($model) {
+                                        return ["id" => "rbutton" . $model->id];
+                                    },
+                                    'headerOptions'      => ['style' => 'width: 100px;'],
+                                ],
+                                [
+                                    'format'             => 'raw',
+                                    'header'             => 'Номер накладной',
+                                    'attribute'          => 'invoice_id',
+                                    'filterInputOptions' => [
+                                        'class'       => 'form-control',
+                                        'placeholder' => 'Наименование поставщика'
+                                    ],
+                                    'contentOptions'     => function ($model) {
+                                        return ["id" => "nn" . $model->id];
+                                    },
+                                    'value'              => function ($data) {
+
+                                        $user = Yii::$app->user->identity;
+                                        $licenses = $user->organization->getLicenseList();
+                                        $timestamp_now = time();
+                                        if (isset($licenses['rkws'])) {
+                                            $sub0 = explode(' ', $licenses['rkws']->td);
+                                            $sub1 = explode('-', $sub0[0]);
+                                            $licenses['rkws']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
+                                            if ($licenses['rkws']->status_id == 0) {
+                                                $rk_us = 0;
+                                            }
+                                            if (($licenses['rkws']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws']->td)))) {
+                                                $link = 'rkws';
+                                            }
+                                        }
+                                        if (isset($licenses['iiko'])) {
+                                            $sub0 = explode(' ', $licenses['iiko']->td);
+                                            $sub1 = explode('-', $sub0[0]);
+                                            $licenses['iiko']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
+                                            if ($licenses['iiko']->status_id == 0) {
+                                                $lic_iiko = 0;
+                                            }
+                                            if (($licenses['iiko']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['iiko']->td)))) {
+                                                $link = 'iiko';
+                                            }
+                                        }
+                                        if (isset($licenses['tillypad'])) {
+                                            $sub0 = explode(' ', $licenses['tillypad']->td);
+                                            $sub1 = explode('-', $sub0[0]);
+                                            $licenses['tillypad']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
+                                            if ($licenses['tillypad']->status_id == 0) {
+                                                $lic_tilly = 0;
+                                            }
+                                            if (($licenses['tillypad']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['tillypad']->td)))) {
+                                                $link = 'tillypad';
+                                            }
+                                        }
+                                        if (!isset($link)) {
+                                            return $data->number;
+                                        } else {
+                                            $page = \common\models\IntegrationInvoice::pageOrder($data->order_id);
+                                            return (!empty($data->order_id)) ? \yii\helpers\Html::a($data->number, ['/clientintegr/' . $link . '/waybill/index', 'way' => $data->order_id, 'page' => $page]) : $data->number;
+                                        }
+                                    }
+                                ],
+                                [
+                                    'attribute'          => 'date',
+                                    'format'             => 'raw',
+                                    'filterInputOptions' => [
+                                        'class'       => 'form-control',
+                                        'placeholder' => 'Дата'
+                                    ],
+                                    'value'              => function ($row) {
+                                        return \Yii::$app->formatter->asDatetime(new DateTime($row->date), 'php:Y-m-d');
+                                    }
+                                ],
+                                [
+                                    'format' => 'raw',
+                                    'header' => 'Наименование поставщика',
+                                    'value'  => function ($data) {
+                                        return $data->name_postav;
+                                    }
+                                ],
+                                [
+                                    'attribute' => 'consignee',
+                                    'value'     => function ($data) {
+                                        if ($data->consignee) {
+                                            return $data->consignee;
+                                        } else {
+                                            return $data->organization->name;
+                                        }
+                                    }
+                                ],
+                                [
+                                    'attribute' => 'count',
+                                    'value'     => function ($data) {
+                                        return count($data->content);
+                                    }
+                                ],
+                                [
+                                    'format'    => 'raw',
+                                    'attribute' => 'created_at',
+                                    'value'     => function ($data) {
+                                        return Yii::$app->formatter->asDatetime($data->created_at, "php:Y-m-d H:i:s");
+                                    },
+                                ],
+                                [
+                                    'format'         => 'raw',
+                                    'attribute'      => 'order_id',
+                                    'contentOptions' => function ($data) {
+                                        return ["id" => "oid" . $data->id];
+                                    },
+                                    'value'          => function ($data) {
+                                        return Html::a($data->order_id, Url::to(['/order/view', 'id' => $data->order_id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
+                                    },
+                                ],
+                                [
+                                    'attribute' => 'total_sum_withtax',
+                                    'value'     => function ($data) {
+                                        return number_format($data->total_sum_withtax, 2, '.', ' ');
+                                    }
+                                ],
+                                [
+                                    'header'         => 'Связь с поставщиком',
+                                    //'class' => 'yii\grid\ActionColumn',
+                                    //'template' => '{view_relations}',
+                                    //'contentOptions' => ['style' => 'text-align:center'],
+                                    'hAlign'         => 'center',
+                                    'contentOptions' => function ($data) {
+                                        return ["id"          => "way" . $data->id,
+                                                "data-vendor" => $data->vendor_id];
+                                    },
+                                    /* 'buttons' => [
+                                      'view_relations' => function ($url, $model) {
+                                      if (isset($model->order->vendor)) {
+                                      return $model->order->vendor->name;
+                                      } else {
+                                      return 'Задать'renderButton($model->id);
+                                      }
+                                      }
+                                      ], */
+                                    'value'          => function ($model) {
+                                        if (isset($model->vendor_id)) {
+                                            return $model->vendor->name;
+                                        } else {
+                                            return 'Задать';
+                                        }
+                                    }
+                                ],
+                                [
+                                    'class'            => 'kartik\grid\ExpandRowColumn',
+                                    'width'            => '50px',
+                                    'value'            => function ($model, $key, $index, $column) {
+                                        return GridView::ROW_COLLAPSED;
+                                    },
+                                    'detail'           => function ($model, $key, $index, $column) {
+                                        return \Yii::$app->controller->renderPartial('_content', ['model' => $model]);
+                                    },
+                                    'expandOneOnly'    => false,
+                                    'enableRowClick'   => false,
+                                    'allowBatchToggle' => false,
+                                    'contentOptions'   => function ($data) {
+                                        return ["id" => "triangle" . $data->id];
+                                    }
+                                ],
+                            ]
+                        ]);
+                    } catch (Exception $e) {
+
+                    }
+                    ?>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+    <div class="catalog-index orders" style="display:none">
+        <div class="box box-info">
+            <div class="box-body">
+                <div class="col-sm-12">
+                    <div id="invoice-orders"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 <?php
 $url = \Yii::$app->urlManager->createUrl('/clientintegr/email/invoice');
 
@@ -361,13 +380,17 @@ $list_integration = '';
 
 if (!empty($integration)) {
     $links = [
-        'rk'   => [
-            'title' => 'R_keeper',
+        'rk'       => [
+            'title' => 'R-Keeper',
             'url'   => '/clientintegr/rkws/waybill/index'
         ],
-        'iiko' => [
+        'iiko'     => [
             'title' => 'iiko Office',
             'url'   => '/clientintegr/iiko/waybill/index'
+        ],
+        'tillypad' => [
+            'title' => 'Tillypad',
+            'url'   => '/clientintegr/tillypad/waybill/index'
         ]
     ];
     foreach ($integration as $key => $row) {

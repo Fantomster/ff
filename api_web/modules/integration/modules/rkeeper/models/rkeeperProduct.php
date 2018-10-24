@@ -76,7 +76,7 @@ class rkeeperProduct extends WebApi
 
     /**
      * Подготовка продукта к выдаче
-     * @param \api\common\models\rkws\RkProduct $model
+     * @param \api\common\models\RkProduct $model
      * @return array
      */
     private function prepareProduct(RkProduct $model)

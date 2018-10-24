@@ -14,7 +14,7 @@ use api_web\helpers\WaybillHelper;
 class WaybillController extends WebApiController
 {
     /**
-     * @SWG\Post(path="/waybill/create-by-order",
+     * @SWG\Post(path="/waybill/regenerate-by-order",
      *     tags={"Waybill"},
      *     summary="Создание накладной по заказу",
      *     description="Создание накладной по заказу",
@@ -54,7 +54,7 @@ class WaybillController extends WebApiController
      * )
      * @throws \Exception
      */
-    public function actionCreateByOrder()
+    public function actionRegenerateByOrder()
     {
         $this->response = (new WaybillHelper())->createWaybillForApi($this->request);
     }

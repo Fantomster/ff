@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use api_web\modules\integration\classes\documents\EdiOrder;
 use api_web\modules\integration\classes\documents\EdiOrderContent;
@@ -14,6 +15,7 @@ use api_web\modules\integration\classes\documents\WaybillContent;
 use common\helpers\DBNameHelper;
 use common\models\RelationUserOrganization;
 use common\models\Order as OrderMC;
+use InvalidArgumentException;
 use yii\data\SqlDataProvider;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
@@ -34,21 +36,6 @@ class DocumentWebApi extends \api_web\components\WebApi
         1 => self::DOC_GROUP_STATUS_WAIT_SENDING,
         2 => self::DOC_GROUP_STATUS_WAIT_FORMING,
         3 => self::DOC_GROUP_STATUS_SENT,
-    ];
-    //todo_refactoring to Registry class
-    const DOC_WAYBILL_STATUS_COLLATED = 'Сопоставлена';
-    const DOC_WAYBILL_STATUS_READY = 'Сформирована';
-    const DOC_WAYBILL_STATUS_ERROR = 'Ошибка';
-    const DOC_WAYBILL_STATUS_RESET = 'Сброшена';
-    const DOC_WAYBILL_STATUS_SENT = 'Выгружена';
-
-    //todo_refactoring to Registry class
-    private static $doc_waybill_status = [
-        1 => self::DOC_WAYBILL_STATUS_COLLATED,
-        2 => self::DOC_WAYBILL_STATUS_READY,
-        3 => self::DOC_WAYBILL_STATUS_ERROR,
-        4 => self::DOC_WAYBILL_STATUS_RESET,
-        5 => self::DOC_WAYBILL_STATUS_SENT,
     ];
 
     /**константа типа документа - заказ*/
@@ -459,6 +446,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
      * @throws ValidationException
      */
     public function editWaybillDetail(array $post)
@@ -469,13 +457,13 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (!isset($waybill)) {
             throw new BadRequestHttpException("waybill_not_found");
         }
-
+        //todo_refactoring to foreach
         if (!empty($post['agent_uid'])) {
-            $waybill->outer_contractor_uuid = $post['agent_uid'];
+            $waybill->outer_agent_id = $post['agent_uid'];
         }
 
         if (!empty($post['store_uid'])) {
-            $waybill->outer_store_uuid = $post['store_uid'];
+            $waybill->outer_store_id = $post['store_uid'];
         }
 
         if (!empty($post['doc_date'])) {
@@ -557,7 +545,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function getWaybillStatus()
     {
-        return self::$doc_waybill_status;
+        return Registry::$waybill_statuses;
     }
 
     /**

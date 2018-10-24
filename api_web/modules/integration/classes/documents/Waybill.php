@@ -140,13 +140,13 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "status_id"   => $model->status_id,
             "status_text" => "",
         ];
-
-        $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_contractor_uuid);
+        //todo_refactoring wtf
+        $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_agent_id);
         if (empty($agent)) {
             $return ["agent"] = [];
         } else {
             $return ["agent"] = [
-                "uid"  => $agent['outer_uid'],
+                "id"  => $agent['id'],
                 "name" => $agent['name'],
             ];
         }
@@ -166,13 +166,13 @@ class Waybill extends BaseWaybill implements DocumentInterface
                 "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
             ];
         }
-
-        $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_uuid);
+        //todo_refactoring wtf
+        $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_id);
         if (empty($agent)) {
             $return ["store"] = [];
         } else {
             $return ["store"] = [
-                "uid"  => $store['outer_uid'],
+                "id"  => $store['id'],
                 "name" => $store['name'],
             ];
         }

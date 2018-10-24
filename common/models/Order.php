@@ -62,20 +62,20 @@ class Order extends \yii\db\ActiveRecord
 
     const STATUS_AWAITING_ACCEPT_FROM_VENDOR = 1;
     const STATUS_AWAITING_ACCEPT_FROM_CLIENT = 2;
-    const STATUS_PROCESSING                  = 3;
-    const STATUS_DONE                        = 4;
-    const STATUS_REJECTED                    = 5;
-    const STATUS_CANCELLED                   = 6;
-    const STATUS_FORMING                     = 7;
-    const STATUS_EDI_SENT_BY_VENDOR          = 8;
-    const STATUS_EDI_ACCEPTANCE_FINISHED     = 9;
-    const STATUS_EDI_SENDING_TO_VENDOR       = 10;
-    const STATUS_EDI_SENDING_ERROR           = 11;
-    const DISCOUNT_NO_DISCOUNT               = null;
-    const DISCOUNT_FIXED                     = 1;
-    const DISCOUNT_PERCENT                   = 2;
-    const DELAY_WITH_DELIVERY_DATE           = 86400; //sec - 1 day
-    const DELAY_WITHOUT_DELIVERY_DATE        = 86400; //sec - 1 day
+    const STATUS_PROCESSING = 3;
+    const STATUS_DONE = 4;
+    const STATUS_REJECTED = 5;
+    const STATUS_CANCELLED = 6;
+    const STATUS_FORMING = 7;
+    const STATUS_EDI_SENT_BY_VENDOR = 8;
+    const STATUS_EDI_ACCEPTANCE_FINISHED = 9;
+    const STATUS_EDI_SENDING_TO_VENDOR = 10;
+    const STATUS_EDI_SENDING_ERROR = 11;
+    const DISCOUNT_NO_DISCOUNT = null;
+    const DISCOUNT_FIXED = 1;
+    const DISCOUNT_PERCENT = 2;
+    const DELAY_WITH_DELIVERY_DATE = 86400; //sec - 1 day
+    const DELAY_WITHOUT_DELIVERY_DATE = 86400; //sec - 1 day
 
     /**
      * @inheritdoc
@@ -120,7 +120,7 @@ class Order extends \yii\db\ActiveRecord
     {
         return [
             [['client_id', 'vendor_id', 'status'], 'required'],
-            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id'], 'integer'],
+            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id', 'replaced_order_id'], 'integer'],
             [['total_price', 'discount'], 'number'],
             [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number', 'edi_ordersp'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -138,20 +138,21 @@ class Order extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'id'             => Yii::t('app', 'Номер заказа'),
-            'client_id'      => 'Client ID',
-            'vendor_id'      => 'Vendor ID',
-            'created_by_id'  => 'Created By ID',
-            'accepted_by_id' => 'Accepted By ID',
-            'status'         => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
-            'status_text'    => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
-            'total_price'    => Yii::t('app', 'common.models.total_price', ['ru' => 'Итоговая цена']),
-            'created_at'     => Yii::t('app', 'Дата создания'),
-            'updated_at'     => 'Updated At',
-            'vendor'         => Yii::t('app', 'Поставщик'),
-            'create_user'    => Yii::t('app', 'Заказ создал'),
-            'plan_price'     => Yii::t('app', 'План'),
-            'waybill_number' => Yii::t('app', 'Номер накладной'),
+            'id'                => Yii::t('app', 'Номер заказа'),
+            'replaced_order_id' => Yii::t('app', 'ID заказа который был заменен текущим'),
+            'client_id'         => 'Client ID',
+            'vendor_id'         => 'Vendor ID',
+            'created_by_id'     => 'Created By ID',
+            'accepted_by_id'    => 'Accepted By ID',
+            'status'            => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'status_text'       => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'total_price'       => Yii::t('app', 'common.models.total_price', ['ru' => 'Итоговая цена']),
+            'created_at'        => Yii::t('app', 'Дата создания'),
+            'updated_at'        => 'Updated At',
+            'vendor'            => Yii::t('app', 'Поставщик'),
+            'create_user'       => Yii::t('app', 'Заказ создал'),
+            'plan_price'        => Yii::t('app', 'План'),
+            'waybill_number'    => Yii::t('app', 'Номер накладной'),
         ];
     }
 
@@ -161,7 +162,7 @@ class Order extends \yii\db\ActiveRecord
         if ($this->discount_type == Order::DISCOUNT_FIXED) {
             $this->discount = round($this->discount, 2);
         } else {
-            $this->discount = abs((int) $this->discount);
+            $this->discount = abs((int)$this->discount);
         }
         return $result;
     }
@@ -274,11 +275,11 @@ class Order extends \yii\db\ActiveRecord
         $today = time();
         if (empty($this->requested_delivery)) {
             $updatedAt = strtotime($this->updated_at);
-            $interval  = $today - $updatedAt;
+            $interval = $today - $updatedAt;
             return $interval > self::DELAY_WITHOUT_DELIVERY_DATE;
         } else {
             $deliveryDate = strtotime($this->requested_delivery);
-            $interval     = $today - $deliveryDate;
+            $interval = $today - $deliveryDate;
             return $interval > self::DELAY_WITH_DELIVERY_DATE;
         }
     }
@@ -443,7 +444,7 @@ class Order extends \yii\db\ActiveRecord
 
     public function getTotalPriceWithOutDiscount()
     {
-        $total_price   = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
+        $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
         $free_delivery = $this->vendor->delivery->min_free_delivery_charge;
         if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
             $total_price += floatval($this->vendor->delivery->delivery_charge);
@@ -485,7 +486,7 @@ class Order extends \yii\db\ActiveRecord
         }
         $franchiseeClientsManagers = $this->client->getRelatedFranchisee();
         $franchiseeVendorsManagers = $this->vendor->getRelatedFranchisee();
-        $recipients                = array_merge($recipients, $franchiseeClientsManagers, $franchiseeVendorsManagers);
+        $recipients = array_merge($recipients, $franchiseeClientsManagers, $franchiseeVendorsManagers);
 
         //Получаем дополнительные Емайлы для рассылки
         //Для заказчика
@@ -563,8 +564,8 @@ class Order extends \yii\db\ActiveRecord
         }
 
         if ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == OrderStatus::STATUS_DONE)) {
-            $vendor    = Organization::findOne(['id' => $this->vendor_id]);
-            $client    = Organization::findOne(['id' => $this->client_id]);
+            $vendor = Organization::findOne(['id' => $this->vendor_id]);
+            $client = Organization::findOne(['id' => $this->client_id]);
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
             if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
                 $this->service_id = 6;
@@ -638,8 +639,8 @@ class Order extends \yii\db\ActiveRecord
         //Если пришла модель с дополнительного Емайла
         if ($user instanceof AdditionalEmail) {
             return Yii::$app->urlManagerFrontend->createAbsoluteUrl([
-                        "/order/view",
-                        "id" => $this->id
+                "/order/view",
+                "id" => $this->id
             ]);
         }
     }
@@ -715,12 +716,12 @@ class Order extends \yii\db\ActiveRecord
         $db_instance = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
 
         $query = (new Query())
-                ->distinct()
-                ->select(['w.id'])
-                ->from(Waybill::tableName() . ' as w')
-                ->leftJoin(WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
-                ->innerJoin($db_instance . '.' . OrderContent::tableName() . ' as oc', 'oc.id = wc.order_content_id')
-                ->where('oc.order_id = :id', [':id' => $this->id]);
+            ->distinct()
+            ->select(['w.id'])
+            ->from(Waybill::tableName() . ' as w')
+            ->leftJoin(WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
+            ->innerJoin($db_instance . '.' . OrderContent::tableName() . ' as oc', 'oc.id = wc.order_content_id')
+            ->where('oc.order_id = :id', [':id' => $this->id]);
 
         if ($service_id) {
             $query->andWhere('w.service_id = :s_id', [':s_id' => $service_id]);

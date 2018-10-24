@@ -156,10 +156,9 @@ class WaybillHelper
     {
         $model = new Waybill();
         $model->acquirer_id = $orgId;
-        $datetime = new \DateTime();
-        $model->doc_date = $datetime->format('Y-m-d H:i:s');
-        $model->created_at = $datetime->format('Y-m-d H:i:s');
-        $model->exported_at = $datetime->format('Y-m-d H:i:s');
+        $model->doc_date = \gmdate('Y-m-d H:i:s');
+        $model->created_at = \gmdate('Y-m-d H:i:s');
+        $model->exported_at = \gmdate('Y-m-d H:i:s');
 
         return $model;
     }

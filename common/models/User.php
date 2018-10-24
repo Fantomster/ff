@@ -618,12 +618,12 @@ class User extends \amnah\yii2\user\models\User
      */
     public function getEmailLastFail()
     {
-        return EmailFails::find()->where("email = :e", [':e' => $this->email])->orderBy('type DESC, id DESC')->one();
+        return EmailFails::find()->where("email = :e", [':e' => $this->email])->orderBy('type DESC, id DESC')->limit(1)->one();
     }
 
     public function getLastEmail()
     {
-        return EmailQueue::find()->where("`to` = :email", [':email' => $this->email])->orderBy('id DESC')->one();
+        return EmailQueue::find()->where("`to` = :email", [':email' => $this->email])->orderBy('id DESC')->limit(1)->one();
     }
     
     //-- wtf begin

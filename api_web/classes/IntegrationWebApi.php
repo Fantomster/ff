@@ -111,7 +111,7 @@ class IntegrationWebApi extends WebApi
             }
         }
 
-        $waybill = new Waybill();
+        $waybill = new \api_web\modules\integration\classes\documents\Waybill();
         $waybill->service_id = (int)$post['service_id'];
         $waybill->status_id = Registry::WAYBILL_FORMED;
         $waybill->outer_number_code = $ediNumber;
@@ -123,7 +123,7 @@ class IntegrationWebApi extends WebApi
             throw new ValidationException($waybill->getFirstErrors());
         }
 
-        return ['success' => true, 'waybill_id' => $waybill->id];
+        return ['result' => $waybill->prepare()];
     }
 
     /**

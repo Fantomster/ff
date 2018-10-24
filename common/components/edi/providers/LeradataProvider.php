@@ -168,12 +168,50 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     private function executeCurl($paramsArray, $action)
     {
         $requestArray = [
-            "token"     => $this->token,
-            "varGln"    => $this->varGln,
-            "intUserID" => $this->intUserID,
+            "token"     => "$this->token",
+            "varGln"    => "$this->varGln",
+            "intUserID" => "$this->intUserID",
             "params"    => $paramsArray
         ];
         $payload = json_encode($requestArray);
+        $payload = <<<EOJSON
+{
+    "token":"yN2XiNfSMmNGA6bLtlHKo21bxtbWAx3",
+    "varGln":"9879870002282",
+    "intUserID":"13902",
+    "params":[{
+                "docType":"order",
+                "doc":{
+                        "DOCUMENTNAME":"220",
+                        "NUMBER":"13954",
+                        "DATE":"2018-10-24",
+                        "DELIVERYDATE":"2018-10-24",
+                        "CURRENCY":"RUB",
+                        "SUPORDER":"13954",
+                        "DOCTYPE":"O",
+                        "CAMPAIGNNUMBER":"13954",
+                        "ORDRTYPE":"ORIGINAL",
+                        "HEAD":[{
+                                "SUPPLIER":"9879870002282",
+                                "BUYER":"9879870002268",
+                                "DELIVERYPLACE":"9879870002268",
+                                "SENDER":"9879870002268",
+                                "RECIPIENT":"9879870002282",
+                                "EDIINTERCHANGEID":"13954",
+                                "POSITION":[{
+                                                "POSITIONNUMBER":"1",
+                                                "PRODUCT":"8",
+                                                "ORDEREDQUANTITY":"0.100",
+                                                "ORDERUNIT":"0",
+                                                "ORDERPRICE":"118.00"
+                            }]
+            }]
+        }
+        }
+    ]
+}
+EOJSON;
+        //da($payload);
         $ch = curl_init($this->url);
         curl_setopt($ch, CURLOPT_POSTFIELDS, "$action=$payload");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

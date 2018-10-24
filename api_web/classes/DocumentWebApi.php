@@ -545,7 +545,9 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function getWaybillStatus()
     {
-        return Registry::$waybill_statuses;
+        return array_map(function ($el) {
+            return \Yii::t('api_web', 'waybill.'.$el);
+        }, Registry::$waybill_statuses);
     }
 
     /**

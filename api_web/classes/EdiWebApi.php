@@ -132,7 +132,7 @@ class EdiWebApi extends WebApi
      */
     public function getOrderHistory(array $post)
     {
-        $post['search']['service_id'] = Registry::EDI_SERVICE_ID;
+        $post['search']['service_id'] = [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID];
         return $this->container->get('OrderWebApi')->getHistory($post);
     }
 
@@ -154,7 +154,7 @@ class EdiWebApi extends WebApi
 
         if (empty($order)) {
             throw new BadRequestHttpException("order_not_found");
-        } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
+        } elseif (!in_array($order->service_id, [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID])) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
         }
 

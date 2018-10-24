@@ -8,7 +8,6 @@
 
 namespace api_web\controllers;
 
-
 use api_web\components\WebApiController;
 use api_web\helpers\WaybillHelper;
 
@@ -60,7 +59,6 @@ class WaybillController extends WebApiController
         $this->response = (new WaybillHelper())->createWaybillForApi($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/move-order-content-to-waybill",
      *     tags={"Waybill"},
@@ -108,7 +106,6 @@ class WaybillController extends WebApiController
         $this->response = (new WaybillHelper())->moveOrderContentToWaybill($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/create-waybill",
      *     tags={"Waybill"},
@@ -155,7 +152,6 @@ class WaybillController extends WebApiController
         $this->response = $this->container->get('IntegrationWebApi')->handleWaybill($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/reset-waybill-content",
      *     tags={"Waybill"},
@@ -199,7 +195,6 @@ class WaybillController extends WebApiController
     {
         $this->response = $this->container->get('IntegrationWebApi')->resetWaybillContent($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/waybill/show-waybill-content",
@@ -267,7 +262,6 @@ class WaybillController extends WebApiController
         $this->response = $this->container->get('IntegrationWebApi')->showWaybillContent($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/update-waybill-content",
      *     tags={"Waybill"},
@@ -320,7 +314,6 @@ class WaybillController extends WebApiController
         $this->response = $this->container->get('IntegrationWebApi')->updateWaybillContent($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/create-waybill-content",
      *     tags={"Waybill"},
@@ -372,10 +365,9 @@ class WaybillController extends WebApiController
         $this->response = $this->container->get('IntegrationWebApi')->createWaybillContent($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/delete-waybill-content",
-     *     tags={"waybill"},
+     *     tags={"Waybill"},
      *     summary="Накладная - Удалить/Убрать позицию",
      *     description="Накладная - Удалить/Убрать позицию",
      *     produces={"application/json"},

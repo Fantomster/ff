@@ -4,6 +4,7 @@ namespace common\models;
 
 use api\common\models\merc\MercVsd;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "waybill_content".
@@ -44,6 +45,21 @@ class WaybillContent extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return array
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function rules()
@@ -53,6 +69,7 @@ class WaybillContent extends \yii\db\ActiveRecord
             [['waybill_id', 'order_content_id', 'outer_product_id', 'outer_unit_id'], 'integer'],
             [['sum_with_vat', 'sum_without_vat', 'price_with_vat', 'price_without_vat', 'quantity_waybill', 'vat_waybill', 'koef'], 'number'],
             [['merc_uuid'], 'string', 'max' => 255],
+            [['created_at', 'updated_at'], 'safe'],
             [['waybill_id'], 'exist', 'skipOnError' => true, 'targetClass' => Waybill::className(), 'targetAttribute' => ['waybill_id' => 'id']],
         ];
     }

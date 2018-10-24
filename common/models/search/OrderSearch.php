@@ -89,6 +89,11 @@ class OrderSearch extends Order
         }
 
         $query = Order::find();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+
         $this->load($params);
 
         $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");

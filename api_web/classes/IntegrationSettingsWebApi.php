@@ -22,13 +22,13 @@ class IntegrationSettingsWebApi extends WebApi
      * @return array
      * @throws \Exception
      */
-    public function list (array $post): array
+    public function list(array $post): array
     {
         $this->validateRequest($post, ['service_id']);
 
         $result = IntegrationSettingValue::find()
             ->select(['name', 'value'])
-            ->leftJoin(IntegrationSetting::tableName(), IntegrationSetting::tableName().".id = ".IntegrationSettingValue::tableName().".setting_id")
+            ->leftJoin(IntegrationSetting::tableName(), IntegrationSetting::tableName() . ".id = " . IntegrationSettingValue::tableName() . ".setting_id")
             ->where("org_id = :org and service_id = :service and is_active = true", [':org' => $this->user->organization_id, ':service' => $post['service_id']])
             ->asArray()->all();
         return $result;
@@ -41,13 +41,13 @@ class IntegrationSettingsWebApi extends WebApi
      * @return array
      * @throws \Exception
      */
-    public function getSetting (array $post): array
+    public function getSetting(array $post): array
     {
         $this->validateRequest($post, ['service_id', 'name']);
 
         $result = IntegrationSettingValue::find()
             ->select(['name', 'value'])
-            ->leftJoin(IntegrationSetting::tableName(), IntegrationSetting::tableName().".id = ".IntegrationSettingValue::tableName().".setting_id")
+            ->leftJoin(IntegrationSetting::tableName(), IntegrationSetting::tableName() . ".id = " . IntegrationSettingValue::tableName() . ".setting_id")
             ->where("org_id = :org and service_id = :service and is_active = true and name = :name",
                 [':org' => $this->user->organization_id, ':service' => $post['service_id'], ':name' => $post['name']])
             ->asArray()->one();
@@ -61,7 +61,7 @@ class IntegrationSettingsWebApi extends WebApi
      * @return array
      * @throws \yii\web\BadRequestHttpException
      */
-    public function update (array $post): array
+    public function update(array $post): array
     {
         $this->validateRequest($post, ['service_id', 'settings']);
 
@@ -91,16 +91,16 @@ class IntegrationSettingsWebApi extends WebApi
 
         $modelSetting = IntegrationSetting::findOne(['name' => $request['name'], 'service_id' => $service_id, 'is_active' => true]);
 
-        if(!$modelSetting) {
+        if (!$modelSetting) {
             throw new BadRequestHttpException('Setting not found');
         }
 
         $model = IntegrationSettingValue::find()
             ->where("setting_id = :setting_id and org_id = :org",
-                [':setting_id' => $modelSetting->id,':org' => $this->user->organization_id])
+                [':setting_id' => $modelSetting->id, ':org' => $this->user->organization_id])
             ->one();
 
-        if(!$model) {
+        if (!$model) {
             $model = new IntegrationSettingValue();
             $model->setting_id = $modelSetting->id;
             $model->org_id = $this->user->organization_id;
@@ -109,7 +109,6 @@ class IntegrationSettingsWebApi extends WebApi
         $model->value = $request['value'];
 
         if (!$model->save()) {
-            var_dump($model->getErrors()); die();
             throw new ValidationException($model->getFirstErrors());
         }
 

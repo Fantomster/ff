@@ -111,6 +111,13 @@ class WaybillHelper
                         }
 
                         foreach ($arMappedForStores as $storeId => $storeProducts) {
+                            if (!$storeId){
+                                $storeId = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id,
+                                    ['defStore']);
+                                if (!$storeId){
+                                    continue;
+                                }
+                            }
                             $arOuterMappedProducts = $this->prepareStoreProducts($storeProducts, $notInWaybillContent);
                             $waybillIds[] = $this->createWaybillAndContent($arOuterMappedProducts, $order->client_id,
                                 $storeId, $serviceId);

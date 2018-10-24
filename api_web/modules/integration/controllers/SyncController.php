@@ -2,20 +2,19 @@
 
 /**
  * Class SyncController
- * @package api_web\module\integration
+ *
+ * @package   api_web\module\integration
  * @createdBy Basil A Konakov
  * @createdAt 2018-09-20
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
+ * @author    Mixcart
+ * @module    WEB-API
+ * @version   2.0
  */
 
 namespace api_web\modules\integration\controllers;
 
-use api_web\modules\integration\classes\sync\ServiceRkws;
 use Yii;
 use yii\web\BadRequestHttpException;
-use yii\web\UnauthorizedHttpException;
 use api_web\modules\integration\classes\SyncLog;
 use api_web\modules\integration\classes\SyncServiceFactory;
 use api_web\modules\integration\classes\sync\AbstractSyncFactory;
@@ -31,7 +30,7 @@ class SyncController extends WebApiController
 {
     /**
      * @SWG\Post(path="/integration/sync/run",
-     *     tags={"Integration/sync/run"},
+     *     tags={"Integration/sync"},
      *     summary="Универсальный метод интеграционных действий",
      *     description="Универсальный метод интеграционных действий по синхронизации данных с внешней системой
      * Доступные значения:
@@ -88,8 +87,6 @@ class SyncController extends WebApiController
      *         description = "error"
      *     )
      * )
-     *
-     * Multifunctoinal integration method
      * @throws BadRequestHttpException
      */
     public function actionRun()
@@ -136,7 +133,7 @@ class SyncController extends WebApiController
 
     /**
      * @SWG\Post(path="/integration/sync/send-waybill",
-     *     tags={"/integration/sync/send-waybill"},
+     *     tags={"Integration/sync"},
      *     summary="Метод выгрузки накладных во внешнюю систему",
      *     description="Метод выгрузки накладных во внешнюю систему",
      *     produces={"application/json"},
@@ -183,21 +180,20 @@ class SyncController extends WebApiController
      */
     public function actionSendWaybill()
     {
-            # 2.2.1. Check root script params
-            if (!isset($this->request['service_id']) || !$this->request['service_id'] || !is_int($this->request['service_id'])) {
-                SyncLog::trace('"Service ID" is required and empty!');
-                throw new BadRequestHttpException("empty_param|service_id");
-            }
-            if (!isset($this->request['ids']) || !is_array($this->request['ids']) || !$this->request['ids']) {
-                SyncLog::trace('Required variable "ids" is empty!');
-                throw new BadRequestHttpException("empty_param|ids");
-            }
-            SyncLog::trace('Fix non-callback operation scenario');
+        # 2.2.1. Check root script params
+        if (!isset($this->request['service_id']) || !$this->request['service_id'] || !is_int($this->request['service_id'])) {
+            SyncLog::trace('"Service ID" is required and empty!');
+            throw new BadRequestHttpException("empty_param|service_id");
+        }
+        if (!isset($this->request['ids']) || !is_array($this->request['ids']) || !$this->request['ids']) {
+            SyncLog::trace('Required variable "ids" is empty!');
+            throw new BadRequestHttpException("empty_param|ids");
+        }
+        SyncLog::trace('Fix non-callback operation scenario');
 
         # 3. Load integration script with env and post params
-        $factory = (new SyncServiceFactory($this->request['service_id'], [],SyncServiceFactory::TASK_SYNC_GET_LOG))->factory($this->request['service_id']);
+        $factory = (new SyncServiceFactory($this->request['service_id'], [], SyncServiceFactory::TASK_SYNC_GET_LOG))->factory($this->request['service_id']);
 
         $this->response = $factory->sendWaybill($this->request);
     }
-
 }

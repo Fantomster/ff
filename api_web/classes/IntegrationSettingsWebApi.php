@@ -87,8 +87,11 @@ class IntegrationSettingsWebApi extends WebApi
      */
     private function updateSetting($service_id, $request)
     {
-        $this->validateRequest($request, ['name', 'value']);
+        $this->validateRequest($request, ['name']);
 
+        if (!isset($request['value'])) {
+            throw new BadRequestHttpException('empty_param|value');
+        }
         $modelSetting = IntegrationSetting::findOne(['name' => $request['name'], 'service_id' => $service_id, 'is_active' => true]);
 
         if (!$modelSetting) {

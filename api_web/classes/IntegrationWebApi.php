@@ -118,6 +118,7 @@ class IntegrationWebApi extends WebApi
         $waybill->outer_agent_id = $outerAgentId;
         $waybill->outer_store_id = $outerStoreId;
         $waybill->acquirer_id = $acquirerID;
+        $waybill->doc_date = \gmdate('Y-m-d H:i:s');
 
         if (!$waybill->save()) {
             throw new ValidationException($waybill->getFirstErrors());

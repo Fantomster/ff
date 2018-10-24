@@ -8,13 +8,80 @@
 
 namespace api_web\modules\integration\controllers;
 
-
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\classes\Integration;
 use yii\web\BadRequestHttpException;
 
 class DictionaryController extends \api_web\components\WebApiController
 {
+    /**
+     * @SWG\Post(path="/integration/dictionary/list",
+     *     tags={"Integration/dictionary"},
+     *     summary="Список справочников",
+     *     description="Список справочников",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 2
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                          {
+     *                              "id": 6,
+     *                              "name": "agent",
+     *                              "title": "Контрагенты",
+     *                              "count": 7,
+     *                              "status_id": 1,
+     *                              "status_text": "Загружены",
+     *                              "created_at": "2018-10-18T16:50:54+03:00",
+     *                              "updated_at": "2018-10-19T09:12:42+03:00"
+     *                          },
+     *                          {
+     *                              "id": 10,
+     *                              "name": "store",
+     *                              "title": "Склады",
+     *                              "count": 10,
+     *                              "status_id": 1,
+     *                              "status_text": "Загружены",
+     *                              "created_at": "2018-10-18T16:50:54+03:00",
+     *                              "updated_at": "2018-10-19T09:12:42+03:00"
+     *                          }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     */
+    public function actionList()
+    {
+        if (empty($this->request['service_id'])) {
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+
+        $this->response = (new Dictionary($this->request['service_id'], 'Dictionary'))->getList();
+    }
+
     /**
      * @SWG\Post(path="/integration/dictionary/product-list",
      *     tags={"Integration/dictionary"},
@@ -343,7 +410,7 @@ class DictionaryController extends \api_web\components\WebApiController
 
     public function actionStoreList()
     {
-        if (!isset($this->request['service_id'])){
+        if (!isset($this->request['service_id'])) {
             throw new BadRequestHttpException('empty_param|service_id');
         }
         $this->response = (new Dictionary($this->request['service_id'], 'Store'))->storeList($this->request);
@@ -367,6 +434,10 @@ class DictionaryController extends \api_web\components\WebApiController
      *                      "service_id": 2,
      *                      "search": {
      *                          "name": "наименование"
+     *                      },
+     *                      "pagination":{
+     *                          "page": 1,
+     *                          "page_size": 12
      *                      }
      *                    }
      *              )
@@ -420,7 +491,7 @@ class DictionaryController extends \api_web\components\WebApiController
 
     public function actionUnitList()
     {
-        if (!isset($this->request['service_id'])){
+        if (!isset($this->request['service_id'])) {
             throw new BadRequestHttpException('empty_param|service_id');
         }
         $this->response = (new Dictionary($this->request['service_id'], 'Unit'))->unitList($this->request);
@@ -517,7 +588,7 @@ class DictionaryController extends \api_web\components\WebApiController
 
     public function actionCategoryList()
     {
-        if (!isset($this->request['service_id'])){
+        if (!isset($this->request['service_id'])) {
             throw new BadRequestHttpException('empty_param|service_id');
         }
         $this->response = (new Dictionary($this->request['service_id'], 'Unit'))->categoryList($this->request);

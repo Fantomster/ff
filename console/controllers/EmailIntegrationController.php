@@ -13,6 +13,7 @@ use yii\console\Controller;
 
 class EmailIntegrationController extends Controller
 {
+
     /**
      * @var $connect Pop3
      */
@@ -142,7 +143,6 @@ class EmailIntegrationController extends Controller
             print_r("Result price_with_tax_sum:" . $result[$i - 1]['invoice']['price_with_tax_sum'] . PHP_EOL);
             print_r("=================================" . PHP_EOL);
             //print_r($result[$i - 1]['invoice']['rows']);
-
             //file_put_contents('result_'.$i.'.txt', $filet.PHP_EOL,true);
             //file_put_contents('result_'.$i.'.txt', print_r($result[$i-1],true));
             $i++;
@@ -156,7 +156,7 @@ class EmailIntegrationController extends Controller
          */
         error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
         //Получаем все активные настройки или конкретную настройку
-        $where = (isset($this->setting_id) ? ['id' => $this->setting_id] : ['is_active' => 1]);
+        $where    = (isset($this->setting_id) ? ['id' => $this->setting_id] : ['is_active' => 1]);
         $settings = IntegrationSettingFromEmail::find()->where($where)->all();
         \Yii::$app->db->createCommand('SET SESSION wait_timeout = 28800;')->execute();
         //Побежали по серверам
@@ -291,19 +291,19 @@ class EmailIntegrationController extends Controller
                 continue;
             }
 
-            /*$this->log([
-                str_pad('', 100, '_'),
-                'EMAIL ID: ' . $email['id'],
-                'FROM: ' . $email['from']['email'],
-                'SUBJECT: ' . $email['subject'] . PHP_EOL
-            ]);*/
+            /* $this->log([
+              str_pad('', 100, '_'),
+              'EMAIL ID: ' . $email['id'],
+              'FROM: ' . $email['from']['email'],
+              'SUBJECT: ' . $email['subject'] . PHP_EOL
+              ]); */
 
             //Получаем тело файла
-            $content = array_values($file)[0];
+            $content      = array_values($file)[0];
             //Декодируем имя файла
-            $name_file = iconv_mime_decode($name_file, 0, "UTF-8");
+            $name_file    = iconv_mime_decode($name_file, 0, "UTF-8");
             //Темповый файл, для прочтения и парсинга
-            $temp_file = \Yii::getAlias('@app') . '/runtime/' . md5($email['id']) . '_' . $name_file;
+            $temp_file    = \Yii::getAlias('@app') . '/runtime/' . md5($email['id']) . '_' . $name_file;
             //Тело файла в BASE64 для возможности записи в базу
             $file_content = base64_encode($content);
             //Проверяем на всякий темповый файл, если есть, удаляем
@@ -312,9 +312,9 @@ class EmailIntegrationController extends Controller
             }
             //Проверяем, нет ли уже этой накладной у этой организации
             $model = IntegrationInvoice::findOne([
-                'integration_setting_from_email_id' => $setting->id,
-                'organization_id' => $setting->organization_id,
-                'file_hash_summ' => md5($file_content),
+                        'integration_setting_from_email_id' => $setting->id,
+                        'organization_id'                   => $setting->organization_id,
+                        'file_hash_summ'                    => md5($file_content),
             ]);
             if (!empty($model)) {
                 //$this->log('- File (' . $name_file . ') has previously been processed by the parser `integration_invoice`.`id` = ' . $model->id);
@@ -327,13 +327,19 @@ class EmailIntegrationController extends Controller
             try {
                 // запускаем обработку накладной
                 $parser->parse();
-                if ($parser->sumNotEqual === true) $parser->sendMailNotEqualSum($email['from']['email'], $name_file, $setting->language);
+                if ($parser->sumNotEqual === true) {
+                    $parser->sendMailNotEqualSum($email['from']['email'], $name_file, $setting->language);
+                }
             } catch (ParseTorg12Exception $e) {
                 $this->log([
                     PHP_EOL,
                     'ERROR PARSING TORG12 FILE: ' . $name_file,
                     '--!-- ' . $e->getMessage()
                 ]);
+                //Удаляем темп файл
+                if (file_exists($temp_file)) {
+                    unlink($temp_file);
+                }
                 continue;
             }
 
@@ -342,18 +348,22 @@ class EmailIntegrationController extends Controller
                     PHP_EOL,
                     'Error: empty rows ' . $name_file
                 ]);
+                //Удаляем темп файл
+                if (file_exists($temp_file)) {
+                    unlink($temp_file);
+                }
                 continue;
             }
 
             //Данные, необходимые для сохранения в базу
             $result[] = [
                 'integration_setting_from_email_id' => $setting->id,
-                'organization_id' => $setting->organization_id,
-                'email_id' => $email['id'],
-                'file_mime_type' => $mime_type,
-                'file_content' => $file_content,
-                'file_hash_summ' => md5($file_content),
-                'invoice' => \GuzzleHttp\json_decode(\GuzzleHttp\json_encode($parser->invoice), true),
+                'organization_id'                   => $setting->organization_id,
+                'email_id'                          => $email['id'],
+                'file_mime_type'                    => $mime_type,
+                'file_content'                      => $file_content,
+                'file_hash_summ'                    => md5($file_content),
+                'invoice'                           => \GuzzleHttp\json_decode(\GuzzleHttp\json_encode($parser->invoice), true),
             ];
             //Удаляем темп файл
             if (file_exists($temp_file)) {
@@ -376,4 +386,5 @@ class EmailIntegrationController extends Controller
             $this->log[] = trim($message);
         }
     }
+
 }

@@ -6,7 +6,8 @@ use yii\widgets\Breadcrumbs;
 use yii\widgets\Pjax;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\grid\GridView;
+//use yii\grid\GridView;
+use kartik\grid\GridView;
 use kartik\date\DatePicker;
 use common\components\SearchOrdersComponent;
 use common\models\search\OrderSearch;
@@ -43,10 +44,11 @@ $headers = [
     'client' => Yii::t('message', 'frontend.views.order.rest_two', ['ru' => 'Ресторан']),
 ];
 
+$urlSaveSelected = Url::to(['order/save-selected-orders']);
 
 $dataColumns = [
     // 1. ЧЕКБОКС (ТОЛЬКО ПОСТАВЩИКИ)
-    [
+   /*[
         'visible' => $forVendor,
         'class' => CheckboxColumn::class,
         'contentOptions' => ['class' => 'small_cell_checkbox'],
@@ -54,6 +56,52 @@ $dataColumns = [
         'checkboxOptions' => function ($model) use ($selected) {
             return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => in_array($model['id'], $selected)];
         }
+    ],*/
+    [
+        'class' => 'common\components\multiCheck\CheckboxColumn',
+        'visible' => $forVendor,
+        'contentOptions' => ['class' => 'small_cell_checkbox'],
+        'headerOptions' => ['style' => 'text-align:center;'],
+        'onChangeEvents' => [
+            'changeAll' => 'function(e) {
+                                                            url      = window.location.href;
+                                                            var value = [];
+                                                            state = $(this).prop("checked") ? 1 : 0;
+    
+                                                           $(".checkbox-export").each(function() {
+                                                                value.push($(this).val());
+                                                            });    
+                                                
+                                                           value = value.toString();  
+                                                           
+                                                           $.ajax({
+                                                             url: "'.$urlSaveSelected.'?selected=" +  value+"&state=" + state,
+                                                             type: "POST",
+                                                             data: {selected: value, state: state},
+                                                             success: function(data){
+                                                             //$.pjax.reload({container: "#order-list", url: url, timeout:30000});
+                                                             }
+                                                           }); }',
+            'changeCell' => 'function(e) { 
+                                                            state = $(this).prop("checked") ? 1 : 0;
+                                                            selectedCount = parseInt($("#selected_info").text());
+                                                             
+                                                            url = window.location.href;
+                                                            var value = $(this).val();
+                                                          
+                                                           $.ajax({
+                                                             url: "'.$urlSaveSelected.'?selected=" +  value+"&state=" + state,
+                                                             type: "POST",
+                                                             data: {selected: value, state: state},
+                                                             success: function(data){
+                                                             //$.pjax.reload({container: "#order-list", url: url, timeout:30000});                                                             
+                                                                
+                                                             }
+                                                           });}'
+        ],
+        'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
+            return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => (in_array($model['id'], $selected)) ? 'checked' : ""];
+        },
     ],
     // 2. ID заказа
     [
@@ -326,23 +374,23 @@ $("document").ready(function () {
 
     $(document).on("click", ".export-to-xls", function () {
         if ($("#orderHistory").yiiGridView("getSelectedRows").length > 0) {
-            window.location.href = "$urlExport?selected=" + $("#orderHistory").yiiGridView("getSelectedRows") + "&page=" + current_page;
+            window.location.href = "$urlExport";
         }
 
     });
     $(document).on("click", ".grid-report", function () {
         if ($("#orderHistory").yiiGridView("getSelectedRows").length > 0) {
-            window.location.href = "$urlReport?selected=" + $("#orderHistory").yiiGridView("getSelectedRows") + "&page=" + current_page;
+            window.location.href = "$urlReport";
         }
     });
 
-    var current_page = 0;
+    /*var current_page = 0;
     $(document).on("click", ".pagination a", function (e) {
         e.preventDefault();
         var url = $(this).attr("href");
 
         $.ajax({
-            url: "$urlSaveSelected?selected=" + $("#orderHistory").yiiGridView("getSelectedRows") + "&page=" + current_page,
+            url: "$urlSaveSelected?selected=" + $("#orderHistory").yiiGridView("getSelectedRows"),
             type: "GET",
             success: function () {
                 $.pjax.reload({container: "#order-list", url: url, timeout: 30000});
@@ -350,7 +398,7 @@ $("document").ready(function () {
         });
 
         current_page = $(this).attr("data-page")
-    });
+    });*/
 
     $(".box-body").on("click", "td", function () {
         if ($(this).find("input").hasClass("checkbox-export")) {

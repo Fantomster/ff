@@ -8,12 +8,9 @@
 
 namespace api_web\helpers;
 
+use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use common\helpers\DBNameHelper;
-use common\models\IntegrationSetting;
-use common\models\IntegrationSettingValue;
-use common\models\licenses\License;
-use common\models\licenses\LicenseOrganization;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OuterAgent;
@@ -28,30 +25,6 @@ use yii\web\BadRequestHttpException;
  * */
 class WaybillHelper
 {
-    const RK_SERVICE_ID = 1;
-    const IIKO_SERVICE_ID = 2;
-    /**@var int const for mercuriy service id in all_service table */
-    const MERC_SERVICE_ID = 4;
-    /**@var int const for EDI service id in all_service table */
-    const EDI_SERVICE_ID = 6;
-    const VENDOR_DOC_MAIL_SERVICE_ID = 3;
-    const WAYBILL_COMPARED = 'compared';
-    const WAYBILL_FORMED = 'formed';
-    const WAYBILL_ERROR = 'error';
-    const WAYBILL_RESET = 'reset';
-    const WAYBILL_UNLOADED = 'unloaded';
-    const WAYBILL_UNLOADING = 'unloading';
-
-    /**@var array $statuses */
-    static $statuses = [
-        self::WAYBILL_COMPARED  => 1,
-        self::WAYBILL_FORMED    => 2,
-        self::WAYBILL_ERROR     => 3,
-        self::WAYBILL_RESET     => 4,
-        self::WAYBILL_UNLOADED  => 5,
-        self::WAYBILL_UNLOADING => 6,
-    ];
-
     /**
      * Create waybill and waybill_content and binding VSD
      *
@@ -64,7 +37,7 @@ class WaybillHelper
         $orgId = (\Yii::$app->user->identity)->organization_id;
         $modelWaybill = new Waybill();
         $modelWaybill->acquirer_id = $orgId;
-        $modelWaybill->service_id = self::MERC_SERVICE_ID;
+        $modelWaybill->service_id = Registry::MERC_SERVICE_ID;
 
         $modelWaybillContent = new WaybillContent();
         $modelWaybillContent->merc_uuid = $uuid;
@@ -81,7 +54,6 @@ class WaybillHelper
 
         return true;
     }
-
 
     /**
      * @param      $order_id
@@ -115,7 +87,7 @@ class WaybillHelper
                 }
 
                 $hasDefaultStore = 1234;
-                $hasDefaultServiceID = 1234;
+                $hasDefaultServiceID = 2;
                 if ($hasDefaultStore) {
                     $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
                         $hasDefaultStore, $hasDefaultServiceID);
@@ -172,10 +144,8 @@ class WaybillHelper
     {
         $model = new Waybill();
         $model->acquirer_id = $orgId;
-        $model->service_id = WaybillHelper::EDI_SERVICE_ID;
-        $model->bill_status_id = self::$statuses[self::WAYBILL_FORMED]; //TODO: bill_status_id ???
-        $model->readytoexport = 0;
-        $model->is_deleted = 0;
+        $model->service_id = Registry::EDI_SERVICE_ID;
+        $model->status_id = Registry::WAYBILL_FORMED;
         $datetime = new \DateTime();
         $model->doc_date = $datetime->format('Y-m-d H:i:s');
         $model->created_at = $datetime->format('Y-m-d H:i:s');
@@ -185,8 +155,8 @@ class WaybillHelper
     }
 
     /**
-     * @param $orderContent
-     * @param $orgId
+     * @param      $orderContent
+     * @param      $orgId
      * @param null $outerStoreUuid
      * @param null $serviceId
      * @return int
@@ -233,7 +203,9 @@ class WaybillHelper
                 $modelWaybillContent->order_content_id = $ordCont->id;
                 $modelWaybillContent->waybill_id = $model->id;
                 $modelWaybillContent->merc_uuid = $ordCont->merc_uuid;
-                $modelWaybillContent->product_outer_id = $ordCont->product_id;
+                #TODO refactor
+                #Тут должен браться id продукта из у.с.
+                $modelWaybillContent->outer_product_id = $ordCont->product_id;
                 $modelWaybillContent->quantity_waybill = $quantity;
                 $modelWaybillContent->vat_waybill = $taxRate;
                 $modelWaybillContent->sum_with_vat = $quantity * $priceWithVat;
@@ -292,11 +264,11 @@ class WaybillHelper
             throw new BadRequestHttpException('empty_param|waybill_id|order_content_id');
         }
         $waybill = Waybill::findOne([
-            'id'             => $request['waybill_id'],
-            'bill_status_id' => [
-                self::$statuses[self::WAYBILL_COMPARED],
-                self::$statuses[self::WAYBILL_ERROR],
-                self::$statuses[self::WAYBILL_FORMED],
+            'id'        => $request['waybill_id'],
+            'status_id' => [
+                Registry::WAYBILL_COMPARED,
+                Registry::WAYBILL_ERROR,
+                Registry::WAYBILL_FORMED,
             ]]);
         if (!$waybill) {
             throw new BadRequestHttpException('waybill cannot adding waybill_content with id ' . $request['waybill_id']);
@@ -305,6 +277,9 @@ class WaybillHelper
         if (!$orderContent) {
             throw new BadRequestHttpException('OrderContent dont exists with id ' . $request['order_content_id']);
         }
+
+        $this->checkOrderForWaybillContent($waybill, $orderContent);
+
         $taxRate = $orderContent->vat_product ?? null;
         $quantity = $orderContent->quantity;
         $price = $orderContent->price;
@@ -316,7 +291,9 @@ class WaybillHelper
             $waybillContent = new WaybillContent();
             $waybillContent->waybill_id = $request['waybill_id'];
             $waybillContent->order_content_id = $orderContent->id;
-            $waybillContent->product_outer_id = $orderContent->product_id;
+            #todo_refactoring
+            #Тут должен быть id продукта у.с. а не наш продукт
+            $waybillContent->outer_product_id = $orderContent->product_id;
             $waybillContent->quantity_waybill = (float)$quantity;
             $waybillContent->vat_waybill = $taxRate;
             $waybillContent->merc_uuid = $orderContent->merc_uuid;
@@ -334,5 +311,29 @@ class WaybillHelper
         }
 
         return ['result' => true];
+    }
+
+    /**
+     * Проверка на правильность добавления позиции заказа к накладной
+     * Нельзя добавить к накладной, имеющей позиции из одного заказа, позиции из другой заказа
+     * Так же нельзя добавить позицию заказа, уже имеющую позицию в накладной
+     *
+     * @param Waybill      $waybill
+     * @param OrderContent $orderContent
+     * @throws BadRequestHttpException
+     */
+    private function checkOrderForWaybillContent(Waybill $waybill, OrderContent $orderContent)
+    {
+        if ($orderContent->waybillContent){
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_allready_has_waybill_content') . '-' . $orderContent->waybillContent->id);
+        }
+        $waybillContent = WaybillContent::find()->where(['waybill_id' => $waybill->id])
+            ->andWhere(['not', ['order_content_id' => null]])->one();
+        if ($waybillContent) {
+            $orderContentFromWaybill = $waybillContent->orderContent;
+            if ($orderContent->order_id != $orderContentFromWaybill->order_id) {
+                throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_not_for_this_waybill'));
+            }
+        }
     }
 }

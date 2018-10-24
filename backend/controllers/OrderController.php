@@ -126,6 +126,7 @@ class OrderController extends Controller
 
     /**
      * Lists all Order models.
+     *
      * @return mixed
      */
     public function actionIndex()
@@ -142,6 +143,7 @@ class OrderController extends Controller
 
     /**
      * Displays a single Order model.
+     *
      * @param integer $id
      * @return mixed
      */
@@ -214,7 +216,6 @@ class OrderController extends Controller
             }
         }
 
-
         $searchModel = new OrderContentSearch();
         $params = Yii::$app->request->getQueryParams();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -285,6 +286,7 @@ class OrderController extends Controller
 
     /**
      * Страница оператора заказов
+     *
      * @return string
      */
     public function actionOperator()
@@ -298,6 +300,7 @@ class OrderController extends Controller
 
     /**
      * Изменение атрибутов звонка
+     *
      * @return string
      */
     public function actionOperatorChangeAttribute()
@@ -316,6 +319,7 @@ class OrderController extends Controller
 
     /**
      * Установить оператора к заказу
+     *
      * @return string
      */
     public function actionOperatorSetToOrder()
@@ -323,7 +327,7 @@ class OrderController extends Controller
         if (\Yii::$app->request->isAjax) {
 
             $wait = OperatorTimeout::getTimeoutOperator(Yii::$app->user->getId());
-            if($wait > 0) {
+            if ($wait > 0) {
                 exit("Нужно подождать {$wait} секунд.");
             }
 
@@ -344,13 +348,15 @@ class OrderController extends Controller
                     ->where(['operator_id' => Yii::$app->user->getId()])
                     ->andWhere('status_call_id != 3')->count();
 
-                $modelTimeout = OperatorTimeout::findOne(['operator_id' => Yii::$app->user->getId()]);
-                if (empty($modelTimeout)) {
-                    $modelTimeout = new OperatorTimeout(['operator_id' => Yii::$app->user->getId()]);
+                if ($countCall > 1) {
+                    $modelTimeout = OperatorTimeout::findOne(['operator_id' => Yii::$app->user->getId()]);
+                    if (empty($modelTimeout)) {
+                        $modelTimeout = new OperatorTimeout(['operator_id' => Yii::$app->user->getId()]);
+                    }
+                    $modelTimeout->timeout_at = \gmdate('Y-m-d H:i:s');
+                    $modelTimeout->timeout = $countCall * (10 + $countCall);
+                    $modelTimeout->save();
                 }
-                $modelTimeout->timeout_at = \gmdate('Y-m-d H:i:s');
-                $modelTimeout->timeout = $countCall * (10 + $countCall);
-                $modelTimeout->save();
             } else {
                 $user = User::findOne($model->operator_id);
                 exit('Оператор уже установлен: ' . $user->profile->full_name);
@@ -361,6 +367,7 @@ class OrderController extends Controller
     /**
      * Finds the Order model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
      * @return Order the loaded model
      * @throws NotFoundHttpException if the model cannot be found

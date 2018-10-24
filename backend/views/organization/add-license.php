@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="col-md-9">
                 <?php foreach ($allLicenseOrganization as $value): ?>
-                    <p <?php if($value['td'] < $tenDaysAfter) echo 'style ="color: red;"' ?>><?= $value['license']['name'] . " : " . $value['td'] ?></p>
+                    <p <?php if ($value['td'] < $tenDaysAfter) echo 'style ="color: red;"' ?>><?= $value['license']['name'] . " : " . $value['td'] ?></p>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -67,19 +67,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 <p>Дата окончания</p>
                 <div>
                     <?= DatePicker::widget([
-                        'name' => 'td[' . $id . ']',
-                        'value' => date('d.m.Y'),
-                        'options' => [
+                        'name'          => 'td[' . $id . ']',
+                        'value'         => date('d.m.Y'),
+                        'options'       => [
                             'placeholder' => 'Дата окончания',
-                            'class' => 'delivery-date',
-                            'label' => 'Дата окончания'
+                            'class'       => 'delivery-date',
+                            'label'       => 'Дата окончания'
                         ],
-                        'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                        'layout' => '{picker}{input}{remove}',
+                        'type'          => DatePicker::TYPE_COMPONENT_APPEND,
+                        'layout'        => '{picker}{input}{remove}',
                         'pluginOptions' => [
-                            'format' => 'dd.mm.yyyy',
-                            'autoclose' => true,
-                            'startDate' => "0d",
+                            'format'         => 'dd.mm.yyyy',
+                            'autoclose'      => true,
+                            'startDate'      => "0d",
                             'todayHighlight' => true,
                         ]
                     ]) ?>

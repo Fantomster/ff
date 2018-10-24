@@ -50,6 +50,20 @@
         <div class="col-sm-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
+                    <h3 class="panel-title">Tillypad</h3>
+                </div>
+                <div class="panel-body">
+                    <a href="/tillypad" class="btn btn-success">
+                        Список лицензий
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
                     <h3 class="panel-title">Меркурий</h3>
                 </div>
                 <div class="panel-body">
@@ -58,6 +72,8 @@
                     </a>
                 </div>
             </div>
+        </div>
+        <div class="col-sm-6">
         </div>
     </div>
 </div>

@@ -746,7 +746,7 @@ class getResearchMethodChangesListResponse{
 var $researchMethodList;//ResearchMethodList
 }
 class Cerber
- {
+{
  var $soapClient;
 
 private static $classmap = array('GenericEntity'=>'GenericEntity'

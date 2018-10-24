@@ -261,6 +261,7 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionUpdate()
     {

@@ -14,10 +14,15 @@ use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 
 /**
- * OrganizationSearch represents the model behind the search form about `common\models\Organization`.
+ * OrganizationSearch represents the model behind the search form about common\models\Organization.
  */
 class OrganizationSearch extends Organization
 {
+    private $dbApiName;
+    private $dbName;
+    private $tenDaysAfter;
+    private $tenDaysAgo;
+    private $maxQuery;
 
     /**
      * @inheritdoc
@@ -43,39 +48,49 @@ class OrganizationSearch extends Organization
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params, bool $isForLicenses = false)
     {
         $this->load($params);
         if ($isForLicenses) {
-            $dbApiName = $this->getDbName('db_api');
-            $dbName = $this->getDbName('db');
-            $now = new Expression('NOW()');
-            $tenDaysAgo = new Expression('NOW() - INTERVAL 10 DAY');
+            $this->dbApiName = $this->getDbName('db_api');
+            $this->dbName = $this->getDbName('db');
+            $this->tenDaysAfter = new Expression('NOW() + INTERVAL 10 DAY');
+            $this->tenDaysAgo = new Expression('NOW() - INTERVAL 1 DAY');
 
-            $query1 = Organization::find()->innerJoin($dbApiName . '.license_organization', "`$dbApiName`.license_organization.org_id=`$dbName`.organization.id")->where(['between', 'td', $tenDaysAgo, $now])->orderBy('td', 'desc')->groupBy('td')->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
-            $query2 = Organization::find()->innerJoin($dbApiName . '.license_organization', "`$dbApiName`.license_organization.org_id=`$dbName`.organization.id")->where(['<', 'td', $now])->orderBy('td', 'desc')->groupBy('td')->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
-            $allLicenseOrganizations = ArrayHelper::getColumn(LicenseOrganization::find()->where(['not', ['org_id' => null]])->groupBy('org_id')->all(), 'org_id');
-            $query3 = Organization::find()->where(['not in', 'id', $allLicenseOrganizations])->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
+            $maxSelect = (new \yii\db\Query())
+                ->select('MAX(td)')
+                ->from("$this->dbApiName.license_organization AS lo")
+                ->where("lo.org_id = $this->dbName.organization.id");
+            $maxSelectSQL = $maxSelect->createCommand()->getRawSql();
 
-            $query1->union($query2)->union($query3);
+            $this->maxQuery = "$this->dbApiName.license_organization.td = ($maxSelectSQL)";
+            $query1 = $this->getSQLQuery(1);
+
+            $query2 = $this->getSQLQuery(2);
+
+            $query3 = $this->getSQLQuery(3);
+
+            $query4 = Organization::find()->with('licenseOrganization')->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
+
+            $query1->union($query2)->union($query3)->union($query4);
             $sql = $query1->createCommand()->getRawSql();
+
             $dataProvider = new SqlDataProvider([
-                'sql' => $sql,
-                'key' => 'id',
+                'sql'        => $sql,
+                'key'        => 'id',
                 'pagination' => ['pageSize' => 20],
-                'sort' => [
+                'sort'       => [
                     'attributes' => [
-                        'id' => [
-                            'asc' => ['id' => SORT_ASC], // от А до Я
-                            'desc' => ['id' => SORT_DESC], // от Я до А
+                        'id'   => [
+                            'asc'     => ['id' => SORT_ASC], // от А до Я
+                            'desc'    => ['id' => SORT_DESC], // от Я до А
                             'default' => SORT_DESC
                         ],
                         'name' => [
-                            'asc' => ['name' => SORT_ASC], // от А до Я
-                            'desc' => ['name' => SORT_DESC], // от Я до А
+                            'asc'     => ['name' => SORT_ASC], // от А до Я
+                            'desc'    => ['name' => SORT_DESC], // от Я до А
                             'default' => SORT_DESC
                         ],
                     ],
@@ -86,8 +101,8 @@ class OrganizationSearch extends Organization
 // add conditions that should always apply here
 
             $dataProvider = new ActiveDataProvider([
-                'query' => $query,
-                'sort' => [
+                'query'      => $query,
+                'sort'       => [
                     'attributes' => [
                         'id',
                         'name',
@@ -95,7 +110,6 @@ class OrganizationSearch extends Organization
                 ],
                 'pagination' => ['pageSize' => 20]
             ]);
-
 
             if (!$this->validate()) {
 // uncomment the following line if you do not want to return any records when validation fails
@@ -105,11 +119,11 @@ class OrganizationSearch extends Organization
 
 // grid filtering conditions
             $query->andFilterWhere([
-                'id' => $this->id,
-                'type_id' => $this->type_id,
-                'created_at' => $this->created_at,
-                'updated_at' => $this->updated_at,
-                'step' => $this->step,
+                'id'          => $this->id,
+                'type_id'     => $this->type_id,
+                'created_at'  => $this->created_at,
+                'updated_at'  => $this->updated_at,
+                'step'        => $this->step,
                 'blacklisted' => $this->blacklisted,
             ]);
 
@@ -128,12 +142,33 @@ class OrganizationSearch extends Organization
         return $dataProvider;
     }
 
-
     private function getDbName($db)
     {
         $db = Yii::$app->get($db);
         $dbNameArr = explode(';dbname=', $db->dsn);
         $dbName = $dbNameArr[1];
-        return $dbName;
+        return "`" . $dbName . "`";
+    }
+
+    private function getSQLQuery($queue)
+    {
+        $query = Organization::find()
+            ->innerJoin("$this->dbApiName.license_organization", "$this->dbApiName.license_organization.org_id=$this->dbName.organization.id");
+        if ($queue == 1 || $queue == 2) {
+            $query = $query->where($this->maxQuery);
+        }
+        if ($queue == 1) {
+            $query = $query->andWhere(['between', 'td', $this->tenDaysAgo, $this->tenDaysAfter]);
+        }
+        if ($queue == 2) {
+            $query = $query->andWhere(['<=', 'td', $this->tenDaysAfter]);
+        }
+        if ($queue == 3) {
+            $query = $query->andWhere(['>', 'td', $this->tenDaysAfter]);
+        }
+
+        $query = $query->andFilterWhere(['like', 'name', $this->name])
+            ->andFilterWhere(['like', 'address', $this->address]);
+        return $query;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api_web\components\Registry;
 use yii\db\ActiveRecord;
 use Yii;
 use yii\web\BadRequestHttpException;
@@ -103,7 +104,7 @@ class OrderStatus extends ActiveRecord
      */
     public static function checkEdiOrderPermissions(Order $order = null, string $type = null, array $ediExcludesStatuses = [])
     {
-        if ($order && $order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
+        if ($order && $order->service_id == Registry::EDI_SERVICE_ID) {
             if (!$ediExcludesStatuses || !in_array($order->status, $ediExcludesStatuses)) {
                 if (OrderStatus::getClientPermissionByType($order->status, $type) == null) {
                     throw new BadRequestHttpException('Bad permission type! Check the awailable list of types.');

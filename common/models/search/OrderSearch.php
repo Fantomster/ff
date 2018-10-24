@@ -43,7 +43,7 @@ class OrderSearch extends Order
     {
         return [
             [['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 'client_search_id', 'vendor_search_id', 'manager_id', 'service_id'], 'integer'],
-            [['created_at', 'updated_at', 'date_from', 'date_to', 'docStatus'], 'safe'],
+            [['created_at', 'updated_at', 'date_from', 'date_to', 'docStatus', 'completion_date_from', 'completion_date_to'], 'safe'],
         ];
     }
 
@@ -75,7 +75,6 @@ class OrderSearch extends Order
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
@@ -91,7 +90,6 @@ class OrderSearch extends Order
 
         $query = Order::find();
         $this->load($params);
-
 
         $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
         if ($from) {
@@ -123,7 +121,6 @@ class OrderSearch extends Order
         /**
          * END
          */
-
 
         switch ($this->status) {
             case 1: //new
@@ -176,7 +173,7 @@ class OrderSearch extends Order
         $addSortAttributes[] = 'acceptedByProfile.full_name';
         foreach ($addSortAttributes as $addSortAttribute) {
             $dataProvider->sort->attributes[$addSortAttribute] = [
-                'asc' => [$addSortAttribute => SORT_ASC],
+                'asc'  => [$addSortAttribute => SORT_ASC],
                 'desc' => [$addSortAttribute => SORT_DESC],
             ];
         }
@@ -190,9 +187,9 @@ class OrderSearch extends Order
         // grid filtering conditions
         $query->andFilterWhere([
             Order::tableName() . '.status' => $this->status_array,
-            'total_price' => $this->total_price,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'total_price'                  => $this->total_price,
+            'created_at'                   => $this->created_at,
+            'updated_at'                   => $this->updated_at,
         ]);
 
         if (isset($t1_f)) {
@@ -202,11 +199,12 @@ class OrderSearch extends Order
             $query->andFilterWhere(['<=', Order::tableName() . '.created_at', $t2_f]);
         }
 
+        $orderTable = Order::tableName();
         if (isset($completion_date_from)) {
-            $query->andFilterWhere(['>=', Order::tableName() . '.completion_date', $completion_date_from]);
+            $query->andWhere("IF( $orderTable.status = " . OrderStatus::STATUS_DONE . ", IFNULL($orderTable.completion_date, $orderTable.actual_delivery) >= '$completion_date_from', $orderTable.updated_at >= '$completion_date_from')");
         }
         if (isset($completion_date_to)) {
-            $query->andFilterWhere(['<=', Order::tableName() . '.completion_date', $completion_date_to]);
+            $query->andWhere("IF( $orderTable.status = " . OrderStatus::STATUS_DONE . ", IFNULL($orderTable.completion_date, $orderTable.actual_delivery) <= '$completion_date_to', $orderTable.updated_at <= '$completion_date_to')");
         }
 
         if (!empty($this->vendor_array)) {
@@ -220,7 +218,7 @@ class OrderSearch extends Order
         }
 
         /**
-         * @editedBy Basil A Konakov
+         * @editedBy          Basil A Konakov
          * @editedByKonakovAt 2018-08-13
          * Служба или источник получения заказа (EDI и т.д.) - см., например, таблицу all_service
          */
@@ -231,31 +229,29 @@ class OrderSearch extends Order
             $query->andWhere(
                 ['OR',
                     ['not in', 'service_id', $this->service_id_excluded],
-                    ['service_id' => NULL]
+                    ['service_id' => null]
                 ]);
         }
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'query'      => $query,
+            'sort'       => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => ['pageSize' => 20],
         ]);
         return $dataProvider;
 
     }
 
-
     /**
      * Creates data provider instance with search query applied for waybill controller (Integration)
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function searchWaybill($params)
     {
 
         /**
-         * @editedBy Basil A Konakov
+         * @editedBy          Basil A Konakov
          * @editedByKonakovAt 2018-08-10
          */
         if (isset($params['OrderSearch']['id']) && (int)$params['OrderSearch']['id'] > 0) {
@@ -265,7 +261,6 @@ class OrderSearch extends Order
                 'query' => $query
             ]);
         }
-
 
         //$query = Order::find();
 
@@ -329,7 +324,7 @@ class OrderSearch extends Order
         // $query ->innerJoin('rk_waybill', 'rk_waybill.order_id = order.id');
 
         $nacl = null;
-        $naclInternal = array();
+        $naclInternal = [];
 
         switch ($this->docStatus) {
             case 1: //new
@@ -363,7 +358,6 @@ class OrderSearch extends Order
 
         }
 
-
         // var_dump($nacl);
         // die();
 
@@ -393,7 +387,7 @@ class OrderSearch extends Order
         $addSortAttributes[] = 'acceptedByProfile.full_name';
         foreach ($addSortAttributes as $addSortAttribute) {
             $dataProvider->sort->attributes[$addSortAttribute] = [
-                'asc' => [$addSortAttribute => SORT_ASC],
+                'asc'  => [$addSortAttribute => SORT_ASC],
                 'desc' => [$addSortAttribute => SORT_DESC],
             ];
         }
@@ -407,9 +401,9 @@ class OrderSearch extends Order
         // grid filtering conditions
         $query->andFilterWhere([
             Order::tableName() . '.status' => $this->status_array,
-            'total_price' => $this->total_price,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'total_price'                  => $this->total_price,
+            'created_at'                   => $this->created_at,
+            'updated_at'                   => $this->updated_at,
         ]);
 
         if (isset($t1_f)) {
@@ -423,19 +417,17 @@ class OrderSearch extends Order
         $query->andFilterWhere(['client_id' => $this->client_id]);
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'query'      => $query,
+            'sort'       => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => ['pageSize' => 20],
         ]);
         return $dataProvider;
     }
 
-
     /**
      * Creates data array applied for waybill controller (Integration)
      *
      * @param array $post
-     *
      * @return array
      */
     public function searchWaybillWebApi(array $post, String $modelName = 'api\common\models\iiko\iikoWaybill'): array
@@ -511,9 +503,9 @@ class OrderSearch extends Order
         }
 
         $arr['pagination'] = [
-            'page' => $page,
+            'page'       => $page,
             'total_page' => ceil($count / $pageSize),
-            'page_size' => $pageSize
+            'page_size'  => $pageSize
         ];
         return $arr;
     }
@@ -522,7 +514,6 @@ class OrderSearch extends Order
      * Creates data provider instance with search query applied for waybill controller (Integration)
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function searchWaybillRkeeperWebApi(array $post): array
@@ -548,7 +539,6 @@ class OrderSearch extends Order
         if ($vendorID) {
             $query->andWhere(['order.vendor_id' => $vendorID]);
         }
-
 
         if ($actualDelivery) {
             $query->andWhere(['order.actual_delivery' => $actualDelivery]);
@@ -596,9 +586,9 @@ class OrderSearch extends Order
         }
 
         $arr['pagination'] = [
-            'page' => $page,
+            'page'       => $page,
             'total_page' => ceil($count / $pageSize),
-            'page_size' => $pageSize
+            'page_size'  => $pageSize
         ];
         return $arr;
     }
@@ -607,7 +597,6 @@ class OrderSearch extends Order
      * Создаёт dataProvider для представления заказов при сопоставлении их с накладными ТОРГ-12
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function searchForTorg12($params)
@@ -617,21 +606,21 @@ class OrderSearch extends Order
         //$this->load($params);
 
         if ((isset($params['invoice_id']) && !isset($params['show_waybill'])) || (isset($params['show_waybill']) && $params['show_waybill'] == 'false')) {
-            $query->andFilterWhere(['waybill_number' => $params['invoice_id'],
-                'client_id' => $params['OrderSearch']['client_id'],
-                'vendor_id' => $params['OrderSearch']['vendor_id'],
-                'invoice_relation' => null,]);
+            $query->andFilterWhere(['waybill_number'   => $params['invoice_id'],
+                                    'client_id'        => $params['OrderSearch']['client_id'],
+                                    'vendor_id'        => $params['OrderSearch']['vendor_id'],
+                                    'invoice_relation' => null,]);
             $query->andWhere("status!=$deleted_status");
         } else {
-            $query->andFilterWhere(['client_id' => $params['OrderSearch']['client_id'],
-                'vendor_id' => $params['OrderSearch']['vendor_id'],
-                'invoice_relation' => null]);
+            $query->andFilterWhere(['client_id'        => $params['OrderSearch']['client_id'],
+                                    'vendor_id'        => $params['OrderSearch']['vendor_id'],
+                                    'invoice_relation' => null]);
             $query->andWhere("status!=$deleted_status");
         }
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'query'      => $query,
+            'sort'       => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => ['pageSize' => 20],
         ]);
         return $dataProvider;

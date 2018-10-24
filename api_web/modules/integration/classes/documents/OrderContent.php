@@ -1,9 +1,9 @@
 <?php
+
 namespace api_web\modules\integration\classes\documents;
 
-use api\common\models\AllMaps;
+use api_web\helpers\CurrencyHelper;
 use api_web\modules\integration\interfaces\DocumentInterface;
-use api_web\modules\integration\modules\iiko\models\iikoService;
 use common\models\OrderContent as BaseOrderContent;
 
 class OrderContent extends BaseOrderContent implements DocumentInterface
@@ -11,6 +11,7 @@ class OrderContent extends BaseOrderContent implements DocumentInterface
 
     /**
      * Порлучение данных из модели
+     *
      * @return mixed
      */
     public function prepare()
@@ -20,14 +21,14 @@ class OrderContent extends BaseOrderContent implements DocumentInterface
         }
 
         $return = [
-            "id" => $this->id,
-            "product_id" => $this->product_id,
+            "id"           => $this->id,
+            "product_id"   => $this->product_id,
+            "edi_number"   => $this->edi_number,
             "product_name" => $this->product->product,
-            "quantity" => $this->quantity,
-            "unit" => $this->product->units,
-            "price" => $this->price,
-            "is_fullmap" => $this->isFullmap(),
-
+            "quantity"     => $this->quantity,
+            "unit"         => $this->product->ed,
+            "sum_with_vat" => CurrencyHelper::asDecimal($this->price),
+            "merc_uuid"    => $this->merc_uuid ?? null
         ];
 
         return $return;
@@ -35,27 +36,16 @@ class OrderContent extends BaseOrderContent implements DocumentInterface
 
     /**
      * Загрузка модели и получение данных
+     *
      * @param $key
      * @return $array
      */
     public static function prepareModel($key)
     {
         $model = self::findOne(['id' => $key]);
-        if($model === null ) {
+        if ($model === null) {
             return [];
         }
         return $model->prepare();
-    }
-
-    /**
-     * Признак наличия позиции в массовом сопоставлении
-     * @return bool
-     */
-    private function isFullmap()
-    {
-        $client_id = $this->order->client_id;
-        $mainOrg = iikoService::getMainOrg($client_id);
-        return (AllMaps::find()->where("org_id in ($client_id, $mainOrg) and product_id = $this->product_id and is_active = 1")->one()) != null;
-
     }
 }

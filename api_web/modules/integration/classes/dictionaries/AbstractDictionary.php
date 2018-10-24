@@ -8,13 +8,14 @@
 
 namespace api_web\modules\integration\classes\dictionaries;
 
-
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use common\models\Organization;
+use common\models\OrganizationDictionary;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
 use common\models\OuterCategory;
+use common\models\OuterDictionary;
 use common\models\OuterProduct;
 use common\models\OuterStore;
 use common\models\OuterUnit;
@@ -47,7 +48,52 @@ class AbstractDictionary extends WebApi
     }
 
     /**
+     * Список справочников
+     *
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getList()
+    {
+        $models = OuterDictionary::find()
+            ->where([
+                'service_id' => (int)$this->service_id
+            ])
+            ->leftJoin(
+                OrganizationDictionary::tableName(),
+                'outer_dictionary.id = organization_dictionary.outer_dic_id AND organization_dictionary.org_id = :org_id'
+            )
+            ->addParams([
+                ':org_id' => $this->user->organization_id
+            ])
+            ->all();
+
+        $return = [];
+        /**
+         * Статус по умолчанию = "Синхронизация не проводилась"
+         */
+        $defaultStatusText = OrganizationDictionary::getStatusTextList()[OrganizationDictionary::STATUS_DISABLED];
+        foreach ($models as $model) {
+            /** @var \common\models\OrganizationDictionary $d */
+            $d = current($model->organizationDictionaries);
+            $return[] = [
+                'id'          => $model->id,
+                'name'        => $model->name,
+                'title'       => \Yii::t('api_web', 'dictionary.' . $model->name),
+                'count'       => $d->count ?? 0,
+                'status_id'   => $d->status_id ?? 0,
+                'status_text' => $d->statusText ?? $defaultStatusText,
+                'created_at'  => $d->created_at ?? null,
+                'updated_at'  => $d->updated_at ?? null
+            ];
+        }
+
+        return $return;
+    }
+
+    /**
      * Список продуктов полученных из внешней системы
+     *
      * @param $request
      * @throws \Exception
      * @return array
@@ -84,10 +130,10 @@ class AbstractDictionary extends WebApi
         }
 
         $return = [
-            'products' => $result,
+            'products'   => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -97,21 +143,23 @@ class AbstractDictionary extends WebApi
 
     /**
      * Подготовка продукта к выдаче
+     *
      * @param OuterProduct $model
      * @return array
      */
     private function prepareProduct(OuterProduct $model)
     {
         return [
-            'id' => (int)$model->id,
-            'name' => $model->name,
-            'unit' => (OuterUnit::findOne($model->outer_unit_id))->name,
+            'id'        => (int)$model->id,
+            'name'      => $model->name,
+            'unit'      => (OuterUnit::findOne($model->outer_unit_id))->name,
             'is_active' => (int)!$model->is_deleted
         ];
     }
 
     /**
      * Список агентов
+     *
      * @param $request
      * @throws \Exception
      * @return array
@@ -122,10 +170,9 @@ class AbstractDictionary extends WebApi
         $page = (isset($pag['page']) ? $pag['page'] : 1);
         $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
 
-
         $search = OuterAgent::find()->joinWith(['store', 'nameWaybills'])
             ->where([
-                '`outer_agent`.org_id' => $this->user->organization->id,
+                '`outer_agent`.org_id'     => $this->user->organization->id,
                 '`outer_agent`.service_id' => $this->service_id
             ]);
 
@@ -150,10 +197,10 @@ class AbstractDictionary extends WebApi
         }
 
         $return = [
-            'agents' => $result,
+            'agents'     => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -163,6 +210,7 @@ class AbstractDictionary extends WebApi
 
     /**
      * Информация по агенту
+     *
      * @param $agent_uid
      * @return array
      */
@@ -170,9 +218,9 @@ class AbstractDictionary extends WebApi
     {
         $model = OuterAgent::find()->joinWith(['store', 'nameWaybills'])
             ->where([
-                '`outer_agent`.org_id' => $this->user->organization->id,
+                '`outer_agent`.org_id'     => $this->user->organization->id,
                 '`outer_agent`.service_id' => $this->service_id,
-                '`outer_agent`.outer_uid' => $agent_uid,
+                '`outer_agent`.outer_uid'  => $agent_uid,
             ])->one();
 
         if ($model === null) {
@@ -184,6 +232,7 @@ class AbstractDictionary extends WebApi
 
     /**
      * Обновление контрагента
+     *
      * @param $request
      * @return array
      * @throws ValidationException
@@ -208,7 +257,6 @@ class AbstractDictionary extends WebApi
             OuterAgentNameWaybill::deleteAll(['agent_id' => $request['id']]);
         }
 
-
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             \Yii::$app->db_api->createCommand()
@@ -229,16 +277,16 @@ class AbstractDictionary extends WebApi
         }
 
         return [
-            'id' => $model->id,
-            'outer_uid' => $model->outer_uid,
-            'name' => $model->name,
-            'vendor_id' => $model->vendor_id,
-            'vendor_name' => $model->vendor->name ?? null,
-            'store_id' => $model->store_id,
-            'store_name' => $model->store->name ?? null,
+            'id'            => $model->id,
+            'outer_uid'     => $model->outer_uid,
+            'name'          => $model->name,
+            'vendor_id'     => $model->vendor_id,
+            'vendor_name'   => $model->vendor->name ?? null,
+            'store_id'      => $model->store_id,
+            'store_name'    => $model->store->name ?? null,
             'payment_delay' => $model->payment_delay,
-            'is_active' => (int)!$model->is_deleted,
-            'name_waybill' => array_map(
+            'is_active'     => (int)!$model->is_deleted,
+            'name_waybill'  => array_map(
                 function ($el) {
                     return $el['name'];
                 },
@@ -249,6 +297,7 @@ class AbstractDictionary extends WebApi
 
     /**
      * Получение списка складов
+     *
      * @param $request
      * @return array
      * */
@@ -275,6 +324,7 @@ class AbstractDictionary extends WebApi
 
     /***
      * Информация по складу
+     *
      * @param $store_uid
      * @return array
      */
@@ -282,8 +332,8 @@ class AbstractDictionary extends WebApi
     {
         $model = OuterStore::find()
             ->where([
-                'org_id' => $this->user->organization->id,  
-                'outer_uid' => $store_uid,
+                'org_id'     => $this->user->organization->id,
+                'outer_uid'  => $store_uid,
                 'service_id' => $this->service_id])
             ->one();
 
@@ -296,6 +346,7 @@ class AbstractDictionary extends WebApi
 
     /**
      * Функция рекурсия от корневого склада
+     *
      * @param OuterStore $model
      * @return array
      * */
@@ -310,37 +361,38 @@ class AbstractDictionary extends WebApi
             return $arReturn;
         };
         return [
-            'id' => $model->id,
-            'outer_uid' => $model->outer_uid,
-            'name' => $model->name,
+            'id'         => $model->id,
+            'outer_uid'  => $model->outer_uid,
+            'name'       => $model->name,
             'store_type' => $model->store_type,
             'created_at' => $model->created_at,
             'updated_at' => $model->updated_at,
-            'is_active' => (int)!$model->is_deleted,
-            'childs' => $child($model),
+            'is_active'  => (int)!$model->is_deleted,
+            'childs'     => $child($model),
         ];
     }
 
     /**
      * Агент. Собираем необходимые данные из модели
+     *
      * @param \yii\db\ActiveRecord $model
      * @return array
      */
     private function prepareAgent(\yii\db\ActiveRecord $model)
     {
-        /**@var OuterAgent $model*/
+        /**@var OuterAgent $model */
         $orgModel = Organization::findOne($model->vendor_id);
         return [
-            'id' => $model->id,
-            'outer_uid' => $model->outer_uid,
-            'name' => $model->name,
-            'vendor_id' => $model->vendor_id,
-            'vendor_name' => $orgModel->name ?? null,
-            'store_id' => $model->store_id,
-            'store_name' => $model->store->name ?? null,
+            'id'            => $model->id,
+            'outer_uid'     => $model->outer_uid,
+            'name'          => $model->name,
+            'vendor_id'     => $model->vendor_id,
+            'vendor_name'   => $orgModel->name ?? null,
+            'store_id'      => $model->store_id,
+            'store_name'    => $model->store->name ?? null,
             'payment_delay' => $model->payment_delay,
-            'is_active' => (int)!$model->is_deleted,
-            'name_waybill' => array_map(function ($el) {
+            'is_active'     => (int)!$model->is_deleted,
+            'name_waybill'  => array_map(function ($el) {
                 return $el['name'];
             }, $model->nameWaybills)
 
@@ -349,11 +401,16 @@ class AbstractDictionary extends WebApi
 
     /**
      * Получение списка единиц измерения
+     *
      * @param $request
      * @return array
      * */
     public function unitList($request): array
     {
+        $pag = $request['pagination'];
+        $page = (isset($pag['page']) ? $pag['page'] : 1);
+        $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
+
         $search = OuterUnit::find()->where(['org_id' => $this->user->organization->id, 'service_id' => $this->service_id]);
 
         if (isset($request['search'])) {
@@ -362,16 +419,36 @@ class AbstractDictionary extends WebApi
             }
         }
 
+        $dataProvider = new ActiveDataProvider([
+            'query' => $search
+        ]);
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+
         $result = [];
-        foreach ($search->all() as $model) {
-            $result[] = $model;
+
+        foreach ($dataProvider->models as $model) {
+            $result[] = $model->toArray();
         }
 
-        return ['units' => $result];
+        $return = [
+            'units'      => $result,
+            'pagination' => [
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
+
+        return $return;
     }
 
     /**
      * Получение списка категорий
+     *
      * @param $request
      * @return array
      * */
@@ -379,7 +456,6 @@ class AbstractDictionary extends WebApi
     {
         $search = OuterCategory::find()->where(['org_id' => $this->user->organization->id, 'service_id' =>
             $this->service_id]);
-
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
@@ -400,6 +476,7 @@ class AbstractDictionary extends WebApi
 
     /**
      * Функция рекурсия от корневой категории
+     *
      * @param OuterCategory $model
      * @return array
      * */
@@ -414,13 +491,13 @@ class AbstractDictionary extends WebApi
             return $arReturn;
         };
         return [
-            'id' => $model->id,
-            'outer_uid' => $model->outer_uid,
-            'name' => $model->name,
+            'id'         => $model->id,
+            'outer_uid'  => $model->outer_uid,
+            'name'       => $model->name,
             'created_at' => $model->created_at,
             'updated_at' => $model->updated_at,
-            'is_active' => (int)!$model->is_deleted,
-            'childs' => $child($model),
+            'is_active'  => (int)!$model->is_deleted,
+            'childs'     => $child($model),
         ];
     }
 }

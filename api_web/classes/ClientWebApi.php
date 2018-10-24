@@ -19,6 +19,7 @@ use yii\web\BadRequestHttpException;
 
 /**
  * Class ClientWebApi
+ *
  * @package api_web\classes
  */
 class ClientWebApi extends WebApi
@@ -26,6 +27,7 @@ class ClientWebApi extends WebApi
 
     /**
      * Детальная информация о ресторане
+     *
      * @return mixed
      * @throws BadRequestHttpException
      */
@@ -40,6 +42,7 @@ class ClientWebApi extends WebApi
 
     /**
      * Обновление поставщика
+     *
      * @param array $post
      * @return mixed
      * @throws BadRequestHttpException
@@ -135,11 +138,11 @@ class ClientWebApi extends WebApi
             throw $e;
         }
 
-
     }
 
     /**
      * Загрузка логотипа ресторана
+     *
      * @param array $post
      * @return mixed
      * @throws BadRequestHttpException
@@ -151,9 +154,7 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
-        if (empty($post['image_source'])) {
-            throw new BadRequestHttpException('empty_param|image_source');
-        }
+        $this->validateRequest($post, ['image_source']);
 
         //Поиск ресторана в системе
         $model = Organization::find()->where(['id' => $this->user->organization->id, 'type_id' => Organization::TYPE_RESTAURANT])->one();
@@ -182,6 +183,7 @@ class ClientWebApi extends WebApi
 
     /**
      * Создание дополнительного емайла
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -193,9 +195,7 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
-        if (!isset($post['email'])) {
-            throw new BadRequestHttpException('empty_param|email');
-        }
+        $this->validateRequest($post, ['email']);
 
         $t = \Yii::$app->db->beginTransaction();
         try {
@@ -234,6 +234,7 @@ class ClientWebApi extends WebApi
 
     /**
      * Список уведомлений
+     *
      * @return mixed
      * @throws BadRequestHttpException
      */
@@ -253,30 +254,30 @@ class ClientWebApi extends WebApi
         $user_phone = SmsNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $rel->id]);
         if (!empty($user_phone)) {
             $result[] = [
-                'id' => $user_phone->id,
-                'value' => $this->user->profile->phone,
-                'type' => 'user_phone',
-                'order_created' => $user_phone['order_created'],
-                'order_canceled' => $user_phone['order_canceled'],
-                'order_changed' => $user_phone['order_changed'],
+                'id'               => $user_phone->id,
+                'value'            => $this->user->profile->phone,
+                'type'             => 'user_phone',
+                'order_created'    => $user_phone['order_created'],
+                'order_canceled'   => $user_phone['order_canceled'],
+                'order_changed'    => $user_phone['order_changed'],
                 'order_processing' => $user_phone['order_processing'],
-                'order_done' => $user_phone['order_done'],
-                'request_accept' => $user_phone['request_accept']
+                'order_done'       => $user_phone['order_done'],
+                'request_accept'   => $user_phone['request_accept']
             ];
         }
 
         $user_email = EmailNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $rel->id]);
         if (!empty($user_email)) {
             $result[] = [
-                'id' => $user_email->id,
-                'value' => $this->user->email,
-                'type' => 'user_email',
-                'order_created' => $user_email['order_created'],
-                'order_canceled' => $user_email['order_canceled'],
-                'order_changed' => $user_email['order_changed'],
+                'id'               => $user_email->id,
+                'value'            => $this->user->email,
+                'type'             => 'user_email',
+                'order_created'    => $user_email['order_created'],
+                'order_canceled'   => $user_email['order_canceled'],
+                'order_changed'    => $user_email['order_changed'],
                 'order_processing' => $user_email['order_processing'],
-                'order_done' => $user_email['order_done'],
-                'request_accept' => $user_email['request_accept'],
+                'order_done'       => $user_email['order_done'],
+                'request_accept'   => $user_email['request_accept'],
             ];
         }
 
@@ -284,15 +285,15 @@ class ClientWebApi extends WebApi
         if (!empty($additional_emails)) {
             foreach ($additional_emails as $row) {
                 $result[] = [
-                    'id' => $row['id'],
-                    'value' => $row['email'],
-                    'type' => 'additional_email',
-                    'order_created' => $row['order_created'],
-                    'order_canceled' => $row['order_canceled'],
-                    'order_changed' => $row['order_changed'],
+                    'id'               => $row['id'],
+                    'value'            => $row['email'],
+                    'type'             => 'additional_email',
+                    'order_created'    => $row['order_created'],
+                    'order_canceled'   => $row['order_canceled'],
+                    'order_changed'    => $row['order_changed'],
                     'order_processing' => $row['order_processing'],
-                    'order_done' => $row['order_done'],
-                    'request_accept' => $row['request_accept'],
+                    'order_done'       => $row['order_done'],
+                    'request_accept'   => $row['request_accept'],
                 ];
             }
         }
@@ -302,6 +303,7 @@ class ClientWebApi extends WebApi
 
     /**
      * Обновление уведомления
+     *
      * @param array $posts
      * @return array
      * @throws BadRequestHttpException
@@ -374,6 +376,7 @@ class ClientWebApi extends WebApi
 
     /**
      * Удаление дополнительного емайла
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -385,9 +388,7 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
-        if (!isset($post['id'])) {
-            throw new BadRequestHttpException('empty_param|id');
-        }
+        $this->validateRequest($post, ['id']);
 
         $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization->id]);
         if (empty($model)) {
@@ -410,6 +411,7 @@ class ClientWebApi extends WebApi
 
     /**
      * Поиск сотрудника по id
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -420,14 +422,14 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
-        if (empty($post['id'])) {
-            throw new BadRequestHttpException('empty_param|id.');
-        }
+        $this->validateRequest($post, ['id']);
+
         return $this->prepareEmployee($this->userGet($post['id']));
     }
 
     /**
      * Поиск сотрудника по email
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -438,9 +440,7 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
-        if (empty($post['email'])) {
-            throw new BadRequestHttpException('empty_param|email.');
-        }
+        $this->validateRequest($post, ['email']);
 
         $model = User::findOne(['email' => $post['email']]);
 
@@ -453,6 +453,7 @@ class ClientWebApi extends WebApi
 
     /**
      * Список ролей для сотрудников ресторана
+     *
      * @return array
      * @throws BadRequestHttpException
      */
@@ -468,7 +469,7 @@ class ClientWebApi extends WebApi
             foreach ($list as $item) {
                 $result[] = [
                     'role_id' => (int)$item->id,
-                    'name' => $item->name,
+                    'name'    => $item->name,
                 ];
             }
         }
@@ -477,6 +478,7 @@ class ClientWebApi extends WebApi
 
     /**
      * Список сотрудников в ресторане
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -516,17 +518,17 @@ class ClientWebApi extends WebApi
 
         $h = new User();
         $return = [
-            'headers' => [
-                'id' => $h->getAttributeLabel('id'),
-                'name' => $h->getAttributeLabel('name'),
+            'headers'    => [
+                'id'    => $h->getAttributeLabel('id'),
+                'name'  => $h->getAttributeLabel('name'),
                 'email' => $h->getAttributeLabel('email'),
                 'phone' => $h->getAttributeLabel('phone'),
-                'role' => $h->getAttributeLabel('role')
+                'role'  => $h->getAttributeLabel('role')
             ],
-            'employees' => $result,
+            'employees'  => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -536,6 +538,7 @@ class ClientWebApi extends WebApi
 
     /**
      * Добавляем сотрудника
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -547,27 +550,12 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
-        if (empty($post['email'])) {
-            throw new BadRequestHttpException('empty_param|email.');
-        }
-
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             /**
              * Проверка полей
              */
-            if (empty($post['name'])) {
-                throw new BadRequestHttpException('empty_param|name');
-            }
-            if (empty($post['email'])) {
-                throw new BadRequestHttpException('empty_param|email');
-            }
-            if (empty($post['phone'])) {
-                throw new BadRequestHttpException('empty_param|phone');
-            }
-            if (empty($post['role_id']) or !isset($post['role_id'])) {
-                throw new BadRequestHttpException('empty_param|role_id');
-            }
+            $this->validateRequest($post, ['email', 'name', 'phone', 'role_id']);
 
             //Интуем роль
             $role_id = (int)$post['role_id'];
@@ -593,12 +581,12 @@ class ClientWebApi extends WebApi
                 //Это новый пользователь, идем создавать
                 //готовим запрос на создание пользователя
                 $request = [
-                    'user' => [
-                        'email' => $post['email'],
+                    'user'    => [
+                        'email'    => $post['email'],
                         'password' => substr(md5(time() . time()), 0, 8)
                     ],
                     'profile' => [
-                        'phone' => $post['phone'],
+                        'phone'     => $post['phone'],
                         'full_name' => $post['name']
                     ]
                 ];
@@ -625,6 +613,7 @@ class ClientWebApi extends WebApi
 
     /**
      * Обновляем сотрудника
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -636,16 +625,14 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
-        if (empty($post['id'])) {
-            throw new BadRequestHttpException('empty_param|id.');
-        }
+        $this->validateRequest($post, ['id']);
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $user = $this->userGet($post['id']);
 
             $relation = RelationUserOrganization::findOne([
-                'user_id' => $user->id,
+                'user_id'         => $user->id,
                 'organization_id' => $this->user->organization->id
             ]);
 
@@ -702,6 +689,7 @@ class ClientWebApi extends WebApi
 
     /**
      * Удаляем сотрудника
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -713,9 +701,7 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
-        if (empty($post['id'])) {
-            throw new BadRequestHttpException('empty_param|id');
-        }
+        $this->validateRequest($post, ['id']);
 
         if ($post['id'] === $this->user->id) {
             throw new BadRequestHttpException('Удаление себя из списка сотрудников недоступно.');
@@ -726,7 +712,7 @@ class ClientWebApi extends WebApi
             $user = $this->userGet($post['id']);
 
             $relation = RelationUserOrganization::findOne([
-                'user_id' => $user->id,
+                'user_id'         => $user->id,
                 'organization_id' => $this->user->organization->id
             ]);
 
@@ -759,17 +745,18 @@ class ClientWebApi extends WebApi
         $r = RelationUserOrganization::findOne(['user_id' => $model->id, 'organization_id' => $this->user->organization->id]);
 
         return [
-            'id' => (int)$model->id,
-            'name' => $model->profile->full_name,
-            'email' => $model->email ?? '',
-            'phone' => $model->profile->phone ?? '',
-            'role' => Role::getRoleName($r->role_id ?? 0),
+            'id'      => (int)$model->id,
+            'name'    => $model->profile->full_name,
+            'email'   => $model->email ?? '',
+            'phone'   => $model->profile->phone ?? '',
+            'role'    => Role::getRoleName($r->role_id ?? 0),
             'role_id' => (int)$r->role_id
         ];
     }
 
     /**
      * Поиск пользователя
+     *
      * @param $id
      * @return User
      * @throws BadRequestHttpException

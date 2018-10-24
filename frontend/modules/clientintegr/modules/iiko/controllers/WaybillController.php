@@ -50,10 +50,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actions()
     {
         return ArrayHelper::merge(parent::actions(), [
-            'edit' => [
-                'class' => EditableColumnAction::className(),
-                'modelClass' => iikoWaybillData::className(),
-                'outputValue' => function ($model, $attribute) {
+            'edit'               => [
+                'class'         => EditableColumnAction::className(),
+                'modelClass'    => iikoWaybillData::className(),
+                'outputValue'   => function ($model, $attribute) {
                     $value = $model->$attribute;
                     if ($attribute === 'pdenom') {
                         if (is_numeric($model->pdenom)) {
@@ -73,9 +73,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 },
             ],
             'change-coefficient' => [
-                'class' => EditableColumnAction::className(),
-                'modelClass' => iikoWaybillData::className(),
-                'outputValue' => function ($model, $attribute) {
+                'class'           => EditableColumnAction::className(),
+                'modelClass'      => iikoWaybillData::className(),
+                'outputValue'     => function ($model, $attribute) {
                     if ($attribute === 'vat') {
                         return $model->$attribute / 100;
                     } else {
@@ -84,11 +84,11 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                         return round($model->$attribute, 6);
                     }
                 },
-                'outputMessage' => function () {
+                'outputMessage'   => function () {
                     return '';
                 },
                 'showModelErrors' => true,
-                'errorOptions' => ['header' => '']
+                'errorOptions'    => ['header' => '']
             ]
         ]);
     }
@@ -178,15 +178,15 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), NOW(), NOW())";
                 $result = Yii::$app->db_api->createCommand($sql, [
-                    ':w_s' => 2,
-                    ':w_org' => $org_id,
+                    ':w_s'       => 2,
+                    ':w_org'     => $org_id,
                     ':w_product' => $product_id,
-                    ':w_supp' => $agent,
-                    ':w_spid' => $product_rid,
-                    ':w_unitr' => null,
-                    ':w_store' => $store,
-                    ':w_koef' => $koef,
-                    ':w_vat' => $vat,
+                    ':w_supp'    => $agent,
+                    ':w_spid'    => $product_rid,
+                    ':w_unitr'   => null,
+                    ':w_store'   => $store,
+                    ':w_koef'    => $koef,
+                    ':w_vat'     => $vat,
                 ])->execute();
             } else {
                 $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
@@ -252,15 +252,15 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
                 $result = Yii::$app->db_api->createCommand($sql, [
-                    ':w_s' => 2,
-                    ':w_org' => $org_id,
+                    ':w_s'       => 2,
+                    ':w_org'     => $org_id,
                     ':w_product' => $product_id,
-                    ':w_supp' => $agent,
-                    ':w_spid' => $product_rid,
-                    ':w_unitr' => null,
-                    ':w_store' => $store,
-                    ':w_koef' => $koef,
-                    ':w_vat' => $vat,
+                    ':w_supp'    => $agent,
+                    ':w_spid'    => $product_rid,
+                    ':w_unitr'   => null,
+                    ':w_store'   => $store,
+                    ':w_koef'    => $koef,
+                    ':w_vat'     => $vat,
                 ])->execute();
                 if (!(is_null($product_rid))) {
                     $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
@@ -317,7 +317,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             self::ORDER_STATUS_COMPLETED_DEFINEDBY_WB_STATUS,
         ];
 
-
         $searchModel = new OrderSearch2();
         $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
 
@@ -333,23 +332,23 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         if (isset($lisences['iiko']) && $lisences['iiko']) {
             $lisences = $lisences['iiko'];
             $view = 'index';
+            //$view = '/../../iiko/views/waybill/index';
         } else {
             $view = '/default/_nolic';
-            $lisences = NULL;
+            $lisences = null;
         }
         //$search->dataProvider->pagination->pageParam = 'page_tovar';
 
-
         $renderParams = [
-            'searchModel' => $searchModel,
-            'affiliated' => $search->affiliated,
+            'searchModel'  => $searchModel,
+            'affiliated'   => $search->affiliated,
             'dataProvider' => $search->dataProvider,
             'searchParams' => $search->searchParams,
             'businessType' => $search->businessType,
-            'lic' => $lisences,
-            'visible' => iikoPconst::getSettingsColumn($organization->id),
-            'wbStatuses' => $wbStatuses,
-            'way' => Yii::$app->request->get('way', 0),
+            'lic'          => $lisences,
+            'visible'      => iikoPconst::getSettingsColumn($organization->id),
+            'wbStatuses'   => $wbStatuses,
+            'way'          => Yii::$app->request->get('way', 0),
         ];
 
         if (Yii::$app->request->isPjax) {
@@ -393,17 +392,17 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $lic = iikoService::getLicense();
         $view = $lic ? 'indexmap' : '/default/_nolic';
-        $vatFilter = array();
+        $vatFilter = [];
         $vatFilter["vat"] = 1;
         $params = [
-            'dataProvider' => $dataProvider,
-            'wmodel' => $model,
-            'agentName' => isset($agentModel->denom) ? $agentModel->denom : 'Не указан',
-            'storeName' => isset($storeModel->denom) ? $storeModel->denom : 'Не указан',
-            'isAndroid' => $isAndroid,
-            'searchModel' => $searchModel,
-            'vatData' => $vatData,
-            'parentBusinessId' => $obConstModel->getPconstValue(),
+            'dataProvider'          => $dataProvider,
+            'wmodel'                => $model,
+            'agentName'             => isset($agentModel->denom) ? $agentModel->denom : 'Не указан',
+            'storeName'             => isset($storeModel->denom) ? $storeModel->denom : 'Не указан',
+            'isAndroid'             => $isAndroid,
+            'searchModel'           => $searchModel,
+            'vatData'               => $vatData,
+            'parentBusinessId'      => $obConstModel->getPconstValue(),
             'iikoWaybillDataSearch' => $vatFilter,
         ];
 
@@ -518,8 +517,8 @@ SQL;
             $db = Yii::$app->db_api;
             $data = $db->createCommand($sql)
                 ->bindValues([
-                    'term' => $term,
-                    'term_' => $term . '%',
+                    'term'   => $term,
+                    'term_'  => $term . '%',
                     '_term_' => '%' . $term . '%',
                     'org_id' => $organizationID
                 ])
@@ -577,8 +576,8 @@ SQL;
             $db = Yii::$app->db_api;
             $data = $db->createCommand($sql)
                 ->bindValues([
-                    'term' => $term,
-                    'term_' => $term . '%',
+                    'term'   => $term,
+                    'term_'  => $term . '%',
                     '_term_' => '%' . $term . '%',
                     'org_id' => $organizationID
                 ])
@@ -610,7 +609,7 @@ SQL;
 
     /**
      * @param null $term
-     * @param $org
+     * @param      $org
      * @return mixed
      */
     public function actionAutoCompleteAgent($term = null, $org)
@@ -718,6 +717,7 @@ SQL;
 
     /**
      * Отправляем накладную
+     *
      * @var $id int|null
      * @return array
      */
@@ -914,15 +914,15 @@ SQL;
                     $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                                 VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
                     $result = Yii::$app->db_api->createCommand($sql, [
-                        ':w_s' => 2,
-                        ':w_org' => $org_id,
+                        ':w_s'       => 2,
+                        ':w_org'     => $org_id,
                         ':w_product' => $product_id,
-                        ':w_supp' => $agent,
-                        ':w_spid' => $product_rid,
-                        ':w_unitr' => null,
-                        ':w_store' => $store,
-                        ':w_koef' => $koef,
-                        ':w_vat' => $vat,
+                        ':w_supp'    => $agent,
+                        ':w_spid'    => $product_rid,
+                        ':w_unitr'   => null,
+                        ':w_store'   => $store,
+                        ':w_koef'    => $koef,
+                        ':w_vat'     => $vat,
                     ])->execute();
                     if (!(is_null($product_rid))) {
                         $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
@@ -943,7 +943,6 @@ SQL;
 
         return $this->redirect(['map', 'waybill_id' => $model->id, 'way' => 0, 'iikoWaybillDataSearch[vat]' => $vatf, 'sort' => $sort, 'page' => $page]);
     }
-
 
     public function actionChvat($id, $koef, $vatf, $sort = 'fproductnameProduct', $vat, $page, $way)
     {
@@ -977,15 +976,15 @@ SQL;
             $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
             $result = Yii::$app->db_api->createCommand($sql, [
-                ':w_s' => 2,
-                ':w_org' => $org_id,
+                ':w_s'       => 2,
+                ':w_org'     => $org_id,
                 ':w_product' => $product_id,
-                ':w_supp' => $agent,
-                ':w_spid' => $product_rid,
-                ':w_unitr' => null,
-                ':w_store' => $store,
-                ':w_koef' => $koef,
-                ':w_vat' => $vat,
+                ':w_supp'    => $agent,
+                ':w_spid'    => $product_rid,
+                ':w_unitr'   => null,
+                ':w_store'   => $store,
+                ':w_koef'    => $koef,
+                ':w_vat'     => $vat,
             ])->execute();
             if (!(is_null($product_rid))) {
                 $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
@@ -1028,7 +1027,6 @@ SQL;
         } else $url = $url_part; // Если параметров не осталось, то просто берём всё, что идёт до знака ?
         return $url; // Возвращаем итоговый URL
     }
-
 
     /**
      * @param $id ИД накладной
@@ -1092,7 +1090,7 @@ SQL;
 
         $temp0 = explode('?', $hr);
         $temp1 = explode('&', $temp0[1]);
-        $arr = array();
+        $arr = [];
         foreach ($temp1 as $para) {
             $temp2 = explode('=', $para);
             $arr[$temp2[0]] = $temp2[1];

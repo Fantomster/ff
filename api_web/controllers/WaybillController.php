@@ -8,7 +8,6 @@
 
 namespace api_web\controllers;
 
-
 use api_web\components\WebApiController;
 use api_web\helpers\WaybillHelper;
 
@@ -60,7 +59,6 @@ class WaybillController extends WebApiController
         $this->response = (new WaybillHelper())->createWaybillForApi($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/move-order-content-to-waybill",
      *     tags={"Waybill"},
@@ -108,7 +106,6 @@ class WaybillController extends WebApiController
         $this->response = (new WaybillHelper())->moveOrderContentToWaybill($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/create-waybill",
      *     tags={"Waybill"},
@@ -155,7 +152,6 @@ class WaybillController extends WebApiController
         $this->response = $this->container->get('IntegrationWebApi')->handleWaybill($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/reset-waybill-content",
      *     tags={"Waybill"},
@@ -200,7 +196,6 @@ class WaybillController extends WebApiController
         $this->response = $this->container->get('IntegrationWebApi')->resetWaybillContent($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/show-waybill-content",
      *     tags={"Waybill"},
@@ -229,7 +224,7 @@ class WaybillController extends WebApiController
      *                          "id": 1,
      *                           "waybill_id": 11,
      *                           "order_content_id": 14822,
-     *                           "product_outer_id": 4822,
+     *                           "outer_product_id": 4822,
      *                           "quantity_waybill": 1,
      *                           "vat_waybill": 0,
      *                           "merc_uuid": "745663-6454-4657-234775",
@@ -267,7 +262,6 @@ class WaybillController extends WebApiController
         $this->response = $this->container->get('IntegrationWebApi')->showWaybillContent($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/update-waybill-content",
      *     tags={"Waybill"},
@@ -286,7 +280,7 @@ class WaybillController extends WebApiController
      *                              "waybill_content_id": 5,
      *                              "koef": 1.55,
      *                              "quantity_waybill": 1,
-     *                              "product_outer_id": 4822,
+     *                              "outer_product_id": 4822,
      *                              "price_without_vat": 35000,
      *                              "vat_waybill": 0.18,
      *                              "outer_unit_id": 5
@@ -320,7 +314,6 @@ class WaybillController extends WebApiController
         $this->response = $this->container->get('IntegrationWebApi')->updateWaybillContent($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/create-waybill-content",
      *     tags={"Waybill"},
@@ -337,12 +330,12 @@ class WaybillController extends WebApiController
      *                  property="request",
      *                  default={
      *                              "waybill_id": 5,
-     *                              "product_outer_id": 4352,
+     *                              "outer_product_id": 4352,
      *                              "outer_unit_id": 8,
      *                              "quantity_waybill": 1,
-     *                              "product_outer_id": 4822,
+     *                              "outer_product_id": 4822,
      *                              "price_without_vat": 35000,
-     *                              "vat_waybill": 0.18
+     *                              "vat_waybill": 18
      *                          }
      *              )
      *         )
@@ -372,10 +365,9 @@ class WaybillController extends WebApiController
         $this->response = $this->container->get('IntegrationWebApi')->createWaybillContent($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/delete-waybill-content",
-     *     tags={"waybill"},
+     *     tags={"Waybill"},
      *     summary="Накладная - Удалить/Убрать позицию",
      *     description="Накладная - Удалить/Убрать позицию",
      *     produces={"application/json"},

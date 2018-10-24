@@ -28,20 +28,20 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
     public function actionIndex()
     {
         $searchModel = new iikoDicconstSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search([Yii::$app->request->queryParams]);
         $lic = iikoService::getLicense();
         $vi = $lic ? 'index' : '/default/_nolic';
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
-                'searchModel' => $searchModel,
+                'searchModel'  => $searchModel,
                 'dataProvider' => $dataProvider,
-                'lic' => $lic,
+                'lic'          => $lic,
             ]);
         } else {
             return $this->render($vi, [
-                'searchModel' => $searchModel,
+                'searchModel'  => $searchModel,
                 'dataProvider' => $dataProvider,
-                'lic' => $lic,
+                'lic'          => $lic,
             ]);
         }
     }
@@ -112,19 +112,18 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         } else {
             $dicConst = iikoDicconst::findOne(['id' => $pConst->const_id]);
             return $this->render($vi, [
-                'model' => $pConst,
-                'dicConst' => $dicConst,
-                'id' => $id,
-                'sort' => $sort,
-                'productSearch' => $productSearch,
+                'model'              => $pConst,
+                'dicConst'           => $dicConst,
+                'id'                 => $id,
+                'sort'               => $sort,
+                'productSearch'      => $productSearch,
                 'cookingPlaceSearch' => $cookingPlaceSearch,
-                'unitSearch' => $unitSearch,
-                'page' => $page,
+                'unitSearch'         => $unitSearch,
+                'page'               => $page,
             ]);
         }
 
     }
-
 
     private function handleSelectedProducts($post, $org)
     {
@@ -161,7 +160,6 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         return $count;
     }
 
-
     private function handleSelectedStores($post, $org)
     {
         $stores = $post['Stores'];
@@ -183,7 +181,6 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         return iikoSelectedStore::find()->where(['organization_id' => $org])->count();
     }
 
-
     public function actionAjaxAddProductToSession()
     {
         $productID = Yii::$app->request->post('productID');
@@ -193,6 +190,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
 
     /**
      * Render collation table
+     *
      * @var iikoPconst->const_id $const_id
      */
     public function actionCollations()
@@ -206,11 +204,11 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         if (in_array($currentUserRole->role_id, $roles)) {
             $arOrgsObj = $currentUser->getAllOrganization();
             $provider = new ArrayDataProvider([
-                'allModels' => $arOrgsObj,
+                'allModels'  => $arOrgsObj,
                 'pagination' => [
                     'pageSize' => 999,
                 ],
-                'key' => 'id'
+                'key'        => 'id'
             ]);
 
             $arIdsOrgs = [];
@@ -232,6 +230,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
 
     /**
      * Создаём сопоставления в дочерних бизнесах
+     *
      * @var iikoPconst->const_id $const_id
      * @return array
      */
@@ -294,11 +293,12 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
 
     /**
      * Вносит изменения в список доступных товаров
+     *
      * @return array
      */
     public function actionChangeSelectedProducts()
     {
-        $izmen = array(); //создаём массив, в который будут записаны изменения (он понадобится, если что-то пойдёт не так и все изменения в таблице-гриде нужно будет "откатить")
+        $izmen = []; //создаём массив, в который будут записаны изменения (он понадобится, если что-то пойдёт не так и все изменения в таблице-гриде нужно будет "откатить")
         $uspeh = 'true'; //задаём изначальное значение переменной, отвечающей за состояние успешности операций сохранения и удаления
         $i = 0; //задаём начальное значение переменной-итератору цикла
         $all = 2; //задаём начальное значение переменной, отвечающей за состояние флажка "Выделить все" (0 - снять выделения всех чекбоксов, 1 - установить выделения всех чекбоксов, 2 - вариант, когда в таблице есть и выделенные и невыделенные чекбоксы)

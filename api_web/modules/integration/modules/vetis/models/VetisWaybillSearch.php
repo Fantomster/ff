@@ -10,8 +10,9 @@ namespace api_web\modules\integration\modules\vetis\models;
 
 use api_web\classes\UserWebApi;
 use api\common\models\merc\MercVsd;
+use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use common\helpers\DBNameHelper;
-use yii\db\Query;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class VetisWaybillSearch
@@ -37,6 +38,7 @@ class VetisWaybillSearch extends MercVsd
      * @param $params
      * @param $page
      * @param $pageSize
+     * @throws \Exception
      * @return array
      */
     public function search($params, $page, $pageSize)
@@ -50,11 +52,15 @@ class VetisWaybillSearch extends MercVsd
             }
         } else {
             $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
+            if (empty($orgIds['result'])){
+                throw new BadRequestHttpException('You dont have available businesses, plz add relation to organization for your user');
+            }
             $strOrgIds = array_map(function ($el) {
                 return $el['id'];
             }, $orgIds['result']);
             $strOrgIds = implode(',', $strOrgIds);
         }
+        $entGuids = implode('\',\'', (new VetisHelper())->getEnterpriseGuids());
 
         $queryParams = [
             ':page'     => $page,
@@ -87,9 +93,8 @@ class VetisWaybillSearch extends MercVsd
                 a.sender_guid,
                 a.status,
                 a.type,
-                case when a.recipient_guid = b.value then \'incoming\'
-                     when a.sender_guid = b.value  then \'outgoing\'
-                     else \'nevedomaya\'
+                case when a.recipient_guid in (\''.$entGuids.'\') and a.sender_guid not in (\''.$entGuids.'\') then \'incoming\'
+                     else \'outgoing\'
                 end vsd_direction,
                 case when c.id is not null then 
                   (

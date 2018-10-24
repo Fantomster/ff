@@ -31,39 +31,44 @@ class MercuryCronController extends Controller
     /**
      * Автоматическая загрузка списка ВСД и журнала склада для всех пользователей (за прошедшие сутки)
      */
-    public function actionVetDocumentsChangeList()
+    public function actionVetDocumentsChangeList($interval = 60 * 60 * 24)
     {
         $organizations = (new \yii\db\Query)
-                ->from(mercService::tableName())
-                ->where('status_id = 1 and now() between fd and td')
-                ->createCommand(Yii::$app->db_api)
-                ->queryColumn();
-        try {
-            foreach ($organizations as $org) {
-                $org_id = $org->org;
+            ->from(mercService::tableName())
+            ->where('status_id = 1 and now() between fd and td')
+            ->createCommand(Yii::$app->db_api)
+            ->queryAll();
+
+        foreach ($organizations as $org) {
+            try {
+                $org_id = $org['org'];
+
+                var_dump($org_id);
 
                 $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
 
-                if (!isset($locations->activityLocationList->location)) {
+                if (!isset($locations)) {
                     continue;
                 }
 
-                foreach ($locations->activityLocationList->location as $item) {
-                    if (!isset($item->enterprise)) {
+                foreach ($locations as $item) {
+                    if (!isset($item->guid)) {
                         continue;
                     }
 
-                    echo "GET MercVSDList " . $item->enterprise->guid . PHP_EOL;
-                    MercVsd::getUpdateData($org_id, $item->enterprise->guid);
+                    $start_date = gmdate("Y-m-d H:i:s", time() - $interval);
+                    echo "GET MercVSDList " . $item->guid . PHP_EOL;
+                    echo "Start date " . $start_date . PHP_EOL;
+                    MercVsd::getUpdateData($org_id, $item->guid, $start_date);
 
-                    if ($org->code == mercService::EXTENDED_LICENSE_CODE) {
-                        echo "GET MercStockEntryList" . $item->enterprise->guid . PHP_EOL;
-                        MercStockEntry::getUpdateData($org_id, $item->enterprise->guid);
+                    if ($org['code'] == mercService::EXTENDED_LICENSE_CODE) {
+                        echo "GET MercStockEntryList" . $item->guid . PHP_EOL;
+                        MercStockEntry::getUpdateData($org_id, $item->guid);
                     }
                 }
+            } catch (\Exception $e) {
+                \Yii::error($e->getMessage());
             }
-        } catch (\Exception $e) {
-            \Yii::error($e->getMessage());
         }
     }
 
@@ -121,8 +126,8 @@ class MercuryCronController extends Controller
         echo "START" . PHP_EOL;
         //Формируем данные для запроса
         $data['method'] = 'getRussianEnterpriseChangesList';
-        $data['struct'] = ['listName' => 'enterpriseList',
-            'listItemName' => 'enterprise'
+        $data['struct'] = ['listName'     => 'enterpriseList',
+                           'listItemName' => 'enterprise'
         ];
 
         $listOptions = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\ListOptions();
@@ -162,9 +167,9 @@ class MercuryCronController extends Controller
     {
         FireBase::getInstance()->update([
             'mercury',
-            'operation' => 'MercVSDList',
+            'operation'      => 'MercVSDList',
             'enterpriseGuid' => 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b',
-                ], [
+        ], [
             'update_date' => strtotime(gmdate("M d Y H:i:s")),
         ]);
     }

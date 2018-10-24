@@ -1,48 +1,31 @@
 <?php
+
 $params = array_merge(
-    require(__DIR__ . '/../../common/config/params.php'),
-    require(__DIR__ . '/../../common/config/params-local.php'),
-    require(__DIR__ . '/params.php'),
-    require(__DIR__ . '/params-local.php')
+        require(__DIR__ . '/../../common/config/params.php'), require(__DIR__ . '/../../common/config/params-local.php'), require(__DIR__ . '/params.php'), require(__DIR__ . '/params-local.php')
 );
 
 return [
-    'id' => 'app-console',
-    'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'id'                  => 'app-console',
+    'basePath'            => dirname(__DIR__),
+    'bootstrap'           => ['log'],
     'controllerNamespace' => 'console\controllers',
-    'components' => [
-        'log' => [
-            'targets' => [
-                [
-                    'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
-                ],
-            ],
-        ],
-        'urlManager' => [
-            'baseUrl' => 'http://example.com/'
-        ]
-    ],
-    'controllerMap' => [
+    'controllerMap'       => [
         'watcher-daemon' => [
-            'class' => "\console\controllers\WatcherDaemonController",
+            'class'             => "\console\controllers\WatcherDaemonController",
             'maxChildProcesses' => 5,
-            'isMultiInstance' => false,
-            'daemons' => [
+            'isMultiInstance'   => false,
+            'daemons'           => [
                 ['className' => 'iikoLogDaemonController', 'enabled' => true]
             ]
         ],
         'abaddon-daemon' => [
-            'class' => "\console\controllers\AbaddonDaemonController",
+            'class'             => "\console\controllers\AbaddonDaemonController",
             'maxChildProcesses' => 100,
-            'isMultiInstance' => false,
+            'isMultiInstance'   => false,
         ],
     ],
-    'aliases' => [
-          '@baseUrl'=>'https://mixcart.ru'
-//        '@web' => 'http://f-keeper.dev',
-//        '@webroot' => '/var/www/html/f-keeper.dev/frontend/web',
+    'aliases'             => [
+        '@baseUrl' => 'https://mixcart.ru'
     ],
-    'params' => $params,
+    'params'              => $params,
 ];

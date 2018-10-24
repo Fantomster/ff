@@ -2,16 +2,18 @@
 
 /**
  * Class Migration
- * @package api_web\classes
+ *
+ * @package   api_web\classes
  * @createdBy Basil A Konakov
  * @createdAt 2018-10-02
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
+ * @author    Mixcart
+ * @module    WEB-API
+ * @version   2.0
  */
 
 namespace common\models;
 
+use api_web\components\Registry;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
@@ -19,22 +21,36 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "organization_dictionary".
  *
- * @property int $id Идентификатор записи
- * @property int $outer_dic_id Код словаря
- * @property int $org_id Код организации
- * @property int $status_id ID статуса - выгружен, ошибка, не выгружался
- * @property int $count Количество записей в словаре
- * @property string $created_at Дата создания
- * @property string $updated_at Дата обновления
- *
- * @property Organization $org
+ * @property int             $id           Идентификатор записи
+ * @property int             $outer_dic_id Код словаря
+ * @property int             $org_id       Код организации
+ * @property int             $status_id    ID статуса - выгружен, ошибка, не выгружался
+ * @property int             $statusText   Статус текстом
+ * @property int             $count        Количество записей в словаре
+ * @property string          $created_at   Дата создания
+ * @property string          $updated_at   Дата обновления
+ * @property Organization    $org
  * @property OuterDictionary $outerDic
  */
 class OrganizationDictionary extends ActiveRecord
 {
-
+    const STATUS_DISABLED = 0;
     const STATUS_ACTIVE = 1;
-    const STATUS_DISABLED = null;
+    const STATUS_ERROR = 2;
+    const STATUS_SEND_REQUEST = 3;
+    const IIKO_UNIT_DICT_ID = 9;
+
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ]
+        ];
+    }
 
     public static function tableName()
     {
@@ -60,13 +76,13 @@ class OrganizationDictionary extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'Идентификатор записи',
+            'id'           => 'Идентификатор записи',
             'outer_dic_id' => 'Код словаря',
-            'org_id' => 'Код организации',
-            'status_id' => 'ID статуса - выгружен, ошибка, не выгружался',
-            'count' => 'Количество записей в словаре',
-            'created_at' => 'Дата создания',
-            'updated_at' => 'Дата обновления',
+            'org_id'       => 'Код организации',
+            'status_id'    => 'ID статуса - выгружен, ошибка, не выгружался',
+            'count'        => 'Количество записей в словаре',
+            'created_at'   => 'Дата создания',
+            'updated_at'   => 'Дата обновления',
         ];
     }
 
@@ -80,17 +96,79 @@ class OrganizationDictionary extends ActiveRecord
         return $this->hasOne(OuterDictionary::class, ['id' => 'outer_dic_id']);
     }
 
-
-    public function behaviors()
+    /**
+     * @param int $count
+     * @return bool
+     */
+    public function successSync(int $count)
     {
-        return [
-            [
-                'class' => TimestampBehavior::class,
-                'createdAtAttribute' => 'created_at',
-                'updatedAtAttribute' => 'updated_at',
-                'value' => \gmdate('Y-m-d H:i:s'),
-            ],
-        ];
+        $this->status_id = self::STATUS_ACTIVE;
+        $this->count = $count;
+        $this->updated_at = \gmdate('Y-m-d H:i:s');
+        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID && $this->outerDic->name == 'product') {
+            $this->updateIikoUnitDictionary(self::STATUS_ACTIVE);
+        }
+        return $this->save();
     }
 
+    /**
+     * @return bool
+     */
+    public function errorSync()
+    {
+        $this->status_id = self::STATUS_ERROR;
+        $this->updated_at = \gmdate('Y-m-d H:i:s');
+        return $this->save();
+    }
+
+    /**
+     * @param $status
+     */
+    private function updateIikoUnitDictionary($status)
+    {
+        $dictionary = self::findOne([
+            'org_id'       => $this->org_id,
+            'outer_dic_id' => self::IIKO_UNIT_DICT_ID
+        ]);
+
+        if (empty($dictionary)) {
+            $dictionary = new self([
+                'org_id'       => $this->org_id,
+                'outer_dic_id' => self::IIKO_UNIT_DICT_ID,
+                'status_id'    => $status
+            ]);
+        }
+
+        if ($status == self::STATUS_ACTIVE) {
+            $count = OuterUnit::find()->where(['org_id' => $this->org_id])->count();
+            $dictionary->successSync($count);
+        } else {
+            $dictionary->errorSync();
+        }
+    }
+
+    /**
+     * Статус справочника текстом
+     *
+     * @return mixed
+     */
+    public function getStatusText()
+    {
+        return self::getStatusTextList()[$this->status_id ?? 0];
+    }
+
+    /**
+     * Список статусов справочников
+     *
+     * @return array
+     */
+    public static function getStatusTextList()
+    {
+        return [
+            self::STATUS_DISABLED     => \Yii::t('app', 'organization_dictionary.status.disabled'),
+            self::STATUS_ACTIVE       => \Yii::t('app', 'organization_dictionary.status.active'),
+            self::STATUS_ERROR        => \Yii::t('app', 'organization_dictionary.status.error'),
+            self::STATUS_SEND_REQUEST => \Yii::t('app', 'organization_dictionary.status.send_request')
+        ];
+    }
 }

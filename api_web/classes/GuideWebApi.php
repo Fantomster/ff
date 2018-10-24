@@ -146,9 +146,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function getInfo(array $post)
     {
-        if (empty($post['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
+        $this->validateRequest($post, ['guide_id']);
 
         $this->isMyGuide($post['guide_id']);
 
@@ -163,9 +161,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function getProducts(array $post)
     {
-        if (empty($post['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
+        $this->validateRequest($post, ['guide_id']);
 
         $this->isMyGuide($post['guide_id']);
 
@@ -246,12 +242,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function create(array $post)
     {
-        if (empty($post['name'])) {
-            throw new BadRequestHttpException("empty_param|name");
-        }
-        if (empty($post['color'])) {
-            throw new BadRequestHttpException("empty_param|color");
-        }
+        $this->validateRequest($post, ['name', 'color']);
 
         $client = $this->user->organization;
         $transaction = \Yii::$app->db->beginTransaction();
@@ -291,9 +282,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function createFromOrder(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException("empty_param|order_id");
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $order = \common\models\Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
         if (empty($order)) {
@@ -313,8 +302,8 @@ class GuideWebApi extends \api_web\components\WebApi
         foreach ($order->orderContent as $orderContent) {
             $request['products'][] = $orderContent->product_id;
         }
-
-        return $this->create($request);
+        $array = $this->create($request);
+        return $array;
     }
 
     /**
@@ -324,9 +313,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function delete(array $params)
     {
-        if (empty($params['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
+        $this->validateRequest($params, ['guide_id']);
         $this->isMyGuide($params['guide_id']);
         $model = Guide::findOne($params['guide_id']);
         if ($model) {
@@ -343,12 +330,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function rename(array $params)
     {
-        if (empty($params['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
-        if (empty($params['name'])) {
-            throw new BadRequestHttpException("empty_param|name");
-        }
+        $this->validateRequest($params, ['guide_id', 'name']);
 
         $this->isMyGuide($params['guide_id']);
 
@@ -372,12 +354,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function changeColorGuide(array $params)
     {
-        if (empty($params['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
-        if (empty($params['color'])) {
-            throw new BadRequestHttpException("empty_param|color");
-        }
+        $this->validateRequest($params, ['guide_id', 'color']);
 
         $this->isMyGuide($params['guide_id']);
 
@@ -400,10 +377,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function addToCart(array $post)
     {
-
-        if (empty($post['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
+        $this->validateRequest($post, ['guide_id']);
 
         $this->isMyGuide($post['guide_id']);
 
@@ -441,14 +415,7 @@ class GuideWebApi extends \api_web\components\WebApi
     public function actionProductFromGuide($params)
     {
         set_time_limit(60 * 3);
-        if (empty($params['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
-
-        if (empty($params['products'])) {
-            throw new BadRequestHttpException("empty_param|products");
-        }
-
+        $this->validateRequest($params, ['guide_id', 'products']);
         $this->isMyGuide($params['guide_id']);
 
         $result = [
@@ -586,13 +553,12 @@ class GuideWebApi extends \api_web\components\WebApi
     {
         $model = Guide::findOne($id);
         if ($model) {
-
             $return = [
                 'id' => (int)$model->id,
                 'name' => $model->name,
                 'color' => $model->color,
-                'created_at' => \Yii::$app->formatter->asDate($model->created_at),
-                'updated_at' => \Yii::$app->formatter->asDate($model->updated_at),
+                'created_at' => $model->created_at,
+                'updated_at' => $model->updated_at,
                 'product_count' => (int)$model->productCount,
             ];
 

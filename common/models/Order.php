@@ -569,16 +569,12 @@ class Order extends \yii\db\ActiveRecord
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
             if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
                 $this->service_id = 6;
-                if (strpos($vendor->name, 'est_Korus_Organization')) {
-                    $eComIntegration = new EDIIntegration(['orgId' => $vendor->id]);
-                } else {
-                    $eComIntegration = new EComIntegration();
-                }
+                $ediIntegration = new EDIIntegration(['orgId' => $vendor->id]);
 
                 if ($this->status == OrderStatus::STATUS_DONE) {
-                    $result = $eComIntegration->sendOrderInfo($this, true);
+                    $result = $ediIntegration->sendOrderInfo($this, true);
                 } else {
-                    $result = $eComIntegration->sendOrderInfo($this, false);
+                    $result = $ediIntegration->sendOrderInfo($this, false);
                 }
                 if (!$result) {
                     Yii::error(Yii::t('app', 'common.models.order.edi_error'));

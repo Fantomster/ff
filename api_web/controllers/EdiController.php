@@ -846,7 +846,7 @@ class EdiController extends WebApiController
 
     /**
      * @SWG\Post(path="/edi/save-to-pdf",
-     *     tags={"Order"},
+     *     tags={"edi"},
      *     summary="Сохранить заказ в PDF",
      *     description="Сохранить заказ в PDF",
      *     produces={"application/json", "application/pdf"},

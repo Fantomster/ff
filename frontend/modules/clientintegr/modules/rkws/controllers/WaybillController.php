@@ -189,7 +189,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 } else {
                     $agent = $cagent;
                 }
-                $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, outer_unit_id, outer_store_id, koef, vat, is_active, created_at, linked_at, updated_at)
+                $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), NOW(), NOW())";
                 $result = Yii::$app->db_api->createCommand($sql, [
                     ':w_s' => 1,
@@ -205,7 +205,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             } else {
                 $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
                 $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => 1, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
-                $sql = "UPDATE all_map SET serviceproduct_id = :w_spid, outer_unit_id = :w_unitr, linked_at = NOW(), updated_at = NOW() WHERE id = :w_id";
+                $sql = "UPDATE all_map SET serviceproduct_id = :w_spid, unit_rid = :w_unitr, linked_at = NOW(), updated_at = NOW() WHERE id = :w_id";
                 $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_unitr' => $munit_id, ':w_id' => $id_all_map])->execute();
             }
         }
@@ -277,7 +277,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 } else {
                     $agent = $cagent;
                 }
-                $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, outer_unit_id, outer_store_id, koef, vat, is_active, created_at, linked_at, updated_at)
+                $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
                 $result = Yii::$app->db_api->createCommand($sql, [
                     ':w_s' => 1,
@@ -608,7 +608,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     } else {
                         $agent = $cagent;
                     }
-                    $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, outer_unit_id, outer_store_id, koef, vat, is_active, created_at, linked_at, updated_at)
+                    $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                                 VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
                     $result = Yii::$app->db_api->createCommand($sql, [
                         ':w_s' => 1,
@@ -683,7 +683,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             } else {
                 $agent = $cagent;
             }
-            $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, outer_unit_id, outer_store_id, koef, vat, is_active, created_at, linked_at, updated_at)
+            $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
             $result = Yii::$app->db_api->createCommand($sql, [
                 ':w_s' => 1,

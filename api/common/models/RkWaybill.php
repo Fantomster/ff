@@ -191,14 +191,14 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
                 $records = OrderContent::find()
                         ->where(['order_id' => $this->order_id])
                         ->leftJoin('`' . $dbName . '`.all_map', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 1')
-                        //  ->andWhere('product_id in ( select product_id from ' . $dbName . '.all_map where service_id = 1 and outer_store_id is null)')
-                        ->andWhere('`' . $dbName . '`.all_map.outer_store_id is null')
+                        //  ->andWhere('product_id in ( select product_id from ' . $dbName . '.all_map where service_id = 1 and store_rid is null)')
+                        ->andWhere('`' . $dbName . '`.all_map.store_rid is null')
                         ->all();
             } else {
                 $records = OrderContent::find()
                         ->where(['order_id' => $this->order_id])
                         ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2')
-                        ->andWhere('`' . $dbName . '`.all_map.outer_store_id =' . $this->store_rid)
+                        ->andWhere('`' . $dbName . '`.all_map.store_rid =' . $this->store_rid)
                         ->all();
             }
         } else {
@@ -288,18 +288,18 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
 
         $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
 
-        /* $stories2 = AllMaps::find()->select('outer_store_id')->andWhere('org_id = :org and service_id = 1 and product_id in (
+        /* $stories2 = AllMaps::find()->select('store_rid')->andWhere('org_id = :org and service_id = 1 and product_id in (
           SELECT product_id from '.$dbName.'.order_content where order_id = :order
-          ) and is_active = 1 ',[':org' => $order->client_id, ':order' => $order_id])->groupBy('outer_store_id')->column(); */
+          ) and is_active = 1 ',[':org' => $order->client_id, ':order' => $order_id])->groupBy('store_rid')->column(); */
 
         $db = Yii::$app->db_api;
-        $sql = ' SELECT m.outer_store_id FROM `' . $dbName . '`.`order_content` o ' .
+        $sql = ' SELECT m.store_rid FROM `' . $dbName . '`.`order_content` o ' .
                 ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 1 AND m.org_id = ' . $order->client_id .
                 ' WHERE o.order_id = ' . $order_id .
-                ' GROUP BY outer_store_id';
+                ' GROUP BY store_rid';
 
         $stories = $db->createCommand($sql)->queryAll();
-        $stories = ArrayHelper::getColumn($stories, 'outer_store_id');
+        $stories = ArrayHelper::getColumn($stories, 'store_rid');
 
         $contra = RkAgent::findOne(['vendor_id' => $order->vendor_id]);
 

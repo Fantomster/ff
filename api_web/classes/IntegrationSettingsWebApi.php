@@ -90,7 +90,7 @@ class IntegrationSettingsWebApi extends WebApi
         $this->validateRequest($request, ['name']);
 
         if (!isset($request['value'])) {
-            throw new BadRequestHttpException('empty_param| value');
+            throw new BadRequestHttpException('empty_param|value');
         }
         $modelSetting = IntegrationSetting::findOne(['name' => $request['name'], 'service_id' => $service_id, 'is_active' => true]);
 

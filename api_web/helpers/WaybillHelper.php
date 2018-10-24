@@ -14,6 +14,7 @@ use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
+use common\models\OuterProductMap;
 use common\models\Waybill;
 use common\models\WaybillContent;
 use yii\web\BadRequestHttpException;
@@ -84,10 +85,10 @@ class WaybillHelper
             $arOrderContentForCreate = $order->orderContent;
         }
         $licenses = License::getAllLicense($order->client_id, [Registry::RK_SERVICE_ID, Registry::IIKO_SERVICE_ID], true);
+
         foreach ($licenses as $license) {
             $serviceId = $license['service_id'];
             $settingAuto = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id, ['auto_unload_invoice']);
-
             if ($settingAuto) {
                 $waybillContents = WaybillContent::find()->andWhere(['order_content_id' => array_keys
                 ($order->orderContent)])->indexBy('order_content_id')->all();
@@ -112,7 +113,7 @@ class WaybillHelper
                         foreach ($arMappedForStores as $storeId => $storeProducts) {
                             $arOuterMappedProducts = $this->prepareStoreProducts($storeProducts, $notInWaybillContent);
                             $waybillIds[] = $this->createWaybillAndContent($arOuterMappedProducts, $order->client_id,
-                                $storeId, $serviceId, $waybillIds);
+                                $storeId, $serviceId);
                         }
                         return $waybillIds;
                     }
@@ -193,7 +194,7 @@ class WaybillHelper
                 $modelWaybillContent->order_content_id = $ordCont->id;
                 $modelWaybillContent->waybill_id = $model->id;
                 $modelWaybillContent->merc_uuid = $ordCont->merc_uuid;
-                $modelWaybillContent->outer_product_id = $ordCont->product_id;
+                $modelWaybillContent->outer_product_id = $mappedProduct['outer_product_id'];
                 $modelWaybillContent->quantity_waybill = $quantity;
                 $modelWaybillContent->vat_waybill = $taxRate;
                 $modelWaybillContent->sum_with_vat = $quantity * $priceWithVat;
@@ -276,13 +277,15 @@ class WaybillHelper
             $priceWithVat = $price + ($price * ($taxRate / 100));
         }
 
+        $outerProductMap = OuterProductMap::find()->where(['organization_id' => \Yii::$app->user->identity->organization_id])
+            ->andWhere(['service_id' => $waybill->service_id, 'product_id' => $orderContent->product_id])
+            ->andWhere(['outer_store_id' => $waybill->outer_store_id])->one();
+
         try {
             $waybillContent = new WaybillContent();
             $waybillContent->waybill_id = $request['waybill_id'];
             $waybillContent->order_content_id = $orderContent->id;
-            #todo_refactoring
-            #Тут должен быть id продукта у.с. а не наш продукт
-            $waybillContent->outer_product_id = $orderContent->product_id;
+            $waybillContent->outer_product_id = $outerProductMap->outer_product_id ?? $orderContent->product_id;
             $waybillContent->quantity_waybill = (float)$quantity;
             $waybillContent->vat_waybill = $taxRate;
             $waybillContent->merc_uuid = $orderContent->merc_uuid;
@@ -337,12 +340,15 @@ class WaybillHelper
         foreach ($notInWaybillContent as $item) {
             /**@var OrderContent $item */
             if (array_key_exists($item->product_id, $storeProducts)) {
+                $outer_product_id = $storeProducts[$item->product_id]['master_serviceproduct_id'] ??
+                    $storeProducts[$item->product_id]['outer_product_id'];
                 $arStoreProducts[] = [
-                    'product_id'     => $item->product_id,
-                    'outer_store_id' => $storeProducts[$item->product_id]['outer_store_id'],
-                    'vat'            => $storeProducts[$item->product_id]['vat'],
-                    'coefficient'    => $storeProducts[$item->product_id]['coefficient'],
-                    'orderContent'   => $item,
+                    'product_id'       => $item->product_id,
+                    'outer_store_id'   => $storeProducts[$item->product_id]['outer_store_id'],
+                    'vat'              => $storeProducts[$item->product_id]['vat'],
+                    'coefficient'      => $storeProducts[$item->product_id]['coefficient'],
+                    'outer_product_id' => $outer_product_id,
+                    'orderContent'     => $item,
                 ];
             }
         }
@@ -387,7 +393,8 @@ class WaybillHelper
      * @param $ediNumber
      * @return int|mixed|string
      */
-    private function getLastEdiNumber($ediNumber){
+    private function getLastEdiNumber($ediNumber)
+    {
         $ed_nums = explode('-', $ediNumber);
         $ed_num = array_pop($ed_nums);
         $ed_num = (int)$ed_num + 1;

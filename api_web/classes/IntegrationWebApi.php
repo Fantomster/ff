@@ -190,7 +190,7 @@ class IntegrationWebApi extends WebApi
             if ($allMap) {
                 $arr['koef'] = $allMap->koef;
                 $arr['serviceproduct_id'] = $allMap->serviceproduct_id;
-                $arr['store_rid'] = $allMap->outer_store_id;
+                $arr['store_rid'] = $allMap->store_rid;
                 $outerProduct = OuterProduct::findOne(['id' => $allMap->serviceproduct_id]);
                 if ($outerProduct) {
                     $arr['outer_product_name'] = $outerProduct->name;
@@ -199,7 +199,7 @@ class IntegrationWebApi extends WebApi
                 } else {
                     $arr['product_id_equality'] = false;
                 }
-                $outerStore = OuterStore::findOne(['outer_uid' => $allMap->outer_store_id]);
+                $outerStore = OuterStore::findOne(['outer_uid' => $allMap->store_rid]);
                 if ($outerStore) {
                     $arr['outer_store_name'] = $outerStore->name;
                     $arr['outer_store_id'] = $outerStore->id;

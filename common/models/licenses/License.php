@@ -159,7 +159,7 @@ class License extends ActiveRecord
         }
 
         if (!is_null($is_active)) {
-            $license->andWhere(['=', 'ls.service_id', (int)$is_active]);
+            $license->andWhere(['=', 'is_active', (int)$is_active]);
             $license->orderBy('to_date');
         }
 

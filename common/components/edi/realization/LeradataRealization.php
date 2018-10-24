@@ -41,7 +41,7 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
      * @return bool
      * @throws \yii\db\Exception
      */
-    public function handlePriceListUpdating($xml): bool
+    public function handlePriceListUpdating($key, $xml): bool
     {
         return $this->edi->handlePriceListUpdating($xml, true);
     }

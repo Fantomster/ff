@@ -92,9 +92,9 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         if(isset($obj['response'])){
             $list = $obj['response'];
             if(!empty($list)){
-                foreach ($list as $xml) {
+                foreach ($list as $key => $xml) {
                     if($type=='pricat'){
-                        $this->realization->handlePriceListUpdating($xml);
+                        $this->realization->handlePriceListUpdating($key, $xml);
                     }else{
                         $this->realization->handleOrderResponse($xml);
                     }
@@ -150,11 +150,12 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     {
         $action = 'edi_sendDocuments';
         $dataArray = new \SimpleXMLElement($string);
+        $dataArray = ArrayHelper::toArray($dataArray);
         $documentType = ($done) ? 'recadv' : 'order';
-        $paramsArray = [
-            "docType" => "order",
+        $paramsArray = [[
+            "docType" => $documentType,
             "doc" =>  $dataArray
-        ];
+        ]];
         $array = $this->executeCurl($paramsArray, $action);
 
         if ($array['ns2SendResponse']['ns2Res'] == 1) {
@@ -174,43 +175,44 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             "params"    => $paramsArray
         ];
         $payload = json_encode($requestArray);
-        $payload = <<<EOJSON
-{
-    "token":"yN2XiNfSMmNGA6bLtlHKo21bxtbWAx3",
-    "varGln":"9879870002282",
-    "intUserID":"13902",
-    "params":[{
-                "docType":"order",
-                "doc":{
-                        "DOCUMENTNAME":"220",
-                        "NUMBER":"13954",
-                        "DATE":"2018-10-24",
-                        "DELIVERYDATE":"2018-10-24",
-                        "CURRENCY":"RUB",
-                        "SUPORDER":"13954",
-                        "DOCTYPE":"O",
-                        "CAMPAIGNNUMBER":"13954",
-                        "ORDRTYPE":"ORIGINAL",
-                        "HEAD":[{
-                                "SUPPLIER":"9879870002282",
-                                "BUYER":"9879870002268",
-                                "DELIVERYPLACE":"9879870002268",
-                                "SENDER":"9879870002268",
-                                "RECIPIENT":"9879870002282",
-                                "EDIINTERCHANGEID":"13954",
-                                "POSITION":[{
-                                                "POSITIONNUMBER":"1",
-                                                "PRODUCT":"8",
-                                                "ORDEREDQUANTITY":"0.100",
-                                                "ORDERUNIT":"0",
-                                                "ORDERPRICE":"118.00"
-                            }]
-            }]
-        }
-        }
-    ]
-}
-EOJSON;
+        da($payload);
+//        $payload = <<<EOJSON
+//{
+//    "token":"yN2XiNfSMmNGA6bLtlHKo21bxtbWAx3",
+//    "varGln":"9879870002282",
+//    "intUserID":"13902",
+//    "params":[{
+//                "docType":"order",
+//                "doc":{
+//                        "DOCUMENTNAME":"220",
+//                        "NUMBER":"13954",
+//                        "DATE":"2018-10-24",
+//                        "DELIVERYDATE":"2018-10-24",
+//                        "CURRENCY":"RUB",
+//                        "SUPORDER":"13954",
+//                        "DOCTYPE":"O",
+//                        "CAMPAIGNNUMBER":"13954",
+//                        "ORDRTYPE":"ORIGINAL",
+//                        "HEAD":[{
+//                                "SUPPLIER":"9879870002282",
+//                                "BUYER":"9879870002268",
+//                                "DELIVERYPLACE":"9879870002268",
+//                                "SENDER":"9879870002268",
+//                                "RECIPIENT":"9879870002282",
+//                                "EDIINTERCHANGEID":"13954",
+//                                "POSITION":[{
+//                                                "POSITIONNUMBER":"1",
+//                                                "PRODUCT":"8",
+//                                                "ORDEREDQUANTITY":"0.100",
+//                                                "ORDERUNIT":"0",
+//                                                "ORDERPRICE":"118.00"
+//                            }]
+//            }]
+//        }
+//        }
+//    ]
+//}
+//EOJSON;
         //da($payload);
         $ch = curl_init($this->url);
         curl_setopt($ch, CURLOPT_POSTFIELDS, "$action=$payload");

@@ -108,7 +108,6 @@ class OrderWebApi extends \api_web\components\WebApi
 
             $order->discount = $post['discount']['amount'];
         }
-
         $tr = \Yii::$app->db->beginTransaction();
         try {
             //Тут операции с продуктами в этом заказе
@@ -196,7 +195,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $orderContent->quantity = $product['quantity'];
         }
 
-        $orderContent->comment = $product['comment'];
+        $orderContent->comment = $product['comment'] ?? '';
 
         if (!empty($product['price'])) {
             $orderContent->price = $product['price'];

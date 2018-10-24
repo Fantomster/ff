@@ -192,12 +192,13 @@ class EdiWebApi extends WebApi
                         $priceChangeDirection = 'up';
                         if ($priceChangeValue < 0) {
                             $priceChangeDirection = 'down';
-                            $priceChangeValue = -1 * $priceChangeValue;
                         }
                         if ($priceChangeValue) {
                             $difference = [
-                                'class' => $priceChangeDirection,
-                                'price' => $oldPrice,
+                                'trend_type'       => $priceChangeDirection,
+                                'price'       => $oldPrice,
+                                'priceChange' => $priceChangeValue,
+                                'percent'     => $v['price'] * 100 / $oldPrice - 100,
                             ];
                         }
                     }

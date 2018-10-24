@@ -21,15 +21,15 @@
         foreach ($orderContent as $position): ?>
             <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
                 $barcode = $product->barcode;
-                $edi_supplier_article = $product->edi_supplier_article ?? $position['id'];
-                $article = $product->article ?? $position['id'];
+                $edi_supplier_article = (isset($product->edi_supplier_article) && $product->edi_supplier_article != '') ? $product->edi_supplier_article : $position['id'];
+                $article = (isset($product->article) && $product->article != '') ? $product->article : $position['id'];
             if (!$barcode)continue;
             ?>
             <POSITION>
                 <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>
                 <PRODUCT><?= $barcode ?></PRODUCT>
-                <PRODUCTIDBUYER><?= $article ?></PRODUCTIDBUYER>
-                <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
+                <PRODUCTIDBUYER><?= $article ?? '' ?></PRODUCTIDBUYER>
+                <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?? '' ?></PRODUCTIDSUPPLIER>
                 <ORDEREDQUANTITY><?= $position['quantity']  ?></ORDEREDQUANTITY>
                 <ORDERUNIT><?= $position['units']  ?></ORDERUNIT>
                 <ORDERPRICE><?= $position['price']  ?></ORDERPRICE>

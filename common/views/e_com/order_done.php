@@ -1,6 +1,7 @@
 <?= '<?xml version="1.0" encoding="utf-8"?>'; ?>
 <RECADV>
     <NUMBER><?= $order->id ?></NUMBER>
+    <DOCACTION>351</DOCACTION>
     <DATE><?= $dateArray['created_at'] ?></DATE>
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>
     <ORDERNUMBER><?= $order->id ?></ORDERNUMBER>
@@ -22,8 +23,8 @@
             foreach ($orderContent as $position): ?>
                 <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
                 $barcode = $product->barcode;
-                $edi_supplier_article = $product->edi_supplier_article ?? $position['id'];
-                $article = $product->article ?? $position['id'];
+                $edi_supplier_article = (isset($product->edi_supplier_article) && $product->edi_supplier_article != '') ? $product->edi_supplier_article : $position['id'];
+                $article = (isset($product->article) && $product->article != '') ? $product->article : $position['id'];
                 if (!$barcode) continue;
                 ?>
                 <POSITION>
@@ -33,7 +34,8 @@
                     <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
                     <DELIVEREDQUANTITY><?= $position['quantity'] ?></DELIVEREDQUANTITY>
                     <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
-                    <DELIVEREDUNIT><?= $position['units'] ?></DELIVEREDUNIT>
+                    <DELIVEREDUNITY><?= $position['quantity'] ?></DELIVEREDUNITY>
+                    <ACCEPTEDQUANTITY><?= $position['quantity'] ?></ACCEPTEDQUANTITY>
                     <ORDERUNIT><?= $position['units'] ?></ORDERUNIT>
                     <EGAISCODE><?= $position['id'] ?></EGAISCODE>
                     <EGAISQUANTITY><?= $position['quantity'] ?></EGAISQUANTITY>

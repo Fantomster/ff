@@ -75,8 +75,8 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
      */
     public function getFilesListForInsertingInQueue()
     {
-        $this->getOneTypeFilesList('pricat');
-        $this->getOneTypeFilesList('desadv');
+        //$this->getOneTypeFilesList('pricat');
+        //$this->getOneTypeFilesList('desadv');
         $this->getOneTypeFilesList('ordrsp');
         return true;
     }
@@ -149,19 +149,36 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     public function sendDoc(String $string, $done = false): bool
     {
         $action = 'edi_sendDocuments';
-        $dataArray = new \SimpleXMLElement($string);
-        $dataArray = ArrayHelper::toArray($dataArray);
+        $object = new \SimpleXMLElement($string);
+        $dataArray = json_decode(json_encode($object, JSON_UNESCAPED_UNICODE), true, 512, JSON_UNESCAPED_UNICODE);
+
+        if($done){
+            if(isset($dataArray['HEAD']['PACKINGSEQUENCE']['POSITION']['POSITIONNUMBER'])){
+                $dataArray['HEAD']['PACKINGSEQUENCE']['POSITION'] = [$dataArray['HEAD']['PACKINGSEQUENCE']['POSITION']];
+            }
+            $dataArray['HEAD']['PACKINGSEQUENCE'] = [$dataArray['HEAD']['PACKINGSEQUENCE']];
+        }else{
+            if(isset($dataArray['HEAD']['POSITION']['CHARACTERISTIC'])){
+                $dataArray['HEAD']['POSITION']['CHARACTERISTIC'] = [$dataArray['HEAD']['POSITION']['CHARACTERISTIC']];
+                $dataArray['HEAD']['POSITION'] = [$dataArray['HEAD']['POSITION']];
+            }else{
+                foreach ($dataArray['HEAD']['POSITION'] as $key => $value){
+                    $dataArray['HEAD']['POSITION'][$key]['CHARACTERISTIC'] = [$value['CHARACTERISTIC']];
+                }
+            }
+        }
+
+        $dataArray['HEAD'] = [$dataArray['HEAD']];
         $documentType = ($done) ? 'recadv' : 'order';
         $paramsArray = [[
             "docType" => $documentType,
             "doc" =>  $dataArray
         ]];
         $array = $this->executeCurl($paramsArray, $action);
-
-        if ($array['ns2SendResponse']['ns2Res'] == 1) {
+        if ($array['response']) {
             return true;
         } else {
-            Yii::error("Ecom returns error code");
+            Yii::error("EDI returns error code");
             return false;
         }
     }
@@ -174,53 +191,15 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             "intUserID" => "$this->intUserID",
             "params"    => $paramsArray
         ];
-        $payload = json_encode($requestArray);
-        da($payload);
-//        $payload = <<<EOJSON
-//{
-//    "token":"yN2XiNfSMmNGA6bLtlHKo21bxtbWAx3",
-//    "varGln":"9879870002282",
-//    "intUserID":"13902",
-//    "params":[{
-//                "docType":"order",
-//                "doc":{
-//                        "DOCUMENTNAME":"220",
-//                        "NUMBER":"13954",
-//                        "DATE":"2018-10-24",
-//                        "DELIVERYDATE":"2018-10-24",
-//                        "CURRENCY":"RUB",
-//                        "SUPORDER":"13954",
-//                        "DOCTYPE":"O",
-//                        "CAMPAIGNNUMBER":"13954",
-//                        "ORDRTYPE":"ORIGINAL",
-//                        "HEAD":[{
-//                                "SUPPLIER":"9879870002282",
-//                                "BUYER":"9879870002268",
-//                                "DELIVERYPLACE":"9879870002268",
-//                                "SENDER":"9879870002268",
-//                                "RECIPIENT":"9879870002282",
-//                                "EDIINTERCHANGEID":"13954",
-//                                "POSITION":[{
-//                                                "POSITIONNUMBER":"1",
-//                                                "PRODUCT":"8",
-//                                                "ORDEREDQUANTITY":"0.100",
-//                                                "ORDERUNIT":"0",
-//                                                "ORDERPRICE":"118.00"
-//                            }]
-//            }]
-//        }
-//        }
-//    ]
-//}
-//EOJSON;
-        //da($payload);
+        $payload = json_encode($requestArray, JSON_UNESCAPED_UNICODE);
         $ch = curl_init($this->url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, "$action=$payload");
+        $postData = "$action=$payload";
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
-        da($result);
+        dd($postData);
         curl_close($ch);
-        $array = json_decode($result);
+        $array = json_decode($result, true, 512, JSON_UNESCAPED_UNICODE);
         return (array)$array;
     }
 

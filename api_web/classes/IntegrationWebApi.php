@@ -123,7 +123,7 @@ class IntegrationWebApi extends WebApi
             throw new ValidationException($waybill->getFirstErrors());
         }
 
-        return ['success' => true, 'waybill_id' => $waybill->id];
+        return ['result' => $waybill];
     }
 
     /**

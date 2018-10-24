@@ -433,7 +433,7 @@ class IntegrationWebApi extends WebApi
      */
     private function editProductMap(int $service_id, $request)
     {
-        $this->validateRequest($request, ['product__id']);
+        $this->validateRequest($request, ['product_id']);
 
         //Загружаем данные по базовому и дочерним бизнесам (если бизнес главный)
         $mainOrg = OuterProductMap::getMainOrg($this->user->organization_id);

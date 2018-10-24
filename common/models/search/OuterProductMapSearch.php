@@ -24,7 +24,7 @@ class OuterProductMapSearch extends OuterProductMap
      */
     public function search($client, $post)
     {
-        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+        $dbName = "`".DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn)."`";
         $outerProductMapTableName = OuterProductMap::tableName();
         $outerProductTableName = OuterProduct::tableName();
         $catalogBaseGoodsTableName = CatalogBaseGoods::tableName();
@@ -45,7 +45,7 @@ class OuterProductMapSearch extends OuterProductMap
                 "$dbName.$outerProductMapTableName.created_at as created_at", "$dbName.$outerProductMapTableName.updated_at as updated_at"])
             ->leftJoin("$dbName.$outerProductMapTableName", "$dbName.$outerProductMapTableName.product_id = $catalogBaseGoodsTableName.id 
             and $dbName.$outerProductMapTableName.service_id = :service_id and $dbName.$outerProductMapTableName.organization_id = IF(product_id in 
-            (select product_id from `$dbName`.$outerProductMapTableName where service_id = :service_id and organization_id = :client_id), :client_id, :mainOrgId)")
+            (select product_id from $dbName.$outerProductMapTableName where service_id = :service_id and organization_id = :client_id), :client_id, :mainOrgId)")
             ->leftJoin("$dbName.$outerProductTableName", "$dbName.$outerProductTableName.id = $dbName.$outerProductMapTableName.outer_product_id")
             ->leftJoin("$dbName.$outerUnitTableName", "$dbName.$outerUnitTableName.id = $dbName.$outerProductMapTableName.outer_unit_id")
             ->leftJoin("$dbName.$outerStoreTableName", "$dbName.$outerStoreTableName.id = $dbName.$outerProductMapTableName.outer_store_id")

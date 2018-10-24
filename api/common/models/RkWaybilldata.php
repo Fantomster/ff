@@ -289,7 +289,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         }
 
         $allMapModel->serviceproduct_id = $this->product_rid;
-        $allMapModel->outer_unit_id = $this->munit_rid;
+        $allMapModel->unit_rid = $this->munit_rid;
         // $allMapModel->store_rid = $this->getWaybill()->store_rid;
         $allMapModel->koef = $this->koef;
         $allMapModel->vat = $this->vat * 100;

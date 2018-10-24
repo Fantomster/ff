@@ -207,7 +207,7 @@ class IntegrationWebApi extends WebApi
                 } else {
                     $arr['store_id_equality'] = false;
                 }
-                $outerUnit = OuterUnit::findOne(['outer_uid' => $allMap->outer_unit_id]);
+                $outerUnit = OuterUnit::findOne(['outer_uid' => $allMap->unit_rid]);
                 if ($outerUnit) {
                     $arr['outer_unit_name'] = $outerUnit->name;
                     $arr['outer_unit_id'] = $outerUnit->id;

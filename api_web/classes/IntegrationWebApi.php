@@ -366,7 +366,7 @@ class IntegrationWebApi extends WebApi
             throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_relation_this_service', ['ru' => 'Накладная не связана с заданным сервисом']));
         }
 
-        if ($waybillCheck->status_id == Registry::WAYBILL_UNLOADING) {
+        if ($waybillCheck->status_id == Registry::WAYBILL_UNLOADED) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_unloading', ['ru' => 'Накладная в статусе выгружена']));
         }
 

@@ -42,7 +42,7 @@ class EmailRoboWebApi extends WebApi
         $this->validateRequest($post, ['id']);
         $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id]);
         if (!$model) {
-            return ['result' => $model];
+            throw new BadRequestHttpException('model_not_found');
         }
         $model->password = str_pad('', strlen($model->password), '*');
         return ['result' => $model];
@@ -59,6 +59,9 @@ class EmailRoboWebApi extends WebApi
     {
         $this->validateRequest($post, ['id']);
         $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id]);
+        if (!$model) {
+            throw new BadRequestHttpException('model_not_found');
+        }
         try {
             foreach ($post as $key => $field) {
                 if ($key != 'id') {

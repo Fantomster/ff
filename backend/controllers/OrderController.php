@@ -300,7 +300,7 @@ class OrderController extends Controller
 
         $statistic = OperatorCall::find()
             ->select(['count(order_id) as cnt', 'status_call_id as status'])
-            ->where("status_call_id != 3")
+            ->where("status_call_id != 3 and order.created_at > '2018-10-17 00:00:00'")
             ->groupBy(['status_call_id'])
             ->orderBy(['status_call_id' => SORT_ASC])
             ->asArray()
@@ -329,7 +329,7 @@ class OrderController extends Controller
             else {
                 $model = OperatorCall::findOne($id);
             }
-
+            
             $model->{$nameAttribute} = $valueAttribute;
             if (!$model->save()) {
                 return implode(", ",$model->getFirstErrors());

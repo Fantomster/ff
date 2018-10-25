@@ -20,6 +20,11 @@ use yii\db\ActiveRecord;
  */
 class OperatorCall extends ActiveRecord
 {
+            1;//Открыто
+            2; //Перезвонить
+            3; //Завершено
+            4; //Контроль
+
     public function behaviors(): array
     {
         return [

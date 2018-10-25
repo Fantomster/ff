@@ -58,7 +58,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $order = Order::findOne($post['order_id']);
 
         if (!$order) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found'));
+            throw new BadRequestHttpException('order_not_found');
         }
 
         //If user is unconfirmed

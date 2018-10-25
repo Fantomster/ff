@@ -77,7 +77,7 @@ class Order extends \yii\db\ActiveRecord
     const DISCOUNT_PERCENT = 2;
     const DELAY_WITH_DELIVERY_DATE = 86400; //sec - 1 day
     const DELAY_WITHOUT_DELIVERY_DATE = 86400; //sec - 1 day
-
+  
     /**
      * @param string $name
      * @return mixed
@@ -136,7 +136,7 @@ class Order extends \yii\db\ActiveRecord
     {
         return [
             [['client_id', 'vendor_id', 'status'], 'required'],
-            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id'], 'integer'],
+            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id', 'replaced_order_id'], 'integer'],
             [['total_price', 'discount'], 'number'],
             [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number', 'edi_ordersp'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -154,20 +154,21 @@ class Order extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'id'             => Yii::t('app', 'Номер заказа'),
-            'client_id'      => 'Client ID',
-            'vendor_id'      => 'Vendor ID',
-            'created_by_id'  => 'Created By ID',
-            'accepted_by_id' => 'Accepted By ID',
-            'status'         => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
-            'status_text'    => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
-            'total_price'    => Yii::t('app', 'common.models.total_price', ['ru' => 'Итоговая цена']),
-            'created_at'     => Yii::t('app', 'Дата создания'),
-            'updated_at'     => 'Updated At',
-            'vendor'         => Yii::t('app', 'Поставщик'),
-            'create_user'    => Yii::t('app', 'Заказ создал'),
-            'plan_price'     => Yii::t('app', 'План'),
-            'waybill_number' => Yii::t('app', 'Номер накладной'),
+            'id'                => Yii::t('app', 'Номер заказа'),
+            'replaced_order_id' => Yii::t('app', 'ID заказа который был заменен текущим'),
+            'client_id'         => 'Client ID',
+            'vendor_id'         => 'Vendor ID',
+            'created_by_id'     => 'Created By ID',
+            'accepted_by_id'    => 'Accepted By ID',
+            'status'            => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'status_text'       => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'total_price'       => Yii::t('app', 'common.models.total_price', ['ru' => 'Итоговая цена']),
+            'created_at'        => Yii::t('app', 'Дата создания'),
+            'updated_at'        => 'Updated At',
+            'vendor'            => Yii::t('app', 'Поставщик'),
+            'create_user'       => Yii::t('app', 'Заказ создал'),
+            'plan_price'        => Yii::t('app', 'План'),
+            'waybill_number'    => Yii::t('app', 'Номер накладной'),
         ];
     }
 

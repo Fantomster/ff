@@ -55,8 +55,8 @@ abstract class AbstractProvider
     }
 
 
-    public function updateQueue(int $ediFilesQueueID, int $status, String $errorText): void
+    public function updateQueue(int $ediFilesQueueID, int $status, String $errorText = '', String $jsonData = ''): void
     {
-        Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText], 'id=' . $ediFilesQueueID)->execute();
+        Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText, 'json_data' => $jsonData], 'id=' . $ediFilesQueueID)->execute();
     }
 }

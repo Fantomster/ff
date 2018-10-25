@@ -94,9 +94,13 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             if(!empty($list)){
                 foreach ($list as $key => $xml) {
                     if($type=='pricat'){
-                        $this->realization->handlePriceListUpdating($key, $xml);
+                        $res = $this->realization->handlePriceListUpdating($key, $xml);
                     }else{
-                        $this->realization->handleOrderResponse($xml);
+                        $res = $this->realization->handleOrderResponse($xml, $type);
+                    }
+                    if(!$res){
+                        $jsonData = json_encode($xml);
+                        $this->updateQueue($key, parent::STATUS_ERROR, 'Error handling Leradata file', $jsonData);
                     }
                 }
             }
@@ -197,76 +201,13 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
-        dd($postData);
+        $result = '{"response":{"18904185":{"HEAD":[{"SUPPLIER":"9879870002268","BUYER":"9879870002282","DELIVERYPLACE":"9879870002282","FINALRECIPIENT":"","INVOICEPARTNER":"","CONSEGNOR":"","SENDER":"9879870002268","RECIPIENT":"9879870002282","POSITION":{"1":{"POSITIONNUMBER":1,"PRODUCT":"111","PRODUCTIDSUPPLIER":"444","PRODUCTIDBUYER":"","PRODUCTTYPE":1,"ORDEREDQUANTITY":"5","BOXQUANTITY":"","PALLETQUANTITY":"","ORDRSPUNIT":"LTR","SHORTSUPPLYREASON":"","ACCEPTEDQUANTITY":"5","PRICE":"7.0000","PRICEWITHVAT":"7.0000000","VAT":0,"INFO":"","COUNTRYORIGIN":"","CALIBRE":"","MARK":"","DELIVERYDATE":"","PACKING":[],"DESCRIPTION":"кинза"}}}],"NUMBER":"14005","TIME":"","ORDERNUMBER":"14005","ORDERDATE":"","SHIPMENTDATE":"","DELIVERYTIME":"","CURRENCY":"","VAT":"","ACTION":"29","TOTALPACKAGES":"","TOTALPACKAGESSPACE":"","TRANSPORTQUANTITY":"","TOTALPACKAGESWEIGHT":"","TEMPMODE":"","SHORTSUPPLYREASON":"","INFO":"","LIMES":[],"DELIVERYDATE":"","DATE":"2018-10-25","senderUserID":null}}}';
         curl_close($ch);
         $array = json_decode($result, true, 512, JSON_UNESCAPED_UNICODE);
         return (array)$array;
     }
 
 
-    /**
-     * @param String $fileName
-     * @param String $login
-     * @param String $pass
-     * @return string
-     * @throws \yii\db\Exception
-     */
-    public function getDocContent(String $fileName, String $login, String $pass, $glnCode): String
-    {
-        $action = 'receive';
-        $relationId = $this->getRelation('PRICAT', $login, $pass, $glnCode);
-        if (!$relationId) {
-            throw new BadRequestHttpException('no relation');
-        }
-        $soap_request = <<<EOXML
-<soapenv:Envelope xmlns:soapenv="$this->schema" xmlns:edi="$this->wsdl">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <edi:ReceiveInput>
-         <edi:Name>$login</edi:Name>
-         <edi:Password>$pass</edi:Password>
-         <edi:RelationId>$relationId</edi:RelationId>
-         <edi:TrackingId>$fileName</edi:TrackingId>   
-      </edi:ReceiveInput>
-   </soapenv:Body>
-</soapenv:Envelope>
-EOXML;
-        $array = $this->executeCurl($soap_request, $action);
-        if ($array['ns2ReceiveResponse']['ns2Res'] != 1) {
-            throw new Exception('EComIntegration getList Error №' . $array['ns2ReceiveResponse']['ns2Res']);
-        }
-        if (!isset($array['ns2ReceiveResponse']['ns2Cnt'])) {
-            throw new Exception('EComIntegration getList Error № 1');
-        }
-        return base64_decode($array['ns2ReceiveResponse']['ns2Cnt']);
-    }
-
-    public function getFile($item, $orgId)
-    {
-        try {
-            $this->ediFilesQueueID = $item['id'];
-            $this->realization->fileName = $item['name'];
-            $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
-            $this->updateQueue($this->ediFilesQueueID, self::STATUS_PROCESSING, '');
-            try {
-                $content = $this->getDocContent($item['name'], $ediOrganization['login'], $ediOrganization['pass'], $ediOrganization['gln_code']);
-            } catch (\Throwable $e) {
-                $this->updateQueue($this->ediFilesQueueID, self::STATUS_ERROR, $e->getMessage());
-                Yii::error($e->getMessage());
-                return false;
-            }
-
-            if ($content == '') {
-                $this->updateQueue($this->ediFilesQueueID, self::STATUS_ERROR, 'No such file');
-                return false;
-            }
-        } catch (\Exception $e) {
-            Yii::error($e);
-            $this->updateQueue($this->ediFilesQueueID, self::STATUS_ERROR, 'Error handling file 2');
-            return false;
-        }
-        return $content;
-    }
 
     public function parseFile($content)
     {
@@ -279,9 +220,17 @@ EOXML;
     }
 
 
-    public function getFilesList($organizationId)
+    /**
+     * @return array
+     */
+    public function getFilesList($organizationId): array
     {
-
+        return (new \yii\db\Query())
+            ->select(['id', 'name', 'json_data'])
+            ->from('edi_files_queue')
+            ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
+            ->andWhere(['organization_id' => $organizationId])
+            ->all();
     }
 
 }

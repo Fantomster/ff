@@ -339,8 +339,8 @@ class DocumentController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "order_id": 2525,
-     *                      "document_id": 1111
+     *                      "document_id": 1111,
+     *                      "replaced_order_id": 2525
      *                      }
      *              )
      *         )

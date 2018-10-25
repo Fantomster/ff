@@ -146,6 +146,7 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionCreateWaybill()
     {

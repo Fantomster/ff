@@ -112,7 +112,7 @@ class License extends ActiveRecord
             ->all(\Yii::$app->db_api);
 
         if (count($license) > 1) {
-            throw new Exception('Organization having more than one different licenses');
+            throw new Exception('Organization having more than one same licenses, please delete not actual');
         }
 
         return $license;

@@ -41,7 +41,7 @@ class IntegrationWebApi extends WebApi
             $this->user->save();
             return ['result' => true];
         } else {
-            throw new BadRequestHttpException('Dont have license for this service');
+            throw new BadRequestHttpException('Dont have active скуфlicense for this service');
         }
     }
 
@@ -106,6 +106,8 @@ class IntegrationWebApi extends WebApi
                 $waybillsCount = count($order->getWaybills($post['service_id']));
                 if ($waybillsCount == 0) {
                     $waybillsCount = 1;
+                } else {
+                    $waybillsCount++;
                 }
                 $ediNumber = $post['order_id'] . "-" . $waybillsCount;
             }

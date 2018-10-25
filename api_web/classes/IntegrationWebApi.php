@@ -41,7 +41,7 @@ class IntegrationWebApi extends WebApi
             $this->user->save();
             return ['result' => true];
         } else {
-            throw new BadRequestHttpException('Dont have active скуфlicense for this service');
+            throw new BadRequestHttpException('Dont have active license for this service');
         }
     }
 

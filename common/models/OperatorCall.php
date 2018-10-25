@@ -20,10 +20,10 @@ use yii\db\ActiveRecord;
  */
 class OperatorCall extends ActiveRecord
 {
-            1;//Открыто
-            2; //Перезвонить
-            3; //Завершено
-            4; //Контроль
+    const STATUS_OPEN = 1;//Открыто
+    const STATUS_RECALL = 2; //Перезвонить
+    const STATUS_COMPLETE = 3; //Завершено
+    const STATUS_CONTROLL = 4; //Контроль
 
     public function behaviors(): array
     {
@@ -49,7 +49,7 @@ class OperatorCall extends ActiveRecord
      */
     public function save($runValidation = true, $attributeNames = null)
     {
-        if ($this->status_call_id == 3) {
+        if ($this->status_call_id == self::STATUS_COMPLETE) {
             $this->setAttribute('closed_at', \gmdate("Y-m-d H:i:s"));
         }
 
@@ -82,7 +82,7 @@ class OperatorCall extends ActiveRecord
     {
         if($attribute == 'status_call_id') {
             if ($this->$attribute == 4) {
-                if (self::find()->where(['operator_id' => $this->operator_id, $attribute => 4])->count() == 10) {
+                if (self::find()->where(['operator_id' => $this->operator_id, $attribute => self::STATUS_CONTROLL])->count() == 10) {
                     $this->addError($attribute, "Одновременно на контроле может быть не более 10 заказаов!");
                 }
             }
@@ -111,10 +111,10 @@ class OperatorCall extends ActiveRecord
     public static function getStatus()
     {
         return [
-            '1' => 'Открыто',
-            '2' => 'Перезвонить',
-            '3' => 'Завершено',
-            '4' => 'Контроль'
+            self::STATUS_OPEN => 'Открыто',
+            self::STATUS_RECALL => 'Перезвонить',
+            self::STATUS_COMPLETE => 'Завершено',
+            self::STATUS_CONTROLL => 'Контроль'
         ];
     }
 

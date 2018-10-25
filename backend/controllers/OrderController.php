@@ -366,7 +366,7 @@ class OrderController extends Controller
 
                 $countCall = OperatorCall::find()
                     ->where(['operator_id' => Yii::$app->user->getId()])
-                    ->andWhere('status_call_id != 3')->count();
+                    ->andWhere('status_call_id not in (3,4)')->count();
 
                 if ($countCall > 1) {
                     $modelTimeout = OperatorTimeout::findOne(['operator_id' => Yii::$app->user->getId()]);

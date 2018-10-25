@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use common\models\OperatorCall;
 use common\models\OperatorTimeout;
+use common\models\OperatorVendorComment;
 use common\models\OrderStatus;
 use common\models\Organization;
 use common\models\search\OrderContentSearch;
@@ -25,6 +26,7 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
 use yii\web\BadRequestHttpException;
+use yii\web\Response;
 
 /**
  * OrderController implements the CRUD actions for Order model.
@@ -295,7 +297,16 @@ class OrderController extends Controller
         $searchModel->user_id = \Yii::$app->user->getId();
         $searchModel->load(Yii::$app->request->queryParams);
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        return $this->render('operator', ['dataProvider' => $dataProvider, 'searchModel' => $searchModel, 'user_id' => $searchModel->user_id]);
+
+        $statistic = OperatorCall::find()
+            ->select(['count(order_id) as cnt', 'status_call_id as status'])
+            ->where("status_call_id != 3")
+            ->groupBy(['status_call_id'])
+            ->orderBy(['status_call_id' => SORT_ASC])
+            ->asArray()
+            ->all();
+
+        return $this->render('operator', ['dataProvider' => $dataProvider, 'searchModel' => $searchModel, 'user_id' => $searchModel->user_id, 'statistic' => $statistic]);
     }
 
     /**
@@ -309,10 +320,19 @@ class OrderController extends Controller
             $id = Yii::$app->request->post('id');
             $nameAttribute = Yii::$app->request->post('name');
             $valueAttribute = Yii::$app->request->post('value');
-            $model = OperatorCall::findOne($id);
+
+            if($nameAttribute == 'vendor_comment') {
+                $model = OperatorVendorComment::findOne(['vendor_id' => $id]) ?? new OperatorVendorComment();
+                $model->vendor_id = $id;
+                $nameAttribute = 'comment';
+            }
+            else {
+                $model = OperatorCall::findOne($id);
+            }
+
             $model->{$nameAttribute} = $valueAttribute;
             if (!$model->save()) {
-                print_r($model->getFirstErrors());
+                return implode(", ",$model->getFirstErrors());
             }
         }
     }

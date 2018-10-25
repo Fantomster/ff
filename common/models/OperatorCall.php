@@ -67,9 +67,21 @@ class OperatorCall extends ActiveRecord
         return [
             [['operator_id'], 'required'],
             [['operator_id', 'status_call_id'], 'integer'],
+            [['status_call_id'], 'checkControlCount'],
             [['created_at', 'updated_at', 'closed_at'], 'safe'],
             [['comment'], 'string', 'max' => 255],
         ];
+    }
+
+    public function checkControlCount($attribute, $params)
+    {
+        if($attribute == 'status_call_id') {
+            if ($this->$attribute == 4) {
+                if (self::find()->where(['operator_id' => $this->operator_id, $attribute => 4])->count() == 10) {
+                    $this->addError($attribute, "Одновременно на контроле может быть не более 10 заказаов!");
+                }
+            }
+        }
     }
 
     /**
@@ -97,6 +109,7 @@ class OperatorCall extends ActiveRecord
             '1' => 'Открыто',
             '2' => 'Перезвонить',
             '3' => 'Завершено',
+            '4' => 'Контроль'
         ];
     }
 

@@ -118,6 +118,9 @@ class EmailRoboWebApi extends WebApi
     {
         $this->validateRequest($post, ['id']);
         $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id]);
+        if (!$model) {
+            throw new BadRequestHttpException('model_not_found');
+        }
         try {
             $model->delete();
         } catch (\Throwable $t) {

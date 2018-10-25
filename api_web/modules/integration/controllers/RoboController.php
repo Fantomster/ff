@@ -36,7 +36,7 @@ class RoboController extends \api_web\components\WebApiController
      *            @SWG\Schema(
      *              default={
      *                  "result": {
-     *                          "organization_id": 3768,
+     *                          "name": "капотник",
      *                          "user": "kapotnik2017@yandex.ru",
      *                          "is_active": 1,
      *                          "updated_at": "2018-10-25 12:39:36"

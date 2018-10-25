@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\Currency;
 use common\models\OperatorCall;
+use common\models\OperatorVendorComment;
 use common\models\Order;
 use common\models\Organization;
 use common\models\Profile;
@@ -85,6 +86,7 @@ class OrderOperatorSearch extends Order
             'order.status',
             'client.id as client_id',
             'vendor.id as vendor_id',
+            'client.name as client_title',
             '(CASE 
                 WHEN client.legal_entity = \'\' THEN client.name
                 WHEN client.legal_entity is null THEN client.name 
@@ -117,11 +119,13 @@ class OrderOperatorSearch extends Order
             'op.status_call_id',
             'op.comment',
             'op.updated_at as operator_updated_at',
-            'c.iso_code'
+            'c.iso_code',
+            'opvc.comment as vendor_comment'
         ])->from(Order::tableName())
             ->leftJoin(Organization::tableName() . ' as vendor', 'order.vendor_id = vendor.id')
             ->leftJoin(Organization::tableName() . ' as client', 'order.client_id = client.id')
             ->leftJoin(OperatorCall::tableName() . ' as op', 'op.order_id = order.id')
+            ->leftJoin(OperatorVendorComment::tableName() . ' as opvc', 'opvc.vendor_id = order.vendor_id')
             ->leftJoin(User::tableName() . ' as user', 'user.id = op.operator_id')
             ->leftJoin(Profile::tableName() . ' as profile', 'profile.user_id = user.id')
             ->leftJoin(Currency::tableName() . ' as c', 'c.id = order.currency_id')
@@ -131,10 +135,10 @@ class OrderOperatorSearch extends Order
                 [
                     'AND',
                     ['in', 'order.status', $status],
-                    'op.status_call_id != 3 OR op.status_call_id is null'
                 ]
             ])
-            ->andWhere('op.operator_id is null OR op.operator_id = :current_user', [':current_user' => $this->user_id]);
+            ->andWhere('op.operator_id is null OR op.operator_id = :current_user', [':current_user' => $this->user_id])
+            ->andWhere("order.created_at > '2018-10-17 00:00:00'");
 
         $query->orderBy([
             'status_call_id' => SORT_DESC,

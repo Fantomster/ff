@@ -89,7 +89,7 @@ class EmailRoboWebApi extends WebApi
         try {
             foreach ($post as $key => $field) {
                 if ($key != 'id') {
-                    $model->{$key} = $field ?? null;
+                    $model->setAttribute($key, $field);
                 }
             }
         } catch (\Throwable $t) {

@@ -23,11 +23,21 @@ class EmailRoboWebApi extends WebApi
      */
     public function list(array $post): array
     {
-        $models = IntegrationSettingFromEmail::find()->select(['organization_id', 'user', 'is_active', 'integration_setting_from_email.updated_at'])
+        $models = IntegrationSettingFromEmail::find()
             ->joinWith('organization')
             ->where(['organization_id' => $this->user->organization_id])->all();
+        $arResult = [];
 
-        return ['result' => $models];
+        foreach ($models as $model) {
+            $arResult[] = [
+                'name'       => $model->organization->name,
+                'user'       => $model->user,
+                'is_active'  => $model->is_active,
+                'updated_at' => $model->updated_at,
+            ];
+        }
+
+        return ['result' => $arResult];
     }
 
     /**

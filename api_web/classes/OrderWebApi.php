@@ -57,6 +57,10 @@ class OrderWebApi extends \api_web\components\WebApi
         //Поиск заказа
         $order = Order::findOne($post['order_id']);
 
+        if (!$order) {
+            throw new BadRequestHttpException('order_not_found');
+        }
+
         //If user is unconfirmed
         if ($isUnconfirmedVendor) {
             $organizationID = $this->user->organization_id;

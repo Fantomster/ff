@@ -13,6 +13,7 @@ use api_web\modules\integration\classes\documents\OrderEmail;
 use api_web\modules\integration\classes\documents\Waybill;
 use api_web\modules\integration\classes\documents\WaybillContent;
 use common\helpers\DBNameHelper;
+use common\models\AllService;
 use common\models\RelationUserOrganization;
 use common\models\Order as OrderMC;
 use InvalidArgumentException;
@@ -509,26 +510,56 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
     public function mapWaybillOrder(array $post)
     {
-        $this->validateRequest($post, ['order_id', 'document_id']);
+        $this->validateRequest($post, ['replaced_order_id', 'document_id']);
 
-        $waybill = Waybill::findOne(['id' => (int)$post['document_id']]);
-        if (!isset($waybill)) {
-            throw new BadRequestHttpException("waybill_not_found");
+        $replacedOrder = \common\models\Order::findOne([
+            'id'         => (int)$post['replaced_order_id'],
+            'service_id' => Registry::MC_BACKEND
+        ]);
+
+        if (!isset($replacedOrder)) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'document.replaced_order_not_found', ['ru' => 'Заменяемый документ не найден или не является заказом']));
         }
 
-        $order = \common\models\Order::find()->where([
-            'id'        => (int)$post['order_id'],
-            'client_id' => $this->user->organization_id
-        ])->one();
+        $order = \common\models\Order::findOne([
+            'id'         => (int)$post['document_id'],
+            'service_id' => Registry::VENDOR_DOC_MAIL_SERVICE_ID,
+        ]);
 
-        if (empty($order)) {
-            throw new BadRequestHttpException('order_not_found');
+        if (!isset($order)) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_not_found', ['ru' => 'Документ не найден или не является документом от поставщика']));
         }
 
-        $waybill->mapWaybill($order->id);
+        if ($order->status == Order::STATUS_CANCELLED) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_cancelled', ['ru' => 'Документ в состоянии "Отменен"']));
+        }
+
+        if (!is_null($order->replaced_order_id)) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_replaced_order_id_is_not_null', ['ru' => 'Документ уже заменен']));
+        }
+
+        $replacedOrder->status = Order::STATUS_CANCELLED;
+        $order->replaced_order_id = (int)$post['replaced_order_id'];
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            if (!$replacedOrder->save()) {
+                throw new ValidationException($replacedOrder->getFirstErrors());
+            }
+
+            if (!$order->save()) {
+                throw new ValidationException($replacedOrder->getFirstErrors());
+            }
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+
         return ['result' => true];
     }
 
@@ -546,7 +577,7 @@ class DocumentWebApi extends \api_web\components\WebApi
     public function getWaybillStatus()
     {
         return array_map(function ($el) {
-            return \Yii::t('api_web', 'waybill.'.$el);
+            return \Yii::t('api_web', 'waybill.' . $el);
         }, Registry::$waybill_statuses);
     }
 

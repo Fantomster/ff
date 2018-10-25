@@ -56,6 +56,7 @@ use yii\web\BadRequestHttpException;
  * @property OrderAttachment[] $attachments
  * @property OrderAssignment   $assignment
  * @property EmailQueue[]      $relatedEmails
+ * @property integer            $replaced_order_id
  */
 class Order extends \yii\db\ActiveRecord
 {

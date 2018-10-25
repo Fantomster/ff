@@ -41,7 +41,7 @@ class EmailRoboWebApi extends WebApi
     {
         $this->validateRequest($post, ['id']);
         $model = IntegrationSettingFromEmail::findOne($post['id']);
-        if (!$model){
+        if (!$model) {
             return ['result' => $model];
         }
         $model->password = str_pad('', strlen($model->password), '*');
@@ -65,11 +65,11 @@ class EmailRoboWebApi extends WebApi
                     $model->{$key} = $field ?? null;
                 }
             }
-        } catch (\Throwable $t){
+        } catch (\Throwable $t) {
             return ['error' => $t->getMessage()];
         }
 
-        if (!$model->save()){
+        if (!$model->save()) {
             throw new ValidationException($model->getFirstErrors());
         }
 
@@ -92,11 +92,11 @@ class EmailRoboWebApi extends WebApi
                     $model->{$key} = $field ?? null;
                 }
             }
-        } catch (\Throwable $t){
+        } catch (\Throwable $t) {
             return ['error' => $t->getMessage()];
         }
 
-        if (!$model->save()){
+        if (!$model->save()) {
             throw new ValidationException($model->getFirstErrors());
         }
 
@@ -114,9 +114,9 @@ class EmailRoboWebApi extends WebApi
     {
         $this->validateRequest($post, ['id']);
         $model = IntegrationSettingFromEmail::findOne($post['id']);
-        try{
+        try {
             $model->delete();
-        } catch (\Throwable $t){
+        } catch (\Throwable $t) {
             return ['error' => $t->getMessage()];
         }
 

@@ -10,14 +10,13 @@ namespace api_web\helpers;
 
 use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
-use common\helpers\DBNameHelper;
+use common\models\IntegrationSettingValue;
+use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
-use common\models\OuterAgent;
-use common\models\OuterStore;
+use common\models\OuterProductMap;
 use common\models\Waybill;
 use common\models\WaybillContent;
-use Exception;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -25,6 +24,20 @@ use yii\web\BadRequestHttpException;
  * */
 class WaybillHelper
 {
+
+    /**
+     * @var OuterProductMapHelper
+     */
+    private $helper;
+
+    /**
+     * WaybillHelper constructor.
+     */
+    public function __construct()
+    {
+        $this->helper = new OuterProductMapHelper();
+    }
+
     /**
      * Create waybill and waybill_content and binding VSD
      *
@@ -57,7 +70,7 @@ class WaybillHelper
 
     /**
      * @param      $order_id
-     * @param null $arOrderContentForCreate
+     * @param null $arOrderContentForCreate С EDI может приходить несколькими файлами orderContent для одного заказа
      * @param null $supplierOrgId
      * @throws \Exception
      * @return mixed
@@ -71,65 +84,64 @@ class WaybillHelper
         if (is_null($arOrderContentForCreate)) {
             $arOrderContentForCreate = $order->orderContent;
         }
-        $settingsAuto = true;
-        if ($settingsAuto) {
-            $waybillContents = WaybillContent::find()->andWhere(['order_content_id' => array_keys
-            ($order->orderContent)])->indexBy('order_content_id')->all();
-            $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
+        $licenses = License::getAllLicense($order->client_id, [Registry::RK_SERVICE_ID, Registry::IIKO_SERVICE_ID], true);
 
-            if ($notInWaybillContent) {
-                $defaultAgent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id]);
-                if ($defaultAgent && $defaultAgent->store_id) {
-                    $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
-                        $defaultAgent->store_id, $defaultAgent->service_id);
-                    return [$waybillId];
+        foreach ($licenses as $license) {
+            $serviceId = $license['service_id'];
+            $settingAuto = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id, ['auto_unload_invoice']);
+            if ($settingAuto) {
+                $waybillContents = WaybillContent::find()->andWhere(['order_content_id' => array_keys
+                ($order->orderContent)])->indexBy('order_content_id')->all();
+                $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
 
-                }
-
-                $hasDefaultStore = 1234;
-                $hasDefaultServiceID = 2;
-                if ($hasDefaultStore) {
-                    $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
-                        $hasDefaultStore, $hasDefaultServiceID);
-                    return [$waybillId];
-                }
-                $waybillIds = [];
-                $integrations = ['iiko' => 2];
-                foreach ($integrations as $integration) {
-                    $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
-                    $stories = OrderContent::find()->select([
-                        'm.store_rid as store_id',
-                        'GROUP_CONCAT(order_content.product_id) as prd_ids'])
-                        ->leftJoin('`' . $dbName . '`.all_map m', 'order_content.product_id = m.product_id AND m.service_id = ' . $integration . ' AND m.org_id = ' . $order->client_id)
-                        ->where(['order_content.order_id' => $order->id])
-                        ->andWhere(['not', ['m.store_rid' => null]])
-                        ->groupBy('m.store_rid')->indexBy('m.store_rid')->all();
-                    $orderContForStore = [];
-                    if (empty($waybillContents)) {
-                        if (!empty($stories)) {
-                            foreach ($stories as $store) {
-                                $store_uuid = (OuterStore::findOne($store['store_rid']))->outer_uid;
-                                $prods = explode(',', $store['prd_ids']);
-
-                                foreach ($prods as $prod) {
-                                    /**@var OrderContent $ordCont */
-                                    foreach ($notInWaybillContent as $ordCont) {
-                                        if ($ordCont->product_id == $prod) {
-                                            $orderContForStore[$ordCont->id] = $ordCont;
-                                        }
-                                    }
-                                }
-                                $waybillIds[] = $this->createWaybillAndContent($orderContForStore, $order->client_id,
-                                    $store_uuid, $store_uuid);
-                            }
-                        }
+                if ($notInWaybillContent) {
+                    $mainOrg = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id, ['main_org']);
+                    $waybillIds = [];
+                    try {
+                        $rows = $this->helper->getMapForOrder($order, $serviceId, $mainOrg);
+                    } catch (\Throwable $t) {
+                        \Yii::error($t->getMessage(), 'waybill_create');
                     }
-                }
-                $notInWaybillContent = array_diff_key($notInWaybillContent, $orderContForStore);
-                if (!empty($notInWaybillContent)) {
-                    $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id);
-                    $waybillIds[] = $waybillId;
-                    return $waybillIds;
+
+                    if (!empty($rows)) {
+                        $arMappedForStores = [];
+                        // Remap for 1 store = 1 waybill
+                        foreach ($rows as $row) {
+                            $arMappedForStores[$row['outer_store_id']][$row['product_id']] = $row;
+                        }
+
+                        foreach ($arMappedForStores as $storeId => $storeProducts) {
+                            if (!$storeId){
+                                $storeId = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id,
+                                    ['defStore']);
+                                if (!$storeId){
+                                    continue;
+                                }
+                            }
+                            $arOuterMappedProducts = $this->prepareStoreProducts($storeProducts, $notInWaybillContent);
+                            $waybillIds[] = $this->createWaybillAndContent($arOuterMappedProducts, $order->client_id,
+                                $storeId, $serviceId);
+                        }
+                        return $waybillIds;
+                    }
+                    //Agent default store
+//                    if ($supplierOrgId) {
+//                        $defaultAgent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id]);
+//                        if ($defaultAgent && $defaultAgent->store_id) {
+//                            $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
+//                                $defaultAgent->store_id, $defaultAgent->service_id);
+//                            return [$waybillId];
+//
+//                        }
+//                    }
+//                    $hasDefaultStore = 1234;
+//                    $hasDefaultServiceID = 2;
+//                    if ($hasDefaultStore) {
+//                        $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
+//                            $hasDefaultStore, $hasDefaultServiceID);
+//                        return [$waybillId];
+//                    }
+
                 }
             }
         }
@@ -144,74 +156,56 @@ class WaybillHelper
     {
         $model = new Waybill();
         $model->acquirer_id = $orgId;
-        $model->service_id = Registry::EDI_SERVICE_ID;
-        $model->status_id = Registry::WAYBILL_FORMED;
-        $datetime = new \DateTime();
-        $model->doc_date = $datetime->format('Y-m-d H:i:s');
-        $model->created_at = $datetime->format('Y-m-d H:i:s');
-        $model->exported_at = $datetime->format('Y-m-d H:i:s');
+        $model->doc_date = \gmdate('Y-m-d H:i:s');
 
         return $model;
     }
 
     /**
-     * @param      $orderContent
+     * @param      $arOuterMappedProducts
      * @param      $orgId
-     * @param null $outerStoreUuid
+     * @param null $outerStoreId
      * @param null $serviceId
      * @return int
-     * @throws Exception
+     * @throws \Exception
      */
-    private function createWaybillAndContent($orderContent, $orgId, $outerStoreUuid = null, $serviceId = null)
+    private function createWaybillAndContent($arOuterMappedProducts, $orgId, $outerStoreId, $serviceId)
     {
         $model = $this->buildWaybill($orgId);
-        $model->outer_store_uuid = (string)$outerStoreUuid;
+        $model->outer_store_id = (string)$outerStoreId;
         $model->service_id = $serviceId;
-        /*
-                $tmp_ed_num = reset($orderContent)->order_id;
-                if (reset($orderContent)->edi_number) {
-                    $tmp_ed_num = reset($orderContent)->edi_number;
-                }
+        $model->status_id = Registry::WAYBILL_COMPARED;
 
-                $existWaybill = OrderContent::find()->where(['like', 'edi_number', $tmp_ed_num])->orderBy(['edi_number' => 'desc'])->limit(1)->one();
-                if ($existWaybill) {
-                    if (strpos('-', $existWaybill->edi_number)) {
-                        $ed_num = explode('-', $existWaybill->edi_number);
-                        $ed_num[1] = (int)$ed_num[1] + 1;
-                        $ed_num = implode('-', $ed_num);
-                    } else {
-                        $ed_num = $existWaybill->edi_number . '-1';
-                    }
-                } else {
-                    $ed_num = $tmp_ed_num;
-                }
-                $model->edi_number = $ed_num;
-        */
+        //для каждого может быть разный
+        $model->edi_number = $this->generateEdiNumber($arOuterMappedProducts, $serviceId);
+
         $transaction = \Yii::$app->db_api->beginTransaction();
+
         try {
             if (!$model->save()) {
                 throw new ValidationException($model->getErrors());
             }
 
-            foreach ($orderContent as $ordCont) {
+            foreach ($arOuterMappedProducts as $mappedProduct) {
+                /**@var OrderContent $ordCont */
+                $ordCont = $mappedProduct['orderContent'];
                 $price = $ordCont->price;
                 $quantity = $ordCont->quantity;
-                $taxRate = $ordCont->vat_product;
+                $taxRate = $mappedProduct['vat'];
                 $priceWithVat = (float)($price + ($price * ($taxRate / 100)));
 
                 $modelWaybillContent = new WaybillContent();
                 $modelWaybillContent->order_content_id = $ordCont->id;
                 $modelWaybillContent->waybill_id = $model->id;
                 $modelWaybillContent->merc_uuid = $ordCont->merc_uuid;
-                #TODO refactor
-                #Тут должен браться id продукта из у.с.
-                $modelWaybillContent->outer_product_id = $ordCont->product_id;
+                $modelWaybillContent->outer_product_id = $mappedProduct['outer_product_id'];
                 $modelWaybillContent->quantity_waybill = $quantity;
                 $modelWaybillContent->vat_waybill = $taxRate;
                 $modelWaybillContent->sum_with_vat = $quantity * $priceWithVat;
                 $modelWaybillContent->sum_without_vat = $quantity * $price;
                 $modelWaybillContent->price_with_vat = $priceWithVat;
                 $modelWaybillContent->price_without_vat = $price;
+                $modelWaybillContent->koef = $mappedProduct['coefficient'];
                 if (!$modelWaybillContent->save()) {
                     throw new ValidationException($modelWaybillContent->getErrors());
                 }
@@ -287,13 +281,15 @@ class WaybillHelper
             $priceWithVat = $price + ($price * ($taxRate / 100));
         }
 
+        $outerProductMap = OuterProductMap::find()->where(['organization_id' => \Yii::$app->user->identity->organization_id])
+            ->andWhere(['service_id' => $waybill->service_id, 'product_id' => $orderContent->product_id])
+            ->andWhere(['outer_store_id' => $waybill->outer_store_id])->one();
+
         try {
             $waybillContent = new WaybillContent();
             $waybillContent->waybill_id = $request['waybill_id'];
             $waybillContent->order_content_id = $orderContent->id;
-            #todo_refactoring
-            #Тут должен быть id продукта у.с. а не наш продукт
-            $waybillContent->outer_product_id = $orderContent->product_id;
+            $waybillContent->outer_product_id = $outerProductMap->outer_product_id ?? $orderContent->product_id;
             $waybillContent->quantity_waybill = (float)$quantity;
             $waybillContent->vat_waybill = $taxRate;
             $waybillContent->merc_uuid = $orderContent->merc_uuid;
@@ -324,7 +320,7 @@ class WaybillHelper
      */
     private function checkOrderForWaybillContent(Waybill $waybill, OrderContent $orderContent)
     {
-        if ($orderContent->waybillContent){
+        if ($orderContent->waybillContent) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_allready_has_waybill_content') . '-' . $orderContent->waybillContent->id);
         }
         $waybillContent = WaybillContent::find()->where(['waybill_id' => $waybill->id])
@@ -335,5 +331,80 @@ class WaybillHelper
                 throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_not_for_this_waybill'));
             }
         }
+    }
+
+    /**
+     * @param $storeProducts
+     * @param $notInWaybillContent
+     * @return array
+     */
+    private function prepareStoreProducts($storeProducts, $notInWaybillContent)
+    {
+        $arStoreProducts = [];
+        foreach ($notInWaybillContent as $item) {
+            /**@var OrderContent $item */
+            if (array_key_exists($item->product_id, $storeProducts)) {
+                $outer_product_id = $storeProducts[$item->product_id]['master_serviceproduct_id'] ??
+                    $storeProducts[$item->product_id]['outer_product_id'];
+                $arStoreProducts[] = [
+                    'product_id'       => $item->product_id,
+                    'outer_store_id'   => $storeProducts[$item->product_id]['outer_store_id'],
+                    'vat'              => $storeProducts[$item->product_id]['vat'],
+                    'coefficient'      => $storeProducts[$item->product_id]['coefficient'],
+                    'outer_product_id' => $outer_product_id,
+                    'orderContent'     => $item,
+                ];
+            }
+        }
+
+        return $arStoreProducts;
+    }
+
+    /**
+     * @param $arOuterStoreProducts
+     * @param $serviceId
+     * @return array|string
+     */
+    private function generateEdiNumber($arOuterStoreProducts, $serviceId)
+    {
+        /**@var OrderContent $orderContent */
+        $orderContent = current($arOuterStoreProducts)['orderContent'];
+        $tmp_ed_num = $orderContent->order_id;
+        if ($orderContent->edi_number) {
+            $tmp_ed_num = $orderContent->edi_number;
+        }
+
+        $existWaybill = OrderContent::find()->where(['like', 'edi_number', $tmp_ed_num])
+            ->andWhere(['order_id' => $orderContent->order_id])
+            ->orderBy(['edi_number' => SORT_DESC])->limit(1)->one();
+        if (!$existWaybill) {
+            $existWaybill = Waybill::find()->where(['like', 'edi_number', $tmp_ed_num])
+                ->andWhere(['service_id' => $serviceId])
+                ->orderBy(['edi_number' => SORT_DESC])->limit(1)->one();
+        }
+        $ed_num = $tmp_ed_num . '-1';
+
+        if ($existWaybill) {
+            if (mb_strpos($existWaybill->edi_number, '-')) {
+                $ed_num = $this->getLastEdiNumber($existWaybill->edi_number);
+            }
+        }
+
+        return $ed_num;
+    }
+
+    /**
+     * @param $ediNumber
+     * @return int|mixed|string
+     */
+    private function getLastEdiNumber($ediNumber)
+    {
+        $ed_nums = explode('-', $ediNumber);
+        $ed_num = array_pop($ed_nums);
+        $ed_num = (int)$ed_num + 1;
+        array_push($ed_nums, $ed_num);
+        $ed_num = implode('-', $ed_nums);
+
+        return $ed_num;
     }
 }

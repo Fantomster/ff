@@ -89,7 +89,7 @@ class UserNotice
 
         if(!empty($user->email)) {
             $mailer->compose('@common/mail/demonstration', compact("user"))
-                ->setFrom('zahryapina@mixcart.ru')
+                ->setFrom(['zahryapina@mixcart.ru' => 'zahryapina@mixcart.ru'])
                 ->setTo($user->email)
                 ->setSubject($subject)
                 ->send();
@@ -110,7 +110,7 @@ class UserNotice
         if(!empty($user->email)) {
             //var_dump($user);
             $mailer->compose('@common/mail/manager-message', ['user' => $user])
-                ->setFrom('zahryapina@mixcart.ru')
+                ->setFrom(['zahryapina@mixcart.ru' => 'zahryapina@mixcart.ru'])
                 ->setTo($user->email)
                 ->setSubject($subject)
                 ->send();

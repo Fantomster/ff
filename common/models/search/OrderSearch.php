@@ -33,7 +33,7 @@ class OrderSearch extends Order
     public $date_to;
     public $docStatus;
     public $completion_date_to;
-    public $service_id;
+    public $service_id = [];
     public $service_id_excluded = [];
 
     /**
@@ -42,8 +42,8 @@ class OrderSearch extends Order
     public function rules(): array
     {
         return [
-            [['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 'client_search_id', 'vendor_search_id', 'manager_id', 'service_id'], 'integer'],
-            [['created_at', 'updated_at', 'date_from', 'date_to', 'docStatus', 'completion_date_from', 'completion_date_to'], 'safe'],
+            [['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 'client_search_id', 'vendor_search_id', 'manager_id'], 'integer'],
+            [['created_at', 'updated_at', 'date_from', 'date_to', 'docStatus', 'completion_date_from', 'completion_date_to', 'service_id'], 'safe'],
         ];
     }
 

@@ -6,7 +6,7 @@ $recipientIsClient = ($recipient->organization->type_id == Organization::TYPE_RE
 if ($recipientIsClient) {
     $text = Yii::t('app', 'common.mail.order_confirmed.text_for_client', ['ru' => 'Поставщик {org_name} потдвердил заказ №{order_id}', 'order_id' => $order->id, 'org_name' => $senderOrg->name]);
 } else {
-    $text = Yii::t('app', 'common.mail.order_confirmed.text_for_vendor', ['ru' => 'Вы подтвердили заказ N°{order_id} для ресторана {org_name}', 'order_id' => $order->id, 'org_name' => $senderOrg->name]);
+    $text = Yii::t('app', 'common.mail.order_confirmed.text_for_vendor', ['ru' => 'Вы подтвердили заказ N°{order_id} для ресторана {org_name}', 'order_id' => $order->id, 'org_name' => $order->client->name]);
 }
 ?>
 

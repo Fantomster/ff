@@ -136,7 +136,8 @@ class License extends ActiveRecord
                 'license.created_at',
                 'license.updated_at',
                 'license.login_allowed',
-                'max(lo.td) as to_date'
+                'max(lo.td) as to_date',
+                'ls.service_id',
             ])
             ->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
@@ -148,7 +149,8 @@ class License extends ActiveRecord
                 'license.is_active',
                 'license.created_at',
                 'license.updated_at',
-                'license.login_allowed'
+                'license.login_allowed',
+                'ls.service_id',
             ])
             ->indexBy('id');
 
@@ -157,7 +159,7 @@ class License extends ActiveRecord
         }
 
         if (!is_null($is_active)) {
-            $license->andWhere(['=', 'ls.service_id', (int)$is_active]);
+            $license->andWhere(['=', 'is_active', (int)$is_active]);
             $license->orderBy('to_date');
         }
 

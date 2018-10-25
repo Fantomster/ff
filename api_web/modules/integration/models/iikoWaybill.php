@@ -12,6 +12,8 @@ use api_web\components\Registry;
 use common\models\IntegrationSettingValue;
 use common\models\Order;
 use common\models\OrderContent;
+use common\models\OuterAgent;
+use common\models\OuterStore;
 use common\models\Waybill;
 use common\models\WaybillContent;
 
@@ -52,12 +54,15 @@ class iikoWaybill extends Waybill
             }
         }
 
+        $store = OuterStore::findOne($this->outer_store_id);
+        $agent = OuterAgent::findOne($this->outer_agent_id);
+
         $xml->addChild('comment', $this->outer_note);
         $datetime = new \DateTime($this->doc_date);
         $xml->addChild('dateIncoming', $datetime->format('d.m.Y'));
         $xml->addChild('incomingDate', $datetime->format('d.m.Y'));
-        $xml->addChild('defaultStore', $this->outer_store_uuid);
-        $xml->addChild('supplier', $this->outer_contractor_uuid);
+        $xml->addChild('defaultStore', $store->outer_uid);
+        $xml->addChild('supplier', $agent->outer_uid);
         $xml->addChild('status', 'NEW');
 
         $items = $xml->addChild('items');
@@ -81,7 +86,7 @@ class iikoWaybill extends Waybill
             $item->addChild('sum', $row->price_with_vat);
             $item->addChild('price', $row->sum_with_vat);
             $item->addChild('isAdditionalExpense', false);
-            $item->addChild('store', $this->outer_store_uuid);
+            $item->addChild('store', $store->outer_uid);
 
         }
 

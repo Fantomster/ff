@@ -108,7 +108,6 @@ class OrderWebApi extends \api_web\components\WebApi
 
             $order->discount = $post['discount']['amount'];
         }
-
         $tr = \Yii::$app->db->beginTransaction();
         try {
             //Тут операции с продуктами в этом заказе
@@ -196,7 +195,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $orderContent->quantity = $product['quantity'];
         }
 
-        $orderContent->comment = $product['comment'];
+        $orderContent->comment = $product['comment'] ?? '';
 
         if (!empty($product['price'])) {
             $orderContent->price = $product['price'];
@@ -1108,6 +1107,43 @@ class OrderWebApi extends \api_web\components\WebApi
         $content = ob_get_clean();
         $base64 = (isset($post['base64_encode']) && $post['base64_encode'] == 1 ? true : false);
         return ($base64 ? base64_encode($content) : $content);
+    }
+
+    /**
+     * Изменение номера документа
+     *
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function setDocumentNumber($post)
+    {
+        $this->validateRequest($post, ['order_id', 'document_number']);
+
+        $model = Order::find()->where(['id' => $post['order_id'], 'client_id' => $this->user->organization_id])->one();
+
+        if (empty($model)) {
+            throw new BadRequestHttpException('order_not_found');
+        }
+
+        if ($model->service_id != Registry::MC_BACKEND) {
+            throw new BadRequestHttpException('bad_service_id_in_order|' . ($model->service_id ?? "NULL") . '|' . Registry::MC_BACKEND);
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            $result = (bool)OrderContent::updateAll(
+                ['edi_number' => trim($post['document_number'])],
+                'order_id = :oid',
+                [':oid' => $model->id]
+            );
+            $t->commit();
+            return ['result' => $result];
+        } catch (\Throwable $e) {
+            $t->rollBack();
+            \Yii::info($e->getMessage());
+            return ['result' => false];
+        }
     }
 
     /**

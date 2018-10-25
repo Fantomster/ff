@@ -34,6 +34,8 @@ class Registry
     const EDI_SERVICE_ID = 6;
     /**@var int const for 1C (rest) service id in all_service table */
     const ONE_S_CLIENT_SERVICE_ID = 8;
+    /**@var int const for MixCart service_id in all_service table */
+    const MC_BACKEND = 9;
 
     /** - Waybill section - */
     const WAYBILL_COMPARED = 1;

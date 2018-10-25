@@ -160,7 +160,7 @@ class License extends ActiveRecord
 
         if (!is_null($is_active)) {
             $license->andWhere(['=', 'is_active', (int)$is_active]);
-            $license->orderBy('to_date');
+            $license->orderBy(['to_date' => SORT_DESC]);
         }
 
         return $license->all(\Yii::$app->db_api);

@@ -30,9 +30,13 @@ class WebApiErrorHandler extends ErrorHandler
         $response->data = $this->convertExceptionToArray($exception);
 
         if (isset($exception->statusCode)) {
-            $response->setStatusCode($exception->statusCode);
+            $response->setStatusCode($exception->getCode());
         } elseif ($response->data['code'] == 42000) {
             $response->setStatusCode(500);
+        }
+
+        if($exception->getCode() != 0) {
+            \Yii::$app->response->statusCode = $exception->getCode();
         }
 
         $response->send();

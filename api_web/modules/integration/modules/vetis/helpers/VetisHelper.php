@@ -87,7 +87,7 @@ class VetisHelper
         $this->issueNumber = (isset($this->vsdModel->number)) ? $this->vsdModel->number : null;
         $this->issueDate = $this->vsdModel->date_doc;
         $this->form = $this->vsdModel->form;
-        $this->type = $this->vsdModel->type;
+        $this->type = MercVsd::$types[$this->vsdModel->type];
         $this->status = $this->vsdModel->status;
         return $this;
     }

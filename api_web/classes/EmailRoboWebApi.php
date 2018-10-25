@@ -40,7 +40,7 @@ class EmailRoboWebApi extends WebApi
     public function getSetting(array $post): array
     {
         $this->validateRequest($post, ['id']);
-        $model = IntegrationSettingFromEmail::findOne($post['id']);
+        $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id]);
         if (!$model) {
             return ['result' => $model];
         }
@@ -58,7 +58,7 @@ class EmailRoboWebApi extends WebApi
     public function update(array $post): array
     {
         $this->validateRequest($post, ['id']);
-        $model = IntegrationSettingFromEmail::findOne($post['id']);
+        $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id]);
         try {
             foreach ($post as $key => $field) {
                 if ($key != 'id') {
@@ -113,7 +113,7 @@ class EmailRoboWebApi extends WebApi
     public function delete(array $post): array
     {
         $this->validateRequest($post, ['id']);
-        $model = IntegrationSettingFromEmail::findOne($post['id']);
+        $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id]);
         try {
             $model->delete();
         } catch (\Throwable $t) {

@@ -87,6 +87,7 @@ class EmailRoboWebApi extends WebApi
     {
         $model = new IntegrationSettingFromEmail();
         try {
+            $model->setAttribute('organization_id', $this->user->organization_id);
             foreach ($post as $key => $field) {
                 if ($key != 'id') {
                     $model->setAttribute($key, $field);

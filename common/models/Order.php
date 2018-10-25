@@ -77,7 +77,7 @@ class Order extends \yii\db\ActiveRecord
     const DISCOUNT_PERCENT = 2;
     const DELAY_WITH_DELIVERY_DATE = 86400; //sec - 1 day
     const DELAY_WITHOUT_DELIVERY_DATE = 86400; //sec - 1 day
-  
+
     /**
      * @param string $name
      * @return mixed
@@ -172,6 +172,10 @@ class Order extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @param bool $insert
+     * @return bool
+     */
     public function beforeSave($insert)
     {
         $result = parent::beforeSave($insert);
@@ -279,7 +283,9 @@ class Order extends \yii\db\ActiveRecord
         return $this->getOrderChat()->orderBy(['created_at' => SORT_DESC])->one();
     }
 
-    //check if order is obsolete i.e. can be set as done from any state by any side
+    /**
+     * @return bool
+     */
     public function getIsObsolete()
     {
         if (in_array($this->status, [OrderStatus::STATUS_DONE, OrderStatus::STATUS_REJECTED, OrderStatus::STATUS_CANCELLED, OrderStatus::STATUS_FORMING])) {
@@ -300,6 +306,10 @@ class Order extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @param $status
+     * @return string
+     */
     public static function statusText($status)
     {
         $text = Yii::t('app', 'common.models.undefined', ['ru' => 'Неопределен']);
@@ -322,6 +332,9 @@ class Order extends \yii\db\ActiveRecord
         return $text;
     }
 
+    /**
+     * @return array
+     */
     public function discountDropDown()
     {
         return [
@@ -331,6 +344,9 @@ class Order extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return mixed
+     */
     public function getStatusText()
     {
         if (in_array($this->service_id, [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID])) {
@@ -341,6 +357,9 @@ class Order extends \yii\db\ActiveRecord
         return $statusList[$this->status];
     }
 
+    /**
+     * @return array
+     */
     public static function getStatusListEdo()
     {
         return [
@@ -361,6 +380,10 @@ class Order extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @param bool $short
+     * @return array
+     */
     public static function getStatusList($short = false)
     {
         $result = [
@@ -377,6 +400,9 @@ class Order extends \yii\db\ActiveRecord
         return $result;
     }
 
+    /**
+     * @return array
+     */
     public static function getStatusColors()
     {
         return [
@@ -390,11 +416,17 @@ class Order extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return int|string
+     */
     public function getPositionCount()
     {
         return $this->hasMany(OrderContent::className(), ['order_id' => 'id'])->count();
     }
 
+    /**
+     * @return int|string
+     */
     public function calculateDelivery()
     {
         $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
@@ -410,6 +442,10 @@ class Order extends \yii\db\ActiveRecord
         return 0;
     }
 
+    /**
+     * @param null $rawPrice
+     * @return float|int
+     */
     public function forFreeDelivery($rawPrice = null)
     {
         if ($this->vendor->delivery->min_free_delivery_charge == 0) {
@@ -423,6 +459,10 @@ class Order extends \yii\db\ActiveRecord
         return ceil((($diff > 0) ? $diff : 0) * 100) / 100;
     }
 
+    /**
+     * @param null $rawPrice
+     * @return float|int
+     */
     public function forMinOrderPrice($rawPrice = null)
     {
         if (isset($this->vendor->delivery)) {
@@ -433,14 +473,29 @@ class Order extends \yii\db\ActiveRecord
         return ceil((($diff > 0) ? $diff : 0) * 100) / 100;
     }
 
+    /**
+     * @return false|null|string
+     */
     public function getRawPrice()
     {
         return OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
     }
 
+    /**
+     * Пересчет total_price
+     *
+     * @param bool $save
+     * @param null $rawPrice
+     * @return string
+     */
     public function calculateTotalPrice($save = true, $rawPrice = null)
     {
-        $total_price = !isset($rawPrice) ? OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar() : $rawPrice;
+        if (is_null($rawPrice)) {
+            $total_price = $this->getTotalPriceFromDb();
+        } else {
+            $total_price = $rawPrice;
+        }
+
         if ($this->discount && ($this->discount_type == self::DISCOUNT_FIXED)) {
             $total_price -= $this->discount;
         }
@@ -452,16 +507,20 @@ class Order extends \yii\db\ActiveRecord
             $total_price += $this->vendor->delivery->delivery_charge;
         }
 
-        $this->total_price = number_format($total_price, 2, '.', '');
+        $this->setAttribute('total_price', number_format($total_price, 2, '.', ''));
         if ($save) {
             $this->save();
         }
-        return $this->total_price;
+
+        return $this->getAttribute('total_price');
     }
 
+    /**
+     * @return string
+     */
     public function getTotalPriceWithOutDiscount()
     {
-        $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
+        $total_price = $this->getTotalPriceFromDb();
         $free_delivery = $this->vendor->delivery->min_free_delivery_charge;
         if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
             $total_price += floatval($this->vendor->delivery->delivery_charge);
@@ -469,6 +528,46 @@ class Order extends \yii\db\ActiveRecord
         return number_format(round($total_price, 2), 2, '.', '');
     }
 
+    /**
+     * @return false|null|string
+     */
+    private function getTotalPriceFromDb()
+    {
+        if (!empty($this->waybills)) {
+            $query_waybill = (new Query)
+                ->select('sum_without_vat')
+                ->from(WaybillContent::tableName() . ' as w')
+                ->where('w.order_content_id = oc.id')
+                ->orderBy(['updated_at' => SORT_DESC])
+                ->limit(1)->createCommand()->getRawSql();
+
+            $query = (new Query())
+                ->select([
+                    'waybill_sum' => "(" . $query_waybill . ")",
+                    'oc_sum'      => '(oc.quantity * oc.price)'
+                ])
+                ->from(DBNameHelper::getMainName() . '.' . OrderContent::tableName() . ' as oc')
+                ->where('oc.order_id = :o_id', [':o_id' => $this->id])
+                ->createCommand()->getRawSql();
+
+            $total_price = (new Query())
+                ->select('SUM(COALESCE(`waybill_sum`, `oc_sum`))')
+                ->from("(" . $query . ") as t")
+                ->scalar(\Yii::$app->db_api);
+
+        } else {
+            $total_price = OrderContent::find()
+                ->select('SUM(quantity*price)')
+                ->where(['order_id' => $this->id])
+                ->scalar();
+        }
+        return $total_price;
+    }
+
+    /**
+     * @param bool $iso_code
+     * @return bool|string
+     */
     public function getFormattedDiscount($iso_code = false)
     {
         switch ($this->discount_type) {
@@ -527,6 +626,9 @@ class Order extends \yii\db\ActiveRecord
         return $result;
     }
 
+    /**
+     * @return array
+     */
     public function getOrdersExportColumns()
     {
         return [
@@ -567,6 +669,11 @@ class Order extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @param bool  $insert
+     * @param array $changedAttributes
+     * @throws BadRequestHttpException
+     */
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
@@ -607,7 +714,7 @@ class Order extends \yii\db\ActiveRecord
 
     public function afterDelete()
     {
-        parent::afterDelete(); // TODO: Change the autogenerated stub
+        parent::afterDelete();
         if (!is_a(Yii::$app, 'yii\console\Application')) {
             if ($this->status == OrderStatus::STATUS_FORMING) {
                 \api\modules\v1\modules\mobile\components\notifications\NotificationCart::actionCart($this->id);
@@ -662,6 +769,10 @@ class Order extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @param $user
+     * @return Organization|null
+     */
     public function getOrganizationByUser($user)
     {
         $clientRelation = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $this->client_id]);
@@ -675,21 +786,33 @@ class Order extends \yii\db\ActiveRecord
         return null;
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCurrency()
     {
         return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getInvoice()
     {
         return $this->hasOne(IntegrationInvoice::className(), ['order_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getInvoiceRelation()
     {
         return $this->hasOne(IntegrationInvoice::className(), ['id' => 'invoice_relation']);
     }
 
+    /**
+     * @return string
+     */
     public function formatPrice()
     {
         return $this->total_price . " " . $this->currency->symbol;
@@ -719,6 +842,9 @@ class Order extends \yii\db\ActiveRecord
         return $this->hasMany(EmailQueue::className(), ['order_id' => 'id']);
     }
 
+    /**
+     * @return string
+     */
     public function getFormattedCreationDate()
     {
         return Yii::$app->formatter->asDatetime($this->created_at, "php:d.m.Y, H:i");
@@ -754,31 +880,7 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getTotalPrice()
     {
-        if (!empty($this->waybills)) {
-
-            $query_waybill = (new Query)
-                ->select('sum_without_vat')
-                ->from(DBNameHelper::getApiName() . '.' . WaybillContent::tableName() . ' as w')
-                ->where('w.order_content_id = oc.id')
-                ->orderBy(['updated_at' => SORT_DESC])
-                ->limit(1)->createCommand()->getRawSql();
-
-            $query = (new Query())
-                ->select([
-                    'waybill_sum' => "(" . $query_waybill . ")",
-                    'oc_sum'      => '(oc.quantity * oc.price)'
-                ])
-                ->from(DBNameHelper::getMainName() . '.' . OrderContent::tableName() . ' as oc')
-                ->where('oc.order_id = :o_id', [':o_id' => $this->id])
-                ->createCommand()->getRawSql();
-
-            $total_price = (new Query())
-                ->select('SUM(COALESCE(`waybill_sum`, `oc_sum`))')
-                ->from("(" . $query . ") as t")
-                ->scalar();
-        } else {
-            $total_price = $this->getAttribute('total_price');
-        }
+        $total_price = $this->getAttribute('total_price');
         return number_format(round($total_price, 2), 2, '.', '');
     }
 }

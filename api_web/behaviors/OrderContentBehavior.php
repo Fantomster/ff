@@ -18,7 +18,7 @@ use yii\db\ActiveRecord;
  */
 class OrderContentBehavior extends Behavior
 {
-    /** @var \common\models\OrderContent $order */
+    /** @var \common\models\OrderContent $model */
     public $model;
     private $updateAttributes = [];
 

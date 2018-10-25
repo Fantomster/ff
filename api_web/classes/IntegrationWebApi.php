@@ -400,7 +400,6 @@ class IntegrationWebApi extends WebApi
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
-            var_dump($e->getTraceAsString()); die();
             throw $e;
         }
         return ['success' => true];

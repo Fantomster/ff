@@ -5,10 +5,13 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVsd;
+use api_web\classes\UserWebApi;
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use api_web\modules\integration\modules\vetis\api\mercury\mercuryApi;
 use api_web\modules\integration\modules\vetis\api\mercury\VetDocumentDone;
+use common\models\licenses\LicenseOrganization;
+use common\models\licenses\LicenseService;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -19,7 +22,6 @@ use yii\web\BadRequestHttpException;
  */
 class VetisWaybill extends WebApi
 {
-
     /**
      * @var \api_web\modules\integration\modules\vetis\helpers\VetisHelper
      */
@@ -43,6 +45,11 @@ class VetisWaybill extends WebApi
      */
     public function getGroupsList($request)
     {
+        $license = LicenseOrganization::getLicenseForOrganizationService($this->user->organization_id,4);
+        if(!isset($license)) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.active_license_not_found', ['ru' => 'Нет активной лицензии для доступа к этой функции']));
+        }
+
         $reqPag = $request['pagination'] ?? [];
         $reqSearch = $request['search'] ?? [];
         $page = $this->helper->isSetDef($reqPag['page'] ?? null, 0);
@@ -72,6 +79,21 @@ class VetisWaybill extends WebApi
                 'total_count' => $arResult['count'],
             ]
         ];
+
+        if($page == 1) {
+            if(isset($search->acquirer_id)) {
+                MercVsd::getUpdateData($search->acquirer_id);
+            }
+            else {
+                $businessList = (new UserWebApi())->getUserOrganizationBusinessList($this->user->organization_id);
+                foreach ($businessList['result'] as $item) {
+                    $license = LicenseOrganization::getLicenseForOrganizationService($item['id'], 4);
+                    if (isset($license)) {
+                        MercVsd::getUpdateData($item['id']);
+                    }
+                }
+            }
+        }
         return $return;
     }
 

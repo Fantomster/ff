@@ -35,7 +35,7 @@ class IntegrationWebApi extends WebApi
     public function userServiceSet($request)
     {
         $this->validateRequest($request, ['service_id']);
-        $license = License::checkByServiceId($this->user->id, $request['service_id']);
+        $license = License::checkByServiceId($this->user->organization_id, $request['service_id']);
         if ($license) {
             $this->user->integration_service_id = $request['service_id'];
             $this->user->save();

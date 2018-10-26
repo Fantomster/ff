@@ -112,7 +112,7 @@ class License extends ActiveRecord
             ->all(\Yii::$app->db_api);
 
         if (count($license) > 1) {
-            throw new Exception('Organization having more than one different licenses');
+            throw new Exception('Organization having more than one same licenses, please delete not actual');
         }
 
         return $license;
@@ -160,7 +160,7 @@ class License extends ActiveRecord
 
         if (!is_null($is_active)) {
             $license->andWhere(['=', 'is_active', (int)$is_active]);
-            $license->orderBy('to_date');
+            $license->orderBy(['to_date' => SORT_DESC]);
         }
 
         return $license->all(\Yii::$app->db_api);

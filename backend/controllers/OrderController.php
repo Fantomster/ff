@@ -300,7 +300,8 @@ class OrderController extends Controller
 
         $statistic = OperatorCall::find()
             ->select(['count(order_id) as cnt', 'status_call_id as status'])
-            ->where("status_call_id != 3")
+            ->leftJoin('order', 'order.id = operator_call.order_id')
+            ->where("status_call_id != :status and order.created_at > '2018-10-17 00:00:00'", [":status" => OperatorCall::STATUS_COMPLETE])
             ->groupBy(['status_call_id'])
             ->orderBy(['status_call_id' => SORT_ASC])
             ->asArray()
@@ -357,7 +358,7 @@ class OrderController extends Controller
                 $model = new OperatorCall([
                     'order_id'       => $id,
                     'operator_id'    => Yii::$app->user->getId(),
-                    'status_call_id' => 1
+                    'status_call_id' => OperatorCall::STATUS_OPEN
                 ]);
 
                 if (!$model->save()) {
@@ -366,7 +367,9 @@ class OrderController extends Controller
 
                 $countCall = OperatorCall::find()
                     ->where(['operator_id' => Yii::$app->user->getId()])
-                    ->andWhere('status_call_id != 3')->count();
+                    ->andWhere('status_call_id not in (:status_complete,:status_controll)',
+                        [':status_complete' => OperatorCall::STATUS_COMPLETE,
+                         ':status_controll' => OperatorCall::STATUS_CONTROLL])->count();
 
                 if ($countCall > 1) {
                     $modelTimeout = OperatorTimeout::findOne(['operator_id' => Yii::$app->user->getId()]);

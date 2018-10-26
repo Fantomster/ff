@@ -41,7 +41,7 @@ class IntegrationWebApi extends WebApi
             $this->user->save();
             return ['result' => true];
         } else {
-            throw new BadRequestHttpException('Dont have license for this service');
+            throw new BadRequestHttpException('Dont have active license for this service');
         }
     }
 
@@ -106,6 +106,8 @@ class IntegrationWebApi extends WebApi
                 $waybillsCount = count($order->getWaybills($post['service_id']));
                 if ($waybillsCount == 0) {
                     $waybillsCount = 1;
+                } else {
+                    $waybillsCount++;
                 }
                 $ediNumber = $post['order_id'] . "-" . $waybillsCount;
             }
@@ -344,6 +346,65 @@ class IntegrationWebApi extends WebApi
         $waybillContent->save();
 
         return ['success' => true, 'waybill_content_id' => $waybillContent->id];
+    }
+
+    /**
+     * integration: Накладная - Удалить
+     *
+     * @param array $post
+     * @throws \Exception|\Throwable
+     * @return array
+     */
+    public function deleteWaybill(array $post): array
+    {
+        $this->validateRequest($post, ['waybill_id', 'service_id']);
+
+        $waybillCheck = Waybill::findOne(['id' => $post['waybill_id']]);
+        if (!isset($waybillCheck)) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_found', ['ru' => 'Накладная не найдена']));
+        }
+
+        if ($waybillCheck->service_id != $post['service_id']) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_relation_this_service', ['ru' => 'Накладная не связана с заданным сервисом']));
+        }
+
+        if ($waybillCheck->status_id == Registry::WAYBILL_UNLOADED) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_unloading', ['ru' => 'Накладная в статусе выгружена']));
+        }
+
+        $waybillContentCheck = WaybillContent::find()
+        ->where(['waybill_id' => $waybillCheck->id])
+        ->andWhere('order_content_id is not null')
+        ->one();
+        if (isset($waybillContentCheck)) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_relation_order', ['ru' => 'Накладная связана с заказом']));
+        }
+
+        $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
+
+        $checkOrg = false;
+        foreach ($businessList['result'] as $item) {
+            if($item['id'] == $waybillCheck->acquirer_id) {
+                $checkOrg = true;
+                break;
+            }
+        }
+
+        if (!$checkOrg) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_releated_current_user', ['ru' => 'Накладная не пренадлежит организациям текущего пользователя']));
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+
+            WaybillContent::deleteAll(['waybill_id' => $waybillCheck->id]);
+            $waybillCheck->delete();
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+        return ['success' => true];
     }
 
     /**

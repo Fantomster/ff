@@ -146,10 +146,56 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionCreateWaybill()
     {
         $this->response = $this->container->get('IntegrationWebApi')->handleWaybill($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/waybill/delete-waybill",
+     *     tags={"Waybill"},
+     *     summary="Накладная - Удалить",
+     *     description="Накладная - Удалить",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                              "waybill_id": 5,
+     *                              "service_id":1
+     *                          }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                "success": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionDeleteWaybill()
+    {
+        $this->response = $this->container->get('IntegrationWebApi')->deleteWaybill($this->request);
     }
 
     /**

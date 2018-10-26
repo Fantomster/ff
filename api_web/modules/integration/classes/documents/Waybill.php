@@ -38,8 +38,8 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "number"      => $this->outer_number_code ? [$this->outer_number_code] : null,
             "type"        => DocumentWebApi::TYPE_WAYBILL,
             "status_id"   => $this->status_id,
-            "status_text" => \Yii::t('api_web', 'waybill.compared'),
-            "service_id"  => $this->service_id,
+            "status_text" => \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$this->status_id]),
+            "service_id"  => $this->service_id
         ];
 
         try {
@@ -146,7 +146,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
             $return ["agent"] = [];
         } else {
             $return ["agent"] = [
-                "id"  => $agent['id'],
+                "id"   => $agent['id'],
                 "name" => $agent['name'],
             ];
         }
@@ -172,7 +172,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
             $return ["store"] = [];
         } else {
             $return ["store"] = [
-                "id"  => $store['id'],
+                "id"   => $store['id'],
                 "name" => $store['name'],
             ];
         }

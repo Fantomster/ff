@@ -146,13 +146,24 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "status_text" => \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model->status_id]),
         ];
 
-        $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_agent_id);
+        try {
+            $agent = OuterAgent::findOne($model->outer_agent_id);
+        } catch (\Throwable $t) {
+            // Все нормально, пока что не зарефакторили waybill, потом убрать try{}catch(){} todo_refactoring
+            $agent = null;
+        }
+
         if (empty($agent)) {
-            $return ["agent"] = null;
-        } else {
-            $return ["agent"] = [
-                "id"   => $agent['id'],
-                "name" => $agent['name'],
+            if (!empty($model->order)) {
+                $return ["agent"] = [
+                    "id"   => $model->order->vendor_id,
+                    "name" => $model->order->vendor->name,
+                ];
+            }
+        } elseif (isset($agent['vendor_id'])) {
+            $return["vendor"] = [
+                "id"   => $agent->vendor_id,
+                "name" => Organization::findOne(['id' => $agent->vendor_id])->name,
             ];
         }
 

@@ -495,7 +495,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if ($waybill->validate() && $waybill->save()) {
-            return $this->getWaybillDetail(['waybill_id' => $waybill->id]);
+            return $waybill->prepare();
         } else {
             throw new ValidationException($waybill->getFirstErrors());
         }

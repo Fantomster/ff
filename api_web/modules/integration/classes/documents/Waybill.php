@@ -44,7 +44,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         ];
 
         try {
-            $agent = OuterAgent::findOne($this->outer_contractor_id);
+            $agent = OuterAgent::findOne($this->outer_agent_id);
         } catch (\Throwable $t) {
             // Все нормально, пока что не зарефакторили waybill, потом убрать try{}catch(){} todo_refactoring
             $agent = null;

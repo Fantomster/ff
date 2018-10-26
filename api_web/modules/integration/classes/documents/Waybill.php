@@ -51,15 +51,6 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
 
         if (empty($agent)) {
-            $return ["agent"] = null;
-        } else {
-            $return ["agent"] = [
-                "id"   => $agent->id,
-                "name" => $agent->name,
-            ];
-        }
-
-        if (empty($agent)) {
             if (!empty($this->order)) {
                 $return ["agent"] = [
                     "id"   => $this->order->vendor_id,
@@ -70,6 +61,17 @@ class Waybill extends BaseWaybill implements DocumentInterface
             $return["vendor"] = [
                 "id"   => $agent->vendor_id,
                 "name" => Organization::findOne(['id' => $agent->vendor_id])->name,
+            ];
+        }
+
+        //todo_refactoring wtf
+        $store = (new Dictionary($this->service_id, 'Store'))->storeInfo($this->outer_store_id);
+        if (empty($agent)) {
+            $return ["store"] = [];
+        } else {
+            $return ["store"] = [
+                "id"   => $store['id'],
+                "name" => $store['name'],
             ];
         }
 
@@ -122,4 +124,70 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
         return true;
     }
+
+    /**
+     * Накладная - Детальная информация
+     *
+     * @param $key
+     * @throws \Exception
+     * @return array
+     */
+    public static function prepareDetail($key)
+    {
+        $model = self::findOne(['id' => $key]);
+        if ($model === null) {
+            return [];
+        }
+
+        $return = [
+            "id"          => $model->id,
+            "code"        => $model->id,
+            "status_id"   => $model->status_id,
+            "status_text" => \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model->status_id]),
+        ];
+
+        $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_agent_id);
+        if (empty($agent)) {
+            $return ["agent"] = null;
+        } else {
+            $return ["agent"] = [
+                "id"   => $agent['id'],
+                "name" => $agent['name'],
+            ];
+        }
+
+        $return["vendor"] = null;
+        if (isset($agent['vendor_id'])) {
+            $return["vendor"] = [
+                "id"   => $agent['vendor_id'],
+                "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
+            ];
+        } else {
+            if (isset($model->order)) {
+                $return["vendor"] = [
+                    "id"   => $model->order->vendor_id,
+                    "name" => $model->order->vendor->name,
+                ];
+            }
+        }
+
+        $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_id);
+        if (empty($store)) {
+            $return ["store"] = null;
+        } else {
+            $return ["store"] = [
+                "id"   => $store['id'],
+                "name" => $store['name'],
+            ];
+        }
+
+        $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($model->doc_date));
+        $return["outer_number_additional"] = $model->outer_number_additional;
+        $return["outer_number_code"] = $model->outer_number_code;
+        $return["payment_delay_date"] = date("Y-m-d H:i:s T", strtotime($model->payment_delay_date));
+        $return["outer_note"] = $model->outer_note;
+
+        return $return;
+    }
+
 }

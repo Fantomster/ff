@@ -449,7 +449,8 @@ class DocumentWebApi extends \api_web\components\WebApi
     {
         $this->validateRequest($post, ['waybill_id']);
 
-        return Waybill::prepareModel($post['waybill_id']);
+        return Waybill::prepareDetail($post['waybill_id']);
+
     }
 
     /**

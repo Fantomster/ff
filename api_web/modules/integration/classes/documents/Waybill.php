@@ -138,12 +138,12 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "id"          => $model->id,
             "code"        => $model->id,
             "status_id"   => $model->status_id,
-            "status_text" => "",
+            "status_text" => \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model->status_id]),
         ];
-        //todo_refactoring wtf
+
         $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_agent_id);
         if (empty($agent)) {
-            $return ["agent"] = [];
+            $return ["agent"] = null;
         } else {
             $return ["agent"] = [
                 "id"   => $agent['id'],
@@ -151,25 +151,21 @@ class Waybill extends BaseWaybill implements DocumentInterface
             ];
         }
 
-        $return ["agent"] = [];
-        if (empty($agent)) {
-            $order = $model->order;
-            if (isset($order)) {
-                $return ["agent"] = [
-                    "id"   => $order->vendor_id,
-                    "name" => $order->vendor->name,
-                ];
-            }
-        } elseif (isset($agent['vendor_id'])) {
+        if (isset($agent['vendor_id'])) {
             $return["vendor"] = [
                 "id"   => $agent['vendor_id'],
                 "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
             ];
+        } else {
+            $return["vendor"] = [
+                "id"   => $model->order->vendor_id,
+                "name" => $model->order->vendor->name,
+            ];
         }
-        //todo_refactoring wtf
+
         $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_id);
-        if (empty($agent)) {
-            $return ["store"] = [];
+        if (empty($store)) {
+            $return ["store"] = null;
         } else {
             $return ["store"] = [
                 "id"   => $store['id'],

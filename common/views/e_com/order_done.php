@@ -22,6 +22,7 @@
             $i = 1;
             foreach ($orderContent as $position): ?>
                 <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
+                $catalogGood = \common\models\CatalogGoods::findOne(['base_goods_id' => $product->id]);
                 $barcode = $product->barcode;
                 $edi_supplier_article = (isset($product->edi_supplier_article) && $product->edi_supplier_article != '') ? $product->edi_supplier_article : $position['id'];
                 $article = (isset($product->article) && $product->article != '') ? $product->article : $position['id'];
@@ -41,7 +42,7 @@
                     <EGAISQUANTITY><?= $position['quantity'] ?></EGAISQUANTITY>
                     <PRICE><?= $position['price'] ?></PRICE>
                     <PRICEWITHVAT><?= $position['price'] ?></PRICEWITHVAT>
-                    <TAXRATE>0</TAXRATE>
+                    <TAXRATE><?= isset($catalogGood->vat) ? $catalogGood->vat : 0 ?></TAXRATE>
                 </POSITION>
             <?php endforeach; ?>
         </PACKINGSEQUENCE>

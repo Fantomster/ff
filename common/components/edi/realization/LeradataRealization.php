@@ -29,7 +29,6 @@ use frontend\controllers\OrderController;
 use yii\db\Expression;
 use Yii;
 
-
 /**
  * Class Realization
  *
@@ -42,6 +41,7 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
      */
     public $xml;
     private $edi;
+    public $fileName;
 
     public function __construct()
     {
@@ -68,16 +68,13 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
         return $this->edi->insertGood($catID, $catalogBaseGoodID, $price);
     }
 
-    public function handleOrderResponse($simpleXMLElement, $documentType, $isAlcohol = false)
+    public function handleOrderResponse($simpleXMLElement, $documentType, $isAlcohol = false, $key)
     {
         $simpleXMLElement = json_decode(json_encode($simpleXMLElement, JSON_UNESCAPED_UNICODE));
-
         $orderID = $simpleXMLElement->NUMBER;
         $head = $simpleXMLElement->HEAD[0];
-        dd($head);
-        $supplier = $head->SUPPLIER;
+        $supplier = $head->BUYER;
         $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
-
         if (!$ediOrganization) {
             return false;
         }
@@ -90,10 +87,12 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
         \Yii::$app->language = $order->edi_order->lang ?? 'ru';
         $user = User::findOne(['id' => $order->created_by_id]);
 
-        $positions = $head->POSITION;
+        $positions = $head->POSITION ?? null;
         $isDesadv = false;
+
         if (!count($positions)) {
-            $positions = $head->PACKINGSEQUENCE->POSITION;
+            $seq = $head->PACKINGSEQUENCE[0];
+            $positions = $seq->POSITION;
             $isDesadv = true;
         }
         $positionsArray = [];
@@ -101,6 +100,7 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
         $barcodeArray = [];
         $totalQuantity = 0;
         $totalPrice = 0;
+
         foreach ($positions as $position) {
             $contID = (int)$position->PRODUCTIDBUYER;
             if (!$contID) {
@@ -112,19 +112,20 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
             } else {
                 $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
             }
-            $arr[$contID]['PRICE'] = (float)$position->PRICE[0] ?? (float)$position->PRICEWITHVAT;
+            $arr[$contID]['PRICE'] = (float)$position->PRICE ?? 0;
             $arr[$contID]['PRICEWITHVAT'] = (float)$position->PRICEWITHVAT ?? 0.00;
-            $arr[$contID]['TAXRATE'] = (float)$position->TAXRATE ?? 0.00;
+            $arr[$contID]['TAXRATE'] = (isset($position->VAT)) ? (float)$position->VAT : 0.00;
             $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
-            $arr[$contID]['WAYBILLNUMBER'] = $position->WAYBILLNUMBER ?? null;
-            $arr[$contID]['WAYBILLDATE'] = $position->WAYBILLDATE ?? null;
-            $arr[$contID]['DELIVERYNOTENUMBER'] = $position->DELIVERYNOTENUMBER ?? null;
-            $arr[$contID]['DELIVERYNOTEDATE'] = $position->DELIVERYNOTEDATE ?? null;
-            $arr[$contID]['GTIN'] = $position->GTIN ?? null;
-            $arr[$contID]['UUID'] = $position->UUID ?? null;
+            $arr[$contID]['WAYBILLNUMBER'] = isset($position->WAYBILLNUMBER) ? $position->WAYBILLNUMBER : null;
+            $arr[$contID]['WAYBILLDATE'] = isset($position->WAYBILLDATE) ? $position->WAYBILLDATE : null;
+            $arr[$contID]['DELIVERYNOTENUMBER'] = isset($position->DELIVERYNOTENUMBER) ? $position->DELIVERYNOTENUMBER : null;
+            $arr[$contID]['DELIVERYNOTEDATE'] = isset($position->DELIVERYNOTEDATE) ? $position->DELIVERYNOTEDATE : null;
+            $arr[$contID]['GTIN'] = isset($position->GTIN) ? $position->GTIN : null;
+            $arr[$contID]['UUID'] = isset($position->UUID) ? $position->UUID : null;
             $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
             $totalPrice += $arr[$contID]['PRICE'];
         }
+
         if ($totalQuantity == 0.00 || $totalPrice == 0.00) {
             OrderController::sendOrderCanceled($order->client, $order);
             $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
@@ -133,7 +134,6 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
             $order->save();
             return true;
         }
-
         $summ = 0;
         $ordContArr = [];
         foreach ($order->orderContent as $orderContent) {
@@ -186,6 +186,7 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
 
                 $docType = ($isAlcohol) ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
                 $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $orderContent->id]);
+
                 if ($ediOrderContent) {
                     $ediOrderContent->doc_type = $docType;
                     $ediOrderContent->pricewithvat = $arr[$index]['PRICEWITHVAT'] ?? 0.00;
@@ -202,14 +203,15 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
                 $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
                 $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
                 if ($documentType == 2) {
-                    $orderContent->edi_desadv = $this->fileName;
+                    $orderContent->edi_desadv = $key;
                 }
                 if ($documentType == 3) {
-                    $orderContent->edi_alcdes = $this->fileName;
+                    $orderContent->edi_alcdes = $key;
                 }
                 $orderContent->save();
             }
         }
+
         if (!$isDesadv) {
             foreach ($positions as $position) {
                 if ($position->ACCEPTEDQUANTITY == 0.00 || $position->PRICE == 0.00) continue;
@@ -246,22 +248,22 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
         }
         Yii::$app->db->createCommand()->update('order', ['status' => OrderStatus::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
         $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
+
         if ($ediOrder) {
             $ediOrder->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
             $ediOrder->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE ?? '';
             $ediOrder->save();
         }
         $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
-        $order->edi_ordersp = $this->ediDocumentType;
+        $order->edi_ordersp = $key;
         $order->service_id = 6;
-        $order->edi_ordersp = $this->fileName;
         $order->save();
-
         if ($message != '') {
             OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
         }
 
-        $action = ($isDesadv) ? " " . Yii::t('app','отправил заказ!') : Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
+        $action = ($isDesadv) ? " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
+
         $systemMessage = $order->vendor->name . '' . $action;
         OrderController::sendSystemMessage($user, $order->id, $systemMessage);
 
@@ -282,11 +284,12 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
         return $this->edi->getFileList();
     }
 
-    public function array_to_object($array) {
+    public function array_to_object($array)
+    {
         $obj = new \stdClass();
-        foreach($array as $k => $v) {
-            if(strlen($k)) {
-                if(is_array($v)) {
+        foreach ($array as $k => $v) {
+            if (strlen($k)) {
+                if (is_array($v)) {
                     $obj->{$k} = array_to_object($v); //RECURSION
                 } else {
                     $obj->{$k} = $v;

@@ -39,7 +39,6 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     private $varGln;
     private $intUserID;
 
-
     /**
      * Provider constructor.
      */
@@ -75,8 +74,8 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
      */
     public function getFilesListForInsertingInQueue()
     {
-        //$this->getOneTypeFilesList('pricat');
-        //$this->getOneTypeFilesList('desadv');
+        $this->getOneTypeFilesList('pricat');
+        $this->getOneTypeFilesList('desadv');
         $this->getOneTypeFilesList('ordrsp');
         return true;
     }
@@ -89,16 +88,17 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         ];
 
         $obj = $this->executeCurl($paramsArray, 'edi_getDocument');
-        if(isset($obj['response'])){
+        if (isset($obj['response'])) {
             $list = $obj['response'];
-            if(!empty($list)){
+            if (!empty($list)) {
                 foreach ($list as $key => $xml) {
-                    if($type=='pricat'){
+                    if ($type == 'pricat') {
+                        $xml = json_decode(json_encode($xml, JSON_UNESCAPED_UNICODE));
                         $res = $this->realization->handlePriceListUpdating($key, $xml);
-                    }else{
-                        $res = $this->realization->handleOrderResponse($xml, $type);
+                    } else {
+                        $res = $this->realization->handleOrderResponse($xml, $type, false, $key);
                     }
-                    if(!$res){
+                    if (!$res) {
                         $jsonData = json_encode($xml);
                         $this->updateQueue($key, parent::STATUS_ERROR, 'Error handling Leradata file', $jsonData);
                     }
@@ -107,7 +107,6 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         }
         return [];
     }
-
 
     public function sendOrderInfo($order, $orgId, $done = false): bool
     {
@@ -126,7 +125,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             $dateArray = $this->ediProvider->getDateData($order);
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
             $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
-            if(!$ediOrganization){
+            if (!$ediOrganization) {
                 throw new BadRequestHttpException();
                 $transaction->rollback();
             }
@@ -142,31 +141,23 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         return $result;
     }
 
-    /**
-     * @param \common\models\Organization $vendor
-     * @param String                      $string
-     * @param String                      $remoteFile
-     * @param String                      $login
-     * @param String                      $pass
-     * @return bool
-     */
     public function sendDoc(String $string, $done = false): bool
     {
         $action = 'edi_sendDocuments';
         $object = new \SimpleXMLElement($string);
         $dataArray = json_decode(json_encode($object, JSON_UNESCAPED_UNICODE), true, 512, JSON_UNESCAPED_UNICODE);
 
-        if($done){
-            if(isset($dataArray['HEAD']['PACKINGSEQUENCE']['POSITION']['POSITIONNUMBER'])){
+        if ($done) {
+            if (isset($dataArray['HEAD']['PACKINGSEQUENCE']['POSITION']['POSITIONNUMBER'])) {
                 $dataArray['HEAD']['PACKINGSEQUENCE']['POSITION'] = [$dataArray['HEAD']['PACKINGSEQUENCE']['POSITION']];
             }
             $dataArray['HEAD']['PACKINGSEQUENCE'] = [$dataArray['HEAD']['PACKINGSEQUENCE']];
-        }else{
-            if(isset($dataArray['HEAD']['POSITION']['CHARACTERISTIC'])){
+        } else {
+            if (isset($dataArray['HEAD']['POSITION']['CHARACTERISTIC'])) {
                 $dataArray['HEAD']['POSITION']['CHARACTERISTIC'] = [$dataArray['HEAD']['POSITION']['CHARACTERISTIC']];
                 $dataArray['HEAD']['POSITION'] = [$dataArray['HEAD']['POSITION']];
-            }else{
-                foreach ($dataArray['HEAD']['POSITION'] as $key => $value){
+            } else {
+                foreach ($dataArray['HEAD']['POSITION'] as $key => $value) {
                     $dataArray['HEAD']['POSITION'][$key]['CHARACTERISTIC'] = [$value['CHARACTERISTIC']];
                 }
             }
@@ -176,7 +167,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         $documentType = ($done) ? 'recadv' : 'order';
         $paramsArray = [[
             "docType" => $documentType,
-            "doc" =>  $dataArray
+            "doc"     => $dataArray
         ]];
         $array = $this->executeCurl($paramsArray, $action);
         if ($array['response']) {
@@ -201,13 +192,10 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
-        $result = '{"response":{"18904185":{"HEAD":[{"SUPPLIER":"9879870002268","BUYER":"9879870002282","DELIVERYPLACE":"9879870002282","FINALRECIPIENT":"","INVOICEPARTNER":"","CONSEGNOR":"","SENDER":"9879870002268","RECIPIENT":"9879870002282","POSITION":{"1":{"POSITIONNUMBER":1,"PRODUCT":"111","PRODUCTIDSUPPLIER":"444","PRODUCTIDBUYER":"","PRODUCTTYPE":1,"ORDEREDQUANTITY":"5","BOXQUANTITY":"","PALLETQUANTITY":"","ORDRSPUNIT":"LTR","SHORTSUPPLYREASON":"","ACCEPTEDQUANTITY":"5","PRICE":"7.0000","PRICEWITHVAT":"7.0000000","VAT":0,"INFO":"","COUNTRYORIGIN":"","CALIBRE":"","MARK":"","DELIVERYDATE":"","PACKING":[],"DESCRIPTION":"кинза"}}}],"NUMBER":"14005","TIME":"","ORDERNUMBER":"14005","ORDERDATE":"","SHIPMENTDATE":"","DELIVERYTIME":"","CURRENCY":"","VAT":"","ACTION":"29","TOTALPACKAGES":"","TOTALPACKAGESSPACE":"","TRANSPORTQUANTITY":"","TOTALPACKAGESWEIGHT":"","TEMPMODE":"","SHORTSUPPLYREASON":"","INFO":"","LIMES":[],"DELIVERYDATE":"","DATE":"2018-10-25","senderUserID":null}}}';
         curl_close($ch);
         $array = json_decode($result, true, 512, JSON_UNESCAPED_UNICODE);
         return (array)$array;
     }
-
-
 
     public function parseFile($content)
     {
@@ -218,7 +206,6 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             $this->updateQueue($this->ediFilesQueueID, parent::STATUS_ERROR, 'Error handling file 1');
         }
     }
-
 
     /**
      * @return array

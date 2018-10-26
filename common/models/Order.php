@@ -4,9 +4,7 @@ namespace common\models;
 
 use api_web\components\Registry;
 use common\components\edi\EDIIntegration;
-use common\components\EComIntegration;
 use common\helpers\DBNameHelper;
-use common\helpers\ModelHelper;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
 use yii\behaviors\AttributesBehavior;
@@ -57,7 +55,7 @@ use yii\web\BadRequestHttpException;
  * @property OrderAttachment[] $attachments
  * @property OrderAssignment   $assignment
  * @property EmailQueue[]      $relatedEmails
- * @property integer            $replaced_order_id
+ * @property integer           $replaced_order_id
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -78,21 +76,6 @@ class Order extends \yii\db\ActiveRecord
     const DISCOUNT_PERCENT = 2;
     const DELAY_WITH_DELIVERY_DATE = 86400; //sec - 1 day
     const DELAY_WITHOUT_DELIVERY_DATE = 86400; //sec - 1 day
-
-    /**
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        if (in_array($name, ['total_price'])) {
-            $getter = 'get' . ModelHelper::snake2Camel($name);
-            if (method_exists($this, $getter)) {
-                return $this->$getter();
-            }
-        }
-        return parent::__get($name);
-    }
 
     /**
      * @inheritdoc
@@ -693,7 +676,7 @@ class Order extends \yii\db\ActiveRecord
             $client = Organization::findOne(['id' => $this->client_id]);
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
             if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
-                $this->service_id = 6;
+                $this->service_id = Registry::EDI_SERVICE_ID;
                 $ediIntegration = new EDIIntegration(['orgId' => $vendor->id]);
                 if ($this->status == OrderStatus::STATUS_DONE) {
                     $result = $ediIntegration->sendOrderInfo($this, true);

@@ -12,6 +12,7 @@ use api_web\modules\integration\interfaces\DocumentInterface;
 use api_web\modules\integration\modules\iiko\models\iikoService;
 use common\models\Organization;
 use common\models\OuterAgent;
+use common\models\OuterStore;
 use common\models\Waybill as BaseWaybill;
 
 /**
@@ -64,14 +65,13 @@ class Waybill extends BaseWaybill implements DocumentInterface
             ];
         }
 
-        //todo_refactoring wtf
-        $store = (new Dictionary($this->service_id, 'Store'))->storeInfo($this->outer_store_id);
-        if (empty($agent)) {
-            $return ["store"] = [];
+        $store = OuterStore::findOne($this->outer_agent_id);
+        if (empty($store)) {
+            $return ["store"] = null;
         } else {
             $return ["store"] = [
-                "id"   => $store['id'],
-                "name" => $store['name'],
+                "id"   => $store->id,
+                "name" => $store->name,
             ];
         }
 
@@ -146,13 +146,24 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "status_text" => \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model->status_id]),
         ];
 
-        $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_agent_id);
+        try {
+            $agent = OuterAgent::findOne($model->outer_agent_id);
+        } catch (\Throwable $t) {
+            // Все нормально, пока что не зарефакторили waybill, потом убрать try{}catch(){} todo_refactoring
+            $agent = null;
+        }
+
         if (empty($agent)) {
-            $return ["agent"] = null;
-        } else {
-            $return ["agent"] = [
-                "id"   => $agent['id'],
-                "name" => $agent['name'],
+            if (!empty($model->order)) {
+                $return ["agent"] = [
+                    "id"   => $model->order->vendor_id,
+                    "name" => $model->order->vendor->name,
+                ];
+            }
+        } elseif (isset($agent['vendor_id'])) {
+            $return["vendor"] = [
+                "id"   => $agent->vendor_id,
+                "name" => Organization::findOne(['id' => $agent->vendor_id])->name,
             ];
         }
 
@@ -171,13 +182,13 @@ class Waybill extends BaseWaybill implements DocumentInterface
             }
         }
 
-        $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_id);
+        $store = OuterStore::findOne($model->outer_agent_id);
         if (empty($store)) {
             $return ["store"] = null;
         } else {
             $return ["store"] = [
-                "id"   => $store['id'],
-                "name" => $store['name'],
+                "id"   => $store->id,
+                "name" => $store->name,
             ];
         }
 

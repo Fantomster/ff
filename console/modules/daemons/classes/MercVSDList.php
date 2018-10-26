@@ -39,6 +39,7 @@ class MercVSDList extends MercDictConsumer
 
         if ($check == 9) {
             $this->data = json_decode($this->data, true);
+            $this->data['enterpriseGuid'] = 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b';
             $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList', 'organization_id' => $this->org_id, 'store_id' => $this->data['enterpriseGuid']])->one();
             $this->data = isset($this->queue->data_request) ? json_decode($this->queue->data_request, true) : $this->data;
             if (!isset($this->data)) {
@@ -55,7 +56,7 @@ class MercVSDList extends MercDictConsumer
     {
         $className = BaseStringHelper::basename(static::class);
         $this->init();
-        $this->log('Load' . PHP_EOL);
+        $this->log('Load for Organization '.$this->data['enterpriseGuid'] . PHP_EOL);
         $load_data_succ = false;
         $count_error = 0;
         $list = null;
@@ -93,7 +94,7 @@ class MercVSDList extends MercDictConsumer
                     $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
 
                     $count = $curr_offset + $vetDocumentList->count;
-                    $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
+                    $this->log('Load for Organization '.$this->data['enterpriseGuid'] . ' ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
                     echo 'Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL;
 
                     if ($vetDocumentList->count > 0) {
@@ -176,6 +177,9 @@ class MercVSDList extends MercDictConsumer
         MercVisits::updateLastVisit($this->org_id, MercVisits::LOAD_VSD_LIST, $this->data['enterpriseGuid']);
 
         mercLogger::getInstance()->addMercLogDict('COMPLETE', BaseStringHelper::basename(static::class), null);
+
+        $this->queue->data_request = new Expression('NULL');
+        $this->queue->save();
 
         $this->addFCMMessage('MercVSDList', $this->data['enterpriseGuid']);
     }

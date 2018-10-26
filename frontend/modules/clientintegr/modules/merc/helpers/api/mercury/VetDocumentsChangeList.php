@@ -74,7 +74,7 @@ class VetDocumentsChangeList extends Model
                 'sub_product_guid' => isset($item->certifiedConsignment->batch->subProduct->guid) ? $item->certifiedConsignment->batch->subProduct->guid : null,
                 'product_item_guid' => isset($item->certifiedConsignment->batch->productItem->guid) ? $item->certifiedConsignment->batch->productItem->guid : null,
                 'origin_country_guid' => isset($item->certifiedConsignment->batch->origin->country->guid) ? $item->certifiedConsignment->batch->origin->country->guid : null,
-                'confirmed_by' => isset($item->statusChange->specifiedPerson) ? json_encode(!is_array($item->authentication->laboratoryResearch) ? [$item->authentication->laboratoryResearch] : $item->authentication->laboratoryResearch) : null,
+                'confirmed_by' => isset($item->statusChange->specifiedPerson) ? json_encode(!is_array($item->statusChange->specifiedPerson) ? [$item->statusChange->specifiedPerson] : $item->statusChange->specifiedPerson) : null,
                 'other_info' => json_encode([
                     'locationProsperity' => isset($item->authentication->locationProsperity) ? $item->authentication->locationProsperity : null,
                     'cargoExpertized' => isset($item->authentication->cargoExpertized) ? $item->authentication->cargoExpertized : null,

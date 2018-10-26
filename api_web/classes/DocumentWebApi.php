@@ -189,7 +189,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      */
-    private function getDocumentWaybill($document_id, $service_id, $has_order_content = false)
+    private function getDocumentWaybill($document_id, $service_id, $hasOrderContent = false)
     {
         $result = [
             'documents' => [],
@@ -201,9 +201,9 @@ class DocumentWebApi extends \api_web\components\WebApi
                 ->select('id')
                 ->from(\common\models\WaybillContent::tableName())
                 ->where('waybill_id = :doc_id', [':doc_id' => (int)$document_id]);
-            if ($has_order_content === true) {
+            if ($hasOrderContent === true) {
                 $query->andWhere(['not', ['order_content_id' => null]]);
-            } elseif ($has_order_content === false){
+            } elseif ($hasOrderContent === false){
                 $query->andWhere(['order_content_id' => null]);
             }
             $positions = $query->all(\Yii::$app->db_api);

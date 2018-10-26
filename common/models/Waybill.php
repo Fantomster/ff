@@ -28,7 +28,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string           $exported_at
  * @property int              $payment_delay
  * @property string           $payment_delay_date
- * @property string           $edi_number
+ * @property Order            $order
  * @property string           $edi_recadv
  * @property string           $edi_invoice
  * @property WaybillContent[] $waybillContents
@@ -140,4 +140,15 @@ class Waybill extends \yii\db\ActiveRecord
         return round(WaybillContent::find()->where(['waybill_id' => $this->id])->sum('sum_with_vat'), 2);
     }
 
+    /**
+     * @return Order|null
+     */
+    public function getOrder()
+    {
+        $wcModel = WaybillContent::find()->where('waybill_id = :wid AND order_content_id is not null', [':wid' => $this->id])->one();
+        if(!empty($wcModel)) {
+            return $wcModel->orderContent->order;
+        }
+        return null;
+    }
 }

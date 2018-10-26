@@ -136,15 +136,21 @@ class VetisHelper
         $laboratory_research = json_decode($this->vsdModel->laboratory_research, true);
         $this->expertiseInfo = 'Экспертиза не проводилась';
         try {
-            $arTmp = [];
-            foreach ($laboratory_research as $item) {
-                $arTmp[] =
-                    $item['indicator']['name'] . ' : ' . $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($item['actualDateTime'])) . " ( " . $item['conclusion'] . " )";
+            if (array_key_exists('batchID', $laboratory_research)){
+                $this->expertiseInfo = mb_convert_encoding(
+                    $laboratory_research['indicator']['name'] . ' : ' . $laboratory_research['operator']['name'] . " эксп №" . $laboratory_research['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($laboratory_research['actualDateTime'])) . " ( " . $laboratory_research['conclusion'] . " )",  "UTF-8", "UTF-8");
+            } else {
+                $arTmp = [];
+                foreach ($laboratory_research as $item) {
+                    $arTmp[] = mb_convert_encoding(
+                        $item['indicator']['name'] . ' : ' . $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($item['actualDateTime'])) . " ( " . $item['conclusion'] . " )", "UTF-8", "UTF-8");
+                }
+                $this->expertiseInfo = $arTmp;
             }
-            $this->expertiseInfo = $arTmp;
         } catch (\Throwable $t) {
             // too many errors in VSD
         }
+
         $transportInfo = json_decode($this->vsdModel->transport_info, true);
 
         $this->transport_type = isset($transportInfo['transportType']) ? MercVsd::$transport_types[$transportInfo['transportType']] : null;

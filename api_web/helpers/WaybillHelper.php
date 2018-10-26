@@ -189,7 +189,7 @@ class WaybillHelper
         $model->status_id = Registry::WAYBILL_COMPARED;
 
         //для каждого может быть разный
-        $model->edi_number = $this->generateEdiNumber($arOuterMappedProducts, $serviceId);
+        $model->outer_number_code = $this->generateEdiNumber($arOuterMappedProducts, $serviceId);
 
         $transaction = \Yii::$app->db_api->beginTransaction();
 
@@ -390,11 +390,6 @@ class WaybillHelper
         $existWaybill = OrderContent::find()->where(['like', 'edi_number', $tmp_ed_num])
             ->andWhere(['order_id' => $orderContent->order_id])
             ->orderBy(['edi_number' => SORT_DESC])->limit(1)->one();
-        if (!$existWaybill) {
-            $existWaybill = Waybill::find()->where(['like', 'edi_number', $tmp_ed_num])
-                ->andWhere(['service_id' => $serviceId])
-                ->orderBy(['edi_number' => SORT_DESC])->limit(1)->one();
-        }
         $ed_num = $tmp_ed_num . '-1';
 
         if ($existWaybill) {

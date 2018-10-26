@@ -55,7 +55,7 @@ class MercVSDList extends MercDictConsumer
     {
         $className = BaseStringHelper::basename(static::class);
         $this->init();
-        $this->log('Load' . PHP_EOL);
+        $this->log('Load for Organization '.$this->data['enterpriseGuid'] . PHP_EOL);
         $load_data_succ = false;
         $count_error = 0;
         $list = null;
@@ -93,7 +93,7 @@ class MercVSDList extends MercDictConsumer
                     $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
 
                     $count = $curr_offset + $vetDocumentList->count;
-                    $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
+                    $this->log('Load for Organization '.$this->data['enterpriseGuid'] . ' ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
                     echo 'Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL;
 
                     if ($vetDocumentList->count > 0) {

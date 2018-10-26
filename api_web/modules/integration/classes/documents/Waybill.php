@@ -5,6 +5,7 @@ namespace api_web\modules\integration\classes\documents;
 use api\common\models\AllMaps;
 use api_web\classes\DocumentWebApi;
 use api_web\components\Registry;
+use api_web\exceptions\ValidationException;
 use api_web\helpers\CurrencyHelper;
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\interfaces\DocumentInterface;
@@ -100,19 +101,21 @@ class Waybill extends BaseWaybill implements DocumentInterface
     /**
      * Сброс привязки позиций накладной к заказу
      *
-     * @throws \Exception
-     * @return mixed
+     * @return bool
+     * @throws \Throwable
      */
     public function resetPositions()
     {
-        if (isset($this->order_id)) {
-            $transaction = \Yii::$app->db->beginTransaction();
+        if (isset($this->order)) {
+            $transaction = \Yii::$app->db_api->beginTransaction();
             try {
                 WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = ' . $this->id);
-                $this->order_id = null;
-                $this->save();
+                $this->status_id = Registry::WAYBILL_RESET;
+                if (!$this->save()) {
+                    throw new ValidationException($this->getFirstErrors());
+                }
                 $transaction->commit();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $transaction->rollBack();
                 throw $e;
             }
@@ -151,16 +154,19 @@ class Waybill extends BaseWaybill implements DocumentInterface
             ];
         }
 
+        $return["vendor"] = null;
         if (isset($agent['vendor_id'])) {
             $return["vendor"] = [
                 "id"   => $agent['vendor_id'],
                 "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
             ];
         } else {
-            $return["vendor"] = [
-                "id"   => $model->order->vendor_id,
-                "name" => $model->order->vendor->name,
-            ];
+            if (isset($model->order)) {
+                $return["vendor"] = [
+                    "id"   => $model->order->vendor_id,
+                    "name" => $model->order->vendor->name,
+                ];
+            }
         }
 
         $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_id);

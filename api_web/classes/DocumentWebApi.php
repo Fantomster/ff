@@ -115,7 +115,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
             throw new BadRequestHttpException('document.not_support_type');
         }
-        if (isset($post['has_order_content']) && is_bool($post['has_order_content'])){
+        if (isset($post['has_order_content']) && is_bool($post['has_order_content'])) {
             $hasOrderContent = $post['has_order_content'];
         }
 
@@ -203,7 +203,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 ->where('waybill_id = :doc_id', [':doc_id' => (int)$document_id]);
             if ($hasOrderContent === true) {
                 $query->andWhere(['not', ['order_content_id' => null]]);
-            } elseif ($hasOrderContent === false){
+            } elseif ($hasOrderContent === false) {
                 $query->andWhere(['order_content_id' => null]);
             }
             $positions = $query->all(\Yii::$app->db_api);
@@ -414,6 +414,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     public function waybillResetPositions(array $post)
     {
@@ -425,12 +426,16 @@ class DocumentWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("waybill_not_found");
         }
 
-        if ($waybill->status_id == 3) {
+        if (in_array($waybill->status_id, [Registry::WAYBILL_UNLOADED, Registry::WAYBILL_UNLOADING])) {
             throw new BadRequestHttpException("document.waybill_in_the_state_of_reset_or_unloaded");
         }
 
-        $waybill->resetPositions();
-        return ['result' => true];
+        try {
+            $waybill->resetPositions();
+            return Waybill::prepareDetail($waybill->id);
+        } catch (\Throwable $e) {
+            throw $e;
+        }
     }
 
     /**

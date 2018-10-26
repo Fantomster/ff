@@ -34,9 +34,6 @@ class cerberApi extends baseApi
      */
     public function getEnterpriseByUuid($UUID)
     {
-        VetisForeignEnterprise::getUpdateData($this->org_id);
-        VetisRussianEnterprise::getUpdateData($this->org_id);
-
         if ($UUID == null) {
             return null;
         }
@@ -51,6 +48,8 @@ class cerberApi extends baseApi
             return unserialize($enterprise->data);
         }
 
+        VetisForeignEnterprise::getUpdateData($this->org_id);
+        VetisRussianEnterprise::getUpdateData($this->org_id);
         return null;
     }
 
@@ -61,14 +60,13 @@ class cerberApi extends baseApi
      */
     public function getBusinessEntityByUuid($UUID)
     {
-        VetisBusinessEntity::getUpdateData($this->org_id);
-
         $business = VetisBusinessEntity::findOne(['uuid' => $UUID, 'active' => true, 'last' => true]);
 
         if (!empty($business)) {
             return unserialize($business->data);
         }
 
+        VetisBusinessEntity::getUpdateData($this->org_id);
         return null;
     }
 
@@ -79,9 +77,6 @@ class cerberApi extends baseApi
      */
     public function getEnterpriseByGuid($GUID)
     {
-        VetisForeignEnterprise::getUpdateData($this->org_id);
-        VetisRussianEnterprise::getUpdateData($this->org_id);
-
         if ($GUID == null) {
             return null;
         }
@@ -95,7 +90,10 @@ class cerberApi extends baseApi
         if (!empty($enterprise)) {
             return unserialize($enterprise->data);
         }
-            return null;
+
+        VetisForeignEnterprise::getUpdateData($this->org_id);
+        VetisRussianEnterprise::getUpdateData($this->org_id);
+        return null;
     }
 
     /**
@@ -105,14 +103,13 @@ class cerberApi extends baseApi
      */
     public function getBusinessEntityByGuid($GUID)
     {
-        VetisBusinessEntity::getUpdateData($this->org_id);
-
         $business = VetisBusinessEntity::findOne(['guid' => $GUID, 'active' => true, 'last' => true]);
 
         if (!empty($business)) {
             return unserialize($business->data);
         }
 
+        VetisBusinessEntity::getUpdateData($this->org_id);
         return null;
     }
 
@@ -124,8 +121,6 @@ class cerberApi extends baseApi
      */
     public function getForeignEnterpriseList($name, $country_guid)
     {
-        VetisForeignEnterprise::getUpdateData($this->org_id);
-
         $result = VetisForeignEnterprise::find()->where(['active' => true, 'last' => true, 'country_guid' => $country_guid])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")->all();
 
         if (!empty($result)) {
@@ -137,6 +132,7 @@ class cerberApi extends baseApi
                 return $list;
             }
 
+        VetisForeignEnterprise::getUpdateData($this->org_id);
         return [];
     }
 
@@ -148,8 +144,6 @@ class cerberApi extends baseApi
      */
     public function getRussianEnterpriseList($name)
     {
-        VetisRussianEnterprise::getUpdateData($this->org_id);
-
         $result = VetisRussianEnterprise::find()->where(['active' => true, 'last' => true])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")->all();
 
         if (!empty($result)) {
@@ -161,6 +155,7 @@ class cerberApi extends baseApi
             return $list;
         }
 
+        VetisRussianEnterprise::getUpdateData($this->org_id);
         return [];
     }
 

@@ -25,14 +25,13 @@ class dictsApi extends baseApi
      */
     public function getPurposeByGuid($GUID)
     {
-        VetisPurpose::getUpdateData($this->org_id);
-
         $purpose = VetisPurpose::findOne(['guid' => $GUID]);
 
         if (!empty($purpose)) {
             return unserialize($purpose->data);
         }
 
+        VetisPurpose::getUpdateData($this->org_id);
         return null;
     }
     /**
@@ -42,14 +41,13 @@ class dictsApi extends baseApi
      */
     public function getUnitByGuid($GUID)
     {
-        VetisUnit::getUpdateData($this->org_id);
-
         $unit = VetisUnit::findOne(['guid' => $GUID]);
 
         if (!empty($unit)) {
             return unserialize($unit->data);
         }
 
+        VetisUnit::getUpdateData($this->org_id);
         return null;
     }
 
@@ -59,8 +57,6 @@ class dictsApi extends baseApi
      */
     public function getUnitList()
     {
-        VetisUnit::getUpdateData($this->org_id);
-
         $units = VetisUnit::findAll(['active' => 1, 'last' => 1]);
 
         if (!empty($units)) {
@@ -72,6 +68,7 @@ class dictsApi extends baseApi
             return $list;
         }
 
+        VetisUnit::getUpdateData($this->org_id);
         return [];
     }
 
@@ -81,8 +78,6 @@ class dictsApi extends baseApi
      */
     public function getPurposeList()
     {
-        VetisPurpose::getUpdateData($this->org_id);
-
         $purposes = VetisPurpose::findAll(['active' => 1, 'last' => 1]);
 
         if (!empty($purposes)) {
@@ -94,6 +89,7 @@ class dictsApi extends baseApi
             return $list;
         }
 
+        VetisPurpose::getUpdateData($this->org_id);
         return [];
     }
 

@@ -18,13 +18,13 @@ class ikarApi extends baseApi
     //Получние страны по GUID
     public function getCountryByGuid($GUID)
     {
-       VetisCountry::getUpdateData($this->org_id);
        $country = VetisCountry::findOne(['guid' => $GUID]);
         
         if (!empty($country)) {
             return unserialize($country->data);
         }
 
+        VetisCountry::getUpdateData($this->org_id);
         return null;
     }
 
@@ -34,7 +34,6 @@ class ikarApi extends baseApi
      */
     public function getAllCountryList()
     {
-        VetisCountry::getUpdateData($this->org_id);
         $countries = VetisCountry::findAll(['active' => 1, 'last' => 1]);
 
         if (!empty($countries)) {
@@ -47,6 +46,7 @@ class ikarApi extends baseApi
             return $list;
         }
 
+        VetisCountry::getUpdateData($this->org_id);
         return [];
     }
 

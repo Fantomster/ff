@@ -86,7 +86,9 @@ class VetisHelper
         }
         $this->vehicle_number = $this->vsdModel->vehicle_number;
         $other = json_decode($this->vsdModel->other_info, true);
-        $this->cargo_expertized = \Yii::t('api_web', self::$expertizeList[$other['cargoExpertized']]);
+        if (isset($other['cargoExpertized'])) {
+            $this->cargo_expertized = \Yii::t('api_web', self::$expertizeList[$other['cargoExpertized']]);
+        }
         $this->location_prosperity = $other['locationProsperity'];
         $this->special_marks = $other['specialMarks'];
         $this->issueNumber = (isset($this->vsdModel->number)) ? $this->vsdModel->number : null;

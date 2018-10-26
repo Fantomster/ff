@@ -16,11 +16,11 @@ class m181026_095958_update_values_table_integration_invoice extends Migration
             $this->update('{{%integration_invoice}}', ['date' => $date], ['id' =>$id]);
         }
         $query2 = new Query;
-        $query2->select('id','created_at')->from('db.integration_invoice')->where('date<:date',['date' => '2017-01-01 00:00:00']);
+        $query2->select(['id','created_at'])->from('integration_invoice')->where('date<:date',['date' => '2017-01-01 00:00:00']);
         $rows = $query2->all();
         foreach ($rows as $row) {
-            $id = $row->id;
-            $date = $row->created_at;
+            $id = $row['id'];
+            $date = $row['created_at'];
             $this->update('{{%integration_invoice}}', ['date' => $date], ['id' =>$id]);
         }
     }

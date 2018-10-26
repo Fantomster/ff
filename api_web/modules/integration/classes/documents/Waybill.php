@@ -12,6 +12,7 @@ use api_web\modules\integration\interfaces\DocumentInterface;
 use api_web\modules\integration\modules\iiko\models\iikoService;
 use common\models\Organization;
 use common\models\OuterAgent;
+use common\models\OuterStore;
 use common\models\Waybill as BaseWaybill;
 
 /**
@@ -64,15 +65,16 @@ class Waybill extends BaseWaybill implements DocumentInterface
             ];
         }
 
-        $store = (new Dictionary($this->service_id, 'Store'))->storeInfo($this->outer_store_id);
+        $store = OuterStore::findOne($this->outer_agent_id);
         if (empty($store)) {
             $return ["store"] = null;
         } else {
             $return ["store"] = [
-                "id"   => $store['id'],
-                "name" => $store['name'],
+                "id"   => $store->id,
+                "name" => $store->name,
             ];
         }
+
         $return["is_mercury_cert"] = $this->getIsMercuryCert();
         $return["count"] = (int)$this->getTotalCount();
         $return["total_price"] = CurrencyHelper::asDecimal($this->getTotalPrice());
@@ -169,13 +171,13 @@ class Waybill extends BaseWaybill implements DocumentInterface
             }
         }
 
-        $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_id);
+        $store = OuterStore::findOne($model->outer_agent_id);
         if (empty($store)) {
             $return ["store"] = null;
         } else {
             $return ["store"] = [
-                "id"   => $store['id'],
-                "name" => $store['name'],
+                "id"   => $store->id,
+                "name" => $store->name,
             ];
         }
 

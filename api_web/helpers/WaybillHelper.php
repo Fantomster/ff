@@ -129,6 +129,8 @@ class WaybillHelper
                                 $storeId, $serviceId);
                         }
                         return $waybillIds;
+                    } else {
+                        throw new BadRequestHttpException('You dont have mapped products');
                     }
                     //Agent default store
 //                    if ($supplierOrgId) {

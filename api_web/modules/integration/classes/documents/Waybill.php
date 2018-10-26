@@ -45,7 +45,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         ];
 
         try {
-            $agent = OuterAgent::findOne($this->outer_agent_id);
+            $agent = OuterAgent::findOne(['id' => $this->outer_agent_id]);
         } catch (\Throwable $t) {
             // Все нормально, пока что не зарефакторили waybill, потом убрать try{}catch(){} todo_refactoring
             $agent = null;
@@ -65,7 +65,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
             ];
         }
 
-        $store = OuterStore::findOne($this->outer_agent_id);
+        $store = OuterStore::findOne(['id' => $this->outer_store_id]);
         if (empty($store)) {
             $return ["store"] = null;
         } else {
@@ -147,7 +147,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         ];
 
         try {
-            $agent = OuterAgent::findOne($model->outer_agent_id);
+            $agent = OuterAgent::findOne(['id' => $model->outer_agent_id]);
         } catch (\Throwable $t) {
             // Все нормально, пока что не зарефакторили waybill, потом убрать try{}catch(){} todo_refactoring
             $agent = null;
@@ -182,7 +182,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
             }
         }
 
-        $store = OuterStore::findOne($model->outer_agent_id);
+        $store = OuterStore::findOne(['id' => $model->outer_store_id]);
         if (empty($store)) {
             $return ["store"] = null;
         } else {

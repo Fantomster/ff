@@ -84,7 +84,13 @@ class WaybillHelper
         if (is_null($arOrderContentForCreate)) {
             $arOrderContentForCreate = $order->orderContent;
         }
+        if (!$arOrderContentForCreate){
+            throw new BadRequestHttpException('You dont have order content');
+        }
         $licenses = License::getAllLicense($order->client_id, [Registry::RK_SERVICE_ID, Registry::IIKO_SERVICE_ID], true);
+        if (!$licenses){
+            throw new BadRequestHttpException('You dont have licenses for services');
+        }
 
         foreach ($licenses as $license) {
             $serviceId = $license['service_id'];
@@ -142,7 +148,11 @@ class WaybillHelper
 //                        return [$waybillId];
 //                    }
 
+                } else {
+                    throw new BadRequestHttpException('You dont have order content for waybills');
                 }
+            } else {
+                throw new BadRequestHttpException('You dont have auto setting');
             }
         }
         return false;

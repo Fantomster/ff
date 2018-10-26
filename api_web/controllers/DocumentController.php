@@ -16,6 +16,10 @@ class DocumentController extends \api_web\components\WebApiController
      *     description="Детальная часть документа
      *     Типы возвращаемых данных:
      *     https://goo.gl/VSWoBC
+     *
+     *     has_order_content - если не задан или null вернет все
+     *                       - false вернет только без привязки к заказу
+     *                       - true вернет только с привязкой к заказу
      * ",
      *     produces={"application/json"},
      *     @SWG\Parameter(
@@ -29,7 +33,8 @@ class DocumentController extends \api_web\components\WebApiController
      *                  default={
      *                      "document_id": 2,
      *                      "type": "order",
-     *                      "service_id": 2
+     *                      "service_id": 2,
+     *                      "has_order_content": true
      *                  }
      *              )
      *         )

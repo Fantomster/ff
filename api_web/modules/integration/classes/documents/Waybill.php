@@ -151,16 +151,19 @@ class Waybill extends BaseWaybill implements DocumentInterface
             ];
         }
 
+        $return["vendor"] = null;
         if (isset($agent['vendor_id'])) {
             $return["vendor"] = [
                 "id"   => $agent['vendor_id'],
                 "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
             ];
         } else {
-            $return["vendor"] = [
-                "id"   => $model->order->vendor_id,
-                "name" => $model->order->vendor->name,
-            ];
+            if (isset($model->order)) {
+                $return["vendor"] = [
+                    "id"   => $model->order->vendor_id,
+                    "name" => $model->order->vendor->name,
+                ];
+            }
         }
 
         $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_id);

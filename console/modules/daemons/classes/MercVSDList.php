@@ -39,6 +39,7 @@ class MercVSDList extends MercDictConsumer
 
         if ($check == 9) {
             $this->data = json_decode($this->data, true);
+            $this->data['enterpriseGuid'] = 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b';
             $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList', 'organization_id' => $this->org_id, 'store_id' => $this->data['enterpriseGuid']])->one();
             $this->data = isset($this->queue->data_request) ? json_decode($this->queue->data_request, true) : $this->data;
             if (!isset($this->data)) {

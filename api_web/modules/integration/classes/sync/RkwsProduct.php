@@ -43,6 +43,9 @@ class RkwsProduct extends ServiceRkws
         $array = [];
         $pcount = 0;
         foreach ($this->iterator($myXML->ITEM) as $group) {
+            if (!isset($group->GOODS_LIST) OR empty($group->GOODS_LIST)) {
+                continue;
+            }
             foreach ($this->iterator($group->GOODS_LIST->ITEM) as $product) {
                 $pcount++;
                 foreach ($product->attributes() as $k => $v) {

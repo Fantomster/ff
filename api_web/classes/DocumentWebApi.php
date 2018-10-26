@@ -13,10 +13,8 @@ use api_web\modules\integration\classes\documents\OrderEmail;
 use api_web\modules\integration\classes\documents\Waybill;
 use api_web\modules\integration\classes\documents\WaybillContent;
 use common\helpers\DBNameHelper;
-use common\models\AllService;
 use common\models\RelationUserOrganization;
 use common\models\Order as OrderMC;
-use InvalidArgumentException;
 use yii\data\SqlDataProvider;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
@@ -113,9 +111,12 @@ class DocumentWebApi extends \api_web\components\WebApi
     public function getDocumentContents(array $post)
     {
         $this->validateRequest($post, ['type', 'document_id', 'service_id']);
-
+        $hasOrderContent = null;
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
             throw new BadRequestHttpException('document.not_support_type');
+        }
+        if (isset($post['has_order_content']) && is_bool($post['has_order_content'])){
+            $hasOrderContent = $post['has_order_content'];
         }
 
         switch (strtolower($post['type'])) {
@@ -123,7 +124,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 return $this->getDocumentOrder($post['document_id'], $post['service_id']);
                 break;
             case self::TYPE_WAYBILL:
-                return $this->getDocumentWaybill($post['document_id'], $post['service_id']);
+                return $this->getDocumentWaybill($post['document_id'], $post['service_id'], $hasOrderContent);
                 break;
             default:
                 throw new BadRequestHttpException('document.not_support_type');
@@ -188,7 +189,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      */
-    private function getDocumentWaybill($document_id, $service_id)
+    private function getDocumentWaybill($document_id, $service_id, $has_order_content = false)
     {
         $result = [
             'documents' => [],
@@ -196,11 +197,16 @@ class DocumentWebApi extends \api_web\components\WebApi
         ];
 
         if (\common\models\Waybill::find()->where(['id' => $document_id, 'service_id' => $service_id])->exists()) {
-            $positions = (new Query())
+            $query = (new Query())
                 ->select('id')
                 ->from(\common\models\WaybillContent::tableName())
-                ->where('waybill_id = :doc_id', [':doc_id' => (int)$document_id])
-                ->all(\Yii::$app->db_api);
+                ->where('waybill_id = :doc_id', [':doc_id' => (int)$document_id]);
+            if ($has_order_content === true) {
+                $query->andWhere(['not', ['order_content_id' => null]]);
+            } elseif ($has_order_content === false){
+                $query->andWhere(['order_content_id' => null]);
+            }
+            $positions = $query->all(\Yii::$app->db_api);
 
             if (!empty($positions)) {
                 $modelClass = self::$modelsContent[self::TYPE_WAYBILL];
@@ -322,7 +328,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 created_at as order_date, 
                 null as waybill_date, 
                 null as waybill_number, 
-                id as doc_number, 
+                null as doc_number, 
                 vendor_id as vendor, 
                 null as store
             FROM `order` 
@@ -335,8 +341,8 @@ class DocumentWebApi extends \api_web\components\WebApi
                 status_id as waybill_status_id, 
                 null as order_date, 
                 doc_date as waybill_date, 
-                outer_number_code as waybill_number, 
-                null as doc_number,  
+                edi_number as waybill_number, 
+                outer_number_code as doc_number,  
                 outer_agent_id as vendor, 
                 outer_store_id as store
             FROM `$apiShema`.waybill w
@@ -510,7 +516,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws \yii\db\Exception
+     * @throws \Exception
      */
     public function mapWaybillOrder(array $post)
     {

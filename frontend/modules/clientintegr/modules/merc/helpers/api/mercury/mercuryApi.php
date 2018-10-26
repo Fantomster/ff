@@ -290,7 +290,7 @@ class mercuryApi extends baseApi
                         $rejectedData->description = " ";
                         $rejectedData->volume = $vsd->amount;
                         $rejectedData->uuid = $UUID;
-                        $resul = $this->getVetDocumentDone($UUID, $rejectedData);
+                        $result = $this->getVetDocumentDone($UUID, $rejectedData);
                         break;
                     }
                 }

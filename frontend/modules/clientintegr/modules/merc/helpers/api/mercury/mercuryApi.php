@@ -7,6 +7,7 @@ use console\modules\daemons\classes\MercProductItemList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
+use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
 use Yii;
 
 class mercuryApi extends baseApi
@@ -279,6 +280,20 @@ class mercuryApi extends baseApi
 
             } else {
                 $result = null;
+                foreach ($result->application->errors as $error) {
+                    if($error->code == 'MERC14257')
+                    {
+                        $vsd = MercVsd::findOne(['uuid' => $UUID]);
+                        $rejectedData = new rejectedForm();
+                        $rejectedData->decision = VetDocumentDone::PARTIALLY;
+                        $rejectedData->reason = " ";
+                        $rejectedData->description = " ";
+                        $rejectedData->volume = $vsd->amount;
+                        $rejectedData->uuid = $UUID;
+                        $result = $this->getVetDocumentDone($UUID, $rejectedData);
+                        break;
+                    }
+                }
             }
         } catch (\SoapFault $e) {
             Yii::error($e->detail);

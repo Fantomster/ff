@@ -34,9 +34,10 @@ class OrderContentBehavior extends Behavior
     /**
      * Подмена значений цены и количества, если есть накладные
      *
+     * @param $event
      * @return bool
      */
-    public function substitutionValuePriceQuantity()
+    public function substitutionValuePriceQuantity($event)
     {
         if (!empty($this->model->waybillContent)) {
             $this->model->price = $this->model->waybillContent->price_without_vat;
@@ -50,9 +51,10 @@ class OrderContentBehavior extends Behavior
      * Если редактируем позицию для которой есть накладная, во всех накладных меняем значение
      * а в заказе оставлям прежнее
      *
+     * @param $event
      * @return bool
      */
-    public function changeValuePriceQuantityFromWaybill()
+    public function changeValuePriceQuantityFromWaybill($event)
     {
         if (!empty($this->model->waybillContent)) {
             #Проверяем, менялась ли цена

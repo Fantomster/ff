@@ -34,15 +34,18 @@ class WaybillContentBehavior extends Behavior
     {
         //Смотрим, были ли, изменены аттрибуты, изза которых стоит пересчитывать стоимость заказа
         if (isset($event->changedAttributes['sum_without_vat'])) {
-            $this->recalculateOrderTotalPrice();
+            $this->recalculateOrderTotalPrice($event);
         }
         return true;
     }
 
     /**
      * Пересчет total_price в заказе, привязанной к накладной
+     *
+     * @param $event
+     * @return bool
      */
-    public function recalculateOrderTotalPrice()
+    public function recalculateOrderTotalPrice($event)
     {
         $orderContent = $this->model->orderContent;
         //Если есть связь с заказом пересчитываем его total_price

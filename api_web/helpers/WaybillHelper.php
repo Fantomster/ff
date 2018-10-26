@@ -10,6 +10,7 @@ namespace api_web\helpers;
 
 use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
+use common\helpers\DBNameHelper;
 use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\Order;
@@ -53,7 +54,6 @@ class WaybillHelper
         $modelWaybill->service_id = Registry::MERC_SERVICE_ID;
 
         $modelWaybillContent = new WaybillContent();
-        $modelWaybillContent->merc_uuid = $uuid;
         try {
             $modelWaybill->save();
             $modelWaybillContent->waybill_id = $modelWaybill->id;
@@ -227,7 +227,10 @@ class WaybillHelper
      * */
     public function checkWaybillForVsdUuid($uuid)
     {
-        return WaybillContent::find()->where(['merc_uuid' => $uuid])->exists();
+        return WaybillContent::find()
+            ->leftJoin(DBNameHelper::getMainName() . '.`' . OrderContent::tableName() . '` as oc', 'oc.id = order_content_id')
+            ->where(['oc.merc_uuid' => $uuid])
+            ->exists();
     }
 
     /**

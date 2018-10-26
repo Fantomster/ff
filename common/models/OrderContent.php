@@ -326,6 +326,7 @@ class OrderContent extends \yii\db\ActiveRecord
      */
     public function getWaybillContent()
     {
+        #В случае если связь один ко многим, выдергиваем запись, которая последняя обновилась
         return $this->hasOne(WaybillContent::class, ['order_content_id' => 'id'])->orderBy(['updated_at' => SORT_DESC])->limit(1);
     }
 }

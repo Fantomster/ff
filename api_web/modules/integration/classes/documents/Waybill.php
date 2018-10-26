@@ -64,17 +64,15 @@ class Waybill extends BaseWaybill implements DocumentInterface
             ];
         }
 
-        //todo_refactoring wtf
         $store = (new Dictionary($this->service_id, 'Store'))->storeInfo($this->outer_store_id);
-        if (empty($agent)) {
-            $return ["store"] = [];
+        if (empty($store)) {
+            $return ["store"] = null;
         } else {
             $return ["store"] = [
                 "id"   => $store['id'],
                 "name" => $store['name'],
             ];
         }
-
         $return["is_mercury_cert"] = $this->getIsMercuryCert();
         $return["count"] = (int)$this->getTotalCount();
         $return["total_price"] = CurrencyHelper::asDecimal($this->getTotalPrice());

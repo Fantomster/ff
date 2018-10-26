@@ -8,7 +8,14 @@
 
 namespace frontend\modules\clientintegr\modules\merc\helpers\api\cerber;
 
-class BusinessEntity extends GenericVersioningEntity
+class BusinessEntity
 {
-
+    var $guid;//UUID
+    var $active;//boolean
+    var $last;//boolean
+    var $status;//VersionStatus
+    var $createDate;//dateTime
+    var $updateDate;//dateTime
+    var $previous;//UUID
+    var $next;//UUID
 }

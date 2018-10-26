@@ -290,6 +290,8 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
         foreach ($data as $item) {
             $res = isset($item->enterprise->uuid) ? cerberApi::getInstance($org_id)->getEnterpriseByUuid($item->enterprise->uuid) : null;
 
+            var_dump($res); die();
+
             $result['name'][] = isset($res) ? ($res->name . '(' . $res->address->addressView . ')') : null;
             $result['guid'][] = $item->enterprise->guid;
 

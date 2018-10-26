@@ -279,6 +279,7 @@ class mercuryApi extends baseApi
                 (new VetDocumentsChangeList())->updateDocumentsList($doc[0]);
 
             } else {
+                $result = null;
                 foreach ($result->application->errors as $error) {
                     if($error->code == 'MERC14257')
                     {
@@ -289,11 +290,10 @@ class mercuryApi extends baseApi
                         $rejectedData->description = " ";
                         $rejectedData->volume = $vsd->amount;
                         $rejectedData->uuid = $UUID;
-                        $this->getVetDocumentDone($UUID, $rejectedData);
+                        $resul = $this->getVetDocumentDone($UUID, $rejectedData);
                         break;
                     }
                 }
-                $result = null;
             }
         } catch (\SoapFault $e) {
             Yii::error($e->detail);

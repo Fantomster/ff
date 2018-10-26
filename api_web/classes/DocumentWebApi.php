@@ -432,7 +432,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         try {
             $waybill->resetPositions();
-            return Waybill::prepareDetail($waybill->id);
+            return $waybill->prepare();
         } catch (\Throwable $e) {
             throw $e;
         }
@@ -449,7 +449,7 @@ class DocumentWebApi extends \api_web\components\WebApi
     {
         $this->validateRequest($post, ['waybill_id']);
 
-        return Waybill::prepareDetail($post['waybill_id']);
+        return Waybill::prepareModel($post['waybill_id']);
     }
 
     /**

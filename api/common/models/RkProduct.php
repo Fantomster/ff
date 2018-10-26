@@ -5,7 +5,6 @@ namespace api\common\models;
 use Yii;
 use common\models\Organization;
 
-
 /**
  * This is the model class for table "rk_access".
  *
@@ -28,11 +27,10 @@ use common\models\Organization;
  */
 class RkProduct extends \yii\db\ActiveRecord
 {
-    
+
     const STATUS_UNLOCKED = 0;
-    const STATUS_LOCKED = 1;
-      
-    
+    const STATUS_LOCKED   = 1;
+
     /**
      * @inheritdoc
      */
@@ -47,10 +45,10 @@ class RkProduct extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['acc','rid','denom'], 'required'],
-            [['acc','rid'], 'integer'],
+            [['acc', 'rid', 'denom'], 'required'],
+            [['acc', 'rid'], 'integer'],
             [['comment'], 'string', 'max' => 255],
-            [['acc','rid','denom','cat_id','updated_at','group_rid','group_name','unit_rid','unitname'],'safe']
+            [['acc', 'rid', 'denom', 'cat_id', 'updated_at', 'group_rid', 'group_name', 'unit_rid', 'unitname'], 'safe']
         ];
     }
 
@@ -60,43 +58,40 @@ class RkProduct extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'fid' => 'FID',
-            'token' => 'Token',
-            'Nonce' => 'Nonce',
-            'rid' => 'RID Store House',
-            'denom' => 'Наименование Store House',
+            'id'         => 'ID',
+            'fid'        => 'FID',
+            'token'      => 'Token',
+            'Nonce'      => 'Nonce',
+            'rid'        => 'RID Store House',
+            'denom'      => 'Наименование Store House',
             'updated_at' => 'Обновлено',
-            'unitname' => 'Ед.измерения',
+            'unitname'   => 'Ед.измерения',
             'group_name' => 'Категория',
-            
-        ];
-    }
-    
-    
-    public static function getStatusArray() {
-        return [
-        RkAccess::STATUS_UNLOCKED  => 'Активен',
-        RkAccess::STATUS_LOCKED => 'Отключен',    
         ];
     }
 
-    public function getOrganization() {
-           return $this->hasOne(Organization_api::className(), ['id' => 'org']);          
-           
+    public static function getStatusArray()
+    {
+        return [
+            RkAccess::STATUS_UNLOCKED => 'Активен',
+            RkAccess::STATUS_LOCKED   => 'Отключен',
+        ];
     }
-    
+
+    public function getOrganization()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'org']);
+    }
+
     public function getOrganizationName()
-{
-    $org = $this->organization;
-    return $org ? $org->name : 'no';
-}
-    
-    
+    {
+        $org = $this->organization;
+        return $org ? $org->name : 'no';
+    }
+
     public static function getDb()
     {
-       return \Yii::$app->db_api;
+        return \Yii::$app->db_api;
     }
-
 
 }

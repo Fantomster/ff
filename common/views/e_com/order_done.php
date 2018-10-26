@@ -3,6 +3,7 @@
     <NUMBER><?= $order->id ?></NUMBER>
     <DOCACTION>351</DOCACTION>
     <DATE><?= $dateArray['created_at'] ?></DATE>
+    <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?></RECEPTIONDATE>
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>
     <ORDERNUMBER><?= $order->id ?></ORDERNUMBER>
     <ORDERDATE><?= $dateArray['created_at'] ?></ORDERDATE>
@@ -10,6 +11,7 @@
     <DELIVERYNOTEDATE><?= $order->ediOrder->invoice_date ?? $dateArray['requested_delivery_date'] ?></DELIVERYNOTEDATE>
     <WAYBILLNUMBER><?= $order->id ?></WAYBILLNUMBER>
     <WAYBILLDATE><?= $dateArray['requested_delivery_date'] ?></WAYBILLDATE>
+    <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?? '' ?></RECEPTIONDATE>
     <HEAD>
         <SUPPLIER><?= $vendor->ediOrganization->gln_code ?></SUPPLIER>
         <BUYER><?= $client->ediOrganization->gln_code ?></BUYER>
@@ -43,6 +45,8 @@
                     <PRICE><?= $position['price'] ?></PRICE>
                     <PRICEWITHVAT><?= $position['price'] ?></PRICEWITHVAT>
                     <TAXRATE><?= isset($catalogGood->vat) ? $catalogGood->vat : 0 ?></TAXRATE>
+                    <ACCEPTEDQUANTITY><?= $position['quantity'] ?></ACCEPTEDQUANTITY>
+                    <BUYERPARTNUMBER><?= $article ?? '' ?></BUYERPARTNUMBER>
                 </POSITION>
             <?php endforeach; ?>
         </PACKINGSEQUENCE>

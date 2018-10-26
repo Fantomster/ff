@@ -8,18 +8,22 @@
 
 namespace api_web\modules\integration\classes\dictionaries;
 
+use api_web\classes\UserWebApi;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use common\models\Organization;
+use common\models\OrganizationDictionary;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
 use common\models\OuterCategory;
+use common\models\OuterDictionary;
 use common\models\OuterProduct;
 use common\models\OuterStore;
 use common\models\OuterUnit;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -43,6 +47,50 @@ class AbstractDictionary extends WebApi
     {
         parent::__construct();
         $this->service_id = $serviceId;
+    }
+
+    /**
+     * Список справочников
+     *
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getList()
+    {
+        $models = OuterDictionary::find()
+            ->where([
+                'service_id' => (int)$this->service_id
+            ])
+            ->leftJoin(
+                OrganizationDictionary::tableName(),
+                'outer_dictionary.id = organization_dictionary.outer_dic_id AND organization_dictionary.org_id = :org_id'
+            )
+            ->addParams([
+                ':org_id' => $this->user->organization_id
+            ])
+            ->all();
+
+        $return = [];
+        /**
+         * Статус по умолчанию = "Синхронизация не проводилась"
+         */
+        $defaultStatusText = OrganizationDictionary::getStatusTextList()[OrganizationDictionary::STATUS_DISABLED];
+        foreach ($models as $model) {
+            /** @var \common\models\OrganizationDictionary $d */
+            $d = current($model->organizationDictionaries);
+            $return[] = [
+                'id'          => $model->id,
+                'name'        => $model->name,
+                'title'       => \Yii::t('api_web', 'dictionary.' . $model->name),
+                'count'       => $d->count ?? 0,
+                'status_id'   => $d->status_id ?? 0,
+                'status_text' => $d->statusText ?? $defaultStatusText,
+                'created_at'  => $d->created_at ?? null,
+                'updated_at'  => $d->updated_at ?? null
+            ];
+        }
+
+        return $return;
     }
 
     /**
@@ -271,6 +319,57 @@ class AbstractDictionary extends WebApi
 
         foreach ($rootModels as $rootModel) {
             $result = $this->prepareStore($rootModel);
+        }
+
+        return ['stores' => $result];
+    }
+
+    /**
+     * Плоский список складов
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function storeFlatList($request)
+    {
+        $search = OuterStore::find()->where(['service_id' => $this->service_id]);
+
+        if (isset($request['search'])) {
+            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+                $search->andWhere(['like', 'name', $request['search']['name']]);
+            }
+        }
+
+        if (isset($request['search']['organization_id'])) {
+            $find_org_id = (int)$request['search']['organization_id'];
+            $organizations = (new UserWebApi())->getUserOrganizationBusinessList();
+            if (!empty($organizations['result'])) {
+                $organizations = ArrayHelper::map($organizations['result'], 'id', 'name');
+                if (isset($organizations[$find_org_id])) {
+                    $search->andWhere(['org_id' => $find_org_id]);
+                } else {
+                    throw new BadRequestHttpException('dictionary.access_denied');
+                }
+            }
+        } else {
+            $search->andWhere(['org_id' => $this->user->organization->id]);
+        }
+
+        $models = $search->orderBy(['left' => SORT_ASC])->all();
+        $result = [];
+
+        if (!empty($models)) {
+            /**@var OuterStore $rootModel * */
+            foreach ($models as $model) {
+                $result[] = [
+                    'id'          => $model->id,
+                    'outer_uid'   => $model->outer_uid,
+                    'name'        => str_pad('', $model->level, "-") . $model->name,
+                    'is_active'   => (bool)!$model->is_deleted,
+                    'is_category' => (bool)$model->isRoot()
+                ];
+            }
         }
 
         return ['stores' => $result];

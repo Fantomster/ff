@@ -32,7 +32,7 @@ use backend\controllers\RkwsController;
 <section class="content-header">
     <h1>
         <i class="fa fa-upload"></i> Интеграция с внешними системами
-        <small>Обменивайтесь номенклатурой и приходными документами с Вашей учетной системой автоматически</small>
+        <small>Обменивайтесь номенклатурой и приходными документами с Вашей учётной системой автоматически</small>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -48,53 +48,122 @@ use backend\controllers\RkwsController;
 <?php
 $user = Yii::$app->user->identity;
 $licenses = $user->organization->getLicenseList();
-//print "<pre>";
-//print_r($licenses);
-//print "</pre>";
 $timestamp_now = time();
+
+// Блок проверки состояния лицензий R-Keeper
+
 if (isset($licenses['rkws'])) {
     $sub0 = explode(' ', $licenses['rkws']->td);
     $sub1 = explode('-', $sub0[0]);
     $licenses['rkws']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-    if ($licenses['rkws']->status_id == 0) $rk_us = 0;
-    if (($licenses['rkws']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws']->td)))) $rk_us = 3;
-    if (($licenses['rkws']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['rkws']->td)))) $rk_us = 2;
-    if (($licenses['rkws']->status_id == 1) and ($timestamp_now > (strtotime($licenses['rkws']->td)))) $rk_us = 1;
+    if ($licenses['rkws']->status_id == 0) { // если лицензия отключена в админке Mixcart
+        $rk_us = 0;
+    }
+    if (($licenses['rkws']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws']->td)))) { // если лицензия в админке включена, но истёк её срок
+        $rk_us = 3;
+    }
+    if (($licenses['rkws']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['rkws']->td)))) { // если лицензия в админке включена, до окончания её срока осталось менее двух недель
+        $rk_us = 2;
+    }
+    if (($licenses['rkws']->status_id == 1) and ($timestamp_now > (strtotime($licenses['rkws']->td)))) { // если лицензия в админке включена и до окончания её срока осталось более двух недель
+        $rk_us = 1;
+    }
     $sub0 = explode(' ', $licenses['rkws_ucs']->td);
     $sub1 = explode('-', $sub0[0]);
     $licenses['rkws_ucs']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-    if ($licenses['rkws_ucs']->status_id == 0) $rk_lic = 0;
-    if (($licenses['rkws_ucs']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws_ucs']->td)))) $rk_lic = 3;
-    if (($licenses['rkws_ucs']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['rkws_ucs']->td)))) $rk_lic = 2;
-    if (($licenses['rkws_ucs']->status_id == 1) and ($timestamp_now > (strtotime($licenses['rkws_ucs']->td)))) $rk_lic = 1;
+    if ($licenses['rkws_ucs']->status_id == 0) { // если лицензия отключена в админке Mixcart
+        $rk_lic = 0;
+    }
+    if (($licenses['rkws_ucs']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws_ucs']->td)))) { // если лицензия учётной системы в админке включена, но истёк её срок
+        $rk_lic = 3;
+    }
+    if (($licenses['rkws_ucs']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['rkws_ucs']->td)))) { // если лицензия учётной системы в админке включена, до окончания её срока осталось менее двух недель
+        $rk_lic = 2;
+    }
+    if (($licenses['rkws_ucs']->status_id == 1) and ($timestamp_now > (strtotime($licenses['rkws_ucs']->td)))) { // если лицензия учётной системы в админке включена и до окончания её срока осталось более двух недель
+        $rk_lic = 1;
+    }
 }
+
+// Блок проверки состояния лицензии IIKO
+
 if (isset($licenses['iiko'])) {
     $sub0 = explode(' ', $licenses['iiko']->td);
     $sub1 = explode('-', $sub0[0]);
     $licenses['iiko']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-    if ($licenses['iiko']->status_id == 0) $lic_iiko = 0;
-    if (($licenses['iiko']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['iiko']->td)))) $lic_iiko = 3;
-    if (($licenses['iiko']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['iiko']->td)))) $lic_iiko = 2;
-    if (($licenses['iiko']->status_id == 1) and ($timestamp_now > (strtotime($licenses['iiko']->td)))) $lic_iiko = 1;
+    if ($licenses['iiko']->status_id == 0) { // если лицензия отключена в админке Mixcart
+        $lic_iiko = 0;
+    }
+    if (($licenses['iiko']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['iiko']->td)))) { // если лицензия в админке включена, но истёк её срок
+        $lic_iiko = 3;
+    }
+    if (($licenses['iiko']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['iiko']->td)))) { // если лицензия в админке включена, до окончания её срока осталось менее двух недель
+        $lic_iiko = 2;
+    }
+    if (($licenses['iiko']->status_id == 1) and ($timestamp_now > (strtotime($licenses['iiko']->td)))) { // если лицензия в админке включена и до окончания её срока осталось более двух недель
+        $lic_iiko = 1;
+    }
 }
+
+// Блок проверки состояния лицензии Tillypad
+
+if (isset($licenses['tillypad'])) {
+    $sub0 = explode(' ', $licenses['tillypad']->td);
+    $sub1 = explode('-', $sub0[0]);
+    $licenses['tillypad']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
+    if ($licenses['tillypad']->status_id == 0) {
+        $lic_tilly = 0;
+    }
+    if (($licenses['tillypad']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['tillypad']->td)))) { // если лицензия в админке включена, но истёк её срок
+        $lic_tilly = 3;
+    }
+    if (($licenses['tillypad']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['tillypad']->td)))) { // если лицензия в админке включена, до окончания её срока осталось менее двух недель
+        $lic_tilly = 2;
+    }
+    if (($licenses['tillypad']->status_id == 1) and ($timestamp_now > (strtotime($licenses['tillypad']->td)))) { // если лицензия в админке включена и до окончания её срока осталось более двух недель
+        $lic_tilly = 1;
+    }
+}
+
+// Блок проверки состояния лицензии Mercury
+
 if (isset($licenses['mercury'])) {
     $sub0 = explode(' ', $licenses['mercury']->td);
     $sub1 = explode('-', $sub0[0]);
     $licenses['mercury']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-    if ($licenses['mercury']->status_id == 0) $lic_merc = 0;
-    if (($licenses['mercury']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['mercury']->td)))) $lic_merc = 3;
-    if (($licenses['mercury']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['mercury']->td)))) $lic_merc = 2;
-    if (($licenses['mercury']->status_id == 1) and ($timestamp_now > (strtotime($licenses['mercury']->td)))) $lic_merc = 1;
+    if ($licenses['mercury']->status_id == 0) {
+        $lic_merc = 0;
+    }
+    if (($licenses['mercury']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['mercury']->td)))) { // если лицензия в админке включена, но истёк её срок
+        $lic_merc = 3;
+    }
+    if (($licenses['mercury']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['mercury']->td)))) { // если лицензия в админке включена, до окончания её срока осталось менее двух недель
+        $lic_merc = 2;
+    }
+    if (($licenses['mercury']->status_id == 1) and ($timestamp_now > (strtotime($licenses['mercury']->td)))) { // если лицензия в админке включена и до окончания её срока осталось более двух недель
+        $lic_merc = 1;
+    }
 }
+
+// Блок проверки состояния лицензии 1С
+
 if (isset($licenses['odinsobsh'])) {
     $lic_odinsobsh = 0;
     $sub0 = explode(' ', $licenses['odinsobsh']->td);
     $sub1 = explode('-', $sub0[0]);
     $licenses['odinsobsh']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
-    if ($licenses['odinsobsh']->status_id == 0) $lic_odinsobsh = 0;
-    if (($licenses['odinsobsh']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['odinsobsh']->td)))) $lic_odinsobsh = 3;
-    if (($licenses['odinsobsh']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['odinsobsh']->td)))) $lic_odinsobsh = 2;
-    if (($licenses['odinsobsh']->status_id == 1) and ($timestamp_now > (strtotime($licenses['odinsobsh']->td)))) $lic_odinsobsh = 1;
+    if ($licenses['odinsobsh']->status_id == 0) {
+        $lic_odinsobsh = 0;
+    }
+    if (($licenses['odinsobsh']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['odinsobsh']->td)))) { // если лицензия в админке включена, но истёк её срок
+        $lic_odinsobsh = 3;
+    }
+    if (($licenses['odinsobsh']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['odinsobsh']->td)))) { // если лицензия в админке включена, до окончания её срока осталось менее двух недель
+        $lic_odinsobsh = 2;
+    }
+    if (($licenses['odinsobsh']->status_id == 1) and ($timestamp_now > (strtotime($licenses['odinsobsh']->td)))) { // если лицензия в админке включена и до окончания её срока осталось более двух недель
+        $lic_odinsobsh = 1;
+    }
 }
 ?>
 <section class="content">
@@ -237,7 +306,7 @@ if (isset($licenses['odinsobsh'])) {
                     </div>
                 </div>
             <?php endif; ?>
-            <?php if (isset($licenses['iiko'])): ?>
+            <?php if (isset($licenses['tillypad'])): ?>
                 <div class="box-body">
                     <div class="hpanel">
                         <div class="panel-body">
@@ -247,21 +316,21 @@ if (isset($licenses['odinsobsh'])) {
                             </div>
                             <div class="col-md-3 text-left">
                                 <?php
-                                switch ($lic_iiko) {
+                                switch ($lic_tilly) {
                                     case 0:
-                                        print "<p class=\"small\"> Лицензия IIKO: ID " . $licenses['iiko']->id . " <strong><span style=\"color:#dd4b39\">Не активна</span></strong>.</br>";
+                                        print "<p class=\"small\"> Лицензия Tillypad: ID " . $licenses['tillypad']->id . " <strong><span style=\"color:#dd4b39\">Не активна</span></strong>.</br>";
                                         print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>";
                                         break;
                                     case 1:
-                                        print "<p class=\"small\"> Лицензия IIKO: ID " . $licenses['iiko']->id . " <strong><span style=\"color:#dd4b39\">Не активна </span></strong>с " . $licenses['iiko']->td . ".</br>";
+                                        print "<p class=\"small\"> Лицензия Tillypad: ID " . $licenses['tillypad']->id . " <strong><span style=\"color:#dd4b39\">Не активна </span></strong>с " . $licenses['tillypad']->td . ".</br>";
                                         print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>";
                                         break;
                                     case 2:
-                                        print "<p class=\"small\"> Лицензия IIKO: ID " . $licenses['iiko']->id . " <strong><span style=\"color:#dd4b39\">Истекает срок </span></strong>(по " . $licenses['iiko']->td . "). </br>";
+                                        print "<p class=\"small\"> Лицензия Tillypad: ID " . $licenses['tillypad']->id . " <strong><span style=\"color:#dd4b39\">Истекает срок </span></strong>(по " . $licenses['tillypad']->td . "). </br>";
                                         print "Пожалуйста, обратитесь к вашему менеджеру MixCart.</p></br>";
                                         break;
                                     case 3:
-                                        print "<p class=\"small\"> Лицензия IIKO: ID " . $licenses['iiko']->id . " <strong><span style=\"color:#6ea262\">Активна </span></strong>(по " . $licenses['iiko']->td . "). </br>";
+                                        print "<p class=\"small\"> Лицензия Tillypad: ID " . $licenses['tillypad']->id . " <strong><span style=\"color:#6ea262\">Активна </span></strong>(по " . $licenses['tillypad']->td . "). </br>";
                                         print "</p></br>";
                                         break;
                                 }

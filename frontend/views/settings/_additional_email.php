@@ -91,6 +91,13 @@ if (isset($mercLicense)) {
             return ['checked' => $model->merc_vsd, 'data-id' => $model->id, 'data-column' => 'merc_vsd', 'disabled' => !$model->confirmed];
         }
     ];
+    $columns[] = [
+        'header' => $labels['merc_stock_expiry'],
+        'class' => 'yii\grid\CheckboxColumn',
+        'checkboxOptions' => function ($model) {
+            return ['checked' => $model->merc_stock_expiry, 'data-id' => $model->id, 'data-column' => 'merc_stock_expiry', 'disabled' => !$model->confirmed];
+        }
+    ];
 }
 $columns[] = [
     'class' => '\kartik\grid\ActionColumn',

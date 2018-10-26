@@ -2,6 +2,7 @@
 
 namespace common\models\licenses;
 
+use api_web\components\Registry;
 use Exception;
 use Yii;
 use yii\db\ActiveRecord;
@@ -111,7 +112,7 @@ class License extends ActiveRecord
             ->all(\Yii::$app->db_api);
 
         if (count($license) > 1) {
-            throw new Exception('Organization having more than one different licenses');
+            throw new Exception('Organization having more than one same licenses, please delete not actual');
         }
 
         return $license;
@@ -122,9 +123,10 @@ class License extends ActiveRecord
      *
      * @param       $orgId
      * @param array $service_ids
+     * @param null  $is_active
      * @return array
      */
-    public static function getAllLicense($orgId, $service_ids = [])
+    public static function getAllLicense($orgId, $service_ids = [], $is_active = null)
     {
         $license = (new Query())
             ->select([
@@ -134,7 +136,8 @@ class License extends ActiveRecord
                 'license.created_at',
                 'license.updated_at',
                 'license.login_allowed',
-                'max(lo.td) as to_date'
+                'max(lo.td) as to_date',
+                'ls.service_id',
             ])
             ->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
@@ -146,7 +149,8 @@ class License extends ActiveRecord
                 'license.is_active',
                 'license.created_at',
                 'license.updated_at',
-                'license.login_allowed'
+                'license.login_allowed',
+                'ls.service_id',
             ])
             ->indexBy('id');
 
@@ -154,6 +158,27 @@ class License extends ActiveRecord
             $license->andWhere(['in', 'ls.service_id', $service_ids]);
         }
 
+        if (!is_null($is_active)) {
+            $license->andWhere(['=', 'is_active', (int)$is_active]);
+            $license->orderBy(['to_date' => SORT_DESC]);
+        }
+
         return $license->all(\Yii::$app->db_api);
+    }
+
+    /**
+     * Проверка на активную лицензию микскарта
+     *
+     * @param $orgId
+     * @return string
+     */
+    public static function getDateMixCartLicense($orgId)
+    {
+        $license = self::getAllLicense($orgId, Registry::$mc_services, true);
+        if (!empty($license)) {
+            return current($license)['to_date'];
+        } else {
+            return date('Y-m-d H:i:s', strtotime("-1 day"));
+        }
     }
 }

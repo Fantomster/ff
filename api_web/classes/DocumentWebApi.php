@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use api_web\modules\integration\classes\documents\EdiOrder;
 use api_web\modules\integration\classes\documents\EdiOrderContent;
@@ -35,21 +36,6 @@ class DocumentWebApi extends \api_web\components\WebApi
         2 => self::DOC_GROUP_STATUS_WAIT_FORMING,
         3 => self::DOC_GROUP_STATUS_SENT,
     ];
-    //todo_refactoring to Registry class
-    const DOC_WAYBILL_STATUS_COLLATED = 'Сопоставлена';
-    const DOC_WAYBILL_STATUS_READY = 'Сформирована';
-    const DOC_WAYBILL_STATUS_ERROR = 'Ошибка';
-    const DOC_WAYBILL_STATUS_RESET = 'Сброшена';
-    const DOC_WAYBILL_STATUS_SENT = 'Выгружена';
-
-    //todo_refactoring to Registry class
-    private static $doc_waybill_status = [
-        1 => self::DOC_WAYBILL_STATUS_COLLATED,
-        2 => self::DOC_WAYBILL_STATUS_READY,
-        3 => self::DOC_WAYBILL_STATUS_ERROR,
-        4 => self::DOC_WAYBILL_STATUS_RESET,
-        5 => self::DOC_WAYBILL_STATUS_SENT,
-    ];
 
     /**константа типа документа - заказ*/
     const TYPE_ORDER = 'order';
@@ -80,19 +66,13 @@ class DocumentWebApi extends \api_web\components\WebApi
     /**
      * Метод получения шапки документа
      *
-     * @param $document_id
-     * @param $type
+     * @param array $post
      * @return mixed
      * @throws BadRequestHttpException
      */
     public function getHeader(array $post)
     {
-        if (!isset($post['type'])) {
-            throw new BadRequestHttpException("empty_param|type");
-        }
-        if (empty($post['document_id'])) {
-            throw new BadRequestHttpException("empty_param|document_id");
-        }
+        $this->validateRequest($post, ['type', 'document_id']);
 
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
             throw new BadRequestHttpException('dont support this type');
@@ -105,19 +85,13 @@ class DocumentWebApi extends \api_web\components\WebApi
     /**
      * Метод получения детальной части документа
      *
-     * @param $document_id
-     * @param $type
+     * @param array $post
      * @return mixed
      * @throws BadRequestHttpException
      */
     public function getContent(array $post)
     {
-        if (!isset($post['type'])) {
-            throw new BadRequestHttpException("empty_param|type");
-        }
-        if (empty($post['document_id'])) {
-            throw new BadRequestHttpException("empty_param|document_id");
-        }
+        $this->validateRequest($post, ['type', 'document_id']);
 
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
             throw new BadRequestHttpException('dont support this type');
@@ -136,20 +110,13 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function getDocumentContents(array $post)
     {
-        if (!isset($post['type'])) {
-            throw new BadRequestHttpException("empty_param|type");
-        }
-
-        if (empty($post['document_id'])) {
-            throw new BadRequestHttpException("empty_param|document_id");
-        }
-
-        if (empty($post['service_id'])) {
-            throw new BadRequestHttpException("empty_param|service_id");
-        }
-
+        $this->validateRequest($post, ['type', 'document_id', 'service_id']);
+        $hasOrderContent = null;
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
             throw new BadRequestHttpException('document.not_support_type');
+        }
+        if (isset($post['has_order_content']) && is_bool($post['has_order_content'])) {
+            $hasOrderContent = $post['has_order_content'];
         }
 
         switch (strtolower($post['type'])) {
@@ -157,7 +124,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 return $this->getDocumentOrder($post['document_id'], $post['service_id']);
                 break;
             case self::TYPE_WAYBILL:
-                return $this->getDocumentWaybill($post['document_id'], $post['service_id']);
+                return $this->getDocumentWaybill($post['document_id'], $post['service_id'], $hasOrderContent);
                 break;
             default:
                 throw new BadRequestHttpException('document.not_support_type');
@@ -222,7 +189,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      */
-    private function getDocumentWaybill($document_id, $service_id)
+    private function getDocumentWaybill($document_id, $service_id, $hasOrderContent = false)
     {
         $result = [
             'documents' => [],
@@ -230,11 +197,16 @@ class DocumentWebApi extends \api_web\components\WebApi
         ];
 
         if (\common\models\Waybill::find()->where(['id' => $document_id, 'service_id' => $service_id])->exists()) {
-            $positions = (new Query())
+            $query = (new Query())
                 ->select('id')
                 ->from(\common\models\WaybillContent::tableName())
-                ->where('waybill_id = :doc_id', [':doc_id' => (int)$document_id])
-                ->all(\Yii::$app->db_api);
+                ->where('waybill_id = :doc_id', [':doc_id' => (int)$document_id]);
+            if ($hasOrderContent === true) {
+                $query->andWhere(['not', ['order_content_id' => null]]);
+            } elseif ($hasOrderContent === false) {
+                $query->andWhere(['order_content_id' => null]);
+            }
+            $positions = $query->all(\Yii::$app->db_api);
 
             if (!empty($positions)) {
                 $modelClass = self::$modelsContent[self::TYPE_WAYBILL];
@@ -280,7 +252,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (isset($post['search']['waybill_status']) && !empty($post['search']['waybill_status'])) {
-            $where_all .= " AND waybill_status = :waybill_status";
+            $where_all .= " AND waybill_status_id = :waybill_status";
             $params_sql[':waybill_status'] = $post['search']['waybill_status'];
         }
 
@@ -356,7 +328,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 created_at as order_date, 
                 null as waybill_date, 
                 null as waybill_number, 
-                id as doc_number, 
+                null as doc_number, 
                 vendor_id as vendor, 
                 null as store
             FROM `order` 
@@ -369,10 +341,10 @@ class DocumentWebApi extends \api_web\components\WebApi
                 status_id as waybill_status_id, 
                 null as order_date, 
                 doc_date as waybill_date, 
-                outer_number_code as waybill_number, 
-                null as doc_number,  
-                outer_contractor_uuid as vendor, 
-                outer_store_uuid as store
+                edi_number as waybill_number, 
+                outer_number_code as doc_number,  
+                outer_agent_id as vendor, 
+                outer_store_id as store
             FROM `$apiShema`.waybill w
             LEFT JOIN `$apiShema`.waybill_content wc ON wc.waybill_id = w.id
             LEFT JOIN order_content oc ON oc.id = wc.order_content_id
@@ -442,12 +414,11 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     public function waybillResetPositions(array $post)
     {
-        if (!isset($post['waybill_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_id");
-        }
+        $this->validateRequest($post, ['waybill_id']);
 
         $waybill = Waybill::findOne(['id' => $post['waybill_id']]);
 
@@ -455,12 +426,16 @@ class DocumentWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("waybill_not_found");
         }
 
-        if ($waybill->status_id == 3) {
+        if (in_array($waybill->status_id, [Registry::WAYBILL_UNLOADED, Registry::WAYBILL_UNLOADING])) {
             throw new BadRequestHttpException("document.waybill_in_the_state_of_reset_or_unloaded");
         }
 
-        $waybill->resetPositions();
-        return ['result' => true];
+        try {
+            $waybill->resetPositions();
+            return Waybill::prepareDetail($waybill->id);
+        } catch (\Throwable $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -472,9 +447,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function getWaybillDetail(array $post)
     {
-        if (empty($post['waybill_id'])) {
-            throw new BadRequestHttpException("empty_param|document_id");
-        }
+        $this->validateRequest($post, ['waybill_id']);
 
         return Waybill::prepareDetail($post['waybill_id']);
     }
@@ -485,25 +458,24 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
      * @throws ValidationException
      */
     public function editWaybillDetail(array $post)
     {
-        if (empty($post['id'])) {
-            throw new BadRequestHttpException("empty_param|id");
-        }
+        $this->validateRequest($post, ['id']);
 
         $waybill = Waybill::findOne(['id' => $post['id']]);
         if (!isset($waybill)) {
             throw new BadRequestHttpException("waybill_not_found");
         }
-
+        //todo_refactoring to foreach
         if (!empty($post['agent_uid'])) {
-            $waybill->outer_contractor_uuid = $post['agent_uid'];
+            $waybill->outer_agent_id = $post['agent_uid'];
         }
 
         if (!empty($post['store_uid'])) {
-            $waybill->outer_store_uuid = $post['store_uid'];
+            $waybill->outer_store_id = $post['store_uid'];
         }
 
         if (!empty($post['doc_date'])) {
@@ -549,32 +521,56 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Exception
      */
     public function mapWaybillOrder(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException("empty_param|order_id");
+        $this->validateRequest($post, ['replaced_order_id', 'document_id']);
+
+        $replacedOrder = \common\models\Order::findOne([
+            'id'         => (int)$post['replaced_order_id'],
+            'service_id' => Registry::MC_BACKEND
+        ]);
+
+        if (!isset($replacedOrder)) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'document.replaced_order_not_found', ['ru' => 'Заменяемый документ не найден или не является заказом']));
         }
 
-        if (empty($post['document_id'])) {
-            throw new BadRequestHttpException("empty_param|document_id");
+        $order = \common\models\Order::findOne([
+            'id'         => (int)$post['document_id'],
+            'service_id' => Registry::VENDOR_DOC_MAIL_SERVICE_ID,
+        ]);
+
+        if (!isset($order)) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_not_found', ['ru' => 'Документ не найден или не является документом от поставщика']));
         }
 
-        $waybill = Waybill::findOne(['id' => (int)$post['document_id']]);
-        if (!isset($waybill)) {
-            throw new BadRequestHttpException("waybill_not_found");
+        if ($order->status == Order::STATUS_CANCELLED) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_cancelled', ['ru' => 'Документ в состоянии "Отменен"']));
         }
 
-        $order = \common\models\Order::find()->where([
-            'id'        => (int)$post['order_id'],
-            'client_id' => $this->user->organization_id
-        ])->one();
-
-        if (empty($order)) {
-            throw new BadRequestHttpException('order_not_found');
+        if (!is_null($order->replaced_order_id)) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_replaced_order_id_is_not_null', ['ru' => 'Документ уже заменен']));
         }
 
-        $waybill->mapWaybill($order->id);
+        $replacedOrder->status = Order::STATUS_CANCELLED;
+        $order->replaced_order_id = (int)$post['replaced_order_id'];
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            if (!$replacedOrder->save()) {
+                throw new ValidationException($replacedOrder->getFirstErrors());
+            }
+
+            if (!$order->save()) {
+                throw new ValidationException($replacedOrder->getFirstErrors());
+            }
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+
         return ['result' => true];
     }
 
@@ -591,7 +587,9 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function getWaybillStatus()
     {
-        return self::$doc_waybill_status;
+        return array_map(function ($el) {
+            return \Yii::t('api_web', 'waybill.' . $el);
+        }, Registry::$waybill_statuses);
     }
 
     /**

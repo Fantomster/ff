@@ -12,14 +12,11 @@ use api_web\components\Registry;
 use common\models\IntegrationSettingValue;
 use common\models\Order;
 use common\models\OrderContent;
+use common\models\OuterAgent;
+use common\models\OuterStore;
 use common\models\Waybill;
 use common\models\WaybillContent;
 
-/**
- * Class iikoWaybill add for back compatible with legacy methods
- *
- * @package api_web\modules\integration\models
- */
 class iikoWaybill extends Waybill
 {
     /**
@@ -57,22 +54,25 @@ class iikoWaybill extends Waybill
             }
         }
 
+        $store = OuterStore::findOne($this->outer_store_id);
+        $agent = OuterAgent::findOne($this->outer_agent_id);
+
         $xml->addChild('comment', $this->outer_note);
         $datetime = new \DateTime($this->doc_date);
         $xml->addChild('dateIncoming', $datetime->format('d.m.Y'));
         $xml->addChild('incomingDate', $datetime->format('d.m.Y'));
-        $xml->addChild('defaultStore', $this->outer_store_uuid);
-        $xml->addChild('supplier', $this->outer_contractor_uuid);
+        $xml->addChild('defaultStore', $store->outer_uid);
+        $xml->addChild('supplier', $agent->outer_uid);
         $xml->addChild('status', 'NEW');
 
         $items = $xml->addChild('items');
         /**
          * @var WaybillContent $row
          */
-        $records = WaybillContent::findAll(['waybill_id' => $this->id, 'unload_status' => 1]);
+        $records = WaybillContent::findAll(['waybill_id' => $this->id]);
         $discount = 0;
 
-        foreach($records as $i => $row) {
+        foreach ($records as $i => $row) {
             $item = $items->addChild('item');
             $item->addChild('amount', $row->quantity_waybill);
             $item->addChild('product', $row->productOuter->outer_uid);
@@ -81,12 +81,12 @@ class iikoWaybill extends Waybill
             $item->addChild('amountUnit', $row->productOuter->outerUnit->name);
             $item->addChild('discountSum', $discount);
             $item->addChild('sumWithoutNds', $row->sum_without_vat);
-            $item->addChild('vatPercent', $row->vat_waybill / 100);
-            $item->addChild('ndsPercent', $row->vat_waybill / 100);
+            $item->addChild('vatPercent', $row->vat_waybill);
+            $item->addChild('ndsPercent', $row->vat_waybill);
             $item->addChild('sum', $row->price_with_vat);
             $item->addChild('price', $row->sum_with_vat);
             $item->addChild('isAdditionalExpense', false);
-            $item->addChild('store', $this->outer_store_uuid);
+            $item->addChild('store', $store->outer_uid);
 
         }
 

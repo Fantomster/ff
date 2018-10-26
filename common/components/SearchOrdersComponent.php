@@ -1,6 +1,5 @@
 <?php
 
-
 namespace common\components;
 
 use common\models\ManagerAssociate;
@@ -14,11 +13,12 @@ use yii\helpers\Url;
 
 /**
  * Special service component for Customer-type user's `order searching` needs
+ *
  * @createdBy Basil A Konakov
  * @createdAt 2018-08-14
- * @author Mixcart
- * @module Frontend
- * @version 1.0
+ * @author    Mixcart
+ * @module    Frontend
+ * @version   1.0
  */
 class SearchOrdersComponent extends Component
 {
@@ -28,9 +28,9 @@ class SearchOrdersComponent extends Component
     public $searchParams = [];
     /** @var $counts array */
     public $counts = [
-        'new' => 0,
+        'new'        => 0,
         'processing' => 0,
-        'fulfilled' => 0,
+        'fulfilled'  => 0,
         // 'stopped' => 0, //
     ];
     /** @var $totalPrice int */
@@ -52,17 +52,19 @@ class SearchOrdersComponent extends Component
     const INTEGRATION_TYPE_RKWS = 'rkws';
     const INTEGRATION_TYPE_IIKO = 'iiko';
     const INTEGRATION_TYPE_ONES = '1c';
+    const INTEGRATION_TYPE_TILLYPAD = 'Tillypad';
 
     const IIKO_WB_DONT_SHOW_VARNAME_PREF = 'iiko_wb_hide_';
     const RKWS_WB_DONT_SHOW_VARNAME_PREF = 'rkws_wb_hide_';
     const ODIN_C_WB_DONT_SHOW_VARNAME_PREF = 'odin_c_wb_hide_';
+    const TILLYPAD_WB_DONT_SHOW_VARNAME_PREF = 'tillypad_wb_hide_';
 
     /**
      * Search if $organization->type_id == Organization::TYPE_RESTAURANT
      *
-     * @var $orgId int
+     * @var $orgId         int
      * @var $curIUserOrgId int
-     * @var $statuses array
+     * @var $statuses      array
      */
     public function countForRestaurant(int $orgId, int $curIUserOrgId, array $statuses)
     {
@@ -109,7 +111,6 @@ class SearchOrdersComponent extends Component
         }
         $this->searchParams = $sp;
 
-
         Yii::$app->getSession()->set('order', json_encode($this->searchParams));
 
         // 2. Update counts
@@ -131,16 +132,15 @@ class SearchOrdersComponent extends Component
     /**
      * Search if $organization->type_id != Organization::TYPE_RESTAURANT
      *
-     * @var $orgId int
+     * @var $orgId         int
      * @var $curIUserOrgId int
-     * @var $statuses array
-     * @var $userId int
+     * @var $statuses      array
+     * @var $userId        int
      */
     public function countForVendor(int $orgId, int $curIUserOrgId, array $statuses, int $userId)
     {
 
         // 1. Initialize searchParams
-
 
         $temp = (array)json_decode(Yii::$app->getSession()->get('order'));
 
@@ -231,17 +231,17 @@ class SearchOrdersComponent extends Component
             $this->affiliated = ArrayHelper::map($data, 'id', 'name');
             asort($this->affiliated);
 
-
         }
 
     }
 
     /**
      * Search finalize search after counters are culculated
-     * @var $searchModel OrderSearch2
+     *
+     * @var $searchModel   OrderSearch2
      * @var $orderStatuses array
-     * @var $pagination array
-     * @var $sort array
+     * @var $pagination    array
+     * @var $sort          array
      */
     public function finalize(OrderSearch2 $searchModel, array $orderStatuses = [], array $pagination = [], array $sort = [])
     {
@@ -261,13 +261,14 @@ class SearchOrdersComponent extends Component
 
     /**
      * Search orders for intergartion views
-     * @var $type string
-     * @var $searchModel OrderSearch2
-     * @var $orgId int
+     *
+     * @var $type          string
+     * @var $searchModel   OrderSearch2
+     * @var $orgId         int
      * @var $curIUserOrgId int
-     * @var $wbStatuses array
-     * @var $pagination array
-     * @var $sort array
+     * @var $wbStatuses    array
+     * @var $pagination    array
+     * @var $sort          array
      */
     public function getRestaurantIntegration($type, OrderSearch2 $searchModel, int $orgId, int $curIUserOrgId, array $wbStatuses = [], array $pagination = [], array $sort = [])
     {

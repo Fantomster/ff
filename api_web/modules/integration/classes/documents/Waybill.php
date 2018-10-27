@@ -149,6 +149,13 @@ class Waybill extends BaseWaybill implements DocumentInterface
             $status_text = "Status " . $model->status_id;
         }
 
+        $pd = $model->payment_delay_date;
+        if (empty($pd) || $pd = '0000-00-00 00:00:00') {
+            $pd = null;
+        } else {
+            $pd = date("Y-m-d H:i:s T", strtotime($model->payment_delay_date));
+        }
+
         $return = [
             "id"                      => $model->id,
             "code"                    => $model->id,
@@ -160,7 +167,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "doc_date"                => date("Y-m-d H:i:s T", strtotime($model->doc_date)),
             "outer_number_additional" => $model->outer_number_additional,
             "outer_number_code"       => $model->outer_number_code,
-            "payment_delay_date"      => !empty($model->payment_delay_date) ? date("Y-m-d H:i:s T", strtotime($model->payment_delay_date)) : null,
+            "payment_delay_date"      => $pd,
             "outer_note"              => $model->outer_note
         ];
 

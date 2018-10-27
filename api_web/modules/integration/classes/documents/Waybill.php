@@ -150,7 +150,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
 
         $pd = $model->payment_delay_date;
-        if (empty($pd) || $pd = '0000-00-00 00:00:00') {
+        if (empty($pd) || $pd == '0000-00-00 00:00:00') {
             $pd = null;
         } else {
             $pd = date("Y-m-d H:i:s T", strtotime($model->payment_delay_date));

@@ -165,7 +165,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         ];
 
         $agent = OuterAgent::findOne(['id' => $model->outer_agent_id]);
-        if (empty($agent)) {
+        if (!empty($agent)) {
             $return["agent"] = [
                 "id"   => $agent->id,
                 "name" => $agent->name,

@@ -187,33 +187,53 @@ class IntegrationWebApi extends WebApi
         }
         $arr = $waybillContent->attributes;
 
+        $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id]);
+        if ($outerProduct) {
+            $arr['outer_product'] = [
+                'name'     => $outerProduct->name,
+                'id'       => $outerProduct->id,
+                'equality' => false
+            ];
+        } else {
+            $arr['outer_product'] = null;
+        }
+
+        $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id]);
+        if ($outerStore) {
+            $arr['outer_store'] = [
+                'name'     => $outerStore->name,
+                'id'       => $outerStore->id,
+                'equality' => false
+            ];
+        } else {
+            $arr['outer_store'] = null;
+        }
+
+        $outerUnit = OuterUnit::findOne(['id' => $waybillContent->outer_unit_id]);
+        if ($outerUnit) {
+            $arr['outer_unit'] = [
+                'name' => $outerUnit->name,
+                'id'   => $outerUnit->id
+            ];
+        } else {
+            $arr['outer_unit'] = null;
+        }
+
+        $arr['koef'] = $waybillContent->koef;
+
+        //Если есть связь, лезем в массовое сопоставление
         $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
         if ($orderContent) {
-            $allMap = AllMaps::findOne(['product_id' => $orderContent->product_id]);
+            $allMap = OuterProductMap::findOne(['product_id' => $orderContent->product_id]);
             if ($allMap) {
-                $arr['koef'] = $allMap->koef;
-                $arr['serviceproduct_id'] = $allMap->serviceproduct_id;
-                $arr['store_rid'] = $allMap->store_rid;
-                $outerProduct = OuterProduct::findOne(['id' => $allMap->serviceproduct_id]);
-                if ($outerProduct) {
-                    $arr['outer_product_name'] = $outerProduct->name;
-                    $arr['outer_product_id'] = $outerProduct->id;
-                    $arr['product_id_equality'] = true;
-                } else {
-                    $arr['product_id_equality'] = false;
+                $arr['koef'] = $allMap->coefficient;
+                //Если отличаются продукты, надо подсвечивать на фронте
+                if ($waybillContent->outer_product_id != $allMap->outer_product_id) {
+                    $arr['outer_product']['equality'] = true;
                 }
-                $outerStore = OuterStore::findOne(['outer_uid' => $allMap->store_rid]);
-                if ($outerStore) {
-                    $arr['outer_store_name'] = $outerStore->name;
-                    $arr['outer_store_id'] = $outerStore->id;
-                    $arr['store_id_equality'] = true;
-                } else {
-                    $arr['store_id_equality'] = false;
-                }
-                $outerUnit = OuterUnit::findOne(['outer_uid' => $allMap->unit_rid]);
-                if ($outerUnit) {
-                    $arr['outer_unit_name'] = $outerUnit->name;
-                    $arr['outer_unit_id'] = $outerUnit->id;
+                //Если отличаются склады, надо подсвечивать на фронте
+                if ($waybillContent->waybill->outer_store_id != $allMap->outer_store_id) {
+                    $arr['outer_store']['equality'] = true;
                 }
             }
         }
@@ -268,7 +288,7 @@ class IntegrationWebApi extends WebApi
      */
     private function handleWaybillContent($waybillContent, $post, $quan, $koef)
     {
-        if (!OuterProduct::find()->where(['id' => $post['outer_product_id']])->exists()){
+        if (!OuterProduct::find()->where(['id' => $post['outer_product_id']])->exists()) {
             throw new BadRequestHttpException('outer_product_not_found');
         }
         if (isset($post['outer_product_id'])) {
@@ -373,9 +393,9 @@ class IntegrationWebApi extends WebApi
         }
 
         $waybillContentCheck = WaybillContent::find()
-        ->where(['waybill_id' => $waybillCheck->id])
-        ->andWhere('order_content_id is not null')
-        ->one();
+            ->where(['waybill_id' => $waybillCheck->id])
+            ->andWhere('order_content_id is not null')
+            ->one();
         if (isset($waybillContentCheck)) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_relation_order', ['ru' => 'Накладная связана с заказом']));
         }
@@ -384,7 +404,7 @@ class IntegrationWebApi extends WebApi
 
         $checkOrg = false;
         foreach ($businessList['result'] as $item) {
-            if($item['id'] == $waybillCheck->acquirer_id) {
+            if ($item['id'] == $waybillCheck->acquirer_id) {
                 $checkOrg = true;
                 break;
             }

@@ -343,15 +343,16 @@ class DocumentWebApi extends \api_web\components\WebApi
                 doc_date as waybill_date, 
                 edi_number as waybill_number, 
                 outer_number_code as doc_number,  
-                outer_agent_id as vendor, 
+                o.vendor_id as vendor, 
                 outer_store_id as store
             FROM `$apiShema`.waybill w
             LEFT JOIN `$apiShema`.waybill_content wc ON wc.waybill_id = w.id
             LEFT JOIN order_content oc ON oc.id = wc.order_content_id
+            LEFT JOIN `order` o ON o.id = oc.order_id
             WHERE 
                 oc.order_id is null 
             AND 
-                service_id = :service_id
+                w.service_id = :service_id
         ) as documents
         WHERE 
         id is not null $where_all

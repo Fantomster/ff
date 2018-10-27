@@ -35,19 +35,24 @@ class Waybill extends BaseWaybill implements DocumentInterface
             return [];
         }
 
+        if(isset(Registry::$waybill_statuses[$this->status_id])) {
+            $status_text = \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$this->status_id]);
+        } else {
+            $status_text = "Status 0";
+        }
+
         $return = [
             "id"          => $this->id,
             "number"      => $this->outer_number_code ? [$this->outer_number_code] : null,
             "type"        => DocumentWebApi::TYPE_WAYBILL,
             "status_id"   => $this->status_id,
-            "status_text" => \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$this->status_id]),
+            "status_text" => $status_text,
             "service_id"  => $this->service_id
         ];
 
         try {
             $agent = OuterAgent::findOne(['id' => $this->outer_agent_id]);
         } catch (\Throwable $t) {
-            // Все нормально, пока что не зарефакторили waybill, потом убрать try{}catch(){} todo_refactoring
             $agent = null;
         }
 
@@ -58,7 +63,11 @@ class Waybill extends BaseWaybill implements DocumentInterface
                     "name" => $this->order->vendor->name,
                 ];
             }
-        } elseif (isset($agent['vendor_id'])) {
+        } else {
+            $return ["agent"] = $agent;
+        }
+
+        if (isset($agent['vendor_id'])) {
             $return["vendor"] = [
                 "id"   => $agent->vendor_id,
                 "name" => Organization::findOne(['id' => $agent->vendor_id])->name,
@@ -79,7 +88,6 @@ class Waybill extends BaseWaybill implements DocumentInterface
         $return["count"] = (int)$this->getTotalCount();
         $return["total_price"] = CurrencyHelper::asDecimal($this->getTotalPrice());
         $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->doc_date));
-        $return["store"] = null; //todo_refactoring
 
         return $return;
     }

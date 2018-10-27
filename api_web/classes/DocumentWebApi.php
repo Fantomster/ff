@@ -319,7 +319,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         $apiShema = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
 
         $sql = "
-        SELECT * FROM (
+        SELECT DISTINCT * FROM (
             SELECT 
                 id, 
                 '" . self::TYPE_ORDER . "' as type, 

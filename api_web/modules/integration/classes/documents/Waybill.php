@@ -35,59 +35,58 @@ class Waybill extends BaseWaybill implements DocumentInterface
             return [];
         }
 
-        if(isset(Registry::$waybill_statuses[$this->status_id])) {
+        if (isset(Registry::$waybill_statuses[$this->status_id])) {
             $status_text = \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$this->status_id]);
         } else {
             $status_text = "Status 0";
         }
 
         $return = [
-            "id"          => $this->id,
-            "number"      => $this->outer_number_code ? [$this->outer_number_code] : null,
-            "type"        => DocumentWebApi::TYPE_WAYBILL,
-            "status_id"   => $this->status_id,
-            "status_text" => $status_text,
-            "service_id"  => $this->service_id
+            "id"              => $this->id,
+            "number"          => $this->outer_number_code ? [$this->outer_number_code] : null,
+            "type"            => DocumentWebApi::TYPE_WAYBILL,
+            "status_id"       => $this->status_id,
+            "status_text"     => $status_text,
+            "service_id"      => $this->service_id,
+            "vendor"          => null,
+            "agent"           => null,
+            "store"           => null,
+            "is_mercury_cert" => $this->getIsMercuryCert(),
+            "count"           => (int)$this->getTotalCount(),
+            "total_price"     => CurrencyHelper::asDecimal($this->getTotalPrice()),
+            "doc_date"        => date("Y-m-d H:i:s T", strtotime($this->doc_date))
         ];
 
-        try {
-            $agent = OuterAgent::findOne(['id' => $this->outer_agent_id]);
-        } catch (\Throwable $t) {
-            $agent = null;
+        $agent = OuterAgent::findOne(['id' => $this->outer_agent_id]);
+        if (!empty($agent)) {
+            $return["agent"] = [
+                "id"   => $agent->id,
+                "name" => $agent->name,
+            ];
+            if (!empty($agent->vendor_id)) {
+                $return["vendor"] = [
+                    "id"   => $agent->vendor_id,
+                    "name" => Organization::findOne($agent->vendor_id)->name
+                ];
+            }
         }
 
-        if (empty($agent)) {
+        if (empty($return['vendor'])) {
             if (!empty($this->order)) {
-                $return ["agent"] = [
+                $return["vendor"] = [
                     "id"   => $this->order->vendor_id,
                     "name" => $this->order->vendor->name,
                 ];
             }
-        } else {
-            $return ["agent"] = $agent;
-        }
-
-        if (isset($agent['vendor_id'])) {
-            $return["vendor"] = [
-                "id"   => $agent->vendor_id,
-                "name" => Organization::findOne(['id' => $agent->vendor_id])->name,
-            ];
         }
 
         $store = OuterStore::findOne(['id' => $this->outer_store_id]);
-        if (empty($store)) {
-            $return ["store"] = null;
-        } else {
+        if (!empty($store)) {
             $return ["store"] = [
                 "id"   => $store->id,
                 "name" => $store->name,
             ];
         }
-
-        $return["is_mercury_cert"] = $this->getIsMercuryCert();
-        $return["count"] = (int)$this->getTotalCount();
-        $return["total_price"] = CurrencyHelper::asDecimal($this->getTotalPrice());
-        $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->doc_date));
 
         return $return;
     }

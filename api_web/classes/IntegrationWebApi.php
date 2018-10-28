@@ -336,11 +336,10 @@ class IntegrationWebApi extends WebApi
         $waybillContent->vat_waybill = $wcVat;
         $waybillContent->koef = $wcKoef;
         $waybillContent->quantity_waybill = $wcQuantity;
-        //todo_refactor change for valid currency formatting
-        $waybillContent->price_without_vat = Round($wcPrice, 2);
-        $waybillContent->price_with_vat = Round($wcPriceVat, 2);
-        $waybillContent->sum_without_vat = Round($wcSum, 2);
-        $waybillContent->sum_with_vat = Round($wcSumVat, 2);
+        $waybillContent->price_without_vat = number_format(round($wcPrice, 2), 2, '.', '');
+        $waybillContent->price_with_vat = number_format(round($wcPriceVat, 2), 2, '.', '');
+        $waybillContent->sum_without_vat = number_format(round($wcSum, 2), 2, '.', '');
+        $waybillContent->sum_with_vat = number_format(round($wcSumVat, 2), 2, '.', '');
 
         try {
             //todo_refactor check model has been changed

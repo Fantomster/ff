@@ -293,13 +293,13 @@ class IntegrationWebApi extends WebApi
         if (!$waybillContent) {
             throw new BadRequestHttpException("waybill content not found");
         }
-
+        //Обновим внешний продукт и ед. измерения
         if (isset($post['outer_product_id']) && !empty($post['outer_product_id'])) {
             $waybillContent->outer_product_id = $post['outer_product_id'];
             $waybillContent->outer_unit_id = $waybillContent->productOuter->outer_unit_id;
         }
 
-        //Если один из параметров был изменен, сделаем пересчет
+        //Если один из параметров был изменен, будем делать пересчет
         $evaluteCalc = (isset($post['vat_waybill']) ||
                         isset($post['quantity_waybill']) ||
                         isset($post['price_without_vat']) ||
@@ -307,7 +307,7 @@ class IntegrationWebApi extends WebApi
                         isset($post['sum_without_vat']) ||
                         isset($post['sum_with_vat'])
         );
-        //Если собрались считать, но нам прислали все суммы, считать не будем
+        //Если собрались пересчитывать, но были присланы все суммы, считать не будем
         $evaluteCalc = !($evaluteCalc &&
                         isset($post['price_without_vat']) &&
                         isset($post['price_with_vat']) &&
@@ -315,8 +315,6 @@ class IntegrationWebApi extends WebApi
                         isset($post['sum_with_vat'])
         );
         //Заполнили все параметры и изменили полученные от фронта
-        //$wcOuterProduct =       $waybillContent->outer_product_id;
-        //$wcOuterProductUnit =   $waybillContent->productOuter->outer_unit_id;
         $wcVat =                (int)($post['vat_waybill'] ?? $waybillContent->vat_waybill);
         $wcKoef =               (float)($post['koef'] ?? $waybillContent->koef);
         $wcQuantity =           (float)($post['quantity_waybill'] ?? $waybillContent->quantity_waybill);
@@ -338,51 +336,26 @@ class IntegrationWebApi extends WebApi
         $waybillContent->vat_waybill = $wcVat;
         $waybillContent->koef = $wcKoef;
         $waybillContent->quantity_waybill = $wcQuantity;
+        //todo_refactor change for valid currency formatting
         $waybillContent->price_without_vat = Round($wcPrice, 2);
         $waybillContent->price_with_vat = Round($wcPriceVat, 2);
         $waybillContent->sum_without_vat = Round($wcSum, 2);
         $waybillContent->sum_with_vat = Round($wcSumVat, 2);
 
         try {
+            //todo_refactor check model has been changed
             $waybillContent->save();
         } catch (\Exception $exception) {
-            //todo_refactor
+            //todo_refactor change for valid exception
             throw $exception;
         }
-
+        //Подготовим fake request
         $call = [
             'waybill_content_id'    => $waybillContent->id,
             'service_id'            => $waybillContent->waybill->service_id
         ];
-
+        //Вернем обработанную модель деталей позиции
         return $this->showWaybillContent($call);
-
-        $this->validateRequest($post, ['waybill_content_id']);
-
-        $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
-        if (!$waybillContent) {
-            throw new BadRequestHttpException("waybill content not found");
-        }
-
-        if (isset($post['vat_waybill'])) {
-            $waybillContent->vat_waybill = (int)$post['vat_waybill'];
-        }
-
-        if (isset($post['outer_unit_id'])) {
-            $waybillContent->outer_unit_id = $post['outer_unit_id'];
-        }
-
-        $koef = null;
-        $quan = null;
-
-        if (isset($post['koef'])) {
-            $koef = (float)$post['koef'];
-        }
-        if (isset($post['quantity_waybill'])) {
-            $quan = (float)$post['quantity_waybill'];
-        }
-
-        return $this->handleWaybillContent($waybillContent, $post, $quan, $koef);
     }
 
     /**
@@ -395,7 +368,8 @@ class IntegrationWebApi extends WebApi
      */
     private function handleWaybillContent($waybillContent, $post, $quan, $koef)
     {
-
+        return ['deprecated' => true];
+        //DEPRECATED this suck stub
         if (!OuterProduct::find()->where(['id' => $post['outer_product_id']])->exists()) {
             throw new BadRequestHttpException('outer_product_not_found');
         }

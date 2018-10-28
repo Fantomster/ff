@@ -244,10 +244,10 @@ class IntegrationWebApi extends WebApi
                     $arr['outer_store']['equality'] = true;
                 }
                 //Если ставка НДС отличается, то надо подсвечивать на фронте
-                $arr['outer_vat']['equality'] = (!empty($outerProductMap->vat) &&
+                $arr['vat_waybill']['equality'] = (!empty($outerProductMap->vat) &&
                     $outerProductMap->vat == $waybillContent->vat_waybill);
                 //Если коэффициент отличается, то надо подсвечивать на фронте
-                $arr['outer_coefficient']['equality'] = (!empty($outerProductMap->coefficient) &&
+                $arr['koef']['equality'] = (!empty($outerProductMap->coefficient) &&
                     $outerProductMap->coefficient == $waybillContent->koef);
             }
         }

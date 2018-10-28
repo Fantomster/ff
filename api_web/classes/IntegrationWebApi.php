@@ -351,8 +351,8 @@ class IntegrationWebApi extends WebApi
         }
 
         $call = [
-            'waybill_content_id'    => $waybillContent-id,
-            'service_id'            => $waybillContent->waybill->id
+            'waybill_content_id'    => $waybillContent->id,
+            'service_id'            => $waybillContent->waybill->service_id
         ];
 
         return $this->showWaybillContent($call);

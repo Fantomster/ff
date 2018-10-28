@@ -187,6 +187,45 @@ class IntegrationWebApi extends WebApi
         }
         $arr = $waybillContent->attributes;
 
+        $arr['outer_vat'] = [
+            'value'     => $waybillContent->vat_waybill,
+            'equality'  => false
+        ];
+
+        $arr['outer_coefficient'] = [
+            'value'     => $waybillContent->koef,
+            'equality'  => false
+        ];
+
+        //Если есть связь, получаем из массового сопоставления
+        $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
+        if ($orderContent) {
+            $outerProductMap = OuterProductMap::findOne(['product_id' => $orderContent->product_id]);
+            if ($outerProductMap) {
+                $arr['koef'] = $outerProductMap->coefficient;
+                //Если отличаются продукты, надо подсвечивать на фронте
+                if ($waybillContent->outer_product_id != $outerProductMap->outer_product_id) {
+                    $arr['outer_product']['equality'] = true;
+                }
+                //Если отличаются склады, надо подсвечивать на фронте
+                if ($waybillContent->waybill->outer_store_id != $outerProductMap->outer_store_id) {
+                    $arr['outer_store']['equality'] = true;
+                }
+                //Если ставка НДС пустая то заполняем, если отличается, то надо подсвечивать на фронте
+                $arr['outer_vat']['equality'] = (!empty($outerProductMap->vat) &&
+                    $outerProductMap->vat == $waybillContent->vat_waybill);
+                if (empty($waybillContent->vat_waybill)) {
+                    $arr['outer_vat']['value'] = $outerProductMap->vat;
+                }
+                //Если коэффициент пустой то заполняем, если отличается, то надо подсвечивать на фронте
+                $arr['outer_coefficient']['equality'] = (!empty($outerProductMap->coefficient) &&
+                    $outerProductMap->coefficient == $waybillContent->koef);
+                if (empty($waybillContent->koef)) {
+                    $arr['outer_coefficient']['value'] = $outerProductMap->coefficient;
+                }
+            }
+        }
+
         $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id]);
         if ($outerProduct) {
             $arr['outer_product'] = [
@@ -219,25 +258,6 @@ class IntegrationWebApi extends WebApi
             $arr['outer_unit'] = null;
         }
 
-        $arr['koef'] = $waybillContent->koef;
-
-        //Если есть связь, лезем в массовое сопоставление
-        $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
-        if ($orderContent) {
-            $allMap = OuterProductMap::findOne(['product_id' => $orderContent->product_id]);
-            if ($allMap) {
-                $arr['koef'] = $allMap->coefficient;
-                //Если отличаются продукты, надо подсвечивать на фронте
-                if ($waybillContent->outer_product_id != $allMap->outer_product_id) {
-                    $arr['outer_product']['equality'] = true;
-                }
-                //Если отличаются склады, надо подсвечивать на фронте
-                if ($waybillContent->waybill->outer_store_id != $allMap->outer_store_id) {
-                    $arr['outer_store']['equality'] = true;
-                }
-            }
-        }
-
         return $arr;
     }
 
@@ -262,7 +282,7 @@ class IntegrationWebApi extends WebApi
         }
 
         if (isset($post['outer_unit_id'])) {
-            $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
+            $waybillContent->outer_unit_id = $post['outer_unit_id'];
         }
 
         $koef = null;
@@ -272,7 +292,7 @@ class IntegrationWebApi extends WebApi
             $koef = (float)$post['koef'];
         }
         if (isset($post['quantity_waybill'])) {
-            $quan = (int)$post['quantity_waybill'];
+            $quan = (float)$post['quantity_waybill'];
         }
 
         return $this->handleWaybillContent($waybillContent, $post, $quan, $koef);

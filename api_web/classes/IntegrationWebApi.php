@@ -6,6 +6,7 @@ use api\common\models\AllMaps;
 use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use common\models\CatalogBaseGoods;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
@@ -187,22 +188,53 @@ class IntegrationWebApi extends WebApi
         }
         $arr = $waybillContent->attributes;
 
-        $arr['outer_vat'] = [
+        $arr['product'] = [
+            'name'     => null,
+            'id'       => null
+        ];
+
+        $arr['outer_product'] = [
+            'name'     => null,
+            'id'       => null,
+            'equality' => false
+        ];
+
+        $arr['outer_store'] = [
+            'name'     => null,
+            'id'       => null,
+            'equality' => false
+        ];
+
+        $arr['outer_unit'] = [
+            'name' => null,
+            'id'   => null
+        ];
+
+        $arr['vat_waybill'] = [
             'value'     => $waybillContent->vat_waybill,
             'equality'  => false
         ];
 
-        $arr['outer_coefficient'] = [
+        $arr['koef'] = [
             'value'     => $waybillContent->koef,
             'equality'  => false
         ];
 
-        //Если есть связь, получаем из массового сопоставления
+        //Если есть связь, с заказом
         $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
         if ($orderContent) {
+
+            //Вернуть продукт поставщика
+            $orderContentProduct = CatalogBaseGoods::findOne(['id' => $orderContent->product_id]);
+            if($orderContentProduct) {
+                $arr['product']['name'] = $orderContent->product_id;
+                $arr['product']['name'] = $orderContentProduct->product;
+            }
+
+            //получаем из массового сопоставления
+            //todo_refactor from helper with main_org mapping
             $outerProductMap = OuterProductMap::findOne(['product_id' => $orderContent->product_id]);
             if ($outerProductMap) {
-                $arr['koef'] = $outerProductMap->coefficient;
                 //Если отличаются продукты, надо подсвечивать на фронте
                 if ($waybillContent->outer_product_id != $outerProductMap->outer_product_id) {
                     $arr['outer_product']['equality'] = true;
@@ -211,18 +243,12 @@ class IntegrationWebApi extends WebApi
                 if ($waybillContent->waybill->outer_store_id != $outerProductMap->outer_store_id) {
                     $arr['outer_store']['equality'] = true;
                 }
-                //Если ставка НДС пустая то заполняем, если отличается, то надо подсвечивать на фронте
+                //Если ставка НДС отличается, то надо подсвечивать на фронте
                 $arr['outer_vat']['equality'] = (!empty($outerProductMap->vat) &&
                     $outerProductMap->vat == $waybillContent->vat_waybill);
-                if (empty($waybillContent->vat_waybill)) {
-                    $arr['outer_vat']['value'] = $outerProductMap->vat;
-                }
-                //Если коэффициент пустой то заполняем, если отличается, то надо подсвечивать на фронте
+                //Если коэффициент отличается, то надо подсвечивать на фронте
                 $arr['outer_coefficient']['equality'] = (!empty($outerProductMap->coefficient) &&
                     $outerProductMap->coefficient == $waybillContent->koef);
-                if (empty($waybillContent->koef)) {
-                    $arr['outer_coefficient']['value'] = $outerProductMap->coefficient;
-                }
             }
         }
 
@@ -230,22 +256,16 @@ class IntegrationWebApi extends WebApi
         if ($outerProduct) {
             $arr['outer_product'] = [
                 'name'     => $outerProduct->name,
-                'id'       => $outerProduct->id,
-                'equality' => false
+                'id'       => $outerProduct->id
             ];
-        } else {
-            $arr['outer_product'] = null;
         }
 
         $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id]);
         if ($outerStore) {
             $arr['outer_store'] = [
                 'name'     => $outerStore->name,
-                'id'       => $outerStore->id,
-                'equality' => false
+                'id'       => $outerStore->id
             ];
-        } else {
-            $arr['outer_store'] = null;
         }
 
         $outerUnit = OuterUnit::findOne(['id' => $waybillContent->outer_unit_id]);
@@ -254,8 +274,6 @@ class IntegrationWebApi extends WebApi
                 'name' => $outerUnit->name,
                 'id'   => $outerUnit->id
             ];
-        } else {
-            $arr['outer_unit'] = null;
         }
 
         return $arr;

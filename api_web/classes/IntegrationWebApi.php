@@ -227,7 +227,7 @@ class IntegrationWebApi extends WebApi
             //Вернуть продукт поставщика
             $orderContentProduct = CatalogBaseGoods::findOne(['id' => $orderContent->product_id]);
             if($orderContentProduct) {
-                $arr['product']['name'] = $orderContent->product_id;
+                $arr['product']['id'] = $orderContent->product_id;
                 $arr['product']['name'] = $orderContentProduct->product;
             }
 

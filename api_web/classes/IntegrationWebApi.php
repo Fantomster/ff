@@ -289,6 +289,75 @@ class IntegrationWebApi extends WebApi
     public function updateWaybillContent(array $post): array
     {
         $this->validateRequest($post, ['waybill_content_id']);
+        $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
+        if (!$waybillContent) {
+            throw new BadRequestHttpException("waybill content not found");
+        }
+
+        if (isset($post['outer_product_id']) && !empty($post['outer_product_id'])) {
+            $waybillContent->outer_product_id = $post['outer_product_id'];
+            $waybillContent->outer_unit_id = $waybillContent->productOuter->outer_unit_id;
+        }
+
+        //Если один из параметров был изменен, сделаем пересчет
+        $evaluteCalc = (isset($post['vat_waybill']) ||
+                        isset($post['quantity_waybill']) ||
+                        isset($post['price_without_vat']) ||
+                        isset($post['price_with_vat']) ||
+                        isset($post['sum_without_vat']) ||
+                        isset($post['sum_with_vat'])
+        );
+        //Если собрались считать, но нам прислали все суммы, считать не будем
+        $evaluteCalc = !($evaluteCalc &&
+                        isset($post['price_without_vat']) &&
+                        isset($post['price_with_vat']) &&
+                        isset($post['sum_without_vat']) &&
+                        isset($post['sum_with_vat'])
+        );
+        //Заполнили все параметры и изменили полученные от фронта
+        //$wcOuterProduct =       $waybillContent->outer_product_id;
+        //$wcOuterProductUnit =   $waybillContent->productOuter->outer_unit_id;
+        $wcVat =                (int)($post['vat_waybill'] ?? $waybillContent->vat_waybill);
+        $wcKoef =               (float)($post['koef'] ?? $waybillContent->koef);
+        $wcQuantity =           (float)($post['quantity_waybill'] ?? $waybillContent->quantity_waybill);
+        $wcPrice =              (float)($post['price_without_vat'] ?? $waybillContent->price_without_vat);
+        $wcPriceVat =           (float)($post['price_with_vat'] ?? $waybillContent->price_with_vat);
+        $wcSum =                (float)($post['sum_without_vat'] ?? $waybillContent->sum_without_vat);
+        $wcSumVat =             (float)($post['sum_with_vat'] ?? $waybillContent->sum_with_vat);
+
+        if ($evaluteCalc) {
+            if (isset($post['price_with_vat']) &&
+                !isset($post['price_without_vat'])) {
+                $wcPrice = ($wcPriceVat / (100 + $wcVat) * 100);
+            }
+            $wcPriceVat = $wcPrice / 100 * $wcVat + $wcPrice;
+            $wcSum = $wcPrice * $wcQuantity;
+            $wcSumVat = ($wcPrice / 100 * $wcVat + $wcPrice) * $wcQuantity;
+        }
+
+        $waybillContent->vat_waybill = $wcVat;
+        $waybillContent->koef = $wcKoef;
+        $waybillContent->quantity_waybill = $wcQuantity;
+        $waybillContent->price_without_vat = Round($wcPrice, 2);
+        $waybillContent->price_with_vat = Round($wcPriceVat, 2);
+        $waybillContent->sum_without_vat = Round($wcSum, 2);
+        $waybillContent->sum_with_vat = Round($wcSumVat, 2);
+
+        try {
+            $waybillContent->save();
+        } catch (\Exception $exception) {
+            //todo_refactor
+            throw $exception;
+        }
+
+        $call = [
+            'waybill_content_id'    => $waybillContent-id,
+            'service_id'            => $waybillContent->waybill->id
+        ];
+
+        return $this->showWaybillContent($call);
+
+        $this->validateRequest($post, ['waybill_content_id']);
 
         $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
         if (!$waybillContent) {
@@ -296,7 +365,7 @@ class IntegrationWebApi extends WebApi
         }
 
         if (isset($post['vat_waybill'])) {
-            $waybillContent->vat_waybill = (float)$post['vat_waybill'];
+            $waybillContent->vat_waybill = (int)$post['vat_waybill'];
         }
 
         if (isset($post['outer_unit_id'])) {
@@ -326,6 +395,7 @@ class IntegrationWebApi extends WebApi
      */
     private function handleWaybillContent($waybillContent, $post, $quan, $koef)
     {
+
         if (!OuterProduct::find()->where(['id' => $post['outer_product_id']])->exists()) {
             throw new BadRequestHttpException('outer_product_not_found');
         }

@@ -112,19 +112,23 @@ class Waybill extends BaseWaybill implements DocumentInterface
      */
     public function resetPositions()
     {
-        if (isset($this->order)) {
-            $transaction = \Yii::$app->db_api->beginTransaction();
-            try {
-                WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = ' . $this->id);
-                $this->status_id = Registry::WAYBILL_RESET;
-                if (!$this->save()) {
-                    throw new ValidationException($this->getFirstErrors());
-                }
-                $transaction->commit();
-            } catch (\Throwable $e) {
-                $transaction->rollBack();
-                throw $e;
+        //Если нет связи с заказом
+        if (!isset($this->order)) {
+            throw new BadRequestHttpException("document_has_not_path_to_order");
+        }
+        $transaction = \Yii::$app->db_api->beginTransaction();
+        try {
+            WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = ' . $this->id);
+            $this->status_id = Registry::WAYBILL_RESET;
+            if (!$this->save()) {
+                //todo_refactor
+                throw new ValidationException($this->getFirstErrors());
             }
+            $transaction->commit();
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            //todo_refactor
+            throw $e;
         }
         return true;
     }

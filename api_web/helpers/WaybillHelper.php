@@ -303,7 +303,8 @@ class WaybillHelper
             $waybillContent = new WaybillContent();
             $waybillContent->waybill_id = $request['waybill_id'];
             $waybillContent->order_content_id = $orderContent->id;
-            $waybillContent->outer_product_id = $outerProductMap->outer_product_id ?? $orderContent->product_id;
+            //todo_refactor нужно брать через helper, что бы учитывать главный бизнес
+            $waybillContent->outer_product_id = $outerProductMap->outer_product_id;
             $waybillContent->quantity_waybill = (float)$quantity;
             $waybillContent->vat_waybill = $taxRate;
             $waybillContent->sum_with_vat = (int)(isset($priceWithVat) ? $priceWithVat * $quantity * 100 : null);

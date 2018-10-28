@@ -115,16 +115,13 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
             throw new BadRequestHttpException('document.not_support_type');
         }
-        if (isset($post['has_order_content']) && is_bool($post['has_order_content'])) {
-            $hasOrderContent = $post['has_order_content'];
-        }
 
         switch (strtolower($post['type'])) {
             case self::TYPE_ORDER :
                 return $this->getDocumentOrder($post['document_id'], $post['service_id']);
                 break;
             case self::TYPE_WAYBILL:
-                return $this->getDocumentWaybill($post['document_id'], $post['service_id'], $hasOrderContent);
+                return $this->getDocumentWaybill($post['document_id'], $post['service_id']);
                 break;
             default:
                 throw new BadRequestHttpException('document.not_support_type');
@@ -189,7 +186,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      */
-    private function getDocumentWaybill($document_id, $service_id, $hasOrderContent = false)
+    private function getDocumentWaybill($document_id, $service_id)
     {
         $result = [
             'documents' => [],
@@ -201,11 +198,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 ->select('id')
                 ->from(\common\models\WaybillContent::tableName())
                 ->where('waybill_id = :doc_id', [':doc_id' => (int)$document_id]);
-            if ($hasOrderContent === true) {
-                $query->andWhere(['not', ['order_content_id' => null]]);
-            } elseif ($hasOrderContent === false) {
-                $query->andWhere(['order_content_id' => null]);
-            }
+
             $positions = $query->all(\Yii::$app->db_api);
 
             if (!empty($positions)) {

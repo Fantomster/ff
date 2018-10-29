@@ -65,7 +65,6 @@ class OrganizationController extends Controller
                             'ajax-update-status',
                             'list-organizations-for-licenses',
                             'add-license',
-                            'employees'
                         ],
                         'allow'   => true,
                         'roles'   => [
@@ -99,25 +98,6 @@ class OrganizationController extends Controller
                     'searchModel'  => $searchModel,
                     'dataProvider' => $dataProvider,
         ]);
-    }
-
-    /**
-     * Lists all employees
-     */
-    public function actionEmployees($id)
-    {
-        $organization_id                         = $id;
-        $organization                            = Organization::findOne(['id' => $organization_id]);
-        if (empty($organization)) {
-            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
-        }
-        /** @var \common\models\search\UserSearch $searchModel */
-        $searchModel                             = new \common\models\search\UserSearch();
-        $params['UserSearch']                    = Yii::$app->request->post("UserSearch");
-        $params['UserSearch']['organization_id'] = $organization_id;
-        $dataProvider                            = $searchModel->search($params);
-
-        return $this->render('employees', compact('searchModel', 'dataProvider', 'organization'));
     }
 
     /**

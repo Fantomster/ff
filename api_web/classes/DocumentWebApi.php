@@ -425,8 +425,12 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         try {
-            $waybill->resetPositions();
-            return $waybill->prepare();
+            if($waybill->resetPositions()) {
+                return $waybill->prepare();
+            } else {
+                throw new BadRequestHttpException('waybill.error_reset_positions');
+            }
+
         } catch (\Throwable $e) {
             throw $e;
         }

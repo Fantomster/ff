@@ -11,6 +11,7 @@ use common\models\Organization;
 use common\models\OuterAgent;
 use common\models\OuterStore;
 use common\models\Waybill as BaseWaybill;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class Waybill
@@ -118,16 +119,14 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
         $transaction = \Yii::$app->db_api->beginTransaction();
         try {
-            WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = ' . $this->id);
+            WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = :wid', [':wid' => $this->id]);
             $this->status_id = Registry::WAYBILL_RESET;
             if (!$this->save()) {
-                //todo_refactor
                 throw new ValidationException($this->getFirstErrors());
             }
             $transaction->commit();
         } catch (\Throwable $e) {
             $transaction->rollBack();
-            //todo_refactor
             throw $e;
         }
         return true;

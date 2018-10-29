@@ -59,6 +59,8 @@ class MercuryReportSearch extends Journal
         ]);
 
         $this->load($params);
+        $this->service_id = 4;
+        $this->operation_code = '3';
 
         if (!$this->validate()) {
             $this->dateFrom = date('Y-m-d', strtotime(date('Y-m-d') . ' - 3 month'));
@@ -71,7 +73,8 @@ class MercuryReportSearch extends Journal
             $this->dateFrom = date('Y-m-d', strtotime(date('Y-m-d') . ' - 3 month'));
             $this->dateTo = date('Y-m-d');
         }
-        $query->andWhere('log.created_at between :dateFrom and :dateTo', [':dateFrom' => $this->dateFrom, ':dateTo' => $this->dateTo]);
+
+        $query->andWhere('log.created_at1 between :dateFrom and :dateTo', [':dateFrom' => $this->dateFrom, ':dateTo' => $this->dateTo]);
 
         if (isset($this->orgName))
             $query->andWhere('org.name like :org_name', [':org_name' => '%' . $this->orgName . '%']);

@@ -99,5 +99,9 @@ return [
         'pdfLink'        => 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=1&preview=false&_action=printVetDocumentList&_language=ru&isplayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=&printPk=',
         'chooseFirmLink' => 'https://t2-mercury.vetrf.ru/hs/operatorui?_action=chooseServicedFirm&_language=ru&firmGuid=',
     ],
-    'edi_api_leradata_url' => 'https://leradata.pro/api/vetis/api.php',
+    'edi_api_data' => [
+        'edi_api_leradata_url' => 'https://leradata.pro/api/vetis/api.php',
+        'edi_api_order_document_id' => 220,
+        'edi_api_recadv_document_id' => 351
+    ]
 ];

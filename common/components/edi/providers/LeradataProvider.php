@@ -45,7 +45,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     public function __construct()
     {
         $this->ediProvider = new EDIProvidersClass();
-        $this->url = \Yii::$app->params['edi_api_leradata_url'];
+        $this->url = \Yii::$app->params['edi_api_data']['edi_api_leradata_url'];
     }
 
     /**
@@ -92,16 +92,17 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             $list = $obj['response'];
             if (!empty($list)) {
                 foreach ($list as $key => $xml) {
-                    if ($type == 'pricat') {
-                        $xml = json_decode(json_encode($xml, JSON_UNESCAPED_UNICODE));
-                        $res = $this->realization->handlePriceListUpdating($key, $xml);
-                    } else {
-                        $res = $this->realization->handleOrderResponse($xml, $type, false, $key);
-                    }
-                    if (!$res) {
-                        $jsonData = json_encode($xml);
-                        $this->updateQueue($key, parent::STATUS_ERROR, 'Error handling Leradata file', $jsonData);
-                    }
+                        if ($type == 'pricat') {
+                            $xml = json_decode(json_encode($xml, JSON_UNESCAPED_UNICODE));
+                            $this->realization->handlePriceListUpdating($key, $xml);
+                        } else {
+                            $exceptionArray = [
+                                'file_id' => $key,
+                                'status' => parent::STATUS_ERROR,
+                                'json_data' => json_encode($xml)
+                            ];
+                            $this->realization->handleOrderResponse($xml, $type, false, $exceptionArray);
+                        }
                 }
             }
         }

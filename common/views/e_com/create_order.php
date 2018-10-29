@@ -1,6 +1,6 @@
 <?= '<?xml version="1.0" encoding="utf-8"?>'; ?>
 <ORDER>
-    <DOCUMENTNAME>220</DOCUMENTNAME>
+    <DOCUMENTNAME><?= Yii::$app->params['edi_api_data']['edi_api_order_document_id'] ?></DOCUMENTNAME>
     <NUMBER><?= $order->id ?></NUMBER>
     <DATE><?= $dateArray['created_at'] ?></DATE>
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>

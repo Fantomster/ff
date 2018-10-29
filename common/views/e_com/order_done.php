@@ -1,7 +1,7 @@
 <?= '<?xml version="1.0" encoding="utf-8"?>'; ?>
 <RECADV>
     <NUMBER><?= $order->id ?></NUMBER>
-    <DOCACTION>351</DOCACTION>
+    <DOCACTION><?= Yii::$app->params['edi_api_data']['edi_api_recadv_document_id'] ?></DOCACTION>
     <DATE><?= $dateArray['created_at'] ?></DATE>
     <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?></RECEPTIONDATE>
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>

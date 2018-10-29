@@ -26,8 +26,9 @@ use common\models\Organization;
 use common\models\RelationSuppRest;
 use common\models\User;
 use frontend\controllers\OrderController;
-use yii\db\Expression;
+use yii\base\Exception;
 use Yii;
+use yii\db\Expression;
 
 /**
  * Class Realization
@@ -68,207 +69,219 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
         return $this->edi->insertGood($catID, $catalogBaseGoodID, $price);
     }
 
-    public function handleOrderResponse($simpleXMLElement, $documentType, $isAlcohol = false, $key)
+    public function handleOrderResponse($simpleXMLElement, $documentType, $isAlcohol = false, $exceptionArray)
     {
-        $simpleXMLElement = json_decode(json_encode($simpleXMLElement, JSON_UNESCAPED_UNICODE));
-        $orderID = $simpleXMLElement->NUMBER;
-        $head = $simpleXMLElement->HEAD[0];
-        $supplier = $head->BUYER;
-        $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
-        if (!$ediOrganization) {
-            return false;
-        }
-        $order = Order::findOne(['id' => $orderID, 'vendor_id' => $ediOrganization->organization_id]);
-        $message = "";
-        if (!$order) {
-            Yii::error('No such order ID: ' . $orderID);
-            return false;
-        }
-        \Yii::$app->language = $order->edi_order->lang ?? 'ru';
-        $user = User::findOne(['id' => $order->created_by_id]);
-
-        $positions = $head->POSITION ?? null;
-        $isDesadv = false;
-
-        if (!count($positions)) {
-            $seq = $head->PACKINGSEQUENCE[0];
-            $positions = $seq->POSITION;
-            $isDesadv = true;
-        }
-        $positionsArray = [];
-        $arr = [];
-        $barcodeArray = [];
-        $totalQuantity = 0;
-        $totalPrice = 0;
-
-        foreach ($positions as $position) {
-            $contID = (int)$position->PRODUCTIDBUYER;
-            if (!$contID) {
-                $contID = (int)$position->PRODUCT;
+        try {
+            $simpleXMLElement = json_decode(json_encode($simpleXMLElement, JSON_UNESCAPED_UNICODE));
+            $orderID = $simpleXMLElement->NUMBER;
+            $head = $simpleXMLElement->HEAD[0];
+            $supplier = $head->BUYER;
+            $ediOrganization = EdiOrganization::findOne(['gln_code' => 111]);
+            if (!$ediOrganization) {
+                throw new Exception('no EDI organization found');
             }
-            $positionsArray[] = (int)$contID;
-            if ($isDesadv) {
-                $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
-            } else {
-                $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
+            $order = Order::findOne(['id' => $orderID, 'vendor_id' => $ediOrganization->organization_id]);
+            $message = "";
+            if (!$order) {
+                throw new Exception('No such order ID: ' . $orderID);
             }
-            $arr[$contID]['PRICE'] = (float)$position->PRICE ?? 0;
-            $arr[$contID]['PRICEWITHVAT'] = (float)$position->PRICEWITHVAT ?? 0.00;
-            $arr[$contID]['TAXRATE'] = (isset($position->VAT)) ? (float)$position->VAT : 0.00;
-            $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
-            $arr[$contID]['WAYBILLNUMBER'] = isset($position->WAYBILLNUMBER) ? $position->WAYBILLNUMBER : null;
-            $arr[$contID]['WAYBILLDATE'] = isset($position->WAYBILLDATE) ? $position->WAYBILLDATE : null;
-            $arr[$contID]['DELIVERYNOTENUMBER'] = isset($position->DELIVERYNOTENUMBER) ? $position->DELIVERYNOTENUMBER : null;
-            $arr[$contID]['DELIVERYNOTEDATE'] = isset($position->DELIVERYNOTEDATE) ? $position->DELIVERYNOTEDATE : null;
-            $arr[$contID]['GTIN'] = isset($position->GTIN) ? $position->GTIN : null;
-            $arr[$contID]['UUID'] = isset($position->UUID) ? $position->UUID : null;
-            $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
-            $totalPrice += $arr[$contID]['PRICE'];
-        }
+            \Yii::$app->language = $order->edi_order->lang ?? 'ru';
+            $user = User::findOne(['id' => $order->created_by_id]);
 
-        if ($totalQuantity == 0.00 || $totalPrice == 0.00) {
-            OrderController::sendOrderCanceled($order->client, $order);
-            $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
-            OrderController::sendSystemMessage($user, $order->id, $message);
-            $order->status = OrderStatus::STATUS_REJECTED;
-            $order->save();
-            return true;
-        }
-        $summ = 0;
-        $ordContArr = [];
-        foreach ($order->orderContent as $orderContent) {
-            $index = $orderContent->article;
-            $ordContArr[] = $orderContent->id;
-            if (!isset($arr[$index]['BARCODE'])) {
-                if (isset($orderContent->ediOrderContent)) {
-                    $index = $orderContent->ediOrderContent->barcode;
-                    $ordContArr[] = $index;
-                } else {
-                    continue;
-                }
+            $positions = $head->POSITION ?? null;
+            $isDesadv = false;
+
+            if (!count($positions)) {
+                $seq = $head->PACKINGSEQUENCE[0];
+                $positions = $seq->POSITION;
+                $isDesadv = true;
             }
-            if (!isset($arr[$index]['BARCODE'])) continue;
-            $good = CatalogBaseGoods::findOne(['barcode' => $arr[$index]['BARCODE']]);
-            if (!$good) continue;
-            $barcodeArray[] = $good->barcode;
+            $positionsArray = [];
+            $arr = [];
+            $barcodeArray = [];
+            $totalQuantity = 0;
+            $totalPrice = 0;
 
-            $ordCont = OrderContent::findOne(['id' => $orderContent->id]);
-            if (!$ordCont) continue;
-            if (!in_array($index, $positionsArray)) {
-                $ordCont->delete();
-                $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-            } else {
-                $oldQuantity = (float)$ordCont->quantity;
-                $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
-
-                if ($oldQuantity != $newQuantity) {
-                    if ($newQuantity == 0) {
-                        $ordCont->delete();
-                        $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-                    } else {
-                        $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
-                    }
-                }
-
-                $oldPrice = (float)$ordCont->price;
-                $newPrice = (float)$arr[$index]['PRICE'];
-                if ($oldPrice != $newPrice) {
-                    if ($newPrice == 0) {
-                        $ordCont->delete();
-                        $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-                    } else {
-                        $change = " <br/>" . Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' => $orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol' => $order->currency->iso_code]) . " " . $newPrice . " руб";
-                        $message .= $change;
-                    }
-                }
-                $summ += $newQuantity * $newPrice;
-                Yii::$app->db->createCommand()->update('order_content', ['price' => $newPrice, 'quantity' => $newQuantity, 'updated_at' => new Expression('NOW()')], 'id=' . $ordCont->id)->execute();
-
-                $docType = ($isAlcohol) ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
-                $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $orderContent->id]);
-
-                if ($ediOrderContent) {
-                    $ediOrderContent->doc_type = $docType;
-                    $ediOrderContent->pricewithvat = $arr[$index]['PRICEWITHVAT'] ?? 0.00;
-                    $ediOrderContent->taxrate = $arr[$index]['TAXRATE'] ?? 0.00;
-                    $ediOrderContent->uuid = $arr[$index]['UUID'];
-                    $ediOrderContent->gtin = $arr[$index]['GTIN'];
-                    $ediOrderContent->waybill_date = $arr[$index]['WAYBILLDATE'];
-                    $ediOrderContent->waybill_number = $arr[$index]['WAYBILLNUMBER'];
-                    $ediOrderContent->delivery_note_date = $arr[$index]['DELIVERYNOTEDATE'];
-                    $ediOrderContent->delivery_note_number = $arr[$index]['DELIVERYNOTENUMBER'];
-                    $ediOrderContent->save();
-                }
-                $orderContent->vat_product = $arr[$index]['TAXRATE'] ?? 0.00;
-                $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
-                $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
-                if ($documentType == 2) {
-                    $orderContent->edi_desadv = $key;
-                }
-                if ($documentType == 3) {
-                    $orderContent->edi_alcdes = $key;
-                }
-                $orderContent->save();
-            }
-        }
-
-        if (!$isDesadv) {
             foreach ($positions as $position) {
-                if ($position->ACCEPTEDQUANTITY == 0.00 || $position->PRICE == 0.00) continue;
                 $contID = (int)$position->PRODUCTIDBUYER;
                 if (!$contID) {
                     $contID = (int)$position->PRODUCT;
                 }
-                if (!$contID) continue;
-                $barcode = (int)$position->PRODUCT;
-                if (!in_array($contID, $ordContArr) && !in_array($barcode, $barcodeArray)) {
-                    $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
-                    if (!$good) continue;
-                    if ($isDesadv) {
-                        $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
+                $positionsArray[] = (int)$contID;
+                if ($isDesadv) {
+                    $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
+                } else {
+                    $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
+                }
+                $arr[$contID]['PRICE'] = (float)$position->PRICE ?? 0;
+                $arr[$contID]['PRICEWITHVAT'] = (float)$position->PRICEWITHVAT ?? 0.00;
+                $arr[$contID]['TAXRATE'] = (isset($position->VAT)) ? (float)$position->VAT : 0.00;
+                $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
+                $arr[$contID]['WAYBILLNUMBER'] = isset($position->WAYBILLNUMBER) ? $position->WAYBILLNUMBER : null;
+                $arr[$contID]['WAYBILLDATE'] = isset($position->WAYBILLDATE) ? $position->WAYBILLDATE : null;
+                $arr[$contID]['DELIVERYNOTENUMBER'] = isset($position->DELIVERYNOTENUMBER) ? $position->DELIVERYNOTENUMBER : null;
+                $arr[$contID]['DELIVERYNOTEDATE'] = isset($position->DELIVERYNOTEDATE) ? $position->DELIVERYNOTEDATE : null;
+                $arr[$contID]['GTIN'] = isset($position->GTIN) ? $position->GTIN : null;
+                $arr[$contID]['UUID'] = isset($position->UUID) ? $position->UUID : null;
+                $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
+                $totalPrice += $arr[$contID]['PRICE'];
+            }
+
+            if ($totalQuantity == 0.00 || $totalPrice == 0.00) {
+                OrderController::sendOrderCanceled($order->client, $order);
+                $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
+                OrderController::sendSystemMessage($user, $order->id, $message);
+                $order->status = OrderStatus::STATUS_REJECTED;
+                $order->save();
+                return true;
+            }
+            $summ = 0;
+            $ordContArr = [];
+            foreach ($order->orderContent as $orderContent) {
+                $index = $orderContent->article;
+                $ordContArr[] = $orderContent->id;
+                if (!isset($arr[$index]['BARCODE'])) {
+                    if (isset($orderContent->ediOrderContent)) {
+                        $index = $orderContent->ediOrderContent->barcode;
+                        $ordContArr[] = $index;
                     } else {
-                        $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+                        continue;
                     }
-                    Yii::$app->db->createCommand()->insert('order_content', [
-                        'order_id'         => $order->id,
-                        'product_id'       => $good->id,
-                        'quantity'         => $quan,
-                        'price'            => (float)$position->PRICE,
-                        'initial_quantity' => $quan,
-                        'product_name'     => $good->product,
-                        'plan_quantity'    => $quan,
-                        'plan_price'       => (float)$position->PRICE,
-                        'units'            => $good->units,
-                        'updated_at'       => new Expression('NOW()'),
-                    ])->execute();
-                    $message .= Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
-                    $summ += $quan * $position->PRICE;
+                }
+                if (!isset($arr[$index]['BARCODE'])) continue;
+                $good = CatalogBaseGoods::findOne(['barcode' => $arr[$index]['BARCODE']]);
+                if (!$good) continue;
+                $barcodeArray[] = $good->barcode;
+
+                $ordCont = OrderContent::findOne(['id' => $orderContent->id]);
+                if (!$ordCont) continue;
+                if (!in_array($index, $positionsArray)) {
+                    $ordCont->delete();
+                    $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
+                } else {
+                    $oldQuantity = (float)$ordCont->quantity;
+                    $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
+
+                    if ($oldQuantity != $newQuantity) {
+                        if ($newQuantity == 0) {
+                            $ordCont->delete();
+                            $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
+                        } else {
+                            if ($good->ed) {
+                                $measure = $good->ed;
+                            } else {
+                                $measure = '';
+                            }
+                            $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $measure]) . " $newQuantity " . $measure;
+                        }
+                    }
+
+                    $oldPrice = (float)$ordCont->price;
+                    $newPrice = (float)$arr[$index]['PRICE'];
+                    if ($oldPrice != $newPrice) {
+                        if ($newPrice == 0) {
+                            $ordCont->delete();
+                            $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
+                        } else {
+                            $change = " <br/>" . Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' => $orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol' => $order->currency->iso_code]) . " " . $newPrice . " руб";
+                            $message .= $change;
+                        }
+                    }
+                    $summ += $newQuantity * $newPrice;
+                    Yii::$app->db->createCommand()->update('order_content', ['price' => $newPrice, 'quantity' => $newQuantity, 'updated_at' => new Expression('NOW()')], 'id=' . $ordCont->id)->execute();
+
+                    $orderContent->vat_product = $arr[$index]['TAXRATE'] ?? 0.00;
+                    $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
+                    $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
+                    if ($documentType == 2) {
+                        $orderContent->edi_desadv = $key;
+                    }
+                    if ($documentType == 3) {
+                        $orderContent->edi_alcdes = $key;
+                    }
+
+                    $orderContent->save();
                 }
             }
+
+            if (!$isDesadv) {
+                foreach ($positions as $position) {
+                    if ($position->ACCEPTEDQUANTITY == 0.00 || $position->PRICE == 0.00) continue;
+                    $contID = (int)$position->PRODUCTIDBUYER;
+                    if (!$contID) {
+                        $contID = (int)$position->PRODUCT;
+                    }
+                    if (!$contID) continue;
+                    $barcode = (int)$position->PRODUCT;
+                    if (!in_array($contID, $ordContArr) && !in_array($barcode, $barcodeArray)) {
+                        $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
+                        if (!$good) continue;
+                        if ($isDesadv) {
+                            $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
+                        } else {
+                            $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+                        }
+                        Yii::$app->db->createCommand()->insert('order_content', [
+                            'order_id'         => $order->id,
+                            'product_id'       => $good->id,
+                            'quantity'         => $quan,
+                            'price'            => (float)$position->PRICE,
+                            'initial_quantity' => $quan,
+                            'product_name'     => $good->product,
+                            'plan_quantity'    => $quan,
+                            'plan_price'       => (float)$position->PRICE,
+                            'units'            => $good->units,
+                            'updated_at'       => new Expression('NOW()'),
+                        ])->execute();
+                        $message .= Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
+                        $summ += $quan * $position->PRICE;
+                    }
+                }
+            }
+            Yii::$app->db->createCommand()->update('order', ['status' => OrderStatus::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
+            $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
+
+            if ($ediOrder) {
+                $ediOrder->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
+                $ediOrder->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE ?? '';
+                $ediOrder->save();
+            }
+            $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
+            $order->edi_ordersp = $key;
+            $order->service_id = 6;
+            $order->save();
+            if ($message != '') {
+                OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
+            }
+
+            $action = ($isDesadv) ? " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
+
+            $systemMessage = $order->vendor->name . '' . $action;
+            OrderController::sendSystemMessage($user, $order->id, $systemMessage);
+
+            OrderController::sendOrderProcessing($order->client, $order);
+            return true;
+        } catch (Exception $e) {
+            $arr = [
+                'name' => (String)$exceptionArray['file_id'],
+                'organization_id' => $supplier,
+                'status' => $exceptionArray['status'],
+                'error_text' => (String)$e->getMessage(),
+                'json_data' => $exceptionArray['json_data'],
+                'updated_at'       => new Expression('NOW()')
+            ];
+dd($arr);
+            $res = Yii::$app->db->createCommand()->insert('edi_files_queue', [
+                'name' => (String)$exceptionArray['file_id'],
+                'organization_id' => $supplier,
+                'status' => $exceptionArray['status'],
+                'error_text' => (String)$e->getMessage(),
+                'json_data' => $exceptionArray['json_data'],
+                'updated_at'       => new Expression('NOW()')
+            ])->execute();
+            dd($res);
+            //$this->edi->insertEdiErrorData($exceptionArray['file_id'], $supplier, $exceptionArray['status'], $e->getMessage(), $exceptionArray['json_data']);
         }
-        Yii::$app->db->createCommand()->update('order', ['status' => OrderStatus::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
-        $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
-
-        if ($ediOrder) {
-            $ediOrder->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
-            $ediOrder->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE ?? '';
-            $ediOrder->save();
-        }
-        $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
-        $order->edi_ordersp = $key;
-        $order->service_id = 6;
-        $order->save();
-        if ($message != '') {
-            OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
-        }
-
-        $action = ($isDesadv) ? " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
-
-        $systemMessage = $order->vendor->name . '' . $action;
-        OrderController::sendSystemMessage($user, $order->id, $systemMessage);
-
-        OrderController::sendOrderProcessing($order->client, $order);
-        return true;
     }
 
     public function getSendingOrderContent($order, $done, $dateArray, $orderContent)

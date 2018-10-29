@@ -389,4 +389,15 @@ class EDIClass extends Component
         $string = Yii::$app->controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'vendor', 'client', 'dateArray', 'orderContent'));
         return $string;
     }
+
+    public function insertEdiErrorData(int $fileID, int $supplier, int $status, String $errorText = '', String $jsonData = ''): void
+    {
+        Yii::$app->db->createCommand()->insert('edi_files_queue', [
+            'name' => $fileID,
+            'organization_id' => $supplier,
+            'status' => $status,
+            'error_text' => $errorText,
+            'json_data' => $jsonData
+        ])->execute();
+    }
 }

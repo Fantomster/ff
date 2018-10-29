@@ -6,6 +6,7 @@ use api\common\models\AllMaps;
 use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use api_web\helpers\OuterProductMapHelper;
 use common\models\CatalogBaseGoods;
 use common\models\licenses\License;
 use common\models\Order;
@@ -28,6 +29,21 @@ use yii\web\BadRequestHttpException;
  */
 class IntegrationWebApi extends WebApi
 {
+
+    /**
+     * @var OuterProductMapHelper
+     */
+    public $helper;
+
+    /**
+     * IntegrationWebApi constructor.
+     */
+    function __construct()
+    {
+        $this->helper = new OuterProductMapHelper();
+        parent::__construct();
+    }
+
     /**
      * @param $request
      * @return array
@@ -148,23 +164,32 @@ class IntegrationWebApi extends WebApi
             throw new BadRequestHttpException("waybill content not found");
         }
 
-        $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
-        if ($orderContent) {
+        $orderContent = $waybillContent->orderContent;
+        if (!empty($orderContent)) {
+            //Поиск в массовом сопоставлении
+            $outerProductMap = $this->helper->getMapForOrder($orderContent->order, $waybillContent->waybill->service_id, $orderContent->product_id);
+            if (!empty($outerProductMap)) {
+                $outerProductMap = (object)current($outerProductMap);
+                $outerProduct = OuterProduct::findOne($outerProductMap->outer_product_id);
+                $waybillContent->outer_product_id = $outerProduct->id;
+                $waybillContent->outer_unit_id = $outerProduct->outer_unit_id;
+                $waybillContent->vat_waybill = $outerProductMap->vat;
+                $waybillContent->koef = $outerProductMap->coefficient ?? 1;
+            } else {
+                $waybillContent->vat_waybill = $orderContent->vat_product;
+            }
             $waybillContent->quantity_waybill = $orderContent->quantity;
             $waybillContent->price_without_vat = (int)$orderContent->price;
-            $waybillContent->vat_waybill = $orderContent->vat_product;
             $waybillContent->price_with_vat = (int)($orderContent->price + ($orderContent->price * $orderContent->vat_product));
             $waybillContent->sum_without_vat = (int)$orderContent->price * $orderContent->quantity;
             $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $orderContent->quantity;
-            $allMap = AllMaps::findOne(['product_id' => $orderContent->product_id]);
-            if ($allMap) {
-                $waybillContent->outer_product_id = $allMap->serviceproduct_id;
-            }
         } else {
             throw new BadRequestHttpException("order content not found");
         }
 
-        $waybillContent->save();
+        if (!$waybillContent->save()) {
+            throw new ValidationException($waybillContent->getFirstErrors());
+        }
 
         return ['success' => true];
     }

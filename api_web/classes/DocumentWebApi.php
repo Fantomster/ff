@@ -334,7 +334,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 status_id as waybill_status_id, 
                 null as order_date, 
                 doc_date as waybill_date, 
-                edi_number as waybill_number, 
+                null as waybill_number, 
                 outer_number_code as doc_number,  
                 o.vendor_id as vendor, 
                 outer_store_id as store

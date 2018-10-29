@@ -456,4 +456,52 @@ class DocumentController extends \api_web\components\WebApiController
     {
         $this->response = $this->container->get('DocumentWebApi')->getWaybillStatus();
     }
+
+    /**
+     * @SWG\Post(path="/document/sort-list",
+     *     tags={"Documents"},
+     *     summary="Список сортировок",
+     *     description="Список сортировок",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={{}}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  {
+     *                       "waybill_number": "Номеру накладной А-Я",
+     *                       "-waybill_number": "Номеру накладной Я-А",
+     *                       "doc_number": "Номеру документа А-Я",
+     *                       "-doc_number": "Номеру документа Я-А",
+     *                       "waybill_date": "Дате накладной по возрастанию",
+     *                       "-waybill_date": "Дате накладной по убванию",
+     *                       "order_date": "Дата заказа по возрастанию",
+     *                       "-order_date": "Дата заказа по убыванию"
+     *                   }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     * @throws \Exception
+     */
+    public function actionSortList()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->getSortList();
+    }
 }

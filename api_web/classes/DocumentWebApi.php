@@ -351,6 +351,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         id is not null $where_all
        ";
 
+
         if (is_null($sort)) {
             $sql .= 'ORDER BY coalesce(documents.order_date,documents.waybill_date) DESC';
         }
@@ -589,6 +590,24 @@ class DocumentWebApi extends \api_web\components\WebApi
         return array_map(function ($el) {
             return \Yii::t('api_web', 'waybill.' . $el);
         }, Registry::$waybill_statuses);
+    }
+
+    /**
+     * Список сортировок списка документов
+     * @return array
+     */
+    public function getSortList()
+    {
+        return [
+            'waybill_number' => 'Номеру накладной А-Я',
+            '-waybill_number' => 'Номеру накладной Я-А',
+            'doc_number' => 'Номеру документа А-Я',
+            '-doc_number' => 'Номеру документа Я-А',
+            'waybill_date' => 'Дате накладной по возрастанию',
+            '-waybill_date' => 'Дате накладной по убванию',
+            'order_date' => 'Дата заказа по возрастанию',
+            '-order_date' => 'Дата заказа по убыванию',
+            ];
     }
 
     /**

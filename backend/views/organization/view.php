@@ -113,7 +113,7 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
             [
                 'format' => 'raw',
                 'label' => 'Работники',
-                'value' => Html::a('Список', ['client/index', 'UserSearch[organization_id]' => $model->id])
+                'value' => Html::a('Список', ['organization/employees', 'id' => $model->id])
             ],
             [
                 'format' => 'raw',

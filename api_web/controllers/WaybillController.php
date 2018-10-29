@@ -377,9 +377,7 @@ class WaybillController extends WebApiController
      *                  default={
      *                              "waybill_id": 5,
      *                              "outer_product_id": 4352,
-     *                              "outer_unit_id": 8,
      *                              "quantity_waybill": 1,
-     *                              "outer_product_id": 4822,
      *                              "price_without_vat": 35000,
      *                              "vat_waybill": 18
      *                          }

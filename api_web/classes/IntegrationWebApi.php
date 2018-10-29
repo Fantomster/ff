@@ -189,8 +189,8 @@ class IntegrationWebApi extends WebApi
         $arr = $waybillContent->attributes;
 
         $arr['product'] = [
-            'name'     => null,
-            'id'       => null
+            'name' => null,
+            'id'   => null
         ];
 
         $arr['outer_product'] = [
@@ -211,13 +211,13 @@ class IntegrationWebApi extends WebApi
         ];
 
         $arr['vat_waybill'] = [
-            'value'     => $waybillContent->vat_waybill,
-            'equality'  => false
+            'value'    => $waybillContent->vat_waybill,
+            'equality' => false
         ];
 
         $arr['koef'] = [
-            'value'     => $waybillContent->koef,
-            'equality'  => false
+            'value'    => $waybillContent->koef,
+            'equality' => false
         ];
 
         //Если есть связь, с заказом
@@ -226,7 +226,7 @@ class IntegrationWebApi extends WebApi
 
             //Вернуть продукт поставщика
             $orderContentProduct = CatalogBaseGoods::findOne(['id' => $orderContent->product_id]);
-            if($orderContentProduct) {
+            if ($orderContentProduct) {
                 $arr['product']['id'] = $orderContent->product_id;
                 $arr['product']['name'] = $orderContentProduct->product;
             }
@@ -255,16 +255,16 @@ class IntegrationWebApi extends WebApi
         $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id]);
         if ($outerProduct) {
             $arr['outer_product'] = [
-                'name'     => $outerProduct->name,
-                'id'       => $outerProduct->id
+                'name' => $outerProduct->name,
+                'id'   => $outerProduct->id
             ];
         }
 
         $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id]);
         if ($outerStore) {
             $arr['outer_store'] = [
-                'name'     => $outerStore->name,
-                'id'       => $outerStore->id
+                'name' => $outerStore->name,
+                'id'   => $outerStore->id
             ];
         }
 
@@ -301,27 +301,27 @@ class IntegrationWebApi extends WebApi
 
         //Если один из параметров был изменен, будем делать пересчет
         $evaluteCalc = (isset($post['vat_waybill']) ||
-                        isset($post['quantity_waybill']) ||
-                        isset($post['price_without_vat']) ||
-                        isset($post['price_with_vat']) ||
-                        isset($post['sum_without_vat']) ||
-                        isset($post['sum_with_vat'])
+            isset($post['quantity_waybill']) ||
+            isset($post['price_without_vat']) ||
+            isset($post['price_with_vat']) ||
+            isset($post['sum_without_vat']) ||
+            isset($post['sum_with_vat'])
         );
         //Если собрались пересчитывать, но были присланы все суммы, считать не будем
         $evaluteCalc = !($evaluteCalc &&
-                        isset($post['price_without_vat']) &&
-                        isset($post['price_with_vat']) &&
-                        isset($post['sum_without_vat']) &&
-                        isset($post['sum_with_vat'])
+            isset($post['price_without_vat']) &&
+            isset($post['price_with_vat']) &&
+            isset($post['sum_without_vat']) &&
+            isset($post['sum_with_vat'])
         );
         //Заполнили все параметры и изменили полученные от фронта
-        $wcVat =                (int)($post['vat_waybill'] ?? $waybillContent->vat_waybill);
-        $wcKoef =               (float)($post['koef'] ?? $waybillContent->koef);
-        $wcQuantity =           (float)($post['quantity_waybill'] ?? $waybillContent->quantity_waybill);
-        $wcPrice =              (float)($post['price_without_vat'] ?? $waybillContent->price_without_vat);
-        $wcPriceVat =           (float)($post['price_with_vat'] ?? $waybillContent->price_with_vat);
-        $wcSum =                (float)($post['sum_without_vat'] ?? $waybillContent->sum_without_vat);
-        $wcSumVat =             (float)($post['sum_with_vat'] ?? $waybillContent->sum_with_vat);
+        $wcVat = (int)($post['vat_waybill'] ?? $waybillContent->vat_waybill);
+        $wcKoef = (float)($post['koef'] ?? $waybillContent->koef);
+        $wcQuantity = (float)($post['quantity_waybill'] ?? $waybillContent->quantity_waybill);
+        $wcPrice = (float)($post['price_without_vat'] ?? $waybillContent->price_without_vat);
+        $wcPriceVat = (float)($post['price_with_vat'] ?? $waybillContent->price_with_vat);
+        $wcSum = (float)($post['sum_without_vat'] ?? $waybillContent->sum_without_vat);
+        $wcSumVat = (float)($post['sum_with_vat'] ?? $waybillContent->sum_with_vat);
 
         if ($evaluteCalc) {
             if (isset($post['price_with_vat']) &&
@@ -350,8 +350,8 @@ class IntegrationWebApi extends WebApi
         }
         //Подготовим fake request
         $call = [
-            'waybill_content_id'    => $waybillContent->id,
-            'service_id'            => $waybillContent->waybill->service_id
+            'waybill_content_id' => $waybillContent->id,
+            'service_id'         => $waybillContent->waybill->service_id
         ];
         //Вернем обработанную модель деталей позиции
         return $this->showWaybillContent($call);
@@ -411,27 +411,37 @@ class IntegrationWebApi extends WebApi
      */
     public function createWaybillContent(array $post): array
     {
-        $this->validateRequest($post, ['waybill_id', 'outer_product_id', 'outer_unit_id']);
+        $this->validateRequest($post, ['waybill_id', 'outer_product_id']);
 
+        //Поиск накладной
         $waybill = Waybill::findOne(['id' => $post['waybill_id'], 'acquirer_id' => $this->user->organization_id]);
         if (!$waybill) {
             throw new BadRequestHttpException("waybill_not_found");
         }
 
-        $exists = WaybillContent::find()
-            ->where([
-                'waybill_id'       => $waybill->id,
-                'outer_product_id' => $post['outer_product_id']
-            ])->exists();
+        //Найдем продукт у.с.
+        $outerProduct = OuterProduct::findOne([
+            'id'         => (int)$post['outer_product_id'],
+            'service_id' => $waybill->service_id
+        ]);
+        if (empty($outerProduct)) {
+            throw new BadRequestHttpException('waybill.outer_product_not_found');
+        }
 
+        //Проверяем, нет ли в накладной этого продукта
+        $exists = WaybillContent::find()->where([
+            'waybill_id'       => $waybill->id,
+            'outer_product_id' => $outerProduct->id
+        ])->exists();
         if ($exists) {
             throw new BadRequestHttpException("waybill.content_exists");
         }
 
+        //Создаем новую запись
         $waybillContent = new WaybillContent();
-        $waybillContent->waybill_id = $post['waybill_id'];
-        $waybillContent->outer_product_id = $post['outer_product_id'];
-        $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
+        $waybillContent->waybill_id = $waybill->id;
+        $waybillContent->outer_product_id = $outerProduct->id;
+        $waybillContent->outer_unit_id = $outerProduct->outer_unit_id;
         $waybillContent->vat_waybill = (int)$post['vat_waybill'] ?? 0;
         $waybillContent->quantity_waybill = $post['quantity_waybill'] ?? 1;
 

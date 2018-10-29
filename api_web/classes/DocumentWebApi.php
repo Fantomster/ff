@@ -184,7 +184,6 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @param      $document_id
      * @param null $service_id
      * @return array
-     * @throws BadRequestHttpException
      */
     private function getDocumentWaybill($document_id, $service_id)
     {
@@ -602,5 +601,21 @@ class DocumentWebApi extends \api_web\components\WebApi
                 yield $item;
             }
         }
+    }
+
+    /**
+     * @param array $request
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+    public function getDocument(array $request){
+        $this->validateRequest($request, ['service_id', 'type', 'document_id']);
+
+        if (array_key_exists($request['type'], self::$models)) {
+            $modelClass = self::$models[$request['type']];
+            $document = $modelClass::prepareModel($request['document_id']);
+        }
+
+        return array_merge(['document' => $document], $this->getDocumentContents($request));
     }
 }

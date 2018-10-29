@@ -502,7 +502,7 @@ class EdiController extends WebApiController
      *                  default={
      *                      "order_id":1,
      *                      "products": {
-     *                          {"operation":"edit", "id":1 "quantity":2},
+     *                          {"operation":"edit", "id":1, "quantity":2},
      *                          {"operation":"edit", "id":2},
      *                          {"operation":"add", "id":3, "quantity":2},
      *                          {"operation":"delete", "id":4}

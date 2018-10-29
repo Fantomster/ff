@@ -234,6 +234,9 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         $wbContent = WaybillContent::findOne(['order_content_id' => $orderContent->id]);
+        if (!$wbContent) {
+            return false;
+        }
 
         if (!empty($product['quantity'])) {
             $wbContent->quantity_waybill = $product['quantity'];

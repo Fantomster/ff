@@ -340,13 +340,8 @@ class IntegrationWebApi extends WebApi
         $waybillContent->price_with_vat = number_format(round($wcPriceVat, 2), 2, '.', '');
         $waybillContent->sum_without_vat = number_format(round($wcSum, 2), 2, '.', '');
         $waybillContent->sum_with_vat = number_format(round($wcSumVat, 2), 2, '.', '');
-
-        try {
-            //todo_refactor check model has been changed
-            $waybillContent->save();
-        } catch (\Exception $exception) {
-            //todo_refactor change for valid exception
-            throw $exception;
+        if (!$waybillContent->save()) {
+            throw new ValidationException($waybillContent->getFirstErrors());
         }
         //Подготовим fake request
         $call = [

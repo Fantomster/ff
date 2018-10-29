@@ -425,7 +425,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         try {
-            if($waybill->resetPositions()) {
+            if ($waybill->resetPositions()) {
                 return $waybill->prepare();
             } else {
                 throw new BadRequestHttpException('waybill.error_reset_positions');
@@ -464,11 +464,11 @@ class DocumentWebApi extends \api_web\components\WebApi
     {
         $this->validateRequest($post, ['id']);
 
-        $waybill = Waybill::findOne(['id' => $post['id']]);
+        $waybill = Waybill::findOne(['id' => $post['id'], 'acquirer_id' => $this->user->organization_id]);
         if (!isset($waybill)) {
             throw new BadRequestHttpException("waybill_not_found");
         }
-        //todo_refactoring to foreach
+
         if (!empty($post['agent_uid'])) {
             $waybill->outer_agent_id = $post['agent_uid'];
         }

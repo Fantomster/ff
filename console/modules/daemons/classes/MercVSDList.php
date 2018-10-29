@@ -99,6 +99,10 @@ class MercVSDList extends MercDictConsumer
                     if ($vetDocumentList->count > 0) {
                         $vsd->updateDocumentsList($vetDocumentList->vetDocument);
                     }
+                    elseif($vetDocumentList->total == 0)
+                    {
+                        break;
+                    }
 
                     //Готовимся к следующей итерации
                     $curr_count = $vetDocumentList->count ?? 0;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: Konstantin Silukov
@@ -26,22 +27,23 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
  */
 class MercVSDList extends MercDictConsumer
 {
+
     const DEFAULT_STEP = 100;
-    public static $timeout = 60 * 15;
+
+    public static $timeout          = 60 * 15;
     public static $timeoutExecuting = 60 * 60;
-    private $result = true;
+    private $result                 = true;
 
     public function init()
     {
-        $check = 9;/*RabbitQueues::find()->where("consumer_class_name in ('MercUnitList', 'MercPurposeList',
-        'MercCountryList', 'MercRussianEnterpriseList', 'MercForeignEnterpriseList', 'MercBusinessEntityList', 'MercProductList', 'MercProductItemList', 'MercSubProductList')")
-            ->andWhere('start_executing is null and last_executed is not null and data_request is null')->count();*/
+        $check = 9; /* RabbitQueues::find()->where("consumer_class_name in ('MercUnitList', 'MercPurposeList',
+          'MercCountryList', 'MercRussianEnterpriseList', 'MercForeignEnterpriseList', 'MercBusinessEntityList', 'MercProductList', 'MercProductItemList', 'MercSubProductList')")
+          ->andWhere('start_executing is null and last_executed is not null and data_request is null')->count(); */
 
         if ($check == 9) {
-            $this->data = json_decode($this->data, true);
-            $this->data['enterpriseGuid'] = 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b';
+            $this->data  = json_decode($this->data, true);
             $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList', 'organization_id' => $this->org_id, 'store_id' => $this->data['enterpriseGuid']])->one();
-            $this->data = isset($this->queue->data_request) ? json_decode($this->queue->data_request, true) : $this->data;
+            $this->data  = isset($this->queue->data_request) ? json_decode($this->queue->data_request, true) : $this->data;
             if (!isset($this->data)) {
                 $this->log('Not data for request' . PHP_EOL);
                 throw new \Exception('Not data for request');
@@ -54,7 +56,7 @@ class MercVSDList extends MercDictConsumer
 
     public function getData()
     {
-        $className = BaseStringHelper::basename(static::class);
+        $className       = BaseStringHelper::basename(static::class);
         $this->init();
         $this->log('Load for Organization '.$this->data['enterpriseGuid'] . PHP_EOL);
         $load_data_succ = false;
@@ -64,24 +66,24 @@ class MercVSDList extends MercDictConsumer
         $vsd->org_id = $this->org_id;
         $api = mercuryApi::getInstance($this->org_id);
         $api->setEnterpriseGuid($this->data['enterpriseGuid']);
-        $curr_step = $this->data['listOptions']['count']; //Текущий шаг
-        $curr_offset = $this->data['listOptions']['offset']; //Текущий отступ
-        $total = 0;
+        $curr_step       = $this->data['listOptions']['count']; //Текущий шаг
+        $curr_offset     = $this->data['listOptions']['offset']; //Текущий отступ
+        $total           = 0;
         $add_curr_offset = 0;
         try {
             do {
                 try {
                     //Записываем в базу данные о текущем шаге
-                    $add_curr_offset = 0;
+                    $add_curr_offset                     = 0;
                     $this->data['listOptions']['offset'] = $curr_offset;
-                    $this->data['listOptions']['count'] = $curr_step;
-                    $this->data['listOptions'] = $this->data['listOptions'];
-                    $this->queue->data_request = json_encode($this->data);
+                    $this->data['listOptions']['count']  = $curr_step;
+                    $this->data['listOptions']           = $this->data['listOptions'];
+                    $this->queue->data_request           = json_encode($this->data);
                     $this->queue->save();
                     echo "============================" . PHP_EOL;
                     //Выполняем запрос и обработку полученных данных
-                    $load_data_succ = false;
-                    $result = $api->getVetDocumentChangeList($this->data['startDate'], $this->data['listOptions']);
+                    $load_data_succ                      = false;
+                    $result                              = $api->getVetDocumentChangeList($this->data['startDate'], $this->data['listOptions']);
 
                     //Проверяем результат запроса
                     if ($result->application->status != mercLog::COMPLETED) {
@@ -99,11 +101,13 @@ class MercVSDList extends MercDictConsumer
 
                     if ($vetDocumentList->count > 0) {
                         $vsd->updateDocumentsList($vetDocumentList->vetDocument);
+                    } elseif ($vetDocumentList->total == 0) {
+                        break;
                     }
 
                     //Готовимся к следующей итерации
-                    $curr_count = $vetDocumentList->count ?? 0;
-                    $curr_step = self::DEFAULT_STEP;
+                    $curr_count  = $vetDocumentList->count ?? 0;
+                    $curr_step   = self::DEFAULT_STEP;
                     $curr_offset = $vetDocumentList->offset;
                     $count_error = 0;
                 } catch (\Throwable $e) {
@@ -124,7 +128,7 @@ class MercVSDList extends MercDictConsumer
                                 $this->log('ERROR RECORD' . json_encode($this->request, true) . PHP_EOL);
                                 $add_curr_offset++;
                             }
-                            $count_error = 0; //Даем еще три попытки
+                            $count_error    = 0; //Даем еще три попытки
                             $load_data_succ = true;
                         } else {
                             echo "Error 1 " . PHP_EOL;
@@ -135,8 +139,8 @@ class MercVSDList extends MercDictConsumer
                     }
                     $count_error++;
                 }
-                $total = $vetDocumentList->total ?? $total;
-                $offset = $curr_offset;
+                $total       = $vetDocumentList->total ?? $total;
+                $offset      = $curr_offset;
                 $curr_offset += $curr_count;
                 $curr_offset += $add_curr_offset;
                 //sleep(60);
@@ -178,8 +182,10 @@ class MercVSDList extends MercDictConsumer
 
         mercLogger::getInstance()->addMercLogDict('COMPLETE', BaseStringHelper::basename(static::class), null);
 
-        $this->queue->data_request = new Expression('NULL');
-        $this->queue->save();
+        if (isset($this->queue)) {
+            $this->queue->data_request = new Expression('NULL');
+            $this->queue->save();
+        }
 
         $this->addFCMMessage('MercVSDList', $this->data['enterpriseGuid']);
     }
@@ -188,4 +194,5 @@ class MercVSDList extends MercDictConsumer
     {
         return $this->result;
     }
+
 }

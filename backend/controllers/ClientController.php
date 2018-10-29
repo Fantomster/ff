@@ -28,22 +28,31 @@ class ClientController extends Controller
     public function behaviors()
     {
         return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
+            'verbs'  => [
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
-                        'actions' => ['index', 'view', 'update', 'managers', 'postavs', 'restors', 'delete'],
-                        'allow' => true,
-                        'roles' => [
+                        'actions' => [
+                            'index',
+                            'view',
+                            'update',
+                            'managers',
+                            'postavs',
+                            'restors',
+                            'delete',
+                            'employees',
+                        ],
+                        'allow'   => true,
+                        'roles'   => [
                             Role::ROLE_ADMIN,
 //                            Role::ROLE_FKEEPER_OBSERVER,
                         ],
@@ -59,12 +68,31 @@ class ClientController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new UserSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $searchModel    = new UserSearch();
+        $dataProvider   = $searchModel->search(Yii::$app->request->queryParams);
         $exceptionArray = Role::getExceptionArray();
         Yii::$app->session->set("clients", 'index');
         Yii::$app->session->set("clients_name", 'Пользователи');
         return $this->render('index', compact('searchModel', 'dataProvider', 'exceptionArray'));
+    }
+
+    /**
+     * Lists all employees
+     */
+    public function actionEmployees($id)
+    {
+        $organization_id = $id;
+        $organization    = \common\models\Organization::findOne(['id' => $organization_id]);
+        if (empty($organization)) {
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
+        }
+        /** @var \common\models\search\UserSearch $searchModel */
+        $searchModel                             = new \common\models\search\UserSearch();
+        $params['UserSearch']                    = Yii::$app->request->post("UserSearch");
+        $params['UserSearch']['organization_id'] = $organization_id;
+        $dataProvider                            = $searchModel->search($params);
+
+        return $this->render('employees', compact('searchModel', 'dataProvider', 'organization'));
     }
 
     /**
@@ -73,12 +101,12 @@ class ClientController extends Controller
      */
     public function actionManagers()
     {
-        $searchModel = new UserSearch();
+        $searchModel  = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Role::ROLE_FKEEPER_MANAGER);
         Yii::$app->session->set("clients", 'managers');
         Yii::$app->session->set("clients_name", 'Менеджеры MixCart');
         return $this->render('managers', [
-                    'searchModel' => $searchModel,
+                    'searchModel'  => $searchModel,
                     'dataProvider' => $dataProvider,
         ]);
     }
@@ -89,13 +117,13 @@ class ClientController extends Controller
      */
     public function actionPostavs()
     {
-        $searchModel = new UserSearch();
+        $searchModel  = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE]);
         Yii::$app->session->set("clients", 'postavs');
         Yii::$app->session->set("clients_name", 'Сотрудники поставщиков');
 
         return $this->render('postavs', [
-                    'searchModel' => $searchModel,
+                    'searchModel'  => $searchModel,
                     'dataProvider' => $dataProvider,
         ]);
     }
@@ -106,12 +134,12 @@ class ClientController extends Controller
      */
     public function actionRestors()
     {
-        $searchModel = new UserSearch();
+        $searchModel  = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_ONE_S_INTEGRATION]);
         Yii::$app->session->set("clients", 'restors');
         Yii::$app->session->set("clients_name", 'Сотрудники ресторанов');
         return $this->render('restors', [
-                    'searchModel' => $searchModel,
+                    'searchModel'  => $searchModel,
                     'dataProvider' => $dataProvider,
         ]);
     }
@@ -134,7 +162,7 @@ class ClientController extends Controller
         }
 
         return $this->render('view', [
-                    'model' => $this->findModel($id),
+                    'model'        => $this->findModel($id),
                     'newPassModel' => $newPassModel
         ]);
     }
@@ -165,8 +193,8 @@ class ClientController extends Controller
      */
     public function actionUpdate($id)
     {
-        $user = User::findOne(['id' => $id]);
-        $profile = Profile::findOne(['user_id' => $id]);
+        $user        = User::findOne(['id' => $id]);
+        $profile     = Profile::findOne(['user_id' => $id]);
         $currentUser = User::findOne(Yii::$app->user->identity->id);
 
         if (in_array($user->role_id, Role::getExceptionArray())) {
@@ -200,7 +228,7 @@ class ClientController extends Controller
                     $selected = $user->getRelationUserOrganizationRoleID($id);
                 } else {
                     $dropDown[$user->role_id] = Role::getRoleName($user->role_id);
-                    $selected = $user->role_id;
+                    $selected                 = $user->role_id;
                 }
                 return $this->render('update', compact('user', 'profile', 'dropDown', 'selected', 'currentUser'));
             }
@@ -223,10 +251,10 @@ class ClientController extends Controller
             throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.get_out_two', ['ru' => 'Нет здесь ничего такого, проходите, гражданин!']));
         }
 
-        $role = $model->role_id;
-        $model->role_id = Role::ROLE_USER;
+        $role                   = $model->role_id;
+        $model->role_id         = Role::ROLE_USER;
         $model->organization_id = null;
-        $model->status = User::STATUS_INACTIVE;
+        $model->status          = User::STATUS_INACTIVE;
         $model->save();
 
         switch ($role) {

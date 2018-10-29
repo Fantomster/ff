@@ -17,6 +17,12 @@ namespace api_web\components;
 class Registry
 {
 
+    /** MixCart services */
+    #TODO заменить на нормальные значения, когда будем делать лицензии
+    #заполнить ими переменную self::$mc_services
+    const MC_LITE_SERVICE_ID = 100;
+    const MC_BUSINESS_SERVICE_ID = 101;
+    const MC_ENTERPRICE_SERVICE_ID = 102;
     /** - Services section - */
     const RK_SERVICE_ID = 1;
     const IIKO_SERVICE_ID = 2;
@@ -28,23 +34,25 @@ class Registry
     const EDI_SERVICE_ID = 6;
     /**@var int const for 1C (rest) service id in all_service table */
     const ONE_S_CLIENT_SERVICE_ID = 8;
+    /**@var int const for MixCart service_id in all_service table */
+    const MC_BACKEND = 9;
 
     /** - Waybill section - */
-    const WAYBILL_COMPARED = 'compared';
-    const WAYBILL_FORMED = 'formed';
-    const WAYBILL_ERROR = 'error';
-    const WAYBILL_RESET = 'reset';
-    const WAYBILL_UNLOADED = 'unloaded';
-    const WAYBILL_UNLOADING = 'unloading';
+    const WAYBILL_COMPARED = 1;
+    const WAYBILL_FORMED = 2;
+    const WAYBILL_ERROR = 3;
+    const WAYBILL_RESET = 4;
+    const WAYBILL_UNLOADED = 5;
+    const WAYBILL_UNLOADING = 6;
 
     /**@var array $statuses */
     static $waybill_statuses = [
-        1 => self::WAYBILL_COMPARED,
-        2 => self::WAYBILL_FORMED,
-        3 => self::WAYBILL_ERROR,
-        4 => self::WAYBILL_RESET,
-        5 => self::WAYBILL_UNLOADED,
-        6 => self::WAYBILL_UNLOADING,
+        self::WAYBILL_COMPARED  => 'compared',
+        self::WAYBILL_FORMED    => 'formed',
+        self::WAYBILL_ERROR     => 'error',
+        self::WAYBILL_RESET     => 'reset',
+        self::WAYBILL_UNLOADED  => 'unloaded',
+        self::WAYBILL_UNLOADING => 'unloading',
     ];
 
     /**@var array интеграционные сервисы */
@@ -54,5 +62,9 @@ class Registry
         self::MERC_SERVICE_ID,
         self::VENDOR_DOC_MAIL_SERVICE_ID,
         self::ONE_S_CLIENT_SERVICE_ID
+    ];
+
+    /**@var array сервисы MixCart*/
+    static $mc_services = [
     ];
 }

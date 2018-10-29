@@ -6,6 +6,7 @@ use api_web\components\WebApiController;
 
 /**
  * Class OrderController
+ *
  * @package api_web\controllers
  */
 class OrderController extends WebApiController
@@ -69,7 +70,8 @@ class OrderController extends WebApiController
      *                      "ed": "",
      *                      "currency": "RUB",
      *                      "currency_id": 1,
-     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
+     *                      "image":
+     *                      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
      *                  }
      *              },
      *              "client": {
@@ -155,7 +157,8 @@ class OrderController extends WebApiController
      *                          "amount": 100
      *                      },
      *                      "products": {
-     *                          {"operation":"edit", "id":1, "price":200.2, "quantity":2, "comment":"Комментарий к товару!"},
+     *                          {"operation":"edit", "id":1, "price":200.2, "quantity":2, "comment":"Комментарий к
+     *                          товару!"},
      *                          {"operation":"edit", "id":2, "price":100.2},
      *                          {"operation":"add", "id":3, "quantity":2, "comment":"Комментарий к товару!"},
      *                          {"operation":"delete", "id":4}
@@ -203,7 +206,8 @@ class OrderController extends WebApiController
      *                      "ed": "",
      *                      "currency": "RUB",
      *                      "currency_id": 1,
-     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
+     *                      "image":
+     *                      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
      *                  }
      *              },
      *              "client": {
@@ -268,7 +272,6 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('OrderWebApi')->update($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/order/update-order-by-unconfirmed-vendor",
      *     tags={"Order/UnconfirmedVendorActions"},
@@ -293,7 +296,8 @@ class OrderController extends WebApiController
      *                      "delivery_price": 100,
      *                      "actual_delivery": "2016-09-28 15:22:20",
      *                      "products": {
-     *                          {"operation":"edit", "id":1, "price":200.2, "quantity":2, "comment":"Комментарий к товару!"},
+     *                          {"operation":"edit", "id":1, "price":200.2, "quantity":2, "comment":"Комментарий к
+     *                          товару!"},
      *                          {"operation":"edit", "id":2, "price":100.2},
      *                          {"operation":"add", "id":3, "quantity":2, "comment":"Комментарий к товару!"},
      *                          {"operation":"delete", "id":4}
@@ -341,7 +345,8 @@ class OrderController extends WebApiController
      *                      "ed": "",
      *                      "currency": "RUB",
      *                      "currency_id": 1,
-     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
+     *                      "image":
+     *                      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
      *                  }
      *              },
      *              "client": {
@@ -404,7 +409,6 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->update($this->request, true);
     }
-
 
     /**
      * @SWG\Post(path="/order/products",
@@ -486,7 +490,6 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('OrderWebApi')->products($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/order/products-list-for-unconfirmed-vendor",
      *     tags={"Order/UnconfirmedVendorActions"},
@@ -567,7 +570,6 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('OrderWebApi')->products($this->request, true);
     }
 
-
     /**
      * @SWG\Post(path="/order/categories",
      *     tags={"Order"},
@@ -619,7 +621,6 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->categories($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/order/categories-for-unconfirmed-vendor",
@@ -674,7 +675,6 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->categories($this->request, true);
     }
-
 
     /**
      * @SWG\Post(path="/order/comment",
@@ -813,7 +813,8 @@ class OrderController extends WebApiController
      *                      "ed": "",
      *                      "currency": "RUB",
      *                      "currency_id": 1,
-     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx"
+     *                      "image":
+     *                      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx"
      *                  }
      *              },
      *              "client": {
@@ -876,7 +877,6 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->cancel($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/order/cancel-order-by-unconfirmed-vendor",
@@ -999,7 +999,6 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('OrderWebApi')->cancel($this->request, true);
     }
 
-
     /**
      * @SWG\Post(path="/order/repeat",
      *     tags={"Order"},
@@ -1102,7 +1101,8 @@ class OrderController extends WebApiController
      *                      "email": "investor@f-keeper.ru",
      *                      "site": "",
      *                      "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
-     *                      "image": "https://fkeeper.s3.amazonaws.com/org-picture/20d9d738e5498f36654cda93a071622e.jpg",
+     *                      "image":
+     *                      "https://fkeeper.s3.amazonaws.com/org-picture/20d9d738e5498f36654cda93a071622e.jpg",
      *                      "type_id": 1,
      *                      "type": "Ресторан",
      *                      "rating": 0,
@@ -1335,6 +1335,7 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionSaveToPdf()
     {
@@ -1347,6 +1348,49 @@ class OrderController extends WebApiController
             header('Access-Control-Allow-Headers:Content-Type, Authorization');
             exit($result);
         }
+    }
+
+    /**
+     * @SWG\Post(path="/order/set-document-number",
+     *     tags={"Order"},
+     *     summary="Изменение номера документа",
+     *     description="Изменение номера документа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"order_id":1, "document_number": "9038480-1"}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "result":true
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionSetDocumentNumber()
+    {
+        $this->response = $this->container->get('OrderWebApi')->setDocumentNumber($this->request);
     }
 
 }

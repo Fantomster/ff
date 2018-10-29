@@ -556,7 +556,7 @@ $js = <<< JS
 		                            $.post(url, {ids:ids}, function (data) {
 		                                if (data.success === true) {
 		                                    swal.close();
-		                                    swal('Готово', 'Выгруженно ' + data.count + ' накладных', 'success')
+		                                    swal('Готово', 'Выгружено ' + data.count + ' накладных', 'success')
 		                                } else {
 		                                    swal(
 		                                        'Ошибка',

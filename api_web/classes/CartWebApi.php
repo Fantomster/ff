@@ -66,12 +66,7 @@ class CartWebApi extends \api_web\components\WebApi
      */
     private function addItem(array $post)
     {
-        if (!isset($post['quantity'])) {
-            throw new BadRequestHttpException("empty_param|quantity");
-        }
-        if (empty($post['product_id'])) {
-            throw new BadRequestHttpException("empty_param|product_id");
-        }
+        $this->validateRequest($post, ['quantity', 'product_id']);
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
@@ -338,9 +333,7 @@ class CartWebApi extends \api_web\components\WebApi
      */
     public function productComment(array $post)
     {
-        if (empty($post['product_id'])) {
-            throw new BadRequestHttpException("empty_param|product_id");
-        }
+        $this->validateRequest($post, ['product_id']);
 
         /**
          * @var $model CartContent

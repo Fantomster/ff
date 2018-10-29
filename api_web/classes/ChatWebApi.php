@@ -102,9 +102,7 @@ class ChatWebApi extends WebApi
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-        if (empty($post['dialog_id'])) {
-            throw new BadRequestHttpException("empty_param|dialog_id");
-        }
+        $this->validateRequest($post, ['dialog_id']);
 
         $client = $this->user->organization;
         $order = Order::find()->where(['id' => $post['dialog_id']])
@@ -299,9 +297,7 @@ class ChatWebApi extends WebApi
      */
     public function readMessages($post)
     {
-        if (empty($post['dialog_id'])) {
-            throw new BadRequestHttpException("empty_param|dialog_id");
-        }
+        $this->validateRequest($post, ['dialog_id']);
 
         $order = Order::find()->where(['id' => $post['dialog_id']])->andWhere([
             'or',

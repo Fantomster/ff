@@ -5,7 +5,6 @@ namespace api\common\models;
 use Yii;
 use common\models\Organization;
 
-
 /**
  * This is the model class for table "rk_access".
  *
@@ -28,11 +27,9 @@ use common\models\Organization;
  */
 class RkEdism extends \yii\db\ActiveRecord
 {
-    
     //const STATUS_UNLOCKED = 0;
     //const STATUS_LOCKED = 1;
-      
-    
+
     /**
      * @inheritdoc
      */
@@ -47,10 +44,10 @@ class RkEdism extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['acc','rid','denom'], 'required'],
-            [['acc','rid'], 'integer'],
+            [['acc', 'rid', 'denom'], 'required'],
+            [['acc', 'rid'], 'integer'],
             [['comment'], 'string', 'max' => 255],
-            [['acc','rid','denom','ratio','updated_at', 'group_rid','group_name'],'safe']
+            [['acc', 'rid', 'denom', 'ratio', 'updated_at', 'group_rid', 'group_name'], 'safe']
         ];
     }
 
@@ -60,40 +57,37 @@ class RkEdism extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'fid' => 'FID',
-            'rid' => 'RID Store House',
-            'denom' => 'Наименование Store House',
+            'id'         => 'ID',
+            'fid'        => 'FID',
+            'rid'        => 'RID Store House',
+            'denom'      => 'Наименование Store House',
             'updated_at' => 'Обновлено',
-            'groupname' => 'Вид',
-
+            'groupname'  => 'Вид',
         ];
     }
-    
-    
-    public static function getStatusArray() {
+
+    public static function getStatusArray()
+    {
         return [
-        RkAccess::STATUS_UNLOCKED  => 'Активен',
-        RkAccess::STATUS_LOCKED => 'Отключен',    
+            RkAccess::STATUS_UNLOCKED => 'Активен',
+            RkAccess::STATUS_LOCKED   => 'Отключен',
         ];
     }
 
-    public function getOrganization() {
-           return $this->hasOne(Organization_api::className(), ['id' => 'org']);          
-           
+    public function getOrganization()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'org']);
     }
-    
+
     public function getOrganizationName()
-{
-    $org = $this->organization;
-    return $org ? $org->name : 'no';
-}
-    
-    
+    {
+        $org = $this->organization;
+        return $org ? $org->name : 'no';
+    }
+
     public static function getDb()
     {
-       return \Yii::$app->db_api;
+        return \Yii::$app->db_api;
     }
-
 
 }

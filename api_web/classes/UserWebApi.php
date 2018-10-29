@@ -5,7 +5,9 @@ namespace api_web\classes;
 use api_web\components\Registry;
 use api_web\helpers\WebApiHelper;
 use common\models\licenses\License;
+use common\models\ManagerAssociate;
 use common\models\notifications\EmailNotification;
+use common\models\notifications\SmsNotification;
 use common\models\RelationSuppRest;
 use common\models\RelationUserOrganization;
 use common\models\Role;
@@ -154,11 +156,11 @@ class UserWebApi extends \api_web\components\WebApi
      * Создание профиля пользователя
      *
      * @param array $post
-     * @param User  $user
+     * @param $user
      * @return Profile
      * @throws ValidationException
      */
-    public function createProfile(array $post, User $user)
+    public function createProfile(array $post, $user)
     {
         $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
         if (mb_substr($phone, 0, 1) == '8') {
@@ -189,9 +191,7 @@ class UserWebApi extends \api_web\components\WebApi
     {
         WebApiHelper::clearRequest($post);
 
-        if (!isset($post['user_id'])) {
-            throw new BadRequestHttpException('empty_param|user_id');
-        }
+        $this->validateRequest($post, ['user_id']);
 
         $model = User::findOne($post['user_id']);
         if (empty($model)) {
@@ -239,17 +239,11 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function confirm(array $post)
     {
+        $this->validateRequest($post, ['user_id', 'code']);
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $user_id = (int)trim($post['user_id']);
-            if (empty($user_id)) {
-                throw new BadRequestHttpException('empty_param|user_id');
-            }
-
             $code = (int)trim($post['code']);
-            if (empty($code)) {
-                throw new BadRequestHttpException('empty_param|code');
-            }
 
             $userToken = UserToken::findByPIN($code, [UserToken::TYPE_EMAIL_ACTIVATE]);
             if (!$userToken || ($userToken->user_id !== $user_id)) {
@@ -281,10 +275,7 @@ class UserWebApi extends \api_web\components\WebApi
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-
-            if (!isset($post['organization_id'])) {
-                throw new BadRequestHttpException('empty_param|organization_id');
-            }
+            $this->validateRequest($post, ['organization_id']);
 
             $organization = Organization::findOne(['id' => $post['organization_id']]);
             if (empty($organization)) {
@@ -556,13 +547,10 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function removeVendor(array $post)
     {
-        if (empty($post['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($post, ['vendor_id']);
 
         $id = (int)$post['vendor_id'];
         $vendor = Organization::find()->where(['id' => $id])->andWhere(['type_id' => Organization::TYPE_SUPPLIER])->one();
-
         if (empty($vendor)) {
             throw new BadRequestHttpException('vendor_not_found');
         }
@@ -598,17 +586,7 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function changePassword($post)
     {
-        if (empty($post['password'])) {
-            throw new BadRequestHttpException('empty_param|password');
-        }
-
-        if (empty($post['new_password'])) {
-            throw new BadRequestHttpException('empty_param|new_password');
-        }
-
-        if (empty($post['new_password_confirm'])) {
-            throw new BadRequestHttpException('empty_param|new_password_confirm');
-        }
+        $this->validateRequest($post, ['password', 'new_password', 'new_password_confirm']);
 
         if (!$this->user->validatePassword($post['password'])) {
             throw new BadRequestHttpException('bad_old_password');
@@ -652,10 +630,7 @@ class UserWebApi extends \api_web\components\WebApi
     public function mobileChange($post)
     {
         WebApiHelper::clearRequest($post);
-
-        if (empty($post['phone'])) {
-            throw new BadRequestHttpException('empty_param|password');
-        }
+        $this->validateRequest($post, ['phone']);
 
         $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['phone']);
         if (mb_substr($phone, 0, 1) == '8') {
@@ -870,11 +845,8 @@ class UserWebApi extends \api_web\components\WebApi
     public function getUserOrganizationBusinessList()
     {
         $res = (new Query())->select(['a.id', 'a.name'])->distinct()->from('organization a')
-            ->leftJoin('relation_user_organization b', 'a.id = b.organization_id')
-            ->where(['or',
-                ['a.parent_id' => $this->user->organization_id],
-                ['a.id' => $this->user->organization_id]
-            ])
+            ->leftJoin('relation_user_organization b', 'a.id = b.organization_id, (select id, parent_id from organization where id = :orgId) c', [':orgId' => $this->user->organization_id])
+            ->where('coalesce(a.parent_id, a.id) = coalesce(c.parent_id, c.id)')
             ->andWhere([
                 'b.user_id' => $this->user->id,
                 'a.type_id' => 1,
@@ -929,7 +901,7 @@ class UserWebApi extends \api_web\components\WebApi
     /**
      * @param $user_id
      * @param $organization_id
-     * @return notifications\SmsNotification
+     * @return SmsNotification
      * @throws BadRequestHttpException
      */
     public function setDefaultSmsNotification($user_id, $organization_id)
@@ -945,10 +917,10 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('no such user relation');
         }
 
-        $notification = notifications\SmsNotification::findOne(['user_id' => $user_id, 'rel_user_org_id' => $relation]);
+        $notification = SmsNotification::findOne(['user_id' => $user_id, 'rel_user_org_id' => $relation]);
 
         if (!$notification) {
-            $notification = new notifications\SmsNotification();
+            $notification = new SmsNotification();
             $notification->user_id = $user_id;
             $notification->rel_user_org_id = $relation;
         }
@@ -967,13 +939,13 @@ class UserWebApi extends \api_web\components\WebApi
      * @param      $profile
      * @param null $associate_org_id
      * @throws BadRequestHttpException
+     * @throws \Exception
      */
     public function initUserOptions($user_id, $organization_id, $profile, $associate_org_id = null)
     {
         $user = \common\models\User::findOne(['id' => $user_id]);
-
-        if (!user) {
-            throw new BadRequestHttpException('user not found');
+        if (!$user) {
+            throw new BadRequestHttpException('user_not_found');
         }
 
         $transaction = \Yii::$app->db_api->beginTransaction();
@@ -992,7 +964,7 @@ class UserWebApi extends \api_web\components\WebApi
 
             $this->setDefaultEmailNotification($user->id, $organization_id);
             $this->setDefaultSmsNotification($user->id, $organization_id);
-            $this->createProfile($profile);
+            $this->createProfile($profile, $user);
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollback();

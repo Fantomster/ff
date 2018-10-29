@@ -6,8 +6,9 @@ use api\common\models\iiko\iikoDicconst;
 use api\common\models\iiko\iikoPconst;
 use api\common\models\iiko\iikoSelectedProduct;
 use api\common\models\iiko\iikoSelectedStore;
-use api\common\models\iiko\iikoService;
 use api\common\models\iiko\search\iikoDicconstSearch;
+use api\common\models\tillypad\TillypadService;
+use api\common\models\tillypad\search\TillypadServiceSearch;
 use common\helpers\ModelsCollection;
 use common\models\Role;
 use common\models\User;
@@ -22,35 +23,35 @@ class SettingsController extends \frontend\modules\clientintegr\modules\iiko\con
     /** @var integer Индекс, заведомо больший количества строк в таблице показа Списка доступных товаров, используется для передачи информации о состоянии флажка "Выделить все" */
     const SELECTED_PRODUCTS_ALL_INDEX = 101;
 
-    /*
+    /**
      * @return string
      */
-    /*public function actionIndex()
+    public function actionIndex()
     {
         $searchModel = new iikoDicconstSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $lic = iikoService::getLicense();
+        $dataProvider = $searchModel->searchTillypad(Yii::$app->request->queryParams);
+        $lic = TillypadService::getLicense();
         $vi = $lic ? 'index' : '/default/_nolic';
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
-                'searchModel' => $searchModel,
+                'searchModel'  => $searchModel,
                 'dataProvider' => $dataProvider,
-                'lic' => $lic,
+                'lic'          => $lic,
             ]);
         } else {
             return $this->render($vi, [
-                'searchModel' => $searchModel,
+                'searchModel'  => $searchModel,
                 'dataProvider' => $dataProvider,
-                'lic' => $lic,
+                'lic'          => $lic,
             ]);
         }
-    }*/
+    }
 
-    /*
+    /**
      * @param $id
      * @return string|\yii\web\Response
      */
-    /*public function actionChangeConst($id)
+    public function actionChangeConst($id)
     {
         $org = Yii::$app->user->identity->organization_id;
         $pConst = iikoPconst::findOne(['const_id' => $id, 'org' => $org]);
@@ -65,7 +66,7 @@ class SettingsController extends \frontend\modules\clientintegr\modules\iiko\con
             }
         }
 
-        $lic = iikoService::getLicense();
+        $lic = TillypadService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
 
         $post = Yii::$app->request->post();
@@ -103,27 +104,28 @@ class SettingsController extends \frontend\modules\clientintegr\modules\iiko\con
             $post['iikoPconst']['value'] = $this->handleSelectedStores($post, $org);
         }
 
-        if ($pConst->load($post) && $pConst->save() && $id != 7) {*/
-    /*if ($pConst->getErrors()) {
-        var_dump($pConst->getErrors());
-        exit;
-    }*/
-    /*return $this->redirect(['index']);
-} else {
-    $dicConst = iikoDicconst::findOne(['id' => $pConst->const_id]);
-    return $this->render($vi, [
-        'model' => $pConst,
-        'dicConst' => $dicConst,
-        'id' => $id,
-        'sort' => $sort,
-        'productSearch' => $productSearch,
-        'cookingPlaceSearch' => $cookingPlaceSearch,
-        'unitSearch' => $unitSearch,
-        'page' => $page,
-    ]);
-}
+        if ($pConst->load($post) && $pConst->save() && $id != 7) {
+            
+            /*if ($pConst->getErrors()) {
+                var_dump($pConst->getErrors());
+                exit;
+            }*/
+            return $this->redirect(['index']);
+        } else {
+            $dicConst = iikoDicconst::findOne(['id' => $pConst->const_id]);
+            return $this->render($vi, [
+                'model'              => $pConst,
+                'dicConst'           => $dicConst,
+                'id'                 => $id,
+                'sort'               => $sort,
+                'productSearch'      => $productSearch,
+                'cookingPlaceSearch' => $cookingPlaceSearch,
+                'unitSearch'         => $unitSearch,
+                'page'               => $page,
+            ]);
+        }
 
-}*/
+    }
 
     /*private function handleSelectedProducts($post, $org)
     {

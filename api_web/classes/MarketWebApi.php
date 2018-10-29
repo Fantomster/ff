@@ -16,12 +16,14 @@ use yii\web\BadRequestHttpException;
 
 /**
  * Class MarketWebApi
+ *
  * @package api_web\classes
  */
 class MarketWebApi extends WebApi
 {
     /**
      * Список доступных для заказа продуктов на маркете
+     *
      * @param $post
      * @return array
      * @throws BadRequestHttpException
@@ -38,13 +40,12 @@ class MarketWebApi extends WebApi
             ->joinWith(['vendor', 'category'])
             ->where([
                 'organization.white_list' => Organization::WHITE_LIST_ON,
-                'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                'status' => CatalogBaseGoods::STATUS_ON,
-                'deleted' => CatalogBaseGoods::DELETED_OFF])
+                'market_place'            => CatalogBaseGoods::MARKETPLACE_ON,
+                'status'                  => CatalogBaseGoods::STATUS_ON,
+                'deleted'                 => CatalogBaseGoods::DELETED_OFF])
             ->andWhere('category_id is not null')
             ->limit($pageSize)
             ->offset($pageSize * ($page - 1));
-
 
         if (!\Yii::$app->user->isGuest) {
             $client = $currentUser->organization;
@@ -59,7 +60,6 @@ class MarketWebApi extends WebApi
                 }
             }
         }
-
 
         if (!empty(\Yii::$app->session->get('city')) || !empty(\Yii::$app->session->get('region'))) {
             $supplierRegion = DeliveryRegions::getSuppRegion(\Yii::$app->session->get('city'), \Yii::$app->session->get('region'));
@@ -76,7 +76,6 @@ class MarketWebApi extends WebApi
                 }
             }
         }
-
 
         //Условия поиска
         if (isset($post['search'])) {
@@ -136,11 +135,11 @@ class MarketWebApi extends WebApi
             }
         }
         //Готовим ответ
-        $return = ['headers' => [],
-            'products' => [],
-            'pagination' => ['page' => $page,
-                'page_size' => $pageSize,
-                'total_page' => ceil($result->count() / $pageSize)]];
+        $return = ['headers'    => [],
+                   'products'   => [],
+                   'pagination' => ['page'       => $page,
+                                    'page_size'  => $pageSize,
+                                    'total_page' => ceil($result->count() / $pageSize)]];
         //Сортировка
         if ($sort) {
             $sort = str_replace('supplier_id', 'organization.id', $sort);
@@ -174,6 +173,7 @@ class MarketWebApi extends WebApi
 
     /**
      * Список доступных категорий на маркете
+     *
      * @return array
      */
     public function categories()
@@ -183,9 +183,9 @@ class MarketWebApi extends WebApi
         \Yii::setAlias('@frontend', dirname(dirname(__DIR__)) . '/frontend');
         foreach ($categories as $model) {
             $category = [
-                'id' => $model->id,
-                'name' => $model->name,
-                'image' => $this->getCategoryImage($model->id),
+                'id'            => $model->id,
+                'name'          => $model->name,
+                'image'         => $this->getCategoryImage($model->id),
                 'subcategories' => []
             ];
             $all_child = $model->child;
@@ -198,8 +198,8 @@ class MarketWebApi extends WebApi
                         $image = $this->getCategoryImage($model->id);
                     }
                     $category['subcategories'][] = [
-                        'id' => $child->id,
-                        'name' => $child->name,
+                        'id'    => $child->id,
+                        'name'  => $child->name,
                         'image' => $image
                     ];
                 }
@@ -216,47 +216,43 @@ class MarketWebApi extends WebApi
      */
     public function product($post)
     {
-        if (isset($post['id'])) {
+        $this->validateRequest($post, ['id']);
+        $model = CatalogBaseGoods::findOne(['id' => $post['id']]);
+        if (empty($model)) {
+            throw new BadRequestHttpException('product_not_found');
+        }
 
-            $model = CatalogBaseGoods::findOne(['id' => $post['id']]);
-            if (empty($model)) {
-                throw new BadRequestHttpException('product_not_found');
-            }
-
-            $currentUser = $this->user;
-            if (!\Yii::$app->user->isGuest) {
-                $client = $currentUser->organization;
-                if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                    $relation = RelationSuppRest::find()
-                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
-                        ->asArray()
-                        ->all();
-                    foreach ($relation as $row) {
-                        $relationSuppliers[] = $row['id'];
-                    }
-                    if (!empty($relationSuppliers)) {
-                        if (in_array($model->supp_org_id, $relationSuppliers)) {
-                            throw new BadRequestHttpException('Нет доступа к продукту');
-                        }
+        $currentUser = $this->user;
+        if (!\Yii::$app->user->isGuest) {
+            $client = $currentUser->organization;
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+                $relation = RelationSuppRest::find()
+                    ->select('supp_org_id as id,supp_org_id as supp_org_id')
+                    ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
+                    ->asArray()
+                    ->all();
+                foreach ($relation as $row) {
+                    $relationSuppliers[] = $row['id'];
+                }
+                if (!empty($relationSuppliers)) {
+                    if (in_array($model->supp_org_id, $relationSuppliers)) {
+                        throw new BadRequestHttpException('Нет доступа к продукту');
                     }
                 }
             }
-
-            return $this->prepareProduct($model);
-        } else {
-            throw new BadRequestHttpException('empty_param|id');
         }
+
+        return $this->prepareProduct($model);
     }
 
     /**
      * Список организаций на маркете
+     *
      * @param $post
      * @return array
      * @throws BadRequestHttpException
      */
-    public
-    function organizations($post)
+    public function organizations($post)
     {
         $sort = (isset($post['sort']) ? $post['sort'] : null);
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
@@ -322,11 +318,11 @@ class MarketWebApi extends WebApi
         }
         //Готовим ответ
         $return = [
-            'headers' => [],
+            'headers'       => [],
             'organizations' => [],
-            'pagination' => [
-                'page' => $page,
-                'page_size' => $pageSize,
+            'pagination'    => [
+                'page'       => $page,
+                'page_size'  => $pageSize,
                 'total_page' => ceil($result->count() / $pageSize)
             ]
         ];
@@ -360,6 +356,7 @@ class MarketWebApi extends WebApi
 
     /**
      * Собираем массив для отдачи, из модели
+     *
      * @param CatalogBaseGoods $model
      * @return mixed
      */
@@ -398,6 +395,7 @@ class MarketWebApi extends WebApi
 
     /**
      * Определяем ссылку на картинку товара
+     *
      * @param CatalogBaseGoods $model
      * @return string
      */
@@ -414,6 +412,7 @@ class MarketWebApi extends WebApi
 
     /**
      * Картинка категории
+     *
      * @param $id
      * @return string
      */

@@ -5,6 +5,7 @@ namespace api_web\modules\integration\modules\iiko\models;
 use api\common\models\iiko\iikoDicconst;
 use api\common\models\iiko\iikoPconst;
 use api\common\models\iiko\iikoWaybill;
+use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\modules\integration\interfaces\ServiceInterface;
@@ -30,7 +31,7 @@ class iikoService extends WebApi implements ServiceInterface
      */
     public static function getServiceId()
     {
-        return 2;
+        return Registry::IIKO_SERVICE_ID;
     }
 
     /**

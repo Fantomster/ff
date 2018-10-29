@@ -5,60 +5,41 @@ $params = array_merge(
 );
 
 return [
-    'id' => 'mixcart',
-    'name' => 'mixcart',
-    'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log', ], // 'assetsAutoCompress'
+    'id'                  => 'mixcart',
+    'name'                => 'mixcart',
+    'basePath'            => dirname(__DIR__),
+    'bootstrap'           => ['log',], // 'assetsAutoCompress'
     'controllerNamespace' => 'frontend\controllers',
-    'components' => [
-        'request' => [
-            'csrfParam' => '_csrf-fk',
+    'components'          => [
+//                'cloudWatchLogTarget' => [
+//                    'class' => 'common\components\CloudWatchLogTarget',
+//                    'levels' => ['error'],
+//                    'cloudWatchLog' => 'cloudWatchLog',
+//                    'groupName' => 'Errors_at_mixcart.test',
+//                ],        
+        'request'             => [
+            'csrfParam'        => '_csrf-fk',
             'enableCsrfCookie' => true,
         ],
-        'session' => [
+        'session'             => [
             // this is the name of the session cookie used for login on the frontend
             'name' => 'FKEEPSESSID',
         ],
-        'log' => [
-            'traceLevel' => YII_DEBUG ? 3 : 0,
-            'targets' => [
-                'file' => [
-                    'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
-                ],
-//                'email' => [
-//                    'class' => 'yii\log\EmailTarget',
-//                    'except' => ['yii\web\HttpException:404','yii\web\HttpException:403'],
-//                    'levels' => ['error'],
-//                    'message' => [
-//                        'from' => 'noreply@f-keeper.ru', 
-//                        'to' => ['sharap@f-keeper.ru', 'marshal1209448@gmail.com','xsupervisor@f-keeper.ru'], 
-//                        'subject' => 'Error message',
-//                    ],
-//                    'mailer' => 'mailer',
-//                ],
-            ],
-        ],
-//        'assetsAutoCompress' =>
-//        [
-//            'class'         => '\skeeks\yii2\assetsAuto\AssetsAutoCompressComponent',
-//        ],
-        'errorHandler' => [
+        'errorHandler'        => [
             'errorAction' => 'site/error',
         ],
-        'formatter' => [
+        'formatter'           => [
             'datetimeFormat' => 'MM/dd/yyyy HH:mm',
-            'timeFormat' => 'HH:mm',
+            'timeFormat'     => 'HH:mm',
         ],
         'urlManagerFranchise' => [
-            'class' => 'yii\web\urlManager',
-            'baseUrl' => '//partner.mixcart.ru',
+            'class'           => 'yii\web\urlManager',
+            'baseUrl'         => '//partner.mixcart.ru',
             'enablePrettyUrl' => true,
-            'showScriptName' => false,
+            'showScriptName'  => false,
         ],
     ],
-
-    'params' => $params,
+    'params'  => $params,
     'modules' => [
         'billing' => [
             'class' => 'frontend\modules\billing\Module',

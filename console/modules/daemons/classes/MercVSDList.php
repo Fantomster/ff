@@ -162,6 +162,9 @@ class MercVSDList extends MercDictConsumer
                 echo "============================" . PHP_EOL;
                 sleep(60);
             } while ($condition);
+            if ($count_error > 0) {
+                throw new \Exception('Cancel error operation');
+            }
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
             mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());

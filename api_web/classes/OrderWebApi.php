@@ -7,7 +7,6 @@ use api_web\components\WebApiController;
 use api_web\controllers\OrderController;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
-use common\models\AllService;
 use api_web\models\User;
 use common\models\CatalogBaseGoods;
 use common\models\Delivery;
@@ -58,6 +57,10 @@ class OrderWebApi extends \api_web\components\WebApi
         //Поиск заказа
         $order = Order::findOne($post['order_id']);
 
+        if (!$order) {
+            throw new BadRequestHttpException('order_not_found');
+        }
+
         //If user is unconfirmed
         if ($isUnconfirmedVendor) {
             $organizationID = $this->user->organization_id;
@@ -79,7 +82,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if (!$this->accessAllow($order)) {
             throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
         }
-        OrderStatus::checkEdiOrderPermissions($order, 'edit');
+        //OrderStatus::checkEdiOrderPermissions($order, 'edit');
 
         //Проверим статус заказа
         if (in_array($order->status, [OrderStatus::STATUS_CANCELLED, OrderStatus::STATUS_REJECTED])) {
@@ -109,7 +112,6 @@ class OrderWebApi extends \api_web\components\WebApi
 
             $order->discount = $post['discount']['amount'];
         }
-
         $tr = \Yii::$app->db->beginTransaction();
         try {
             //Тут операции с продуктами в этом заказе
@@ -197,7 +199,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $orderContent->quantity = $product['quantity'];
         }
 
-        $orderContent->comment = $product['comment'];
+        $orderContent->comment = $product['comment'] ?? '';
 
         if (!empty($product['price'])) {
             $orderContent->price = $product['price'];
@@ -241,7 +243,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $wbContent->quantity_waybill = $product['quantity'];
         }
         if (!empty($product['price'])) {
-            $wbContent->price_waybill = $product['price'];
+            $wbContent->price_without_vat = $product['price'];
         }
 
         if ($wbContent->validate() && $wbContent->save()) {
@@ -473,7 +475,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
         # корректируем данные заказа на данные из накладной если это документ EDI
         # editedBy Basil A Konakov 2018-09-17 [DEV-1872]
-        if ($order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
+        if ($order->service_id == Registry::EDI_SERVICE_ID) {
             $productsEdo = [];
             /**@var OrderContent $model */
             foreach ($products as $k => $model) {
@@ -663,7 +665,6 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function getHistoryCount()
     {
-
         $result = (new Query())->from(Order::tableName())
             ->select(['status', 'COUNT(status) as count'])
             ->where([
@@ -673,7 +674,7 @@ class OrderWebApi extends \api_web\components\WebApi
             ])
             ->andWhere(
                 ['OR',
-                    ['not in', 'service_id', [(AllService::findOne(['denom' => 'EDI']))->id]],
+                    ['not in', 'service_id', [Registry::EDI_SERVICE_ID]],
                     ['service_id' => null]
                 ]
             )
@@ -712,13 +713,10 @@ class OrderWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Список доступных для заказа продуктов
-     *
      * @param      $post
      * @param bool $isUnconfirmedVendor
      * @return array
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws BadRequestHttpException
      */
     public function products($post, bool $isUnconfirmedVendor = false)
     {
@@ -915,9 +913,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function cancel(array $post, bool $isUnconfirmedVendor = false)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $query = Order::find()->where(['id' => $post['order_id']]);
         if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
@@ -980,9 +976,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function repeat(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $order = Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
 
@@ -1022,9 +1016,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function complete(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $query = Order::find()->where(['id' => $post['order_id']]);
         if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
@@ -1079,9 +1071,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function saveToPdf(array $post, WebApiController $c)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $order = Order::findOne(['id' => $post['order_id']]);
         if (empty($order)) {
@@ -1124,6 +1114,43 @@ class OrderWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * Изменение номера документа
+     *
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function setDocumentNumber($post)
+    {
+        $this->validateRequest($post, ['order_id', 'document_number']);
+
+        $model = Order::find()->where(['id' => $post['order_id'], 'client_id' => $this->user->organization_id])->one();
+
+        if (empty($model)) {
+            throw new BadRequestHttpException('order_not_found');
+        }
+
+        if ($model->service_id != Registry::MC_BACKEND) {
+            throw new BadRequestHttpException('bad_service_id_in_order|' . ($model->service_id ?? "NULL") . '|' . Registry::MC_BACKEND);
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            $result = (bool)OrderContent::updateAll(
+                ['edi_number' => trim($post['document_number'])],
+                'order_id = :oid',
+                [':oid' => $model->id]
+            );
+            $t->commit();
+            return ['result' => $result];
+        } catch (\Throwable $e) {
+            $t->rollBack();
+            \Yii::info($e->getMessage());
+            return ['result' => false];
+        }
+    }
+
+    /**
      * @param OrderContent $model
      * @return array
      * @throws \yii\base\InvalidConfigException
@@ -1136,20 +1163,23 @@ class OrderWebApi extends \api_web\components\WebApi
         $item = [];
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product->product;
-        $item['product_id'] = isset($model->productFromCatalog->base_goods_id) ? $model->productFromCatalog->base_goods_id : $model->product->id;
-        $item['catalog_id'] = isset($model->productFromCatalog->cat_id) ? $model->productFromCatalog->cat_id : $model->product->cat_id;
+        $item['product_id'] = $model->productFromCatalog->base_goods_id ?? $model->product->id;
+        $item['catalog_id'] = $model->productFromCatalog->cat_id ?? $model->product->cat_id;
         $item['price'] = round($model->price, 2);
         $item['quantity'] = $quantity;
         $item['comment'] = $model->comment ?? '';
         $item['total'] = round($model->total, 2);
         $item['rating'] = round($model->product->ratingStars, 1);
-        $item['brand'] = ($model->product->brand ? $model->product->brand : '');
+        $item['brand'] = $model->product->brand ? $model->product->brand : '';
         $item['article'] = $model->product->article;
         $item['ed'] = $model->product->ed;
         $item['units'] = $model->product->units;
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
+        if ($model->order->service_id == Registry::EDI_SERVICE_ID) {
+            $item['edi_number'] = $model->edi_number;
+        }
         return $item;
     }
 

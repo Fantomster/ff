@@ -16,7 +16,7 @@ if (!Yii::$app->user->isGuest) {
     $homeUrl = parse_url(Url::base(true), PHP_URL_HOST);
     $cartUrl = Url::to(['/order/pjax-cart']);
     $notificationsUrl = isset(Yii::$app->params['notificationsUrl']) ? Yii::$app->params['notificationsUrl'] : "http://$homeUrl:8890";
-    $refreshStatsUrl = Url::to(['order/ajax-refresh-stats']);
+    $refreshStatsUrl = Url::to(['/order/ajax-refresh-stats']);
     $tutorialOn = Url::to(['/site/ajax-tutorial-on']);
     $dashboard = Url::to(['/site/index']);
     $unreadMessages = $organization->unreadMessages;

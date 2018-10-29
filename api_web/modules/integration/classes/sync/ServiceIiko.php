@@ -1,24 +1,14 @@
 <?php
 
-/**
- * Class ServiceIiko
- *
- * @package   api_web\module\integration\sync
- * @createdBy Basil A Konakov
- * @createdAt 2018-09-20
- * @author    Mixcart
- * @module    WEB-API
- * @version   2.0
- */
-
 namespace api_web\modules\integration\classes\sync;
 
 use api_web\classes\RabbitWebApi;
 use api_web\components\Registry;
-use api_web\helpers\WaybillHelper;
+use api_web\exceptions\ValidationException;
 use api_web\modules\integration\models\iikoWaybill;
 use common\models\Waybill;
-use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
+use api_web\helpers\iikoApi;
+use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
 use yii\web\ServerErrorHttpException;
 
@@ -44,8 +34,9 @@ class ServiceIiko extends AbstractSyncFactory
     ];
 
     /**
+     * @param array $params
      * @return array
-     * @throws \Exception
+     * @throws ServerErrorHttpException
      */
     public function sendRequest(array $params = []): array
     {
@@ -75,13 +66,15 @@ class ServiceIiko extends AbstractSyncFactory
      */
     public function sendWaybill($request): array
     {
-        if (!isset($request['ids']) && empty($request['ids'])) {
-            throw new BadRequestHttpException('empty_param|ids');
-        }
+        $this->validateRequest($request, ['ids']);
+
         $res = [];
         $records = iikoWaybill::find()
-            ->andWhere(['id' => $request['ids'], 'service_id' => $this->serviceId])
-            ->andWhere('status_id = :stat', [':stat' => Registry::$waybill_statuses[Registry::WAYBILL_COMPARED]])
+            ->where([
+                'id'          => $request['ids'],
+                'acquirer_id' => $this->user->organization_id,
+                'service_id'  => $this->serviceId
+            ])
             ->all();
 
         if (!isset($records)) {
@@ -91,33 +84,49 @@ class ServiceIiko extends AbstractSyncFactory
 
         $api = iikoApi::getInstance();
         if ($api->auth()) {
-            /**@var Waybill $model */
+            /** @var iikoWaybill $model */
             foreach ($records as $model) {
+                if ($model->status_id !== Registry::WAYBILL_COMPARED) {
+                    if ($model->status_id == Registry::WAYBILL_UNLOADED) {
+                        $res[$model->id] = [
+                            'success' => true,
+                            'message' => \Yii::t('api_web', 'service_iiko.already_success_unloading_waybill'),
+                        ];
+                    } else {
+                        $res[$model->id] = [
+                            'success' => false,
+                            'message' => \Yii::t('api_web', 'service_iiko.no_ready_unloading_waybill'),
+                        ];
+                    }
+                    continue;
+                }
+                /** @var Transaction $transaction */
                 $transaction = \Yii::$app->db_api->beginTransaction();
                 try {
                     $response = $api->sendWaybill($model);
                     if ($response !== true) {
                         \Yii::error('Error during sending waybill');
                         throw new \Exception('Ошибка при отправке. ' . $response);
-                    } else {
-                        \Yii::error('Waybill' . $model->id . 'has been exported');
                     }
-
-                    $model->status_id = 2;
+                    $model->status_id = Registry::WAYBILL_UNLOADED;
                     $model->save();
-                    $res[$model->id] = true;
+                    $res[$model->id] = [
+                        'success' => true,
+                        'message' => \Yii::t('api_web', 'service_iiko.success_unloading_waybill'),
+                    ];
                     $transaction->commit();
                 } catch (\Exception $e) {
                     $transaction->rollBack();
-                    \yii::error('Cant send waybill, rolled back' . $e);
+                    $model->status_id = Registry::WAYBILL_ERROR;
+                    $model->save();
+                    \Yii::error('Cant send waybill, rolled back' . $e);
                     $res[$model->id] = [
-                        $e->getTraceAsString(),
-                        $e->getMessage(),
+                        'success' => false,
+                        'message' => $e->getMessage()
                     ];
                 }
             }
             $api->logout();
-
         }
         return ['result' => $res];
     }

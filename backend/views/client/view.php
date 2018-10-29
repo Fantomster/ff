@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\web\View;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\User */
@@ -11,6 +12,10 @@ $clients = !empty(Yii::$app->session->get('clients')) ? Yii::$app->session->get(
 $clientsName = !empty(Yii::$app->session->get('clients_name')) ? Yii::$app->session->get('clients_name') : 'Пользователи';
 $this->params['breadcrumbs'][] = ['label' => $clientsName, 'url' => [$clients]];
 $this->params['breadcrumbs'][] = $this->title;
+
+$customJs = <<< JS
+JS;
+$this->registerJs($customJs, View::POS_READY);
 ?>
 <div class="user-view">
 
@@ -85,6 +90,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
                         $html .= "<div style='padding-top: 20px;'>Последнее письмо</div>";
                         $html .= Html::tag('div', $message . '.<br>' . $email->subject, ['class' => 'list-group-item email-error ' . $class]);
+                        if (isset($email->emailFail)) {
+                            $html .= "<br/>" . Html::tag('div', $email->emailFail->body, ['class' => 'list-group-item list-group-item-danger']);
+                        }
                     }
                     return $html;
                 }

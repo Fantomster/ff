@@ -8,14 +8,13 @@
 
 namespace api_web\controllers;
 
-
 use api_web\components\WebApiController;
 use api_web\helpers\WaybillHelper;
 
 class WaybillController extends WebApiController
 {
     /**
-     * @SWG\Post(path="/waybill/create-by-order",
+     * @SWG\Post(path="/waybill/regenerate-by-order",
      *     tags={"Waybill"},
      *     summary="Создание накладной по заказу",
      *     description="Создание накладной по заказу",
@@ -55,11 +54,10 @@ class WaybillController extends WebApiController
      * )
      * @throws \Exception
      */
-    public function actionCreateByOrder()
+    public function actionRegenerateByOrder()
     {
         $this->response = (new WaybillHelper())->createWaybillForApi($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/waybill/move-order-content-to-waybill",
@@ -108,7 +106,6 @@ class WaybillController extends WebApiController
         $this->response = (new WaybillHelper())->moveOrderContentToWaybill($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/create-waybill",
      *     tags={"Waybill"},
@@ -149,12 +146,57 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionCreateWaybill()
     {
         $this->response = $this->container->get('IntegrationWebApi')->handleWaybill($this->request);
     }
 
+    /**
+     * @SWG\Post(path="/waybill/delete-waybill",
+     *     tags={"Waybill"},
+     *     summary="Накладная - Удалить",
+     *     description="Накладная - Удалить",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                              "waybill_id": 5,
+     *                              "service_id":1
+     *                          }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                "success": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionDeleteWaybill()
+    {
+        $this->response = $this->container->get('IntegrationWebApi')->deleteWaybill($this->request);
+    }
 
     /**
      * @SWG\Post(path="/waybill/reset-waybill-content",
@@ -199,7 +241,6 @@ class WaybillController extends WebApiController
     {
         $this->response = $this->container->get('IntegrationWebApi')->resetWaybillContent($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/waybill/show-waybill-content",
@@ -267,7 +308,6 @@ class WaybillController extends WebApiController
         $this->response = $this->container->get('IntegrationWebApi')->showWaybillContent($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/update-waybill-content",
      *     tags={"Waybill"},
@@ -320,7 +360,6 @@ class WaybillController extends WebApiController
         $this->response = $this->container->get('IntegrationWebApi')->updateWaybillContent($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/create-waybill-content",
      *     tags={"Waybill"},
@@ -342,7 +381,7 @@ class WaybillController extends WebApiController
      *                              "quantity_waybill": 1,
      *                              "outer_product_id": 4822,
      *                              "price_without_vat": 35000,
-     *                              "vat_waybill": 0.18
+     *                              "vat_waybill": 18
      *                          }
      *              )
      *         )
@@ -372,10 +411,9 @@ class WaybillController extends WebApiController
         $this->response = $this->container->get('IntegrationWebApi')->createWaybillContent($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/waybill/delete-waybill-content",
-     *     tags={"waybill"},
+     *     tags={"Waybill"},
      *     summary="Накладная - Удалить/Убрать позицию",
      *     description="Накладная - Удалить/Убрать позицию",
      *     produces={"application/json"},

@@ -130,6 +130,9 @@ class AllMaps extends \yii\db\ActiveRecord
                 $modelName = OneSGood::class;
                 $attr = 'name';
                 break;
+            case 10 : // tillypad
+                $modelName = iikoProduct::class;
+                break;
         }
 
        $res =  $modelName::find()->andWhere('id = :id', [':id' => $this->serviceproduct_id])->one();
@@ -149,9 +152,15 @@ class AllMaps extends \yii\db\ActiveRecord
                 $stores += ArrayHelper::map(iikoStore::find()->andWhere('org_id=:acc',[':acc' => $org_id])->
                 andWhere('is_active = 1')->all(), 'id', 'denom');
                 break;
+
             case 8 : // 1C
                 $stores += ArrayHelper::map(OneSStore::find()->andWhere('org_id=:acc',[':acc' => $org_id])->
                 all(), 'id', 'name');
+                break;
+
+            case 10 : // tillypad
+                $stores += ArrayHelper::map(iikoStore::find()->andWhere('org_id=:acc',[':acc' => $org_id])->
+                andWhere('is_active = 1')->all(), 'id', 'denom');
                 break;
         }
 
@@ -172,6 +181,9 @@ class AllMaps extends \yii\db\ActiveRecord
                 andWhere('org_id = :acc', [':acc' => $acc])->one();
             case 8:  // 1C
                 return OneSStore::find()->andWhere('id = :id', [':id' => $this->store_rid])->
+                andWhere('org_id = :acc', [':acc' => $acc])->one();
+            case 10:  // tillypad
+                return iikoStore::find()->andWhere('id = :id', [':id' => $this->store_rid])->
                 andWhere('org_id = :acc', [':acc' => $acc])->one();
             default:
                 return null;

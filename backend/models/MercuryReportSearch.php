@@ -69,12 +69,25 @@ class MercuryReportSearch extends Journal
             return $dataProvider;
         }
 
-        if (!(isset($this->dateFrom) || isset($this->dateTo))) {
+
+
+        if (empty(\Yii::$app->request->get("date") || \Yii::$app->request->get("date2"))) {
             $this->dateFrom = date('Y-m-d', strtotime(date('Y-m-d') . ' - 3 month'));
             $this->dateTo = date('Y-m-d');
         }
+        else {
+            $today = new \DateTime();
+            $dateFilterFrom = !empty(\Yii::$app->request->get("date")) ? \Yii::$app->request->get("date") : "01.12.2016";
+            $dateFilterTo = !empty(\Yii::$app->request->get("date2")) ? \Yii::$app->request->get("date2") : $today->format('d.m.Y');
 
-        $query->andWhere('log.created_at1 between :dateFrom and :dateTo', [':dateFrom' => $this->dateFrom, ':dateTo' => $this->dateTo]);
+            $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
+            $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 00:00:00");
+            $end = $dtEnd->add(new \DateInterval('P1D'));
+
+            $this->dateFrom = $dt->format('Y-m-d');
+            $this->dateTo = $end->format('Y-m-d');
+        }
+        $query->andWhere('log.created_at between :dateFrom and :dateTo', [':dateFrom' => $this->dateFrom, ':dateTo' => $this->dateTo]);
 
         if (isset($this->orgName))
             $query->andWhere('org.name like :org_name', [':org_name' => '%' . $this->orgName . '%']);

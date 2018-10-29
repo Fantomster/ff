@@ -217,7 +217,7 @@ class IntegrationWebApi extends WebApi
         if (!$waybillContent) {
             throw new BadRequestHttpException("waybill_content_not_found");
         }
-        
+
         $arr = $waybillContent->attributes;
 
         $arr['product'] = [

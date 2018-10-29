@@ -300,13 +300,6 @@ class DocumentWebApi extends \api_web\components\WebApi
             $where_all .= " AND store in ($stories)";
         }
 
-        $sort_field = "";
-        if ($sort) {
-            $order = (preg_match('#^-(.+?)$#', $sort) ? SORT_DESC : SORT_ASC);
-            $sort_field = str_replace('-', '', $sort);
-            $where_all .= " AND $sort_field is not null ";
-        }
-
         $params['client_id'] = $client->id;
 
         $apiShema = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
@@ -314,27 +307,30 @@ class DocumentWebApi extends \api_web\components\WebApi
         $sql = "
         SELECT DISTINCT * FROM (
             SELECT 
-                id, 
+                o.id as id, 
                 '" . self::TYPE_ORDER . "' as type, 
                 client_id, 
                 null as waybill_status_id, 
                 created_at as order_date, 
                 null as waybill_date, 
-                null as waybill_number, 
-                null as doc_number, 
+                edi_number as doc_number, 
                 vendor_id as vendor, 
                 null as store
-            FROM `order` 
+            FROM `order` as o
+            LEFT JOIN (
+             SELECT id, order_id, edi_number
+				FROM order_content 
+				order by char_length(edi_number) desc limit 1
+            ) as oc on oc.order_id = o.id
             WHERE client_id = {$client->id}
         UNION ALL
             SELECT
-                w.id, 
+                w.id as id, 
                 '" . self::TYPE_WAYBILL . "' as type, 
                 acquirer_id as client_id, 
                 status_id as waybill_status_id, 
                 null as order_date, 
                 doc_date as waybill_date, 
-                null as waybill_number, 
                 outer_number_code as doc_number,  
                 o.vendor_id as vendor, 
                 outer_store_id as store
@@ -351,8 +347,17 @@ class DocumentWebApi extends \api_web\components\WebApi
         id is not null $where_all
        ";
 
-
-        if (is_null($sort)) {
+        if ($sort) {
+            $order = (preg_match('#^-(.+?)$#', $sort) ? 'DESC' : 'ASC');
+            $sort_field = str_replace('-', '', $sort);
+            //$where_all .= " AND $sort_field is not null ";
+            if($sort_field == 'doc_number') {
+                $sql .= 'ORDER BY char_length(doc_number) '.$order;
+            }elseif($sort_field == 'doc_date') {
+                $sql .= 'ORDER BY coalesce(documents.order_date,documents.waybill_date)'.$order;
+            }
+        }
+        else {
             $sql .= 'ORDER BY coalesce(documents.order_date,documents.waybill_date) DESC';
         }
 
@@ -368,17 +373,14 @@ class DocumentWebApi extends \api_web\components\WebApi
                 'attributes' => [
                     'id',
                     'client_id',
-                    'order_date',
-                    'waybill_date',
-                    'waybill_number',
-                    'doc_number',
+                    'doc_date',
                 ],
             ],
         ]);
 
-        if (isset($order)) {
+        /*if (isset($order)) {
             $dataProvider->sort->defaultOrder = [$sort_field => $order];
-        }
+        }*/
 
         $result = $dataProvider->getModels();
         if (!empty($result)) {
@@ -599,14 +601,10 @@ class DocumentWebApi extends \api_web\components\WebApi
     public function getSortList()
     {
         return [
-            'waybill_number' => 'Номеру накладной А-Я',
-            '-waybill_number' => 'Номеру накладной Я-А',
             'doc_number' => 'Номеру документа А-Я',
             '-doc_number' => 'Номеру документа Я-А',
-            'waybill_date' => 'Дате накладной по возрастанию',
-            '-waybill_date' => 'Дате накладной по убванию',
-            'order_date' => 'Дата заказа по возрастанию',
-            '-order_date' => 'Дата заказа по убыванию',
+            'doc_date' => 'Дате документа по возрастанию',
+            '-doc_date' => 'Дате документа по убванию',
             ];
     }
 

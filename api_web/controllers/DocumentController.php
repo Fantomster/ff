@@ -104,47 +104,43 @@ class DocumentController extends \api_web\components\WebApiController
      *              default={
      *                  "documents": {
      *                      {
-     *                              "id": 22666,
-     *                               "service_id": 2,
-     *                               "type": "order",
-     *                               "status_id": 1,
-     *                               "status_text": "Ожидают формирования",
-     *                               "agent": {
-     *                               "uid": "11232123",
-     *                               "name": "Опт Холод",
-     *                               "difer": false
-     *                               },
-     *                               "vendor": {
-     *                               "id": 3489,
-     *                               "name": "Halal Organic Food",
-     *                               "difer": false
-     *                               },
-     *                               "is_mercury_cert": true,
-     *                               "count": 134,
-     *                               "total_price": 3214222.95,
-     *                               "doc_date": "2018-09-04T09:55:22+03:00"
+     *                        "id": 11326,
+     *                        "doc_number": "тест",
+     *                        "type": "order",
+     *                        "status_id": 6,
+     *                        "status_text": "Отменен клиентом",
+     *                        "service_id": 9,
+     *                        "is_mercury_cert": false,
+     *                        "count": 10,
+     *                        "total_price": "500.00",
+     *                        "doc_date": "2018-04-11T18:41:34+03:00",
+     *                        "vendor": {
+     *                          "id": 4749,
+     *                          "name": "Demo1",
+     *                          "difer": false
+     *                        },
+     *                        "agent": null,
+     *                        "store": null
      *                      },
      *                      {
-     *                               "id": 22666,
-     *                               "service_id": 2,
-     *                               "type": "order",
-     *                               "status_id": 1,
-     *                               "status_text": "Ожидают формирования",
-     *                               "agent": {
-     *                               "uid": "11232123",
-     *                               "name": "Опт Холод",
-     *                               "difer": false
-     *                               },
-     *                               "vendor": {
-     *                               "id": 3489,
-     *                               "name": "Halal Organic Food",
-     *                               "difer": false
-     *                               },
-     *                               "is_mercury_cert": true,
-     *                               "count": 134,
-     *                               "total_price": 3214222.95,
-     *                               "doc_date": "2018-09-04T09:55:22+03:00"
-     *                     }
+     *                         "id": 11327,
+     *                         "doc_number": null,
+     *                         "type": "order",
+     *                         "status_id": 4,
+     *                         "status_text": "Завершен",
+     *                         "service_id": 3,
+     *                         "is_mercury_cert": false,
+     *                         "count": 10,
+     *                         "total_price": "1173.20",
+     *                         "doc_date": "2018-04-11T18:41:42+03:00",
+     *                         "vendor": {
+     *                         "id": 5158,
+     *                         "name": "MixCart Поставщик",
+     *                         "difer": false
+     *                          },
+     *                         "agent": null,
+     *                         "store": null
+     *                      },
      *                  },
      *                  "pagination": {
      *                      "page": 1,
@@ -480,15 +476,11 @@ class DocumentController extends \api_web\components\WebApiController
      *         description = "success",
      *         @SWG\Schema(
      *              default={
-     *                  {
-     *                       "waybill_number": "Номеру накладной А-Я",
-     *                       "-waybill_number": "Номеру накладной Я-А",
+     *                   {
      *                       "doc_number": "Номеру документа А-Я",
      *                       "-doc_number": "Номеру документа Я-А",
-     *                       "waybill_date": "Дате накладной по возрастанию",
-     *                       "-waybill_date": "Дате накладной по убванию",
-     *                       "order_date": "Дата заказа по возрастанию",
-     *                       "-order_date": "Дата заказа по убыванию"
+     *                       "doc_date": "Дате документа по возрастанию",
+     *                       "-doc_date": "Дате документа по убванию"
      *                   }
      *              }
      *         )

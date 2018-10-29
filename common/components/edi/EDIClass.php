@@ -76,7 +76,7 @@ class EDIClass extends Component
         $totalQuantity = 0;
         $totalPrice = 0;
         foreach ($positions as $position) {
-            $contID = (int)$position->PRODUCT ?? (int)$position->PRODUCTIDBUYER;
+            $contID = (int)$position->PRODUCTIDBUYER ?? (int)$position->PRODUCT;
 
             $positionsArray[] = (int)$contID;
             if ($isDesadv) {
@@ -108,7 +108,7 @@ class EDIClass extends Component
         $summ = 0;
         $ordContArr = [];
         foreach ($order->orderContent as $orderContent) {
-            $index = $orderContent->article;
+            $index = $orderContent->id;
             $ordContArr[] = $orderContent->id;
             if (!isset($arr[$index]['BARCODE'])) {
                 if (isset($orderContent->ediOrderContent)) {
@@ -131,7 +131,6 @@ class EDIClass extends Component
             } else {
                 $oldQuantity = (float)$ordCont->quantity;
                 $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
-
                 if ($oldQuantity != $newQuantity) {
                     if ($newQuantity == 0) {
                         $ordCont->delete();

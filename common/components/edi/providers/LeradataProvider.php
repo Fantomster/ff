@@ -45,7 +45,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     public function __construct()
     {
         $this->ediProvider = new EDIProvidersClass();
-        $this->url = "https://leradata.pro/api/vetis/api.php";
+        $this->url = \Yii::$app->params['edi_api_leradata_url'];
     }
 
     /**

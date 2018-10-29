@@ -181,6 +181,11 @@ class MercVSDList extends MercDictConsumer
 
         mercLogger::getInstance()->addMercLogDict('COMPLETE', BaseStringHelper::basename(static::class), null);
 
+        if(isset($this->queue)) {
+            $this->queue->data_request = new Expression('NULL');
+            $this->queue->save();
+        }
+
         $this->addFCMMessage('MercVSDList', $this->data['enterpriseGuid']);
     }
 

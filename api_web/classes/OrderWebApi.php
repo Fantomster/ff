@@ -517,6 +517,10 @@ class OrderWebApi extends \api_web\components\WebApi
 
         if (isset($post['search'])) {
 
+            if (isset($post['search']['id']) && !empty($post['search']['id'])){
+                $search->id = $post['search']['id'];
+            }
+
             if (isset($post['search']['service_id']) && !empty($post['search']['service_id'])) {
                 $search->service_id = $post['search']['service_id'];
             } else {
@@ -538,12 +542,12 @@ class OrderWebApi extends \api_web\components\WebApi
              * Фильтр по дате создания
              */
             if (isset($post['search']['create_date']) && !empty($post['search']['create_date'])) {
-                if (isset($post['search']['create_date']['from']) && !empty($post['search']['create_date']['from'])) {
-                    $search->date_from = $post['search']['create_date']['from'];
+                if (isset($post['search']['create_date']['start']) && !empty($post['search']['create_date']['start'])) {
+                    $search->date_from = $post['search']['create_date']['start'];
                 }
 
-                if (isset($post['search']['create_date']['to']) && !empty($post['search']['create_date']['to'])) {
-                    $search->date_to = $post['search']['create_date']['to'];
+                if (isset($post['search']['create_date']['end']) && !empty($post['search']['create_date']['end'])) {
+                    $search->date_to = $post['search']['create_date']['end'];
                 }
             }
 
@@ -551,12 +555,12 @@ class OrderWebApi extends \api_web\components\WebApi
              * Фильтр по дате завершения
              */
             if (isset($post['search']['completion_date']) && !empty($post['search']['completion_date'])) {
-                if (isset($post['search']['completion_date']['from']) && !empty($post['search']['completion_date']['from'])) {
-                    $search->completion_date_from = $post['search']['completion_date']['from'];
+                if (isset($post['search']['completion_date']['start']) && !empty($post['search']['completion_date']['start'])) {
+                    $search->completion_date_from = $post['search']['completion_date']['start'];
                 }
 
-                if (isset($post['search']['completion_date']['to']) && !empty($post['search']['completion_date']['to'])) {
-                    $search->completion_date_to = $post['search']['completion_date']['to'];
+                if (isset($post['search']['completion_date']['end']) && !empty($post['search']['completion_date']['end'])) {
+                    $search->completion_date_to = $post['search']['completion_date']['end'];
                 }
             }
         }

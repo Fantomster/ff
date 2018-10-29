@@ -64,7 +64,7 @@ class CatalogGoods extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['cat_id', 'base_goods_id'], 'required'],
-            [['cat_id', 'base_goods_id'], 'integer'],
+            [['cat_id', 'base_goods_id', 'vat'], 'integer'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'], 
             [['discount'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/', 'min' => 0],
             [['discount_percent'], 'number', 'min' => -100, 'max' => 100],
@@ -84,6 +84,7 @@ class CatalogGoods extends \yii\db\ActiveRecord {
             'discount' => Yii::t('app', 'common.models.discount_rouble', ['ru'=>'Скидка (руб.)']),
             'discount_percent' => Yii::t('app', 'common.models.discount_percent', ['ru'=>'Скидка %']),
             'discount_fixed' => Yii::t('app', 'common.models.fix_price', ['ru'=>'Фиксированная цена']),
+            'vat' => Yii::t('app', 'Ставка НДС'),
         ];
     }
 

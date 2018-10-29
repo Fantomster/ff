@@ -520,7 +520,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
         if (isset($post['search'])) {
 
-            if (isset($post['search']['id']) && !empty($post['search']['id'])){
+            if (isset($post['search']['id']) && !empty($post['search']['id'])) {
                 $search->id = $post['search']['id'];
             }
 
@@ -631,7 +631,8 @@ class OrderWebApi extends \api_web\components\WebApi
                     'vendor'          => $model->vendor->name,
                     'currency_id'     => $model->currency_id,
                     'create_user'     => $model->createdByProfile->full_name ?? '',
-                    'accept_user'     => $model->acceptedByProfile->full_name ?? ''
+                    'accept_user'     => $model->acceptedByProfile->full_name ?? '',
+                    'count_position'  => count($model->orderContent),
                 ];
                 if ($model->service_id == Registry::EDI_SERVICE_ID) {
                     if (!empty($model->orderContent)) {

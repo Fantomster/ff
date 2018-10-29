@@ -245,8 +245,8 @@ class EDIClass extends Component
      */
     public function handlePriceListUpdating($xml, $isLeradata = false): bool
     {
-        $supplierGLN = ($isLeradata) ? $xml->BUYER : $xml->SUPPLIER;
-        $buyerGLN = ($isLeradata) ? $xml->SUPPLIER : $xml->BUYER;
+        $supplierGLN = $xml->SUPPLIER;
+        $buyerGLN = $xml->BUYER;
         $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplierGLN]);
 
         if (!$ediOrganization) {
@@ -390,14 +390,8 @@ class EDIClass extends Component
         return $string;
     }
 
-    public function insertEdiErrorData(int $fileID, int $supplier, int $status, String $errorText = '', String $jsonData = ''): void
+    public function insertEdiErrorData($arr): void
     {
-        Yii::$app->db->createCommand()->insert('edi_files_queue', [
-            'name' => $fileID,
-            'organization_id' => $supplier,
-            'status' => $status,
-            'error_text' => $errorText,
-            'json_data' => $jsonData
-        ])->execute();
+        Yii::$app->db->createCommand()->insert('edi_files_queue', $arr)->execute();
     }
 }

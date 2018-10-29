@@ -45,7 +45,6 @@
                     <PRICE><?= $position['price'] ?></PRICE>
                     <PRICEWITHVAT><?= $position['price'] ?></PRICEWITHVAT>
                     <TAXRATE><?= isset($catalogGood->vat) ? $catalogGood->vat : 0 ?></TAXRATE>
-                    <ACCEPTEDQUANTITY><?= $position['quantity'] ?></ACCEPTEDQUANTITY>
                     <BUYERPARTNUMBER><?= $article ?? '' ?></BUYERPARTNUMBER>
                 </POSITION>
             <?php endforeach; ?>

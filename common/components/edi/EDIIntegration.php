@@ -8,11 +8,13 @@ use yii\web\BadRequestHttpException;
 
 /**
  * Class for E-COM integration methods
+ *
  * @author Silukov Konstantin
  */
 class EDIIntegration extends Component
 {
     public $orgId;
+    public $clientId;
 
     /**
      * @var array
@@ -24,6 +26,7 @@ class EDIIntegration extends Component
 
     /**
      * EDIIntegration constructor.
+     *
      * @param array $config
      */
     public function __construct(array $config = [], $obConfig = [])
@@ -38,9 +41,15 @@ class EDIIntegration extends Component
     public function init()
     {
         $conf = EcomIntegrationConfig::findOne(['org_id' => $this->orgId]);
-        if (!$conf) {
-            throw new BadRequestHttpException("Config not set for this vendor");
+
+        if (!$conf || strpos($conf['provider'], 'eradata')) {
+            $conf = EcomIntegrationConfig::findOne(['org_id' => $this->clientId]);
+            $this->orgId = $this->clientId;
+            if (!$conf) {
+                throw new BadRequestHttpException("Config not set for this vendor");
+            }
         }
+
         $this->setProvider($this->createClass('providers\\', $conf['provider']));
         $this->setRealization($this->createClass('realization\\', $conf['realization']));
     }
@@ -97,6 +106,7 @@ class EDIIntegration extends Component
 
     /**
      * Отправляем информацию о заказе
+     *
      * @param $order
      * @param $isNewOrder
      */

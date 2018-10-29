@@ -11,6 +11,7 @@ namespace common\components\edi\realization;
 use common\components\edi\AbstractRealization;
 use common\components\edi\EDIClass;
 use common\components\edi\RealizationInterface;
+use common\models\EdiFilesQueue;
 use yii\base\Component;
 use common\models\Catalog;
 use common\models\CatalogBaseGoods;
@@ -76,17 +77,21 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
             $orderID = $simpleXMLElement->NUMBER;
             $head = $simpleXMLElement->HEAD[0];
             $supplier = $head->BUYER;
-            $ediOrganization = EdiOrganization::findOne(['gln_code' => 111]);
+            $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
             if (!$ediOrganization) {
                 throw new Exception('no EDI organization found');
             }
-            $order = Order::findOne(['id' => $orderID, 'vendor_id' => $ediOrganization->organization_id]);
+            $order = Order::findOne(['id' => $orderID, 'client_id' => $ediOrganization->organization_id]);
+
             $message = "";
             if (!$order) {
-                throw new Exception('No such order ID: ' . $orderID);
+                throw new Exception('No such order');
             }
             \Yii::$app->language = $order->edi_order->lang ?? 'ru';
             $user = User::findOne(['id' => $order->created_by_id]);
+            if (!$user) {
+                throw new Exception('No such user');
+            }
 
             $positions = $head->POSITION ?? null;
             $isDesadv = false;
@@ -132,7 +137,9 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
                 $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
                 OrderController::sendSystemMessage($user, $order->id, $message);
                 $order->status = OrderStatus::STATUS_REJECTED;
-                $order->save();
+                if (!$order->save()) {
+                    throw new Exception('Error saving order');
+                }
                 return true;
             }
             $summ = 0;
@@ -194,13 +201,15 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
                     $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
                     $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
                     if ($documentType == 2) {
-                        $orderContent->edi_desadv = $key;
+                        $orderContent->edi_desadv = $exceptionArray['file_id'];
                     }
                     if ($documentType == 3) {
-                        $orderContent->edi_alcdes = $key;
+                        $orderContent->edi_alcdes = $exceptionArray['file_id'];
                     }
 
-                    $orderContent->save();
+                    if (!$orderContent->save()) {
+                        throw new Exception('Error saving order content');
+                    }
                 }
             }
 
@@ -244,12 +253,16 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
             if ($ediOrder) {
                 $ediOrder->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
                 $ediOrder->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE ?? '';
-                $ediOrder->save();
+                if (!$ediOrder->save()) {
+                    throw new Exception('Error saving edi order');
+                }
             }
             $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
-            $order->edi_ordersp = $key;
+            $order->edi_ordersp = $exceptionArray['file_id'];
             $order->service_id = 6;
-            $order->save();
+            if (!$order->save()) {
+                throw new Exception('Error saving order');
+            }
             if ($message != '') {
                 OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
             }
@@ -260,27 +273,15 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
             OrderController::sendSystemMessage($user, $order->id, $systemMessage);
 
             OrderController::sendOrderProcessing($order->client, $order);
-            return true;
         } catch (Exception $e) {
             $arr = [
-                'name' => (String)$exceptionArray['file_id'],
-                'organization_id' => $supplier,
-                'status' => $exceptionArray['status'],
-                'error_text' => (String)$e->getMessage(),
-                'json_data' => $exceptionArray['json_data'],
-                'updated_at'       => new Expression('NOW()')
+                'name'            => (String)$exceptionArray['file_id'],
+                'organization_id' => substr($supplier, 0, 8),
+                'status'          => $exceptionArray['status'],
+                'error_text'      => (String)$e->getMessage(),
+                'json_data'       => $exceptionArray['json_data']
             ];
-dd($arr);
-            $res = Yii::$app->db->createCommand()->insert('edi_files_queue', [
-                'name' => (String)$exceptionArray['file_id'],
-                'organization_id' => $supplier,
-                'status' => $exceptionArray['status'],
-                'error_text' => (String)$e->getMessage(),
-                'json_data' => $exceptionArray['json_data'],
-                'updated_at'       => new Expression('NOW()')
-            ])->execute();
-            dd($res);
-            //$this->edi->insertEdiErrorData($exceptionArray['file_id'], $supplier, $exceptionArray['status'], $e->getMessage(), $exceptionArray['json_data']);
+            $this->edi->insertEdiErrorData($arr);
         }
     }
 

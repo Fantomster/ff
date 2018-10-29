@@ -217,9 +217,8 @@ class OrderWebApi extends \api_web\components\WebApi
      *
      * @param Order $order
      * @param array $product
-     * @return bool
-     * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @return WaybillContent
+     * @throws BadRequestHttpException | ValidationException | \Exception
      * @editedBy Basil A Konakov
      */
     private function editProductEdo(Order $order, array $product)
@@ -228,26 +227,20 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("EDIT CANCELED product id empty");
         }
 
-        /**
-         * @var $orderContent OrderContent
-         */
+        /** @var OrderContent $orderContent */
         $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
         if (empty($orderContent)) {
             throw new BadRequestHttpException("EDIT CANCELED the product is not found in the order: product_id = " . $product['id']);
         }
 
-        /** @var OrderContent $orderContent */
         $wbContent = WaybillContent::findOne(['order_content_id' => $orderContent->id]);
 
         if (!empty($product['quantity'])) {
             $wbContent->quantity_waybill = $product['quantity'];
         }
-        if (!empty($product['price'])) {
-            $wbContent->price_without_vat = $product['price'];
-        }
 
         if ($wbContent->validate() && $wbContent->save()) {
-            return true;
+            return $wbContent;
         } else {
             throw new ValidationException($wbContent->getFirstErrors());
         }

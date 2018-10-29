@@ -477,6 +477,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionHistoryCount()
     {
@@ -500,15 +501,10 @@ class EdiController extends WebApiController
      *                  property="request",
      *                  default={
      *                      "order_id":1,
-     *                      "comment": "Комментарий к заказу",
-     *                      "discount": {
-     *                          "type": "FIXED|PERCENT",
-     *                          "amount": 100
-     *                      },
      *                      "products": {
-     *                          {"operation":"edit", "id":1, "price":200.2, "quantity":2, "comment":"Комментарий к товару!"},
-     *                          {"operation":"edit", "id":2, "price":100.2},
-     *                          {"operation":"add", "id":3, "quantity":2, "comment":"Комментарий к товару!"},
+     *                          {"operation":"edit", "id":1 "quantity":2},
+     *                          {"operation":"edit", "id":2},
+     *                          {"operation":"add", "id":3, "quantity":2},
      *                          {"operation":"delete", "id":4}
      *                       }
      *                  }
@@ -612,6 +608,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderUpdate()
     {
@@ -651,6 +648,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderRepeat()
     {
@@ -692,6 +690,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderPrintPdf()
     {
@@ -761,6 +760,7 @@ class EdiController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderCreateGuide()
     {

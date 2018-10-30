@@ -55,12 +55,12 @@ class ParserTorg12
      * @var array
      */
     private $settingsHeader = [
-        'document_number' => [
-            'label' => ['номер документа'],
+        'document_number'   => [
+            'label'     => ['номер документа'],
             'shift_row' => 1,
         ],
-        'document_date' => [
-            'label' => ['дата составления'],
+        'document_date'     => [
+            'label'     => ['дата составления'],
             'shift_row' => 1,
         ],
         //   'document_upd_info' => [
@@ -68,7 +68,7 @@ class ParserTorg12
         //       'shift_row' => 1,
         //   ],
         'document_headinfo' => [
-            'label' => ['счет-фактура №'],
+            'label'     => ['счет-фактура №'],
             'shift_row' => 1,
         ]
     ];
@@ -106,7 +106,7 @@ class ParserTorg12
      */
     private $worksheet;
     private $firstRow = 0; // номер строки, которую считаем началом заголовка
-    private $startRow = NULL; // номер строки, которую считаем началом строк накладной
+    private $startRow = null; // номер строки, которую считаем началом строк накладной
     private $highestRow; // номер последней строки
     private $highestColumn; // номер последнего столбца
     private $columnList = []; // координаты заголовков значащих столбцов
@@ -119,9 +119,9 @@ class ParserTorg12
     public $sumNotEqual = false; //совпадения общих сумм в накладной с суммами всех строк
 
     /**
-     * @param string $filePath Путь к файлу
-     * @param array $taxRateList Список доступных ставкок НДС
-     * @param int $defaultTaxRate Ставка НДС по умолчанию
+     * @param string $filePath       Путь к файлу
+     * @param array  $taxRateList    Список доступных ставкок НДС
+     * @param int    $defaultTaxRate Ставка НДС по умолчанию
      */
 
     public function __construct($filePath, array $taxRateList = [0, 10, 18], $defaultTaxRate = 18)
@@ -140,7 +140,7 @@ class ParserTorg12
         foreach ($result as $row) {
             if ($row['regular_expression'] == 1) {
                 $this->settingsRow[$row['name']] = trim($row['value']);
-            } else if ($row['regular_expression'] == 3) {
+            } elseif ($row['regular_expression'] == 3) {
                 $this->settingsRow[$row['name']] = ['reg' => [explode('|', trim($row['value']))]];
             } else {
                 $this->settingsRow[$row['name']] = explode('|', trim($row['value']));
@@ -243,7 +243,7 @@ class ParserTorg12
      *  - удаляем переносы строк
      *
      * @param string $cellValue Содержимое ячейки
-     * @param bool $toLower Перевести все символы в нижний регистр
+     * @param bool   $toLower   Перевести все символы в нижний регистр
      * @return string
      */
     private function normalizeHeaderCellValue($cellValue, $toLower = true)
@@ -277,7 +277,7 @@ class ParserTorg12
      *  - заменяем "," на ".", если в ячейке должно быть число
      *
      * @param string $cellValue Содержимое ячейки
-     * @param bool $isNumber Число
+     * @param bool   $isNumber  Число
      * @return string
      */
     private function normalizeCellValue($cellValue, $isNumber = false)
@@ -347,18 +347,18 @@ class ParserTorg12
                         $rightSide = trim(preg_replace("/." . $year . ".*/", "." . $year, $rightSide));
                     }
                     $monthArr = [
-                        ' января.' => '.01.',
-                        ' февраля.' => '.02.',
-                        ' марта.' => '.03.',
-                        ' апреля.' => '.04.',
-                        ' мая.' => '.05.',
-                        ' июня.' => '.06.',
-                        ' июля.' => '.07.',
-                        ' августа.' => '.08.',
+                        ' января.'   => '.01.',
+                        ' февраля.'  => '.02.',
+                        ' марта.'    => '.03.',
+                        ' апреля.'   => '.04.',
+                        ' мая.'      => '.05.',
+                        ' июня.'     => '.06.',
+                        ' июля.'     => '.07.',
+                        ' августа.'  => '.08.',
                         ' сентября.' => '.09.',
-                        ' октября.' => '.10.',
-                        ' ноября.' => '.11.',
-                        ' декабря.' => '.12.',
+                        ' октября.'  => '.10.',
+                        ' ноября.'   => '.11.',
+                        ' декабря.'  => '.12.',
                     ];
 
                     foreach ($monthArr as $key => $value) {
@@ -422,7 +422,7 @@ class ParserTorg12
                 }
             }
 
-            return NULL;
+            return null;
         };
 
         // запоминаем координаты номера накладной
@@ -882,7 +882,6 @@ class ParserTorg12
 
         /**
          * Запоминаем координаты первого заголовка
-         *
          */
         for ($row = $this->firstRow; $row <= $this->highestRow; $row++) {
             for ($col = 0; $col <= $this->highestColumn; $col++) {
@@ -920,11 +919,11 @@ class ParserTorg12
                     $this->columnList['price_without_tax']['col'] = $col;
                     $this->columnList['price_without_tax']['row'] = $row;
 
-                    /*  } elseif (!isset($this->columnList['price_with_tax']) && $match($cellValue, $this->settingsRow['price_with_tax'])) {
+                } elseif (!isset($this->columnList['price_with_tax']) && $match($cellValue, $this->settingsRow['price_with_tax'])) {
 
-                      $this->columnList['price_with_tax']['col'] = $col;
-                      $this->columnList['price_with_tax']['row'] = $row;
-                     */
+                    $this->columnList['price_with_tax']['col'] = $col;
+                    $this->columnList['price_with_tax']['row'] = $row;
+
                 } elseif (!isset($this->columnList['sum_with_tax']) && $match($cellValue, $this->settingsRow['sum_with_tax'])) {
 
                     $this->columnList['sum_with_tax']['col'] = $col;
@@ -995,7 +994,6 @@ class ParserTorg12
                 $headErrors[] = sprintf($msg, implode('"; "', $this->settingsRow['sum_without_tax']['reg'][0]));
             }
 
-
             /*  } elseif (!isset($this->columnList['price_with_tax']) && !isset($this->columnList['sum_with_tax'])) {
 
               $msg = 'Необходимо добавить столбец, содержащий цену товара c НДС ("%s")';
@@ -1010,7 +1008,6 @@ class ParserTorg12
 
     /**
      * Разбираем накладную, определяем номера строк с позицими накладной
-     *
      */
     private function parseRows()
     {
@@ -1042,7 +1039,7 @@ class ParserTorg12
     /**
      * Проверить не является ли строка заголовком, т.к. ТОРГ12 может содержать несколько заголовков
      *
-     * @param int $rowNumber Номер строки
+     * @param int   $rowNumber  Номер строки
      * @param array $currentRow Содержимое строки
      * @return bool
      */
@@ -1104,7 +1101,6 @@ class ParserTorg12
      * Обработать валидные строки накладной
      *  - добавить строки в накладную
      *  - определить ошибки в строках накладной
-     *
      */
     private function processRows()
     {
@@ -1127,7 +1123,6 @@ class ParserTorg12
                 $invoiceRow->num = $numberRow;
             }
 
-
             // код товара
             $invoiceRow->code = $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['code']['col'], $row)->getValue());
             if (!$invoiceRow->code) {
@@ -1149,7 +1144,6 @@ class ParserTorg12
             if (!$invoiceRow->cnt && isset($this->columnList['cnt_place'])) {
                 $invoiceRow->cnt = (int)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['cnt_place']['col'], $row)->getValue(), true);
             }
-
 
             if (($invoiceRow->name != '') and ($invoiceRow->num != 0)) {
                 // сумма без НДС
@@ -1535,10 +1529,10 @@ class ParserTorg12
 
         if (!empty($email)) {
             $mailer->compose('torg12', [
-                'invoice' => $this->invoice,
-                'name_file' => $name_file,
+                'invoice'            => $this->invoice,
+                'name_file'          => $name_file,
                 'sumWithoutTaxExcel' => $sumWithoutTaxExcel,
-                'sumWithTaxExcel' => $sumWithTaxExcel,
+                'sumWithTaxExcel'    => $sumWithTaxExcel,
             ])
                 ->setTo($email)
                 ->setSubject($subject)

@@ -35,6 +35,11 @@ class EmailIntegration2Controller extends Controller
     public $setting_id;
 
     /**
+     * @var VendorEmailWaybillsHelper
+     */
+    public $helper;
+
+    /**
      * EmailIntegration2Controller constructor.
      *
      * @param string $id
@@ -124,7 +129,7 @@ class EmailIntegration2Controller extends Controller
     public function actionIndex()
     {
         /**
-         * @var $setting IntegrationSettingFromEmail
+         * @var IntegrationSettingFromEmail $setting
          */
         error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
         //Получаем все активные настройки или конкретную настройку
@@ -163,7 +168,6 @@ class EmailIntegration2Controller extends Controller
                             $transaction = \Yii::$app->db->beginTransaction();
                             try {
                                 $this->helper->processFile($file);
-                                $this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) . PHP_EOL);
                                 $transaction->commit();
                             } catch (\Exception $e) {
                                 $transaction->rollBack();
@@ -204,6 +208,7 @@ class EmailIntegration2Controller extends Controller
             default:
                 throw new Exception('Не определён тип сервера.');
         }
+
         $this->connect = $connect;
     }
 
@@ -232,6 +237,7 @@ class EmailIntegration2Controller extends Controller
      * Получим список вложений, которые не обрабатывали
      * @param array $email
      * @param IntegrationSettingFromEmail $setting
+     * @throws \Exception
      * @return array|null
      */
     private function getAttachments(array $email, IntegrationSettingFromEmail $setting)
@@ -350,12 +356,16 @@ class EmailIntegration2Controller extends Controller
      */
     private function log($message)
     {
-        if (is_array($message)) {
-            foreach ($message as $m) {
-                $this->log[] = trim($m);
+        try {
+            if (is_array($message)) {
+                foreach ($message as $m) {
+                    $this->log[] = trim($m);
+                }
+            } else {
+                $this->log[] = trim($message);
             }
-        } else {
-            $this->log[] = trim($message);
+        } catch (\Throwable $t){
+            $this->log($t->getTraceAsString());
         }
     }
 

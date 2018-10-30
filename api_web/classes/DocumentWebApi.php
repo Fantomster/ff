@@ -27,17 +27,6 @@ use yii\web\BadRequestHttpException;
  */
 class DocumentWebApi extends \api_web\components\WebApi
 {
-
-    const DOC_GROUP_STATUS_WAIT_SENDING = 'Ожидают выгрузки';
-    const DOC_GROUP_STATUS_WAIT_FORMING = 'Ожидают формирования';
-    const DOC_GROUP_STATUS_SENT = 'Выгружена';
-
-    private static $doc_group_status = [
-        1 => self::DOC_GROUP_STATUS_WAIT_SENDING,
-        2 => self::DOC_GROUP_STATUS_WAIT_FORMING,
-        3 => self::DOC_GROUP_STATUS_SENT,
-    ];
-
     /**константа типа документа - заказ*/
     const TYPE_ORDER = 'order';
     /**константа типа документа - накладная*/
@@ -346,9 +335,9 @@ class DocumentWebApi extends \api_web\components\WebApi
                    o.id as id, 
                    edi_number as doc_number, 
                    '" . self::TYPE_ORDER . "' as type, 
-                   if(is_not_compared > 0,".Registry::WAYBILL_FORMED.",
-                   if(st.formed > 0, ".Registry::WAYBILL_FORMED.", 
-                   if(st.compared > 0, ".Registry::WAYBILL_COMPARED.", if(st.unloaded > 0,  ".Registry::WAYBILL_UNLOADED.", ".Registry::WAYBILL_FORMED.")))) as status_id, 
+                   if(is_not_compared > 0,".Registry::DOC_GROUP_STATUS_WAIT_FORMING.",
+                   if(st.formed > 0, ".Registry::DOC_GROUP_STATUS_WAIT_FORMING.", 
+                   if(st.compared > 0, ".Registry::DOC_GROUP_STATUS_WAIT_SENDING.", if(st.unloaded > 0,  ".Registry::DOC_GROUP_STATUS_SENT.", ".Registry::DOC_GROUP_STATUS_WAIT_FORMING.")))) as status_id, 
                    o.service_id,
                    certs as is_mercury_cert,
                    `count`,
@@ -463,7 +452,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                     "doc_number"      => $model['doc_number'],
                     "type"            => $model['type'],
                     "status_id"       => $model['status_id'],
-                    "status_text"     => \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['status_id']]),
+                    "status_text"     => ($model['type'] == self::TYPE_WAYBILL) ? \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['status_id']]) : \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$model['status_id']]),
                     "service_id"      => $model['service_id'],
                     "is_mercury_cert" => (int)($model['is_mercury_cert'] > 0),
                     "count"           => (int)$model['count'],
@@ -680,7 +669,9 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     public function getDocumentStatus()
     {
-        return self::$doc_group_status;
+        return array_map(function ($el) {
+            return \Yii::t('api_web', 'doc_group.' . $el);
+        }, Registry::$doc_group_status);
     }
 
     /**
@@ -701,10 +692,10 @@ class DocumentWebApi extends \api_web\components\WebApi
     public function getSortList()
     {
         return [
-            'doc_number'  => 'Номеру документа А-Я',
-            '-doc_number' => 'Номеру документа Я-А',
-            'doc_date'    => 'Дате документа по возрастанию',
-            '-doc_date'   => 'Дате документа по убванию',
+            'doc_number'  => \Yii::t('api_web', 'doc_order.doc_number'),
+            '-doc_number' => \Yii::t('api_web', 'doc_order.-doc_number'),
+            'doc_date'    => \Yii::t('api_web', 'doc_order.doc_date'),
+            '-doc_date'   => \Yii::t('api_web', 'doc_order.-doc_date'),
         ];
     }
 

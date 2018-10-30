@@ -103,44 +103,40 @@ class DocumentController extends \api_web\components\WebApiController
      *          @SWG\Schema(
      *              default={
      *                  "documents": {
-     *                      {
-     *                        "id": 11326,
-     *                        "doc_number": "тест",
-     *                        "type": "order",
-     *                        "status_id": 6,
-     *                        "status_text": "Отменен клиентом",
-     *                        "service_id": 9,
-     *                        "is_mercury_cert": false,
-     *                        "count": 10,
-     *                        "total_price": "500.00",
-     *                        "doc_date": "2018-04-11T18:41:34+03:00",
-     *                        "vendor": {
-     *                          "id": 4749,
-     *                          "name": "Demo1",
-     *                          "difer": false
-     *                        },
-     *                        "agent": null,
-     *                        "store": null
-     *                      },
-     *                      {
-     *                         "id": 11327,
-     *                         "doc_number": null,
-     *                         "type": "order",
-     *                         "status_id": 4,
-     *                         "status_text": "Завершен",
-     *                         "service_id": 3,
-     *                         "is_mercury_cert": false,
-     *                         "count": 10,
-     *                         "total_price": "1173.20",
-     *                         "doc_date": "2018-04-11T18:41:42+03:00",
-     *                         "vendor": {
-     *                         "id": 5158,
-     *                         "name": "MixCart Поставщик",
-     *                         "difer": false
-     *                          },
-     *                         "agent": null,
-     *                         "store": null
-     *                      },
+     *                     {
+     *                           "id": "2",
+     *                           "doc_number": null,
+     *                           "type": "waybill",
+     *                           "status_id": "1",
+     *                           "status_text": "Сопоставлена",
+     *                           "service_id": "2",
+     *                           "is_mercury_cert": 0,
+     *                           "count": 1,
+     *                           "total_price": "0.00",
+     *                           "doc_date": "2018-10-29T15:58:11+03:00",
+     *                           "vendor": null,
+     *                           "agent": null,
+     *                           "store": null
+     *                           },
+     *                           {
+     *                           "id": "13508",
+     *                           "doc_number": null,
+     *                           "type": "order",
+     *                           "status_id": "2",
+     *                           "status_text": "Сформирована",
+     *                           "service_id": null,
+     *                           "is_mercury_cert": 0,
+     *                           "count": 2,
+     *                           "total_price": "10700.00",
+     *                           "doc_date": "2018-10-18T14:48:36+03:00",
+     *                           "vendor": {
+     *                           "id": "5440",
+     *                           "name": "ООО \"Организация поставок\"",
+     *                           "difer": false
+     *                           },
+     *                           "agent": null,
+     *                           "store": null
+     *                           },
      *                  },
      *                  "pagination": {
      *                      "page": 1,

@@ -356,7 +356,7 @@ class OrganizationController extends Controller
                     $licenseOrganization = new LicenseOrganization();
                     $licenseOrganization->license_id = $license->id;
                     $licenseOrganization->org_id = $organizationID;
-                    $licenseOrganization->status_id = 1;
+                    $licenseOrganization->status_id = LicenseOrganization::STATUS_ACTIVE;
                     $licenseOrganization->fd = new Expression('NOW()');
                     $licenseOrganization->td = date("Y-m-d H:i:s", strtotime($post['td'][$licenseID]));
                     $licenseOrganization->save();

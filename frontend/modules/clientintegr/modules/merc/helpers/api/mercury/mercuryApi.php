@@ -272,31 +272,37 @@ class mercuryApi extends baseApi
             } while ($status == 'IN_PROCESS');
 
             //Пишем лог
-            mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
-
-            if ($status == 'COMPLETED') {
-                $doc[] = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
-                (new VetDocumentsChangeList())->updateDocumentsList($doc[0]);
-
-            } else {
-                $result = null;
-                foreach ($result->application->errors as $error) {
+            try {
+                mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+            } catch (\Exception $e) {
+                $errors = is_array($result->application->errors->error) ? $result->application->errors->error : [$result->application->errors->error];
+                $err = true;
+                foreach ($errors as $error) {
                     if($error->code == 'MERC14257')
                     {
+                        $err = false;
                         $vsd = MercVsd::findOne(['uuid' => $UUID]);
                         $rejectedData = new rejectedForm();
-                        $rejectedData->decision = VetDocumentDone::PARTIALLY;
-                        $rejectedData->reason = " ";
-                        $rejectedData->description = " ";
-                        $rejectedData->volume = $vsd->amount;
+                        $rejectedData->decision = VetDocumentDone::ACCEPT_ALL;
+                        $rejectedData->reason = "ТТН верна";
+                        $rejectedData->description = "ТТН верна";
                         $rejectedData->uuid = $UUID;
                         $result = $this->getVetDocumentDone($UUID, $rejectedData);
                         break;
                     }
                 }
+                if($err) {
+                    throw $e;
+                }
+            }
+            if ($status == 'COMPLETED') {
+                $doc[] = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
+                (new VetDocumentsChangeList())->updateDocumentsList($doc[0]);
+
             }
         } catch (\SoapFault $e) {
             Yii::error($e->detail);
+            var_dump($e->detail); die();
         }
         return $result;
     }

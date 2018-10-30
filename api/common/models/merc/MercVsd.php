@@ -323,10 +323,14 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $queueName = $queue->consumer_class_name;
             }
 
-            $data['startDate'] = $start_date ?? MercVisits::getLastVisit($org_id, 'MercVSDList', $enterpriseGuid);
+            $data['startDate'] = $start_date ?? gmdate("Y-m-d H:i:s", time() - 60*60*24);
             $data['listOptions']['count'] = 100;
             $data['listOptions']['offset'] = 0;
             $data['enterpriseGuid'] = $enterpriseGuid;
+
+            if(isset($start_date)) {
+                $queue->data_request = json_encode($data);
+            }
 
             //ставим задачу в очередь
             \Yii::$app->get('rabbit')

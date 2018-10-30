@@ -153,7 +153,7 @@ class License extends ActiveRecord
             ->indexBy('id');
 
         if (!empty($service_ids)) {
-            $license->andWhere(['in', 'ls.service_id', $service_ids]);
+            $license->andWhere(['in', 'license.service_id', $service_ids]);
         }
 
         if (!is_null($is_active)) {

@@ -350,7 +350,8 @@ class DocumentWebApi extends \api_web\components\WebApi
                    null as store_name,
                    null as waybill_status,
                    null as waybill_date,
-                   o.created_at as order_date
+                   o.created_at as order_date,
+                   o.replaced_order_id as replaced_order_id
                    FROM `order` as o
                    LEFT JOIN (
                       SELECT id, order_id, edi_number
@@ -395,7 +396,8 @@ class DocumentWebApi extends \api_web\components\WebApi
                     os.name as store_name,
                     status_id as waybill_status,
                     doc_date as waybill_date,
-                    null as order_date
+                    null as order_date,
+                    null as replaced_order_id
                     FROM `$apiShema`.waybill w
                     LEFT JOIN `$apiShema`.waybill_content wc ON wc.waybill_id = w.id
                     LEFT JOIN order_content oc ON oc.id = wc.order_content_id
@@ -475,6 +477,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                                             "id"    => $model['store_id'],
                                             "name"  => $model['store_name'],
                                         ],
+                    "replaced_order_id" => isset($model['replaced_order_id']) ? (int)$model['replaced_order_id'] : null
                     ];
             }
         }

@@ -24,13 +24,13 @@ class OrderEmail extends BaseOrder implements DocumentInterface
         $order = (isset($this->order_id)) ? $this->order : null;
 
         $return = [
-            "id"                => $this->id,
+            "id"                => (int)$this->id,
             "number"            => $this->number ? [$this->number] : null,
             "type"              => DocumentWebApi::TYPE_ORDER_EMAIL,
-            "status_id"         => isset($order) ? $order->status : null,
+            "status_id"         => isset($order) ? (int)$order->status : null,
             "status_text"       => isset($order) ? $order->statusText : null,
-            "service_id"        => isset($order) ? $order->service_id : null,
-            "replaced_order_id" => isset($order) ? $order->replaced_order_id : null
+            "service_id"        => isset($order) ? (int)$order->service_id : null,
+            "replaced_order_id" => isset($order) ? (int)$order->replaced_order_id : null
         ];
 
         $return ["agent"] = null;
@@ -44,14 +44,14 @@ class OrderEmail extends BaseOrder implements DocumentInterface
 
         if ($vendor != null) {
             $return["vendor"] = [
-                "id"    => $vendor->id,
+                "id"    => (int)$vendor->id,
                 "name"  => $vendor->name,
                 "difer" => false,
             ];
             $agent = OuterAgent::findOne(['vendor_id' => $vendor->id]);
             $return ["agent"] = !empty($agent) ? [
                 'name' => $agent->name,
-                'id'   => $agent->id,
+                'id'   => (int)$agent->id,
             ] : null;
         } else {
             $return["vendor"] = null;

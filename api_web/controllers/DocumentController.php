@@ -131,7 +131,8 @@ class DocumentController extends \api_web\components\WebApiController
      *                           "difer": false
      *                           },
      *                           "agent": null,
-     *                           "store": null
+     *                           "store": null,
+     *                           "replaced_order_id": null
      *                           },
      *                           {
      *                           "id": 13508,
@@ -152,7 +153,8 @@ class DocumentController extends \api_web\components\WebApiController
      *                           "difer": false
      *                           },
      *                           "agent": null,
-     *                           "store": null
+     *                           "store": null,
+     *                           "replaced_order_id": null
      *                           },
      *                  },
      *                  "pagination": {

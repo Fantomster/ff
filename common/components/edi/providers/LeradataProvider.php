@@ -92,6 +92,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             $list = $obj['response'];
             if (!empty($list)) {
                 foreach ($list as $key => $xml) {
+                    $this->ediFilesQueueID = $key;
                         if ($type == 'pricat') {
                             $xml = json_decode(json_encode($xml, JSON_UNESCAPED_UNICODE));
                             $this->realization->handlePriceListUpdating($key, $xml);
@@ -203,8 +204,6 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         $success = $this->realization->parseFile($content);
         if ($success) {
             $this->updateQueue($this->ediFilesQueueID, parent::STATUS_HANDLED, '');
-        } else {
-            $this->updateQueue($this->ediFilesQueueID, parent::STATUS_ERROR, 'Error handling file 1');
         }
     }
 

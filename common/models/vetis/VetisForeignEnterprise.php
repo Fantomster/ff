@@ -23,9 +23,10 @@ use Yii;
  * @property string $country_guid
  * @property string $addressView
  * @property string $data
- * @property object
  * @property string $owner_guid
  * @property string $owner_uuid
+ * 
+ * @property object $enterprise
  */
 class VetisForeignEnterprise extends \yii\db\ActiveRecord implements UpdateDictInterface
 {

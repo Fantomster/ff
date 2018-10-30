@@ -25,6 +25,8 @@ use Yii;
  * @property object $enterprise
  * @property string $owner_guid
  * @property string $owner_uuid
+ * 
+ * @property object $enterprise
  */
 class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictInterface
 {

@@ -274,9 +274,9 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
 
             OrderController::sendOrderProcessing($order->client, $order);
         } catch (Exception $e) {
-            if($ediOrganization){
+            if ($ediOrganization) {
                 $orgID = $ediOrganization->organization_id;
-            }else{
+            } else {
                 $orgID = substr($supplier, 0, 8);
             }
             $arr = [

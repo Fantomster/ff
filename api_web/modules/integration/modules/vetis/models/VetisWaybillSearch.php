@@ -117,7 +117,7 @@ class VetisWaybillSearch extends MercVsd
              ';
 
         $result = \Yii::$app->db_api->createCommand($sql, $queryParams)->queryAll();
-
+        $arIncomingOutgoing = [];
         $arUuids = $arOrders = [];
         foreach ($result as $row) {
             $arUuids[$row['uuid']] = $row['order_id'];

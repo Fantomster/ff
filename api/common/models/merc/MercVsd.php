@@ -3,11 +3,9 @@
 namespace api\common\models\merc;
 
 use api\common\models\RabbitQueues;
+use common\models\OrderContent;
 use console\modules\daemons\components\UpdateDictInterface;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ListOptions;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
 use Yii;
 
 /**
@@ -292,6 +290,8 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
         foreach ($data as $item) {
             $res = isset($item->enterprise->uuid) ? cerberApi::getInstance($org_id)->getEnterpriseByUuid($item->enterprise->uuid) : null;
 
+            //var_dump($res); die();
+
             $result['name'][] = isset($res) ? ($res->name . '(' . $res->address->addressView . ')') : null;
             $result['guid'][] = $item->enterprise->guid;
 
@@ -336,5 +336,13 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
         }
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrderContent()
+    {
+        return $this->hasOne(OrderContent::className(), ['merc_uuid' => 'uuid']);
     }
 }

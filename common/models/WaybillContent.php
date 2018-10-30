@@ -3,27 +3,30 @@
 namespace common\models;
 
 use api\common\models\merc\MercVsd;
+use api_web\behaviors\WaybillContentBehavior;
+use common\helpers\DBNameHelper;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "waybill_content".
  *
- * @property int     $id
- * @property int     $waybill_id
- * @property int     $order_content_id
- * @property int     $outer_product_id
- * @property double  $quantity_waybill
- * @property double  $vat_waybill
- * @property string  $merc_uuid
- * @property int     $sum_with_vat
- * @property int     $sum_without_vat
- * @property int     $price_with_vat
- * @property int     $price_without_vat
- * @property int     $outer_unit_id
- * @property int     $koef
+ * @property int          $id
+ * @property int          $waybill_id
+ * @property int          $order_content_id
+ * @property int          $outer_product_id
+ * @property double       $quantity_waybill
+ * @property double       $vat_waybill
+ * @property string       $merc_uuid
+ * @property int          $sum_with_vat
+ * @property int          $sum_without_vat
+ * @property int          $price_with_vat
+ * @property int          $price_without_vat
+ * @property int          $outer_unit_id
+ * @property int          $koef
  * @property OrderContent $orderContent
  * @property OuterProduct $productOuter
- * @property Waybill $waybill
+ * @property Waybill      $waybill
  */
 class WaybillContent extends \yii\db\ActiveRecord
 {
@@ -44,6 +47,25 @@ class WaybillContent extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return array
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => WaybillContentBehavior::class,
+                'model' => $this
+            ],
+            [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function rules()
@@ -52,7 +74,7 @@ class WaybillContent extends \yii\db\ActiveRecord
             [['waybill_id'], 'required'],
             [['waybill_id', 'order_content_id', 'outer_product_id', 'outer_unit_id'], 'integer'],
             [['sum_with_vat', 'sum_without_vat', 'price_with_vat', 'price_without_vat', 'quantity_waybill', 'vat_waybill', 'koef'], 'number'],
-            [['merc_uuid'], 'string', 'max' => 255],
+            [['created_at', 'updated_at'], 'safe'],
             [['waybill_id'], 'exist', 'skipOnError' => true, 'targetClass' => Waybill::className(), 'targetAttribute' => ['waybill_id' => 'id']],
         ];
     }
@@ -64,15 +86,13 @@ class WaybillContent extends \yii\db\ActiveRecord
     {
         return [
             'id'               => 'ID',
-            'waybill_id'       => 'Waybill ID',
-            'order_content_id' => 'Order Content ID',
-            'outer_product_id' => 'Product Outer ID',
-            'quantity_waybill' => 'Quantity Waybill',
-            'vat_waybill'      => 'Vat Waybill',
-            'merc_uuid'        => 'Merc Uuid',
-            'unload_status'    => 'Unload Status',
+            'waybill_id'       => 'ID Накладной',
+            'order_content_id' => 'ID Позиции заказа',
+            'outer_product_id' => 'ID Продукта',
+            'quantity_waybill' => 'Количество',
+            'vat_waybill'      => 'НДС',
             'koef'             => 'Коэффициент',
-            'outer_unit_id'    => 'ID единицы измерения'
+            'outer_unit_id'    => 'ID Единицы измерения'
         ];
     }
 
@@ -89,7 +109,7 @@ class WaybillContent extends \yii\db\ActiveRecord
      * */
     public function getMercVsd()
     {
-        return $this->hasOne(MercVsd::className(), ['uuid' => 'merc_uuid']);
+        return $this->hasOne(MercVsd::className(), ['uuid' => 'merc_uuid'])->via('orderContent');
     }
 
     /**
@@ -116,25 +136,50 @@ class WaybillContent extends \yii\db\ActiveRecord
         return $this->hasOne(OuterUnit::className(), ['id' => 'outer_unit_id']);
     }
 
+    /**
+     * @param bool $insert
+     * @return bool
+     */
     public function beforeSave($insert)
     {
         $dirtyAttr = $this->getDirtyAttributes();
 
-        if (array_key_exists('price_without_vat', $dirtyAttr)) {
-            $this->price_with_vat = $this->price_without_vat * ((100 + ($this->vat_waybill ?? 0)) /100);
+        if (isset($dirtyAttr['price_without_vat']) || isset($dirtyAttr['quantity_waybill'])) {
+            if (isset($dirtyAttr['price_without_vat'])) {
+                $value = $this->price_without_vat * ((100 + ($this->vat_waybill ?? 0)) / 100);
+                $this->setAttribute('price_with_vat', $value);
+            }
             $this->refreshSum();
+
+            //Если присутствует связь с orderContent
+            //обновляем все записи waybill_content, которые привязаны к этому же order_content_id
+            if (!empty($this->orderContent)) {
+                self::updateAll(
+                    [
+                        'price_without_vat' => $this->getAttribute('price_without_vat'),
+                        'quantity_waybill'  => $this->getAttribute('quantity_waybill'),
+                        'sum_with_vat'      => $this->getAttribute('sum_with_vat'),
+                        'sum_without_vat'   => $this->getAttribute('sum_without_vat'),
+                        'vat_waybill'       => $this->getAttribute('vat_waybill')
+                    ],
+                    'order_content_id = :oid AND id != :id',
+                    [
+                        ':oid' => $this->orderContent->id,
+                        ":id"  => $this->id
+                    ]
+                );
+            }
         }
 
-        if (array_key_exists('quantity_waybill', $dirtyAttr)) {
-            $this->refreshSum();
-        }
-
-        return parent::beforeSave($insert); // TODO: Change the autogenerated stub
+        return parent::beforeSave($insert);
     }
 
+    /**
+     * Обновление сумм
+     */
     public function refreshSum()
     {
-        $this->sum_with_vat = $this->quantity_waybill * $this->price_with_vat;
-        $this->sum_without_vat = $this->quantity_waybill * $this->price_without_vat;
+        $this->setAttribute('sum_with_vat', ($this->quantity_waybill * $this->price_with_vat));
+        $this->setAttribute('sum_without_vat', ($this->quantity_waybill * $this->price_without_vat));
     }
 }

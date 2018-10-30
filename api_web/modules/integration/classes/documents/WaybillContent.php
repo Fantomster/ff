@@ -21,13 +21,6 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
         }
 
         $orderContent = $this->orderContent;
-        $productOuter = $this->productOuter;
-        $unit = null;
-        if (isset($orderContent)) {
-            $unit = $orderContent->product->ed;
-        } elseif (isset($productOuter)) {
-            $unit = isset($productOuter->outerUnit) ? $productOuter->outerUnit->name : null;
-        }
 
         $return = [
             "id"              => $this->id,
@@ -35,7 +28,7 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
             "product_name"    => isset($orderContent) ? $orderContent->product->product : null,
             "outer_product"   => $this->getOuterProduct(),
             "quantity"        => $this->quantity_waybill,
-            "unit"            => $unit,
+            "outer_unit"      => $this->getOuterUnitObject(),
             "koef"            => $this->koef,
             "merc_uuid"       => isset($orderContent) ? $orderContent->merc_uuid : null,
             "sum_without_vat" => CurrencyHelper::asDecimal($this->sum_without_vat),
@@ -53,13 +46,24 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
      */
     private function getOuterProduct()
     {
-        if (empty($this->productOuter)) {
-            return null;
-        }
-
         return [
-            'id'   => $this->productOuter->id,
-            'name' => $this->productOuter->name
+            'id'   => isset($this->productOuter) ? $this->productOuter->id : null,
+            'name' => isset($this->productOuter) ? $this->productOuter->name : null
+        ];
+    }
+
+
+    /**
+     * Информация о внешних еденицах измерения
+     *
+     * @return array|null
+     */
+    private function getOuterUnitObject()
+    {
+        $productOuter = $this->productOuter;
+        return [
+            'id'   => isset($productOuter->outerUnit) ? $productOuter->outerUnit->id : null,
+            'name' => isset($productOuter->outerUnit) ? $productOuter->outerUnit->name : null
         ];
     }
 

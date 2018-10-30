@@ -2,36 +2,35 @@
 
 namespace common\models;
 
+use common\helpers\DBNameHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "waybill".
  *
- * @property int $id
- * @property int $acquirer_id
- * @property int $status_id
- * @property int $service_id
- * @property string $outer_number_code
- * @property string $outer_number_additional
- * @property string $outer_store_id
- * @property string $outer_duedate
- * @property string $outer_note
- * @property string $outer_order_date
- * @property string $outer_agent_id
- * @property int $vat_included
- *
- * @property string $doc_date
- * @property int $is_duedate
- * @property string $created_at
- * @property string $updated_at
- * @property string $exported_at
- * @property int $payment_delay
- * @property string $payment_delay_date
- * @property string $edi_number
- * @property string $edi_recadv
- * @property string $edi_invoice
- *
+ * @property int              $id
+ * @property int              $acquirer_id
+ * @property int              $status_id
+ * @property int              $service_id
+ * @property string           $outer_number_code
+ * @property string           $outer_number_additional
+ * @property string           $outer_store_id
+ * @property string           $outer_duedate
+ * @property string           $outer_note
+ * @property string           $outer_order_date
+ * @property string           $outer_agent_id
+ * @property int              $vat_included
+ * @property string           $doc_date
+ * @property int              $is_duedate
+ * @property string           $created_at
+ * @property string           $updated_at
+ * @property string           $exported_at
+ * @property int              $payment_delay
+ * @property string           $payment_delay_date
+ * @property Order            $order
+ * @property string           $edi_recadv
+ * @property string           $edi_invoice
  * @property WaybillContent[] $waybillContents
  */
 class Waybill extends \yii\db\ActiveRecord
@@ -94,12 +93,12 @@ class Waybill extends \yii\db\ActiveRecord
             'service_id'              => 'Service ID',
             'outer_number_code'       => 'Outer Number Code',
             'outer_number_additional' => 'Outer Number Additional',
-            'outer_store_id' => 'Outer Store Id',
-            'outer_duedate' => 'Outer Duedate',
-            'outer_note' => 'Outer Note',
-            'outer_order_date' => 'Outer Order Date',
-            'outer_agent_id' => 'Outer Agent Id',
-            'vat_included' => 'Vat Included'
+            'outer_store_id'          => 'Outer Store Id',
+            'outer_duedate'           => 'Outer Duedate',
+            'outer_note'              => 'Outer Note',
+            'outer_order_date'        => 'Outer Order Date',
+            'outer_agent_id'          => 'Outer Agent Id',
+            'vat_included'            => 'Vat Included'
         ];
     }
 
@@ -116,7 +115,13 @@ class Waybill extends \yii\db\ActiveRecord
      */
     public function getIsMercuryCert()
     {
-        return (WaybillContent::find()->where(['waybill_id' => $this->id])->andWhere('merc_uuid is not null')->count()) > 0;
+        $count = WaybillContent::find()
+            ->where(['waybill_id' => $this->id])
+            ->leftJoin(DBNameHelper::getMainName() . '.' . OrderContent::tableName() . ' as oc', 'oc.id = order_content_id')
+            ->andWhere('oc.merc_uuid is not null')
+            ->count();
+
+        return ($count) > 0;
     }
 
     /**
@@ -135,4 +140,15 @@ class Waybill extends \yii\db\ActiveRecord
         return round(WaybillContent::find()->where(['waybill_id' => $this->id])->sum('sum_with_vat'), 2);
     }
 
+    /**
+     * @return Order|null
+     */
+    public function getOrder()
+    {
+        $wcModel = WaybillContent::find()->where('waybill_id = :wid AND order_content_id is not null', [':wid' => $this->id])->one();
+        if(!empty($wcModel)) {
+            return $wcModel->orderContent->order;
+        }
+        return null;
+    }
 }

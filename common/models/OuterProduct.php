@@ -48,7 +48,7 @@ class OuterProduct extends \yii\db\ActiveRecord
         return [
             [['service_id', 'org_id', 'level', 'is_deleted', 'is_category', 'outer_unit_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['outer_uid', 'name', 'parent_uid'], 'string', 'max' => 45],
+            [['outer_uid', 'name', 'parent_uid'], 'string', 'max' => 255],
             [['comment'], 'string', 'max' => 255],
         ];
     }

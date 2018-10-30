@@ -16,6 +16,10 @@ class DocumentController extends \api_web\components\WebApiController
      *     description="Детальная часть документа
      *     Типы возвращаемых данных:
      *     https://goo.gl/VSWoBC
+     *
+     *     has_order_content - если не задан или null вернет все
+     *                       - false вернет только без привязки к заказу
+     *                       - true вернет только с привязкой к заказу
      * ",
      *     produces={"application/json"},
      *     @SWG\Parameter(
@@ -29,7 +33,8 @@ class DocumentController extends \api_web\components\WebApiController
      *                  default={
      *                      "document_id": 2,
      *                      "type": "order",
-     *                      "service_id": 2
+     *                      "service_id": 2,
+     *                      "has_order_content": true
      *                  }
      *              )
      *         )
@@ -339,8 +344,8 @@ class DocumentController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "order_id": 2525,
-     *                      "document_id": 1111
+     *                      "document_id": 1111,
+     *                      "replaced_order_id": 2525
      *                      }
      *              )
      *         )
@@ -450,5 +455,94 @@ class DocumentController extends \api_web\components\WebApiController
     public function actionWaybillStatus()
     {
         $this->response = $this->container->get('DocumentWebApi')->getWaybillStatus();
+    }
+
+    /**
+     * @SWG\Post(path="/document/get",
+     *     tags={"Documents"},
+     *     summary="Получение документа",
+     *     description="Получение документа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "document_id": 7,
+     *                      "type": "waybill",
+     *                      "service_id": 2
+     *                 }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "document": {
+     *                          "id": 83,
+     *                          "number": {
+     *                              "13392-1"
+     *                          },
+     *                          "type": "waybill",
+     *                          "status_id": 1,
+     *                          "status_text": "Сопоставлена",
+     *                          "service_id": 2,
+     *                          "vendor": {
+     *                              "id": 5785,
+     *                              "name": "ООО AAAAA"
+     *                          },
+     *                          "agent": null,
+     *                          "store": {
+     *                              "id": 9,
+     *                              "name": "Основной склад"
+     *                          },
+     *                          "is_mercury_cert": false,
+     *                          "count": 1,
+     *                          "total_price": "4998.00",
+     *                          "doc_date": "2018-10-26T14:36:54+03:00"
+     *                      },
+     *                      "documents": {},
+     *                      "positions": {
+     *                          {
+     *                              "id": 26,
+     *                              "product_id": 1640035,
+     *                              "product_name": "Треска горячего копчения",
+     *                              "outer_product": {
+     *                                  "id": 1565080,
+     *                                  "name": "____сосиска2"
+     *                              },
+     *                              "quantity": 1,
+     *                              "outer_unit": {
+     *                                  "id": 14,
+     *                                  "name": "кг"
+     *                              },
+     *                              "koef": 1,
+     *                              "merc_uuid": null,
+     *                              "sum_without_vat": "4998.00",
+     *                              "sum_with_vat": "4998.00",
+     *                              "vat": 0
+     *                          }
+     *                      }
+     *                  }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     * @throws \Exception
+     */
+    public function actionGet()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->getDocument($this->request);
     }
 }

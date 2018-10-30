@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use api\common\models\merc\MercStockEntry;
+use api\common\models\merc\MercVisits;
 use api\common\models\merc\MercVsd;
 use common\models\vetis\VetisBusinessEntity;
 use common\models\vetis\VetisCountry;
@@ -145,11 +146,17 @@ class MercuryCronController extends Controller
         echo "FINISH" . PHP_EOL;
     }
 
-    public function actionTestVsd()
+    public function actionTestVsd($org_id = 5144, $enterpriseGuid = 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b', $start_date = null)
     {
         echo "START" . PHP_EOL;
-        $w = new MercVSDList(5144);
-        $w->data = 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b';
+        $w = new MercVSDList($org_id);
+        MercVsd::getUpdateData($org_id);
+
+        $data['startDate'] = $start_date ?? MercVisits::getLastVisit($org_id, 'MercVSDList', $enterpriseGuid);
+        $data['listOptions']['count'] = 100;
+        $data['listOptions']['offset'] = 0;
+        $data['enterpriseGuid'] = $enterpriseGuid;
+        $w->data = json_encode($data);
         $w->getData();
         echo "FINISH" . PHP_EOL;
     }

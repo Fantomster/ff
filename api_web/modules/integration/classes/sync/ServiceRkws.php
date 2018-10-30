@@ -131,31 +131,24 @@ class ServiceRkws extends AbstractSyncFactory
             throw new BadRequestHttpException('Cannot authorize with curl');
         }
 
-        $result = [];
         #Если пришел запрос на обновление продуктов, и нет конкретной группы, обновляем все группы
         # которые выбраны
         if ($params['dictionary'] == 'product' && empty($params['product_group'])) {
+
             $models = OuterCategory::find()->where([
                 'service_id' => Registry::RK_SERVICE_ID,
                 'org_id'     => $this->user->organization_id,
                 'selected'   => 1
             ])->all();
 
-            foreach ($models as $model) {
-                $params['product_group'] = $model->outer_uid;
-                try {
-                    $result[] = $this->sendRequestPrivate($params, $cook);
-                } catch (\Throwable $e) {
-                    $result[$model->outer_uid] = [
-                        'error' => $e->getMessage()
-                    ];
-                    continue;
-                }
+            if (empty($models)) {
+                throw new BadRequestHttpException('Не выбраны категории для загрузки товаров');
             }
-        } else {
-            $result = $this->sendRequestPrivate($params, $cook);
+
+            $params['product_group'] = $models;
         }
-        return $result;
+
+        return $this->sendRequestPrivate($params, $cook);
     }
 
     /**

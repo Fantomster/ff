@@ -79,6 +79,9 @@ class OrderSearch extends Order
      */
     public function search($params)
     {
+        if (isset($this->id) && $this->id > 0){
+            $params['OrderSearch']['id'] = $this->id;
+        }
 
         if (isset($params['OrderSearch']['id']) && (int)$params['OrderSearch']['id'] > 0) {
             $query = Order::find()->where(['id' => (int)$params['OrderSearch']['id']])
@@ -89,13 +92,18 @@ class OrderSearch extends Order
         }
 
         $query = Order::find();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+
         $this->load($params);
 
         $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
         if ($from) {
             $t1_f = $from->format('Y-m-d H:i:s');
         }
-        $to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_to . " 00:00:00");
+        $to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_to . " 23:59:59");
         if ($to) {
             $to->add(new \DateInterval('P1D'));
             $t2_f = $to->format('Y-m-d H:i:s');
@@ -179,8 +187,7 @@ class OrderSearch extends Order
         }
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 

@@ -28,22 +28,28 @@ class Order extends BaseOrder implements DocumentInterface
             $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
                 return $el->edi_number;
             }, $this->orderContent)));
-            if (is_null(reset($arWaybillNames))){
+            if (is_null(reset($arWaybillNames))) {
                 $arWaybillNames = null;
             }
         }
 
         $return = [
-            "id"          => $this->id,
-            "number"      => $arWaybillNames ?? null,
-            "type"        => DocumentWebApi::TYPE_ORDER,
-            "status_id"   => $this->status,
-            "status_text" => $this->statusText,
-            "service_id"  => $this->service_id,
+            "id"              => $this->id,
+            "number"          => $arWaybillNames ?? null,
+            "type"            => DocumentWebApi::TYPE_ORDER,
+            "status_id"       => $this->status,
+            "status_text"     => $this->statusText,
+            "service_id"      => $this->service_id,
+            "is_mercury_cert" => $this->getIsMercuryCert(),
+            "count"           => (int)$this->positionCount,
+            "total_price"     => CurrencyHelper::asDecimal($this->total_price),
+            "doc_date"        => date("Y-m-d H:i:s T", strtotime($this->created_at)),
+            "vendor"          => null,
+            "agent"           => null,
+            "store"           => null
         ];
 
         $vendor = $this->vendor;
-
         $return["vendor"] = [
             "id"    => $vendor->id,
             "name"  => $vendor->name,
@@ -51,16 +57,12 @@ class Order extends BaseOrder implements DocumentInterface
         ];
 
         $agent = OuterAgent::findOne(['vendor_id' => $vendor->id]);
-        $return ["agent"] = !empty($agent) ? [
-            'name' => $agent->name,
-            'id'   => $agent->id,
-        ] : null;
-
-        $return["is_mercury_cert"] = $this->getIsMercuryCert();
-        $return["count"] = (int)$this->positionCount;
-        $return["total_price"] = CurrencyHelper::asDecimal($this->total_price);
-        $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->created_at));
-        $return["store"] = null; //todo_refactoring
+        if (!empty($agent)) {
+            $return["agent"] = [
+                'id'   => $agent->id,
+                'name' => $agent->name,
+            ];
+        }
 
         return $return;
     }

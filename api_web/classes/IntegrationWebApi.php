@@ -6,6 +6,8 @@ use api\common\models\AllMaps;
 use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use api_web\helpers\OuterProductMapHelper;
+use common\models\CatalogBaseGoods;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
@@ -27,6 +29,21 @@ use yii\web\BadRequestHttpException;
  */
 class IntegrationWebApi extends WebApi
 {
+
+    /**
+     * @var OuterProductMapHelper
+     */
+    public $helper;
+
+    /**
+     * IntegrationWebApi constructor.
+     */
+    function __construct()
+    {
+        $this->helper = new OuterProductMapHelper();
+        parent::__construct();
+    }
+
     /**
      * @param $request
      * @return array
@@ -35,13 +52,13 @@ class IntegrationWebApi extends WebApi
     public function userServiceSet($request)
     {
         $this->validateRequest($request, ['service_id']);
-        $license = License::checkByServiceId($this->user->id, $request['service_id']);
+        $license = License::checkByServiceId($this->user->organization_id, $request['service_id']);
         if ($license) {
             $this->user->integration_service_id = $request['service_id'];
             $this->user->save();
             return ['result' => true];
         } else {
-            throw new BadRequestHttpException('Dont have license for this service');
+            throw new BadRequestHttpException('Dont have active license for this service');
         }
     }
 
@@ -106,6 +123,8 @@ class IntegrationWebApi extends WebApi
                 $waybillsCount = count($order->getWaybills($post['service_id']));
                 if ($waybillsCount == 0) {
                     $waybillsCount = 1;
+                } else {
+                    $waybillsCount++;
                 }
                 $ediNumber = $post['order_id'] . "-" . $waybillsCount;
             }
@@ -145,23 +164,32 @@ class IntegrationWebApi extends WebApi
             throw new BadRequestHttpException("waybill content not found");
         }
 
-        $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
-        if ($orderContent) {
+        $orderContent = $waybillContent->orderContent;
+        if (!empty($orderContent)) {
+            //Поиск в массовом сопоставлении
+            $outerProductMap = $this->helper->getMapForOrder($orderContent->order, $waybillContent->waybill->service_id, $orderContent->product_id);
+            if (!empty($outerProductMap)) {
+                $outerProductMap = (object)current($outerProductMap);
+                $outerProduct = OuterProduct::findOne($outerProductMap->outer_product_id);
+                $waybillContent->outer_product_id = $outerProduct->id;
+                $waybillContent->outer_unit_id = $outerProduct->outer_unit_id;
+                $waybillContent->vat_waybill = $outerProductMap->vat;
+                $waybillContent->koef = $outerProductMap->coefficient ?? 1;
+            } else {
+                $waybillContent->vat_waybill = $orderContent->vat_product;
+            }
             $waybillContent->quantity_waybill = $orderContent->quantity;
             $waybillContent->price_without_vat = (int)$orderContent->price;
-            $waybillContent->vat_waybill = $orderContent->vat_product;
             $waybillContent->price_with_vat = (int)($orderContent->price + ($orderContent->price * $orderContent->vat_product));
             $waybillContent->sum_without_vat = (int)$orderContent->price * $orderContent->quantity;
             $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $orderContent->quantity;
-            $allMap = AllMaps::findOne(['product_id' => $orderContent->product_id]);
-            if ($allMap) {
-                $waybillContent->outer_product_id = $allMap->serviceproduct_id;
-            }
         } else {
             throw new BadRequestHttpException("order content not found");
         }
 
-        $waybillContent->save();
+        if (!$waybillContent->save()) {
+            throw new ValidationException($waybillContent->getFirstErrors());
+        }
 
         return ['success' => true];
     }
@@ -179,41 +207,105 @@ class IntegrationWebApi extends WebApi
             throw new BadRequestHttpException("empty_param|waybill_content_id");
         }
 
-        $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
+        $waybillContent = WaybillContent::find()
+            ->joinWith('waybill')
+            ->where([
+                'waybill_content.id'  => (int)$post['waybill_content_id'],
+                'waybill.acquirer_id' => $this->user->organization_id
+            ])->one();
+
         if (!$waybillContent) {
-            throw new BadRequestHttpException("waybill content not found");
+            throw new BadRequestHttpException("waybill_content_not_found");
         }
+
         $arr = $waybillContent->attributes;
 
+        $arr['product'] = [
+            'name' => null,
+            'id'   => null
+        ];
+
+        $arr['outer_product'] = [
+            'name'     => null,
+            'id'       => null,
+            'equality' => false
+        ];
+
+        $arr['outer_store'] = [
+            'name'     => null,
+            'id'       => null,
+            'equality' => false
+        ];
+
+        $arr['outer_unit'] = [
+            'name' => null,
+            'id'   => null
+        ];
+
+        $arr['vat_waybill'] = [
+            'value'    => $waybillContent->vat_waybill,
+            'equality' => false
+        ];
+
+        $arr['koef'] = [
+            'value'    => $waybillContent->koef,
+            'equality' => false
+        ];
+
+        //Если есть связь, с заказом
         $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
         if ($orderContent) {
-            $allMap = AllMaps::findOne(['product_id' => $orderContent->product_id]);
-            if ($allMap) {
-                $arr['koef'] = $allMap->koef;
-                $arr['serviceproduct_id'] = $allMap->serviceproduct_id;
-                $arr['store_rid'] = $allMap->store_rid;
-                $outerProduct = OuterProduct::findOne(['id' => $allMap->serviceproduct_id]);
-                if ($outerProduct) {
-                    $arr['outer_product_name'] = $outerProduct->name;
-                    $arr['outer_product_id'] = $outerProduct->id;
-                    $arr['product_id_equality'] = true;
-                } else {
-                    $arr['product_id_equality'] = false;
+            //Вернуть продукт поставщика
+            $orderContentProduct = CatalogBaseGoods::findOne(['id' => $orderContent->product_id]);
+            if ($orderContentProduct) {
+                $arr['product']['id'] = $orderContent->product_id;
+                $arr['product']['name'] = $orderContentProduct->product;
+            }
+            //получаем из массового сопоставления
+            $outerProductMap = $this->helper->getMapForOrder($orderContent->order, $waybillContent->waybill->service_id, $orderContent->product_id);
+            if (!empty($outerProductMap)) {
+                $outerProductMap = (object)current($outerProductMap);
+                //Если отличаются продукты, надо подсвечивать на фронте
+                if ($outerProductMap->outer_product_id != $waybillContent->outer_product_id) {
+                    $arr['outer_product']['equality'] = true;
                 }
-                $outerStore = OuterStore::findOne(['outer_uid' => $allMap->store_rid]);
-                if ($outerStore) {
-                    $arr['outer_store_name'] = $outerStore->name;
-                    $arr['outer_store_id'] = $outerStore->id;
-                    $arr['store_id_equality'] = true;
-                } else {
-                    $arr['store_id_equality'] = false;
+                //Если отличаются склады, надо подсвечивать на фронте
+                if ($outerProductMap->outer_store_id != $waybillContent->waybill->outer_store_id) {
+                    $arr['outer_store']['equality'] = true;
                 }
-                $outerUnit = OuterUnit::findOne(['outer_uid' => $allMap->unit_rid]);
-                if ($outerUnit) {
-                    $arr['outer_unit_name'] = $outerUnit->name;
-                    $arr['outer_unit_id'] = $outerUnit->id;
+                //Если ставка НДС отличается, то надо подсвечивать на фронте
+                if ($outerProductMap->vat != $waybillContent->vat_waybill) {
+                    $arr['vat_waybill']['equality'] = true;
+                }
+                //Если коэффициент отличается, то надо подсвечивать на фронте
+                if ($outerProductMap->coefficient != $waybillContent->koef) {
+                    $arr['koef']['equality'] = true;
                 }
             }
+        }
+
+        $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id]);
+        if ($outerProduct) {
+            $arr['outer_product'] = [
+                'name' => $outerProduct->name,
+                'id'   => $outerProduct->id
+            ];
+        }
+
+        $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id]);
+        if ($outerStore) {
+            $arr['outer_store'] = [
+                'name' => $outerStore->name,
+                'id'   => $outerStore->id
+            ];
+        }
+
+        $outerUnit = OuterUnit::findOne(['id' => $waybillContent->outer_unit_id]);
+        if ($outerUnit) {
+            $arr['outer_unit'] = [
+                'name' => $outerUnit->name,
+                'id'   => $outerUnit->id
+            ];
         }
 
         return $arr;
@@ -229,31 +321,51 @@ class IntegrationWebApi extends WebApi
     public function updateWaybillContent(array $post): array
     {
         $this->validateRequest($post, ['waybill_content_id']);
+        $waybillContent = WaybillContent::find()
+            ->joinWith('waybill')
+            ->where([
+                'waybill_content.id'  => (int)$post['waybill_content_id'],
+                'waybill.acquirer_id' => $this->user->organization_id
+            ])->one();
 
-        $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
         if (!$waybillContent) {
             throw new BadRequestHttpException("waybill content not found");
         }
 
-        if (isset($post['vat_waybill'])) {
-            $waybillContent->vat_waybill = (float)$post['vat_waybill'];
+        //Обновим внешний продукт и ед. измерения
+        if (isset($post['outer_product_id']) && !empty($post['outer_product_id'])) {
+            //Поиск, есть ли такой продукт в у.с. у этого ресторана
+            $outerProduct = OuterProduct::findOne([
+                'id'         => (int)$post['outer_product_id'],
+                'service_id' => $waybillContent->waybill->service_id,
+                'org_id'     => $this->user->organization_id
+            ]);
+
+            if (empty($outerProduct)) {
+                throw new BadRequestHttpException("waybill.outer_product_not_found");
+            }
+            $waybillContent->outer_product_id = $outerProduct->id;
+            $waybillContent->outer_unit_id = $outerProduct->outer_unit_id;
         }
 
-        if (isset($post['outer_unit_id'])) {
-            $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
+        $params = ["koef", "quantity_waybill", "price_without_vat", "vat_waybill"];
+        foreach ($params as $key => $attributeName) {
+            if (isset($post[$attributeName]) && !empty($post[$attributeName])) {
+                $waybillContent->setAttribute($attributeName, $post[$attributeName]);
+            }
         }
 
-        $koef = null;
-        $quan = null;
-
-        if (isset($post['koef'])) {
-            $koef = (float)$post['koef'];
+        //Пересчет сумм происходит в beforeSave() модели
+        if (!$waybillContent->save()) {
+            throw new ValidationException($waybillContent->getFirstErrors());
         }
-        if (isset($post['quantity_waybill'])) {
-            $quan = (int)$post['quantity_waybill'];
-        }
-
-        return $this->handleWaybillContent($waybillContent, $post, $quan, $koef);
+        //Подготовим fake request
+        $call = [
+            'waybill_content_id' => $waybillContent->id,
+            'service_id'         => $waybillContent->waybill->service_id
+        ];
+        //Вернем обработанную модель деталей позиции
+        return $this->showWaybillContent($call);
     }
 
     /**
@@ -266,7 +378,9 @@ class IntegrationWebApi extends WebApi
      */
     private function handleWaybillContent($waybillContent, $post, $quan, $koef)
     {
-        if (!OuterProduct::find()->where(['id' => $post['outer_product_id']])->exists()){
+        return ['deprecated' => true];
+        //DEPRECATED this suck stub
+        if (!OuterProduct::find()->where(['id' => $post['outer_product_id']])->exists()) {
             throw new BadRequestHttpException('outer_product_not_found');
         }
         if (isset($post['outer_product_id'])) {
@@ -308,27 +422,37 @@ class IntegrationWebApi extends WebApi
      */
     public function createWaybillContent(array $post): array
     {
-        $this->validateRequest($post, ['waybill_id', 'outer_product_id', 'outer_unit_id']);
+        $this->validateRequest($post, ['waybill_id', 'outer_product_id']);
 
+        //Поиск накладной
         $waybill = Waybill::findOne(['id' => $post['waybill_id'], 'acquirer_id' => $this->user->organization_id]);
         if (!$waybill) {
             throw new BadRequestHttpException("waybill_not_found");
         }
 
-        $exists = WaybillContent::find()
-            ->where([
-                'waybill_id'       => $waybill->id,
-                'outer_product_id' => $post['outer_product_id']
-            ])->exists();
+        //Найдем продукт у.с.
+        $outerProduct = OuterProduct::findOne([
+            'id'         => (int)$post['outer_product_id'],
+            'service_id' => $waybill->service_id
+        ]);
+        if (empty($outerProduct)) {
+            throw new BadRequestHttpException('waybill.outer_product_not_found');
+        }
 
+        //Проверяем, нет ли в накладной этого продукта
+        $exists = WaybillContent::find()->where([
+            'waybill_id'       => $waybill->id,
+            'outer_product_id' => $outerProduct->id
+        ])->exists();
         if ($exists) {
             throw new BadRequestHttpException("waybill.content_exists");
         }
 
+        //Создаем новую запись
         $waybillContent = new WaybillContent();
-        $waybillContent->waybill_id = $post['waybill_id'];
-        $waybillContent->outer_product_id = $post['outer_product_id'];
-        $waybillContent->outer_unit_id = (float)$post['outer_unit_id'];
+        $waybillContent->waybill_id = $waybill->id;
+        $waybillContent->outer_product_id = $outerProduct->id;
+        $waybillContent->outer_unit_id = $outerProduct->outer_unit_id;
         $waybillContent->vat_waybill = (int)$post['vat_waybill'] ?? 0;
         $waybillContent->quantity_waybill = $post['quantity_waybill'] ?? 1;
 
@@ -344,6 +468,65 @@ class IntegrationWebApi extends WebApi
         $waybillContent->save();
 
         return ['success' => true, 'waybill_content_id' => $waybillContent->id];
+    }
+
+    /**
+     * integration: Накладная - Удалить
+     *
+     * @param array $post
+     * @throws \Exception|\Throwable
+     * @return array
+     */
+    public function deleteWaybill(array $post): array
+    {
+        $this->validateRequest($post, ['waybill_id', 'service_id']);
+
+        $waybillCheck = Waybill::findOne(['id' => $post['waybill_id']]);
+        if (!isset($waybillCheck)) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_found', ['ru' => 'Накладная не найдена']));
+        }
+
+        if ($waybillCheck->service_id != $post['service_id']) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_relation_this_service', ['ru' => 'Накладная не связана с заданным сервисом']));
+        }
+
+        if ($waybillCheck->status_id == Registry::WAYBILL_UNLOADED) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_unloading', ['ru' => 'Накладная в статусе выгружена']));
+        }
+
+        $waybillContentCheck = WaybillContent::find()
+            ->where(['waybill_id' => $waybillCheck->id])
+            ->andWhere('order_content_id is not null')
+            ->one();
+        if (isset($waybillContentCheck)) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_relation_order', ['ru' => 'Накладная связана с заказом']));
+        }
+
+        $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
+
+        $checkOrg = false;
+        foreach ($businessList['result'] as $item) {
+            if ($item['id'] == $waybillCheck->acquirer_id) {
+                $checkOrg = true;
+                break;
+            }
+        }
+
+        if (!$checkOrg) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_releated_current_user', ['ru' => 'Накладная не пренадлежит организациям текущего пользователя']));
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+
+            WaybillContent::deleteAll(['waybill_id' => $waybillCheck->id]);
+            $waybillCheck->delete();
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+        return ['success' => true];
     }
 
     /**

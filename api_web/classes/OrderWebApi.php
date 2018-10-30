@@ -57,6 +57,10 @@ class OrderWebApi extends \api_web\components\WebApi
         //Поиск заказа
         $order = Order::findOne($post['order_id']);
 
+        if (!$order) {
+            throw new BadRequestHttpException('order_not_found');
+        }
+
         //If user is unconfirmed
         if ($isUnconfirmedVendor) {
             $organizationID = $this->user->organization_id;
@@ -213,9 +217,8 @@ class OrderWebApi extends \api_web\components\WebApi
      *
      * @param Order $order
      * @param array $product
-     * @return bool
-     * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @return WaybillContent
+     * @throws BadRequestHttpException | ValidationException | \Exception
      * @editedBy Basil A Konakov
      */
     private function editProductEdo(Order $order, array $product)
@@ -224,26 +227,23 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("EDIT CANCELED product id empty");
         }
 
-        /**
-         * @var $orderContent OrderContent
-         */
+        /** @var OrderContent $orderContent */
         $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
         if (empty($orderContent)) {
             throw new BadRequestHttpException("EDIT CANCELED the product is not found in the order: product_id = " . $product['id']);
         }
 
-        /** @var OrderContent $orderContent */
         $wbContent = WaybillContent::findOne(['order_content_id' => $orderContent->id]);
+        if (!$wbContent) {
+            return false;
+        }
 
         if (!empty($product['quantity'])) {
             $wbContent->quantity_waybill = $product['quantity'];
         }
-        if (!empty($product['price'])) {
-            $wbContent->price_without_vat = $product['price'];
-        }
 
         if ($wbContent->validate() && $wbContent->save()) {
-            return true;
+            return $wbContent;
         } else {
             throw new ValidationException($wbContent->getFirstErrors());
         }
@@ -520,6 +520,10 @@ class OrderWebApi extends \api_web\components\WebApi
 
         if (isset($post['search'])) {
 
+            if (isset($post['search']['id']) && !empty($post['search']['id'])) {
+                $search->id = $post['search']['id'];
+            }
+
             if (isset($post['search']['service_id']) && !empty($post['search']['service_id'])) {
                 $search->service_id = $post['search']['service_id'];
             } else {
@@ -541,12 +545,12 @@ class OrderWebApi extends \api_web\components\WebApi
              * Фильтр по дате создания
              */
             if (isset($post['search']['create_date']) && !empty($post['search']['create_date'])) {
-                if (isset($post['search']['create_date']['from']) && !empty($post['search']['create_date']['from'])) {
-                    $search->date_from = $post['search']['create_date']['from'];
+                if (isset($post['search']['create_date']['start']) && !empty($post['search']['create_date']['start'])) {
+                    $search->date_from = $post['search']['create_date']['start'];
                 }
 
-                if (isset($post['search']['create_date']['to']) && !empty($post['search']['create_date']['to'])) {
-                    $search->date_to = $post['search']['create_date']['to'];
+                if (isset($post['search']['create_date']['end']) && !empty($post['search']['create_date']['end'])) {
+                    $search->date_to = $post['search']['create_date']['end'];
                 }
             }
 
@@ -554,12 +558,12 @@ class OrderWebApi extends \api_web\components\WebApi
              * Фильтр по дате завершения
              */
             if (isset($post['search']['completion_date']) && !empty($post['search']['completion_date'])) {
-                if (isset($post['search']['completion_date']['from']) && !empty($post['search']['completion_date']['from'])) {
-                    $search->completion_date_from = $post['search']['completion_date']['from'];
+                if (isset($post['search']['completion_date']['start']) && !empty($post['search']['completion_date']['start'])) {
+                    $search->completion_date_from = $post['search']['completion_date']['start'];
                 }
 
-                if (isset($post['search']['completion_date']['to']) && !empty($post['search']['completion_date']['to'])) {
-                    $search->completion_date_to = $post['search']['completion_date']['to'];
+                if (isset($post['search']['completion_date']['end']) && !empty($post['search']['completion_date']['end'])) {
+                    $search->completion_date_to = $post['search']['completion_date']['end'];
                 }
             }
         }
@@ -627,7 +631,8 @@ class OrderWebApi extends \api_web\components\WebApi
                     'vendor'          => $model->vendor->name,
                     'currency_id'     => $model->currency_id,
                     'create_user'     => $model->createdByProfile->full_name ?? '',
-                    'accept_user'     => $model->acceptedByProfile->full_name ?? ''
+                    'accept_user'     => $model->acceptedByProfile->full_name ?? '',
+                    'count_position'  => count($model->orderContent),
                 ];
                 if ($model->service_id == Registry::EDI_SERVICE_ID) {
                     if (!empty($model->orderContent)) {

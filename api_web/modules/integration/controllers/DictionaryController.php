@@ -417,6 +417,81 @@ class DictionaryController extends \api_web\components\WebApiController
     }
 
     /**
+     * @SWG\Post(path="/integration/dictionary/store-flat-list",
+     *     tags={"Integration/dictionary"},
+     *     summary="Список складов (плоский)",
+     *     description="Полный список складов (плоский)",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 2,
+     *                      "search": {
+     *                          "name": "название",
+     *                          "organization_id": 10
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "stores": {
+     *                      {
+     *                          "id": 5,
+     *                          "outer_uid": "c9319967c038f9b923068dabdf60cfe3",
+     *                          "name": "Все склады",
+     *                          "is_active": 1,
+     *                          "is_category": true
+     *                      },
+     *                      {
+     *                          "id": 5,
+     *                          "outer_uid": "c9319967c038f9b923068dabdf60cfe3",
+     *                          "name": "-Первый склад",
+     *                          "is_active": 1,
+     *                          "is_category": false
+     *                      },
+     *                      {
+     *                          "id": 5,
+     *                          "outer_uid": "c9319967c038f9b923068dabdf60cfe3",
+     *                          "name": "--Второй склад",
+     *                          "is_active": 1,
+     *                          "is_category": false
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     */
+
+    public function actionStoreFlatList()
+    {
+        if (!isset($this->request['service_id'])) {
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+        $this->response = (new Dictionary($this->request['service_id'], 'Store'))->storeFlatList($this->request);
+    }
+
+    /**
      * @SWG\Post(path="/integration/dictionary/unit-list",
      *     tags={"Integration/dictionary"},
      *     summary="Список единиц измерения",

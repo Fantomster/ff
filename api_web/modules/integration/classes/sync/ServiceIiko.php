@@ -87,7 +87,7 @@ class ServiceIiko extends AbstractSyncFactory
             /** @var iikoWaybill $model */
             foreach ($records as $model) {
                 if ($model->status_id !== Registry::WAYBILL_COMPARED) {
-                    if($model->status_id == Registry::WAYBILL_UNLOADING) {
+                    if ($model->status_id == Registry::WAYBILL_UNLOADED) {
                         $res[$model->id] = [
                             'success' => true,
                             'message' => \Yii::t('api_web', 'service_iiko.already_success_unloading_waybill'),
@@ -108,7 +108,7 @@ class ServiceIiko extends AbstractSyncFactory
                         \Yii::error('Error during sending waybill');
                         throw new \Exception('Ошибка при отправке. ' . $response);
                     }
-                    $model->status_id = Registry::WAYBILL_UNLOADING;
+                    $model->status_id = Registry::WAYBILL_UNLOADED;
                     $model->save();
                     $res[$model->id] = [
                         'success' => true,
@@ -117,7 +117,9 @@ class ServiceIiko extends AbstractSyncFactory
                     $transaction->commit();
                 } catch (\Exception $e) {
                     $transaction->rollBack();
-                    \yii::error('Cant send waybill, rolled back' . $e);
+                    $model->status_id = Registry::WAYBILL_ERROR;
+                    $model->save();
+                    \Yii::error('Cant send waybill, rolled back' . $e);
                     $res[$model->id] = [
                         'success' => false,
                         'message' => $e->getMessage()

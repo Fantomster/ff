@@ -73,6 +73,11 @@ class VetisHelper
             throw new BadRequestHttpException('Uuid is bad');
         }
         $this->producer_name = $this->vsdModel->producer_name;
+        $confirmedBy = json_decode($this->vsdModel->confirmed_by, true);
+        $this->confirmed_by = [
+            'fio'  => $confirmedBy['fio'] ?? "-",
+            'post' => $confirmedBy['post'] ?? "",
+        ];
         $country = VetisCountry::findOne(['guid' => $this->vsdModel->origin_country_guid]);
         $this->country_name = isset($country) ? $country->name : null;
 
@@ -81,14 +86,17 @@ class VetisHelper
         }
         $this->vehicle_number = $this->vsdModel->vehicle_number;
         $other = json_decode($this->vsdModel->other_info, true);
-        $this->cargo_expertized = $other['cargoExpertized'];
+        if (isset($other['cargoExpertized'])) {
+            $this->cargo_expertized = \Yii::t('api_web', self::$expertizeList[$other['cargoExpertized']]);
+        }
         $this->location_prosperity = $other['locationProsperity'];
         $this->special_marks = $other['specialMarks'];
         $this->issueNumber = (isset($this->vsdModel->number)) ? $this->vsdModel->number : null;
         $this->issueDate = $this->vsdModel->date_doc;
         $this->form = $this->vsdModel->form;
-        $this->type = $this->vsdModel->type;
+        $this->type = MercVsd::$types[$this->vsdModel->type];
         $this->status = $this->vsdModel->status;
+        $this->recipient_name = $this->vsdModel->recipient_name;
         return $this;
     }
 
@@ -127,17 +135,24 @@ class VetisHelper
         $this->perishable_products = isset($this->vsdModel->perishable) ? (($this->vsdModel->perishable == 'true') ? 'Да' :
             'Нет') : null;
 
-        $laboratory_research = [json_decode($this->vsdModel->laboratory_research, true)];
+        $laboratory_research = json_decode($this->vsdModel->laboratory_research, true);
         $this->expertiseInfo = 'Экспертиза не проводилась';
         try {
-            foreach ($laboratory_research as $item) {
-                $this->expertiseInfo = [
-                    $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($item['actualDateTime'])) . " ( " . $item['conclusion'] . " )"
-                ];
+            if (array_key_exists('batchID', $laboratory_research)){
+                $this->expertiseInfo = mb_convert_encoding(
+                    $laboratory_research['indicator']['name'] . ' : ' . $laboratory_research['operator']['name'] . " эксп №" . $laboratory_research['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($laboratory_research['actualDateTime'])) . " ( " . $laboratory_research['conclusion'] . " )",  "UTF-8", "UTF-8");
+            } else {
+                $arTmp = [];
+                foreach ($laboratory_research as $item) {
+                    $arTmp[] = mb_convert_encoding(
+                        $item['indicator']['name'] . ' : ' . $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($item['actualDateTime'])) . " ( " . $item['conclusion'] . " )", "UTF-8", "UTF-8");
+                }
+                $this->expertiseInfo = $arTmp;
             }
         } catch (\Throwable $t) {
             // too many errors in VSD
         }
+
         $transportInfo = json_decode($this->vsdModel->transport_info, true);
 
         $this->transport_type = isset($transportInfo['transportType']) ? MercVsd::$transport_types[$transportInfo['transportType']] : null;

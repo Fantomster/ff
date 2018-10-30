@@ -1039,15 +1039,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $order->status = OrderStatus::STATUS_DONE;
             $order->actual_delivery = gmdate("Y-m-d H:i:s");
             $order->completion_date = new Expression('NOW()');
-            if ($order->validate()) {
-                try {
-                    if (!$order->save()) {
-                        throw new \Exception('Order not save!!!');
-                    }
-                } catch (\Throwable $e) {
-                    throw $e;
-                }
-            } else {
+            if (!$order->save()) {
                 throw new ValidationException($order->getFirstErrors());
             }
             $t->commit();

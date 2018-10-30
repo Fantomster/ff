@@ -450,7 +450,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             foreach ($this->iterator($result) as $model) {
                 $documents[] =  $return = [
                     "id"              => (int)$model['id'],
-                    "number"          => explode(",", $model['documents']),
+                    "number"          => isset($model['documents']) ? explode(",", $model['documents']) : [],
                     "type"            => $model['type'],
                     "status_id"       => (int)$model['status_id'],
                     "status_text"     => ($model['type'] == self::TYPE_WAYBILL) ? \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['status_id']]) : \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$model['status_id']]),

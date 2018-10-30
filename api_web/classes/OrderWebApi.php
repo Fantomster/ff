@@ -1038,7 +1038,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
         $t = \Yii::$app->db->beginTransaction();
         try {
-            $order->status = ($vendor === true ? Order::STATUS_PROCESSING : OrderStatus::STATUS_DONE);
+            $order->status = ($vendor ? Order::STATUS_PROCESSING : OrderStatus::STATUS_DONE);
             $order->actual_delivery = gmdate("Y-m-d H:i:s");
             $order->completion_date = new Expression('NOW()');
             if (!$order->save()) {

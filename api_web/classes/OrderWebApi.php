@@ -236,7 +236,7 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         if (!empty($product['quantity'])) {
-            $orderContent->quantity = $product['quantity'];
+            $orderContent->setAttribute('quantity', $product['quantity']);
         }
 
         if ($orderContent->validate() && $orderContent->save()) {

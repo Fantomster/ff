@@ -40,14 +40,18 @@ class EDIIntegration extends Component
      */
     public function init()
     {
-        $conf = EcomIntegrationConfig::findOne(['org_id' => $this->orgId]);
-
-        if (!$conf || strpos($conf['provider'], 'eradata')) {
+        if ($this->clientId > 0) {
             $conf = EcomIntegrationConfig::findOne(['org_id' => $this->clientId]);
-            $this->orgId = $this->clientId;
-            if (!$conf) {
-                throw new BadRequestHttpException("Config not set for this vendor");
+            if ($conf && strpos($conf['provider'], 'eradata')) {
+                $this->orgId = $this->clientId;
+            } else {
+                $conf = EcomIntegrationConfig::findOne(['org_id' => $this->orgId]);
             }
+        } else {
+            $conf = EcomIntegrationConfig::findOne(['org_id' => $this->orgId]);
+        }
+        if (!$conf) {
+            throw new BadRequestHttpException("Config not set for this vendor");
         }
 
         $this->setProvider($this->createClass('providers\\', $conf['provider']));

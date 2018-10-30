@@ -27,6 +27,9 @@ class EDIClass extends Component
 
     public function parseFile($content)
     {
+        if (!$content) {
+            return false;
+        }
         $dom = new \DOMDocument();
         $dom->loadXML($content);
         $simpleXMLElement = simplexml_import_dom($dom);

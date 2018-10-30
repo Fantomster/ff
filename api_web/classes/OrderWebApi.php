@@ -97,7 +97,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $order->actual_delivery = $post['actual_delivery'];
         }
         //Если поменяли скидку
-        if (!empty($post['discount'])) {
+        if (isset($post['discount']) && !empty($post['discount'])) {
             if (empty($post['discount']['type']) || !in_array(strtoupper($post['discount']['type']), ['FIXED', 'PERCENT'])) {
                 throw new BadRequestHttpException("Discount type FIXED or PERCENT");
             }
@@ -139,8 +139,10 @@ class OrderWebApi extends \api_web\components\WebApi
                                 break;
                         }
                     }
-                    if ($order->discount_type == Order::DISCOUNT_FIXED && $order->getTotalPriceWithOutDiscount() < $post['discount']['amount']) {
-                        throw new BadRequestHttpException("Discount amount > Total Price");
+                    if (isset($post['discount']['amount'])) {
+                        if ($order->discount_type == Order::DISCOUNT_FIXED && $order->getTotalPriceWithOutDiscount() < $post['discount']['amount']) {
+                            throw new BadRequestHttpException("Discount amount > Total Price");
+                        }
                     }
 
                     if ($order->positionCount == 0) {
@@ -217,7 +219,7 @@ class OrderWebApi extends \api_web\components\WebApi
      *
      * @param Order $order
      * @param array $product
-     * @return WaybillContent
+     * @return WaybillContent | OrderContent
      * @throws BadRequestHttpException | ValidationException | \Exception
      * @editedBy Basil A Konakov
      */
@@ -233,19 +235,14 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("EDIT CANCELED the product is not found in the order: product_id = " . $product['id']);
         }
 
-        $wbContent = WaybillContent::findOne(['order_content_id' => $orderContent->id]);
-        if (!$wbContent) {
-            return false;
-        }
-
         if (!empty($product['quantity'])) {
-            $wbContent->quantity_waybill = $product['quantity'];
+            $orderContent->setAttribute('quantity', $product['quantity']);
         }
 
-        if ($wbContent->validate() && $wbContent->save()) {
-            return $wbContent;
+        if ($orderContent->validate() && $orderContent->save()) {
+            return $orderContent;
         } else {
-            throw new ValidationException($wbContent->getFirstErrors());
+            throw new ValidationException($orderContent->getFirstErrors());
         }
     }
 

@@ -51,13 +51,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <hr>
     <h4>Лицензии</h4>
     <hr>
-    <?php foreach ($services as $id => $denom): ?>
+    <?php foreach ($licenses as $id => $name): ?>
         <div class="row">
             <div class="col-md-3">
                 <div class="checkbox">
-                    <?= Html::checkbox('services[]', false, [
+                    <?= Html::checkbox('licenses[]', false, [
                         'value' => $id,
-                        'label' => $denom,
+                        'label' => $name,
                         'class' => 'checkbox',
                     ]);
                     ?>

@@ -24,6 +24,7 @@
             $i = 1;
             foreach ($orderContent as $position): ?>
                 <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
+                $measure = $product->ed ?? 'шт';
                 $catalogGood = \common\models\CatalogGoods::findOne(['base_goods_id' => $product->id]);
                 $barcode = $product->barcode;
                 $edi_supplier_article = (isset($product->edi_supplier_article) && $product->edi_supplier_article != '') ? $product->edi_supplier_article : $position['id'];
@@ -39,7 +40,7 @@
                     <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
                     <DELIVEREDUNITY><?= $position['quantity'] ?></DELIVEREDUNITY>
                     <ACCEPTEDQUANTITY><?= $position['quantity'] ?></ACCEPTEDQUANTITY>
-                    <ORDERUNIT><?= $position['ed'] ?></ORDERUNIT>
+                    <ORDERUNIT><?= $measure ?></ORDERUNIT>
                     <EGAISCODE><?= $position['id'] ?></EGAISCODE>
                     <EGAISQUANTITY><?= $position['quantity'] ?></EGAISQUANTITY>
                     <PRICE><?= $position['price'] ?></PRICE>

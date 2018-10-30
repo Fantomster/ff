@@ -63,7 +63,8 @@ class EmailRoboWebApi extends WebApi
      *
      * @param array $post
      * @return array
-     * @throws \yii\web\BadRequestHttpException|ValidationException
+     * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     public function update(array $post): array
     {
@@ -78,12 +79,11 @@ class EmailRoboWebApi extends WebApi
                     $model->setAttribute($key, $field);
                 }
             }
+            if (!$model->save()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
         } catch (\Throwable $t) {
-            return ['error' => $t->getMessage()];
-        }
-
-        if (!$model->save()) {
-            throw new ValidationException($model->getFirstErrors());
+            throw $t;
         }
 
         return ['result' => $model];
@@ -94,7 +94,7 @@ class EmailRoboWebApi extends WebApi
      *
      * @param array $post
      * @return array
-     * @throws ValidationException
+     * @throws \Throwable
      */
     public function add(array $post): array
     {
@@ -106,12 +106,11 @@ class EmailRoboWebApi extends WebApi
                 }
             }
             $model->setAttribute('organization_id', $this->user->organization_id);
+            if (!$model->save()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
         } catch (\Throwable $t) {
-            return ['error' => $t->getMessage()];
-        }
-
-        if (!$model->save()) {
-            throw new ValidationException($model->getFirstErrors());
+            throw $t;
         }
 
         return ['result' => $model];
@@ -123,6 +122,7 @@ class EmailRoboWebApi extends WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     public function delete(array $post): array
     {
@@ -132,9 +132,11 @@ class EmailRoboWebApi extends WebApi
             throw new BadRequestHttpException('integration.email.setting_not_found');
         }
         try {
-            $model->delete();
+            if (!$model->delete()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
         } catch (\Throwable $t) {
-            return ['error' => $t->getMessage()];
+            throw $t;
         }
 
         return ['result' => true];

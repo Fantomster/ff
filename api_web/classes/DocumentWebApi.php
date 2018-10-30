@@ -333,6 +333,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 SELECT 
                    o.id as id, 
                    edi_number as doc_number, 
+                   (select group_concat(edi_number) from order_content sq1 where sq1.order_id = o.id order by edi_number) documents,
                    '" . self::TYPE_ORDER . "' as type, 
                    if(is_not_compared > 0,".Registry::DOC_GROUP_STATUS_WAIT_FORMING.",
                    if(st.formed > 0, ".Registry::DOC_GROUP_STATUS_WAIT_FORMING.", 
@@ -353,7 +354,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                    FROM `order` as o
                    LEFT JOIN (
                       SELECT id, order_id, edi_number
-                      FROM order_content order by char_length(edi_number) desc limit 1
+                      FROM order_content order by char_length(edi_number) desc, edi_number desc limit 1
                    ) as oc on oc.order_id = o.id
                    LEFT JOIN (
                        select order_id, count(oc.id) as `count`, count(merc_uuid) as certs, sum(if(wc.id is null, 1, 0)) as is_not_compared 
@@ -379,6 +380,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 SELECT DISTINCT
                     w.id, 
                     outer_number_code as doc_number, 
+                    outer_number_code as documents,
                     '" . self::TYPE_WAYBILL . "' as type, 
                     status_id, 
                     w.service_id,
@@ -447,12 +449,12 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (!empty($result)) {
             foreach ($this->iterator($result) as $model) {
                 $documents[] =  $return = [
-                    "id"              => $model['id'],
-                    "number"      => $model['doc_number'],
+                    "id"              => (int)$model['id'],
+                    "number"          => explode(",", $model['documents']),
                     "type"            => $model['type'],
-                    "status_id"       => $model['status_id'],
+                    "status_id"       => (int)$model['status_id'],
                     "status_text"     => ($model['type'] == self::TYPE_WAYBILL) ? \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['status_id']]) : \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$model['status_id']]),
-                    "service_id"      => $model['service_id'],
+                    "service_id"      => (int)$model['service_id'],
                     "is_mercury_cert" => (int)($model['is_mercury_cert'] > 0),
                     "count"           => (int)$model['count'],
                     "total_price"     => CurrencyHelper::asDecimal($model['total_price']),

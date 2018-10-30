@@ -104,27 +104,44 @@ class DocumentController extends \api_web\components\WebApiController
      *              default={
      *                  "documents": {
      *                     {
-     *                           "id": "2",
-     *                           "number": null,
-     *                           "type": "waybill",
-     *                           "status_id": "1",
-     *                           "status_text": "Сопоставлена",
-     *                           "service_id": "2",
-     *                           "is_mercury_cert": 0,
-     *                           "count": 1,
-     *                           "total_price": "0.00",
-     *                           "doc_date": "2018-10-29T15:58:11+03:00",
-     *                           "vendor": null,
+     *                           "id": 11326,
+     *                           "number": {
+     *                           "1",
+     *                           "2",
+     *                           "3",
+     *                           "4",
+     *                           "тест",
+     *                           "6",
+     *                           "7",
+     *                           "8",
+     *                           "9",
+     *                           "10"
+     *                           },
+     *                           "type": "order",
+     *                           "status_id": 2,
+     *                           "status_text": "Ожидает формирования",
+     *                           "service_id": 9,
+     *                           "is_mercury_cert": 1,
+     *                           "count": 10,
+     *                           "total_price": "3390.00",
+     *                           "doc_date": "2018-04-11T18:41:34+03:00",
+     *                           "vendor": {
+     *                           "id": "4749",
+     *                           "name": "Demo1",
+     *                           "difer": false
+     *                           },
      *                           "agent": null,
      *                           "store": null
      *                           },
      *                           {
-     *                           "id": "13508",
-     *                           "number": null,
+     *                           "id": 13508,
+     *                             "number": {
+     *                               "888"
+     *                               },
      *                           "type": "order",
-     *                           "status_id": "2",
+     *                           "status_id": 2,
      *                           "status_text": "Сформирована",
-     *                           "service_id": null,
+     *                           "service_id": 2,
      *                           "is_mercury_cert": 0,
      *                           "count": 2,
      *                           "total_price": "10700.00",

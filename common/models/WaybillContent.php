@@ -182,6 +182,14 @@ class WaybillContent extends \yii\db\ActiveRecord
     {
         $this->setAttribute('sum_with_vat', ($this->quantity_waybill * $this->price_with_vat));
         $this->setAttribute('sum_without_vat', ($this->quantity_waybill * $this->price_without_vat));
+        /**
+         * Необходимо чтобы запустить пересчет заказа
+         */
+        $this->setOldAttribute('sum_with_vat', 0);
+        $this->setOldAttribute('sum_without_vat', 0);
+        /**
+         * Необходимо чтобы запустить пересчет заказа
+         */
     }
 
     /**
@@ -193,7 +201,7 @@ class WaybillContent extends \yii\db\ActiveRecord
     {
         //Атрибуты, обязательные для заполнения при выгрузке
         $requireAttributes = [
-            'product_outer_id',
+            'outer_product_id',
             'quantity_waybill',
             'vat_waybill',
             'price_without_vat',
@@ -207,7 +215,11 @@ class WaybillContent extends \yii\db\ActiveRecord
         foreach ($requireAttributes as $attribute) {
             $value = $this->getAttribute($attribute);
             //Если хоть какое то значение не задано, возвращаем false
-            if (!isset($value) || empty($value)) {
+            if (is_null($value)) {
+                return false;
+            }
+            //Коэфициент не должен быть 0
+            if($attribute == 'koef' && $value == 0) {
                 return false;
             }
         }

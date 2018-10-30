@@ -9,6 +9,7 @@ namespace api_web\behaviors;
 
 use api_web\components\Registry;
 use yii\base\Behavior;
+use yii\base\Event;
 use yii\elasticsearch\ActiveRecord;
 
 class WaybillContentBehavior extends Behavior
@@ -22,19 +23,28 @@ class WaybillContentBehavior extends Behavior
             //Пересчет стоимости заказа
             ActiveRecord::EVENT_AFTER_INSERT => 'recalculateOrderTotalPrice',
             ActiveRecord::EVENT_AFTER_DELETE => 'recalculateOrderTotalPrice',
-            ActiveRecord::EVENT_AFTER_UPDATE => 'recalculateOrderTotalPriceUpdate',
-            //Меняет статус накладной на "Сопоставлена"
-            ActiveRecord::EVENT_AFTER_UPDATE => 'changeStatusWaybill',
+            ActiveRecord::EVENT_AFTER_UPDATE => 'afterUpdate'
         ];
+    }
+
+    /**
+     * @param $event
+     * @return bool
+     */
+    public function afterUpdate($event)
+    {
+        $this->recalculateOrderTotalPriceUpdate($event);
+        $this->changeStatusWaybill($event);
+        return true;
     }
 
     /**
      * Пересчет total_price в заказе, привязанной к накладной
      *
-     * @param $event
+     * @param $event Event
      * @return bool
      */
-    public function recalculateOrderTotalPriceUpdate($event)
+    private function recalculateOrderTotalPriceUpdate($event)
     {
         //Смотрим, были ли, изменены аттрибуты, изза которых стоит пересчитывать стоимость заказа
         if (isset($event->changedAttributes['sum_without_vat'])) {
@@ -65,10 +75,10 @@ class WaybillContentBehavior extends Behavior
      * @param $event
      * @return bool
      */
-    public function changeStatusWaybill($event)
+    private function changeStatusWaybill($event)
     {
         //Если накладная в статусе "Cформирована"
-        if ($this->model->waybill->status_id == Registry::WAYBILL_FORMED) {
+        if (in_array($this->model->waybill->status_id, [Registry::WAYBILL_FORMED, Registry::WAYBILL_RESET])) {
             $contents = $this->model->waybill->waybillContents;
             /** @var \common\models\WaybillContent $waybillContent */
             //Проверяем все позиции накладной, что они готовы к выгрузке

@@ -20,6 +20,7 @@
         $i = 1;
         foreach ($orderContent as $position): ?>
             <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
+            $measure = $product->ed ?? 'шт';
             $catalogGood = \common\models\CatalogGoods::findOne(['base_goods_id' => $product->id]);
             $barcode = $product->barcode;
             $edi_supplier_article = (isset($product->edi_supplier_article) && $product->edi_supplier_article != '') ? $product->edi_supplier_article : $position['id'];
@@ -32,7 +33,7 @@
                 <PRODUCTIDBUYER><?= $article ?? '' ?></PRODUCTIDBUYER>
                 <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?? '' ?></PRODUCTIDSUPPLIER>
                 <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
-                <ORDERUNIT><?= $position['ed'] ?></ORDERUNIT>
+                <ORDERUNIT><?= $measure ?></ORDERUNIT>
                 <ORDERPRICE><?= $position['price'] ?></ORDERPRICE>
                 <VAT><?= isset($catalogGood->vat) ? $catalogGood->vat : 0 ?></VAT>
                 <CHARACTERISTIC>

@@ -24,6 +24,7 @@ use yii\behaviors\TimestampBehavior;
  * @property int          $price_without_vat
  * @property int          $outer_unit_id
  * @property int          $koef
+ * @property bool         $readyToExport
  * @property OrderContent $orderContent
  * @property OuterProduct $productOuter
  * @property Waybill      $waybill
@@ -181,5 +182,35 @@ class WaybillContent extends \yii\db\ActiveRecord
     {
         $this->setAttribute('sum_with_vat', ($this->quantity_waybill * $this->price_with_vat));
         $this->setAttribute('sum_without_vat', ($this->quantity_waybill * $this->price_without_vat));
+    }
+
+    /**
+     * Проверка, готова ли запись накладной к выгрузке
+     *
+     * @return bool
+     */
+    public function getReadyToExport()
+    {
+        //Атрибуты, обязательные для заполнения при выгрузке
+        $requireAttributes = [
+            'product_outer_id',
+            'quantity_waybill',
+            'vat_waybill',
+            'price_without_vat',
+            'price_with_vat',
+            'sum_with_vat',
+            'sum_without_vat',
+            'koef',
+            'outer_unit_id'
+        ];
+        //Проверяем их в текущей моделе
+        foreach ($requireAttributes as $attribute) {
+            $value = $this->getAttribute($attribute);
+            //Если хоть какое то значение не задано, возвращаем false
+            if (!isset($value) || empty($value)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

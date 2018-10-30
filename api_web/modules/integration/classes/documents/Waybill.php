@@ -59,12 +59,12 @@ class Waybill extends BaseWaybill implements DocumentInterface
         $agent = OuterAgent::findOne(['id' => $this->outer_agent_id]);
         if (!empty($agent)) {
             $return["agent"] = [
-                "id"   => $agent->id,
+                "id"   => (int)$agent->id,
                 "name" => $agent->name,
             ];
             if (!empty($agent->vendor_id)) {
                 $return["vendor"] = [
-                    "id"   => $agent->vendor_id,
+                    "id"   => (int)$agent->vendor_id,
                     "name" => Organization::findOne($agent->vendor_id)->name
                 ];
             }
@@ -73,7 +73,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         if (empty($return['vendor'])) {
             if (!empty($this->order)) {
                 $return["vendor"] = [
-                    "id"   => $this->order->vendor_id,
+                    "id"   => (int)$this->order->vendor_id,
                     "name" => $this->order->vendor->name,
                 ];
             }
@@ -82,7 +82,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         $store = OuterStore::findOne(['id' => $this->outer_store_id]);
         if (!empty($store)) {
             $return ["store"] = [
-                "id"   => $store->id,
+                "id"   => (int)$store->id,
                 "name" => $store->name,
             ];
         }
@@ -161,9 +161,9 @@ class Waybill extends BaseWaybill implements DocumentInterface
         }
 
         $return = [
-            "id"                      => $model->id,
+            "id"                      => (int)$model->id,
             "code"                    => $model->id,
-            "status_id"               => $model->status_id,
+            "status_id"               => (int)$model->status_id,
             "status_text"             => $status_text,
             "agent"                   => null,
             "vendor"                  => null,
@@ -178,20 +178,20 @@ class Waybill extends BaseWaybill implements DocumentInterface
         $agent = OuterAgent::findOne(['id' => $model->outer_agent_id]);
         if (!empty($agent)) {
             $return["agent"] = [
-                "id"   => $agent->id,
+                "id"   => (int)$agent->id,
                 "name" => $agent->name,
             ];
         }
 
         if (isset($agent->vendor_id)) {
             $return["vendor"] = [
-                "id"   => $agent->vendor_id,
+                "id"   => (int)$agent->vendor_id,
                 "name" => Organization::findOne(['id' => $agent->vendor_id])->name,
             ];
         } else {
             if (!empty($model->order)) {
                 $return["vendor"] = [
-                    "id"   => $model->order->vendor_id,
+                    "id"   => (int)$model->order->vendor_id,
                     "name" => $model->order->vendor->name,
                 ];
             }
@@ -200,7 +200,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         $store = OuterStore::findOne(['id' => $model->outer_store_id]);
         if (!empty($store)) {
             $return["store"] = [
-                "id"   => $store->id,
+                "id"   => (int)$store->id,
                 "name" => $store->name,
             ];
         }

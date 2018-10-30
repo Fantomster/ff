@@ -51,7 +51,7 @@ class Order extends BaseOrder implements DocumentInterface
 
         $vendor = $this->vendor;
         $return["vendor"] = [
-            "id"    => $vendor->id,
+            "id"    => (int)$vendor->id,
             "name"  => $vendor->name,
             "difer" => false,
         ];
@@ -59,7 +59,7 @@ class Order extends BaseOrder implements DocumentInterface
         $agent = OuterAgent::findOne(['vendor_id' => $vendor->id]);
         if (!empty($agent)) {
             $return["agent"] = [
-                'id'   => $agent->id,
+                'id'   => (int)$agent->id,
                 'name' => $agent->name,
             ];
         }

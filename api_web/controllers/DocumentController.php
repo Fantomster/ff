@@ -450,6 +450,95 @@ class DocumentController extends \api_web\components\WebApiController
     }
 
     /**
+     * @SWG\Post(path="/document/get",
+     *     tags={"Documents"},
+     *     summary="Получение документа",
+     *     description="Получение документа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "document_id": 7,
+     *                      "type": "waybill",
+     *                      "service_id": 2
+     *                 }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "document": {
+     *                          "id": 83,
+     *                          "number": {
+     *                              "13392-1"
+     *                          },
+     *                          "type": "waybill",
+     *                          "status_id": 1,
+     *                          "status_text": "Сопоставлена",
+     *                          "service_id": 2,
+     *                          "vendor": {
+     *                              "id": 5785,
+     *                              "name": "ООО AAAAA"
+     *                          },
+     *                          "agent": null,
+     *                          "store": {
+     *                              "id": 9,
+     *                              "name": "Основной склад"
+     *                          },
+     *                          "is_mercury_cert": false,
+     *                          "count": 1,
+     *                          "total_price": "4998.00",
+     *                          "doc_date": "2018-10-26T14:36:54+03:00"
+     *                      },
+     *                      "documents": {},
+     *                      "positions": {
+     *                          {
+     *                              "id": 26,
+     *                              "product_id": 1640035,
+     *                              "product_name": "Треска горячего копчения",
+     *                              "outer_product": {
+     *                                  "id": 1565080,
+     *                                  "name": "____сосиска2"
+     *                              },
+     *                              "quantity": 1,
+     *                              "outer_unit": {
+     *                                  "id": 14,
+     *                                  "name": "кг"
+     *                              },
+     *                              "koef": 1,
+     *                              "merc_uuid": null,
+     *                              "sum_without_vat": "4998.00",
+     *                              "sum_with_vat": "4998.00",
+     *                              "vat": 0
+     *                          }
+     *                      }
+     *                  }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     * @throws \Exception
+     */
+    public function actionGet()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->getDocument($this->request);
+    }
+  
+    /**
      * @SWG\Post(path="/document/sort-list",
      *     tags={"Documents"},
      *     summary="Список сортировок",

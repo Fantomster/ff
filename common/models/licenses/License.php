@@ -45,7 +45,7 @@ class License extends ActiveRecord
     public function rules()
     {
         return [
-            [['is_active'], 'integer'],
+            [['is_active', 'service_id', 'login_allowed'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
         ];
@@ -104,8 +104,7 @@ class License extends ActiveRecord
         $now = new \DateTime();
         $license = (new Query())->select(['license.id', 'license.name', 'license.is_active', 'license.created_at', 'license.updated_at', 'license.login_allowed', 'max(lo.td) as td'])->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
-            ->leftJoin('license_service ls', 'ls.license_id=license.id')
-            ->where(['lo.org_id' => $orgId, 'ls.service_id' => $serviceId, 'license.is_active' => 1])
+            ->where(['lo.org_id' => $orgId, 'license.service_id' => $serviceId, 'license.is_active' => 1])
             ->andWhere(['>', 'lo.td', $now->format('Y-m-d h:s:i')])
             ->groupBy(['license.id', 'license.name', 'license.is_active', 'license.created_at', 'license.updated_at', 'license.login_allowed'])
             ->indexBy('id')
@@ -137,11 +136,10 @@ class License extends ActiveRecord
                 'license.updated_at',
                 'license.login_allowed',
                 'max(lo.td) as to_date',
-                'ls.service_id',
+                'license.service_id',
             ])
             ->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
-            ->leftJoin('license_service ls', 'ls.license_id=license.id')
             ->where(['lo.org_id' => $orgId])
             ->groupBy([
                 'license.id',
@@ -150,7 +148,7 @@ class License extends ActiveRecord
                 'license.created_at',
                 'license.updated_at',
                 'license.login_allowed',
-                'ls.service_id',
+                'license.service_id',
             ])
             ->indexBy('id');
 

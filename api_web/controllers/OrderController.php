@@ -1162,6 +1162,7 @@ class OrderController extends WebApiController
      *                  property="request",
      *                  default={
      *                               "search":{
+     *                                   "id":1,
      *                                   "vendor": {1,2},
      *                                   "status": {1,2,3},
      *                                   "create_date": {
@@ -1196,6 +1197,7 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionHistory()
     {

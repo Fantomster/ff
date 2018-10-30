@@ -677,7 +677,7 @@ class Order extends \yii\db\ActiveRecord
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
             if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
                 $this->service_id = Registry::EDI_SERVICE_ID;
-                $ediIntegration = new EDIIntegration(['orgId' => $vendor->id]);
+                $ediIntegration = new EDIIntegration(['orgId' => $vendor->id, 'clientId' => $client->id]);
                 if ($this->status == OrderStatus::STATUS_DONE) {
                     $result = $ediIntegration->sendOrderInfo($this, true);
                 } else {

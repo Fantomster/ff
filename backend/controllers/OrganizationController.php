@@ -54,7 +54,18 @@ class OrganizationController extends Controller
                 ],
                 'rules'      => [
                     [
-                        'actions' => ['index', 'view', 'test-vendors', 'create-test-vendor', 'update-test-vendor', 'start-test-vendors-updating', 'notifications', 'ajax-update-status', 'list-organizations-for-licenses', 'add-license'],
+                        'actions' => [
+                            'index',
+                            'view',
+                            'test-vendors',
+                            'create-test-vendor',
+                            'update-test-vendor',
+                            'start-test-vendors-updating',
+                            'notifications',
+                            'ajax-update-status',
+                            'list-organizations-for-licenses',
+                            'add-license',
+                        ],
                         'allow'   => true,
                         'roles'   => [
                             Role::ROLE_ADMIN,
@@ -196,7 +207,6 @@ class OrganizationController extends Controller
             return $this->render('update', compact('model', 'franchiseeModel', 'franchiseeList', 'ediModel'));
         }
     }
-
 
 //    /**
 //     * Deletes an existing Organization model.
@@ -347,26 +357,19 @@ class OrganizationController extends Controller
 
         $childOrganizations = ArrayHelper::map(Organization::findAll(['parent_id' => $id]), 'id', 'name');
         $organizations = ArrayHelper::merge($organizations, $childOrganizations);
-        $services = ArrayHelper::map(AllService::findAll(['is_active' => true]), 'id', 'denom');
+        $licenses = ArrayHelper::map(License::findAll(['is_active' => true]), 'id', 'name');
         if (Yii::$app->request->isPost && !empty(Yii::$app->request->post())) {
             $post = Yii::$app->request->post();
             foreach ($post['organizations'] as $organizationID) {
-                foreach ($post['services'] as $serviceID) {
-                    $service = AllService::findOne(['id' => $serviceID]);
-                    $license = new License();
-                    $license->name = $service->denom;
-                    $license->is_active = true;
-                    $license->save();
+                foreach ($post['licenses'] as $licenseID) {
+                    $license = License::findOne(['id' => $licenseID]);
                     $licenseOrganization = new LicenseOrganization();
                     $licenseOrganization->license_id = $license->id;
                     $licenseOrganization->org_id = $organizationID;
+                    $licenseOrganization->status_id = LicenseOrganization::STATUS_ACTIVE;
                     $licenseOrganization->fd = new Expression('NOW()');
-                    $licenseOrganization->td = date("Y-m-d H:i:s", strtotime($post['td'][$serviceID]));
+                    $licenseOrganization->td = date("Y-m-d H:i:s", strtotime($post['td'][$licenseID]));
                     $licenseOrganization->save();
-                    $licenseService = new LicenseService();
-                    $licenseService->license_id = $license->id;
-                    $licenseService->service_id = $serviceID;
-                    $licenseService->save();
                 }
             }
             Yii::$app->session->setFlash('licenses-added', 'Лицензии добавлены');
@@ -378,6 +381,7 @@ class OrganizationController extends Controller
         $date = new \DateTime('-10 month');
         $tenDaysBefore = $date->format('Y-m-d H:i:s');
 
-        return $this->render('add-license', ['services' => $services, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'tenDaysBefore' => $tenDaysBefore]);
+        return $this->render('add-license', ['licenses' => $licenses, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'tenDaysBefore' => $tenDaysBefore]);
     }
+
 }

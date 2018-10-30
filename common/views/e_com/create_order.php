@@ -32,7 +32,7 @@
                 <PRODUCTIDBUYER><?= $article ?? '' ?></PRODUCTIDBUYER>
                 <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?? '' ?></PRODUCTIDSUPPLIER>
                 <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
-                <ORDERUNIT><?= $position['units'] ?></ORDERUNIT>
+                <ORDERUNIT><?= $position['ed'] ?></ORDERUNIT>
                 <ORDERPRICE><?= $position['price'] ?></ORDERPRICE>
                 <VAT><?= isset($catalogGood->vat) ? $catalogGood->vat : 0 ?></VAT>
                 <CHARACTERISTIC>

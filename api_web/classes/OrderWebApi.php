@@ -1016,10 +1016,12 @@ class OrderWebApi extends \api_web\components\WebApi
     {
         $this->validateRequest($post, ['order_id']);
 
+        $vendor = false;
         $query = Order::find()->where(['id' => $post['order_id']]);
         if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
             $query->andWhere(['client_id' => $this->user->organization->id]);
         } else {
+            $vendor = true;
             $query->andWhere(['vendor_id' => $this->user->organization->id]);
         }
         $order = $query->one();
@@ -1036,7 +1038,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
         $t = \Yii::$app->db->beginTransaction();
         try {
-            $order->status = OrderStatus::STATUS_DONE;
+            $order->status = ($vendor === true ? Order::STATUS_PROCESSING : OrderStatus::STATUS_DONE);
             $order->actual_delivery = gmdate("Y-m-d H:i:s");
             $order->completion_date = new Expression('NOW()');
             if (!$order->save()) {

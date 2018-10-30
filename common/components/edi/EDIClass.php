@@ -284,8 +284,8 @@ class EDIClass extends Component
             $goodsArray[$barcode]['name'] = (String)$good->PRODUCTNAME ?? '';
             $goodsArray[$barcode]['price'] = (float)$good->UNITPRICE ?? 0.0;
             $goodsArray[$barcode]['article'] = (isset($good->IDBUYER) && $good->IDBUYER != '') ? (String)$good->IDBUYER : $barcode;
-            $goodsArray[$barcode]['ed'] = (String)$good->QUANTITYOFCUINTUUNIT ?? 'шт';
-            $goodsArray[$barcode]['units'] = (float)$good->PACKINGMULTIPLENESS ?? 0.0;
+            $goodsArray[$barcode]['ed'] = $good->UNIT ?? (String)$good->QUANTITYOFCUINTUUNIT ?? 'шт';
+            $goodsArray[$barcode]['units'] = (float)$good->PACKINGMULTIPLENESS ?? $good->UNIT;
             $goodsArray[$barcode]['edi_supplier_article'] = $good->IDSUPPLIER ?? $barcode ?? null;
             $goodsArray[$barcode]['vat'] = (int)$good->TAXRATE ?? null;
         }

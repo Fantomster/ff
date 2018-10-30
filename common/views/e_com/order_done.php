@@ -39,7 +39,7 @@
                     <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
                     <DELIVEREDUNITY><?= $position['quantity'] ?></DELIVEREDUNITY>
                     <ACCEPTEDQUANTITY><?= $position['quantity'] ?></ACCEPTEDQUANTITY>
-                    <ORDERUNIT><?= $position['units'] ?></ORDERUNIT>
+                    <ORDERUNIT><?= $position['ed'] ?></ORDERUNIT>
                     <EGAISCODE><?= $position['id'] ?></EGAISCODE>
                     <EGAISQUANTITY><?= $position['quantity'] ?></EGAISQUANTITY>
                     <PRICE><?= $position['price'] ?></PRICE>

@@ -67,4 +67,15 @@ class Registry
     /**@var array сервисы MixCart*/
     static $mc_services = [
     ];
+
+    const DOC_GROUP_STATUS_WAIT_SENDING = 1;
+    const DOC_GROUP_STATUS_WAIT_FORMING = 2;
+    const DOC_GROUP_STATUS_SENT = 3;
+
+    static $doc_group_status = [
+        self::DOC_GROUP_STATUS_WAIT_SENDING => 'sending',
+        self::DOC_GROUP_STATUS_WAIT_FORMING => 'forming',
+        self::DOC_GROUP_STATUS_SENT => 'sent',
+    ];
+
 }

@@ -70,7 +70,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                      "search": {
      *                         "business_id": 124,
      *                         "waybill_status": 1,
-     *                         "doc_number" : "12346",
+     *                         "number" : "12346",
      *                         "waybill_date": {
      *                             "from": "23.08.2018",
      *                             "to": "24.08.2018"
@@ -103,48 +103,40 @@ class DocumentController extends \api_web\components\WebApiController
      *          @SWG\Schema(
      *              default={
      *                  "documents": {
-     *                      {
-     *                              "id": 22666,
-     *                               "service_id": 2,
-     *                               "type": "order",
-     *                               "status_id": 1,
-     *                               "status_text": "Ожидают формирования",
-     *                               "agent": {
-     *                               "uid": "11232123",
-     *                               "name": "Опт Холод",
-     *                               "difer": false
-     *                               },
-     *                               "vendor": {
-     *                               "id": 3489,
-     *                               "name": "Halal Organic Food",
-     *                               "difer": false
-     *                               },
-     *                               "is_mercury_cert": true,
-     *                               "count": 134,
-     *                               "total_price": 3214222.95,
-     *                               "doc_date": "2018-09-04T09:55:22+03:00"
-     *                      },
-     *                      {
-     *                               "id": 22666,
-     *                               "service_id": 2,
-     *                               "type": "order",
-     *                               "status_id": 1,
-     *                               "status_text": "Ожидают формирования",
-     *                               "agent": {
-     *                               "uid": "11232123",
-     *                               "name": "Опт Холод",
-     *                               "difer": false
-     *                               },
-     *                               "vendor": {
-     *                               "id": 3489,
-     *                               "name": "Halal Organic Food",
-     *                               "difer": false
-     *                               },
-     *                               "is_mercury_cert": true,
-     *                               "count": 134,
-     *                               "total_price": 3214222.95,
-     *                               "doc_date": "2018-09-04T09:55:22+03:00"
-     *                     }
+     *                     {
+     *                           "id": "2",
+     *                           "number": null,
+     *                           "type": "waybill",
+     *                           "status_id": "1",
+     *                           "status_text": "Сопоставлена",
+     *                           "service_id": "2",
+     *                           "is_mercury_cert": 0,
+     *                           "count": 1,
+     *                           "total_price": "0.00",
+     *                           "doc_date": "2018-10-29T15:58:11+03:00",
+     *                           "vendor": null,
+     *                           "agent": null,
+     *                           "store": null
+     *                           },
+     *                           {
+     *                           "id": "13508",
+     *                           "number": null,
+     *                           "type": "order",
+     *                           "status_id": "2",
+     *                           "status_text": "Сформирована",
+     *                           "service_id": null,
+     *                           "is_mercury_cert": 0,
+     *                           "count": 2,
+     *                           "total_price": "10700.00",
+     *                           "doc_date": "2018-10-18T14:48:36+03:00",
+     *                           "vendor": {
+     *                           "id": "5440",
+     *                           "name": "ООО Организация поставок",
+     *                           "difer": false
+     *                           },
+     *                           "agent": null,
+     *                           "store": null
+     *                           },
      *                  },
      *                  "pagination": {
      *                      "page": 1,
@@ -544,5 +536,49 @@ class DocumentController extends \api_web\components\WebApiController
     public function actionGet()
     {
         $this->response = $this->container->get('DocumentWebApi')->getDocument($this->request);
+    }
+  
+    /**
+     * @SWG\Post(path="/document/sort-list",
+     *     tags={"Documents"},
+     *     summary="Список сортировок",
+     *     description="Список сортировок",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={{}}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                   {
+     *                       "number": "Номеру документа А-Я",
+     *                       "-number": "Номеру документа Я-А",
+     *                       "doc_date": "Дате документа по возрастанию",
+     *                       "-doc_date": "Дате документа по убванию"
+     *                   }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     * @throws \Exception
+     */
+    public function actionSortList()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->getSortList();
     }
 }

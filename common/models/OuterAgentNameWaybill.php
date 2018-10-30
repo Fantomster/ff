@@ -10,6 +10,7 @@ use Yii;
  * @property int    $id
  * @property int    $agent_id
  * @property string $name
+ * @property OuterAgent $agent
  */
 class OuterAgentNameWaybill extends \yii\db\ActiveRecord
 {
@@ -50,5 +51,13 @@ class OuterAgentNameWaybill extends \yii\db\ActiveRecord
             'agent_id' => 'Agent ID',
             'name'     => 'Name',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAgent()
+    {
+        return $this->hasOne(OuterAgent::class, ['id' => 'agent_id']);
     }
 }

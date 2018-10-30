@@ -569,7 +569,9 @@ class DocumentWebApi extends \api_web\components\WebApi
             throw $e;
         }
 
-        return ['result' => true];
+        $result = OrderEmail::findOne(['order_id' => $order->id])->prepare();
+
+        return $result;
     }
 
     /**

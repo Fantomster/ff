@@ -24,12 +24,13 @@ class OrderEmail extends BaseOrder implements DocumentInterface
         $order = (isset($this->order_id)) ? $this->order() : null;
 
         $return = [
-            "id"          => $this->id,
-            "number"      => $this->number ? [$this->number] : null,
-            "type"        => DocumentWebApi::TYPE_ORDER_EMAIL,
-            "status_id"   => isset($order) ? $order->status_id : null,
-            "status_text" => isset($order) ? $order->statusText : null,
-            "service_id"  => isset($order) ? $order->service_id : null
+            "id"                => $this->id,
+            "number"            => $this->number ? [$this->number] : null,
+            "type"              => DocumentWebApi::TYPE_ORDER_EMAIL,
+            "status_id"         => isset($order) ? $order->status_id : null,
+            "status_text"       => isset($order) ? $order->statusText : null,
+            "service_id"        => isset($order) ? $order->service_id : null,
+            "replaced_order_id" => isset($order) ? $order->replaced_order_id : null
         ];
 
         $return ["agent"] = null;

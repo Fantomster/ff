@@ -235,26 +235,14 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("EDIT CANCELED the product is not found in the order: product_id = " . $product['id']);
         }
 
-        $wbContent = WaybillContent::findOne(['order_content_id' => $orderContent->id]);
-        if (!$wbContent) {
-            if (!empty($product['quantity'])) {
-                $orderContent->quantity = $product['quantity'];
-            }
-            if ($orderContent->validate() && $orderContent->save()) {
-                return $orderContent;
-            } else {
-                throw new ValidationException($orderContent->getFirstErrors());
-            }
-        }
-
         if (!empty($product['quantity'])) {
-            $wbContent->quantity_waybill = $product['quantity'];
+            $orderContent->quantity = $product['quantity'];
         }
 
-        if ($wbContent->validate() && $wbContent->save()) {
-            return $wbContent;
+        if ($orderContent->validate() && $orderContent->save()) {
+            return $orderContent;
         } else {
-            throw new ValidationException($wbContent->getFirstErrors());
+            throw new ValidationException($orderContent->getFirstErrors());
         }
     }
 

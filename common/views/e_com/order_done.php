@@ -1,6 +1,7 @@
 <?= '<?xml version="1.0" encoding="utf-8"?>'; ?>
 <RECADV>
     <NUMBER><?= $order->id ?></NUMBER>
+    <DOCACTION><?= Yii::$app->params['edi_api_data']['edi_api_recadv_document_id'] ?></DOCACTION>
     <DATE><?= $dateArray['created_at'] ?></DATE>
     <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?></RECEPTIONDATE>
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>
@@ -23,9 +24,10 @@
             $i = 1;
             foreach ($orderContent as $position): ?>
                 <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
+                $catalogGood = \common\models\CatalogGoods::findOne(['base_goods_id' => $product->id]);
                 $barcode = $product->barcode;
-                $edi_supplier_article = $product->edi_supplier_article ?? $position['id'];
-                $article = $product->article ?? $position['id'];
+                $edi_supplier_article = (isset($product->edi_supplier_article) && $product->edi_supplier_article != '') ? $product->edi_supplier_article : $position['id'];
+                $article = (isset($product->article) && $product->article != '') ? $product->article : $position['id'];
                 if (!$barcode) continue;
                 ?>
                 <POSITION>
@@ -35,14 +37,14 @@
                     <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
                     <DELIVEREDQUANTITY><?= $position['quantity'] ?></DELIVEREDQUANTITY>
                     <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
-                    <DELIVEREDUNIT><?= $position['units'] ?></DELIVEREDUNIT>
+                    <DELIVEREDUNITY><?= $position['quantity'] ?></DELIVEREDUNITY>
+                    <ACCEPTEDQUANTITY><?= $position['quantity'] ?></ACCEPTEDQUANTITY>
                     <ORDERUNIT><?= $position['units'] ?></ORDERUNIT>
                     <EGAISCODE><?= $position['id'] ?></EGAISCODE>
                     <EGAISQUANTITY><?= $position['quantity'] ?></EGAISQUANTITY>
                     <PRICE><?= $position['price'] ?></PRICE>
                     <PRICEWITHVAT><?= $position['price'] ?></PRICEWITHVAT>
-                    <TAXRATE>0</TAXRATE>
-                    <ACCEPTEDQUANTITY><?= $position['quantity'] ?></ACCEPTEDQUANTITY>
+                    <TAXRATE><?= isset($catalogGood->vat) ? $catalogGood->vat : 0 ?></TAXRATE>
                     <BUYERPARTNUMBER><?= $article ?? '' ?></BUYERPARTNUMBER>
                 </POSITION>
             <?php endforeach; ?>

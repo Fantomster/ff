@@ -15,6 +15,7 @@ use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
+use common\models\OuterAgent;
 use common\models\OuterProduct;
 use common\models\OuterProductMap;
 use common\models\Waybill;
@@ -117,9 +118,18 @@ class WaybillHelper
                         }
 
                         foreach ($arMappedForStores as $storeId => $storeProducts) {
+                            //todo_refactoring
                             if (!$storeId) {
-                                $storeId = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id,
-                                    ['defStore']);
+                                if ($supplierOrgId) {
+                                    $agent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
+                                    if ($agent) {
+                                        $storeId = $agent->store_id;
+                                    }
+                                }
+                                if (!$storeId) {
+                                    $storeId = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id,
+                                        ['defStore']);
+                                }
                                 if (!$storeId) {
                                     continue;
                                 }

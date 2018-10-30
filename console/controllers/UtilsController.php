@@ -370,4 +370,12 @@ class UtilsController extends Controller
         \Yii::$app->get('cloudWatchLog')->writeLog("testCWL", "id_108", "test 8");
         \Yii::$app->get('cloudWatchLog')->writeLog("testCWL2", "id_99", "test 12");
     }
+    
+    public function actionCerberTest()
+    {
+        $result = \common\models\vetis\VetisBusinessEntity::findOne(['uuid' => 'ffdf7257-c035-41bf-9bd8-274fdcb77fd2']);
+        var_dump($result->businessEntity);
+        $result2 = \common\models\vetis\VetisBusinessEntity::findOne(['uuid' => 'ffdf75a8-0b50-49c1-98a4-ae83742c8b8b']);
+        var_dump($result2->businessEntity);
+    }
 }

@@ -46,7 +46,7 @@ class cerberApi extends baseApi
         }
 
         if (!empty($enterprise)) {
-            return unserialize($enterprise->data);
+            return $enterprise->enterprise;
         }
 
         VetisForeignEnterprise::getUpdateData($this->org_id);
@@ -64,7 +64,7 @@ class cerberApi extends baseApi
         $business = VetisBusinessEntity::findOne(['uuid' => $UUID, 'active' => true, 'last' => true]);
 
         if (!empty($business)) {
-            return unserialize($business->data);
+            return $business->businessEntity;
         }
 
         VetisBusinessEntity::getUpdateData($this->org_id);
@@ -89,7 +89,7 @@ class cerberApi extends baseApi
         }
 
         if (!empty($enterprise)) {
-            return unserialize($enterprise->data);
+            return $enterprise->enterprise;
         }
 
         VetisForeignEnterprise::getUpdateData($this->org_id);
@@ -107,7 +107,7 @@ class cerberApi extends baseApi
         $business = VetisBusinessEntity::findOne(['guid' => $GUID, 'active' => true, 'last' => true]);
 
         if (!empty($business)) {
-            return unserialize($business->data);
+            return $business->businessEntity;
         }
 
         VetisBusinessEntity::getUpdateData($this->org_id);
@@ -128,7 +128,7 @@ class cerberApi extends baseApi
                 $list = [];
                 foreach ($result as $item)
                 {
-                    $list[] = unserialize($item->data);
+                    $list[] = $item->enterprise;
                 }
                 return $list;
             }
@@ -151,7 +151,7 @@ class cerberApi extends baseApi
             $list = [];
             foreach ($result as $item)
             {
-                $list[] = unserialize($item->data);
+                $list[] = $item->enterprise;
             }
             return $list;
         }

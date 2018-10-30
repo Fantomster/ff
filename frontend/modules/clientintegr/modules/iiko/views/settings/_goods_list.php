@@ -18,7 +18,7 @@ $this->registerCss("
         ");
 $searchModel = new \api\common\models\iiko\search\iikoProductSearch();
 
-$dataProvider = $searchModel->search(array_merge(Yii::$app->request->queryParams, ['org_id' => $org]));
+$dataProvider = $searchModel->search(array_merge(Yii::$app->request->queryParams, ['org_id' => $org, 'is_active' => '1']));
 $arrSession = Yii::$app->session->get('SelectedProduct');
 $iikoSelectedGoods = \api\common\models\iiko\iikoSelectedProduct::findAll(['organization_id' => $org]);
 $arr = [];
@@ -33,13 +33,13 @@ if (is_array($arrSession)) {
 
 Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => true]);
 $form = ActiveForm::begin([
-    'options' => [
+    'options'                => [
         'data-pjax' => true,
-        'id' => 'search-form',
-        'role' => 'search',
+        'id'        => 'search-form',
+        'role'      => 'search',
     ],
     'enableClientValidation' => false,
-    'method' => 'get',
+    'method'                 => 'get',
 ]);
 ?>
     <div class="row">
@@ -64,13 +64,13 @@ $form = ActiveForm::begin([
 <?php echo Html::hiddenInput('selected_goods'); ?>
 <?php
 echo \kartik\grid\GridView::widget([
-    'dataProvider' => $dataProvider,
-    'filterModel' => $searchModel,
-    'columns' => [
+    'dataProvider'     => $dataProvider,
+    'filterModel'      => $searchModel,
+    'columns'          => [
         [
-            'class' => 'kartik\grid\CheckboxColumn',
-            'contentOptions' => ['class' => 'small_cell_checkbox'],
-            'headerOptions' => ['style' => 'text-align:center; '],
+            'class'           => 'kartik\grid\CheckboxColumn',
+            'contentOptions'  => ['class' => 'small_cell_checkbox'],
+            'headerOptions'   => ['style' => 'text-align:center; '],
             'checkboxOptions' => function ($model, $key, $index, $widget) use ($arr) {
                 if (is_iterable($arr) && in_array($model->id, $arr)) {
                     $checked = true;
@@ -93,18 +93,18 @@ echo \kartik\grid\GridView::widget([
         'created_at',
         'updated_at'
     ],
-    'filterPosition' => false,
-    'pjax' => true,
-    'options' => ['class' => 'table-responsive'],
-    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-    'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-    'bordered' => false,
-    'striped' => true,
-    'condensed' => false,
-    'responsive' => false,
-    'hover' => true,
+    'filterPosition'   => false,
+    'pjax'             => true,
+    'options'          => ['class' => 'table-responsive'],
+    'tableOptions'     => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+    'formatter'        => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+    'bordered'         => false,
+    'striped'          => true,
+    'condensed'        => false,
+    'responsive'       => false,
+    'hover'            => true,
     'resizableColumns' => false,
-    'export' => [
+    'export'           => [
         'fontAwesome' => true,
     ],
 ]);

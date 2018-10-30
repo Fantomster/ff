@@ -34,12 +34,12 @@ class Order extends BaseOrder implements DocumentInterface
         }
 
         $return = [
-            "id"              => $this->id,
+            "id"              => (int)$this->id,
             "number"          => $arWaybillNames ?? null,
             "type"            => DocumentWebApi::TYPE_ORDER,
-            "status_id"       => $this->status,
+            "status_id"       => (int)$this->status,
             "status_text"     => $this->statusText,
-            "service_id"      => $this->service_id,
+            "service_id"      => (int)$this->service_id,
             "is_mercury_cert" => $this->getIsMercuryCert(),
             "count"           => (int)$this->positionCount,
             "total_price"     => CurrencyHelper::asDecimal($this->total_price),

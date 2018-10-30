@@ -21,13 +21,13 @@ class OrderEmail extends BaseOrder implements DocumentInterface
             return [];
         }
 
-        $order = (isset($this->order_id)) ? $this->order() : null;
+        $order = (isset($this->order_id)) ? $this->order : null;
 
         $return = [
             "id"                => $this->id,
             "number"            => $this->number ? [$this->number] : null,
             "type"              => DocumentWebApi::TYPE_ORDER_EMAIL,
-            "status_id"         => isset($order) ? $order->status_id : null,
+            "status_id"         => isset($order) ? $order->status : null,
             "status_text"       => isset($order) ? $order->statusText : null,
             "service_id"        => isset($order) ? $order->service_id : null,
             "replaced_order_id" => isset($order) ? $order->replaced_order_id : null
@@ -56,7 +56,7 @@ class OrderEmail extends BaseOrder implements DocumentInterface
         } else {
             $return["vendor"] = null;
         }
-        $return["is_mercury_cert"] = isset($order) ? $order->getIsMercuryCert() : null;
+        $return["is_mercury_cert"] = false;
         $return["count"] = (int)count($this->content);
         $return["total_price"] = $this->totalSumm;
         $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->date));

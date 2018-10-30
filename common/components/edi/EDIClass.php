@@ -27,7 +27,7 @@ class EDIClass extends Component
 
     public function parseFile($content)
     {
-        if(!$content){
+        if (!$content) {
             return false;
         }
         $dom = new \DOMDocument();

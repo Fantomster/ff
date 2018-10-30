@@ -91,12 +91,12 @@ class OrganizationController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel  = new OrganizationSearch();
+        $searchModel = new OrganizationSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-                    'searchModel'  => $searchModel,
-                    'dataProvider' => $dataProvider,
+            'searchModel'  => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -107,12 +107,12 @@ class OrganizationController extends Controller
      */
     public function actionTestVendors()
     {
-        $searchModel  = new TestVendorsSearch();
+        $searchModel = new TestVendorsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('test-vendors', [
-                    'searchModel'  => $searchModel,
-                    'dataProvider' => $dataProvider,
+            'searchModel'  => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -125,7 +125,7 @@ class OrganizationController extends Controller
     public function actionView($id)
     {
         return $this->render('view', [
-                    'model' => $this->findModel($id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -143,7 +143,7 @@ class OrganizationController extends Controller
             return $this->redirect(['test-vendors']);
         } else {
             return $this->render('create-test-vendor', [
-                        'model' => $model,
+                'model' => $model,
             ]);
         }
     }
@@ -162,7 +162,7 @@ class OrganizationController extends Controller
             return $this->redirect(['test-vendors']);
         } else {
             return $this->render('update-test-vendor', [
-                        'model' => $model,
+                'model' => $model,
             ]);
         }
     }
@@ -191,11 +191,11 @@ class OrganizationController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model           = $this->findModel($id);
+        $model = $this->findModel($id);
         $franchiseeModel = $this->findFranchiseeAssociateModel($id);
-        $ediModel        = EdiOrganization::findOne(['organization_id' => $id]);
+        $ediModel = EdiOrganization::findOne(['organization_id' => $id]);
         if (!$ediModel) {
-            $ediModel                  = new EdiOrganization();
+            $ediModel = new EdiOrganization();
             $ediModel->organization_id = $id;
             $ediModel->save();
         }
@@ -263,9 +263,9 @@ class OrganizationController extends Controller
     public function actionNotifications(int $id)
     {
         Yii::$app->language = 'ru';
-        $users              = User::find()->leftJoin('relation_user_organization', 'relation_user_organization.user_id = user.id')->where('relation_user_organization.organization_id=' . $id)->all();
+        $users = User::find()->leftJoin('relation_user_organization', 'relation_user_organization.user_id = user.id')->where('relation_user_organization.organization_id=' . $id)->all();
         if (count(Yii::$app->request->post())) {
-            $post   = Yii::$app->request->post();
+            $post = Yii::$app->request->post();
             $emails = $post['Email'];
             foreach ($emails as $userId => $fields) {
                 $user = User::findOne(['id' => $userId]);
@@ -282,7 +282,7 @@ class OrganizationController extends Controller
             }
             $sms = $post['Sms'];
             foreach ($sms as $userId => $fields) {
-                $user            = User::findOne(['id' => $userId]);
+                $user = User::findOne(['id' => $userId]);
                 $smsNotification = $user->smsNotification;
                 foreach ($fields as $key => $value) {
                     $smsNotification->$key = $value;
@@ -298,9 +298,9 @@ class OrganizationController extends Controller
     public function actionAjaxUpdateStatus()
     {
         if (Yii::$app->request->isAjax) {
-            $status                    = Yii::$app->request->post('value');
-            $organizationId            = str_replace('blacklisted_', '', Yii::$app->request->post('id'));
-            $organization              = Organization::findOne(['id' => $organizationId]);
+            $status = Yii::$app->request->post('value');
+            $organizationId = str_replace('blacklisted_', '', Yii::$app->request->post('id'));
+            $organization = Organization::findOne(['id' => $organizationId]);
             $organization->blacklisted = $status;
             $organization->save();
             return true;
@@ -352,7 +352,7 @@ class OrganizationController extends Controller
         $parentOrganizationObject = Organization::findOne(['id' => $organizationObject->parent_id]);
         if ($parentOrganizationObject) {
             $parentOrganization = ArrayHelper::map([$parentOrganizationObject->toArray()], 'id', 'name');
-            $organizations      = ArrayHelper::merge($organizations, $parentOrganization);
+            $organizations = ArrayHelper::merge($organizations, $parentOrganization);
         }
 
         $childOrganizations = ArrayHelper::map(Organization::findAll(['parent_id' => $id]), 'id', 'name');
@@ -370,7 +370,6 @@ class OrganizationController extends Controller
                     $licenseOrganization->fd = new Expression('NOW()');
                     $licenseOrganization->td = date("Y-m-d H:i:s", strtotime($post['td'][$licenseID]));
                     $licenseOrganization->save();
-
                 }
             }
             Yii::$app->session->setFlash('licenses-added', 'Лицензии добавлены');

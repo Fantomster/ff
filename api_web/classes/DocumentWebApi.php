@@ -4,6 +4,7 @@ namespace api_web\classes;
 
 use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
+use api_web\helpers\CurrencyHelper;
 use api_web\modules\integration\classes\documents\EdiOrder;
 use api_web\modules\integration\classes\documents\EdiOrderContent;
 use api_web\modules\integration\classes\documents\Order;
@@ -223,7 +224,6 @@ class DocumentWebApi extends \api_web\components\WebApi
     public function getDocumentsList(array $post)
     {
         $this->validateRequest($post, ['service_id']);
-        $client = $this->user->organization;
 
         $sort = (isset($post['sort']) ? $post['sort'] : null);
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
@@ -232,21 +232,20 @@ class DocumentWebApi extends \api_web\components\WebApi
         $documents = [];
 
         $params_sql = [];
-        $where_all = " AND client_id  = :business_id";
+        $where_all = "";
         $params_sql[':service_id'] = $post['service_id'];
+        $params_sql[':business_id'] = $this->user->organization_id;
         if (isset($post['search']['business_id']) && !empty($post['search']['business_id'])) {
             if (RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
                 $params_sql[':business_id'] = $post['search']['business_id'];
             } else {
                 throw new BadRequestHttpException("business unavailable to current user");
             }
-        } else {
-            $params_sql[':business_id'] = $this->user->organization_id;
         }
 
         if (isset($post['search']['waybill_status']) && !empty($post['search']['waybill_status'])) {
-            $where_all .= " AND waybill_status_id = :waybill_status";
-            $params_sql[':waybill_status'] = $post['search']['waybill_status'];
+            $where_all .= " AND waybill_status_id = :status";
+            $params_sql[':status'] = $post['search']['waybill_status'];
         }
 
         if (isset($post['search']['doc_number']) && !empty($post['search']['doc_number'])) {
@@ -300,20 +299,17 @@ class DocumentWebApi extends \api_web\components\WebApi
             $where_all .= " AND store in ($stories)";
         }
 
-        $params['client_id'] = $client->id;
-
         $apiShema = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
 
-        $sql = "
+        /*$sql = "
         SELECT DISTINCT * FROM (
             SELECT 
                 o.id as id, 
-                '" . self::TYPE_ORDER . "' as type, 
-                client_id, 
-                null as waybill_status_id, 
-                created_at as order_date, 
-                null as waybill_date, 
                 edi_number as doc_number, 
+                '" . self::TYPE_ORDER . "' as type, 
+                null as waybill_status_id, 
+                created_at as doc_date, 
+                null as agent,
                 vendor_id as vendor, 
                 null as store
             FROM `order` as o
@@ -326,12 +322,10 @@ class DocumentWebApi extends \api_web\components\WebApi
         UNION ALL
             SELECT
                 w.id as id, 
-                '" . self::TYPE_WAYBILL . "' as type, 
-                acquirer_id as client_id, 
-                status_id as waybill_status_id, 
-                null as order_date, 
-                doc_date as waybill_date, 
                 outer_number_code as doc_number,  
+                '" . self::TYPE_WAYBILL . "' as type, 
+                status_id as waybill_status_id, 
+                doc_date, 
                 o.vendor_id as vendor, 
                 outer_store_id as store
             FROM `$apiShema`.waybill w
@@ -345,21 +339,101 @@ class DocumentWebApi extends \api_web\components\WebApi
         ) as documents
         WHERE 
         id is not null $where_all
-       ";
+       ";*/
+
+        $sql = "SELECT DISTINCT documents.*, org.name as vendor_name FROM (
+                SELECT 
+                   o.id as id, 
+                   edi_number as doc_number, 
+                   '" . self::TYPE_ORDER . "' as type, 
+                   if(is_not_compared > 0,".Registry::WAYBILL_FORMED.",
+                   if(st.formed > 0, ".Registry::WAYBILL_FORMED.", 
+                   if(st.compared > 0, ".Registry::WAYBILL_COMPARED.", if(st.unloaded > 0,  ".Registry::WAYBILL_UNLOADED.", ".Registry::WAYBILL_FORMED.")))) as status_id, 
+                   o.service_id,
+                   certs as is_mercury_cert,
+                   `count`,
+                   total_price as total_price,
+                   o.created_at as doc_date, 
+                   o.vendor_id, 
+                   oa.id as agent_id,
+                   oa.name as agent_name,
+                   null as store_id,
+                   null as store_name,
+                   null as waybill_status,
+                   null as waybill_date,
+                   o.created_at as order_date
+                   FROM `order` as o
+                   LEFT JOIN (
+                      SELECT id, order_id, edi_number
+                      FROM order_content order by char_length(edi_number) desc limit 1
+                   ) as oc on oc.order_id = o.id
+                   LEFT JOIN (
+                       select order_id, count(oc.id) as `count`, count(merc_uuid) as certs, sum(if(wc.id is null, 1, 0)) as is_not_compared 
+                       from order_content as oc 
+                       left join `$apiShema`.waybill_content as wc on wc.order_content_id = oc.id
+                       group by (order_id)
+                   ) as counts on counts.order_id = o.id
+                   LEFT JOIN `$apiShema`.outer_agent as oa on oa.vendor_id = o.vendor_id
+                   LEFT JOIN (
+                       SELECT 
+                          order_id, 
+                          sum(if(w.status_id = ".Registry::WAYBILL_COMPARED.", 1 , 0)) as compared,
+                          sum(if(w.status_id  = ".Registry::WAYBILL_UNLOADED.", 1 , 0)) as unloaded,
+                          sum(if(w.status_id = ".Registry::WAYBILL_FORMED.", 1 , 0)) as formed
+                       FROM `$apiShema`.waybill as w
+                       left join `$apiShema`.waybill_content as wc on wc.waybill_id = w.id
+                       left join order_content as oc on oc.id = wc.order_content_id
+                       left join `order` as o on o.id = oc.order_id
+                       where order_id is not null
+                  ) as st on st.order_id = o.id
+                WHERE o.client_id = :business_id	
+                UNION ALL
+                SELECT DISTINCT
+                    w.id, 
+                    outer_number_code as doc_number, 
+                    '" . self::TYPE_WAYBILL . "' as type, 
+                    status_id, 
+                    w.service_id,
+                    0 as is_mercury_cert,
+                    `count`,
+                    counts.total_price,
+                    doc_date, 
+                    oa.vendor_id as vendor_id,
+                    oa.id as agent_id,
+                    oa.name as agent_name,
+                    os.id as store_id,
+                    os.name as store_name,
+                    status_id as waybill_status,
+                    doc_date as waybill_date,
+                    null as order_date
+                    FROM `$apiShema`.waybill w
+                    LEFT JOIN `$apiShema`.waybill_content wc ON wc.waybill_id = w.id
+                    LEFT JOIN order_content oc ON oc.id = wc.order_content_id
+                    LEFT JOIN `order` o ON o.id = oc.order_id
+                    LEFT JOIN (
+                                select waybill_id, count(id) as `count`, sum(sum_with_vat) as total_price from `$apiShema`.waybill_content group by (waybill_id)
+                                ) as counts on counts.waybill_id = w.id
+                    LEFT JOIN `$apiShema`.outer_agent as oa on oa.id = w.outer_agent_id      
+                    LEFT JOIN `$apiShema`.outer_store as os on os.id = w.outer_store_id         
+                    WHERE oc.order_id is null AND w.service_id = :service_id and w.acquirer_id = :business_id
+                ) as documents
+                LEFT JOIN organization as org on org.id = vendor_id
+                WHERE documents.id is not null $where_all";
 
         if ($sort) {
             $order = (preg_match('#^-(.+?)$#', $sort) ? 'DESC' : 'ASC');
             $sort_field = str_replace('-', '', $sort);
             //$where_all .= " AND $sort_field is not null ";
-            if($sort_field == 'doc_number') {
-                $sql .= 'ORDER BY char_length(doc_number) '.$order;
-            }elseif($sort_field == 'doc_date') {
-                $sql .= 'ORDER BY coalesce(documents.order_date,documents.waybill_date)'.$order;
+            if ($sort_field == 'doc_number') {
+                $sql .= ' ORDER BY char_length(doc_number) ' . $order;
+            } elseif ($sort_field == 'doc_date') {
+                $sql .= ' ORDER BY doc_date ' . $order;
             }
+        } else {
+            $sql .= ' ORDER BY doc_date DESC';
         }
-        else {
-            $sql .= 'ORDER BY coalesce(documents.order_date,documents.waybill_date) DESC';
-        }
+
+        //var_dump($sql); die();
 
         $dataProvider = new SqlDataProvider([
             'sql'        => $sql,
@@ -372,7 +446,6 @@ class DocumentWebApi extends \api_web\components\WebApi
             'sort'       => [
                 'attributes' => [
                     'id',
-                    'client_id',
                     'doc_date',
                 ],
             ],
@@ -385,8 +458,34 @@ class DocumentWebApi extends \api_web\components\WebApi
         $result = $dataProvider->getModels();
         if (!empty($result)) {
             foreach ($this->iterator($result) as $model) {
-                $modelClass = self::$models[$model['type']];
-                $documents[] = $modelClass::prepareModel($model['id']);
+                $documents[] =  $return = [
+                    "id"              => $model['id'],
+                    "doc_number"      => $model['doc_number'],
+                    "type"            => $model['type'],
+                    "status_id"       => $model['status_id'],
+                    "status_text"     => \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['status_id']]),
+                    "service_id"      => $model['service_id'],
+                    "is_mercury_cert" => (int)($model['is_mercury_cert'] > 0),
+                    "count"           => (int)$model['count'],
+                    "total_price"     => CurrencyHelper::asDecimal($model['total_price']),
+                    "doc_date"        => date("Y-m-d H:i:s T", strtotime($model['doc_date'])),
+                    "vendor"          => (!(isset($model['vendor_id']) && isset($model['vendor_name']))) ? null :
+                                        [
+                                            "id"    => $model['vendor_id'],
+                                            "name"  => $model['vendor_name'],
+                                            "difer" => false,
+                                        ],
+                    "agent"           => (!(isset($model['agent_id']) && isset($model['agent_name']))) ? null :
+                                        [
+                                            "id"    => $model['agent_id'],
+                                            "name"  => $model['agent_name'],
+                                        ],
+                    "store"           => (!(isset($model['store_id']) && isset($model['store_name']))) ? null :
+                                        [
+                                            "id"    => $model['store_id'],
+                                            "name"  => $model['store_name'],
+                                        ],
+                    ];
             }
         }
 
@@ -596,16 +695,17 @@ class DocumentWebApi extends \api_web\components\WebApi
 
     /**
      * Список сортировок списка документов
+     *
      * @return array
      */
     public function getSortList()
     {
         return [
-            'doc_number' => 'Номеру документа А-Я',
+            'doc_number'  => 'Номеру документа А-Я',
             '-doc_number' => 'Номеру документа Я-А',
-            'doc_date' => 'Дате документа по возрастанию',
-            '-doc_date' => 'Дате документа по убванию',
-            ];
+            'doc_date'    => 'Дате документа по возрастанию',
+            '-doc_date'   => 'Дате документа по убванию',
+        ];
     }
 
     /**

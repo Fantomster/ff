@@ -70,7 +70,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                      "search": {
      *                         "business_id": 124,
      *                         "waybill_status": 1,
-     *                         "doc_number" : "12346",
+     *                         "number" : "12346",
      *                         "waybill_date": {
      *                             "from": "23.08.2018",
      *                             "to": "24.08.2018"
@@ -105,7 +105,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                  "documents": {
      *                     {
      *                           "id": "2",
-     *                           "doc_number": null,
+     *                           "number": null,
      *                           "type": "waybill",
      *                           "status_id": "1",
      *                           "status_text": "Сопоставлена",
@@ -120,7 +120,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                           },
      *                           {
      *                           "id": "13508",
-     *                           "doc_number": null,
+     *                           "number": null,
      *                           "type": "order",
      *                           "status_id": "2",
      *                           "status_text": "Сформирована",
@@ -131,7 +131,7 @@ class DocumentController extends \api_web\components\WebApiController
      *                           "doc_date": "2018-10-18T14:48:36+03:00",
      *                           "vendor": {
      *                           "id": "5440",
-     *                           "name": "ООО \"Организация поставок\"",
+     *                           "name": "ООО Организация поставок",
      *                           "difer": false
      *                           },
      *                           "agent": null,
@@ -562,8 +562,8 @@ class DocumentController extends \api_web\components\WebApiController
      *         @SWG\Schema(
      *              default={
      *                   {
-     *                       "doc_number": "Номеру документа А-Я",
-     *                       "-doc_number": "Номеру документа Я-А",
+     *                       "number": "Номеру документа А-Я",
+     *                       "-number": "Номеру документа Я-А",
      *                       "doc_date": "Дате документа по возрастанию",
      *                       "-doc_date": "Дате документа по убванию"
      *                   }

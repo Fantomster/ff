@@ -236,9 +236,9 @@ class DocumentWebApi extends \api_web\components\WebApi
             $params_sql[':status'] = $post['search']['waybill_status'];
         }
 
-        if (isset($post['search']['doc_number']) && !empty($post['search']['doc_number'])) {
+        if (isset($post['search']['number']) && !empty($post['search']['number'])) {
             $where_all .= " AND doc_number = :doc_number";
-            $params_sql[':doc_number'] = $post['search']['doc_number'];
+            $params_sql[':doc_number'] = $post['search']['number'];
         }
 
         if (isset($post['search']['waybill_date']) && !empty($post['search']['waybill_date'])) {
@@ -412,7 +412,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             $order = (preg_match('#^-(.+?)$#', $sort) ? 'DESC' : 'ASC');
             $sort_field = str_replace('-', '', $sort);
             //$where_all .= " AND $sort_field is not null ";
-            if ($sort_field == 'doc_number') {
+            if ($sort_field == 'number') {
                 $sql .= ' ORDER BY char_length(doc_number) ' . $order;
             } elseif ($sort_field == 'doc_date') {
                 $sql .= ' ORDER BY doc_date ' . $order;
@@ -448,7 +448,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             foreach ($this->iterator($result) as $model) {
                 $documents[] =  $return = [
                     "id"              => $model['id'],
-                    "doc_number"      => $model['doc_number'],
+                    "number"      => $model['doc_number'],
                     "type"            => $model['type'],
                     "status_id"       => $model['status_id'],
                     "status_text"     => ($model['type'] == self::TYPE_WAYBILL) ? \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['status_id']]) : \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$model['status_id']]),
@@ -693,8 +693,8 @@ class DocumentWebApi extends \api_web\components\WebApi
     public function getSortList()
     {
         return [
-            'doc_number'  => \Yii::t('api_web', 'doc_order.doc_number'),
-            '-doc_number' => \Yii::t('api_web', 'doc_order.-doc_number'),
+            'number'  => \Yii::t('api_web', 'doc_order.doc_number'),
+            '-number' => \Yii::t('api_web', 'doc_order.-doc_number'),
             'doc_date'    => \Yii::t('api_web', 'doc_order.doc_date'),
             '-doc_date'   => \Yii::t('api_web', 'doc_order.-doc_date'),
         ];

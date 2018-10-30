@@ -24,25 +24,18 @@ class Order extends BaseOrder implements DocumentInterface
             return [];
         }
 
-        $edi_number = OrderContent::find()
-            ->select('edi_number')
-            ->where(['order_id' => $this->id])
-            ->orderBy('char_length(edi_number) desc')
-            ->limit(1)
-            ->scalar();
-
-       /* if (!empty($this->orderContent)) {
+        if (!empty($this->orderContent)) {
             $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
                 return $el->edi_number;
             }, $this->orderContent)));
             if (is_null(reset($arWaybillNames))) {
                 $arWaybillNames = null;
             }
-        }*/
+        }
 
         $return = [
             "id"              => $this->id,
-            "doc_number"      => $edi_number,
+            "number"          => $arWaybillNames ?? null,
             "type"            => DocumentWebApi::TYPE_ORDER,
             "status_id"       => $this->status,
             "status_text"     => $this->statusText,

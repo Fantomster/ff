@@ -156,8 +156,8 @@ class WaybillContent extends \yii\db\ActiveRecord
             }
         }
         //Если изменилась цена или количество, пересчитываем суммы
-        if (isset($dirtyAttr['price_without_vat']) || isset($dirtyAttr['quantity_waybill'])) {
-            if (isset($dirtyAttr['price_without_vat'])) {
+        if (isset($dirtyAttr['price_without_vat']) || isset($dirtyAttr['quantity_waybill']) || isset($dirtyAttr['vat_waybill'])) {
+            if (isset($dirtyAttr['price_without_vat']) || isset($dirtyAttr['vat_waybill'])) {
                 $value = $this->price_without_vat * ((100 + ($this->vat_waybill ?? 0)) / 100);
                 $this->setAttribute('price_with_vat', $value);
             }

@@ -124,7 +124,7 @@ class EmailIntegration2Controller extends Controller
     }
 
     /**
-     * @throws \yii\db\Exception
+     * @throws \Exception
      */
     public function actionIndex()
     {
@@ -148,7 +148,7 @@ class EmailIntegration2Controller extends Controller
             ]);
 
             if ($setting->is_active == 0) {
-                $this->log('SETTING IS DISABLED!');
+                $this->helper->addLog('SETTING IS DISABLED! For user ' . $setting->user, 'auth');
                 continue;
             }
 
@@ -171,8 +171,7 @@ class EmailIntegration2Controller extends Controller
                                 $transaction->commit();
                             } catch (\Exception $e) {
                                 $transaction->rollBack();
-                                $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
-                                \Yii::error($this->log, 'email-integration-error');
+                                $this->helper->addLog($e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine(), 'parsing');
                             }
                         }
                         $this->log([
@@ -182,10 +181,10 @@ class EmailIntegration2Controller extends Controller
                         ]);
                     }
                 }
-                $this->connect->disconnect();
             } catch (\Exception $e) {
-                $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
-                \Yii::error($this->log, 'email-integration-error');
+                $this->helper->addLog($e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine(), 'auth');
+            } finally {
+                $this->connect->disconnect();
             }
         }
     }
@@ -314,6 +313,7 @@ class EmailIntegration2Controller extends Controller
                     'ERROR PARSING TORG12 FILE: ' . $name_file,
                     '--!-- ' . $e->getMessage()
                 ]);
+                $this->helper->addLog('ERROR PARSING TORG12 FILE: ' . $name_file . ' ' . $e->getMessage(), 'parsing');
                 //Удаляем темп файл
                 if (file_exists($temp_file)) {
                     unlink($temp_file);
@@ -326,6 +326,7 @@ class EmailIntegration2Controller extends Controller
                     PHP_EOL,
                     'Error: empty rows ' . $name_file
                 ]);
+                $this->helper->addLog('Error: empty rows ' . $name_file, 'parsing');
                 //Удаляем темп файл
                 if (file_exists($temp_file)) {
                     unlink($temp_file);

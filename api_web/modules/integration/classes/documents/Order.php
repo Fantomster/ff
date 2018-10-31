@@ -3,7 +3,6 @@
 namespace api_web\modules\integration\classes\documents;
 
 use api_web\classes\DocumentWebApi;
-use api_web\components\Registry;
 use api_web\helpers\CurrencyHelper;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\Order as BaseOrder;

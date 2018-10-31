@@ -626,29 +626,29 @@ class DocumentWebApi extends \api_web\components\WebApi
             'service_id' => Registry::MC_BACKEND
         ]);
 
-        if (!isset($replacedOrder)) {
+        if (empty($replacedOrder)) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'document.replaced_order_not_found', ['ru' => 'Заменяемый документ не найден или не является заказом']));
         }
 
-        $order = \common\models\Order::findOne([
+        $document = OrderEmail::findOne([
             'id'         => (int)$post['document_id'],
             'service_id' => Registry::VENDOR_DOC_MAIL_SERVICE_ID,
         ]);
 
-        if (!isset($order)) {
+        if (empty($document)) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_not_found', ['ru' => 'Документ не найден или не является документом от поставщика']));
         }
 
-        if ($order->status == Order::STATUS_CANCELLED) {
+        if ($document->status == Order::STATUS_CANCELLED) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_cancelled', ['ru' => 'Документ в состоянии "Отменен"']));
         }
 
-        if (!is_null($order->replaced_order_id)) {
+        if (!is_null($document->replaced_order_id)) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_replaced_order_id_is_not_null', ['ru' => 'Документ уже заменен']));
         }
 
         $replacedOrder->status = Order::STATUS_CANCELLED;
-        $order->replaced_order_id = (int)$post['replaced_order_id'];
+        $document->replaced_order_id = (int)$post['replaced_order_id'];
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
@@ -656,8 +656,8 @@ class DocumentWebApi extends \api_web\components\WebApi
                 throw new ValidationException($replacedOrder->getFirstErrors());
             }
 
-            if (!$order->save()) {
-                throw new ValidationException($replacedOrder->getFirstErrors());
+            if (!$document->save()) {
+                throw new ValidationException($document->getFirstErrors());
             }
             $transaction->commit();
         } catch (\Exception $e) {
@@ -665,9 +665,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             throw $e;
         }
 
-        $result = OrderEmail::findOne(['order_id' => $order->id])->prepare();
-
-        return $result;
+        return $document->prepare();
     }
 
     /**

@@ -145,13 +145,24 @@ class WaybillContent extends \yii\db\ActiveRecord
     {
         $dirtyAttr = $this->getDirtyAttributes();
 
+        //Если прилетело изменение сумма без НДС
+        //Нужно вычислить цену
+        if (isset($dirtyAttr['sum_without_vat'])) {
+            //Будем считать цену только тогда, если нам ее не прислали
+            //Если же прислали, пересчитаем суммы ниже
+            if (!isset($dirtyAttr['price_without_vat'])) {
+                $this->setAttribute('price_without_vat', round($this->sum_without_vat / $this->quantity_waybill, 2));
+                $dirtyAttr['price_without_vat'] = $this->getAttribute('price_without_vat');
+            }
+        }
+        //Если изменилась цена или количество, пересчитываем суммы
         if (isset($dirtyAttr['price_without_vat']) || isset($dirtyAttr['quantity_waybill'])) {
             if (isset($dirtyAttr['price_without_vat'])) {
                 $value = $this->price_without_vat * ((100 + ($this->vat_waybill ?? 0)) / 100);
                 $this->setAttribute('price_with_vat', $value);
             }
+            //Пересчет сумм позиции
             $this->refreshSum();
-
             //Если присутствует связь с orderContent
             //обновляем все записи waybill_content, которые привязаны к этому же order_content_id
             if (!empty($this->orderContent)) {
@@ -219,7 +230,7 @@ class WaybillContent extends \yii\db\ActiveRecord
                 return false;
             }
             //Коэфициент не должен быть 0
-            if($attribute == 'koef' && $value == 0) {
+            if ($attribute == 'koef' && $value == 0) {
                 return false;
             }
         }

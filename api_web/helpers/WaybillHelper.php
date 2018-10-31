@@ -338,6 +338,13 @@ class WaybillHelper
             if (!$waybillContent->validate() || !$waybillContent->save()) {
                 throw new ValidationException($waybillContent->getFirstErrors());
             }
+            //Если эта позиция не готова к выгрузке, меняем статус накладной
+            if ($waybillContent->readyToExport === false) {
+                $waybill->status_id = Registry::WAYBILL_FORMED;
+                if (!$waybill->save()) {
+                    throw new ValidationException($waybill->getFirstErrors());
+                }
+            }
         } catch (\Throwable $t) {
             \Yii::error($t->getMessage());
             throw $t;

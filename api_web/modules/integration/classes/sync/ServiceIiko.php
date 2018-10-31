@@ -147,7 +147,7 @@ class ServiceIiko extends AbstractSyncFactory
     private function response(&$res, $model_id, $message, $success = true)
     {
         if ($this->countWaybillSend == 1 and $success === false) {
-            throw new BadRequestHttpException("Ошибка: " . $message);
+            throw new BadRequestHttpException($message);
         } else {
             $res[$model_id] = [
                 'success' => $success,

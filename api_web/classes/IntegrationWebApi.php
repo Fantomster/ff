@@ -19,6 +19,7 @@ use common\models\search\OuterProductMapSearch;
 use common\models\Waybill;
 use common\models\WaybillContent;
 use yii\base\Exception;
+use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -165,6 +166,8 @@ class IntegrationWebApi extends WebApi
 
         $orderContent = $waybillContent->orderContent;
         if (!empty($orderContent)) {
+            $result = (new Query())->select(['quantity', 'price'])->from('order_content')
+                ->where(['id' => $orderContent->id])->one();
             //Поиск в массовом сопоставлении
             $outerProductMap = $this->helper->getMapForOrder($orderContent->order, $waybillContent->waybill->service_id, $orderContent->product_id);
             if (!empty($outerProductMap)) {
@@ -177,11 +180,11 @@ class IntegrationWebApi extends WebApi
             } else {
                 $waybillContent->vat_waybill = $orderContent->vat_product;
             }
-            $waybillContent->quantity_waybill = $orderContent->quantity;
-            $waybillContent->price_without_vat = (int)$orderContent->price;
-            $waybillContent->price_with_vat = (int)($orderContent->price + ($orderContent->price * $orderContent->vat_product));
-            $waybillContent->sum_without_vat = (int)$orderContent->price * $orderContent->quantity;
-            $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $orderContent->quantity;
+            $waybillContent->quantity_waybill = $result['quantity'];
+            $waybillContent->price_without_vat = (int)$result['price'];
+            $waybillContent->price_with_vat = (int)($result['price'] + ($result['price'] * $orderContent->vat_product));
+            $waybillContent->sum_without_vat = (int)$result['price'] * $result['quantity'];
+            $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $result['quantity'];
         } else {
             throw new BadRequestHttpException("order content not found");
         }

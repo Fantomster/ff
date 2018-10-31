@@ -83,7 +83,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                    'user'         => $user
         ];
 
-        if($dataProvider->pagination->page == 1) {
+        if(!isset(Yii::$app->request->queryParams['page'])) {
             $this->updateVSDList();
         }
 

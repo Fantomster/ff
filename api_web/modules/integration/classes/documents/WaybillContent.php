@@ -26,6 +26,8 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
             "id"              => $this->id,
             "product_id"      => isset($orderContent) ? $orderContent->product_id : null,
             "product_name"    => isset($orderContent) ? $orderContent->product->product : null,
+            "mixcart_count"   => isset($orderContent) ? count($orderContent->order->orderContent) : null,
+            "mixcart_unit"    => isset($orderContent) ? $orderContent->product->ed : null,
             "outer_product"   => $this->getOuterProduct(),
             "quantity"        => $this->quantity_waybill,
             "outer_unit"      => $this->getOuterUnitObject(),
@@ -51,7 +53,6 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
             'name' => isset($this->productOuter) ? $this->productOuter->name : null
         ];
     }
-
 
     /**
      * Информация о внешних еденицах измерения

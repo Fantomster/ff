@@ -170,8 +170,9 @@ class VendorEmailWaybillsHelper
     {
         $operation = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => $denom]);
 
-        if ($operation != null)
+        if ($operation != null) {
             return $operation;
+        }
         throw new \Exception('Operation - ' . $denom . ' dont exists');
     }
 

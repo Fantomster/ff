@@ -243,11 +243,11 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         if (isset($post['search']['waybill_date']) && !empty($post['search']['waybill_date'])) {
             if (isset($post['search']['waybill_date']['from']) && !empty($post['search']['waybill_date']['from'])) {
-                $from = self::convertDate($post['search']['waybill_date']['from']);
+                $from = self::convertDate($post['search']['waybill_date']['from'], 'from');
             }
 
             if (isset($post['search']['waybill_date']['to']) && !empty($post['search']['waybill_date']['to'])) {
-                $to = self::convertDate($post['search']['waybill_date']['to']);
+                $to = self::convertDate($post['search']['waybill_date']['to'], 'to');
             }
 
             if (isset($from) && isset($to)) {
@@ -263,11 +263,11 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         if (isset($post['search']['order_date']) && !empty($post['search']['order_date'])) {
             if (isset($post['search']['order_date']['from']) && !empty($post['search']['order_date']['from'])) {
-                $from = self::convertDate($post['search']['order_date']['from']);
+                $from = self::convertDate($post['search']['order_date']['from'], 'from');
             }
 
             if (isset($post['search']['order_date']['to']) && !empty($post['search']['order_date']['to'])) {
-                $to = self::convertDate($post['search']['order_date']['to']);
+                $to = self::convertDate($post['search']['order_date']['to'], 'to');
             }
 
             if (isset($from) && isset($to)) {
@@ -279,12 +279,12 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
             $vendors = implode(",", $post['search']['vendor']);
-            $where_all .= " AND vendor in ($vendors)";
+            $where_all .= " AND vendor_id in ($vendors)";
         }
 
         if (isset($post['search']['store']) && !empty($post['search']['store'])) {
             $stories = implode(",", $post['search']['store']);
-            $where_all .= " AND store in ($stories)";
+            $where_all .= " AND store_id in ($stories)";
         }
 
         $apiShema = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
@@ -596,9 +596,13 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @param $date
      * @return string
      */
-    private static function convertDate($date)
+    private static function convertDate($date, $direction)
     {
-        $result = \DateTime::createFromFormat('d.m.Y H:i:s', $date . " 00:00:00");
+        $strTime = " 00:00:00";
+        if ($direction == 'to'){
+            $strTime = " 23:59:59";
+        }
+        $result = \DateTime::createFromFormat('d.m.Y H:i:s', $date . $strTime);
         if ($result) {
             return $result->format('Y-m-d H:i:s');
         }

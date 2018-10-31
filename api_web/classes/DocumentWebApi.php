@@ -335,9 +335,9 @@ class DocumentWebApi extends \api_web\components\WebApi
                    edi_number as doc_number, 
                    (select group_concat(edi_number) from order_content sq1 where sq1.order_id = o.id order by edi_number) documents,
                    '" . self::TYPE_ORDER . "' as type, 
-                   if(is_not_compared > 0,".Registry::DOC_GROUP_STATUS_WAIT_FORMING.",
-                   if(st.formed > 0, ".Registry::DOC_GROUP_STATUS_WAIT_FORMING.", 
-                   if(st.compared > 0, ".Registry::DOC_GROUP_STATUS_WAIT_SENDING.", if(st.unloaded > 0,  ".Registry::DOC_GROUP_STATUS_SENT.", ".Registry::DOC_GROUP_STATUS_WAIT_FORMING.")))) as status_id, 
+                   if(is_not_compared > 0," . Registry::DOC_GROUP_STATUS_WAIT_FORMING . ",
+                   if(st.formed > 0, " . Registry::DOC_GROUP_STATUS_WAIT_FORMING . ", 
+                   if(st.compared > 0, " . Registry::DOC_GROUP_STATUS_WAIT_SENDING . ", if(st.unloaded > 0,  " . Registry::DOC_GROUP_STATUS_SENT . ", " . Registry::DOC_GROUP_STATUS_WAIT_FORMING . ")))) as status_id, 
                    o.service_id,
                    certs as is_mercury_cert,
                    `count`,
@@ -367,9 +367,9 @@ class DocumentWebApi extends \api_web\components\WebApi
                    LEFT JOIN (
                        SELECT 
                           order_id, 
-                          sum(if(w.status_id = ".Registry::WAYBILL_COMPARED.", 1 , 0)) as compared,
-                          sum(if(w.status_id  = ".Registry::WAYBILL_UNLOADED.", 1 , 0)) as unloaded,
-                          sum(if(w.status_id = ".Registry::WAYBILL_FORMED.", 1 , 0)) as formed
+                          sum(if(w.status_id = " . Registry::WAYBILL_COMPARED . ", 1 , 0)) as compared,
+                          sum(if(w.status_id  = " . Registry::WAYBILL_UNLOADED . ", 1 , 0)) as unloaded,
+                          sum(if(w.status_id = " . Registry::WAYBILL_FORMED . ", 1 , 0)) as formed
                        FROM `$apiShema`.waybill as w
                        left join `$apiShema`.waybill_content as wc on wc.waybill_id = w.id
                        left join order_content as oc on oc.id = wc.order_content_id
@@ -450,35 +450,35 @@ class DocumentWebApi extends \api_web\components\WebApi
         $result = $dataProvider->getModels();
         if (!empty($result)) {
             foreach ($this->iterator($result) as $model) {
-                $documents[] =  $return = [
-                    "id"              => (int)$model['id'],
-                    "number"          => isset($model['documents']) ? explode(",", $model['documents']) : [],
-                    "type"            => $model['type'],
-                    "status_id"       => (int)$model['status_id'],
-                    "status_text"     => ($model['type'] == self::TYPE_WAYBILL) ? \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['status_id']]) : \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$model['status_id']]),
-                    "service_id"      => (int)$model['service_id'],
-                    "is_mercury_cert" => (int)($model['is_mercury_cert'] > 0),
-                    "count"           => (int)$model['count'],
-                    "total_price"     => CurrencyHelper::asDecimal($model['total_price']),
-                    "doc_date"        => date("Y-m-d H:i:s T", strtotime($model['doc_date'])),
-                    "vendor"          => (!(isset($model['vendor_id']) && isset($model['vendor_name']))) ? null :
-                                        [
-                                            "id"    => $model['vendor_id'],
-                                            "name"  => $model['vendor_name'],
-                                            "difer" => false,
-                                        ],
-                    "agent"           => (!(isset($model['agent_id']) && isset($model['agent_name']))) ? null :
-                                        [
-                                            "id"    => $model['agent_id'],
-                                            "name"  => $model['agent_name'],
-                                        ],
-                    "store"           => (!(isset($model['store_id']) && isset($model['store_name']))) ? null :
-                                        [
-                                            "id"    => $model['store_id'],
-                                            "name"  => $model['store_name'],
-                                        ],
+                $documents[] = $return = [
+                    "id"                => (int)$model['id'],
+                    "number"            => isset($model['documents']) ? explode(",", $model['documents']) : [],
+                    "type"              => $model['type'],
+                    "status_id"         => (int)$model['status_id'],
+                    "status_text"       => ($model['type'] == self::TYPE_WAYBILL) ? \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['status_id']]) : \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$model['status_id']]),
+                    "service_id"        => (int)$model['service_id'],
+                    "is_mercury_cert"   => (int)($model['is_mercury_cert'] > 0),
+                    "count"             => (int)$model['count'],
+                    "total_price"       => CurrencyHelper::asDecimal($model['total_price']),
+                    "doc_date"          => date("Y-m-d H:i:s T", strtotime($model['doc_date'])),
+                    "vendor"            => (!(isset($model['vendor_id']) && isset($model['vendor_name']))) ? null :
+                        [
+                            "id"    => $model['vendor_id'],
+                            "name"  => $model['vendor_name'],
+                            "difer" => false,
+                        ],
+                    "agent"             => (!(isset($model['agent_id']) && isset($model['agent_name']))) ? null :
+                        [
+                            "id"   => $model['agent_id'],
+                            "name" => $model['agent_name'],
+                        ],
+                    "store"             => (!(isset($model['store_id']) && isset($model['store_name']))) ? null :
+                        [
+                            "id"   => $model['store_id'],
+                            "name" => $model['store_name'],
+                        ],
                     "replaced_order_id" => isset($model['replaced_order_id']) ? (int)$model['replaced_order_id'] : null
-                    ];
+                ];
             }
         }
 
@@ -541,9 +541,7 @@ class DocumentWebApi extends \api_web\components\WebApi
     public function getWaybillDetail(array $post)
     {
         $this->validateRequest($post, ['waybill_id']);
-
         return Waybill::prepareDetail($post['waybill_id']);
-
     }
 
     /**
@@ -696,10 +694,10 @@ class DocumentWebApi extends \api_web\components\WebApi
     public function getSortList()
     {
         return [
-            'number'  => \Yii::t('api_web', 'doc_order.doc_number'),
-            '-number' => \Yii::t('api_web', 'doc_order.-doc_number'),
-            'doc_date'    => \Yii::t('api_web', 'doc_order.doc_date'),
-            '-doc_date'   => \Yii::t('api_web', 'doc_order.-doc_date'),
+            'number'    => \Yii::t('api_web', 'doc_order.doc_number'),
+            '-number'   => \Yii::t('api_web', 'doc_order.-doc_number'),
+            'doc_date'  => \Yii::t('api_web', 'doc_order.doc_date'),
+            '-doc_date' => \Yii::t('api_web', 'doc_order.-doc_date'),
         ];
     }
 
@@ -721,7 +719,8 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @return mixed
      * @throws BadRequestHttpException
      */
-    public function getDocument(array $request){
+    public function getDocument(array $request)
+    {
         $this->validateRequest($request, ['service_id', 'type', 'document_id']);
 
         if (array_key_exists($request['type'], self::$models)) {

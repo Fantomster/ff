@@ -141,6 +141,14 @@ class Waybill extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return float
+     */
+    public function getTotalPriceWithOutVat()
+    {
+        return round(WaybillContent::find()->where(['waybill_id' => $this->id])->sum('sum_without_vat'), 2);
+    }
+
+    /**
      * @return Order|null
      */
     public function getOrder()

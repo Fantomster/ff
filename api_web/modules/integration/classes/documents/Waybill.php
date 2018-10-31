@@ -6,6 +6,7 @@ use api_web\classes\DocumentWebApi;
 use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\CurrencyHelper;
+use api_web\helpers\OuterProductMapHelper;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\Organization;
 use common\models\OuterAgent;
@@ -20,6 +21,14 @@ use yii\web\BadRequestHttpException;
  */
 class Waybill extends BaseWaybill implements DocumentInterface
 {
+
+    public $helper;
+
+    public function __construct(array $config = [])
+    {
+        $this->helper = new OuterProductMapHelper();
+        parent::__construct($config);
+    }
 
     /**
      * Порлучение данных из модели
@@ -36,24 +45,24 @@ class Waybill extends BaseWaybill implements DocumentInterface
         if (isset(Registry::$waybill_statuses[$this->status_id])) {
             $status_text = \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$this->status_id]);
         } else {
-            $status_text = "Status 0";
+            $status_text = "Status " . $this->status_id;
         }
 
-
         $return = [
-            "id"              => (int)$this->id,
-            "number"      => $this->outer_number_code ? [$this->outer_number_code] : [],
-            "type"            => DocumentWebApi::TYPE_WAYBILL,
-            "status_id"       => (int)$this->status_id,
-            "status_text"     => $status_text,
-            "service_id"      => (int)$this->service_id,
-            "vendor"          => null,
-            "agent"           => null,
-            "store"           => null,
-            "is_mercury_cert" => $this->getIsMercuryCert(),
-            "count"           => (int)$this->getTotalCount(),
-            "total_price"     => CurrencyHelper::asDecimal($this->getTotalPrice()),
-            "doc_date"        => date("Y-m-d H:i:s T", strtotime($this->doc_date))
+            "id"                       => (int)$this->id,
+            "number"                   => $this->outer_number_code ? [$this->outer_number_code] : [],
+            "type"                     => DocumentWebApi::TYPE_WAYBILL,
+            "status_id"                => (int)$this->status_id,
+            "status_text"              => $status_text,
+            "service_id"               => (int)$this->service_id,
+            "vendor"                   => null,
+            "agent"                    => null,
+            "store"                    => null,
+            "is_mercury_cert"          => $this->getIsMercuryCert(),
+            "count"                    => (int)$this->getTotalCount(),
+            "total_price"              => CurrencyHelper::asDecimal($this->getTotalPrice()),
+            "total_price_with_out_vat" => CurrencyHelper::asDecimal($this->getTotalPriceWithOutVat()),
+            "doc_date"                 => date("Y-m-d H:i:s T", strtotime($this->doc_date))
         ];
 
         $agent = OuterAgent::findOne(['id' => $this->outer_agent_id]);
@@ -147,12 +156,6 @@ class Waybill extends BaseWaybill implements DocumentInterface
             return [];
         }
 
-        if (isset(Registry::$waybill_statuses[$model->status_id])) {
-            $status_text = \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model->status_id]);
-        } else {
-            $status_text = "Status " . $model->status_id;
-        }
-
         $pd = $model->payment_delay_date;
         if (empty($pd) || $pd == '0000-00-00 00:00:00') {
             $pd = null;
@@ -160,50 +163,12 @@ class Waybill extends BaseWaybill implements DocumentInterface
             $pd = date("Y-m-d H:i:s T", strtotime($model->payment_delay_date));
         }
 
-        $return = [
-            "id"                      => (int)$model->id,
-            "code"                    => $model->id,
-            "status_id"               => (int)$model->status_id,
-            "status_text"             => $status_text,
-            "agent"                   => null,
-            "vendor"                  => null,
-            "store"                   => null,
-            "doc_date"                => date("Y-m-d H:i:s T", strtotime($model->doc_date)),
-            "outer_number_additional" => $model->outer_number_additional,
-            "outer_number_code"       => $model->outer_number_code,
-            "payment_delay_date"      => $pd,
-            "outer_note"              => $model->outer_note
-        ];
-
-        $agent = OuterAgent::findOne(['id' => $model->outer_agent_id]);
-        if (!empty($agent)) {
-            $return["agent"] = [
-                "id"   => (int)$agent->id,
-                "name" => $agent->name,
-            ];
-        }
-
-        if (isset($agent->vendor_id)) {
-            $return["vendor"] = [
-                "id"   => (int)$agent->vendor_id,
-                "name" => Organization::findOne(['id' => $agent->vendor_id])->name,
-            ];
-        } else {
-            if (!empty($model->order)) {
-                $return["vendor"] = [
-                    "id"   => (int)$model->order->vendor_id,
-                    "name" => $model->order->vendor->name,
-                ];
-            }
-        }
-
-        $store = OuterStore::findOne(['id' => $model->outer_store_id]);
-        if (!empty($store)) {
-            $return["store"] = [
-                "id"   => (int)$store->id,
-                "name" => $store->name,
-            ];
-        }
+        $return = $model->prepare();
+        $return['outer_number_additional'] = $model->outer_number_additional;
+        $return['outer_number_code'] = $model->outer_number_code;
+        $return['payment_delay_date'] = $pd;
+        $return['outer_note'] = $model->outer_note;
+        $return['code'] = $model->id;
 
         return $return;
     }

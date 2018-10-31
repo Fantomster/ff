@@ -15,11 +15,11 @@ $autoNumber = 'textcode="' . $waybill->outer_number_code . '" numcode="' . $wayb
 <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="<?= $guid ?>" callback="<?= $cb ?>">
     <PARAM name="object_id" val="<?= $code ?>"/>
     <DOC date="<?= Yii::$app->formatter->asDatetime($waybill->doc_date, "php:Y-m-d") ?>"
-         corr="<?= $waybill->outer_agent_id ?>"
-         store="<?= $waybill->outer_store_id ?>"
+         corr="<?= $agentUid ?>"
+         store="<?= $storeUid ?>"
          active="<?= $exportApproved ?>"
          duedate="1" note="<?= $waybill->outer_note ?>"
-    <?= $autoNumber ?>
+        <?= $autoNumber ?>
     <?= '>' . PHP_EOL ?>
     <?php
     foreach ($records as $rec) {

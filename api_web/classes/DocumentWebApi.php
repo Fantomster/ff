@@ -399,15 +399,13 @@ class DocumentWebApi extends \api_web\components\WebApi
                     null as order_date,
                     null as replaced_order_id
                     FROM `$apiShema`.waybill w
-                    LEFT JOIN `$apiShema`.waybill_content wc ON wc.waybill_id = w.id
-                    LEFT JOIN order_content oc ON oc.id = wc.order_content_id
-                    LEFT JOIN `order` o ON o.id = oc.order_id
+                    LEFT JOIN (SELECT waybill_id, sum(ifnull(order_content_id,0)) as orders FROM api.waybill_content group by waybill_id) as o on o.waybill_id = w.id
                     LEFT JOIN (
                                 select waybill_id, count(id) as `count`, sum(sum_with_vat) as total_price from `$apiShema`.waybill_content group by (waybill_id)
                                 ) as counts on counts.waybill_id = w.id
                     LEFT JOIN `$apiShema`.outer_agent as oa on oa.id = w.outer_agent_id      
                     LEFT JOIN `$apiShema`.outer_store as os on os.id = w.outer_store_id         
-                    WHERE oc.order_id is null AND w.service_id = :service_id and w.acquirer_id = :business_id
+                    WHERE o.orders = 0 AND w.service_id = :service_id and w.acquirer_id = :business_id
                 ) as documents
                 LEFT JOIN organization as org on org.id = vendor_id
                 WHERE documents.id is not null $where_all";
@@ -425,7 +423,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             $sql .= ' ORDER BY doc_date DESC';
         }
 
-        //var_dump($sql); die();
+        var_dump($sql); die();
 
         $dataProvider = new SqlDataProvider([
             'sql'        => $sql,

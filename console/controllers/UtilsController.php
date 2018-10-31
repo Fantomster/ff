@@ -363,11 +363,4 @@ class UtilsController extends Controller
             echo $i . "/" . $all_count . PHP_EOL;
         }
     }
-    
-    public function actionCloudWatchTest()
-    {
-        \Yii::$app->get('cloudWatchLog')->writeLog("testCWL", "id_102", "test 3");
-        \Yii::$app->get('cloudWatchLog')->writeLog("testCWL", "id_108", "test 8");
-        \Yii::$app->get('cloudWatchLog')->writeLog("testCWL2", "id_99", "test 12");
-    }
 }

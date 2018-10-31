@@ -20,7 +20,7 @@ class cerberApi extends baseApi
      */
     public function init()
     {
-        $this->system = 'cerber';
+        $this->system        = 'cerber';
         $this->wsdlClassName = Cerber::class;
         parent::init();
     }
@@ -31,7 +31,7 @@ class cerberApi extends baseApi
      */
     public function getActivityLocationList()
     {
-       return VetisRussianEnterprise::find()->where(['owner_guid' => $this->issuerID])->all();
+        return VetisRussianEnterprise::find()->where(['owner_guid' => $this->issuerID])->all();
     }
 
     /**
@@ -55,7 +55,7 @@ class cerberApi extends baseApi
         }
 
         if (!empty($enterprise)) {
-            return unserialize($enterprise->data);
+            return $enterprise->enterprise;
         }
 
         return null;
@@ -73,7 +73,7 @@ class cerberApi extends baseApi
         $business = VetisBusinessEntity::findOne(['uuid' => $UUID, 'active' => true, 'last' => true]);
 
         if (!empty($business)) {
-            return unserialize($business->data);
+            return $business->businessEntity;
         }
 
         return null;
@@ -100,9 +100,9 @@ class cerberApi extends baseApi
         }
 
         if (!empty($enterprise)) {
-            return unserialize($enterprise->data);
+            return $enterprise->enterprise;
         }
-            return null;
+        return null;
     }
 
     /**
@@ -117,7 +117,7 @@ class cerberApi extends baseApi
         $business = VetisBusinessEntity::findOne(['guid' => $GUID, 'active' => true, 'last' => true]);
 
         if (!empty($business)) {
-            return unserialize($business->data);
+            return $business->businessEntity;
         }
 
         return null;
@@ -136,13 +136,12 @@ class cerberApi extends baseApi
         $result = VetisForeignEnterprise::find()->where(['active' => true, 'last' => true, 'country_guid' => $country_guid])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")->all();
 
         if (!empty($result)) {
-                $list = [];
-                foreach ($result as $item)
-                {
-                    $list[] = unserialize($item->data);
-                }
-                return $list;
+            $list = [];
+            foreach ($result as $item) {
+                $list[] = $item->enterprise;
             }
+            return $list;
+        }
 
         return [];
     }
@@ -160,9 +159,8 @@ class cerberApi extends baseApi
 
         if (!empty($result)) {
             $list = [];
-            foreach ($result as $item)
-            {
-                $list[] = unserialize($item->data);
+            foreach ($result as $item) {
+                $list[] = $item->enterprise;
             }
             return $list;
         }
@@ -178,7 +176,7 @@ class cerberApi extends baseApi
      */
     public function getForeignEnterpriseChangesList($options)
     {
-        require_once (__DIR__ ."/Cerber.php");
+        require_once (__DIR__ . "/Cerber.php");
         $request = new getForeignEnterpriseChangesListRequest();
         if (array_key_exists('listOptions', $options)) {
             $request->listOptions = $options['listOptions'];
@@ -188,9 +186,9 @@ class cerberApi extends baseApi
             throw new \Exception('startDate field is not specified');
         }
 
-        $request->updateDateInterval = new DateInterval();
+        $request->updateDateInterval            = new DateInterval();
         $request->updateDateInterval->beginDate = date('Y-m-d', strtotime($options['startDate'])) . 'T' . date('H:i:s', strtotime($options['startDate']));
-        $request->updateDateInterval->endDate = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
+        $request->updateDateInterval->endDate   = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
 
         return $request;
     }
@@ -203,7 +201,7 @@ class cerberApi extends baseApi
      */
     public function getRussianEnterpriseChangesList($options)
     {
-        require_once (__DIR__ ."/Cerber.php");
+        require_once (__DIR__ . "/Cerber.php");
         $request = new getRussianEnterpriseChangesListRequest();
         if (array_key_exists('listOptions', $options)) {
             $request->listOptions = $options['listOptions'];
@@ -213,9 +211,9 @@ class cerberApi extends baseApi
             throw new \Exception('startDate field is not specified');
         }
 
-        $request->updateDateInterval = new DateInterval();
+        $request->updateDateInterval            = new DateInterval();
         $request->updateDateInterval->beginDate = date('Y-m-d', strtotime($options['startDate'])) . 'T' . date('H:i:s', strtotime($options['startDate']));
-        $request->updateDateInterval->endDate = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
+        $request->updateDateInterval->endDate   = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
 
         return $request;
     }
@@ -228,7 +226,7 @@ class cerberApi extends baseApi
      */
     public function getBusinessEntityChangesList($options)
     {
-        require_once (__DIR__ ."/Cerber.php");
+        require_once (__DIR__ . "/Cerber.php");
         $request = new getBusinessEntityChangesListRequest();
         if (array_key_exists('listOptions', $options)) {
             $request->listOptions = $options['listOptions'];
@@ -238,12 +236,11 @@ class cerberApi extends baseApi
             throw new \Exception('startDate field is not specified');
         }
 
-        $request->updateDateInterval = new DateInterval();
+        $request->updateDateInterval            = new DateInterval();
         $request->updateDateInterval->beginDate = date('Y-m-d', strtotime($options['startDate'])) . 'T' . date('H:i:s', strtotime($options['startDate']));
-        $request->updateDateInterval->endDate = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
+        $request->updateDateInterval->endDate   = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
 
         return $request;
     }
-
 
 }

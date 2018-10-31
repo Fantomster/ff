@@ -30,7 +30,7 @@
             <POSITION>
                 <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>
                 <PRODUCT><?= $barcode ?></PRODUCT>
-                <PRODUCTIDBUYER><?= $article ?? '' ?></PRODUCTIDBUYER>
+                <PRODUCTIDBUYER><?= $position['id'] ?></PRODUCTIDBUYER>
                 <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?? '' ?></PRODUCTIDSUPPLIER>
                 <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
                 <ORDERUNIT><?= $measure ?></ORDERUNIT>

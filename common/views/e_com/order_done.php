@@ -3,7 +3,6 @@
     <NUMBER><?= $order->id ?></NUMBER>
     <DOCACTION><?= Yii::$app->params['edi_api_data']['edi_api_recadv_document_id'] ?></DOCACTION>
     <DATE><?= $dateArray['created_at'] ?></DATE>
-    <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?></RECEPTIONDATE>
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>
     <ORDERNUMBER><?= $order->id ?></ORDERNUMBER>
     <ORDERDATE><?= $dateArray['created_at'] ?></ORDERDATE>
@@ -34,7 +33,7 @@
                 <POSITION>
                     <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>
                     <PRODUCT><?= $barcode ?></PRODUCT>
-                    <PRODUCTIDBUYER><?= $article ?></PRODUCTIDBUYER>
+                    <PRODUCTIDBUYER><?= $position['id'] ?></PRODUCTIDBUYER>
                     <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
                     <DELIVEREDQUANTITY><?= $position['quantity'] ?></DELIVEREDQUANTITY>
                     <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>

@@ -91,7 +91,7 @@ class VendorEmailWaybillsHelper
                         $product->units = 1;
                         $product->ed = $row['ed'];
                         if (!$product->save()) {
-                            $this->addLog(implode(' ', $product->getFirstErrors()) . ' Название продукта = ' . $row['name'], 'order_create');
+                            $this->addLog(implode(' ', $product->getFirstErrors()) . ' Название продукта = ' . $row['name'], 'product_create');
                             continue;
                         }
                     }

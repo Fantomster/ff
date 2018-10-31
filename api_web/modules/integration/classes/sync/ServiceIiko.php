@@ -34,6 +34,11 @@ class ServiceIiko extends AbstractSyncFactory
     ];
 
     /**
+     * @var int
+     */
+    private $countWaybillSend = 0;
+
+    /**
      * @param array $params
      * @return array
      * @throws ServerErrorHttpException
@@ -77,26 +82,22 @@ class ServiceIiko extends AbstractSyncFactory
             ])
             ->all();
 
-        if (!isset($records)) {
-            \Yii::error('Cant find waybills for export');
-            throw new BadRequestHttpException('Ошибка при экспорте накладных в авторежиме');
+        if (empty($records)) {
+            throw new BadRequestHttpException('waybill_not_found');
         }
 
+        $this->countWaybillSend = count($records);
+
         $api = iikoApi::getInstance();
-        if ($api->auth()) {
+        try {
+            $api->auth();
             /** @var iikoWaybill $model */
             foreach ($records as $model) {
                 if (!in_array($model->status_id, [Registry::WAYBILL_COMPARED, Registry::WAYBILL_ERROR])) {
                     if ($model->status_id == Registry::WAYBILL_UNLOADED) {
-                        $res[$model->id] = [
-                            'success' => true,
-                            'message' => \Yii::t('api_web', 'service_iiko.already_success_unloading_waybill'),
-                        ];
+                        $this->response($res, $model->id, \Yii::t('api_web', 'service_iiko.already_success_unloading_waybill'));
                     } else {
-                        $res[$model->id] = [
-                            'success' => false,
-                            'message' => \Yii::t('api_web', 'service_iiko.no_ready_unloading_waybill'),
-                        ];
+                        $this->response($res, $model->id, \Yii::t('api_web', 'service_iiko.no_ready_unloading_waybill'), false);
                     }
                     continue;
                 }
@@ -105,29 +106,54 @@ class ServiceIiko extends AbstractSyncFactory
                 try {
                     $response = $api->sendWaybill($model);
                     if ($response !== true) {
-                        \Yii::error('Error during sending waybill');
-                        throw new \Exception('Ошибка при отправке. ' . $response);
+                        $this->response($res, $model->id, $response, false);
                     }
                     $model->status_id = Registry::WAYBILL_UNLOADED;
                     $model->save();
-                    $res[$model->id] = [
-                        'success' => true,
-                        'message' => \Yii::t('api_web', 'service_iiko.success_unloading_waybill'),
-                    ];
+                    $this->response($res, $model->id, \Yii::t('api_web', 'service_iiko.success_unloading_waybill'));
                     $transaction->commit();
                 } catch (\Exception $e) {
                     $transaction->rollBack();
                     $model->status_id = Registry::WAYBILL_ERROR;
                     $model->save();
-                    \Yii::error('Cant send waybill, rolled back' . $e);
-                    $res[$model->id] = [
-                        'success' => false,
-                        'message' => $e->getMessage()
-                    ];
+                    //Если одна накладная к выгрузке, и произошла ошибка
+                    //то в $this->response() будет Exception и мы тупо займем лицензию
+                    //Надо отконектиться
+                    if ($this->countWaybillSend == 1) {
+                        $api->logout();
+                    }
+                    $this->response($res, $model->id, $e->getMessage(), false);
                 }
             }
             $api->logout();
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            if ($message == "Код ответа сервера: 401 | ") {
+                $message = "Ошибка авторизации, проверьте настройки подключения к iiko";
+            }
+            throw new BadRequestHttpException($message);
         }
         return ['result' => $res];
+    }
+
+    /**
+     * @param      $res
+     * @param      $model_id
+     * @param      $message
+     * @param bool $success
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+    private function response(&$res, $model_id, $message, $success = true)
+    {
+        if ($this->countWaybillSend == 1 and $success === false) {
+            throw new BadRequestHttpException("Ошибка: " . $message);
+        } else {
+            $res[$model_id] = [
+                'success' => $success,
+                'message' => $message
+            ];
+        }
+        return $res;
     }
 }

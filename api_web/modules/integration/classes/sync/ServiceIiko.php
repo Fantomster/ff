@@ -86,7 +86,7 @@ class ServiceIiko extends AbstractSyncFactory
         if ($api->auth()) {
             /** @var iikoWaybill $model */
             foreach ($records as $model) {
-                if ($model->status_id !== Registry::WAYBILL_COMPARED) {
+                if (!in_array($model->status_id, [Registry::WAYBILL_COMPARED, Registry::WAYBILL_ERROR])) {
                     if ($model->status_id == Registry::WAYBILL_UNLOADED) {
                         $res[$model->id] = [
                             'success' => true,

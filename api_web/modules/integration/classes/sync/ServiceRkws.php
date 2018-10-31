@@ -18,7 +18,9 @@ use api_web\components\Registry;
 use api_web\modules\integration\classes\documents\WaybillContent;
 use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
+use common\models\OuterAgent;
 use common\models\OuterCategory;
+use common\models\OuterStore;
 use common\models\Waybill;
 use Yii;
 use yii\db\Transaction;
@@ -525,9 +527,13 @@ class ServiceRkws extends AbstractSyncFactory
 
             $exportApproved = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['useAcceptedDocs']);
 
+            $outerAgent = OuterAgent::findOne($waybill->outer_agent_id);
+            $outerStore = OuterStore::findOne($waybill->outer_store_id);
             $xml = Yii::$app->view->render($this->dirResponseXml . '/' . ucfirst('Waybill'),
                 [
                     'waybill'        => $waybill,
+                    'agentUid'       => $outerAgent->outer_uid,
+                    'storeUid'       => $outerStore->outer_uid,
                     'records'        => $records,
                     'exportApproved' => $exportApproved ?? 0,
                     'code'           => $this->licenseCode,

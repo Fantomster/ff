@@ -152,6 +152,7 @@ class WebApiHelper
             foreach ($days as $day) {
                 $item['delivery_days'][$day] = (int)$model->delivery->{$day};
             }
+            $item['is_edi'] = !empty($model->organizationGln) ? true : false;
         }
 
         return $item;

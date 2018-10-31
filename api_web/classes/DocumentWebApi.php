@@ -727,7 +727,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         if (array_key_exists($request['type'], self::$models)) {
             $modelClass = self::$models[$request['type']];
-            $document = $modelClass::prepareModel($request['document_id']);
+            $document = $modelClass::prepareModel($request['document_id'], $request['service_id']);
         }
 
         return array_merge(['document' => $document], $this->getDocumentContents($request));

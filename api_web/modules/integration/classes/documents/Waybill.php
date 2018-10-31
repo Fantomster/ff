@@ -103,12 +103,17 @@ class Waybill extends BaseWaybill implements DocumentInterface
      * Загрузка модели и получение данных
      *
      * @param $key
+     * @param $serviceId
      * @throws \Exception
      * @return array
      */
-    public static function prepareModel($key)
+    public static function prepareModel($key, $serviceId = null)
     {
-        $model = self::findOne(['id' => $key]);
+        $where = ['id' => $key];
+        if (!is_null($serviceId)){
+            $where['service_id'] = $serviceId;
+        }
+        $model = self::findOne($where);
         if ($model === null) {
             return [];
         }

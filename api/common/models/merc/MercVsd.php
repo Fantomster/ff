@@ -6,6 +6,7 @@ use api\common\models\RabbitQueues;
 use common\models\OrderContent;
 use console\modules\daemons\components\UpdateDictInterface;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
+use yii\behaviors\TimestampBehavior;
 use Yii;
 
 /**
@@ -56,6 +57,8 @@ use Yii;
  * @property string $transport_info
  * @property string $unit_guid
  * @property string $user_status
+ * @property string $created_at
+ * @property string $updated_at
  */
 class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
@@ -155,6 +158,18 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
         return Yii::$app->get('db_api');
     }
 
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -167,6 +182,7 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
             [['uuid', 'number', 'type', 'status', 'recipient_name', 'recipient_guid', 'sender_guid',
                 'sender_name', 'product_name', 'unit', 'production_date', 'expiry_date',
                 'producer_name', 'producer_guid', 'owner_guid', 'product_guid', 'sub_product_guid', 'product_item_guid', 'origin_country_guid', 'waybill_number', 'unit_guid'], 'string', 'max' => 255],
+            [['created_at', 'updated_at'], 'safe'],
             [['form', 'vehicle_number', 'trailer_number', 'container_number', 'transport_storage_type', 'gtin', 'article', 'batch_id'], 'string', 'max' => 45],
         ];
     }

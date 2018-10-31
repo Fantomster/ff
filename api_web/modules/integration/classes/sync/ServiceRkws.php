@@ -16,6 +16,8 @@ namespace api_web\modules\integration\classes\sync;
 use api\common\models\RkDicconst;
 use api_web\components\Registry;
 use api_web\modules\integration\classes\documents\WaybillContent;
+use common\models\IntegrationSettingValue;
+use common\models\licenses\License;
 use common\models\OuterCategory;
 use common\models\Waybill;
 use Yii;
@@ -29,7 +31,6 @@ use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use api\common\models\RkService;
 use api\common\models\RkAccess;
 use api\common\models\RkSession;
-use api\common\models\RkServicedata;
 use api_web\modules\integration\classes\SyncLog;
 
 class ServiceRkws extends AbstractSyncFactory
@@ -44,15 +45,15 @@ class ServiceRkws extends AbstractSyncFactory
         self::DICTIONARY_STORE,
     ];
 
-    /** @var $licenseCode string License record CODE */
+    /** @var string $licenseCode License record CODE */
     public $licenseCode;
-    /** @var $licenseMixcartId string License record ID */
+    /** @var string $licenseMixcartId License record ID */
     public $licenseMixcartId;
 
-    /** @var $now string */
+    /** @var string $now */
     public $now;
 
-    /** @var $entityTableName string */
+    /** @var string $entityTableName */
     public $entityTableName;
 
     public $index;
@@ -157,7 +158,7 @@ class ServiceRkws extends AbstractSyncFactory
      * @param array $params
      * @param       $cook
      * @return array
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException | \Exception
      */
     private function sendRequestPrivate(array $params = [], $cook): array
     {
@@ -209,33 +210,34 @@ class ServiceRkws extends AbstractSyncFactory
         $this->now = date('Y-m-d H:i:s', time());
 
         # 2. Find license Mixcart data
-        $licenseMixcart = RkServicedata::findOne(['org' => $this->user->organization_id, 'status_id' => 1]);
-        if (!$licenseMixcart || $licenseMixcart->td <= $this->now) {
+        /**@var License $licenseMixcart*/
+        $licenseMixcart = License::checkByServiceId($this->user->organization_id, Registry::RK_SERVICE_ID);
+        if (!$licenseMixcart) {
             SyncLog::trace('Mixcart licence record with active state not found!');
             throw new BadRequestHttpException('no_active_mixcart_license');
         }
 
         # 3. Find license Rkeeper data
-        $license = RkService::findOne([
-            'id'         => $licenseMixcart->service_id,
-            // 'org' => $this->user->organization_id, поле не используется!
-            'status_id'  => 1,
-            'is_deleted' => 0
-        ]);
-        if (!$license || !$license->code || ($license->td <= $this->now)) {
-            SyncLog::trace('RKeeper licence record with active state not found!');
-            throw new BadRequestHttpException('no_active_rkeeper_license');
-        }
+//        $license = RkService::findOne([
+//            'id'         => $licenseMixcart->service_id,
+//            // 'org' => $this->user->organization_id, поле не используется!
+//            'status_id'  => 1,
+//            'is_deleted' => 0
+//        ]);
+//        if (!$license || !$license->code || ($license->td <= $this->now)) {
+//            SyncLog::trace('RKeeper licence record with active state not found!');
+//            throw new BadRequestHttpException('no_active_rkeeper_license');
+//        }
 
         # 3. Remember license codes
-        $this->licenseCode = $license->code;
-        $this->licenseMixcartId = $licenseMixcart->id;
+        $this->licenseCode = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['code']);
+//        $this->licenseMixcartId = $licenseMixcart->id;
 
         # 5. Фиксируем активную лицензия найдена и инициализируем транзакции в БД
         SyncLog::trace('Service licence record for organization #' . $this->user->organization_id .
-            ' was found (Service code and final date are ' . $license->code . '/' . $license->td . ')');
+            ' was found (Service code and final date are ' .$this->licenseCode . '/' . $licenseMixcart['td'] . ')');
         SyncLog::trace('Mixcart licence record for organization #' . $this->user->organization_id .
-            ' was found (License ID and final date are ' . $licenseMixcart->id . '/' . $licenseMixcart->td . ')');
+            ' was found (License ID and final date are ' . $licenseMixcart->id . '/' . $licenseMixcart['td'] . ')');
         $transaction = $this->createTransaction();
 
         # 6. Пытаемся найти активную сессию и если все хорошо - то используем ее
@@ -253,7 +255,7 @@ class ServiceRkws extends AbstractSyncFactory
                 if (isset($xml['OBJECTINFO'])) {
                     $xml = (array)$xml['OBJECTINFO'];
                     $err = (isset($xml['ERROR']) && $xml['ERROR']) ? $xml['ERROR'] : null;
-                    if (isset($xml['@attributes']['id']) && $xml['@attributes']['id'] == $license->code && !$err) {
+                    if (isset($xml['@attributes']['id']) && $xml['@attributes']['id'] == $this->licenseCode && !$err) {
 
                         # 6.1.1. Активная сессия в куки подтверждена - используем ее и прекращаем процедуры
                         SyncLog::trace('Service licence session with active state id good - use it');
@@ -322,6 +324,14 @@ class ServiceRkws extends AbstractSyncFactory
 
     }
 
+    /**
+     * @param RkSession   $sess
+     * @param Transaction $transaction
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
+     */
     public function deactivateSessionWithoutCommit(RkSession $sess, Transaction $transaction)
     {
         # 6.2. Активная сессия в куки не подтверждена
@@ -337,15 +347,12 @@ class ServiceRkws extends AbstractSyncFactory
         }
     }
 
+    /**
+     * @return Transaction
+     */
     public function createTransaction(): Transaction
     {
-        $app = Yii::$app;
-        /** @var Object $app */
-        $pdo = $app->db_api;
-        /** @var PDO $pdo */
-        $transaction = $pdo->beginTransaction();
-        /** @var $transaction Transaction */
-        return $transaction;
+        return \Yii::$app->db_api->beginTransaction();
     }
 
     /**
@@ -410,7 +417,7 @@ class ServiceRkws extends AbstractSyncFactory
     /**
      * Prepare Xml to test service connection session with login params
      *
-     * @param $access RkAccess
+     * @param RkAccess $access
      * @return string
      */
     public function prepareXmlWithAuthParams(RkAccess $access): string
@@ -462,7 +469,9 @@ class ServiceRkws extends AbstractSyncFactory
     /**
      * Метод отправки накладной
      *
+     * @param array $request
      * @return array
+     * @throws \Exception
      */
     public function sendWaybill($request): array
     {
@@ -487,7 +496,7 @@ class ServiceRkws extends AbstractSyncFactory
                 ->leftJoin('outer_product', 'outer_product.id = outer_product_id')
                 ->leftJoin('outer_unit', 'outer_unit.id = outer_product.outer_unit_id')
                 ->andWhere('waybill_id = :wid', [':wid' => $waybill_id])
-                ->andWhere(['unload_status' => 1])
+//                ->andWhere(['unload_status' => 1])
                 ->asArray(true)->all();
 
             if (!isset($records)) {
@@ -514,13 +523,13 @@ class ServiceRkws extends AbstractSyncFactory
             $cb = Yii::$app->params['rkeepCallBackURL'] . "/send-waybill?" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
             SyncLog::trace('Callback URL and salespoint code for the template are:' . $cb . ' (' . $this->licenseCode . ')');
 
-            $exportApproved = (RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() != null) ? RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() : 0;
+            $exportApproved = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['useAcceptedDocs']);
 
             $xml = Yii::$app->view->render($this->dirResponseXml . '/' . ucfirst('Waybill'),
                 [
                     'waybill'        => $waybill,
                     'records'        => $records,
-                    'exportApproved' => $exportApproved,
+                    'exportApproved' => $exportApproved ?? 0,
                     'code'           => $this->licenseCode,
                     'guid'           => $guid,
                     'cb'             => $cb,

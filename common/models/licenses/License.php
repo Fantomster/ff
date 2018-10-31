@@ -114,7 +114,7 @@ class License extends ActiveRecord
             throw new Exception('Organization having more than one same licenses, please delete not actual');
         }
 
-        return $license;
+        return current($license);
     }
 
     /**

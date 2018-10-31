@@ -279,6 +279,7 @@ class EDIClass extends Component
         $barcodeArray = [];
         foreach ($goods as $good) {
             $barcode = (is_array($good->PRODUCT)) ? $good->PRODUCT[0] : $good->PRODUCT;
+            $barcode = (String)$barcode;
             if (!$barcode) continue;
             $barcodeArray[] = $barcode;
             $goodsArray[$barcode]['name'] = (String)$good->PRODUCTNAME ?? '';

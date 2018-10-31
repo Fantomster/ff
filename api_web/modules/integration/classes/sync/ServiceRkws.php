@@ -237,7 +237,7 @@ class ServiceRkws extends AbstractSyncFactory
         SyncLog::trace('Service licence record for organization #' . $this->user->organization_id .
             ' was found (Service code and final date are ' .$this->licenseCode . '/' . $licenseMixcart['td'] . ')');
         SyncLog::trace('Mixcart licence record for organization #' . $this->user->organization_id .
-            ' was found (License ID and final date are ' . $licenseMixcart->id . '/' . $licenseMixcart['td'] . ')');
+            ' was found (License ID and final date are ' . $licenseMixcart['id'] . '/' . $licenseMixcart['td'] . ')');
         $transaction = $this->createTransaction();
 
         # 6. Пытаемся найти активную сессию и если все хорошо - то используем ее
@@ -535,6 +535,8 @@ class ServiceRkws extends AbstractSyncFactory
                     'cb'             => $cb,
                 ]);
 
+            echo $xml;
+            exit();
             $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
 
             if ($xmlData) {

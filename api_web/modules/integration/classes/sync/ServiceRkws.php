@@ -210,7 +210,7 @@ class ServiceRkws extends AbstractSyncFactory
         $this->now = date('Y-m-d H:i:s', time());
 
         # 2. Find license Mixcart data
-        /**@var License $licenseMixcart*/
+        /**@var License $licenseMixcart */
         $licenseMixcart = License::checkByServiceId($this->user->organization_id, Registry::RK_SERVICE_ID);
         if (!$licenseMixcart) {
             SyncLog::trace('Mixcart licence record with active state not found!');
@@ -235,7 +235,7 @@ class ServiceRkws extends AbstractSyncFactory
 
         # 5. Фиксируем активную лицензия найдена и инициализируем транзакции в БД
         SyncLog::trace('Service licence record for organization #' . $this->user->organization_id .
-            ' was found (Service code and final date are ' .$this->licenseCode . '/' . $licenseMixcart['td'] . ')');
+            ' was found (Service code and final date are ' . $this->licenseCode . '/' . $licenseMixcart['td'] . ')');
         SyncLog::trace('Mixcart licence record for organization #' . $this->user->organization_id .
             ' was found (License ID and final date are ' . $licenseMixcart['id'] . '/' . $licenseMixcart['td'] . ')');
         $transaction = $this->createTransaction();
@@ -520,7 +520,7 @@ class ServiceRkws extends AbstractSyncFactory
 
             //$xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
 
-            $cb = Yii::$app->params['rkeepCallBackURL'] . "/send-waybill?" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
+            $cb = str_replace('load-dictionary', '', Yii::$app->params['rkeepCallBackURL']) . "send-waybill?" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
             SyncLog::trace('Callback URL and salespoint code for the template are:' . $cb . ' (' . $this->licenseCode . ')');
 
             $exportApproved = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['useAcceptedDocs']);
@@ -535,8 +535,6 @@ class ServiceRkws extends AbstractSyncFactory
                     'cb'             => $cb,
                 ]);
 
-            echo $xml;
-            exit();
             $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
 
             if ($xmlData) {

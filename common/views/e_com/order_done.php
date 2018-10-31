@@ -46,6 +46,9 @@
                     <PRICEWITHVAT><?= $position['price'] ?></PRICEWITHVAT>
                     <TAXRATE><?= isset($catalogGood->vat) ? $catalogGood->vat : 0 ?></TAXRATE>
                     <BUYERPARTNUMBER><?= $article ?? '' ?></BUYERPARTNUMBER>
+                    <CHARACTERISTIC>
+                        <DESCRIPTION><?= $position['product_name'] ?></DESCRIPTION>
+                    </CHARACTERISTIC>
                 </POSITION>
             <?php endforeach; ?>
         </PACKINGSEQUENCE>

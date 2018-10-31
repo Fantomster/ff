@@ -34,7 +34,7 @@ class MercuryCronController extends Controller
     public function actionVetDocumentsChangeList($interval = 86000)
     {
         $sql = "
-        select distinct mp.value as guid, mp.org as org, ms.code as code from merc_service as ms
+        select distinct vre.guid as guid, mp.org as org, ms.code as code from merc_service as ms
             left join merc_pconst as mp on mp.org = ms.org and const_id = 5
             left join vetis_russian_enterprise as vre on vre.owner_guid = mp.value 
             where ms.status_id = 1 and now() between ms.fd and ms.td and mp.value is not null and vre.active = 1 and vre.last = 1 

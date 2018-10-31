@@ -349,7 +349,7 @@ class IntegrationWebApi extends WebApi
 
         $params = ["koef", "quantity_waybill", "price_without_vat", "vat_waybill", "sum_without_vat"];
         foreach ($params as $key => $attributeName) {
-            if (isset($post[$attributeName]) && !empty($post[$attributeName])) {
+            if (isset($post[$attributeName]) && (!empty($post[$attributeName]) || $post[$attributeName] === 0)) {
                 $waybillContent->setAttribute($attributeName, $post[$attributeName]);
             }
         }

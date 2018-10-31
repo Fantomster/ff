@@ -29,6 +29,11 @@ use yii\behaviors\TimestampBehavior;
  * @property string                    $edi_recadv
  * @property string                    $edi_invoice
  * @property string                    $updated_at
+ * @property float                     $into_quantity
+ * @property float                     $into_price
+ * @property float                     $into_price_vat
+ * @property float                     $into_price_sum
+ * @property float                     $into_price_sum_vat
  * @property integer                   $invoice_content_id
  * @property Order                     $order
  * @property CatalogBaseGoods          $product

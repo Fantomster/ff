@@ -2,7 +2,6 @@
 
 namespace api_web\classes;
 
-use api\common\models\AllMaps;
 use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;

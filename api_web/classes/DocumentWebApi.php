@@ -423,7 +423,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             $sql .= ' ORDER BY doc_date DESC';
         }
 
-        var_dump($sql); die();
+        //var_dump($sql); die();
 
         $dataProvider = new SqlDataProvider([
             'sql'        => $sql,

@@ -34,38 +34,28 @@ class MercuryCronController extends Controller
      */
     public function actionVetDocumentsChangeList($interval = 60 * 60 * 24)
     {
-        $organizations = (new \yii\db\Query)
-            ->from(mercService::tableName())
-            ->where('status_id = 1 and now() between fd and td')
-            ->createCommand(Yii::$app->db_api)
-            ->queryAll();
+        $sql = "
+        select distinct mp.value as guid, mp.org as org, ms.code as code from merc_service as ms
+            left join merc_pconst as mp on mp.org = ms.org and const_id = 5
+            left join vetis_russian_enterprise as vre on vre.owner_guid = mp.value 
+            where ms.status_id = 1 and now() between ms.fd and ms.td and mp.value is not null and vre.active = 1 and vre.last = 1 
+            group by guid order by guid, code desc
+        ";
 
-        foreach ($organizations as $org) {
+        $locations = \Yii::$app->db_api->createCommand($sql)->queryAll();
+
+        foreach ($locations as $item) {
             try {
-                $org_id = $org['org'];
+                echo "Guid: ".$item['guid'].PHP_EOL;
 
-                var_dump($org_id);
+                $start_date = gmdate("Y-m-d H:i:s", time() - $interval);
+                echo "GET MercVSDList: " . $item['guid'] . PHP_EOL;
+                echo "Start date " . $start_date . PHP_EOL;
+                MercVsd::getUpdateData($item['org'], $item['guid'], $start_date);
 
-                $locations = cerberApi::getInstance($org_id)->getActivityLocationList();
-
-                if (!isset($locations)) {
-                    continue;
-                }
-
-                foreach ($locations as $item) {
-                    if (!isset($item->guid)) {
-                        continue;
-                    }
-
-                    $start_date = gmdate("Y-m-d H:i:s", time() - $interval);
-                    echo "GET MercVSDList " . $item->guid . PHP_EOL;
-                    echo "Start date " . $start_date . PHP_EOL;
-                    MercVsd::getUpdateData($org_id, $item->guid, $start_date);
-
-                    if ($org['code'] == mercService::EXTENDED_LICENSE_CODE) {
-                        echo "GET MercStockEntryList" . $item->guid . PHP_EOL;
-                        MercStockEntry::getUpdateData($org_id, $item->guid);
-                    }
+                if ($item['code'] == mercService::EXTENDED_LICENSE_CODE) {
+                    echo "GET MercStockEntryList: " . $item['guid'] . PHP_EOL;
+                    MercStockEntry::getUpdateData($item['org'], $item['guid']);
                 }
             } catch (\Exception $e) {
                 \Yii::error($e->getMessage());

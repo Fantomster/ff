@@ -79,8 +79,7 @@ class EDIClass extends Component
         $totalQuantity = 0;
         $totalPrice = 0;
         foreach ($positions as $position) {
-            $contID = (int)$position->PRODUCTIDBUYER ?? (int)$position->PRODUCT;
-
+            $contID = (int)$position->PRODUCTIDBUYER;
             $positionsArray[] = (int)$contID;
             if ($isDesadv) {
                 $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;

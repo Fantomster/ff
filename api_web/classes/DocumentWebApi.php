@@ -399,7 +399,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                     null as order_date,
                     null as replaced_order_id
                     FROM `$apiShema`.waybill w
-                    LEFT JOIN `api`.waybill_content as wc on  w.id = wc.waybill_id
+                    LEFT JOIN `$apiShema`.waybill_content as wc on  w.id = wc.waybill_id
                     LEFT JOIN (SELECT waybill_id, sum(ifnull(order_content_id,0)) as orders FROM `$apiShema`.waybill_content group by waybill_id) as o on o.waybill_id = w.id
                     LEFT JOIN (
                                 select waybill_id, count(id) as `count`, sum(sum_with_vat) as total_price from `$apiShema`.waybill_content group by (waybill_id)

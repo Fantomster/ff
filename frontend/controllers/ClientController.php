@@ -363,7 +363,7 @@ class ClientController extends DefaultController
                     if (!in_array($user->role_id, User::getAllowedRoles($this->currentUser->role_id)) && $this->currentUser->role_id != Role::ROLE_FRANCHISEE_OWNER && $user->role_id != Role::ROLE_ONE_S_INTEGRATION) {
                         $user->role_id = array_keys($dropDown)[0];
                     }
-                    $user->setRegisterAttributes($user->role_id)->save();
+                    $user->setRegisterAttributes($user->role_id, $user->status)->save();
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);

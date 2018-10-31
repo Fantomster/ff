@@ -942,7 +942,7 @@ class User extends \amnah\yii2\user\models\User
             $userProfileFullName = $vendor->profile->full_name;
             $userProfilePhone = $vendor->profile->phone;
             $userOrgId = $vendor->organization_id;
-            $userOrgName = $vendor->organization->name;
+            $userOrgName = isset($vendor->organization) ? $vendor->organization->name : '';
 
             $result = [
                 'success' => true,

@@ -25,9 +25,9 @@ class EmailRoboWebApi extends WebApi
     {
         $models = IntegrationSettingFromEmail::find()
             ->joinWith('organization')
-            ->where(['organization_id' => $this->user->organization_id])->all();
+            ->where(['organization_id' => $this->user->organization_id, 'version' => 2])->all();
         $arResult = [];
-
+        /**@var IntegrationSettingFromEmail $model */
         foreach ($models as $model) {
             $arResult[] = [
                 'name'       => $model->organization->name,
@@ -50,7 +50,7 @@ class EmailRoboWebApi extends WebApi
     public function getSetting(array $post): array
     {
         $this->validateRequest($post, ['id']);
-        $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id]);
+        $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id, 'version' => 2]);
         if (!$model) {
             throw new BadRequestHttpException('integration.email.setting_not_found');
         }
@@ -69,7 +69,7 @@ class EmailRoboWebApi extends WebApi
     public function update(array $post): array
     {
         $this->validateRequest($post, ['id']);
-        $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id]);
+        $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id, 'version' => 2]);
         if (!$model) {
             throw new BadRequestHttpException('integration.email.setting_not_found');
         }
@@ -106,6 +106,7 @@ class EmailRoboWebApi extends WebApi
                 }
             }
             $model->setAttribute('organization_id', $this->user->organization_id);
+            $model->setAttribute('version', 2);
             if (!$model->save()) {
                 throw new ValidationException($model->getFirstErrors());
             }
@@ -127,7 +128,7 @@ class EmailRoboWebApi extends WebApi
     public function delete(array $post): array
     {
         $this->validateRequest($post, ['id']);
-        $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id]);
+        $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id, 'version' => 2]);
         if (!$model) {
             throw new BadRequestHttpException('integration.email.setting_not_found');
         }

@@ -26,7 +26,7 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
             "id"              => $this->id,
             "product_id"      => isset($orderContent) ? $orderContent->product_id : null,
             "product_name"    => isset($orderContent) ? $orderContent->product->product : null,
-            "mixcart_count"   => isset($orderContent) ? count($orderContent->order->orderContent) : null,
+            "mixcart_count"   => isset($orderContent) ? $orderContent->quantity : null,
             "mixcart_unit"    => isset($orderContent) ? $orderContent->product->ed : null,
             "outer_product"   => $this->getOuterProduct(),
             "quantity"        => $this->quantity_waybill,

@@ -31,6 +31,16 @@ class VendorEmailWaybillsHelper
     private $serviceId = 3;
 
     /**
+     * @var
+     */
+    public $orgId;
+
+    /**
+     * @var
+     */
+    public $userId;
+
+    /**
      * @param $invoice
      * @return bool
      * @throws \Exception
@@ -191,6 +201,7 @@ class VendorEmailWaybillsHelper
         $journal->log_guide = $denom;
         $journal->type = $type;
         $journal->response = $response;
+        $journal->organization_id = $this->orgId;
 
         $journal->save();
 

@@ -328,7 +328,7 @@ class WaybillController extends WebApiController
      *                              "quantity_waybill": 1,
      *                              "outer_product_id": 4822,
      *                              "price_without_vat": 35000,
-     *                              "vat_waybill": 0.18,
+     *                              "vat_waybill": 18,
      *                              "outer_unit_id": 5
      *                          }
      *              )
@@ -376,6 +376,7 @@ class WaybillController extends WebApiController
      *                  property="request",
      *                  default={
      *                              "waybill_id": 5,
+     *                              "koef": 1.55,
      *                              "outer_product_id": 4352,
      *                              "quantity_waybill": 1,
      *                              "price_without_vat": 35000,

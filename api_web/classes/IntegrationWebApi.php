@@ -427,7 +427,7 @@ class IntegrationWebApi extends WebApi
         $this->validateRequest($post, ['waybill_id', 'outer_product_id']);
 
         //Поиск накладной
-        $waybill = Waybill::findOne(['id' => $post['waybill_id'], 'acquirer_id' => $this->user->organization_id]);
+        $waybill = Waybill::findOne(['id' => (int)$post['waybill_id'], 'acquirer_id' => $this->user->organization_id]);
         if (!$waybill) {
             throw new BadRequestHttpException("waybill_not_found");
         }
@@ -457,17 +457,15 @@ class IntegrationWebApi extends WebApi
         $waybillContent->outer_unit_id = $outerProduct->outer_unit_id;
         $waybillContent->vat_waybill = (int)$post['vat_waybill'] ?? 0;
         $waybillContent->quantity_waybill = $post['quantity_waybill'] ?? 1;
+        $waybillContent->koef = $post['koef'] ?? 1;
 
         if (!empty($post['price_without_vat'])) {
             $waybillContent->price_without_vat = round($post['price_without_vat'], 2);
-            $waybillContent->sum_without_vat = round($post['price_without_vat'] * $waybillContent->quantity_waybill, 2);
-            if ($waybillContent->vat_waybill != 0) {
-                $waybillContent->price_with_vat = round(($post['price_without_vat'] + (($post['price_without_vat'] / 100) * $post['vat_waybill'])), 2);
-            }
         }
 
-        $waybillContent->sum_with_vat = round($waybillContent->price_with_vat * $waybillContent->quantity_waybill, 2);
-        $waybillContent->save();
+        if (!$waybillContent->save()) {
+            throw new ValidationException($waybillContent->getFirstErrors());
+        }
 
         return ['success' => true, 'waybill_content_id' => $waybillContent->id];
     }

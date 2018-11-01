@@ -338,11 +338,11 @@ EOXML;
 
     public function parseFile($content)
     {
-        $success = $this->realization->parseFile($content);
-        if ($success) {
+        $success = $this->realization->parseFile($content, $this->realization->fileName);
+        if ($success === true) {
             $this->updateQueue($this->ediFilesQueueID, parent::STATUS_HANDLED, '');
         } else {
-            $this->updateQueue($this->ediFilesQueueID, parent::STATUS_ERROR, 'Error handling file 1');
+            $this->updateQueue($this->ediFilesQueueID, parent::STATUS_ERROR, $success);
         }
     }
 

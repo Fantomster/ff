@@ -56,16 +56,18 @@ class EDIClass extends Component
         $supplier = $simpleXMLElement->HEAD->SUPPLIER;
         $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
         if (!$ediOrganization) {
-            return false;
+            return 'no EDI organization found';
         }
         $order = Order::findOne(['id' => $orderID, 'vendor_id' => $ediOrganization->organization_id]);
         $message = "";
         if (!$order) {
-            Yii::error('No such order ID: ' . $orderID);
-            return false;
+            return 'No such order';
         }
         \Yii::$app->language = $order->edi_order->lang ?? 'ru';
         $user = User::findOne(['id' => $order->created_by_id]);
+        if (!$user) {
+            return 'No such user';
+        }
 
         $positions = $simpleXMLElement->HEAD->POSITION;
         $isDesadv = false;
@@ -104,7 +106,9 @@ class EDIClass extends Component
             $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
             OrderController::sendSystemMessage($user, $order->id, $message);
             $order->status = OrderStatus::STATUS_REJECTED;
-            $order->save();
+            if (!$order->save()) {
+                return 'Error saving order';
+            }
             return true;
         }
         $summ = 0;
@@ -169,6 +173,9 @@ class EDIClass extends Component
                     $ediOrderContent->delivery_note_date = $arr[$index]['DELIVERYNOTEDATE'];
                     $ediOrderContent->delivery_note_number = $arr[$index]['DELIVERYNOTENUMBER'];
                     $ediOrderContent->save();
+                    if (!$ediOrderContent->save()) {
+                        return 'Error saving edi order content';
+                    }
                 }
                 $orderContent->vat_product = $arr[$index]['TAXRATE'] ?? 0.00;
                 $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
@@ -179,7 +186,9 @@ class EDIClass extends Component
                 if ($documentType == 3) {
                     $orderContent->edi_alcdes = $this->fileName;
                 }
-                $orderContent->save();
+                if (!$orderContent->save()) {
+                    return 'Error saving order content';
+                }
             }
         }
         if (!$isDesadv) {
@@ -221,13 +230,17 @@ class EDIClass extends Component
         if ($ediOrder) {
             $ediOrder->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
             $ediOrder->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE ?? '';
-            $ediOrder->save();
+            if (!$ediOrder->save()) {
+                return 'Error saving edi order';
+            }
         }
         $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
         $order->edi_ordersp = $this->ediDocumentType;
         $order->service_id = 6;
         $order->edi_ordersp = $this->fileName;
-        $order->save();
+        if (!$order->save()) {
+            return 'Error saving order';
+        }
 
         if ($message != '') {
             OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");

@@ -135,8 +135,10 @@ class WaybillHelper
                                 }
                             }
                             $arOuterMappedProducts = $this->prepareStoreProducts($storeProducts, $notInWaybillContent);
-                            $waybillIds[] = $this->createWaybillAndContent($arOuterMappedProducts, $order->client_id,
-                                $storeId, $serviceId);
+                            if (!empty($arOuterMappedProducts)) {
+                                $waybillIds[] = $this->createWaybillAndContent($arOuterMappedProducts, $order->client_id,
+                                    $storeId, $serviceId);
+                            }
                         }
                         return $waybillIds;
                     } else {

@@ -23,6 +23,7 @@
             $measure = $product->ed ?? 'шт';
             $catalogGood = \common\models\CatalogGoods::findOne(['base_goods_id' => $product->id]);
             $barcode = $product->barcode;
+            $vat = isset($catalogGood->vat) ? $catalogGood->vat : 0;
             $edi_supplier_article = (isset($product->edi_supplier_article) && $product->edi_supplier_article != '') ? $product->edi_supplier_article : $position['id'];
             $article = (isset($product->article) && $product->article != '') ? $product->article : $position['id'];
             if (!$barcode) continue;
@@ -35,7 +36,7 @@
                 <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
                 <ORDERUNIT><?= $measure ?></ORDERUNIT>
                 <ORDERPRICE><?= $position['price'] ?></ORDERPRICE>
-                <VAT><?= isset($catalogGood->vat) ? $catalogGood->vat : 0 ?></VAT>
+                <VAT><?= $vat ?></VAT>
                 <CHARACTERISTIC>
                     <DESCRIPTION><?= $position['product_name'] ?></DESCRIPTION>
                 </CHARACTERISTIC>

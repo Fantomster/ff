@@ -26,6 +26,8 @@
                 $measure = $product->ed ?? 'шт';
                 $catalogGood = \common\models\CatalogGoods::findOne(['base_goods_id' => $product->id]);
                 $barcode = $product->barcode;
+                $vat = isset($catalogGood->vat) ? $catalogGood->vat : 0;
+                $priceWithVat = $position['price'] + ($position['price'] * $vat / 100);
                 $edi_supplier_article = (isset($product->edi_supplier_article) && $product->edi_supplier_article != '') ? $product->edi_supplier_article : $position['id'];
                 $article = (isset($product->article) && $product->article != '') ? $product->article : $position['id'];
                 if (!$barcode) continue;
@@ -43,8 +45,8 @@
                     <EGAISCODE><?= $position['id'] ?></EGAISCODE>
                     <EGAISQUANTITY><?= $position['quantity'] ?></EGAISQUANTITY>
                     <PRICE><?= $position['price'] ?></PRICE>
-                    <PRICEWITHVAT><?= $position['price'] ?></PRICEWITHVAT>
-                    <TAXRATE><?= isset($catalogGood->vat) ? $catalogGood->vat : 0 ?></TAXRATE>
+                    <PRICEWITHVAT><?= $priceWithVat ?></PRICEWITHVAT>
+                    <TAXRATE><?= $vat ?></TAXRATE>
                     <BUYERPARTNUMBER><?= $article ?? '' ?></BUYERPARTNUMBER>
                     <CHARACTERISTIC>
                         <DESCRIPTION><?= $position['product_name'] ?></DESCRIPTION>

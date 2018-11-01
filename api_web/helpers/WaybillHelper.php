@@ -138,6 +138,8 @@ class WaybillHelper
                             if (!empty($arOuterMappedProducts)) {
                                 $waybillIds[] = $this->createWaybillAndContent($arOuterMappedProducts, $order->client_id,
                                     $storeId, $serviceId);
+                            } else {
+                                throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.no_content_for_create_waybill'));
                             }
                         }
                         return $waybillIds;

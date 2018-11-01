@@ -10,7 +10,6 @@ use yii\data\ActiveDataProvider;
 class iikoProductSearch extends iikoProduct
 {
 
-
     /**
      * @inheritdoc
      */
@@ -23,7 +22,6 @@ class iikoProductSearch extends iikoProduct
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
@@ -35,16 +33,16 @@ class iikoProductSearch extends iikoProduct
                 'product_type' => $params['productSearch']
             ]);
         }
-        
+
         if (isset($params['cookingPlaceSearch']) && $params['cookingPlaceSearch'] != 'all') {
-            if($params['cookingPlaceSearch'] == ''){
+            if ($params['cookingPlaceSearch'] == '') {
                 $params['cookingPlaceSearch'] = null;
             }
             $query->andWhere([
                 'cooking_place_type' => $params['cookingPlaceSearch']
             ]);
         }
-        
+
         if (isset($params['unitSearch']) && $params['unitSearch'] != 'all') {
             $query->andWhere([
                 'unit' => $params['unitSearch']
@@ -54,6 +52,12 @@ class iikoProductSearch extends iikoProduct
         if (isset($params['org_id'])) {
             $query->andWhere([
                 'org_id' => $params['org_id']
+            ]);
+        }
+
+        if (isset($params['is_active'])) {
+            $query->andWhere([
+                'is_active' => $params['is_active']
             ]);
         }
 
@@ -70,7 +74,6 @@ class iikoProductSearch extends iikoProduct
         return $dataProvider;
     }
 
-
     public function getProductType()
     {
         $rows = (new \yii\db\Query())
@@ -85,7 +88,6 @@ class iikoProductSearch extends iikoProduct
         return $arr;
     }
 
-
     public function getCoockingPlaceType()
     {
         $rows = (new \yii\db\Query())
@@ -99,7 +101,6 @@ class iikoProductSearch extends iikoProduct
         }
         return $arr;
     }
-
 
     public function getUnit()
     {

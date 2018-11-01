@@ -18,7 +18,7 @@ $this->registerCss("
         ");
 $searchModel = new \api\common\models\iiko\search\iikoProductSearch();
 
-$dataProvider = $searchModel->search(array_merge(Yii::$app->request->queryParams, ['org_id' => $org]));
+$dataProvider = $searchModel->search(array_merge(Yii::$app->request->queryParams, ['org_id' => $org, 'is_active' => '1']));
 $arrSession = Yii::$app->session->get('SelectedProduct');
 $iikoSelectedGoods = \api\common\models\iiko\iikoSelectedProduct::findAll(['organization_id' => $org]);
 $arr = [];

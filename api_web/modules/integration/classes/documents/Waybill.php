@@ -12,6 +12,7 @@ use common\models\Organization;
 use common\models\OuterAgent;
 use common\models\OuterStore;
 use common\models\Waybill as BaseWaybill;
+use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -110,7 +111,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
     public static function prepareModel($key, $serviceId = null)
     {
         $where = ['id' => $key];
-        if (!is_null($serviceId)){
+        if (!is_null($serviceId)) {
             $where['service_id'] = $serviceId;
         }
         $model = self::findOne($where);
@@ -132,6 +133,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         if (!isset($this->order)) {
             throw new BadRequestHttpException("document_has_not_path_to_order");
         }
+        /** @var Transaction $transaction */
         $transaction = \Yii::$app->db_api->beginTransaction();
         try {
             WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = :wid', [':wid' => $this->id]);

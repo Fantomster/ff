@@ -4,11 +4,9 @@ namespace api_web\modules\integration\classes\documents;
 
 use api_web\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
-use api_web\modules\integration\classes\documents\Order as BaseOrder;
 
-class OrderEmail extends BaseOrder implements DocumentInterface
+class OrderEmail extends Order implements DocumentInterface
 {
-
     /**
      * Порлучение данных из модели
      *
@@ -23,5 +21,4 @@ class OrderEmail extends BaseOrder implements DocumentInterface
 
         return $return;
     }
-
 }

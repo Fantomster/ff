@@ -28,14 +28,14 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
             "product_name"    => isset($orderContent) ? $orderContent->product->product : null,
             "mixcart_count"   => isset($orderContent) ? $orderContent->quantity : null,
             "mixcart_unit"    => isset($orderContent) ? $orderContent->product->ed : null,
-            "outer_product"   => $this->getOuterProduct(),
             "quantity"        => $this->quantity_waybill,
+            "outer_product"   => $this->getOuterProduct(),
             "outer_unit"      => $this->getOuterUnitObject(),
             "koef"            => $this->koef,
             "merc_uuid"       => isset($orderContent) ? $orderContent->merc_uuid : null,
             "sum_without_vat" => CurrencyHelper::asDecimal($this->sum_without_vat),
             "sum_with_vat"    => CurrencyHelper::asDecimal($this->sum_with_vat),
-            "vat"             => $this->vat_waybill,
+            "vat"             => $this->vat_waybill
         ];
 
         return $return;
@@ -48,9 +48,13 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
      */
     private function getOuterProduct()
     {
+        if (empty($this->productOuter)) {
+            return null;
+        }
+
         return [
-            'id'   => isset($this->productOuter) ? $this->productOuter->id : null,
-            'name' => isset($this->productOuter) ? $this->productOuter->name : null
+            'id'   => $this->productOuter->id,
+            'name' => $this->productOuter->name
         ];
     }
 
@@ -62,9 +66,13 @@ class WaybillContent extends BaseWaybillContent implements DocumentInterface
     private function getOuterUnitObject()
     {
         $productOuter = $this->productOuter;
+        if (empty($productOuter->outerUnit)) {
+            return null;
+        }
+
         return [
-            'id'   => isset($productOuter->outerUnit) ? $productOuter->outerUnit->id : null,
-            'name' => isset($productOuter->outerUnit) ? $productOuter->outerUnit->name : null
+            'id'   => $productOuter->outerUnit->id,
+            'name' => $productOuter->outerUnit->name
         ];
     }
 

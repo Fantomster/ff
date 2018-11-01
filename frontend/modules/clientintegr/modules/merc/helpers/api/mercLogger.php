@@ -117,6 +117,7 @@ class mercLogger extends Component
 
     public function addMercLogDict ($result, $localTransactionId, $response)
     {
+        $response = mb_strimwidth($response, 0,32000);
         $operation = $this->getServiceOperation($localTransactionId);
         $journal = new Journal();
         $journal->service_id = self::service_id;

@@ -87,7 +87,7 @@ class MercVSDList extends MercDictConsumer
 
                     //Проверяем результат запроса
                     if ($result->application->status != mercLog::COMPLETED) {
-                        throw new \Exception(json_encode($result));
+                        throw new \Exception($result->application->status);
                     }
 
                     $load_data_succ = true;
@@ -114,6 +114,12 @@ class MercVSDList extends MercDictConsumer
                     //Вслучае ошибки увеличиваем счетчик ошибок на единицу
                     $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
                     mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
+                    If(isset($result->application->errors)) {
+                        if ($result->application->errors->error->code == 'APLM0012') {
+                            echo "Error APLM0012" . PHP_EOL;
+                            throw new \Exception('Error APLM0012');
+                        }
+                    }
                     echo "Error " . PHP_EOL;
                     $curr_count = 0; //Если произошла ошибка значит данные мы на этой итерации не получили
                     if ($count_error >= 3) {

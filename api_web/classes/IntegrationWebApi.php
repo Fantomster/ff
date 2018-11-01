@@ -193,7 +193,7 @@ class IntegrationWebApi extends WebApi
             throw new ValidationException($waybillContent->getFirstErrors());
         }
 
-        return ['success' => true];
+        return ['result' => $waybillContent];
     }
 
     /**

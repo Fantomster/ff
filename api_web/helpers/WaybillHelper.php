@@ -135,8 +135,10 @@ class WaybillHelper
                                 }
                             }
                             $arOuterMappedProducts = $this->prepareStoreProducts($storeProducts, $notInWaybillContent);
-                            $waybillIds[] = $this->createWaybillAndContent($arOuterMappedProducts, $order->client_id,
-                                $storeId, $serviceId);
+                            if (!empty($arOuterMappedProducts)) {
+                                $waybillIds[] = $this->createWaybillAndContent($arOuterMappedProducts, $order->client_id,
+                                    $storeId, $serviceId);
+                            }
                         }
                         return $waybillIds;
                     } else {
@@ -388,8 +390,7 @@ class WaybillHelper
         foreach ($notInWaybillContent as $item) {
             /**@var OrderContent $item */
             if (array_key_exists($item->product_id, $storeProducts)) {
-                $outer_product_id = $storeProducts[$item->product_id]['master_serviceproduct_id'] ??
-                    $storeProducts[$item->product_id]['outer_product_id'];
+                $outer_product_id = $storeProducts[$item->product_id]['outer_product_id'];
                 $arStoreProducts[] = [
                     'product_id'       => $item->product_id,
                     'outer_store_id'   => $storeProducts[$item->product_id]['outer_store_id'],

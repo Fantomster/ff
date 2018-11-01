@@ -116,7 +116,7 @@ class WaybillHelper
                         foreach ($rows as $row) {
                             $arMappedForStores[$row['outer_store_id']][$row['product_id']] = $row;
                         }
-                        //Склад по умолчанию, у контграгента
+                        //Склад по умолчанию, у контрагента
                         $defaultStoreAgent = null;
                         if ($supplierOrgId) {
                             $agent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id, 'service_id' => $serviceId]);

@@ -16,7 +16,6 @@ use yii\behaviors\TimestampBehavior;
  * @property int          $order_content_id
  * @property int          $outer_product_id
  * @property double       $quantity_waybill
- * @property double       $quantity_waybill_default
  * @property double       $vat_waybill
  * @property string       $merc_uuid
  * @property int          $sum_with_vat
@@ -75,7 +74,7 @@ class WaybillContent extends \yii\db\ActiveRecord
         return [
             [['waybill_id'], 'required'],
             [['waybill_id', 'order_content_id', 'outer_product_id', 'outer_unit_id'], 'integer'],
-            [['sum_with_vat', 'sum_without_vat', 'price_with_vat', 'price_without_vat', 'quantity_waybill', 'quantity_waybill_default', 'vat_waybill', 'koef'], 'number'],
+            [['sum_with_vat', 'sum_without_vat', 'price_with_vat', 'price_without_vat', 'quantity_waybill', 'vat_waybill', 'koef'], 'number'],
             [['created_at', 'updated_at'], 'safe'],
             [['waybill_id'], 'exist', 'skipOnError' => true, 'targetClass' => Waybill::className(), 'targetAttribute' => ['waybill_id' => 'id']],
         ];
@@ -92,7 +91,6 @@ class WaybillContent extends \yii\db\ActiveRecord
             'order_content_id'         => 'ID Позиции заказа',
             'outer_product_id'         => 'ID Продукта',
             'quantity_waybill'         => 'Количество',
-            'quantity_waybill_default' => 'Количество до смены коэффиниента',
             'vat_waybill'              => 'НДС',
             'koef'                     => 'Коэффициент',
             'outer_unit_id'            => 'ID Единицы измерения'
@@ -145,35 +143,8 @@ class WaybillContent extends \yii\db\ActiveRecord
      */
     public function beforeSave($insert)
     {
-        //При создании записываем количество по умолчанию
-        if ($insert or empty($this->quantity_waybill_default)) {
-            $this->quantity_waybill_default = $this->quantity_waybill;
-        }
-
         //Получаем атрибуты которые изменились
         $dirtyAttr = $this->getDirtyAttributes();
-
-        #Если изменился атрибут "koef"
-        /**
-         * Пересчет количества при изменении коэффициента
-         */
-        if ($this->isAttributeChanged('koef') && !$this->isAttributeChanged('quantity_waybill')) {
-            $this->setAttribute('koef', $this->koef ?? 1);
-            //Считаем новое количество от коэфициента
-            $quantity_waybill = round($this->quantity_waybill_default * $this->koef, 10);
-            $this->setAttribute('quantity_waybill', $quantity_waybill);
-            //Записываем что изменился параметр, нужен пересчет сумм
-            $dirtyAttr['quantity_waybill'] = $quantity_waybill;
-        }
-
-        /**
-         * Пересчет коэффициента при изменении количества
-         */
-        if (!$this->isAttributeChanged('koef') && $this->isAttributeChanged('quantity_waybill')) {
-            //Считаем новое количество от коэфициента
-            $this->setAttribute('koef', round($this->quantity_waybill / $this->quantity_waybill_default, 10));
-        }
-
         //Если прилетело изменение сумма без НДС
         //Нужно вычислить цену
         if (isset($dirtyAttr['sum_without_vat'])) {
@@ -184,7 +155,6 @@ class WaybillContent extends \yii\db\ActiveRecord
                 $dirtyAttr['price_without_vat'] = $this->getAttribute('price_without_vat');
             }
         }
-
         //Если изменилась цена или количество, пересчитываем суммы
         if (isset($dirtyAttr['price_without_vat']) || isset($dirtyAttr['quantity_waybill']) || isset($dirtyAttr['vat_waybill'])) {
             if (isset($dirtyAttr['price_without_vat']) || isset($dirtyAttr['vat_waybill'])) {

@@ -406,7 +406,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                                 ) as counts on counts.waybill_id = w.id
                     LEFT JOIN `$apiShema`.outer_agent as oa on oa.id = w.outer_agent_id      
                     LEFT JOIN `$apiShema`.outer_store as os on os.id = w.outer_store_id         
-                    WHERE o.orders = 0 OR wc.id is null AND w.service_id = :service_id and w.acquirer_id = :business_id
+                    WHERE (o.orders = 0 OR wc.id is null) AND w.service_id = :service_id AND w.acquirer_id = :business_id
                 ) as documents
                 LEFT JOIN organization as org on org.id = vendor_id
                 WHERE documents.id is not null $where_all";
@@ -449,12 +449,19 @@ class DocumentWebApi extends \api_web\components\WebApi
         $result = $dataProvider->getModels();
         if (!empty($result)) {
             foreach ($this->iterator($result) as $model) {
+
+                if ($model['type'] == self::TYPE_WAYBILL) {
+                    $statusText = \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['status_id']]);
+                } else {
+                    $statusText = \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$model['status_id']]);
+                }
+
                 $documents[] = $return = [
                     "id"                => (int)$model['id'],
                     "number"            => isset($model['documents']) ? explode(",", $model['documents']) : [],
                     "type"              => $model['type'],
                     "status_id"         => (int)$model['status_id'],
-                    "status_text"       => ($model['type'] == self::TYPE_WAYBILL) ? \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['status_id']]) : \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$model['status_id']]),
+                    "status_text"       => $statusText,
                     "service_id"        => (int)$model['service_id'],
                     "is_mercury_cert"   => (int)($model['is_mercury_cert'] > 0),
                     "count"             => (int)$model['count'],
@@ -599,7 +606,7 @@ class DocumentWebApi extends \api_web\components\WebApi
     private static function convertDate($date, $direction)
     {
         $strTime = " 00:00:00";
-        if ($direction == 'to'){
+        if ($direction == 'to') {
             $strTime = " 23:59:59";
         }
         $result = \DateTime::createFromFormat('d.m.Y H:i:s', $date . $strTime);

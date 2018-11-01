@@ -289,11 +289,16 @@ class VendorController extends DefaultController
                 } else {
                     if (array_key_exists('email', $user->errors)) {
                         $existingUser = User::findOne(['email' => $post['User']['email']]);
-                        $success      = $existingUser->setRelationUserOrganization($this->currentUser->organization->id, $post['User']['role_id']);
+                        if (in_array($existingUser->role_id, Role::getAdminRoles()) || in_array($existingUser->role_id, Role::getFranchiseeEditorRoles())) {
+                            $newRole = $existingUser->role_id;
+                        } else {
+                            $newRole = $post['User']['role_id'];
+                        }
+                        $success = $existingUser->setRelationUserOrganization($this->currentUser->organization->id, $newRole);
                         if ($success) {
 
-                            $existingUser->setOrganization($this->currentUser->organization, false, true)->save();
-                            $existingUser->setRole($post['User']['role_id'])->save();
+                            //$existingUser->setOrganization($this->currentUser->organization, false, true)->save();
+                            //$existingUser->setRole($post['User']['role_id'])->save();
                             $message = Yii::t('app', 'Пользователь добавлен!');
                         } else {
                             $message = Yii::t('app', 'common.models.already_exists');
@@ -322,6 +327,10 @@ class VendorController extends DefaultController
         $dropDown                  = Role::dropdown(Role::getRelationOrganizationType($id, $currentUserOrganizationID));
         $selected                  = $user->getRelationUserOrganizationRoleID($currentUserOrganizationID);
 
+        if (in_array($user->role_id, Role::getAdminRoles()) || in_array($user->role_id, Role::getFranchiseeEditorRoles())) {
+            return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));
+        }
+        
         if (Yii::$app->request->isAjax) {
             $post  = Yii::$app->request->post();
             $email = $user->email;
@@ -1421,7 +1430,9 @@ class VendorController extends DefaultController
                             $transaction = \Yii::$app->db->beginTransaction();
                             try {
                                 $user->organization_id = $rel2[0]->organization_id;
-                                $user->role_id         = $rel2[0]->role_id;
+                                if (!(in_array($user->role_id, Role::getAdminRoles()) || in_array($user->role_id, Role::getFranchiseeEditorRoles()))) {
+                                    $user->role_id = $rel2[0]->role_id;
+                                }
                                 //$profile->email = $user->getEmail();
                                 $user->save();
                                 User::deleteRelationUserOrganization($post['id'], $this->currentUser->organization_id);

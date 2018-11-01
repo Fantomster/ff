@@ -110,9 +110,10 @@ class FullmapController extends DefaultController
         $stores = AllMaps::getStoreListService($searchModel->service_id, $client->id);
         if ($session['service_id'] == 2) {
             $mainOrg = iikoService::getMainOrg($client->id);
+            ($orgId == $mainOrg) ? $editCan = 1 : $editCan = 0;
+        } else {
+            $editCan = 1;
         }
-
-        ($orgId == $mainOrg) ? $editCan = 1 : $editCan = 0;
 
         if (Yii::$app->request->isAjax || Yii::$app->request->isPjax) {
             return $this->renderAjax($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services', 'mainOrg', 'editCan'));

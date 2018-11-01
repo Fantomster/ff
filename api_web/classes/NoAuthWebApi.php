@@ -77,20 +77,20 @@ class NoAuthWebApi
             if (method_exists($entity, 'receiveXmlData')) {
                 $res = $entity->receiveXMLDataWaybill($task, Yii::$app->request->getRawBody());
                 $xml = (array)simplexml_load_string($res);
-                // Когда все хорошо и накладная создалась в R-keeper
                 $waybill = Waybill::findOne($task->waybill_id);
                 $journal = new Journal();
                 $journal->service_id = $waybill->service_id;
                 $journal->operation_code = 21;
                 $journal->log_guide = 'any_call';
                 $journal->organization_id = $waybill->acquirer_id;
+                // Когда все хорошо и накладная создалась в R-keeper
                 if (array_key_exists('DOC', $xml)){
                     $waybill->status_id = Registry::WAYBILL_UNLOADED;
                     $journal->type = 'success';
                     $journal->response = $waybill->id;
                 } else if(array_key_exists('ERROR', $xml)){
-                    $error = (array)$xml['ERROR'];
                     //Когда случилась ошибка
+                    $error = (array)$xml['ERROR'];
                     $waybill->status_id = Registry::WAYBILL_ERROR;
                     $journal->type = 'error';
                     $journal->response = $error['@attributes']['Text'];

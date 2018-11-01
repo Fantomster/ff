@@ -692,62 +692,63 @@ class IntegrationWebApi extends WebApi
     /**
      * Информация по сопоставлению продукта
      *
-     * @param OuterProductMap $model
+     * @param array $model
      * @return array
      */
     private function prepareOutProductMap(array $model)
     {
         $result = [
             "id"              => $model['id'],
-            "service_id"      => $model['service_id'],
-            "organization_id" => $model['organization_id'],
-            "vendor_id"       => $model['vendor_id'],
+            "service_id"      => (int)$model['service_id'],
+            "organization_id" => (int)$model['organization_id'],
+            "product"         => null,
+            "unit"            => null,
+            "vendor"          => null,
+            "outer_product"   => null,
+            "outer_unit"      => null,
+            "outer_store"     => null,
+            "coefficient"     => !empty($model['coefficient']) ? round($model['coefficient'], 10) : 1,
+            "vat"             => (int)$model['vat'],
+            "created_at"      => $model['created_at'] ?? null,
+            "updated_at"      => $model['updated_at'] ?? null,
         ];
+
+        if (isset($model['vendor_id'])) {
+            $result ["vendor"] = [
+                "id"   => (int)$model['vendor_id'],
+                "name" => $model['vendor_name']
+            ];
+        }
 
         if (isset($model['product_id'])) {
             $result ["product"] = [
-                "id"   => $model['product_id'],
-                "name" => $model['product_name'],
+                "id"   => (int)$model['product_id'],
+                "name" => $model['product_name']
             ];
-            $result["unit"] = [
-                "name" => $model['unit'],
-            ];
-        } else {
-            $result ["product"] = null;
-            $result["unit"] = null;
+            $result["unit"] = $model['unit'];
         }
 
         if (isset($model['outer_product_id'])) {
             $result ["outer_product"] = [
-                "id"   => $model['outer_product_id'],
+                "id"   => (int)$model['outer_product_id'],
                 "name" => $model['outer_product_name']
             ];
-        } else {
-            $result ["outer_product"] = null;
         }
 
         if (isset($model["outer_unit_id"])) {
             $result["outer_unit"] = [
-                "id"   => $model['outer_unit_id'],
+                "id"   => (int)$model['outer_unit_id'],
                 "name" => $model['outer_unit_name']
             ];
-        } else {
-            $result["outer_unit"] = null;
         }
 
         if (isset($model['outer_store_id'])) {
             $result["outer_store"] = [
-                "id"   => $model['outer_store_id'],
+                "id"   => (int)$model['outer_store_id'],
                 "name" => $model['outer_store_name']
             ];
-        } else {
-            $result["outer_store"] = null;
         }
 
-        $result["coefficient"] = $model['coefficient'];
-        $result["vat"] = $model['vat'];
-        $result["created_at"] = isset ($model['created_at']) ? date("Y-m-d H:i:s T", strtotime($model['created_at'])) : null;
-        $result["updated_at"] = isset($model['updated_at']) ? date("Y-m-d H:i:s T", strtotime($model['updated_at'])) : null;
         return $result;
     }
 }

@@ -115,35 +115,36 @@ class DefaultController extends \api_web\components\WebApiController
      *              default={
      *                  "products" : {
      *                       {
-     *                      "id": 22666,
-     *                       "service_id": 2,
-     *                       "organization_id": 1,
-     *                       "vendor_id": 1,
-     *                       "product": {
-     *                          "id": 1,
-     *                          "name": "продукт из МС"
-     *                       },
-     *                       "unit": {
-     *                          "name": "кг"
-     *                       },
-     *                       "outer_product": {
-     *                       "id": 1,
-     *                          "name": "продукт из у.с."
-     *                       },
-     *                       "outer_unit": {
-     *                          "id": 1,
-     *                          "name": "кг"
-     *                       },
-     *                       "outer_store": {
-     *                          "id": 1,
-     *                          "name": "Основной склад у.с."
-     *                       },
-     *                       "coefficient": 2,
-     *                       "vat":10,
-     *                       "created_at": "2018-09-04T09:55:22+03:00",
-     *                       "updated_at": "2018-09-04T09:55:22+03:00"
+     *                          "id": "1",
+     *                          "service_id": 1,
+     *                          "organization_id": 1,
+     *                          "product": {
+     *                              "id": 481037,
+     *                             "name": "ааа"
+     *                          },
+     *                          "unit": "бутылка",
+     *                          "vendor": {
+     *                              "id": 3803,
+     *                              "name": "EL Поставщик"
+     *                          },
+     *                          "outer_product": {
+     *                              "id": 10,
+     *                              "name": "Авокадо"
+     *                          },
+     *                          "outer_unit": {
+     *                              "id": 4,
+     *                              "name": "шт"
+     *                          },
+     *                          "outer_store": {
+     *                              "id": 3,
+     *                              "name": "Тест склад 1"
+     *                          },
+     *                          "coefficient": 1,
+     *                          "vat": 10,
+     *                          "created_at": "2018-11-01T19:03:31+03:00",
+     *                          "updated_at": "2018-11-01T19:03:39+03:00"
      *                       }
-     *                       },
+     *                  },
      *                  "pagination": {
      *                      "page": 1,
      *                      "page_size": 12,

@@ -30,6 +30,9 @@ class Module extends \yii\base\Module
             'vetis' => [
                 'class' => 'api_web\modules\integration\modules\vetis\Module',
             ],
+            'egais' => [
+                'class' => 'api_web\modules\integration\modules\egais\Module',
+            ],
         ];
     }
 }

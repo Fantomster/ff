@@ -338,7 +338,7 @@ EOXML;
 
     public function parseFile($content)
     {
-        $success = $this->realization->parseFile($content, $this->realization->fileName);
+        $success = $this->realization->parseFile($content);
         if ($success === true) {
             $this->updateQueue($this->ediFilesQueueID, parent::STATUS_HANDLED, '');
         } else {

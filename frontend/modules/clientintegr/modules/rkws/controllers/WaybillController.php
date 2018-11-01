@@ -143,7 +143,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $sql = "SELECT COUNT(*) FROM rk_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
         $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryScalar();
 
-        $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);
+        $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
         $sql = "SELECT corr_rid,num_code,text_code,store_rid FROM rk_waybill WHERE id = :w_wid";
         $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryAll();
@@ -247,7 +247,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $quant_new = $quant_old * ($koef / $koef_old);
         $quant_new = round($quant_new, 4);
 
-        $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);
+        $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
         if (is_null($product_rid)) {
             $product_rid = 0;
@@ -582,7 +582,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $org_id = $result[0]["org"];
                 $koef = $result[0]["koef"];
 
-                $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);
+                $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
                 if (is_null($product_rid)) {
                     $product_rid = 0;
@@ -659,7 +659,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $product_rid = $result[0]["product_rid"];
         $org_id = $result[0]["org"];
 
-        $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);
+        $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
         if (is_null($product_rid)) {
             $product_rid = 0;

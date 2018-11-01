@@ -128,7 +128,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $sql = "SELECT COUNT(*) FROM one_s_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
         $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryScalar();
 
-        $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);
+        $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
         $sql = "SELECT agent_uuid,num_code,store_id FROM one_s_waybill WHERE id = :w_wid";
         $result = Yii::$app->db_api->createCommand($sql, [':w_wid' => $waybill_id])->queryAll();
@@ -232,7 +232,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $quant_new = $quant_old * ($koef / $koef_old);
         $quant_new = round($quant_new, 4);
 
-        $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);
+        $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
         $sql = "UPDATE one_s_waybill_data SET quant = :w_quant, koef = :w_koef WHERE id = :w_id";
         $result = Yii::$app->db_api->createCommand($sql, [':w_quant' => $quant_new, ':w_koef' => $koef, ':w_id' => $koef_id])->execute();
@@ -746,7 +746,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $org_id = $result[0]["org"];
                 $koef = $result[0]["koef"];
 
-                $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);
+                $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
                 $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
                 $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 8, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
@@ -811,7 +811,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $product_rid = $result[0]["product_rid"];
         $org_id = $result[0]["org"];
 
-        $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);
+        $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
         $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
         $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 8, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();

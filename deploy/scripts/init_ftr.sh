@@ -1,5 +1,6 @@
 #!/bin/bash
 cd /var/www/html/ftr.mixcart.ru/
+export COMPOSER_HOME="$HOME/.composer";
 composer update
 php yii migrate --interactive=0
 

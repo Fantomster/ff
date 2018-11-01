@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 cd /var/www/html/qas.mixcart.ru/
+export COMPOSER_HOME="$HOME/.composer";
 composer update
 if [ -e "/var/www/html/qas.mixcart.ru/deploy/db_dump/qas-dbs.sql" ] 
 then

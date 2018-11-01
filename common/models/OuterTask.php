@@ -36,6 +36,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string $broker_version Версия механизма API, задействованного во внешнем обработчике
  * @property int $total_parts Общее количество порций получаемых данных (при загрузке данных из источника порциями)
  * @property int $current_part Текущий номер порции получаемых данных (при загрузке данных из источника порциями)
+ * @property int $waybill_id Связь с накладной
  */
 class OuterTask extends ActiveRecord
 {

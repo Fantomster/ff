@@ -152,6 +152,7 @@ class EmailIntegration2Controller extends Controller
                 $this->helper->addLog('SETTING IS DISABLED! For user ' . $setting->user, 'auth');
                 continue;
             }
+            $this->helper->orgId = $setting->organization_id;
 
             try {
                 //Подключаемся

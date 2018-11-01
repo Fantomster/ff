@@ -540,13 +540,17 @@ class ServiceRkws extends AbstractSyncFactory
                     'guid'           => $guid,
                     'cb'             => $cb,
                 ]);
-
+            SyncLog::trace($xml);
             $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
 
             if ($xmlData) {
                 $xml = (array)simplexml_load_string($xmlData);
                 if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
                     $transaction = $this->createTransaction();
+                    $waybill->status_id = Registry::WAYBILL_UNLOADING;
+                    if (!$waybill->save()){
+                        SyncLog::trace('Error while saving waybill status');
+                    }
                     $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => 'sh_doc_receiving_report']);
                     $task = new OuterTask([
                         'service_id'     => $this->serviceId,
@@ -558,6 +562,7 @@ class ServiceRkws extends AbstractSyncFactory
                         'outer_guid'     => $xml['@attributes']['taskguid'],
                         'broker_version' => $xml['@attributes']['version'],
                         'oper_code'      => $oper->id,
+                        'waybill_id'     => $waybill->id,
                     ]);
                     if ($task->save()) {
                         $transaction->commit();

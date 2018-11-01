@@ -115,11 +115,6 @@ class WaybillHelper
                     }
 
                     if (!empty($rows)) {
-                        $arMappedForStores = [];
-                        // Remap for 1 store = 1 waybill
-                        foreach ($rows as $row) {
-                            $arMappedForStores[$row['outer_store_id']][$row['product_id']] = $row;
-                        }
                         //Склад по умолчанию, у контрагента
                         $defaultStoreAgent = null;
                         if ($supplierOrgId) {
@@ -133,6 +128,11 @@ class WaybillHelper
                         //Счетчики для выброса Exception
                         $storeCount = 0;
                         $errorCount = 0;
+                        // Remap for 1 store = 1 waybill
+                        $arMappedForStores = [];
+                        foreach ($rows as $row) {
+                            $arMappedForStores[$row['outer_store_id']][$row['product_id']] = $row;
+                        }
                         foreach ($arMappedForStores as $storeId => $storeProducts) {
                             //Пытаемся найти хоть какой то склад
                             $storeId = $storeId ?? $defaultStoreAgent ?? $defaultStoreConfig ?? null;

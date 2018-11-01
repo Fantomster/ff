@@ -127,7 +127,7 @@ class WaybillHelper
                         $defaultStoreConfig = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id, ['defStore']);
                         //Счетчики для выброса Exception
                         $storeCount = 0;
-                        $errorCount = 0;
+                        $skipCount = 0;
                         // Remap for 1 store = 1 waybill
                         $arMappedForStores = [];
                         foreach ($rows as $row) {
@@ -145,11 +145,11 @@ class WaybillHelper
                                 $waybillIds[] = $this->createWaybillAndContent($arOuterMappedProducts, $order->client_id,
                                     $storeId, $serviceId);
                             } else {
-                                $errorCount++;
+                                $skipCount++;
                             }
                         }
-                        //Если количество складов = числу ошибок, бросаем throw
-                        if ($storeCount === $errorCount) {
+                        //Если количество складов = числу пропусков, бросаем throw
+                        if ($storeCount === $skipCount) {
                             throw new BadRequestHttpException('waybill.no_content_for_create_waybill');
                         }
                         return $waybillIds;

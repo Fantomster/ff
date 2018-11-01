@@ -576,6 +576,7 @@ class User extends \amnah\yii2\user\models\User
             Role::ROLE_RESTAURANT_ACCOUNTANT,
             Role::ROLE_RESTAURANT_BUYER,
             Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+            Role::ROLE_RESTAURANT_ORDER_INITIATOR
         ];
         $vendorRoles = [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE];
         $franchiseeRoles = [Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR, Role::ROLE_FRANCHISEE_ACCOUNTANT];
@@ -600,6 +601,7 @@ class User extends \amnah\yii2\user\models\User
             Role::ROLE_RESTAURANT_ACCOUNTANT,
             Role::ROLE_RESTAURANT_BUYER,
             Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+            Role::ROLE_RESTAURANT_ORDER_INITIATOR
         ];
     }
 
@@ -941,7 +943,7 @@ class User extends \amnah\yii2\user\models\User
             $userProfileFullName = $vendor->profile->full_name;
             $userProfilePhone = $vendor->profile->phone;
             $userOrgId = $vendor->organization_id;
-            $userOrgName = $vendor->organization->name;
+            $userOrgName = isset($vendor->organization) ? $vendor->organization->name : '';
 
             $result = [
                 'success' => true,

@@ -42,7 +42,7 @@ $this->registerJs('
         //    $("#search-form").submit();
         //});
         $(".box-body").on("change", "#dateFrom, #dateTo", function() {
-        
+            
             if (!justSubmitted) {console.log(\'время\');
                 $("#search-form").submit();
                 justSubmitted = true;
@@ -149,6 +149,7 @@ $this->registerJs('
                     </div>
                 </div>
                 <?php ActiveForm::end(); ?>
+                <?php ?>
                 <div class="col-sm-12">
                     <?php
                     try {
@@ -238,7 +239,7 @@ $this->registerJs('
                                                 $link = 'tillypad';
                                             }
                                         }
-                                        if (!isset($link)) {
+                                        if (!$data->order_id) {
                                             return $data->number;
                                         } else {
                                             $page = \common\models\IntegrationInvoice::pageOrder($data->order_id);
@@ -349,7 +350,7 @@ $this->registerJs('
                             ]
                         ]);
                     } catch (Exception $e) {
-
+                        die($e);
                     }
                     ?>
                 </div>

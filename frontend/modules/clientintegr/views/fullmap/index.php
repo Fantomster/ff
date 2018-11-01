@@ -606,7 +606,7 @@ $this->registerJs(
                                             'class'           => 'kartik\grid\EditableColumn',
                                             'attribute'       => 'koef',
                                             'refreshGrid'     => true,
-                                            'readonly'        => ($searchModel->service_id == 2 && $mainOrg != $client->id),
+                                            'readonly'        => ($searchModel->service_id == 2 && $editCan == 0),
                                             'contentOptions'  => function ($model) {
                                                 return ["id" => "koeff" . $model['id']];
                                             },
@@ -906,11 +906,17 @@ $js = <<< JS
         }
 
         $(document).on('pjax:end', function() {
-            links_column4();
+            var edit_can = '$editCan';
+            if (edit_can==1) {
+                links_column4();    
+            }
         });
 
         $(document).ready(function() {
-            links_column4();
+            var edit_can = '$editCan';
+            if (edit_can==1) {
+                links_column4();    
+            }
         });
 
     });

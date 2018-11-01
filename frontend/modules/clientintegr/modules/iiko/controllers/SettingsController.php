@@ -11,6 +11,7 @@ use api\common\models\iiko\search\iikoDicconstSearch;
 use common\helpers\ModelsCollection;
 use common\models\Role;
 use common\models\User;
+use frontend\modules\clientintegr\controllers\FullmapController;
 use Yii;
 use yii\data\ArrayDataProvider;
 use yii\web\Response;
@@ -236,16 +237,16 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
      */
     public function actionApplyCollation()
     {
-        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']); // Получаем идентификатор константы бизнеса для сопоставления
         Yii::$app->response->format = Response::FORMAT_JSON;
-        $ids = Yii::$app->request->post('ids');
-        $mainId = Yii::$app->request->post('main');
+        $ids = Yii::$app->request->post('ids'); // получаем дочерние бизнесы
+        $mainId = Yii::$app->request->post('main'); //получаем главный бизнес
         $arModels = [];
 
         $arPconstModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'org' => $ids])->indexBy('org')->all();
-        $arDeletedIds = array_keys($arPconstModels);
+        $arDeletedIds = array_keys($arPconstModels); // получаем массив уже имеющихся записей дочек из iiko_pconst
 
-        foreach ($ids as $id) {
+        foreach ($ids as $id) { // создаём массив для вснх дочерних бизнесов
             $pConst = new iikoPconst();
             $pConst->org = $id;
             $pConst->const_id = $obConstModel->id;
@@ -253,19 +254,29 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             $arModels[] = $pConst;
         }
 
-        if (!empty($arDeletedIds)) {
+        if (!empty($arDeletedIds)) { // если в iiko_pconst уже есть дочки, то удаляем их все.
             $resDel = $this->actionCancelCollation($arDeletedIds);
         }
 
-        if (empty($arModels) && !empty($arDeletedIds)) {
+        if (empty($arModels) && !empty($arDeletedIds)) { // если нужно только удалить и не нужно добавлять дочек, то возвращаем true
             return $resDel;
-        } elseif (empty($arModels) && empty($arDeletedIds)) {
+        } elseif (empty($arModels) && empty($arDeletedIds)) { // если не нужно ни удалять, ни добавлять дочек, то возвращается ошибка
             return ['success' => false, 'error' => 'Невозможно выполнить данную операцию'];
         }
 
         $modelCollection = new ModelsCollection();
 
-        return $modelCollection->saveMultiple($arModels);
+        $multiple = $modelCollection->saveMultiple($arModels); // пытаемся добавить все дочерние бизнесы и вернуть статус выполнения команды
+        if ($multiple['success'] === true) {
+            $add_all = FullmapController::actionAddAllChildsProductsFromMain($mainId);
+            if ($add_all === true) {
+                return ['success' => true, 'error' => ''];
+            } else {
+                return ['success' => false, 'error' => 'Не удалось сохранить продукт дочернего бизнеса.'];
+            }
+        } else {
+            return $multiple;
+        }
     }
 
     /**
@@ -277,18 +288,18 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
      */
     public function actionCancelCollation($ids = null)
     {
-        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']); // Получаем идентификатор константы бизнеса для сопоставления
         Yii::$app->response->format = Response::FORMAT_JSON;
-        if (is_null($ids)) {
-            $ids = Yii::$app->request->post('ids');
+        if (is_null($ids)) { // если массив удаляемых дочерних бизнесов, переданный параметром, нулевой
+            $ids = Yii::$app->request->post('ids'); //то получаем массив дочерних бизнесов из POST
         }
         try {
-            $pConst = iikoPconst::deleteAll(['const_id' => $obConstModel->id, 'org' => $ids]);
+            $pConst = iikoPconst::deleteAll(['const_id' => $obConstModel->id, 'org' => $ids]); // удалемя все дочерние бизнесы из таблицы iiko_pconst
         } catch (\Throwable $throwable) {
-            return ['success' => false, 'error' => $throwable->getMessage()];
+            return ['success' => false, 'error' => $throwable->getMessage()]; // если не удалось, возвращаем ошибку
         }
 
-        return ['success' => true];
+        return ['success' => true]; // если удалось, возвращаем успешно
     }
 
     /**

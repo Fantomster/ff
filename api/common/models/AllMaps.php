@@ -210,12 +210,14 @@ class AllMaps extends \yii\db\ActiveRecord
                     if (!$this->koef)
                         $this->koef = 1;
                 }
+                $this->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
                 //$this->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
             } else { // Создание
                 // $this->koef = 1;
                 // $this->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+                $this->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                 $this->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             }
 

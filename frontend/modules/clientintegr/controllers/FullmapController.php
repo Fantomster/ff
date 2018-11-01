@@ -48,6 +48,7 @@ class FullmapController extends DefaultController
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearchMap();
         $params = Yii::$app->request->getQueryParams();
+        $orgId = Yii::$app->user->identity->organization_id;
 
         if (Yii::$app->request->post("OrderCatalogSearchMap")) {
             $params['OrderCatalogSearchMap'] = Yii::$app->request->post("OrderCatalogSearchMap");
@@ -111,14 +112,12 @@ class FullmapController extends DefaultController
             $mainOrg = iikoService::getMainOrg($client->id);
         }
 
-        if ($session['service_id'] == 10) {
-            $mainOrg = iikoService::getMainOrg($client->id);
-        }
+        ($orgId == $mainOrg) ? $editCan = 1 : $editCan = 0;
 
         if (Yii::$app->request->isAjax || Yii::$app->request->isPjax) {
-            return $this->renderAjax($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services', 'mainOrg'));
+            return $this->renderAjax($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services', 'mainOrg', 'editCan'));
         } else {
-            return $this->render($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services', 'mainOrg'));
+            return $this->render($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services', 'mainOrg', 'editCan'));
         }
     }
 
@@ -661,6 +660,88 @@ class FullmapController extends DefaultController
                 break;
         }
         return $munit;
+    }
+
+    /** Проверяет и добавляет в all_map все записи главного бизнеса для дочерних бизнесов
+     */
+    public function actionAddAllChildsProductsFromMain($parent_id)
+    {
+        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']); // Получаем идентификатор константы бизнеса для сопоставления
+        $arChildsModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'value' => $parent_id])->all(); //получаем дочерние бизнесы
+        $allMainProducts = AllMaps::find()->select('service_id, product_id, supp_id, serviceproduct_id, koef, vat, is_active')->where(['org_id' => $parent_id, 'service_id' => 2])->all();
+        foreach ($arChildsModels as $child) {
+            foreach ($allMainProducts as $main_product) {
+                $child_product = AllMaps::find()->select('id, store_rid, vat')->where(['org_id' => $child->org, 'service_id' => 2, 'product_id' => $main_product->product_id])->one();
+                if ($child_product) {
+                    $ChildProduct = AllMaps::findOne($child_product->id);
+                    (is_null($child_product->store_rid)) ? $ChildProduct->store_rid = null : $ChildProduct->store_rid = $child_product->store_rid;
+                    (is_null($child_product->vat)) ? $ChildProduct->vat = null : $ChildProduct->vat = $child_product->vat;
+                } else {
+                    $ChildProduct = new AllMaps();
+                    $ChildProduct->store_rid = null;
+                    $ChildProduct->vat = $main_product->vat;
+                }
+                $ChildProduct->service_id = $main_product->service_id;
+                $ChildProduct->koef = $main_product->koef;
+                $ChildProduct->org_id = $child->org;
+                $ChildProduct->product_id = $main_product->product_id;
+                $ChildProduct->supp_id = $main_product->supp_id;
+                $ChildProduct->serviceproduct_id = $main_product->serviceproduct_id;
+                $ChildProduct->is_active = $main_product->is_active;
+                if (!is_null($ChildProduct->serviceproduct_id)) {
+                    $ChildProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+                }
+                try {
+                    if (!$ChildProduct->save()) {
+                        throw new \Exception('Не удалось сохранить продукт дочернего бизнеса.');
+                    }
+                } catch (\Exception $e) {
+                    \yii::error('Не удалось сохранить продукт ' . $main_product->id . ' дочернего бизнеса ' . $child->org);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /** Проверяет и добавляет в all_map сопоставленную запись из главного бизнеса в дочерние бизнесы
+     */
+    public function actionAddProductFromMain($parent_id, $product_id)
+    {
+        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']); // Получаем идентификатор константы бизнеса для сопоставления
+        $arChildsModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'value' => $parent_id])->all(); //получаем дочерние бизнесы
+        $main_product = AllMaps::find()->select('service_id, product_id, supp_id, serviceproduct_id, koef, vat, is_active')->where(['org_id' => $parent_id, 'service_id' => 2, 'product_id' => $product_id])->one();
+        foreach ($arChildsModels as $child) {
+            $child_product = AllMaps::find()->select('id, store_rid, vat')->where(['org_id' => $child->org, 'service_id' => 2, 'product_id' => $main_product->product_id])->one();
+            if ($child_product) {
+                $ChildProduct = AllMaps::findOne($child_product->id);
+                (is_null($child_product->store_rid)) ? $ChildProduct->store_rid = null : $ChildProduct->store_rid = $child_product->store_rid;
+                (is_null($child_product->vat)) ? $ChildProduct->vat = null : $ChildProduct->vat = $child_product->vat;
+            } else {
+                $ChildProduct = new AllMaps();
+                $ChildProduct->store_rid = null;
+                $ChildProduct->vat = $main_product->vat;
+            }
+            $ChildProduct->service_id = $main_product->service_id;
+            $ChildProduct->koef = $main_product->koef;
+            $ChildProduct->org_id = $child->org;
+            $ChildProduct->product_id = $main_product->product_id;
+            $ChildProduct->supp_id = $main_product->supp_id;
+            $ChildProduct->serviceproduct_id = $main_product->serviceproduct_id;
+            $ChildProduct->is_active = $main_product->is_active;
+            if (!is_null($ChildProduct->serviceproduct_id)) {
+                $ChildProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+            }
+            try {
+                if (!$ChildProduct->save()) {
+                    throw new \Exception('Не удалось сохранить продукт дочернего бизнеса.');
+                }
+            } catch (\Exception $e) {
+                \yii::error('Не удалось сохранить продукт ' . $main_product->id . ' дочернего бизнеса ' . $child->org);
+                return false;
+            }
+        }
+        return true;
     }
 
 }

@@ -418,9 +418,18 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
      */
     public function getSuppById($id)
     {
-        $vrem = CatalogBaseGoods::find()->where(["id" => $id])->one();
-        $result = $vrem->supp_org_id;
-        return $result;
+        $result = null;
+        try {
+            $vrem = CatalogBaseGoods::find()->where(["id" => $id])->one();
+            $result = $vrem['supp_org_id'];
+            return $result;
+        } catch (InvalidParamException $e) {
+            \yii::error('Cant get value, invalid parameter ' . $id);
+        }
+        if (is_null($result)) {
+            throw new BadRequestHttpException($e->getMessage());
+        }
+
     }
 
 }

@@ -28,8 +28,8 @@ $form = ActiveForm::begin([
     <h4 class="modal-title"><?= $user->isNewRecord ? Yii::t('message', 'frontend.views.client.settings.new', ['ru'=>'Новый пользователь']) : Yii::t('message', 'frontend.views.client.settings.edit', ['ru'=>'Редактировать пользователя']) ?></h4>
 </div>
 <div class="modal-body">
-    <input type="email" name="fake_email" style="position: absolute; top: -100%;">
-    <input type="password" name="fake_pwd" style="position: absolute; top: -100%;">
+    <input type="email" name="new-email" style="position: absolute; top: -100%;">
+    <input type="password" name="new-password" style="position: absolute; top: -100%;">
 
     <?= $form->field($user, 'email')->textInput(['disabled' => $user->isNewRecord ? false : true]) ?>
 

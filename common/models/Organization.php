@@ -994,14 +994,16 @@ class Organization extends \yii\db\ActiveRecord
     {
         $usrTable = User::tableName();
         $profTable = Profile::tableName();
+        $ruoTable = RelationUserOrganization::tableName();
 
         $managers = ArrayHelper::map(User::find()
-            ->joinWith('profile')
-            ->select(["$usrTable.id as id", "$profTable.full_name as name"])
-            ->where(["$usrTable.organization_id" => $this->id])
-            ->orderBy(['name' => SORT_ASC])
-            ->asArray()
-            ->all(), 'id', 'name');
+                                ->joinWith('profile')
+                                ->leftJoin($ruoTable, "$ruoTable.user_id=$usrTable.id")
+                                ->select(["$usrTable.id as id", "$profTable.full_name as name"])
+                                ->where(["$ruoTable.organization_id" => $this->id])
+                                ->orderBy(['name' => SORT_ASC])
+                                ->asArray()
+                                ->all(), 'id', 'name');
         return $managers;
     }
 

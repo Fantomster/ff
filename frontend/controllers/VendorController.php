@@ -276,7 +276,7 @@ class VendorController extends DefaultController
                         $user->role_id = array_keys($dropDown)[0];
                     }
 
-                    $user->setRegisterAttributes($user->role_id)->save();
+                    $user->setRegisterAttributes($user->role_id, $user->status)->save();
                     //$profile->email = $user->getEmail();
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization, false, true)->save();
@@ -1899,8 +1899,7 @@ class VendorController extends DefaultController
         return $this->renderAjax('catalogs/_setPercentCatalog', compact('catalogGoods', 'cat_id'));
     }
 
-    public
-            function actionViewClient($id)
+    public function actionViewClient($id)
     {
         $client_id          = $id;
         $currentUser        = User::findIdentity(Yii::$app->user->id);

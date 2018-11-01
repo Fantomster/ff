@@ -342,6 +342,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                    certs as is_mercury_cert,
                    `count`,
                    total_price as total_price,
+                   null as total_price_with_out_vat,
                    o.created_at as doc_date, 
                    o.vendor_id, 
                    oa.id as agent_id,
@@ -388,6 +389,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                     0 as is_mercury_cert,
                     `count`,
                     counts.total_price,
+                    counts.total_price_with_out_vat,
                     doc_date, 
                     oa.vendor_id as vendor_id,
                     oa.id as agent_id,
@@ -402,7 +404,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                     LEFT JOIN `$apiShema`.waybill_content as wc on  w.id = wc.waybill_id
                     LEFT JOIN (SELECT waybill_id, sum(ifnull(order_content_id,0)) as orders FROM `$apiShema`.waybill_content group by waybill_id) as o on o.waybill_id = w.id
                     LEFT JOIN (
-                                select waybill_id, count(id) as `count`, sum(sum_with_vat) as total_price from `$apiShema`.waybill_content group by (waybill_id)
+                                select waybill_id, count(id) as `count`, sum(sum_with_vat) as total_price, sum(sum_without_vat) as total_price_with_out_vat from `$apiShema`.waybill_content group by (waybill_id)
                                 ) as counts on counts.waybill_id = w.id
                     LEFT JOIN `$apiShema`.outer_agent as oa on oa.id = w.outer_agent_id      
                     LEFT JOIN `$apiShema`.outer_store as os on os.id = w.outer_store_id         
@@ -457,33 +459,34 @@ class DocumentWebApi extends \api_web\components\WebApi
                 }
 
                 $documents[] = $return = [
-                    "id"                => (int)$model['id'],
-                    "number"            => isset($model['documents']) ? explode(",", $model['documents']) : [],
-                    "type"              => $model['type'],
-                    "status_id"         => (int)$model['status_id'],
-                    "status_text"       => $statusText,
-                    "service_id"        => (int)$model['service_id'],
-                    "is_mercury_cert"   => (int)($model['is_mercury_cert'] > 0),
-                    "count"             => (int)$model['count'],
-                    "total_price"       => CurrencyHelper::asDecimal($model['total_price']),
-                    "doc_date"          => date("Y-m-d H:i:s T", strtotime($model['doc_date'])),
-                    "vendor"            => (!(isset($model['vendor_id']) && isset($model['vendor_name']))) ? null :
+                    "id"                       => (int)$model['id'],
+                    "number"                   => isset($model['documents']) ? explode(",", $model['documents']) : [],
+                    "type"                     => $model['type'],
+                    "status_id"                => (int)$model['status_id'],
+                    "status_text"              => $statusText,
+                    "service_id"               => (int)$model['service_id'],
+                    "is_mercury_cert"          => (int)($model['is_mercury_cert'] > 0),
+                    "count"                    => (int)$model['count'],
+                    "total_price"              => CurrencyHelper::asDecimal($model['total_price']),
+                    "total_price_with_out_vat" => CurrencyHelper::asDecimal($model['total_price_with_out_vat'], 2, null),
+                    "doc_date"                 => date("Y-m-d H:i:s T", strtotime($model['doc_date'])),
+                    "vendor"                   => (!(isset($model['vendor_id']) && isset($model['vendor_name']))) ? null :
                         [
                             "id"    => $model['vendor_id'],
                             "name"  => $model['vendor_name'],
                             "difer" => false,
                         ],
-                    "agent"             => (!(isset($model['agent_id']) && isset($model['agent_name']))) ? null :
+                    "agent"                    => (!(isset($model['agent_id']) && isset($model['agent_name']))) ? null :
                         [
                             "id"   => $model['agent_id'],
                             "name" => $model['agent_name'],
                         ],
-                    "store"             => (!(isset($model['store_id']) && isset($model['store_name']))) ? null :
+                    "store"                    => (!(isset($model['store_id']) && isset($model['store_name']))) ? null :
                         [
                             "id"   => $model['store_id'],
                             "name" => $model['store_name'],
                         ],
-                    "replaced_order_id" => isset($model['replaced_order_id']) ? (int)$model['replaced_order_id'] : null
+                    "replaced_order_id"        => isset($model['replaced_order_id']) ? (int)$model['replaced_order_id'] : null
                 ];
             }
         }

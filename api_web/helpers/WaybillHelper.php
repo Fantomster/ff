@@ -116,31 +116,37 @@ class WaybillHelper
                         foreach ($rows as $row) {
                             $arMappedForStores[$row['outer_store_id']][$row['product_id']] = $row;
                         }
-
-                        foreach ($arMappedForStores as $storeId => $storeProducts) {
-                            //todo_refactoring
-                            if (!$storeId) {
-                                if ($supplierOrgId) {
-                                    $agent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
-                                    if ($agent) {
-                                        $storeId = $agent->store_id;
-                                    }
-                                }
-                                if (!$storeId) {
-                                    $storeId = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id,
-                                        ['defStore']);
-                                }
-                                if (!$storeId) {
-                                    continue;
-                                }
+                        //Склад по умолчанию, у контграгента
+                        $defaultStoreAgent = null;
+                        if ($supplierOrgId) {
+                            $agent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
+                            if ($agent && $agent->store_id) {
+                                $defaultStoreAgent = $agent->store_id;
                             }
+                        }
+                        //Склад по умолчанию в настройках
+                        $defaultStoreConfig = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id, ['defStore']);
+                        //Счетчики для выброса Exception
+                        $storeCount = 0;
+                        $errorCount = 0;
+                        foreach ($arMappedForStores as $storeId => $storeProducts) {
+                            //Пытаемся найти хоть какой то склад
+                            $storeId = $storeId ?? $defaultStoreAgent ?? $defaultStoreConfig ?? null;
+                            if (!$storeId) {
+                                continue;
+                            }
+                            $storeCount++;
                             $arOuterMappedProducts = $this->prepareStoreProducts($storeProducts, $notInWaybillContent);
                             if (!empty($arOuterMappedProducts)) {
                                 $waybillIds[] = $this->createWaybillAndContent($arOuterMappedProducts, $order->client_id,
                                     $storeId, $serviceId);
                             } else {
-                                throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.no_content_for_create_waybill'));
+                                $errorCount++;
                             }
+                        }
+                        //Если количество складов = числу ошибок, бросаем throw
+                        if ($storeCount === $errorCount) {
+                            throw new BadRequestHttpException('waybill.no_content_for_create_waybill');
                         }
                         return $waybillIds;
                     } else {
@@ -178,7 +184,8 @@ class WaybillHelper
      * @param int $orgId
      * @return \common\models\Waybill
      */
-    private function buildWaybill($orgId)
+    private
+    function buildWaybill($orgId)
     {
         $model = new Waybill();
         $model->acquirer_id = $orgId;
@@ -195,7 +202,8 @@ class WaybillHelper
      * @return int
      * @throws \Exception
      */
-    private function createWaybillAndContent($arOuterMappedProducts, $orgId, $outerStoreId, $serviceId)
+    private
+    function createWaybillAndContent($arOuterMappedProducts, $orgId, $outerStoreId, $serviceId)
     {
         $model = $this->buildWaybill($orgId);
         $model->outer_store_id = (string)$outerStoreId;
@@ -250,7 +258,8 @@ class WaybillHelper
      * @param string $uuid
      * @return boolean
      * */
-    public function checkWaybillForVsdUuid($uuid)
+    public
+    function checkWaybillForVsdUuid($uuid)
     {
         return WaybillContent::find()
             ->leftJoin(DBNameHelper::getMainName() . '.`' . OrderContent::tableName() . '` as oc', 'oc.id = order_content_id')
@@ -263,7 +272,8 @@ class WaybillHelper
      * @return array
      * @throws \Exception
      */
-    public function createWaybillForApi($request)
+    public
+    function createWaybillForApi($request)
     {
         if (empty($request['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');
@@ -281,7 +291,8 @@ class WaybillHelper
      * @throws BadRequestHttpException
      * @throws \Throwable
      */
-    public function moveOrderContentToWaybill($request)
+    public
+    function moveOrderContentToWaybill($request)
     {
         if (!isset($request['waybill_id'])) {
             throw new BadRequestHttpException('empty_param|waybill_id');
@@ -366,7 +377,8 @@ class WaybillHelper
      * @param OrderContent $orderContent
      * @throws BadRequestHttpException
      */
-    private function checkOrderForWaybillContent(Waybill $waybill, OrderContent $orderContent)
+    private
+    function checkOrderForWaybillContent(Waybill $waybill, OrderContent $orderContent)
     {
         if ($orderContent->waybillContent) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_allready_has_waybill_content') . '-' . $orderContent->waybillContent->id);
@@ -386,7 +398,8 @@ class WaybillHelper
      * @param $notInWaybillContent
      * @return array
      */
-    private function prepareStoreProducts($storeProducts, $notInWaybillContent)
+    private
+    function prepareStoreProducts($storeProducts, $notInWaybillContent)
     {
         $arStoreProducts = [];
         foreach ($notInWaybillContent as $item) {
@@ -412,7 +425,8 @@ class WaybillHelper
      * @param $serviceId
      * @return array|string
      */
-    private function generateEdiNumber($arOuterStoreProducts, $serviceId)
+    private
+    function generateEdiNumber($arOuterStoreProducts, $serviceId)
     {
         /**@var OrderContent $orderContent */
         $orderContent = current($arOuterStoreProducts)['orderContent'];
@@ -439,7 +453,8 @@ class WaybillHelper
      * @param $ediNumber
      * @return int|mixed|string
      */
-    private function getLastEdiNumber($ediNumber)
+    private
+    function getLastEdiNumber($ediNumber)
     {
         $ed_nums = explode('-', $ediNumber);
         $ed_num = array_pop($ed_nums);

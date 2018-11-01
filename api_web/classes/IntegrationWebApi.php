@@ -605,7 +605,8 @@ class IntegrationWebApi extends WebApi
      *
      * @param int $service_id
      * @param     $request
-     * @return array
+     * @throws Exception
+     * @throws ValidationException
      */
     private function editProductMap(int $service_id, $request)
     {

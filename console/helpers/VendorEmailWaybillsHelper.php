@@ -8,6 +8,7 @@
 
 namespace console\helpers;
 
+use api_web\components\Registry;
 use common\models\AllServiceOperation;
 use common\models\Catalog;
 use common\models\CatalogBaseGoods;
@@ -28,7 +29,7 @@ class VendorEmailWaybillsHelper
     /**
      * @var int ServiceId
      */
-    private $serviceId = 3;
+    private $serviceId = Registry::VENDOR_DOC_MAIL_SERVICE_ID;
 
     /**
      * @var

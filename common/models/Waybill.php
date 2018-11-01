@@ -29,6 +29,8 @@ use yii\behaviors\TimestampBehavior;
  * @property int              $payment_delay
  * @property string           $payment_delay_date
  * @property Order            $order
+ * @property OuterStore       $outerStore
+ * @property OuterAgent       $outerAgent
  * @property string           $edi_recadv
  * @property string           $edi_invoice
  * @property WaybillContent[] $waybillContents
@@ -111,6 +113,22 @@ class Waybill extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOuterStore()
+    {
+        return $this->hasOne(OuterStore::class, ['id' => 'outer_store_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOuterAgent()
+    {
+        return $this->hasOne(OuterAgent::class, ['id' => 'outer_agent_id']);
+    }
+
+    /**
      * @return bool
      */
     public function getIsMercuryCert()
@@ -154,7 +172,7 @@ class Waybill extends \yii\db\ActiveRecord
     public function getOrder()
     {
         $wcModel = WaybillContent::find()->where('waybill_id = :wid AND order_content_id is not null', [':wid' => $this->id])->one();
-        if(!empty($wcModel)) {
+        if (!empty($wcModel)) {
             return $wcModel->orderContent->order;
         }
         return null;

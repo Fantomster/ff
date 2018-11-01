@@ -21,6 +21,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string $comment Комментарий
  * @property string $created_at Дата создания
  * @property string $updated_at Дата обновления
+ * @property OuterUnit $outerUnit
  */
 class OuterProduct extends \yii\db\ActiveRecord
 {

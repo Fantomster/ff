@@ -147,7 +147,7 @@ class mercuryApi extends baseApi
             } while ($status == 'IN_PROCESS');
 
             //Пишем лог
-            //mercLogger::getInstance()->addMercLog($result, 'MercVSDList', $localTransactionId, $reuest_xml, $client->__getLastResponse(), $this->org_id);
+            mercLogger::getInstance()->addMercLog($result, 'MercVSDList', $localTransactionId, $reuest_xml, $client->__getLastResponse(), $this->org_id);
         } catch (\Throwable $e) {
             Yii::error($e->getMessage());
         }

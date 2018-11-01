@@ -113,7 +113,7 @@ class MercVSDList extends MercDictConsumer
                 } catch (\Throwable $e) {
                     //Вслучае ошибки увеличиваем счетчик ошибок на единицу
                     $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
-                    mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
+                    mercLogger::getInstance()->addMercLogDict('ERROR', 'AutoLoad'.BaseStringHelper::basename(static::class), $e->getMessage());
                     If(isset($result->application->errors)) {
                         if ($result->application->errors->error->code == 'APLM0012') {
                             echo "Error APLM0012" . PHP_EOL;
@@ -178,7 +178,7 @@ class MercVSDList extends MercDictConsumer
             }
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
-            mercLogger::getInstance()->addMercLogDict('ERROR', BaseStringHelper::basename(static::class), $e->getMessage());
+            mercLogger::getInstance()->addMercLogDict('ERROR', 'AutoLoad'.BaseStringHelper::basename(static::class), $e->getMessage());
             $this->addFCMMessage('MercVSDList', $this->data['enterpriseGuid']);
             throw new \Exception('Error operation');
         }
@@ -186,7 +186,7 @@ class MercVSDList extends MercDictConsumer
 
         MercVisits::updateLastVisit($this->org_id, MercVisits::LOAD_VSD_LIST, $this->data['enterpriseGuid']);
 
-        mercLogger::getInstance()->addMercLogDict('COMPLETE', BaseStringHelper::basename(static::class), null);
+        mercLogger::getInstance()->addMercLogDict('COMPLETE', 'AutoLoad'.BaseStringHelper::basename(static::class), null);
 
         if (isset($this->queue)) {
             $this->queue->data_request = new Expression('NULL');

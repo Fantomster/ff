@@ -41,40 +41,6 @@ class WaybillHelper
     }
 
     /**
-     * Create waybill and waybill_content and binding VSD
-     *
-     * @param string $uuid VSD uuid
-     * @return boolean
-     * */
-    public function createWaybillFromVsd($uuid)
-    {
-        $orgId = (\Yii::$app->user->identity)->organization_id;
-        /** @var Transaction $transaction */
-        $transaction = \Yii::$app->db_api->beginTransaction();
-        try {
-            $modelWaybill = new Waybill();
-            $modelWaybill->acquirer_id = $orgId;
-            $modelWaybill->service_id = Registry::MERC_SERVICE_ID;
-            if (!$modelWaybill->save()) {
-                throw new ValidationException($modelWaybill->getFirstErrors());
-            }
-
-            $modelWaybillContent = new WaybillContent();
-            $modelWaybillContent->waybill_id = $modelWaybill->id;
-            if (!$modelWaybillContent->save()) {
-                throw new ValidationException($modelWaybillContent->getFirstErrors());
-            }
-            $transaction->commit();
-        } catch (\Throwable $t) {
-            $transaction->rollBack();
-            \Yii::error($t->getMessage(), __METHOD__);
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * @param      $order_id
      * @param null $arOrderContentForCreate С EDI может приходить несколькими файлами orderContent для одного заказа
      * @param null $supplierOrgId

@@ -22,6 +22,8 @@ abstract class AbstractConsumer
     /**@var integer $timeoutExecuting timeout in seconds for execution consumer*/
     public static $timeoutExecuting = 600;
 
+    public $logPrefix;
+
     /**
      * @param $message array|string
      */
@@ -33,7 +35,7 @@ abstract class AbstractConsumer
         $message = $message . PHP_EOL;
         $message .= str_pad('', 80, '=') . PHP_EOL;
         $className = BaseStringHelper::basename(get_class($this));
-        \Yii::info($message, "daemon_".$className);
-        //file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . $className . '.log', $message, FILE_APPEND);
+        \Yii::info($className.": ($this->logPrefix) ".$message, "daemonLogs");
+        file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . $className . '.log', $message, FILE_APPEND);
     }
 }

@@ -45,6 +45,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
         } else {
             $this->org_id = 0;
         }
+        $this->logPrefix = $org_id;
     }
 
     /**
@@ -160,7 +161,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
             throw new \Exception('Error operation');
         }
 
-        $this->log("FIND: consumer_class_name = " . BaseStringHelper::basename(static::class));
+        $this->log("Complete operation success");
 
         $this->queue->data_request = new Expression('NULL');
         $this->queue->save();

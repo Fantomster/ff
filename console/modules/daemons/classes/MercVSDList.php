@@ -39,9 +39,9 @@ class MercVSDList extends MercDictConsumer
         $check = 9; /* RabbitQueues::find()->where("consumer_class_name in ('MercUnitList', 'MercPurposeList',
           'MercCountryList', 'MercRussianEnterpriseList', 'MercForeignEnterpriseList', 'MercBusinessEntityList', 'MercProductList', 'MercProductItemList', 'MercSubProductList')")
           ->andWhere('start_executing is null and last_executed is not null and data_request is null')->count(); */
-
         if ($check == 9) {
             $this->data  = json_decode($this->data, true);
+            $this->logPrefix .= " ".$this->data['enterpriseGuid'];
             $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList', 'organization_id' => $this->org_id, 'store_id' => $this->data['enterpriseGuid']])->one();
             $this->data  = isset($this->queue->data_request) ? json_decode($this->queue->data_request, true) : $this->data;
             if (!isset($this->data)) {
@@ -58,7 +58,7 @@ class MercVSDList extends MercDictConsumer
     {
         $className       = BaseStringHelper::basename(static::class);
         $this->init();
-        $this->log('Load for Organization '.$this->data['enterpriseGuid'] . PHP_EOL);
+        $this->log('Load data' . PHP_EOL);
         $load_data_succ = false;
         $count_error = 0;
         $list = null;
@@ -96,7 +96,7 @@ class MercVSDList extends MercDictConsumer
                     $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
 
                     $count = $curr_offset + $vetDocumentList->count;
-                    $this->log('Load for Organization '.$this->data['enterpriseGuid'] . ' ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
+                    $this->log('Load rows ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
                     echo 'Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL;
 
                     if ($vetDocumentList->count > 0) {
@@ -131,7 +131,7 @@ class MercVSDList extends MercDictConsumer
                             } else {
                                 //Если ошибка повторилась 3 раза и шаг равен 1, записываем данные о битом запросе в лог и пропускаем данную запись
                                 echo "Error 00" . PHP_EOL;
-                                $this->log('ERROR RECORD' . json_encode($this->request, true) . PHP_EOL);
+                                $this->log('Error in row ' . json_encode($this->request, true) . PHP_EOL);
                                 $add_curr_offset++;
                             }
                             $count_error    = 0; //Даем еще три попытки
@@ -182,7 +182,7 @@ class MercVSDList extends MercDictConsumer
             $this->addFCMMessage('MercVSDList', $this->data['enterpriseGuid']);
             throw new \Exception('Error operation');
         }
-        $this->log("FIND: consumer_class_name = {$className}");
+        $this->log("Complete operation success");
 
         MercVisits::updateLastVisit($this->org_id, MercVisits::LOAD_VSD_LIST, $this->data['enterpriseGuid']);
 

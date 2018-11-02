@@ -179,6 +179,7 @@ class EDIClass extends Component
                 }
                 $orderContent->vat_product = $arr[$index]['TAXRATE'] ?? 0.00;
                 $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
+                $orderContent->edi_shipment_quantity = $simpleXMLElement->DELIVEREDQUANTITY ?? null;
                 $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
                 if ($documentType == 2) {
                     $orderContent->edi_desadv = $this->fileName;
@@ -238,6 +239,7 @@ class EDIClass extends Component
         $order->edi_ordersp = $this->ediDocumentType;
         $order->service_id = 6;
         $order->edi_ordersp = $this->fileName;
+        $order->edi_doc_date = $simpleXMLElement->DELIVERYNOTEDATE ?? '';
         if (!$order->save()) {
             return 'Error saving order';
         }

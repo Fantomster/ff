@@ -182,20 +182,21 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
         $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
 
         $waybillMode = RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+        $org_id = User::findOne(Yii::$app->user->id)->organization_id;
 
         if ($waybillMode !== '0') {
 
             if ($this->store_rid === null) {
                 $records = OrderContent::find()
                         ->where(['order_id' => $this->order_id])
-                        ->leftJoin('`' . $dbName . '`.all_map', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 1 and `' . $dbName . '`.all_map.org_id =' . $this->org . ')')
+                        ->leftJoin('`' . $dbName . '`.all_map', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 1 and `' . $dbName . '`.all_map.org_id =' . $org_id . ')')
                         //  ->andWhere('product_id in ( select product_id from ' . $dbName . '.all_map where service_id = 1 and store_rid is null)')
                         ->andWhere('`' . $dbName . '`.all_map.store_rid is null')
                         ->all();
             } else {
                 $records = OrderContent::find()
                         ->where(['order_id' => $this->order_id])
-                        ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 1 and `' . $dbName . '`.all_map.org_id =' . $this->org . ')')
+                        ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 1 and `' . $dbName . '`.all_map.org_id =' . $org_id . ')')
                         ->andWhere('`' . $dbName . '`.all_map.store_rid =' . $this->store_rid)
                         ->all();
             }

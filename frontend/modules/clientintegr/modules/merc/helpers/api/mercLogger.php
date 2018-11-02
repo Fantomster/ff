@@ -64,7 +64,7 @@ class mercLogger extends Component
         $journal->save();
 
 
-        $this->addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml, $org_id = null);
+        $this->addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml, $org_id);
 
         if (\Yii::$app instanceof \Yii\web\Application) {
             if ($journal->type == mercLog::REJECTED) {
@@ -123,8 +123,8 @@ class mercLogger extends Component
         $journal->service_id = self::service_id;
         $journal->operation_code = $operation->code."";
         $journal->log_guide = $localTransactionId;
-        $journal->type = $result;
-        $journal->response = ($journal->type == 'COMPLETE') ? 'COMPLETE' :  $response;
+        $journal->type = ($result == 'COMPLETE') ? 'success' : 'error';
+        $journal->response = ($journal->type == 'success') ? 'COMPLETE' :  $response;
 
         $journal->save();
 

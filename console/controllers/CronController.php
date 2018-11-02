@@ -5,7 +5,7 @@ namespace console\controllers;
 use common\components\ecom\providers\Provider;
 use common\components\ecom\realization\Realization;
 use common\components\EComIntegration;
-use common\components\ecom\EDIIntegration;
+use common\components\edi\EDIIntegration;
 use common\models\EcomIntegrationConfig;
 use Yii;
 use yii\web\View;

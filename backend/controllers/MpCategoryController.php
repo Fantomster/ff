@@ -8,22 +8,41 @@ use backend\models\MpCategorySearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use common\models\Role;
+use yii\filters\AccessControl;
+use common\components\AccessRule;
 
 /**
  * MpCategoryController implements the CRUD actions for MpCategory model.
  */
 class MpCategoryController extends Controller
 {
+
     /**
      * @inheritdoc
      */
     public function behaviors()
     {
         return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
+            'verbs'  => [
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
+                ],
+            ],
+            'access' => [
+                'class'      => AccessControl::className(),
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'rules'      => [
+                    [
+                        'actions' => ['index', 'view', 'update'],
+                        'allow'   => true,
+                        'roles'   => [
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
                 ],
             ],
         ];
@@ -35,12 +54,12 @@ class MpCategoryController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new MpCategorySearch();
+        $searchModel  = new MpCategorySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+                    'searchModel'  => $searchModel,
+                    'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -52,7 +71,7 @@ class MpCategoryController extends Controller
     public function actionView($id)
     {
         return $this->render('view', [
-            'model' => $this->findModel($id),
+                    'model' => $this->findModel($id),
         ]);
     }
 
@@ -88,7 +107,7 @@ class MpCategoryController extends Controller
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
             return $this->render('update', [
-                'model' => $model,
+                        'model' => $model,
             ]);
         }
     }
@@ -118,7 +137,8 @@ class MpCategoryController extends Controller
         if (($model = MpCategory::findOne($id)) !== null) {
             return $model;
         } else {
-            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.mp.page_error', ['ru'=>'The requested page does not exist.']));
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.mp.page_error', ['ru' => 'The requested page does not exist.']));
         }
     }
+
 }

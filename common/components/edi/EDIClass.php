@@ -88,6 +88,7 @@ class EDIClass extends Component
             } else {
                 $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
             }
+            $arr[$contID]['DELIVEREDQUANTITY'] = (int)$position->DELIVEREDQUANTITY ?? 0;
             $arr[$contID]['PRICE'] = (float)$position->PRICE[0] ?? (float)$position->PRICE ?? 0;
             $arr[$contID]['PRICEWITHVAT'] = (float)$position->PRICEWITHVAT ?? 0.00;
             $arr[$contID]['TAXRATE'] = (float)$position->TAXRATE ?? 0.00;
@@ -179,7 +180,7 @@ class EDIClass extends Component
                 }
                 $orderContent->vat_product = $arr[$index]['TAXRATE'] ?? 0.00;
                 $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
-                $orderContent->edi_shipment_quantity = $simpleXMLElement->DELIVEREDQUANTITY ?? null;
+                $orderContent->edi_shipment_quantity = $arr[$index]['DELIVEREDQUANTITY'];
                 $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
                 if ($documentType == 2) {
                     $orderContent->edi_desadv = $this->fileName;

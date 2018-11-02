@@ -64,6 +64,13 @@ class Registry
         self::ONE_S_CLIENT_SERVICE_ID
     ];
 
+    /** @var array сервисы в которых генерируются накладные */
+    static $waybill_services = [
+        self::RK_SERVICE_ID,
+        self::IIKO_SERVICE_ID,
+        self::ONE_S_CLIENT_SERVICE_ID
+    ];
+
     /**@var array сервисы MixCart*/
     static $mc_services = [
     ];

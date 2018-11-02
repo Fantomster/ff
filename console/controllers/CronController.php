@@ -381,27 +381,6 @@ class CronController extends Controller
     //handle EDI integration files
     public function actionHandleFiles()
     {
-        $eComIntegration = new EComIntegration();
-        $eComIntegration->handleFilesList();
-    }
-
-    //handle EDI integration files queue
-    public function actionHandleFilesQueue()
-    {
-        $eComIntegration = new EComIntegration();
-        $eComIntegration->handleFilesListQueue();
-    }
-
-    //archieve EDI integration files
-    public function actionArchiveFiles()
-    {
-        $eComIntegration = new EComIntegration();
-        $eComIntegration->archiveFiles();
-    }
-
-    //handle EDI integration files
-    public function actionHandleFiles2()
-    {
         $conf = EcomIntegrationConfig::find()->all();
         if ($conf) {
             foreach ($conf as $one) {
@@ -413,7 +392,7 @@ class CronController extends Controller
     }
 
     //handle EDI integration files queue
-    public function actionHandleFilesQueue2()
+    public function actionHandleFilesQueue()
     {
         $conf = EcomIntegrationConfig::find()->all();
         if ($conf) {
@@ -422,14 +401,7 @@ class CronController extends Controller
                 $eComIntegration = new EDIIntegration(['orgId' => $orgId]);
                 $eComIntegration->handleFilesListQueue();
             }
-        }
-    }
-
-    //archieve EDI integration files
-    public function actionArchiveFiles2()
-    {
-        $eComIntegration = new EDIIntegration(['orgId' => 6666]);
-        $eComIntegration->archiveFiles();
+        };
     }
 
     public function actionProcessMercVsd()

@@ -9,22 +9,41 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
+use common\models\Role;
+use yii\filters\AccessControl;
+use common\components\AccessRule;
 
 /**
  * PaymentController implements the CRUD actions for Payment model.
  */
 class PaymentController extends Controller
 {
+
     /**
      * @inheritdoc
      */
     public function behaviors()
     {
         return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
+            'verbs'  => [
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
+                ],
+            ],
+            'access' => [
+                'class'      => AccessControl::className(),
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'rules'      => [
+                    [
+                        'actions' => ['index', 'create', 'delete'],
+                        'allow'   => true,
+                        'roles'   => [
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
                 ],
             ],
         ];
@@ -36,13 +55,13 @@ class PaymentController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new PaymentSearch();
+        $searchModel  = new PaymentSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $dataProvider->query->orderBy('date desc');
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+                    'searchModel'  => $searchModel,
+                    'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -54,7 +73,7 @@ class PaymentController extends Controller
     public function actionCreate()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
-        $model = new Payment();
+        $model                      = new Payment();
         if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
             return ['success' => true];
         } else {
@@ -89,4 +108,5 @@ class PaymentController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+
 }

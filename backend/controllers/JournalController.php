@@ -9,20 +9,38 @@ use yii\data\Sort;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\web\NotFoundHttpException;
-
+use common\models\Role;
+use yii\filters\AccessControl;
+use common\components\AccessRule;
 
 class JournalController extends Controller
 {
+
     /**
      * {@inheritdoc}
      */
     public function behaviors()
     {
         return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
+            'verbs'  => [
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
+                ],
+            ],
+            'access' => [
+                'class'      => AccessControl::className(),
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'rules'      => [
+                    [
+                        'actions' => ['index', 'view'],
+                        'allow'   => true,
+                        'roles'   => [
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
                 ],
             ],
         ];
@@ -34,16 +52,16 @@ class JournalController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new JournalSearch();
+        $searchModel  = new JournalSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        $sort = new Sort();
+        $sort               = new Sort();
         $sort->defaultOrder = ['id' => SORT_DESC];
         $dataProvider->setSort($sort);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+                    'searchModel'  => $searchModel,
+                    'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -56,7 +74,7 @@ class JournalController extends Controller
     public function actionView($id)
     {
         return $this->render('view', [
-            'model' => $this->findModel($id),
+                    'model' => $this->findModel($id),
         ]);
     }
 
@@ -75,4 +93,5 @@ class JournalController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
 }

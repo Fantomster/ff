@@ -2,6 +2,7 @@
 
 namespace api\common\models\merc;
 
+use yii\db\ActiveRecord;
 use Yii;
 
 /**
@@ -49,6 +50,20 @@ class mercLog extends \yii\db\ActiveRecord
         return Yii::$app->get('db_api');
     }
 
+    public function behaviors() {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at']
+                ],
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -88,7 +103,6 @@ class mercLog extends \yii\db\ActiveRecord
     {
         if($this->isNewRecord)
         {
-            $this->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             if (Yii::$app instanceof Yii\web\Application) {
                 $this->user_id = Yii::$app->user->id;
                 $this->organization_id = (Yii::$app->user->identity)->organization_id;

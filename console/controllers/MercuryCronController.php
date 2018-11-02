@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use api\common\models\merc\MercStockEntry;
+use api\common\models\merc\MercVisits;
 use api\common\models\merc\MercVsd;
 use common\models\vetis\VetisBusinessEntity;
 use common\models\vetis\VetisCountry;

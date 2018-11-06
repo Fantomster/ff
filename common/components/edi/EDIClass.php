@@ -52,7 +52,7 @@ class EDIClass extends Component
 
     public function handleOrderResponse(\SimpleXMLElement $simpleXMLElement, $documentType, $isAlcohol = false)
     {
-        $orderID = $simpleXMLElement->NUMBER;
+        $orderID = $simpleXMLElement->ORDERNUMBER;
         $supplier = $simpleXMLElement->HEAD->SUPPLIER;
         $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
         if (!$ediOrganization) {

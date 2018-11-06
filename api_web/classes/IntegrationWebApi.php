@@ -571,8 +571,9 @@ class IntegrationWebApi extends WebApi
         $pagination->setPage($page - 1);
         $pagination->setPageSize($pageSize);
         $dataProvider->setPagination($pagination);
-        $result = [];
+
         $models = $dataProvider->getModels();
+        $result = [];
         if (!empty($models)) {
             foreach ($models as $model) {
                 $result[] = $this->prepareOutProductMap($model);

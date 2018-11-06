@@ -119,10 +119,10 @@ abstract class DaemonController extends Controller
      */
     protected function initLogger()
     {
-//        $targets = \Yii::$app->getLog()->targets;
-//        foreach ($targets as $name => $target) {
-//            $target->enabled = false;
-//        }
+        $targets = \Yii::$app->getLog()->targets;
+        foreach ($targets as $name => $target) {
+            $target->enabled = ($name == 'daemon') ?? false;
+        }
 //        $config = [
 //            'levels'  => ['error', 'warning', 'trace', 'info'],
 //            'logFile' => \Yii::getAlias($this->logDir) . DIRECTORY_SEPARATOR . $this->shortName . '.log',
@@ -132,7 +132,7 @@ abstract class DaemonController extends Controller
 //            ],
 //        ];
 //        $targets['daemon'] = new \yii\log\FileTarget($config);
-//        \Yii::$app->getLog()->targets = $targets;
+        \Yii::$app->getLog()->targets = $targets;
         \Yii::$app->getLog()->init();
     }
     
@@ -152,6 +152,7 @@ abstract class DaemonController extends Controller
      */
     final public function actionIndex()
     {
+        $targets = \Yii::$app->getLog()->targets;
         if ($this->demonize) {
             $pid = pcntl_fork();
             if ($pid == -1) {

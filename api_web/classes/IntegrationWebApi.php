@@ -21,6 +21,7 @@ use common\models\WaybillContent;
 use yii\base\Exception;
 use yii\data\SqlDataProvider;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -160,9 +161,15 @@ class IntegrationWebApi extends WebApi
             throw new BadRequestHttpException("empty_param|waybill_content_id");
         }
 
-        $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
+        $waybillContent = WaybillContent::find()
+            ->joinWith('waybill')
+            ->where([
+                WaybillContent::tableName() . '.id'   => $post['waybill_content_id'],
+                Waybill::tableName() . '.acquirer_id' => $this->user->organization_id
+            ])->one();
+
         if (!$waybillContent) {
-            throw new BadRequestHttpException("waybill content not found");
+            throw new BadRequestHttpException("waybill.content_not_found");
         }
 
         $orderContent = $waybillContent->orderContent;
@@ -487,6 +494,13 @@ class IntegrationWebApi extends WebApi
             throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_found', ['ru' => 'Накладная не найдена']));
         }
 
+        $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
+        $checkOrg = in_array($waybillCheck->acquirer_id, ArrayHelper::map($businessList['result'] ?? [], 'id', 'id')) ?? false;
+
+        if (!$checkOrg) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_releated_current_user', ['ru' => 'Накладная не пренадлежит организациям текущего пользователя']));
+        }
+
         if ($waybillCheck->service_id != $post['service_id']) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_relation_this_service', ['ru' => 'Накладная не связана с заданным сервисом']));
         }
@@ -503,24 +517,8 @@ class IntegrationWebApi extends WebApi
             throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_relation_order', ['ru' => 'Накладная связана с заказом']));
         }
 
-        $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
-
-        $checkOrg = false;
-        foreach ($businessList['result'] as $item) {
-            if ($item['id'] == $waybillCheck->acquirer_id) {
-                $checkOrg = true;
-                break;
-            }
-        }
-
-        if (!$checkOrg) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_releated_current_user', ['ru' => 'Накладная не пренадлежит организациям текущего пользователя']));
-        }
-
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-
-            WaybillContent::deleteAll(['waybill_id' => $waybillCheck->id]);
             $waybillCheck->delete();
             $transaction->commit();
         } catch (\Exception $e) {
@@ -541,14 +539,18 @@ class IntegrationWebApi extends WebApi
     {
         $this->validateRequest($post, ['waybill_content_id']);
 
-        $waybillContent = WaybillContent::findOne(['id' => $post['waybill_content_id']]);
+        $waybillContent = WaybillContent::find()
+            ->joinWith('waybill')
+            ->where([
+                WaybillContent::tableName() . '.id'   => $post['waybill_content_id'],
+                Waybill::tableName() . '.acquirer_id' => $this->user->organization_id
+            ])->one();
+
         if (!$waybillContent) {
-            throw new BadRequestHttpException("waybill content not found");
+            throw new BadRequestHttpException("waybill.content_not_found");
         }
 
-        $waybillContent->delete();
-
-        return ['success' => true];
+        return ['success' => $waybillContent->delete()];
     }
 
     /**

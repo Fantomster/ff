@@ -578,7 +578,8 @@ $this->registerJs(
                                             'class'          => 'yii\grid\ActionColumn',
                                             'contentOptions' => function ($model) {
                                                 return ["id"    => "buttn" . $model['id'],
-                                                        'style' => 'width: 6%;'];
+                                                        'style' => 'width: 6%;',
+                                                        'class' => 'vatcl'];
                                             },
                                             'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
                                             'visibleButtons' => [
@@ -819,6 +820,7 @@ $js = <<< JS
             var edit_can = '$editCan';
             if (edit_can==1) {
                 links_column4();
+                vatclick();
             }
         });
 
@@ -826,49 +828,58 @@ $js = <<< JS
             var edit_can = '$editCan';
             if (edit_can==1) {
                 links_column4();
+                vatclick();
             }
         });
         
-        $('.vatchange').on('click', function() { // реакция на нажатие кнопок установки ставки НДС в крайнем правом столбце
-            var id_vat_full = $(this).attr('id');
-            var id_vat = id_vat_full.substr(7);
-            var vat_vat = id_vat_full.substr(5,2);
-            var vat_num = vat_vat*100;
-            var serv_id = $('#service_id').val();
-            var url_chvat = '$url_chvat';
-            $.post(url_chvat, {prod_id:id_vat, vat:vat_num, service_id:serv_id}, function (data) {
-                data = JSON.parse(data);
-                if (data['output']==vat_num) {
-                    $('#buttn'+vat_vat+id_vat).removeClass('label-default').addClass('label-success');
-                    $('#buttn'+vat_vat+id_vat).attr('style','pointer-events: none; cursor: default; text-decoration: none;');
-                    if (vat_vat=='00') {
-                        $('#nalog'+id_vat).text('0');
-                    } else {
-                        $('#nalog'+id_vat).text(vat_vat);
-                    }
-                    if (vat_vat!='00') {
-                        if($('#buttn00'+id_vat).hasClass('label-success')) {
-                            $('#buttn00'+id_vat).removeClass('label-success').addClass('vatchange label-default');
-                            $('#buttn00'+id_vat).attr('style','');
-                        }    
-                    }
-                    if (vat_vat!='10') {
-                        if($('#buttn10'+id_vat).hasClass('label-success')) {
-                            $('#buttn10'+id_vat).removeClass('label-success').addClass('vatchange label-default');
-                            $('#buttn10'+id_vat).attr('style','');
-                        }    
-                    }
-                    if (vat_vat!='18') {
-                        if($('#buttn18'+id_vat).hasClass('label-success')) {
-                            $('#buttn18'+id_vat).removeClass('label-success').addClass('vatchange label-default');
-                            $('#buttn18'+id_vat).attr('style','');
-                        }    
-                    }
-                } else {
-                    console.log(data['message']);
+        function vatclick() {
+            $('.vatcl').each(function() {
+                if ($(this).hasClass('already')===false) {
+                    $(this).addClass('already');
+                    var td_id = $(this).attr('id');
+                    $('#'+td_id+' .vatchange').on('click', function() { // реакция на нажатие кнопок установки ставки НДС в крайнем правом столбце
+                        var id_vat_full = $(this).attr('id');
+                        var id_vat = id_vat_full.substr(7);
+                        var vat_vat = id_vat_full.substr(5,2);
+                        var vat_num = vat_vat*100;
+                        var serv_id = $('#service_id').val();
+                        var url_chvat = '$url_chvat';
+                        $.post(url_chvat, {prod_id:id_vat, vat:vat_num, service_id:serv_id}, function (data) {
+                            data = JSON.parse(data);
+                            if (data['output']==vat_num) {
+                                $('#buttn'+vat_vat+id_vat).removeClass('label-default').addClass('label-success');
+                                $('#buttn'+vat_vat+id_vat).attr('style','pointer-events: none; cursor: default; text-decoration: none;');
+                                if (vat_vat=='00') {
+                                    $('#nalog'+id_vat).text('0');
+                                } else {
+                                    $('#nalog'+id_vat).text(vat_vat);
+                                }
+                                if (vat_vat!='00') {
+                                    if($('#buttn00'+id_vat).hasClass('label-success')) {
+                                    $('#buttn00'+id_vat).removeClass('label-success').addClass('vatchange label-default');
+                                    $('#buttn00'+id_vat).attr('style','');
+                                    }    
+                                }
+                                if (vat_vat!='10') {
+                                    if($('#buttn10'+id_vat).hasClass('label-success')) {
+                                        $('#buttn10'+id_vat).removeClass('label-success').addClass('vatchange label-default');
+                                        $('#buttn10'+id_vat).attr('style','');
+                                    }    
+                                }
+                                if (vat_vat!='18') {
+                                    if($('#buttn18'+id_vat).hasClass('label-success')) {
+                                        $('#buttn18'+id_vat).removeClass('label-success').addClass('vatchange label-default');
+                                        $('#buttn18'+id_vat).attr('style','');
+                                    }    
+                                }
+                            } else {
+                                console.log(data['message']);
+                            }
+                        })
+                    })
                 }
             })
-        })
+        }        
     });
 JS;
 

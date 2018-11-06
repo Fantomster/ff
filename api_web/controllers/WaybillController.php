@@ -494,6 +494,8 @@ class WaybillController extends WebApiController
                  **/
                 $t = \Yii::$app->db_api->beginTransaction();
                 try {
+                    #Todo refactor
+                    #Отправлять накладную, необходимо в сервис, в котором она создана
                     if (!empty($waybill_ids)) {
                         #Если есть параметры для выгрузки, пробуем выгрузить
                         if (isset($request['send']) && $this->request['send'] === true && !empty($this->request['service_id'])) {

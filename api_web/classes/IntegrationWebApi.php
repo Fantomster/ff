@@ -559,18 +559,27 @@ class IntegrationWebApi extends WebApi
 
     public function getProductMapList(array $post): array
     {
-        $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
+        $page = (!empty($post['pagination']['page']) ? $post['pagination']['page'] : 1);
+        $pageSize = (!empty($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
         $dataProvider = (new OuterProductMapSearch())->search($this->user->organization, $post);
 
+        $pagination = new \yii\data\Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+
         $result = [];
-        foreach ($dataProvider->models as $model) {
-            $result[] = $this->prepareOutProductMap($model);
+        $models = $dataProvider->models;
+        if (!empty($models)) {
+            foreach ($models as $model) {
+                $result[] = $this->prepareOutProductMap($model);
+            }
         }
 
         return [
             'products'   => $result,
             'pagination' => [
-                'page'       => $dataProvider->pagination->page + 1,
+                'page'       => ($dataProvider->pagination->page + 1),
                 'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]

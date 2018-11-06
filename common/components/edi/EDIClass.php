@@ -240,7 +240,8 @@ class EDIClass extends Component
         $order->edi_ordersp = $this->ediDocumentType;
         $order->service_id = 6;
         $order->edi_ordersp = $this->fileName;
-        $order->edi_doc_date = $simpleXMLElement->DELIVERYNOTEDATE ?? '';
+        $order->edi_doc_date = $simpleXMLElement->DELIVERYNOTEDATE ?? null;
+        $order->actual_delivery = $simpleXMLElement->DELIVERYDATE ?? null;
         if (!$order->save()) {
             return 'Error saving order';
         }

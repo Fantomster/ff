@@ -518,7 +518,7 @@ class DocumentWebApi extends \api_web\components\WebApi
     {
         $this->validateRequest($post, ['waybill_id']);
 
-        $waybill = Waybill::findOne(['id' => $post['waybill_id']]);
+        $waybill = Waybill::findOne(['id' => $post['waybill_id'], 'acquirer_id' => $this->user->organization_id]);
 
         if (!isset($waybill)) {
             throw new BadRequestHttpException("waybill_not_found");

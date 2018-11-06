@@ -8,7 +8,6 @@ use common\models\OuterProduct;
 use common\models\OuterProductMap;
 use common\models\OuterStore;
 use common\models\OuterUnit;
-use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
 
 /**
@@ -87,10 +86,14 @@ class OuterProductMapSearch extends OuterProductMap
         }
 
         $query->andWhere(['in', "$catalogBaseGoodsTableName.supp_org_id", $vendors]);
+        $query->orderBy([
+            'IF(outer_product_id is null, 0, 1)' => SORT_DESC,
+            'outer_product_id' => SORT_ASC,
+            'product_id' => SORT_ASC,
+        ]);
 
         $dataProvider = new SqlDataProvider([
-            'sql'        => $query->createCommand()->getRawSql(),
-            'key'        => 'product_id',
+            'sql' => $query->createCommand()->getRawSql()
         ]);
 
         return $dataProvider;

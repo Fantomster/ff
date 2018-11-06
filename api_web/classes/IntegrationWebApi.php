@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\components\definitions\Organization;
 use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
@@ -558,21 +559,34 @@ class IntegrationWebApi extends WebApi
      *
      * @param array $post
      * @return array
+     * @throws BadRequestHttpException
      */
-
     public function getProductMapList(array $post): array
     {
         $page = (!empty($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (!empty($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
-        /** @var SqlDataProvider $dataProvider */
-        $dataProvider = (new OuterProductMapSearch())->search($this->user->organization, $post);
 
+        $client = $this->user->organization;
+        //Фильтр по бизнесу
+        if (!empty($post['search']['business_id']) && $post['search']['business_id'] != $this->user->organization_id) {
+            $searchBusiness = (int)$post['search']['business_id'];
+            $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
+            $checkOrg = in_array($searchBusiness, ArrayHelper::map($businessList['result'] ?? [], 'id', 'id')) ?? false;
+            if (!$checkOrg) {
+                return [];
+            } else {
+                $client = \common\models\Organization::findOne($searchBusiness);
+            }
+        }
+
+        /** @var SqlDataProvider $dataProvider */
+        $dataProvider = (new OuterProductMapSearch())->search($client, $post);
         $pagination = new \yii\data\Pagination();
         $pagination->setPage($page - 1);
         $pagination->setPageSize($pageSize);
         $dataProvider->setPagination($pagination);
-
         $models = $dataProvider->getModels();
+
         $result = [];
         if (!empty($models)) {
             foreach ($models as $model) {

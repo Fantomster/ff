@@ -63,7 +63,7 @@ class MercuryCronController extends Controller
 
                 if ($item['code'] == mercService::EXTENDED_LICENSE_CODE) {
                     echo "GET MercStockEntryList: " . $item['guid'] . PHP_EOL;
-                    MercStockEntry::getUpdateData($item['org'], $item['guid']);
+                    MercStockEntry::getUpdateData($item['org'], $item['guid'], $start_date);
                 }
             } catch (\Exception $e) {
                 \Yii::error($e->getMessage(),$e->getTraceAsString());
@@ -162,11 +162,19 @@ class MercuryCronController extends Controller
         echo "FINISH" . PHP_EOL;
     }
 
-    public function actionTestStock()
+    public function actionTestStock($org_id = 5144, $enterpriseGuid = 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b', $start_date = null)
     {
         echo "START" . PHP_EOL;
+        echo "ORG: " .$org_id. PHP_EOL;
+        echo "EnterpriseGuid: " .$enterpriseGuid. PHP_EOL;
+        echo "Start date: " .$start_date. PHP_EOL;
         $w = new MercStockEntryList(5144);
-        $w->data = 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b';
+        MercStockEntry::getUpdateData($org_id);
+        $data['startDate'] = $start_date ?? MercVisits::getLastVisit($org_id, 'MercStockEntryList', $enterpriseGuid);
+        $data['listOptions']['count'] = 100;
+        $data['listOptions']['offset'] = 0;
+        $data['enterpriseGuid'] = $enterpriseGuid;
+        $w->data = json_encode($data);
         $w->getData();
         echo "FINISH" . PHP_EOL;
     }

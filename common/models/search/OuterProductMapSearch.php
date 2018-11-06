@@ -8,7 +8,6 @@ use common\models\OuterProduct;
 use common\models\OuterProductMap;
 use common\models\OuterStore;
 use common\models\OuterUnit;
-use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
 
 /**
@@ -89,8 +88,7 @@ class OuterProductMapSearch extends OuterProductMap
         $query->andWhere(['in', "$catalogBaseGoodsTableName.supp_org_id", $vendors]);
 
         $dataProvider = new SqlDataProvider([
-            'sql'        => $query->createCommand()->getRawSql(),
-            'key'        => 'product_id',
+            'sql' => $query->createCommand()->getRawSql()
         ]);
 
         return $dataProvider;

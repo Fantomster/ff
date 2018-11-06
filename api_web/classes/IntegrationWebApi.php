@@ -19,6 +19,7 @@ use common\models\search\OuterProductMapSearch;
 use common\models\Waybill;
 use common\models\WaybillContent;
 use yii\base\Exception;
+use yii\data\SqlDataProvider;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
@@ -561,15 +562,15 @@ class IntegrationWebApi extends WebApi
     {
         $page = (!empty($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (!empty($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
+        /** @var SqlDataProvider $dataProvider */
         $dataProvider = (new OuterProductMapSearch())->search($this->user->organization, $post);
 
         $pagination = new \yii\data\Pagination();
         $pagination->setPage($page - 1);
         $pagination->setPageSize($pageSize);
         $dataProvider->setPagination($pagination);
-
         $result = [];
-        $models = $dataProvider->models;
+        $models = $dataProvider->getModels();
         if (!empty($models)) {
             foreach ($models as $model) {
                 $result[] = $this->prepareOutProductMap($model);

@@ -133,7 +133,7 @@ abstract class DaemonController extends Controller
 //        ];
 //        $targets['daemon'] = new \yii\log\FileTarget($config);
 //        \Yii::$app->getLog()->targets = $targets;
-//        \Yii::$app->getLog()->init();
+        \Yii::$app->getLog()->init();
     }
     
     /**

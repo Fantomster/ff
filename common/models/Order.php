@@ -105,7 +105,7 @@ class Order extends \yii\db\ActiveRecord
                     'status_updated_at' => [
                         ActiveRecord::EVENT_BEFORE_UPDATE => function ($event, $attribute) {
                             if ($this->status != $this->oldAttributes['status']) {
-                                $this->$attribute = gmdate("Y-m-d H:i:s");
+                                return gmdate("Y-m-d H:i:s");
                             }
                         },
                     ],

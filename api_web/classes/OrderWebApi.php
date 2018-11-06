@@ -1122,8 +1122,12 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('order_not_found');
         }
 
-        if ($model->service_id != Registry::MC_BACKEND) {
-            throw new BadRequestHttpException('bad_service_id_in_order|' . ($model->service_id ?? "NULL") . '|' . Registry::MC_BACKEND);
+        if (!in_array($model->service_id, [Registry::MC_BACKEND, Registry::VENDOR_DOC_MAIL_SERVICE_ID])) {
+            throw new BadRequestHttpException(
+                'bad_service_id_in_order|' .
+                ($model->service_id ?? "NULL") . '|' .
+                Registry::MC_BACKEND . ' or ' . Registry::VENDOR_DOC_MAIL_SERVICE_ID
+            );
         }
 
         $t = \Yii::$app->db->beginTransaction();

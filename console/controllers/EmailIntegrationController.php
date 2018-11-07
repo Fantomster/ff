@@ -215,7 +215,7 @@ class EmailIntegrationController extends Controller
         }
     }
 
-    protected function beforeAction($action)
+    public function beforeAction($action)
     {
         $targets = \Yii::$app->getLog()->targets;
         foreach ($targets as $name => $target) {

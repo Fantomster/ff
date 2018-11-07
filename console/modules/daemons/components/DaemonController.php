@@ -121,7 +121,7 @@ abstract class DaemonController extends Controller
     {
         $targets = \Yii::$app->getLog()->targets;
         foreach ($targets as $name => $target) {
-            $target->enabled = ($name == 'daemon') ?? false;
+            $target->enabled = ($name == 'daemon');
         }
 //        $config = [
 //            'levels'  => ['error', 'warning', 'trace', 'info'],

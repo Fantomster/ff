@@ -684,7 +684,6 @@ class DictionaryController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                        "agent_id": 1,
      *                        "name": "ООО Рос Прод Торг"
      *                    }
      *              )
@@ -696,8 +695,7 @@ class DictionaryController extends \api_web\components\WebApiController
      *            @SWG\Schema(
      *              default={
      *                          {
-     *                              "result": false,
-     *                              "message": "Такое название уже задано"
+     *                              "result": false
      *                          },
      *                          {
      *                              "result": true

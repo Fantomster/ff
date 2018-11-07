@@ -318,8 +318,9 @@ class FullmapController extends DefaultController
         $vat = Yii::$app->request->post('vat');
         $service_id = Yii::$app->request->post('service_id');
         $org_id = $this->currentUser->organization->id;
-        $Product = AllMaps::find()->andWhere('org_id = :org', [':org' => $org_id,])
-            ->andWhere('service_id = ' . $service_id . ' and is_active =1')
+        $Product = AllMaps::find()->andWhere('org_id = :org', [':org' => $org_id])
+            ->andWhere('service_id = :serv', [':serv' => $service_id])
+            ->andWhere('is_active = :active', [':active' => 1])
             ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
 
         if (!empty($Product)) { // Product link already mapped in table
@@ -347,7 +348,8 @@ class FullmapController extends DefaultController
             if (!empty($childs)) {
                 foreach ($childs as $child) {
                     $child_product = AllMaps::find()->andWhere('org_id = :org', [':org' => $child,])
-                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
+                        ->andWhere('service_id = :serv', [':serv' => $service_id])
+                        ->andWhere('is_active = :active', [':active' => 1])
                         ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
                     if (!empty($child_product)) {
                         if ($child_product->vat === null) {

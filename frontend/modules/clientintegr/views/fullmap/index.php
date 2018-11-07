@@ -839,22 +839,13 @@ $js = <<< JS
                     var td_id = $(this).attr('id');
                     $('#'+td_id+' .vatchange').on('click', function() { // реакция на нажатие кнопок установки ставки НДС в крайнем правом столбце
                         var id_vat_full = $(this).attr('id');
-                        console.log(id_vat_full);
                         var id_vat = id_vat_full.substr(7);
-                        console.log(id_vat);
                         var vat_vat = id_vat_full.substr(5,2);
-                        console.log(vat_vat);
                         var vat_num = vat_vat*100;
-                        console.log(vat_num);
                         var serv_id = $('#service_id').val();
-                        console.log(serv_id);
                         var url_chvat = '$url_chvat';
-                        console.log(url_chvat);
                         $.post(url_chvat, {prod_id:id_vat, vat:vat_num, service_id:serv_id}, function (data) {
-                            console.log(data);
                             data = JSON.parse(data);
-                            console.log(data);
-                            console.log(data['output']);
                             if (data['output']==vat_num) {
                                 $('#buttn'+vat_vat+id_vat).removeClass('label-default').addClass('label-success');
                                 $('#buttn'+vat_vat+id_vat).attr('style','pointer-events: none; cursor: default; text-decoration: none;');

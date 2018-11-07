@@ -65,7 +65,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         $this->validateRequest($post, ['type', 'document_id']);
 
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
-            throw new BadRequestHttpException('dont support this type');
+            throw new BadRequestHttpException('document.not_support_type');
         }
 
         $className = self::$models[$post['type']];
@@ -84,7 +84,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         $this->validateRequest($post, ['type', 'document_id']);
 
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
-            throw new BadRequestHttpException('dont support this type');
+            throw new BadRequestHttpException('document.not_support_type');
         }
 
         $className = self::$modelsContent[$post['type']];
@@ -604,6 +604,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
     /**
      * @param $date
+     * @param $direction
      * @return string
      */
     private static function convertDate($date, $direction)

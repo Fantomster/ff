@@ -2,7 +2,6 @@
 
 namespace api_web\classes;
 
-use api_web\components\definitions\Organization;
 use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
@@ -346,7 +345,7 @@ class IntegrationWebApi extends WebApi
             ])->one();
 
         if (!$waybillContent) {
-            throw new BadRequestHttpException("waybill content not found");
+            throw new BadRequestHttpException("waybill.content_not_found");
         }
 
         //Обновим внешний продукт и ед. измерения

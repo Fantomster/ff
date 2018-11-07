@@ -209,7 +209,7 @@ class EmailIntegrationController extends Controller
                 $this->connect->disconnect();
             } catch (\Exception $e) {
                 $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
-                \Yii::error($this->log);
+                \Yii::error($this->log, 'email-integration-log');
             }
         }
     }

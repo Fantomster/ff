@@ -820,16 +820,16 @@ $js = <<< JS
             var edit_can = '$editCan';
             if (edit_can==1) {
                 links_column4();
-                vatclick();
             }
+            vatclick();
         });
 
         $(document).ready(function() { // действия после полной загрузки страницы
             var edit_can = '$editCan';
             if (edit_can==1) {
                 links_column4();
-                vatclick();
             }
+            vatclick();
         });
         
         function vatclick() {

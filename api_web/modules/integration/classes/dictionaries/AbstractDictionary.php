@@ -58,16 +58,9 @@ class AbstractDictionary extends WebApi
     public function getList()
     {
         $models = OuterDictionary::find()
-            ->where([
-                'service_id' => (int)$this->service_id
-            ])
-            ->leftJoin(
-                OrganizationDictionary::tableName(),
-                'outer_dictionary.id = organization_dictionary.outer_dic_id AND organization_dictionary.org_id = :org_id'
-            )
-            ->addParams([
-                ':org_id' => $this->user->organization_id
-            ])
+            ->where('service_id = :service_id', [':service_id' => (int)$this->service_id])
+            ->leftJoin(OrganizationDictionary::tableName(), 'outer_dictionary.id = organization_dictionary.outer_dic_id')
+            ->andWhere('organization_dictionary.org_id = :org_id', [':org_id' => $this->user->organization_id])
             ->all();
 
         $return = [];

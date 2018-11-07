@@ -182,6 +182,7 @@ class Role extends \amnah\yii2\user\models\Role
             self::ROLE_RESTAURANT_ACCOUNTANT,
             self::ROLE_RESTAURANT_BUYER,
             self::ROLE_RESTAURANT_JUNIOR_BUYER,
+            self::ROLE_RESTAURANT_ORDER_INITIATOR,
         ];
 
         if (in_array($roleID, $restRoles)) {

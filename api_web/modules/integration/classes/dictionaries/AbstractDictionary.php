@@ -57,11 +57,17 @@ class AbstractDictionary extends WebApi
      */
     public function getList()
     {
-        $models = OuterDictionary::find()
+        $dictionary = OuterDictionary::find()
+            ->select('id')
             ->where('service_id = :service_id', [':service_id' => (int)$this->service_id])
-            ->leftJoin(OrganizationDictionary::tableName(), 'outer_dictionary.id = organization_dictionary.outer_dic_id')
-            ->andWhere('organization_dictionary.org_id = :org_id', [':org_id' => $this->user->organization_id])
-            ->all();
+            ->asArray()
+            ->column();
+
+        $models = OrganizationDictionary::find()
+            ->where([
+                'outer_dic_id' => $dictionary,
+                'org_id'       => $this->user->organization_id
+            ])->all();
 
         $return = [];
         /**
@@ -69,17 +75,16 @@ class AbstractDictionary extends WebApi
          */
         $defaultStatusText = OrganizationDictionary::getStatusTextList()[OrganizationDictionary::STATUS_DISABLED];
         foreach ($models as $model) {
-            /** @var \common\models\OrganizationDictionary $d */
-            $d = current($model->organizationDictionaries);
+            /** @var \common\models\OrganizationDictionary $model */
             $return[] = [
                 'id'          => $model->id,
-                'name'        => $model->name,
-                'title'       => \Yii::t('api_web', 'dictionary.' . $model->name),
-                'count'       => $d->count ?? 0,
-                'status_id'   => $d->status_id ?? 0,
-                'status_text' => $d->statusText ?? $defaultStatusText,
-                'created_at'  => $d->created_at ?? null,
-                'updated_at'  => $d->updated_at ?? null
+                'name'        => $model->outerDic->name,
+                'title'       => \Yii::t('api_web', 'dictionary.' . $model->outerDic->name),
+                'count'       => $model->count ?? 0,
+                'status_id'   => $model->status_id ?? 0,
+                'status_text' => $model->statusText ?? $defaultStatusText,
+                'created_at'  => $model->created_at ?? null,
+                'updated_at'  => $model->updated_at ?? null
             ];
         }
 

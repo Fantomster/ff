@@ -368,7 +368,7 @@ class FullmapController extends DefaultController
                         $child_product->serviceproduct_id = $Product->serviceproduct_id;
                         $child_product->unit_rid = null;
                         $child_product->store_rid = null;
-                        ($Product->koef===null)? $child_product->koef = 1 : $child_product->koef = $Product->koef;
+                        $child_product->koef = $Product->koef ?? 1;
                         $child_product->is_active = 1;
                         if (!$child_product->save()) {
                             throw new \RuntimeException('Cant save new allmaps model.');

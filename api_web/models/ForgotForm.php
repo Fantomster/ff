@@ -39,7 +39,7 @@ class ForgotForm extends BaseForm
             // send email
             $subject = Yii::$app->id . " - " . Yii::t("user", "Forgot password");
             $toFrontEnd = true;
-            $result = $mailer->compose('@common/mail/forgotPassword', compact("subject", "user", "userToken", "toFrontEnd"))
+            $result = $mailer->compose('@api_web/views/mail/forgotPassword', compact("subject", "user", "userToken", "toFrontEnd"))
                 ->setTo($user->email)
                 ->setSubject($subject)
                 ->send();

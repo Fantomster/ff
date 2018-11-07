@@ -19,9 +19,8 @@ use api_web\modules\integration\classes\SyncLog;
 
 class RkwsCategory extends ServiceRkws
 {
-
     /** @var string $index Символьный идентификатор справочника */
-    public $index = 'category';
+    public $index = self::DICTIONARY_CATEGORY;
 
     /** @var string $entityTableName Класс таблицы для записи данных */
     public $entityTableName = OuterCategory::class;
@@ -53,5 +52,4 @@ class RkwsCategory extends ServiceRkws
         }
         return $array;
     }
-
 }

@@ -18,9 +18,8 @@ use yii\web\BadRequestHttpException;
 
 class RkwsUnit extends ServiceRkws
 {
-
     /** @var string $index Символьный идентификатор справочника */
-    public $index = 'unit';
+    public $index = self::DICTIONARY_UNIT;
 
     /** @var string $entityTableName Класс таблицы для записи данных */
     public $entityTableName = OuterUnit::class;

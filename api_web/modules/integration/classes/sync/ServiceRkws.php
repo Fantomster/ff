@@ -231,7 +231,14 @@ class ServiceRkws extends AbstractSyncFactory
             'updated_at'  => $model->updated_at ?? null
         ];
     }
-
+  
+    /**
+     * @return null|string
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
+     */
     public function prepareServiceWithAuthCheck(): ?string
     {
 
@@ -249,6 +256,9 @@ class ServiceRkws extends AbstractSyncFactory
 
         # 3. Remember license codes
         $this->licenseCode = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['code']);
+        if (!$this->licenseCode) {
+            throw new BadRequestHttpException('Setting [code] for R-keeper not set');
+        }
 
         # 5. Фиксируем активную лицензия найдена и инициализируем транзакции в БД
         SyncLog::trace('Service licence record for organization #' . $this->user->organization_id .

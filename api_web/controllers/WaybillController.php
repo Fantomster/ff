@@ -464,81 +464,8 @@ class WaybillController extends WebApiController
      */
     public function actionCreateAndSendWaybillAsync()
     {
-        /** @var Transaction $t */
         WebApiHelper::setAsyncResponseHeader();
-        /** @var \Redis $redis */
-        $redis = \Yii::$app->get('redis');
-        //Имя строки блокировки если уже идет обработка по этим параметрам
-        $lockName = implode('-', ['lock-start', $this->action->id, $this->request['order_id'], $this->request['vendor_id']]);
-        //Проверяем блокировку
-        $run = $redis->get($lockName);
-        //Если нет, запускаем
-        if (is_null($run)) {
-            //Блокируем обработку этого заказа
-            $redis->set($lockName, 1);
-            try {
-                /**
-                 * Запускаем создание накладных
-                 **/
-                $t = \Yii::$app->db_api->beginTransaction();
-                try {
-                    $waybill_ids = (new WaybillHelper())->createWaybill($this->request['order_id'], null, $this->request['vendor_id']);
-                    //Если удалось создать накладные
-                    $t->commit();
-                } catch (\Throwable $e) {
-                    $t->rollBack();
-                    throw $e;
-                }
-                /**
-                 * Отправка накладных
-                 **/
-                $t = \Yii::$app->db_api->beginTransaction();
-                try {
-                    #Todo refactor
-                    #Отправлять накладную, необходимо в сервис, в котором она создана
-                    if (!empty($waybill_ids)) {
-                        #Если есть параметры для выгрузки, пробуем выгрузить
-                        if (isset($request['send']) && $this->request['send'] === true && !empty($this->request['service_id'])) {
-                            #Отправка накладных
-                            $factory = (new SyncServiceFactory($this->request['service_id'], [], SyncServiceFactory::TASK_SYNC_GET_LOG))->factory($this->request['service_id']);
-                            $message = $factory->sendWaybill([
-                                'service_id' => $this->request['service_id'],
-                                'ids'        => $waybill_ids
-                            ]);
-                            $this->writeInJournal($message, $this->request['service_id']);
-                            $t->commit();
-                        }
-                    }
-                } catch (\Throwable $e) {
-                    $t->rollBack();
-                    throw $e;
-                }
-            } catch (\Throwable $e) {
-                //Запись ошибки в журнал
-                $this->writeInJournal($e->getMessage(), $this->request['service_id'], 'error');
-            } finally {
-                //Снятие лока с обработки
-                $redis->del($lockName);
-            }
-        }
-    }
-
-    /**
-     * Запись в журнал
-     *
-     * @param        $message
-     * @param        $service_id
-     * @param string $type
-     */
-    private function writeInJournal($message, $service_id, $type = 'success')
-    {
-        $journal = new Journal();
-        $journal->response = is_array($message) ? json_encode($message) : $message;
-        $journal->service_id = (int)$this->request['service_id'];
-        $journal->type = $type;
-        $journal->organization_id = $this->user->organization_id;
-        $journal->user_id = $this->user->id;
-        $journal->operation_code = Registry::$operation_code_send_waybill[$service_id] ?? null;
-        $journal->save();
+        $this->request['action_id'] = $this->action->id;
+        (new WaybillHelper())->sendWaybillAsync($this->request);
     }
 }

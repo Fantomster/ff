@@ -697,7 +697,6 @@ class DictionaryController extends \api_web\components\WebApiController
      *              default={
      *                          {
      *                              "result": false,
-     *                              "message": "Такое название уже задано"
      *                          },
      *                          {
      *                              "result": true

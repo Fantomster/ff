@@ -4,9 +4,7 @@ namespace api_web\modules\integration\classes\sync;
 
 use api_web\classes\RabbitWebApi;
 use api_web\components\Registry;
-use api_web\exceptions\ValidationException;
 use api_web\modules\integration\models\iikoWaybill;
-use common\models\Waybill;
 use api_web\helpers\iikoApi;
 use yii\db\Transaction;
 use yii\web\BadRequestHttpException;

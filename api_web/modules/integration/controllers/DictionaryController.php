@@ -600,48 +600,33 @@ class DictionaryController extends \api_web\components\WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  "stores": {
+     *                  "categories": {
      *                      "id": 5,
      *                      "outer_uid": "c9319967c038f9b923068dabdf60cfe3",
      *                      "name": "Каталог",
-     *                      "created_at": "2018-09-14T11:31:07-02:00",
-     *                      "updated_at": null,
-     *                      "is_active": 1,
      *                      "childs": {
      *                          {
      *                              "id": 9,
      *                              "name": "Алкоголь",
      *                              "outer_uid": "91e0dd93-0923-4509-9435-6cc6224768af",
-     *                              "created_at": "2018-09-14T11:31:07-02:00",
-     *                              "updated_at": null,
-     *                              "is_active": 1,
      *                              "childs": {}
      *                          },
      *                          {
      *                              "id": 8,
      *                              "outer_uid": "73045059-5e4f-4358-90a4-23b2c0641e0f",
      *                              "name": "Алкоголь",
-     *                              "created_at": "2018-09-14T11:31:07-02:00",
-     *                              "updated_at": null,
-     *                              "is_active": 1,
      *                              "childs": {}
      *                          },
      *                          {
      *                              "id": 7,
      *                              "outer_uid": "a3acc051-bfbb-45a9-9e1a-87d2f605f76e",
      *                              "name": "Алкоголь",
-     *                              "created_at": "2018-09-14T11:31:07-02:00",
-     *                              "updated_at": null,
-     *                              "is_active": 1,
      *                              "childs": {}
      *                          },
      *                          {
      *                              "id": 6,
      *                              "outer_uid": "1239d270-1bbe-f64f-b7ea-5f00518ef508",
      *                              "name": "Алкоголь",
-     *                              "created_at": "2018-09-14T11:31:07-02:00",
-     *                              "updated_at": null,
-     *                              "is_active": 1,
      *                              "childs": {}
      *                          }
      *                      }

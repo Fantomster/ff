@@ -516,23 +516,26 @@ class AbstractDictionary extends WebApi
      * */
     public function categoryList($request): array
     {
-        $search = OuterCategory::find()->where(['org_id' => $this->user->organization->id, 'service_id' =>
-            $this->service_id]);
+        $search = OuterCategory::find()->where([
+            'org_id'     => $this->user->organization->id,
+            'service_id' => $this->service_id,
+            'is_deleted' => 0
+        ]);
 
+        /**
+         * TODO Не работает фильтр
+         */
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', 'name', $request['search']['name']]);
             }
         }
 
-        $rootModels = $search->roots()->indexBy('id')->all();
-
+        $rootModels = $search->roots()->all();
         $result = [];
-
-        foreach ($rootModels as $rootModel) {
+        foreach ($this->iterator($rootModels) as $rootModel) {
             $result = $this->prepareCategory($rootModel);
         }
-
         return ['categories' => $result];
     }
 
@@ -544,22 +547,37 @@ class AbstractDictionary extends WebApi
      * */
     private function prepareCategory($model)
     {
+        /**
+         * @param $model OuterCategory
+         * @return array
+         */
         $child = function ($model) {
             $childrens = $model->children()->all();
             $arReturn = [];
-            foreach ($childrens as $children) {
-                $arReturn[] = $this->prepareCategory($children);
+            if (!empty($childrens)) {
+                foreach ($this->iterator($childrens) as $children) {
+                    $arReturn[] = $this->prepareCategory($children);
+                }
             }
             return $arReturn;
         };
+
         return [
-            'id'         => $model->id,
-            'outer_uid'  => $model->outer_uid,
-            'name'       => $model->name,
-            'created_at' => $model->created_at,
-            'updated_at' => $model->updated_at,
-            'is_active'  => (int)!$model->is_deleted,
-            'childs'     => $child($model),
+            'id'        => $model->id,
+            'outer_uid' => $model->outer_uid,
+            'name'      => $model->name,
+            'childs'    => $model->isLeaf() ? [] : $child($model),
         ];
+    }
+
+    /**
+     * @param $items
+     * @return \Generator
+     */
+    private function iterator($items)
+    {
+        foreach ($items as $item) {
+            yield $item;
+        }
     }
 }

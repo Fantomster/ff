@@ -373,7 +373,7 @@ class OrderController extends Controller
 
                 if ($countCall > 1) {
                     $modelTimeout = OperatorTimeout::findOne(['operator_id' => Yii::$app->user->getId()]);
-                    if (empty($modelTimeout)) {
+                    if (!isset($modelTimeout)) {
                         $modelTimeout = new OperatorTimeout(['operator_id' => Yii::$app->user->getId()]);
                     }
                     $modelTimeout->timeout_at = \gmdate('Y-m-d H:i:s');

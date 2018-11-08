@@ -108,7 +108,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
                 ];
             } catch (\Throwable $t) {
                 $log = \Yii::getLogger();
-                $log->log($t->getMessage(), $log::LEVEL_ERROR, 'abaddon');
+                $log->log($t->getMessage(), $log::LEVEL_ERROR);
             }
         }
 

@@ -11,7 +11,7 @@ namespace api_web\components;
 use api_web\helpers\Logger;
 use api_web\helpers\WebApiHelper;
 use common\models\licenses\License;
-use yii\base\Exception;
+use yii\web\HttpException;
 
 /**
  * @SWG\Swagger(
@@ -107,6 +107,7 @@ class WebApiController extends \yii\rest\Controller
     /**
      * @param \yii\base\Action $action
      * @return bool
+     * @throws HttpException
      * @throws \yii\web\BadRequestHttpException
      */
     public function beforeAction($action)
@@ -146,12 +147,9 @@ class WebApiController extends \yii\rest\Controller
                 $headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
                 $headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
                 #Проверяем, не стухла ли лицензия
-                /**
-                 * TODO раскомментировать, когда нужно включить проверку лицензий
-                 */
-                #if(strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
-                #    throw new Exception('license.payment_required', 402);
-                #}
+                if (strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
+                    throw new HttpException(402, 'license.payment_required', 402);
+                }
             }
 
             \Yii::$app->setTimeZone('Etc/GMT' . $this->container->get('UserWebApi')->checkGMTFromDb());

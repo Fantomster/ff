@@ -30,60 +30,51 @@ class MercVSDList extends MercDictConsumer
 
     const DEFAULT_STEP = 100;
 
-    public static $timeout          = 60 * 15;
+    public static $timeout = 60 * 15;
     public static $timeoutExecuting = 60 * 60;
-    private $result                 = true;
+    private $result = true;
 
     public function init()
     {
-        $check = 9; /* RabbitQueues::find()->where("consumer_class_name in ('MercUnitList', 'MercPurposeList',
-          'MercCountryList', 'MercRussianEnterpriseList', 'MercForeignEnterpriseList', 'MercBusinessEntityList', 'MercProductList', 'MercProductItemList', 'MercSubProductList')")
-          ->andWhere('start_executing is null and last_executed is not null and data_request is null')->count(); */
-        if ($check == 9) {
-            $this->data  = json_decode($this->data, true);
-            $this->logPrefix .= " ".$this->data['enterpriseGuid'];
-            $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList', 'organization_id' => $this->org_id, 'store_id' => $this->data['enterpriseGuid']])->one();
-            $this->data  = isset($this->queue->data_request) ? json_decode($this->queue->data_request, true) : $this->data;
-            if (!isset($this->data)) {
-                $this->log('Not data for request' . PHP_EOL);
-                throw new \Exception('Not data for request');
-            }
-        } else {
-            $this->log('Dictionaries are currently being updated' . PHP_EOL);
-            throw new \Exception('Dictionaries are currently being updated');
+        $this->data = json_decode($this->data, true);
+        $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList', 'organization_id' => $this->org_id, 'store_id' => $this->data['enterpriseGuid']])->one();
+        $this->data = isset($this->queue->data_request) ? json_decode($this->queue->data_request, true) : $this->data;
+        if (!isset($this->data)) {
+            $this->log('Not data for request' . PHP_EOL);
+            throw new \Exception('Not data for request');
         }
     }
 
     public function getData()
     {
-        $className       = BaseStringHelper::basename(static::class);
-        $this->init();
-        $this->log('Load data' . PHP_EOL);
-        $load_data_succ = false;
-        $count_error = 0;
-        $list = null;
-        $vsd = new VetDocumentsChangeList();
-        $vsd->org_id = $this->org_id;
-        $api = mercuryApi::getInstance($this->org_id);
-        $api->setEnterpriseGuid($this->data['enterpriseGuid']);
-        $curr_step       = $this->data['listOptions']['count']; //Текущий шаг
-        $curr_offset     = $this->data['listOptions']['offset']; //Текущий отступ
-        $total           = 0;
-        $add_curr_offset = 0;
         try {
+            $className = BaseStringHelper::basename(static::class);
+            $this->init();
+            $this->log('Load' . PHP_EOL);
+            $load_data_succ = false;
+            $count_error = 0;
+            $list = null;
+            $vsd = new VetDocumentsChangeList();
+            $vsd->org_id = $this->org_id;
+            $api = mercuryApi::getInstance($this->org_id);
+            $api->setEnterpriseGuid($this->data['enterpriseGuid']);
+            $curr_step = $this->data['listOptions']['count']; //Текущий шаг
+            $curr_offset = $this->data['listOptions']['offset']; //Текущий отступ
+            $total = 0;
+            $add_curr_offset = 0;
             do {
                 try {
                     //Записываем в базу данные о текущем шаге
-                    $add_curr_offset                     = 0;
+                    $add_curr_offset = 0;
                     $this->data['listOptions']['offset'] = $curr_offset;
-                    $this->data['listOptions']['count']  = $curr_step;
-                    $this->data['listOptions']           = $this->data['listOptions'];
-                    $this->queue->data_request           = json_encode($this->data);
+                    $this->data['listOptions']['count'] = $curr_step;
+                    $this->data['listOptions'] = $this->data['listOptions'];
+                    $this->queue->data_request = json_encode($this->data);
                     $this->queue->save();
                     echo "============================" . PHP_EOL;
                     //Выполняем запрос и обработку полученных данных
-                    $load_data_succ                      = false;
-                    $result                              = $api->getVetDocumentChangeList($this->data['startDate'], $this->data['listOptions']);
+                    $load_data_succ = false;
+                    $result = $api->getVetDocumentChangeList($this->data['startDate'], $this->data['listOptions']);
 
                     //Проверяем результат запроса
                     if ($result->application->status != mercLog::COMPLETED) {
@@ -106,14 +97,15 @@ class MercVSDList extends MercDictConsumer
                     }
 
                     //Готовимся к следующей итерации
-                    $curr_count  = $vetDocumentList->count ?? 0;
-                    $curr_step   = self::DEFAULT_STEP;
+                    $curr_count = $vetDocumentList->count ?? 0;
+                    $curr_step = self::DEFAULT_STEP;
                     $curr_offset = $vetDocumentList->offset;
                     $count_error = 0;
                 } catch (\Throwable $e) {
                     //Вслучае ошибки увеличиваем счетчик ошибок на единицу
                     $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
-                    If(isset($result->application->errors)) {
+                    mercLogger::getInstance()->addMercLogDict('ERROR', 'AutoLoad' . BaseStringHelper::basename(static::class), $e->getMessage(), $this->org_id);
+                    If (isset($result->application->errors)) {
                         if ($result->application->errors->error->code == 'APLM0012') {
                             echo "Error APLM0012" . PHP_EOL;
                             throw new \Exception('Error APLM0012');
@@ -134,7 +126,7 @@ class MercVSDList extends MercDictConsumer
                                 $this->log('Error in row ' . json_encode($this->request, true) . PHP_EOL);
                                 $add_curr_offset++;
                             }
-                            $count_error    = 0; //Даем еще три попытки
+                            $count_error = 0; //Даем еще три попытки
                             $load_data_succ = true;
                         } else {
                             echo "Error 1 " . PHP_EOL;
@@ -145,8 +137,8 @@ class MercVSDList extends MercDictConsumer
                     }
                     $count_error++;
                 }
-                $total       = $vetDocumentList->total ?? $total;
-                $offset      = $curr_offset;
+                $total = $vetDocumentList->total ?? $total;
+                $offset = $curr_offset;
                 $curr_offset += $curr_count;
                 $curr_offset += $add_curr_offset;
                 //sleep(60);
@@ -178,7 +170,7 @@ class MercVSDList extends MercDictConsumer
             }
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
-            mercLogger::getInstance()->addMercLogDict('ERROR', 'AutoLoad'.BaseStringHelper::basename(static::class), $e->getMessage());
+            mercLogger::getInstance()->addMercLogDict('ERROR', 'AutoLoad' . BaseStringHelper::basename(static::class), $e->getMessage(), $this->org_id);
             $this->addFCMMessage('MercVSDList', $this->data['enterpriseGuid']);
             throw new \Exception('Error operation');
         }
@@ -186,7 +178,7 @@ class MercVSDList extends MercDictConsumer
 
         MercVisits::updateLastVisit($this->org_id, MercVisits::LOAD_VSD_LIST, $this->data['enterpriseGuid']);
 
-        mercLogger::getInstance()->addMercLogDict('COMPLETE', 'AutoLoad'.BaseStringHelper::basename(static::class), null);
+        mercLogger::getInstance()->addMercLogDict('COMPLETE', 'AutoLoad' . BaseStringHelper::basename(static::class), null, $this->org_id);
 
         if (isset($this->queue)) {
             $this->queue->data_request = new Expression('NULL');

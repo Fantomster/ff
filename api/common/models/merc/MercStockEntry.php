@@ -213,7 +213,7 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
     /**
      * Запрос обновлений справочника
      */
-    public static function getUpdateData($org_id, $enterpriseGuid = null)
+    public static function getUpdateData($org_id, $enterpriseGuid = null, $start_date = null)
     {
         try {
             $enterpriseGuid = $enterpriseGuid ?? mercDicconst::getSetting('enterprise_guid', $org_id);
@@ -224,6 +224,7 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $queue->consumer_class_name = 'MercStockEntryList';
                 $queue->organization_id = $org_id;
                 $queue->store_id = $enterpriseGuid;
+                $queue->save();
             }
 
             if (!empty($queue->organization_id)) {
@@ -232,21 +233,19 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $queueName = $queue->consumer_class_name;
             }
 
-            if (!isset($queue->data_request)) {
-                $data['startDate'] = MercVisits::getLastVisit($org_id, 'MercStockEntryList', $enterpriseGuid);
-                $data['listOptions']['count'] = 100;
-                $data['listOptions']['offset'] = 0;
-                $data['enterpriseGuid'] = $enterpriseGuid;
+            $data['startDate'] = $start_date ?? gmdate("Y-m-d H:i:s", time() - 60*60*24);
+            $data['listOptions']['count'] = 100;
+            $data['listOptions']['offset'] = 0;
+            $data['enterpriseGuid'] = $enterpriseGuid;
+
+            if(isset($start_date)) {
                 $queue->data_request = json_encode($data);
-                $queue->save();
-            } else {
-                $data = json_decode($queue->data_request, true);
             }
 
             //ставим задачу в очередь
             \Yii::$app->get('rabbit')
                 ->setQueue($queueName)
-                ->addRabbitQueue($data['enterpriseGuid']);
+                ->addRabbitQueue(json_encode($data));
 
         } catch (\Exception $e) {
             Yii::error($e->getMessage());

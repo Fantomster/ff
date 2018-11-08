@@ -19,9 +19,8 @@ use yii\web\BadRequestHttpException;
 
 class RkwsProduct extends ServiceRkws
 {
-
     /** @var string $index Символьный идентификатор справочника */
-    public $index = 'product';
+    public $index = self::DICTIONARY_PRODUCT;
 
     /** @var string $OperDenom Поле Denom в таблице all_service_operation */
     public static $OperDenom = 'sh_get_goods';
@@ -76,5 +75,4 @@ class RkwsProduct extends ServiceRkws
             yield $item;
         }
     }
-
 }

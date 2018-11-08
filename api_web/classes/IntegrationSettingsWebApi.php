@@ -28,9 +28,16 @@ class IntegrationSettingsWebApi extends WebApi
 
         $result = IntegrationSettingValue::find()
             ->select(['name', 'value'])
-            ->leftJoin(IntegrationSetting::tableName(), IntegrationSetting::tableName() . ".id = " . IntegrationSettingValue::tableName() . ".setting_id")
-            ->where("org_id = :org and service_id = :service and is_active = true", [':org' => $this->user->organization_id, ':service' => $post['service_id']])
+            ->leftJoin(
+                IntegrationSetting::tableName(),
+                IntegrationSetting::tableName() . ".id = " . IntegrationSettingValue::tableName() . ".setting_id"
+            )->where(
+                "org_id = :org and service_id = :service and is_active = true", [
+                ':org'     => $this->user->organization_id,
+                ':service' => $post['service_id']
+            ])
             ->asArray()->all();
+
         return $result;
     }
 
@@ -47,10 +54,21 @@ class IntegrationSettingsWebApi extends WebApi
 
         $result = IntegrationSettingValue::find()
             ->select(['name', 'value'])
-            ->leftJoin(IntegrationSetting::tableName(), IntegrationSetting::tableName() . ".id = " . IntegrationSettingValue::tableName() . ".setting_id")
-            ->where("org_id = :org and service_id = :service and is_active = true and name = :name",
-                [':org' => $this->user->organization_id, ':service' => $post['service_id'], ':name' => $post['name']])
-            ->asArray()->one();
+            ->leftJoin(
+                IntegrationSetting::tableName(),
+                IntegrationSetting::tableName() . ".id = " . IntegrationSettingValue::tableName() . ".setting_id"
+            )
+            ->where(
+                "org_id = :org and service_id = :service and is_active = true and name = :name",
+                [
+                    ':org'     => $this->user->organization_id,
+                    ':service' => $post['service_id'],
+                    ':name'    => $post['name']
+                ]
+            )
+            ->asArray()
+            ->one();
+
         return $result;
     }
 
@@ -64,7 +82,6 @@ class IntegrationSettingsWebApi extends WebApi
     public function update(array $post): array
     {
         $this->validateRequest($post, ['service_id', 'settings']);
-
         $result = [];
         foreach ($post['settings'] as $item) {
             try {
@@ -73,7 +90,6 @@ class IntegrationSettingsWebApi extends WebApi
                 $result[$item['name']] = ['error' => $e->getMessage()];
             }
         }
-
         return $result;
     }
 
@@ -82,8 +98,9 @@ class IntegrationSettingsWebApi extends WebApi
      *
      * @param $service_id
      * @param $request
-     * @return array
+     * @return mixed|string
      * @throws BadRequestHttpException
+     * @throws ValidationException
      */
     private function updateSetting($service_id, $request)
     {
@@ -93,14 +110,18 @@ class IntegrationSettingsWebApi extends WebApi
             throw new BadRequestHttpException('empty_param|value');
         }
         $modelSetting = IntegrationSetting::findOne(['name' => $request['name'], 'service_id' => $service_id, 'is_active' => true]);
-
         if (!$modelSetting) {
-            throw new BadRequestHttpException('Setting not found');
+            throw new BadRequestHttpException('integration_setting.not_found');
         }
 
         $model = IntegrationSettingValue::find()
-            ->where("setting_id = :setting_id and org_id = :org",
-                [':setting_id' => $modelSetting->id, ':org' => $this->user->organization_id])
+            ->where(
+                "setting_id = :setting_id and org_id = :org",
+                [
+                    ':setting_id' => $modelSetting->id,
+                    ':org'        => $this->user->organization_id
+                ]
+            )
             ->one();
 
         if (!$model) {

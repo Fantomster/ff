@@ -75,6 +75,7 @@ use common\models\guides\Guide;
  * @property Guide               $favorite
  * @property Guide[]             $guides
  * @property Catalog             $baseCatalog
+ * @property EdiOrganization     $ediOrganization
  * @property AdditionalEmail[]   additionalEmail
  */
 class Organization extends \yii\db\ActiveRecord
@@ -248,6 +249,9 @@ class Organization extends \yii\db\ActiveRecord
         return $this->hasMany(LicenseOrganization::className(), ['org_id' => 'id']);
     }
 
+    /**
+     * @return ActiveQuery
+     */
     public function getEdiOrganization(): ActiveQuery
     {
         return $this->hasOne(EdiOrganization::className(), ['organization_id' => 'id']);
@@ -261,6 +265,22 @@ class Organization extends \yii\db\ActiveRecord
     public function getGlnCode()
     {
         return $this->organizationGln->gln_number;
+    }
+
+    /**
+     * EDI организация или нет
+     *
+     * @return bool
+     */
+    public function isEdi()
+    {
+        $query = $this->ediOrganization;
+        if (!empty($query)) {
+            if (isset($query->gln_code) && $query->gln_code > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function beforeSave($insert)
@@ -716,22 +736,22 @@ class Organization extends \yii\db\ActiveRecord
 
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
             $sql = 'SELECT `order_chat`.*, ord.`client_id` AS vid, ma.`manager_id` FROM `order_chat` INNER JOIN '
-                . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
+                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
                 . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
                 . 'AND ((`order_chat`.`is_system`=0) '
                 . 'AND (`order_chat`.`viewed`=0)) '
-                . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id` '
+                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id` '
                 . 'LEFT JOIN `order` AS ord ON ord.`id` = `order_chat`.`order_id` '
                 . 'LEFT JOIN `manager_associate` AS ma ON ord.`client_id` = ma.`organization_id` '
                 . 'WHERE ma.`manager_id` = ' . $userId . ' '
                 . 'ORDER BY `order_chat`.`created_at` DESC';
         } else {
             $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
-                . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
+                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
                 . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
                 . 'AND ((`order_chat`.`is_system`=0) '
                 . 'AND (`order_chat`.`viewed`=0)) '
-                . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id`'
+                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id`'
                 . 'ORDER BY `order_chat`.`created_at` DESC';
         }
 
@@ -754,22 +774,22 @@ class Organization extends \yii\db\ActiveRecord
         $userId = Yii::$app->user->id;
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
             $sql = 'SELECT `order_chat`.*, ord.`client_id` AS vid, ma.`manager_id` FROM `order_chat` INNER JOIN '
-                . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
+                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
                 . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
                 . 'AND ((`order_chat`.`is_system`=1) '
                 . 'AND (`order_chat`.`viewed`=0)) '
-                . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id` '
+                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id` '
                 . 'LEFT JOIN `order` AS ord ON ord.`id` = `order_chat`.`order_id` '
                 . 'LEFT JOIN `manager_associate` AS ma ON ord.`client_id` = ma.`organization_id` '
                 . 'WHERE ma.`manager_id` = ' . $userId . ' '
                 . 'ORDER BY `order_chat`.`created_at` DESC';
         } else {
             $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
-                . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
+                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
                 . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
                 . 'AND ((`order_chat`.`is_system`=1) '
                 . 'AND (`order_chat`.`viewed`=0)) '
-                . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id`'
+                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id`'
                 . 'ORDER BY `order_chat`.`created_at` DESC';
         }
         return OrderChat::findBySql($sql)->all();

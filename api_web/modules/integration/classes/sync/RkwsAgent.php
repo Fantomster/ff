@@ -18,9 +18,8 @@ use api_web\modules\integration\classes\SyncLog;
 
 class RkwsAgent extends ServiceRkws
 {
-
     /** @var string $index Символьный идентификатор справочника */
-    public $index = 'agent';
+    public $index = self::DICTIONARY_AGENT;
 
     /** @var string $entityTableName Класс таблицы для записи данных */
     public $entityTableName = OuterAgent::class;
@@ -55,5 +54,4 @@ class RkwsAgent extends ServiceRkws
         }
         return $array;
     }
-
 }

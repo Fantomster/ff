@@ -13,7 +13,6 @@
 
 namespace api_web\modules\integration\classes\sync;
 
-use api\common\models\RkDicconst;
 use api_web\components\Registry;
 use api_web\modules\integration\classes\documents\WaybillContent;
 use common\models\IntegrationSettingValue;
@@ -30,10 +29,10 @@ use creocoder\nestedsets\NestedSetsBehavior;
 use common\models\AllServiceOperation;
 use common\models\OuterTask;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
-use api\common\models\RkService;
 use api\common\models\RkAccess;
 use api\common\models\RkSession;
 use api_web\modules\integration\classes\SyncLog;
+use common\models\OrganizationDictionary;
 
 class ServiceRkws extends AbstractSyncFactory
 {
@@ -163,50 +162,74 @@ class ServiceRkws extends AbstractSyncFactory
     {
         $url = $this->getUrlCmd();
         $guid = UUID::uuid4();
-        $xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
-        $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
 
-        if ($xmlData) {
-            $xml = (array)simplexml_load_string($xmlData);
+        $dictionary = $this->getOrganizationDictionary($this->serviceId, $this->user->organization_id);
+        $transaction = $this->createTransaction();
+        try {
+            $xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
+            $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
 
-            //Если ошибка
-            if (isset($xml['ERROR'])) {
-                $error = (array)$xml['ERROR'];
-                throw new BadRequestHttpException("RESPONSE WS: " . $error['@attributes']['Text']. ' (code: ' . $error['@attributes']['code'] . ')');
-            }
-
-            if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
-                $transaction = $this->createTransaction();
-                $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => static::$OperDenom]);
-                $task = new OuterTask([
-                    'service_id'     => $this->serviceId,
-                    'retry'          => 0,
-                    'org_id'         => $this->user->organization_id,
-                    'inner_guid'     => $guid,
-                    'salespoint_id'  => (string)$this->licenseMixcartId,
-                    'int_status_id'  => OuterTask::STATUS_REQUESTED,
-                    'outer_guid'     => $xml['@attributes']['taskguid'],
-                    'broker_version' => $xml['@attributes']['version'],
-                    'oper_code'      => $oper->id,
-                ]);
-                if ($task->save()) {
-                    $transaction->commit();
-                    SyncLog::trace('SUCCESS. json-response-data: ' .
-                        str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
-                    return [
-                        'task_id'        => $task->id,
-                        'task_status'    => $task->int_status_id,
-                        'service_prefix' => SyncLog::$servicePrefix,
-                        'log_index'      => SyncLog::$logIndex,
-                    ];
+            if ($xmlData) {
+                $xml = (array)simplexml_load_string($xmlData);
+                //Если ошибка
+                if (isset($xml['ERROR'])) {
+                    $error = (array)$xml['ERROR'];
+                    throw new BadRequestHttpException("RESPONSE WS: " . $error['@attributes']['Text'] . ' (code: ' . $error['@attributes']['code'] . ')');
                 }
-                $transaction->rollBack();
-                SyncLog::trace('Cannot save task!');
-                throw new BadRequestHttpException('rkws_task_save_error');
+
+                if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
+                    $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => static::$OperDenom]);
+                    $task = new OuterTask([
+                        'service_id'     => $this->serviceId,
+                        'retry'          => 0,
+                        'org_id'         => $this->user->organization_id,
+                        'inner_guid'     => $guid,
+                        'salespoint_id'  => (string)$this->licenseMixcartId,
+                        'int_status_id'  => OuterTask::STATUS_REQUESTED,
+                        'outer_guid'     => $xml['@attributes']['taskguid'],
+                        'broker_version' => $xml['@attributes']['version'],
+                        'oper_code'      => $oper->id,
+                    ]);
+                    $task->save();
+
+                    $dictionary->status_id = $dictionary::STATUS_SEND_REQUEST;
+                    $dictionary->save();
+
+                    $transaction->commit();
+                    SyncLog::trace('SUCCESS. json-response-data: ' . str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
+                    return $this->prepareModel($dictionary);
+                }
             }
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            $dictionary->status_id = $dictionary::STATUS_ERROR;
+            $dictionary->save();
+            throw $e;
         }
+
         SyncLog::trace('Service connection parameters for final transaction are wrong');
         throw new BadRequestHttpException('empty_service_response_for_transaction');
+    }
+
+    /**
+     * Ответ на запрос синхронизации
+     *
+     * @param $model OrganizationDictionary
+     * @return array
+     */
+    private function prepareModel($model)
+    {
+        $defaultStatusText = OrganizationDictionary::getStatusTextList()[OrganizationDictionary::STATUS_DISABLED];
+        return [
+            'id'          => $model->id,
+            'name'        => $model->outerDic->name,
+            'title'       => \Yii::t('api_web', 'dictionary.' . $model->outerDic->name),
+            'count'       => $model->count ?? 0,
+            'status_id'   => $model->status_id ?? 0,
+            'status_text' => $model->statusText ?? $defaultStatusText,
+            'created_at'  => $model->created_at ?? null,
+            'updated_at'  => $model->updated_at ?? null
+        ];
     }
 
     public function prepareServiceWithAuthCheck(): ?string
@@ -708,6 +731,7 @@ class ServiceRkws extends AbstractSyncFactory
             $task->int_status_id = OuterTask::STATUS_CALLBACKED;
             $task->retry++;
             $orgDic->count = count($arrayNew);
+            $orgDic->status_id = $orgDic::STATUS_ACTIVE;
             if (!$task->save() || !$orgDic->save()) {
                 $saveErr['task'][] = $task->errors;
                 /** @noinspection PhpUndefinedFieldInspection */

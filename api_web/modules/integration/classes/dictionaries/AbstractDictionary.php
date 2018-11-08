@@ -277,27 +277,29 @@ class AbstractDictionary extends WebApi
             throw new ValidationException($model->getFirstErrors());
         }
 
-        if (!empty($request['name_waybill'])) {
+        if (isset($request['name_waybill'])) {
             if (OuterAgentNameWaybill::find()->where(['agent_id' => $model->id])->exists()) {
                 OuterAgentNameWaybill::deleteAll(['agent_id' => $model->id]);
             }
-            $transaction = \Yii::$app->db->beginTransaction();
-            try {
-                \Yii::$app->db_api->createCommand()
-                    ->batchInsert(
-                        OuterAgentNameWaybill::tableName(),
-                        ['agent_id', 'name'],
-                        array_map(
-                            function ($el) use ($model) {
-                                return [$model->id, $el];
-                            },
-                            $request['name_waybill']
-                        )
-                    )->execute();
-                $transaction->commit();
-            } catch (\Throwable $throwable) {
-                $transaction->rollBack();
-                throw $throwable;
+            if (!empty($request['name_waybill'])) {
+                $transaction = \Yii::$app->db->beginTransaction();
+                try {
+                    \Yii::$app->db_api->createCommand()
+                        ->batchInsert(
+                            OuterAgentNameWaybill::tableName(),
+                            ['agent_id', 'name'],
+                            array_map(
+                                function ($el) use ($model) {
+                                    return [$model->id, $el];
+                                },
+                                $request['name_waybill']
+                            )
+                        )->execute();
+                    $transaction->commit();
+                } catch (\Throwable $throwable) {
+                    $transaction->rollBack();
+                    throw $throwable;
+                }
             }
         }
 

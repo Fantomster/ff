@@ -44,7 +44,7 @@ class iikoWaybill extends Waybill
         $xml->addChild('dateIncoming', $datetime->format('d.m.Y'));
         $xml->addChild('incomingDate', $datetime->format('d.m.Y'));
         $xml->addChild('defaultStore', $this->outerStore->outer_uid);
-        $xml->addChild('supplier', $this->outerAgent->outer_uid);
+        $xml->addChild('supplier', $this->outerAgent ? $this->outerAgent->outer_uid : null);
         $xml->addChild('status', 'NEW');
 
         $items = $xml->addChild('items');

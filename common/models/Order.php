@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api_web\behaviors\OrderBehavior;
 use api_web\components\Registry;
 use common\components\edi\EDIIntegration;
 use common\helpers\DBNameHelper;
@@ -93,6 +94,10 @@ class Order extends \yii\db\ActiveRecord
     public function behaviors(): array
     {
         return [
+            [
+                "class" => OrderBehavior::class,
+                "model" => $this
+            ],
             'timestamp'  => [
                 'class'              => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
@@ -433,7 +438,6 @@ class Order extends \yii\db\ActiveRecord
             $free_delivery = 0;
         }
         if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
-            $test = $this->vendor->delivery->delivery_charge;
             return $this->vendor->delivery->delivery_charge;
         }
         return 0;

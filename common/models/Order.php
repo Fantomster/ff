@@ -121,7 +121,7 @@ class Order extends \yii\db\ActiveRecord
     {
         return [
             [['client_id', 'vendor_id', 'status'], 'required'],
-            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id', 'replaced_order_id'], 'integer'],
+            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id', 'replaced_order_id', 'edi_organization_id'], 'integer'],
             [['total_price', 'discount'], 'number'],
             [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number', 'edi_ordersp', 'edi_doc_date', 'edi_shipment_quantity'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -156,6 +156,7 @@ class Order extends \yii\db\ActiveRecord
             'waybill_number'        => Yii::t('app', 'Номер накладной'),
             'edi_doc_date'          => Yii::t('app', 'Дата накладной заказа по EDI'),
             'edi_shipment_quantity' => Yii::t('app', 'Отгруженное количество товара EDI'),
+            'edi_organization_id'   => Yii::t('app', 'Идентификатор связи ресторана в таблице edi_organization'),
         ];
     }
 

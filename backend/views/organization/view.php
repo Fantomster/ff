@@ -37,6 +37,8 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
 
     <?= ($model->type_id == Organization::TYPE_SUPPLIER) ? Html::a('Настройка уведомлений', ['notifications', 'id' => $model->id], ['class' => 'btn btn-danger', 'style' => 'margin-bottom: 10px;']) : '' ?>
 
+    <?= Html::a('Настройки EDI', ['edi-settings', 'id' => $model->id], ['class' => 'btn btn-default', 'style' => 'margin-bottom: 10px;']) ?>
+
     <?=
     DetailView::widget([
         'model' => $model,

@@ -250,7 +250,7 @@ class Organization extends \yii\db\ActiveRecord
 
     public function getEdiOrganization(): ActiveQuery
     {
-        return $this->hasOne(EdiOrganization::className(), ['organization_id' => 'id']);
+        return $this->hasMany(EdiOrganization::className(), ['organization_id' => 'id']);
     }
 
     public function getOrganizationGln(): ActiveQuery

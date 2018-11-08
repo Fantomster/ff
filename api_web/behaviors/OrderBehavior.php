@@ -61,8 +61,7 @@ class OrderBehavior extends Behavior
         //Отправка async запроса
         try {
             $client = new Client([
-//                            'base_uri'        => \Yii::$app->params['api_web_url'],
-                'base_uri'        => $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'],
+                'base_uri'        => \Yii::$app->params['api_web_url'],
                 'timeout'         => 1,
                 'handler'         => HandlerStack::create((new CurlMultiHandler())),
                 'http_errors'     => false,
@@ -73,7 +72,7 @@ class OrderBehavior extends Behavior
             ]);
 
             //Строим запрос
-            $user = User::findOne(\Yii::$app->user->getIdentity()->getId());
+            $user = User::findOne($this->model->created_by_id);
             $body = [
                 "user"    => [
                     "token"    => $user->access_token,

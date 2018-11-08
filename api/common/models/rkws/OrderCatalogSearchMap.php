@@ -67,24 +67,24 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
         $fields = [
             0                       => [],
-            RK_SERVICE_ID           => ["fprod.denom as pdenom", "fstore.name as store", "fprod.unitname as unitname"], // R-keeper
-            IIKO_SERVICE_ID         => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // iiko
-            ONE_S_CLIENT_SERVICE_ID => ["fprod.name as pdenom", "fstore.name as store", "fprod.measure as unitname"], // 1C
-            TILLYPAD_SERVICE_ID     => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // tillypad
+            Registry::RK_SERVICE_ID           => ["fprod.denom as pdenom", "fstore.name as store", "fprod.unitname as unitname"], // R-keeper
+            Registry::IIKO_SERVICE_ID         => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // iiko
+            Registry::ONE_S_CLIENT_SERVICE_ID => ["fprod.name as pdenom", "fstore.name as store", "fprod.measure as unitname"], // 1C
+            Registry::TILLYPAD_SERVICE_ID     => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // tillypad
         ];
 
         $joins = [
             0             => '',
-            RK_SERVICE_ID => " LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
+            Registry::RK_SERVICE_ID => " LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.acc  AND fstore.type = 2 ",
 
-            IIKO_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
+            Registry::IIKO_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`iiko_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
 
-            ONE_S_CLIENT_SERVICE_ID => " LEFT JOIN `$dbName`.`one_s_good` fprod ON fmap.serviceproduct_id = fprod.id
+            Registry::ONE_S_CLIENT_SERVICE_ID => " LEFT JOIN `$dbName`.`one_s_good` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`one_s_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id ",
 
-            TILLYPAD_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
+            Registry::TILLYPAD_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`iiko_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
 
         ];

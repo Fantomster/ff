@@ -121,17 +121,17 @@ abstract class DaemonController extends Controller
     {
         $targets = \Yii::$app->getLog()->targets;
         foreach ($targets as $name => $target) {
-            $target->enabled = ($name == 'daemon');
+            $target->enabled = false;//($name == 'daemon');
         }
-//        $config = [
-//            'levels'  => ['error', 'warning', 'trace', 'info'],
-//            'logFile' => \Yii::getAlias($this->logDir) . DIRECTORY_SEPARATOR . $this->shortName . '.log',
-//            'logVars' => [],
-//            'except'  => [
-//                'yii\db\*', // Don't include messages from db
-//            ],
-//        ];
-//        $targets['daemon'] = new \yii\log\FileTarget($config);
+        $config = [
+            'levels'  => ['error', 'warning', 'trace', 'info'],
+            'logFile' => \Yii::getAlias($this->logDir) . DIRECTORY_SEPARATOR . $this->shortName . '.log',
+            'logVars' => [],
+            'except'  => [
+                'yii\db\*', // Don't include messages from db
+            ],
+        ];
+        $targets['daemon1'] = new \yii\log\FileTarget($config);
         \Yii::$app->getLog()->targets = $targets;
         \Yii::$app->getLog()->init();
     }

@@ -35,6 +35,7 @@ class Registry
     const ONE_S_CLIENT_SERVICE_ID = 8;
     /**@var int const for MixCart service_id in all_service table */
     const MC_BACKEND = 9;
+    const TILLYPAD_SERVICE_ID = 10;
 
     /** - Waybill section - */
     const WAYBILL_COMPARED = 1;

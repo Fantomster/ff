@@ -8,6 +8,7 @@ use common\models\CatalogGoods;
 use common\models\RelationSuppRest;
 use yii\data\SqlDataProvider;
 use common\models\Catalog;
+use api_web\components\Registry;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
@@ -65,25 +66,25 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             $this->service_id = 0;
         }
         $fields = [
-            0  => [],
-            1  => ["fprod.denom as pdenom", "fstore.name as store", "fprod.unitname as unitname"], // R-keeper
-            2  => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // iiko
-            8  => ["fprod.name as pdenom", "fstore.name as store", "fprod.measure as unitname"], // 1C
-            10 => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // tillypad
+            0                       => [],
+            RK_SERVICE_ID           => ["fprod.denom as pdenom", "fstore.name as store", "fprod.unitname as unitname"], // R-keeper
+            IIKO_SERVICE_ID         => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // iiko
+            ONE_S_CLIENT_SERVICE_ID => ["fprod.name as pdenom", "fstore.name as store", "fprod.measure as unitname"], // 1C
+            TILLYPAD_SERVICE_ID     => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // tillypad
         ];
 
         $joins = [
-            0 => '',
-            1 => " LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
+            0             => '',
+            RK_SERVICE_ID => " LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.acc  AND fstore.type = 2 ",
 
-            2 => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
+            IIKO_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`iiko_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
 
-            8 => " LEFT JOIN `$dbName`.`one_s_good` fprod ON fmap.serviceproduct_id = fprod.id
+            ONE_S_CLIENT_SERVICE_ID => " LEFT JOIN `$dbName`.`one_s_good` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`one_s_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id ",
 
-            10 => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
+            TILLYPAD_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`iiko_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
 
         ];

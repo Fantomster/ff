@@ -494,7 +494,6 @@ class WaybillHelper extends WebApi
                             $this->writeInJournal($e->getMessage(), $serviceId, 'error');
                         }
                     }
-
                 }
             } catch (\Throwable $e) {
                 //Запись ошибки в журнал, здесь нет service_id

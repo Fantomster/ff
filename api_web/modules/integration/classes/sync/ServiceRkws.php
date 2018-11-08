@@ -204,6 +204,13 @@ class ServiceRkws extends AbstractSyncFactory
         throw new BadRequestHttpException('empty_service_response_for_transaction');
     }
 
+    /**
+     * @return null|string
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
+     */
     public function prepareServiceWithAuthCheck(): ?string
     {
 
@@ -219,21 +226,11 @@ class ServiceRkws extends AbstractSyncFactory
             throw new BadRequestHttpException('no_active_mixcart_license');
         }
 
-        # 3. Find license Rkeeper data
-//        $license = RkService::findOne([
-//            'id'         => $licenseMixcart->service_id,
-//            // 'org' => $this->user->organization_id, поле не используется!
-//            'status_id'  => 1,
-//            'is_deleted' => 0
-//        ]);
-//        if (!$license || !$license->code || ($license->td <= $this->now)) {
-//            SyncLog::trace('RKeeper licence record with active state not found!');
-//            throw new BadRequestHttpException('no_active_rkeeper_license');
-//        }
-
         # 3. Remember license codes
         $this->licenseCode = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['code']);
-//        $this->licenseMixcartId = $licenseMixcart->id;
+        if (!$this->licenseCode){
+            throw new BadRequestHttpException('Setting [code] for R-keeper not set');
+        }
 
         # 5. Фиксируем активную лицензия найдена и инициализируем транзакции в БД
         SyncLog::trace('Service licence record for organization #' . $this->user->organization_id .

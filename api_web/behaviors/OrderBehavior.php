@@ -38,14 +38,8 @@ class OrderBehavior extends Behavior
     public function afterUpdate($event)
     {
         $obj = new WaybillHelper();
-        $obj->setAutoInvoiceSettings();
-        $arTmp = 0;
-        foreach ($obj->settings as $setting){
-            if ($setting['value'] == 0){
-                $arTmp++;
-            }
-        }
-        if (count($obj->settings) == $arTmp){
+        $arExcludedServices = $obj->getExcludedServices();
+        if (count($obj->settings) == count($arExcludedServices)){
             return;
         }
         //Если заказ из MC и если заказ перешел в статус "Завершен"

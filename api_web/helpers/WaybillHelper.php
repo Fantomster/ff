@@ -40,7 +40,7 @@ class WaybillHelper extends WebApi
     /**
      * @var array настройки огранизации по всем сервисам
      */
-    private $settings;
+    public $settings;
 
     /**
      * WaybillHelper constructor.
@@ -452,7 +452,6 @@ class WaybillHelper extends WebApi
         if (is_null($run)) {
             //Блокируем обработку этого заказа
             $redis->set($lockName, 1);
-            $this->setAutoInvoiceSettings();
             try {
                 $this->createWaybill($request['order_id'], null, $request['vendor_id'], $this->getExcludedServices());
             } catch (\Throwable $e) {
@@ -549,7 +548,7 @@ class WaybillHelper extends WebApi
      * Установить свойство settings для всех сервисов, если будут нужны еще где то,
      * перенести вызов из sendWaybillAsync() в метод __construct()
      */
-    private function setAutoInvoiceSettings(): void
+    public function setAutoInvoiceSettings(): void
     {
         $this->settings = (new Query())->select(['is.service_id', 'isv.value', 'is.name', 'isv.id'])
             ->from(IntegrationSettingValue::tableName() . ' as isv')
@@ -564,8 +563,9 @@ class WaybillHelper extends WebApi
      * Получить сервисы по которым не надо создавать накладные
      * @return array
      */
-    private function getExcludedServices()
+    public function getExcludedServices()
     {
+        $this->setAutoInvoiceSettings();
         $arExcludedServices = [];
         foreach ($this->settings as $setting) {
             if ($setting['value'] == 0) {

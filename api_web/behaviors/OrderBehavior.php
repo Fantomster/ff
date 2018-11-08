@@ -8,6 +8,7 @@
 namespace api_web\behaviors;
 
 use api_web\components\Registry;
+use api_web\helpers\WaybillHelper;
 use api_web\models\User;
 use common\models\Order;
 use GuzzleHttp\Handler\CurlMultiHandler;
@@ -36,6 +37,17 @@ class OrderBehavior extends Behavior
      */
     public function afterUpdate($event)
     {
+        $obj = new WaybillHelper();
+        $obj->setAutoInvoiceSettings();
+        $arTmp = 0;
+        foreach ($obj->settings as $setting){
+            if ($setting['value'] == 0){
+                $arTmp++;
+            }
+        }
+        if (count($obj->settings) == $arTmp){
+            return;
+        }
         //Если заказ из MC и если заказ перешел в статус "Завершен"
         if ($this->model->service_id == Registry::MC_BACKEND && $this->model->status == Order::STATUS_DONE) {
             $this->createAndSendWaybill();

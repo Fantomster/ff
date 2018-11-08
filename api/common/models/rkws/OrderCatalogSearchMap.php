@@ -173,31 +173,6 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
 
         $client_id = $this->client->id;
-        /*if ($this->service_id == 2) {
-            $mainOrg_id = iikoService::getMainOrg($this->client->id);
-            if ($mainOrg_id != $this->client->id) {
-                $client_id = "IF(product_id in (select product_id from `$dbName`.all_map where service_id = 2 and org_id = $client_id), $client_id";
-
-                if (!empty($mainOrg_id)) {
-                    $client_id .= ", $mainOrg_id";
-                }
-                $client_id .= ")";
-            }
-
-        }*/
-
-        /*if ($this->service_id == 10) {
-            $mainOrg_id = iikoService::getMainOrg($this->client->id);
-            if ($mainOrg_id != $this->client->id) {
-                $client_id = "IF(product_id in (select product_id from `$dbName`.all_map where service_id = 10 and org_id = $client_id), $client_id";
-
-                if (!empty($mainOrg_id)) {
-                    $client_id .= ", $mainOrg_id";
-                }
-                $client_id .= ")";
-            }
-
-        }*/
         $vendorInList = $this->selectedVendor;
 
         if (isset($this->vendors) && empty($this->selectedVendor)) {
@@ -226,8 +201,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
              ) catg ON catg.supp_org_id = cbg.supp_org_id AND cbg.id = case WHEN catg.base_goods_id IS NULL THEN cbg.id ELSE catg.base_goods_id END
            WHERE
            cbg.deleted = 0
-           " . $where . $where_all/*. " GROUP BY org.id"*/
-        ;
+           " . $where . $where_all;
 
         /*$sql = "
         SELECT DISTINCT * FROM (

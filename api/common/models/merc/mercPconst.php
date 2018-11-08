@@ -2,6 +2,7 @@
 
 namespace api\common\models\merc;
 
+use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use Yii;
 
 /**
@@ -43,8 +44,20 @@ class mercPconst extends \yii\db\ActiveRecord
             [['const_id', 'org'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['value'], 'string', 'max' => 255],
+            [['value'], 'checkEnterpriseGuid'],
             [['const_id'], 'exist', 'skipOnError' => true, 'targetClass' => mercDicconst::className(), 'targetAttribute' => ['const_id' => 'id']],
         ];
+    }
+
+    public function checkEnterpriseGuid ($attribute, $params) {
+       if($this->const_id != 10) {
+           return;
+       }
+        if (!mercDicconst::checkSettings()) {
+            $this->addError($attribute, "Нужно заполнить остальные настройки");
+        }elseif (!cerberApi::getInstance()->checkRelationEnterproseGuidandIssuerID($this->value)) {
+            $this->addError($attribute, "Указанное предприятие не связано с вашим ХС");
+        }
     }
 
     /**

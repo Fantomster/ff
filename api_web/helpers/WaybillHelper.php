@@ -561,6 +561,7 @@ class WaybillHelper extends WebApi
 
     /**
      * Получить сервисы по которым не надо создавать накладные
+     *
      * @return array
      */
     public function getExcludedServices()

@@ -37,16 +37,17 @@ class OrderBehavior extends Behavior
      */
     public function afterUpdate($event)
     {
+        //Если настройки автосоздания выключены для всех сервисов, тогда выход
         $obj = new WaybillHelper();
         $arExcludedServices = $obj->getExcludedServices();
-        if (count($obj->settings) == count($arExcludedServices)){
+        if (count($obj->settings) == count($arExcludedServices)) {
             return;
         }
         //Если заказ из MC и если заказ перешел в статус "Завершен"
         if ($this->model->service_id == Registry::MC_BACKEND && $this->model->status == Order::STATUS_DONE) {
             $this->createAndSendWaybill();
         } elseif (in_array($this->model->service_id, [Registry::VENDOR_DOC_MAIL_SERVICE_ID, Registry::EDI_SERVICE_ID])) {
-            if ($this->model->status == Order::STATUS_EDI_ACCEPTANCE_FINISHED){
+            if ($this->model->status == Order::STATUS_EDI_ACCEPTANCE_FINISHED) {
                 $this->createAndSendWaybill();
             }
         }

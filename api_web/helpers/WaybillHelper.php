@@ -445,7 +445,7 @@ class WaybillHelper extends WebApi
         /** @var \Redis $redis */
         $redis = \Yii::$app->get('redis');
         //Имя строки блокировки если уже идет обработка по этим параметрам
-        $lockName = implode('-1', ['lock-start', $request['action_id'], $request['order_id'], $request['vendor_id']]);
+        $lockName = implode('-', ['lock-start', $request['action_id'], $request['order_id'], $request['vendor_id']]);
         //Проверяем блокировку
         $run = $redis->get($lockName);
         //Если нет, запускаем

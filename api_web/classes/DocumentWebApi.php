@@ -232,7 +232,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (isset($post['search']['waybill_status']) && !empty($post['search']['waybill_status'])) {
-            $where_all .= " AND waybill_status_id = :status";
+            $where_all .= " AND status_id = :status";
             $params_sql[':status'] = $post['search']['waybill_status'];
         }
 
@@ -739,6 +739,16 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         if (array_key_exists($request['type'], self::$models)) {
             $modelClass = self::$models[$request['type']];
+            $query = $modelClass::find()->where(['id' => $request['document_id'], 'service_id' => $request['service_id']]);
+            if ($request['type'] == self::TYPE_WAYBILL){
+                $field = 'acquirer_id';
+            } elseif ($request['type'] == self::TYPE_ORDER){
+                $field = 'client_id';
+            }
+            if (!$query->andWhere([$field => $this->user->organization_id])->exists()){
+                throw new BadRequestHttpException($request['type'] . '_not_found');
+            }
+
             $document = $modelClass::prepareModel($request['document_id'], $request['service_id']);
         }
 

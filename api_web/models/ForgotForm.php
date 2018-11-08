@@ -28,10 +28,11 @@ class ForgotForm extends BaseForm
         if ($this->validate()) {
             // get user
             $user = $this->getUser();
+            $user->newPassword = $this->newPassword;
             // calculate expireTime
-            $expireTime = $this->module->resetExpireTime;
+           /* $expireTime = $this->module->resetExpireTime;
             $expireTime = $expireTime ? gmdate("Y-m-d H:i:s", strtotime($expireTime)) : null;
-            $userToken = UserToken::generate($user->id, UserToken::TYPE_PASSWORD_RESET, null, $expireTime);
+            $userToken = UserToken::generate($user->id, UserToken::TYPE_PASSWORD_RESET, null, $expireTime);*/
             // modify view path to module views
             $mailer = Yii::$app->mailer;
             $oldViewPath = $mailer->viewPath;

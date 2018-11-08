@@ -133,10 +133,8 @@ class ServiceRkws extends AbstractSyncFactory
             SyncLog::trace('Cannot authorize with session or login data');
             throw new BadRequestHttpException('Cannot authorize with curl');
         }
-
-        #Если пришел запрос на обновление продуктов, и нет конкретной группы, обновляем все группы
-        # которые выбраны
-        if ($params['dictionary'] == 'product' && empty($params['product_group'])) {
+        #Если пришел запрос на обновление продуктов
+        if ($params['dictionary'] == 'product') {
 
             $models = OuterCategory::find()->where([
                 'service_id' => Registry::RK_SERVICE_ID,
@@ -147,7 +145,6 @@ class ServiceRkws extends AbstractSyncFactory
             if (empty($models)) {
                 throw new BadRequestHttpException('Не выбраны категории для загрузки товаров');
             }
-
             $params['product_group'] = $models;
         }
 
@@ -168,8 +165,16 @@ class ServiceRkws extends AbstractSyncFactory
         $guid = UUID::uuid4();
         $xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
         $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
+
         if ($xmlData) {
             $xml = (array)simplexml_load_string($xmlData);
+
+            //Если ошибка
+            if (isset($xml['ERROR'])) {
+                $error = (array)$xml['ERROR'];
+                throw new BadRequestHttpException("RESPONSE WS: " . $error['@attributes']['Text']. ' (code: ' . $error['@attributes']['code'] . ')');
+            }
+
             if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
                 $transaction = $this->createTransaction();
                 $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => static::$OperDenom]);
@@ -228,7 +233,7 @@ class ServiceRkws extends AbstractSyncFactory
 
         # 3. Remember license codes
         $this->licenseCode = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['code']);
-        if (!$this->licenseCode){
+        if (!$this->licenseCode) {
             throw new BadRequestHttpException('Setting [code] for R-keeper not set');
         }
 
@@ -545,7 +550,7 @@ class ServiceRkws extends AbstractSyncFactory
                 if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
                     $transaction = $this->createTransaction();
                     $waybill->status_id = Registry::WAYBILL_UNLOADING;
-                    if (!$waybill->save()){
+                    if (!$waybill->save()) {
                         SyncLog::trace('Error while saving waybill status');
                     }
                     $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => 'sh_doc_receiving_report']);

@@ -99,7 +99,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                  default={
      *                      "service_id": 2,
      *                      "search": {
-     *                          "name": "название"
+     *                          "name": "название",
+     *                          "business_id": "бизнес id"
      *                      },
      *                      "pagination":{
      *                          "page": 1,
@@ -173,7 +174,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                  default={
      *                      "service_id": 2,
      *                      "search": {
-     *                          "name": "название"
+     *                          "name": "название",
+     *                          "business_id": "бизнес id"
      *                      },
      *                      "pagination":{
      *                          "page": 1,
@@ -332,7 +334,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                  default={
      *                      "service_id": 2,
      *                      "search": {
-     *                          "name": "название"
+     *                          "name": "название",
+     *                          "business_id": "бизнес id"
      *                      }
      *                    }
      *              )
@@ -434,7 +437,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                      "service_id": 2,
      *                      "search": {
      *                          "name": "название",
-     *                          "organization_id": 10
+     *                          "organization_id": 10,
+     *                          "business_id": "бизнес id"
      *                      }
      *                    }
      *              )
@@ -508,7 +512,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                  default={
      *                      "service_id": 2,
      *                      "search": {
-     *                          "name": "наименование"
+     *                          "name": "наименование",
+     *                          "business_id": "бизнес id"
      *                      },
      *                      "pagination":{
      *                          "page": 1,
@@ -589,7 +594,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                  default={
      *                      "service_id": 2,
      *                      "search": {
-     *                          "name": "наименование"
+     *                          "name": "наименование",
+     *                          "business_id": "бизнес id"
      *                      }
      *                    }
      *              )

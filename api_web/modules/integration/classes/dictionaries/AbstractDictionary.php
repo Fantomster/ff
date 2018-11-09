@@ -106,16 +106,24 @@ class AbstractDictionary extends WebApi
         $page = (isset($pag['page']) ? $pag['page'] : 1);
         $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
 
-        $search = OuterProduct::find()->where(['org_id' => $this->user->organization->id, 'service_id' => $this->service_id]);
+        $search = OuterProduct::find()->where(['service_id' => $this->service_id]);
+        $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
-            if (isset($request['search']['name'])) {
+            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', 'name', $request['search']['name']]);
             }
+
+            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
+                $orgId = $request['search']['business_id'];
+            }
+
 //            if (isset($request['search']['is_active'])) {
 //                $search->andWhere(['is_active' => (int)$request['search']['is_active']]);
 //            }
         }
+
+        $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $search->all()
@@ -174,15 +182,21 @@ class AbstractDictionary extends WebApi
 
         $search = OuterAgent::find()->joinWith(['store', 'nameWaybills'])
             ->where([
-                '`outer_agent`.org_id'     => $this->user->organization->id,
                 '`outer_agent`.service_id' => $this->service_id
             ]);
+        $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', '`outer_agent`.name', $request['search']['name']]);
             }
+
+            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
+                $orgId = $request['search']['business_id'];
+            }
         }
+
+        $search->andWhere('`outer_agent`.org_id = :org_id', [':org_id' => $orgId]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $search
@@ -305,13 +319,20 @@ class AbstractDictionary extends WebApi
      * */
     public function storeList($request): array
     {
-        $search = OuterStore::find()->where(['org_id' => $this->user->organization->id, 'service_id' => $this->service_id]);
+        $search = OuterStore::find()->where(['service_id' => $this->service_id]);
+        $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', 'name', $request['search']['name']]);
             }
+
+            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
+                $orgId = $request['search']['business_id'];
+            }
         }
+
+        $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
 
         $rootModels = $search->roots()->indexBy('id')->all();
 
@@ -334,10 +355,15 @@ class AbstractDictionary extends WebApi
     public function storeFlatList($request)
     {
         $search = OuterStore::find()->where(['service_id' => $this->service_id]);
+        $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', 'name', $request['search']['name']]);
+            }
+
+            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
+                $orgId = $request['search']['business_id'];
             }
         }
 
@@ -353,7 +379,7 @@ class AbstractDictionary extends WebApi
                 }
             }
         } else {
-            $search->andWhere(['org_id' => $this->user->organization->id]);
+            $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
         }
 
         $models = $search->orderBy(['left' => SORT_ASC])->all();
@@ -464,13 +490,20 @@ class AbstractDictionary extends WebApi
         $page = (isset($pag['page']) ? $pag['page'] : 1);
         $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
 
-        $search = OuterUnit::find()->where(['org_id' => $this->user->organization->id, 'service_id' => $this->service_id]);
+        $search = OuterUnit::find()->where(['service_id' => $this->service_id]);
+        $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', 'name', $request['search']['name']]);
             }
+
+            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
+                $orgId = $request['search']['business_id'];
+            }
         }
+
+        $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $search
@@ -507,14 +540,20 @@ class AbstractDictionary extends WebApi
      * */
     public function categoryList($request): array
     {
-        $search = OuterCategory::find()->where(['org_id' => $this->user->organization->id, 'service_id' =>
-            $this->service_id]);
+        $search = OuterCategory::find()->where(['service_id' => $this->service_id]);
+        $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', 'name', $request['search']['name']]);
             }
+
+            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
+                $orgId = $request['search']['business_id'];
+            }
         }
+
+        $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
 
         $rootModels = $search->roots()->indexBy('id')->all();
 

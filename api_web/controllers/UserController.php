@@ -591,6 +591,7 @@ class UserController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionVendors()
     {

@@ -78,7 +78,8 @@ use common\models\guides\Guide;
  * @property Guide[]             $guides
  * @property Catalog             $baseCatalog
  * @property EdiOrganization     $ediOrganization
- * @property AdditionalEmail[]   additionalEmail
+ * @property AdditionalEmail[]   $additionalEmail
+ * @property OrganizationGln     $organizationGln
  */
 class Organization extends \yii\db\ActiveRecord
 {

@@ -1,16 +1,5 @@
 <?php
 
-/**
- * Class RkwsProduct
- *
- * @package   api_web\module\integration\sync
- * @createdBy Basil A Konakov
- * @createdAt 2018-09-20
- * @author    Mixcart
- * @module    WEB-API
- * @version   2.0
- */
-
 namespace api_web\modules\integration\classes\sync;
 
 use api_web\modules\integration\classes\SyncLog;
@@ -33,6 +22,11 @@ class RkwsProduct extends ServiceRkws
     /** @var array $additionalXmlFields Поле во входящем xml -> поле в нашей модели данных */
     public $additionalXmlFields = ['name' => 'name', 'outer_unit_id' => 'outer_unit_id'];
 
+    /**
+     * @param string|null $data
+     * @return array
+     * @throws BadRequestHttpException
+     */
     public function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
     {
         $dictionary = $this->getOrganizationDictionary($this->serviceId, $this->orgId);
@@ -55,7 +49,6 @@ class RkwsProduct extends ServiceRkws
         if (!empty($units)) {
             $units = ArrayHelper::map($units, 'outer_uid', 'id');
         }
-
 
         $array = [];
         $pcount = 0;
@@ -101,16 +94,5 @@ class RkwsProduct extends ServiceRkws
             throw new BadRequestHttpException("wrong_xml_data");
         }
         return $array;
-    }
-
-    /**
-     * @param $items
-     * @return \Generator
-     */
-    private function iterator($items)
-    {
-        foreach ($items as $item) {
-            yield $item;
-        }
     }
 }

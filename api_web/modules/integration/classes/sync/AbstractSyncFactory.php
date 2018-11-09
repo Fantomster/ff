@@ -68,6 +68,12 @@ abstract class AbstractSyncFactory extends WebApi
         }
     }
 
+    /**
+     * @param int $service_id
+     * @param int $org_id
+     * @return OrganizationDictionary
+     * @throws BadRequestHttpException
+     */
     public function getOrganizationDictionary(int $service_id, int $org_id): OrganizationDictionary
     {
 
@@ -95,6 +101,9 @@ abstract class AbstractSyncFactory extends WebApi
         return $orgDic;
     }
 
+    /**
+     * @return array
+     */
     public function getObjects(): array
     {
         if (method_exists($this, 'sendRequestForObjects')) {
@@ -250,6 +259,9 @@ abstract class AbstractSyncFactory extends WebApi
         return ['Не определена функция отправки накладной в классе: ' . get_class($this)];
     }
 
+    /**
+     * @return array
+     */
     public static function getAllSyncOperations(): array
     {
         return [
@@ -263,4 +275,14 @@ abstract class AbstractSyncFactory extends WebApi
         ];
     }
 
+    /**
+     * @param $items
+     * @return \Generator
+     */
+    public function iterator($items)
+    {
+        foreach ($items as $item) {
+            yield $item;
+        }
+    }
 }

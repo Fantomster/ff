@@ -1,16 +1,5 @@
 <?php
 
-/**
- * Class RkwsAgent
- *
- * @package   api_web\module\integration\sync
- * @createdBy Basil A Konakov
- * @createdAt 2018-09-20
- * @author    Mixcart
- * @module    WEB-API
- * @version   2.0
- */
-
 namespace api_web\modules\integration\classes\sync;
 
 use common\models\Waybill;
@@ -31,6 +20,11 @@ class RkwsWaybill extends ServiceRkws
     /** @var array $additionalXmlFields Поле во входящем xml -> поле в нашей модели данных */
     public $additionalXmlFields = ['name' => 'name'];
 
+    /**
+     * @param string|null $data
+     * @return array
+     * @throws BadRequestHttpException
+     */
     public function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
     {
         $myXML = simplexml_load_string($data);

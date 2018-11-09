@@ -48,6 +48,9 @@ class SyncLog
         }
     }
 
+    /**
+     * @param array $params
+     */
     public static function showLog(array $params)
     {
         if (isset($params['service_prefix']) && isset($params['log_index'])) {
@@ -67,7 +70,6 @@ class SyncLog
      */
     public static function trace(string $message, string $service = null, string $callbackTaskId = null)
     {
-
         $currentTime = (string)microtime(true);
         if (!self::$logIndex) {
             self::$logIndex = (string)microtime(true) . '--' . self::uuid4();

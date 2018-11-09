@@ -621,6 +621,11 @@ class ServiceRkws extends AbstractSyncFactory
         return $result;
     }
 
+    /**
+     * @param OuterTask   $task
+     * @param string|null $data
+     * @return string
+     */
     public function receiveXMLData(OuterTask $task, string $data = null)
     {
 
@@ -766,16 +771,10 @@ class ServiceRkws extends AbstractSyncFactory
     }
 
     /**
-     * @param $items
-     * @return \Generator
+     * @param OuterTask   $task
+     * @param string|null $data
+     * @return string
      */
-    private function iterator($items)
-    {
-        foreach ($items as $item) {
-            yield $item;
-        }
-    }
-
     public function receiveXMLDataWaybill(OuterTask $task, string $data = null)
     {
         # 1. Получаем массив входящих данных

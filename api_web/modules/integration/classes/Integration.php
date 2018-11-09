@@ -17,6 +17,7 @@ use yii\web\BadRequestHttpException;
 
 class Integration
 {
+    /** @var array */
     static $service_map = [
         Registry::RK_SERVICE_ID   => 'Rkws',
         Registry::IIKO_SERVICE_ID => 'Iiko'
@@ -70,7 +71,7 @@ class Integration
             ->select('id')
             ->from(OuterAgent::tableName())
             ->where([
-                'org_id' => (new WebApi())->user->organization_id,
+                'org_id'     => (new WebApi())->user->organization_id,
                 'is_deleted' => 0
             ])
             ->createCommand(\Yii::$app->db_api)

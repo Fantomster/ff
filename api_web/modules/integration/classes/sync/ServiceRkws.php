@@ -59,6 +59,9 @@ class ServiceRkws extends AbstractSyncFactory
 
     public $index;
 
+    /** @var  int Заполняется при ответе от r-keeper */
+    public $orgId;
+
     public $urlCmdInit = 'http://ws.ucs.ru/WSClient/api/Client/Cmd';
     public $urlLoginInit = 'http://ws.ucs.ru/WSClient/api/Client/Login';
 
@@ -173,7 +176,7 @@ class ServiceRkws extends AbstractSyncFactory
                 $xml = (array)simplexml_load_string($xmlData);
                 //Если ошибка
                 if (isset($xml['ERROR']) || (isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 5)) {
-                    if(isset($xml['@attributes']['code'])) {
+                    if (isset($xml['@attributes']['code'])) {
                         $code = $xml['@attributes']['code'];
                         $text = $xml['@attributes']['Text'];
                     } else {
@@ -239,7 +242,7 @@ class ServiceRkws extends AbstractSyncFactory
             'updated_at'  => $model->updated_at ?? null
         ];
     }
-  
+
     /**
      * @return null|string
      * @throws BadRequestHttpException
@@ -636,11 +639,19 @@ class ServiceRkws extends AbstractSyncFactory
         $saveCount = 0;
         $saveErr = [];
 
+        # 5.2.0. Построчная блокировка таблицы
+        Yii::$app->db_api->createCommand("
+                SELECT * FROM {$entityTableName::tableName()} WHERE
+                org_id = :org_id AND service_id = :service_id FOR UPDATE",
+            [
+                ':org_id'     => $task->org_id,
+                ':service_id' => $this->serviceId
+            ])->execute();
+
+        # 5.2.1. Помечаем все данные как удаленные
+        $entityTableName::updateAll(['is_deleted' => 1], ['org_id' => $task->org_id, 'service_id' => $this->serviceId]);
+
         if ($this->useNestedSets) {
-
-            # 5.1.1. Обнуляем все существующие данные
-            $entityTableName::updateAll(['is_deleted' => 1], ['org_id' => $task->org_id, 'service_id' => $this->serviceId]);
-
             # 5.1.2. Получаем сведения о существовании записи root для nestedSets
             $rootModel = $entityTableName::findOne(['org_id' => $task->org_id, 'service_id' => $this->serviceId, 'level' => 0]);
             if ($rootModel && isset($rootModel->outer_uid)) {
@@ -653,7 +664,7 @@ class ServiceRkws extends AbstractSyncFactory
             # 5.1.3. Перебираем данные
             $list = [];
 
-            foreach ($arrayNew as $k => $v) {
+            foreach ($this->iterator($arrayNew) as $k => $v) {
                 $model = $entityTableName::findOne(['outer_uid' => $v['rid'], 'org_id' => $task->org_id, 'service_id' => $this->serviceId]);
                 if (!$model) {
                     $model = new $entityTableName([
@@ -693,22 +704,22 @@ class ServiceRkws extends AbstractSyncFactory
                     $saveErr['dicElement'][$model->id][] = $model->errors;
                 }
             }
-
         } else {
-
-            # 5.2.1. Надохим все имеющиеся данные
-            $arrayInit = $entityTableName::findAll(['org_id' => $task->org_id, 'service_id' => $task->service_id]);
-
             # 5.2.2. Перебираем новые данные и пробуем добавить/обновить записи в БД
-            foreach ($arrayNew as $elementNew) {
-                $entity = $entityTableName::findOne(['org_id'     => $task->org_id, 'outer_uid' => $elementNew['rid'],
-                                                     'service_id' => $task->service_id]);
+            foreach ($this->iterator($arrayNew) as $elementNew) {
+                $entity = $entityTableName::findOne([
+                    'org_id'     => $task->org_id,
+                    'outer_uid'  => $elementNew['rid'],
+                    'service_id' => $task->service_id
+                ]);
+
                 if (!$entity) {
                     $entity = new $entityTableName();
                     $entity->org_id = $task->org_id;
                     $entity->outer_uid = $elementNew['rid'];
                     $entity->service_id = $task->service_id;
                 }
+
                 /** @noinspection PhpUndefinedFieldInspection */
                 foreach ($this->additionalXmlFields as $k => $v) {
                     if (isset($elementNew[$k])) {
@@ -723,25 +734,7 @@ class ServiceRkws extends AbstractSyncFactory
                     /** @noinspection PhpUndefinedFieldInspection */
                     $saveErr['dicElement'][$entity->id][] = $entity->errors;
                 }
-                if (/** @noinspection PhpUndefinedFieldInspection */
-                array_key_exists($entity->id, $arrayInit)) {
-                    /** @noinspection PhpUndefinedFieldInspection */
-                    unset($arrayInit[$entity->id]);
-                }
             }
-
-            # 5.2.3. Перебираем существующие данные которые подлежат удалению
-            foreach ($arrayInit as $element) {
-                /** @noinspection PhpUndefinedFieldInspection */
-                $element->is_deleted = 1;
-                if ($element->save()) {
-                    $saveCount++;
-                } else {
-                    /** @noinspection PhpUndefinedFieldInspection */
-                    $saveErr['dicElement'][$element->id][] = $element->errors;
-                }
-            }
-
         }
 
         # 6. Фиксируем изменения в текущей задаче
@@ -770,6 +763,17 @@ class ServiceRkws extends AbstractSyncFactory
         $transaction->rollback();
         SyncLog::trace('Fixed save errors: ' . json_encode($saveErr));
         return self::XML_LOAD_RESULT_FAULT;
+    }
+
+    /**
+     * @param $items
+     * @return \Generator
+     */
+    private function iterator($items)
+    {
+        foreach ($items as $item) {
+            yield $item;
+        }
     }
 
     public function receiveXMLDataWaybill(OuterTask $task, string $data = null)

@@ -172,9 +172,17 @@ class ServiceRkws extends AbstractSyncFactory
             if ($xmlData) {
                 $xml = (array)simplexml_load_string($xmlData);
                 //Если ошибка
-                if (isset($xml['ERROR'])) {
-                    $error = (array)$xml['ERROR'];
-                    throw new BadRequestHttpException("RESPONSE WS: " . $error['@attributes']['Text'] . ' (code: ' . $error['@attributes']['code'] . ')');
+                if (isset($xml['ERROR']) || (isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 5)) {
+                    if(isset($xml['@attributes']['code'])) {
+                        $code = $xml['@attributes']['code'];
+                        $text = $xml['@attributes']['Text'];
+                    } else {
+                        $error = (array)$xml['ERROR'];
+                        $code = $error['@attributes']['Text'];
+                        $text = $error['@attributes']['Text'];
+                    }
+
+                    throw new BadRequestHttpException("RESPONSE WS: " . $text . ' (code: ' . $code . ')');
                 }
 
                 if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {

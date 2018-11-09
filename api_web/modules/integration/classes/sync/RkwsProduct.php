@@ -33,9 +33,13 @@ class RkwsProduct extends ServiceRkws
 
     public function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
     {
+        $dictionary = $this->getOrganizationDictionary($this->serviceId, $this->user->organization_id);
+
         $myXML = simplexml_load_string($data);
         SyncLog::trace('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);
         if (!$myXML) {
+            $dictionary->status_id = $dictionary::STATUS_ERROR;
+            $dictionary->save();
             SyncLog::trace('Empty XML data!');
             throw new BadRequestHttpException("empty_result_xml_data");
         }
@@ -58,7 +62,11 @@ class RkwsProduct extends ServiceRkws
                 }
             }
         }
+
         if (!$array) {
+            $dictionary->status_id = $dictionary::STATUS_ACTIVE;
+            $dictionary->count = 0;
+            $dictionary->save();
             SyncLog::trace('Wrong XML data!');
             throw new BadRequestHttpException("wrong_xml_data");
         }

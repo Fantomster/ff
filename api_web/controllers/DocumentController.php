@@ -10,7 +10,7 @@ namespace api_web\controllers;
 class DocumentController extends \api_web\components\WebApiController
 {
     /**
-     * @SWG\Post(path="/document/document-content",
+     * @SWG\Post(path=" /document/document-content",
      *     tags={"Documents"},
      *     summary="Детальная часть документа",
      *     description="Детальная часть документа

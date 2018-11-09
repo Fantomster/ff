@@ -735,7 +735,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
             }
         } else {
-            $searchSupplier = (isset($post['search']['supplier_id']) ? $post['search']['supplier_id'] : null);
+            $searchSupplier = $post['search']['supplier_id'] ?? null;
             $client = $this->user->organization;
             $vendors = $client->getSuppliers('', false);
             $catalogs = $vendors ? $client->getCatalogs(null) : "(0)";
@@ -803,6 +803,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 'currency_id' => (int)$model['currency_id'],
                 'image'       => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
                 'in_basket'   => $this->container->get('CartWebApi')->countProductInCart($model['id']),
+                'edi_product' => $model['edi_supplier_article'] > 0 ? true : false,
             ];
         }
 
@@ -1122,8 +1123,12 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('order_not_found');
         }
 
-        if ($model->service_id != Registry::MC_BACKEND) {
-            throw new BadRequestHttpException('bad_service_id_in_order|' . ($model->service_id ?? "NULL") . '|' . Registry::MC_BACKEND);
+        if (!in_array($model->service_id, [Registry::MC_BACKEND, Registry::VENDOR_DOC_MAIL_SERVICE_ID])) {
+            throw new BadRequestHttpException(
+                'bad_service_id_in_order|' .
+                ($model->service_id ?? "NULL") . '|' .
+                Registry::MC_BACKEND . ' or ' . Registry::VENDOR_DOC_MAIL_SERVICE_ID
+            );
         }
 
         $t = \Yii::$app->db->beginTransaction();
@@ -1172,6 +1177,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if ($model->order->service_id == Registry::EDI_SERVICE_ID) {
             $item['edi_number'] = $model->edi_number;
         }
+        $item['edi_product'] = $model->product->edi_supplier_article > 0 ? true : false;
         return $item;
     }
 

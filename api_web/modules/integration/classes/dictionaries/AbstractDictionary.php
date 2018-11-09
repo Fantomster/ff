@@ -57,18 +57,17 @@ class AbstractDictionary extends WebApi
      */
     public function getList()
     {
-        $models = OuterDictionary::find()
+        $dictionary = OuterDictionary::find()
+            ->select('id')
+            ->where('service_id = :service_id', [':service_id' => (int)$this->service_id])
+            ->asArray()
+            ->column();
+
+        $models = OrganizationDictionary::find()
             ->where([
-                'service_id' => (int)$this->service_id
-            ])
-            ->leftJoin(
-                OrganizationDictionary::tableName(),
-                'outer_dictionary.id = organization_dictionary.outer_dic_id AND organization_dictionary.org_id = :org_id'
-            )
-            ->addParams([
-                ':org_id' => $this->user->organization_id
-            ])
-            ->all();
+                'outer_dic_id' => $dictionary,
+                'org_id'       => $this->user->organization_id
+            ])->all();
 
         $return = [];
         /**
@@ -76,17 +75,16 @@ class AbstractDictionary extends WebApi
          */
         $defaultStatusText = OrganizationDictionary::getStatusTextList()[OrganizationDictionary::STATUS_DISABLED];
         foreach ($models as $model) {
-            /** @var \common\models\OrganizationDictionary $d */
-            $d = current($model->organizationDictionaries);
+            /** @var \common\models\OrganizationDictionary $model */
             $return[] = [
                 'id'          => $model->id,
-                'name'        => $model->name,
-                'title'       => \Yii::t('api_web', 'dictionary.' . $model->name),
-                'count'       => $d->count ?? 0,
-                'status_id'   => $d->status_id ?? 0,
-                'status_text' => $d->statusText ?? $defaultStatusText,
-                'created_at'  => $d->created_at ?? null,
-                'updated_at'  => $d->updated_at ?? null
+                'name'        => $model->outerDic->name,
+                'title'       => \Yii::t('api_web', 'dictionary.' . $model->outerDic->name),
+                'count'       => $model->count ?? 0,
+                'status_id'   => $model->status_id ?? 0,
+                'status_text' => $model->statusText ?? $defaultStatusText,
+                'created_at'  => $model->created_at ?? null,
+                'updated_at'  => $model->updated_at ?? null
             ];
         }
 
@@ -256,59 +254,70 @@ class AbstractDictionary extends WebApi
      */
     public function agentUpdate($request)
     {
-        $model = OuterAgent::findOne($request['id']);
+        $this->validateRequest($request, ['id', 'service_id']);
+
+        $model = OuterAgent::findOne([
+            'id'         => (int)$request['id'],
+            'service_id' => (int)$request['service_id'],
+            'org_id'     => $this->user->organization_id
+        ]);
 
         if (empty($model)) {
             throw new BadRequestHttpException('model_not_found');
         }
 
-        $model->vendor_id = $request['vendor_id'] ?? null;
-        $model->store_id = $request['store_id'] ?? null;
-        $model->payment_delay = $request['payment_delay'] ?? null;
+        //Если хотят поменять поставщика, проверим работает ли с нми ресторан
+        if (!empty($request['vendor_id'])) {
+            $vendors = $this->user->organization->getSuppliers();
+            if (!array_key_exists($request['vendor_id'], $vendors)) {
+                throw new BadRequestHttpException('dictionary.you_not_work_this_vendor');
+            }
+            $model->vendor_id = (int)$request['vendor_id'];
+        }
+        //Если хотят поменять склад, смотрим принадлежит ли он организации пользователя
+        if (!empty($request['store_id'])) {
+            $store = OuterStore::findOne(['id' => $request['store_id'], 'org_id' => $this->user->organization_id]);
+            if (empty($store)) {
+                throw new BadRequestHttpException('dictionary.this_not_you_store');
+            }
+            $model->store_id = (int)$request['store_id'];
+        }
+        //Дата отсрочки платежа
+        if (!empty($request['payment_delay'])) {
+            $model->payment_delay = $request['payment_delay'];
+        }
+
         if (!$model->save()) {
             throw new ValidationException($model->getFirstErrors());
         }
 
-        if (OuterAgentNameWaybill::find()->where(['agent_id' => $request['id']])->exists()) {
-            OuterAgentNameWaybill::deleteAll(['agent_id' => $request['id']]);
+        if (isset($request['name_waybill'])) {
+            if (OuterAgentNameWaybill::find()->where(['agent_id' => $model->id])->exists()) {
+                OuterAgentNameWaybill::deleteAll(['agent_id' => $model->id]);
+            }
+            if (!empty($request['name_waybill'])) {
+                $transaction = \Yii::$app->db->beginTransaction();
+                try {
+                    \Yii::$app->db_api->createCommand()
+                        ->batchInsert(
+                            OuterAgentNameWaybill::tableName(),
+                            ['agent_id', 'name'],
+                            array_map(
+                                function ($el) use ($model) {
+                                    return [$model->id, $el];
+                                },
+                                $request['name_waybill']
+                            )
+                        )->execute();
+                    $transaction->commit();
+                } catch (\Throwable $throwable) {
+                    $transaction->rollBack();
+                    throw $throwable;
+                }
+            }
         }
 
-        $transaction = \Yii::$app->db->beginTransaction();
-        try {
-            \Yii::$app->db_api->createCommand()
-                ->batchInsert(
-                    OuterAgentNameWaybill::tableName(),
-                    ['agent_id', 'name'],
-                    array_map(
-                        function ($el) use ($request) {
-                            return [$request['id'], $el];
-                        },
-                        $request['name_waybill']
-                    )
-                )->execute();
-            $transaction->commit();
-        } catch (\Throwable $throwable) {
-            $transaction->rollBack();
-            throw $throwable;
-        }
-
-        return [
-            'id'            => $model->id,
-            'outer_uid'     => $model->outer_uid,
-            'name'          => $model->name,
-            'vendor_id'     => $model->vendor_id,
-            'vendor_name'   => $model->vendor->name ?? null,
-            'store_id'      => $model->store_id,
-            'store_name'    => $model->store->name ?? null,
-            'payment_delay' => $model->payment_delay,
-            'is_active'     => (int)!$model->is_deleted,
-            'name_waybill'  => array_map(
-                function ($el) {
-                    return $el['name'];
-                },
-                $model->nameWaybills
-            )
-        ];
+        return $this->prepareAgent($model);
     }
 
     /**
@@ -432,10 +441,12 @@ class AbstractDictionary extends WebApi
     private function prepareStore($model)
     {
         $child = function ($model) {
-            $childrens = $model->children()->all();
+            $childrens = $model->children(1)->all();
             $arReturn = [];
-            foreach ($childrens as $children) {
-                $arReturn[] = $this->prepareStore($children);
+            if (!empty($childrens)) {
+                foreach ($childrens as $children) {
+                    $arReturn[] = $this->prepareStore($children);
+                }
             }
             return $arReturn;
         };
@@ -447,7 +458,7 @@ class AbstractDictionary extends WebApi
             'created_at' => $model->created_at,
             'updated_at' => $model->updated_at,
             'is_active'  => (int)!$model->is_deleted,
-            'childs'     => $child($model),
+            'childs'     => $model->isLeaf() ? [] : $child($model),
         ];
     }
 
@@ -540,9 +551,12 @@ class AbstractDictionary extends WebApi
      * */
     public function categoryList($request): array
     {
-        $search = OuterCategory::find()->where(['service_id' => $this->service_id]);
+        $search = OuterCategory::find()->where(['service_id' => $this->service_id, 'is_deleted' => 0]);
         $orgId = $this->user->organization->id;
 
+        /**
+         * TODO Не работает фильтр
+         */
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', 'name', $request['search']['name']]);
@@ -554,15 +568,12 @@ class AbstractDictionary extends WebApi
         }
 
         $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
-
         $rootModels = $search->roots()->indexBy('id')->all();
 
         $result = [];
-
-        foreach ($rootModels as $rootModel) {
+        foreach ($this->iterator($rootModels) as $rootModel) {
             $result = $this->prepareCategory($rootModel);
         }
-
         return ['categories' => $result];
     }
 
@@ -574,22 +585,39 @@ class AbstractDictionary extends WebApi
      * */
     private function prepareCategory($model)
     {
+        /**
+         * @param $model OuterCategory
+         * @return array
+         */
         $child = function ($model) {
-            $childrens = $model->children()->all();
+            $childrens = $model->children(1)->all();
             $arReturn = [];
-            foreach ($childrens as $children) {
-                $arReturn[] = $this->prepareCategory($children);
+            if (!empty($childrens)) {
+                foreach ($this->iterator($childrens) as $children) {
+                    $arReturn[] = $this->prepareCategory($children);
+                }
             }
             return $arReturn;
         };
+
         return [
-            'id'         => $model->id,
-            'outer_uid'  => $model->outer_uid,
-            'name'       => $model->name,
+            'id'        => $model->id,
+            'outer_uid' => $model->outer_uid,
+            'name'      => $model->name,
             'created_at' => $model->created_at,
             'updated_at' => $model->updated_at,
-            'is_active'  => (int)!$model->is_deleted,
-            'childs'     => $child($model),
+            'childs'    => $model->isLeaf() ? [] : $child($model),
         ];
+    }
+
+    /**
+     * @param $items
+     * @return \Generator
+     */
+    private function iterator($items)
+    {
+        foreach ($items as $item) {
+            yield $item;
+        }
     }
 }

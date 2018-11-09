@@ -8,7 +8,6 @@ use common\models\OuterProduct;
 use common\models\OuterProductMap;
 use common\models\OuterStore;
 use common\models\OuterUnit;
-use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
 
 /**
@@ -36,7 +35,7 @@ class OuterProductMapSearch extends OuterProductMap
         $query = CatalogBaseGoods::find()
             ->select([
                 "$outerProductMapTableName.id as id",
-                "IFNULL($outerProductMapTableName.id, :service_id) as service_id",
+                "IFNULL($outerProductMapTableName.service_id, :service_id) as service_id",
                 "IFNULL($outerProductMapTableName.organization_id, :client_id) as organization_id",
                 "$catalogBaseGoodsTableName.supp_org_id as vendor_id",
                 "vendor.name as vendor_name",
@@ -68,9 +67,6 @@ class OuterProductMapSearch extends OuterProductMap
             $query->andWhere("service_id = :service_id", [':service_id' => $this->service_id]);
         }
 
-        $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
-        $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
-
         $vendors = array_keys($client->getSuppliers(null));
 
         if (isset($post['search'])) {
@@ -90,14 +86,14 @@ class OuterProductMapSearch extends OuterProductMap
         }
 
         $query->andWhere(['in', "$catalogBaseGoodsTableName.supp_org_id", $vendors]);
+        $query->orderBy([
+            'IF(outer_product_id is null, 0, 1)' => SORT_DESC,
+            'outer_product_id' => SORT_ASC,
+            'product_id' => SORT_ASC,
+        ]);
 
         $dataProvider = new SqlDataProvider([
-            'sql'        => $query->createCommand()->getRawSql(),
-            'pagination' => [
-                'page'     => $page - 1,
-                'pageSize' => $pageSize
-            ],
-            'key'        => 'product_id',
+            'sql' => $query->createCommand()->getRawSql()
         ]);
 
         return $dataProvider;

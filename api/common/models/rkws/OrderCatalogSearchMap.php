@@ -3,8 +3,12 @@
 namespace api\common\models\rkws;
 
 use api\common\models\iiko\iikoService;
+use common\models\CatalogBaseGoods;
+use common\models\CatalogGoods;
+use common\models\RelationSuppRest;
 use yii\data\SqlDataProvider;
 use common\models\Catalog;
+use api_web\components\Registry;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
@@ -18,7 +22,6 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
     public $pdenom;
     public $service_id;
     public $vendors;
-
 
     /**
      * @inheritdoc
@@ -37,19 +40,19 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
     public function attributeLabels(): array
     {
         return [
-            'product_rid' => 'Продукт в системе Заказчика',
-            'store' => 'Склад',
-            'koef' => 'Коэффициент',
-            'vat' => 'Ставка НДС',
-            'pdenom' => 'Название продукта сопоставления',
-            'service_id' => 'Сервис',
+            'product_rid'   => 'Продукт в системе Заказчика',
+            'store'         => 'Склад',
+            'koef'          => 'Коэффициент',
+            'vat'           => 'Ставка НДС',
+            'pdenom'        => 'Название продукта сопоставления',
+            'service_id'    => 'Сервис',
             'service_denom' => 'Сервис'
         ];
     }
 
-
     /**
      * Search
+     *
      * @param array $params
      * @return ActiveDataProvider
      */
@@ -63,25 +66,25 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             $this->service_id = 0;
         }
         $fields = [
-            0 => [],
-            1 => ["fprod.denom as pdenom", "fstore.name as store", "fprod.unitname as unitname"], // R-keeper
-            2 => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // iiko
-            8 => ["fprod.name as pdenom", "fstore.name as store", "fprod.measure as unitname"], // 1C
-            10 => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // tillypad
+            0                       => [],
+            Registry::RK_SERVICE_ID           => ["fprod.denom as pdenom", "fstore.name as store", "fprod.unitname as unitname"], // R-keeper
+            Registry::IIKO_SERVICE_ID         => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // iiko
+            Registry::ONE_S_CLIENT_SERVICE_ID => ["fprod.name as pdenom", "fstore.name as store", "fprod.measure as unitname"], // 1C
+            Registry::TILLYPAD_SERVICE_ID     => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // tillypad
         ];
 
         $joins = [
-            0 => '',
-            1 => " LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
+            0             => '',
+            Registry::RK_SERVICE_ID => " LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.acc  AND fstore.type = 2 ",
 
-            2 => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
+            Registry::IIKO_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`iiko_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
 
-            8 => " LEFT JOIN `$dbName`.`one_s_good` fprod ON fmap.serviceproduct_id = fprod.id
+            Registry::ONE_S_CLIENT_SERVICE_ID => " LEFT JOIN `$dbName`.`one_s_good` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`one_s_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id ",
 
-            10 => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
+            Registry::TILLYPAD_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
                    LEFT JOIN `$dbName`.`iiko_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
 
         ];
@@ -171,42 +174,16 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
 
         $client_id = $this->client->id;
-        if ($this->service_id == 2) {
-            $mainOrg_id = iikoService::getMainOrg($this->client->id);
-            if ($mainOrg_id != $this->client->id) {
-                $client_id = "IF(product_id in (select product_id from `$dbName`.all_map where service_id = 2 and org_id = $client_id), $client_id";
+        $vendorInList = $this->selectedVendor;
 
-                if (!empty($mainOrg_id)) {
-                    $client_id .= ", $mainOrg_id";
-                }
-                $client_id .= ")";
-            }
-
-        }
-
-        if ($this->service_id == 10) {
-            $mainOrg_id = iikoService::getMainOrg($this->client->id);
-            if ($mainOrg_id != $this->client->id) {
-                $client_id = "IF(product_id in (select product_id from `$dbName`.all_map where service_id = 10 and org_id = $client_id), $client_id";
-
-                if (!empty($mainOrg_id)) {
-                    $client_id .= ", $mainOrg_id";
-                }
-                $client_id .= ")";
-            }
-
-        }
-
-        if(isset($this->vendors) && empty($this->selectedVendor))
-        {
+        if (isset($this->vendors) && empty($this->selectedVendor)) {
             $arrayVendorsId = array_keys($this->vendors);
             unset($arrayVendorsId[0]);
             $arrayVendorsId = implode(",", $arrayVendorsId);
-            $where_all .= " AND cbg.supp_org_id in ($arrayVendorsId)";
-        }
-        else
-        {
-            $where_all .= " AND cbg.supp_org_id in (".$this->selectedVendor.")";
+            $vendorInList = $arrayVendorsId;
+            $where_all .= " AND cbg.supp_org_id in ($vendorInList)";
+        } else {
+            $where_all .= " AND cbg.supp_org_id in (" . $vendorInList . ")";
         }
 
         $sql = "SELECT " . implode(',', $fieldsCBG) . "
@@ -214,8 +191,16 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
              LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
              LEFT JOIN `$dbName`.`all_map` `fmap` ON cbg.id = fmap.product_id AND fmap.org_id = " . $client_id . " AND fmap.service_id = " . $this->service_id . "
              " . $joins[$this->service_id] . "
-             LEFT JOIN `$dbName`.`all_service` `allservice` ON fmap.service_id = allservice.id       
-           WHERE          
+             LEFT JOIN `$dbName`.`all_service` `allservice` ON fmap.service_id = allservice.id
+             JOIN (
+                SELECT sqc.base_goods_id, sqa.supp_org_id
+                  FROM relation_supp_rest sqa
+                  LEFT JOIN catalog_goods sqc ON sqc.cat_id = sqa.cat_id
+                 WHERE sqa.supp_org_id in (" . $vendorInList . ")
+                   AND sqa.rest_org_id = " . $client_id . "
+                   GROUP BY sqc.base_goods_id, sqa.supp_org_id
+             ) catg ON catg.supp_org_id = cbg.supp_org_id AND cbg.id = case WHEN catg.base_goods_id IS NULL THEN cbg.id ELSE catg.base_goods_id END
+           WHERE
            cbg.deleted = 0
            " . $where . $where_all;
 
@@ -254,19 +239,19 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         $query = \Yii::$app->db->createCommand($sql);
 
         $dataProvider = new SqlDataProvider([
-            'sql' => $query->sql,
+            'sql'    => $query->sql,
             'params' => $params_sql,
 
             'pagination' => [
-                'page' => isset($params['page']) ? ($params['page'] - 1) : 0,
+                'page'     => isset($params['page']) ? ($params['page'] - 1) : 0,
                 'pageSize' => isset($params['pageSize']) ? $params['pageSize'] : null,
-                'params' => [
+                'params'   => [
                     'sort' => isset($params['sort']) ? $params['sort'] : 'product',
                 ]
             ],
-            'key' => 'id',
-            'sort' => [
-                'attributes' => [
+            'key'        => 'id',
+            'sort'       => [
+                'attributes'   => [
                     'product',
                     /* => [
                         'asc' => ['product' => SORT_ASC],
@@ -296,7 +281,6 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         ]);
         return $dataProvider;
     }
-
 
     private function getDsnAttribute($name, $dsn)
     {

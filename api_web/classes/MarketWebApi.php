@@ -5,7 +5,6 @@ namespace api_web\classes;
 use api_web\components\WebApi;
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogGoods;
-use common\models\Category;
 use common\models\MpCategory;
 use common\models\Organization;
 use common\models\DeliveryRegions;

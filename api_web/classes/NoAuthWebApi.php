@@ -50,6 +50,7 @@ class NoAuthWebApi
                     SyncLog::trace('Empty response: ' . $task->id);
                     return 'false';
                 }
+                SyncLog::trace($body);
                 $res = $entity->receiveXmlData($task, $body);
                 SyncLog::trace($res);
                 return $res;

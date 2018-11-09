@@ -370,27 +370,22 @@ class AbstractDictionary extends WebApi
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', 'name', $request['search']['name']]);
             }
-
-            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
-                $orgId = $request['search']['business_id'];
-            }
         }
 
-        if (isset($request['search']['organization_id'])) {
-            $find_org_id = (int)$request['search']['organization_id'];
+        if (isset($request['search']['business_id'])) {
+            $find_org_id = (int)$request['search']['business_id'];
             $organizations = (new UserWebApi())->getUserOrganizationBusinessList();
             if (!empty($organizations['result'])) {
                 $organizations = ArrayHelper::map($organizations['result'], 'id', 'name');
                 if (isset($organizations[$find_org_id])) {
-                    $search->andWhere(['org_id' => $find_org_id]);
+                    $orgId = $find_org_id;
                 } else {
                     throw new BadRequestHttpException('dictionary.access_denied');
                 }
             }
-        } else {
-            $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
         }
 
+        $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
         $models = $search->orderBy(['left' => SORT_ASC])->all();
         $result = [];
 
@@ -578,6 +573,38 @@ class AbstractDictionary extends WebApi
     }
 
     /**
+     * Выбор категории для загрузки
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function categorySetSelected($request): array
+    {
+        $model = OuterCategory::findOne([
+            'id'         => (int)$request['category_id'],
+            'org_id'     => $request['business_id'] ?? $this->user->organization->id,
+            'service_id' => $this->service_id
+        ]);
+
+        if (empty($model)) {
+            throw new BadRequestHttpException('dictionary.category_not_found');
+        }
+
+        if (!$model->isLeaf()) {
+            throw new BadRequestHttpException('dictionary.directory_cannot_be_selected');
+        }
+
+        $model->selected = (int)$request['selected'] ?? 0;
+        if (!$model->save()) {
+            throw new ValidationException($model->getFirstErrors());
+        }
+
+        return ['selected' => (bool)$model->selected];
+    }
+
+    /**
      * Функция рекурсия от корневой категории
      *
      * @param OuterCategory $model
@@ -601,12 +628,13 @@ class AbstractDictionary extends WebApi
         };
 
         return [
-            'id'        => $model->id,
-            'outer_uid' => $model->outer_uid,
-            'name'      => $model->name,
+            'id'         => $model->id,
+            'outer_uid'  => $model->outer_uid,
+            'name'       => $model->name,
+            'selected'   => (bool)$model->selected,
             'created_at' => $model->created_at,
             'updated_at' => $model->updated_at,
-            'childs'    => $model->isLeaf() ? [] : $child($model),
+            'childs'     => $model->isLeaf() ? [] : $child($model),
         ];
     }
 

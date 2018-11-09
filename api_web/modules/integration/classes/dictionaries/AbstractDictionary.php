@@ -415,10 +415,12 @@ class AbstractDictionary extends WebApi
     private function prepareStore($model)
     {
         $child = function ($model) {
-            $childrens = $model->children()->all();
+            $childrens = $model->children(1)->all();
             $arReturn = [];
-            foreach ($childrens as $children) {
-                $arReturn[] = $this->prepareStore($children);
+            if (!empty($childrens)) {
+                foreach ($childrens as $children) {
+                    $arReturn[] = $this->prepareStore($children);
+                }
             }
             return $arReturn;
         };
@@ -430,7 +432,7 @@ class AbstractDictionary extends WebApi
             'created_at' => $model->created_at,
             'updated_at' => $model->updated_at,
             'is_active'  => (int)!$model->is_deleted,
-            'childs'     => $child($model),
+            'childs'     => $model->isLeaf() ? [] : $child($model),
         ];
     }
 
@@ -566,6 +568,8 @@ class AbstractDictionary extends WebApi
             'id'        => $model->id,
             'outer_uid' => $model->outer_uid,
             'name'      => $model->name,
+            'created_at' => $model->created_at,
+            'updated_at' => $model->updated_at,
             'childs'    => $model->isLeaf() ? [] : $child($model),
         ];
     }

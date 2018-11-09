@@ -552,7 +552,7 @@ class AbstractDictionary extends WebApi
          * @return array
          */
         $child = function ($model) {
-            $childrens = $model->children()->all();
+            $childrens = $model->children(1)->all();
             $arReturn = [];
             if (!empty($childrens)) {
                 foreach ($this->iterator($childrens) as $children) {

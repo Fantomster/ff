@@ -57,6 +57,8 @@ use common\models\guides\Guide;
  * @property string              $kpp
  * @property integer             $parent_id
  * @property integer             $gmt
+ * @property integer             $user_agreement
+ * @property integer             $confidencial_policy
  * @property string              $action
  * @property integer             $blacklisted
  * @property OrganizationType    $type
@@ -136,7 +138,7 @@ class Organization extends \yii\db\ActiveRecord
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
             [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'common.models.organization_address_error', ['ru' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'])],
             [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id', 'blacklisted', 'gmt'], 'integer'],
-            [['created_at', 'updated_at', 'white_list', 'partnership', 'inn', 'kpp', 'lang'], 'safe'],
+            [['created_at', 'updated_at', 'white_list', 'partnership', 'inn', 'kpp', 'lang', 'user_agreement', 'confidencial_policy'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1', 'action'], 'string', 'max' => 255],
             [['gln_code'], 'integer', 'min' => 1000000000000, 'max' => 99999999999999999, 'tooSmall' => 'Too small value', 'tooBig' => 'To big value'],
             [['gln_code'], 'unique'],

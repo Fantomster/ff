@@ -972,4 +972,33 @@ class UserWebApi extends \api_web\components\WebApi
             throw $e;
         }
     }
+
+    /**
+     * Установка флага принятого соглашения  для текущей органищации
+     * Нельзя установить уже "принятое" соглашение в "не принятое"
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function setAgreement($request)
+    {
+        $org = $this->user->organization;
+        $this->validateRequest($request, ['type', 'value']);
+        $user_agreement = $org->user_agreement;
+        $confidencial_policy = $org->confidencial_policy;
+        if (!array_key_exists($request['type'], get_defined_vars())) {
+            throw new BadRequestHttpException('user.wrong_agreement_name');
+        }
+        if ($request['value'] == 0 && ${$request['type']} == 1) {
+            throw new BadRequestHttpException('user.cannot_disable_accepted_agreement');
+        }
+        $org->{$request['type']} = $request['value'];
+        if (!$org->save()) {
+            throw new ValidationException($org->getFirstErrors());
+        }
+
+        return ['result' => $org];
+    }
 }

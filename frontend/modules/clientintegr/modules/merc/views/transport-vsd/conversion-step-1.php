@@ -99,9 +99,10 @@ $this->registerCss($style);
                                         'initval' => $amount,
                                         'min' => 0.0001,
                                         'max' => $data->amount,
-                                        'step' => 1,
-                                        'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
-                                        'forcestepdivisibility' => (isset($data['units']) && $data['units'] && (floor($data['units']) == $data['units'])) ? 'floor' : 'none',
+                                        'step' =>  0.01,
+                                        'decimals' => 3,
+                                        /*'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
+                                        'forcestepdivisibility' => (isset($data['units']) && $data['units'] && (floor($data['units']) == $data['units'])) ? 'floor' : 'none',*/
                                         'buttonup_class' => 'btn btn-default',
                                         'buttondown_class' => 'btn btn-default',
                                         'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',

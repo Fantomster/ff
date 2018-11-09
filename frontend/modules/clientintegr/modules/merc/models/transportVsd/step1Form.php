@@ -19,7 +19,11 @@ class step1Form extends MercStockEntry
     {
         return [
             [['product_name', 'select_amount'], 'required'],
-            [['select_amount'], 'number'],
+            [['select_amount'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
+            ['select_amount', 'filter', 'filter' => function ($value) {
+                $newValue = isset($value) ? (0 + str_replace(',', '.', $value)) : null;
+                return $newValue;
+            }],
             [['select_amount'], 'checkNax'],
             [['product_name'], 'string'],
         ];

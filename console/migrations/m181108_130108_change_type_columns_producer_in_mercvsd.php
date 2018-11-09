@@ -18,7 +18,8 @@ class m181108_130108_change_type_columns_producer_in_mercvsd extends Migration
      */
     public function safeUp()
     {
-        $this->execute("ALTER TABLE `api`.`merc_vsd` 
+        $dbName = \common\helpers\DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+        $this->execute("ALTER TABLE `$dbName`.`merc_vsd` 
             CHANGE COLUMN `producer_name` `producer_name` TEXT NULL DEFAULT NULL COMMENT 'Наименование производителя' ,
             CHANGE COLUMN `producer_guid` `producer_guid` TEXT NULL DEFAULT NULL COMMENT 'Глобальный идентификатор предприятия' ;
             ");

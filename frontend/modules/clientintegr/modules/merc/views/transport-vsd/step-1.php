@@ -96,7 +96,7 @@ CSS;
                         'options' => function ($data) { return [
                             'pluginOptions' => [
                                 'initval' => isset($data->select_amount) ? $data->select_amount : $data->amount,
-                                'min' => 1,
+                                'min' => 0.0001,
                                 'max' => $data->amount,
                                 'step' =>  0.01,
                                 'decimals' => 3,

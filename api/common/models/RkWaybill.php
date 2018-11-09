@@ -178,7 +178,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
     protected function createWaybillData()
     {
 
-        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+        $dbName = DBNameHelper::getApiName();
 
         $waybillMode = RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
         $org_id = User::findOne(Yii::$app->user->id)->organization_id;

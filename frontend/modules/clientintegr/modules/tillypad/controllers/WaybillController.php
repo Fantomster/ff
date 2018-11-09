@@ -1165,7 +1165,7 @@ return $out;
             $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_koef' => $koef_all_map, ':w_id' => $id_all_map])->execute();
         }
 
-        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        $dbName = DBNameHelper::getMainName();
         $sql = "SELECT wd.id FROM `iiko_waybill_data` `wd` LEFT JOIN `iiko_waybill` `w` ON wd.waybill_id = w.id 
                 LEFT JOIN " . $dbName . ".`order` `o` ON w.order_id = o.id 
                 WHERE w.status_id = 1 AND o.vendor_id = :w_supp AND o.client_id = :w_org AND wd.product_id = :w_pid AND wd.product_rid IS NULL";

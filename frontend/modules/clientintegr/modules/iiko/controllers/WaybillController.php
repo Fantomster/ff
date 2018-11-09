@@ -1184,7 +1184,7 @@ SQL;
             }
         }
         $idorgs = rtrim($idorgs, ',');
-        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        $dbName = DBNameHelper::getMainName();
 
         $sql = "SELECT wd.id FROM `iiko_waybill_data` `wd` LEFT JOIN `iiko_waybill` `w` ON wd.waybill_id = w.id 
                 LEFT JOIN " . $dbName . ".`order` `o` ON w.order_id = o.id  

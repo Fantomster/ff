@@ -30,6 +30,7 @@ use yii\web\BadRequestHttpException;
 use common\components\SearchOrdersComponent;
 use yii\helpers\Json;
 use api_web\components\Registry;
+use common\helpers\DBNameHelper;
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
@@ -1183,9 +1184,10 @@ SQL;
             }
         }
         $idorgs = rtrim($idorgs, ',');
+        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
 
         $sql = "SELECT wd.id FROM `iiko_waybill_data` `wd` LEFT JOIN `iiko_waybill` `w` ON wd.waybill_id = w.id 
-                LEFT JOIN `db`.`order` `o` ON w.order_id = o.id  
+                LEFT JOIN " . $dbName . ".`order` `o` ON w.order_id = o.id  
                 WHERE w.status_id = 1 AND o.vendor_id = :w_supp AND o.client_id in (" . $idorgs . ") AND wd.product_id = :w_pid AND wd.product_rid IS NULL";
         $massivs = Yii::$app->db_api->createCommand($sql, [':w_pid' => $number, ':w_supp' => $supp_id, ':w_org' => $org_id])->queryAll();
         $ids = '';

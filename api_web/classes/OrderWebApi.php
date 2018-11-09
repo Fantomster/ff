@@ -1177,6 +1177,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if ($model->order->service_id == Registry::EDI_SERVICE_ID) {
             $item['edi_number'] = $model->edi_number;
         }
+        $item['edi_product'] = $model->product->edi_supplier_article > 0 ? true : false;
         return $item;
     }
 

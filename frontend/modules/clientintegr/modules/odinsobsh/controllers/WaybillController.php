@@ -25,6 +25,8 @@ use yii\helpers\Url;
 use common\models\search\OrderSearch2;
 use yii\web\BadRequestHttpException;
 use common\components\SearchOrdersComponent;
+use api_web\components\Registry;
+use common\helpers\DBNameHelper;
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
@@ -161,7 +163,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         if ($button == 'forever') {
             $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
-            $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 8, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+            $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => Registry::ONE_S_CLIENT_SERVICE_ID, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
             if ($existence == 0) {
                 /*$sql = "SELECT store_id,agent_uuid FROM one_s_waybill WHERE id = :w_wi";
                 $res = Yii::$app->db_api->createCommand($sql, [':w_wi' => $waybill_id])->queryAll();
@@ -178,7 +180,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), NOW(), NOW())";
                 $result = Yii::$app->db_api->createCommand($sql, [
-                    ':w_s'       => 8,
+                    ':w_s'       => Registry::ONE_S_CLIENT_SERVICE_ID,
                     ':w_org'     => $org_id,
                     ':w_product' => $product_id,
                     ':w_supp'    => $supp_id,
@@ -190,7 +192,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 ])->execute();
             } else {
                 $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
-                $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => 8, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+                $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => Registry::ONE_S_CLIENT_SERVICE_ID, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
                 $sql = "UPDATE all_map SET serviceproduct_id = :w_spid, unit_rid = :w_unitr, linked_at = NOW(), updated_at = NOW() WHERE id = :w_id";
                 $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_unitr' => null, ':w_id' => $id_all_map])->execute();
             }
@@ -238,7 +240,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $result = Yii::$app->db_api->createCommand($sql, [':w_quant' => $quant_new, ':w_koef' => $koef, ':w_id' => $koef_id])->execute();
         if ($buttons == 'forever') {
             $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
-            $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 8, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+            $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => Registry::ONE_S_CLIENT_SERVICE_ID, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
             if ($existence == 0) {
                 $sql = "SELECT store_id/*,agent_uuid*/ FROM one_s_waybill WHERE id = :w_wi";
                 $res = Yii::$app->db_api->createCommand($sql, [':w_wi' => $waybill_id])->queryAll();
@@ -255,7 +257,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
                 $result = Yii::$app->db_api->createCommand($sql, [
-                    ':w_s'       => 8,
+                    ':w_s'       => Registry::ONE_S_CLIENT_SERVICE_ID,
                     ':w_org'     => $org_id,
                     ':w_product' => $product_id,
                     ':w_supp'    => $supp_id,
@@ -267,11 +269,11 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 ])->execute();
                 if (!(is_null($product_rid))) {
                     $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
-                    $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $org_id, ':w_product' => $product_id, ':w_s' => 8])->execute();
+                    $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $org_id, ':w_product' => $product_id, ':w_s' => Registry::ONE_S_CLIENT_SERVICE_ID])->execute();
                 }
             } else {
                 $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
-                $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => 8, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+                $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => Registry::ONE_S_CLIENT_SERVICE_ID, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
                 $sql = "UPDATE all_map SET koef = :w_koef, vat = :w_vat, updated_at = NOW() WHERE id = :w_id";
                 $result = Yii::$app->db_api->createCommand($sql, [':w_koef' => $koef, ':w_vat' => $vat, ':w_id' => $id_all_map])->execute();
             }
@@ -749,7 +751,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
                 $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
-                $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 8, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+                $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => Registry::ONE_S_CLIENT_SERVICE_ID, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
                 if ($existence == 0) {
                     $sql = "SELECT store_id/*,agent_uuid*/ FROM one_s_waybill WHERE id = :w_wi";
                     $res = Yii::$app->db_api->createCommand($sql, [':w_wi' => $waybill_id])->queryAll();
@@ -766,7 +768,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                                 VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
                     $result = Yii::$app->db_api->createCommand($sql, [
-                        ':w_s'       => 8,
+                        ':w_s'       => Registry::ONE_S_CLIENT_SERVICE_ID,
                         ':w_org'     => $org_id,
                         ':w_product' => $product_id,
                         ':w_supp'    => $supp_id,
@@ -778,11 +780,11 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     ])->execute();
                     if (!(is_null($product_rid))) {
                         $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
-                        $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $org_id, ':w_product' => $product_id, ':w_s' => 8])->execute();
+                        $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $org_id, ':w_product' => $product_id, ':w_s' => Registry::ONE_S_CLIENT_SERVICE_ID])->execute();
                     }
                 } else {
                     $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
-                    $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => 8, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+                    $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => Registry::ONE_S_CLIENT_SERVICE_ID, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
                     $sql = "UPDATE all_map SET vat = :w_vat, updated_at = NOW() WHERE id = :w_id";
                     $result = Yii::$app->db_api->createCommand($sql, [':w_vat' => $vat, ':w_id' => $id_all_map])->execute();
                 }
@@ -814,7 +816,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
         $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
-        $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 8, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+        $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => Registry::ONE_S_CLIENT_SERVICE_ID, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
         if ($existence == 0) {
             $sql = "SELECT store_id/*,agent_uuid*/ FROM one_s_waybill WHERE id = :w_wi";
             $res = Yii::$app->db_api->createCommand($sql, [':w_wi' => $waybill_id])->queryAll();
@@ -831,7 +833,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), null, NOW())";
             $result = Yii::$app->db_api->createCommand($sql, [
-                ':w_s'       => 8,
+                ':w_s'       => Registry::ONE_S_CLIENT_SERVICE_ID,
                 ':w_org'     => $org_id,
                 ':w_product' => $product_id,
                 ':w_supp'    => $supp_id,
@@ -843,11 +845,11 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             ])->execute();
             if (!(is_null($product_rid))) {
                 $sql = "UPDATE all_map SET linked_at = NOW() WHERE org_id = :w_org AND product_id = :w_product AND service_id = :w_s";
-                $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $org_id, ':w_product' => $product_id, ':w_s' => 8])->execute();
+                $result = Yii::$app->db_api->createCommand($sql, [':w_org' => $org_id, ':w_product' => $product_id, ':w_s' => Registry::ONE_S_CLIENT_SERVICE_ID])->execute();
             }
         } else {
             $sql = "SELECT id FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
-            $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => 8, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+            $id_all_map = Yii::$app->db_api->createCommand($sql, [':w_s' => Registry::ONE_S_CLIENT_SERVICE_ID, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
             $sql = "UPDATE all_map SET vat = :w_vat, updated_at = NOW() WHERE id = :w_id";
             $result = Yii::$app->db_api->createCommand($sql, [':w_vat' => $vat, ':w_id' => $id_all_map])->execute();
         }
@@ -969,12 +971,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);
 
         $sql = "SELECT id, koef FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product LIMIT 1";
-        $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 8, ':w_org' => $org_id, ':w_product' => $number])->queryAll();
+        $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => Registry::ONE_S_CLIENT_SERVICE_ID, ':w_org' => $org_id, ':w_product' => $number])->queryAll();
         if (!$existence) {
             $sql = "INSERT INTO all_map (service_id, org_id, product_id, supp_id, serviceproduct_id, unit_rid, store_rid, koef, vat, is_active, created_at, linked_at, updated_at)
                         VALUES (:w_s, :w_org, :w_product, :w_supp, :w_spid, :w_unitr, :w_store, :w_koef , :w_vat, 1, NOW(), NOW(), NOW())";
             $result = Yii::$app->db_api->createCommand($sql, [
-                ':w_s'       => 8,
+                ':w_s'       => Registry::ONE_S_CLIENT_SERVICE_ID,
                 ':w_org'     => $org_id,
                 ':w_product' => $number,
                 ':w_supp'    => $supp_id,
@@ -993,6 +995,19 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $sql = "UPDATE all_map SET serviceproduct_id = :w_spid, koef = :w_koef, linked_at = NOW(), updated_at = NOW() WHERE id = :w_id";
             $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_koef' => $koef_all_map, ':w_id' => $id_all_map])->execute();
         }
+        $dbName = DBNameHelper::getMainName();
+        $sql = "SELECT wd.id FROM `one_s_waybill_data` `wd` LEFT JOIN `one_s_waybill` `w` ON wd.waybill_id = w.id 
+                LEFT JOIN " . $dbName . ".`order` `o` ON w.order_id = o.id  
+                WHERE w.status_id = 1 AND o.vendor_id = :w_supp AND o.client_id = :w_org AND wd.product_id = :w_pid AND wd.product_rid IS NULL";
+        $massivs = Yii::$app->db_api->createCommand($sql, [':w_pid' => $number, ':w_supp' => $supp_id, ':w_org' => $org_id])->queryAll();
+        $ids = '';
+        foreach ($massivs as $massiv) {
+            $ids .= $massiv['id'] . ',';
+        }
+        $ids = rtrim($ids, ',');
+        $sql = "UPDATE `one_s_waybill_data` SET `product_rid` = :w_spid, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
+        $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid])->execute();
+
         return $munit;
     }
 }

@@ -111,7 +111,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
             throw new BadRequestHttpException('document.not_support_type');
         }
-        if (isset($post['has_order_content']) && is_bool($post['has_order_content'])){
+        if (isset($post['has_order_content']) && is_bool($post['has_order_content'])) {
             $hasOrderContent = $post['has_order_content'];
         }
 
@@ -128,7 +128,7 @@ class DocumentWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Возвращаем информацию по докумнту типа order
+     * Возвращаем информацию по документу типа order
      *
      * @param      $document_id
      * @param null $service_id
@@ -170,6 +170,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (!empty($result['positions'])) {
             $modelClass = self::$modelsContent[self::TYPE_ORDER];
             foreach ($this->iterator($result['positions']) as $key => $position) {
+                $modelClass::$serviceId = $service_id;
                 $result['positions'][$key] = $modelClass::prepareModel($position);
             }
         }
@@ -198,7 +199,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 ->where('waybill_id = :doc_id', [':doc_id' => (int)$document_id]);
             if ($hasOrderContent === true) {
                 $query->andWhere(['not', ['order_content_id' => null]]);
-            } elseif ($hasOrderContent === false){
+            } elseif ($hasOrderContent === false) {
                 $query->andWhere(['order_content_id' => null]);
             }
             $positions = $query->all(\Yii::$app->db_api);
@@ -753,12 +754,12 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (array_key_exists($request['type'], self::$models)) {
             $modelClass = self::$models[$request['type']];
             $query = $modelClass::find()->where(['id' => $request['document_id'], 'service_id' => $request['service_id']]);
-            if ($request['type'] == self::TYPE_WAYBILL){
+            if ($request['type'] == self::TYPE_WAYBILL) {
                 $field = 'acquirer_id';
-            } elseif ($request['type'] == self::TYPE_ORDER){
+            } elseif ($request['type'] == self::TYPE_ORDER) {
                 $field = 'client_id';
             }
-            if (!$query->andWhere([$field => $this->user->organization_id])->exists()){
+            if (!$query->andWhere([$field => $this->user->organization_id])->exists()) {
                 throw new BadRequestHttpException($request['type'] . '_not_found');
             }
 

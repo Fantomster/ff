@@ -395,7 +395,7 @@ class AbstractDictionary extends WebApi
                 $result[] = [
                     'id'          => $model->id,
                     'outer_uid'   => $model->outer_uid,
-                    'level-name'  => str_pad('', $model->level, "-"),
+                    'level_name'  => str_pad('', $model->level, "-"),
                     'name'        => $model->name,
                     'is_active'   => (bool)!$model->is_deleted,
                     'is_category' => (bool)$model->isRoot()

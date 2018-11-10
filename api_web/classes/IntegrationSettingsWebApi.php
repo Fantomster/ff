@@ -6,6 +6,7 @@ use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
+use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -139,4 +140,32 @@ class IntegrationSettingsWebApi extends WebApi
         return $model->value;
     }
 
+    /**
+     * @param $request
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function getMainOrganizations($request)
+    {
+        $arOrgs = $this->container->get('UserWebApi')->getUserOrganizationBusinessList();
+        $arOrgIds = array_map(function ($el) {
+            return $el['id'];
+        }, $arOrgs['result']);
+        $settingToOrg = $this->getSettingsByOrgIds('main_org', $arOrgIds);
+    }
+
+    /**
+     * @param string $settingName
+     * @param array  $arOrgIds
+     * @return array
+     */
+    public function getSettingsByOrgIds(string $settingName, array $arOrgIds)
+    {
+        return (new Query())->select(['isv.org_id', 'coalesce(isv.value, null)'])->from(IntegrationSettingValue::tableName() . ' as isv')
+            ->leftJoin(IntegrationSetting::tableName() . ' as is', 'is.id=isv.setting_id')
+            ->where(['is.name' => $settingName, 'isv.org_id' => $arOrgIds])
+//            ->createCommand()->getRawSql();
+            ->all(\Yii::$app->db_api);
+
+    }
 }

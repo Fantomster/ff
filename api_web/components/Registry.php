@@ -62,7 +62,8 @@ class Registry
         self::IIKO_SERVICE_ID,
         self::MERC_SERVICE_ID,
         self::VENDOR_DOC_MAIL_SERVICE_ID,
-        self::ONE_S_CLIENT_SERVICE_ID
+        self::ONE_S_CLIENT_SERVICE_ID,
+        self::TILLYPAD_SERVICE_ID,
     ];
 
     /** @var array сервисы в которых генерируются накладные */

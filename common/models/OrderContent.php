@@ -347,7 +347,7 @@ class OrderContent extends \yii\db\ActiveRecord
             ->leftJoin(DBNameHelper::getApiName() . '.' . OuterProductMap::tableName() . ' as opm', 'opm.product_id=oc.product_id AND opm.service_id = :serviceId', [':serviceId' => $serviceId])
             ->where([
                 'oc.id'           => $this->id,
-                'organization_id' => (\Yii::$app->user->identity)->organization->id,
+                'organization_id' => $this->order->client_id,
                 'vendor_id'       => $this->order->vendor_id,
             ])->exists();
     }

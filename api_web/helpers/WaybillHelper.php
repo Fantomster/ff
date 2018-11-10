@@ -62,17 +62,17 @@ class WaybillHelper extends WebApi
     {
         $order = Order::findOne($order_id);
         if (!$order) {
-            throw new BadRequestHttpException('Not found order with id' . $order_id);
+            throw new BadRequestHttpException('order_not_found');
         }
         if (is_null($arOrderContentForCreate)) {
             $arOrderContentForCreate = $order->orderContent;
         }
         if (!$arOrderContentForCreate) {
-            throw new BadRequestHttpException('You dont have order content');
+            throw new BadRequestHttpException('waybill.you_dont_have_order_content');
         }
         $licenses = License::getAllLicense($order->client_id, Registry::$waybill_services, true);
         if (!$licenses) {
-            throw new BadRequestHttpException('You dont have licenses for services');
+            throw new BadRequestHttpException('waybill.you_dont_have_licenses_for_services');
         }
 
         $waybillModels = [];
@@ -87,7 +87,7 @@ class WaybillHelper extends WebApi
             $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
 
             if (empty($notInWaybillContent)) {
-                throw new BadRequestHttpException('You dont have order content for waybills, order_id = ' . $order_id);
+                throw new BadRequestHttpException('waybill.you_dont_have_order_content_for_waybills');
             }
 
             try {
@@ -98,7 +98,7 @@ class WaybillHelper extends WebApi
             }
 
             if (empty($rows)) {
-                throw new BadRequestHttpException('You dont have mapped products');
+                throw new BadRequestHttpException('waybill.you_dont_have_mapped_products');
             }
 
             //Склад по умолчанию, у контрагента

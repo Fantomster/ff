@@ -138,7 +138,7 @@ class AbstractDictionary extends WebApi
         }
 
         $return = [
-            'products'   => $result,
+            'products'   => empty($result) ? null : $result,
             'pagination' => [
                 'page'       => ($dataProvider->pagination->page + 1),
                 'page_size'  => $dataProvider->pagination->pageSize,
@@ -211,7 +211,7 @@ class AbstractDictionary extends WebApi
         }
 
         $return = [
-            'agents'     => $result,
+            'agents'     => empty($result) ? null : $result,
             'pagination' => [
                 'page'       => ($dataProvider->pagination->page + 1),
                 'page_size'  => $dataProvider->pagination->pageSize,
@@ -351,7 +351,7 @@ class AbstractDictionary extends WebApi
             $result = $this->prepareStore($rootModel);
         }
 
-        return ['stores' => $result];
+        return ['stores' => empty($result) ? null : $result];
     }
 
     /**
@@ -402,7 +402,7 @@ class AbstractDictionary extends WebApi
             }
         }
 
-        return ['stores' => $result];
+        return ['stores' => empty($result) ? null : $result];
     }
 
     /***
@@ -527,7 +527,7 @@ class AbstractDictionary extends WebApi
         }
 
         $return = [
-            'units'      => $result,
+            'units'      => empty($result) ? null : $result,
             'pagination' => [
                 'page'       => ($dataProvider->pagination->page + 1),
                 'page_size'  => $dataProvider->pagination->pageSize,
@@ -565,7 +565,7 @@ class AbstractDictionary extends WebApi
         $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
         $rootModels = $search->roots()->indexBy('id')->all();
 
-        $result = [];
+        $result = null;
         foreach ($this->iterator($rootModels) as $rootModel) {
             $result = $this->prepareCategory($rootModel);
         }

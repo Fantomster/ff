@@ -344,12 +344,11 @@ class OrderContent extends \yii\db\ActiveRecord
     public function isComparised($serviceId)
     {
         return (new Query())->from(self::tableName() . ' as oc')
-            ->leftJoin(DBNameHelper::getApiName() . '.' . OuterProductMap::tableName() . ' as opm', 'opm.product_id=oc.product_id')
+            ->leftJoin(DBNameHelper::getApiName() . '.' . OuterProductMap::tableName() . ' as opm', 'opm.product_id=oc.product_id AND opm.service_id = :serviceId', [':serviceId' => $serviceId])
             ->where([
-                'opm.service_id'  => $serviceId,
-                'organization_id' => (\Yii::$app->user->identity)->organization,
+                'oc.id'           => $this->id,
+                'organization_id' => (\Yii::$app->user->identity)->organization->id,
                 'vendor_id'       => $this->order->vendor_id,
-            ])
-            ->exists();
+            ])->exists();
     }
 }

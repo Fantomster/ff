@@ -3,8 +3,10 @@
 namespace common\models;
 
 use api_web\behaviors\OrderContentBehavior;
+use common\helpers\DBNameHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\Query;
 
 /**
  * This is the model class for table "order_content".
@@ -333,5 +335,20 @@ class OrderContent extends \yii\db\ActiveRecord
     {
         #В случае если связь один ко многим, выдергиваем запись, которая последняя обновилась
         return $this->hasOne(WaybillContent::class, ['order_content_id' => 'id'])->orderBy(['updated_at' => SORT_DESC])->limit(1);
+    }
+
+    /**
+     * @param $serviceId
+     * @return bool
+     */
+    public function isComparised($serviceId)
+    {
+        return (new Query())->from(self::tableName() . ' as oc')
+            ->leftJoin(DBNameHelper::getApiName() . '.' . OuterProductMap::tableName() . ' as opm', 'opm.product_id=oc.product_id AND opm.service_id = :serviceId', [':serviceId' => $serviceId])
+            ->where([
+                'oc.id'           => $this->id,
+                'organization_id' => $this->order->client_id,
+                'vendor_id'       => $this->order->vendor_id,
+            ])->exists();
     }
 }

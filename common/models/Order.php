@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api_web\behaviors\OrderBehavior;
 use api_web\components\Registry;
 use common\components\edi\EDIIntegration;
 use common\helpers\DBNameHelper;
@@ -93,6 +94,10 @@ class Order extends \yii\db\ActiveRecord
     public function behaviors(): array
     {
         return [
+            [
+                "class" => OrderBehavior::class,
+                "model" => $this
+            ],
             'timestamp'  => [
                 'class'              => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
@@ -105,7 +110,7 @@ class Order extends \yii\db\ActiveRecord
                     'status_updated_at' => [
                         ActiveRecord::EVENT_BEFORE_UPDATE => function ($event, $attribute) {
                             if ($this->status != $this->oldAttributes['status']) {
-                                $this->$attribute = gmdate("Y-m-d H:i:s");
+                                return gmdate("Y-m-d H:i:s");
                             }
                         },
                     ],
@@ -165,13 +170,23 @@ class Order extends \yii\db\ActiveRecord
      */
     public function beforeSave($insert)
     {
-        $result = parent::beforeSave($insert);
-        if ($this->discount_type == Order::DISCOUNT_FIXED) {
-            $this->discount = round($this->discount, 2);
-        } else {
-            $this->discount = abs((int)$this->discount);
+        if (parent::beforeSave($insert)) {
+
+            if ($this->discount_type == Order::DISCOUNT_FIXED) {
+                $this->discount = round($this->discount, 2);
+            } else {
+                $this->discount = abs((int)$this->discount);
+            }
+
+            /**
+             * Если ресторан и поставщик EDI 
+             **/
+            if ($this->client->isEdi() && $this->vendor->isEdi()) {
+                $this->service_id = Registry::EDI_SERVICE_ID;
+            }
+
+            return true;
         }
-        return $result;
     }
 
     /**
@@ -423,7 +438,6 @@ class Order extends \yii\db\ActiveRecord
             $free_delivery = 0;
         }
         if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
-            $test = $this->vendor->delivery->delivery_charge;
             return $this->vendor->delivery->delivery_charge;
         }
         return 0;
@@ -675,11 +689,10 @@ class Order extends \yii\db\ActiveRecord
         }
 
         if ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == OrderStatus::STATUS_DONE)) {
-            $vendor = Organization::findOne(['id' => $this->vendor_id]);
-            $client = Organization::findOne(['id' => $this->client_id]);
+            $vendor = $this->vendor;
+            $client = $this->client;
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
             if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
-                $this->service_id = Registry::EDI_SERVICE_ID;
                 $ediIntegration = new EDIIntegration(['orgId' => $vendor->id, 'clientId' => $client->id]);
                 if ($this->status == OrderStatus::STATUS_DONE) {
                     $result = $ediIntegration->sendOrderInfo($this, true);

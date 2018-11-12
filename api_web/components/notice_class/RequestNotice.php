@@ -43,8 +43,8 @@ class RequestNotice
                 //Отправляем емайлы ресторану о новом отклике
                 if ($client->email && $client->emailNotification->request_accept == 1) {
                     $mailer = Yii::$app->mailer;
-                    $mailer->htmlLayout = 'layouts/request';
-                    $mailer->compose('requestNewCallback', compact("request", "client", "vendor"))
+                    $mailer->htmlLayout = '@api_web/views/mail/layouts/request';
+                    $mailer->compose('@api_web/views/mail/requestNewCallback', compact("request", "client", "vendor"))
                         ->setTo($client->email)
                         ->setSubject($subject)
                         ->send();
@@ -62,8 +62,8 @@ class RequestNotice
             $client = User::findOne($request->rest_user_id);
             foreach ($additional_email as $add_email) {
                 $mailer = Yii::$app->mailer;
-                $mailer->htmlLayout = 'layouts/request';
-                $mailer->compose('requestNewCallback', compact("request", "client", "vendor"))
+                $mailer->htmlLayout = '@api_web/views/mail/layouts/request';
+                $mailer->compose('@api_web/views/mail/requestNewCallback', compact("request", "client", "vendor"))
                     ->setTo($add_email->email)
                     ->setSubject($subject)
                     ->send();
@@ -109,8 +109,8 @@ class RequestNotice
                 //Отправляем емайлы поставщику, о принятии решения по его отклику
                 if ($user->email && $user->emailNotification->request_accept == 1) {
                     $mailer = Yii::$app->mailer;
-                    $mailer->htmlLayout = 'layouts/request';
-                    $mailer->compose($templateMessage['email_template'], [
+                    $mailer->htmlLayout = '@api_web/views/mail/layouts/request';
+                    $mailer->compose('@api_web/views/mail/'.$templateMessage['email_template'], [
                         "request" => $request,
                         "vendor" => $user
                     ])->setTo($user->email)
@@ -130,8 +130,8 @@ class RequestNotice
             $vendor = User::findOne($request_callback->supp_user_id);
             foreach ($additional_email as $add_email) {
                 $mailer = Yii::$app->mailer;
-                $mailer->htmlLayout = 'layouts/request';
-                $mailer->compose($templateMessage['email_template'], compact("request", "vendor"))
+                $mailer->htmlLayout = '@api_web/views/mail/layouts/request';
+                $mailer->compose('@api_web/views/mail/'.$templateMessage['email_template'], compact("request", "vendor"))
                     ->setTo($add_email->email)
                     ->setSubject($templateMessage['email_subject'])
                     ->send();
@@ -140,8 +140,8 @@ class RequestNotice
         //Отправим письмо ресторану, что произошло с откликом
         if (!empty($client->email)) {
             $mailer = Yii::$app->mailer;
-            $mailer->htmlLayout = 'layouts/request';
-            $mailer->compose($templateMessage['client_email_template'], compact("request", "client"))
+            $mailer->htmlLayout = '@api_web/views/mail/layouts/request';
+            $mailer->compose('@api_web/views/mail/'.$templateMessage['client_email_template'], compact("request", "client"))
                 ->setTo($client->email)
                 ->setSubject($templateMessage['email_subject'])
                 ->send();

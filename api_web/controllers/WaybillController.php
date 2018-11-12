@@ -8,8 +8,13 @@
 
 namespace api_web\controllers;
 
+use api_web\components\Registry;
 use api_web\components\WebApiController;
 use api_web\helpers\WaybillHelper;
+use api_web\helpers\WebApiHelper;
+use api_web\modules\integration\classes\SyncServiceFactory;
+use common\models\Journal;
+use yii\db\Transaction;
 
 class WaybillController extends WebApiController
 {
@@ -452,5 +457,15 @@ class WaybillController extends WebApiController
     public function actionDeleteWaybillContent()
     {
         $this->response = $this->container->get('IntegrationWebApi')->deleteWaybillContent($this->request);
+    }
+
+    /**
+     * Асинхронный метод создания и отправки накладных
+     */
+    public function actionCreateAndSendWaybillAsync()
+    {
+        WebApiHelper::setAsyncResponseHeader();
+        $this->request['action_id'] = $this->action->id;
+        (new WaybillHelper())->sendWaybillAsync($this->request);
     }
 }

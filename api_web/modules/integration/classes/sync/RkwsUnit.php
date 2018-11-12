@@ -1,15 +1,5 @@
 <?php
 
-/**
- * Class RkwsUnit
- * @package api_web\module\integration\sync
- * @createdBy Basil A Konakov
- * @createdAt 2018-09-20
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
- */
-
 namespace api_web\modules\integration\classes\sync;
 
 use api_web\modules\integration\classes\SyncLog;
@@ -18,9 +8,8 @@ use yii\web\BadRequestHttpException;
 
 class RkwsUnit extends ServiceRkws
 {
-
     /** @var string $index Символьный идентификатор справочника */
-    public $index = 'unit';
+    public $index = self::DICTIONARY_UNIT;
 
     /** @var string $entityTableName Класс таблицы для записи данных */
     public $entityTableName = OuterUnit::class;
@@ -31,6 +20,11 @@ class RkwsUnit extends ServiceRkws
     /** @var array $additionalXmlFields Поле во входящем xml -> поле в нашей модели данных */
     public $additionalXmlFields = ['name' => 'name', 'ratio' => 'ratio'];
 
+    /**
+     * @param string|null $data
+     * @return array
+     * @throws BadRequestHttpException
+     */
     public function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
     {
         $myXML = simplexml_load_string($data);
@@ -40,14 +34,14 @@ class RkwsUnit extends ServiceRkws
             throw new BadRequestHttpException("empty_result_xml_data");
         }
         $array = [];
-        foreach ($myXML->ITEM as $unit_group) {
+        foreach ($this->iterator($myXML->ITEM) as $unit_group) {
             $parent = $unit_group->attributes()['rid'];
             foreach ($unit_group->attributes() as $k => $v) {
                 $array['_' . $parent][$k] = strval($v[0]);
             }
             $array['_' . $parent]['parent'] = '';
-            foreach ($unit_group->MUNITS_LIST as $list) {
-                foreach ($list->ITEM as $item) {
+            foreach ($this->iterator($unit_group->MUNITS_LIST) as $list) {
+                foreach ($this->iterator($list->ITEM) as $item) {
                     $i = $item->attributes()['rid'];
                     foreach ($item->attributes() as $k => $v) {
                         $array[(string)$parent . '_' . (string)$i][$k] = strval($v[0]);

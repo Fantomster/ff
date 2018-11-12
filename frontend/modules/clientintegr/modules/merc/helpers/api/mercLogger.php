@@ -115,7 +115,7 @@ class mercLogger extends Component
         return $operation;
     }
 
-    public function addMercLogDict ($result, $localTransactionId, $response)
+    public function addMercLogDict ($result, $localTransactionId, $response, $org_id = null)
     {
         $response = mb_strimwidth($response, 0,32000);
         $operation = $this->getServiceOperation($localTransactionId);
@@ -125,6 +125,7 @@ class mercLogger extends Component
         $journal->log_guide = $localTransactionId;
         $journal->type = ($result == 'COMPLETE') ? 'success' : 'error';
         $journal->response = ($journal->type == 'success') ? 'COMPLETE' :  $response;
+        $journal->organization_id = $org_id;
 
         $journal->save();
 

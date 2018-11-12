@@ -73,7 +73,7 @@
 
 <?php if (!empty($order->comment)) { ?>
     <div class="col-sm-12 order_comment_block">
-        <div><img src="https://mixcart.ru/img/c.png"></div>
+        <div><img src="https://app.mixcart.ru/img/c.png"></div>
         <p><?= $order->comment ?></p>
     </div>
 <?php } ?>

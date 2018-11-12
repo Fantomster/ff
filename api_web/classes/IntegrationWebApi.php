@@ -6,6 +6,7 @@ use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\OuterProductMapHelper;
+use common\models\AllService;
 use common\models\CatalogBaseGoods;
 use common\models\licenses\License;
 use common\models\Order;
@@ -72,13 +73,12 @@ class IntegrationWebApi extends WebApi
      */
     public function list()
     {
-        $result = array_values(License::getAllLicense($this->user->organization_id, Registry::$integration_services));
+        $result = array_values(AllService::getAllServiceAndLicense($this->user->organization_id, Registry::$integration_services));
         $user_service_id = $this->user->integration_service_id;
         $result = array_map(function ($item) use ($user_service_id) {
             $item['is_default'] = $user_service_id == $item['service_id'] ? true : false;
             return $item;
         }, $result);
-
         return [
             'services' => $result
         ];

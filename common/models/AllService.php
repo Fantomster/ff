@@ -2,7 +2,11 @@
 
 namespace common\models;
 
+use common\models\licenses\License;
+use common\models\licenses\LicenseOrganization;
 use Yii;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "{{%all_service}}".
@@ -73,5 +77,69 @@ class AllService extends \yii\db\ActiveRecord
     public function getAllServiceOperations()
     {
         return $this->hasMany(AllServiceOperation::className(), ['service_id' => 'id']);
+    }
+
+    /**
+     * @param $org_id
+     * @param array $service_ids
+     * @param null $is_active
+     * @return array
+     */
+    public static function getAllServiceAndLicense($org_id, $service_ids = [], $is_active = null)
+    {
+        $services = self::find();
+
+        if (!empty($service_ids)) {
+            $services->andWhere(['in', 'id', $service_ids]);
+        }
+
+        return ArrayHelper::getColumn($services->all(\Yii::$app->db_api), function (self $service) use ($org_id, $is_active){
+            return $service->getLicense($org_id, $is_active);
+        });
+    }
+
+    /**
+     * @param $org_id
+     * @param $is_active
+     * @return array
+     */
+    private function getLicense($org_id, $is_active) {
+        $license = (new Query())
+            ->select([
+                'license.id',
+                'license.name',
+                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as is_active',
+                'license.created_at',
+                'license.updated_at',
+                'license.login_allowed',
+                'max(lo.td) as to_date',
+            ])
+            ->from(License::tableName())
+            ->leftJoin(['lo' => LicenseOrganization::tableName()], 'lo.license_id=license.id')
+            ->where(['lo.org_id' => $org_id, 'license.service_id' => $this->id])
+            ->groupBy([
+                'license.id',
+                'license.name',
+                'license.is_active',
+                'license.created_at',
+                'license.updated_at',
+                'license.login_allowed',
+            ])
+            ->indexBy('id');
+
+        if (!is_null($is_active)) {
+            $license->andWhere(['=', 'is_active', (int)$is_active]);
+        }
+
+        return [
+            "id" => $this->id,
+            "type_id" => $this->type_id,
+            "is_active" => $this->is_active,
+            "denom" => $this->denom,
+            "vendor" => $this->vendor,
+            "created_at" => $this->created_at,
+            "updated_at" => $this->updated_at,
+            "license" => $license->one(\Yii::$app->db_api) ?: null
+        ];
     }
 }

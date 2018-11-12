@@ -22,13 +22,7 @@ class m181106_113728_add_edi_providers_columns extends Migration
         $this->addColumn('{{%edi_provider}}', 'realization_class', $this->string(30)->null());
         $this->addCommentOnColumn('{{%edi_provider}}', 'realization_class', 'Класс реализации');
 
-        $this->addColumn('{{%roaming_map}}', 'provider_id', $this->integer());
-        $this->addCommentOnColumn('{{%roaming_map}}', 'provider_id', 'ID провайдера');
-
         $this->dropTable('{{%roaming_map}}');
-
-        $this->dropColumn('{{%roaming_map}}', 'acquire_provider_id');
-        $this->dropColumn('{{%roaming_map}}', 'vendor_provider_id');
 
         $this->update('{{%edi_provider}}', ['provider_class' => 'EcomProvider', 'realization_class' => 'EcomRealization'], ['name' => 'Ecom']);
         $this->update('{{%edi_provider}}', ['provider_class' => 'KorusProvider', 'realization_class' => 'KorusRealization'], ['name' => 'Korus']);

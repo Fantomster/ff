@@ -22,8 +22,6 @@ class m181106_113728_add_edi_providers_columns extends Migration
         $this->addColumn('{{%edi_provider}}', 'realization_class', $this->string(30)->null());
         $this->addCommentOnColumn('{{%edi_provider}}', 'realization_class', 'Класс реализации');
 
-        $this->dropTable('{{%roaming_map}}');
-
         $this->update('{{%edi_provider}}', ['provider_class' => 'EcomProvider', 'realization_class' => 'EcomRealization'], ['name' => 'Ecom']);
         $this->update('{{%edi_provider}}', ['provider_class' => 'KorusProvider', 'realization_class' => 'KorusRealization'], ['name' => 'Korus']);
         $this->update('{{%edi_provider}}', ['provider_class' => 'LeradataProvider', 'realization_class' => 'LeradataRealization'], ['name' => 'Leradata']);

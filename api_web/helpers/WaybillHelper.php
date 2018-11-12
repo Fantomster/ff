@@ -75,6 +75,7 @@ class WaybillHelper extends WebApi
             throw new BadRequestHttpException('waybill.you_dont_have_licenses_for_services');
         }
 
+        $cntEmptyRows = 0;
         $waybillModels = [];
         foreach ($licenses as $license) {
             $serviceId = $license['service_id'];
@@ -100,7 +101,8 @@ class WaybillHelper extends WebApi
             }
 
             if (empty($rows)) {
-                throw new BadRequestHttpException('waybill.you_dont_have_mapped_products');
+                $cntEmptyRows++;
+                continue;
             }
 
             //Склад по умолчанию, у контрагента
@@ -150,6 +152,10 @@ class WaybillHelper extends WebApi
             if ($mapCount === $skipCount) {
                 throw new BadRequestHttpException('waybill.no_map_for_create_waybill');
             }
+        }
+
+        if ($cntEmptyRows == count($licenses)){
+            throw new BadRequestHttpException('waybill.you_dont_have_mapped_products');
         }
 
         return $waybillModels;

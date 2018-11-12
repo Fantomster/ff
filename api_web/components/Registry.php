@@ -17,12 +17,11 @@ namespace api_web\components;
 class Registry
 {
 
-    /** MixCart services */
-    #TODO заменить на нормальные значения, когда будем делать лицензии
-    #заполнить ими переменную self::$mc_services
-    const MC_LITE_SERVICE_ID = 100;
-    const MC_BUSINESS_SERVICE_ID = 101;
-    const MC_ENTERPRICE_SERVICE_ID = 102;
+    /** id лицензий MixCart из таблицы license*/
+    const MC_LITE_LICENSE_ID = 11;
+    const MC_BUSINESS_LICENSE_ID = 12;
+    const MC_ENTERPRICE_LICENSE_ID = 13;
+
     /** - Services section - */
     const RK_SERVICE_ID = 1;
     const IIKO_SERVICE_ID = 2;
@@ -34,6 +33,8 @@ class Registry
     const EDI_SERVICE_ID = 6;
     /**@var int const for 1C (rest) service id in all_service table */
     const ONE_S_CLIENT_SERVICE_ID = 8;
+    /**@var int const for 1C (rest) service id in all_service table */
+    const TILLYPAD_SERVICE_ID = 10;
     /**@var int const for MixCart service_id in all_service table */
     const MC_BACKEND = 9;
 
@@ -61,7 +62,8 @@ class Registry
         self::IIKO_SERVICE_ID,
         self::MERC_SERVICE_ID,
         self::VENDOR_DOC_MAIL_SERVICE_ID,
-        self::ONE_S_CLIENT_SERVICE_ID
+        self::ONE_S_CLIENT_SERVICE_ID,
+        self::TILLYPAD_SERVICE_ID,
     ];
 
     /** @var array сервисы в которых генерируются накладные */
@@ -71,8 +73,11 @@ class Registry
         self::ONE_S_CLIENT_SERVICE_ID
     ];
 
-    /**@var array сервисы MixCart*/
-    static $mc_services = [
+    /**@var array сервисы MixCart */
+    static $mc_licenses_id = [
+        self::MC_LITE_LICENSE_ID,
+        self::MC_BUSINESS_LICENSE_ID,
+        self::MC_ENTERPRICE_LICENSE_ID
     ];
 
     const DOC_GROUP_STATUS_WAIT_SENDING = 1;
@@ -82,7 +87,14 @@ class Registry
     static $doc_group_status = [
         self::DOC_GROUP_STATUS_WAIT_SENDING => 'sending',
         self::DOC_GROUP_STATUS_WAIT_FORMING => 'forming',
-        self::DOC_GROUP_STATUS_SENT => 'sent',
+        self::DOC_GROUP_STATUS_SENT         => 'sent',
     ];
 
+    /** @var array коды операций выгрузки накладныхх по сервисам */
+    static $operation_code_send_waybill = [
+        self::RK_SERVICE_ID => 33,
+        self::IIKO_SERVICE_ID => 5,
+        self::TILLYPAD_SERVICE_ID => 5,
+        self::ONE_S_CLIENT_SERVICE_ID => 0
+    ];
 }

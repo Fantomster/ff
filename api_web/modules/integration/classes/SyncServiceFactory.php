@@ -9,7 +9,6 @@ use yii\web\BadRequestHttpException;
 
 class SyncServiceFactory extends WebApi
 {
-
     /** SERVICE RKEEPER name */
     const SERVICE_RKEEPER = 'Rkws';
 
@@ -22,6 +21,7 @@ class SyncServiceFactory extends WebApi
         Registry::IIKO_SERVICE_ID => self::SERVICE_IIKO
     ];
 
+    /** @var array */
     public $syncResult = [];
 
     const TASK_SYNC_GET_LOG = 'get-log';

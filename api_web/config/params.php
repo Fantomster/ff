@@ -20,5 +20,6 @@ return [
         '/market/organizations',
         '/payment/currency-list',
         '/system/datetime'
-    ]
+    ],
+    'api_web_url' => 'https://api-dev.mixcart.ru'
 ];

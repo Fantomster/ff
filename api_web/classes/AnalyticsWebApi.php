@@ -3,7 +3,6 @@
 namespace api_web\classes;
 
 use common\models\Currency;
-use common\models\Order;
 use api_web\components\WebApi;
 use common\models\OrderStatus;
 use yii\data\ArrayDataProvider;
@@ -13,12 +12,13 @@ use yii\db\Query;
 
 /**
  * Class AnalyticsWebApi
- * @package api_web\classes
+ *
+ * @package   api_web\classes
  * @createdBy Basil A Konakov
  * @createdAt 2018-08-28
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
+ * @author    Mixcart
+ * @module    WEB-API
+ * @version   2.0
  */
 class AnalyticsWebApi extends WebApi
 {
@@ -30,14 +30,17 @@ class AnalyticsWebApi extends WebApi
         OrderStatus::STATUS_DONE,
         OrderStatus::STATUS_FORMING,
     ];
+
     const ORDER_STATUSES_NEW = [
         OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
         OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
     ];
+
     const ORDER_STATUSES_PROCESS = [
         OrderStatus::STATUS_PROCESSING,
         // Order::STATUS_FORMING,
     ];
+
     const ORDER_STATUSES_DONE = [
         OrderStatus::STATUS_DONE,
     ];
@@ -47,19 +50,20 @@ class AnalyticsWebApi extends WebApi
     const ORDER_TYPE_DONE = 'done';
 
     const ORDER_MAPPING_TYPE_STATUSES = [
-        AnalyticsWebApi::ORDER_TYPE_NEW => AnalyticsWebApi::ORDER_STATUSES_NEW,
+        AnalyticsWebApi::ORDER_TYPE_NEW     => AnalyticsWebApi::ORDER_STATUSES_NEW,
         AnalyticsWebApi::ORDER_TYPE_PROCESS => AnalyticsWebApi::ORDER_STATUSES_PROCESS,
-        AnalyticsWebApi::ORDER_TYPE_DONE => AnalyticsWebApi::ORDER_STATUSES_DONE,
+        AnalyticsWebApi::ORDER_TYPE_DONE    => AnalyticsWebApi::ORDER_STATUSES_DONE,
     ];
 
     /**
      * Общий метод
+     *
      * @param $post
      * @param $limit int
      * @return array
      * @throws BadRequestHttpException
      */
-    public function vendorTurnover($post, $limit = NULL)
+    public function vendorTurnover($post, $limit = null)
     {
         // ограничение на собственные заказы
         $whereParams = ['order.client_id' => $this->user->organization->id];
@@ -126,6 +130,7 @@ class AnalyticsWebApi extends WebApi
 
     /**
      * Ресторан: Статистика по товарам
+     *
      * @param $post
      * @return array
      * @throws BadRequestHttpException
@@ -201,10 +206,10 @@ class AnalyticsWebApi extends WebApi
             $result[] = $data;
         }
         return [
-            'result' => $result,
+            'result'     => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -213,6 +218,7 @@ class AnalyticsWebApi extends WebApi
 
     /**
      * Ресторан: Объем закупок за период
+     *
      * @param $post
      * @return array
      * @throws BadRequestHttpException
@@ -281,6 +287,7 @@ class AnalyticsWebApi extends WebApi
 
     /**
      * Общий метод
+     *
      * @param $post
      * @return integer
      * @throws BadRequestHttpException
@@ -351,36 +358,35 @@ class AnalyticsWebApi extends WebApi
 
     }
 
-
     /**
      * Ресторан: Общая аналитика - новые
+     *
      * @param $post
      * @return array
      * @throws BadRequestHttpException
      */
     public function clientSummary($post)
     {
-
         if (!isset($post['search']['currency_id'])) {
             throw new BadRequestHttpException('parameter_required|currency_id');
         }
 
         $currency = Currency::findOne($post['search']['currency_id']);
 
-        return
-            [
-                AnalyticsWebApi::ORDER_TYPE_NEW => $this->getClientSummaryByType($post, AnalyticsWebApi::ORDER_TYPE_NEW),
-                AnalyticsWebApi::ORDER_TYPE_PROCESS => $this->getClientSummaryByType($post, AnalyticsWebApi::ORDER_TYPE_PROCESS),
-                AnalyticsWebApi::ORDER_TYPE_DONE => $this->getClientSummaryByType($post, AnalyticsWebApi::ORDER_TYPE_DONE),
-                'total_sum' => $this->turnover($post),
-                'currency_id' => $post['search']['currency_id'],
-                'currency' => $currency->symbol,
-            ];
+        return [
+            AnalyticsWebApi::ORDER_TYPE_NEW     => $this->getClientSummaryByType($post, AnalyticsWebApi::ORDER_TYPE_NEW),
+            AnalyticsWebApi::ORDER_TYPE_PROCESS => $this->getClientSummaryByType($post, AnalyticsWebApi::ORDER_TYPE_PROCESS),
+            AnalyticsWebApi::ORDER_TYPE_DONE    => $this->getClientSummaryByType($post, AnalyticsWebApi::ORDER_TYPE_DONE),
+            'total_sum'                         => $this->turnover($post),
+            'currency_id'                       => $post['search']['currency_id'],
+            'currency'                          => $currency->symbol,
+        ];
     }
 
     /**
      * Ресторан: Общая аналитика - новые
-     * @param $post
+     *
+     * @param        $post
      * @param string $type
      * @return integer
      * @throws BadRequestHttpException
@@ -458,6 +464,7 @@ class AnalyticsWebApi extends WebApi
 
     /**
      * Ресторан: Заказы по поставщикам
+     *
      * @param $post
      * @return array
      * @throws BadRequestHttpException
@@ -471,6 +478,7 @@ class AnalyticsWebApi extends WebApi
 
     /**
      * Ресторан: Объем по поставщикам
+     *
      * @param $post
      * @return array
      * @throws BadRequestHttpException
@@ -492,21 +500,21 @@ class AnalyticsWebApi extends WebApi
 
     /**
      * Метод получения списка валют
+     *
      * @return array
      * @throws BadRequestHttpException
      */
     public function currencies()
     {
-
-        // ТЕЛО ЗАПРОСА
-        $query = new Query;
-        $query->select(
-            [
-                'order.currency_id',
-                'c.symbol as iso_code',
-                'c.text as name',
-            ]
-        )->from('order_content')
+        $query = (new Query())
+            ->select(
+                [
+                    'order.currency_id',
+                    'c.symbol as iso_code',
+                    'c.text as name',
+                ]
+            )
+            ->from('order_content')
             ->leftJoin('order', 'order.id = order_content.order_id')
             ->leftJoin('currency c', 'c.id = order.currency_id')
             ->andWhere(['order.client_id' => $this->user->organization->id])
@@ -515,16 +523,14 @@ class AnalyticsWebApi extends WebApi
         $result = [];
         foreach ($query->all() as $data) {
             $result[] = [
-                'id' => round($data['currency_id'], 0),
+                'id'       => round($data['currency_id'], 0),
                 'iso_code' => $data['iso_code'],
-                'name' => $data['name'],
+                'name'     => $data['name'],
             ];
         }
 
         return [
             'result' => $result,
         ];
-
     }
-
 }

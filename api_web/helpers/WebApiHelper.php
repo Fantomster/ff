@@ -146,6 +146,8 @@ class WebApiHelper
         $item['about'] = $model->about ?? "";
         $item['is_allowed_for_franchisee'] = $model->is_allowed_for_franchisee ?? 0;
         $item['gmt'] = $model->gmt ?? 0;
+        $item['user_agreement'] = $model->user_agreement;
+        $item['confidencial_policy'] = $model->confidencial_policy;
 
         if ($model->type_id == Organization::TYPE_SUPPLIER) {
             $item['inn'] = $model->inn ?? null;

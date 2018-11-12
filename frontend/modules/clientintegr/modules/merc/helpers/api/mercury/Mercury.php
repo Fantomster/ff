@@ -558,7 +558,7 @@ class TransportNumber{
 }
 class ShipmentRoutePoint{
     var $sqnId;//SequenceNumber
-    var $location;//Location
+    //var $location;//Location
     var $enterprise;//Enterprise
     var $transshipment;//boolean
     var $nextTransport;//TransportInfo

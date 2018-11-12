@@ -928,4 +928,75 @@ class mercuryApi extends baseApi
         return $result;
     }
 
+    public function checkShipmentRegionalizationOperation ($recipient_guid, $sender_guid, $cargoTypeGuid) {
+        $result = null;
+
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        //Готовим запрос
+        $client = $this->getSoapClient('mercury');
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        $data = new checkShipmentRegionalizationRequest();
+
+        $data->localTransactionId = $localTransactionId;
+        $data->initiator = new User();
+        $data->initiator->login = $this->vetisLogin;
+        $data->cargoType = new SubProduct();
+        $data->cargoType->guid = $cargoTypeGuid;
+
+        $routePoints[]['routePoint'] = [
+        'sqnId' => 1,
+        'enterprise' => ['guid' => $recipient_guid]
+        ];
+
+        $routePoints[]['routePoint'] = [
+            'sqnId' => 2,
+            'enterprise' => ['guid' => $sender_guid]
+        ];
+
+        $data->shipmentRoute = $routePoints;
+
+        $appData->any['ns3:checkShipmentRegionalizationRequest'] = $data;
+
+        $request->application->data = $appData;
+
+       /* echo "<pre>";
+        var_dump($request); die();*/
+
+        //Делаем запрос
+        try {
+            $result = $client->submitApplicationRequest($request);
+        } catch (\SoapFault $e) {
+var_dump($e->detail); die();
+}
+
+        $request_xml = $client->__getLastRequest();
+
+        $app_id = $result->application->applicationId;
+        do {
+            //timeout перед запросом результата
+            sleep($this->query_timeout);
+            //Получаем результат запроса
+            $result = $this->getReceiveApplicationResult($app_id);
+
+            $status = $result->application->status;
+        } while ($status == 'IN_PROCESS');
+
+        //Пишем лог
+        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+
+        if ($status == 'COMPLETED') {
+            $result = $result->application->result->any['checkShipmentRegionalizationRespons']->r13nRouteSection;
+        } else {
+            $result = null;
+        }
+
+        return $result;
+    }
+
 }

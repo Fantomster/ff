@@ -913,6 +913,8 @@ class UpdateVeterinaryEventsResponse{
     var $stockEntry;//StockEntry
 }
 class CheckShipmentRegionalizationRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $cargoType;//SubProduct
     var $shipmentRoute;//ShipmentRoute
 }

@@ -167,9 +167,18 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             $model->decision = VetDocumentDone::PARTIALLY;
         }
         
-        try {
+        //try {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $api = mercuryApi::getInstance();
+
+                $vsd = MercVsd::findOne(['uuid' => $uuid]);
+                $result = $api->checkShipmentRegionalizationOperation($vsd->recipient_guid, $vsd->sender_guid, $vsd->sub_product_guid);
+                if($result == null){
+                    throw new \Exception('CheckShipmentRegionalizationOperation error');
+                }
+
+                echo "<pre>";
+                var_dump(json_decode(json_encode($result), true)); die();
                 
                 if (!$api->getVetDocumentDone($uuid, $model->attributes)) {
                     throw new \Exception('Done error');
@@ -181,13 +190,13 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                 }
                 return $this->redirect(['view', 'uuid' => $uuid]);
             }
-        } catch (\Error $e) {
+        /*} catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
         } catch (\Exception $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }
+        }*/
         
         try {
             $document = new getVetDocumentByUUID();

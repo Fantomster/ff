@@ -206,14 +206,25 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
            cbg.deleted = 0
            " . $where . $where_all;*/
 
-        $sql = "SELECT DISTINCT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id] .
-            " FROM `assigned_catalog_products` `acp`
+        if ($this->service_id==0) {
+            $sql = "SELECT DISTINCT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id] .
+                " FROM `assigned_catalog_products` `acp`
+            LEFT JOIN `$dbName`.`all_map` `amap` ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
+            LEFT JOIN `$dbName`.`all_service` `aser` ON amap.service_id = aser.id " . $joins[$this->service_id] . "
+            WHERE acp.rest_org_id = " . $client_id . " 
+              AND acp.supp_org_id in (" . $vendorInList . ") 
+              AND acp.catalog_status = 1 
+              AND acp.deleted = 0 AND amap.service_id = 0" . $where;
+        } else {
+            $sql = "SELECT DISTINCT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id] .
+                " FROM `assigned_catalog_products` `acp`
             LEFT JOIN `$dbName`.`all_map` `amap` ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
             LEFT JOIN `$dbName`.`all_service` `aser` ON amap.service_id = aser.id " . $joins[$this->service_id] . "
             WHERE acp.rest_org_id = " . $client_id . " 
               AND acp.supp_org_id in (" . $vendorInList . ") 
               AND acp.catalog_status = 1 
               AND acp.deleted = 0" . $where;
+        }
         /*$sql = "
         SELECT DISTINCT * FROM (
            SELECT 

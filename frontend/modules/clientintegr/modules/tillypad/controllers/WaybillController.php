@@ -1175,8 +1175,10 @@ return $out;
             $ids .= $massiv['id'] . ',';
         }
         $ids = rtrim($ids, ',');
-        $sql = "UPDATE `iiko_waybill_data` SET `product_rid` = :w_spid, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
-        $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid])->execute();
+        if ($ids) {
+            $sql = "UPDATE `iiko_waybill_data` SET `product_rid` = :w_spid, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
+            $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid])->execute();
+        }
         return $munit;
     }
 }

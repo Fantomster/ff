@@ -188,4 +188,35 @@ class IntegrationSettingsWebApi extends WebApi
             ->indexBy('org_id')
             ->all(\Yii::$app->db_api);
     }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function setMainOrganizations($request){
+        $this->validateRequest($request, ['checked', 'main_org', 'service_id']);
+        $settingToService = IntegrationSetting::find()->select(['id', 'service_id'])
+            ->andWhere(['name' => 'main_org'])
+            ->indexBy('service_id')->all();
+        $settingId = $settingToService[$request['service_id']]->id;
+
+        $arResult = [];
+        foreach ($request['checked'] as $orgId) {
+            $settingModel = IntegrationSettingValue::findOne(['setting_id' => $settingId, 'org_id' => $orgId]);
+            if (!$settingModel){
+                $settingModel = new IntegrationSettingValue();
+            }
+            $settingModel->setting_id = $settingId;
+            $settingModel->org_id = $orgId;
+            $settingModel->value = (string)$request['main_org'];
+            if (!$settingModel->save()){
+                throw new ValidationException($settingModel->getFirstErrors());
+            }
+            $arResult[$orgId] = (bool)$settingModel->id;
+        }
+
+        return ['result' => $arResult];
+    }
 }

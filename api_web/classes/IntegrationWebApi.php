@@ -76,7 +76,7 @@ class IntegrationWebApi extends WebApi
         $result = array_values(AllService::getAllServiceAndLicense($this->user->organization_id, Registry::$integration_services));
         $user_service_id = $this->user->integration_service_id;
         $result = array_map(function ($item) use ($user_service_id) {
-            $item['is_default'] = $user_service_id == $item['service_id'] ? true : false;
+            $item['is_default'] = $user_service_id == $item['id'] ? true : false;
             return $item;
         }, $result);
         return [

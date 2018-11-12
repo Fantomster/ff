@@ -16,6 +16,11 @@ use yii\web\BadRequestHttpException;
 class ForgotForm extends BaseForm
 {
     /**
+     * @var string password
+     */
+    public $newPassword;
+
+    /**
      * @return int
      * @throws BadRequestHttpException
      */

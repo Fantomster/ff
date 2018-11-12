@@ -24,12 +24,15 @@ abstract class AbstractProvider
 
     /**
      * Подключение к провайдеру, подключать в __construct
+     *
      * @var
      */
     private $client;
+    private $isDebug = false;
 
     /**
      * Получение файла от провадера
+     *
      * @param $item
      */
     public function getFile($item, $orgId)
@@ -54,9 +57,10 @@ abstract class AbstractProvider
         //sending order
     }
 
-
     public function updateQueue(int $ediFilesQueueID, int $status, String $errorText = '', String $jsonData = ''): void
     {
-        Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText, 'json_data' => $jsonData], 'id=' . $ediFilesQueueID)->execute();
+        if (!$this->isDebug) {
+            Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText, 'json_data' => $jsonData], 'id=' . $ediFilesQueueID)->execute();
+        }
     }
 }

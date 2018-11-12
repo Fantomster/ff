@@ -31,9 +31,9 @@ class EcomRealization extends AbstractRealization implements RealizationInterfac
         $this->edi->fileName = $this->fileName;
     }
 
-    public function parseFile($content)
+    public function parseFile($content, $providerID)
     {
-        return $this->edi->parseFile($content);
+        return $this->edi->parseFile($content, $providerID);
     }
 
     /**

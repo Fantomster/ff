@@ -1,6 +1,6 @@
 <?php
 
-namespace common\models;
+namespace common\models\edi;
 
 use Yii;
 
@@ -11,6 +11,8 @@ use Yii;
  * @property string $name
  * @property string $legal_name
  * @property string $web_site
+ * @property string $provider_class Класс провайдера
+ * @property string $realization_class Класс реализации
  *
  * @property RoamingMap $roamingMap
  */
@@ -34,6 +36,7 @@ class EdiProvider extends \yii\db\ActiveRecord
             [['name'], 'string', 'max' => 100],
             [['legal_name'], 'string', 'max' => 255],
             [['web_site'], 'string', 'max' => 45],
+            [['provider_class', 'realization_class'], 'string', 'max' => 30],
         ];
     }
 
@@ -47,6 +50,8 @@ class EdiProvider extends \yii\db\ActiveRecord
             'name' => 'Name',
             'legal_name' => 'Legal Name',
             'web_site' => 'Web Site',
+            'provider_class' => 'Класс провайдера',
+            'realization_class' => 'Класс реализации',
         ];
     }
 

@@ -126,7 +126,7 @@ class Order extends \yii\db\ActiveRecord
     {
         return [
             [['client_id', 'vendor_id', 'status'], 'required'],
-            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id', 'replaced_order_id'], 'integer'],
+            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id', 'replaced_order_id', 'edi_organization_id'], 'integer'],
             [['total_price', 'discount'], 'number'],
             [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number', 'edi_ordersp', 'edi_doc_date', 'edi_shipment_quantity'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -161,6 +161,7 @@ class Order extends \yii\db\ActiveRecord
             'waybill_number'        => Yii::t('app', 'Номер накладной'),
             'edi_doc_date'          => Yii::t('app', 'Дата накладной заказа по EDI'),
             'edi_shipment_quantity' => Yii::t('app', 'Отгруженное количество товара EDI'),
+            'edi_organization_id'   => Yii::t('app', 'Идентификатор связи ресторана в таблице edi_organization'),
         ];
     }
 
@@ -692,8 +693,9 @@ class Order extends \yii\db\ActiveRecord
             $vendor = $this->vendor;
             $client = $this->client;
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
-            if (isset($client->ediOrganization->gln_code) && isset($vendor->ediOrganization->gln_code) && $client->ediOrganization->gln_code > 0 && $vendor->ediOrganization->gln_code > 0) {
-                $ediIntegration = new EDIIntegration(['orgId' => $vendor->id, 'clientId' => $client->id]);
+            $glnArray = $client->getGlnCodes($client->id, $vendor->id);
+            if (isset($glnArray['client_gln']) && isset($glnArray['vendor_gln']) && $glnArray['client_gln'] > 0 && $glnArray['vendor_gln'] > 0) {
+                $ediIntegration = new EDIIntegration(['orgId' => $vendor->id, 'clientId' => $client->id, 'providerID' => $glnArray['provider_id']]);
                 if ($this->status == OrderStatus::STATUS_DONE) {
                     $result = $ediIntegration->sendOrderInfo($this, true);
                 } else {
@@ -703,7 +705,7 @@ class Order extends \yii\db\ActiveRecord
                     Yii::error(Yii::t('app', 'common.models.order.edi_error'));
                 }
             }
-            if ((!isset($client->ediOrganization->gln_code) || empty($client->ediOrganization->gln_code)) && isset($vendor->ediOrganization->gln_code)) {
+            if ((!isset($glnArray['client_gln']) || empty($glnArray['client_gln'])) && isset($glnArray['vendor_gln'])) {
                 throw new BadRequestHttpException($errorText);
             }
         }

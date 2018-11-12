@@ -295,6 +295,7 @@ class mercuryApi extends baseApi
                             $vsd = MercVsd::findOne(['uuid' => $UUID]);
                             $vsd->status = MercVsd::DOC_STATUS_UTILIZED;
                             $vsd->save();
+                            $result = $vsd;
                             break;
                     }
                     if (!$err) {

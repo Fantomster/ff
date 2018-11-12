@@ -1,16 +1,5 @@
 <?php
 
-/**
- * Class RkwsCategory
- * @package api_web\module\integration\sync
- * @createdBy Basil A Konakov
- * @createdAt 2018-09-20
- * @updateddAt 2018-10-08
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
- */
-
 namespace api_web\modules\integration\classes\sync;
 
 use yii\web\BadRequestHttpException;
@@ -19,9 +8,8 @@ use api_web\modules\integration\classes\SyncLog;
 
 class RkwsCategory extends ServiceRkws
 {
-
     /** @var string $index Символьный идентификатор справочника */
-    public $index = 'category';
+    public $index = self::DICTIONARY_CATEGORY;
 
     /** @var string $entityTableName Класс таблицы для записи данных */
     public $entityTableName = OuterCategory::class;
@@ -41,7 +29,7 @@ class RkwsCategory extends ServiceRkws
         }
         $array = [];
         $ccount = 0;
-        foreach ($myXML->ITEM as $category) {
+        foreach ($this->iterator($myXML->ITEM) as $category) {
             $ccount++;
             foreach ($category->attributes() as $k => $v) {
                 $array[$ccount][$k] = strval($v[0]);
@@ -53,5 +41,4 @@ class RkwsCategory extends ServiceRkws
         }
         return $array;
     }
-
 }

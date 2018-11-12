@@ -28,6 +28,7 @@ class ConsumerDaemonController extends AbstractDaemonController
      */
     public function doJob($job)
     {
+        $this->initLogger();
         $this->renewConnections();
 
         try {

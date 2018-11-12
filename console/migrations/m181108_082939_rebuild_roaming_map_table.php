@@ -12,7 +12,6 @@ class m181108_082939_rebuild_roaming_map_table extends Migration
      */
     public function safeUp()
     {
-        //$this->dropTable('{{%roaming_map}}');
         $this->dropTable('{{%organization_gln}}');
         $this->dropTable('{{%ecom_integration_config}}');
         $this->createTable('{{%edi_roaming_map}}', [

@@ -162,4 +162,73 @@ class SettingController extends \api_web\components\WebApiController
     {
         $this->response = $this->container->get('IntegrationSettingsWebApi')->update($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/integration/setting/get-main-organizations",
+     *     tags={"Integration/settings"},
+     *     summary="Изменение настройки",
+     *     description="Изменение настройки",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                   "result": {
+     *                        {
+     *                            "id": "4300",
+     *                            "parent_id": "4398",
+     *                            "name": "1йцу",
+     *                            "main_org":true,
+     *                            "checked": false
+     *                        },
+     *                        {
+     *                            "id": "4392",
+     *                            "parent_id": "4398",
+     *                            "name": "тест сортировка",
+     *                            "main_org":false,
+     *                            "checked":true
+     *                        },
+     *                        {
+     *                            "id": "4400",
+     *                            "parent_id": "4398",
+     *                            "name": "421",
+     *                            "main_org":false,
+     *                            "checked":false
+     *                        }
+     *                   }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * )
+     * @throws \Exception
+     */
+
+    public function actionGetMainOrganizations()
+    {
+        $this->response = $this->container->get('IntegrationSettingsWebApi')->getMainOrganizations($this->request);
+    }
 }

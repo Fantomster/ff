@@ -66,12 +66,13 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             $this->service_id = 0;
         }
         $fields = [
-            0                                 => [],
-            Registry::RK_SERVICE_ID           => ["fprod.denom as pdenom", "fstore.name as store", "fprod.unitname as unitname"], // R-keeper
-            Registry::IIKO_SERVICE_ID         => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // iiko
-            Registry::ONE_S_CLIENT_SERVICE_ID => ["fprod.name as pdenom", "fstore.name as store", "fprod.measure as unitname"], // 1C
-            Registry::TILLYPAD_SERVICE_ID     => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // tillypad
+            0                                 => '',
+            Registry::RK_SERVICE_ID           => ',fprod.denom as pdenom, fstore.name as store, fprod.unitname as unitname', // R-keeper
+            Registry::IIKO_SERVICE_ID         => ',fprod.denom as pdenom, fstore.denom as store, fprod.unit as unitname', // iiko
+            Registry::ONE_S_CLIENT_SERVICE_ID => ',fprod.name as pdenom, fstore.name as store, fprod.measure as unitname', // 1C
+            Registry::TILLYPAD_SERVICE_ID     => ',fprod.denom as pdenom, fstore.denom as store, fprod.unit as unitname', // tillypad
         ];
+        //print_r($fields);die();
 
         $joins = [
             0                       => '',
@@ -175,6 +176,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
 
         $client_id = $this->client->id;
         $vendorInList = $this->selectedVendor;
+        //$fields_sql = ''.$fields[$this->service_id];
 
         if (isset($this->vendors) && empty($this->selectedVendor)) {
             $arrayVendorsId = array_keys($this->vendors);
@@ -204,8 +206,8 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
            cbg.deleted = 0
            " . $where . $where_all;*/
 
-        $sql = "SELECT DISTINCT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom,fprod.denom as pdenom,fstore.name as store,fprod.unitname as unitname
-            FROM `assigned_catalog_products` `acp`
+        $sql = "SELECT DISTINCT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id] .
+            " FROM `assigned_catalog_products` `acp`
             LEFT JOIN `$dbName`.`all_map` `amap` ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
             LEFT JOIN `$dbName`.`all_service` `aser` ON amap.service_id = aser.id " . $joins[$this->service_id] . "
             WHERE acp.rest_org_id = " . $client_id . " 

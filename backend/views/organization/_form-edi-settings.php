@@ -22,7 +22,23 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'token')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'provider_priority')->textInput(['maxlength' => true]) ?>
+
+    <?php
+        if($model->isNewRecord):
+    ?>
+
     <?= $form->field($model, 'provider_id')->dropDownList($providers)->label('Название провайдера') ?>
+
+    <?php
+        else:
+    ?>
+
+            <h2><?= $model->ediProvider->name ?></h2>
+
+    <?php
+        endif;
+    ?>
 
     <h3>Выберите организации</h3>
 
@@ -52,6 +68,9 @@ $(document).on('change', '#ediorganization-provider_id', function(e) {
         type: "POST",
         data: {'value' : value, 'org_id' : "$orgID"},
         cache: false,
+        success: function(res) {
+          $('#alEdiList').html(res);
+        },
         failure: function(errMsg) {
             console.log(errMsg);
         }

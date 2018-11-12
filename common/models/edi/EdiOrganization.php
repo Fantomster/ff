@@ -38,6 +38,9 @@ class EdiOrganization extends \yii\db\ActiveRecord
             [['login', 'pass'], 'string', 'max' => 255],
             [['int_user_id'], 'string', 'max' => 50],
             [['token'], 'string', 'max' => 150],
+            [['organization_id', 'provider_id'], 'unique', 'targetAttribute' => ['organization_id', 'provider_id'], 'when' => function($model) {
+        return $model->isNewRecord;
+    }]
         ];
     }
 

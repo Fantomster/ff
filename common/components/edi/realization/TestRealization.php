@@ -19,7 +19,7 @@ use common\models\CatalogGoods;
 use common\models\Currency;
 use common\models\EdiOrder;
 use common\models\EdiOrderContent;
-use common\models\EdiOrganization;
+use common\models\edi\EdiOrganization;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OrderStatus;
@@ -57,7 +57,6 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
     {
         $this->fileToXml = $ar;
     }
-
 
     /**
      * @param        $client
@@ -121,7 +120,6 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
         }
         return true;
     }
-
 
     /**
      * @param bool $isAlcohol
@@ -283,7 +281,6 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
 
         $createWaybill = (new WaybillHelper())->createWaybill($order->id, $arUploadedContents,
             $ediOrganization->organization_id);
-
 
         if ($message != '') {
             OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . \Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");

@@ -8,7 +8,6 @@
 
 namespace common\components\edi\realization;
 
-
 use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WaybillHelper;
@@ -20,7 +19,7 @@ use common\models\CatalogGoods;
 use common\models\Currency;
 use common\models\EdiOrder;
 use common\models\EdiOrderContent;
-use common\models\EdiOrganization;
+use common\models\edi\EdiOrganization;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OrderStatus;
@@ -43,13 +42,12 @@ class Realization extends AbstractRealization implements RealizationInterface
      */
     public $xml;
 
-
     /**
      * @param        $client
      * @param String $fileName
      * @param String $login
      * @param String $pass
-     * @param int $fileId
+     * @param int    $fileId
      * @return bool
      * @throws \yii\db\Exception
      */
@@ -103,7 +101,6 @@ class Realization extends AbstractRealization implements RealizationInterface
         }
         return true;
     }
-
 
     /**
      * @param bool $isAlcohol

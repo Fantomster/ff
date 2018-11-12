@@ -3,22 +3,6 @@
 namespace common\components\edi;
 
 use yii\base\Component;
-use common\models\Catalog;
-use common\models\CatalogBaseGoods;
-use common\models\CatalogGoods;
-use common\models\Currency;
-use common\models\EdiOrder;
-use common\models\EdiOrderContent;
-use common\models\EdiOrganization;
-use common\models\Order;
-use common\models\OrderContent;
-use common\models\OrderStatus;
-use common\models\Organization;
-use common\models\RelationSuppRest;
-use common\models\User;
-use frontend\controllers\OrderController;
-use yii\db\Expression;
-use Yii;
 
 class EDIProvidersClass extends Component
 {

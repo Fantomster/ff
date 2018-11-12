@@ -2,6 +2,7 @@
 
 namespace common\models\edi;
 
+use common\models\User;
 use Yii;
 
 /**

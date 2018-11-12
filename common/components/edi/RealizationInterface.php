@@ -15,7 +15,7 @@ namespace common\components\edi;
  */
 interface RealizationInterface
 {
-    public function parseFile($content);
+    public function parseFile($content, $providerID);
 
     public function getSendingOrderContent($order, $done, $dateArray, $orderContent);
 }

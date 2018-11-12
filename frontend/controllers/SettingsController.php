@@ -5,8 +5,10 @@ namespace frontend\controllers;
 use common\components\edi\EDIIntegration;
 use common\components\EComIntegration;
 use common\models\EcomIntegrationConfig;
+use common\models\edi\EdiOrganization;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
+use common\models\Organization;
 use Yii;
 use common\components\AccessRule;
 use yii\base\ErrorException;
@@ -33,11 +35,11 @@ class SettingsController extends DefaultController
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
                         'actions' => [
                             'notifications',
@@ -46,8 +48,8 @@ class SettingsController extends DefaultController
                             'ajax-change-email-notification',
                             'test'
                         ],
-                        'allow' => true,
-                        'roles' => [
+                        'allow'   => true,
+                        'roles'   => [
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_ONE_S_INTEGRATION,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
@@ -65,19 +67,20 @@ class SettingsController extends DefaultController
 
     public function actionTest()
     {
-        $conf = EcomIntegrationConfig::find()->all();
-        if ($conf) {
-            foreach ($conf as $one) {
-                $orgId = $one->org_id;
-                $eComIntegration = new EDIIntegration(['orgId' => $orgId]);
+        $ediOrganizations = EdiOrganization::find()->all();
+        if ($ediOrganizations) {
+            foreach ($ediOrganizations as $organization) {
+                $orgId = $organization->organization_id;
+                $providerID = $organization->provider_id;
+                if ($providerID == 3 && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
+                $eComIntegration = new EDIIntegration(['orgId' => $orgId, 'providerID' => $providerID]);
                 $eComIntegration->handleFilesList();
-                $eComIntegration = new EDIIntegration(['orgId' => $orgId]);
+                $eComIntegration = new EDIIntegration(['orgId' => $orgId, 'providerID' => $providerID]);
                 $eComIntegration->handleFilesListQueue();
             }
         }
         echo 'success';
     }
-
 
     public function actionUser()
     {
@@ -143,12 +146,12 @@ class SettingsController extends DefaultController
             'allModels' => $this->currentUser->organization->additionalEmail,
         ]);
 
-
         return $this->render('notifications', compact('user', 'emailNotification', 'smsNotification', 'additional_email'));
     }
 
     /**
      * Удаление дополнительного Email адреса
+     *
      * @param $id
      * @return false|int
      * @throws HttpException
@@ -171,6 +174,7 @@ class SettingsController extends DefaultController
 
     /**
      * Добавляем дополнительный Емайл
+     *
      * @throws HttpException
      */
     public function actionAjaxAddEmail()
@@ -197,6 +201,7 @@ class SettingsController extends DefaultController
 
     /**
      * Меняем значения флагов у дополнительного емайла
+     *
      * @throws HttpException
      */
     public function actionAjaxChangeEmailNotification()

@@ -10,11 +10,11 @@
     <CAMPAIGNNUMBER><?= $order->id ?></CAMPAIGNNUMBER>
     <ORDRTYPE>ORIGINAL</ORDRTYPE>
     <HEAD>
-        <SUPPLIER><?= $vendor->ediOrganization->gln_code ?></SUPPLIER>
-        <BUYER><?= $client->ediOrganization->gln_code ?></BUYER>
-        <DELIVERYPLACE><?= $client->ediOrganization->gln_code ?></DELIVERYPLACE>
-        <SENDER><?= $client->ediOrganization->gln_code ?></SENDER>
-        <RECIPIENT><?= $vendor->ediOrganization->gln_code ?></RECIPIENT>
+        <SUPPLIER><?= $glnArray['vendor_gln'] ?></SUPPLIER>
+        <BUYER><?= $glnArray['client_gln'] ?></BUYER>
+        <DELIVERYPLACE><?= $glnArray['client_gln'] ?></DELIVERYPLACE>
+        <SENDER><?= $glnArray['client_gln'] ?></SENDER>
+        <RECIPIENT><?= $glnArray['vendor_gln'] ?></RECIPIENT>
         <EDIINTERCHANGEID><?= $order->id ?></EDIINTERCHANGEID>
         <?php
         $i = 1;

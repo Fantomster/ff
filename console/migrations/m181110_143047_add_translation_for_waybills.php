@@ -18,13 +18,13 @@ class m181110_143047_add_translation_for_waybills extends Migration
      * {@inheritdoc}
      */
     public function safeUp() {
-        \console\helpers\BatchTranslations::insertCategory('ru', 'app', $this->translations);
+        \console\helpers\BatchTranslations::insertCategory('ru', 'api_web', $this->translations);
     }
 
     /**
      * {@inheritdoc}
      */
     public function safeDown() {
-        \console\helpers\BatchTranslations::deleteCategory('ru', 'app', $this->translations);
+        \console\helpers\BatchTranslations::deleteCategory('ru', 'api_web', $this->translations);
     }
 }

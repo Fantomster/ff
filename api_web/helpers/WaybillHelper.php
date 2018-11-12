@@ -84,8 +84,7 @@ class WaybillHelper extends WebApi
 
             $waybillContents = WaybillContent::find()
                 ->leftJoin('waybill w', 'w.id=waybill_content.waybill_id')
-                ->where(['order_content_id' => array_keys($order->orderContent), ''])
-                ->andWhere(['w.service_id' => $serviceId])
+                ->where(['order_content_id' => array_keys($order->orderContent), 'w.service_id' => $serviceId])
                 ->indexBy('order_content_id')->all();
             $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
 

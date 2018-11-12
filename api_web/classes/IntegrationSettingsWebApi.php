@@ -166,7 +166,7 @@ class IntegrationSettingsWebApi extends WebApi
                     $el['checked'] = true;
                 }
             }
-            $el['parent_id'] = $setting['parent_id'] ?? null;
+            $el['parent_id'] = $setting['parent_id'] != "" ? $setting['parent_id'] : null;
             return $el;
         }, $arOrgs['result'])];
     }

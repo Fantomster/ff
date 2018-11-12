@@ -422,7 +422,6 @@ class OrganizationController extends Controller
      */
     public function actionUpdateEdiSettings(int $id)
     {
-
         $model = EdiOrganization::findOne(['id' => $id]);
         $post = Yii::$app->request->post();
         return $this->handleEdiSettings($model, $id, $post, false);

@@ -8,6 +8,7 @@ use common\components\EComIntegration;
 use common\components\edi\EDIIntegration;
 use common\models\EcomIntegrationConfig;
 use common\models\edi\EdiOrganization;
+use common\models\edi\EdiProvider;
 use Yii;
 use yii\web\View;
 use yii\console\Controller;
@@ -387,7 +388,8 @@ class CronController extends Controller
             foreach ($ediOrganizations as $organization) {
                 $orgId = $organization->organization_id;
                 $providerID = $organization->provider_id;
-                if ($providerID == 3 && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
+                $provider = EdiProvider::findOne(['id' => $providerID]);
+                if ($provider == 'LeradataProvider' && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
                 $ediIntegration = new EDIIntegration(['orgId' => $orgId, 'providerID' => $providerID]);
                 $ediIntegration->handleFilesList();
             }
@@ -402,7 +404,8 @@ class CronController extends Controller
             foreach ($ediOrganizations as $organization) {
                 $orgId = $organization->organization_id;
                 $providerID = $organization->provider_id;
-                if ($providerID == 3 && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
+                $provider = EdiProvider::findOne(['id' => $providerID]);
+                if ($provider == 'LeradataProvider' && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
                 $ediIntegration = new EDIIntegration(['orgId' => $orgId, 'providerID' => $providerID]);
                 $ediIntegration->handleFilesListQueue();
             }

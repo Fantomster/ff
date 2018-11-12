@@ -9,6 +9,7 @@ use common\models\edi\EdiOrganization;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
 use common\models\Organization;
+use console\controllers\CronController;
 use Yii;
 use common\components\AccessRule;
 use yii\base\ErrorException;
@@ -65,20 +66,12 @@ class SettingsController extends DefaultController
         ];
     }
 
+    //метод для теста - симуляция запуска крон
     public function actionTest()
     {
-        $ediOrganizations = EdiOrganization::find()->all();
-        if ($ediOrganizations) {
-            foreach ($ediOrganizations as $organization) {
-                $orgId = $organization->organization_id;
-                $providerID = $organization->provider_id;
-                if ($providerID == 3 && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
-                $eComIntegration = new EDIIntegration(['orgId' => $orgId, 'providerID' => $providerID]);
-                $eComIntegration->handleFilesList();
-                $eComIntegration = new EDIIntegration(['orgId' => $orgId, 'providerID' => $providerID]);
-                $eComIntegration->handleFilesListQueue();
-            }
-        }
+        $cron = new CronController(1, 1);
+        $cron->actionHandleFiles();
+        $cron->actionHandleFilesQueue();
         echo 'success';
     }
 

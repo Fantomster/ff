@@ -1459,7 +1459,7 @@ class OrderController extends WebApiController
      */
     public function actionMessagesByUnconfirmedVendor()
     {
-        $this->response = $this->container->get('OrderWebApi')->getDialogMessages($this->request);
+        $this->response = $this->container->get('ChatWebApi')->getDialogMessages($this->request);
     }
 
 }

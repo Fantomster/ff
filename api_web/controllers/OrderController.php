@@ -1396,4 +1396,70 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('OrderWebApi')->setDocumentNumber($this->request);
     }
 
+    /**
+     * @SWG\Post(path="/order/messages-by-unconfirmed-vendor",
+     *     tags={"Order"},
+     *     summary="Список сообщений диалога неподтвержденного вендора",
+     *     description="Получить список всех сообщений дилога неподтвержденного вендора",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                      "dialog_id":1,
+     *                      "pagination":{
+     *                          "page":1,
+     *                          "page_size":12
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *              "result":{
+     *                 {
+     *                      "message_id": 6328,
+     *                      "message": "El postavshik подтвердил заказ!",
+     *                      "sender": "MixCart Bot",
+     *                      "recipient_name": "Космическая пятница",
+     *                      "recipient_id": 1,
+     *                      "is_my_message": false,
+     *                      "is_system": true,
+     *                      "viewed": true,
+     *                      "date": "2018-02-12",
+     *                      "time": "06:33:16"
+     *                 }
+     *              },
+     *              "pagination":{
+     *                  "page":1,
+     *                  "page_size":12,
+     *                  "total_page":3
+     *              }
+     *         }),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionMessagesByUnconfirmedVendor()
+    {
+        $this->response = $this->container->get('OrderWebApi')->getDialogMessages($this->request);
+    }
+
 }

@@ -1234,4 +1234,70 @@ class OrderWebApi extends \api_web\components\WebApi
         }
         return false;
     }
+
+    /**
+     * Список сообщений в диалоге
+     *
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getDialogMessages(array $post)
+    {
+
+        $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
+        $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
+
+        $this->validateRequest($post, ['dialog_id']);
+
+        $client = $this->user->organization;
+        $order = Order::find()->where(['id' => $post['dialog_id']])
+            ->andWhere(['or', ['client_id' => $client->id], ['vendor_id' => $client->id]])
+            ->one();
+
+        if (empty($order)) {
+            throw new BadRequestHttpException("chat.dialog_not_found");
+        }
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $order->getOrderChat()->orderBy(['created_at' => SORT_DESC])->all()
+        ]);
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+
+        $result = [];
+
+        /**
+         * @var $model OrderChat
+         */
+        foreach ($dataProvider->models as $model) {
+            $message = $this->prepareMessage($model);
+
+            if ($message['is_my_message'] === false && $message['viewed'] === false) {
+                $model->viewed = true;
+                $model->save();
+            }
+
+            $result[] = $message;
+        }
+
+        /**
+         * Отправка уведомлений в FCM
+         */
+        Notice::init('Chat')->updateCountMessageAndDialog($this->user->organization->id, $order);
+
+        $return = [
+            'result'     => $result,
+            'pagination' => [
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
+
+        return $return;
+    }
 }

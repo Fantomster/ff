@@ -142,30 +142,50 @@ class IntegrationSettingsWebApi extends WebApi
 
     /**
      * @param $request
+     * @return array
+     * @throws BadRequestHttpException
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      */
     public function getMainOrganizations($request)
     {
+        $this->validateRequest($request, ['service_id']);
         $arOrgs = $this->container->get('UserWebApi')->getUserOrganizationBusinessList();
         $arOrgIds = array_map(function ($el) {
-            return $el['id'];
+            return (int)$el['id'];
         }, $arOrgs['result']);
-        $settingToOrg = $this->getSettingsByOrgIds('main_org', $arOrgIds);
+        $arSettingToOrg = $this->getSettingsByOrgIds('main_org', $arOrgIds, $request['service_id']);
+
+        return ['result' => array_map(function ($el) use ($arSettingToOrg) {
+            $setting = $arSettingToOrg[$el['id']] ?? null;
+            $el['main_org'] = $el['checked'] = false;
+            if (!is_null($setting)) {
+                if ($setting['parent_id'] === "") {
+                    $el['main_org'] = true;
+                } else {
+                    $el['checked'] = true;
+                }
+            }
+            $el['parent_id'] = $setting['parent_id'] ?? null;
+            return $el;
+        }, $arOrgs['result'])];
     }
 
     /**
+     * Получение настройки для всех организаций
+     *
      * @param string $settingName
      * @param array  $arOrgIds
+     * @param int    $serviceId
      * @return array
      */
-    public function getSettingsByOrgIds(string $settingName, array $arOrgIds)
+    public function getSettingsByOrgIds(string $settingName, array $arOrgIds, int $serviceId)
     {
-        return (new Query())->select(['isv.org_id', 'coalesce(isv.value, null)'])->from(IntegrationSettingValue::tableName() . ' as isv')
+        return (new Query())->select(['isv.org_id', 'isv.value parent_id'])
+            ->from(IntegrationSettingValue::tableName() . ' as isv')
             ->leftJoin(IntegrationSetting::tableName() . ' as is', 'is.id=isv.setting_id')
-            ->where(['is.name' => $settingName, 'isv.org_id' => $arOrgIds])
-//            ->createCommand()->getRawSql();
+            ->where(['is.name' => $settingName, 'isv.org_id' => $arOrgIds, 'is.service_id' => $serviceId])
+            ->indexBy('org_id')
             ->all(\Yii::$app->db_api);
-
     }
 }

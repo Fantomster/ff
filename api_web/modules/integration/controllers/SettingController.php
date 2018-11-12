@@ -178,17 +178,7 @@ class SettingController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "service_id": 1,
-     *                      "settings": {
-     *                           {
-     *                              "name":"taxVat",
-     *                              "value":10
-     *                          },
-     *                           {
-     *                              "name":"auth_password",
-     *                              "value":"password"
-     *                          }
-     *                       }
+     *                      "service_id": 1
      *                  }
      *              )
      *         )

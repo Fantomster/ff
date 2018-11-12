@@ -1006,8 +1006,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
         $ids = rtrim($ids, ',');
         if ($ids) {
-            $sql = "UPDATE `one_s_waybill_data` SET `product_rid` = :w_spid, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
-            $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid])->execute();
+            $sql = "UPDATE `one_s_waybill_data` SET `product_rid` = :w_spid, `munit` = :w_munit, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
+            $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_munit' => $munit])->execute();
         }
 
 

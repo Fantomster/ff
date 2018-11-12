@@ -16,6 +16,7 @@ use yii\web\BadRequestHttpException;
  * @property int                   $id         Уникальный ID
  * @property string                $name       Наименование лицензии
  * @property int                   $is_active  Флаг активности
+ * @property int                   $service_id id service
  * @property string                $created_at Дата создания
  * @property string                $updated_at Дата обновления
  * @property LicenseService[]      $licenseServices

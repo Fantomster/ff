@@ -33,24 +33,28 @@ class LicenseOrganizationBehavior extends Behavior
     public function createDictionary($event)
     {
         //Список справочников необходимых для интеграции
-        $dictionaryList = OuterDictionary::findAll(['service_id' => $this->model->licenseService->service_id]);
-        if (!empty($dictionaryList)) {
-            //Проверяем, нет ли уже справочников для этой организации в этой интеграции
-            //Если нет, создаем
-            foreach ($dictionaryList as $dictionary) {
-                $exists = OrganizationDictionary::find()->where([
-                    'org_id'       => $this->model->org_id,
-                    'outer_dic_id' => $dictionary->id
-                ])->exists();
-
-                if (!$exists) {
-                    $model = new OrganizationDictionary([
-                        'outer_dic_id' => $dictionary->id,
+        $service_id = $this->model->license->service_id;
+        //Если у лицензии есть сервис
+        if (!empty($service_id)) {
+            $dictionaryList = OuterDictionary::findAll(['service_id' => $service_id]);
+            if (!empty($dictionaryList)) {
+                //Проверяем, нет ли уже справочников для этой организации в этой интеграции
+                //Если нет, создаем
+                foreach ($dictionaryList as $dictionary) {
+                    $exists = OrganizationDictionary::find()->where([
                         'org_id'       => $this->model->org_id,
-                        'status_id'    => OrganizationDictionary::STATUS_DISABLED,
-                        'count'        => 0
-                    ]);
-                    $model->save();
+                        'outer_dic_id' => $dictionary->id
+                    ])->exists();
+
+                    if (!$exists) {
+                        $model = new OrganizationDictionary([
+                            'outer_dic_id' => $dictionary->id,
+                            'org_id'       => $this->model->org_id,
+                            'status_id'    => OrganizationDictionary::STATUS_DISABLED,
+                            'count'        => 0
+                        ]);
+                        $model->save();
+                    }
                 }
             }
         }

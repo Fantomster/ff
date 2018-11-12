@@ -12,7 +12,7 @@ class m181112_134124_truncate_edi_organization extends Migration
      */
     public function safeUp()
     {
-        $this->truncateTable('{{%edi_organization}}');
+        $this->delete('{{%edi_organization}}', ['provider_id' => null]);
     }
 
     /**

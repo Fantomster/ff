@@ -422,44 +422,10 @@ class OrganizationController extends Controller
      */
     public function actionUpdateEdiSettings(int $id)
     {
-        $providers = ArrayHelper::map(EdiProvider::find()->asArray()->all(), 'id', 'name');
+
         $model = EdiOrganization::findOne(['id' => $id]);
-        $organization = Organization::findOne(['id' => $model->organization_id]);
         $post = Yii::$app->request->post();
-        $checkedOrganizations = [];
-        if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-            $checkedOrganizations = ArrayHelper::getColumn(EdiRoamingMap::find()->where(['sender_edi_organization_id' => $model->id])->asArray()->all(), 'recipient_edi_organization_id');
-        }
-        if ($model->load($post) && $model->validate() && $model->save()) {
-            if (isset($post['organizations'])) {
-                foreach ($post['organizations'] as $organizationID) {
-                    if (!in_array($organizationID, $checkedOrganizations)) {
-                        $roamingMap = new  EdiRoamingMap();
-                        $roamingMap->sender_edi_organization_id = $model->id;
-                        $roamingMap->recipient_edi_organization_id = $organizationID;
-                        $roamingMap->created_by_id = Yii::$app->user->id;
-                        $roamingMap->save();
-                    }
-                }
-            }
-            return $this->redirect(Url::to(['organization/edi-settings', 'id' => $organization->id]));
-        }
-
-        if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-            $ediOrganizations = EdiOrganization::find();
-            $ediOrganizations->with('organization')->innerJoin('relation_supp_rest', 'edi_organization.organization_id = relation_supp_rest.supp_org_id')->where("provider_id = " . $model->provider_id)->andWhere('relation_supp_rest.rest_org_id = ' . $model->id);
-            $ediOrganizations = ArrayHelper::map($ediOrganizations->asArray()->all(), 'id', 'organization.name');
-        } else {
-            $ediOrganizations = [];
-        }
-
-        return $this->render('update-edi-settings', [
-            'model'                => $model,
-            'providers'            => $providers,
-            'orgID'                => $id,
-            'ediOrganizations'     => $ediOrganizations,
-            'checkedOrganizations' => $checkedOrganizations
-        ]);
+        return $this->handleEdiSettings($model, $id, $post, false);
     }
 
     /**
@@ -469,40 +435,9 @@ class OrganizationController extends Controller
      */
     public function actionCreateEdiSettings(int $id)
     {
-        $organization = Organization::findOne(['id' => $id]);
-        $providers = ArrayHelper::map(EdiProvider::find()->asArray()->all(), 'id', 'name');
         $model = new EdiOrganization();
-        $model->organization_id = $id;
         $post = Yii::$app->request->post();
-        if ($model->load($post) && $model->validate() && $model->save()) {
-            if (isset($post['organizations'])) {
-                foreach ($post['organizations'] as $organizationID) {
-                    $roamingMap = new  EdiRoamingMap();
-                    $roamingMap->sender_edi_organization_id = $model->id;
-                    $roamingMap->recipient_edi_organization_id = $organizationID;
-                    $roamingMap->created_by_id = Yii::$app->user->id;
-                    $roamingMap->save();
-                }
-            }
-            return $this->redirect(Url::to(['organization/edi-settings', 'id' => $id]));
-        }
-        $checkedOrganizations = [];
-        $ediOrganizations = EdiOrganization::find();
-        if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-            $ediOrganizations->with('organization')->innerJoin('relation_supp_rest', 'edi_organization.organization_id = relation_supp_rest.supp_org_id')->where("provider_id = 1")->andWhere('relation_supp_rest.rest_org_id = ' . $id);
-            $ediOrganizations = ArrayHelper::map($ediOrganizations->asArray()->all(), 'id', 'organization.name');
-        } else {
-            $ediOrganizations = [];
-        }
-
-        return $this->render('create-edi-settings', [
-            'model'                => $model,
-            'providers'            => $providers,
-            'organization'         => $organization,
-            'ediOrganizations'     => $ediOrganizations,
-            'orgID'                => $id,
-            'checkedOrganizations' => $checkedOrganizations
-        ]);
+        return $this->handleEdiSettings($model, $id, $post, true);
     }
 
     public function actionAjaxUpdateEdiList()
@@ -526,6 +461,52 @@ class OrganizationController extends Controller
         } else {
             return false;
         }
+    }
+
+    private function handleEdiSettings($model, $id, $post, $isCreate = true)
+    {
+        $model->organization_id = $id;
+        if ($model->load($post) && $model->validate() && $model->save()) {
+            if (isset($post['organizations'])) {
+                foreach ($post['organizations'] as $organizationID) {
+                    $roamingMap = new  EdiRoamingMap();
+                    $roamingMap->sender_edi_organization_id = $model->id;
+                    $roamingMap->recipient_edi_organization_id = $organizationID;
+                    $roamingMap->created_by_id = Yii::$app->user->id;
+                    $roamingMap->save();
+                }
+            }
+            return $this->redirect(Url::to(['organization/edi-settings', 'id' => $id]));
+        }
+        $providers = ArrayHelper::map(EdiProvider::find()->asArray()->all(), 'id', 'name');
+
+        $organization = Organization::findOne(['id' => $id]);
+        $checkedOrganizations = [];
+        $ediOrganizations = EdiOrganization::find();
+
+        if ($isCreate) {
+            $defaultProvider = EdiProvider::find()->one();
+            $providerID = $defaultProvider->id;
+            $action = 'create-edi-settings';
+        } else {
+            $providerID = $model->provider_id;
+            $action = 'update-edi-settings';
+        }
+        if ($organization->type_id == Organization::TYPE_RESTAURANT) {
+            $ediOrganizations->with('organization')->innerJoin('relation_supp_rest', 'edi_organization.organization_id = relation_supp_rest.supp_org_id')->where("provider_id = $providerID")->andWhere('relation_supp_rest.rest_org_id = ' . $id);
+            $ediOrganizations = ArrayHelper::map($ediOrganizations->asArray()->all(), 'id', 'organization.name');
+        } else {
+            $ediOrganizations = [];
+        }
+
+        return $this->render($action, [
+            'model'                => $model,
+            'providers'            => $providers,
+            'organization'         => $organization,
+            'ediOrganizations'     => $ediOrganizations,
+            'orgID'                => $id,
+            'checkedOrganizations' => $checkedOrganizations
+        ]);
     }
 
 }

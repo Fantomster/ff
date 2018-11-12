@@ -309,7 +309,7 @@ class mercuryApi extends baseApi
             if ($status == 'COMPLETED') {
                 $doc[] = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
                 (new VetDocumentsChangeList())->updateDocumentsList($doc[0]);
-
+                $result = MercVsd::findOne(['uuid' => $UUID]);
             }
         } catch (\SoapFault $e) {
             Yii::error($e->detail);

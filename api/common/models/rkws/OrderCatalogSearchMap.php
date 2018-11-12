@@ -9,6 +9,7 @@ use common\models\RelationSuppRest;
 use yii\data\SqlDataProvider;
 use common\models\Catalog;
 use api_web\components\Registry;
+use Yii;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
@@ -58,6 +59,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
      */
     public function search($params)
     {
+        Yii::info('Начало метода');
         $this->load($params);
 
         $db_api = \Yii::$app->db_api;
@@ -205,7 +207,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
            WHERE
            cbg.deleted = 0
            " . $where . $where_all;*/
-
+        Yii::info('До начала запроса');
         if ($this->service_id==0) {
             $sql = "SELECT DISTINCT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id] .
                 " FROM `assigned_catalog_products` `acp`
@@ -225,6 +227,8 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
               AND acp.catalog_status = 1 
               AND acp.deleted = 0" . $where;
         }
+        Yii::info('После запроса');
+        //print $sql; die();
         /*$sql = "
         SELECT DISTINCT * FROM (
            SELECT 
@@ -258,6 +262,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         ) as c WHERE id != 0 " . $where_all;*/
 
         $query = \Yii::$app->db->createCommand($sql);
+        Yii::info('После формирования команды');
 
         $dataProvider = new SqlDataProvider([
             'sql'    => $query->sql,
@@ -300,6 +305,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                 ]
             ],
         ]);
+        Yii::info('После дата-провайдера');
         return $dataProvider;
     }
 

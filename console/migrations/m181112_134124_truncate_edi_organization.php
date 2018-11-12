@@ -14,6 +14,7 @@ class m181112_134124_truncate_edi_organization extends Migration
     {
         $this->dropForeignKey('sender_edi_organization_idx', 'edi_roaming_map');
         $this->delete('{{%edi_organization}}', ['provider_id' => null]);
+        $this->addForeignKey('sender_edi_organization_idx', 'edi_roaming_map', 'sender_edi_organization_id', 'edi_organization', 'organization_id');
     }
 
     /**

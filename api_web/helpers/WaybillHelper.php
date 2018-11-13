@@ -48,6 +48,11 @@ class WaybillHelper
     public $user;
 
     /**
+     * @var
+     */
+    public $orgId;
+
+    /**
      * WaybillHelper constructor.
      */
     public function __construct()
@@ -465,7 +470,7 @@ class WaybillHelper
             //Блокируем обработку этого заказа
             $redis->set($lockName, 1);
             $order = Order::findOne($request['order_id']);
-            $orgId = $order->client_id;
+            $this->orgId = $order->client_id;
             $this->user = $order->createdBy;
 
             try {
@@ -491,7 +496,7 @@ class WaybillHelper
                 foreach ($waybillToService as $serviceId => $ids) {
                     $scenario = IntegrationSettingValue::getSettingsByServiceId(
                         $serviceId,
-                        $orgId,
+                        $this->orgId,
                         ['auto_unload_invoice']
                     );
                     if ($scenario == 1) {
@@ -535,7 +540,7 @@ class WaybillHelper
         $journal->response = is_array($message) ? json_encode($message) : $message;
         $journal->service_id = (int)$service_id;
         $journal->type = $type;
-        $journal->organization_id = $this->user->organization_id;
+        $journal->organization_id = $this->orgId;
         $journal->user_id = $this->user->id;
         $journal->operation_code = (string)(Registry::$operation_code_send_waybill[$service_id] ?? 0);
         if (!$journal->save()) {
@@ -569,7 +574,7 @@ class WaybillHelper
             ->from(IntegrationSettingValue::tableName() . ' as isv')
             ->leftJoin(IntegrationSetting::tableName() . ' as is', 'is.id = isv.setting_id')
             ->where([
-                'isv.org_id' => $this->user->organization_id,
+                'isv.org_id' => $this->orgId,
                 'is.name'    => 'auto_unload_invoice',
             ])->all(\Yii::$app->db_api);
     }

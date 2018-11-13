@@ -11,6 +11,7 @@ use yii\web\BadRequestHttpException;
 
 /**
  * Class ForgotForm
+ *
  * @package api_web\models
  */
 class ForgotForm extends BaseForm
@@ -35,9 +36,9 @@ class ForgotForm extends BaseForm
             $user = $this->getUser();
             $user->newPassword = $this->newPassword;
             // calculate expireTime
-           /* $expireTime = $this->module->resetExpireTime;
-            $expireTime = $expireTime ? gmdate("Y-m-d H:i:s", strtotime($expireTime)) : null;
-            $userToken = UserToken::generate($user->id, UserToken::TYPE_PASSWORD_RESET, null, $expireTime);*/
+            /* $expireTime = $this->module->resetExpireTime;
+             $expireTime = $expireTime ? gmdate("Y-m-d H:i:s", strtotime($expireTime)) : null;
+             $userToken = UserToken::generate($user->id, UserToken::TYPE_PASSWORD_RESET, null, $expireTime);*/
             // modify view path to module views
             $mailer = Yii::$app->mailer;
             $oldViewPath = $mailer->viewPath;
@@ -59,6 +60,7 @@ class ForgotForm extends BaseForm
 
     /**
      * Get user based on email
+     *
      * @return \amnah\yii2\user\models\User|null
      */
     public function getUser()
@@ -67,5 +69,36 @@ class ForgotForm extends BaseForm
             $this->user = \common\models\User::findOne(["email" => $this->email]);
         }
         return $this->user;
+    }
+
+    /**
+     * @param $number length
+     * @return string
+     */
+    public function generatePassword($number)
+    {
+        $arr = ['a', 'b', 'c', 'd', 'e', 'f',
+            'g', 'h', 'i', 'j', 'k', 'l',
+            'm', 'n', 'o', 'p', 'r', 's',
+            't', 'u', 'v', 'x', 'y', 'z',
+            'A', 'B', 'C', 'D', 'E', 'F',
+            'G', 'H', 'I', 'J', 'K', 'L',
+            'M', 'N', 'O', 'P', 'R', 'S',
+            'T', 'U', 'V', 'X', 'Y', 'Z',
+            '1', '2', '3', '4', '5', '6',
+            '7', '8', '9', '0', '!', '@',
+            '#', '$', '%', '^', '&', '*',
+            '(', ')', '-', '_', '=', '+',
+            '[', ']', '{', '}', ';', ':'];
+        $ranges = [0, 26, 52, 62];
+        // Генерируем пароль
+        $pass = "";
+        for ($i = 0; $i < $number; $i++) {
+            // Вычисляем случайный индекс массива
+            $start = rand(0, count($ranges) - 1);
+            $index = rand($start, count($arr) - 1);
+            $pass .= $arr[$index];
+        }
+        return $pass;
     }
 }

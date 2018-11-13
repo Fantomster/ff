@@ -135,8 +135,8 @@ class CloudWatchLog extends Component
             }
             $client->putLogEvents($request);
             return true;
-        } catch (\Aws\CloudWatchLogs\Exception\CloudWatchLogsException $e) {
-            \Yii::error($e->getAwsErrorCode() . PHP_EOL . $e->getMessage() .  PHP_EOL . $e->getTraceAsString());
+        } catch (\Throwable $e) {
+            \Yii::error($e->getCode() . PHP_EOL . $e->getMessage() .  PHP_EOL . $e->getTraceAsString());
             return false;
         }
     }

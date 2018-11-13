@@ -8,13 +8,80 @@
 
 namespace api_web\modules\integration\controllers;
 
-
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\classes\Integration;
 use yii\web\BadRequestHttpException;
 
 class DictionaryController extends \api_web\components\WebApiController
 {
+    /**
+     * @SWG\Post(path="/integration/dictionary/list",
+     *     tags={"Integration/dictionary"},
+     *     summary="Список справочников",
+     *     description="Список справочников",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 2
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                          {
+     *                              "id": 6,
+     *                              "name": "agent",
+     *                              "title": "Контрагенты",
+     *                              "count": 7,
+     *                              "status_id": 1,
+     *                              "status_text": "Загружены",
+     *                              "created_at": "2018-10-18T16:50:54+03:00",
+     *                              "updated_at": "2018-10-19T09:12:42+03:00"
+     *                          },
+     *                          {
+     *                              "id": 10,
+     *                              "name": "store",
+     *                              "title": "Склады",
+     *                              "count": 10,
+     *                              "status_id": 1,
+     *                              "status_text": "Загружены",
+     *                              "created_at": "2018-10-18T16:50:54+03:00",
+     *                              "updated_at": "2018-10-19T09:12:42+03:00"
+     *                          }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     */
+    public function actionList()
+    {
+        if (empty($this->request['service_id'])) {
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+
+        $this->response = (new Dictionary($this->request['service_id'], 'Dictionary'))->getList();
+    }
+
     /**
      * @SWG\Post(path="/integration/dictionary/product-list",
      *     tags={"Integration/dictionary"},
@@ -343,10 +410,248 @@ class DictionaryController extends \api_web\components\WebApiController
 
     public function actionStoreList()
     {
-        if (!isset($this->request['service_id'])){
+        if (!isset($this->request['service_id'])) {
             throw new BadRequestHttpException('empty_param|service_id');
         }
         $this->response = (new Dictionary($this->request['service_id'], 'Store'))->storeList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/store-flat-list",
+     *     tags={"Integration/dictionary"},
+     *     summary="Список складов (плоский)",
+     *     description="Полный список складов (плоский)",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 2,
+     *                      "search": {
+     *                          "name": "название",
+     *                          "organization_id": 10
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "stores": {
+     *                      {
+     *                          "id": 5,
+     *                          "outer_uid": "c9319967c038f9b923068dabdf60cfe3",
+     *                          "name": "Все склады",
+     *                          "is_active": 1,
+     *                          "is_category": true
+     *                      },
+     *                      {
+     *                          "id": 5,
+     *                          "outer_uid": "c9319967c038f9b923068dabdf60cfe3",
+     *                          "name": "-Первый склад",
+     *                          "is_active": 1,
+     *                          "is_category": false
+     *                      },
+     *                      {
+     *                          "id": 5,
+     *                          "outer_uid": "c9319967c038f9b923068dabdf60cfe3",
+     *                          "name": "--Второй склад",
+     *                          "is_active": 1,
+     *                          "is_category": false
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     */
+
+    public function actionStoreFlatList()
+    {
+        if (!isset($this->request['service_id'])) {
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+        $this->response = (new Dictionary($this->request['service_id'], 'Store'))->storeFlatList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/unit-list",
+     *     tags={"Integration/dictionary"},
+     *     summary="Список единиц измерения",
+     *     description="Полный список единиц измерения",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 2,
+     *                      "search": {
+     *                          "name": "наименование"
+     *                      },
+     *                      "pagination":{
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "units": {
+     *                      {
+     *                          "id": 1,
+     *                            "outer_uid": "1",
+     *                            "ratio": 1,
+     *                            "org_id": 3768,
+     *                            "service_id": 1,
+     *                            "name": "123",
+     *                            "iso_code": null,
+     *                            "is_deleted": null,
+     *                            "created_at": null,
+     *                            "updated_at": null
+     *                      },
+     *                      {
+     *                          "id": 2,
+     *                            "outer_uid": "2",
+     *                            "ratio": 1,
+     *                            "org_id": 3768,
+     *                            "service_id": 1,
+     *                            "name": "123",
+     *                            "iso_code": null,
+     *                            "is_deleted": null,
+     *                            "created_at": null,
+     *                            "updated_at": null
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     */
+
+    public function actionUnitList()
+    {
+        if (!isset($this->request['service_id'])) {
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+        $this->response = (new Dictionary($this->request['service_id'], 'Unit'))->unitList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/category-list",
+     *     tags={"Integration/dictionary"},
+     *     summary="Список категорий",
+     *     description="Полный список категорий (для айко не доступно)",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 2,
+     *                      "search": {
+     *                          "name": "наименование"
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "categories": {
+     *                      "id": 5,
+     *                      "outer_uid": "c9319967c038f9b923068dabdf60cfe3",
+     *                      "name": "Каталог",
+     *                      "childs": {
+     *                          {
+     *                              "id": 9,
+     *                              "name": "Алкоголь",
+     *                              "outer_uid": "91e0dd93-0923-4509-9435-6cc6224768af",
+     *                              "childs": {}
+     *                          },
+     *                          {
+     *                              "id": 8,
+     *                              "outer_uid": "73045059-5e4f-4358-90a4-23b2c0641e0f",
+     *                              "name": "Алкоголь",
+     *                              "childs": {}
+     *                          },
+     *                          {
+     *                              "id": 7,
+     *                              "outer_uid": "a3acc051-bfbb-45a9-9e1a-87d2f605f76e",
+     *                              "name": "Алкоголь",
+     *                              "childs": {}
+     *                          },
+     *                          {
+     *                              "id": 6,
+     *                              "outer_uid": "1239d270-1bbe-f64f-b7ea-5f00518ef508",
+     *                              "name": "Алкоголь",
+     *                              "childs": {}
+     *                          }
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     */
+
+    public function actionCategoryList()
+    {
+        if (!isset($this->request['service_id'])) {
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+        $this->response = (new Dictionary($this->request['service_id'], 'Unit'))->categoryList($this->request);
     }
 
     /**
@@ -364,7 +669,6 @@ class DictionaryController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                        "agent_id": 1,
      *                        "name": "ООО Рос Прод Торг"
      *                    }
      *              )
@@ -376,8 +680,7 @@ class DictionaryController extends \api_web\components\WebApiController
      *            @SWG\Schema(
      *              default={
      *                          {
-     *                              "result": false,
-     *                              "message": "Такое название уже задано"
+     *                              "result": false
      *                          },
      *                          {
      *                              "result": true

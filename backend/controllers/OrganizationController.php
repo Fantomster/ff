@@ -86,49 +86,53 @@ class OrganizationController extends Controller
 
     /**
      * Lists all Organization models.
+     *
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel  = new OrganizationSearch();
+        $searchModel = new OrganizationSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-                    'searchModel'  => $searchModel,
-                    'dataProvider' => $dataProvider,
+            'searchModel'  => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
      * Lists all TestVendors models.
+     *
      * @return mixed
      */
     public function actionTestVendors()
     {
-        $searchModel  = new TestVendorsSearch();
+        $searchModel = new TestVendorsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('test-vendors', [
-                    'searchModel'  => $searchModel,
-                    'dataProvider' => $dataProvider,
+            'searchModel'  => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
      * Displays a single Organization model.
+     *
      * @param integer $id
      * @return mixed
      */
     public function actionView($id)
     {
         return $this->render('view', [
-                    'model' => $this->findModel($id),
+            'model' => $this->findModel($id),
         ]);
     }
 
     /**
      * Creates a new TestVendors model.
      * If creation is successful, the browser will be redirected to the 'view' page.
+     *
      * @return mixed
      */
     public function actionCreateTestVendor()
@@ -139,7 +143,7 @@ class OrganizationController extends Controller
             return $this->redirect(['test-vendors']);
         } else {
             return $this->render('create-test-vendor', [
-                        'model' => $model,
+                'model' => $model,
             ]);
         }
     }
@@ -147,6 +151,7 @@ class OrganizationController extends Controller
     /**
      * Updates TestVendors model.
      * If creation is successful, the browser will be redirected to the 'view' page.
+     *
      * @return mixed
      */
     public function actionUpdateTestVendor($id)
@@ -157,7 +162,7 @@ class OrganizationController extends Controller
             return $this->redirect(['test-vendors']);
         } else {
             return $this->render('update-test-vendor', [
-                        'model' => $model,
+                'model' => $model,
             ]);
         }
     }
@@ -165,6 +170,7 @@ class OrganizationController extends Controller
     /**
      * Updates TestVendors.
      * If creation is successful, the browser will be redirected to the 'view' page.
+     *
      * @return mixed
      */
     public function actionStartTestVendorsUpdating()
@@ -179,24 +185,22 @@ class OrganizationController extends Controller
     /**
      * Updates an existing Organization model.
      * If update is successful, the browser will be redirected to the 'view' page.
+     *
      * @param integer $id
      * @return mixed
      */
     public function actionUpdate($id)
     {
-        $model           = $this->findModel($id);
+        $model = $this->findModel($id);
         $franchiseeModel = $this->findFranchiseeAssociateModel($id);
-        $ediModel        = EdiOrganization::findOne(['organization_id' => $id]);
+        $ediModel = EdiOrganization::findOne(['organization_id' => $id]);
         if (!$ediModel) {
-            $ediModel                  = new EdiOrganization();
+            $ediModel = new EdiOrganization();
             $ediModel->organization_id = $id;
             $ediModel->save();
         }
         $franchiseeList = ArrayHelper::map(Franchisee::find()->all(), 'id', 'legal_entity');
         if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save() && $ediModel->load(Yii::$app->request->post())) {
-            if (strlen($ediModel->pass) < 20) {
-                $ediModel->pass = md5($ediModel->pass);
-            }
             $ediModel->save();
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
@@ -220,6 +224,7 @@ class OrganizationController extends Controller
     /**
      * Finds the Organization model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
      * @return Organization the loaded model
      * @throws NotFoundHttpException if the model cannot be found
@@ -236,6 +241,7 @@ class OrganizationController extends Controller
     /**
      * Finds the Organization model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
      * @return Organization the loaded model
      * @throws NotFoundHttpException if the model cannot be found
@@ -250,15 +256,16 @@ class OrganizationController extends Controller
 
     /**
      * Edit notifications.
+     *
      * @param integer $id
      * @return mixed
      */
     public function actionNotifications(int $id)
     {
         Yii::$app->language = 'ru';
-        $users              = User::find()->leftJoin('relation_user_organization', 'relation_user_organization.user_id = user.id')->where('relation_user_organization.organization_id=' . $id)->all();
+        $users = User::find()->leftJoin('relation_user_organization', 'relation_user_organization.user_id = user.id')->where('relation_user_organization.organization_id=' . $id)->all();
         if (count(Yii::$app->request->post())) {
-            $post   = Yii::$app->request->post();
+            $post = Yii::$app->request->post();
             $emails = $post['Email'];
             foreach ($emails as $userId => $fields) {
                 $user = User::findOne(['id' => $userId]);
@@ -275,7 +282,7 @@ class OrganizationController extends Controller
             }
             $sms = $post['Sms'];
             foreach ($sms as $userId => $fields) {
-                $user            = User::findOne(['id' => $userId]);
+                $user = User::findOne(['id' => $userId]);
                 $smsNotification = $user->smsNotification;
                 foreach ($fields as $key => $value) {
                     $smsNotification->$key = $value;
@@ -291,9 +298,9 @@ class OrganizationController extends Controller
     public function actionAjaxUpdateStatus()
     {
         if (Yii::$app->request->isAjax) {
-            $status                    = Yii::$app->request->post('value');
-            $organizationId            = str_replace('blacklisted_', '', Yii::$app->request->post('id'));
-            $organization              = Organization::findOne(['id' => $organizationId]);
+            $status = Yii::$app->request->post('value');
+            $organizationId = str_replace('blacklisted_', '', Yii::$app->request->post('id'));
+            $organization = Organization::findOne(['id' => $organizationId]);
             $organization->blacklisted = $status;
             $organization->save();
             return true;
@@ -304,21 +311,30 @@ class OrganizationController extends Controller
 
     /**
      * Lists all Organization models.
+     *
      * @return mixed
      */
     public function actionListOrganizationsForLicenses()
     {
-        $searchModel  = new OrganizationSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $searchModel = new OrganizationSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, true);
+        $db = Yii::$app->get('db_api');
+        $dbNameArr = explode(';dbname=', $db->dsn);
+        $dbName = "`" . $dbNameArr[1] . "`";
+        $date = new \DateTime('+10 day');
+        $tenDaysAfter = $date->format('Y-m-d H:i:s');
 
         return $this->render('list-organizations-for-licenses', [
-                    'searchModel'  => $searchModel,
-                    'dataProvider' => $dataProvider,
+            'searchModel'  => $searchModel,
+            'dataProvider' => $dataProvider,
+            'dbName'       => $dbName,
+            'tenDaysAfter' => $tenDaysAfter
         ]);
     }
 
     /**
      * Lists all Organization models.
+     *
      * @return mixed
      */
     public function actionAddLicense(int $id)
@@ -327,44 +343,45 @@ class OrganizationController extends Controller
         if (!$organizationObject) {
             throw new BadRequestHttpException();
         }
+
         $organizations = ArrayHelper::map([$organizationObject->toArray()], 'id', 'name');
         if (!$organizations) {
             throw new BadRequestHttpException();
         }
+
         $parentOrganizationObject = Organization::findOne(['id' => $organizationObject->parent_id]);
         if ($parentOrganizationObject) {
             $parentOrganization = ArrayHelper::map([$parentOrganizationObject->toArray()], 'id', 'name');
-            $organizations      = ArrayHelper::merge($organizations, $parentOrganization);
+            $organizations = ArrayHelper::merge($organizations, $parentOrganization);
         }
+
         $childOrganizations = ArrayHelper::map(Organization::findAll(['parent_id' => $id]), 'id', 'name');
-        $organizations      = ArrayHelper::merge($organizations, $childOrganizations);
-        $services           = ArrayHelper::map(AllService::findAll(['is_active' => true]), 'id', 'denom');
+        $organizations = ArrayHelper::merge($organizations, $childOrganizations);
+        $licenses = ArrayHelper::map(License::findAll(['is_active' => true]), 'id', 'name');
         if (Yii::$app->request->isPost && !empty(Yii::$app->request->post())) {
             $post = Yii::$app->request->post();
             foreach ($post['organizations'] as $organizationID) {
-                foreach ($post['services'] as $serviceID) {
-                    $service                         = AllService::findOne(['id' => $serviceID]);
-                    $license                         = new License();
-                    $license->name                   = $service->denom;
-                    $license->is_active              = true;
-                    $license->save();
-                    $licenseOrganization             = new LicenseOrganization();
+                foreach ($post['licenses'] as $licenseID) {
+                    $license = License::findOne(['id' => $licenseID]);
+                    $licenseOrganization = new LicenseOrganization();
                     $licenseOrganization->license_id = $license->id;
-                    $licenseOrganization->org_id     = $organizationID;
-                    $licenseOrganization->fd         = new Expression('NOW()');
-                    $licenseOrganization->td         = date("Y-m-d H:i:s", strtotime($post['td'][$serviceID]));
+                    $licenseOrganization->org_id = $organizationID;
+                    $licenseOrganization->status_id = LicenseOrganization::STATUS_ACTIVE;
+                    $licenseOrganization->fd = new Expression('NOW()');
+                    $licenseOrganization->td = date("Y-m-d H:i:s", strtotime($post['td'][$licenseID]));
                     $licenseOrganization->save();
-                    $licenseService                  = new LicenseService();
-                    $licenseService->license_id      = $license->id;
-                    $licenseService->service_id      = $serviceID;
-                    $licenseService->save();
                 }
             }
             Yii::$app->session->setFlash('licenses-added', 'Лицензии добавлены');
             return $this->redirect('/organization/list-organizations-for-licenses');
         }
 
-        return $this->render('add-license', ['services' => $services, 'organizations' => $organizations]);
+        $date = new \DateTime('+10 day');
+        $tenDaysAfter = $date->format('Y-m-d H:i:s');
+        $date = new \DateTime('-10 month');
+        $tenDaysBefore = $date->format('Y-m-d H:i:s');
+
+        return $this->render('add-license', ['licenses' => $licenses, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'tenDaysBefore' => $tenDaysBefore]);
     }
 
 }

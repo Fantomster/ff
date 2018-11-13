@@ -14,6 +14,10 @@ return [
     'timeZone' => 'Asia/Baghdad',
     'charset' => 'utf-8',
     'components' => [
+        'formatter' => [
+            'decimalSeparator' => '.',
+            'thousandSeparator' => '',
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
@@ -222,7 +226,14 @@ return [
             'class' => 'mongosoft\soapclient\Client',
             'url' => 'https://soap-api.e-vo.ru/soap/exite.wsdl',
             'options' => [
-                'cache_wsdl' => WSDL_CACHE_NONE,
+                'cache_wsdl' => WSDL_CACHE_BOTH,
+            ],
+        ],
+        'siteApiKorus' => [
+            'class' => 'mongosoft\soapclient\Client',
+            'url' => 'https://edi-ws.esphere.ru/edi.wsdl',
+            'options' => [
+                'cache_wsdl' => WSDL_CACHE_BOTH,
             ],
         ],
         //Rabbit MQ

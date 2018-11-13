@@ -11,13 +11,14 @@ use api\common\models\iiko\search\iikoDicconstSearch;
 use common\helpers\ModelsCollection;
 use common\models\Role;
 use common\models\User;
+use frontend\modules\clientintegr\controllers\FullmapController;
 use Yii;
 use yii\data\ArrayDataProvider;
 use yii\web\Response;
 
 class SettingsController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
-    /** @var integer Количество строк (и чекбоксов) в таблице показа Списка доступных товаров в IIKO*/
+    /** @var integer Количество строк (и чекбоксов) в таблице показа Списка доступных товаров в IIKO */
     const SELECTED_PRODUCTS_PAGE_SIZE = 20;
     /** @var integer Индекс, заведомо больший количества строк в таблице показа Списка доступных товаров, используется для передачи информации о состоянии флажка "Выделить все" */
     const SELECTED_PRODUCTS_ALL_INDEX = 101;
@@ -28,20 +29,20 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
     public function actionIndex()
     {
         $searchModel = new iikoDicconstSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search([Yii::$app->request->queryParams]);
         $lic = iikoService::getLicense();
         $vi = $lic ? 'index' : '/default/_nolic';
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
-                'searchModel' => $searchModel,
+                'searchModel'  => $searchModel,
                 'dataProvider' => $dataProvider,
-                'lic' => $lic,
+                'lic'          => $lic,
             ]);
         } else {
             return $this->render($vi, [
-                'searchModel' => $searchModel,
+                'searchModel'  => $searchModel,
                 'dataProvider' => $dataProvider,
-                'lic' => $lic,
+                'lic'          => $lic,
             ]);
         }
     }
@@ -112,19 +113,18 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         } else {
             $dicConst = iikoDicconst::findOne(['id' => $pConst->const_id]);
             return $this->render($vi, [
-                'model' => $pConst,
-                'dicConst' => $dicConst,
-                'id' => $id,
-                'sort' => $sort,
-                'productSearch' => $productSearch,
+                'model'              => $pConst,
+                'dicConst'           => $dicConst,
+                'id'                 => $id,
+                'sort'               => $sort,
+                'productSearch'      => $productSearch,
                 'cookingPlaceSearch' => $cookingPlaceSearch,
-                'unitSearch' => $unitSearch,
-                'page' => $page,
+                'unitSearch'         => $unitSearch,
+                'page'               => $page,
             ]);
         }
 
     }
-
 
     private function handleSelectedProducts($post, $org)
     {
@@ -161,7 +161,6 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         return $count;
     }
 
-
     private function handleSelectedStores($post, $org)
     {
         $stores = $post['Stores'];
@@ -183,7 +182,6 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         return iikoSelectedStore::find()->where(['organization_id' => $org])->count();
     }
 
-
     public function actionAjaxAddProductToSession()
     {
         $productID = Yii::$app->request->post('productID');
@@ -193,6 +191,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
 
     /**
      * Render collation table
+     *
      * @var iikoPconst->const_id $const_id
      */
     public function actionCollations()
@@ -206,11 +205,11 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         if (in_array($currentUserRole->role_id, $roles)) {
             $arOrgsObj = $currentUser->getAllOrganization();
             $provider = new ArrayDataProvider([
-                'allModels' => $arOrgsObj,
+                'allModels'  => $arOrgsObj,
                 'pagination' => [
                     'pageSize' => 999,
                 ],
-                'key' => 'id'
+                'key'        => 'id'
             ]);
 
             $arIdsOrgs = [];
@@ -232,21 +231,22 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
 
     /**
      * Создаём сопоставления в дочерних бизнесах
+     *
      * @var iikoPconst->const_id $const_id
      * @return array
      */
     public function actionApplyCollation()
     {
-        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']); // Получаем идентификатор константы бизнеса для сопоставления
         Yii::$app->response->format = Response::FORMAT_JSON;
-        $ids = Yii::$app->request->post('ids');
-        $mainId = Yii::$app->request->post('main');
+        $ids = Yii::$app->request->post('ids'); // получаем дочерние бизнесы
+        $mainId = Yii::$app->request->post('main'); //получаем главный бизнес
         $arModels = [];
 
         $arPconstModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'org' => $ids])->indexBy('org')->all();
-        $arDeletedIds = array_keys($arPconstModels);
+        $arDeletedIds = array_keys($arPconstModels); // получаем массив уже имеющихся записей дочек из iiko_pconst
 
-        foreach ($ids as $id) {
+        foreach ($ids as $id) { // создаём массив для вснх дочерних бизнесов
             $pConst = new iikoPconst();
             $pConst->org = $id;
             $pConst->const_id = $obConstModel->id;
@@ -254,19 +254,29 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             $arModels[] = $pConst;
         }
 
-        if (!empty($arDeletedIds)) {
+        if (!empty($arDeletedIds)) { // если в iiko_pconst уже есть дочки, то удаляем их все.
             $resDel = $this->actionCancelCollation($arDeletedIds);
         }
 
-        if (empty($arModels) && !empty($arDeletedIds)) {
+        if (empty($arModels) && !empty($arDeletedIds)) { // если нужно только удалить и не нужно добавлять дочек, то возвращаем true
             return $resDel;
-        } elseif (empty($arModels) && empty($arDeletedIds)) {
+        } elseif (empty($arModels) && empty($arDeletedIds)) { // если не нужно ни удалять, ни добавлять дочек, то возвращается ошибка
             return ['success' => false, 'error' => 'Невозможно выполнить данную операцию'];
         }
 
         $modelCollection = new ModelsCollection();
 
-        return $modelCollection->saveMultiple($arModels);
+        $multiple = $modelCollection->saveMultiple($arModels); // пытаемся добавить все дочерние бизнесы и вернуть статус выполнения команды
+        if ($multiple['success'] === true) {
+            $add_all = FullmapController::actionAddAllChildsProductsFromMain($mainId);
+            if ($add_all === true) {
+                return ['success' => true, 'error' => ''];
+            } else {
+                return ['success' => false, 'error' => 'Не удалось сохранить продукт дочернего бизнеса.'];
+            }
+        } else {
+            return $multiple;
+        }
     }
 
     /**
@@ -278,27 +288,28 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
      */
     public function actionCancelCollation($ids = null)
     {
-        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+        $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']); // Получаем идентификатор константы бизнеса для сопоставления
         Yii::$app->response->format = Response::FORMAT_JSON;
-        if (is_null($ids)) {
-            $ids = Yii::$app->request->post('ids');
+        if (is_null($ids)) { // если массив удаляемых дочерних бизнесов, переданный параметром, нулевой
+            $ids = Yii::$app->request->post('ids'); //то получаем массив дочерних бизнесов из POST
         }
         try {
-            $pConst = iikoPconst::deleteAll(['const_id' => $obConstModel->id, 'org' => $ids]);
+            $pConst = iikoPconst::deleteAll(['const_id' => $obConstModel->id, 'org' => $ids]); // удалемя все дочерние бизнесы из таблицы iiko_pconst
         } catch (\Throwable $throwable) {
-            return ['success' => false, 'error' => $throwable->getMessage()];
+            return ['success' => false, 'error' => $throwable->getMessage()]; // если не удалось, возвращаем ошибку
         }
 
-        return ['success' => true];
+        return ['success' => true]; // если удалось, возвращаем успешно
     }
 
     /**
      * Вносит изменения в список доступных товаров
+     *
      * @return array
      */
     public function actionChangeSelectedProducts()
     {
-        $izmen = array(); //создаём массив, в который будут записаны изменения (он понадобится, если что-то пойдёт не так и все изменения в таблице-гриде нужно будет "откатить")
+        $izmen = []; //создаём массив, в который будут записаны изменения (он понадобится, если что-то пойдёт не так и все изменения в таблице-гриде нужно будет "откатить")
         $uspeh = 'true'; //задаём изначальное значение переменной, отвечающей за состояние успешности операций сохранения и удаления
         $i = 0; //задаём начальное значение переменной-итератору цикла
         $all = 2; //задаём начальное значение переменной, отвечающей за состояние флажка "Выделить все" (0 - снять выделения всех чекбоксов, 1 - установить выделения всех чекбоксов, 2 - вариант, когда в таблице есть и выделенные и невыделенные чекбоксы)
@@ -329,7 +340,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
                 $izmen[$i]['val'] = 0; //записываем в массив изменений значение действия, которое предстоит сделать с чекбоксом (0 - снять выделение, 1 - выделить)
             }
         }
-        if (count($izmen) == SELECTED_PRODUCTS_PAGE_SIZE) { //если количество чекбоксов равно количеству строк в таблице-гриде, то есть изменены все чекбоксы на странице, то
+        if (count($izmen) == self::SELECTED_PRODUCTS_PAGE_SIZE) { //если количество чекбоксов равно количеству строк в таблице-гриде, то есть изменены все чекбоксы на странице, то
             if ((!in_array(0, $izmen)) or (!in_array(1, $izmen))) { //если все чекбоксы содержат одинаковое значение (или все выделены, или все "сняты"),
                 (in_array(0, $izmen)) ? $all = 0 : $all = 1; //узнаём значение всех чекбоксов и записываем его в переменную, отвечающую за состояние флажка "Выделить все"
             }
@@ -340,8 +351,8 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
             $pConst->value = $count;
             $pConst->save(); //и сохраняем это значение в таблице iiko_pconst
         }
-        $izmen[SELECTED_PRODUCTS_ALL_INDEX]['id'] = $uspeh; //записываем в массив изменений значение успешности операций добавления и удаления товаров
-        $izmen[SELECTED_PRODUCTS_ALL_INDEX]['val'] = $all; //записываем в массив изменений значение переменной, отвечающей за состояние флажка "Выделить все"
+        $izmen[self::SELECTED_PRODUCTS_ALL_INDEX]['id'] = $uspeh; //записываем в массив изменений значение успешности операций добавления и удаления товаров
+        $izmen[self::SELECTED_PRODUCTS_ALL_INDEX]['val'] = $all; //записываем в массив изменений значение переменной, отвечающей за состояние флажка "Выделить все"
         $izmen = json_encode($izmen); //кодируем массив изменений в JSON
         return $izmen;
     }

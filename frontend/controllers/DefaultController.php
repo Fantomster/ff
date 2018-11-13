@@ -45,7 +45,7 @@ class DefaultController extends Controller {
             $order_id = Yii::$app->request->get("id");
             $order = \common\models\Order::findOne(['id' => $order_id]);
             $user = \common\models\User::findOne(['access_token' => $token]);
-            $organization = isset($order) ? $order->getOrganizationByUser($user) : null;
+            $organization = (isset($order) && isset($user)) ? $order->getOrganizationByUser($user) : null;
             if ($user && isset($order) && isset($organization)) {
                 Yii::$app->user->logout();
                 Yii::$app->user->login($user, 0);

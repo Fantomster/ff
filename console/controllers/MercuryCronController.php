@@ -74,28 +74,28 @@ class MercuryCronController extends Controller
     public function actionTest()
     {
         $org_id = 0;
-        echo "START" . PHP_EOL;
-        echo "GET Unit" . PHP_EOL;
-        VetisUnit::getUpdateData($org_id);
-        echo "GET Purpose" . PHP_EOL;
-        VetisPurpose::getUpdateData($org_id);
-
-        echo "GET Country" . PHP_EOL;
-        VetisCountry::getUpdateData($org_id);
-
-        echo "GET RussianEnterprise" . PHP_EOL;
-        VetisRussianEnterprise::getUpdateData($org_id);
-        echo "GET ForeignEnterprise" . PHP_EOL;
-        VetisForeignEnterprise::getUpdateData($org_id);
+//        echo "START" . PHP_EOL;
+//        echo "GET Unit" . PHP_EOL;
+//        VetisUnit::getUpdateData($org_id);
+//        echo "GET Purpose" . PHP_EOL;
+//        VetisPurpose::getUpdateData($org_id);
+//
+//        echo "GET Country" . PHP_EOL;
+//        VetisCountry::getUpdateData($org_id);
+//
+//        echo "GET RussianEnterprise" . PHP_EOL;
+//        VetisRussianEnterprise::getUpdateData($org_id);
+//        echo "GET ForeignEnterprise" . PHP_EOL;
+//        VetisForeignEnterprise::getUpdateData($org_id);
         echo "GET BusinessEntity" . PHP_EOL;
         VetisBusinessEntity::getUpdateData($org_id);
 
-        echo "GET ProductByType" . PHP_EOL;
-        VetisProductByType::getUpdateData($org_id);
-        echo "GET ProductItem" . PHP_EOL;
-        VetisProductItem::getUpdateData($org_id);
-        echo "GET SubproductByProduct" . PHP_EOL;
-        VetisSubproductByProduct::getUpdateData($org_id);
+//        echo "GET ProductByType" . PHP_EOL;
+//        VetisProductByType::getUpdateData($org_id);
+//        echo "GET ProductItem" . PHP_EOL;
+//        VetisProductItem::getUpdateData($org_id);
+//        echo "GET SubproductByProduct" . PHP_EOL;
+//        VetisSubproductByProduct::getUpdateData($org_id);
         echo "FINISH" . PHP_EOL;
     }
 

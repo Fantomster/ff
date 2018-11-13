@@ -7,18 +7,20 @@ use yii\web\BadRequestHttpException;
 
 /**
  * Class SystemWebApi
- * @package api_web\classes
+ *
+ * @package   api_web\classes
  * @createdBy Basil A Konakov
  * @createdAt 2018-09-03
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
+ * @author    Mixcart
+ * @module    WEB-API
+ * @version   2.0
  */
 class SystemWebApi extends WebApi
 {
 
     /**
      * Параметры работы сервера со временем
+     *
      * @return array
      * @throws BadRequestHttpException
      */
@@ -26,12 +28,12 @@ class SystemWebApi extends WebApi
     {
         $res = [
             'date_default_timezone_get()' => date_default_timezone_get(),
-            'time()' => time(),
-            'microtime(1)' => microtime(1),
-            'localtime()' => localtime(),
-            'getdate()' => getdate(),
-            'gmdate("Y-m-d H:i:s")' => gmdate("Y-m-d H:i:s"),
-            'date("Y-m-d H:i:s")' => date("Y-m-d H:i:s"),
+            'time()'                      => time(),
+            'microtime(1)'                => microtime(1),
+            'localtime()'                 => localtime(),
+            'getdate()'                   => getdate(),
+            'gmdate("Y-m-d H:i:s")'       => gmdate("Y-m-d H:i:s"),
+            'date("Y-m-d H:i:s")'         => date("Y-m-d H:i:s"),
         ];
 
         foreach ($res as $v) {
@@ -41,6 +43,5 @@ class SystemWebApi extends WebApi
         }
         exit;
     }
-
 
 }

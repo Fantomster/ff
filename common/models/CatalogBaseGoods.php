@@ -13,39 +13,38 @@ use yii\helpers\ArrayHelper;
 /**
  * This is the model class for table "catalog_base_goods".
  *
- * @property integer $id
- * @property integer $cat_id
- * @property integer $category_id
- * @property integer $supp_org_id
- * @property string $article
- * @property string $product
- * @property number $units
- * @property string $price
- * @property integer $status
- * @property integer $market_place
- * @property integer $deleted
- * @property string $created_at
- * @property string $updated_at
- * @property string $image
- * @property string $imageUrl
- * @property string $miniImageUrl
- * @property string $brand
- * @property string $region
- * @property string $weight
- * @property file $importCatalog
- * @property string $note
- * @property string $ed
- * @property integer $mp_show_price
- * @property string $edi_supplier_article
- * @property string $ssid
- * 
- * @property MpCountry $mpRegion
- * @property Organization $vendor
- * @property MpCategory $category
- * @property MpCategory $mainCategory
- * @property RatingStars $ratingStars
+ * @property integer       $id
+ * @property integer       $cat_id
+ * @property integer       $category_id
+ * @property integer       $supp_org_id
+ * @property string        $article
+ * @property string        $product
+ * @property number        $units
+ * @property string        $price
+ * @property integer       $status
+ * @property integer       $market_place
+ * @property integer       $deleted
+ * @property string        $created_at
+ * @property string        $updated_at
+ * @property string        $image
+ * @property string        $imageUrl
+ * @property string        $miniImageUrl
+ * @property string        $brand
+ * @property string        $region
+ * @property string        $weight
+ * @property file          $importCatalog
+ * @property string        $note
+ * @property string        $ed
+ * @property integer       $mp_show_price
+ * @property string        $edi_supplier_article
+ * @property string        $ssid
+ * @property MpCountry     $mpRegion
+ * @property Organization  $vendor
+ * @property MpCategory    $category
+ * @property MpCategory    $mainCategory
+ * @property RatingStars   $ratingStars
  * @property RatingPercent $ratingPercent
- * @property Catalog $catalog
+ * @property Catalog       $catalog
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord
 {
@@ -79,23 +78,23 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
     public function behaviors()
     {
         return ArrayHelper::merge(parent::behaviors(), [
-                    [
-                        'class' => ImageUploadBehavior::className(),
-                        'attribute' => 'image',
-                        'scenarios' => ['default', 'marketPlace'],
-                        'path' => '@app/web/upload/temp/',
-                        'url' => '/upload/temp/',
-                        'thumbs' => [
-                            'image' => ['width' => 432, 'height' => 243, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
-                            'mini' => ['width' => 96, 'height' => 54, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
-                        ],
-                    ],
-                    'timestamp' => [
-                        'class' => 'yii\behaviors\TimestampBehavior',
-                        'value' => function ($event) {
-                            return gmdate("Y-m-d H:i:s");
-                        },
-                    ],
+            [
+                'class'     => ImageUploadBehavior::className(),
+                'attribute' => 'image',
+                'scenarios' => ['default', 'marketPlace'],
+                'path'      => '@app/web/upload/temp/',
+                'url'       => '/upload/temp/',
+                'thumbs'    => [
+                    'image' => ['width' => 432, 'height' => 243, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
+                    'mini'  => ['width' => 96, 'height' => 54, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
+                ],
+            ],
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
         ]);
     }
 
@@ -131,17 +130,17 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             [['price'], 'number', 'min' => 0.00],
             [['barcode'], 'integer', 'min' => 1000000000000, 'max' => 9999999999999],
             [['sub1', 'sub2'], 'required',
-                'when' => function($model) {
+                'when'       => function ($model) {
                     return $model->market_place == self::MARKETPLACE_ON;
                 },
                 'whenClient' => 'function(attribute, value) {
                     return ($("#catalogbasegoods-market_place").val() == ' . self::MARKETPLACE_ON . ');
                 }',
-                'message' => Yii::t('app', 'common.models.catalog_base.category', ['ru' => 'Укажите категорию товара']),
-                'on' => 'marketPlace',
+                'message'    => Yii::t('app', 'common.models.catalog_base.category', ['ru' => 'Укажите категорию товара']),
+                'on'         => 'marketPlace',
             ],
             [['category_id'], 'required',
-                'when' => function($model) {
+                'when'   => function ($model) {
                     return $model->market_place == self::MARKETPLACE_ON;
                 },
                 'except' => 'marketPlace',
@@ -165,28 +164,28 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'cat_id' => Yii::t('app', 'common.models.catalog', ['ru' => 'Каталог']),
-            'category_id' => Yii::t('app', 'common.models.category', ['ru' => 'Категория']),
-            'article' => Yii::t('app', 'common.models.art', ['ru' => 'Артикул']),
-            'product' => Yii::t('app', 'common.models.name', ['ru' => 'Название']),
-            'supp_org_id' => Yii::t('app', 'common.models.vendors_id', ['ru' => 'id поставщика']),
-            'supplier' => Yii::t('app', 'common.models.vendor_two', ['ru' => 'Поставщик']),
-            'units' => Yii::t('app', 'common.models.multiplicity', ['ru' => 'Кратность']),
-            'price' => Yii::t('app', 'common.models.price', ['ru' => 'Цена']),
+            'id'             => 'ID',
+            'cat_id'         => Yii::t('app', 'common.models.catalog', ['ru' => 'Каталог']),
+            'category_id'    => Yii::t('app', 'common.models.category', ['ru' => 'Категория']),
+            'article'        => Yii::t('app', 'common.models.art', ['ru' => 'Артикул']),
+            'product'        => Yii::t('app', 'common.models.name', ['ru' => 'Название']),
+            'supp_org_id'    => Yii::t('app', 'common.models.vendors_id', ['ru' => 'id поставщика']),
+            'supplier'       => Yii::t('app', 'common.models.vendor_two', ['ru' => 'Поставщик']),
+            'units'          => Yii::t('app', 'common.models.multiplicity', ['ru' => 'Кратность']),
+            'price'          => Yii::t('app', 'common.models.price', ['ru' => 'Цена']),
             'discount_price' => Yii::t('app', 'common.models.discount_price', ['ru' => 'Цена со скидкой']),
-            'status' => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
-            'market_place' => Yii::t('app', 'common.models.settled_on_f_market', ['ru' => 'Размещен на F-MARKET']),
-            'deleted' => Yii::t('app', 'Deleted'),
-            'note' => Yii::t('app', 'common.models.comment', ['ru' => 'Комментарий']),
-            'ed' => Yii::t('app', 'common.models.measure', ['ru' => 'Единица измерения']),
-            'image' => Yii::t('app', 'common.models.products_image', ['ru' => 'Картинка продукта']),
-            'brand' => Yii::t('app', 'common.models.vendor', ['ru' => 'Производитель']),
-            'region' => Yii::t('app', 'common.models.country_vendor', ['ru' => 'Страна производитель']),
-            'weight' => Yii::t('app', 'common.models.weight', ['ru' => 'Вес']),
-            'mp_show_price' => Yii::t('app', 'common.models.show_price_in_f_market', ['ru' => 'Показывать цену в F-MARKET']),
-            'rating' => Yii::t('app', 'common.models.rating', ['ru' => 'Рейтинг'])
-                //'importCatalog'=>'Files'
+            'status'         => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'market_place'   => Yii::t('app', 'common.models.settled_on_f_market', ['ru' => 'Размещен на F-MARKET']),
+            'deleted'        => Yii::t('app', 'Deleted'),
+            'note'           => Yii::t('app', 'common.models.comment', ['ru' => 'Комментарий']),
+            'ed'             => Yii::t('app', 'common.models.measure', ['ru' => 'Единица измерения']),
+            'image'          => Yii::t('app', 'common.models.products_image', ['ru' => 'Картинка продукта']),
+            'brand'          => Yii::t('app', 'common.models.vendor', ['ru' => 'Производитель']),
+            'region'         => Yii::t('app', 'common.models.country_vendor', ['ru' => 'Страна производитель']),
+            'weight'         => Yii::t('app', 'common.models.weight', ['ru' => 'Вес']),
+            'mp_show_price'  => Yii::t('app', 'common.models.show_price_in_f_market', ['ru' => 'Показывать цену в F-MARKET']),
+            'rating'         => Yii::t('app', 'common.models.rating', ['ru' => 'Рейтинг'])
+            //'importCatalog'=>'Files'
         ];
     }
 
@@ -226,7 +225,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
         }
 
         $query->orFilterWhere(['like', 'article', $this->searchString])
-                ->orFilterWhere(['like', 'product', $this->searchString]);
+            ->orFilterWhere(['like', 'product', $this->searchString]);
 
         return $dataProvider;
     }
@@ -347,15 +346,15 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
     public function getDataForExcelExport(Catalog $catalog, string $sort, bool $isBase = false): ActiveDataProvider
     {
         $q = self::find()
-                ->select([
-                    '*',
-                    "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
-                    "`article` REGEXP '^-?[0-9]+$' as i",
-                    "(`article` + 0) AS c_article_1",
-                    "`article` AS c_article",
-                    "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
-                ])
-                ->where(['deleted' => 0]);
+            ->select([
+                '*',
+                "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
+                "`article` REGEXP '^-?[0-9]+$' as i",
+                "(`article` + 0) AS c_article_1",
+                "`article` AS c_article",
+                "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+            ])
+            ->where(['deleted' => 0]);
         if ($isBase) {
             $q->andWhere(['cat_id' => $catalog->id]);
         } else {
@@ -363,7 +362,6 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
 
             $q->andWhere(['catalog_goods.cat_id' => $catalog->id]);
         }
-
 
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
             $searchString = trim(\Yii::$app->request->get('searchString'));
@@ -373,23 +371,23 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
 
         if ($sort == 'product') {
             $q->orderBy('`alf_cyr` DESC, `product` ASC');
-        } else if ($sort == '-product') {
+        } elseif ($sort == '-product') {
             $q->orderBy('`alf_cyr` ASC, `product` DESC');
         }
 
         if ($sort == 'article') {
             $q->orderBy('len DESC, i DESC, (article + 0), article');
-        } else if ($sort == '-article') {
+        } elseif ($sort == '-article') {
             $q->orderBy('len DESC, i ASC, (article + 0) DESC, article DESC');
         }
 
         $dataProvider = new \yii\data\ActiveDataProvider([
-            'query' => $q,
+            'query'      => $q,
             'pagination' => [
                 'pageSize' => 20,
             ],
-            'sort' => [
-                'attributes' => [
+            'sort'       => [
+                'attributes'   => [
                     'product',
                     'price',
                     'article',
@@ -404,15 +402,34 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
                     'len'
                 ],
                 'defaultOrder' => [
-                    'len' => SORT_DESC,
-                    'i' => SORT_DESC,
+                    'len'         => SORT_DESC,
+                    'i'           => SORT_DESC,
                     'c_article_1' => SORT_ASC,
-                    'c_article' => SORT_ASC
+                    'c_article'   => SORT_ASC
                 ]
             ],
         ]);
 
         return $dataProvider;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getSuppById($id)
+    {
+        $result = null;
+        try {
+            $vrem = CatalogBaseGoods::find()->where(["id" => $id])->one();
+            $result = $vrem['supp_org_id'];
+            return $result;
+        } catch (InvalidParamException $e) {
+            \yii::error('Cant get value, invalid parameter ' . $id);
+        }
+        if (is_null($result)) {
+            throw new BadRequestHttpException($e->getMessage());
+        }
+
     }
 
 }

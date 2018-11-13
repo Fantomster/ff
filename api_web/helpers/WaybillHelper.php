@@ -8,159 +8,149 @@
 
 namespace api_web\helpers;
 
+use api_web\components\Registry;
+use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use api_web\modules\integration\classes\SyncServiceFactory;
 use common\helpers\DBNameHelper;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
+use common\models\Journal;
 use common\models\licenses\License;
-use common\models\licenses\LicenseOrganization;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OuterAgent;
-use common\models\OuterStore;
+use common\models\OuterProduct;
 use common\models\Waybill;
 use common\models\WaybillContent;
-use Exception;
+use yii\db\Query;
+use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
 
 /**
  * Waybills class for generate\update\delete\ actions
  * */
-class WaybillHelper
+class WaybillHelper extends WebApi
 {
-    const RK_SERVICE_ID = 1;
-    const IIKO_SERVICE_ID = 2;
-    /**@var int const for mercuriy service id in all_service table */
-    const MERC_SERVICE_ID = 4;
-    /**@var int const for EDI service id in all_service table */
-    const EDI_SERVICE_ID = 6;
-    const WAYBILL_COMPARED = 'compared';
-    const WAYBILL_FORMED = 'formed';
-    const WAYBILL_ERROR = 'error';
-    const WAYBILL_RESET = 'reset';
-    const WAYBILL_UNLOADED = 'unloaded';
-    const WAYBILL_UNLOADING = 'unloading';
-
-    /**@var array $statuses */
-    static $statuses = [
-        self::WAYBILL_COMPARED  => 1,
-        self::WAYBILL_FORMED    => 2,
-        self::WAYBILL_ERROR     => 3,
-        self::WAYBILL_RESET     => 4,
-        self::WAYBILL_UNLOADED  => 5,
-        self::WAYBILL_UNLOADING => 6,
-    ];
+    /**
+     * @var OuterProductMapHelper
+     */
+    private $helper;
 
     /**
-     * Create waybill and waybill_content and binding VSD
-     *
-     * @param string $uuid VSD uuid
-     * @return boolean
-     * */
-    public function createWaybillFromVsd($uuid)
+     * @var array настройки огранизации по всем сервисам
+     */
+    public $settings;
+
+    /**
+     * WaybillHelper constructor.
+     */
+    public function __construct()
     {
-        $transaction = \Yii::$app->db_api->beginTransaction();
-        $orgId = (\Yii::$app->user->identity)->organization_id;
-        $modelWaybill = new Waybill();
-        $modelWaybill->acquirer_id = $orgId;
-        $modelWaybill->service_id = self::MERC_SERVICE_ID;
-
-        $modelWaybillContent = new WaybillContent();
-        $modelWaybillContent->merc_uuid = $uuid;
-        try {
-            $modelWaybill->save();
-            $modelWaybillContent->waybill_id = $modelWaybill->id;
-            $modelWaybillContent->save();
-            $transaction->commit();
-        } catch (\Throwable $t) {
-            $transaction->rollBack();
-            \Yii::error($t->getMessage(), __METHOD__);
-            return false;
-        }
-
-        return true;
+        $this->helper = new OuterProductMapHelper();
+        parent::__construct();
     }
-
 
     /**
      * @param      $order_id
-     * @param null $arOrderContentForCreate
+     * @param null $arOrderContentForCreate С EDI может приходить несколькими файлами orderContent для одного заказа
      * @param null $supplierOrgId
      * @throws \Exception
-     * @return array|bool
+     * @return mixed
      */
-    public function createWaybill($order_id, $arOrderContentForCreate = null, $supplierOrgId = null): array
+    public function createWaybill($order_id, $arOrderContentForCreate = null, $supplierOrgId = null, $arExcludedService = [])
     {
         $order = Order::findOne($order_id);
-        if (!$order){
+        if (!$order) {
             throw new BadRequestHttpException('Not found order with id' . $order_id);
         }
         if (is_null($arOrderContentForCreate)) {
             $arOrderContentForCreate = $order->orderContent;
         }
-        $settingsAuto = true;
-        if ($settingsAuto) {
+        if (!$arOrderContentForCreate) {
+            throw new BadRequestHttpException('You dont have order content');
+        }
+        $licenses = License::getAllLicense($order->client_id, Registry::$waybill_services, true);
+        if (!$licenses) {
+            throw new BadRequestHttpException('You dont have licenses for services');
+        }
+
+        $waybillModels = [];
+        foreach ($licenses as $license) {
+            $serviceId = $license['service_id'];
+            if (!empty($arExcludedService) && in_array($serviceId, $arExcludedService)) {
+                continue;
+            }
+
             $waybillContents = WaybillContent::find()->andWhere(['order_content_id' => array_keys
             ($order->orderContent)])->indexBy('order_content_id')->all();
             $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
 
-            if ($notInWaybillContent) {
-                $defaultAgent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id]);
-                if ($defaultAgent && $defaultAgent->store_id) {
-                    $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
-                        $defaultAgent->store_id, $defaultAgent->service_id);
-                    return [$waybillId];
+            if (empty($notInWaybillContent)) {
+                throw new BadRequestHttpException('You dont have order content for waybills, order_id = ' . $order_id);
+            }
 
-                }
+            try {
+                $rows = $this->helper->getMapForOrder($order, $serviceId);
+            } catch (\Throwable $t) {
+                \Yii::error($t->getMessage(), 'waybill_create');
+                $this->writeInJournal($t->getMessage(), $serviceId, 'error');
+            }
 
-                $hasDefaultStore = 1234;
-                $hasDefaultServiceID = 1234;
-                if ($hasDefaultStore) {
-                    $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id,
-                        $hasDefaultStore, $hasDefaultServiceID);
-                    return [$waybillId];
-                }
-                $waybillIds = [];
-                $integrations = ['iiko' => 2];
-                foreach ($integrations as $integration) {
-                    $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
-                    $stories = OrderContent::find()->select([
-                        'm.store_rid as store_id',
-                        'GROUP_CONCAT(order_content.product_id) as prd_ids'])
-                        ->leftJoin('`' . $dbName . '`.all_map m', 'order_content.product_id = m.product_id AND m.service_id = ' . $integration . ' AND m.org_id = ' . $order->client_id)
-                        ->where(['order_content.order_id' => $order->id])
-                        ->andWhere(['not', ['m.store_rid' => null]])
-                        ->groupBy('m.store_rid')->indexBy('m.store_rid')->all();
-                    $orderContForStore = [];
-                    if (empty($waybillContents)) {
-                        if (!empty($stories)) {
-                            foreach ($stories as $store) {
-                                $store_uuid = (OuterStore::findOne($store['store_rid']))->outer_uid;
-                                $prods = explode(',', $store['prd_ids']);
+            if (empty($rows)) {
+                throw new BadRequestHttpException('You dont have mapped products');
+            }
 
-                                foreach ($prods as $prod) {
-                                    /**@var OrderContent $ordCont */
-                                    foreach ($notInWaybillContent as $ordCont) {
-                                        if ($ordCont->product_id == $prod) {
-                                            $orderContForStore[$ordCont->id] = $ordCont;
-                                        }
-                                    }
-                                }
-                                $waybillIds[] = $this->createWaybillAndContent($orderContForStore, $order->client_id,
-                                    $store_uuid, $store_uuid);
-                            }
-                        }
-                    }
+            //Склад по умолчанию, у контрагента
+            $defaultStoreAgent = null;
+            if ($supplierOrgId) {
+                $agent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
+                if ($agent && $agent->store_id) {
+                    $defaultStoreAgent = $agent->store_id;
                 }
-                $notInWaybillContent = array_diff_key($notInWaybillContent, $orderContForStore);
-                if (!empty($notInWaybillContent)) {
-                    $waybillId = $this->createWaybillAndContent($notInWaybillContent, $order->client_id);
-                    $waybillIds[] = $waybillId;
-                    return $waybillIds;
+            } else {
+                $agent = OuterAgent::findOne(['vendor_id' => $order->vendor_id, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
+            }
+            //Склад по умолчанию в настройках
+            $defaultStoreConfig = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id, ['defStore']);
+            //Счетчики для выброса Exception
+            $mapCount = 0;
+            $skipCount = 0;
+            $skipByStore = 0;
+            // Remap for 1 store = 1 waybill
+            $arMappedForStores = [];
+            foreach ($rows as $row) {
+                $arMappedForStores[$row['outer_store_id']][$row['product_id']] = $row;
+            }
+            foreach ($arMappedForStores as $storeId => $storeProducts) {
+                //Пытаемся найти хоть какой то склад
+                $storeId = $storeId ?? $defaultStoreAgent ?? $defaultStoreConfig ?? null;
+                if (!$storeId) {
+                    $skipByStore++;
+                    continue;
+                }
+                $mapCount++;
+                $arOuterMappedProducts = $this->prepareStoreProducts($storeProducts, $notInWaybillContent);
+                if (!empty($arOuterMappedProducts)) {
+                    $waybillModels[] = $this->createWaybillAndContent($arOuterMappedProducts, $order->client_id,
+                        $storeId, $serviceId, $agent);
+                } else {
+                    $skipCount++;
                 }
             }
+
+            // Если количество складов = числу пропусков, бросаем throw
+            if (count($arMappedForStores) === $skipByStore) {
+                throw new BadRequestHttpException('waybill.no_store_for_create_waybill');
+            }
+
+            // Если количество маппингов = числу пропусков, бросаем throw
+            if ($mapCount === $skipCount) {
+                throw new BadRequestHttpException('waybill.no_map_for_create_waybill');
+            }
         }
-        return false;
+
+        return $waybillModels;
     }
 
     /**
@@ -171,69 +161,65 @@ class WaybillHelper
     {
         $model = new Waybill();
         $model->acquirer_id = $orgId;
-        $model->service_id = WaybillHelper::EDI_SERVICE_ID;
-        $model->bill_status_id = self::$statuses[self::WAYBILL_FORMED]; //TODO: bill_status_id ???
-        $model->readytoexport = 0;
-        $model->is_deleted = 0;
-        $datetime = new \DateTime();
-        $model->doc_date = $datetime->format('Y-m-d H:i:s');
-        $model->created_at = $datetime->format('Y-m-d H:i:s');
-        $model->exported_at = $datetime->format('Y-m-d H:i:s');
-
+        $model->doc_date = \gmdate('Y-m-d H:i:s');
         return $model;
     }
 
     /**
-     * @param      $orderContent
-     * @param      $orgId
-     * @param null $outerStoreUuid
-     * @param null $serviceId
-     * @return bool|int
+     * @param            $arOuterMappedProducts
+     * @param            $orgId
+     * @param null       $outerStoreId
+     * @param null       $serviceId
+     * @param OuterAgent $agent
+     * @return Waybill
+     * @throws \Exception
      */
-    private function createWaybillAndContent($orderContent, $orgId, $outerStoreUuid = null, $serviceId = null)
+    private function createWaybillAndContent($arOuterMappedProducts, $orgId, $outerStoreId, $serviceId, $agent)
     {
         $model = $this->buildWaybill($orgId);
-        $model->outer_store_uuid = $outerStoreUuid;
+        $model->outer_store_id = $outerStoreId;
+        $model->outer_agent_id = $agent->id ?? null;
         $model->service_id = $serviceId;
-        $tmp_ed_num = reset($orderContent)->edi_number;
-        $existWaybill = Waybill::find()->where(['like', 'edi_number', $tmp_ed_num])->orderBy(['edi_number' => 'desc'])->limit(1);
-        if ($existWaybill) {
-            if (strpos('-', $existWaybill->edi_number)) {
-                $ed_num = explode('-', $existWaybill->edi_number);
-                $ed_num[1] = (int)$ed_num[1] + 1;
-                $ed_num = implode('-', $ed_num);
-            } else {
-                $ed_num = $existWaybill->edi_number . '-1';
+        $model->status_id = Registry::WAYBILL_COMPARED;
+        //для каждого может быть разный
+        $model->outer_number_code = $this->generateEdiNumber($arOuterMappedProducts, $serviceId);
+
+        /** @var Transaction $transaction */
+        $transaction = \Yii::$app->db_api->beginTransaction();
+        try {
+            if (!$model->save()) {
+                throw new ValidationException($model->getErrors());
             }
-        } else {
-            $ed_num = $tmp_ed_num;
-        }
-        $model->edi_number = $ed_num;
-        if (!$model->save()) {
-            \yii::error('Error during saving waybill' . print_r($model->getErrors(), true));
-            return false;
-        }
 
-        foreach ($orderContent as $ordCont) {
-            $price = $ordCont->price;
-            $quantity = $ordCont->quantity;
-            $taxRate = $ordCont->vat_product;
-            $priceWithVat = (float)($price + ($price * ($taxRate / 100)));
+            foreach ($arOuterMappedProducts as $mappedProduct) {
+                /**@var OrderContent $ordCont */
+                $ordCont = $mappedProduct['orderContent'];
+                $price = $ordCont->price;
+                $quantity = $ordCont->quantity;
+                $taxRate = $mappedProduct['vat'];
+                $priceWithVat = (float)($price + ($price * ($taxRate / 100)));
 
-            $modelWaybillContent = new WaybillContent();
-            $modelWaybillContent->order_content_id = $ordCont->id;
-            $modelWaybillContent->waybill_id = $model->id;
-            $modelWaybillContent->merc_uuid = $ordCont->merc_uuid;
-            $modelWaybillContent->product_outer_id = $ordCont->product_id;
-            $modelWaybillContent->quantity_waybill = $quantity;
-            $modelWaybillContent->vat_waybill = $taxRate;
-            $modelWaybillContent->sum_with_vat = $quantity * $priceWithVat;
-            $modelWaybillContent->sum_without_vat = $quantity * $price;
-            $modelWaybillContent->price_with_vat = $priceWithVat;
-            $modelWaybillContent->price_without_vat = $price;
-            $modelWaybillContent->save();
+                $modelWaybillContent = new WaybillContent();
+                $modelWaybillContent->order_content_id = $ordCont->id;
+                $modelWaybillContent->waybill_id = $model->id;
+                $modelWaybillContent->outer_product_id = $mappedProduct['outer_product_id'];
+                $modelWaybillContent->quantity_waybill = $quantity;
+                $modelWaybillContent->vat_waybill = $taxRate;
+                $modelWaybillContent->sum_with_vat = $quantity * $priceWithVat;
+                $modelWaybillContent->sum_without_vat = $quantity * $price;
+                $modelWaybillContent->price_with_vat = $priceWithVat;
+                $modelWaybillContent->price_without_vat = $price;
+                $modelWaybillContent->koef = $mappedProduct['coefficient'];
+                if (!$modelWaybillContent->save()) {
+                    throw new ValidationException($modelWaybillContent->getErrors());
+                }
+            }
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            $this->writeInJournal($e->getMessage(), $serviceId, 'error');
         }
-        return $model->id;
+        return $model;
     }
 
     /**
@@ -244,7 +230,10 @@ class WaybillHelper
      * */
     public function checkWaybillForVsdUuid($uuid)
     {
-        return WaybillContent::find()->where(['merc_uuid' => $uuid])->exists();
+        return WaybillContent::find()
+            ->leftJoin(DBNameHelper::getMainName() . '.`' . OrderContent::tableName() . '` as oc', 'oc.id = order_content_id')
+            ->where(['oc.merc_uuid' => $uuid])
+            ->exists();
     }
 
     /**
@@ -252,7 +241,8 @@ class WaybillHelper
      * @return array
      * @throws \Exception
      */
-    public function createWaybillForApi($request){
+    public function createWaybillForApi($request)
+    {
         if (empty($request['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');
         }
@@ -266,54 +256,323 @@ class WaybillHelper
     /**
      * @param $request
      * @return array
-     * @throws \yii\web\BadRequestHttpException
+     * @throws BadRequestHttpException
+     * @throws \Throwable
      */
-    public function moveOrderContentToWaybill($request){
-        if (!isset($request['waybill_id']) && !isset($request['order_content_id'])){
-            throw new BadRequestHttpException('empty_param|waybill_id|order_content_id');
+    public function moveOrderContentToWaybill($request)
+    {
+        if (!isset($request['waybill_id'])) {
+            throw new BadRequestHttpException('empty_param|waybill_id');
         }
+
+        if (!isset($request['order_content_id'])) {
+            throw new BadRequestHttpException('empty_param|order_content_id');
+        }
+
         $waybill = Waybill::findOne([
-            'id' => $request['waybill_id'],
-            'bill_status_id' => [
-                self::$statuses[self::WAYBILL_COMPARED],
-                self::$statuses[self::WAYBILL_ERROR],
-                self::$statuses[self::WAYBILL_FORMED],
-            ]]);
-        if (!$waybill){
+            'id'        => (int)$request['waybill_id'],
+            'status_id' => [
+                Registry::WAYBILL_COMPARED,
+                Registry::WAYBILL_ERROR,
+                Registry::WAYBILL_FORMED,
+            ]
+        ]);
+        if (!$waybill) {
             throw new BadRequestHttpException('waybill cannot adding waybill_content with id ' . $request['waybill_id']);
         }
+
         $orderContent = OrderContent::findOne($request['order_content_id']);
-        if (!$orderContent){
+        if (!$orderContent) {
             throw new BadRequestHttpException('OrderContent dont exists with id ' . $request['order_content_id']);
         }
-        $taxRate = $orderContent->vat_product ?? null;
+
+        $this->checkOrderForWaybillContent($waybill, $orderContent);
+
+        $outerProduct = null;
+        $outerProductMap = $this->helper->getMapForOrder($orderContent->order, $waybill->service_id, $orderContent->product_id);
+        if (!empty($outerProductMap)) {
+            $outerProductMap = (object)current($outerProductMap);
+            $outerProduct = OuterProduct::findOne($outerProductMap->outer_product_id);
+        }
+
+        $coefficient = $outerProductMap->coefficient ?? 1;
         $quantity = $orderContent->quantity;
         $price = $orderContent->price;
-        if ($taxRate){
+
+        $taxRate = $outerProductMap->vat ?? $orderContent->vat_product ?? 0;
+        if ($taxRate != 0) {
             $priceWithVat = $price + ($price * ($taxRate / 100));
         }
 
         try {
             $waybillContent = new WaybillContent();
-            $waybillContent->waybill_id = $request['waybill_id'];
+            $waybillContent->waybill_id = $waybill->id;
             $waybillContent->order_content_id = $orderContent->id;
-            $waybillContent->product_outer_id = $orderContent->product_id;
+            $waybillContent->outer_product_id = empty($outerProduct) ? null : $outerProduct->id;
+            $waybillContent->outer_unit_id = empty($outerProduct) ? null : $outerProduct->outer_unit_id;
             $waybillContent->quantity_waybill = (float)$quantity;
             $waybillContent->vat_waybill = $taxRate;
-            $waybillContent->merc_uuid = $orderContent->merc_uuid;
+            $waybillContent->koef = $coefficient;
             $waybillContent->sum_with_vat = (int)(isset($priceWithVat) ? $priceWithVat * $quantity * 100 : null);
             $waybillContent->sum_without_vat = (int)($price * $quantity * 100);
             $waybillContent->price_with_vat = (int)(isset($priceWithVat) ? $priceWithVat * 100 : null);
             $waybillContent->price_without_vat = (int)($price * 100);
-            $waybillContent->save();
             if (!$waybillContent->validate() || !$waybillContent->save()) {
-                throw new ValidationException($waybillContent->getErrorSummary(true));
+                throw new ValidationException($waybillContent->getFirstErrors());
             }
-        } catch (\Throwable $t){
+            //Если эта позиция не готова к выгрузке, меняем статус накладной
+            if ($waybillContent->readyToExport === false) {
+                $waybill->status_id = Registry::WAYBILL_FORMED;
+                if (!$waybill->save()) {
+                    throw new ValidationException($waybill->getFirstErrors());
+                }
+            }
+        } catch (\Throwable $t) {
             \Yii::error($t->getMessage());
-            return ['result' => $t->getMessage()];
+            throw $t;
         }
 
         return ['result' => true];
+    }
+
+    /**
+     * Проверка на правильность добавления позиции заказа к накладной
+     * Нельзя добавить к накладной, имеющей позиции из одного заказа, позиции из другой заказа
+     * Так же нельзя добавить позицию заказа, уже имеющую позицию в накладной
+     *
+     * @param Waybill      $waybill
+     * @param OrderContent $orderContent
+     * @throws BadRequestHttpException
+     */
+    private function checkOrderForWaybillContent(Waybill $waybill, OrderContent $orderContent)
+    {
+        if ($orderContent->waybillContent) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_allready_has_waybill_content') . '-' . $orderContent->waybillContent->id);
+        }
+
+        $waybillContent = WaybillContent::find()
+            ->where(['waybill_id' => $waybill->id])
+            ->andWhere(['not', ['order_content_id' => null]])
+            ->one();
+
+        if ($waybillContent) {
+            $orderContentFromWaybill = $waybillContent->orderContent;
+            if ($orderContent->order_id != $orderContentFromWaybill->order_id) {
+                throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_not_for_this_waybill'));
+            }
+        }
+    }
+
+    /**
+     * @param $storeProducts
+     * @param $notInWaybillContent
+     * @return array
+     */
+    private function prepareStoreProducts($storeProducts, $notInWaybillContent)
+    {
+        $arStoreProducts = [];
+        foreach ($notInWaybillContent as $item) {
+            /**@var OrderContent $item */
+            if (array_key_exists($item->product_id, $storeProducts)) {
+                $outer_product_id = $storeProducts[$item->product_id]['outer_product_id'];
+                $arStoreProducts[] = [
+                    'product_id'       => $item->product_id,
+                    'outer_store_id'   => $storeProducts[$item->product_id]['outer_store_id'],
+                    'vat'              => $storeProducts[$item->product_id]['vat'],
+                    'coefficient'      => $storeProducts[$item->product_id]['coefficient'],
+                    'outer_product_id' => $outer_product_id,
+                    'orderContent'     => $item,
+                ];
+            }
+        }
+
+        return $arStoreProducts;
+    }
+
+    /**
+     * @param $arOuterStoreProducts
+     * @param $serviceId
+     * @return int|mixed|string
+     */
+    private function generateEdiNumber($arOuterStoreProducts, $serviceId)
+    {
+        /**@var OrderContent $orderContent */
+        $orderContent = current($arOuterStoreProducts)['orderContent'];
+        $tmp_ed_num = $orderContent->order_id;
+        if ($orderContent->edi_number) {
+            $tmp_ed_num = $orderContent->edi_number;
+        }
+        $ed_num = $tmp_ed_num . '-1';
+
+        $existOrderContent = OrderContent::find()->where(['like', 'edi_number', $tmp_ed_num])
+            ->andWhere(['order_id' => $orderContent->order_id])
+            ->orderBy(['edi_number' => SORT_DESC])->limit(1)->one();
+        if ($existOrderContent) {
+            return $this->getLastEdiNumber($existOrderContent->edi_number);
+        } else {
+            $existWaybill = Waybill::find()->where(['like', 'outer_number_code', $tmp_ed_num])
+                ->andWhere(['service_id' => $serviceId])
+                ->orderBy(['outer_number_code' => SORT_DESC])->limit(1)->one();
+            if ($existWaybill) {
+                return $this->getLastEdiNumber($existWaybill->outer_number_code);
+            }
+        }
+
+        return $ed_num;
+    }
+
+    /**
+     * @param $ediNumber
+     * @return int|mixed|string
+     */
+    private function getLastEdiNumber($ediNumber)
+    {
+        $ed_nums = explode('-', $ediNumber);
+        $ed_num = array_pop($ed_nums);
+        $ed_num = (int)$ed_num + 1;
+        array_push($ed_nums, $ed_num);
+        $ed_num = implode('-', $ed_nums);
+        return $ed_num;
+    }
+
+    /**
+     * @param $request
+     * @throws ValidationException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function sendWaybillAsync($request)
+    {
+        /** @var \Redis $redis */
+        $redis = \Yii::$app->get('redis');
+        //Имя строки блокировки если уже идет обработка по этим параметрам
+        $lockName = implode('-', ['lock-start', $request['action_id'], $request['order_id'], $request['vendor_id']]);
+        //Проверяем блокировку
+        $run = $redis->get($lockName);
+        //Если нет, запускаем
+        if (is_null($run)) {
+            //Блокируем обработку этого заказа
+            $redis->set($lockName, 1);
+            try {
+                $this->createWaybill($request['order_id'], null, $request['vendor_id'], $this->getExcludedServices());
+            } catch (\Throwable $e) {
+                //Запись ошибки в журнал, здесь нет service_id
+                $this->writeInJournal($e->getMessage(), 0, 'error');
+            }
+            $waybillToService = [];
+            $query = $this->createQueryWyabillToOrder($request['order_id']);
+            $dbResult = $query->andWhere(['status_id' => [Registry::WAYBILL_ERROR, Registry::WAYBILL_COMPARED]])
+                ->all(\Yii::$app->db_api);
+
+            foreach ($dbResult as $row) {
+                $waybillToService[$row['service_id']][] = $row['id'];
+            }
+            /**
+             * Отправка накладных
+             *
+             * @var Transaction $t
+             **/
+            try {
+                foreach ($waybillToService as $serviceId => $ids) {
+                    $scenario = IntegrationSettingValue::getSettingsByServiceId(
+                        $serviceId,
+                        $this->user->organization_id,
+                        ['auto_unload_invoice']
+                    );
+                    if ($scenario == 1) {
+                        $t = \Yii::$app->db_api->beginTransaction();
+                        try {
+                            #Отправка накладных
+                            $factory = (new SyncServiceFactory($serviceId, [], SyncServiceFactory::TASK_SYNC_GET_LOG))->factory($serviceId);
+                            $message = $factory->sendWaybill([
+                                'service_id' => $serviceId,
+                                'ids'        => $ids,
+                            ]);
+                            $this->writeInJournal($message, $serviceId);
+                            $t->commit();
+                        } catch (\Throwable $e) {
+                            $t->rollBack();
+                            $this->writeInJournal($e->getMessage(), $serviceId, 'error');
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                //Запись ошибки в журнал, здесь нет service_id
+                $this->writeInJournal($e->getMessage(), 0, 'error');
+            } finally {
+                //Снятие лока с обработки
+                $redis->del($lockName);
+            }
+        }
+    }
+
+    /**
+     * Запись в журнал
+     *
+     * @param        $message
+     * @param        $service_id
+     * @param string $type
+     * @throws ValidationException
+     */
+    private function writeInJournal($message, $service_id, $type = 'success'): void
+    {
+        $journal = new Journal();
+        $journal->response = is_array($message) ? json_encode($message) : $message;
+        $journal->service_id = (int)$service_id;
+        $journal->type = $type;
+        $journal->organization_id = $this->user->organization_id;
+        $journal->user_id = $this->user->id;
+        $journal->operation_code = (string)(Registry::$operation_code_send_waybill[$service_id] ?? 0);
+        if (!$journal->save()) {
+            throw new ValidationException($journal->getFirstErrors());
+        }
+    }
+
+    /**
+     * Создает запрос для выборки всех накладных для одного заказа
+     *
+     * @param $orderId
+     * @return Query
+     */
+    public function createQueryWyabillToOrder($orderId)
+    {
+        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        return (new Query())->distinct()->select(['w.id', 'w.service_id'])
+            ->from('waybill w')
+            ->leftJoin('waybill_content wc', 'w.id=wc.waybill_id')
+            ->leftJoin(DBNameHelper::getMainName() . '.' . OrderContent::tableName() . ' as oc', 'oc.id=wc.order_content_id')
+            ->where(['oc.order_id' => $orderId]);
+    }
+
+    /**
+     * Установить свойство settings для всех сервисов, если будут нужны еще где то,
+     * перенести вызов из sendWaybillAsync() в метод __construct()
+     */
+    public function setAutoInvoiceSettings(): void
+    {
+        $this->settings = (new Query())->select(['is.service_id', 'isv.value', 'is.name', 'isv.id'])
+            ->from(IntegrationSettingValue::tableName() . ' as isv')
+            ->leftJoin(IntegrationSetting::tableName() . ' as is', 'is.id = isv.setting_id')
+            ->where([
+                'isv.org_id' => $this->user->organization_id,
+                'is.name'    => 'auto_unload_invoice',
+            ])->all(\Yii::$app->db_api);
+    }
+
+    /**
+     * Получить сервисы по которым не надо создавать накладные
+     *
+     * @return array
+     */
+    public function getExcludedServices()
+    {
+        $this->setAutoInvoiceSettings();
+        $arExcludedServices = [];
+        foreach ($this->settings as $setting) {
+            if ($setting['value'] == 0) {
+                $arExcludedServices[] = $setting['service_id'];
+            }
+        }
+
+        return $arExcludedServices;
     }
 }

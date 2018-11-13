@@ -233,6 +233,7 @@ class MercStockEntry extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $queueName = $queue->consumer_class_name;
             }
 
+            $data['job_uid'] = base64_encode(strtolower('MercStockEntryList').time());
             $data['startDate'] = $start_date ?? gmdate("Y-m-d H:i:s", time() - 60*60*24);
             $data['listOptions']['count'] = 100;
             $data['listOptions']['offset'] = 0;

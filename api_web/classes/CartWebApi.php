@@ -2,7 +2,6 @@
 
 namespace api_web\classes;
 
-use api_web\components\FireBase;
 use api_web\components\Notice;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
@@ -20,6 +19,7 @@ use api_web\exceptions\ValidationException;
 
 /**
  * Class CartWebApi
+ *
  * @package api_web\classes
  */
 class CartWebApi extends \api_web\components\WebApi
@@ -30,8 +30,9 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Добавляем/Удаляем товар в заказе
+     *
      * @param array $post
-     * @param bool $ajax_published
+     * @param bool  $ajax_published
      * @return array
      */
     public function add(array $post, $ajax_published = false)
@@ -60,18 +61,14 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Добавляем товар в корзину
+     *
      * @param array $post
      * @throws BadRequestHttpException
      * @throws \Exception
      */
     private function addItem(array $post)
     {
-        if (!isset($post['quantity'])) {
-            throw new BadRequestHttpException("empty_param|quantity");
-        }
-        if (empty($post['product_id'])) {
-            throw new BadRequestHttpException("empty_param|product_id");
-        }
+        $this->validateRequest($post, ['quantity', 'product_id']);
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
@@ -79,7 +76,7 @@ class CartWebApi extends \api_web\components\WebApi
             $product = (new Product())->findFromCatalogs($post['product_id']);
             //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
             if (!in_array($product['cat_id'], $this->getCatalogs()) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
-                throw new BadRequestHttpException("Каталог {$product['cat_id']} недоступен для вас.");
+                throw new BadRequestHttpException("catalog.access_denied|" . $product['cat_id']);
             }
             $this->setPosition($cart, $product, $post['quantity']);
             $transaction->commit();
@@ -92,6 +89,7 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Содержимое корзины
+     *
      * @return array
      */
     public function items()
@@ -108,18 +106,18 @@ class CartWebApi extends \api_web\components\WebApi
         /**
          * @var CartContent $row
          */
-        foreach ($content as $row) {
+        foreach ($this->iterator($content) as $row) {
             $items[$row->vendor->id][] = $this->prepareProduct($row);
             if (!isset($return[$row->vendor->id])) {
                 $return[$row->vendor->id] = [
-                    'id' => $row->vendor->id,
-                    'delivery_price' => $this->getCart()->calculateDelivery($row->vendor_id),
+                    'id'                 => $row->vendor->id,
+                    'delivery_price'     => $this->getCart()->calculateDelivery($row->vendor_id),
                     'for_min_cart_price' => $this->getCart()->forMinCartPrice($row->vendor_id),
-                    'for_free_delivery' => $this->getCart()->forFreeDelivery($row->vendor_id),
-                    'total_price' => $this->getCart()->calculateTotalPrice($row->vendor_id),
-                    'vendor' => WebApiHelper::prepareOrganization($row->vendor),
-                    'currency' => $items[$row->vendor->id][0]['currency'],
-                    'items' => $items[$row->vendor->id]
+                    'for_free_delivery'  => $this->getCart()->forFreeDelivery($row->vendor_id),
+                    'total_price'        => $this->getCart()->calculateTotalPrice($row->vendor_id),
+                    'vendor'             => WebApiHelper::prepareOrganization($row->vendor),
+                    'currency'           => $items[$row->vendor->id][0]['currency'],
+                    'items'              => $items[$row->vendor->id]
                 ];
             } else {
                 $return[$row->vendor->id]['items'] = $items[$row->vendor->id];
@@ -131,6 +129,7 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Очистка корзины, полная или частичная
+     *
      * @param array $post
      * @return array
      */
@@ -138,47 +137,51 @@ class CartWebApi extends \api_web\components\WebApi
     {
         $client = $this->user->organization;
         $query = Cart::find()->where(['organization_id' => $client->id]);
+        if (isset($post['vendor_id'])) {
+            $query->distinct()
+                ->joinWith('cartContents')
+                ->andWhere('cart_content.vendor_id = :vendor_id', [
+                    ':vendor_id' => (int)$post['vendor_id']
+                ]);
+        }
         /**
-         * @var $cart Cart
+         * @var $cart     Cart
          * @var $position CartContent
          */
         $carts = $query->all();
-        foreach ($carts as $cart) {
-            foreach ($cart->cartContents as $position) {
-                if (isset($post['vendor_id'])) {
-                    if ($position->vendor_id == $post['vendor_id']) {
-                        $position->delete();
-                    }
-                } else {
-                    $position->delete();
-                }
+        foreach ($this->iterator($carts) as $cart) {
+            $cartContents = $cart->cartContents;
+            foreach ($this->iterator($cartContents) as $position) {
+                $position->delete();
             }
         }
 
-        //Сообщение в очередь, Изменение количества товара в корзине
+        //Сообщение в очередь, Изменение количества товара в корзиlне
         Notice::init('Order')->sendOrderToTurnClient($this->user);
-
         return $this->items();
     }
 
     /**
      * Создание заказа из корзины
      * https://api-dev.mixcart.ru/site/doc#!/Cart/post_cart_registration
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     public function registration(array $post)
     {
         WebApiHelper::clearRequest($post);
         $cart = $this->getCart();
-
         //Результат для ответа
         $result = [
             'success' => 0,
-            'error' => 0,
+            'error'   => 0,
             'message' => '',
         ];
+
+        $orders = [];
 
         if (!empty($post)) {
 
@@ -186,42 +189,46 @@ class CartWebApi extends \api_web\components\WebApi
                 $post[] = $post;
             }
 
-            $orders = [];
             foreach ($post as $row) {
                 if (empty($row['id'])) {
                     throw new BadRequestHttpException("empty_param|id");
                 }
                 $orders[$row['id']] = [
                     'delivery_date' => $row['delivery_date'] ?? null,
-                    'comment' => $row['comment'] ?? null,
+                    'comment'       => $row['comment'] ?? null,
                 ];
             }
         }
 
-        try {
-            foreach ($cart->getVendors() as $vendor) {
-                if (isset($orders) && empty($orders[$vendor->id])) {
-                    continue;
+        if (!empty($orders)) {
+            try {
+                foreach ($cart->getVendors() as $vendor) {
+                    if (isset($orders) && empty($orders[$vendor->id])) {
+                        continue;
+                    }
+                    if ($this->createOrder($cart, $vendor, $orders[$vendor->id])) {
+                        $result['success'] += 1;
+                    }
                 }
-                if ($this->createOrder($cart, $vendor, $orders[$vendor->id])) {
-                    $result['success'] += 1;
-                }
+            } catch (\Exception $e) {
+                $result['error'] += 1;
+                $result['message'] = $e->getMessage();
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             }
-        } catch (\Exception $e) {
-            $result['error'] += 1;
-            $result['message'] = $e->getMessage();
-            \Yii::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
+
         return $result;
     }
 
     /**
      * Создание заказа
-     * @param Cart $cart
-     * @param $vendor
+     *
+     * @param Cart  $cart
+     * @param       $vendor
      * @param array $post ['id', 'delivery_date', 'comment']
      * @return bool
      * @throws \Exception
+     * @throws \Throwable
      */
     private function createOrder(Cart $cart, Organization $vendor, array $post)
     {
@@ -251,11 +258,11 @@ class CartWebApi extends \api_web\components\WebApi
                 throw new ValidationException($order->getFirstErrors());
             }
             /**
-             * @var $cartContent CartContent
+             * @var CartContent $cartContent
              */
             //Получаем записи только нужного нам поставщика
             $contents = $cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->all();
-            foreach ($contents as $cartContent) {
+            foreach ($this->iterator($contents) as $cartContent) {
                 $orderContent = new OrderContent();
                 $orderContent->order_id = $order->id;
                 $orderContent->product_id = $cartContent->product_id;
@@ -293,7 +300,7 @@ class CartWebApi extends \api_web\components\WebApi
                 //Сообщение в очередь, Изменение количества товара в корзине
                 Notice::init('Order')->sendOrderToTurnClient($this->user);
             } catch (\Exception $e) {
-                \Yii::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             }
             return true;
         }
@@ -302,6 +309,7 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Количество конкретного продукта в корзине пользователя
+     *
      * @param $id
      * @return float|int
      */
@@ -313,10 +321,13 @@ class CartWebApi extends \api_web\components\WebApi
             return $return;
         }
 
-        $result = (new Query())->from('cart as c')
+        $result = (new Query())
+            ->from('cart as c')
             ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
-            ->andWhere(['c.organization_id' => $this->user->organization->id])
-            ->andWhere(['cc.product_id' => $id])
+            ->andWhere([
+                'c.organization_id' => $this->user->organization->id,
+                'cc.product_id'     => $id
+            ])
             ->one();
 
         if (!empty($result['quantity'])) {
@@ -328,39 +339,37 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Добавить комментарий к товару
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
      * @throws ValidationException
      */
     public function productComment(array $post)
     {
-        if (empty($post['product_id'])) {
-            throw new BadRequestHttpException("empty_param|product_id");
-        }
-
+        $this->validateRequest($post, ['product_id']);
         /**
          * @var $model CartContent
          */
         $model = $this->getCart()->getCartContents()->andWhere(['product_id' => $post['product_id']])->one();
 
         if (empty($model)) {
-            throw new BadRequestHttpException("Нет такого товара в корзине");
+            throw new BadRequestHttpException("cart.cart_content_not_found");
         }
 
         $model->comment = $post['comment'] ?? '';
 
-        if (!$model->validate()) {
+        if (!$model->save()) {
             throw new ValidationException($model->getFirstErrors());
         }
-
-        $model->save();
 
         return $this->items();
     }
 
     /**
      * Получить объект Cart текушего пользователя
+     *
      * @return Cart|null|static
      * @throws ValidationException
      */
@@ -375,7 +384,7 @@ class CartWebApi extends \api_web\components\WebApi
             if (empty($cart)) {
                 $cart = new Cart([
                     'organization_id' => $this->user->organization->id,
-                    'user_id' => $this->user->id,
+                    'user_id'         => $this->user->id,
                 ]);
 
                 if (!$cart->save()) {
@@ -389,6 +398,7 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Список доступных каталогов
+     *
      * @return array
      */
     private function getCatalogs()
@@ -401,9 +411,10 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Записываем позицию в корзину
-     * @param Cart $cart
+     *
+     * @param Cart  $cart
      * @param array $product
-     * @param $quantity
+     * @param       $quantity
      * @return bool
      * @throws BadRequestHttpException
      * @throws ValidationException
@@ -436,12 +447,11 @@ class CartWebApi extends \api_web\components\WebApi
             $position->units = $product['units'];
             $position->vendor_id = $product['vendor_id'];
             $position->currency_id = $product['currency_id'];
-            if (!$position->validate()) {
+            if (!$position->save()) {
                 throw new ValidationException($position->getFirstErrors());
             }
-            $position->save();
         } else {
-            throw new BadRequestHttpException("ERROR: the quantity must be greater than zero");
+            throw new BadRequestHttpException("cart.quantity_must_be_greater_zero");
         }
         return true;
 
@@ -449,6 +459,7 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Считаем количество в корзине, исходя из кратности
+     *
      * @param $product
      * @param $quantity
      * @return float
@@ -475,6 +486,7 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Продукт. Собираем необходимые данные из модели
+     *
      * @param $row CartContent
      * @return mixed
      */
@@ -501,10 +513,23 @@ class CartWebApi extends \api_web\components\WebApi
         return $item;
     }
 
+    /**
+     * Отправка уведомлений
+     */
     public function noticeWhenProductAddToCart()
     {
         Notice::init('Order')->sendOrderToTurnClient($this->user);
         //Notice::init('Order')->sendLastUserCartAdd($this->user);
     }
 
+    /**
+     * @param $items
+     * @return \Generator
+     */
+    private function iterator($items)
+    {
+        foreach ($items as $item) {
+            yield $item;
+        }
+    }
 }

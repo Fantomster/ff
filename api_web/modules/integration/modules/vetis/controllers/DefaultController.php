@@ -677,11 +677,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "uuids": {
-     *                                 "ede52e76-6091-46bb-9349-87324ee1ae41",
-     *                                  "eb9eed88-919d-422d-9593-8092fdb91ab7",
-     *                                  "470b17ea-9e16-434d-b3d6-b3064324ca82"
-     *                      }
+     *                      "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41"
      *                  }
      *              )
      *         )
@@ -708,7 +704,7 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \yii\web\BadRequestHttpException
+     * @throws \Exception
      */
     public function actionRepayVsd()
     {

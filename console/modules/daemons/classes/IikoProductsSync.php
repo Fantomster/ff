@@ -70,7 +70,7 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
      * @return int
      * @throws \Exception
      */
-    protected function goods()
+    protected function product()
     {
         $this->items = iikoApi::getInstance($this->orgId)->getProducts();
 
@@ -114,7 +114,6 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
      */
     private function updateProduct($uuid, $item)
     {
-        $transaction = \Yii::$app->get('db_api')->beginTransaction();
         try {
             $model = OuterProduct::findOne(['outer_uid' => $uuid, 'org_id' => $this->orgId, 'service_id' => self::SERVICE_ID,]);
             //Если нет товара у нас, создаем
@@ -132,11 +131,13 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
             }
 
             if (!empty($item['mainUnit'])) {
-                $obUnitModel = OuterUnit::findOne(['name' => $item['mainUnit'], 'service_id' => self::SERVICE_ID]);
+                $obUnitModel = OuterUnit::findOne(['name' => $item['mainUnit'], 'service_id' => self::SERVICE_ID, 'org_id' => $this->orgId]);
                 if (!$obUnitModel) {
                     $obUnitModel = new OuterUnit();
                     $obUnitModel->name = $item['mainUnit'];
                     $obUnitModel->service_id = self::SERVICE_ID;
+                    $obUnitModel->org_id = $this->orgId;
+                    $obUnitModel->outer_uid = md5($item['mainUnit']);
                     if ($obUnitModel->validate()) {
                         $obUnitModel->save();
                     }
@@ -152,10 +153,8 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
                 $this->updates_uuid[] = $uuid;
             }
 
-            $transaction->commit();
             return true;
         } catch (\Exception $e) {
-            $transaction->roolBack();
             throw $e;
         }
     }

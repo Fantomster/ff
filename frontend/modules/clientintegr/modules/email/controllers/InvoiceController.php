@@ -30,22 +30,21 @@ class InvoiceController extends Controller
 
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
-        $searchModel->date_from = Yii::$app->formatter->asTime($this->getEarliestInvoice($organization->id), "php:d.m.Y");
+        $searchModel->date_from = Yii::$app->formatter->asDate($this->getEarliestInvoice($organization->id), "php:d.m.Y");
 
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $dataProvider->pagination->pageParam = 'page_outer';
         $vi = 'index';
 
-
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
-                        'searchModel' => $searchModel,
-                        'dataProvider' => $dataProvider,
+                'searchModel'  => $searchModel,
+                'dataProvider' => $dataProvider,
             ]);
         } else {
             return $this->render($vi, [
-                        'searchModel' => $searchModel,
-                        'dataProvider' => $dataProvider,
+                'searchModel'  => $searchModel,
+                'dataProvider' => $dataProvider,
             ]);
         }
     }
@@ -93,16 +92,17 @@ class InvoiceController extends Controller
 
         $dataProvider->pagination->pageParam = 'page_order';
         return $this->renderAjax('_orders', [
-                    'dataProvider' => $dataProvider,
-                    'searchModel' => $searchModel,
-                    'vendor_id' => $params['OrderSearch']['vendor_id'],
-                    'invoice_id' => $params['invoice_id'],
-                    'show_waybill' => $showAll
+            'dataProvider' => $dataProvider,
+            'searchModel'  => $searchModel,
+            'vendor_id'    => $params['OrderSearch']['vendor_id'],
+            'invoice_id'   => $params['invoice_id'],
+            'show_waybill' => $showAll
         ]);
     }
 
     /**
      * Создание заказа, и товаров с накладной
+     *
      * @return array
      * @throws \Exception
      * @throws \yii\db\Exception
@@ -141,7 +141,7 @@ class InvoiceController extends Controller
                 if ($licenses['rkws']->status_id == 0) {
                     $rk_us = 0;
                 }
-                if (($licenses['rkws']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['rkws']->td)))) {
+                if (($licenses['rkws']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws']->td)))) {
                     $link = 'rkws';
                 }
             }
@@ -152,7 +152,7 @@ class InvoiceController extends Controller
                 if ($licenses['iiko']->status_id == 0) {
                     $lic_iiko = 0;
                 }
-                if (($licenses['iiko']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['iiko']->td)))) {
+                if (($licenses['iiko']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['iiko']->td)))) {
                     $link = 'iiko';
                 }
             }
@@ -293,11 +293,11 @@ class InvoiceController extends Controller
 
         $dataProvider->pagination->pageParam = 'page_order';
         return $this->renderAjax('_orders', [
-                    'dataProvider' => $dataProvider,
-                    'searchModel' => $searchModel,
-                    'vendor_id' => $params['OrderSearch']['vendor_id'],
-                    'invoice_id' => $params['invoice_id'],
-                    'show_waybill' => $params['show_waybill']
+            'dataProvider' => $dataProvider,
+            'searchModel'  => $searchModel,
+            'vendor_id'    => $params['OrderSearch']['vendor_id'],
+            'invoice_id'   => $params['invoice_id'],
+            'show_waybill' => $params['show_waybill']
         ]);
     }
 

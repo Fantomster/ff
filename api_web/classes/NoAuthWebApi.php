@@ -12,6 +12,9 @@
 
 namespace api_web\classes;
 
+use api_web\components\Registry;
+use common\models\Journal;
+use common\models\Waybill;
 use Yii;
 use api_web\modules\integration\classes\sync\AbstractSyncFactory;
 use api_web\modules\integration\classes\SyncLog;
@@ -43,6 +46,57 @@ class NoAuthWebApi
             /** @var $entity AbstractSyncFactory */
             if (method_exists($entity, 'receiveXmlData')) {
                 $res = $entity->receiveXmlData($task, Yii::$app->request->getRawBody());
+                SyncLog::trace($res);
+                return $res;
+            }
+        }
+        SyncLog::trace('Fail!');
+        return 'false';
+    }
+
+    public function sendWaybill(OuterTask $task)
+    {
+
+        # 2.1.1. Trace callback operation with task_id
+        SyncLog::trace('Callback operation `task_id` params is ' . $task->id);
+
+        # 2.1.2. Check oper_code
+        $oper = AllServiceOperation::findOne($task->oper_code);
+        if (!$oper) {
+            SyncLog::trace('Operation code ('.$task->oper_code.') is wrong!');
+            throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
+        }
+
+        $allOpers = AbstractSyncFactory::getAllSyncOperations();
+
+        SyncLog::trace('Try to receive XML data...');
+        if (array_key_exists($oper->denom, $allOpers) && isset($allOpers[$oper->denom])) {
+            $entityName = $allOpers[$oper->denom];
+            $entity = new $entityName(SyncServiceFactory::ALL_SERVICE_MAP[$oper->service_id], $oper->service_id);
+            /** @var AbstractSyncFactory $entity */
+            if (method_exists($entity, 'receiveXmlData')) {
+                $res = $entity->receiveXMLDataWaybill($task, Yii::$app->request->getRawBody());
+                $xml = (array)simplexml_load_string($res);
+                $waybill = Waybill::findOne($task->waybill_id);
+                $journal = new Journal();
+                $journal->service_id = $waybill->service_id;
+                $journal->operation_code = 21;
+                $journal->log_guide = 'any_call';
+                $journal->organization_id = $waybill->acquirer_id;
+                // Когда все хорошо и накладная создалась в R-keeper
+                if (array_key_exists('DOC', $xml)){
+                    $waybill->status_id = Registry::WAYBILL_UNLOADED;
+                    $journal->type = 'success';
+                    $journal->response = $waybill->id;
+                } else if(array_key_exists('ERROR', $xml)){
+                    //Когда случилась ошибка
+                    $error = (array)$xml['ERROR'];
+                    $waybill->status_id = Registry::WAYBILL_ERROR;
+                    $journal->type = 'error';
+                    $journal->response = $error['@attributes']['Text'];
+                }
+                $waybill->save();
+                $journal->save();
                 SyncLog::trace($res);
                 return $res;
             }

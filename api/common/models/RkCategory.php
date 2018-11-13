@@ -5,34 +5,34 @@ namespace api\common\models;
 use Yii;
 use common\models\Organization;
 
-
 /**
  * This is the model class for table "rk_access".
  *
- * @property integer $id
- * @property integer $fid
- * @property integer $org
- * @property string $login
- * @property string $password
- * @property string $token
- * @property string $lic
+ * @property integer  $id
+ * @property integer  $fid
+ * @property integer  $org
+ * @property integer  $type
+ * @property string   $rid
+ * @property string   $acc
+ * @property string   $login
+ * @property string   $password
+ * @property string   $token
+ * @property string   $lic
  * @property datetime $fd
  * @property datetime $td
- * @property integer $ver
- * @property integer $locked
- * @property string $usereq 
- * @property string $comment
- * @property string $salespoint
- * 
- * 
+ * @property integer  $ver
+ * @property integer  $locked
+ * @property string   $usereq
+ * @property string   $comment
+ * @property string   $salespoint
+ * @method prependTo() prependTo(\kartik\tree\models\Tree $node)
  */
 class RkCategory extends \kartik\tree\models\Tree
 {
-    
+
     const STATUS_UNLOCKED = 0;
     const STATUS_LOCKED = 1;
-      
-    
+
     /**
      * @inheritdoc
      */
@@ -40,16 +40,14 @@ class RkCategory extends \kartik\tree\models\Tree
     {
         return 'rk_category';
     }
-    
-    
 
-        public function rules()
+    public function rules()
     {
         $rules = parent::rules();
-        $rules[] = [['type', 'fid','acc','version'], 'safe'];
+        $rules[] = [['type', 'fid', 'acc', 'version'], 'safe'];
         return $rules;
     }
-    
+
     /*
     /**
      * @inheritdoc
@@ -76,24 +74,19 @@ class RkCategory extends \kartik\tree\models\Tree
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'fid' => 'FID',
-            'token' => 'Token',
-            'Nonce' => 'Nonce',
-            'rid' => 'RID Store House',
-            'denom' => 'Наименование Store House',
+            'id'         => 'ID',
+            'fid'        => 'FID',
+            'token'      => 'Token',
+            'Nonce'      => 'Nonce',
+            'rid'        => 'RID Store House',
+            'denom'      => 'Наименование Store House',
             'updated_at' => 'Обновлено',
         ];
     }
-    
-    
 
-    
-    
     public static function getDb()
     {
-       return \Yii::$app->db_api;
+        return \Yii::$app->db_api;
     }
-
 
 }

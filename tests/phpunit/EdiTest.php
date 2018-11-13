@@ -8,9 +8,10 @@
 
 namespace tests\phpunit;
 
+use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WaybillHelper;
-use common\components\ecom\EComIntegration2;
+use common\components\ecom\EDIIntegration;
 use common\components\ecom\providers\TestProvider;
 use common\components\ecom\realization\TestRealization;
 use common\models\Cart;
@@ -35,7 +36,7 @@ class EdiTest extends TestCase
      */
     public function testUploadEdiFilesListToTable(): void
     {
-        $eComIntegration = new EComIntegration2();
+        $eComIntegration = new EDIIntegration();
         $eComIntegration->setProvider(new TestProvider());
         $eComIntegration->setRealization(new TestRealization([]));
         $eComIntegration->handleFilesList();
@@ -58,7 +59,7 @@ class EdiTest extends TestCase
         $order = $this->createOrder(3768, 3795, [1564828, 1564207, 1563629, 1564554, 1564387]);
         $fileName = 'test_ordrsp_20180918171352_2412656653.xml';
 
-        $eComIntegration = new EComIntegration2(['orgId' => 7777], ['TestRealization' => [$fileName =>
+        $eComIntegration = new EDIIntegration(['orgId' => 7777], ['TestRealization' => [$fileName =>
                                                                                                   $order->id]]);
 
         $eComIntegration->handleFilesListQueue();
@@ -66,7 +67,7 @@ class EdiTest extends TestCase
         $tO = Order::findOne($order->id);
         $this->assertEquals($tO->edi_ordersp, $fileName);
         $this->assertNotEquals($tO->total_price, 898.05);
-        $this->assertEquals($tO->service_id, WaybillHelper::EDI_SERVICE_ID);
+        $this->assertEquals($tO->service_id, Registry::EDI_SERVICE_ID);
         foreach ($tO->orderContent as $content){
 //            $wC = WaybillContent::findOne(['order_content_id' => $content->id]);
 //            $this->assertTrue($wC);

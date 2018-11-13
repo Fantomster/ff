@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api\modules\v1\modules\mobile\resources\RelationSuppRest;
+use api_web\exceptions\ValidationException;
 use common\models\CatalogGoods;
 use common\models\CatalogTemp;
 use common\models\CatalogTempContent;
@@ -19,6 +20,7 @@ use api_web\components\WebApi;
 
 /**
  * Class CatalogWebApi
+ *
  * @package api_web\classes
  */
 class CatalogWebApi extends WebApi
@@ -26,6 +28,7 @@ class CatalogWebApi extends WebApi
 
     /**
      * Смена уникального индекса главного каталога
+     *
      * @param Catalog $catalog
      * @param integer $index
      * @return array
@@ -41,12 +44,13 @@ class CatalogWebApi extends WebApi
                 'result' => true
             ];
         } else {
-            throw new BadRequestHttpException('Catalog not empty');
+            throw new BadRequestHttpException('catalog.not_empty');
         }
     }
 
     /**
      * Удаление главного каталога
+     *
      * @param Catalog $catalog
      * @return array
      * @throws BadRequestHttpException
@@ -55,21 +59,21 @@ class CatalogWebApi extends WebApi
     {
         $isEmpty = !CatalogBaseGoods::find()->where(['cat_id' => $catalog->id, 'deleted' => false])->exists();
         if ($isEmpty) {
-            throw new BadRequestHttpException('Catalog is empty');
+            throw new BadRequestHttpException('catalog.is_empty');
         } else {
             if ($catalog->deleteAllProducts()) {
                 return [
                     'result' => true
                 ];
             } else {
-                throw new BadRequestHttpException('Deleting failed');
+                throw new BadRequestHttpException('catalog.delete_failed');
             }
         }
     }
 
-
     /**
      * Обновление инд. каталога
+     *
      * @param $request
      * @return array
      * @throws \Throwable
@@ -108,7 +112,7 @@ class CatalogWebApi extends WebApi
                 'status' => CatalogBaseGoods::STATUS_OFF
             ], [
                 'supp_org_id' => $catalog->supp_org_id,
-                'cat_id' => $catalogID
+                'cat_id'      => $catalogID
             ]);
             /**
              * @var $tempRow CatalogTempContent
@@ -116,16 +120,16 @@ class CatalogWebApi extends WebApi
             foreach ($catalogTempContent as $tempRow) {
                 //Поиск товара в главном каталоге
                 $model = CatalogBaseGoods::findOne([
-                    'cat_id' => $catalogID,
+                    'cat_id'  => $catalogID,
                     'article' => $tempRow->article,
                     'product' => $tempRow->product
                 ]);
                 //Если не нашли, создаем его
                 if (empty($model)) {
                     $model = new CatalogBaseGoods([
-                        'cat_id' => $catalogID,
-                        'article' => $tempRow->article,
-                        'product' => $tempRow->product,
+                        'cat_id'      => $catalogID,
+                        'article'     => $tempRow->article,
+                        'product'     => $tempRow->product,
                         'supp_org_id' => $catalog->supp_org_id
                     ]);
                 }
@@ -159,6 +163,7 @@ class CatalogWebApi extends WebApi
 
     /**
      * Список ключей
+     *
      * @return array
      */
     public function getKeys()
@@ -166,13 +171,13 @@ class CatalogWebApi extends WebApi
         return [
             'product' => Yii::t('api_web', 'api_web.catalog.key.product', ['ru' => 'Нименование товара']),
             'article' => Yii::t('api_web', 'api_web.catalog.key.article', ['ru' => 'Артикул']),
-            'other' => Yii::t('api_web', 'api_web.catalog.key.other', ['ru' => 'Другое']),
+            'other'   => Yii::t('api_web', 'api_web.catalog.key.other', ['ru' => 'Другое']),
         ];
     }
 
-
     /**
      * Удаление из временного каталога
+     *
      * @param $request
      * @return array
      * @throws \Throwable
@@ -181,13 +186,7 @@ class CatalogWebApi extends WebApi
      */
     public function deleteItemTemporary($request)
     {
-        if (empty($request['temp_id'])) {
-            throw new BadRequestHttpException("empty_param|temp_id");
-        }
-
-        if (empty($request['id'])) {
-            throw new BadRequestHttpException("empty_param|position_id");
-        }
+        $this->validateRequest($request, ['temp_id', 'id']);
 
         $model = CatalogTempContent::findOne(['temp_id' => (int)$request['temp_id'], 'id' => (int)$request['id']]);
         if (empty($model)) {
@@ -195,7 +194,7 @@ class CatalogWebApi extends WebApi
         }
 
         if (!$model->delete()) {
-            throw new BadRequestHttpException('Model not delete!!!');
+            throw new BadRequestHttpException('catalog.delete_failed');
         }
 
         return ['result' => true];
@@ -208,13 +207,10 @@ class CatalogWebApi extends WebApi
      * @throws \yii\db\StaleObjectException
      * @throws \yii\web\BadRequestHttpException
      */
-    public function deleteItemPersonalCatalog($request){
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
-        if (empty($request['product_id'])) {
-            throw new BadRequestHttpException('empty_param|product_id');
-        }
+    public function deleteItemPersonalCatalog($request)
+    {
+
+        $this->validateRequest($request, ['vendor_id', 'product_id']);
 
         $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
         if (empty($catalog)) {
@@ -223,24 +219,26 @@ class CatalogWebApi extends WebApi
 
         $product = CatalogGoods::findOne([
             'base_goods_id' => $request['product_id'],
-            'supp_org_id' => $this->user->organization_id,
-            'cat_id' => $catalog->id]);
+            'cat_id'        => $catalog->id]);
+        if (!$product) {
+            throw new BadRequestHttpException('product_not_found');
+        }
         $success = $product->delete();
 
-        return ['result' => $success];
+        return ['result' => (bool)$success];
     }
 
     /**
      * Поиск дублей в темповом каталоге
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
      */
     public function getTempDuplicatePosition(array $request)
     {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($request, ['vendor_id']);
+
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
         $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($catalogTemp)) {
@@ -248,7 +246,7 @@ class CatalogWebApi extends WebApi
         }
 
         if (empty($catalogTemp->index_column)) {
-            throw new BadRequestHttpException('Для каталога не назначен ключ');
+            throw new BadRequestHttpException('catalog.main_index_empty');
         }
 
         //Ключ, по которому ищем дубли
@@ -286,7 +284,7 @@ class CatalogWebApi extends WebApi
         }
 
         foreach ($content as $row) {
-            $result[$row[$index]][] = array_merge(['index_field' => $index],$this->prepareTempDuplicatePosition($row));
+            $result[$row[$index]][] = array_merge(['index_field' => $index], $this->prepareTempDuplicatePosition($row));
         }
 
         return $result;
@@ -294,6 +292,7 @@ class CatalogWebApi extends WebApi
 
     /**
      * Автоматическое удаление дублей из загружаемого каталога
+     *
      * @param array $request
      * @return array
      * @throws \Exception
@@ -345,9 +344,7 @@ class CatalogWebApi extends WebApi
         $page = (isset($request['pagination']['page']) ? $request['pagination']['page'] : 1);
         $pageSize = (isset($request['pagination']['page_size']) ? $request['pagination']['page_size'] : 12);
 
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($request, ['vendor_id']);
 
         $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
 
@@ -401,18 +398,18 @@ class CatalogWebApi extends WebApi
         }
 
         return [
-            'result' => array_values($result),
+            'result'     => array_values($result),
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
     }
 
-
     /**
      * Список товаров в временном каталоге
+     *
      * @param $request
      * @return array
      * @throws \yii\base\InvalidArgumentException
@@ -425,16 +422,15 @@ class CatalogWebApi extends WebApi
         $page = (isset($request['pagination']['page']) ? $request['pagination']['page'] : 1);
         $pageSize = (isset($request['pagination']['page_size']) ? $request['pagination']['page_size'] : 12);
 
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($request, ['vendor_id']);
+
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
         if (!$catalog) {
-            throw new BadRequestHttpException("Catalog not found");
+            throw new BadRequestHttpException("catalog.not_found");
         }
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($tempCatalog)) {
-            throw new BadRequestHttpException("Temp catalog not found");
+            throw new BadRequestHttpException("catalog.temp_not_found");
         }
         $tempContent = CatalogTempContent::find()->where(['temp_id' => $tempCatalog->id]);
         $dataProvider = new ActiveDataProvider([
@@ -449,10 +445,10 @@ class CatalogWebApi extends WebApi
         $result = $dataProvider->models;
 
         return [
-            'result' => $result,
+            'result'     => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -460,16 +456,14 @@ class CatalogWebApi extends WebApi
 
     /**
      * Список товаров в каталоге
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
      */
     public function setCurrencyForPersonalCatalog($request)
     {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
-
-        if (empty($request['currency_id'])) {
-            throw new BadRequestHttpException('empty_param|currency_id');
-        }
+        $this->validateRequest($request, ['vendor_id', 'currency_id']);
 
         $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
 
@@ -491,26 +485,34 @@ class CatalogWebApi extends WebApi
     private function prepareTempDuplicatePosition(array $row)
     {
         return [
-            "id" => (int)$row['id'],
+            "id"      => (int)$row['id'],
             "temp_id" => (int)$row['temp_id'],
             "article" => $row['article'],
             "product" => $row['product'],
-            "price" => round($row['price'], 2),
-            "units" => round($row['units'], 3),
-            "note" => $row['note'],
-            "ed" => $row['ed'],
+            "price"   => round($row['price'], 2),
+            "units"   => round($row['units'], 3),
+            "note"    => $row['note'],
+            "ed"      => $row['ed'],
             "CountOf" => (int)$row['CountOf'] ?? 1
         ];
     }
 
     /**
-     * @param int                         $vendorID
-     * @param \common\models\Organization $restOrganization
-     * @return \common\models\Catalog|null
+     * @param int          $vendorID
+     * @param Organization $restOrganization
+     * @return Catalog|null|static
+     * @throws ValidationException
      */
     public function getPersonalCatalog(int $vendorID, Organization $restOrganization)
     {
-        $rel = RelationSuppRest::find()->where(['supp_org_id' => $vendorID, 'rest_org_id' => $restOrganization->id])->andWhere([">", "cat_id", 0])->one();
+        $rel = RelationSuppRest::find()
+            ->where([
+                'supp_org_id' => $vendorID,
+                'rest_org_id' => $restOrganization->id
+            ])
+            ->andWhere([">", "cat_id", 0])
+            ->one();
+
         if (!isset($rel->cat_id) || $rel->cat_id == 0) {
             $catalog = new Catalog();
             $vendorOrganization = Organization::findOne(['id' => $vendorID]);
@@ -526,10 +528,14 @@ class CatalogWebApi extends WebApi
                 $catalog->mapping = $mainCatalog->mapping;
                 $catalog->index_column = $mainCatalog->index_column;
             }
-            $catalog->save();
+            if (!$catalog->save()) {
+                throw new ValidationException($catalog->getFirstErrors());
+            }
             if ($rel) {
                 $rel->cat_id = $catalog->id;
-                $rel->save();
+                if (!$rel->save()) {
+                    throw new ValidationException($rel->getFirstErrors());
+                }
             }
         } else {
             $catalog = Catalog::findOne(['id' => $rel->cat_id]);
@@ -541,7 +547,9 @@ class CatalogWebApi extends WebApi
             $rel->cat_id = $catalog->id;
             $rel->invite = 1;
             $rel->status = 1;
-            $rel->save();
+            if (!$rel->save()) {
+                throw new ValidationException($rel->getFirstErrors());
+            }
         }
         return $catalog;
     }

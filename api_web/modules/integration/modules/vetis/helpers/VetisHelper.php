@@ -8,16 +8,18 @@
 
 namespace api_web\modules\integration\modules\vetis\helpers;
 
-use api\common\models\merc\mercDicconst;
 use api\common\models\merc\MercVsd;
 use api_web\classes\UserWebApi;
+use api_web\components\Registry;
 use common\helpers\DBNameHelper;
-use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
+use common\models\IntegrationSettingValue;
+use api_web\modules\integration\modules\vetis\api\cerber\cerberApi;
+use common\models\vetis\VetisCountry;
+use common\models\vetis\VetisProductByType;
+use common\models\vetis\VetisSubproductByProduct;
+use common\models\vetis\VetisUnit;
+use yii\db\Expression;
 use yii\db\Query;
-use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ikarApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\products\productApi;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -26,27 +28,25 @@ use yii\web\BadRequestHttpException;
  * */
 class VetisHelper
 {
-    /**@var object Vetis raw document */
-    private $doc;
     /**@var MercVsd model */
     private $vsdModel;
     /**@var int organization id */
-    private $org_id;
+    private $orgId;
     /**@var array $expertizeList расшифровки статусов экспертиз */
     public static $expertizeList = [
-        'UNKNOWN' => 'the_result_is_unknown', //Результат неизвестен
-        'UNDEFINED' => 'the_result_can_not_be_determined', //Результат невозможно определить (не нормируется)
-        'POSITIVE' => 'positive_result', //Положительный результат
-        'NEGATIVE' => 'negative_result', //Отрицательный результат
+        'UNKNOWN'     => 'the_result_is_unknown', //Результат неизвестен
+        'UNDEFINED'   => 'the_result_can_not_be_determined', //Результат невозможно определить (не нормируется)
+        'POSITIVE'    => 'positive_result', //Положительный результат
+        'NEGATIVE'    => 'negative_result', //Отрицательный результат
         'UNFULFILLED' => 'not_conducted', //Не проводилось
-        'VSERAW' => 'VSE_subjected_the_raw_materials_from_which_the_products_were_manufactured', // ВСЭ подвергнуто сырьё, из которого произведена продукция
-        'VSEFULL' => 'the_products_are_fully', // Продукция подвергнута ВСЭ в полном объеме
+        'VSERAW'      => 'VSE_subjected_the_raw_materials_from_which_the_products_were_manufactured', // ВСЭ подвергнуто сырьё, из которого произведена продукция
+        'VSEFULL'     => 'the_products_are_fully', // Продукция подвергнута ВСЭ в полном объеме
     ];
     /**@var array $ordersStatuses статусы для заказов */
     public static $ordersStatuses = [
         'WITHDRAWN' => 'vsd_status_withdrawn', //'Сертификаты аннулированы',
         'CONFIRMED' => 'vsd_status_confirmed', //'Сертификаты ожидают погашения',
-        'UTILIZED' => 'vsd_status_utilized', //'Сертификаты погашены',
+        'UTILIZED'  => 'vsd_status_utilized', //'Сертификаты погашены',
     ];
 
     /**
@@ -54,7 +54,7 @@ class VetisHelper
      */
     public function __construct()
     {
-        $this->org_id = \Yii::$app->user->identity->organization_id;
+        $this->orgId = \Yii::$app->user->identity->organization_id;
     }
 
     /**
@@ -62,28 +62,41 @@ class VetisHelper
      *
      * @param string $uuid
      * @throws BadRequestHttpException
+     * @return VetisHelper
      * */
     public function getShortInfoVsd($uuid)
     {
         $this->uuid = $uuid;
-        $this->doc = mercuryApi::getInstance()->getVetDocumentByUUID($uuid);
-        if (!$this->doc) {
+
+        $this->vsdModel = MercVsd::findOne(['uuid' => $uuid]);
+        if (!$this->vsdModel) {
             throw new BadRequestHttpException('Uuid is bad');
         }
-        $this->vsdModel = MercVsd::findOne(['uuid' => $uuid]);
-        $arProducerName = unserialize($this->vsdModel->producer_name);
-        $this->producer_name = is_array($arProducerName) ? reset($arProducerName) : $arProducerName;
-        $country_raw = ikarApi::getInstance($this->org_id)->getCountryByGuid($this->doc->certifiedConsignment->batch->origin->country->guid);
-        $this->country_name = isset($country_raw) ? $country_raw->name : null;
-        if (isset($this->doc->referencedDocument)) {
-            $this->setTransportWaybill($this->doc->referencedDocument);
-        }
-        $this->cargo_expertized = isset($this->doc->authentication->cargoExpertized) ?
-            \Yii::t('api_web', self::$expertizeList[$this->doc->authentication->cargoExpertized]) : null;
-        $this->location_prosperity = $this->doc->authentication->locationProsperity;
-        $this->specialMarks = $this->doc->authentication->specialMarks ?? null;
-        $this->vehicle_number = $this->vsdModel->vehicle_number;
+        $this->producer_name = $this->vsdModel->producer_name;
+        $confirmedBy = json_decode($this->vsdModel->confirmed_by, true);
+        $this->confirmed_by = [
+            'fio'  => $confirmedBy['fio'] ?? "-",
+            'post' => $confirmedBy['post'] ?? "",
+        ];
+        $country = VetisCountry::findOne(['guid' => $this->vsdModel->origin_country_guid]);
+        $this->country_name = isset($country) ? $country->name : null;
 
+        if (isset($this->vsdModel->referencedDocument)) {
+            $this->setTransportWaybill($this->vsdModel->referencedDocument);
+        }
+        $this->vehicle_number = $this->vsdModel->vehicle_number;
+        $other = json_decode($this->vsdModel->other_info, true);
+        if (isset($other['cargoExpertized'])) {
+            $this->cargo_expertized = \Yii::t('api_web', self::$expertizeList[$other['cargoExpertized']]);
+        }
+        $this->location_prosperity = $other['locationProsperity'];
+        $this->special_marks = $other['specialMarks'];
+        $this->issueNumber = (isset($this->vsdModel->number)) ? $this->vsdModel->number : null;
+        $this->issueDate = $this->vsdModel->date_doc;
+        $this->form = $this->vsdModel->form;
+        $this->type = MercVsd::$types[$this->vsdModel->type];
+        $this->status = $this->vsdModel->status;
+        $this->recipient_name = $this->vsdModel->recipient_name;
         return $this;
     }
 
@@ -91,81 +104,79 @@ class VetisHelper
      * Получение полной информации о ВСД
      *
      * @param $uuid
-     * @throws BadRequestHttpException
+     * @throws \Exception
+     * @return VetisHelper
      * */
     public function getFullInfoVsd($uuid)
     {
         $this->getShortInfoVsd($uuid);
 
-        $businessEntity = cerberApi::getInstance($this->org_id)->getBusinessEntityByGuid($this->doc->certifiedConsignment->consignor->businessEntity->guid);
-        $this->consignor_business = isset($businessEntity) ? $businessEntity->name . ', ИНН:' . $businessEntity->inn : null;
-        $this->product_type = isset($this->doc->certifiedConsignment->batch->productType) ?
-            MercVsd::$product_types[$this->doc->certifiedConsignment->batch->productType] : null;
-        $product_raw = productApi::getInstance($this->org_id)->getProductByGuid($this->doc->certifiedConsignment->batch->product->guid);
-        $this->product = isset($product_raw) ? $product_raw->name : null;
-        $sub_product_raw = productApi::getInstance($this->org_id)->getSubProductByGuid($this->doc->certifiedConsignment->batch->subProduct->guid);
-        $this->sub_product = isset($sub_product_raw) ? $sub_product_raw->name : null;
-        $this->product_in_numenclature = $this->doc->certifiedConsignment->batch->productItem->name ?? null;
-        $unit = dictsApi::getInstance($this->org_id)->getUnitByGuid($this->doc->certifiedConsignment->batch->unit->guid);
-        $this->volume = $this->doc->certifiedConsignment->batch->volume . (isset($unit) ? " " . $unit->name : '');
-        $this->date_of_production = MercVsd::getDate($this->doc->certifiedConsignment->batch->dateOfProduction);
-        $this->expiry_date_of_production = MercVsd::getDate($this->doc->certifiedConsignment->batch->expiryDate);
-        $this->perishable_products = isset($this->doc->certifiedConsignment->batch->perishable) ?
-            (($this->doc->certifiedConsignment->batch->perishable == 'true') ? 'Да' : 'Нет') : null;
-        $producer = isset($this->doc->certifiedConsignment->batch->origin->producer) ?
-            MercVsd::getProduccerData($this->doc->certifiedConsignment->batch->origin->producer, $this->org_id) : null;
-        $this->producers = isset($producer) ? implode(", ", $producer['name']) : null;
-        $labResearch = $this->doc->authentication->laboratoryResearch;
+        $hc = cerberApi::getInstance()->getEnterpriseByGuid($this->vsdModel->sender_guid);
+        if (isset($hc)) {
+            if (isset($hc->owner)) {
+                $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
+            }
+        }
+        $this->consignor_business = isset($hc) ? $hc->name . ', ИНН:' . $hc->inn : null;
+        $this->product_type = isset($this->vsdModel->product_type) ?
+            MercVsd::$product_types[$this->vsdModel->product_type] : null;
+        $product = VetisProductByType::findOne(['guid' => $this->vsdModel->product_guid]);
+        $this->product = isset($product) ? $product->name : null;
+        $sub_product = VetisSubproductByProduct::findOne(['guid' => $this->vsdModel->sub_product_guid]);;
+        $this->sub_product = isset($sub_product) ? $sub_product->name : null;
+
+        $this->product_in_numenclature = $this->vsdModel->product_name ?? null;
+
+        $unit = VetisUnit::findOne(['guid' => $this->vsdModel->unit_guid]);;
+        $this->volume = $this->vsdModel->amount . (isset($unit) ? " " . $unit->name : '');
+
+        $this->date_of_production = $this->vsdModel->production_date;
+        $this->expiry_date_of_production = $this->vsdModel->expiry_date;
+        $this->perishable_products = isset($this->vsdModel->perishable) ? (($this->vsdModel->perishable == 'true') ? 'Да' :
+            'Нет') : null;
+
+        $laboratory_research = json_decode($this->vsdModel->laboratory_research, true);
         $this->expertiseInfo = 'Экспертиза не проводилась';
         try {
-            if (isset($labResearch)) {
-                $this->expertiseInfo = $labResearch->operator->name . ' эксп №' . $labResearch->expertiseID . ' от ' .
-                    $labResearch->referencedDocument->issueDate . ' ( ' . $labResearch->indicator->name . ' - ' .
-                    $labResearch->conclusion . ' )';
+            if (array_key_exists('batchID', $laboratory_research)){
+                $this->expertiseInfo = mb_convert_encoding(
+                    $laboratory_research['indicator']['name'] . ' : ' . $laboratory_research['operator']['name'] . " эксп №" . $laboratory_research['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($laboratory_research['actualDateTime'])) . " ( " . $laboratory_research['conclusion'] . " )",  "UTF-8", "UTF-8");
+            } else {
+                $arTmp = [];
+                foreach ($laboratory_research as $item) {
+                    $arTmp[] = mb_convert_encoding(
+                        $item['indicator']['name'] . ' : ' . $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($item['actualDateTime'])) . " ( " . $item['conclusion'] . " )", "UTF-8", "UTF-8");
+                }
+                $this->expertiseInfo = $arTmp;
             }
         } catch (\Throwable $t) {
             // too many errors in VSD
         }
-        $this->transport_type = isset($this->doc->certifiedConsignment->transportInfo->transportType) ?
-            MercVsd::$transport_types[$this->doc->certifiedConsignment->transportInfo->transportType] : null;
-        $this->transport_number = $this->doc->certifiedConsignment->transportInfo->transportNumber->vehicleNumber ?? null;
-        $this->transport_storage_type = isset($this->doc->certifiedConsignment->transportStorageType) ? MercVsd::$storage_types[$this->doc->certifiedConsignment->transportStorageType] : null;
-        if (is_array($this->doc->statusChange)) {
-            $specPerson = current($this->doc->statusChange);
-        } else {
-            $specPerson = $this->doc->statusChange;
-        }
-        $this->specified_person = $specPerson->specifiedPerson->fio ?? "-";
-        $this->specified_person_post = $specPerson->specifiedPerson->post ?? "";
 
+        $transportInfo = json_decode($this->vsdModel->transport_info, true);
+
+        $this->transport_type = isset($transportInfo['transportType']) ? MercVsd::$transport_types[$transportInfo['transportType']] : null;
+        $this->containerNumber = isset($transportInfo['transportNumber']['containerNumber']) ? $transportInfo['transportNumber']['containerNumber'] : null;
+        $this->agonNumber = isset ($transportInfo['transportNumber']['agonNumber']) ? $transportInfo['transportNumber']['wagonNumber'] : null;
+        $this->vehicleNumber = isset($transportInfo['transportNumber']['vehicleNumber']) ? $transportInfo['transportNumber']['vehicleNumber'] : null;
+        $this->trailerNumber = isset($transportInfo['transportNumber']['trailerNumber']) ? $transportInfo['transportNumber']['trailerNumber'] : null;
+        $this->shipName = isset($transportInfo['transportNumber']['shipName']) ? $transportInfo['transportNumber']['shipName'] : null;
+        $this->flightNumber = isset($transportInfo['transportNumber']['flightNumber']) ? $transportInfo['transportNumber']['flightNumber'] : null;
+        $this->transport_storage_type = isset($this->vsdModel->transport_storage_type) ? MercVsd::$storage_types[$this->vsdModel->transport_storage_type] : null;
+
+        $confirmed_by = json_decode($this->vsdModel->confirmed_by, true);
+
+        if (is_array($confirmed_by)) {
+            $specPerson = current($confirmed_by);
+        } else {
+            $specPerson = $confirmed_by;
+        }
+        $this->specified_person = $specPerson['fio'] ?? "-";
+        $this->specified_person_post = $specPerson['post'] ?? "-";
+
+        $this->waybillSeries = $this->vsdModel->waybill_number;
+        $this->waybillDate = $this->vsdModel->waybill_date;
         return $this;
-    }
-
-    /**
-     * Парсит $doc->referencedDocument и записывает в экземпляр класса
-     *
-     * @param object $refDoc
-     * */
-    public function setTransportWaybill($refDoc): void
-    {
-        $docs = [];
-        if (!is_array($refDoc)) {
-            $docs[] = $refDoc;
-        } else {
-            $docs = $refDoc;
-        }
-        $this->referenced_document = null;
-        $this->referenced_date = null;
-        foreach ($docs as $item) {
-            if (($item->type >= 1) && ($item->type <= 5)) {
-                $str = '';
-                $str .= isset($item->issueSeries) && !empty($item->issueSeries) ? $item->issueSeries . ' ' : '';
-                $str .= $item->issueNumber;
-                $this->referenced_document = $str;
-                $this->referenced_date = $item->issueDate;
-                break;
-            }
-        }
     }
 
     /**
@@ -205,7 +216,7 @@ class VetisHelper
     }
 
     /**
-     * @param int $id
+     * @param int   $id
      * @param array $uuids
      * @return array|bool
      */
@@ -265,14 +276,14 @@ class VetisHelper
         $statuses = explode(',', $strStatuses);
         if (count($statuses) > 1) {
             return [
-                'id' => 'CONFIRMED',
+                'id'   => 'CONFIRMED',
                 'text' => \Yii::t('api_web', self::$ordersStatuses['CONFIRMED'])
             ];
         } else {
             $status = current($statuses);
             if ($status) {
                 return [
-                    'id' => $status,
+                    'id'   => $status,
                     'text' => \Yii::t('api_web', self::$ordersStatuses[$status])
                 ];
             }
@@ -332,7 +343,6 @@ class VetisHelper
             ->andWhere(['uuid' => $uuids])->indexBy('uuid')->all();
     }
 
-
     /**
      * @param null $enterpriseGuids
      * @return array
@@ -360,30 +370,80 @@ class VetisHelper
     {
         $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
         foreach ($orgIds['result'] as $orgId) {
-            $entGuid = mercDicconst::getSetting('enterprise_guid', $orgId['id']);
+            $entGuid = $this->getSettings($orgId['id'], ['enterprise_guid']);
             $enterpriseGuids[$entGuid] = $entGuid;
         }
 
         return $enterpriseGuids;
     }
 
-
+    /**
+     * @param $userStatus
+     * @param $uuid
+     * @return int
+     */
     public function setMercVsdUserStatus($userStatus, $uuid)
     {
         $where = ['uuid' => $uuid];
-        return MercVsd::updateAll(['user_status' => $userStatus], $where);
+        return MercVsd::updateAll(['user_status' => $userStatus, 'last_error' => new Expression('NULL')], $where);
     }
-    
+
+    /**
+     * @return \frontend\modules\clientintegr\modules\merc\components\VsdHttp
+     * @throws \Exception
+     */
     public function generateVsdHttp()
     {
+        $settings = $this->getSettings($this->orgId, ['vetis_login', 'vetis_password', 'issuer_id']);
         return new \frontend\modules\clientintegr\modules\merc\components\VsdHttp([
             'authLink'       => \Yii::$app->params['vtsHttp']['authLink'],
             'vsdLink'        => \Yii::$app->params['vtsHttp']['vsdLink'],
             'pdfLink'        => \Yii::$app->params['vtsHttp']['pdfLink'],
             'chooseFirmLink' => \Yii::$app->params['vtsHttp']['chooseFirmLink'],
-            'username'       => mercDicconst::getSetting("vetis_login", $this->org_id),
-            'password'       => mercDicconst::getSetting("vetis_password", $this->org_id),
-            'firmGuid'       => mercDicconst::getSetting("issuer_id", $this->org_id),
+            'username'       => $settings["vetis_login"],
+            'password'       => $settings["vetis_password"],
+            'firmGuid'       => $settings["issuer_id"],
         ]);
+    }
+
+    /**
+     * @param $error
+     * @param $uuid
+     * @return int
+     */
+    public function setLastError($error, $uuid)
+    {
+        if (mb_strlen($error) > 255) {
+            $error = mb_substr($error, 0, 254);
+        }
+        $where = ['uuid' => $uuid];
+        return MercVsd::updateAll(['last_error' => $error, 'user_status' => 'operation error'], $where);
+    }
+
+    /**
+     * @param $uuid
+     * @param $orgId
+     * @return string
+     */
+    public function getVsdDirection($uuid, $orgId)
+    {
+        $guid = $this->getSettings($orgId, ['enterprise_guid']);
+        $model = MercVsd::findOne(['uuid' => $uuid]);
+        if ($guid == $model->recipient_guid && $guid != $model->sender_guid) {
+            return 'incoming';
+        }
+
+        return 'outgoing';
+    }
+
+    /**
+     * @param       $orgId
+     * @param array $settingNames
+     * @return array|string
+     */
+    public function getSettings($orgId, $settingNames = [])
+    {
+        return IntegrationSettingValue::getSettingsByServiceId(Registry::MERC_SERVICE_ID,
+            $orgId, $settingNames);
     }
 }

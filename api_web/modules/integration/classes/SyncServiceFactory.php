@@ -1,17 +1,8 @@
 <?php
 
-/**
- * Class SyncServiceFactory
- * @package api_web\module\integration
- * @createdBy Basil A Konakov
- * @createdAt 2018-09-20
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
- */
-
 namespace api_web\modules\integration\classes;
 
+use api_web\components\Registry;
 use api_web\modules\integration\classes\sync\AbstractSyncFactory;
 use api_web\components\WebApi;
 use yii\web\BadRequestHttpException;
@@ -27,8 +18,8 @@ class SyncServiceFactory extends WebApi
 
     /** SERVICE "id - name" mapping */
     const ALL_SERVICE_MAP = [
-        1 => self::SERVICE_RKEEPER,
-        2 => self::SERVICE_IIKO,
+        Registry::RK_SERVICE_ID   => self::SERVICE_RKEEPER,
+        Registry::IIKO_SERVICE_ID => self::SERVICE_IIKO
     ];
 
     public $syncResult = [];
@@ -42,14 +33,14 @@ class SyncServiceFactory extends WebApi
 
     /**
      * Construct method for Class SyncServiceFactory
-     * @param mixed $serviceId Service ID
-     * @param array $params Transaction params
+     *
+     * @param mixed  $serviceId      Service ID
+     * @param array  $params         Transaction params
      * @param string $callbackTaskId Callback task id
      * @throws BadRequestHttpException
      */
     public function __construct($serviceId = 0, array $params = [], string $callbackTaskId = null)
     {
-
         # 1. Load integration script with application environment params
         parent::__construct();
         SyncLog::trace('Loaded integration script with env and post params');
@@ -76,9 +67,7 @@ class SyncServiceFactory extends WebApi
         } elseif ($callbackTaskId == self::TASK_SYNC_GET_LOG) {
             SyncLog::trace('Show log!');
             SyncLog::showLog($params);
-
         } else {
-
             # 2.2.1. Find service ID and other params by task_id
             $serviceName = null;
             if (isset(self::SYNC_TASK_SERVICE_MAPPING[$callbackTaskId])) {
@@ -98,24 +87,25 @@ class SyncServiceFactory extends WebApi
             $entity = $this->factory((int)$serviceId, $serviceName);
             SyncLog::trace('Initialized entity class: ' . get_class($entity), self::ALL_SERVICE_MAP[$serviceId]);
 
-
             # 2.1.3. Load dictionary data
             /** AbstractSyncFactory $entity */
             $this->syncResult = $entity->getObjects();
-
         }
-
     }
 
     /**
      * Service Class Factory
-     * @param int $serviceId Service ID
+     *
+     * @param int    $serviceId   Service ID
      * @param string $serviceName Service name
      * @return AbstractSyncFactory
      * @throws BadRequestHttpException
      */
-    public function factory(int $serviceId, string $serviceName): AbstractSyncFactory
+    public function factory(int $serviceId, string $serviceName = null): AbstractSyncFactory
     {
+        if (!$serviceName) {
+            $serviceName = (string)self::ALL_SERVICE_MAP[$serviceId];
+        }
 
         $className = __NAMESPACE__ . '\\sync\\Service' . $serviceName;
         if (class_exists($className)) {
@@ -125,5 +115,4 @@ class SyncServiceFactory extends WebApi
             throw new BadRequestHttpException("class_not_exist");
         }
     }
-
 }

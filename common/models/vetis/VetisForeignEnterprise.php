@@ -23,12 +23,14 @@ use Yii;
  * @property string $country_guid
  * @property string $addressView
  * @property string $data
- * @property object
  * @property string $owner_guid
  * @property string $owner_uuid
+ * 
+ * @property object $enterprise
  */
 class VetisForeignEnterprise extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
+
     /**
      * {@inheritdoc}
      */
@@ -65,32 +67,41 @@ class VetisForeignEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
         ];
     }
 
-
     /**
      * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'uuid' => 'Uuid',
-            'guid' => 'Guid',
-            'last' => 'Last',
-            'active' => 'Active',
-            'type' => 'Type',
-            'next' => 'Next',
-            'previous' => 'Previous',
-            'name' => 'Name',
-            'inn' => 'Inn',
-            'kpp' => 'Kpp',
+            'uuid'         => 'Uuid',
+            'guid'         => 'Guid',
+            'last'         => 'Last',
+            'active'       => 'Active',
+            'type'         => 'Type',
+            'next'         => 'Next',
+            'previous'     => 'Previous',
+            'name'         => 'Name',
+            'inn'          => 'Inn',
+            'kpp'          => 'Kpp',
             'country_guid' => 'Country Guid',
-            'addressView' => 'Address View',
-            'data' => 'Data',
+            'addressView'  => 'Address View',
+            'data'         => 'Data',
         ];
     }
-    
+
     public function getEnterprise()
     {
-        return \yii\helpers\Json::decode($this->data);
+        // временно, потом только json
+        require_once __DIR__ . '/../../../frontend/modules/clientintegr/modules/merc/helpers/api/cerber/Cerber.php';
+        try {
+            $result = \yii\helpers\Json::decode($this->data, false);
+            if (isset($result->guid)) {
+                return $result;
+            }
+        } catch (\Exception $e) {
+            return \unserialize($this->data);
+        }
+        return null;
     }
 
     public static function getUpdateData($org_id)
@@ -98,42 +109,41 @@ class VetisForeignEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
         try {
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercForeignEnterpriseList'])->one();
-            if($queue == null) {
-                $queue = new RabbitQueues();
+            if ($queue == null) {
+                $queue                      = new RabbitQueues();
                 $queue->consumer_class_name = 'MercForeignEnterpriseList';
                 $queue->save();
             }
 
             //Формируем данные для запроса
             $data['method'] = 'getForeignEnterpriseChangesList';
-            $data['struct'] = ['listName' => 'enterpriseList',
+            $data['struct'] = ['listName'     => 'enterpriseList',
                 'listItemName' => 'enterprise'
             ];
 
-            $listOptions['count'] = 1000;
+            $listOptions['count']  = 1000;
             $listOptions['offset'] = 0;
 
             $queueDate = $queue->last_executed ?? $queue->start_executing;
 
-            $startDate =  !isset($queueDate) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queueDate;
-            $instance = cerberApi::getInstance($org_id);
+            $startDate       = !isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
+            $instance        = cerberApi::getInstance($org_id);
             $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
             if (!empty($queue->organization_id)) {
                 $queueName = $queue->consumer_class_name . '_' . $queue->organization_id;
-            }
-            else {
+            } else {
                 $queueName = $queue->consumer_class_name;
             }
 
             //ставим задачу в очередь
-            \Yii::$app->get('rabbit')
-                ->setQueue($queueName)
-                ->addRabbitQueue(json_encode($data));
-
+            //\Yii::$app->get('sqsQueue')->sendMessage(Yii::$app->params['sqsQueues']['vetis']['enterprise'], $data);
+//            \Yii::$app->get('rabbit')
+//                ->setQueue($queueName)
+//                ->addRabbitQueue(json_encode($data));
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
-            echo $e->getMessage().PHP_EOL;
         }
     }
+
 }

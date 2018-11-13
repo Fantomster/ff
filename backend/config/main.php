@@ -5,77 +5,22 @@ $params = array_merge(
 );
 
 return [
-    'id' => 'app-backend',
-    'basePath' => dirname(__DIR__),
+    'id'                  => 'app-backend',
+    'basePath'            => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
-    'bootstrap' => ['log'],
-    'modules' => [],
-    'components' => [
-        'request' => [
+    'bootstrap'           => ['log'],
+    'modules'             => [],
+    'components'          => [
+        'request'      => [
             'csrfParam' => '_csrf-fk',
         ],
-        'session' => [
+        'session'      => [
             // this is the name of the session cookie used for login on the backend
             'name' => 'FKEEPSESSID',
-        ],
-        'log' => [
-            'traceLevel' => YII_DEBUG ? 3 : 0,
-            'targets' => [
-                'file' => [
-                    'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
-                ],
-//                'email' => [
-//                    'class' => 'yii\log\EmailTarget',
-//                    'except' => ['yii\web\HttpException:404'],
-//                    'levels' => ['error'],
-//                    'message' => [
-//                        'from' => 'noreply@f-keeper.ru', 
-//                        'to' => ['sharap@f-keeper.ru'], 
-//                        'subject' => 'Error message',
-//                    ],
-//                    'mailer' => 'mailer',
-//                ],
-            ],
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-    /*
-      'urlManager' => [
-      'enablePrettyUrl' => true,
-      'showScriptName' => false,
-      'rules' => [
-      ],
-      ],
-     */
     ],
-    'params' => $params,
-//    'modules' => [
-//        'user' => [
-//            'class' => 'amnah\yii2\user\Module',
-//            'loginEmail' => true,
-//            'requireEmail' => true,
-//            'requireUsername' => false,
-//            'loginUsername' => false, 
-//            'controllerMap' => [
-//                'default' => 'amnah\yii2\user\controllers\DefaultController',
-//            ],
-//        ],
-//    ],
-        /*
-          'on beforeAction' => function ($event) {
-          if (Yii::$app->user->isGuest) {
-          if ($event->action->id !== 'login') {
-          $event->isValid = false;
-          Yii::$app->response->redirect(['/user/default/login']);
-          }
-          return;
-          }
-          if (!Yii::$app->user->can('observe')) {
-          $event->isValid = false;
-          Yii::$app->response->statusCode = 403;
-          }
-          },
-         */
+    'params'              => $params,
 ];

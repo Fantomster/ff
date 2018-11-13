@@ -10,8 +10,9 @@ namespace api_web\modules\integration\modules\vetis\models;
 
 use api_web\classes\UserWebApi;
 use api\common\models\merc\MercVsd;
+use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use common\helpers\DBNameHelper;
-use yii\db\Query;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class VetisWaybillSearch
@@ -37,6 +38,7 @@ class VetisWaybillSearch extends MercVsd
      * @param $params
      * @param $page
      * @param $pageSize
+     * @throws \Exception
      * @return array
      */
     public function search($params, $page, $pageSize)
@@ -50,11 +52,15 @@ class VetisWaybillSearch extends MercVsd
             }
         } else {
             $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
+            if (empty($orgIds['result'])){
+                throw new BadRequestHttpException('You dont have available businesses, plz add relation to organization for your user');
+            }
             $strOrgIds = array_map(function ($el) {
                 return $el['id'];
             }, $orgIds['result']);
             $strOrgIds = implode(',', $strOrgIds);
         }
+        $entGuids = implode('\',\'', (new VetisHelper())->getEnterpriseGuids());
 
         $queryParams = [
             ':page'     => $page,
@@ -87,6 +93,9 @@ class VetisWaybillSearch extends MercVsd
                 a.sender_guid,
                 a.status,
                 a.type,
+                case when a.recipient_guid in (\''.$entGuids.'\') and a.sender_guid not in (\''.$entGuids.'\') then \'incoming\'
+                     else \'outgoing\'
+                end vsd_direction,
                 case when c.id is not null then 
                   (
                   select max(date_doc) 
@@ -98,37 +107,45 @@ class VetisWaybillSearch extends MercVsd
                 else null end ort
                 FROM (SELECT @row := 0, @page_size := :pageSize, @page := 0, @offset := 0, @prev_order_id := NULL) x,
                        merc_vsd a
-                join merc_pconst b on b.const_id = 10 and b.value in ('.$mercPconst.')
+                join merc_pconst b on b.const_id = 10 and b.value in (' . $mercPconst . ')
                 left join `' . $tableName . '`.order_content c on a.uuid = c.merc_uuid
                 where 
-                b.org in (' . $strOrgIds . ') '.$arWhereAndCount['sql'].'
+                b.org in (' . $strOrgIds . ') ' . $arWhereAndCount['sql'] . '
                 order by coalesce(ort, a.date_doc) desc, order_id, a.date_doc desc
                 ) tb 
               ) tb2 where pg=:page
              ';
 
         $result = \Yii::$app->db_api->createCommand($sql, $queryParams)->queryAll();
-
+        $arIncomingOutgoing = [];
         $arUuids = $arOrders = [];
         foreach ($result as $row) {
             $arUuids[$row['uuid']] = $row['order_id'];
             if (!is_null($row['order_id'])) {
                 $arOrders[$row['order_id']] = $row['order_id'];
             }
+            $arIncomingOutgoing[$row['uuid']] = $row['vsd_direction'];
         }
 
 
-        return ['uuids' => $arUuids, 'groups' => $arOrders, 'count' => ceil($arWhereAndCount['count'] / $pageSize)];
+        return [
+            'uuids'    => $arUuids,
+            'groups'   => $arOrders,
+            'count'    => ceil($arWhereAndCount['count'] / $pageSize),
+            'arIncOut' => $arIncomingOutgoing,
+        ];
     }
 
     /**
      * Cant separate method, count depends on where
+     *
      * @param $params
      * @param $strOrgIds
      * @param $queryParams
      * @return array
      */
-    private function generateWhereStatementAndCount($params, $strOrgIds, &$queryParams){
+    private function generateWhereStatementAndCount($params, $strOrgIds, &$queryParams)
+    {
         $sql = '';
         $arCount = [];
         $mercPconst = null;
@@ -138,8 +155,8 @@ class VetisWaybillSearch extends MercVsd
                 $endDate = date('Y-m-d 23:59:59', strtotime($this->to));
             } elseif ($key == 'product_name') {
                 $sql .= " and a.product_name in (";
-                for ($i=0; $i < count($this->product_name); $i++){
-                    $sql .=  ($i==0 ? '' : ",") . ":product_name" . $i;
+                for ($i = 0; $i < count($this->product_name); $i++) {
+                    $sql .= ($i == 0 ? '' : ",") . ":product_name" . $i;
                     $queryParams[':product_name' . $i] = $this->product_name[$i];
                 }
                 $arCount['product_name'] = $this->product_name;
@@ -154,9 +171,9 @@ class VetisWaybillSearch extends MercVsd
                 $sql .= " and a.sender_guid in ('$sender') ";
                 $arCount['sender_guid'] = $this->sender_guid;
             } elseif ($key == 'type') {
-                if ($this->type == 'INCOMING'){
+                if ($this->type == 'INCOMING') {
                     $mercPconst = 'recipient_guid';
-                } elseif ($this->type == 'OUTGOING'){
+                } elseif ($this->type == 'OUTGOING') {
                     $mercPconst = 'sender_guid';
                 }
             } elseif ($key == 'status') {
@@ -174,18 +191,18 @@ class VetisWaybillSearch extends MercVsd
         }
 
         $pConstForCount = 'merc_vsd.recipient_guid,  merc_vsd.sender_guid';
-        if ($mercPconst){
+        if ($mercPconst) {
             $pConstForCount = 'merc_vsd.' . $mercPconst;
         }
         $count = MercVsd::find()->distinct()->leftJoin('merc_pconst b', 'b.const_id = 10 and b.value in ('
-            .$pConstForCount.')')->where(
+            . $pConstForCount . ')')->where(
             array_merge(['b.org' => explode(',', $strOrgIds)], $arCount)
         );
-        if ($between){
+        if ($between) {
             $count->andWhere($between);
         }
         $count = $count->count();
 
-        return ['sql' => $sql, 'count' => $count, 'merc_pconst' => $mercPconst ? 'a.'. $mercPconst : null];
+        return ['sql' => $sql, 'count' => $count, 'merc_pconst' => $mercPconst ? 'a.' . $mercPconst : null];
     }
 }

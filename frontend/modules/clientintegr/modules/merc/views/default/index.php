@@ -128,7 +128,7 @@ Modal::widget([
                     if (!empty($enterprise)) {
                         return $enterprise->name.'('. $enterprise->addressView .')';
                     }
-                    return 22; //$data['recipient_name'];
+                    return $data['recipient_name'];
                 },
                 'visible' => ($searchModel->type == 2),
             ],
@@ -146,8 +146,7 @@ Modal::widget([
                     if (!empty($enterprise)) {
                         return $enterprise->name.'('. $enterprise->addressView .')';
                     }
-                    return 22; //$data['recipient_name'];
-                    //return $data['sender_name'];
+                    return $data['recipient_name'];
                 },
                 'visible' => ($searchModel->type != 2),
             ],

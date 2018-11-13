@@ -2,12 +2,13 @@
 
 /**
  * Class RkwsProduct
- * @package api_web\module\integration\sync
+ *
+ * @package   api_web\module\integration\sync
  * @createdBy Basil A Konakov
  * @createdAt 2018-09-20
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
+ * @author    Mixcart
+ * @module    WEB-API
+ * @version   2.0
  */
 
 namespace api_web\modules\integration\classes\sync;
@@ -18,9 +19,8 @@ use yii\web\BadRequestHttpException;
 
 class RkwsProduct extends ServiceRkws
 {
-
     /** @var string $index Символьный идентификатор справочника */
-    public $index = 'product';
+    public $index = self::DICTIONARY_PRODUCT;
 
     /** @var string $OperDenom Поле Denom в таблице all_service_operation */
     public static $OperDenom = 'sh_get_goods';
@@ -41,15 +41,20 @@ class RkwsProduct extends ServiceRkws
         }
         $array = [];
         $pcount = 0;
-        foreach ($myXML->ITEM as $product) {
-            $pcount++;
-            foreach ($product->attributes() as $k => $v) {
-                $array[$pcount][$k] = strval($v[0]);
+        foreach ($this->iterator($myXML->ITEM) as $group) {
+            if (!isset($group->GOODS_LIST) OR empty($group->GOODS_LIST)) {
+                continue;
             }
-            $array[$pcount]['outer_uid'] = null;
-            foreach ($product->MUNITS as $unit) {
-                foreach ($unit->MUNIT as $v) {
-                    $array[$pcount]['outer_uid'] = strval($v->attributes()['rid'][0]);
+            foreach ($this->iterator($group->GOODS_LIST->ITEM) as $product) {
+                $pcount++;
+                foreach ($product->attributes() as $k => $v) {
+                    $array[$pcount][$k] = strval($v[0]);
+                }
+                $array[$pcount]['outer_uid'] = null;
+                foreach ($product->MUNITS as $unit) {
+                    foreach ($unit->MUNIT as $v) {
+                        $array[$pcount]['outer_uid'] = strval($v->attributes()['rid'][0]);
+                    }
                 }
             }
         }
@@ -60,4 +65,14 @@ class RkwsProduct extends ServiceRkws
         return $array;
     }
 
+    /**
+     * @param $items
+     * @return \Generator
+     */
+    private function iterator($items)
+    {
+        foreach ($items as $item) {
+            yield $item;
+        }
+    }
 }

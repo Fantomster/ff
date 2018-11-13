@@ -121,7 +121,7 @@ abstract class DaemonController extends Controller
     {
         $targets = \Yii::$app->getLog()->targets;
         foreach ($targets as $name => $target) {
-            $target->enabled = false;
+            $target->enabled = false;//($name == 'daemon');
         }
         $config = [
             'levels'  => ['error', 'warning', 'trace', 'info'],
@@ -131,7 +131,7 @@ abstract class DaemonController extends Controller
                 'yii\db\*', // Don't include messages from db
             ],
         ];
-        $targets['daemon'] = new \yii\log\FileTarget($config);
+        $targets['daemon1'] = new \yii\log\FileTarget($config);
         \Yii::$app->getLog()->targets = $targets;
         \Yii::$app->getLog()->init();
     }
@@ -152,6 +152,7 @@ abstract class DaemonController extends Controller
      */
     final public function actionIndex()
     {
+        $targets = \Yii::$app->getLog()->targets;
         if ($this->demonize) {
             $pid = pcntl_fork();
             if ($pid == -1) {

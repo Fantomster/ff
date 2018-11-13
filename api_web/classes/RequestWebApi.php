@@ -184,10 +184,7 @@ class RequestWebApi extends WebApi
         if ($this->user->organization->type_id !== Organization::TYPE_RESTAURANT) {
             throw new BadRequestHttpException('Вы не можете смотреть предложения, могут только рестораны...');
         }
-
-        if (empty($post['request_id'])) {
-            throw new BadRequestHttpException('empty_param|request_id');
-        }
+        $this->validateRequest($post, ['request_id']);
 
         $model = Request::find()->where(['id' => (int)$post['request_id']])->one();
         if (empty($model)) {
@@ -233,9 +230,7 @@ class RequestWebApi extends WebApi
      */
     public function getRequest(array $post)
     {
-        if (empty($post['request_id'])) {
-            throw new BadRequestHttpException('empty_param|request_id');
-        }
+        $this->validateRequest($post, ['request_id']);
 
         $model = Request::find()->where(['id' => (int)$post['request_id']])->one();
         if (empty($model)) {
@@ -260,17 +255,7 @@ class RequestWebApi extends WebApi
             throw new BadRequestHttpException('Вы не можете создавать заявки, могут только рестораны...');
         }
 
-        if (empty($post['category_id'])) {
-            throw new BadRequestHttpException('empty_param|category_id');
-        }
-
-        if (empty($post['product'])) {
-            throw new BadRequestHttpException('empty_param|product');
-        }
-
-        if (empty($post['amount'])) {
-            throw new BadRequestHttpException('empty_param|amount');
-        }
+        $this->validateRequest($post, ['category_id', 'product', 'amount']);
 
         $issetCategory = false;
         $category = $this->getCategoryList();
@@ -322,9 +307,7 @@ class RequestWebApi extends WebApi
      */
     public function close(array $post)
     {
-        if (empty($post['request_id'])) {
-            throw new BadRequestHttpException('empty_param|request_id');
-        }
+        $this->validateRequest($post, ['request_id']);
 
         $model = Request::findOne((int)$post['request_id']);
         if (empty($model)) {
@@ -351,13 +334,7 @@ class RequestWebApi extends WebApi
             throw new BadRequestHttpException('Вы не можете отправить предложение, доступно только поставщикам...');
         }
 
-        if (empty($post['request_id'])) {
-            throw new BadRequestHttpException('empty_param|request_id');
-        }
-
-        if (empty($post['price'])) {
-            throw new BadRequestHttpException('empty_param|price');
-        }
+        $this->validateRequest($post, ['request_id', 'price']);
 
         $request = Request::findOne((int)$post['request_id']);
         if (empty($request)) {
@@ -413,13 +390,7 @@ class RequestWebApi extends WebApi
             throw new BadRequestHttpException('Вы не ресторан, проходите дальше...');
         }
 
-        if (empty($post['request_id'])) {
-            throw new BadRequestHttpException('empty_param|request_id');
-        }
-
-        if (empty($post['callback_id'])) {
-            throw new BadRequestHttpException('empty_param|callback_id');
-        }
+        $this->validateRequest($post, ['request_id', 'callback_id']);
 
         $request = Request::findOne((int)$post['request_id']);
         if (empty($request)) {
@@ -466,9 +437,7 @@ class RequestWebApi extends WebApi
             throw new BadRequestHttpException('Вы не ресторан, проходите дальше...');
         }
 
-        if (empty($post['request_id'])) {
-            throw new BadRequestHttpException('empty_param|request_id');
-        }
+        $this->validateRequest($post, ['request_id']);
 
         $request = Request::findOne((int)$post['request_id']);
         if (empty($request)) {

@@ -10,23 +10,25 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "license_organization".
  *
- * @property int     $id
- * @property int     $license_id        Указатель на ID лицензии
- * @property int     $org_id            Указатель на организацию
- * @property string  $fd                Начало действия услуги
- * @property string  $td                Окончание действия услуги
- * @property string  $created_at        Дата создания
- * @property string  $updated_at        Дата обновления
- * @property string  $object_id         (Идентификатор объекта во внешней системе
- * @property string  $outer_last_active Время последней зарегистрированной активности
- * @property int     $status_id         Статус лицензии - идентификатор
- * @property int     $is_deleted        Признак soft-delete
- *
- * @property License $license
+ * @property int            $id
+ * @property int            $license_id        Указатель на ID лицензии
+ * @property int            $org_id            Указатель на организацию
+ * @property string         $fd                Начало действия услуги
+ * @property string         $td                Окончание действия услуги
+ * @property string         $created_at        Дата создания
+ * @property string         $updated_at        Дата обновления
+ * @property string         $object_id         (Идентификатор объекта во внешней системе
+ * @property string         $outer_last_active Время последней зарегистрированной активности
+ * @property int            $status_id         Статус лицензии - идентификатор
+ * @property int            $is_deleted        Признак soft-delete
+ * @property License        $license
  * @property LicenseService $licenseService
  */
 class LicenseOrganization extends ActiveRecord
 {
+    const STATUS_INACTIVE = 0;
+    const STATUS_ACTIVE = 1;
+
     /**
      * {@inheritdoc}
      */
@@ -52,8 +54,6 @@ class LicenseOrganization extends ActiveRecord
             [['license_id', 'org_id', 'status_id', 'is_deleted'], 'integer'],
             [['fd', 'td', 'created_at', 'updated_at', 'outer_last_active'], 'safe'],
             [['object_id'], 'string', 'max' => 64],
-            [['outer_user', 'outer_name', 'outer_address'], 'string', 'max' => 255],
-            [['outer_phone'], 'string', 'max' => 32],
             [['license_id'], 'exist', 'skipOnError' => true, 'targetClass' => License::class, 'targetAttribute' => ['license_id' => 'id']],
         ];
     }
@@ -72,16 +72,11 @@ class LicenseOrganization extends ActiveRecord
             'created_at'        => 'Дата создания',
             'updated_at'        => 'Дата обновления',
             'object_id'         => '(Идентификатор объекта во внешней системе',
-            'outer_user'        => 'Имя пользователя во внешней системе',
-            'outer_name'        => 'Имя внешнего объекта - название ресторана внутри UCS, например',
-            'outer_address'     => 'Адрес внешнего объекта - по данным UCS, например',
-            'outer_phone'       => 'Телефон(ы) внешнего объекта лицензии',
             'outer_last_active' => 'Время последней зарегистрированной активности',
             'status_id'         => 'Статус лицензии - идентификатор',
             'is_deleted'        => 'Признак soft-delete',
         ];
     }
-
 
     public function behaviors()
     {
@@ -95,7 +90,6 @@ class LicenseOrganization extends ActiveRecord
         ];
     }
 
-
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -103,7 +97,6 @@ class LicenseOrganization extends ActiveRecord
     {
         return $this->hasOne(License::class, ['id' => 'license_id']);
     }
-
 
     /**
      * @return \yii\db\ActiveQuery
@@ -119,5 +112,25 @@ class LicenseOrganization extends ActiveRecord
     public function getLicenseService()
     {
         return $this->hasOne(LicenseService::class, ['license_id' => 'license_id']);
+    }
+
+    /**
+     * @param $organization_id
+     * @param $service_id
+     * @return \api\common\models\merc\MercVsd[]|array|\common\models\Franchisee[]|\common\models\IntegrationSettingValue[]|LicenseOrganization[]|\common\models\User[]|\common\models\vetis\VetisForeignEnterprise[]|\common\models\vetis\VetisProductByType[]|\common\models\vetis\VetisProductItem[]|\common\models\vetis\VetisRussianEnterprise[]|ActiveRecord[]
+     */
+    public static function getLicenseForOrganizationService($organization_id, $service_id)
+    {
+        $licenseTableName = License::tableName();
+        $licenseServiceTableName = LicenseService::tableName();
+        $licenseOrgTablename = self::tableName();
+        return self::find()
+            ->select(["$licenseOrgTablename.*"])
+            ->leftJoin($licenseTableName, "$licenseTableName.id = $licenseOrgTablename.license_id")
+            ->leftJoin($licenseServiceTableName, "$licenseServiceTableName.license_id = $licenseTableName.id")
+            ->where("$licenseTableName.is_active = 1 and now() between $licenseOrgTablename.fd 
+            and $licenseOrgTablename.td and $licenseOrgTablename.org_id = :organization and $licenseServiceTableName.service_id = :service",
+                [':organization' => $organization_id, ':service' => $service_id])
+            ->all();
     }
 }

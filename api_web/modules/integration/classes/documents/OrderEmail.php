@@ -1,74 +1,24 @@
 <?php
+
 namespace api_web\modules\integration\classes\documents;
 
 use api_web\classes\DocumentWebApi;
 use api_web\modules\integration\interfaces\DocumentInterface;
-use common\models\IntegrationInvoice as BaseOrder;
 
-class OrderEmail extends BaseOrder implements DocumentInterface
+class OrderEmail extends Order implements DocumentInterface
 {
-
     /**
      * Порлучение данных из модели
+     *
      * @return mixed
      */
     public function prepare()
     {
-        if (empty($this->attributes)) {
-            return [];
-        }
-
-        $order = (isset($this->order_id)) ? $this->order() : null;
-
-        $return = [
-            "id" => $this->id,
-            "mumber" => $this->number,
-            "type" => DocumentWebApi::TYPE_ORDER_EMAIL,
-            "status_id" => isset($order) ? $order->status_id : null,
-            "status_text" => isset($order) ? $order->statusText : null,
-        ];
-
-        $return ["agent"] = [
-        ];
-
-        $vendor = null;
-        if(isset($this->vendor_id)) {
-            $vendor = $this->vendor;
-        }
-        elseif (isset($order)) {
-            $vendor = $order->vendor;
-        }
-
-        if($vendor != null) {
-            $return["vendor"] = [
-                "id" => $vendor->id,
-                "name" => $vendor->name,
-                "difer" => false,
-            ];
-        }
-        else
-        {
-            $return["vendor"] = [];
-        }
-        $return["is_mercury_cert"] = isset($order) ? $order->getIsMercuryCert() : null;
-        $return["count"] = count($this->content);
-        $return["total_price"] = $this->totalSumm;
-        $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->date));
+        $return = parent::prepare();
+        $return['type'] = DocumentWebApi::TYPE_ORDER_EMAIL;
+        $return['replaced_order_id'] = (int)$this->replaced_order_id ?? null;
+        $return['doc_date'] = (!empty($this->invoice) ? date("Y-m-d H:i:s T", strtotime($this->invoice->date)) : null);
 
         return $return;
-    }
-
-    /**
-     * Загрузка модели и получение данных
-     * @param $key
-     * @return $array
-     */
-    public static function prepareModel($key)
-    {
-        $model = self::findOne(['id' => $key]);
-        if($model === null ) {
-            return [];
-        }
-        return $model->prepare();
     }
 }

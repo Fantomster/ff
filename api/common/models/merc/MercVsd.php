@@ -3,11 +3,10 @@
 namespace api\common\models\merc;
 
 use api\common\models\RabbitQueues;
+use common\models\OrderContent;
 use console\modules\daemons\components\UpdateDictInterface;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\ikar\ListOptions;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
-use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\mercuryApi;
+use yii\behaviors\TimestampBehavior;
 use Yii;
 
 /**
@@ -44,6 +43,22 @@ use Yii;
  * @property string $producer_guid
  * @property int    $low_grade_cargo
  * @property string $raw_data
+ * @property string $last_error
+ * @property string $owner_guid
+ * @property string $product_guid
+ * @property string $sub_product_guid
+ * @property string $product_item_guid
+ * @property string $origin_country_guid
+ * @property string $waybill_number
+ * @property string $waybill_date
+ * @property string $confirmed_by
+ * @property string $other_info
+ * @property string $laboratory_research
+ * @property string $transport_info
+ * @property string $unit_guid
+ * @property string $user_status
+ * @property string $created_at
+ * @property string $updated_at
  */
 class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
@@ -143,17 +158,31 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
         return Yii::$app->get('db_api');
     }
 
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['date_doc', 'last_update_date', 'raw_data'], 'safe'],
+            [['date_doc', 'last_update_date', 'raw_data', 'waybill_date', 'confirmed_by', 'other_info', 'laboratory_research', 'transport_info', 'batch_id', 'producer_name', 'producer_guid'], 'safe'],
             [['finalized', 'product_type', 'perishable', 'low_grade_cargo'], 'integer'],
             [['amount'], 'number'],
-            [['uuid', 'number', 'type', 'status', 'recipient_name', 'recipient_guid', 'sender_guid', 'sender_name', 'product_name', 'unit', 'production_date', 'expiry_date', 'producer_name', 'producer_guid'], 'string', 'max' => 255],
-            [['form', 'vehicle_number', 'trailer_number', 'container_number', 'transport_storage_type', 'gtin', 'article', 'batch_id'], 'string', 'max' => 45],
+            [['uuid', 'number', 'type', 'status', 'recipient_name', 'recipient_guid', 'sender_guid',
+                'sender_name', 'product_name', 'unit', 'production_date', 'expiry_date', 'owner_guid', 'product_guid', 'sub_product_guid', 'product_item_guid', 'origin_country_guid', 'waybill_number', 'unit_guid'], 'string', 'max' => 255],
+            [['created_at', 'updated_at'], 'safe'],
+            [['form', 'vehicle_number', 'trailer_number', 'container_number', 'transport_storage_type', 'gtin', 'article'], 'string', 'max' => 45],
         ];
     }
 
@@ -267,14 +296,16 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 
     public static function getProduccerData($producer, $org_id)
     {
-        if (!is_array($producer))
+        if (!is_array($producer)) {
             $data[] = $producer;
-        else
+        } else {
             $data = $producer;
-
+        }
         $result = null;
         foreach ($data as $item) {
             $res = isset($item->enterprise->uuid) ? cerberApi::getInstance($org_id)->getEnterpriseByUuid($item->enterprise->uuid) : null;
+
+            //var_dump($res); die();
 
             $result['name'][] = isset($res) ? ($res->name . '(' . $res->address->addressView . ')') : null;
             $result['guid'][] = $item->enterprise->guid;
@@ -307,6 +338,7 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $queueName = $queue->consumer_class_name;
             }
 
+            $data['job_uid'] = base64_encode(strtolower('MercVSDList').time());
             $data['startDate'] = $start_date ?? gmdate("Y-m-d H:i:s", time() - 60*60*24);
             $data['listOptions']['count'] = 100;
             $data['listOptions']['offset'] = 0;
@@ -324,5 +356,13 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
         }
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrderContent()
+    {
+        return $this->hasOne(OrderContent::className(), ['merc_uuid' => 'uuid']);
     }
 }

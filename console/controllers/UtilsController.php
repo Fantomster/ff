@@ -2,8 +2,11 @@
 
 namespace console\controllers;
 
+use api\common\models\merc\MercVsd;
 use api_web\helpers\Product;
 use common\models\vetis\VetisProductItem;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentsChangeList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\Products;
 use yii\console\Controller;
 
@@ -315,11 +318,49 @@ class UtilsController extends Controller
             echo $i . "/" . $all_count . PHP_EOL;
         }
     }
-    
-    public function actionCloudWatchTest()
+
+    public function actionUpdateMercVsd($count = 1000)
     {
-        \Yii::$app->get('cloudWatchLog')->writeLog("testCWL", "id_102", "test 3");
-        \Yii::$app->get('cloudWatchLog')->writeLog("testCWL", "id_108", "test 8");
-        \Yii::$app->get('cloudWatchLog')->writeLog("testCWL2", "id_99", "test 12");
+        $mercury = new Mercury();
+        $all_count = MercVsd::find()->count();
+        echo "Update ".$all_count." rows".PHP_EOL;
+        $offset = 0;
+        $i=0;
+
+        do {
+            $query = (new \yii\db\Query())
+                ->select([
+                    'uuid',
+                    'raw_data' //=> '(SELECT t2.data FROM ' . VetisProductItem::tableName() . ' t2 WHERE t2.uuid = t1.uuid)'
+                ])
+                ->from(MercVsd::tableName() . ' t1')
+                ->limit($count)
+                ->offset($offset)
+                ->indexBy('uuid');
+
+            echo "start SQL".PHP_EOL;
+            $rows = $query->all(\Yii::$app->get('db_api'));
+            echo "end SQL".PHP_EOL;
+            $this->mercVSDWork($rows, $i, $all_count);
+            $offset += $count;
+        } while ($i < $all_count);
+    }
+
+    private function mercVSDWork($rows, &$i, $all_count)
+    {
+        $generator = function ($items) {
+            foreach ($items as &$item) {
+                yield $item;
+            }
+        };
+
+        $vsd = new VetDocumentsChangeList();
+        $vsd->org_id = 0;
+        foreach ($generator($rows) as $row) {
+            $i++;
+            $doc = (unserialize($row['raw_data']));
+            $vsd->updateDocumentsList($doc);
+            echo $i . "/" . $all_count . PHP_EOL;
+        }
     }
 }

@@ -8,6 +8,7 @@ use yii\web\BadRequestHttpException;
 
 /**
  * Class UserController
+ *
  * @package api\modules\v1\modules\web\controllers
  */
 class UserController extends WebApiController
@@ -54,6 +55,7 @@ class UserController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionGet()
     {

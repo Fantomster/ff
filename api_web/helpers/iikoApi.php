@@ -9,6 +9,7 @@
 namespace api_web\helpers;
 
 use api\common\models\iiko\iikoWaybill;
+use api_web\components\Registry;
 use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
 use common\models\IntegrationSettingValue;
 use common\models\Waybill;
@@ -55,7 +56,7 @@ class iikoApi
     public static function getInstance($orgId = null)
     {
         if (self::$_instance === null) {
-            $settings = IntegrationSettingValue::getSettingsByServiceId(WaybillHelper::IIKO_SERVICE_ID, $orgId, ['URL', 'auth_login', 'auth_password']);
+            $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::IIKO_SERVICE_ID, $orgId, ['URL', 'auth_login', 'auth_password']);
             self::$_instance = new self;
             self::$_instance->host = $settings['URL'];
             self::$_instance->login = $settings['auth_login'];

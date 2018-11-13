@@ -2,7 +2,12 @@
 
 namespace api_web\classes;
 
+use api_web\components\Registry;
 use api_web\helpers\WebApiHelper;
+use common\models\licenses\License;
+use common\models\ManagerAssociate;
+use common\models\notifications\EmailNotification;
+use common\models\notifications\SmsNotification;
 use common\models\RelationSuppRest;
 use common\models\RelationUserOrganization;
 use common\models\Role;
@@ -13,8 +18,6 @@ use common\models\UserToken;
 use api_web\components\Notice;
 use common\models\RelationSuppRestPotential;
 use common\models\Organization;
-use yii\data\ArrayDataProvider;
-use yii\db\Expression;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -32,7 +35,7 @@ class UserWebApi extends \api_web\components\WebApi
      *
      * @param $post
      * @return array
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|\Exception
      */
     public function get($post)
     {
@@ -46,14 +49,24 @@ class UserWebApi extends \api_web\components\WebApi
         if (empty($model)) {
             throw new BadRequestHttpException('user_not_found');
         }
+        if (empty($model->integration_service_id)) {
+            foreach ([Registry::RK_SERVICE_ID, Registry::IIKO_SERVICE_ID] as $serviceId) {
+                if (!empty(License::checkByServiceId($this->user->organization_id, $serviceId))) {
+                    $model->integration_service_id = $serviceId;
+                    $model->save();
+                    break;
+                }
+            }
+        }
 
         return [
-            'id'      => $model->id,
-            'email'   => $model->email,
-            'phone'   => $model->profile->phone,
-            'name'    => $model->profile->full_name,
-            'role_id' => $model->role->id,
-            'role'    => $model->role->name,
+            'id'                     => $model->id,
+            'email'                  => $model->email,
+            'phone'                  => $model->profile->phone,
+            'name'                   => $model->profile->full_name,
+            'role_id'                => $model->role->id,
+            'role'                   => $model->role->name,
+            'integration_service_id' => $model->integration_service_id,
         ];
     }
 
@@ -143,11 +156,11 @@ class UserWebApi extends \api_web\components\WebApi
      * Создание профиля пользователя
      *
      * @param array $post
-     * @param User  $user
+     * @param       $user
      * @return Profile
      * @throws ValidationException
      */
-    public function createProfile(array $post, User $user)
+    public function createProfile(array $post, $user)
     {
         $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
         if (mb_substr($phone, 0, 1) == '8') {
@@ -178,9 +191,7 @@ class UserWebApi extends \api_web\components\WebApi
     {
         WebApiHelper::clearRequest($post);
 
-        if (!isset($post['user_id'])) {
-            throw new BadRequestHttpException('empty_param|user_id');
-        }
+        $this->validateRequest($post, ['user_id']);
 
         $model = User::findOne($post['user_id']);
         if (empty($model)) {
@@ -228,17 +239,11 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function confirm(array $post)
     {
+        $this->validateRequest($post, ['user_id', 'code']);
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $user_id = (int)trim($post['user_id']);
-            if (empty($user_id)) {
-                throw new BadRequestHttpException('empty_param|user_id');
-            }
-
             $code = (int)trim($post['code']);
-            if (empty($code)) {
-                throw new BadRequestHttpException('empty_param|code');
-            }
 
             $userToken = UserToken::findByPIN($code, [UserToken::TYPE_EMAIL_ACTIVATE]);
             if (!$userToken || ($userToken->user_id !== $user_id)) {
@@ -270,10 +275,7 @@ class UserWebApi extends \api_web\components\WebApi
     {
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-
-            if (!isset($post['organization_id'])) {
-                throw new BadRequestHttpException('empty_param|organization_id');
-            }
+            $this->validateRequest($post, ['organization_id']);
 
             $organization = Organization::findOne(['id' => $post['organization_id']]);
             if (empty($organization)) {
@@ -545,13 +547,10 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function removeVendor(array $post)
     {
-        if (empty($post['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($post, ['vendor_id']);
 
         $id = (int)$post['vendor_id'];
         $vendor = Organization::find()->where(['id' => $id])->andWhere(['type_id' => Organization::TYPE_SUPPLIER])->one();
-
         if (empty($vendor)) {
             throw new BadRequestHttpException('vendor_not_found');
         }
@@ -587,17 +586,7 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function changePassword($post)
     {
-        if (empty($post['password'])) {
-            throw new BadRequestHttpException('empty_param|password');
-        }
-
-        if (empty($post['new_password'])) {
-            throw new BadRequestHttpException('empty_param|new_password');
-        }
-
-        if (empty($post['new_password_confirm'])) {
-            throw new BadRequestHttpException('empty_param|new_password_confirm');
-        }
+        $this->validateRequest($post, ['password', 'new_password', 'new_password_confirm']);
 
         if (!$this->user->validatePassword($post['password'])) {
             throw new BadRequestHttpException('bad_old_password');
@@ -641,10 +630,7 @@ class UserWebApi extends \api_web\components\WebApi
     public function mobileChange($post)
     {
         WebApiHelper::clearRequest($post);
-
-        if (empty($post['phone'])) {
-            throw new BadRequestHttpException('empty_param|password');
-        }
+        $this->validateRequest($post, ['phone']);
 
         $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['phone']);
         if (mb_substr($phone, 0, 1) == '8') {
@@ -709,7 +695,6 @@ class UserWebApi extends \api_web\components\WebApi
         return ['result' => true];
     }
 
-
     /**
      * Смена телефона неподтвержденным пользователем
      *
@@ -758,7 +743,6 @@ class UserWebApi extends \api_web\components\WebApi
         return ['result' => true];
     }
 
-
     /**
      * Информация о поставщике
      *
@@ -804,7 +788,8 @@ class UserWebApi extends \api_web\components\WebApi
             'picture'       => $model->vendor->getPictureUrl() ?? "",
             'address'       => implode(', ', $locality),
             'rating'        => $model->vendor->rating ?? 0,
-            'allow_editing' => $model->vendor->allow_editing
+            'allow_editing' => $model->vendor->allow_editing,
+            'is_edi'        => !empty($model->vendor->organizationGln) ? true : false
         ];
     }
 
@@ -860,12 +845,13 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function getUserOrganizationBusinessList()
     {
-        $res = (new Query())->select(['a.id', 'a.name'])->from('organization a')
-            ->leftJoin('relation_user_organization b', 'a.id = b.organization_id')
-            ->where([
-                'b.user_id'   => $this->user->id,
-                'a.type_id'   => 1,
-                'b.role_id'   => [
+        $res = (new Query())->select(['a.id', 'a.name'])->distinct()->from('organization a')
+            ->leftJoin('relation_user_organization b', 'a.id = b.organization_id, (select id, parent_id from organization where id = :orgId) c', [':orgId' => $this->user->organization_id])
+            ->where('coalesce(a.parent_id, a.id) = coalesce(c.parent_id, c.id)')
+            ->andWhere([
+                'b.user_id' => $this->user->id,
+                'a.type_id' => 1,
+                'b.role_id' => [
                     Role::ROLE_RESTAURANT_MANAGER,
                     Role::ROLE_RESTAURANT_EMPLOYEE,
                     Role::ROLE_RESTAURANT_BUYER,
@@ -874,5 +860,116 @@ class UserWebApi extends \api_web\components\WebApi
             ])->all();
 
         return ['result' => $res];
+    }
+
+    /**
+     * @param $user_id
+     * @param $organization_id
+     * @return array|EmailNotification|null|\yii\db\ActiveRecord
+     * @throws BadRequestHttpException
+     */
+    public function setDefaultEmailNotification($user_id, $organization_id)
+    {
+        $relation = RelationUserOrganization::find()
+            ->select('id')
+            ->where(['user_id'         => $user_id,
+                     'organization_id' => $organization_id,
+                     'is_active'       => 1])
+            ->scalar();
+
+        if (!$relation) {
+            throw new BadRequestHttpException('no such user relation');
+        }
+
+        $notification = EmailNotification::findOne(['user_id' => $user_id, 'rel_user_org_id' => $relation]);
+
+        if (!$notification) {
+            $notification = new EmailNotification();
+            $notification->user_id = $user_id;
+            $notification->rel_user_org_id = $relation;
+        }
+
+        $notification->orders = true;
+        $notification->requests = true;
+        $notification->changes = true;
+        $notification->invites = true;
+        $notification->order_done = isset($organization) ? (($organization->type_id == Organization::TYPE_SUPPLIER) ? 0 : 1) : 0;
+        $notification->save();
+
+        return $notification;
+    }
+
+    /**
+     * @param $user_id
+     * @param $organization_id
+     * @return SmsNotification
+     * @throws BadRequestHttpException
+     */
+    public function setDefaultSmsNotification($user_id, $organization_id)
+    {
+        $relation = RelationUserOrganization::find()
+            ->select('id')
+            ->where(['user_id'         => $user_id,
+                     'organization_id' => $organization_id,
+                     'is_active'       => 1])
+            ->scalar();
+
+        if (!$relation) {
+            throw new BadRequestHttpException('no such user relation');
+        }
+
+        $notification = SmsNotification::findOne(['user_id' => $user_id, 'rel_user_org_id' => $relation]);
+
+        if (!$notification) {
+            $notification = new SmsNotification();
+            $notification->user_id = $user_id;
+            $notification->rel_user_org_id = $relation;
+        }
+        $notification->orders = true;
+        $notification->requests = true;
+        $notification->changes = true;
+        $notification->invites = true;
+        $notification->save();
+
+        return $notification;
+    }
+
+    /**
+     * @param      $user_id
+     * @param      $organization_id
+     * @param      $profile
+     * @param null $associate_org_id
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    public function initUserOptions($user_id, $organization_id, $profile, $associate_org_id = null)
+    {
+        $user = \common\models\User::findOne(['id' => $user_id]);
+        if (!$user) {
+            throw new BadRequestHttpException('user_not_found');
+        }
+
+        $transaction = \Yii::$app->db_api->beginTransaction();
+        try {
+            $user->setOrganization($organization_id, true);
+            $user->setRelationUserOrganization($organization_id, $user->role_id);
+
+            if ($associate_org_id) {
+                if (!ManagerAssociate::find()->where(['manager_id' => $user->id, 'organization_id' => $associate_org_id])->exists()) {
+                    $managerAssociate = new ManagerAssociate();
+                    $managerAssociate->manager_id = $user->id;
+                    $managerAssociate->organization_id = $associate_org_id;
+                    $managerAssociate->save();
+                }
+            }
+
+            $this->setDefaultEmailNotification($user->id, $organization_id);
+            $this->setDefaultSmsNotification($user->id, $organization_id);
+            $this->createProfile($profile, $user);
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollback();
+            throw $e;
+        }
     }
 }

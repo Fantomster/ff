@@ -2,7 +2,6 @@
 
 namespace api_web\classes;
 
-use api_web\components\definitions\Order;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogBaseGoods;
@@ -19,6 +18,7 @@ use yii\web\BadRequestHttpException;
 
 /**
  * Class GuideWebApi
+ *
  * @package api_web\classes
  */
 class GuideWebApi extends \api_web\components\WebApi
@@ -34,12 +34,14 @@ class GuideWebApi extends \api_web\components\WebApi
      *      'updated_at' => NOW()
      *   ), ...
      * )
+     *
      * @var array
      */
     private $add_products = [];
 
     /**
      * Список шаблонов
+     *
      * @param array $post
      * @return array
      */
@@ -128,10 +130,10 @@ class GuideWebApi extends \api_web\components\WebApi
             }
         }
         $return = [
-            'result' => $result,
+            'result'     => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -140,15 +142,14 @@ class GuideWebApi extends \api_web\components\WebApi
 
     /**
      * Информация о шаблоне
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
      */
     public function getInfo(array $post)
     {
-        if (empty($post['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
+        $this->validateRequest($post, ['guide_id']);
 
         $this->isMyGuide($post['guide_id']);
 
@@ -157,15 +158,14 @@ class GuideWebApi extends \api_web\components\WebApi
 
     /**
      * Список продуктов шаблона, с пагинацией и фильтрами
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
      */
     public function getProducts(array $post)
     {
-        if (empty($post['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
+        $this->validateRequest($post, ['guide_id']);
 
         $this->isMyGuide($post['guide_id']);
 
@@ -227,10 +227,10 @@ class GuideWebApi extends \api_web\components\WebApi
             }
         }
         $return = [
-            'products' => $result,
+            'products'   => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -239,6 +239,7 @@ class GuideWebApi extends \api_web\components\WebApi
 
     /**
      * Создание шаблона
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -246,12 +247,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function create(array $post)
     {
-        if (empty($post['name'])) {
-            throw new BadRequestHttpException("empty_param|name");
-        }
-        if (empty($post['color'])) {
-            throw new BadRequestHttpException("empty_param|color");
-        }
+        $this->validateRequest($post, ['name', 'color']);
 
         $client = $this->user->organization;
         $transaction = \Yii::$app->db->beginTransaction();
@@ -275,7 +271,7 @@ class GuideWebApi extends \api_web\components\WebApi
                 $transaction->commit();
                 return $this->prepareGuide($guide->id);
             } else {
-                throw new BadRequestHttpException("Создание шаблона, доступно только для Ресторана.");
+                throw new BadRequestHttpException("guide.vendor_create_denied");
             }
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -285,15 +281,14 @@ class GuideWebApi extends \api_web\components\WebApi
 
     /**
      * Создание шаблона из заказа
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
      */
     public function createFromOrder(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException("empty_param|order_id");
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $order = \common\models\Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
         if (empty($order)) {
@@ -301,32 +296,31 @@ class GuideWebApi extends \api_web\components\WebApi
         }
 
         if (empty($order->orderContent)) {
-            throw new BadRequestHttpException("Not found products in order_content!");
+            throw new BadRequestHttpException("order_content_not_found");
         }
 
         $request = [
-            'name' => 'Шаблон по заказу №' . $order->id . ' ' . date('d/m/Y'),
-            'color' => Guide::$COLORS[rand(0, (count(Guide::$COLORS) - 1))],
+            'name'     => \Yii::t('api_web', 'guide.template_name') . $order->id . ' ' . date('d/m/Y'),
+            'color'    => Guide::$COLORS[rand(0, (count(Guide::$COLORS) - 1))],
             'products' => []
         ];
 
         foreach ($order->orderContent as $orderContent) {
             $request['products'][] = $orderContent->product_id;
         }
-
-        return $this->create($request);
+        $array = $this->create($request);
+        return $array;
     }
 
     /**
      * Удалить шаблон
+     *
      * @param array $params
      * @throws BadRequestHttpException
      */
     public function delete(array $params)
     {
-        if (empty($params['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
+        $this->validateRequest($params, ['guide_id']);
         $this->isMyGuide($params['guide_id']);
         $model = Guide::findOne($params['guide_id']);
         if ($model) {
@@ -336,6 +330,7 @@ class GuideWebApi extends \api_web\components\WebApi
 
     /**
      * Переименовать шаблон
+     *
      * @param array $params
      * @return array
      * @throws BadRequestHttpException
@@ -343,12 +338,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function rename(array $params)
     {
-        if (empty($params['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
-        if (empty($params['name'])) {
-            throw new BadRequestHttpException("empty_param|name");
-        }
+        $this->validateRequest($params, ['guide_id', 'name']);
 
         $this->isMyGuide($params['guide_id']);
 
@@ -365,6 +355,7 @@ class GuideWebApi extends \api_web\components\WebApi
 
     /**
      * Меняем цвет шаблона
+     *
      * @param array $params
      * @return array
      * @throws BadRequestHttpException
@@ -372,12 +363,7 @@ class GuideWebApi extends \api_web\components\WebApi
      */
     public function changeColorGuide(array $params)
     {
-        if (empty($params['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
-        if (empty($params['color'])) {
-            throw new BadRequestHttpException("empty_param|color");
-        }
+        $this->validateRequest($params, ['guide_id', 'color']);
 
         $this->isMyGuide($params['guide_id']);
 
@@ -394,16 +380,14 @@ class GuideWebApi extends \api_web\components\WebApi
 
     /**
      * Добавить шаблон в корзину
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
      */
     public function addToCart(array $post)
     {
-
-        if (empty($post['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
+        $this->validateRequest($post, ['guide_id']);
 
         $this->isMyGuide($post['guide_id']);
 
@@ -411,14 +395,13 @@ class GuideWebApi extends \api_web\components\WebApi
         $dataProvider = (new GuideProductsSearch())->search([], $post['guide_id'], $client->id);
         $result = $dataProvider->models;
         if (empty($result)) {
-            throw new BadRequestHttpException("Нет товаров в шаблоне.");
+            throw new BadRequestHttpException("guide.empty_goods");
         }
 
         $products = [];
-
         foreach ($result as $product) {
             $products[] = [
-                'quantity' => $product['units'] ?? 1,
+                'quantity'   => $product['units'] ?? 1,
                 'product_id' => $product['cbg_id'],
                 'catalog_id' => $product['cat_id']
             ];
@@ -434,6 +417,7 @@ class GuideWebApi extends \api_web\components\WebApi
 
     /**
      * Агрегированая функция для работы с шаблоном
+     *
      * @param $params
      * @return array
      * @throws BadRequestHttpException
@@ -441,28 +425,19 @@ class GuideWebApi extends \api_web\components\WebApi
     public function actionProductFromGuide($params)
     {
         set_time_limit(60 * 3);
-        if (empty($params['guide_id'])) {
-            throw new BadRequestHttpException("empty_param|guide_id");
-        }
-
-        if (empty($params['products'])) {
-            throw new BadRequestHttpException("empty_param|products");
-        }
-
+        $this->validateRequest($params, ['guide_id', 'products']);
         $this->isMyGuide($params['guide_id']);
 
         $result = [
             'success' => 0,
-            'error' => 0
+            'error'   => 0
         ];
 
         try {
             foreach ($params['products'] as &$product) {
-
                 if (!in_array($product['operation'], ['add', 'del'])) {
-                    throw new BadRequestHttpException("Operation not found " . $product['operation']);
+                    throw new BadRequestHttpException("guide.operation_not_found|" . $product['operation']);
                 }
-
                 //Добавляем продукт в шаблон
                 if ($product['operation'] == 'add') {
                     if (Guide::findOne($params['guide_id'])->getGuideProducts()->where(['cbg_id' => $product['product_id']])->exists()) {
@@ -470,12 +445,10 @@ class GuideWebApi extends \api_web\components\WebApi
                     }
                     $this->addProduct($params['guide_id'], $product['product_id']);
                 }
-
                 //Удаление продукта из шаблона
                 if ($product['operation'] == 'del') {
                     $this->operationRemoveProduct($params['guide_id'], $product['product_id']);
                 }
-
                 $result['success']++;
             }
 
@@ -495,7 +468,7 @@ class GuideWebApi extends \api_web\components\WebApi
 
     /**
      * @param int $guide_id
-     * @param $id
+     * @param     $id
      * @throws BadRequestHttpException
      */
     private function addProduct(int $guide_id, $id)
@@ -509,7 +482,7 @@ class GuideWebApi extends \api_web\components\WebApi
         $guide = Guide::findOne($guide_id);
 
         if ($guide->getProductCount() == 1000) {
-            throw new BadRequestHttpException('MAX = 1000 products.');
+            throw new BadRequestHttpException('guide.max_products|1000');
         }
 
         /**
@@ -522,14 +495,14 @@ class GuideWebApi extends \api_web\components\WebApi
                 $newProduct = GuideProduct::findOne(['guide_id' => $guide_id, 'cbg_id' => $id]);
                 if (!$newProduct) {
                     $this->add_products[] = [
-                        'guide_id' => $guide->id,
-                        'cbg_id' => $id,
+                        'guide_id'   => $guide->id,
+                        'cbg_id'     => $id,
                         'created_at' => new Expression('NOW()'),
                         'updated_at' => new Expression('NOW()')
                     ];
                 }
             } else {
-                throw new BadRequestHttpException('Вы не можете добавить этот товар в шаблон: ' . $id);
+                throw new BadRequestHttpException('guide.not_add_product_in_guide|' . $id);
             }
         }
     }
@@ -568,7 +541,7 @@ class GuideWebApi extends \api_web\components\WebApi
                         throw new ValidationException($product->getFirstErrors());
                     }
                 } else {
-                    throw new BadRequestHttpException("Product not found " . $pid);
+                    throw new BadRequestHttpException("guide.product_not_found|" . $pid);
                 }
             }
         } catch (\Exception $e) {
@@ -579,20 +552,22 @@ class GuideWebApi extends \api_web\components\WebApi
 
     /**
      * Подготавливаем шаблон к ответу
-     * @param $id
+     *
+     * @param       $id
+     * @param bool  $product_list
+     * @param array $attr
      * @return array
      */
     private function prepareGuide($id, $product_list = true, $attr = [])
     {
         $model = Guide::findOne($id);
         if ($model) {
-
             $return = [
-                'id' => (int)$model->id,
-                'name' => $model->name,
-                'color' => $model->color,
-                'created_at' => \Yii::$app->formatter->asDate($model->created_at),
-                'updated_at' => \Yii::$app->formatter->asDate($model->updated_at),
+                'id'            => (int)$model->id,
+                'name'          => $model->name,
+                'color'         => $model->color,
+                'created_at'    => $model->created_at,
+                'updated_at'    => $model->updated_at,
                 'product_count' => (int)$model->productCount,
             ];
 
@@ -643,6 +618,7 @@ class GuideWebApi extends \api_web\components\WebApi
 
     /**
      * Проверка на мой шаблон
+     *
      * @param $guide_id
      * @throws BadRequestHttpException
      */
@@ -652,11 +628,11 @@ class GuideWebApi extends \api_web\components\WebApi
         $model = Guide::findOne($guide_id);
 
         if (empty($model)) {
-            throw new BadRequestHttpException('Шаблон не найден.');
+            throw new BadRequestHttpException('guide.not_found');
         }
 
         if ($model->client_id != $client->id) {
-            throw new BadRequestHttpException('Доступ закрыт!');
+            throw new BadRequestHttpException('guide.access_denied');
         }
     }
 }

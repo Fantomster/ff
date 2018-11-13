@@ -2,11 +2,11 @@
 
 namespace api_web\classes;
 
+use api_web\components\Registry;
 use api_web\components\WebApiController;
 use api_web\controllers\OrderController;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
-use common\models\AllService;
 use api_web\models\User;
 use common\models\CatalogBaseGoods;
 use common\models\Delivery;
@@ -33,13 +33,15 @@ use api_web\exceptions\ValidationException;
 
 /**
  * Class OrderWebApi
+ *
  * @package api_web\classes
  */
 class OrderWebApi extends \api_web\components\WebApi
 {
     /**
      * Редактирование заказа
-     * @param $post
+     *
+     * @param      $post
      * @param bool $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
@@ -55,6 +57,10 @@ class OrderWebApi extends \api_web\components\WebApi
         //Поиск заказа
         $order = Order::findOne($post['order_id']);
 
+        if (!$order) {
+            throw new BadRequestHttpException('order_not_found');
+        }
+
         //If user is unconfirmed
         if ($isUnconfirmedVendor) {
             $organizationID = $this->user->organization_id;
@@ -69,14 +75,14 @@ class OrderWebApi extends \api_web\components\WebApi
                     $delivery->delivery_charge = (float)$post['delivery_price'];
                     $delivery->save();
                 }
-            }else{
+            } else {
                 throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
             }
         }
         if (!$this->accessAllow($order)) {
             throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
         }
-        OrderStatus::checkEdiOrderPermissions($order, 'edit');
+        //OrderStatus::checkEdiOrderPermissions($order, 'edit');
 
         //Проверим статус заказа
         if (in_array($order->status, [OrderStatus::STATUS_CANCELLED, OrderStatus::STATUS_REJECTED])) {
@@ -91,7 +97,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $order->actual_delivery = $post['actual_delivery'];
         }
         //Если поменяли скидку
-        if (!empty($post['discount'])) {
+        if (isset($post['discount']) && !empty($post['discount'])) {
             if (empty($post['discount']['type']) || !in_array(strtoupper($post['discount']['type']), ['FIXED', 'PERCENT'])) {
                 throw new BadRequestHttpException("Discount type FIXED or PERCENT");
             }
@@ -106,7 +112,6 @@ class OrderWebApi extends \api_web\components\WebApi
 
             $order->discount = $post['discount']['amount'];
         }
-
         $tr = \Yii::$app->db->beginTransaction();
         try {
             //Тут операции с продуктами в этом заказе
@@ -126,7 +131,7 @@ class OrderWebApi extends \api_web\components\WebApi
                                 $this->addProduct($order, $product);
                                 break;
                             case 'edit':
-                                if ($order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
+                                if ($order->service_id == Registry::EDI_SERVICE_ID) {
                                     $this->editProductEdo($order, $product);
                                 } else {
                                     $this->editProduct($order, $product);
@@ -134,8 +139,10 @@ class OrderWebApi extends \api_web\components\WebApi
                                 break;
                         }
                     }
-                    if ($order->discount_type == Order::DISCOUNT_FIXED && $order->getTotalPriceWithOutDiscount() < $post['discount']['amount']) {
-                        throw new BadRequestHttpException("Discount amount > Total Price");
+                    if (isset($post['discount']['amount'])) {
+                        if ($order->discount_type == Order::DISCOUNT_FIXED && $order->getTotalPriceWithOutDiscount() < $post['discount']['amount']) {
+                            throw new BadRequestHttpException("Discount amount > Total Price");
+                        }
                     }
 
                     if ($order->positionCount == 0) {
@@ -169,6 +176,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * Редактирвание продукта в заказе
+     *
      * @param Order $order
      * @param array $product
      * @return bool
@@ -193,9 +201,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $orderContent->quantity = $product['quantity'];
         }
 
-        if (!empty($product['comment'])) {
-            $orderContent->comment = $product['comment'];
-        }
+        $orderContent->comment = $product['comment'] ?? '';
 
         if (!empty($product['price'])) {
             $orderContent->price = $product['price'];
@@ -210,11 +216,11 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * Редактирвание продукта в заказе типа EDI (меняем данные в накладной)
+     *
      * @param Order $order
      * @param array $product
-     * @return bool
-     * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @return WaybillContent | OrderContent
+     * @throws BadRequestHttpException | ValidationException | \Exception
      * @editedBy Basil A Konakov
      */
     private function editProductEdo(Order $order, array $product)
@@ -223,35 +229,28 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("EDIT CANCELED product id empty");
         }
 
-        /**
-         * @var $orderContent OrderContent
-         */
+        /** @var OrderContent $orderContent */
         $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
         if (empty($orderContent)) {
             throw new BadRequestHttpException("EDIT CANCELED the product is not found in the order: product_id = " . $product['id']);
         }
 
-        /** @var OrderContent $orderContent */
-        $wbContent = WaybillContent::findOne(['order_content_id' => $orderContent->id]);
-
         if (!empty($product['quantity'])) {
-            $wbContent->quantity_waybill = $product['quantity'];
-        }
-        if (!empty($product['price'])) {
-            $wbContent->price_waybill = $product['price'];
+            $orderContent->setAttribute('quantity', $product['quantity']);
         }
 
-        if ($wbContent->validate() && $wbContent->save()) {
-            return true;
+        if ($orderContent->validate() && $orderContent->save()) {
+            return $orderContent;
         } else {
-            throw new ValidationException($wbContent->getFirstErrors());
+            throw new ValidationException($orderContent->getFirstErrors());
         }
     }
 
     /**
      * Удаление продукта из заказа
+     *
      * @param Order $order
-     * @param int $id
+     * @param int   $id
      * @throws BadRequestHttpException
      */
     private function deleteProduct(Order $order, int $id)
@@ -271,6 +270,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * Добавление продукта в заказ
+     *
      * @param Order $order
      * @param array $product
      * @return bool
@@ -313,6 +313,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * Оставляем комментарий к заказу
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -348,10 +349,12 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * Комментарий к конкретному товару в заказе
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
+     * @throws \yii\base\InvalidArgumentException
      */
     public function addProductComment(array $post)
     {
@@ -389,24 +392,26 @@ class OrderWebApi extends \api_web\components\WebApi
         $orderContent->save();
 
         return [
-            'order_id' => $order->id,
+            'order_id'   => $order->id,
             'product_id' => $orderContent->product_id,
-            'comment' => $orderContent->comment
+            'comment'    => $orderContent->comment
         ];
     }
 
     /**
      * Информация о заказе
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Exception
      */
     public function getInfo(array $post)
     {
         if (empty($post['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');
         }
-
+        /**@var Order $order */
         $order = Order::find()->where(['id' => $post['order_id']])->one();
 
         if (empty($order)) {
@@ -463,18 +468,14 @@ class OrderWebApi extends \api_web\components\WebApi
 
         # корректируем данные заказа на данные из накладной если это документ EDI
         # editedBy Basil A Konakov 2018-09-17 [DEV-1872]
-        if ($order->service_id == (AllService::findOne(['denom' => 'EDI']))->id) {
-            $deltaTotalSumm = 0;
-            $deltaQuantity = 0;
+        if ($order->service_id == Registry::EDI_SERVICE_ID) {
             $productsEdo = [];
+            /**@var OrderContent $model */
             foreach ($products as $k => $model) {
                 $wbContent = WaybillContent::findOne(['order_content_id' => $model->id]);
                 if ($wbContent) {
-                    $deltaTotalSumm += (($wbContent->quantity_waybill * $wbContent->price_waybill)
-                        - ($model->quantity * $model->price));
-                    $deltaQuantity += $wbContent->quantity_waybill - $model->quantity;
                     $model->quantity = $wbContent->quantity_waybill;
-                    $model->price = $wbContent->price_waybill;
+                    $model->price = $wbContent->price_with_vat;
                 }
                 $productsEdo[$k] = $model;
             }
@@ -498,7 +499,9 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * История заказов
+     *
      * @param array $post
+     * @throws \Exception
      * @return array
      */
     public function getHistory(array $post)
@@ -514,10 +517,14 @@ class OrderWebApi extends \api_web\components\WebApi
 
         if (isset($post['search'])) {
 
+            if (isset($post['search']['id']) && !empty($post['search']['id'])) {
+                $search->id = $post['search']['id'];
+            }
+
             if (isset($post['search']['service_id']) && !empty($post['search']['service_id'])) {
                 $search->service_id = $post['search']['service_id'];
             } else {
-                $search->service_id_excluded = [];
+                $search->service_id_excluded = [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID];
             }
 
             if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
@@ -590,7 +597,6 @@ class OrderWebApi extends \api_web\components\WebApi
             $dataProvider->setSort(['defaultOrder' => [$field => $sort]]);
         }
 
-
         /**
          * Собираем результат
          */
@@ -599,45 +605,52 @@ class OrderWebApi extends \api_web\components\WebApi
         $models = $dataProvider->models;
         if (!empty($models)) {
             /**
-             * @var $model Order
+             * @var Order $model
              */
             foreach ($models as $model) {
-
                 if ($model->status == OrderStatus::STATUS_DONE) {
                     $date = $model->completion_date ?? $model->actual_delivery;
                 } else {
                     $date = $model->updated_at;
                 }
 
-                if ($model->completion_date != $date) {
-                    $model->completion_date = $date;
-                    $model->save(false);
+                if (!empty($date)) {
+                    $obDateTime = new \DateTime($date);
+                    $date = $obDateTime->format("d.m.Y H:i:s");
                 }
-
-                $date = (!empty($date) ? \Yii::$app->formatter->asDate($date, "dd.MM.yyyy") : null);
-
-                $orders[] = [
-                    'id' => (int)$model->id,
-                    'created_at' => \Yii::$app->formatter->asDate($model->created_at, "dd.MM.yyyy"),
-                    'completion_date' => $date,
-                    'status' => (int)$model->status,
-                    'status_text' => $model->statusText,
-                    'vendor' => $model->vendor->name,
-                    'currency_id' => $model->currency_id,
-                    'create_user' => $model->createdByProfile->full_name ?? '',
-                    'accept_user' => $model->acceptedByProfile->full_name ?? ''
+                $obCreateAt = new \DateTime($model->created_at);
+                $orderInfo = [
+                    'id'              => (int)$model->id,
+                    'created_at'      => $obCreateAt->format("d.m.Y H:i:s"),
+                    'completion_date' => $date ?? null,
+                    'status'          => (int)$model->status,
+                    'status_text'     => $model->statusText,
+                    'vendor'          => $model->vendor->name,
+                    'currency_id'     => $model->currency_id,
+                    'create_user'     => $model->createdByProfile->full_name ?? '',
+                    'accept_user'     => $model->acceptedByProfile->full_name ?? '',
+                    'count_position'  => count($model->orderContent),
                 ];
+                if ($model->service_id == Registry::EDI_SERVICE_ID) {
+                    if (!empty($model->orderContent)) {
+                        $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
+                            return $el->edi_number;
+                        }, $model->orderContent)));
+                        $orderInfo = array_merge($orderInfo, ['edi_number' => $arWaybillNames]);
+                    }
+                }
+                $orders[] = $orderInfo;
             }
         }
 
         $return = [
-            'orders' => $orders,
+            'orders'     => $orders,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ],
-            'sort' => $sort_field
+            'sort'       => $sort_field
         ];
 
         return $return;
@@ -645,11 +658,11 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * Количество заказов в разных статусах
+     *
      * @return array
      */
     public function getHistoryCount()
     {
-
         $result = (new Query())->from(Order::tableName())
             ->select(['status', 'COUNT(status) as count'])
             ->where([
@@ -659,18 +672,18 @@ class OrderWebApi extends \api_web\components\WebApi
             ])
             ->andWhere(
                 ['OR',
-                    ['not in', 'service_id', [(AllService::findOne(['denom' => 'EDI']))->id]],
-                    ['service_id' => NULL]
+                    ['not in', 'service_id', [Registry::EDI_SERVICE_ID]],
+                    ['service_id' => null]
                 ]
             )
             ->groupBy('status')
             ->all();
 
         $return = [
-            'waiting' => 0,
+            'waiting'    => 0,
             'processing' => 0,
-            'success' => 0,
-            'canceled' => 0
+            'success'    => 0,
+            'canceled'   => 0
         ];
 
         if (!empty($result)) {
@@ -698,12 +711,10 @@ class OrderWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Список доступных для заказа продуктов
-     * @param $post
+     * @param      $post
      * @param bool $isUnconfirmedVendor
      * @return array
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws BadRequestHttpException
      */
     public function products($post, bool $isUnconfirmedVendor = false)
     {
@@ -751,11 +762,11 @@ class OrderWebApi extends \api_web\components\WebApi
 
         //Готовим ответ
         $return = [
-            'headers' => [],
-            'products' => [],
+            'headers'    => [],
+            'products'   => [],
             'pagination' => [
-                'page' => $page,
-                'page_size' => $pageSize,
+                'page'       => $page,
+                'page_size'  => $pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -777,21 +788,21 @@ class OrderWebApi extends \api_web\components\WebApi
         $result = $dataProvider->getModels();
         foreach ($result as $model) {
             $return['products'][] = [
-                'id' => (int)$model['id'],
-                'product_id' => (int)$model['id'],
-                'product' => $model['product'],
-                'article' => $model['article'],
-                'supplier' => $model['name'],
+                'id'          => (int)$model['id'],
+                'product_id'  => (int)$model['id'],
+                'product'     => $model['product'],
+                'article'     => $model['article'],
+                'supplier'    => $model['name'],
                 'supp_org_id' => (int)$model['supp_org_id'],
-                'cat_id' => (int)$model['cat_id'],
+                'cat_id'      => (int)$model['cat_id'],
                 'category_id' => (int)$model['category_id'],
-                'price' => round($model['price'], 2),
-                'ed' => $model['ed'],
-                'units' => round(($model['units'] ?? 0), 3),
-                'currency' => $model['symbol'],
+                'price'       => round($model['price'], 2),
+                'ed'          => $model['ed'],
+                'units'       => round(($model['units'] ?? 0), 3),
+                'currency'    => $model['symbol'],
                 'currency_id' => (int)$model['currency_id'],
-                'image' => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
-                'in_basket' => $this->container->get('CartWebApi')->countProductInCart($model['id']),
+                'image'       => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
+                'in_basket'   => $this->container->get('CartWebApi')->countProductInCart($model['id']),
             ];
         }
 
@@ -808,7 +819,8 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * Список доступных категорий
-     * @param $post
+     *
+     * @param      $post
      * @param bool $isUnconfirmedVendor
      * @return array
      */
@@ -847,8 +859,8 @@ class OrderWebApi extends \api_web\components\WebApi
 
             if ($id == 0) {
                 $return[9999] = [
-                    'id' => (int)$id,
-                    'name' => 'Без категории',
+                    'id'            => (int)$id,
+                    'name'          => 'Без категории',
                     'count_product' => MpCategory::getProductCountWithOutCategory(null, $organizationID)
                 ];
                 continue;
@@ -858,22 +870,22 @@ class OrderWebApi extends \api_web\components\WebApi
             if (!empty($model->parent)) {
                 if (!isset($return[$model->parentCategory->id])) {
                     $return[$model->parentCategory->id] = [
-                        'id' => $model->parentCategory->id,
-                        'name' => $model->parentCategory->name,
+                        'id'    => $model->parentCategory->id,
+                        'name'  => $model->parentCategory->name,
                         'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->parentCategory->id)
                     ];
                 }
                 $return[$model->parentCategory->id]['subcategories'][] = [
-                    'id' => $model->id,
-                    'name' => $model->name,
-                    'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->id),
+                    'id'            => $model->id,
+                    'name'          => $model->name,
+                    'image'         => $this->container->get('MarketWebApi')->getCategoryImage($model->id),
                     'count_product' => $model->getProductCount(null, $this->user->organization_id),
                 ];
             } else {
                 if (!isset($return[$model->id])) {
                     $return[$model->id] = [
-                        'id' => $model->id,
-                        'name' => $model->name,
+                        'id'    => $model->id,
+                        'name'  => $model->name,
                         'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->id)
                     ];
                 }
@@ -890,17 +902,16 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * Отмена заказа
+     *
      * @param array $post
-     * @param bool $isUnconfirmedVendor
+     * @param bool  $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
      * @throws \Exception
      */
     public function cancel(array $post, bool $isUnconfirmedVendor = false)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $query = Order::find()->where(['id' => $post['order_id']]);
         if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
@@ -955,6 +966,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * Повторить заказ
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -962,9 +974,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function repeat(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $order = Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
 
@@ -996,6 +1006,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * Заверщить заказ
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -1003,14 +1014,14 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function complete(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
+        $vendor = false;
         $query = Order::find()->where(['id' => $post['order_id']]);
         if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
             $query->andWhere(['client_id' => $this->user->organization->id]);
         } else {
+            $vendor = true;
             $query->andWhere(['vendor_id' => $this->user->organization->id]);
         }
         $order = $query->one();
@@ -1027,18 +1038,10 @@ class OrderWebApi extends \api_web\components\WebApi
 
         $t = \Yii::$app->db->beginTransaction();
         try {
-            $order->status = OrderStatus::STATUS_DONE;
+            $order->status = ($vendor ? Order::STATUS_PROCESSING : OrderStatus::STATUS_DONE);
             $order->actual_delivery = gmdate("Y-m-d H:i:s");
             $order->completion_date = new Expression('NOW()');
-            if ($order->validate()) {
-                try {
-                    if (!$order->save()) {
-                        throw new \Exception('Order not save!!!');
-                    }
-                } catch (\Throwable $e) {
-                    throw $e;
-                }
-            } else {
+            if (!$order->save()) {
                 throw new ValidationException($order->getFirstErrors());
             }
             $t->commit();
@@ -1052,16 +1055,15 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * Сохранение заказа в PDF
-     * @param array $post
+     *
+     * @param array           $post
      * @param OrderController $c
      * @return string
      * @throws BadRequestHttpException
      */
     public function saveToPdf(array $post, WebApiController $c)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $order = Order::findOne(['id' => $post['order_id']]);
         if (empty($order)) {
@@ -1081,19 +1083,19 @@ class OrderWebApi extends \api_web\components\WebApi
         $dataProvider->pagination = false;
 
         $pdf = new Pdf([
-            'mode' => Pdf::MODE_UTF8,
-            'format' => Pdf::FORMAT_A4,
+            'mode'        => Pdf::MODE_UTF8,
+            'format'      => Pdf::FORMAT_A4,
             'orientation' => Pdf::ORIENT_PORTRAIT,
             'destination' => Pdf::DEST_BROWSER,
-            'content' => $c->renderPartial('@app/../frontend/views/order/_pdf_order', compact('dataProvider', 'order')),
-            'options' => [
-                'defaultfooterline' => false,
+            'content'     => $c->renderPartial('@app/../frontend/views/order/_pdf_order', compact('dataProvider', 'order')),
+            'options'     => [
+                'defaultfooterline'      => false,
                 'defaultfooterfontstyle' => false,
             ],
-            'methods' => [
+            'methods'     => [
                 'SetFooter' => $c->renderPartial('@app/../frontend/views/order/_pdf_signature'),
             ],
-            'cssFile' => '@app/../frontend/web/css/pdf_styles.css'
+            'cssFile'     => '@app/../frontend/web/css/pdf_styles.css'
         ]);
         $pdf->filename = 'mixcart_order_' . $post['order_id'] . '.pdf';
         ob_start();
@@ -1101,6 +1103,47 @@ class OrderWebApi extends \api_web\components\WebApi
         $content = ob_get_clean();
         $base64 = (isset($post['base64_encode']) && $post['base64_encode'] == 1 ? true : false);
         return ($base64 ? base64_encode($content) : $content);
+    }
+
+    /**
+     * Изменение номера документа
+     *
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function setDocumentNumber($post)
+    {
+        $this->validateRequest($post, ['order_id', 'document_number']);
+
+        $model = Order::find()->where(['id' => $post['order_id'], 'client_id' => $this->user->organization_id])->one();
+
+        if (empty($model)) {
+            throw new BadRequestHttpException('order_not_found');
+        }
+
+        if (!in_array($model->service_id, [Registry::MC_BACKEND, Registry::VENDOR_DOC_MAIL_SERVICE_ID])) {
+            throw new BadRequestHttpException(
+                'bad_service_id_in_order|' .
+                ($model->service_id ?? "NULL") . '|' .
+                Registry::MC_BACKEND . ' or ' . Registry::VENDOR_DOC_MAIL_SERVICE_ID
+            );
+        }
+
+        $t = \Yii::$app->db->beginTransaction();
+        try {
+            $result = (bool)OrderContent::updateAll(
+                ['edi_number' => trim($post['document_number'])],
+                'order_id = :oid',
+                [':oid' => $model->id]
+            );
+            $t->commit();
+            return ['result' => $result];
+        } catch (\Throwable $e) {
+            $t->rollBack();
+            \Yii::info($e->getMessage());
+            return ['result' => false];
+        }
     }
 
     /**
@@ -1116,25 +1159,29 @@ class OrderWebApi extends \api_web\components\WebApi
         $item = [];
         $item['id'] = (int)$model->id;
         $item['product'] = $model->product->product;
-        $item['product_id'] = isset($model->productFromCatalog->base_goods_id) ? $model->productFromCatalog->base_goods_id : $model->product->id;
-        $item['catalog_id'] = isset($model->productFromCatalog->cat_id) ? $model->productFromCatalog->cat_id : $model->product->cat_id;
+        $item['product_id'] = $model->productFromCatalog->base_goods_id ?? $model->product->id;
+        $item['catalog_id'] = $model->productFromCatalog->cat_id ?? $model->product->cat_id;
         $item['price'] = round($model->price, 2);
         $item['quantity'] = $quantity;
         $item['comment'] = $model->comment ?? '';
         $item['total'] = round($model->total, 2);
         $item['rating'] = round($model->product->ratingStars, 1);
-        $item['brand'] = ($model->product->brand ? $model->product->brand : '');
+        $item['brand'] = $model->product->brand ? $model->product->brand : '';
         $item['article'] = $model->product->article;
         $item['ed'] = $model->product->ed;
         $item['units'] = $model->product->units;
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
+        if ($model->order->service_id == Registry::EDI_SERVICE_ID) {
+            $item['edi_number'] = $model->edi_number;
+        }
         return $item;
     }
 
     /**
      * Доступ к изменению заказа
+     *
      * @param $order
      * @return bool
      */
@@ -1168,12 +1215,12 @@ class OrderWebApi extends \api_web\components\WebApi
         return false;
     }
 
-
     /**
      * Доступ к изменению заказа
+     *
      * @param int $orderID
      * @param int $organizationID
-     * @param $status
+     * @param     $status
      * @return bool
      */
     private function checkUnconfirmedVendorAccess(int $orderID, int $organizationID, $status): bool

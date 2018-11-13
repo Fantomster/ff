@@ -3,11 +3,13 @@
 namespace common\models;
 
 use api\common\models\iiko\iikoService;
+use api\common\models\tillypad\TillypadService;
 use api\common\models\one_s\OneSService;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 use api\common\models\RkServicedata;
+use common\models\licenses\LicenseOrganization;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
@@ -20,61 +22,61 @@ use common\models\guides\Guide;
 /**
  * This is the model class for table "organization".
  *
- * @property integer $id
- * @property integer $type_id
- * @property string $name
- * @property string $city
- * @property string $address
- * @property string $zip_code
- * @property string $phone
- * @property string $email
- * @property string $website
- * @property string $created_at
- * @property string $updated_at
- * @property string $legal_entity
- * @property string $contact_name
- * @property string $about
- * @property string $picture
- * @property string $es_status
- * @property bool $partnership
- * @property integer $rating
- * @property integer $allow_editing
- * @property integer $is_allowed_for_franchisee
- * @property integer $is_work
- * @property double $lat
- * @property double $lng
- * @property string $country
- * @property string $locality
- * @property string $route
- * @property string $street_number
- * @property string $place_id
- * @property string $administrative_area_level_1
- * @property string $formatted_address
- * @property string $franchisee_sorted
- * @property string $inn
- * @property string $kpp
- * @property integer $parent_id
- * @property integer $gmt
- * @property string $action
- * @property integer $blacklisted
- *
- * @property OrganizationType $type
- * @property Delivery $delivery
- * @property User $users
- * @property OrderChat $unreadMessages
- * @property OrderChat $unreadSystem
- * @property string $pictureUrl
- * @property RatingStars $ratingStars
- * @property RatingPercent $ratingPercent
- * @property BuisinessInfo $buisinessInfo
+ * @property integer             $id
+ * @property integer             $type_id
+ * @property string              $name
+ * @property string              $city
+ * @property string              $address
+ * @property string              $zip_code
+ * @property string              $phone
+ * @property string              $email
+ * @property string              $website
+ * @property string              $created_at
+ * @property string              $updated_at
+ * @property string              $legal_entity
+ * @property string              $contact_name
+ * @property string              $about
+ * @property string              $picture
+ * @property string              $es_status
+ * @property bool                $partnership
+ * @property integer             $rating
+ * @property integer             $allow_editing
+ * @property integer             $is_allowed_for_franchisee
+ * @property integer             $is_work
+ * @property double              $lat
+ * @property double              $lng
+ * @property string              $country
+ * @property string              $locality
+ * @property string              $route
+ * @property string              $street_number
+ * @property string              $place_id
+ * @property string              $administrative_area_level_1
+ * @property string              $formatted_address
+ * @property string              $franchisee_sorted
+ * @property string              $inn
+ * @property string              $kpp
+ * @property integer             $parent_id
+ * @property integer             $gmt
+ * @property string              $action
+ * @property integer             $blacklisted
+ * @property OrganizationType    $type
+ * @property Delivery            $delivery
+ * @property User                $users
+ * @property OrderChat           $unreadMessages
+ * @property OrderChat           $unreadSystem
+ * @property string              $pictureUrl
+ * @property RatingStars         $ratingStars
+ * @property RatingPercent       $ratingPercent
+ * @property BuisinessInfo       $buisinessInfo
  * @property FranchiseeAssociate $franchiseeAssociate
- * @property RelationSuppRest $associates
- * @property integer $managersCount
- * @property integer $productsCount
- * @property Guide $favorite
- * @property Guide[] $guides
- * @property Catalog $baseCatalog
- * @property AdditionalEmail[] additionalEmail
+ * @property RelationSuppRest    $associates
+ * @property integer             $managersCount
+ * @property integer             $productsCount
+ * @property Guide               $favorite
+ * @property Guide[]             $guides
+ * @property Catalog             $baseCatalog
+ * @property EdiOrganization     $ediOrganization
+ * @property AdditionalEmail[]   additionalEmail
  */
 class Organization extends \yii\db\ActiveRecord
 {
@@ -134,7 +136,7 @@ class Organization extends \yii\db\ActiveRecord
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
             [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'common.models.organization_address_error', ['ru' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'])],
             [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id', 'blacklisted', 'gmt'], 'integer'],
-            [['created_at', 'updated_at', 'white_list', 'partnership', 'inn', 'kpp'], 'safe'],
+            [['created_at', 'updated_at', 'white_list', 'partnership', 'inn', 'kpp', 'lang'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1', 'action'], 'string', 'max' => 255],
             [['gln_code'], 'integer', 'min' => 1000000000000, 'max' => 99999999999999999, 'tooSmall' => 'Too small value', 'tooBig' => 'To big value'],
             [['gln_code'], 'unique'],
@@ -143,29 +145,14 @@ class Organization extends \yii\db\ActiveRecord
             [['email'], 'email'],
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
-            [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => EdiOrganization::className(), 'targetAttribute' => ['id' => 'organization_id']],
+            [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationGln::className(), 'targetAttribute' => ['id' => 'org_id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
             [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
-            [['inn'], 'isInn'],
-            [['kpp'], 'isKpp'],
+            [['inn'], 'match', 'pattern' => '/^[0-9]{10}$|^[0-9]{12}$/', 'message' => Yii::t('app', 'common.models.organization_inn_error', ['ru' => 'Поле должно состоять из 10 или 12 цифр'])],
+            [['kpp'], 'match', 'pattern' => '/^[0-9]{9}$/', 'message' => Yii::t('app', 'common.models.organization_kpp_error', ['ru' => 'Поле должно состоять из 9 цифр'])],
         ];
     }
 
-    public function isInn($attribute)
-    {
-        if (preg_match('/^[0-9]{10}$/', $this->$attribute) || preg_match('/^[0-9]{12}$/', $this->$attribute)) {
-            return;
-        }
-        $this->addError($attribute, Yii::t('app', 'common.models.organization_inn_error', ['ru' => 'Поле должно состоять из 10 или 12 цифр']));
-    }
-    
-    public function isKpp($attribute)
-    {
-        if (!preg_match('/^[0-9]{9}$/', $this->$attribute)) {
-            $this->addError($attribute, Yii::t('app', 'common.models.organization_kpp_error', ['ru' => 'Поле должно состоять из 9 цифр']));
-        }
-    }
-    
     /**
      * @inheritdoc
      */
@@ -179,12 +166,12 @@ class Organization extends \yii\db\ActiveRecord
                 },
             ],
             [
-                'class' => ImageUploadBehavior::className(),
+                'class'     => ImageUploadBehavior::className(),
                 'attribute' => 'picture',
                 'scenarios' => ['settings'],
-                'path' => '@app/web/upload/temp',
-                'url' => '/upload/temp',
-                'thumbs' => [
+                'path'      => '@app/web/upload/temp',
+                'url'       => '/upload/temp',
+                'thumbs'    => [
                     'picture' => ['width' => 420, 'height' => 236, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
                 ],
             ],
@@ -207,41 +194,42 @@ class Organization extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'type_id' => Yii::t('app', 'common.models.business_type', ['ru' => 'Тип бизнеса']),
-            'name' => Yii::t('app', 'common.models.organization_name', ['ru' => 'Название организации']),
-            'city' => Yii::t('app', 'common.models.city_three', ['ru' => 'Город']),
-            'address' => Yii::t('app', 'common.models.address', ['ru' => 'Адрес']),
-            'zip_code' => Yii::t('app', 'common.models.index', ['ru' => 'Индекс']),
-            'phone' => Yii::t('app', 'common.models.phone_three', ['ru' => 'Телефон']),
-            'email' => Yii::t('app', 'common.models.org_email', ['ru' => 'Email организации']),
-            'website' => Yii::t('app', 'common.models.web_site', ['ru' => 'Веб-сайт']),
-            'inn' => Yii::t('app', 'common.models.inn', ['ru' => 'ИНН']),
-            'kpp' => Yii::t('app', 'common.models.kpp', ['ru' => 'КПП']),
-            'created_at' => Yii::t('app', 'Created At'),
-            'updated_at' => Yii::t('app', 'Updated At'),
-            'legal_entity' => Yii::t('app', 'common.models.jur_name_three', ['ru' => 'Название юридического лица']),
-            'contact_name' => Yii::t('app', 'common.models.contact_name', ['ru' => 'ФИО контактного лица']),
-            'about' => Yii::t('app', 'common.models.org_info', ['ru' => 'Информация об организации']),
-            'picture' => Yii::t('app', 'common.models.avatar', ['ru' => 'Аватар']),
-            'white_list' => Yii::t('app', 'common.models.accepted_for_f_market', ['ru' => 'Одобрено для f-market']),
-            'partnership' => Yii::t('app', 'common.models.partnership', ['ru' => 'Партнерство']),
-            'lat' => Yii::t('app', 'Lat'),
-            'lng' => Yii::t('app', 'Lng'),
-            'country' => Yii::t('app', 'common.models.country_four', ['ru' => 'Страна']),
+            'id'                          => 'ID',
+            'type_id'                     => Yii::t('app', 'common.models.business_type', ['ru' => 'Тип бизнеса']),
+            'name'                        => Yii::t('app', 'common.models.organization_name', ['ru' => 'Название организации']),
+            'city'                        => Yii::t('app', 'common.models.city_three', ['ru' => 'Город']),
+            'address'                     => Yii::t('app', 'common.models.address', ['ru' => 'Адрес']),
+            'zip_code'                    => Yii::t('app', 'common.models.index', ['ru' => 'Индекс']),
+            'phone'                       => Yii::t('app', 'common.models.phone_three', ['ru' => 'Телефон']),
+            'email'                       => Yii::t('app', 'common.models.org_email', ['ru' => 'Email организации']),
+            'website'                     => Yii::t('app', 'common.models.web_site', ['ru' => 'Веб-сайт']),
+            'inn'                         => Yii::t('app', 'common.models.inn', ['ru' => 'ИНН']),
+            'kpp'                         => Yii::t('app', 'common.models.kpp', ['ru' => 'КПП']),
+            'created_at'                  => Yii::t('app', 'Created At'),
+            'updated_at'                  => Yii::t('app', 'Updated At'),
+            'legal_entity'                => Yii::t('app', 'common.models.jur_name_three', ['ru' => 'Название юридического лица']),
+            'contact_name'                => Yii::t('app', 'common.models.contact_name', ['ru' => 'ФИО контактного лица']),
+            'about'                       => Yii::t('app', 'common.models.org_info', ['ru' => 'Информация об организации']),
+            'picture'                     => Yii::t('app', 'common.models.avatar', ['ru' => 'Аватар']),
+            'white_list'                  => Yii::t('app', 'common.models.accepted_for_f_market', ['ru' => 'Одобрено для f-market']),
+            'partnership'                 => Yii::t('app', 'common.models.partnership', ['ru' => 'Партнерство']),
+            'lat'                         => Yii::t('app', 'Lat'),
+            'lng'                         => Yii::t('app', 'Lng'),
+            'country'                     => Yii::t('app', 'common.models.country_four', ['ru' => 'Страна']),
             'administrative_area_level_1' => Yii::t('app', 'common.models.region_three', ['ru' => 'Область']),
-            'locality' => Yii::t('app', 'common.models.city_four', ['ru' => 'Город']),
-            'route' => Yii::t('app', 'common.models.city_five', ['ru' => 'Улица']),
-            'street_number' => Yii::t('app', 'common.models.house', ['ru' => 'Дом']),
-            'place_id' => Yii::t('app', 'Place ID'),
-            'formatted_address' => Yii::t('app', 'Formatted Address'),
-            'franchisee_sorted' => Yii::t('app', 'common.models.settled_franchisee', ['ru' => 'Назначен Франшизы']),
-            'manager_id' => Yii::t('app', 'common.models.manager', ['ru' => 'Менеджер']),
-            'cat_id' => Yii::t('app', 'common.models.catalogue', ['ru' => 'Каталог']),
-            'is_allowed_for_franchisee' => Yii::t('app', 'common.models.let_franchisee', ['ru' => 'Разрешить франчайзи вход в данный Личный Кабинет']),
-            'is_work' => Yii::t('app', 'common.models.is_work', ['ru' => 'Поставщик работает в системе']),
-            'gln_code' => Yii::t('app', 'GLN-код'),
-            'gmt' => Yii::t('app', 'GMT'),
+            'locality'                    => Yii::t('app', 'common.models.city_four', ['ru' => 'Город']),
+            'route'                       => Yii::t('app', 'common.models.city_five', ['ru' => 'Улица']),
+            'street_number'               => Yii::t('app', 'common.models.house', ['ru' => 'Дом']),
+            'place_id'                    => Yii::t('app', 'Place ID'),
+            'formatted_address'           => Yii::t('app', 'Formatted Address'),
+            'franchisee_sorted'           => Yii::t('app', 'common.models.settled_franchisee', ['ru' => 'Назначен Франшизы']),
+            'manager_id'                  => Yii::t('app', 'common.models.manager', ['ru' => 'Менеджер']),
+            'cat_id'                      => Yii::t('app', 'common.models.catalogue', ['ru' => 'Каталог']),
+            'is_allowed_for_franchisee'   => Yii::t('app', 'common.models.let_franchisee', ['ru' => 'Разрешить франчайзи вход в данный Личный Кабинет']),
+            'is_work'                     => Yii::t('app', 'common.models.is_work', ['ru' => 'Поставщик работает в системе']),
+            'gln_code'                    => Yii::t('app', 'GLN-код'),
+            'gmt'                         => Yii::t('app', 'GMT'),
+            'lang'                        => Yii::t('app', 'Язык организации'),
         ];
     }
 
@@ -253,21 +241,56 @@ class Organization extends \yii\db\ActiveRecord
         return $this->hasMany(RelationUserOrganization::className(), ['organization_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLicenseOrganization()
+    {
+        return $this->hasMany(LicenseOrganization::className(), ['org_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
     public function getEdiOrganization(): ActiveQuery
     {
         return $this->hasOne(EdiOrganization::className(), ['organization_id' => 'id']);
     }
 
+    public function getOrganizationGln(): ActiveQuery
+    {
+        return $this->hasOne(OrganizationGln::className(), ['org_id' => 'id']);
+    }
+
     public function getGlnCode()
     {
-        return $this->ediOrganization->gln_code;
+        return $this->organizationGln->gln_number;
+    }
+
+    /**
+     * EDI организация или нет
+     *
+     * @return bool
+     */
+    public function isEdi()
+    {
+        $query = $this->ediOrganization;
+        if (!empty($query)) {
+            if (isset($query->gln_code) && $query->gln_code > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function beforeSave($insert)
     {
-        if ($this->email == '') $this->email = null;
-        if ($this->inn == '') $this->inn = null;
-        if ($this->kpp == '') $this->kpp = null;
+        if ($this->email == '')
+            $this->email = null;
+        if ($this->inn == '')
+            $this->inn = null;
+        if ($this->kpp == '')
+            $this->kpp = null;
         if (parent::beforeSave($insert)) {
             $this->es_status = Organization::ES_UPDATED;
 
@@ -362,9 +385,9 @@ class Organization extends \yii\db\ActiveRecord
         return $vendors;
     }
 
-
     /**
      * Get the list of organization type restaurant suppliers - filtered by categories
+     *
      * @var $addAllOption bool "Don't use filter" indicator
      * @createdBy Basil A Konakov
      * @createdAt 2018-08-10
@@ -498,6 +521,7 @@ class Organization extends \yii\db\ActiveRecord
 
     /**
      * Список регионов доставки и исключения
+     *
      * @return array
      */
     public function getDeliveryRegionAsArray()
@@ -539,6 +563,7 @@ class Organization extends \yii\db\ActiveRecord
 
     /**
      * Метод возвращает корзину организации//пользователя
+     *
      * @return array|CartContent[]|mixed
      */
     public function _getCart()
@@ -608,7 +633,7 @@ class Organization extends \yii\db\ActiveRecord
             case self::TYPE_RESTAURANT:
                 $result = Order::find()->where([
                         'client_id' => $this->id,
-                        'status' => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                        'status'    => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
                 )->count();
                 break;
             case self::TYPE_SUPPLIER:
@@ -618,14 +643,14 @@ class Organization extends \yii\db\ActiveRecord
                     $result = Order::find()
                         ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
                         ->where([
-                            'vendor_id' => $this->id,
+                            'vendor_id'           => $this->id,
                             "$maTable.manager_id" => $manager_id,
-                            'status' => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
+                            'status'              => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
                         ->count();
                 } else {
                     $result = Order::find()->where([
                             'vendor_id' => $this->id,
-                            'status' => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                            'status'    => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
                     )->count();
                 }
                 break;
@@ -643,7 +668,7 @@ class Organization extends \yii\db\ActiveRecord
             case self::TYPE_SUPPLIER:
                 $result = RelationSuppRest::find()->where([
                         'supp_org_id' => $this->id,
-                        'invite' => [RelationSuppRest::INVITE_OFF]]
+                        'invite'      => [RelationSuppRest::INVITE_OFF]]
                 )->count();
                 break;
         }
@@ -711,27 +736,26 @@ class Organization extends \yii\db\ActiveRecord
 
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
             $sql = 'SELECT `order_chat`.*, ord.`client_id` AS vid, ma.`manager_id` FROM `order_chat` INNER JOIN '
-                . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
+                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
                 . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
                 . 'AND ((`order_chat`.`is_system`=0) '
                 . 'AND (`order_chat`.`viewed`=0)) '
-                . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id` '
+                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id` '
                 . 'LEFT JOIN `order` AS ord ON ord.`id` = `order_chat`.`order_id` '
                 . 'LEFT JOIN `manager_associate` AS ma ON ord.`client_id` = ma.`organization_id` '
                 . 'WHERE ma.`manager_id` = ' . $userId . ' '
                 . 'ORDER BY `order_chat`.`created_at` DESC';
         } else {
             $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
-                . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
+                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
                 . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
                 . 'AND ((`order_chat`.`is_system`=0) '
                 . 'AND (`order_chat`.`viewed`=0)) '
-                . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id`'
+                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id`'
                 . 'ORDER BY `order_chat`.`created_at` DESC';
         }
 
         return OrderChat::findBySql($sql)->all();
-
 
 //        return OrderChat::find()
 //                ->leftJoin('order', 'order.id = order_chat.order_id')
@@ -750,22 +774,22 @@ class Organization extends \yii\db\ActiveRecord
         $userId = Yii::$app->user->id;
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
             $sql = 'SELECT `order_chat`.*, ord.`client_id` AS vid, ma.`manager_id` FROM `order_chat` INNER JOIN '
-                . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
+                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
                 . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
                 . 'AND ((`order_chat`.`is_system`=1) '
                 . 'AND (`order_chat`.`viewed`=0)) '
-                . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id` '
+                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id` '
                 . 'LEFT JOIN `order` AS ord ON ord.`id` = `order_chat`.`order_id` '
                 . 'LEFT JOIN `manager_associate` AS ma ON ord.`client_id` = ma.`organization_id` '
                 . 'WHERE ma.`manager_id` = ' . $userId . ' '
                 . 'ORDER BY `order_chat`.`created_at` DESC';
         } else {
             $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
-                . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
+                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
                 . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
                 . 'AND ((`order_chat`.`is_system`=1) '
                 . 'AND (`order_chat`.`viewed`=0)) '
-                . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id`'
+                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id`'
                 . 'ORDER BY `order_chat`.`created_at` DESC';
         }
         return OrderChat::findBySql($sql)->all();
@@ -956,8 +980,8 @@ class Organization extends \yii\db\ActiveRecord
         }
         return CatalogBaseGoods::find()
             ->where([
-                'supp_org_id' => $this->id,
-                'deleted' => CatalogBaseGoods::DELETED_OFF,
+                'supp_org_id'  => $this->id,
+                'deleted'      => CatalogBaseGoods::DELETED_OFF,
                 'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
             ->groupBy(['category_id'])
             ->count();
@@ -997,13 +1021,13 @@ class Organization extends \yii\db\ActiveRecord
         $ruoTable = RelationUserOrganization::tableName();
 
         $managers = ArrayHelper::map(User::find()
-                                ->joinWith('profile')
-                                ->leftJoin($ruoTable, "$ruoTable.user_id=$usrTable.id")
-                                ->select(["$usrTable.id as id", "$profTable.full_name as name"])
-                                ->where(["$ruoTable.organization_id" => $this->id])
-                                ->orderBy(['name' => SORT_ASC])
-                                ->asArray()
-                                ->all(), 'id', 'name');
+            ->joinWith('profile')
+            ->leftJoin($ruoTable, "$ruoTable.user_id=$usrTable.id")
+            ->select(["$usrTable.id as id", "$profTable.full_name as name"])
+            ->where(["$ruoTable.organization_id" => $this->id])
+            ->orderBy(['name' => SORT_ASC])
+            ->asArray()
+            ->all(), 'id', 'name');
         return $managers;
     }
 
@@ -1037,7 +1061,6 @@ class Organization extends \yii\db\ActiveRecord
             ->all();
     }
 
-
     public function getRelatedFranchisee()
     {
         $usrTable = User::tableName();
@@ -1048,7 +1071,6 @@ class Organization extends \yii\db\ActiveRecord
             ->where(["$relationTable.organization_id" => $this->id, "$relationTable.role_id" => Role::ROLE_FRANCHISEE_OWNER])
             ->all();
     }
-
 
     public function hasActiveUsers()
     {
@@ -1095,11 +1117,11 @@ class Organization extends \yii\db\ActiveRecord
             ->where(["$usrTable.organization_id" => $this->id])
             ->orderBy(['name' => SORT_ASC]);
         $managersDataProvider = new ActiveDataProvider([
-            'query' => $query,
+            'query'      => $query,
             'pagination' => [
                 'pageSize' => 20,
             ],
-            'sort' => [
+            'sort'       => [
                 'attributes' => [
                     'id',
                     'name',
@@ -1150,7 +1172,7 @@ class Organization extends \yii\db\ActiveRecord
     {
         $search = ['like', 'product', \Yii::$app->request->get('search') ?: ''];
         $dataListRequest = new ActiveDataProvider([
-            'query' => Request::find()->leftJoin('franchisee_associate', "franchisee_associate.organization_id = request.rest_org_id")->where(['franchisee_associate.franchisee_id' => $franchisee_id])->andWhere($search)->orderBy('request.id DESC'),
+            'query'      => Request::find()->leftJoin('franchisee_associate', "franchisee_associate.organization_id = request.rest_org_id")->where(['franchisee_associate.franchisee_id' => $franchisee_id])->andWhere($search)->orderBy('request.id DESC'),
             'pagination' => [
                 'pageSize' => 15,
             ],
@@ -1235,7 +1257,6 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
-     *
      * return count of products
      *
      * @return integer
@@ -1268,7 +1289,7 @@ class Organization extends \yii\db\ActiveRecord
         $catalogs = Catalog::find()
             ->leftJoin('relation_supp_rest', 'relation_supp_rest.cat_id=catalog.id')
             ->where([
-                'relation_supp_rest.deleted' => false,
+                'relation_supp_rest.deleted'     => false,
                 'relation_supp_rest.supp_org_id' => $this->id,
                 'relation_supp_rest.rest_org_id' => $clientId,
             ])
@@ -1276,16 +1297,16 @@ class Organization extends \yii\db\ActiveRecord
         foreach ($catalogs as $catalog) {
             if ($catalog->type === Catalog::BASE_CATALOG) {
                 $count = CatalogBaseGoods::find()->where([
-                    'cat_id' => $catalog->id,
-                    'status' => CatalogBaseGoods::STATUS_ON,
+                    'cat_id'  => $catalog->id,
+                    'status'  => CatalogBaseGoods::STATUS_ON,
                     'deleted' => CatalogBaseGoods::DELETED_OFF
                 ])->count();
             } else {
                 $count += CatalogGoods::find()
                     ->leftJoin('catalog_base_goods', 'catalog_base_goods.id=catalog_goods.base_goods_id')
                     ->where([
-                        'catalog_goods.cat_id' => $catalog->id,
-                        'catalog_base_goods.status' => CatalogBaseGoods::STATUS_ON,
+                        'catalog_goods.cat_id'       => $catalog->id,
+                        'catalog_base_goods.status'  => CatalogBaseGoods::STATUS_ON,
                         'catalog_base_goods.deleted' => CatalogBaseGoods::DELETED_OFF,
                     ])
                     ->count();
@@ -1317,12 +1338,12 @@ class Organization extends \yii\db\ActiveRecord
             ->leftJoin($rsrTable, "$rsrTable.cat_id = $cgTable.cat_id")
             ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
             ->where([
-                "$rsrTable.deleted" => false,
-                "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF,
-                "$cbgTable.status" => CatalogBaseGoods::STATUS_ON,
+                "$rsrTable.deleted"     => false,
+                "$cbgTable.deleted"     => CatalogBaseGoods::DELETED_OFF,
+                "$cbgTable.status"      => CatalogBaseGoods::STATUS_ON,
                 "$rsrTable.rest_org_id" => $this->id,
-                "$catTable.status" => Catalog::STATUS_ON,
-                "$cbgTable.id" => $product_id,
+                "$catTable.status"      => Catalog::STATUS_ON,
+                "$cbgTable.id"          => $product_id,
             ])
             ->one();
         if ($product) {
@@ -1333,12 +1354,12 @@ class Organization extends \yii\db\ActiveRecord
             ->leftJoin($rsrTable, "$rsrTable.cat_id = $cbgTable.cat_id")
             ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
             ->where([
-                "$rsrTable.deleted" => false,
-                "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF,
-                "$cbgTable.status" => CatalogBaseGoods::STATUS_ON,
+                "$rsrTable.deleted"     => false,
+                "$cbgTable.deleted"     => CatalogBaseGoods::DELETED_OFF,
+                "$cbgTable.status"      => CatalogBaseGoods::STATUS_ON,
                 "$rsrTable.rest_org_id" => $this->id,
-                "$catTable.status" => Catalog::STATUS_ON,
-                "$cbgTable.id" => $product_id,
+                "$catTable.status"      => Catalog::STATUS_ON,
+                "$cbgTable.id"          => $product_id,
             ])
             ->one();
         if ($product) {
@@ -1349,7 +1370,8 @@ class Organization extends \yii\db\ActiveRecord
 
     /**
      * Прикрепление организации к франчази
-     * @param bool $delete_assoc удаление всех связей с франчайзи
+     *
+     * @param bool $delete_assoc  удаление всех связей с франчайзи
      * @param bool $cancel_sorted удаление признака привязки к франчу
      */
     public function setFranchise($delete_assoc = false, $cancel_sorted = false)
@@ -1422,7 +1444,7 @@ class Organization extends \yii\db\ActiveRecord
                         ->select($fields)
                         ->leftJoin('franchisee', 'franchisee.id = franchisee_id')
                         ->where([
-                            'country' => $this->country,
+                            'country'                     => $this->country,
                             'administrative_area_level_1' => $this->administrative_area_level_1
                         ])->andWhere('LENGTH(administrative_area_level_1) > 2')->all();
 
@@ -1441,7 +1463,7 @@ class Organization extends \yii\db\ActiveRecord
             if ($this->setTypeFranchiseeAndSaveAssoc($franchise) === false) {
                 //Создаем новую связь
                 $associate = new FranchiseeAssociate([
-                    'franchisee_id' => $default_id,
+                    'franchisee_id'   => $default_id,
                     'organization_id' => $this->id,
                     'self_registered' => FranchiseeAssociate::SELF_REGISTERED
                 ]);
@@ -1459,15 +1481,15 @@ class Organization extends \yii\db\ActiveRecord
 
     /**
      * @param $franchise_pull [
-     *              [
-     *                  'franchisee_id',
-     *                  'franchisee.type_id',
-     *                  'exception',
-     *                  'administrative_area_level_1',
-     *                  'locality',
-     *                  'franchisee.legal_email',
-     *                  'franchisee.receiving_organization'
-     *              ], ... ]
+     *                        [
+     *                        'franchisee_id',
+     *                        'franchisee.type_id',
+     *                        'exception',
+     *                        'administrative_area_level_1',
+     *                        'locality',
+     *                        'franchisee.legal_email',
+     *                        'franchisee.receiving_organization'
+     *                        ], ... ]
      * @return bool
      */
     private function setTypeFranchiseeAndSaveAssoc($franchise_pull)
@@ -1517,7 +1539,7 @@ class Organization extends \yii\db\ActiveRecord
         }
         //Создаем связь организации с франчем
         $associate = new FranchiseeAssociate([
-            'franchisee_id' => $franchise['franchisee_id'],
+            'franchisee_id'   => $franchise['franchisee_id'],
             'organization_id' => $this->id,
             'self_registered' => FranchiseeAssociate::SELF_REGISTERED
         ]);
@@ -1549,6 +1571,7 @@ class Organization extends \yii\db\ActiveRecord
 
     /**
      * Получение следующего по очереди франча
+     *
      * @param $result
      * @return mixed
      */
@@ -1573,7 +1596,8 @@ class Organization extends \yii\db\ActiveRecord
 
     /**
      * Расставляем коэффициент получения, илил принудительно обновляем его
-     * @param $result
+     *
+     * @param      $result
      * @param bool $p - принудительно обновление
      * @return array
      */
@@ -1626,6 +1650,10 @@ class Organization extends \yii\db\ActiveRecord
             $return['iiko'] = true;
         }
 
+        if (!empty(TillypadService::getLicense())) {
+            $return['tillypad'] = true;
+        }
+
         return $return;
     }
 
@@ -1643,6 +1671,11 @@ class Organization extends \yii\db\ActiveRecord
         $lic = iikoService::getLicense();
         if ($lic != null) {
             $result['iiko'] = $lic;
+        }
+
+        $lic = TillypadService::getLicense();
+        if ($lic != null) {
+            $result['tillypad'] = $lic;
         }
 
         $lic = mercService::getLicense();
@@ -1724,8 +1757,8 @@ class Organization extends \yii\db\ActiveRecord
     {
         return [
             self::STATUS_WHITELISTED => 'Работает',
-            self::STATUS_BLACKISTED => 'Отключён',
-            self::STATUS_UNSORTED => 'Не определён',
+            self::STATUS_BLACKISTED  => 'Отключён',
+            self::STATUS_UNSORTED    => 'Не определён',
         ];
     }
 
@@ -1770,7 +1803,7 @@ class Organization extends \yii\db\ActiveRecord
         $command = $connection->createCommand($sql);
         $res = $command->queryAll();
         ksort($res);
-        $res2 = array();
+        $res2 = [];
         if ($stroka != '') {
             foreach ($res as $postav) {
                 $podstav = mb_strtolower($postav['name']);
@@ -1788,4 +1821,5 @@ class Organization extends \yii\db\ActiveRecord
         }
         return $res2;
     }
+
 }

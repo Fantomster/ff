@@ -7,12 +7,14 @@ use yii\web\BadRequestHttpException;
 
 /**
  * Class WebApiHelper
+ *
  * @package api_web\helpers
  */
 class WebApiHelper
 {
     /**
      * Атрибуты, в которых дата
+     *
      * @var array
      */
     private static $dateField = [
@@ -32,9 +34,10 @@ class WebApiHelper
 
     /**
      * Форматирование всех дат в ATOM
+     *
      * @var array
      */
-    private static $formatDate = 'php:' . \DateTime::ATOM;
+    public static $formatDate = 'php:' . \DateTime::ATOM;
 
     private static function formatDate(&$response)
     {
@@ -53,13 +56,14 @@ class WebApiHelper
 
     /**
      * Является ли атрибут датой
-     * @param $string
+     *
+     * @param       $string
      * @param array $needle_array
      * @return bool
      */
     private static function checkDateAttribute($string, $needle_array = ['_at', '_date', 'date_'])
     {
-        if(is_numeric($string)) {
+        if (is_numeric($string)) {
             return false;
         }
 
@@ -79,6 +83,7 @@ class WebApiHelper
      * Получает картинку в base64 декодируем и конвертируем в PNG
      * Возвращаем тот-же base64 только уже png картинки, так так
      * UploadBehavior работает только с png
+     *
      * @param $imageSourceBase64
      * @return string
      * @throws BadRequestHttpException
@@ -110,6 +115,7 @@ class WebApiHelper
 
     /**
      * Собираем массив для отдачи, из модели
+     *
      * @param Organization $model
      * @return mixed
      */
@@ -152,6 +158,7 @@ class WebApiHelper
             foreach ($days as $day) {
                 $item['delivery_days'][$day] = (int)$model->delivery->{$day};
             }
+            $item['is_edi'] = !empty($model->organizationGln) ? true : false;
         }
 
         return $item;
@@ -159,6 +166,7 @@ class WebApiHelper
 
     /**
      * Значения которых не должно быть в реквесте
+     *
      * @var array
      */
     public static $clearValue = ['d.m.Y', ''];
@@ -180,5 +188,24 @@ class WebApiHelper
                 $post = null;
             }
         }
+    }
+
+    /**
+     * Устанавливает заголовки для асинхронного ответа
+     * Ставим в начале метода, и курл получает сразу успешный ответ, а скрипт продолжает выполняться дальше
+     */
+    public static function setAsyncResponseHeader()
+    {
+        ob_start();
+        header("HTTP/1.1 200 OK");
+        header("Date: " . date('D, j M Y G:i:s e'));
+        header("Server: Apache");
+        header('Connection: close');
+        header('Content-Encoding: none');
+        header("Content-Length: 0");
+        header("Content-Type: application/json"); // Tried without this
+        ob_end_flush();
+        ob_flush();
+        flush();
     }
 }

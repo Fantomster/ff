@@ -3,7 +3,7 @@ return [
     'adminEmail' => 'noreply@mixcart.ru',
     'notificationsUrl' => 'https://notifications.f-keeper.ru:443',
     'maindUrl' => 'http://testama.f-keeper.ru',
-
+    'licenseManagerPhone' => '8(499)404-10-18',
     /**
      * Методы которые не требуют авторизации в АПИ
      */
@@ -20,5 +20,6 @@ return [
         '/market/organizations',
         '/payment/currency-list',
         '/system/datetime'
-    ]
+    ],
+    'api_web_url' => 'https://api-dev.mixcart.ru'
 ];

@@ -2,19 +2,39 @@
 
 namespace api_web\modules\integration\classes\documents;
 
-use api\common\models\AllMaps;
 use api_web\classes\DocumentWebApi;
-use api_web\modules\integration\classes\Dictionary;
+use api_web\components\Registry;
+use api_web\exceptions\ValidationException;
+use api_web\helpers\CurrencyHelper;
+use api_web\helpers\OuterProductMapHelper;
 use api_web\modules\integration\interfaces\DocumentInterface;
-use api_web\modules\integration\modules\iiko\models\iikoService;
 use common\models\Organization;
+use common\models\OuterAgent;
+use common\models\OuterStore;
 use common\models\Waybill as BaseWaybill;
+use yii\db\Transaction;
+use yii\web\BadRequestHttpException;
 
+/**
+ * Class Waybill
+ *
+ * @package api_web\modules\integration\classes\documents
+ */
 class Waybill extends BaseWaybill implements DocumentInterface
 {
 
+    public $helper;
+
+    public function __construct(array $config = [])
+    {
+        $this->helper = new OuterProductMapHelper();
+        parent::__construct($config);
+    }
+
     /**
      * Порлучение данных из модели
+     *
+     * @throws \Exception
      * @return mixed
      */
     public function prepare()
@@ -23,56 +43,78 @@ class Waybill extends BaseWaybill implements DocumentInterface
             return [];
         }
 
+        if (isset(Registry::$waybill_statuses[$this->status_id])) {
+            $status_text = \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$this->status_id]);
+        } else {
+            $status_text = "Status " . $this->status_id;
+        }
+
         $return = [
-            "id" => $this->id,
-            "number" => $this->outer_number_code,
-            "type" => DocumentWebApi::TYPE_WAYBILL,
-            "status_id" => $this->bill_status_id,
-            "status_text" => "",
+            "id"                       => (int)$this->id,
+            "number"                   => $this->outer_number_code ? [$this->outer_number_code] : [],
+            "type"                     => DocumentWebApi::TYPE_WAYBILL,
+            "status_id"                => (int)$this->status_id,
+            "status_text"              => $status_text,
+            "service_id"               => (int)$this->service_id,
+            "vendor"                   => null,
+            "agent"                    => null,
+            "store"                    => null,
+            "is_mercury_cert"          => $this->getIsMercuryCert(),
+            "count"                    => (int)$this->getTotalCount(),
+            "total_price"              => CurrencyHelper::asDecimal($this->getTotalPrice()),
+            "total_price_with_out_vat" => CurrencyHelper::asDecimal($this->getTotalPriceWithOutVat()),
+            "doc_date"                 => date("Y-m-d H:i:s T", strtotime($this->doc_date))
         ];
 
-        $agent = (new Dictionary($this->service_id, 'Agent'))->agentInfo($this->outer_contractor_uuid);
-        if (empty($agent)) {
-            $return ["agent"] = [];
-        } else {
-            $return ["agent"] = [
-                "uid" => $agent['outer_uid'],
-                "name" => $agent['name'],
+        $agent = OuterAgent::findOne(['id' => $this->outer_agent_id]);
+        if (!empty($agent)) {
+            $return["agent"] = [
+                "id"   => (int)$agent->id,
+                "name" => $agent->name,
             ];
-        }
-
-        $return ["agent"] = [];
-        if (empty($agent)) {
-            $order = $this->order;
-            if (isset($order)) {
-                $return ["agent"] = [
-                    "id" => $order->vendor_id,
-                    "name" => $order->vendor->name,
+            if (!empty($agent->vendor_id)) {
+                $return["vendor"] = [
+                    "id"   => (int)$agent->vendor_id,
+                    "name" => Organization::findOne($agent->vendor_id)->name
                 ];
             }
-        } elseif (isset($agent['vendor_id'])) {
-            $return["vendor"] = [
-                "id" => $agent['vendor_id'],
-                "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
-            ];
         }
 
-        $return["is_mercury_cert"] = $this->getIsMercuryCert();
-        $return["count"] = $this->getTotalCount();
-        $return["total_price"] = $this->getTotalPrice();
-        $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($this->doc_date));
+        if (empty($return['vendor'])) {
+            if (!empty($this->order)) {
+                $return["vendor"] = [
+                    "id"   => (int)$this->order->vendor_id,
+                    "name" => $this->order->vendor->name,
+                ];
+            }
+        }
+
+        $store = OuterStore::findOne(['id' => $this->outer_store_id]);
+        if (!empty($store)) {
+            $return ["store"] = [
+                "id"   => (int)$store->id,
+                "name" => $store->name,
+            ];
+        }
 
         return $return;
     }
 
     /**
      * Загрузка модели и получение данных
+     *
      * @param $key
-     * @return $array
+     * @param $serviceId
+     * @throws \Exception
+     * @return array
      */
-    public static function prepareModel($key)
+    public static function prepareModel($key, $serviceId = null)
     {
-        $model = self::findOne(['id' => $key]);
+        $where = ['id' => $key];
+        if (!is_null($serviceId)) {
+            $where['service_id'] = $serviceId;
+        }
+        $model = self::findOne($where);
         if ($model === null) {
             return [];
         }
@@ -81,143 +123,60 @@ class Waybill extends BaseWaybill implements DocumentInterface
 
     /**
      * Сброс привязки позиций накладной к заказу
-     * @return int
+     *
+     * @return bool
+     * @throws \Throwable
      */
     public function resetPositions()
     {
-        if (isset($this->order_id)) {
-            $transaction = \Yii::$app->db->beginTransaction();
-            try {
-                WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = ' . $this->id);
-                $this->order_id = null;
-                $this->save();
-                $transaction->commit();
-            } catch (\Exception $e) {
-                $transaction->rollBack();
-                throw $e;
+        //Если нет связи с заказом
+        if (!isset($this->order)) {
+            throw new BadRequestHttpException("document_has_not_path_to_order");
+        }
+        /** @var Transaction $transaction */
+        $transaction = \Yii::$app->db_api->beginTransaction();
+        try {
+            WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = :wid', [':wid' => $this->id]);
+            $this->status_id = Registry::WAYBILL_RESET;
+            if (!$this->save()) {
+                throw new ValidationException($this->getFirstErrors());
             }
+            $transaction->commit();
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
         }
         return true;
     }
 
     /**
      * Накладная - Детальная информация
+     *
      * @param $key
+     * @throws \Exception
      * @return array
      */
     public static function prepareDetail($key)
     {
         $model = self::findOne(['id' => $key]);
-        if ($model === null) {
+        if (empty($model)) {
             return [];
         }
 
-        $return = [
-            "id" => $model->id,
-            "code" => $model->id,
-            "status_id" => $model->bill_status_id,
-            "status_text" => "",
-        ];
-
-        $agent = (new Dictionary($model->service_id, 'Agent'))->agentInfo($model->outer_contractor_uuid);
-        if (empty($agent)) {
-            $return ["agent"] = [];
+        $pd = $model->payment_delay_date;
+        if (empty($pd) || $pd == '0000-00-00 00:00:00') {
+            $pd = null;
         } else {
-            $return ["agent"] = [
-                "uid" => $agent['outer_uid'],
-                "name" => $agent['name'],
-            ];
+            $pd = date("Y-m-d H:i:s T", strtotime($model->payment_delay_date));
         }
 
-        $return ["agent"] = [];
-        if (empty($agent)) {
-            $order = $model->order;
-            if (isset($order)) {
-                $return ["agent"] = [
-                    "id" => $order->vendor_id,
-                    "name" => $order->vendor->name,
-                ];
-            }
-        } elseif (isset($agent['vendor_id'])) {
-            $return["vendor"] = [
-                "id" => $agent['vendor_id'],
-                "name" => Organization::findOne(['id' => $agent['vendor_id']])->name,
-            ];
-        }
-
-        $store = (new Dictionary($model->service_id, 'Store'))->storeInfo($model->outer_store_uuid);
-        if (empty($agent)) {
-            $return ["store"] = [];
-        } else {
-            $return ["store"] = [
-                "uid" => $store['outer_uid'],
-                "name" => $store['name'],
-            ];
-        }
-
-        $return["doc_date"] = date("Y-m-d H:i:s T", strtotime($model->doc_date));
-        $return["outer_number_additional"] = $model->outer_number_additional;
-        $return["outer_number_code"] = $model->outer_number_code;
-        $return["payment_delay_date"] = date("Y-m-d H:i:s T", strtotime($model->payment_delay_date));
-        $return["outer_note"] = $model->outer_note;
+        $return = $model->prepare();
+        $return['outer_number_additional'] = $model->outer_number_additional;
+        $return['outer_number_code'] = $model->outer_number_code;
+        $return['payment_delay_date'] = $pd;
+        $return['outer_note'] = $model->outer_note;
+        $return['code'] = $model->id;
 
         return $return;
-    }
-
-    /**
-     * Привязка накладной к заказу
-     * @return int
-     */
-    public function mapWaybill($order_id)
-    {
-        $transaction = \Yii::$app->db->beginTransaction();
-        try {
-            if (isset($this->order_id)) {
-                $this->resetPositions();
-            } else {
-                $this->order_id = $order_id;
-            }
-
-            $waybillContents = $this->waybillContents;
-
-            if ($this->service_id == 2) {
-                $mainOrg_id = iikoService::getMainOrg($this->acquirer_id);
-            }
-
-            foreach ($waybillContents as $row) {
-                if (isset($row->product_outer_id)) {
-                    continue;
-                }
-
-                $client_id = $this->acquirer_id;
-                if ($this->service_id == 2) {
-                    if ($mainOrg_id != $this->acquirer_id) {
-                        if ((AllMaps::findOne("service_id = 2 AND org_id = $client_id AND serviceproduct_id = " . $row->product_outer_id) == null) && (!empty($mainOrg_id))) {
-                            $client_id = $mainOrg_id;
-                        }
-                    }
-                }
-
-                $product_id = AllMaps::find()
-                    ->select('product_id')
-                    ->where("service_id = :service_id AND serviceproduct_id = :serviceproduct_id AND org_id = :org_id and is_active = 1",
-                        [':service_id' => $this->service_id, ':serviceproduct_id' => $row->product_outer_id, ':org_id' => $client_id])
-                    ->scalar();
-
-                if ($product_id == null) {
-                    continue;
-                }
-
-                $row->order_content_id = \common\models\OrderContent::find()
-                    ->select('id')
-                    ->where('order_id = :order_id and product_id = :product_id and is_active = 1', [':order_id' => $order_id, ':product_id' => $product_id])
-                    ->scalar();
-                $row->save();
-            }
-            $transaction->commit();
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            throw $e;
-        }
     }
 }

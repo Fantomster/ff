@@ -152,7 +152,6 @@ class VetisPurpose extends \yii\db\ActiveRecord implements UpdateDictInterface
 
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
-            echo $e->getMessage().PHP_EOL;
         }
     }
 }

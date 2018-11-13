@@ -74,6 +74,26 @@ use kartik\grid\GridView;
                                             return $res;
                                         }
 
+                                        // В случае отображения списка доступных складов
+                                        if ($model->denom == 'available_stores_list') {
+                                            switch ($res) {
+                                                case 0:
+                                                    return "Все";
+                                                default:
+                                                    return $res;
+                                            }
+                                        }
+
+                                        // В случае отображения списка доступных товаров
+                                        if ($model->denom == 'available_goods_list') {
+                                            switch ($res) {
+                                                case 0:
+                                                    return "Все";
+                                                default:
+                                                    return $res;
+                                            }
+                                        }
+
                                         if ($model->type == \api\common\models\iiko\iikoDicconst::TYPE_CHECKBOX || $model->type == \api\common\models\iiko\iikoDicconst::TYPE_LIST) {
                                             return $res;
                                         }

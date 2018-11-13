@@ -9,29 +9,32 @@ class Module extends \yii\base\Module
         parent::init();
 
         $this->modules = [
-            'rkws' => [
-                // здесь имеет смысл использовать более лаконичное пространство имен
+            'rkws'      => [
+                // здесь имеет смысл использовать более лаконичное пространство имён
                 'class' => 'frontend\modules\clientintegr\modules\rkws\Module',
             ],
-            'iiko' => [
+            'iiko'      => [
                 'class' => 'frontend\modules\clientintegr\modules\iiko\Module',
             ],
-            'email' => [
+            'email'     => [
                 'class' => 'frontend\modules\clientintegr\modules\email\Module',
             ],
-            'merc' => [
+            'merc'      => [
                 'class' => 'frontend\modules\clientintegr\modules\merc\Module',
             ],
             'odinsobsh' => [
                 'class' => 'frontend\modules\clientintegr\modules\odinsobsh\Module',
             ],
-/*            
-            'supp' => [
-                // здесь имеет смысл использовать более лаконичное пространство имен
-                'class' => 'api\modules\v1\modules\supp\Module',
+            'tillypad'   => [
+                'class' => 'frontend\modules\clientintegr\modules\tillypad\Module',
             ],
- */ 
+            /*
+                        'supp' => [
+                            // здесь имеет смысл использовать более лаконичное пространство имён
+                            'class' => 'api\modules\v1\modules\supp\Module',
+                        ],
+             */
         ];
-   
+
     }
 }

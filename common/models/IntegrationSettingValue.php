@@ -14,7 +14,6 @@ use yii\db\Query;
  * @property string             $value      Значение настройки для данной организации
  * @property string             $created_at
  * @property string             $updated_at
- *
  * @property IntegrationSetting $setting
  */
 class IntegrationSettingValue extends \yii\db\ActiveRecord
@@ -97,9 +96,8 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
         (IntegrationSetting::tableName() . ' is', '`is`.`id`=`isv`.`setting_id`')
             ->where(['isv.org_id' => $orgId])
             ->andFilterWhere(['is.name' => $settingNames, 'is.service_id' => $serviceId])
-            /*->createCommand()->getRawSql();*/
             ->all(\Yii::$app->db_api);
-        if (count($dbResult) > 1 && count($settingNames) > 1) {
+        if (count($dbResult) > 1 && (count($settingNames) > 1 || empty($settingNames))) {
             foreach ($dbResult as $item) {
                 $result[$item['name']] = $item['value'];
             }

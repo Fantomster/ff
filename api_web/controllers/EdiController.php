@@ -70,14 +70,20 @@ class EdiController extends WebApiController
      *              default={
      *                  "orders": {
      *                      {
-     *                          "id": 12,
-     *                          "created_at": "10.10.2016",
-     *                          "status_updated_at": "10.10.2016",
-     *                          "status": 1,
-     *                          "status_text": "Ожидает подтверждения поставщика",
-     *                          "vendor": "POSTAVOK.NET CORPORATION",
-     *                          "create_user": "Admin",
-     *                          "comment": "Коментарий утерян в ящике стола"
+     *                          "id": 6064,
+     *                          "created_at": "2017-09-27T03:00:00+03:00",
+     *                          "completion_date": "2018-10-16T10:05:24+03:00",
+     *                          "status": 8,
+     *                          "status_text": "Отправлен поставщиком",
+     *                          "vendor": "vasilkai2017@mail.ru",
+     *                          "currency_id": 1,
+     *                          "create_user": "Капотник",
+     *                          "accept_user": "",
+     *                          "edi_number": {
+     *                              "1",
+     *                              "2",
+     *                              "3"
+     *                          }
      *                      },
      *                      {
      *                          "id": 14,
@@ -108,6 +114,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderHistory()
     {
@@ -287,6 +294,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderInfo()
     {
@@ -331,6 +339,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionAcceptProducts()
     {
@@ -338,7 +347,7 @@ class EdiController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/edi/finish-order",
+     * @SWG\Post(path="/edi/order-complete",
      *     tags={"edi"},
      *     summary="Завершение заказа",
      *     description="Завершение заказа",
@@ -375,10 +384,56 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
-    public function actionFinishOrder()
+    public function actionOrderComplete()
     {
-        $this->response = $this->container->get('EdiWebApi')->finishOrder($this->request);
+        $this->response = $this->container->get('EdiWebApi')->orderComplete($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/edi/order-cancel",
+     *     tags={"edi"},
+     *     summary="Отмена заказа",
+     *     description="Отмена заказа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=false,
+     *         @SWG\Schema (
+     *             @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "order_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                      true
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionCancelOrder()
+    {
+        $this->response = $this->container->get('EdiWebApi')->cancelOrder($this->request);
     }
 
     /**
@@ -422,6 +477,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionHistoryCount()
     {
@@ -445,15 +501,10 @@ class EdiController extends WebApiController
      *                  property="request",
      *                  default={
      *                      "order_id":1,
-     *                      "comment": "Комментарий к заказу",
-     *                      "discount": {
-     *                          "type": "FIXED|PERCENT",
-     *                          "amount": 100
-     *                      },
      *                      "products": {
-     *                          {"operation":"edit", "id":1, "price":200.2, "quantity":2, "comment":"Комментарий к товару!"},
-     *                          {"operation":"edit", "id":2, "price":100.2},
-     *                          {"operation":"add", "id":3, "quantity":2, "comment":"Комментарий к товару!"},
+     *                          {"operation":"edit", "id":1, "quantity":2},
+     *                          {"operation":"edit", "id":2},
+     *                          {"operation":"add", "id":3, "quantity":2},
      *                          {"operation":"delete", "id":4}
      *                       }
      *                  }
@@ -557,6 +608,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderUpdate()
     {
@@ -596,6 +648,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderRepeat()
     {
@@ -637,6 +690,7 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderPrintPdf()
     {
@@ -706,9 +760,136 @@ class EdiController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionOrderCreateGuide()
     {
         $this->response = $this->container->get('GuideWebApi')->createFromOrder($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/edi/status-list",
+     *     tags={"edi"},
+     *     summary="Статусы заказа EDI",
+     *     description="Статусы заказа EDI",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "id": 1,
+     *                      "title": "Ожидает подтверждения поставщика"
+     *                  },
+     *                  {
+     *                      "id": 3,
+     *                      "title": "Выполняется"
+     *                  },
+     *                  {
+     *                      "id": 8,
+     *                      "title": "Отправлен поставщиком"
+     *                  },
+     *                  {
+     *                      "id": 9,
+     *                      "title": "Приемка завершена"
+     *                  },
+     *                  {
+     *                      "id": 4,
+     *                      "title": "Завершен"
+     *                  },
+     *                  {
+     *                      "id": 6,
+     *                      "title": "Отклонен поставщиком"
+     *                  },
+     *                  {
+     *                      "id": 2,
+     *                      "title": "Ожидает подтверждения клиента"
+     *                  },
+     *                  {
+     *                      "id": 5,
+     *                      "title": "Отклонен поставщиком"
+     *                  }
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException||ValidationException"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionStatusList()
+    {
+        $result = [];
+        foreach ((new \common\models\Order)->getStatusListEdo() as $key => $value) {
+            $result[] = ['id' => (int)$key, 'title' => $value];
+        }
+        $this->response = $result;
+    }
+
+
+    /**
+     * @SWG\Post(path="/edi/save-to-pdf",
+     *     tags={"edi"},
+     *     summary="Сохранить заказ в PDF",
+     *     description="Сохранить заказ в PDF",
+     *     produces={"application/json", "application/pdf"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"order_id":1, "base64_encode":1}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description="Если все прошло хорошо вернет файл закодированый в base64",
+     *         @SWG\Schema(
+     *              default="JVBERi0xLjQKJeLjz9MKMyAwIG9iago8PC9UeXBlIC9QYWdlCi9QYXJlbnQgMSAwIFIKL01lZGlhQm94IFswIDAgNTk1LjI4MCA4NDEuOD"
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionSaveToPdf()
+    {
+        $result = $this->container->get('OrderWebApi')->saveToPdf($this->request, $this);
+        if (is_array($result)) {
+            $this->response = $result;
+        } else {
+            header('Access-Control-Allow-Origin:*');
+            header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
+            header('Access-Control-Allow-Headers:Content-Type, Authorization');
+            exit($result);
+        }
     }
 }

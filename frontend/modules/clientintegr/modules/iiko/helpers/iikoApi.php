@@ -23,7 +23,7 @@ class iikoApi
     {
         if (self::$_instance === null) {
             self::$_instance = new self;
-            self::$_instance->host = iikoDicconst::getSetting('URL', $orgId);
+            self::$_instance->host = iikoDicconst::getSetting('URL_iiko', $orgId);
             self::$_instance->login = iikoDicconst::getSetting('auth_login', $orgId);
             self::$_instance->pass = iikoDicconst::getSetting('auth_password', $orgId);
         }
@@ -41,6 +41,7 @@ class iikoApi
 
     /**
      * Авторизация
+     *
      * @param $login
      * @param $password
      * @return bool
@@ -69,6 +70,7 @@ class iikoApi
 
     /**
      * Выход с апи
+     *
      * @return mixed
      */
     public function logout()
@@ -80,6 +82,7 @@ class iikoApi
 
     /**
      * Список категорий и продуктов
+     *
      * @return array
      */
     public function getProducts()
@@ -111,9 +114,9 @@ class iikoApi
         ];
     }
 
-
     /**
      * Список складов
+     *
      * @return mixed
      */
     public function getStores()
@@ -123,6 +126,7 @@ class iikoApi
 
     /**
      * Список контрагентов
+     *
      * @return mixed
      */
     public function getSuppliers()
@@ -136,7 +140,7 @@ class iikoApi
      */
     public function sendWaybill($model)
     {
-        if ($model instanceof iikoWaybill || $model instanceof \api_web\modules\integration\models\iikoWaybill){
+        if ($model instanceof iikoWaybill || $model instanceof \api_web\modules\integration\models\iikoWaybill) {
             $url = '/documents/import/incomingInvoice';
             return $this->sendXml($url, $model->getXmlDocument());
         }
@@ -146,6 +150,7 @@ class iikoApi
     /**
      * Обычный SEND без чанков. Копия обычной SEND() для авторизации,
      * так как авторизация не поддерживает запрос только с HEADERS для определения чанков
+     *
      * @param        $url
      * @param array  $params
      * @param string $method
@@ -180,7 +185,7 @@ class iikoApi
         if ($info['http_code'] != 200) {
             $logger->setType('error');
             $logger->response(['info' => $info, 'response' => $response]);
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ' . curl_error($ch));
+            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . PHP_EOL . curl_error($ch));
         }
         $logger->response($response);
         return $response;
@@ -252,7 +257,7 @@ class iikoApi
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
         if ($chunked) {
-            curl_setopt($ch, CURLOPT_WRITEFUNCTION, array($this, 'Callback'));
+            curl_setopt($ch, CURLOPT_WRITEFUNCTION, [$this, 'Callback']);
             curl_exec($ch);
         } else {
             $response = curl_exec($ch);
@@ -348,7 +353,7 @@ class iikoApi
 
     public static function getHeadersCurl($response)
     {
-        $headers = array();
+        $headers = [];
         $header_text = substr($response, 0, strpos($response, "\r\n\r\n"));
         foreach (explode("\r\n", $header_text) as $i => $line) {
             if ($i === 0)

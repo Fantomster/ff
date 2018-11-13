@@ -11,6 +11,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string $outer_uid Внешний ID
  * @property int $service_id ID Сервиса
  * @property string $name Название продукта
+ * @property int $org_id ID организации
  * @property string $iso_code ISO код
  * @property int $is_deleted Статус удаления
  * @property string $created_at Дата создания

@@ -33,10 +33,12 @@ class MercVSDList extends MercDictConsumer
     public static $timeout = 60 * 15;
     public static $timeoutExecuting = 60 * 60;
     private $result = true;
+    private $queue_job_uid = null;
 
     public function init()
     {
         $this->data = json_decode($this->data, true);
+        $this->queue_job_uid = isset($this->data['job_uid']) ? $this->data['job_uid'] : null;
         $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList', 'organization_id' => $this->org_id, 'store_id' => $this->data['enterpriseGuid']])->one();
         $this->data = isset($this->queue->data_request) ? json_decode($this->queue->data_request, true) : $this->data;
         if (!isset($this->data)) {
@@ -87,7 +89,7 @@ class MercVSDList extends MercDictConsumer
                     $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
 
                     $count = $curr_offset + $vetDocumentList->count;
-                    $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
+                    $this->log('Load rows ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
                     echo 'Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL;
 
                     if ($vetDocumentList->count > 0) {
@@ -111,6 +113,7 @@ class MercVSDList extends MercDictConsumer
                             throw new \Exception('Error APLM0012');
                         }
                     }
+                    mercLogger::getInstance()->addMercLogDict('ERROR', 'AutoLoad'.BaseStringHelper::basename(static::class), $e->getMessage());
                     echo "Error " . PHP_EOL;
                     $curr_count = 0; //Если произошла ошибка значит данные мы на этой итерации не получили
                     if ($count_error >= 3) {
@@ -122,7 +125,7 @@ class MercVSDList extends MercDictConsumer
                             } else {
                                 //Если ошибка повторилась 3 раза и шаг равен 1, записываем данные о битом запросе в лог и пропускаем данную запись
                                 echo "Error 00" . PHP_EOL;
-                                $this->log('ERROR RECORD' . json_encode($this->request, true) . PHP_EOL);
+                                $this->log('Error in row ' . json_encode($this->request, true) . PHP_EOL);
                                 $add_curr_offset++;
                             }
                             $count_error = 0; //Даем еще три попытки
@@ -173,7 +176,7 @@ class MercVSDList extends MercDictConsumer
             $this->addFCMMessage('MercVSDList', $this->data['enterpriseGuid']);
             throw new \Exception('Error operation');
         }
-        $this->log("FIND: consumer_class_name = {$className}");
+        $this->log("Complete operation success");
 
         MercVisits::updateLastVisit($this->org_id, MercVisits::LOAD_VSD_LIST, $this->data['enterpriseGuid']);
 
@@ -185,6 +188,11 @@ class MercVSDList extends MercDictConsumer
         }
 
         $this->addFCMMessage('MercVSDList', $this->data['enterpriseGuid']);
+
+        $curr_job_uid = isset($this->data['job_uid']) ? $this->data['job_uid'] : null;
+        if($this->queue_job_uid != $curr_job_uid) {
+            $this->result = false;
+        }
     }
 
     public function saveData()

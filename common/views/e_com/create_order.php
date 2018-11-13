@@ -1,6 +1,6 @@
 <?= '<?xml version="1.0" encoding="utf-8"?>'; ?>
 <ORDER>
-    <DOCUMENTNAME>220</DOCUMENTNAME>
+    <DOCUMENTNAME><?= Yii::$app->params['edi_api_data']['edi_api_order_document_id'] ?></DOCUMENTNAME>
     <NUMBER><?= $order->id ?></NUMBER>
     <DATE><?= $dateArray['created_at'] ?></DATE>
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>
@@ -20,21 +20,25 @@
         $i = 1;
         foreach ($orderContent as $position): ?>
             <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
-                $barcode = $product->barcode;
-                $edi_supplier_article = $product->edi_supplier_article ?? $position['id'];
-                $article = $product->article ?? $position['id'];
-            if (!$barcode)continue;
+            $measure = $product->ed ?? 'шт';
+            $catalogGood = \common\models\CatalogGoods::findOne(['base_goods_id' => $product->id]);
+            $barcode = $product->barcode;
+            $vat = isset($catalogGood->vat) ? $catalogGood->vat : 0;
+            $edi_supplier_article = (isset($product->edi_supplier_article) && $product->edi_supplier_article != '') ? $product->edi_supplier_article : $position['id'];
+            $article = (isset($product->article) && $product->article != '') ? $product->article : $position['id'];
+            if (!$barcode) continue;
             ?>
             <POSITION>
                 <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>
                 <PRODUCT><?= $barcode ?></PRODUCT>
-                <PRODUCTIDBUYER><?= $article ?></PRODUCTIDBUYER>
-                <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
-                <ORDEREDQUANTITY><?= $position['quantity']  ?></ORDEREDQUANTITY>
-                <ORDERUNIT><?= $position['units']  ?></ORDERUNIT>
-                <ORDERPRICE><?= $position['price']  ?></ORDERPRICE>
+                <PRODUCTIDBUYER><?= $position['id'] ?></PRODUCTIDBUYER>
+                <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?? '' ?></PRODUCTIDSUPPLIER>
+                <ORDEREDQUANTITY><?= $position['quantity'] ?></ORDEREDQUANTITY>
+                <ORDERUNIT><?= $measure ?></ORDERUNIT>
+                <ORDERPRICE><?= $position['price'] ?></ORDERPRICE>
+                <VAT><?= $vat ?></VAT>
                 <CHARACTERISTIC>
-                    <DESCRIPTION><?= $position['product_name']  ?></DESCRIPTION>
+                    <DESCRIPTION><?= $position['product_name'] ?></DESCRIPTION>
                 </CHARACTERISTIC>
             </POSITION>
         <?php endforeach; ?>

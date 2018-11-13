@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: xsupervisor
- * Date: 31.08.2018
- * Time: 15:47
- */
 
 namespace common\helpers;
-
 
 class DBNameHelper
 {
@@ -18,5 +11,15 @@ class DBNameHelper
         } else {
             return null;
         }
+    }
+
+    public static function getApiName()
+    {
+        return self::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+    }
+
+    public static function getMainName()
+    {
+        return self::getDsnAttribute('dbname', \Yii::$app->db->dsn);
     }
 }

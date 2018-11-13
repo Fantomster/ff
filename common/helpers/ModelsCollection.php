@@ -8,13 +8,13 @@
 
 namespace common\helpers;
 
-
 use yii\base\Model;
 use yii\db\ActiveRecord;
 
 /**
  * Class ModelsCollection
  * В дальнейшем возможно добавить \ArrayAccess и \Iterator интерфейсы
+ *
  * @package common\helpers
  */
 class ModelsCollection extends Model
@@ -27,48 +27,47 @@ class ModelsCollection extends Model
      */
     public function saveMultiple(array $models)
     {
-        if (count($models) > 0) {
-            
-            $firstModel = reset($models);
-            $columnsToInsert = $firstModel->attributes();   // here you can remove excess columns. for example PK column.
+        if (count($models) > 0) { // если массив дочерних бизнесов ненулевой,
+
+            $firstModel = reset($models); //устанавливаем внутренний указатель массива на его первый элемент
+            $columnsToInsert = $firstModel->attributes();   // узнаём названия столбцов таблицы, в которую будем записывать данные
             $rowsToInsert = [];
-            
-            foreach ($models as $model) {
+
+            foreach ($models as $model) { //для каждого дочернего бизнеса
                 if ($model->validate()) {
-                    if ($model->beforeSave(true)) {
-                        $rowsToInsert[] = array_values($model->attributes);// here you can remove excess values
+                    if ($model->beforeSave(true)) { // если данные корректны
+                        $rowsToInsert[] = array_values($model->attributes);// выбираются все значения массива
                     }
-                } else {
+                } else { // если не все данные корректны, возвращаем ошибку
                     return ['success' => false, 'error' => $model->errors];
                 }
             }
-            
-            $transaction = \Yii::$app->db->beginTransaction();
+
+            $transaction = \Yii::$app->db->beginTransaction(); // начинаем транзакцию
             try {
                 $numberAffectedRows = \Yii::$app->db_api->createCommand()
                     ->batchInsert($firstModel->tableName(), $columnsToInsert, $rowsToInsert)
-                    ->execute();
-                $transaction->commit();
+                    ->execute(); // вставляем в таблицу массив значений дочерних бизнесов
+                $transaction->commit(); // заканчиваем транзакцию
             } catch (\Throwable $throwable) {
-                $transaction->rollBack();
+                $transaction->rollBack(); // если не удалось, возвращаем ошибку
                 return ['success' => false, 'error' => $throwable->getMessage()];
             }
-            
-            $isSuccess = ($numberAffectedRows === count($models));
-            
-            if ($isSuccess) {
+
+            $isSuccess = ($numberAffectedRows === count($models)); // если количество всталвенных строк равно количеству элементов массива дочерних бизнесов, то успешно
+
+            if ($isSuccess) { // действия после успешного сохранения записей в таблице
                 $changedAttributes = array_fill_keys($columnsToInsert, null);
                 foreach ($models as $model) {
                     $model->afterSave(true, $changedAttributes);
                 }
             }
-            
-            return ['success' => $isSuccess];
-        } else {
-            
+
+            return ['success' => $isSuccess]; //возвращаем успешно
+        } else { // если массив дочерних бизнесов нулевой, то возвращаем ошибку
+
             return ['success' => false, 'error' => 'count(models) < 0 or not array'];
         }
     }
-    
-    
+
 }

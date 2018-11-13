@@ -22,6 +22,7 @@ use common\models\User;
  * @property integer $order_done
  * @property integer request_accept
  * @property integer $merc_vsd
+ * @property integer $merc_stock_expiry
  * @property string $created_at
  * @property string $updated_at
  *
@@ -59,7 +60,7 @@ class EmailNotification extends \yii\db\ActiveRecord
     {
         return [
             [['rel_user_org_id'], 'required'],
-            [['user_id', 'orders', 'requests', 'changes', 'invites', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done', 'request_accept', 'merc_vsd', 'receive_employee_email', 'rel_user_org_id'], 'integer'],
+            [['user_id', 'orders', 'requests', 'changes', 'invites', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done', 'request_accept', 'merc_vsd', 'receive_employee_email', 'rel_user_org_id', 'merc_stock_expiry'], 'integer'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }

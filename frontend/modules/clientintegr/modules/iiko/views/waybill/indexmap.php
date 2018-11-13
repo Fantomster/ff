@@ -29,10 +29,10 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
             'options' => [
                 'class' => 'breadcrumb',
             ],
-            'links' => [
+            'links'   => [
                 [
                     'label' => 'Интеграция',
-                    'url' => ['/clientintegr'],
+                    'url'   => ['/clientintegr'],
                 ],
                 $this->title
             ],
@@ -58,11 +58,11 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             <div style="text-align:center;">
                                 <?php echo '<label class="cbx-label" for="s_1">Цены в Заказе включают НДС</label>';
                                 echo CheckboxX::widget([
-                                    'name' => 's_1',
-                                    'value' => $wmodel->vat_included ? 1 : 0,
-                                    'options' => ['id' => 's_1'],
+                                    'name'          => 's_1',
+                                    'value'         => $wmodel->vat_included ? 1 : 0,
+                                    'options'       => ['id' => 's_1'],
                                     'pluginOptions' => ['threeState' => false],
-                                    'pluginEvents' => ['change' => 'function() {                                    
+                                    'pluginEvents'  => ['change' => 'function() {                                    
                                     $.ajax({
                                         url: "change-vat", // путь к php-обработчику
                                         type: "POST", // метод передачи данных
@@ -85,10 +85,10 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             $form = ActiveForm::begin([
                                 'options' => [
                                     'data-pjax' => true,
-                                    'id' => 'search-form',
-                                    'role' => 'search',
+                                    'id'        => 'search-form',
+                                    'role'      => 'search',
                                 ],
-                                'method' => 'get',
+                                'method'  => 'get',
                             ]);
                             ?>
                             <div class="row">
@@ -104,137 +104,101 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             <?php ActiveForm::end(); ?>
                             <?php Pjax::end(); ?>
                             <?php
-                            echo GridView::widget([
-                                'dataProvider' => $dataProvider,
-                                'pjax' => true,
-                                'pjaxSettings' => ['options' => ['id' => 'map_grid1', 'enablePushState' => false, 'timeout' => 10000]],
-                                'filterPosition' => false,
-                                'columns' => [
-                                    [
-                                        'attribute' => 'product_id',
-                                        'label' => 'ID в Mixcart',
-                                        'vAlign' => 'bottom',
-                                        'contentOptions' => function ($data) {
-                                            return ["id" => "way" . $data->id];
-                                        },
-                                    ],
-                                    [
-                                        'attribute' => 'fproductnameProduct',
-                                        'label' => 'Наименование продукции',
-                                        'vAlign' => 'bottom',
-                                        'contentOptions' => function ($data) {
-                                            return ["id" => "denom" . $data->id];
-                                        },
-                                    ],
-                                    [
-                                        'attribute' => 'waybill_id',
-                                        'value' => function ($model) {
-                                            return $model->fproductname->ed ? $model->fproductname->ed : 'Не указано';
-                                        },
-                                        'format' => 'raw',
-                                        'label' => 'Ед. изм. Mixcart',
-                                        'vAlign' => 'bottom',
-                                        'contentOptions' => function ($data) {
-                                            return ["id" => "edizm" . $data->id];
-                                        },
-                                    ],
-                                    [
-                                        //'class' => 'kartik\grid\EditableColumn',
-                                        'attribute' => 'pdenom',
-                                        'label' => 'Наименование в iiko',
-                                        'vAlign' => 'bottom',
-                                        'width' => '210px',
-                                        //'refreshGrid' => true,
-                                        'contentOptions' => function ($data) {
-                                            return ["id" => "td" . $data->id, 'style' => 'color:#6ea262'/*width: 120px; text-align: center; padding-right: 30px'*/];
-                                        },
-                                        'value' => function ($model) {
-                                            if (!empty($model->product)) {
-                                                return $model->product->denom;
-                                            }
-                                            return '(не задано)';
-                                        },
-                                        /*'readonly' => function ($model, $key, $index, $column) use ($parentBusinessId) {
-                                            if ($parentBusinessId > 0) {
-                                                return true;
-                                            }
-                                            return false;
-                                        },*/
-                                        /*'editableOptions' => [
-                                            'asPopover' => $isAndroid ? false : true,
-                                            'formOptions' => ['action' => ['edit']],
-                                            'header' => 'Продукт iiko',
-                                            'size' => 'md',
-                                            'inputType' => \kartik\editable\Editable::INPUT_SELECT2,
-                                            'options' => [
-                                                'options' => ['placeholder' => 'Выберите продукт из списка'],
-                                                'pluginOptions' => [
-                                                    'minimumInputLength' => 2,
-                                                    'ajax' => [
-                                                        'url' => Url::toRoute('auto-complete'),
-                                                        'dataType' => 'json',
-                                                        'data' => new JsExpression('function(params) { return {term:params.term}; }')
-                                                    ],
-                                                    'allowClear' => true
-                                                ],
-                                                'pluginEvents' => [
-                                                    "select2:select" => "function() {
-                                                            if($(this).val() == 0)
-                                                            {
-                                                                $('#agent-modal').modal('show');
-                                                            }
-                                                        }",
-                                                ]
-
-                                            ]
-                                        ]*/
-                                    ],
-                                    [
-                                        'attribute' => 'munit',
-                                        'value' => function ($model) {
-                                            if (!empty($model->product)) {
-                                                return $model->product->unit;
-                                            }
-                                            return 'Не задано';
-                                        },
-                                        'format' => 'raw',
-                                        'label' => 'Ед.изм. iiko',
-                                        'vAlign' => 'bottom',
-                                        'contentOptions' => function ($data) {
-                                            return ["id" => "edizm_us" . $data->id];
-                                        },
-                                    ],
-                                    [
-                                        'attribute' => 'defquant',
-                                        'format' => 'raw',
-                                        'label' => 'Кол-во в Заказе',
-                                        'vAlign' => 'bottom',
-                                    ],
-                                    [
-                                        'class' => 'kartik\grid\EditableColumn',
-                                        'attribute' => 'koef',
-                                        'refreshGrid' => true,
-                                        'editableOptions' => [
-                                            'asPopover' => $isAndroid ? false : true,
-                                            'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
-                                            'inputType' => \kartik\editable\Editable::INPUT_TEXT,
-                                            'beforeInput' => function ($form, $w) {
-                                                /**
-                                                 * @var $form ActiveForm
-                                                 * @var $w \kartik\editable\Editable
-                                                 */
-                                                echo $form->field($w->model, 'querys')->hiddenInput(['value' => '', 'display' => 'none', 'class' => 'querys']);
+                            if ($editCan == 1) {
+                                echo GridView::widget([
+                                    'dataProvider'     => $dataProvider,
+                                    'pjax'             => true,
+                                    'pjaxSettings'     => ['options' => ['id' => 'map_grid1', 'enablePushState' => false, 'timeout' => 10000]],
+                                    'filterPosition'   => false,
+                                    'columns'          => [
+                                        [
+                                            'attribute'      => 'product_id',
+                                            'label'          => 'ID в Mixcart',
+                                            'vAlign'         => 'bottom',
+                                            'contentOptions' => function ($data) {
+                                                return ["id" => "way" . $data->id];
                                             },
-                                            'afterInput' => function ($form, $w) {
-                                                /**
-                                                 * @var $form ActiveForm
-                                                 * @var $w \kartik\editable\Editable
-                                                 */
-                                                //echo $form->field($w->model, 'enable_all_map')->checkbox();
-                                                echo $form->field($w->model, 'koef_buttons')->hiddenInput(['value' => 'onlyone', 'class' => 'izm', 'display' => 'none']);
-                                                echo $form->field($w->model, 'koef_forever')->input('button', ['id' => 'koef_forever',
-                                                    'class' => 'btn btn-sm btn-primary', 'value' => 'Применить и запомнить', 'title' => 'Применить и использовать в будущем по умолчанию',
-                                                    'onClick' => '$(\'.izm\').val(\'forever\'); //устаналиваем значение скрытого поля, указывая, что применить и запомнить
+                                        ],
+                                        [
+                                            'attribute'      => 'fproductnameProduct',
+                                            'label'          => 'Наименование продукции',
+                                            'vAlign'         => 'bottom',
+                                            'contentOptions' => function ($data) {
+                                                return ["id" => "denom" . $data->id];
+                                            },
+                                        ],
+                                        [
+                                            'attribute'      => 'waybill_id',
+                                            'value'          => function ($model) {
+                                                return $model->fproductname->ed ? $model->fproductname->ed : 'Не указано';
+                                            },
+                                            'format'         => 'raw',
+                                            'label'          => 'Ед. изм. Mixcart',
+                                            'vAlign'         => 'bottom',
+                                            'contentOptions' => function ($data) {
+                                                return ["id" => "edizm" . $data->id];
+                                            },
+                                        ],
+                                        [
+                                            'attribute'      => 'pdenom',
+                                            'label'          => 'Наименование в iiko',
+                                            'vAlign'         => 'bottom',
+                                            'width'          => '210px',
+                                            'contentOptions' => function ($data) {
+                                                return ["id" => "td" . $data->id, 'style' => 'color:#6ea262'/*width: 120px; text-align: center; padding-right: 30px'*/];
+                                            },
+                                            'value'          => function ($model) {
+                                                if (!empty($model->product)) {
+                                                    return $model->product->denom;
+                                                }
+                                                return '(не задано)';
+                                            },
+                                        ],
+                                        [
+                                            'attribute'      => 'munit',
+                                            'value'          => function ($model) {
+                                                if (!empty($model->product)) {
+                                                    return $model->product->unit;
+                                                }
+                                                return 'Не задано';
+                                            },
+                                            'format'         => 'raw',
+                                            'label'          => 'Ед.изм. iiko',
+                                            'vAlign'         => 'bottom',
+                                            'contentOptions' => function ($data) {
+                                                return ["id" => "edizm_us" . $data->id];
+                                            },
+                                        ],
+                                        [
+                                            'attribute' => 'defquant',
+                                            'format'    => 'raw',
+                                            'label'     => 'Кол-во в Заказе',
+                                            'vAlign'    => 'bottom',
+                                        ],
+                                        [
+                                            'class'           => 'kartik\grid\EditableColumn',
+                                            'attribute'       => 'koef',
+                                            'refreshGrid'     => true,
+                                            'editableOptions' => [
+                                                'asPopover'       => $isAndroid ? false : true,
+                                                'header'          => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
+                                                'inputType'       => \kartik\editable\Editable::INPUT_TEXT,
+                                                'beforeInput'     => function ($form, $w) {
+                                                    /**
+                                                     * @var $form ActiveForm
+                                                     * @var $w    \kartik\editable\Editable
+                                                     */
+                                                    echo $form->field($w->model, 'querys')->hiddenInput(['value' => '', 'display' => 'none', 'class' => 'querys']);
+                                                },
+                                                'afterInput'      => function ($form, $w) {
+                                                    /**
+                                                     * @var $form ActiveForm
+                                                     * @var $w    \kartik\editable\Editable
+                                                     */
+                                                    echo $form->field($w->model, 'koef_buttons')->hiddenInput(['value' => 'onlyone', 'class' => 'izm', 'display' => 'none']);
+                                                    echo $form->field($w->model, 'koef_forever')->input('button', ['id'      => 'koef_forever',
+                                                                                                                   'class'   => 'btn btn-sm btn-primary', 'value' => 'Применить и запомнить', 'title' => 'Применить и использовать в будущем по умолчанию',
+                                                                                                                   'onClick' => '$(\'.izm\').val(\'forever\'); //устаналиваем значение скрытого поля, указывая, что применить и запомнить
                                                     var pos = $(\'.summary\').html(); //запоминаем строку с указанием позиций и страницы
                                                     var qasc=$(\'.asc\').attr(\'data-sort\'); //узнаём порядок сортировки с классом asc
                                                     var qdesc=$(\'.desc\').attr(\'data-sort\'); //узнаём порядок сортировки с классом desc                                                    
@@ -254,81 +218,82 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                     querystr = querystr+"+"+vat_filter; //добавляем в строку третий параметр
                                                     $(\'.querys\').val(querystr); //устанавливаем значение скрытого поля, передавая в него строку с параметрами
                                                     form.submit();' //отправляем значения из формы
-                                                ]);
-                                            },
-                                            'buttonsTemplate' => '{submit}{reset}',
-                                            'resetButton' => [
-                                                'class' => 'btn btn-sm btn-outline-danger',
-                                                'icon' => 'Отменить',
-                                                'name' => 'koef_otkaz',
-                                                'label' => 'Отменить'
-                                            ],
-                                            'submitButton' => [
-                                                'class' => 'btn btn-sm btn-success sub',
-                                                'icon' => 'Применить',
-                                                'id' => 'koef_submit',
-                                                'name' => 'koef_onlyone',
-                                                'label' => 'Применить только для данной накладной'
-                                            ],
-                                            'formOptions' => [
-                                                'action' => Url::toRoute('change-coefficient-new'),
-                                                'enableClientValidation' => false,
-                                            ],
+                                                    ]);
+                                                },
+                                                'buttonsTemplate' => '{submit}{reset}',
+                                                'resetButton'     => [
+                                                    'class' => 'btn btn-sm btn-outline-danger',
+                                                    'icon'  => 'Отменить',
+                                                    'name'  => 'koef_otkaz',
+                                                    'label' => 'Отменить'
+                                                ],
+                                                'submitButton'    => [
+                                                    'class' => 'btn btn-sm btn-success sub',
+                                                    'icon'  => 'Применить',
+                                                    'id'    => 'koef_submit',
+                                                    'name'  => 'koef_onlyone',
+                                                    'label' => 'Применить только для данной накладной'
+                                                ],
+                                                'formOptions'     => [
+                                                    'action'                 => Url::toRoute('change-coefficient-new'),
+                                                    'enableClientValidation' => false,
+                                                ],
+                                            ]
+                                            ,
+                                            'hAlign'          => 'right',
+                                            'vAlign'          => 'bottom',
+                                            'format'          => ['decimal', 6],
+                                            'pageSummary'     => true,
+                                            'label'           => 'Коэфф.'
                                         ],
-                                        'hAlign' => 'right',
-                                        'vAlign' => 'bottom',
-                                        'format' => ['decimal', 6],
-                                        'pageSummary' => true,
-                                        'label' => 'Коэфф.'
-                                    ],
-                                    [
-                                        'class' => 'kartik\grid\EditableColumn',
-                                        'attribute' => 'quant',
-                                        'refreshGrid' => true,
-                                        'editableOptions' => [
-                                            'asPopover' => $isAndroid ? false : true,
-                                            'header' => ':<br><strong>Новое количество равно:&nbsp; &nbsp;</strong>',
-                                            'inputType' => \kartik\editable\Editable::INPUT_TEXT,
-                                            'formOptions' => [
-                                                'action' => Url::toRoute('change-coefficient'),
-                                                'enableClientValidation' => false,
+                                        [
+                                            'class'           => 'kartik\grid\EditableColumn',
+                                            'attribute'       => 'quant',
+                                            'refreshGrid'     => true,
+                                            'editableOptions' => [
+                                                'asPopover'   => $isAndroid ? false : true,
+                                                'header'      => ':<br><strong>Новое количество равно:&nbsp; &nbsp;</strong>',
+                                                'inputType'   => \kartik\editable\Editable::INPUT_TEXT,
+                                                'formOptions' => [
+                                                    'action'                 => Url::toRoute('change-coefficient'),
+                                                    'enableClientValidation' => false,
+                                                ],
                                             ],
-                                        ],
-                                        'hAlign' => 'right',
-                                        'vAlign' => 'bottom',
-                                        'format' => ['decimal'],
+                                            'hAlign'          => 'right',
+                                            'vAlign'          => 'bottom',
+                                            'format'          => ['decimal'],
 
-                                        'pageSummary' => true,
-                                        'footer' => 'Итого сумма без НДС:',
-                                        'label' => 'Количество'
-                                    ],
-                                    [
-                                        'class' => 'kartik\grid\EditableColumn',
-                                        'attribute' => 'sum',
-                                        'refreshGrid' => true,
-                                        'editableOptions' => [
-                                            'asPopover' => $isAndroid ? false : true,
-                                            'header' => '<strong>Новая сумма равна:&nbsp; &nbsp;</strong>',
-                                            'inputType' => \kartik\editable\Editable::INPUT_TEXT,
-                                            'formOptions' => [
-                                                'action' => Url::toRoute('change-coefficient'),
-                                                'enableClientValidation' => false,
-                                            ],
+                                            'pageSummary' => true,
+                                            'footer'      => 'Итого сумма без НДС:',
+                                            'label'       => 'Количество'
                                         ],
-                                        'hAlign' => 'right',
-                                        'vAlign' => 'bottom',
-                                        'format' => ['decimal', 2],
-                                        'pageSummary' => true,
-                                        'footer' => \api\common\models\iiko\iikoWaybillData::getSumByWaybillid($wmodel->id),
-                                        'label' => 'Сумма б/н'
-                                    ],
-                                    [
-                                        'class' => 'yii\grid\ActionColumn',
-                                        'headerOptions' => ['style' => 'width: 6%; text-align:center'],
-                                        'contentOptions' => ['style' => 'width: 6%; text-align:center'],
-                                        'template' => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
-                                        'header' => '<span align="center">НДС</br>' .
-                                            ' <button id="btnZero" type="button" 
+                                        [
+                                            'class'           => 'kartik\grid\EditableColumn',
+                                            'attribute'       => 'sum',
+                                            'refreshGrid'     => true,
+                                            'editableOptions' => [
+                                                'asPopover'   => $isAndroid ? false : true,
+                                                'header'      => '<strong>Новая сумма равна:&nbsp; &nbsp;</strong>',
+                                                'inputType'   => \kartik\editable\Editable::INPUT_TEXT,
+                                                'formOptions' => [
+                                                    'action'                 => Url::toRoute('change-coefficient'),
+                                                    'enableClientValidation' => false,
+                                                ],
+                                            ],
+                                            'hAlign'          => 'right',
+                                            'vAlign'          => 'bottom',
+                                            'format'          => ['decimal', 2],
+                                            'pageSummary'     => true,
+                                            'footer'          => \api\common\models\iiko\iikoWaybillData::getSumByWaybillid($wmodel->id),
+                                            'label'           => 'Сумма б/н'
+                                        ],
+                                        [
+                                            'class'          => 'yii\grid\ActionColumn',
+                                            'headerOptions'  => ['style' => 'width: 6%; text-align:center'],
+                                            'contentOptions' => ['style' => 'width: 6%; text-align:center'],
+                                            'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
+                                            'header'         => '<span align="center">НДС</br>' .
+                                                ' <button id="btnZero" type="button" 
                                             onClick="var path = \'' . $sLinkzero . '\';
                                                     var vatf = $(\'#vatFilter\').val();
                                                     var qasc=$(\'.asc\').attr(\'data-sort\');
@@ -348,7 +313,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                     path = path+\'&vatf=\'+vatf+\'&sort=\'+sortirov+\'&page=\'+pos;
                                                     location.href=path;"
                                             class="btn btn-xs btn-link" style="color:green;">0</button>' .
-                                            '<button id="btnTen" type="button" 
+                                                '<button id="btnTen" type="button" 
                                             onClick="var path = \'' . $sLinkten . '\';
                                                     var vatf = $(\'#vatFilter\').val();
                                                     var qasc=$(\'.asc\').attr(\'data-sort\');
@@ -368,7 +333,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                     path = path+\'&vatf=\'+vatf+\'&sort=\'+sortirov+\'&page=\'+pos;
                                                     location.href=path;" 
                                             class="btn btn-xs btn-link" style="color:green;">10</button>' .
-                                            '<button id="btnEight" type="button" 
+                                                '<button id="btnEight" type="button" 
                                             onClick="var path = \'' . $sLinkeight . '\';
                                                     var vatf = $(\'#vatFilter\').val();
                                                     var qasc=$(\'.asc\').attr(\'data-sort\');
@@ -389,174 +354,566 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                     location.href=path;" 
                                             class="btn btn-xs btn-link" style="color:green;">18</button></span>',
 
-                                        'visibleButtons' => [
-                                            'zero' => function ($model, $key, $index) {
-                                                // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
-                                                return true;
-                                            },
+                                            'visibleButtons' => [
+                                                'zero' => function ($model, $key, $index) {
+                                                    // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
+                                                    return true;
+                                                },
+                                            ],
+                                            'buttons'        => [
+                                                'zero'     => function ($url, $model) {
+
+                                                    if ($model->vat == 0) {
+                                                        $tClass = "label label-success";
+                                                        $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                                                    } else {
+                                                        $tClass = "label label-default";
+                                                        $tStyle = "";
+                                                    }
+
+                                                    $way = $model->id;
+                                                    $sort = Yii::$app->request->get('sort');
+                                                    $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                                    $vatf = 1;
+                                                    if (null !== (Yii::$app->request->get('iikoWaybillDataSearch'))) {
+                                                        $massiv = Yii::$app->request->get('iikoWaybillDataSearch');
+                                                        $vatf = $massiv["vat"];
+                                                    }
+                                                    $customurl = Yii::$app->getUrlManager()->createUrl([
+                                                        'clientintegr/iiko/waybill/chvat',
+                                                        'id'   => $model->id,
+                                                        'koef' => $model->koef,
+                                                        'vatf' => $vatf,
+                                                        'sort' => $sort,
+                                                        'vat'  => 0, 'page' => $page, 'way' => $way
+                                                    ]);
+
+                                                    return \yii\helpers\Html::a('&nbsp;0', $customurl, [
+                                                        'title'     => Yii::t('backend', '0%'),
+                                                        'data-pjax' => 0,
+                                                        'class'     => $tClass,
+                                                        'style'     => $tStyle
+                                                    ]);
+                                                },
+                                                'ten'      => function ($url, $model) {
+
+                                                    if ($model->vat == 1000) {
+                                                        $tClass = "label label-success";
+                                                        $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                                                    } else {
+                                                        $tClass = "label label-default";
+                                                        $tStyle = "";
+                                                    }
+
+                                                    $way = $model->id;
+                                                    $sort = Yii::$app->request->get('sort');
+                                                    $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                                    $vatf = 1;
+                                                    if (null !== (Yii::$app->request->get('iikoWaybillDataSearch'))) {
+                                                        $massiv = Yii::$app->request->get('iikoWaybillDataSearch');
+                                                        $vatf = $massiv["vat"];
+                                                    }
+                                                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id' => $model->id, 'koef' => $model->koef, 'vatf' => $vatf, 'vat' => '1000', 'page' => $page, 'sort' => $sort, 'way' => $way]);
+                                                    return \yii\helpers\Html::a('10', $customurl,
+                                                        ['title' => Yii::t('backend', '10%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
+                                                },
+                                                'eighteen' => function ($url, $model) {
+
+                                                    if ($model->vat == 1800) {
+                                                        $tClass = "label label-success";
+                                                        $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                                                    } else {
+                                                        $tClass = "label label-default";
+                                                        $tStyle = "";
+                                                    }
+
+                                                    $way = $model->id;
+                                                    $sort = Yii::$app->request->get('sort');
+                                                    $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                                    $vatf = 1;
+                                                    if (null !== (Yii::$app->request->get('iikoWaybillDataSearch'))) {
+                                                        $massiv = Yii::$app->request->get('iikoWaybillDataSearch');
+                                                        $vatf = $massiv["vat"];
+                                                    }
+                                                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id' => $model->id, 'koef' => $model->koef, 'vatf' => $vatf, 'vat' => '1800', 'page' => $page, 'sort' => $sort, 'way' => $way]);
+                                                    return \yii\helpers\Html::a('18', $customurl,
+                                                        ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
+                                                },
+                                            ]
                                         ],
-                                        'buttons' => [
-                                            'zero' => function ($url, $model) {
-
-                                                if ($model->vat == 0) {
-                                                    $tClass = "label label-success";
-                                                    $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
-                                                } else {
-                                                    $tClass = "label label-default";
-                                                    $tStyle = "";
-                                                }
-
-                                                $way = $model->id;
-                                                $sort = Yii::$app->request->get('sort');
-                                                $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
-                                                $vatf = 1;
-                                                if (null !== (Yii::$app->request->get('iikoWaybillDataSearch'))) {
-                                                    $massiv = Yii::$app->request->get('iikoWaybillDataSearch');
-                                                    $vatf = $massiv["vat"];
-                                                }
-                                                $customurl = Yii::$app->getUrlManager()->createUrl([
-                                                    'clientintegr/iiko/waybill/chvat',
-                                                    'id' => $model->id,
-                                                    'koef' => $model->koef,
-                                                    'vatf' => $vatf,
-                                                    'sort' => $sort,
-                                                    'vat' => 0, 'page' => $page, 'way' => $way
-                                                ]);
-
-                                                return \yii\helpers\Html::a('&nbsp;0', $customurl, [
-                                                    'title' => Yii::t('backend', '0%'),
-                                                    'data-pjax' => 0,
-                                                    'class' => $tClass,
-                                                    'style' => $tStyle
-                                                ]);
-                                            },
-                                            'ten' => function ($url, $model) {
-
-                                                if ($model->vat == 1000) {
-                                                    $tClass = "label label-success";
-                                                    $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
-                                                } else {
-                                                    $tClass = "label label-default";
-                                                    $tStyle = "";
-                                                }
-
-                                                //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                                $way = $model->id;
-                                                $sort = Yii::$app->request->get('sort');
-                                                $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
-                                                $vatf = 1;
-                                                if (null !== (Yii::$app->request->get('iikoWaybillDataSearch'))) {
-                                                    $massiv = Yii::$app->request->get('iikoWaybillDataSearch');
-                                                    $vatf = $massiv["vat"];
-                                                }
-                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id' => $model->id, 'koef' => $model->koef, 'vatf' => $vatf, 'vat' => '1000', 'page' => $page, 'sort' => $sort, 'way' => $way]);
-                                                return \yii\helpers\Html::a('10', $customurl,
-                                                    ['title' => Yii::t('backend', '10%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
-                                            },
-                                            'eighteen' => function ($url, $model) {
-
-                                                if ($model->vat == 1800) {
-                                                    $tClass = "label label-success";
-                                                    $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
-                                                } else {
-                                                    $tClass = "label label-default";
-                                                    $tStyle = "";
-                                                }
-
-                                                //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                                $way = $model->id;
-                                                $sort = Yii::$app->request->get('sort');
-                                                $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
-                                                $vatf = 1;
-                                                if (null !== (Yii::$app->request->get('iikoWaybillDataSearch'))) {
-                                                    $massiv = Yii::$app->request->get('iikoWaybillDataSearch');
-                                                    $vatf = $massiv["vat"];
-                                                }
-                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id' => $model->id, 'koef' => $model->koef, 'vatf' => $vatf, 'vat' => '1800', 'page' => $page, 'sort' => $sort, 'way' => $way]);
-                                                return \yii\helpers\Html::a('18', $customurl,
-                                                    ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
-                                            },
-                                        ]
+                                        [
+                                            'label'  => 'Сумма с НДС',
+                                            'format' => ['decimal', 2],
+                                            'hAlign' => 'right',
+                                            'vAlign' => 'bottom',
+                                            'value'  => function ($model) {
+                                                $sumsnds = (1 + ($model->vat) / 10000) * ($model->sum);
+                                                return $sumsnds;
+                                            }
+                                        ],
+                                        [
+                                            'class'          => 'yii\grid\ActionColumn',
+                                            'contentOptions' => ['style' => 'width: 6%;'],
+                                            'template'       => '{clear}{delete}',
+                                            'visibleButtons' => [
+                                                'clear'  => function ($model, $key, $index) {
+                                                    return true;
+                                                },
+                                                'delete' => function ($model, $key, $index) {
+                                                    return true;
+                                                },
+                                            ],
+                                            'buttons'        => [
+                                                'clear'  => function ($url, $model) {
+                                                    return \yii\helpers\Html::a(
+                                                        '<i class="fa fa-sign-in padding-right-15" aria-hidden="true"></i>',
+                                                        Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/clear-data', 'id' => $model->id]),
+                                                        [
+                                                            'title'     => Yii::t('backend', 'Вернуть начальные данные'),
+                                                            'data-pjax' => "0"
+                                                        ]
+                                                    );
+                                                },
+                                                'delete' => function ($url, $model) {
+                                                    $text = 'Удалить';
+                                                    $url = Url::toRoute('waybill/map-trigger-waybill-data-status');
+                                                    $action = 'delete';
+                                                    if (!$model->unload_status) {
+                                                        $action = 'restore';
+                                                        $text = 'Восстановить';
+                                                    }
+                                                    return \yii\helpers\Html::a(
+                                                        '<i class="fa fa-trash" aria-hidden="true"></i>',
+                                                        '#',
+                                                        [
+                                                            'title'             => Yii::t('backend', $text),
+                                                            'data-pjax'         => "0",
+                                                            'id'                => 'delete-waybill_' . $model->id,
+                                                            'class'             => 'delete-waybill',
+                                                            'data-waybill-id'   => $model->id,
+                                                            'data-url'          => $url,
+                                                            'data-product-name' => $model->fproductname->product,
+                                                            'data-status'       => $model->unload_status,
+                                                            'data-action'       => $action,
+                                                        ]
+                                                    );
+                                                },
+                                            ]
+                                        ],
                                     ],
-                                    [
-                                        'label' => 'Сумма с НДС',
-                                        'format' => ['decimal', 2],
-                                        'hAlign' => 'right',
-                                        'vAlign' => 'bottom',
-                                        'value' => function ($model) {
-                                            $sumsnds = (1 + ($model->vat) / 10000) * ($model->sum);
-                                            return $sumsnds;
+                                    'showFooter'       => true,
+                                    'options'          => ['class' => 'table-responsive'],
+                                    'tableOptions'     => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                                    'formatter'        => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                                    'bordered'         => false,
+                                    'striped'          => true,
+                                    'condensed'        => false,
+                                    'responsive'       => false,
+                                    'hover'            => true,
+                                    'resizableColumns' => false,
+                                    'export'           => [
+                                        'fontAwesome' => true,
+                                    ],
+                                    'rowOptions'       => function ($model) {
+                                        if (!$model->unload_status) {
+                                            return ['style' => 'opacity: 0.3;'];
                                         }
-                                    ],
-                                    [
-                                        'class' => 'yii\grid\ActionColumn',
-                                        'contentOptions' => ['style' => 'width: 6%;'],
-                                        'template' => '{clear}{delete}',
-                                        'visibleButtons' => [
-                                            'clear' => function ($model, $key, $index) {
-                                                return true;
-                                            },
-                                            'delete' => function ($model, $key, $index) {
-                                                return true;
+                                    },
+                                ]);
+                            } else {
+                                echo GridView::widget([
+                                    'dataProvider'     => $dataProvider,
+                                    'pjax'             => true,
+                                    'pjaxSettings'     => ['options' => ['id' => 'map_grid1', 'enablePushState' => false, 'timeout' => 10000]],
+                                    'filterPosition'   => false,
+                                    'columns'          => [
+                                        [
+                                            'attribute'      => 'product_id',
+                                            'label'          => 'ID в Mixcart',
+                                            'vAlign'         => 'bottom',
+                                            'contentOptions' => function ($data) {
+                                                return ["id" => "way" . $data->id];
                                             },
                                         ],
-                                        'buttons' => [
-                                            'clear' => function ($url, $model) {
-                                                return \yii\helpers\Html::a(
-                                                    '<i class="fa fa-sign-in padding-right-15" aria-hidden="true"></i>',
-                                                    Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/clear-data', 'id' => $model->id]),
-                                                    [
-                                                        'title' => Yii::t('backend', 'Вернуть начальные данные'),
-                                                        'data-pjax' => "0"
-                                                    ]
-                                                );
+                                        [
+                                            'attribute'      => 'fproductnameProduct',
+                                            'label'          => 'Наименование продукции',
+                                            'vAlign'         => 'bottom',
+                                            'contentOptions' => function ($data) {
+                                                return ["id" => "denom" . $data->id];
                                             },
-                                            'delete' => function ($url, $model) {
-                                                $text = 'Удалить';
-                                                $url = Url::toRoute('waybill/map-trigger-waybill-data-status');
-                                                $action = 'delete';
-                                                if (!$model->unload_status) {
-                                                    $action = 'restore';
-                                                    $text = 'Восстановить';
+                                        ],
+                                        [
+                                            'attribute'      => 'waybill_id',
+                                            'value'          => function ($model) {
+                                                return $model->fproductname->ed ? $model->fproductname->ed : 'Не указано';
+                                            },
+                                            'format'         => 'raw',
+                                            'label'          => 'Ед. изм. Mixcart',
+                                            'vAlign'         => 'bottom',
+                                            'contentOptions' => function ($data) {
+                                                return ["id" => "edizm" . $data->id];
+                                            },
+                                        ],
+                                        [
+                                            'attribute'      => 'pdenom',
+                                            'label'          => 'Наименование в iiko',
+                                            'vAlign'         => 'bottom',
+                                            'width'          => '210px',
+                                            'contentOptions' => function ($data) {
+                                                return ["id" => "td" . $data->id, 'style' => 'color:#6ea262'/*width: 120px; text-align: center; padding-right: 30px'*/];
+                                            },
+                                            'value'          => function ($model) {
+                                                if (!empty($model->product)) {
+                                                    return $model->product->denom;
                                                 }
-                                                return \yii\helpers\Html::a(
-                                                    '<i class="fa fa-trash" aria-hidden="true"></i>',
-                                                    '#',
-                                                    [
-                                                        'title' => Yii::t('backend', $text),
-                                                        'data-pjax' => "0",
-                                                        'id' => 'delete-waybill_' . $model->id,
-                                                        'class' => 'delete-waybill',
-                                                        'data-waybill-id' => $model->id,
-                                                        'data-url' => $url,
-                                                        'data-product-name' => $model->fproductname->product,
-                                                        'data-status' => $model->unload_status,
-                                                        'data-action' => $action,
-                                                    ]
-                                                );
+                                                return '(не задано)';
                                             },
-                                        ]
+                                        ],
+                                        [
+                                            'attribute'      => 'munit',
+                                            'value'          => function ($model) {
+                                                if (!empty($model->product)) {
+                                                    return $model->product->unit;
+                                                }
+                                                return 'Не задано';
+                                            },
+                                            'format'         => 'raw',
+                                            'label'          => 'Ед.изм. iiko',
+                                            'vAlign'         => 'bottom',
+                                            'contentOptions' => function ($data) {
+                                                return ["id" => "edizm_us" . $data->id];
+                                            },
+                                        ],
+                                        [
+                                            'attribute' => 'defquant',
+                                            'format'    => 'raw',
+                                            'label'     => 'Кол-во в Заказе',
+                                            'vAlign'    => 'bottom',
+                                        ],
+                                        [
+                                            'class'           => 'kartik\grid\EditableColumn',
+                                            'attribute'       => 'koef',
+                                            'refreshGrid'     => true,
+                                            'editableOptions' => [
+                                                'asPopover'       => $isAndroid ? false : true,
+                                                'header'          => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
+                                                'inputType'       => \kartik\editable\Editable::INPUT_TEXT,
+                                                'beforeInput'     => function ($form, $w) {
+                                                    /**
+                                                     * @var $form ActiveForm
+                                                     * @var $w    \kartik\editable\Editable
+                                                     */
+                                                    echo $form->field($w->model, 'querys')->hiddenInput(['value' => '', 'display' => 'none', 'class' => 'querys']);
+                                                },
+                                                'afterInput'      => function ($form, $w) {
+                                                    /**
+                                                     * @var $form ActiveForm
+                                                     * @var $w    \kartik\editable\Editable
+                                                     */
+                                                    echo $form->field($w->model, 'koef_buttons')->hiddenInput(['value' => 'onlyone', 'class' => 'izm', 'display' => 'none']);
+                                                },
+                                                'buttonsTemplate' => '{submit}{reset}',
+                                                'resetButton'     => [
+                                                    'class' => 'btn btn-sm btn-outline-danger',
+                                                    'icon'  => 'Отменить',
+                                                    'name'  => 'koef_otkaz',
+                                                    'label' => 'Отменить'
+                                                ],
+                                                'submitButton'    => [
+                                                    'class' => 'btn btn-sm btn-success sub',
+                                                    'icon'  => 'Применить',
+                                                    'id'    => 'koef_submit',
+                                                    'name'  => 'koef_onlyone',
+                                                    'label' => 'Применить только для данной накладной'
+                                                ],
+                                                'formOptions'     => [
+                                                    'action'                 => Url::toRoute('change-coefficient-new'),
+                                                    'enableClientValidation' => false,
+                                                ],
+                                            ]
+                                            ,
+                                            'hAlign'          => 'right',
+                                            'vAlign'          => 'bottom',
+                                            'format'          => ['decimal', 6],
+                                            'pageSummary'     => true,
+                                            'label'           => 'Коэфф.'
+                                        ],
+                                        [
+                                            'class'           => 'kartik\grid\EditableColumn',
+                                            'attribute'       => 'quant',
+                                            'refreshGrid'     => true,
+                                            'editableOptions' => [
+                                                'asPopover'   => $isAndroid ? false : true,
+                                                'header'      => ':<br><strong>Новое количество равно:&nbsp; &nbsp;</strong>',
+                                                'inputType'   => \kartik\editable\Editable::INPUT_TEXT,
+                                                'formOptions' => [
+                                                    'action'                 => Url::toRoute('change-coefficient'),
+                                                    'enableClientValidation' => false,
+                                                ],
+                                            ],
+                                            'hAlign'          => 'right',
+                                            'vAlign'          => 'bottom',
+                                            'format'          => ['decimal'],
+
+                                            'pageSummary' => true,
+                                            'footer'      => 'Итого сумма без НДС:',
+                                            'label'       => 'Количество'
+                                        ],
+                                        [
+                                            'class'           => 'kartik\grid\EditableColumn',
+                                            'attribute'       => 'sum',
+                                            'refreshGrid'     => true,
+                                            'editableOptions' => [
+                                                'asPopover'   => $isAndroid ? false : true,
+                                                'header'      => '<strong>Новая сумма равна:&nbsp; &nbsp;</strong>',
+                                                'inputType'   => \kartik\editable\Editable::INPUT_TEXT,
+                                                'formOptions' => [
+                                                    'action'                 => Url::toRoute('change-coefficient'),
+                                                    'enableClientValidation' => false,
+                                                ],
+                                            ],
+                                            'hAlign'          => 'right',
+                                            'vAlign'          => 'bottom',
+                                            'format'          => ['decimal', 2],
+                                            'pageSummary'     => true,
+                                            'footer'          => \api\common\models\iiko\iikoWaybillData::getSumByWaybillid($wmodel->id),
+                                            'label'           => 'Сумма б/н'
+                                        ],
+                                        [
+                                            'class'          => 'yii\grid\ActionColumn',
+                                            'headerOptions'  => ['style' => 'width: 6%; text-align:center'],
+                                            'contentOptions' => ['style' => 'width: 6%; text-align:center'],
+                                            'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
+                                            'header'         => '<span align="center">НДС</br>' .
+                                                ' <button id="btnZero" type="button" 
+                                            onClick="var path = \'' . $sLinkzero . '\';
+                                                    var vatf = $(\'#vatFilter\').val();
+                                                    var qasc=$(\'.asc\').attr(\'data-sort\');
+                                                    var qdesc=$(\'.desc\').attr(\'data-sort\');
+                                                    if (typeof qdesc === \'undefined\') {
+                                                        var sortirov=qasc;
+                                                    } else {
+                                                        var sortirov=qdesc;
+                                                    }
+                                                    var sortirov0=sortirov.substring(0,1);
+                                                    if (sortirov0==\'-\') {
+                                                        sortirov=sortirov.substring(1);
+                                                    } else {
+                                                        sortirov=\'-\'+sortirov;
+                                                    }
+                                                    var pos = $(\'.summary\').html();
+                                                    path = path+\'&vatf=\'+vatf+\'&sort=\'+sortirov+\'&page=\'+pos;
+                                                    location.href=path;"
+                                            class="btn btn-xs btn-link" style="color:green;">0</button>' .
+                                                '<button id="btnTen" type="button" 
+                                            onClick="var path = \'' . $sLinkten . '\';
+                                                    var vatf = $(\'#vatFilter\').val();
+                                                    var qasc=$(\'.asc\').attr(\'data-sort\');
+                                                    var qdesc=$(\'.desc\').attr(\'data-sort\');
+                                                    if (typeof qdesc === \'undefined\') {
+                                                        var sortirov=qasc;
+                                                    } else {
+                                                        var sortirov=qdesc;
+                                                    }
+                                                    var sortirov0=sortirov.substring(0,1);
+                                                    if (sortirov0==\'-\') {
+                                                        sortirov=sortirov.substring(1);
+                                                    } else {
+                                                        sortirov=\'-\'+sortirov;
+                                                    }
+                                                    var pos = $(\'.summary\').html();
+                                                    path = path+\'&vatf=\'+vatf+\'&sort=\'+sortirov+\'&page=\'+pos;
+                                                    location.href=path;" 
+                                            class="btn btn-xs btn-link" style="color:green;">10</button>' .
+                                                '<button id="btnEight" type="button" 
+                                            onClick="var path = \'' . $sLinkeight . '\';
+                                                    var vatf = $(\'#vatFilter\').val();
+                                                    var qasc=$(\'.asc\').attr(\'data-sort\');
+                                                    var qdesc=$(\'.desc\').attr(\'data-sort\');
+                                                    if (typeof qdesc === \'undefined\') {
+                                                        var sortirov=qasc;
+                                                    } else {
+                                                        var sortirov=qdesc;
+                                                    }
+                                                    var sortirov0=sortirov.substring(0,1);
+                                                    if (sortirov0==\'-\') {
+                                                        sortirov=sortirov.substring(1);
+                                                    } else {
+                                                        sortirov=\'-\'+sortirov;
+                                                    }
+                                                    var pos = $(\'.summary\').html();
+                                                    path = path+\'&vatf=\'+vatf+\'&sort=\'+sortirov+\'&page=\'+pos;
+                                                    location.href=path;" 
+                                            class="btn btn-xs btn-link" style="color:green;">18</button></span>',
+
+                                            'visibleButtons' => [
+                                                'zero' => function ($model, $key, $index) {
+                                                    // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
+                                                    return true;
+                                                },
+                                            ],
+                                            'buttons'        => [
+                                                'zero'     => function ($url, $model) {
+
+                                                    if ($model->vat == 0) {
+                                                        $tClass = "label label-success";
+                                                        $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                                                    } else {
+                                                        $tClass = "label label-default";
+                                                        $tStyle = "";
+                                                    }
+
+                                                    $way = $model->id;
+                                                    $sort = Yii::$app->request->get('sort');
+                                                    $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                                    $vatf = 1;
+                                                    if (null !== (Yii::$app->request->get('iikoWaybillDataSearch'))) {
+                                                        $massiv = Yii::$app->request->get('iikoWaybillDataSearch');
+                                                        $vatf = $massiv["vat"];
+                                                    }
+                                                    $customurl = Yii::$app->getUrlManager()->createUrl([
+                                                        'clientintegr/iiko/waybill/chvat',
+                                                        'id'   => $model->id,
+                                                        'koef' => $model->koef,
+                                                        'vatf' => $vatf,
+                                                        'sort' => $sort,
+                                                        'vat'  => 0, 'page' => $page, 'way' => $way
+                                                    ]);
+
+                                                    return \yii\helpers\Html::a('&nbsp;0', $customurl, [
+                                                        'title'     => Yii::t('backend', '0%'),
+                                                        'data-pjax' => 0,
+                                                        'class'     => $tClass,
+                                                        'style'     => $tStyle
+                                                    ]);
+                                                },
+                                                'ten'      => function ($url, $model) {
+
+                                                    if ($model->vat == 1000) {
+                                                        $tClass = "label label-success";
+                                                        $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                                                    } else {
+                                                        $tClass = "label label-default";
+                                                        $tStyle = "";
+                                                    }
+
+                                                    $way = $model->id;
+                                                    $sort = Yii::$app->request->get('sort');
+                                                    $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                                    $vatf = 1;
+                                                    if (null !== (Yii::$app->request->get('iikoWaybillDataSearch'))) {
+                                                        $massiv = Yii::$app->request->get('iikoWaybillDataSearch');
+                                                        $vatf = $massiv["vat"];
+                                                    }
+                                                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id' => $model->id, 'koef' => $model->koef, 'vatf' => $vatf, 'vat' => '1000', 'page' => $page, 'sort' => $sort, 'way' => $way]);
+                                                    return \yii\helpers\Html::a('10', $customurl,
+                                                        ['title' => Yii::t('backend', '10%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
+                                                },
+                                                'eighteen' => function ($url, $model) {
+
+                                                    if ($model->vat == 1800) {
+                                                        $tClass = "label label-success";
+                                                        $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                                                    } else {
+                                                        $tClass = "label label-default";
+                                                        $tStyle = "";
+                                                    }
+
+                                                    $way = $model->id;
+                                                    $sort = Yii::$app->request->get('sort');
+                                                    $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                                    $vatf = 1;
+                                                    if (null !== (Yii::$app->request->get('iikoWaybillDataSearch'))) {
+                                                        $massiv = Yii::$app->request->get('iikoWaybillDataSearch');
+                                                        $vatf = $massiv["vat"];
+                                                    }
+                                                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/chvat', 'id' => $model->id, 'koef' => $model->koef, 'vatf' => $vatf, 'vat' => '1800', 'page' => $page, 'sort' => $sort, 'way' => $way]);
+                                                    return \yii\helpers\Html::a('18', $customurl,
+                                                        ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
+                                                },
+                                            ]
+                                        ],
+                                        [
+                                            'label'  => 'Сумма с НДС',
+                                            'format' => ['decimal', 2],
+                                            'hAlign' => 'right',
+                                            'vAlign' => 'bottom',
+                                            'value'  => function ($model) {
+                                                $sumsnds = (1 + ($model->vat) / 10000) * ($model->sum);
+                                                return $sumsnds;
+                                            }
+                                        ],
+                                        [
+                                            'class'          => 'yii\grid\ActionColumn',
+                                            'contentOptions' => ['style' => 'width: 6%;'],
+                                            'template'       => '{clear}{delete}',
+                                            'visibleButtons' => [
+                                                'clear'  => function ($model, $key, $index) {
+                                                    return true;
+                                                },
+                                                'delete' => function ($model, $key, $index) {
+                                                    return true;
+                                                },
+                                            ],
+                                            'buttons'        => [
+                                                'clear'  => function ($url, $model) {
+                                                    return \yii\helpers\Html::a(
+                                                        '<i class="fa fa-sign-in padding-right-15" aria-hidden="true"></i>',
+                                                        Yii::$app->getUrlManager()->createUrl(['clientintegr/iiko/waybill/clear-data', 'id' => $model->id]),
+                                                        [
+                                                            'title'     => Yii::t('backend', 'Вернуть начальные данные'),
+                                                            'data-pjax' => "0"
+                                                        ]
+                                                    );
+                                                },
+                                                'delete' => function ($url, $model) {
+                                                    $text = 'Удалить';
+                                                    $url = Url::toRoute('waybill/map-trigger-waybill-data-status');
+                                                    $action = 'delete';
+                                                    if (!$model->unload_status) {
+                                                        $action = 'restore';
+                                                        $text = 'Восстановить';
+                                                    }
+                                                    return \yii\helpers\Html::a(
+                                                        '<i class="fa fa-trash" aria-hidden="true"></i>',
+                                                        '#',
+                                                        [
+                                                            'title'             => Yii::t('backend', $text),
+                                                            'data-pjax'         => "0",
+                                                            'id'                => 'delete-waybill_' . $model->id,
+                                                            'class'             => 'delete-waybill',
+                                                            'data-waybill-id'   => $model->id,
+                                                            'data-url'          => $url,
+                                                            'data-product-name' => $model->fproductname->product,
+                                                            'data-status'       => $model->unload_status,
+                                                            'data-action'       => $action,
+                                                        ]
+                                                    );
+                                                },
+                                            ]
+                                        ],
                                     ],
-                                ],
-                                'showFooter' => true,
-                                'options' => ['class' => 'table-responsive'],
-                                'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                                'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                                'bordered' => false,
-                                'striped' => true,
-                                'condensed' => false,
-                                'responsive' => false,
-                                'hover' => true,
-                                'resizableColumns' => false,
-                                'export' => [
-                                    'fontAwesome' => true,
-                                ],
-                                'rowOptions' => function ($model) {
-                                    if (!$model->unload_status) {
-                                        return ['style' => 'opacity: 0.3;'];
-                                    }
-                                },
-                            ]);
+                                    'showFooter'       => true,
+                                    'options'          => ['class' => 'table-responsive'],
+                                    'tableOptions'     => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                                    'formatter'        => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                                    'bordered'         => false,
+                                    'striped'          => true,
+                                    'condensed'        => false,
+                                    'responsive'       => false,
+                                    'hover'            => true,
+                                    'resizableColumns' => false,
+                                    'export'           => [
+                                        'fontAwesome' => true,
+                                    ],
+                                    'rowOptions'       => function ($model) {
+                                        if (!$model->unload_status) {
+                                            return ['style' => 'opacity: 0.3;'];
+                                        }
+                                    },
+                                ]);
+                            }
                             ?>
                             <div class="sendonbutton">
                                 <?php
@@ -568,17 +925,17 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 echo \yii\helpers\Html::a(
                                     Html::tag('b', 'Выгрузить накладную',
                                         [
-                                            'class' => 'btn btn-success',
+                                            'class'       => 'btn btn-success',
                                             'aria-hidden' => true
                                         ]),
                                     '#',
                                     [
-                                        'onclick' => 'return false;',
-                                        'class' => 'export-waybill-btn',
-                                        'title' => Yii::t('backend', 'Выгрузить'),
+                                        'onclick'   => 'return false;',
+                                        'class'     => 'export-waybill-btn',
+                                        'title'     => Yii::t('backend', 'Выгрузить'),
                                         'data-pjax' => "0",
-                                        'data-id' => $wmodel->id,
-                                        'data-oid' => $wmodel->order_id,
+                                        'data-id'   => $wmodel->id,
+                                        'data-oid'  => $wmodel->order_id,
                                     ])
                                 ?>
                             </div>
@@ -620,14 +977,32 @@ $js = <<< JS
                 var tovar = denom+'   /'+edizm+'/';    // наименование товара вместе с единицей измерения
                 var cont_old = $(this).html();         // содержание ячейки до форматирования 
                 var nesopost = '<i>(не задано)</i>';   // содержание несопоставленной ячейки
-                swal({
-                    html: '<i class="glyphicon glyphicon-edit"></i>  <span style="font-size:14px">Редактировать продукт iiko</span></br></br><span id="tovar">товар</span></br></br>' +
+                var editCan = '$editCan';
+                if (editCan == 1) {
+                    var html_can = '<i class="glyphicon glyphicon-edit"></i>  <span style="font-size:14px">Редактировать продукт iiko</span></br></br><span id="tovar">товар</span></br></br>' +
                      '<input type="text" id="bukv-tovar" class="swal2-input" placeholder="Введите или выберите товар" autofocus>'+
                      '<div id="bukv-tovar2" style="margin-top:0px;padding-top:0px;"></div>'+'<div id="bukv-tovar3" style="margin-top:0px;padding-top:0px;"></div>'
                      +'<div id="bukv-tovar4" style="margin-top:0px;padding-top:0px;"></div>'
                      + '</br><input type="submit" name="denom_forever" id="denom_forever" class="btn btn-sm btn-primary butsubmit" value="Сопоставить и запомнить"> '
                      +'<input type="submit" name="denom_onlyone" id="denom_onlyone" class="btn btn-sm btn-success butsubmit" value="Сопоставить"> '+
-                     '<input type="button" id="denom_close" class="btn btn-sm btn-outline-danger" value="Отменить">',
+                     '<input type="button" id="denom_close" class="btn btn-sm btn-outline-danger" value="Отменить">';
+                } else {
+                    var html_can = '<i class="glyphicon glyphicon-edit"></i>  <span style="font-size:14px">Редактировать продукт iiko</span></br></br><span id="tovar">товар</span></br></br>' +
+                     '<input type="text" id="bukv-tovar" class="swal2-input" placeholder="Введите или выберите товар" autofocus>'+
+                     '<div id="bukv-tovar2" style="margin-top:0px;padding-top:0px;"></div>'+'<div id="bukv-tovar3" style="margin-top:0px;padding-top:0px;"></div>'
+                     +'<div id="bukv-tovar4" style="margin-top:0px;padding-top:0px;"></div>'
+                     +'<input type="submit" name="denom_onlyone" id="denom_onlyone" class="btn btn-sm btn-success butsubmit" value="Сопоставить"> '+
+                     '<input type="button" id="denom_close" class="btn btn-sm btn-outline-danger" value="Отменить">';
+                }
+                swal({
+                      html: html_can,  
+                    /*html: '<i class="glyphicon glyphicon-edit"></i>  <span style="font-size:14px">Редактировать продукт iiko</span></br></br><span id="tovar">товар</span></br></br>' +
+                     '<input type="text" id="bukv-tovar" class="swal2-input" placeholder="Введите или выберите товар" autofocus>'+
+                     '<div id="bukv-tovar2" style="margin-top:0px;padding-top:0px;"></div>'+'<div id="bukv-tovar3" style="margin-top:0px;padding-top:0px;"></div>'
+                     +'<div id="bukv-tovar4" style="margin-top:0px;padding-top:0px;"></div>'
+                     + '</br><input type="submit" name="denom_forever" id="denom_forever" class="btn btn-sm btn-primary butsubmit" value="Сопоставить и запомнить"> '
+                     +'<input type="submit" name="denom_onlyone" id="denom_onlyone" class="btn btn-sm btn-success butsubmit" value="Сопоставить"> '+
+                     '<input type="button" id="denom_close" class="btn btn-sm btn-outline-danger" value="Отменить">',*/
                      showConfirmButton:false,
                      inputOptions: new Promise(function (resolve) {
                         $(document).ready ( function(){

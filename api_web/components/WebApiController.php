@@ -4,10 +4,14 @@ namespace api_web\components;
 
 /**
  * Class WebApiController
+ *
  * @package api\modules\v1\modules\web\components
  */
 
 use api_web\helpers\Logger;
+use api_web\helpers\WebApiHelper;
+use common\models\licenses\License;
+use yii\web\HttpException;
 
 /**
  * @SWG\Swagger(
@@ -21,8 +25,6 @@ use api_web\helpers\Logger;
  *     ),
  *     basePath="/"
  * )
- *
- *
  * @SWG\Info(
  *     title="MixCart API WEB - Документация",
  *     description = "Взаимодействие с сервисом MixCart",
@@ -73,8 +75,8 @@ class WebApiController extends \yii\rest\Controller
         $behaviors = parent::behaviors();
 
         $my['authenticator'] = [
-            'class' => \api_web\components\MyCompositeAuth::className(),
-            'no_auth' => \Yii::$app->params['allow_methods'],
+            'class'       => \api_web\components\MyCompositeAuth::className(),
+            'no_auth'     => \Yii::$app->params['allow_methods'],
             'authMethods' => [
                 WebApiAuth::className(),
                 \yii\filters\auth\HttpBearerAuth::className(),
@@ -92,7 +94,7 @@ class WebApiController extends \yii\rest\Controller
         ];
 
         $my['contentNegotiator'] = [
-            'class' => \yii\filters\ContentNegotiator::className(),
+            'class'   => \yii\filters\ContentNegotiator::className(),
             'formats' => [
                 'application/json' => \yii\web\Response::FORMAT_JSON
             ]
@@ -105,6 +107,7 @@ class WebApiController extends \yii\rest\Controller
     /**
      * @param \yii\base\Action $action
      * @return bool
+     * @throws HttpException
      * @throws \yii\web\BadRequestHttpException
      */
     public function beforeAction($action)
@@ -138,6 +141,16 @@ class WebApiController extends \yii\rest\Controller
         if (parent::beforeAction($action)) {
             $this->user = $this->container->get('UserWebApi')->getUser();
             $this->request = \Yii::$app->request->getBodyParam('request');
+            #Проверка лицензии
+            if (!empty($this->user)) {
+                $licenseDate = License::getDateMixCartLicense($this->user->organization_id);
+                $headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
+                $headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
+                #Проверяем, не стухла ли лицензия
+                if (strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
+                    throw new HttpException(402, 'license.payment_required', 402);
+                }
+            }
 
             \Yii::$app->setTimeZone('Etc/GMT' . $this->container->get('UserWebApi')->checkGMTFromDb());
 
@@ -176,7 +189,7 @@ class WebApiController extends \yii\rest\Controller
 
     /**
      * @param \yii\base\Action $action
-     * @param mixed $result
+     * @param mixed            $result
      * @return array|string
      */
     public function afterAction($action, $result)

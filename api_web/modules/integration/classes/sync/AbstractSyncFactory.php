@@ -136,7 +136,7 @@ abstract class AbstractSyncFactory extends WebApi
         # 3. Make transaction "Send request"
         if (method_exists($entity, 'sendRequest')) {
             SyncLog::trace('Target method "sendRequest" in the dictionary class "' . get_class($entity) . '" exist');
-            $requestParams = [];
+            $requestParams = $params ?? [];
             if (isset($params['product_group'])) {
                 SyncLog::trace('Found product grouping parameter: ' . $params['product_group']);
                 $requestParams['product_group'] = $params['product_group'];
@@ -257,6 +257,7 @@ abstract class AbstractSyncFactory extends WebApi
             RkwsUnit::$OperDenom => RkwsUnit::class,
             RkwsStore::$OperDenom => RkwsStore::class,
             RkwsProduct::$OperDenom => RkwsProduct::class,
+            RkwsWaybill::$OperDenom => RkwsWaybill::class
 
         ];
     }

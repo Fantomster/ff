@@ -23,6 +23,8 @@ use Yii;
  * @property string $inn
  * @property string $kpp
  * @property string $addressView
+ * @property string $data
+ * 
  * @property object $businessEntity
  */
 class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInterface
@@ -59,7 +61,7 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInte
             [['uuid'], 'unique'],
             [['last', 'active', 'type'], 'integer'],
             [['uuid', 'guid', 'next', 'previous', 'name', 'fullname', 'fio', 'inn', 'kpp'], 'string', 'max' => 255],
-            [['addressView'], 'string']
+            [['addressView', 'data'], 'string']
         ];
     }
 
@@ -69,25 +71,35 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInte
     public function attributeLabels()
     {
         return [
-            'uuid' => 'Uuid',
-            'guid' => 'Guid',
-            'last' => 'Last',
-            'active' => 'Active',
-            'type' => 'Type',
-            'next' => 'Next',
-            'previous' => 'Previous',
-            'name' => 'Name',
-            'fullname' => 'Fullname',
-            'fio' => 'Fio',
-            'inn' => 'Inn',
-            'kpp' => 'Kpp',
+            'uuid'        => 'Uuid',
+            'guid'        => 'Guid',
+            'last'        => 'Last',
+            'active'      => 'Active',
+            'type'        => 'Type',
+            'next'        => 'Next',
+            'previous'    => 'Previous',
+            'name'        => 'Name',
+            'fullname'    => 'Fullname',
+            'fio'         => 'Fio',
+            'inn'         => 'Inn',
+            'kpp'         => 'Kpp',
             'addressView' => 'Address View',
         ];
     }
 
     public function getBusinessEntity()
     {
-        return \yii\helpers\Json::decode($this->data);
+        // временно, потом только json
+        require_once __DIR__ . '/../../../frontend/modules/clientintegr/modules/merc/helpers/api/cerber/Cerber.php';
+        try {
+            $result = \yii\helpers\Json::decode($this->data, false);
+            if (isset($result->guid)) {
+                return $result;
+            }
+        } catch (\Exception $e) {
+            return \unserialize($this->data);
+        }
+        return null;
     }
 
     public static function getUpdateData($org_id)
@@ -96,24 +108,24 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInte
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercBusinessEntityList'])->one();
             if ($queue == null) {
-                $queue = new RabbitQueues();
+                $queue                      = new RabbitQueues();
                 $queue->consumer_class_name = 'MercBusinessEntityList';
                 $queue->save();
             }
 
             //Формируем данные для запроса
             $data['method'] = 'getBusinessEntityChangesList';
-            $data['struct'] = ['listName' => 'businessEntityList',
+            $data['struct'] = ['listName'     => 'businessEntityList',
                 'listItemName' => 'businessEntity'
             ];
 
-            $listOptions['count'] = 1000;
+            $listOptions['count']  = 1000;
             $listOptions['offset'] = 0;
 
             $queueDate = $queue->last_executed ?? $queue->start_executing;
 
-            $startDate = !isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
-            $instance = cerberApi::getInstance($org_id);
+            $startDate       = !isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
+            $instance        = cerberApi::getInstance($org_id);
             $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
             if (!empty($queue->organization_id)) {
@@ -121,15 +133,14 @@ class VetisBusinessEntity extends \yii\db\ActiveRecord implements UpdateDictInte
             } else {
                 $queueName = $queue->consumer_class_name;
             }
-
             //ставим задачу в очередь
-            \Yii::$app->get('rabbit')
-                ->setQueue($queueName)
-                ->addRabbitQueue(json_encode($data));
-
+            //\Yii::$app->get('sqsQueue')->sendMessage(Yii::$app->params['sqsQueues']['vetis']['enterprise'], $data);
+//            \Yii::$app->get('rabbit')
+//                ->setQueue($queueName)
+//                ->addRabbitQueue(json_encode($data));
         } catch (\Exception $e) {
-            Yii::error($e->getMessage());
-            echo $e->getMessage() . PHP_EOL;
+            \Yii::error($e->getMessage());
         }
     }
+
 }

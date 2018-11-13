@@ -1,8 +1,10 @@
 <?php
 
 namespace api_web\controllers;
+
 /**
  * Class DocumentController
+ *
  * @package api_web\controllers
  */
 class DocumentController extends \api_web\components\WebApiController
@@ -11,7 +13,14 @@ class DocumentController extends \api_web\components\WebApiController
      * @SWG\Post(path="/document/document-content",
      *     tags={"Documents"},
      *     summary="Детальная часть документа",
-     *     description="Детальная часть документа",
+     *     description="Детальная часть документа
+     *     Типы возвращаемых данных:
+     *     https://goo.gl/VSWoBC
+     *
+     *     has_order_content - если не задан или null вернет все
+     *                       - false вернет только без привязки к заказу
+     *                       - true вернет только с привязкой к заказу
+     * ",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -23,84 +32,11 @@ class DocumentController extends \api_web\components\WebApiController
      *                  property="request",
      *                  default={
      *                      "document_id": 2,
-     *                      "type": "order"}
-     *              )
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *         @SWG\Schema(
-     *              default={
-     *                  "documents": {
-     *                      {
-     *                              "id": 22666,
-     *                               "type": "order",
-     *                               "status_id": 1,
-     *                               "status_text": "Ожидают формирования",
-     *                               "agent": {
-     *                               "uid": "11232123",
-     *                               "name": "Опт Холод",
-     *                               "difer": false
-     *                               },
-     *                               "vendor": {
-     *                               "id": 3489,
-     *                               "name": "Halal Organic Food",
-     *                               "difer": false
-     *                               },
-     *                               "is_mercury_cert": true,
-     *                               "count": 134,
-     *                               "total_price": 3214222.95,
-     *                               "doc_date": "2018-09-04T09:55:22+03:00"
-     *                      },
-     *                      {
-     *                               "id": 22666,
-     *                               "type": "order",
-     *                               "status_id": 1,
-     *                               "status_text": "Ожидают формирования",
-     *                               "agent": {
-     *                               "uid": "11232123",
-     *                               "name": "Опт Холод",
-     *                               "difer": false
-     *                               },
-     *                               "vendor": {
-     *                               "id": 3489,
-     *                               "name": "Halal Organic Food",
-     *                               "difer": false
-     *                               },
-     *                               "is_mercury_cert": true,
-     *                               "count": 134,
-     *                               "total_price": 3214222.95,
-     *                               "doc_date": "2018-09-04T09:55:22+03:00"
-     *                     }
-     *                  },
-     *                  "positions": {
-     *                      {
-     *                               "id": 2222,
-     *                               "product_id": 3212,
-     *                               "product_name": "Апелисны",
-     *                               "product_outer_id": 456789,
-     *                               "quantity": "Апелисны импортные",
-     *                               "unit": "кг",
-     *                               "koef": 1,
-     *                               "sum_without_vat": 563789.05,
-     *                               "sum_with_vat": 542364.25,
-     *                               "vat": 18,
-     *                               },
-     *                       {
-     *                               "id": 2222,
-     *                               "product_id": 3212,
-     *                               "product_name": "Апелисны",
-     *                               "product_outer_id": 456789,
-     *                               "quantity": "Апелисны импортные",
-     *                               "unit": "кг",
-     *                               "koef": 1,
-     *                               "sum_without_vat": 563789.05,
-     *                               "sum_with_vat": 542364.25,
-     *                               "vat": 18,
-     *                              },
+     *                      "type": "order",
+     *                      "service_id": 2,
+     *                      "has_order_content": true
      *                  }
-     *              }
+     *              )
      *         )
      *     ),
      *     @SWG\Response(
@@ -108,6 +44,7 @@ class DocumentController extends \api_web\components\WebApiController
      *         description = "BadRequestHttpException"
      *     ),
      * )
+     * @throws \Exception
      */
     public function actionDocumentContent()
     {
@@ -129,10 +66,11 @@ class DocumentController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
+     *                      "service_id": 2,
      *                      "search": {
      *                         "business_id": 124,
      *                         "waybill_status": 1,
-     *                         "doc_number" : "12346",
+     *                         "number" : "12346",
      *                         "waybill_date": {
      *                             "from": "23.08.2018",
      *                             "to": "24.08.2018"
@@ -165,46 +103,59 @@ class DocumentController extends \api_web\components\WebApiController
      *          @SWG\Schema(
      *              default={
      *                  "documents": {
-     *                      {
-     *                              "id": 22666,
-     *                               "type": "order",
-     *                               "status_id": 1,
-     *                               "status_text": "Ожидают формирования",
-     *                               "agent": {
-     *                               "uid": "11232123",
-     *                               "name": "Опт Холод",
-     *                               "difer": false
+     *                     {
+     *                           "id": 11326,
+     *                           "number": {
+     *                           "1",
+     *                           "2",
+     *                           "3",
+     *                           "4",
+     *                           "тест",
+     *                           "6",
+     *                           "7",
+     *                           "8",
+     *                           "9",
+     *                           "10"
+     *                           },
+     *                           "type": "order",
+     *                           "status_id": 2,
+     *                           "status_text": "Ожидает формирования",
+     *                           "service_id": 9,
+     *                           "is_mercury_cert": 1,
+     *                           "count": 10,
+     *                           "total_price": "3390.00",
+     *                           "doc_date": "2018-04-11T18:41:34+03:00",
+     *                           "vendor": {
+     *                           "id": "4749",
+     *                           "name": "Demo1",
+     *                           "difer": false
+     *                           },
+     *                           "agent": null,
+     *                           "store": null,
+     *                           "replaced_order_id": null
+     *                           },
+     *                           {
+     *                           "id": 13508,
+     *                             "number": {
+     *                               "888"
      *                               },
-     *                               "vendor": {
-     *                               "id": 3489,
-     *                               "name": "Halal Organic Food",
-     *                               "difer": false
-     *                               },
-     *                               "is_mercury_cert": true,
-     *                               "count": 134,
-     *                               "total_price": 3214222.95,
-     *                               "doc_date": "2018-09-04T09:55:22+03:00"
-     *                      },
-     *                      {
-     *                               "id": 22666,
-     *                               "type": "order",
-     *                               "status_id": 1,
-     *                               "status_text": "Ожидают формирования",
-     *                               "agent": {
-     *                               "uid": "11232123",
-     *                               "name": "Опт Холод",
-     *                               "difer": false
-     *                               },
-     *                               "vendor": {
-     *                               "id": 3489,
-     *                               "name": "Halal Organic Food",
-     *                               "difer": false
-     *                               },
-     *                               "is_mercury_cert": true,
-     *                               "count": 134,
-     *                               "total_price": 3214222.95,
-     *                               "doc_date": "2018-09-04T09:55:22+03:00"
-     *                     }
+     *                           "type": "order",
+     *                           "status_id": 2,
+     *                           "status_text": "Сформирована",
+     *                           "service_id": 2,
+     *                           "is_mercury_cert": 0,
+     *                           "count": 2,
+     *                           "total_price": "10700.00",
+     *                           "doc_date": "2018-10-18T14:48:36+03:00",
+     *                           "vendor": {
+     *                           "id": "5440",
+     *                           "name": "ООО Организация поставок",
+     *                           "difer": false
+     *                           },
+     *                           "agent": null,
+     *                           "store": null,
+     *                           "replaced_order_id": null
+     *                           },
      *                  },
      *                  "pagination": {
      *                      "page": 1,
@@ -220,6 +171,7 @@ class DocumentController extends \api_web\components\WebApiController
      *         description = "BadRequestHttpException"
      *     ),
      * )
+     * @throws \Exception
      */
     public function actionDocumentsList()
     {
@@ -403,8 +355,8 @@ class DocumentController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "order_id": 2525,
-     *                      "document_id": 1111
+     *                      "document_id": 1111,
+     *                      "replaced_order_id": 2525
      *                      }
      *              )
      *         )
@@ -509,9 +461,143 @@ class DocumentController extends \api_web\components\WebApiController
      *         description = "BadRequestHttpException"
      *     ),
      * )
+     * @throws \Exception
      */
     public function actionWaybillStatus()
     {
         $this->response = $this->container->get('DocumentWebApi')->getWaybillStatus();
+    }
+
+    /**
+     * @SWG\Post(path="/document/get",
+     *     tags={"Documents"},
+     *     summary="Получение документа",
+     *     description="Получение документа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "document_id": 7,
+     *                      "type": "waybill",
+     *                      "service_id": 2
+     *                 }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "document": {
+     *                          "id": 83,
+     *                          "number": {
+     *                              "13392-1"
+     *                          },
+     *                          "type": "waybill",
+     *                          "status_id": 1,
+     *                          "status_text": "Сопоставлена",
+     *                          "service_id": 2,
+     *                          "vendor": {
+     *                              "id": 5785,
+     *                              "name": "ООО AAAAA"
+     *                          },
+     *                          "agent": null,
+     *                          "store": {
+     *                              "id": 9,
+     *                              "name": "Основной склад"
+     *                          },
+     *                          "is_mercury_cert": false,
+     *                          "count": 1,
+     *                          "total_price": "4998.00",
+     *                          "doc_date": "2018-10-26T14:36:54+03:00"
+     *                      },
+     *                      "documents": {},
+     *                      "positions": {
+     *                          {
+     *                              "id": 26,
+     *                              "product_id": 1640035,
+     *                              "product_name": "Треска горячего копчения",
+     *                              "outer_product": {
+     *                                  "id": 1565080,
+     *                                  "name": "____сосиска2"
+     *                              },
+     *                              "quantity": 1,
+     *                              "outer_unit": {
+     *                                  "id": 14,
+     *                                  "name": "кг"
+     *                              },
+     *                              "koef": 1,
+     *                              "merc_uuid": null,
+     *                              "sum_without_vat": "4998.00",
+     *                              "sum_with_vat": "4998.00",
+     *                              "vat": 0
+     *                          }
+     *                      }
+     *                  }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     * @throws \Exception
+     */
+    public function actionGet()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->getDocument($this->request);
+    }
+  
+    /**
+     * @SWG\Post(path="/document/sort-list",
+     *     tags={"Documents"},
+     *     summary="Список сортировок",
+     *     description="Список сортировок",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={{}}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                   {
+     *                       "number": "Номеру документа А-Я",
+     *                       "-number": "Номеру документа Я-А",
+     *                       "doc_date": "Дате документа по возрастанию",
+     *                       "-doc_date": "Дате документа по убванию"
+     *                   }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     * )
+     * @throws \Exception
+     */
+    public function actionSortList()
+    {
+        $this->response = $this->container->get('DocumentWebApi')->getSortList();
     }
 }

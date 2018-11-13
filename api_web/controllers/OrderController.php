@@ -6,6 +6,7 @@ use api_web\components\WebApiController;
 
 /**
  * Class OrderController
+ *
  * @package api_web\controllers
  */
 class OrderController extends WebApiController
@@ -69,7 +70,8 @@ class OrderController extends WebApiController
      *                      "ed": "",
      *                      "currency": "RUB",
      *                      "currency_id": 1,
-     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
+     *                      "image":
+     *                      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
      *                  }
      *              },
      *              "client": {
@@ -155,7 +157,8 @@ class OrderController extends WebApiController
      *                          "amount": 100
      *                      },
      *                      "products": {
-     *                          {"operation":"edit", "id":1, "price":200.2, "quantity":2, "comment":"Комментарий к товару!"},
+     *                          {"operation":"edit", "id":1, "price":200.2, "quantity":2, "comment":"Комментарий к
+     *                          товару!"},
      *                          {"operation":"edit", "id":2, "price":100.2},
      *                          {"operation":"add", "id":3, "quantity":2, "comment":"Комментарий к товару!"},
      *                          {"operation":"delete", "id":4}
@@ -203,7 +206,8 @@ class OrderController extends WebApiController
      *                      "ed": "",
      *                      "currency": "RUB",
      *                      "currency_id": 1,
-     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
+     *                      "image":
+     *                      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
      *                  }
      *              },
      *              "client": {
@@ -261,12 +265,12 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionUpdate()
     {
         $this->response = $this->container->get('OrderWebApi')->update($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/order/update-order-by-unconfirmed-vendor",
@@ -292,7 +296,8 @@ class OrderController extends WebApiController
      *                      "delivery_price": 100,
      *                      "actual_delivery": "2016-09-28 15:22:20",
      *                      "products": {
-     *                          {"operation":"edit", "id":1, "price":200.2, "quantity":2, "comment":"Комментарий к товару!"},
+     *                          {"operation":"edit", "id":1, "price":200.2, "quantity":2, "comment":"Комментарий к
+     *                          товару!"},
      *                          {"operation":"edit", "id":2, "price":100.2},
      *                          {"operation":"add", "id":3, "quantity":2, "comment":"Комментарий к товару!"},
      *                          {"operation":"delete", "id":4}
@@ -340,7 +345,8 @@ class OrderController extends WebApiController
      *                      "ed": "",
      *                      "currency": "RUB",
      *                      "currency_id": 1,
-     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
+     *                      "image":
+     *                      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
      *                  }
      *              },
      *              "client": {
@@ -403,7 +409,6 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->update($this->request, true);
     }
-
 
     /**
      * @SWG\Post(path="/order/products",
@@ -485,7 +490,6 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('OrderWebApi')->products($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/order/products-list-for-unconfirmed-vendor",
      *     tags={"Order/UnconfirmedVendorActions"},
@@ -566,7 +570,6 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('OrderWebApi')->products($this->request, true);
     }
 
-
     /**
      * @SWG\Post(path="/order/categories",
      *     tags={"Order"},
@@ -618,7 +621,6 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->categories($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/order/categories-for-unconfirmed-vendor",
@@ -673,7 +675,6 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->categories($this->request, true);
     }
-
 
     /**
      * @SWG\Post(path="/order/comment",
@@ -812,7 +813,8 @@ class OrderController extends WebApiController
      *                      "ed": "",
      *                      "currency": "RUB",
      *                      "currency_id": 1,
-     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx"
+     *                      "image":
+     *                      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx"
      *                  }
      *              },
      *              "client": {
@@ -875,7 +877,6 @@ class OrderController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->cancel($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/order/cancel-order-by-unconfirmed-vendor",
@@ -998,7 +999,6 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('OrderWebApi')->cancel($this->request, true);
     }
 
-
     /**
      * @SWG\Post(path="/order/repeat",
      *     tags={"Order"},
@@ -1101,7 +1101,8 @@ class OrderController extends WebApiController
      *                      "email": "investor@f-keeper.ru",
      *                      "site": "",
      *                      "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
-     *                      "image": "https://fkeeper.s3.amazonaws.com/org-picture/20d9d738e5498f36654cda93a071622e.jpg",
+     *                      "image":
+     *                      "https://fkeeper.s3.amazonaws.com/org-picture/20d9d738e5498f36654cda93a071622e.jpg",
      *                      "type_id": 1,
      *                      "type": "Ресторан",
      *                      "rating": 0,
@@ -1161,6 +1162,7 @@ class OrderController extends WebApiController
      *                  property="request",
      *                  default={
      *                               "search":{
+     *                                   "id":1,
      *                                   "vendor": {1,2},
      *                                   "status": {1,2,3},
      *                                   "create_date": {
@@ -1195,6 +1197,7 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionHistory()
     {
@@ -1334,6 +1337,7 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionSaveToPdf()
     {
@@ -1348,12 +1352,11 @@ class OrderController extends WebApiController
         }
     }
 
-
     /**
-     * @SWG\Post(path="/order/create-waybill",
-     *     tags={"Order/Integration"},
-     *     summary="Создание накладной к заказу или в конкретном сервисе у.с",
-     *     description="Создание накладной к заказу или в конкретном сервисе у.с",
+     * @SWG\Post(path="/order/set-document-number",
+     *     tags={"Order"},
+     *     summary="Изменение номера документа",
+     *     description="Изменение номера документа",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -1363,69 +1366,20 @@ class OrderController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={
-     *                              "order_id": 1,
-     *                              "service_id": 1
-     *                          }
+     *                  default={"order_id":1, "document_number": "9038480-1"}
      *              )
      *         )
      *     ),
      *     @SWG\Response(
      *         response = 200,
      *         description = "success",
-     *            @SWG\Schema(
+     *         @SWG\Schema(
      *              default={
-     *                "success": true,
-     *                "waybill_id": 1,
+     *                  "result":true
      *              }
-     *          )
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "error"
-     *     )
-     * )
-     */
-    public function actionCreateWaybill()
-    {
-        $this->response = $this->container->get('IntegrationWebApi')->handleWaybill($this->request);
-    }
-
-
-    /**
-     * @SWG\Post(path="/order/reset-waybill-content",
-     *     tags={"Order/Integration"},
-     *     summary="Сброс данных позиции, на значения из заказа",
-     *     description="Сброс данных позиции, на значения из заказа",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                              "waybill_content_id": 14822
-     *                          }
-     *              )
      *         )
      *     ),
      *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *            @SWG\Schema(
-     *              default={
-     *                "success": true
-     *              }
-     *          )
-     *     ),
-     *     @SWG\Response(
      *         response = 400,
      *         description = "BadRequestHttpException"
      *     ),
@@ -1434,226 +1388,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
-    public function actionResetWaybillContent()
+    public function actionSetDocumentNumber()
     {
-        $this->response = $this->container->get('IntegrationWebApi')->resetWaybillContent($this->request);
+        $this->response = $this->container->get('OrderWebApi')->setDocumentNumber($this->request);
     }
 
-
-    /**
-     * @SWG\Post(path="/order/show-waybill-content",
-     *     tags={"Order/Integration"},
-     *     summary="Позиция накладной - Детальная информация",
-     *     description="Позиция накладной - Детальная информация",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                              "waybill_content_id": 14822
-     *                          }
-     *              )
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *            @SWG\Schema(
-     *              default={
-     *                          "id": 1,
-     *                           "waybill_id": 11,
-     *                           "order_content_id": 14822,
-     *                           "product_outer_id": 4822,
-     *                           "quantity_waybill": 1,
-     *                           "vat_waybill": 0,
-     *                           "merc_uuid": "745663-6454-4657-234775",
-     *                           "unload_status": 1,
-     *                           "sum_with_vat": 333299999,
-     *                           "sum_without_vat": 333299999,
-     *                           "price_with_vat": 333299999,
-     *                           "price_without_vat": 333299999,
-     *                           "koef": 1,
-     *                           "serviceproduct_id": 777,
-     *                           "store_rid": 111,
-     *                           "outer_product_name": "Редиска",
-     *                           "outer_product_id": 555,
-     *                           "product_id_equality": true,
-     *                           "outer_store_name": "Склад 1",
-     *                           "outer_store_id": 222,
-     *                           "store_id_equality": true,
-     *                           "outer_unit_name": "кг",
-     *                           "outer_unit_id": 333
-     *                       }
-     *          )
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "error"
-     *     )
-     * )
-     */
-    public function actionShowWaybillContent()
-    {
-        $this->response = $this->container->get('IntegrationWebApi')->showWaybillContent($this->request);
-    }
-
-
-    /**
-     * @SWG\Post(path="/order/update-waybill-content",
-     *     tags={"Order/Integration"},
-     *     summary="Накладные - Обновление детальной информации позиции накладной",
-     *     description="Накладные - Обновление детальной информации позиции накладной",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                              "waybill_content_id": 5,
-     *                              "koef": 1.55,
-     *                              "quantity_waybill": 1,
-     *                              "product_outer_id": 4822,
-     *                              "price_without_vat": 35000,
-     *                              "vat_waybill": 0.18,
-     *                              "outer_unit_id": 5
-     *                          }
-     *              )
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *            @SWG\Schema(
-     *              default={
-     *                "success": true,
-     *                "koef": 0.2,
-     *                "quantity": 1
-     *              }
-     *          )
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "error"
-     *     )
-     * )
-     */
-    public function actionUpdateWaybillContent()
-    {
-        $this->response = $this->container->get('IntegrationWebApi')->updateWaybillContent($this->request);
-    }
-
-
-    /**
-     * @SWG\Post(path="/order/create-waybill-content",
-     *     tags={"Order/Integration"},
-     *     summary="Накладная (привязана к заказу) - Добавление позиции",
-     *     description="Накладная (привязана к заказу) - Добавление позиции",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                              "waybill_id": 5,
-     *                              "product_outer_id": 4352,
-     *                              "outer_unit_id": 8,
-     *                              "quantity_waybill": 1,
-     *                              "product_outer_id": 4822,
-     *                              "price_without_vat": 35000,
-     *                              "vat_waybill": 0.18
-     *                          }
-     *              )
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *            @SWG\Schema(
-     *              default={
-     *                "success": true,
-     *                "waybill_content_id": 5
-     *              }
-     *          )
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "error"
-     *     )
-     * )
-     */
-    public function actionCreateWaybillContent()
-    {
-        $this->response = $this->container->get('IntegrationWebApi')->createWaybillContent($this->request);
-    }
-
-
-    /**
-     * @SWG\Post(path="/order/delete-waybill-content",
-     *     tags={"Order/Integration"},
-     *     summary="Накладная - Удалить/Убрать позицию",
-     *     description="Накладная - Удалить/Убрать позицию",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                              "waybill_content_id": 5
-     *                          }
-     *              )
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *            @SWG\Schema(
-     *              default={
-     *                "success": true
-     *              }
-     *          )
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "error"
-     *     )
-     * )
-     */
-    public function actionDeleteWaybillContent()
-    {
-        $this->response = $this->container->get('IntegrationWebApi')->deleteWaybillContent($this->request);
-    }
 }

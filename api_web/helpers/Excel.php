@@ -120,6 +120,10 @@ class Excel
                 $cellsCount++;
             }
 
+            if (!array_search('units', $mapping) || empty($attributes['units'])){
+                $attributes['units'] = 0;
+            }
+
             if ($write === true) {
                 $rows[] = $attributes;
             }

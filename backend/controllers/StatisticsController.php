@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use backend\models\DynamicUsageSearch;
 use backend\models\MercuryReportSearch;
+use backend\models\OrgUseMercFrequently;
 use common\models\OrderStatus;
 use Yii;
 use common\models\User;
@@ -34,7 +35,7 @@ class StatisticsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc','dynamics','mercury'],
+                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc','dynamics','mercury', 'merc-active-org'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -528,5 +529,29 @@ class StatisticsController extends Controller {
 
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         return $this->render('mercury', compact('searchModel', 'dataProvider'));
+    }
+
+    public function actionMercActiveOrg()
+    {
+        $mercOrg = new OrgUseMercFrequently();
+        $dataProviderIn = $mercOrg->getOrgList();
+        $dataProviderIn->setSort([
+            'attributes' => [
+                'name' => [
+                    'asc' => ['name' => SORT_ASC],
+                ],
+                'id'
+            ]
+        ]);
+        $dataProviderNotIn = $mercOrg->getOrgList(true);
+        $dataProviderNotIn->setSort([
+            'attributes' => [
+                'name' => [
+                    'asc' => ['name' => SORT_ASC],
+                ],
+                'id'
+            ]
+        ]);
+        return $this->render('merc-active-org',compact('dataProviderIn','dataProviderNotIn'));
     }
 }

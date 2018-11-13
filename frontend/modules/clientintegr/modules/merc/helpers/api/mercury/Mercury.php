@@ -342,6 +342,8 @@ class MedicinalDrug{
     var $producer;//BusinessMember
 }
 class RegionalizationCondition{
+    var $uuid; //UUID
+    var $guid; //UUID
     var $referenceNumber;//Identifier
     var $text;//Text
     var $strict;//boolean

@@ -13,11 +13,16 @@ use yii\base\Model;
 
 class rejectedForm extends Model {
 
+    const INPUT_MODE = 1;
+    const CONFIRM_MODE = 2;
+
     public $volume;
     public $reason;
     public $description;
     public $uuid;
     public $decision;
+    public $conditions;
+    public $mode = self::INPUT_MODE;
 
     public function rules()
     {
@@ -29,7 +34,7 @@ class rejectedForm extends Model {
                 return $newValue;
             }],
             [['reason', 'description'], 'string', 'max' => 255],
-            [['uuid'], 'safe']
+            [['uuid','conditions', 'mode'], 'safe']
         ];
     }
 

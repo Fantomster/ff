@@ -168,51 +168,63 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             $model->decision = VetDocumentDone::PARTIALLY;
         }
         
-        //try {
+        try {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $api = mercuryApi::getInstance();
 
-                $vsd = MercVsd::findOne(['uuid' => $uuid]);
-                $result = $api->checkShipmentRegionalizationOperation($vsd->recipient_guid, $vsd->sender_guid, $vsd->sub_product_guid);
-                if($result == null){
-                    throw new \Exception('CheckShipmentRegionalizationOperation error');
-                }
-
-                echo "<pre>";
-                var_dump($result); die();
-                $result= is_array($result) ? $result : [$result];
-                $сonditions = null;
-                foreach ($result as $item) {
-                    $item = json_decode(json_encode($item), true);
-                    switch ($item['appliedR13nRule']['requirement']['decision']) {
-                        case 1 : break;                         //Можно делать перемещение без ограничений
-                        case 2 ://Можно делать перемещение при соблюдении условий
-                            foreach ($item['appliedR13nRule']['appliedR13nRule']['conditionGroup'] as $cond) {
-                                $conditions [$cond['guid']] = $cond['text'];
-                            }
-                        break;
-                        case 3 : throw new Exception('Пересещение запрещено правилами регионализации ('.$item['appliedR13nRule']['requirement']['relatedDisease']['name'].')!');
+                if($model->mode == rejectedForm::INPUT_MODE) {
+                    $vsd = MercVsd::findOne(['uuid' => $uuid]);
+                    $result = $api->checkShipmentRegionalizationOperation($vsd->recipient_guid, $vsd->sender_guid, $vsd->sub_product_guid);
+                    if ($result == null) {
+                        throw new \Exception('CheckShipmentRegionalizationOperation error');
                     }
-                }
 
-                if(isset($conditions)) {
-                    var_dump($conditions); die();
-                   /* if (Yii::$app->request->isAjax) {
-                        return $this->renderAjax('rejected/_ajaxForm', [
+                    $result = is_array($result) ? $result : [$result];
+                    $сonditions = null;
+                    foreach ($result as $item) {
+                        $item = json_decode(json_encode($item), true);
+                        switch ($item['appliedR13nRule']['decision']) {
+                            case 1 :
+                                break;                         //Можно делать перемещение без ограничений
+                            case 2 ://Можно делать перемещение при соблюдении условий
+                                foreach ($item['appliedR13nRule']['requirement'] as $requirement) {
+                                    $conditionGroup = is_array($requirement["conditionGroup"]) ? $requirement["conditionGroup"] : [$requirement["conditionGroup"]];
+                                    foreach ($conditionGroup as $group) {
+                                        $group = !array_key_exists('condition', $group) ? $group : $group['condition'];
+                                        $condition = !array_key_exists('guid', $group) ? $group : [$group];
+                                        foreach ($condition as $cond) {
+                                            if ($cond['active'] && $cond['last']) {
+                                                $conditions [$cond['guid']] = $cond['text'];
+                                            }
+                                        }
+                                    }
+                                }
+                                break;
+                            case 3 :
+                                throw new Exception('Пересещение запрещено правилами регионализации (' . $item['appliedR13nRule']['requirement']['relatedDisease']['name'] . ')!');
+                        }
+                    }
+
+                    if (isset($conditions)) {
+                        $model->conditions = json_encode($conditions);
+                        $model->mode = rejectedForm::CONFIRM_MODE;
+                        if (Yii::$app->request->isAjax) {
+                            return $this->renderAjax('rejected/_ajaxForm', [
+                                'model'  => $model,
+                                'volume' => $model->volume,
+                            ]);
+                        }
+
+                        return $this->render('rejected/rejectedAct', [
                             'model'  => $model,
-                            //'volume' => $document->batch[4]['value']
+                            'volume' => $model->volume,
                         ]);
                     }
-
-                    return $this->render('rejected/rejectedAct', [
-                        'model'  => $model,
-                        //'volume' => $document->batch[4]['value']
-                    ]);*/
                 }
 
-                /*if (!$api->getVetDocumentDone($uuid, $model->attributes)) {
+                if (!$api->getVetDocumentDone($uuid, $model->attributes)) {
                     throw new \Exception('Done error');
-                }*/
+                }
                 
                 Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
                 if (Yii::$app->request->isAjax) {
@@ -220,13 +232,13 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                 }
                 return $this->redirect(['view', 'uuid' => $uuid]);
             }
-        /*} catch (\Error $e) {
+        } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
         } catch (\Exception $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }*/
+        }
         
         try {
             $document = new getVetDocumentByUUID();

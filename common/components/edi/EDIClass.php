@@ -408,8 +408,14 @@ class EDIClass extends Component
     {
         $vendor = $order->vendor;
         $client = $order->client;
+        if (Yii::$app instanceof \yii\console\Application) {
+            $controller = new Controller("", "");
+        } else {
+            $controller = Yii::$app->controller;
+        }
+
         $glnArray = $client->getGlnCodes($client->id, $vendor->id);
-        $string = Yii::$app->controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'glnArray', 'dateArray', 'orderContent'));
+        $string = $controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'glnArray', 'dateArray', 'orderContent'));
         return $string;
     }
 

@@ -9,8 +9,8 @@
 namespace api_web\helpers;
 
 use api_web\components\Registry;
-use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use api_web\models\User;
 use api_web\modules\integration\classes\SyncServiceFactory;
 use common\helpers\DBNameHelper;
 use common\models\IntegrationSetting;
@@ -30,7 +30,7 @@ use yii\web\BadRequestHttpException;
 /**
  * Waybills class for generate\update\delete\ actions
  * */
-class WaybillHelper extends WebApi
+class WaybillHelper
 {
     /**
      * @var OuterProductMapHelper
@@ -43,12 +43,16 @@ class WaybillHelper extends WebApi
     public $settings;
 
     /**
+     * @var User Пользователь текущего заказа
+     */
+    public $user;
+
+    /**
      * WaybillHelper constructor.
      */
     public function __construct()
     {
         $this->helper = new OuterProductMapHelper();
-        parent::__construct();
     }
 
     /**
@@ -460,6 +464,10 @@ class WaybillHelper extends WebApi
         if (is_null($run)) {
             //Блокируем обработку этого заказа
             $redis->set($lockName, 1);
+            $order = Order::findOne($request['order_id']);
+            $orgId = $order->client_id;
+            $this->user = $order->createdBy;
+
             try {
                 $this->createWaybill($request['order_id'], null, $request['vendor_id'], $this->getExcludedServices());
             } catch (\Throwable $e) {
@@ -483,7 +491,7 @@ class WaybillHelper extends WebApi
                 foreach ($waybillToService as $serviceId => $ids) {
                     $scenario = IntegrationSettingValue::getSettingsByServiceId(
                         $serviceId,
-                        $this->user->organization_id,
+                        $orgId,
                         ['auto_unload_invoice']
                     );
                     if ($scenario == 1) {

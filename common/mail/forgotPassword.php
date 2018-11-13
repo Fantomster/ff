@@ -1,8 +1,5 @@
 <?php
 use yii\helpers\Url;
-if (empty($toFrontEnd)) {
-    $toFrontEnd = false;
-}
 ?>
 <p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;"><?= Yii::t('app', 'common.mail.forgot_password.link_for_pass', ['ru'=>'Пройдите по ссылке для установки нового пароля:']) ?></p>
 <br style="margin: 0; padding: 0;" />
@@ -15,7 +12,7 @@ if (empty($toFrontEnd)) {
         $route.= "?token=".$userToken->token;
         Yii::$app->session->destroy('new_pass_session');
     }else{
-        $route = $toFrontEnd ? Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/user/reset", "token" => $userToken->token]) : Url::toRoute(["/user/reset", "token" => $userToken->token], true);
+        $route = Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/user/reset", "token" => $userToken->token]);
     }
     ?>
     <a href="<?= $route ?>"

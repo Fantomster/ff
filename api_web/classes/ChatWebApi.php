@@ -2,7 +2,6 @@
 
 namespace api_web\classes;
 
-use api_web\components\FireBase;
 use api_web\components\Notice;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
@@ -16,12 +15,14 @@ use yii\web\BadRequestHttpException;
 
 /**
  * Class ChatWebApi
+ *
  * @package api_web\classes
  */
 class ChatWebApi extends WebApi
 {
     /**
      * Список диалогов пользователя
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -35,10 +36,10 @@ class ChatWebApi extends WebApi
 
         if ($client->type_id === Organization::TYPE_RESTAURANT) {
             $where = ['client_id' => $client->id];
-        } else if ($client->type_id === Organization::TYPE_SUPPLIER) {
+        } elseif ($client->type_id === Organization::TYPE_SUPPLIER) {
             $where = ['vendor_id' => $client->id];
         } else {
-            throw new BadRequestHttpException('У вас нет доступа к диалогам');
+            throw new BadRequestHttpException('chat.access_denied');
         }
 
         $search = Order::find()->select([
@@ -49,7 +50,7 @@ class ChatWebApi extends WebApi
         ])->where($where)->params(['org_id' => $client->id]);
 
         if (empty($search)) {
-            throw new BadRequestHttpException("Нет диалогов");
+            throw new BadRequestHttpException("chat.dialogs_not_found");
         }
 
         if (isset($post['search'])) {
@@ -79,10 +80,10 @@ class ChatWebApi extends WebApi
         }
 
         $return = [
-            'result' => $result,
+            'result'     => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -92,6 +93,7 @@ class ChatWebApi extends WebApi
 
     /**
      * Список сообщений в диалоге
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -110,7 +112,7 @@ class ChatWebApi extends WebApi
             ->one();
 
         if (empty($order)) {
-            throw new BadRequestHttpException("Нет такого диалога");
+            throw new BadRequestHttpException("chat.dialog_not_found");
         }
 
         $dataProvider = new ArrayDataProvider([
@@ -144,10 +146,10 @@ class ChatWebApi extends WebApi
         Notice::init('Chat')->updateCountMessageAndDialog($this->user->organization->id, $order);
 
         $return = [
-            'result' => $result,
+            'result'     => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -157,6 +159,7 @@ class ChatWebApi extends WebApi
 
     /**
      * Добавить сообщение в диалог
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -171,7 +174,7 @@ class ChatWebApi extends WebApi
             ->one();
 
         if (empty($order)) {
-            throw new BadRequestHttpException("Нет такого диалога");
+            throw new BadRequestHttpException("chat.dialog_not_found");
         }
 
         if ($client->id == $order->client_id) {
@@ -181,13 +184,13 @@ class ChatWebApi extends WebApi
         }
 
         $dialogMessage = new OrderChat([
-            'order_id' => $order->id,
-            'sent_by_id' => $this->user->id,
+            'order_id'     => $order->id,
+            'sent_by_id'   => $this->user->id,
             'recipient_id' => $recipient_id,
-            'message' => \Yii::$app->db->quoteValue($post['message']),
-            'is_system' => 0,
-            'viewed' => 0,
-            'danger' => 0
+            'message'      => \Yii::$app->db->quoteValue($post['message']),
+            'is_system'    => 0,
+            'viewed'       => 0,
+            'danger'       => 0
         ]);
 
         if (!$dialogMessage->validate()) {
@@ -206,6 +209,7 @@ class ChatWebApi extends WebApi
 
     /**
      * Список получателей сообщений
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -220,11 +224,11 @@ class ChatWebApi extends WebApi
         if ($client->type_id === Organization::TYPE_RESTAURANT) {
             $where = ['order.client_id' => $client->id];
             $joinWith = 'order.vendor_id';
-        } else if ($client->type_id === Organization::TYPE_SUPPLIER) {
+        } elseif ($client->type_id === Organization::TYPE_SUPPLIER) {
             $where = ['order.vendor_id' => $client->id];
             $joinWith = 'order.client_id';
         } else {
-            throw new BadRequestHttpException('У вас нет доступа к диалогам');
+            throw new BadRequestHttpException('chat.access_denied');
         }
 
         $query = new Query();
@@ -255,10 +259,10 @@ class ChatWebApi extends WebApi
         }
 
         $return = [
-            'result' => $result,
+            'result'     => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -268,6 +272,7 @@ class ChatWebApi extends WebApi
 
     /**
      * Отмечаем все сообщения прочитаными
+     *
      * @return array
      * @throws \Exception
      */
@@ -277,7 +282,7 @@ class ChatWebApi extends WebApi
         try {
             OrderChat::updateAll(['viewed' => 1], [
                 'recipient_id' => $this->user->organization->id,
-                'viewed' => 0
+                'viewed'       => 0
             ]);
             $transaction->commit();
             Notice::init('Chat')->readAllMessages($this->user->organization->id);
@@ -290,6 +295,7 @@ class ChatWebApi extends WebApi
 
     /**
      * Пометить сообщения прочитанными
+     *
      * @param $post
      * @return array
      * @throws BadRequestHttpException
@@ -306,15 +312,15 @@ class ChatWebApi extends WebApi
         ])->one();
 
         if (empty($order)) {
-            throw new BadRequestHttpException("order_not_found");
+            throw new BadRequestHttpException("chat.dialog_not_found");
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             OrderChat::updateAll(['viewed' => 1], [
                 'recipient_id' => $this->user->organization->id,
-                'viewed' => 0,
-                'order_id' => $order->id
+                'viewed'       => 0,
+                'order_id'     => $order->id
             ]);
             $transaction->commit();
             Notice::init('Chat')->readAllMessages($this->user->organization->id);
@@ -326,6 +332,8 @@ class ChatWebApi extends WebApi
     }
 
     /**
+     * Количество не прочитанных сообщений
+     *
      * @param null $r_id
      * @return int
      */
@@ -337,6 +345,8 @@ class ChatWebApi extends WebApi
 
     /**
      * Число диалогов с новыми сообщениями
+     *
+     * @param null $r_id
      * @return array
      */
     public function dialogUnreadCount($r_id = null)
@@ -358,22 +368,21 @@ class ChatWebApi extends WebApi
      */
     private function prepareDialog(Order $model)
     {
-
-        $last_message = $model->orderChatLastMessage->message ?? 'Нет сообщений';
+        $last_message = $model->orderChatLastMessage->message ?? \Yii::t('api_web', 'chat.not_message', ['ru' => 'Нет сообщений']);
         if (!empty($last_message)) {
             $last_message = stripcslashes(trim($last_message, "'"));
         }
 
         return [
-            'dialog_id' => (int)$model->id,
-            'client' => $model->client->name,
-            'client_id' => (int)$model->client->id,
-            'vendor' => $model->vendor->name,
-            'vendor_id' => (int)$model->vendor->id,
-            'image' => $model->vendor->pictureUrl ?? '',
-            'count_message' => (int)$model->orderChatCount ?? 0,
-            'unread_message' => (int)$model->getOrderChatUnreadCount($this->user->organization_id) ?? 0,
-            'last_message' => $last_message,
+            'dialog_id'         => (int)$model->id,
+            'client'            => $model->client->name,
+            'client_id'         => (int)$model->client->id,
+            'vendor'            => $model->vendor->name,
+            'vendor_id'         => (int)$model->vendor->id,
+            'image'             => $model->vendor->pictureUrl ?? '',
+            'count_message'     => (int)$model->orderChatCount ?? 0,
+            'unread_message'    => (int)$model->getOrderChatUnreadCount($this->user->organization_id) ?? 0,
+            'last_message'      => $last_message,
             'last_message_date' => $model->orderChatLastMessage->created_at ?? null,
         ];
     }
@@ -384,7 +393,6 @@ class ChatWebApi extends WebApi
      */
     private function prepareMessage(OrderChat $model)
     {
-
         $is_my_message = false;
 
         if (!$model->is_system) {
@@ -394,16 +402,16 @@ class ChatWebApi extends WebApi
         }
 
         return [
-            'message_id' => (int)$model->id,
-            'message' => stripcslashes(trim($model->message, "'")),
-            'sender' => $model->is_system ? 'MixCart Bot' : $model->sentBy->profile->full_name,
+            'message_id'     => (int)$model->id,
+            'message'        => stripcslashes(trim($model->message, "'")),
+            'sender'         => $model->is_system ? 'MixCart Bot' : $model->sentBy->profile->full_name,
             'recipient_name' => $model->recipient->name,
-            'recipient_id' => (int)$model->recipient->id,
-            'is_my_message' => $is_my_message,
-            'is_system' => $model->is_system ? true : false,
-            'viewed' => $model->viewed ? true : false,
-            'date' => date('Y-m-d', strtotime($model->created_at)),
-            'time' => date('H:i:s', strtotime($model->created_at)),
+            'recipient_id'   => (int)$model->recipient->id,
+            'is_my_message'  => $is_my_message,
+            'is_system'      => $model->is_system ? true : false,
+            'viewed'         => $model->viewed ? true : false,
+            'date'           => date('Y-m-d', strtotime($model->created_at)),
+            'time'           => date('H:i:s', strtotime($model->created_at)),
         ];
     }
 }

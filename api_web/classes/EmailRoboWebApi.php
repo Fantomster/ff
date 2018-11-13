@@ -30,6 +30,7 @@ class EmailRoboWebApi extends WebApi
         /**@var IntegrationSettingFromEmail $model */
         foreach ($models as $model) {
             $arResult[] = [
+                'id'         => $model->id,
                 'name'       => $model->organization->name,
                 'user'       => $model->user,
                 'is_active'  => $model->is_active,

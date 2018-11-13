@@ -95,7 +95,7 @@ class OrderNotice
         /** @var \yii\swiftmailer\Mailer $mailer */
         /** @var \yii\swiftmailer\Message $message */
         $mailer = Yii::$app->mailer;
-        $mailer->htmlLayout = '@common/mail/layouts/order';
+        $mailer->htmlLayout = '@api_web/views/mail/layouts/order';
         $senderOrg = $sender;
         $subject = Yii::t('message', 'frontend.controllers.order.new_order') . $order->id . "!";
         $dataProvider = new ArrayDataProvider(['allModels' => $order->orderContent, 'pagination' => false]);
@@ -112,7 +112,7 @@ class OrderNotice
 //                        //
 //                    }
                     try {
-                        $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        $mailer->compose('@api_web/views/mail/orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                             ->setTo($email)
                             ->setSubject($subject)
                             ->send();
@@ -149,7 +149,7 @@ class OrderNotice
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
-        $mailer->htmlLayout = '@common/mail/layouts/order';
+        $mailer->htmlLayout = '@api_web/views/mail/layouts/order';
         $subject = Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
 
         $searchModel = new OrderContentSearch();
@@ -170,7 +170,7 @@ class OrderNotice
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification) {
                     if ($notification->order_canceled) {
-                        $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        $mailer->compose('@api_web/views/mail/orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                             ->setTo($email)
                             ->setSubject($subject)
                             ->send();
@@ -205,7 +205,7 @@ class OrderNotice
         /** @var Message $message */
         $sender = $order->createdBy;
         $mailer = Yii::$app->mailer;
-        $mailer->htmlLayout = '@common/mail/layouts/order';
+        $mailer->htmlLayout = '@api_web/views/mail/order';
         $senderOrg = $sender->organization;
         $subject = Yii::t('message', 'frontend.controllers.order.complete', ['ru' => "Заказ № {order_id} выполнен!", 'order_id' => $order->id]);
 
@@ -222,7 +222,7 @@ class OrderNotice
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification) {
                     if ($notification->order_done) {
-                        $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        $mailer->compose('@api_web/views/mail/orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                             ->setTo($email)
                             ->setSubject($subject)
                             ->send();

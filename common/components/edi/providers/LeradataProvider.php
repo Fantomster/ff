@@ -12,11 +12,11 @@ use common\components\edi\AbstractProvider;
 use common\components\edi\AbstractRealization;
 use common\components\edi\EDIProvidersClass;
 use common\components\edi\ProviderInterface;
+use common\models\edi\EdiProvider;
 use common\models\EdiOrder;
-use common\models\EdiOrganization;
+use common\models\edi\EdiOrganization;
 use common\models\OrderContent;
 use yii\base\Exception;
-use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use Yii;
 
@@ -38,6 +38,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     private $token;
     private $varGln;
     private $intUserID;
+    private $providerID;
 
     /**
      * Provider constructor.
@@ -46,14 +47,18 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     {
         $this->ediProvider = new EDIProvidersClass();
         $this->url = \Yii::$app->params['edi_api_data']['edi_api_leradata_url'];
+        $pos = strrpos(self::class, '\\');
+        $class = substr(self::class, $pos + 1);
+        $provider = EdiProvider::findOne(['provider_class' => $class]);
+        $this->providerID = $provider->id;
     }
 
     /**
      * Get files list from provider and insert to table
      */
-    public function handleFilesList($orgId): void
+    public function handleFilesList($orgID): void
     {
-        $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
+        $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgID, 'provider_id' => $this->providerID]);
         if ($ediOrganization) {
             $this->token = $ediOrganization['token'];
             $this->varGln = $ediOrganization['gln_code'];
@@ -93,17 +98,17 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             if (!empty($list)) {
                 foreach ($list as $key => $xml) {
                     $this->ediFilesQueueID = $key;
-                        if ($type == 'pricat') {
-                            $xml = json_decode(json_encode($xml, JSON_UNESCAPED_UNICODE));
-                            $this->realization->handlePriceListUpdating($key, $xml);
-                        } else {
-                            $exceptionArray = [
-                                'file_id' => $key,
-                                'status' => parent::STATUS_ERROR,
-                                'json_data' => json_encode($xml)
-                            ];
-                            $this->realization->handleOrderResponse($xml, $type, false, $exceptionArray);
-                        }
+                    if ($type == 'pricat') {
+                        $xml = json_decode(json_encode($xml, JSON_UNESCAPED_UNICODE));
+                        $this->realization->handlePriceListUpdating($key, $xml, $this->providerID);
+                    } else {
+                        $exceptionArray = [
+                            'file_id'   => $key,
+                            'status'    => parent::STATUS_ERROR,
+                            'json_data' => json_encode($xml)
+                        ];
+                        $this->realization->handleOrderResponse($xml, $type, false, $exceptionArray, $this->providerID);
+                    }
                 }
             }
         }
@@ -126,7 +131,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);
             $dateArray = $this->ediProvider->getDateData($order);
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
-            $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
+            $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId, 'provider_id' => $this->providerID]);
             if (!$ediOrganization) {
                 throw new BadRequestHttpException();
                 $transaction->rollback();
@@ -201,7 +206,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
 
     public function parseFile($content)
     {
-        $success = $this->realization->parseFile($content);
+        $success = $this->realization->parseFile($content, $this->providerID);
         if ($success) {
             $this->updateQueue($this->ediFilesQueueID, parent::STATUS_HANDLED, '');
         }

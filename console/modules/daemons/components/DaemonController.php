@@ -119,21 +119,21 @@ abstract class DaemonController extends Controller
      */
     protected function initLogger()
     {
-//        $targets = \Yii::$app->getLog()->targets;
-//        foreach ($targets as $name => $target) {
-//            $target->enabled = false;
-//        }
-//        $config = [
-//            'levels'  => ['error', 'warning', 'trace', 'info'],
-//            'logFile' => \Yii::getAlias($this->logDir) . DIRECTORY_SEPARATOR . $this->shortName . '.log',
-//            'logVars' => [],
-//            'except'  => [
-//                'yii\db\*', // Don't include messages from db
-//            ],
-//        ];
-//        $targets['daemon'] = new \yii\log\FileTarget($config);
-//        \Yii::$app->getLog()->targets = $targets;
-//        \Yii::$app->getLog()->init();
+        $targets = \Yii::$app->getLog()->targets;
+        foreach ($targets as $name => $target) {
+            $target->enabled = false;//($name == 'daemon');
+        }
+        $config = [
+            'levels'  => ['error', 'warning', 'trace', 'info'],
+            'logFile' => \Yii::getAlias($this->logDir) . DIRECTORY_SEPARATOR . $this->shortName . '.log',
+            'logVars' => [],
+            'except'  => [
+                'yii\db\*', // Don't include messages from db
+            ],
+        ];
+        $targets['daemon1'] = new \yii\log\FileTarget($config);
+        \Yii::$app->getLog()->targets = $targets;
+        \Yii::$app->getLog()->init();
     }
     
     /**
@@ -152,6 +152,7 @@ abstract class DaemonController extends Controller
      */
     final public function actionIndex()
     {
+        $targets = \Yii::$app->getLog()->targets;
         if ($this->demonize) {
             $pid = pcntl_fork();
             if ($pid == -1) {

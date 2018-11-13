@@ -410,6 +410,7 @@ class ClientController extends DefaultController
         $currentUserOrganizationID = $this->currentUser->organization_id;
         $dropDown                  = Role::dropdown(Role::getRelationOrganizationType($id, $currentUserOrganizationID));
         $selected                  = $user->getRelationUserOrganizationRoleID($currentUserOrganizationID);
+        $organization = $user->organization;
 
         if (in_array($user->role_id, Role::getAdminRoles()) || in_array($user->role_id, Role::getFranchiseeEditorRoles())) {
             return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'dropDown', 'selected'));

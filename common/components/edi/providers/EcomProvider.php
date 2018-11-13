@@ -11,11 +11,11 @@ namespace common\components\edi\providers;
 use common\components\edi\AbstractProvider;
 use common\components\edi\AbstractRealization;
 use common\components\edi\ProviderInterface;
+use common\models\edi\EdiProvider;
 use common\models\EdiOrder;
-use common\models\EdiOrganization;
+use common\models\edi\EdiOrganization;
 use common\models\OrderContent;
 use yii\base\Exception;
-use yii\web\BadRequestHttpException;
 use Yii;
 
 /**
@@ -32,6 +32,7 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
     public $realization;
     public $content;
     public $ediFilesQueueID;
+    private $providerID;
 
     /**
      * Provider constructor.
@@ -39,14 +40,18 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
     public function __construct()
     {
         $this->client = \Yii::$app->siteApi;
+        $pos = strrpos(self::class, '\\');
+        $class = substr(self::class, $pos + 1);
+        $provider = EdiProvider::findOne(['provider_class' => $class]);
+        $this->providerID = $provider->id;
     }
 
     /**
      * Get files list from provider and insert to table
      */
-    public function handleFilesList($orgId): void
+    public function handleFilesList($orgID): void
     {
-        $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
+        $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgID, 'provider_id' => $this->providerID]);
         if ($ediOrganization) {
             $login = $ediOrganization['login'];
             $pass = $ediOrganization['pass'];
@@ -57,7 +62,7 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
                 Yii::error($e->getMessage());
             }
             if (!empty($objectList)) {
-                $this->insertFilesInQueue($objectList, $orgId);
+                $this->insertFilesInQueue($objectList, $orgID);
             }
         }
     }
@@ -147,7 +152,7 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
             }
 
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
-            $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
+            $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId, 'provider_id' => $this->providerID]);
             $result = $this->sendDoc($string, $ediOrganization, $done, $order);
             $transaction->commit();
         } catch (Exception $e) {

@@ -2,12 +2,13 @@
 
 /**
  * Class AbstractSyncFactory
- * @package api_web\module\integration\sync
+ *
+ * @package   api_web\module\integration\sync
  * @createdBy Basil A Konakov
  * @createdAt 2018-09-20
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
+ * @author    Mixcart
+ * @module    WEB-API
+ * @version   2.0
  */
 
 namespace api_web\modules\integration\classes\sync;
@@ -54,8 +55,9 @@ abstract class AbstractSyncFactory extends WebApi
 
     /**
      * Construct method for Class SyncServiceFactory
+     *
      * @param string $serviceName Service name
-     * @param int $serviceId Service name
+     * @param int    $serviceId   Service name
      */
     public function __construct(string $serviceName, int $serviceId = null)
     {
@@ -66,6 +68,12 @@ abstract class AbstractSyncFactory extends WebApi
         }
     }
 
+    /**
+     * @param int $service_id
+     * @param int $org_id
+     * @return OrganizationDictionary
+     * @throws BadRequestHttpException
+     */
     public function getOrganizationDictionary(int $service_id, int $org_id): OrganizationDictionary
     {
 
@@ -75,29 +83,27 @@ abstract class AbstractSyncFactory extends WebApi
             throw new BadRequestHttpException("outer_dic_not_found");
         }
 
-        $orgDic = OrganizationDictionary::findOne(['outer_dic_id' => $outerDic->id,
-            'org_id' => $org_id, 'status_id' => OrganizationDictionary::STATUS_DISABLED]);
-        if ($orgDic) {
-            SyncLog::trace('OrganizationDictionary was diabled!');
-            throw new BadRequestHttpException("org_dic_disabled");
-        } else {
-            $orgDic = OrganizationDictionary::findOne(['outer_dic_id' => $outerDic->id, 'org_id' => $org_id]);
-            if ($orgDic && $orgDic->status_id != OrganizationDictionary::STATUS_ACTIVE) {
-                SyncLog::trace('OrganizationDictionary status wrong!');
-                throw new BadRequestHttpException("org_dic_status_wrong");
-            } elseif (!$orgDic) {
-                $orgDic = new OrganizationDictionary(['outer_dic_id' => $outerDic->id,
-                    'org_id' => $org_id, 'status_id' => OrganizationDictionary::STATUS_ACTIVE, 'count' => 0]);
-                if (!$orgDic->save()) {
-                    SyncLog::trace('OrganizationDictionary cannot be updated!');
-                    throw new BadRequestHttpException("org_dic_not_accessible");
-                }
+        $orgDic = OrganizationDictionary::findOne(['outer_dic_id' => $outerDic->id, 'org_id' => $org_id]);
+        if (empty($orgDic)) {
+            $orgDic = new OrganizationDictionary([
+                'outer_dic_id' => $outerDic->id,
+                'org_id'       => $org_id,
+                'status_id'    => OrganizationDictionary::STATUS_DISABLED,
+                'count'        => 0
+            ]);
+
+            if (!$orgDic->save()) {
+                SyncLog::trace('OrganizationDictionary cannot be updated!');
+                throw new BadRequestHttpException("org_dic_not_accessible");
             }
         }
 
         return $orgDic;
     }
 
+    /**
+     * @return array
+     */
     public function getObjects(): array
     {
         if (method_exists($this, 'sendRequestForObjects')) {
@@ -108,6 +114,7 @@ abstract class AbstractSyncFactory extends WebApi
 
     /**
      * Basic integration method "Load dictionary"
+     *
      * @param array $params
      * @return array
      * @throws BadRequestHttpException
@@ -154,9 +161,10 @@ abstract class AbstractSyncFactory extends WebApi
 
     /**
      * Send data using Curl
-     * @param string $sendUrl URL
+     *
+     * @param string $sendUrl  URL
      * @param string $sendData Data
-     * @param string $cookie Data
+     * @param string $cookie   Data
      * @return string?
      * @throws BadRequestHttpException
      */
@@ -215,8 +223,9 @@ abstract class AbstractSyncFactory extends WebApi
 
     /**
      * ServiceMethod Class Factory
+     *
      * @param string $dictionary Dictionary name
-     * @param int $serviceId Service ID
+     * @param int    $serviceId  Service ID
      * @return AbstractSyncFactory?
      * @throws BadRequestHttpException
      */
@@ -233,13 +242,23 @@ abstract class AbstractSyncFactory extends WebApi
 
     /**
      * Отправка запроса, обязательный метод
+     *
      * @param $params array
      * @return array
      */
     abstract public function sendRequest(array $params = []): array;
 
     /**
+     * @return array
+     */
+    public function checkConnect()
+    {
+        return ['Не определена функция проверки соединения в классе: ' . get_class($this)];
+    }
+
+    /**
      * Метод отправки накладной
+     *
      * @param array $request
      * @return array
      */
@@ -248,18 +267,30 @@ abstract class AbstractSyncFactory extends WebApi
         return ['Не определена функция отправки накладной в классе: ' . get_class($this)];
     }
 
-
+    /**
+     * @return array
+     */
     public static function getAllSyncOperations(): array
     {
         return [
-            RkwsAgent::$OperDenom => RkwsAgent::class,
+            RkwsAgent::$OperDenom    => RkwsAgent::class,
             RkwsCategory::$OperDenom => RkwsCategory::class,
-            RkwsUnit::$OperDenom => RkwsUnit::class,
-            RkwsStore::$OperDenom => RkwsStore::class,
-            RkwsProduct::$OperDenom => RkwsProduct::class,
-            RkwsWaybill::$OperDenom => RkwsWaybill::class
+            RkwsUnit::$OperDenom     => RkwsUnit::class,
+            RkwsStore::$OperDenom    => RkwsStore::class,
+            RkwsProduct::$OperDenom  => RkwsProduct::class,
+            RkwsWaybill::$OperDenom  => RkwsWaybill::class
 
         ];
     }
 
+    /**
+     * @param $items
+     * @return \Generator
+     */
+    public function iterator($items)
+    {
+        foreach ($items as $item) {
+            yield $item;
+        }
+    }
 }

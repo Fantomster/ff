@@ -127,7 +127,7 @@ class ClientWebApi extends WebApi
                 $model->formatted_address = $model->address;
             }
 
-            if (!$model->validate() || !$model->save()) {
+            if (!$model->validate($model->getDirtyAttributes()) || !$model->save()) {
                 throw new ValidationException($model->getFirstErrors());
             }
 
@@ -248,7 +248,7 @@ class ClientWebApi extends WebApi
         $rel = RelationUserOrganization::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
 
         if (empty($rel)) {
-            throw new BadRequestHttpException('Relation not found.');
+            throw new BadRequestHttpException('RelationUserOrganization_not_found');
         }
 
         $user_phone = SmsNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $rel->id]);
@@ -323,7 +323,7 @@ class ClientWebApi extends WebApi
             $rel = RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $this->user->organization->id]);
 
             if (empty($rel)) {
-                throw new BadRequestHttpException('Relation not found.');
+                throw new BadRequestHttpException('RelationUserOrganization_not_found');
             }
 
             switch ($post['type']) {
@@ -339,12 +339,11 @@ class ClientWebApi extends WebApi
             }
 
             if (empty($model)) {
-                throw new BadRequestHttpException('Model not found.');
+                throw new BadRequestHttpException('model_not_found');
             }
 
             $t = \Yii::$app->db->beginTransaction();
             try {
-
                 $params = [
                     "order_created",
                     "order_canceled",
@@ -392,7 +391,7 @@ class ClientWebApi extends WebApi
 
         $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization->id]);
         if (empty($model)) {
-            throw new BadRequestHttpException('Additional email not found.');
+            throw new BadRequestHttpException('additional_email.not_found');
         }
 
         $t = \Yii::$app->db->beginTransaction();
@@ -562,7 +561,7 @@ class ClientWebApi extends WebApi
             //Проверка, можно ли проставить эту роль что прислали
             $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
             if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
-                throw new BadRequestHttpException('Нельзя присвоить эту роль пользователю.');
+                throw new BadRequestHttpException('user.role_set_access');
             }
 
             //Ищем пользователя
@@ -571,7 +570,7 @@ class ClientWebApi extends WebApi
                 //Смотрим, вдруг он уже работает в этом ресторане
                 $relation = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $this->user->organization->id]);
                 if (!empty($relation)) {
-                    throw new BadRequestHttpException('Этот сотрудник уже работает под ролью: ' . Role::findOne($relation->role_id)->name);
+                    throw new BadRequestHttpException('user.work_in_role|' . Role::findOne($relation->role_id)->name);
                 }
             } else {
                 /**
@@ -637,7 +636,7 @@ class ClientWebApi extends WebApi
             ]);
 
             if (empty($relation)) {
-                throw new BadRequestHttpException('This user is not a member of your staff.');
+                throw new BadRequestHttpException('user.not_staff');
             }
 
             if (!empty($post['name'])) {
@@ -659,7 +658,7 @@ class ClientWebApi extends WebApi
 
                 $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
                 if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
-                    throw new BadRequestHttpException('Нельзя присвоить эту роль пользователю.');
+                    throw new BadRequestHttpException('user.role_set_access');
                 }
 
                 $user->role_id = $post['role_id'];
@@ -704,7 +703,7 @@ class ClientWebApi extends WebApi
         $this->validateRequest($post, ['id']);
 
         if ($post['id'] === $this->user->id) {
-            throw new BadRequestHttpException('Удаление себя из списка сотрудников недоступно.');
+            throw new BadRequestHttpException('user.delete_myself');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -771,7 +770,7 @@ class ClientWebApi extends WebApi
 
         $organizations = ArrayHelper::map($model->getAllOrganization(), 'id', 'id');
         if (!in_array($this->user->organization->id, $organizations)) {
-            throw new BadRequestHttpException('This user is not a member of your staff.');
+            throw new BadRequestHttpException('user.not_staff');
         }
 
         return $model;

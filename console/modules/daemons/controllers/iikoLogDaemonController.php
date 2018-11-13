@@ -47,8 +47,8 @@ class iikoLogDaemonController extends AbstractDaemonController
              * Вносим информацию об операции в общий журнал
              */
             $journal = new Journal();
-            $journal->user_id = $row['user_id'];
-            $journal->organization_id = $row['organization_id'];
+            $journal->user_id = $row['user_id'] ?? null;
+            $journal->organization_id = $row['organization_id'] ?? null;
             $journal->operation_code = $row['operation_code'];
             $journal->log_guide = $row['guide'];
             $journal->type = $row['type'] ?? 'success';

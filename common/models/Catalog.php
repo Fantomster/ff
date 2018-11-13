@@ -17,6 +17,7 @@ use yii\web\BadRequestHttpException;
  * @property string $created_at
  * @property string $updated_at
  * @property integer $currency_id
+ * @property string $index_column
  * @property string $main_index
  * @property string $mapping
  *

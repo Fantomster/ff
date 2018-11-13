@@ -3,6 +3,7 @@
 namespace common\components\edi;
 
 use common\models\EcomIntegrationConfig;
+use common\models\edi\EdiOrganization;
 use yii\base\Component;
 use yii\web\BadRequestHttpException;
 
@@ -15,6 +16,7 @@ class EDIIntegration extends Component
 {
     public $orgId;
     public $clientId;
+    public $providerID;
 
     /**
      * @var array
@@ -41,21 +43,21 @@ class EDIIntegration extends Component
     public function init()
     {
         if ($this->clientId > 0) {
-            $conf = EcomIntegrationConfig::findOne(['org_id' => $this->clientId]);
-            if ($conf && strpos($conf['provider'], 'eradata')) {
+            $ediOrganization = EdiOrganization::findOne(['organization_id' => $this->clientId, 'provider_id' => $this->providerID]);
+            if ($ediOrganization && strpos($ediOrganization->ediProvider->provider_class, 'eradata')) {
                 $this->orgId = $this->clientId;
             } else {
-                $conf = EcomIntegrationConfig::findOne(['org_id' => $this->orgId]);
+                $ediOrganization = EdiOrganization::findOne(['organization_id' => $this->orgId, 'provider_id' => $this->providerID]);
             }
         } else {
-            $conf = EcomIntegrationConfig::findOne(['org_id' => $this->orgId]);
+            $ediOrganization = EdiOrganization::findOne(['organization_id' => $this->orgId, 'provider_id' => $this->providerID]);
         }
-        if (!$conf) {
+        if (!$ediOrganization) {
             throw new BadRequestHttpException("Config not set for this vendor");
         }
 
-        $this->setProvider($this->createClass('providers\\', $conf['provider']));
-        $this->setRealization($this->createClass('realization\\', $conf['realization']));
+        $this->setProvider($this->createClass('providers\\', $ediOrganization->ediProvider->provider_class));
+        $this->setRealization($this->createClass('realization\\', $ediOrganization->ediProvider->realization_class));
     }
 
     /**
@@ -93,7 +95,7 @@ class EDIIntegration extends Component
      */
     public function handleFilesList()
     {
-        $this->provider->handleFilesList($this->orgId);
+        $this->provider->handleFilesList($this->orgId, $this->providerID);
     }
 
     /**
@@ -116,6 +118,6 @@ class EDIIntegration extends Component
      */
     public function sendOrderInfo($order, $isNewOrder)
     {
-        $this->provider->sendOrderInfo($order, $this->orgId, $isNewOrder);
+        $this->provider->sendOrderInfo($order, $this->orgId, $isNewOrder, $this->providerID);
     }
 }

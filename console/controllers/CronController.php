@@ -7,6 +7,8 @@ use common\components\ecom\realization\Realization;
 use common\components\EComIntegration;
 use common\components\edi\EDIIntegration;
 use common\models\EcomIntegrationConfig;
+use common\models\edi\EdiOrganization;
+use common\models\edi\EdiProvider;
 use Yii;
 use yii\web\View;
 use yii\console\Controller;
@@ -381,12 +383,15 @@ class CronController extends Controller
     //handle EDI integration files
     public function actionHandleFiles()
     {
-        $conf = EcomIntegrationConfig::find()->all();
-        if ($conf) {
-            foreach ($conf as $one) {
-                $orgId = $one->org_id;
-                $eComIntegration = new EDIIntegration(['orgId' => $orgId]);
-                $eComIntegration->handleFilesList();
+        $ediOrganizations = EdiOrganization::find()->all();
+        if ($ediOrganizations) {
+            foreach ($ediOrganizations as $organization) {
+                $orgId = $organization->organization_id;
+                $providerID = $organization->provider_id;
+                $provider = EdiProvider::findOne(['id' => $providerID]);
+                if ($provider == 'LeradataProvider' && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
+                $ediIntegration = new EDIIntegration(['orgId' => $orgId, 'providerID' => $providerID]);
+                $ediIntegration->handleFilesList();
             }
         }
     }
@@ -394,14 +399,17 @@ class CronController extends Controller
     //handle EDI integration files queue
     public function actionHandleFilesQueue()
     {
-        $conf = EcomIntegrationConfig::find()->all();
-        if ($conf) {
-            foreach ($conf as $one) {
-                $orgId = $one->org_id;
-                $eComIntegration = new EDIIntegration(['orgId' => $orgId]);
-                $eComIntegration->handleFilesListQueue();
+        $ediOrganizations = EdiOrganization::find()->all();
+        if ($ediOrganizations) {
+            foreach ($ediOrganizations as $organization) {
+                $orgId = $organization->organization_id;
+                $providerID = $organization->provider_id;
+                $provider = EdiProvider::findOne(['id' => $providerID]);
+                if ($provider == 'LeradataProvider' && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
+                $ediIntegration = new EDIIntegration(['orgId' => $orgId, 'providerID' => $providerID]);
+                $ediIntegration->handleFilesListQueue();
             }
-        };
+        }
     }
 
     public function actionProcessMercVsd()

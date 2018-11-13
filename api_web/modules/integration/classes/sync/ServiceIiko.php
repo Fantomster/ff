@@ -4,12 +4,13 @@ namespace api_web\modules\integration\classes\sync;
 
 use api_web\classes\RabbitWebApi;
 use api_web\components\Registry;
-use api_web\exceptions\ValidationException;
 use api_web\modules\integration\models\iikoWaybill;
-use common\models\Waybill;
+use common\models\OrganizationDictionary;
+use common\models\OuterDictionary;
 use api_web\helpers\iikoApi;
 use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
+use yii\web\HttpException;
 use yii\web\ServerErrorHttpException;
 
 /**
@@ -50,15 +51,22 @@ class ServiceIiko extends AbstractSyncFactory
         }
 
         try {
-            (new RabbitWebApi())->addToQueue([
+            $sendToRabbit = (new RabbitWebApi())->addToQueue([
                 "queue"  => $this->queueName,
                 "org_id" => $this->user->organization->id
             ]);
 
-            return ['success' => true];
+            if ($sendToRabbit) {
+                $model = $this->getModel();
+                $model->status_id = OrganizationDictionary::STATUS_SEND_REQUEST;
+                $model->save();
+                return $this->prepareModel($model);
+            } else {
+                throw new HttpException(402, 'Error send request to RabbitMQ');
+            }
         } catch (\Throwable $e) {
             \Yii::error($e->getMessage());
-            return ['success' => false];
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
 
@@ -128,12 +136,28 @@ class ServiceIiko extends AbstractSyncFactory
             $api->logout();
         } catch (\Exception $e) {
             $message = $e->getMessage();
-            if ($message == "Код ответа сервера: 401 | ") {
+            if (strpos($message, '401') !== false) {
                 $message = "Ошибка авторизации, проверьте настройки подключения к iiko";
             }
             throw new BadRequestHttpException($message);
         }
         return ['result' => $res];
+    }
+
+    /**
+     * Проверка соединения с iiko
+     */
+    public function checkConnect()
+    {
+        $api = iikoApi::getInstance();
+        try {
+            $api->auth();
+            return ['result' => true];
+        } catch (\Exception $e) {
+            throw $e;
+        } finally {
+            $api->logout();
+        }
     }
 
     /**
@@ -155,5 +179,41 @@ class ServiceIiko extends AbstractSyncFactory
             ];
         }
         return $res;
+    }
+
+    /**
+     * Получить модель справочника организыйии
+     *
+     * @return OrganizationDictionary
+     */
+    private function getModel()
+    {
+        $dictionary = OuterDictionary::findOne(['service_id' => $this->serviceId, 'name' => $this->index]);
+        $model = OrganizationDictionary::findOne([
+            'org_id'       => $this->user->organization_id,
+            'outer_dic_id' => $dictionary->id
+        ]);
+        return $model;
+    }
+
+    /**
+     * Ответ на запрос синхронизации
+     *
+     * @param $model OrganizationDictionary
+     * @return array
+     */
+    private function prepareModel($model)
+    {
+        $defaultStatusText = OrganizationDictionary::getStatusTextList()[OrganizationDictionary::STATUS_DISABLED];
+        return [
+            'id'          => $model->id,
+            'name'        => $model->outerDic->name,
+            'title'       => \Yii::t('api_web', 'dictionary.' . $model->outerDic->name),
+            'count'       => $model->count ?? 0,
+            'status_id'   => $model->status_id ?? 0,
+            'status_text' => $model->statusText ?? $defaultStatusText,
+            'created_at'  => $model->created_at ?? null,
+            'updated_at'  => $model->updated_at ?? null
+        ];
     }
 }

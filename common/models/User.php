@@ -64,7 +64,7 @@ class User extends \amnah\yii2\user\models\User
             [['email'], 'email'],
             [['username'], 'match', 'pattern' => '/^\w+$/u', 'except' => 'social', 'message' => Yii::t('user', '{attribute} can contain only letters, numbers, and "_"')],
             // password rules
-            [['newPassword'], 'match', 'pattern' => '/^(?=.*[0-9])([a-zA-Z0-9]+)$/'],
+            [['newPassword'], 'match', 'pattern' => '/^(?=.*[0-9])([a-zA-Z0-9!@#$%^&*()-_=+\[\]{};:]+)$/'],
             [['newPassword'], 'string', 'min' => 3],
             [['newPassword'], 'required', 'on' => ['register', 'reset', 'acceptInvite', 'manageNew']],
             [['newPasswordConfirm'], 'required', 'on' => ['reset']],

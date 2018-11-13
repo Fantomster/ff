@@ -3,7 +3,7 @@
 namespace api_web\classes;
 
 use api_web\components\Registry;
-use common\models\EdiOrganization;
+use common\models\edi\EdiOrganization;
 use common\models\Organization;
 use api_web\components\WebApi;
 use common\components\EComIntegration;

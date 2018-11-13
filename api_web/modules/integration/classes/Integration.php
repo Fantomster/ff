@@ -9,11 +9,15 @@
 namespace api_web\modules\integration\classes;
 
 use api_web\components\Registry;
+use api_web\components\WebApi;
+use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
+use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 class Integration
 {
+    /** @var array */
     static $service_map = [
         Registry::RK_SERVICE_ID   => 'Rkws',
         Registry::IIKO_SERVICE_ID => 'Iiko'
@@ -62,14 +66,21 @@ class Integration
         if (!isset($request['name']) && !empty($request['name'])) {
             throw new BadRequestHttpException('empty_param|name');
         }
-        if (!isset($request['agent_id']) && !empty($request['agent_id'])) {
-            throw new BadRequestHttpException('empty_param|agent_id');
-        }
+
+        $agents = (new Query())
+            ->select('id')
+            ->from(OuterAgent::tableName())
+            ->where([
+                'org_id'     => (new WebApi())->user->organization_id,
+                'is_deleted' => 0
+            ])
+            ->createCommand(\Yii::$app->db_api)
+            ->queryColumn();
 
         $result = OuterAgentNameWaybill::find()
             ->where([
                 'name'     => $request['name'],
-                'agent_id' => $request['agent_id']
+                'agent_id' => $agents
             ])
             ->exists();
 

@@ -2,17 +2,19 @@
 
 /**
  * Class NoAuthWebApi
- * @package api_web\classes
+ *
+ * @package   api_web\classes
  * @createdBy Basil A Konakov
  * @createdAt 2018-10-04
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
+ * @author    Mixcart
+ * @module    WEB-API
+ * @version   2.0
  */
 
 namespace api_web\classes;
 
 use api_web\components\Registry;
+use api_web\modules\integration\classes\sync\ServiceRkws;
 use common\models\Journal;
 use common\models\Waybill;
 use Yii;
@@ -27,14 +29,13 @@ class NoAuthWebApi
 {
     public function loadDictionary(OuterTask $task)
     {
-
         # 2.1.1. Trace callback operation with task_id
         SyncLog::trace('Callback operation `task_id` params is ' . $task->id);
 
         # 2.1.2. Check oper_code
         $oper = AllServiceOperation::findOne($task->oper_code);
         if (!$oper) {
-            SyncLog::trace('Operation code ('.$task->oper_code.') is wrong!');
+            SyncLog::trace('Operation code (' . $task->oper_code . ') is wrong!');
             throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
         $allOpers = AbstractSyncFactory::getAllSyncOperations();
@@ -45,7 +46,18 @@ class NoAuthWebApi
             $entity = new $entityName(SyncServiceFactory::ALL_SERVICE_MAP[$oper->service_id], $oper->service_id);
             /** @var $entity AbstractSyncFactory */
             if (method_exists($entity, 'receiveXmlData')) {
-                $res = $entity->receiveXmlData($task, Yii::$app->request->getRawBody());
+                $body = Yii::$app->request->getRawBody();
+                if (empty($body)) {
+                    SyncLog::trace('Empty response: ' . $task->id);
+                    return 'false';
+                }
+                SyncLog::trace($body);
+
+                if ($entity instanceof ServiceRkws) {
+                    $entity->orgId = $task->org_id;
+                }
+
+                $res = $entity->receiveXmlData($task, $body);
                 SyncLog::trace($res);
                 return $res;
             }
@@ -63,7 +75,7 @@ class NoAuthWebApi
         # 2.1.2. Check oper_code
         $oper = AllServiceOperation::findOne($task->oper_code);
         if (!$oper) {
-            SyncLog::trace('Operation code ('.$task->oper_code.') is wrong!');
+            SyncLog::trace('Operation code (' . $task->oper_code . ') is wrong!');
             throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
 
@@ -84,11 +96,11 @@ class NoAuthWebApi
                 $journal->log_guide = 'any_call';
                 $journal->organization_id = $waybill->acquirer_id;
                 // Когда все хорошо и накладная создалась в R-keeper
-                if (array_key_exists('DOC', $xml)){
+                if (array_key_exists('DOC', $xml)) {
                     $waybill->status_id = Registry::WAYBILL_UNLOADED;
                     $journal->type = 'success';
                     $journal->response = $waybill->id;
-                } else if(array_key_exists('ERROR', $xml)){
+                } elseif (array_key_exists('ERROR', $xml)) {
                     //Когда случилась ошибка
                     $error = (array)$xml['ERROR'];
                     $waybill->status_id = Registry::WAYBILL_ERROR;

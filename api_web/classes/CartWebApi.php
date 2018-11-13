@@ -2,7 +2,6 @@
 
 namespace api_web\classes;
 
-use api_web\components\FireBase;
 use api_web\components\Notice;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
@@ -69,7 +68,7 @@ class CartWebApi extends \api_web\components\WebApi
      */
     private function addItem(array $post)
     {
-        $this->validateRequest($post, ['quantity', 'product_id']);
+        $this->validateRequest($post, ['product_id']);
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
@@ -77,7 +76,7 @@ class CartWebApi extends \api_web\components\WebApi
             $product = (new Product())->findFromCatalogs($post['product_id']);
             //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
             if (!in_array($product['cat_id'], $this->getCatalogs()) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
-                throw new BadRequestHttpException("Каталог {$product['cat_id']} недоступен для вас.");
+                throw new BadRequestHttpException("catalog.access_denied|" . $product['cat_id']);
             }
             $this->setPosition($cart, $product, $post['quantity']);
             $transaction->commit();
@@ -157,9 +156,8 @@ class CartWebApi extends \api_web\components\WebApi
             }
         }
 
-        //Сообщение в очередь, Изменение количества товара в корзине
+        //Сообщение в очередь, Изменение количества товара в корзиlне
         Notice::init('Order')->sendOrderToTurnClient($this->user);
-
         return $this->items();
     }
 
@@ -176,7 +174,6 @@ class CartWebApi extends \api_web\components\WebApi
     {
         WebApiHelper::clearRequest($post);
         $cart = $this->getCart();
-
         //Результат для ответа
         $result = [
             'success' => 0,
@@ -184,13 +181,14 @@ class CartWebApi extends \api_web\components\WebApi
             'message' => '',
         ];
 
+        $orders = [];
+
         if (!empty($post)) {
 
             if (isset($post['id'])) {
                 $post[] = $post;
             }
 
-            $orders = [];
             foreach ($post as $row) {
                 if (empty($row['id'])) {
                     throw new BadRequestHttpException("empty_param|id");
@@ -202,20 +200,23 @@ class CartWebApi extends \api_web\components\WebApi
             }
         }
 
-        try {
-            foreach ($cart->getVendors() as $vendor) {
-                if (isset($orders) && empty($orders[$vendor->id])) {
-                    continue;
+        if (!empty($orders)) {
+            try {
+                foreach ($cart->getVendors() as $vendor) {
+                    if (isset($orders) && empty($orders[$vendor->id])) {
+                        continue;
+                    }
+                    if ($this->createOrder($cart, $vendor, $orders[$vendor->id])) {
+                        $result['success'] += 1;
+                    }
                 }
-                if ($this->createOrder($cart, $vendor, $orders[$vendor->id])) {
-                    $result['success'] += 1;
-                }
+            } catch (\Exception $e) {
+                $result['error'] += 1;
+                $result['message'] = $e->getMessage();
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             }
-        } catch (\Exception $e) {
-            $result['error'] += 1;
-            $result['message'] = $e->getMessage();
-            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
+
         return $result;
     }
 
@@ -320,10 +321,13 @@ class CartWebApi extends \api_web\components\WebApi
             return $return;
         }
 
-        $result = (new Query())->from('cart as c')
+        $result = (new Query())
+            ->from('cart as c')
             ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
-            ->andWhere(['c.organization_id' => $this->user->organization->id])
-            ->andWhere(['cc.product_id' => $id])
+            ->andWhere([
+                'c.organization_id' => $this->user->organization->id,
+                'cc.product_id'     => $id
+            ])
             ->one();
 
         if (!empty($result['quantity'])) {
@@ -345,23 +349,20 @@ class CartWebApi extends \api_web\components\WebApi
     public function productComment(array $post)
     {
         $this->validateRequest($post, ['product_id']);
-
         /**
          * @var $model CartContent
          */
         $model = $this->getCart()->getCartContents()->andWhere(['product_id' => $post['product_id']])->one();
 
         if (empty($model)) {
-            throw new BadRequestHttpException("Нет такого товара в корзине");
+            throw new BadRequestHttpException("cart.cart_content_not_found");
         }
 
         $model->comment = $post['comment'] ?? '';
 
-        if (!$model->validate()) {
+        if (!$model->save()) {
             throw new ValidationException($model->getFirstErrors());
         }
-
-        $model->save();
 
         return $this->items();
     }
@@ -446,12 +447,11 @@ class CartWebApi extends \api_web\components\WebApi
             $position->units = $product['units'];
             $position->vendor_id = $product['vendor_id'];
             $position->currency_id = $product['currency_id'];
-            if (!$position->validate()) {
+            if (!$position->save()) {
                 throw new ValidationException($position->getFirstErrors());
             }
-            $position->save();
         } else {
-            throw new BadRequestHttpException("ERROR: the quantity must be greater than zero");
+            throw new BadRequestHttpException("cart.quantity_must_be_greater_zero");
         }
         return true;
 
@@ -513,6 +513,9 @@ class CartWebApi extends \api_web\components\WebApi
         return $item;
     }
 
+    /**
+     * Отправка уведомлений
+     */
     public function noticeWhenProductAddToCart()
     {
         Notice::init('Order')->sendOrderToTurnClient($this->user);
@@ -523,7 +526,8 @@ class CartWebApi extends \api_web\components\WebApi
      * @param $items
      * @return \Generator
      */
-    private function iterator($items) {
+    private function iterator($items)
+    {
         foreach ($items as $item) {
             yield $item;
         }

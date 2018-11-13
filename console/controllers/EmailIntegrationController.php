@@ -155,6 +155,7 @@ class EmailIntegrationController extends Controller
          * @var $setting IntegrationSettingFromEmail
          */
         error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
+        
         //Получаем все активные настройки или конкретную настройку
         $where    = (isset($this->setting_id) ? ['id' => $this->setting_id] : ['is_active' => 1]);
         $settings = IntegrationSettingFromEmail::find()->where($where)
@@ -196,7 +197,7 @@ class EmailIntegrationController extends Controller
                             } catch (\Exception $e) {
                                 $transaction->rollBack();
                                 $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
-                                \Yii::error($this->log, 'email-integration-error');
+                                \Yii::error($this->log, 'email-integration-log');
                             }
                         }
                         $this->log([
@@ -209,11 +210,23 @@ class EmailIntegrationController extends Controller
                 $this->connect->disconnect();
             } catch (\Exception $e) {
                 $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
-                \Yii::error($this->log, 'email-integration-error');
+                \Yii::error($this->log, 'email-integration-log');
             }
         }
     }
 
+    public function beforeAction($action)
+    {
+        $targets = \Yii::$app->getLog()->targets;
+        foreach ($targets as $name => $target) {
+            $target->enabled = ($name == 'email-integration');
+        }
+        \Yii::$app->getLog()->targets = $targets;
+        \Yii::$app->getLog()->init();
+        
+        return parent::beforeAction($action);
+    }    
+    
     /**
      * Подключение к серверу
      * @param IntegrationSettingFromEmail $setting

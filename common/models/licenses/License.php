@@ -16,6 +16,7 @@ use yii\web\BadRequestHttpException;
  * @property int                   $id         Уникальный ID
  * @property string                $name       Наименование лицензии
  * @property int                   $is_active  Флаг активности
+ * @property int                   $service_id id service
  * @property string                $created_at Дата создания
  * @property string                $updated_at Дата обновления
  * @property LicenseService[]      $licenseServices
@@ -172,9 +173,37 @@ class License extends ActiveRecord
      */
     public static function getDateMixCartLicense($orgId)
     {
-        $license = self::getAllLicense($orgId, Registry::$mc_services, true);
-        if (!empty($license)) {
-            return current($license)['to_date'];
+        $license = (new Query())
+            ->select([
+                'license.id',
+                'license.name',
+                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active',
+                'license.created_at',
+                'license.updated_at',
+                'license.login_allowed',
+                'max(lo.td) as to_date'
+            ])
+            ->from(self::tableName())
+            ->leftJoin('license_organization lo', 'lo.license_id=license.id')
+            ->where(['lo.org_id' => $orgId])
+            ->groupBy([
+                'license.id',
+                'license.name',
+                'license.is_active',
+                'license.created_at',
+                'license.updated_at',
+                'license.login_allowed'
+            ])
+            ->indexBy('id');
+
+        $license->andWhere(['in', 'license.id', Registry::$mc_licenses_id]);
+        $license->andWhere(['=', 'is_active', 1]);
+        $license->orderBy(['to_date' => SORT_DESC]);
+
+        $result = $license->all(\Yii::$app->db_api);
+
+        if (!empty($result)) {
+            return current($result)['to_date'];
         } else {
             return date('Y-m-d H:i:s', strtotime("-1 day"));
         }

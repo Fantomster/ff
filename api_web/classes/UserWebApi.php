@@ -424,23 +424,15 @@ class UserWebApi extends \api_web\components\WebApi
 
         //Сортировка
         if (isset($post['sort'])) {
-
             $field = $post['sort'];
             $sort = 'ASC';
-
             if (strstr($post['sort'], '-') !== false) {
                 $field = str_replace('-', '', $field);
                 $sort = 'DESC';
             }
-
             if ($field == 'name') {
                 $field = 'vendor_name ' . $sort;
             }
-
-            if ($field == 'address') {
-                //$field = 'organization.locality ' . $sort;
-            }
-
             if ($field == 'status') {
                 switch ($sort) {
                     case 'DESC':
@@ -452,18 +444,11 @@ class UserWebApi extends \api_web\components\WebApi
                 }
                 $field = "invite {$sort}, `status` {$sort}";
             }
-
             $dataProvider->query->orderBy($field);
         }
         //Данные для ответа
         foreach ($dataProvider->models as $model) {
             $return['vendors'][] = $this->prepareVendor($model);
-        }
-        //Названия полей
-        if (isset($return['vendors'][0])) {
-            foreach (array_keys($return['vendors'][0]) as $key) {
-                $return['headers'][$key] = (new Organization())->getAttributeLabel($key);
-            }
         }
 
         return $return;
@@ -789,7 +774,7 @@ class UserWebApi extends \api_web\components\WebApi
             'address'       => implode(', ', $locality),
             'rating'        => $model->vendor->rating ?? 0,
             'allow_editing' => $model->vendor->allow_editing,
-            'is_edi'        => !empty($model->vendor->organizationGln) ? true : false
+            'is_edi'        => $model->vendor->isEdi(),
         ];
     }
 
@@ -971,5 +956,34 @@ class UserWebApi extends \api_web\components\WebApi
             $transaction->rollback();
             throw $e;
         }
+    }
+
+    /**
+     * Установка флага принятого соглашения  для текущей органищации
+     * Нельзя установить уже "принятое" соглашение в "не принятое"
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function setAgreement($request)
+    {
+        $org = $this->user->organization;
+        $this->validateRequest($request, ['type', 'value']);
+        $user_agreement = $org->user_agreement;
+        $confidencial_policy = $org->confidencial_policy;
+        if (!array_key_exists($request['type'], get_defined_vars())) {
+            throw new BadRequestHttpException('user.wrong_agreement_name');
+        }
+        if ($request['value'] == 0 && ${$request['type']} == 1) {
+            throw new BadRequestHttpException('user.cannot_disable_accepted_agreement');
+        }
+        $org->{$request['type']} = $request['value'];
+        if (!$org->save()) {
+            throw new ValidationException($org->getFirstErrors());
+        }
+
+        return ['result' => $org];
     }
 }

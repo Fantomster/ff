@@ -311,64 +311,74 @@ class FullmapController extends DefaultController
         return Json::encode(['output' => $res, 'message' => '']);
     }
 
-    public function actionChvat($prod_id, $vat, $service_id)
+    public function actionChvat() // устанавливает ставку НДС для одной позиции в глобальном сопоставлении
     {
 
-        $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $this->currentUser->organization->id,])
-            ->andWhere('service_id = ' . $service_id . ' and is_active =1')
+        $prod_id = Yii::$app->request->post('prod_id');
+        $vat = Yii::$app->request->post('vat');
+        $service_id = Yii::$app->request->post('service_id');
+        $org_id = $this->currentUser->organization->id;
+        $Product = AllMaps::find()->andWhere('org_id = :org', [':org' => $org_id])
+            ->andWhere('service_id = :serv', [':serv' => $service_id])
+            ->andWhere('is_active = :active', [':active' => 1])
             ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
 
-        if (!empty($hasProduct)) { // Product link already mapped in table
-            $hasProduct->vat = $vat;
-            $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        if (!empty($Product)) { // Product link already mapped in table
+            $Product->vat = $vat;
 
-            if (!$hasProduct->save()) {
+            if (!$Product->save()) {
                 throw new \RuntimeException('Cant update allmaps table.');
             }
-
-            $res = $hasProduct->vat;
         } else { // New link for mapping creation
-            $newProduct = new AllMaps();
+            $Product = new AllMaps();
+            $Product->service_id = $service_id;
+            $Product->org_id = $this->currentUser->organization->id;
+            $Product->product_id = $prod_id;
+            $Product->supp_id = CatalogBaseGoods::getSuppById($prod_id);
+            $Product->is_active = 1;
+            $Product->vat = $vat;
 
-            if ($service_id == 2) {
-                $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
-                if (isset($mainOrg)) {
-                    $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
-                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
-                        ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
-                    if (isset($hasProduct)) {
-                        $newProduct->setAttributes($hasProduct->attributes);
-                    }
-                }
-            }
-
-            if ($service_id == 10) {
-                $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
-                if (isset($mainOrg)) {
-                    $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
-                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
-                        ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
-                    if (isset($hasProduct)) {
-                        $newProduct->setAttributes($hasProduct->attributes);
-                    }
-                }
-            }
-
-            $newProduct->service_id = $service_id;
-            $newProduct->org_id = $this->currentUser->organization->id;
-            $newProduct->product_id = $prod_id;
-            $newProduct->supp_id = CatalogBaseGoods::getSuppById($newProduct->product_id);
-            $newProduct->is_active = 1;
-            $newProduct->vat = $vat;
-            $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-            $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-
-            if (!$newProduct->save()) {
+            if (!$Product->save()) {
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
-
-            $res = $newProduct->vat;
         }
+
+        if ($service_id == 2) {
+            $childs = iikoService::getChildOrgsId($org_id);
+            if (!empty($childs)) {
+                foreach ($childs as $child) {
+                    $child_product = AllMaps::find()->andWhere('org_id = :org', [':org' => $child,])
+                        ->andWhere('service_id = :serv', [':serv' => $service_id])
+                        ->andWhere('is_active = :active', [':active' => 1])
+                        ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
+                    if (!empty($child_product)) {
+                        if ($child_product->vat === null) {
+                            $child_product->vat = $vat;
+                        }
+                        if (!$child_product->save()) {
+                            throw new \RuntimeException('Cant update allmaps table.');
+                        }
+                    } else {
+                        $child_product = new AllMaps();
+                        $child_product->vat = $vat;
+                        $child_product->service_id = $service_id;
+                        $child_product->org_id = $child;
+                        $child_product->product_id = $prod_id;
+                        $child_product->supp_id = CatalogBaseGoods::getSuppById($prod_id);
+                        $child_product->serviceproduct_id = $Product->serviceproduct_id;
+                        $child_product->unit_rid = null;
+                        $child_product->store_rid = null;
+                        $child_product->koef = $Product->koef ?? 1;
+                        $child_product->is_active = 1;
+                        if (!$child_product->save()) {
+                            throw new \RuntimeException('Cant save new allmaps model.');
+                        }
+                    }
+                }
+            }
+        }
+
+        $res = $Product->vat;
         return Json::encode(['output' => $res, 'message' => '']);
     }
 

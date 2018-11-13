@@ -30,7 +30,7 @@ $urlApply = Url::to(['fullmap/apply-fullmap']);
 $urlClear = Url::to(['fullmap/clear-fullmap']);
 $selectedCount = count($selected);
 
-if ($client->isEmpty()) {
+if ($client->isEmpty()) { // если у бизнеса не задано имя или местонахождение организации в базе Google
     $endMessage = Yii::t('message', 'frontend.views.request.continue_four', ['ru' => 'Продолжить']);
     $content = Yii::t('message', 'frontend.views.order.hint', ['ru' => 'Чтобы делать заказы, добавьте поставщика!']);
     $suppliersUrl = Url::to(['client/suppliers']);
@@ -43,8 +43,8 @@ if ($client->isEmpty()) {
                             position: 'right-center',
                             overlayMode: 'focus',
                             selector: '.step-vendor',
-                    },
-                        ];
+                        },
+                    ];
 
                     $.tutorialize({
                             slides: _slides,
@@ -71,128 +71,111 @@ JS;
 
 $this->registerJs(
 
-    '
-    var selectedCount = ' . $selectedCount . ';
+    'var selectedCount = ' . $selectedCount . ';
     
     $(document).ready(function(){
     
-     $(document).on("click", ".vatchange", function(e) {
-                 $.ajax({
-             url: $(this).attr("url"),
-             type: "POST",
-             dataType: "json",
-             success: function(){
-                 $.pjax.reload({container: "#fullmapGrid-pjax", timeout:30000});
-             }
-           });
+        /*$(document).on("change", "#selectedCategory", function(e) { //? на странице нет элементов с id = selectedCategory
+            var form = $("#searchForm");
+            form.submit();
+            $.post("' . Url::to(['/order/ajax-refresh-vendors']) . '", {"selectedCategory": $(this).val()}).done(function(result) {
+                $("#selectedVendor").replaceWith(result);
             });
-     
-            $(document).on("change", "#selectedCategory", function(e) {
-                var form = $("#searchForm");
-                form.submit();
-                $.post(
-                    "' . Url::to(['/order/ajax-refresh-vendors']) . '",
-                    {"selectedCategory": $(this).val()}
-                ).done(function(result) {
-                    $("#selectedVendor").replaceWith(result);
-                });
-            });
-            $(document).on("change", "#selectedVendor", function(e) {
-                var form = $("#searchForm");
-                form.submit();
-            });
-            $(document).on("change", "#service_id", function(e) {
-                var form = $("#searchForm");
-                form.submit();
-            });
-
-            $(document).on("change keyup paste cut", "#searchString", function() {
-                $("#hiddenSearchString").val($("#searchString").val());
-                if (timer) {
-                    clearTimeout(timer);
-                }
-                timer = setTimeout(function() {
-                    $("#searchForm").submit();
-                }, 700);
-            });
-            $("body").on("hidden.bs.modal", "#changeQuantity, #showDetails", function() {
-                $(this).data("bs.modal", null);
-            });
-            $(document).on("click", ".pagination li a", function() {
-                clearTimeout(timer);
-                return true;
-            });
-            $(document).on("change", ".quantity", function(e) {
-                value = $(this).val();
-                $(this).val(value.replace(",", "."));
-            });
+        });*/
+        
+        $(document).on("change", "#selectedVendor", function(e) { // реакция на выбор поставщика из выпадающего списка
+            var form = $("#searchForm");
+            form.submit();
         });
         
-            $(document).on("click", ".apply-fullmap", function(e) {
-                       
-             if(($("#fullmapGrid").yiiGridView("getSelectedRows").length + selectedCount) == 0){  
-             alert("Ничего не выбрано!");
-             return false;
-             }
-            
+        $(document).on("change", "#service_id", function(e) { // реакция на выбор учётного сервиса (интеграции) из выпадающего списка
+            var form = $("#searchForm");
+            form.submit();
+        });
+
+        $(document).on("change keyup paste cut", "#searchString", function() { // реакция на изменение строки в поисковом поле
+            $("#hiddenSearchString").val($("#searchString").val());
+            if (timer) {
+                clearTimeout(timer);
+            }
+            timer = setTimeout(function() {
+                $("#searchForm").submit();
+            }, 700);
+        });
+        
+        $("body").on("hidden.bs.modal", "#changeQuantity, #showDetails", function() { //? на странице нет элементов с id = changeQuantity
+            $(this).data("bs.modal", null);
+        });
+        
+        $(document).on("click", ".pagination li a", function() { // реакция на нажатия кнопок пагинации
+            clearTimeout(timer);
+            return true;
+        });
+        
+        $(document).on("change", ".quantity", function(e) { // ? на странице нет элементов с классом quantity
+            value = $(this).val();
+            $(this).val(value.replace(",", "."));
+        });
+    });
+        
+        $(document).on("click", ".apply-fullmap", function(e) { // реакция на нажатия кнопки "Применить"
+            if(($("#fullmapGrid").yiiGridView("getSelectedRows").length + selectedCount) == 0){  
+                alert("Ничего не выбрано!");
+                return false;
+            }
             store_set = $("#store_set").val();
             koef_set =  $("#koef_set").val();
             vat_set  =  $("#vat_set").val();
             service_set  =  $("#service_id option:selected").val();
+            if (typeof(koef_set) == "undefined" || koef_set == null || koef_set.length == 0 ) koef_set = -1;
             
-            if (typeof(koef_set) == "undefined" || koef_set == null || koef_set.length == 0 )
-            koef_set = -1;
-            
-            // console.log(store_set);
-            // console.log(koef_set);
-            // console.log(vat_set);
-            
+            //console.log(store_set);
+            //console.log(koef_set);
+            //console.log(vat_set);
             // Check selection at least one
             
             if (typeof(service_set) == "undefined" || service_set == null || service_set.length == 0 ) {
-            alert ("Не выбран сервис интеграции");
-            return false;
+                alert ("Не выбран сервис интеграции");
+                return false;
             }
             
             if (store_set == -1 && koef_set == -1 && vat_set == -1) {
-            alert ("Не установлен ни один модификатор для массового применения");
-            return false;
+                alert ("Не установлен ни один модификатор для массового применения");
+                return false;
             }
             
             url = $(this).attr("href");
 
-           $.ajax({
-             url: "' . $urlApply . '",
-             type: "POST",
-             dataType: "json",
-             data: {store_set: store_set, koef_set: koef_set, vat_set : vat_set, service_set : service_set},
-             success: function(){
-                 selectedCount = 0;
-                 $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
-             }
-           });
-            
+            $.ajax({
+                url: "' . $urlApply . '",
+                type: "POST",
+                dataType: "json",
+                data: {store_set: store_set, koef_set: koef_set, vat_set : vat_set, service_set : service_set},
+                success: function(){
+                    selectedCount = 0;
+                    $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
+                }
             });
+        });
             
-            $(document).on("click", ".clear-fullmap", function(e) {
-             if($("#fullmapGrid").yiiGridView("getSelectedRows").length > 0){
-            
-            url = $(this).attr("href");
+            $(document).on("click", ".clear-fullmap", function(e) { // реакция на нажатие кнопки "Очистить весь выбор" 
+                if($("#fullmapGrid").yiiGridView("getSelectedRows").length > 0){
+                    url = $(this).attr("href");
 
-           $.ajax({
-             url: "' . $urlClear . '",
-             type: "GET",
-             success: function(){
-                 selectedCount = 0;
-                 $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
-             }
-           });
-            }
+                    $.ajax({
+                        url: "' . $urlClear . '",
+                        type: "GET",
+                        success: function(){
+                            selectedCount = 0;
+                            $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
+                        }
+                    });
+                }
             });
         
           
        /*
-            $(document).on("change", ".select-on-check-all", function(e) {
+            $(document).on("change", ".select-on-check-all", function(e) { // реакция на изменение состояния флажка в чекбоксе в заголовке крайнего левого столбца
    
           //  e.preventDefault();
            // url = $(this).attr("href");
@@ -207,9 +190,9 @@ $this->registerJs(
 
            value = value.toString();  
            
-           // console.log(value);
-           // console.log(state);
-           // console.log(url);
+           //console.log(value);
+           //console.log(state);
+           //console.log(url);
           
            $.ajax({
              url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
@@ -222,7 +205,7 @@ $this->registerJs(
     });
     */
     
-    /* $(document).on("change", ".checkbox-export", function(e) {
+    /* $(document).on("change", ".checkbox-export", function(e) { // реакция на изменение состояния флажков в крайнем левом столбце
    
            // e.preventDefault();
            // url = $(this).attr("href");
@@ -232,9 +215,9 @@ $this->registerJs(
             value = $(this).val();    
             
             
-             console.log(value);
-             console.log(state);
-             console.log(url);
+            //console.log(value);
+            //console.log(state);
+            //console.log(url);
 
            $.ajax({
              url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
@@ -430,7 +413,7 @@ $this->registerJs(
                                                           //   return false;
                                                           //   }
                                                         
-                                                            // console.log(selectedCount);
+                                                            //console.log(selectedCount);
                                                              state = $(this).prop("checked") ? 1 : 0;
                                                             selectedCount = parseInt($("#selected_info").text());
                                                            // alert(selectedCount);
@@ -493,52 +476,7 @@ $this->registerJs(
                                             },
                                             'label'     => Yii::t('message', 'frontend.fullmap.index.product_name_mixcart', ['ru' => 'Название продукта Mixcart']),
                                         ],
-                                        /*[
-                                            'class' => 'kartik\grid\EditableColumn',
-                                            'attribute' => 'pdenom',
-                                            'value' => function ($model) {
-                                            return $model['pdenom'] ?? 'Не задано';
-                                                   },
-                                            'label' => Yii::t('message', 'frontend.fullmap.index.product_name_service', ['ru'=>'Название продукта']),
-                                            'vAlign' => 'middle',
-                                            'width' => '210px',
-                                            'refreshGrid' => true,
-                                            'readonly' => ($searchModel->service_id == 2 && $mainOrg != $client->id),
-                                            'contentOptions' => function ($model) {
-                                                return ["id" => "prdct" . $model['id']];
-                                            },
-                                            'editableOptions' => [
-                                                'asPopover' => true,
-                                                'name' => 'pdenom',
-                                                'formOptions' => ['action' => ['editpdenom', 'service_id' => $searchModel->service_id] ],
-                                                'header' => 'Продукт в интеграции',
-                                                'size' => 'md',
-                                                'inputType' => \kartik\editable\Editable::INPUT_SELECT2,
-                                                'options' => [
-                                                    'options' => ['placeholder' => 'Выберите продукт из списка',
-                                                    ],
-                                                    'pluginOptions' => [
-                                                        'minimumInputLength' => 2,
-                                                        'ajax' => [
-                                                            'url' => Url::toRoute(['autocomplete', 'service_id' => $searchModel->service_id]),
-                                                            'dataType' => 'json',
-                                                            'data' => new JsExpression('function(params) { return {term:params.term}; }')
-                                                        ],
-                                                        'allowClear' => true
-                                                    ],
-                                                    'pluginEvents' => [
-                                                        "select2:select" => "function() {
-                                                                        if($(this).val() == 0)
-                                                                        {
-                                                                             $('#agent-modal').modal('show');
-                                                                        }
-                                                        }",
-                                                    ]
-                                                ]
-                                            ]
-                                        ],*/
                                         [
-                                            //'class' => 'kartik\grid\EditableColumn',
                                             'attribute'      => 'pdenom',
                                             'value'          => function ($model) {
                                                 if (!empty($model['pdenom'])) {
@@ -558,35 +496,6 @@ $this->registerJs(
                                             'contentOptions' => function ($model) {
                                                 return ["id" => "prdct" . $model['id']];
                                             },
-                                            /*'editableOptions' => [
-                                                'asPopover' => true,
-                                                'name' => 'pdenom',
-                                                'formOptions' => ['action' => ['editpdenom', 'service_id' => $searchModel->service_id] ],
-                                                'header' => 'Продукт в интеграции',
-                                                'size' => 'md',
-                                                'inputType' => \kartik\editable\Editable::INPUT_SELECT2,
-                                                'options' => [
-                                                    'options' => ['placeholder' => 'Выберите продукт из списка',
-                                                    ],
-                                                    'pluginOptions' => [
-                                                        'minimumInputLength' => 2,
-                                                        'ajax' => [
-                                                            'url' => Url::toRoute(['autocomplete', 'service_id' => $searchModel->service_id]),
-                                                            'dataType' => 'json',
-                                                            'data' => new JsExpression('function(params) { return {term:params.term}; }')
-                                                        ],
-                                                        'allowClear' => true
-                                                    ],
-                                                    'pluginEvents' => [
-                                                        "select2:select" => "function() {
-                                                                        if($(this).val() == 0)
-                                                                        {
-                                                                             $('#agent-modal').modal('show');
-                                                                        }
-                                                        }",
-                                                    ]
-                                                ]
-                                            ]*/
                                         ],
                                         [
                                             'attribute'      => 'unitname',
@@ -669,7 +578,8 @@ $this->registerJs(
                                             'class'          => 'yii\grid\ActionColumn',
                                             'contentOptions' => function ($model) {
                                                 return ["id"    => "buttn" . $model['id'],
-                                                        'style' => 'width: 6%;'];
+                                                        'style' => 'width: 6%;',
+                                                        'class' => 'vatcl'];
                                             },
                                             'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
                                             'visibleButtons' => [
@@ -679,43 +589,43 @@ $this->registerJs(
                                             ],
                                             'buttons'        => [
                                                 'zero'     => function ($model, $data, $index) use ($searchModel) {
-                                                    if ($data['vat'] === 0) {
-                                                        $tClass = "btn label label-success";
+                                                    if ($data['vat'] === '0') {
+                                                        $tClass = "vatchange btn label label-success";
                                                         $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
                                                     } else {
                                                         $tClass = "vatchange btn label label-default";
                                                         $tStyle = "";
                                                     }
                                                     $tId = 'buttn00' . $data['id'];
-                                                    $customurl = Url::toRoute(['chvat', 'prod_id' => $data['id'], 'vat' => 0, 'service_id' => $searchModel->service_id]);
+                                                    //$customurl = Url::toRoute(['chvat', 'prod_id' => $data['id'], 'vat' => 0, 'service_id' => $searchModel->service_id]);
                                                     return \yii\helpers\Html::button('0',
-                                                        ['title' => Yii::t('backend', '0%'), 'id' => $tId, 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle, 'url' => $customurl]);
+                                                        ['title' => Yii::t('backend', '0%'), 'id' => $tId, 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle/*, 'url' => $customurl*/]);
                                                 },
                                                 'ten'      => function ($model, $data, $index) use ($searchModel) {
                                                     if ($data['vat'] == 1000) {
-                                                        $tClass = "btn label label-success";
+                                                        $tClass = "vatchange btn label label-success";
                                                         $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
                                                     } else {
                                                         $tClass = "vatchange btn label label-default";
                                                         $tStyle = "";
                                                     }
                                                     $tId = 'buttn10' . $data['id'];
-                                                    $customurl = Url::toRoute(['chvat', 'prod_id' => $data['id'], 'vat' => '1000', 'service_id' => $searchModel->service_id]);
+                                                    //$customurl = Url::toRoute(['chvat', 'prod_id' => $data['id'], 'vat' => '1000', 'service_id' => $searchModel->service_id]);
                                                     return \yii\helpers\Html::button('10',
-                                                        ['title' => Yii::t('backend', '10%'), 'id' => $tId, 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle, 'url' => $customurl]);
+                                                        ['title' => Yii::t('backend', '10%'), 'id' => $tId, 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle/*, 'url' => $customurl*/]);
                                                 },
                                                 'eighteen' => function ($model, $data, $index) use ($searchModel) {
                                                     if ($data['vat'] == 1800) {
-                                                        $tClass = "btn label label-success";
+                                                        $tClass = "vatchange btn label label-success";
                                                         $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
                                                     } else {
                                                         $tClass = "vatchange btn label label-default";
                                                         $tStyle = "";
                                                     }
                                                     $tId = 'buttn18' . $data['id'];
-                                                    $customurl = Url::toRoute(['chvat', 'prod_id' => $data['id'], 'vat' => '1800', 'service_id' => $searchModel->service_id]);
+                                                    //$customurl = Url::toRoute(['chvat', 'prod_id' => $data['id'], 'vat' => '1800', 'service_id' => $searchModel->service_id]);
                                                     return \yii\helpers\Html::button('18',
-                                                        ['title' => Yii::t('backend', '18%'), 'id' => $tId, 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle, 'url' => $customurl]);
+                                                        ['title' => Yii::t('backend', '18%'), 'id' => $tId, 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle/*, 'url' => $customurl*/]);
                                                 },
                                             ]
                                         ],
@@ -754,10 +664,11 @@ Modal::widget([
 $url_auto_complete_selected_products = Url::toRoute('fullmap/auto-complete-selected-products');
 $url_auto_complete_new = Url::toRoute('fullmap/auto-complete-new');
 $url_edit_new = Url::toRoute('fullmap/edit-new');
+$url_chvat = Url::toRoute('fullmap/chvat');
 
 $js = <<< JS
     $(function () {
-        function links_column4 () {
+        function links_column4 () { // реакция на нажатие строки в столбце "Наименование продукта"
             $('[data-col-seq='+4+']').each(function() {
                 var idtd = $(this).attr('id');
                 var idtds = String(idtd);
@@ -905,20 +816,70 @@ $js = <<< JS
             });
         }
 
-        $(document).on('pjax:end', function() {
+        $(document).on('pjax:end', function() { // реакция на перерисовку грид-таблицы
             var edit_can = '$editCan';
             if (edit_can==1) {
-                links_column4();    
+                links_column4();
             }
+            vatclick();
         });
 
-        $(document).ready(function() {
+        $(document).ready(function() { // действия после полной загрузки страницы
             var edit_can = '$editCan';
             if (edit_can==1) {
-                links_column4();    
+                links_column4();
             }
+            vatclick();
         });
-
+        
+        function vatclick() {
+            $('.vatcl').each(function() {
+                if ($(this).hasClass('already')===false) {
+                    $(this).addClass('already');
+                    var td_id = $(this).attr('id');
+                    $('#'+td_id+' .vatchange').on('click', function() { // реакция на нажатие кнопок установки ставки НДС в крайнем правом столбце
+                        var id_vat_full = $(this).attr('id');
+                        var id_vat = id_vat_full.substr(7);
+                        var vat_vat = id_vat_full.substr(5,2);
+                        var vat_num = vat_vat*100;
+                        var serv_id = $('#service_id').val();
+                        var url_chvat = '$url_chvat';
+                        $.post(url_chvat, {prod_id:id_vat, vat:vat_num, service_id:serv_id}, function (data) {
+                            data = JSON.parse(data);
+                            if (data['output']==vat_num) {
+                                $('#buttn'+vat_vat+id_vat).removeClass('label-default').addClass('label-success');
+                                $('#buttn'+vat_vat+id_vat).attr('style','pointer-events: none; cursor: default; text-decoration: none;');
+                                if (vat_vat=='00') {
+                                    $('#nalog'+id_vat).text('0');
+                                } else {
+                                    $('#nalog'+id_vat).text(vat_vat);
+                                }
+                                if (vat_vat!='00') {
+                                    if($('#buttn00'+id_vat).hasClass('label-success')) {
+                                    $('#buttn00'+id_vat).removeClass('label-success').addClass('vatchange label-default');
+                                    $('#buttn00'+id_vat).attr('style','');
+                                    }    
+                                }
+                                if (vat_vat!='10') {
+                                    if($('#buttn10'+id_vat).hasClass('label-success')) {
+                                        $('#buttn10'+id_vat).removeClass('label-success').addClass('vatchange label-default');
+                                        $('#buttn10'+id_vat).attr('style','');
+                                    }    
+                                }
+                                if (vat_vat!='18') {
+                                    if($('#buttn18'+id_vat).hasClass('label-success')) {
+                                        $('#buttn18'+id_vat).removeClass('label-success').addClass('vatchange label-default');
+                                        $('#buttn18'+id_vat).attr('style','');
+                                    }    
+                                }
+                            } else {
+                                console.log(data['message']);
+                            }
+                        })
+                    })
+                }
+            })
+        }        
     });
 JS;
 

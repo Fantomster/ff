@@ -2,6 +2,7 @@
 
 namespace common\models\licenses;
 
+use api_web\behaviors\LicenseOrganizationBehavior;
 use Yii;
 use yii\db\ActiveRecord;
 use common\models\Organization;
@@ -81,6 +82,10 @@ class LicenseOrganization extends ActiveRecord
     public function behaviors()
     {
         return [
+            [
+                'class' => LicenseOrganizationBehavior::class,
+                'model' => $this
+            ],
             [
                 'class'              => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',

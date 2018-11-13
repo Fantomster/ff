@@ -9,7 +9,6 @@ use yii\web\BadRequestHttpException;
 
 class SyncServiceFactory extends WebApi
 {
-
     /** SERVICE RKEEPER name */
     const SERVICE_RKEEPER = 'Rkws';
 
@@ -22,6 +21,7 @@ class SyncServiceFactory extends WebApi
         Registry::IIKO_SERVICE_ID => self::SERVICE_IIKO
     ];
 
+    /** @var array */
     public $syncResult = [];
 
     const TASK_SYNC_GET_LOG = 'get-log';
@@ -102,6 +102,29 @@ class SyncServiceFactory extends WebApi
      * @throws BadRequestHttpException
      */
     public function factory(int $serviceId, string $serviceName = null): AbstractSyncFactory
+    {
+        if (!$serviceName) {
+            $serviceName = (string)self::ALL_SERVICE_MAP[$serviceId];
+        }
+
+        $className = __NAMESPACE__ . '\\sync\\Service' . $serviceName;
+        if (class_exists($className)) {
+            return new $className($serviceName, $serviceId);
+        } else {
+            SyncLog::trace("The requested service class does not exist!");
+            throw new BadRequestHttpException("class_not_exist");
+        }
+    }
+
+    /**
+     * Service Class Factory
+     *
+     * @param int    $serviceId   Service ID
+     * @param string $serviceName Service name
+     * @return AbstractSyncFactory
+     * @throws BadRequestHttpException
+     */
+    public static function init(int $serviceId, string $serviceName = null): AbstractSyncFactory
     {
         if (!$serviceName) {
             $serviceName = (string)self::ALL_SERVICE_MAP[$serviceId];

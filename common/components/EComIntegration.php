@@ -8,7 +8,7 @@ use common\models\CatalogGoods;
 use common\models\Currency;
 use common\models\EdiOrder;
 use common\models\EdiOrderContent;
-use common\models\EdiOrganization;
+use common\models\edi\EdiOrganization;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OrderStatus;
@@ -26,7 +26,6 @@ use yii\db\Expression;
  * Class for E-COM integration methods
  *
  * @author alexey.sergeev
- *
  */
 class EComIntegration extends Component
 {
@@ -35,7 +34,6 @@ class EComIntegration extends Component
     const STATUS_PROCESSING = 2;
     const STATUS_ERROR = 3;
     const STATUS_HANDLED = 4;
-
 
     /**
      * get distinct organization
@@ -146,7 +144,7 @@ class EComIntegration extends Component
                 return false;
             }
 
-            if(!$this->checkOrgIdAndOrderId($doc->result->content, $ediFilesQueueID, $fileName)){
+            if (!$this->checkOrgIdAndOrderId($doc->result->content, $ediFilesQueueID, $fileName)) {
                 return false;
             }
 
@@ -180,8 +178,9 @@ class EComIntegration extends Component
 
     /**
      * add org id to file in queue table
+     *
      * @var integer $id
-     * @var string $glnCode
+     * @var string  $glnCode
      * @return boolean
      * */
     private function addOrgIdToFile($id, $glnCode)
@@ -208,7 +207,6 @@ class EComIntegration extends Component
     {
         Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText], 'id=' . $ediFilesQueueID)->execute();
     }
-
 
     private function handleOrderResponse(\SimpleXMLElement $simpleXMLElement, $isAlcohol = false)
     {
@@ -388,7 +386,6 @@ class EComIntegration extends Component
         return true;
     }
 
-
     private function handlePriceListUpdating(\SimpleXMLElement $simpleXMLElement): bool
     {
         $supplierGLN = $simpleXMLElement->SUPPLIER;
@@ -496,7 +493,6 @@ class EComIntegration extends Component
         return true;
     }
 
-
     private function createCatalog(Organization $organization, Currency $currency, Organization $rest): int
     {
         $catalog = new Catalog();
@@ -522,7 +518,6 @@ class EComIntegration extends Component
         return $catalogID;
     }
 
-
     private function insertGood(int $catID, int $catalogBaseGoodID, float $price): bool
     {
         $res = Yii::$app->db->createCommand()->insert('catalog_goods', [
@@ -538,7 +533,6 @@ class EComIntegration extends Component
             return false;
         }
     }
-
 
     public function sendOrderInfo(Order $order, Organization $vendor, Organization $client, String $login, String $pass, bool $done = false): bool
     {
@@ -586,20 +580,17 @@ class EComIntegration extends Component
         return $result;
     }
 
-
     private function formatDate(String $dateString): String
     {
         $date = new \DateTime($dateString);
         return $date->format('Y-m-d');
     }
 
-
     private function formatTime(String $dateString): String
     {
         $date = new \DateTime($dateString);
         return $date->format('H:i');
     }
-
 
     private function getDateData(Order $order): array
     {
@@ -611,7 +602,6 @@ class EComIntegration extends Component
         $arr['actual_delivery_time'] = $this->formatTime($order->actual_delivery ?? '');
         return $arr;
     }
-
 
     private function sendDoc(Organization $vendor, String $string, String $remoteFile, String $login, String $pass): bool
     {
@@ -625,7 +615,6 @@ class EComIntegration extends Component
         }
     }
 
-
     public function archiveFiles()
     {
         Yii::$app->db->createCommand()->delete('edi_files_queue', 'updated_at <= DATE_SUB(CURDATE(),INTERVAL 30 DAY) AND updated_at IS NOT NULL')->execute();
@@ -633,9 +622,10 @@ class EComIntegration extends Component
 
     /**
      * check gln code for organization and check orderId if file dont have pricat prefix
-     * @var string $content
+     *
+     * @var string  $content
      * @var integer $fileId
-     * @var string $fileName
+     * @var string  $fileName
      * @return boolean
      */
     private function checkOrgIdAndOrderId($content, $fileId, $fileName)
@@ -646,7 +636,7 @@ class EComIntegration extends Component
             $this->updateQueue($fileId, self::STATUS_ERROR, 'Dont find organization with gln = ' . $supplier);
             return false;
         }
-        if(strpos($fileName, 'pricat') !== 0){
+        if (strpos($fileName, 'pricat') !== 0) {
             $orderNumber = $this->getStringBetweenTags($content, '<ORDERNUMBER>', '</ORDERNUMBER>');
             if (is_numeric($orderNumber)) {
                 $order = Order::findOne(['id' => $orderNumber]);
@@ -665,6 +655,7 @@ class EComIntegration extends Component
 
     /**
      * Return string between $startTag and $endTag
+     *
      * @var string $startTag
      * @var string $endTag
      * @return string

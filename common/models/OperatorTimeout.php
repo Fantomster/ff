@@ -28,7 +28,7 @@ class OperatorTimeout extends \yii\db\ActiveRecord
 
     public static function getTimeoutOperator($id) {
         $model = self::findOne(['operator_id' => $id]);
-        if(empty($model)) {
+        if(!isset($model)) {
             return 0;
         } else {
             $time_end = strtotime($model->timeout_at) + $model->timeout;

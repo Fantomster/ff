@@ -33,20 +33,17 @@ class SyncController extends WebApiController
      *     tags={"Integration/sync"},
      *     summary="Универсальный метод интеграционных действий",
      *     description="Универсальный метод интеграционных действий по синхронизации данных с внешней системой
-     * Доступные значения:
-     *     service_id: 1, //Сделано только для R-keeper
-     *         params: {
-     *             dictionary: {
-     *                              agent,
-     *                              category,
-     *                              product,
-     *                              store,
-     *                              unit,
-     *                           }
-     *             product_group: 97 // Группа выбранная пользователем,
-     *         }
-     *
-     *     ",
+     *    Доступные значения:
+     *     service_id: 1,
+     *     params: {
+     *       dictionary: {
+     *         agent,
+     *         category,
+     *         product,
+     *         store,
+     *         unit,
+     *       }
+     *     }",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -59,8 +56,7 @@ class SyncController extends WebApiController
      *                  default={
      *                      "service_id": 1,
      *                      "params": {
-     *                          "dictionary": "agent",
-     *                          "product_group": 97
+     *                          "dictionary": "agent"
      *                      }
      *                  }
      *              )
@@ -70,12 +66,16 @@ class SyncController extends WebApiController
      *         response = 200,
      *         description = "success",
      *            @SWG\Schema(
-     *              default={
-     *                  "result": {
-     *                      "task_id": 2763,
-     *                      "task_status": 1
-     *                  }
-     *              }
+     *              default= {
+     *                      "id": 2,
+     *                      "name": "store",
+     *                      "title": "Склады",
+     *                      "count": 5,
+     *                      "status_id": 3,
+     *                      "status_text": "Запрос отправлен",
+     *                      "created_at": "2018-10-18T17:01:57+03:00",
+     *                      "updated_at": "2018-11-07T17:21:27+03:00"
+     *            }
      *          )
      *     ),
      *     @SWG\Response(

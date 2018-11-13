@@ -54,6 +54,7 @@ class KorusEdiTest extends TestCase
         $ediIntegration->setRealization(new KorusRealization([]));
         $this->assertNotEmpty($ediIntegration);
         $ediIntegration->handleFilesList();
+
         $list = $ediIntegration->provider->getFilesList($arr['orgId']);
 
         $rows = (new \yii\db\Query())
@@ -74,10 +75,16 @@ class KorusEdiTest extends TestCase
     public function testParseFiles($orgID, $vendorID, $userID, $goodsArray, $arr): void
     {
         $order = $this->createOrder($orgID, $vendorID, $userID, $goodsArray);
+        $this->assertNotEmpty($order);
+
         $controller = new Controller("", "");
+        $this->assertNotEmpty($controller);
+
         $string = $controller->renderFile('tests/edi_xml/test_ordrsp_korus.php', ['order' => $order]);
+        $this->assertNotEmpty($string);
 
         $ediIntegration = new EDIIntegration(['orgId' => $vendorID, 'providerID' => $arr['providerID']]);
+        $this->assertNotEmpty($ediIntegration);
 
         $ediIntegration->handleFilesListQueue();
         $ediIntegration->provider->parseFile($string);

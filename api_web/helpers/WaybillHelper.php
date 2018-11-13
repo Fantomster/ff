@@ -465,7 +465,6 @@ class WaybillHelper
             //Блокируем обработку этого заказа
             $redis->set($lockName, 1);
             $order = Order::findOne($request['order_id']);
-            $orgId = $order->client_id;
             $this->user = $order->createdBy;
 
             try {
@@ -491,7 +490,7 @@ class WaybillHelper
                 foreach ($waybillToService as $serviceId => $ids) {
                     $scenario = IntegrationSettingValue::getSettingsByServiceId(
                         $serviceId,
-                        $orgId,
+                        $this->user->organization_id,
                         ['auto_unload_invoice']
                     );
                     if ($scenario == 1) {

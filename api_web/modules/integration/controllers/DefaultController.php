@@ -101,7 +101,8 @@ class DefaultController extends \api_web\components\WebApiController
      *                      "search": {
      *                              "product": "Апельсины",
      *                              "vendor": 1,
-     *                              "business_id": 1
+     *                              "business_id": 1,
+     *                              "product_id": 2,
      *                       },
      *                      "pagination": {
      *                          "page": 1,

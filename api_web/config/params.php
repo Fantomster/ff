@@ -21,5 +21,10 @@ return [
         '/payment/currency-list',
         '/system/datetime'
     ],
+    'allow_methods_without_license' => [
+        '/user/login',
+        '/user/get-available-businesses',
+        '/user/set-organization'
+    ],
     'api_web_url' => 'https://api-dev.mixcart.ru'
 ];

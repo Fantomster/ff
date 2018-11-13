@@ -3,12 +3,14 @@
 namespace common\models\licenses;
 
 use api_web\components\Registry;
+use api_web\helpers\WebApiHelper;
 use Exception;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
+use yii\web\HttpException;
 
 /**
  * This is the model class for table "license".
@@ -206,6 +208,67 @@ class License extends ActiveRecord
             return current($result)['to_date'];
         } else {
             return date('Y-m-d H:i:s', strtotime("-1 day"));
+        }
+    }
+
+    /**
+     * Проверка на активную лицензию микскарта нескольких организаций
+     *
+     * @param $orgIds
+     * @return array
+     */
+    public static function getMixCartLicenses($orgIds = [])
+    {
+        if (empty($orgIds)) {
+            return [];
+        }
+
+        $license = (new Query())
+            ->select([
+                'license.id',
+                'license.name',
+                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active',
+                'license.created_at',
+                'license.updated_at',
+                'license.login_allowed',
+                'max(lo.td) as to_date',
+                'lo.org_id',
+            ])
+            ->from(self::tableName())
+            ->leftJoin('license_organization lo', 'lo.license_id=license.id')
+            ->where(['lo.org_id' => $orgIds])
+            ->groupBy([
+                'license.id',
+                'license.name',
+                'license.is_active',
+                'license.created_at',
+                'license.updated_at',
+                'license.login_allowed',
+                'lo.org_id'
+            ])
+            ->indexBy('org_id');
+
+        $license->andWhere(['in', 'license.id', Registry::$mc_licenses_id]);
+        $license->andWhere(['=', 'is_active', 1]);
+        $license->orderBy(['to_date' => SORT_DESC]);
+
+        return $license->all(\Yii::$app->db_api);
+    }
+
+    /**
+     * Проверка лицензии MixCart
+     *
+     * @param $org_id
+     * @throws HttpException
+     */
+    public static function checkMixCartLicenseResponse($org_id)
+    {
+        $licenseDate = self::getDateMixCartLicense($org_id);
+        \Yii::$app->response->headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
+        \Yii::$app->response->headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
+        #Проверяем, не стухла ли лицензия
+        if (strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
+            throw new HttpException(402, 'license.payment_required', 402);
         }
     }
 }

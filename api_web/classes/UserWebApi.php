@@ -19,6 +19,7 @@ use api_web\components\Notice;
 use common\models\RelationSuppRestPotential;
 use common\models\Organization;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
 
@@ -282,9 +283,14 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('Нет организации с таким id');
             }
 
-            if (!$this->user->isAllowOrganization($organization->id)) {
+            //Список доступных бизнесов
+            $allOrganizations = ArrayHelper::index($this->getUserOrganizationBusinessList()['result'], 'id');
+            if (!isset($allOrganizations[$organization->id])) {
                 throw new BadRequestHttpException('Нет прав переключиться на эту организацию');
             }
+
+            //Проверка лицензии в организации
+            License::checkMixCartLicenseResponse($organization->id);
 
             $roleID = RelationUserOrganization::getRelationRole($organization->id, $this->user->id);
 
@@ -830,7 +836,10 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function getUserOrganizationBusinessList()
     {
-        $res = (new Query())->select(['a.id', 'a.name'])->distinct()->from('organization a')
+        $res = (new Query())
+            ->select(['a.id', 'a.name'])
+            ->distinct()
+            ->from('organization a')
             ->leftJoin('relation_user_organization b', 'a.id = b.organization_id, (select id, parent_id from organization where id = :orgId) c', [':orgId' => $this->user->organization_id])
             ->where('coalesce(a.parent_id, a.id) = coalesce(c.parent_id, c.id)')
             ->andWhere([
@@ -843,6 +852,12 @@ class UserWebApi extends \api_web\components\WebApi
                     Role::ROLE_ADMIN,
                 ]
             ])->all();
+
+        $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($res, 'id'));
+        $res = array_map(function ($item) use ($licenses) {
+            $item['license_is_active'] = isset($licenses[$item['id']]);
+            return $item;
+        }, $res);
 
         return ['result' => $res];
     }

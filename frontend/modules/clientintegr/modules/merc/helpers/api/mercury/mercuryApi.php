@@ -929,7 +929,8 @@ class mercuryApi extends baseApi
         return $result;
     }
 
-    public function checkShipmentRegionalizationOperation ($recipient_guid, $sender_guid, $cargoTypeGuid) {
+    public function checkShipmentRegionalizationOperation($recipient_guid, $sender_guid, $cargoTypeGuid)
+    {
         $result = null;
 
         //Генерируем id запроса
@@ -952,15 +953,12 @@ class mercuryApi extends baseApi
         $data->shipmentRoute = new ShipmentRoute();
 
         $routePoint = new ShipmentRoutePoint();
-        unset($routePoint->location);
-        //$routePoint->sqnId = 1;
         $routePoint->enterprise = new Enterprise();
         $routePoint->enterprise->guid = $recipient_guid;
 
         $routePoints[] = $routePoint;
 
         $routePoint = new ShipmentRoutePoint();
-        //$routePoint->sqnId = 2;
         $routePoint->enterprise = new Enterprise();
         $routePoint->enterprise->guid = $sender_guid;
 
@@ -972,39 +970,35 @@ class mercuryApi extends baseApi
 
         $request->application->data = $appData;
 
-       /* echo "<pre>";
-        var_dump($request); die();*/
-
         //Делаем запрос
         try {
             $result = $client->submitApplicationRequest($request);
+
+            $request_xml = $client->__getLastRequest();
+
+            $app_id = $result->application->applicationId;
+            do {
+                //timeout перед запросом результата
+                sleep($this->query_timeout);
+                //Получаем результат запроса
+                $result = $this->getReceiveApplicationResult($app_id);
+
+                $status = $result->application->status;
+            } while ($status == 'IN_PROCESS');
+
+            //Пишем лог
+            mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+
+            if ($status == 'COMPLETED') {
+                $result = $result->application->result->any['checkShipmentRegionalizationResponse']->r13nRouteSection;
+            } else {
+                $result = null;
+            }
+
         } catch (\SoapFault $e) {
-            echo "<pre>";
-            var_dump($client->__getLastRequest());
-var_dump($e->detail); die();
-}
+            Yii::error($e->detail);
 
-        $request_xml = $client->__getLastRequest();
-
-        $app_id = $result->application->applicationId;
-        do {
-            //timeout перед запросом результата
-            sleep($this->query_timeout);
-            //Получаем результат запроса
-            $result = $this->getReceiveApplicationResult($app_id);
-
-            $status = $result->application->status;
-        } while ($status == 'IN_PROCESS');
-
-        //Пишем лог
-        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
-
-        if ($status == 'COMPLETED') {
-            $result = $result->application->result->any['checkShipmentRegionalizationResponse']->r13nRouteSection;
-        } else {
-            $result = null;
         }
-
         return $result;
     }
 

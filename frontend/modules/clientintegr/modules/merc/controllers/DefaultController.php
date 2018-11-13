@@ -15,6 +15,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getVetDocumen
 use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
 use Yii;
 use common\components\AccessRule;
+use yii\base\Exception;
 use yii\filters\AccessControl;
 use common\models\Role;
 
@@ -178,11 +179,40 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                 }
 
                 echo "<pre>";
-                var_dump(json_decode(json_encode($result), true)); die();
-                
-                if (!$api->getVetDocumentDone($uuid, $model->attributes)) {
-                    throw new \Exception('Done error');
+                var_dump($result); die();
+                $result= is_array($result) ? $result : [$result];
+                $сonditions = null;
+                foreach ($result as $item) {
+                    $item = json_decode(json_encode($item), true);
+                    switch ($item['appliedR13nRule']['requirement']['decision']) {
+                        case 1 : break;                         //Можно делать перемещение без ограничений
+                        case 2 ://Можно делать перемещение при соблюдении условий
+                            foreach ($item['appliedR13nRule']['appliedR13nRule']['conditionGroup'] as $cond) {
+                                $conditions [$cond['guid']] = $cond['text'];
+                            }
+                        break;
+                        case 3 : throw new Exception('Пересещение запрещено правилами регионализации ('.$item['appliedR13nRule']['requirement']['relatedDisease']['name'].')!');
+                    }
                 }
+
+                if(isset($conditions)) {
+                    var_dump($conditions); die();
+                   /* if (Yii::$app->request->isAjax) {
+                        return $this->renderAjax('rejected/_ajaxForm', [
+                            'model'  => $model,
+                            //'volume' => $document->batch[4]['value']
+                        ]);
+                    }
+
+                    return $this->render('rejected/rejectedAct', [
+                        'model'  => $model,
+                        //'volume' => $document->batch[4]['value']
+                    ]);*/
+                }
+
+                /*if (!$api->getVetDocumentDone($uuid, $model->attributes)) {
+                    throw new \Exception('Done error');
+                }*/
                 
                 Yii::$app->session->setFlash('success', 'ВСД успешно погашен!');
                 if (Yii::$app->request->isAjax) {

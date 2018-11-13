@@ -54,7 +54,7 @@ class UserNotice
         $model = new ForgotForm();
         $model->email = $email;
 
-        $model->newPassword = Yii::$app->security->generateRandomString(8);
+        $model->newPassword = $model->generatePassword(8);
         $user->setScenario("reset");
         $user->newPassword = $model->newPassword;
         $user->newPasswordConfirm = $model->newPassword;

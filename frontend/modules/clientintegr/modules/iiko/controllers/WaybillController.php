@@ -1177,7 +1177,7 @@ SQL;
         $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
         $arChildsModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'value' => $org_id])->all();
 
-        $idorgs = '' . $org_id;
+        $idorgs = '' . $org_id.',';
         if ($arChildsModels) {
             foreach ($arChildsModels as $child) {
                 $idorgs .= $child->org . ',';
@@ -1185,18 +1185,23 @@ SQL;
         }
         $idorgs = rtrim($idorgs, ',');
         $dbName = DBNameHelper::getMainName();
+        //$number = 1*$number;
 
         $sql = "SELECT wd.id FROM `iiko_waybill_data` `wd` LEFT JOIN `iiko_waybill` `w` ON wd.waybill_id = w.id 
-                LEFT JOIN " . $dbName . ".`order` `o` ON w.order_id = o.id  
+                LEFT JOIN `" . $dbName . "`.`order` `o` ON w.order_id = o.id  
                 WHERE w.status_id = 1 AND o.vendor_id = :w_supp AND o.client_id in (" . $idorgs . ") AND wd.product_id = :w_pid AND wd.product_rid IS NULL";
-        $massivs = Yii::$app->db_api->createCommand($sql, [':w_pid' => $number, ':w_supp' => $supp_id, ':w_org' => $org_id])->queryAll();
+        $massivs = Yii::$app->db_api->createCommand($sql, [':w_pid' => $number, ':w_supp' => $supp_id])->queryAll();
         $ids = '';
         foreach ($massivs as $massiv) {
             $ids .= $massiv['id'] . ',';
         }
         $ids = rtrim($ids, ',');
-        $sql = "UPDATE `iiko_waybill_data` SET `product_rid` = :w_spid, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
-        $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid])->execute();
+        if ($ids) {
+            $now = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
+            //$sql = iikoWaybillData::update(['product_rid' => $product_rid, 'updated_at' => $now, 'linked_at' => $now])->where(['id' => $massiv]);
+            $sql = "UPDATE `iiko_waybill_data` SET `product_rid` = :w_spid, `munit` = :w_munit, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
+            $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_munit' => $munit])->execute();
+        }
 
         return $munit;
     }

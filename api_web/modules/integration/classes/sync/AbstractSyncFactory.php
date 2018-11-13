@@ -249,6 +249,14 @@ abstract class AbstractSyncFactory extends WebApi
     abstract public function sendRequest(array $params = []): array;
 
     /**
+     * @return array
+     */
+    public function checkConnect()
+    {
+        return ['Не определена функция проверки соединения в классе: ' . get_class($this)];
+    }
+
+    /**
      * Метод отправки накладной
      *
      * @param array $request

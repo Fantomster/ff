@@ -32,8 +32,8 @@ class CloudWatchLogTarget extends \yii\log\Target
         try {
             $groupName = preg_replace("/[^a-zA-Z0-9_\/\.\-]/", "", $this->groupName);
             \Yii::$app->get('cloudWatchLog')->writeLog($groupName, date("Y/m/d"), $text);
-        } catch (\Exception $e) {
-            throw new LogRuntimeException("Error while writing to CloudWatch");
+        } catch (\Throwable $e) {
+            throw $e;//new LogRuntimeException("Error while writing to CloudWatch");
         }
         
     }

@@ -1167,7 +1167,7 @@ return $out;
 
         $dbName = DBNameHelper::getMainName();
         $sql = "SELECT wd.id FROM `iiko_waybill_data` `wd` LEFT JOIN `iiko_waybill` `w` ON wd.waybill_id = w.id 
-                LEFT JOIN " . $dbName . ".`order` `o` ON w.order_id = o.id 
+                LEFT JOIN `" . $dbName . "`.`order` `o` ON w.order_id = o.id 
                 WHERE w.status_id = 1 AND o.vendor_id = :w_supp AND o.client_id = :w_org AND wd.product_id = :w_pid AND wd.product_rid IS NULL";
         $massivs = Yii::$app->db_api->createCommand($sql, [':w_pid' => $number, ':w_supp' => $supp_id, ':w_org' => $org_id])->queryAll();
         $ids = '';
@@ -1175,8 +1175,10 @@ return $out;
             $ids .= $massiv['id'] . ',';
         }
         $ids = rtrim($ids, ',');
-        $sql = "UPDATE `iiko_waybill_data` SET `product_rid` = :w_spid, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
-        $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid])->execute();
+        if ($ids) {
+            $sql = "UPDATE `iiko_waybill_data` SET `product_rid` = :w_spid, `munit` = :w_munit, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
+            $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_munit' => $munit])->execute();
+        }
         return $munit;
     }
 }

@@ -753,7 +753,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         if (array_key_exists($request['type'], self::$models)) {
             $modelClass = self::$models[$request['type']];
-            $query = $modelClass::find()->where(['id' => $request['document_id'], 'service_id' => $request['service_id']]);
+            $query = $modelClass::find()->where(['id' => $request['document_id']]);
             if ($request['type'] == self::TYPE_WAYBILL) {
                 $field = 'acquirer_id';
             } elseif ($request['type'] == self::TYPE_ORDER) {

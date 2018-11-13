@@ -145,6 +145,22 @@ class ServiceIiko extends AbstractSyncFactory
     }
 
     /**
+     * Проверка соединения с iiko
+     */
+    public function checkConnect()
+    {
+        $api = iikoApi::getInstance();
+        try {
+            $api->auth();
+            return ['result' => true];
+        } catch (\Exception $e) {
+            throw $e;
+        } finally {
+            $api->logout();
+        }
+    }
+
+    /**
      * @param      $res
      * @param      $model_id
      * @param      $message

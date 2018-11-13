@@ -12,6 +12,7 @@ use Yii;
 use frontend\controllers\ClientController;
 use yii\helpers\ArrayHelper;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
+use api_web\components\Registry;
 
 /**
  * This is the model class for table "iiko_waybill".
@@ -277,7 +278,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         ];
     }
 
-    public static function createWaybill($order_id)
+    public static function createWaybill($order_id, $service_id = 2)
     {
 
         $res = true;
@@ -297,9 +298,9 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         $db = Yii::$app->db_api;
         $sql = ' SELECT m.store_rid FROM `' . $dbName . '`.`order_content` o ' .
-                ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = 2 AND m.org_id in (' . $client_id . ') ' .
-                ' WHERE o.order_id = ' . $order_id .
-                ' GROUP BY store_rid';
+            ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = ' . $service_id . ' AND m.org_id in (' . $client_id . ') ' .
+            ' WHERE o.order_id = ' . $order_id .
+            ' GROUP BY store_rid';
 
         $stories = $db->createCommand($sql)->queryAll();
         $stories = ArrayHelper::getColumn($stories, 'store_rid');
@@ -314,6 +315,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             $model->status_id = 1;
             $model->org = $order->client_id;
             $model->store_id = $store;
+            $model->service_id = $service_id;
             $model->agent_uuid = isset($contra) ? $contra->uuid : null;
             $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s'); //date('d.m.Y', strtotime($model->doc_date));
             $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
@@ -345,7 +347,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         if ($mainOrg != $org_id) {
             $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
-            $client_id = "IF($product_field in (select product_id from `$dbName`.all_map where service_id = 2 and org_id = $client_id), $client_id, $mainOrg)";
+            $client_id = "IF($product_field in (select product_id from `$dbName`.all_map where service_id = " . Registry::IIKO_SERVICE_ID . " and org_id = $client_id), $client_id, $mainOrg)";
         }
 
         return $client_id;
@@ -394,7 +396,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         return $res;
     }
 
-    protected function createWaybillData()
+    protected function createWaybillData($service_id = 2)
     {
         $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
 
@@ -404,16 +406,16 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             $client_id = self::getClientIDcondition($this->org, '`' . $dbName . '`.all_map.product_id');
             if ($this->store_id === null) {
                 $records = OrderContent::find()
-                        ->where(['order_id' => $this->order_id])
-                        ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2 and `' . $dbName . '`.all_map.org_id in (' . $client_id . ')')
-                        ->andWhere('`' . $dbName . '`.all_map.store_rid is null')
-                        ->all();
+                    ->where(['order_id' => $this->order_id])
+                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = ' . $service_id . ' and `' . $dbName . '`.all_map.org_id in (' . $client_id . ')')
+                    ->andWhere('`' . $dbName . '`.all_map.store_rid is null')
+                    ->all();
             } else {
                 $records = OrderContent::find()
-                        ->where(['order_id' => $this->order_id])
-                        ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = 2 and `' . $dbName . '`.all_map.org_id in (' . $client_id . ')')
-                        ->andWhere('`' . $dbName . '`.all_map.store_rid =' . $this->store_id)
-                        ->all();
+                    ->where(['order_id' => $this->order_id])
+                    ->leftJoin('`' . $dbName . '`.`all_map`', 'order_content.product_id = `' . $dbName . '`.`all_map`.`product_id` and `' . $dbName . '`.all_map.service_id = ' . $service_id . ' and `' . $dbName . '`.all_map.org_id in (' . $client_id . ')')
+                    ->andWhere('`' . $dbName . '`.all_map.store_rid =' . $this->store_id)
+                    ->all();
             }
         } else {
             $records = OrderContent::findAll(['order_id' => $this->order_id]);
@@ -442,21 +444,25 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 $wdmodel->product_id = $record->product_id;
                 $wdmodel->org = iikoService::getMainOrg($this->org);
                 $wdmodel->koef = 1;
+                $wdmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
+                $wdmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
                 // New check mapping
                 $client_id = $this->org;
                 if ($wdmodel->org != $this->org) {
-                    $client_id = "IF(product_id in (select product_id from all_map where service_id = 2 and org_id = $client_id), $client_id, $wdmodel->org)";
+                    $client_id = "IF(product_id in (select product_id from all_map where service_id = ' . $service_id . ' and org_id = $client_id), $client_id, $wdmodel->org)";
                 }
 
                 $ch = AllMaps::find()
-                        ->andWhere('product_id = :prod', ['prod' => $record->product_id])
-                        ->andWhere("org_id in ($client_id)")
-                        ->andWhere('service_id = 2')
-                        ->one();
+                    ->andWhere('product_id = :prod', ['prod' => $record->product_id])
+                    ->andWhere("org_id in ($client_id)")
+                    ->andWhere('service_id = :service_id', ['service_id' => $service_id])
+                    ->one();
 
                 if ($ch) {
                     if (isset($ch->serviceproduct_id)) {
                         $wdmodel->product_rid = $ch->serviceproduct_id;
+                    } else {
+                        $wdmodel->product_rid = null;
                     }
 
                     if (isset($ch->koef)) {
@@ -471,6 +477,8 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                     if (isset($ch->vat) && !isset($record->invoiceContent)) {
                         $wdmodel->vat = $ch->vat;
                     }
+                } else {
+                    $wdmodel->product_rid = null;
                 }
 
                 if (!$wdmodel->save()) {

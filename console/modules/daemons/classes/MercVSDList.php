@@ -33,10 +33,12 @@ class MercVSDList extends MercDictConsumer
     public static $timeout = 60 * 15;
     public static $timeoutExecuting = 60 * 60;
     private $result = true;
+    private $queue_job_uid = null;
 
     public function init()
     {
         $this->data = json_decode($this->data, true);
+        $this->queue_job_uid = isset($this->data['job_uid']) ? $this->data['job_uid'] : null;
         $this->queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercVSDList', 'organization_id' => $this->org_id, 'store_id' => $this->data['enterpriseGuid']])->one();
         $this->data = isset($this->queue->data_request) ? json_decode($this->queue->data_request, true) : $this->data;
         if (!isset($this->data)) {
@@ -186,6 +188,11 @@ class MercVSDList extends MercDictConsumer
         }
 
         $this->addFCMMessage('MercVSDList', $this->data['enterpriseGuid']);
+
+        $curr_job_uid = isset($this->data['job_uid']) ? $this->data['job_uid'] : null;
+        if($this->queue_job_uid != $curr_job_uid) {
+            $this->result = false;
+        }
     }
 
     public function saveData()

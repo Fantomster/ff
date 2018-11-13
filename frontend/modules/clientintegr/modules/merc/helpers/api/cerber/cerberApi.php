@@ -25,7 +25,26 @@ class cerberApi extends baseApi
      */
     public function getActivityLocationList()
     {
-       return VetisRussianEnterprise::find()->where(['owner_guid' => $this->issuerID, 'active' => true, 'last' => true])->all();
+        return VetisRussianEnterprise::find()->where(['owner_guid' => $this->issuerID, 'active' => true, 'last' => true])->all();
+    }
+
+    public function checkRelationEnterproseGuidandIssuerID ($enterpriseGuid) {
+        $request['listOptions'] = ['count' => 1000, 'offset' => 0];
+        $request['businessEntity'] = ['guid' => $this->issuerID];
+        try {
+            $response = $this->sendRequest('getActivityLocationList', $request);
+        }
+        catch (\Throwable $e) {
+            return false;
+        }
+        $list = $response->activityLocationList->location;
+        foreach ($list as $item) {
+            if($item->enterprise->guid == $enterpriseGuid) {
+                return true;
+            }
+        }
+        return false;
+
     }
 
     /**

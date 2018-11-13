@@ -471,7 +471,7 @@ $this->registerJs(
                                                 ]);
                                                 $ed_id = 'ed' . $data['id'];
                                                 return "<div class='grid-prod'>" . $productUrl . '</div>' . $note . '<div id="' . $ed_id . '">' . $data['ed'] . "</div><div>" . Yii::t('message', 'frontend.views.order.vendor_two', ['ru' => 'Поставщик:']) . "  "
-                                                    . $data['name'] . "</div><div class='grid-article'>" . Yii::t('message', 'frontend.views.order.art', ['ru' => 'Артикул:']) . "  <span>"
+                                                    . $data['product'] . "</div><div class='grid-article'>" . Yii::t('message', 'frontend.views.order.art', ['ru' => 'Артикул:']) . "  <span>"
                                                     . $data['article'] . "</span></div>";
                                             },
                                             'label'     => Yii::t('message', 'frontend.fullmap.index.product_name_mixcart', ['ru' => 'Название продукта Mixcart']),

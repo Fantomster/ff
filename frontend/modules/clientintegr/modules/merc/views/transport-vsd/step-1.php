@@ -96,9 +96,10 @@ CSS;
                         'options' => function ($data) { return [
                             'pluginOptions' => [
                                 'initval' => isset($data->select_amount) ? $data->select_amount : $data->amount,
-                                'min' => 1,
+                                'min' => 0.0001,
                                 'max' => $data->amount,
-                                'step' =>  1,
+                                'step' =>  0.01,
+                                'decimals' => 3,
                                 //'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
                                 //'forcestepdivisibility' => (isset($data['units']) && $data['units'] && (floor($data['units']) == $data['units'])) ? 'floor' : 'none',
                                 'buttonup_class' => 'btn btn-default',

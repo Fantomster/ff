@@ -30,6 +30,7 @@ use yii\helpers\Url;
 use frontend\modules\clientintegr\modules\rkws\components\FullmapHelper;
 use api\common\models\iiko\iikoDicconst;
 use api\common\models\iiko\iikoPconst;
+use api_web\components\Registry;
 
 //use api\common\models\iiko\iikoSelectedProduct;
 
@@ -132,12 +133,12 @@ class FullmapController extends DefaultController
 
         $orgs[] = $this->currentUser->organization->id;
 
-        if ($service_id == 2) {
+        if ($service_id == Registry::IIKO_SERVICE_ID) {
             $orgs = iikoService::getChildOrgsId($this->currentUser->organization->id);
             $orgs[] = $this->currentUser->organization->id;
         }
 
-        if ($service_id == 10) {
+        if ($service_id == Registry::TILLYPAD_SERVICE_ID) {
             $orgs = iikoService::getChildOrgsId($this->currentUser->organization->id);
             $orgs[] = $this->currentUser->organization->id;
         }
@@ -196,7 +197,7 @@ class FullmapController extends DefaultController
 
         $orgs[] = $this->currentUser->organization->id;
 
-        if ($service_id == 2) {
+        if ($service_id == Registry::IIKO_SERVICE_ID) {
             $orgs = iikoService::getChildOrgsId($this->currentUser->organization->id);
             $orgs[] = $this->currentUser->organization->id;
         }
@@ -265,7 +266,7 @@ class FullmapController extends DefaultController
         } else { // New link for mapping creation
             $newProduct = new AllMaps();
 
-            if ($service_id == 2) {
+            if ($service_id == Registry::IIKO_SERVICE_ID) {
                 $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
                 if (isset($mainOrg)) {
                     $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
@@ -294,16 +295,16 @@ class FullmapController extends DefaultController
         }
 
         switch ($service_id) {
-            case 1 :
+            case Registry::RK_SERVICE_ID :
                 $res = $res->name;
                 break;
-            case 2 :
+            case Registry::IIKO_SERVICE_ID :
                 $res = $res->denom;
                 break;
-            case 8 :
+            case Registry::ONE_S_CLIENT_SERVICE_ID :
                 $res = $res->name;
                 break;
-            case 10 :
+            case Registry::TILLYPAD_SERVICE_ID :
                 $res = $res->denom;
                 break;
         }
@@ -343,7 +344,7 @@ class FullmapController extends DefaultController
             }
         }
 
-        if ($service_id == 2) {
+        if ($service_id == Registry::IIKO_SERVICE_ID) {
             $childs = iikoService::getChildOrgsId($org_id);
             if (!empty($childs)) {
                 foreach ($childs as $child) {
@@ -411,21 +412,21 @@ class FullmapController extends DefaultController
         if (!is_null($term)) {
 
             switch ($service_id) {
-                case 1: // R-keeper
+                case Registry::RK_SERVICE_ID: // R-keeper
                     $sourceTable = 'rk_product';
                     $denomField = 'denom';
                     $unitField = 'unitname';
                     $orgField = 'acc';
                     break;
 
-                case 2: // iiko
+                case Registry::IIKO_SERVICE_ID: // iiko
                     $sourceTable = 'iiko_product';
                     $denomField = 'denom';
                     $unitField = 'unit';
                     $orgField = 'org_id';
                     break;
 
-                case 8: // 1C
+                case Registry::ONE_S_CLIENT_SERVICE_ID: // 1C
                     $sourceTable = 'one_s_good';
                     $denomField = 'name';
                     $unitField = 'measure';
@@ -433,7 +434,7 @@ class FullmapController extends DefaultController
                     $where = ' and is_category = 0 ';
                     break;
 
-                case 10: // tillypad
+                case Registry::TILLYPAD_SERVICE_ID: // tillypad
                     $sourceTable = 'iiko_product';
                     $denomField = 'denom';
                     $unitField = 'unit';
@@ -497,18 +498,18 @@ class FullmapController extends DefaultController
         }
 
         $selected = implode(',', $selected);
-        if ($service_id == 2) {
+        if ($service_id == Registry::IIKO_SERVICE_ID) {
             $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
         }
 
-        if ($service_id == 10) {
+        if ($service_id == Registry::TILLYPAD_SERVICE_ID) {
             $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
         }
 
         foreach ($noProducts as $prod) {
 
             $model = new AllMaps();
-            if ($service_id == 2) {
+            if ($service_id == Registry::IIKO_SERVICE_ID) {
                 if (isset($mainOrg)) {
                     $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
                         ->andWhere('service_id = ' . $service_id . ' and is_active =1')
@@ -519,7 +520,7 @@ class FullmapController extends DefaultController
                 }
             }
 
-            if ($service_id == 10) {
+            if ($service_id == Registry::TILLYPAD_SERVICE_ID) {
                 if (isset($mainOrg)) {
                     $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
                         ->andWhere('service_id = ' . $service_id . ' and is_active =1')
@@ -637,16 +638,16 @@ class FullmapController extends DefaultController
         }
         $out = [];
         switch ($us) {
-            case 1:
+            case Registry::RK_SERVICE_ID:
                 $out = \frontend\modules\clientintegr\modules\rkws\controllers\WaybillController::actionAutoCompleteNew($term);
                 break;
-            case 2:
+            case Registry::IIKO_SERVICE_ID:
                 $out = \frontend\modules\clientintegr\modules\iiko\controllers\WaybillController::actionAutoCompleteNew($term);
                 break;
-            case 8:
+            case Registry::ONE_S_CLIENT_SERVICE_ID:
                 $out = \frontend\modules\clientintegr\modules\odinsobsh\controllers\WaybillController::actionAutoCompleteNew($term);
                 break;
-            case 10:
+            case Registry::TILLYPAD_SERVICE_ID:
                 $out = \frontend\modules\clientintegr\modules\tillypad\controllers\WaybillController::actionAutoCompleteNew($term);
                 break;
         }
@@ -679,10 +680,10 @@ class FullmapController extends DefaultController
     {
         $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']); // Получаем идентификатор константы бизнеса для сопоставления
         $arChildsModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'value' => $parent_id])->all(); //получаем дочерние бизнесы
-        $allMainProducts = AllMaps::find()->select('service_id, product_id, supp_id, serviceproduct_id, koef, vat, is_active')->where(['org_id' => $parent_id, 'service_id' => 2])->all();
+        $allMainProducts = AllMaps::find()->select('service_id, product_id, supp_id, serviceproduct_id, koef, vat, is_active')->where(['org_id' => $parent_id, 'service_id' => Registry::IIKO_SERVICE_ID])->all();
         foreach ($arChildsModels as $child) {
             foreach ($allMainProducts as $main_product) {
-                $child_product = AllMaps::find()->select('id, store_rid, vat')->where(['org_id' => $child->org, 'service_id' => 2, 'product_id' => $main_product->product_id])->one();
+                $child_product = AllMaps::find()->select('id, store_rid, vat')->where(['org_id' => $child->org, 'service_id' => Registry::IIKO_SERVICE_ID, 'product_id' => $main_product->product_id])->one();
                 if ($child_product) {
                     $ChildProduct = AllMaps::findOne($child_product->id);
                     (is_null($child_product->store_rid)) ? $ChildProduct->store_rid = null : $ChildProduct->store_rid = $child_product->store_rid;
@@ -723,7 +724,7 @@ class FullmapController extends DefaultController
         $arChildsModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'value' => $parent_id])->all(); //получаем дочерние бизнесы
         $main_product = AllMaps::find()->select('service_id, product_id, supp_id, serviceproduct_id, koef, vat, is_active')->where(['org_id' => $parent_id, 'service_id' => 2, 'product_id' => $product_id])->one();
         foreach ($arChildsModels as $child) {
-            $child_product = AllMaps::find()->select('id, store_rid, vat')->where(['org_id' => $child->org, 'service_id' => 2, 'product_id' => $main_product->product_id])->one();
+            $child_product = AllMaps::find()->select('id, store_rid, vat')->where(['org_id' => $child->org, 'service_id' => Registry::IIKO_SERVICE_ID, 'product_id' => $main_product->product_id])->one();
             if ($child_product) {
                 $ChildProduct = AllMaps::findOne($child_product->id);
                 (is_null($child_product->store_rid)) ? $ChildProduct->store_rid = null : $ChildProduct->store_rid = $child_product->store_rid;

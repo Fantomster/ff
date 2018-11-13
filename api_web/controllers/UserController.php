@@ -847,18 +847,18 @@ class UserController extends WebApiController
      *                  "result": {
      *                      {
      *                          "id": "4300",
-     *                          "parent_id": "4398",
-     *                          "name": "1йцу"
+     *                          "name": "test346346",
+     *                          "license_is_active": true
      *                      },
      *                      {
-     *                          "id": "4392",
-     *                          "parent_id": "4398",
-     *                          "name": "тест сортировка"
+     *                          "id": "4300",
+     *                          "name": "test346346",
+     *                          "license_is_active": true
      *                      },
      *                      {
-     *                          "id": "4400",
-     *                          "parent_id": "4398",
-     *                          "name": "421"
+     *                          "id": "4300",
+     *                          "name": "test346346",
+     *                          "license_is_active": false
      *                      }
      *                  }
      *              }

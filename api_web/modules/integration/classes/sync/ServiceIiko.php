@@ -136,7 +136,7 @@ class ServiceIiko extends AbstractSyncFactory
             $api->logout();
         } catch (\Exception $e) {
             $message = $e->getMessage();
-            if ($message == "Код ответа сервера: 401 | ") {
+            if (strpos($message, '401') !== false) {
                 $message = "Ошибка авторизации, проверьте настройки подключения к iiko";
             }
             throw new BadRequestHttpException($message);

@@ -176,14 +176,13 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     public function rules()
     {
         return [
-            [['date_doc', 'last_update_date', 'raw_data', 'waybill_date', 'confirmed_by', 'other_info', 'laboratory_research', 'transport_info'], 'safe'],
+            [['date_doc', 'last_update_date', 'raw_data', 'waybill_date', 'confirmed_by', 'other_info', 'laboratory_research', 'transport_info', 'batch_id', 'producer_name', 'producer_guid'], 'safe'],
             [['finalized', 'product_type', 'perishable', 'low_grade_cargo'], 'integer'],
             [['amount'], 'number'],
             [['uuid', 'number', 'type', 'status', 'recipient_name', 'recipient_guid', 'sender_guid',
-                'sender_name', 'product_name', 'unit', 'production_date', 'expiry_date',
-                'producer_name', 'producer_guid', 'owner_guid', 'product_guid', 'sub_product_guid', 'product_item_guid', 'origin_country_guid', 'waybill_number', 'unit_guid'], 'string', 'max' => 255],
+                'sender_name', 'product_name', 'unit', 'production_date', 'expiry_date', 'owner_guid', 'product_guid', 'sub_product_guid', 'product_item_guid', 'origin_country_guid', 'waybill_number', 'unit_guid'], 'string', 'max' => 255],
             [['created_at', 'updated_at'], 'safe'],
-            [['form', 'vehicle_number', 'trailer_number', 'container_number', 'transport_storage_type', 'gtin', 'article', 'batch_id'], 'string', 'max' => 45],
+            [['form', 'vehicle_number', 'trailer_number', 'container_number', 'transport_storage_type', 'gtin', 'article'], 'string', 'max' => 45],
         ];
     }
 
@@ -339,6 +338,7 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $queueName = $queue->consumer_class_name;
             }
 
+            $data['job_uid'] = base64_encode(strtolower('MercVSDList').time());
             $data['startDate'] = $start_date ?? gmdate("Y-m-d H:i:s", time() - 60*60*24);
             $data['listOptions']['count'] = 100;
             $data['listOptions']['offset'] = 0;

@@ -10,22 +10,22 @@ use Yii;
  * This is the model class for table "one_s_waybill".
  *
  * @property integer $id
- * @property string $agent_uuid
+ * @property string  $agent_uuid
  * @property integer $org
  * @property integer $order_id
  * @property integer $num_code
  * @property integer $readytoexport
  * @property integer $status_id
  * @property integer $store_id
- * @property string $note
+ * @property string  $note
  * @property integer $is_duedate
  * @property integer $active
  * @property integer $vat_included
- * @property string $doc_date
- * @property string $created_at
- * @property string $exported_at
- * @property string $updated_at
- * @property Order $order
+ * @property string  $doc_date
+ * @property string  $created_at
+ * @property string  $exported_at
+ * @property string  $updated_at
+ * @property Order   $order
  */
 class OneSWaybill extends \yii\db\ActiveRecord
 {
@@ -66,23 +66,23 @@ class OneSWaybill extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'agent_uuid' => Yii::t('app', 'Контрагент'),
-            'org' => Yii::t('app', 'Организация'),
-            'order_id' => Yii::t('app', 'Заказ'),
-            'num_code' => Yii::t('app', 'Номер документа'),
+            'id'            => Yii::t('app', 'ID'),
+            'agent_uuid'    => Yii::t('app', 'Контрагент'),
+            'org'           => Yii::t('app', 'Организация'),
+            'order_id'      => Yii::t('app', 'Заказ'),
+            'num_code'      => Yii::t('app', 'Номер документа'),
             'readytoexport' => Yii::t('app', 'Readytoexport'),
-            'status_id' => Yii::t('app', 'Статус'),
-            'store_id' => Yii::t('app', 'Склад'),
-            'note' => Yii::t('app', 'Примечание'),
-            'is_duedate' => Yii::t('app', 'Is Duedate'),
-            'active' => Yii::t('app', 'Active'),
-            'vat_included' => Yii::t('app', 'Vat Included'),
-            'doc_date' => Yii::t('app', 'Дата документа'),
-            'created_at' => Yii::t('app', 'Created At'),
-            'exported_at' => Yii::t('app', 'Exported At'),
-            'updated_at' => Yii::t('app', 'Updated At'),
-            'is_invoice' => Yii::t('app', 'Флаг, указывающий надо ли проводить документ при загрузке '),
+            'status_id'     => Yii::t('app', 'Статус'),
+            'store_id'      => Yii::t('app', 'Склад'),
+            'note'          => Yii::t('app', 'Примечание'),
+            'is_duedate'    => Yii::t('app', 'Is Duedate'),
+            'active'        => Yii::t('app', 'Active'),
+            'vat_included'  => Yii::t('app', 'Vat Included'),
+            'doc_date'      => Yii::t('app', 'Дата документа'),
+            'created_at'    => Yii::t('app', 'Created At'),
+            'exported_at'   => Yii::t('app', 'Exported At'),
+            'updated_at'    => Yii::t('app', 'Updated At'),
+            'is_invoice'    => Yii::t('app', 'Флаг, указывающий надо ли проводить документ при загрузке '),
         ];
     }
 
@@ -136,18 +136,22 @@ class OneSWaybill extends \yii\db\ActiveRecord
                     }
                     $wdmodel->org = $this->org;
                     $wdmodel->koef = 1;
+                    $wdmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
+                    $wdmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
                     // Check previous
                     $ch = OneSWaybillData::find()
-                            ->andWhere('product_id = :prod', ['prod' => $wdmodel->product_id])
-                            ->andWhere('org = :org', ['org' => $wdmodel->org])
-                            ->andWhere('product_rid is not null')
-                            //->orderBy(['linked_at' => SORT_DESC])
-                            ->one();
+                        ->andWhere('product_id = :prod', ['prod' => $wdmodel->product_id])
+                        ->andWhere('org = :org', ['org' => $wdmodel->org])
+                        ->andWhere('product_rid is not null')
+                        //->orderBy(['linked_at' => SORT_DESC])
+                        ->one();
                     if ($ch) {
                         $wdmodel->product_rid = $ch->product_rid;
                         $wdmodel->munit = $ch->munit;
                         $wdmodel->koef = $ch->koef;
                         $wdmodel->quant = $wdmodel->quant * $ch->koef;
+                    } else {
+                        $wdmodel->product_rid = null;
                     }
                     if ($ch && !isset($record->invoiceContent)) {
                         $wdmodel->vat = $ch->vat;
@@ -240,7 +244,7 @@ class OneSWaybill extends \yii\db\ActiveRecord
 
             $item->addChild('amount', $row->quant);
             $item->addChild('product', $row->product->uuid);
-            $item->addChild('num', ( ++$i));
+            $item->addChild('num', (++$i));
             $item->addChild('containerId');
             $item->addChild('amountUnit', $row->munit);
             $item->addChild('discountSum', $discount);

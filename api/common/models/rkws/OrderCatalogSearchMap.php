@@ -66,26 +66,27 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             $this->service_id = 0;
         }
         $fields = [
-            0                       => [],
-            Registry::RK_SERVICE_ID           => ["fprod.denom as pdenom", "fstore.name as store", "fprod.unitname as unitname"], // R-keeper
-            Registry::IIKO_SERVICE_ID         => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // iiko
-            Registry::ONE_S_CLIENT_SERVICE_ID => ["fprod.name as pdenom", "fstore.name as store", "fprod.measure as unitname"], // 1C
-            Registry::TILLYPAD_SERVICE_ID     => ["fprod.denom as pdenom", "fstore.denom as store", "fprod.unit as unitname"], // tillypad
+            0                                 => '',
+            Registry::RK_SERVICE_ID           => ',fprod.denom as pdenom, fstore.name as store, fprod.unitname as unitname', // R-keeper
+            Registry::IIKO_SERVICE_ID         => ',fprod.denom as pdenom, fstore.denom as store, fprod.unit as unitname', // iiko
+            Registry::ONE_S_CLIENT_SERVICE_ID => ',fprod.name as pdenom, fstore.name as store, fprod.measure as unitname', // 1C
+            Registry::TILLYPAD_SERVICE_ID     => ',fprod.denom as pdenom, fstore.denom as store, fprod.unit as unitname', // tillypad
         ];
+        //print_r($fields);die();
 
         $joins = [
-            0             => '',
-            Registry::RK_SERVICE_ID => " LEFT JOIN `$dbName`.`rk_product` fprod ON fmap.serviceproduct_id = fprod.id
-                   LEFT JOIN `$dbName`.`rk_storetree` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.acc  AND fstore.type = 2 ",
+            0                       => '',
+            Registry::RK_SERVICE_ID => " LEFT JOIN `$dbName`.`rk_product` fprod ON amap.serviceproduct_id = fprod.id
+                   LEFT JOIN `$dbName`.`rk_storetree` fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.acc  AND fstore.type = 2 ",
 
-            Registry::IIKO_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
-                   LEFT JOIN `$dbName`.`iiko_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
+            Registry::IIKO_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON amap.serviceproduct_id = fprod.id
+                   LEFT JOIN `$dbName`.`iiko_store` fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
 
-            Registry::ONE_S_CLIENT_SERVICE_ID => " LEFT JOIN `$dbName`.`one_s_good` fprod ON fmap.serviceproduct_id = fprod.id
-                   LEFT JOIN `$dbName`.`one_s_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id ",
+            Registry::ONE_S_CLIENT_SERVICE_ID => " LEFT JOIN `$dbName`.`one_s_good` fprod ON amap.serviceproduct_id = fprod.id
+                   LEFT JOIN `$dbName`.`one_s_store` fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.org_id ",
 
-            Registry::TILLYPAD_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON fmap.serviceproduct_id = fprod.id
-                   LEFT JOIN `$dbName`.`iiko_store` fstore ON fmap.store_rid = fstore.id AND fmap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
+            Registry::TILLYPAD_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON amap.serviceproduct_id = fprod.id
+                   LEFT JOIN `$dbName`.`iiko_store` fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
 
         ];
 
@@ -99,17 +100,17 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             "allservice.denom as service_denom"
         ], $fields[$this->service_id]);*/
 
-        $fieldsCBG = array_merge([
-            'cbg.id', 'cbg.product', 'cbg.supp_org_id', /*'cbg.units', 'cbg.price', */
-            'cbg.cat_id', /*'cbg.category_id',*/
-            'cbg.article', /*'cbg.note', */
-            'cbg.ed', 'org.name',
+        //$fieldsCBG = array_merge([
+            //'cbg.id', 'cbg.product', 'cbg.supp_org_id', /*'cbg.units', 'cbg.price', */
+            //'cbg.cat_id', /*'cbg.category_id',*/
+            //'cbg.article', /*'cbg.note', */
+            //'cbg.ed', 'org.name',
             /*"(`cbg`.`article` + 0) AS c_article_1",
             "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",*/
             /*"`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'cbg.updated_at',*/
-            "fmap.id as fmap_id", "fmap.vat as vat", "fmap.koef as koef", "fmap.service_id as service_id",
-            "allservice.denom as service_denom"
-        ], $fields[$this->service_id]);
+            //"fmap.id as fmap_id", "fmap.vat as vat", "fmap.koef as koef", "fmap.service_id as service_id",
+            //"allservice.denom as service_denom"
+        //], $fields[$this->service_id]);
 
         /*$fieldsCG = array_merge([
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id', 'cbg.category_id',
@@ -122,7 +123,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         ], $fields[$this->service_id]);*/
 
         $where = '';
-        $where_all = '';
+        //$where_all = '';
         $params_sql = [];
 
         if (!empty($this->selectedVendor)) {
@@ -134,11 +135,11 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             } else {
                 $this->selectedVendor = (int)$this->selectedVendor;
             }
-            $where .= ' AND `org`.id IN (' . $this->selectedVendor . ') ';
+            //$where .= ' AND `org`.id IN (' . $this->selectedVendor . ') ';
         }
 
         if (!empty($this->searchString)) {
-            $where .= ' AND (cbg.product  LIKE :searchString OR cbg.article LIKE :searchString)';
+            $where .= ' AND (acp.product  LIKE :searchString OR acp.article LIKE :searchString)';
             $params_sql[':searchString'] = "%" . $this->searchString . "%";
         }
 
@@ -169,24 +170,25 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             }
         }*/
 
-        if (!$this->service_id) {
+        /*if (!$this->service_id) {
             $where_all .= ' AND service_id = 0';
-        }
+        }*/
 
         $client_id = $this->client->id;
         $vendorInList = $this->selectedVendor;
+        //$fields_sql = ''.$fields[$this->service_id];
 
         if (isset($this->vendors) && empty($this->selectedVendor)) {
             $arrayVendorsId = array_keys($this->vendors);
             unset($arrayVendorsId[0]);
             $arrayVendorsId = implode(",", $arrayVendorsId);
             $vendorInList = $arrayVendorsId;
-            $where_all .= " AND cbg.supp_org_id in ($vendorInList)";
-        } else {
+            //$where_all .= " AND cbg.supp_org_id in ($vendorInList)";
+        }/* else {
             $where_all .= " AND cbg.supp_org_id in (" . $vendorInList . ")";
-        }
+        }*/
 
-        $sql = "SELECT " . implode(',', $fieldsCBG) . "
+        /*$sql = "SELECT " . implode(',', $fieldsCBG) . "
         FROM `catalog_base_goods` `cbg`
              LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
              LEFT JOIN `$dbName`.`all_map` `fmap` ON cbg.id = fmap.product_id AND fmap.org_id = " . $client_id . " AND fmap.service_id = " . $this->service_id . "
@@ -202,8 +204,16 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
              ) catg ON catg.supp_org_id = cbg.supp_org_id AND cbg.id = case WHEN catg.base_goods_id IS NULL THEN cbg.id ELSE catg.base_goods_id END
            WHERE
            cbg.deleted = 0
-           " . $where . $where_all;
+           " . $where . $where_all;*/
 
+        $sql = "SELECT DISTINCT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id] .
+            " FROM `assigned_catalog_products` `acp`
+            LEFT JOIN `$dbName`.`all_map` `amap` ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
+            LEFT JOIN `$dbName`.`all_service` `aser` ON amap.service_id = aser.id " . $joins[$this->service_id] . "
+            WHERE acp.rest_org_id = " . $client_id . " 
+              AND acp.supp_org_id in (" . $vendorInList . ") 
+              AND acp.catalog_status = 1 
+              AND acp.deleted = 0" . $where;
         /*$sql = "
         SELECT DISTINCT * FROM (
            SELECT 

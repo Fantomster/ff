@@ -108,10 +108,10 @@ class getVetDocumentByUUID extends Model
         $this->type = $doc->type;
         $this->status = $doc->status;
 
-        $hc = cerberApi::getInstance()->getEnterpriseByGuid($doc->sender_guid);
-        if (isset($hc)) {
-            if (isset($hc->owner)) {
-                $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
+        $ent = cerberApi::getInstance()->getEnterpriseByGuid($doc->sender_guid);
+        if (isset($ent)) {
+            if (isset($ent->owner)) {
+                $hc = cerberApi::getInstance()->getBusinessEntityByGuid($ent->owner->guid);
             }
         }
 
@@ -124,10 +124,10 @@ class getVetDocumentByUUID extends Model
             ]
         ];
 
-        $hc = cerberApi::getInstance()->getEnterpriseByGuid($doc->recipient_guid);
-        if (isset($hc)) {
-            if (isset($hc->owner)) {
-                $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
+        $ent = cerberApi::getInstance()->getEnterpriseByGuid($doc->recipient_guid);
+        if (isset($ent)) {
+            if (isset($ent->owner)) {
+                $hc = cerberApi::getInstance()->getBusinessEntityByGuid($ent->owner->guid);
             }
         }
 

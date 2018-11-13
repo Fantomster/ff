@@ -92,6 +92,7 @@ class OuterProductMapSearch extends OuterProductMap
         }
 
         $query->andWhere(['in', "$catalogBaseGoodsTableName.supp_org_id", $vendors]);
+
         $query->orderBy([
             'IF(outer_product_id is null, 0, 1)' => SORT_DESC,
             'outer_product_id' => SORT_ASC,
@@ -100,10 +101,6 @@ class OuterProductMapSearch extends OuterProductMap
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query->createCommand()->getRawSql(),
-            'pagination' => [
-                'page' => $page - 1,
-                'pageSize' => $pageSize
-            ],
             'key' => 'product_id'
         ]);
 

@@ -194,6 +194,22 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 $request->step2 = $session->get('TrVsd_step2');
                 $request->step3 = $session->get('TrVsd_step3');
 
+                if(!$model->confirm) {
+                    $request->checkShipmentRegionalizationOperation();
+
+                    /*$request->conditions = json_encode(['Говядина' =>['44446644' => 'fssfsfsfsd'],
+                    'окорок-777' =>['444466445' => 'fененеене']
+                    ]);*/
+
+                    if (isset($request->conditions)) {
+                        return $this->render('conditionsConfirm', [
+                            'model'      => $model,
+                            'conditions' => $request->conditions,
+                        ]);
+                    }
+                }
+
+                $request->conditions = $post['conditions'] ?? null;
                 try {
                     mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($request);
                     Yii::$app->session->setFlash('success', 'Транспортный ВСД успешно создан!');

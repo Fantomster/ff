@@ -19,6 +19,7 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
 
     public $localTransactionId;
     public $initiator;
+    public $conditions;
     //step-1
     public $step1;
     //step-2
@@ -68,6 +69,11 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
 
         $consigments = [];
         $vetCertificates = [];
+
+        if(isset($this->conditions)) {
+            $this->conditions = json_decode($this->conditions, true);
+        }
+
         foreach ($this->step1 as $id => $product) {
             $consigment = new Consignment();
             $consigment->id = 'con'.$id;
@@ -89,12 +95,24 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
 
             $vetCertificate = new VetDocument();
             $vetCertificate->for = 'con'.$id;
-            $vetCertificate->authentication = new VeterinaryAuthentication();
-            $vetCertificate->authentication->purpose = new Purpose();
-            $vetCertificate->authentication->purpose->guid = $this->step2['purpose'];
-            $vetCertificate->authentication->cargoExpertized = $this->step2['cargoExpertized'];
-            $vetCertificate->authentication->locationProsperity = $this->step2['locationProsperity'];
+            $authentication['purpose']['guid'] = $this->step2['purpose'];
+            $authentication['cargoExpertized'] = $this->step2['cargoExpertized'];
+            $authentication['locationProsperity'] = $this->step2['locationProsperity'];
 
+            //Заполняем условия регионализации при необходимости
+           //var_dump($this->conditions); die();
+            if(isset($this->conditions[$product['product_name']])) {
+                $conditions = null;
+                $buff = $this->conditions[$product['product_name']];
+                foreach ($buff as $key=>$item) {
+                    $r13nClause = new RegionalizationClause();
+                    $r13nClause->condition = new RegionalizationCondition();
+                    $r13nClause->condition->guid = $key;
+                    $conditions[] = $r13nClause;
+                }
+                $authentication['r13nClause'] = $conditions;
+            }
+            $vetCertificate->authentication = $authentication;
             $vetCertificates[] = $vetCertificate;
         }
 
@@ -127,4 +145,44 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
         return $request;
     }
 
+    public function checkShipmentRegionalizationOperation ()
+    {
+        foreach ($this->step1 as $id => $product) {
+            $stock = MercStockEntry::findOne(['id' => $id]);
+            $stock_raw = json_decode(json_encode(unserialize($stock->raw_data)), true);
+            $result = mercuryApi::getInstance()->checkShipmentRegionalizationOperation($this->step3['recipient'], mercDicconst::getSetting('enterprise_guid'), $stock_raw["batch"]["subProduct"]['guid']);
+            if ($result == null) {
+                throw new \Exception('CheckShipmentRegionalizationOperation error');
+            }
+
+            $result = is_array($result) ? $result : [$result];
+            $this->conditions = null;
+            foreach ($result as $item) {
+                $item = json_decode(json_encode($item), true);
+                switch ($item['appliedR13nRule']['decision']) {
+                    case 1 :
+                        break;                         //Можно делать перемещение без ограничений
+                    case 2 ://Можно делать перемещение при соблюдении условий
+                        foreach ($item['appliedR13nRule']['requirement'] as $requirement) {
+                            $conditionGroup = is_array($requirement["conditionGroup"]) ? $requirement["conditionGroup"] : [$requirement["conditionGroup"]];
+                            foreach ($conditionGroup as $group) {
+                                $group = !array_key_exists('condition', $group) ? $group : $group['condition'];
+                                $condition = !array_key_exists('guid', $group) ? $group : [$group];
+                                foreach ($condition as $cond) {
+                                    if ($cond['active'] && $cond['last']) {
+                                        $conditions[$product][$cond['guid']] = $cond['text'];
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case 3 :
+                        throw new Exception('Пересещение запрещено правилами регионализации (' . $item['appliedR13nRule']['requirement']['relatedDisease']['name'] . ')!');
+                }
+            }
+        }
+
+        $this->conditions = (isset($this->conditions)) ?  json_encode($this->conditions) : null;
+
+    }
 }

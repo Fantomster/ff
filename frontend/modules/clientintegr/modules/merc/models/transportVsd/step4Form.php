@@ -18,6 +18,7 @@ class step4Form extends Model
     public $trailer_number;
     public $container_number;
     public $storage_type;
+    public $confirm = false;
 
     public function rules()
     {
@@ -25,6 +26,7 @@ class step4Form extends Model
             [['type', 'car_number', 'trailer_number', 'container_number', 'storage_type'], 'required'],
             [['type'],'integer'],
             [['car_number', 'trailer_number', 'container_number', 'storage_type', 'type_name'], 'string'],
+            [['confirm'], 'safe']
         ];
     }
 

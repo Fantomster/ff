@@ -284,13 +284,12 @@ class UserWebApi extends \api_web\components\WebApi
             }
 
             //Список доступных бизнесов
-            $allOrganizations = ArrayHelper::index($this->getUserOrganizationBusinessList()['result'], 'id');
-            if (!isset($allOrganizations[$organization->id])) {
+            if (!$this->user->isAllowOrganization($organization->id)) {
                 throw new BadRequestHttpException('Нет прав переключиться на эту организацию');
             }
 
-            //Проверка лицензии в организации
-            License::checkMixCartLicenseResponse($organization->id);
+            #Расскоментировать после отказа от первой версии
+            //License::checkMixCartLicenseResponse($organization->id);
 
             $roleID = RelationUserOrganization::getRelationRole($organization->id, $this->user->id);
 

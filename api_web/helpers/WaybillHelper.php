@@ -9,8 +9,8 @@
 namespace api_web\helpers;
 
 use api_web\components\Registry;
-use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use api_web\models\User;
 use api_web\modules\integration\classes\SyncServiceFactory;
 use common\helpers\DBNameHelper;
 use common\models\IntegrationSetting;
@@ -30,7 +30,7 @@ use yii\web\BadRequestHttpException;
 /**
  * Waybills class for generate\update\delete\ actions
  * */
-class WaybillHelper extends WebApi
+class WaybillHelper
 {
     /**
      * @var OuterProductMapHelper
@@ -43,12 +43,21 @@ class WaybillHelper extends WebApi
     public $settings;
 
     /**
+     * @var User Пользователь текущего заказа
+     */
+    public $user;
+
+    /**
+     * @var
+     */
+    public $orgId;
+
+    /**
      * WaybillHelper constructor.
      */
     public function __construct()
     {
         $this->helper = new OuterProductMapHelper();
-        parent::__construct();
     }
 
     /**
@@ -460,6 +469,10 @@ class WaybillHelper extends WebApi
         if (is_null($run)) {
             //Блокируем обработку этого заказа
             $redis->set($lockName, 1);
+            $order = Order::findOne($request['order_id']);
+            $this->orgId = $order->client_id;
+            $this->user = $order->createdBy;
+
             try {
                 $this->createWaybill($request['order_id'], null, $request['vendor_id'], $this->getExcludedServices());
             } catch (\Throwable $e) {
@@ -483,7 +496,7 @@ class WaybillHelper extends WebApi
                 foreach ($waybillToService as $serviceId => $ids) {
                     $scenario = IntegrationSettingValue::getSettingsByServiceId(
                         $serviceId,
-                        $this->user->organization_id,
+                        $this->orgId,
                         ['auto_unload_invoice']
                     );
                     if ($scenario == 1) {
@@ -527,7 +540,7 @@ class WaybillHelper extends WebApi
         $journal->response = is_array($message) ? json_encode($message) : $message;
         $journal->service_id = (int)$service_id;
         $journal->type = $type;
-        $journal->organization_id = $this->user->organization_id;
+        $journal->organization_id = $this->orgId;
         $journal->user_id = $this->user->id;
         $journal->operation_code = (string)(Registry::$operation_code_send_waybill[$service_id] ?? 0);
         if (!$journal->save()) {
@@ -561,7 +574,7 @@ class WaybillHelper extends WebApi
             ->from(IntegrationSettingValue::tableName() . ' as isv')
             ->leftJoin(IntegrationSetting::tableName() . ' as is', 'is.id = isv.setting_id')
             ->where([
-                'isv.org_id' => $this->user->organization_id,
+                'isv.org_id' => $this->orgId,
                 'is.name'    => 'auto_unload_invoice',
             ])->all(\Yii::$app->db_api);
     }

@@ -23,6 +23,7 @@ use common\models\OuterUnit;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -332,12 +333,32 @@ class AbstractDictionary extends WebApi
         $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
-            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
-                $search->andWhere(['like', 'name', $request['search']['name']]);
-            }
-
             if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
                 $orgId = $request['search']['business_id'];
+            }
+            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+                $result = (new Query())->distinct()->select([
+                    'p.name',
+                    'p.level',
+                    'p.id',
+                    'p.outer_uid',
+                    'p.store_type',
+                    'p.created_at',
+                    'p.updated_at',
+                    'p.`left`',
+                    'p.`right`',
+                    'if(p.is_deleted, 0,1) as is_active',
+                ])->from('outer_store os, outer_store p')
+                    ->andWhere('os.`left` BETWEEN p.`left` and p.`right`')
+                    ->andWhere(['like', 'os.name', $request['search']['name']])
+                    ->andWhere(['p.org_id' => $orgId])
+                    ->andWhere(['os.org_id' => $orgId])
+                    ->andWhere(['p.service_id' => $this->service_id])
+                    ->andWhere(['os.service_id' => $this->service_id])
+                    ->orderBy('p.`left`')
+                    ->all(\Yii::$app->db_api);
+                $tree = $this->createTree($result);
+                return ['stores' => empty($tree) ? null : reset($tree)];
             }
         }
 
@@ -456,6 +477,32 @@ class AbstractDictionary extends WebApi
             'is_active'  => (int)!$model->is_deleted,
             'childs'     => $model->isLeaf() ? [] : $child($model),
         ];
+    }
+
+    /**
+     * Функция создания дерева для Nested Sets
+     *
+     * @param      $category
+     * @param int  $left
+     * @param null $right
+     * @return array
+     */
+    private function createTree($category, $left = 0, $right = null)
+    {
+        $tree = [];
+        foreach ($category as $cat => $range) {
+            if (($range['left'] == $left + 1 || $range['left'] > $left) && (is_null($right) || $range['right'] < $right)) {
+                $tree[$cat] = [];
+                $tree[$cat] = $range;
+                if ($range['right'] - $range['left'] > 1) {
+                    $tree[$cat]['childs'] = $this->createTree($category, $range['left'], $range['right']);
+                } else {
+                    $tree[$cat]['childs'] = [];
+                }
+                $left = $range['right'];
+            }
+        }
+        return array_values($tree);
     }
 
     /**

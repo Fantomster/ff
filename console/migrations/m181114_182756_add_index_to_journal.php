@@ -18,7 +18,7 @@ class m181114_182756_add_index_to_journal extends Migration
      */
     public function safeUp()
     {
-        $this->createIndex('idx_log_guide_journal', '{{%journal}}', 'journal');
+        $this->createIndex('idx_log_guide_journal', '{{%journal}}', 'log_guide');
     }
 
     /**

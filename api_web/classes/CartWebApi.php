@@ -68,7 +68,7 @@ class CartWebApi extends \api_web\components\WebApi
      */
     private function addItem(array $post)
     {
-        $this->validateRequest($post, ['quantity', 'product_id']);
+        $this->validateRequest($post, ['product_id']);
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {

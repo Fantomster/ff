@@ -619,9 +619,11 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $obDateTime->format("d.m.Y H:i:s");
                 }
                 $obCreateAt = new \DateTime($model->created_at);
+                $obUpdatedAt = new \DateTime($model->updated_at);
                 $orderInfo = [
                     'id'              => (int)$model->id,
                     'created_at'      => $obCreateAt->format("d.m.Y H:i:s"),
+                    'updated_at'      => $obUpdatedAt->format("d.m.Y H:i:s"),
                     'completion_date' => $date ?? null,
                     'status'          => (int)$model->status,
                     'status_text'     => $model->statusText,

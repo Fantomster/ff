@@ -174,39 +174,10 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
 
                 if($model->mode == rejectedForm::INPUT_MODE) {
                     $vsd = MercVsd::findOne(['uuid' => $uuid]);
-                    $result = $api->checkShipmentRegionalizationOperation($vsd->recipient_guid, $vsd->sender_guid, $vsd->sub_product_guid);
-                    if ($result == null) {
-                        throw new \Exception('CheckShipmentRegionalizationOperation error');
-                    }
-
-                    $result = is_array($result) ? $result : [$result];
-                    $сonditions = null;
-                    foreach ($result as $item) {
-                        $item = json_decode(json_encode($item), true);
-                        switch ($item['appliedR13nRule']['decision']) {
-                            case 1 :
-                                break;                         //Можно делать перемещение без ограничений
-                            case 2 ://Можно делать перемещение при соблюдении условий
-                                foreach ($item['appliedR13nRule']['requirement'] as $requirement) {
-                                    $conditionGroup = is_array($requirement["conditionGroup"]) ? $requirement["conditionGroup"] : [$requirement["conditionGroup"]];
-                                    foreach ($conditionGroup as $group) {
-                                        $group = !array_key_exists('condition', $group) ? $group : $group['condition'];
-                                        $condition = !array_key_exists('guid', $group) ? $group : [$group];
-                                        foreach ($condition as $cond) {
-                                            if ($cond['active'] && $cond['last']) {
-                                                $conditions [$cond['guid']] = $cond['text'];
-                                            }
-                                        }
-                                    }
-                                }
-                                break;
-                            case 3 :
-                                throw new Exception('Пересещение запрещено правилами регионализации (' . $item['appliedR13nRule']['requirement']['relatedDisease']['name'] . ')!');
-                        }
-                    }
+                    $conditions = $api->getRegionalizationConditions($vsd->recipient_guid, $vsd->sender_guid, $vsd->sub_product_guid);
 
                     if (isset($conditions)) {
-                        $model->conditions = json_encode($conditions);
+                        $model->conditionsDescription = json_encode($conditions);
                         $model->mode = rejectedForm::CONFIRM_MODE;
                         if (Yii::$app->request->isAjax) {
                             return $this->renderAjax('rejected/_ajaxForm', [

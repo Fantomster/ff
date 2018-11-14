@@ -253,12 +253,13 @@ class VetDocumentDone extends Component
             $authentication['purpose']= ['guid' => $doc->authentication->purpose->guid];
             $conditions = null;
 
-            $this->conditions = json_decode($this->conditions, true);
-            foreach ($this->conditions as $key=>$item) {
-                $r13nClause = new RegionalizationClause();
-                $r13nClause->condition = new RegionalizationCondition();
-                $r13nClause->condition->guid = $key;
-                $conditions[] = $r13nClause;
+            foreach ($this->conditions as $item) {
+                if($item != "0") {
+                    $r13nClause = new RegionalizationClause();
+                    $r13nClause->condition = new RegionalizationCondition();
+                    $r13nClause->condition->guid = $item;
+                    $conditions[] = $r13nClause;
+                }
             }
             $authentication['r13nClause'] = $conditions;
             $accompanyingForms->vetCertificate->authentication = $authentication;

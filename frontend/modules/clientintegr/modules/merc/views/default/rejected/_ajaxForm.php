@@ -53,26 +53,50 @@ $form = ActiveForm::begin([
             echo $form->field($model, 'volume')->hiddenInput()->label(false);
             echo $form->field($model, 'reason')->hiddenInput()->label(false);
             echo $form->field($model, 'description')->hiddenInput()->label(false);
-            echo $form->field($model, 'conditions')->hiddenInput()->label(false);
+            echo $form->field($model, 'conditionsDescription')->hiddenInput()->label(false);
+            $style= <<< CSS
+   .checkbox {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+CSS;
+            $this->registerCss($style);
+
             echo "<h4>Подтвердите выполнение условий регионализации: </h4>";
-            $conditions = json_decode($model->conditions, true);
-            echo " <div style=\"padding-left: 15px;padding-right: 15px;\"><ul>";
-            foreach ($conditions as $item) {
-                echo "<li style=\"padding-bottom: 10px;\">".$item."</li>";
+            $conditions = json_decode($model->conditionsDescription, true);
+            /* echo "<pre>";
+             var_dump($conditions); die();*/
+            $step = 0;
+            echo " <div style=\"padding-bottom: 15px;\">";
+            foreach ($conditions as $key => $block) {
+                if($step > 0) {
+                    echo "<p><b>и</b></p>";
+                }
+                echo "<div style=\"-webkit-border-radius: 3px;border-radius: 3px;padding: 10px;border: 1px solid #ddd;\">";
+                echo "<p><b><u>".$key."</u></b></p>";
+                $i = 0;
+                foreach ($block as $item) {
+                    if($i > 0) {
+                        echo "<p><b>или</b></p>";
+                    }
+                    echo $form->field($model, 'conditions[]',['template' => '{input}{error}'])
+                        ->checkbox([
+                            'label' => $item['text'],
+                            'labelOptions' => [
+                                'style' => 'padding-left:20px;'
+                            ],
+                            'value' => $item['guid']
+                        ]);
+                    $i++;
+                }
+                echo "</div>";
+                $step++;
             }
-            echo "</ul></div>";
+            echo "</div>";
         }?>
     </div>
     <div class="modal-footer">
-        <?php
-        if($model->mode == \frontend\modules\clientintegr\modules\merc\models\rejectedForm::INPUT_MODE) {
-            echo Html::button('<i class="icon fa fa-save save-form"></i> '.Yii::t('message', 'frontend.views.layouts.client.integration.save', ['ru' => 'Сохранить']), ['class' => 'btn btn-success save-form']);
-        }
-        else
-        {
-            echo Html::button('<i class="icon fa fa-save save-form"></i> '.Yii::t('message', 'market.views.site.main.confirm', ['ru' => 'Подтвердить']), ['class' => 'btn btn-success save-form']);
-        }
-        ?>
+        <?php echo Html::button('<i class="icon fa fa-save save-form"></i> '.Yii::t('message', 'frontend.views.layouts.client.integration.save', ['ru' => 'Сохранить']), ['class' => 'btn btn-success save-form']); ?>
         <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'Close') ?></a>
     </div>
 <?php ActiveForm::end(); ?>

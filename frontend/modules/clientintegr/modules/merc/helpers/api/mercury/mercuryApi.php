@@ -1002,4 +1002,58 @@ class mercuryApi extends baseApi
         return $result;
     }
 
+    public function getRegionalizationConditions ($recipient_guid, $sender_guid, $cargoTypeGuid)
+    {
+        $result = $this->checkShipmentRegionalizationOperation($recipient_guid, $sender_guid, $cargoTypeGuid);
+        if ($result == null) {
+            throw new \Exception('CheckShipmentRegionalizationOperation error');
+        }
+        $result = is_array($result) ? $result : [$result];
+        $сonditions = null;
+        foreach ($result as $item) {
+            $item = json_decode(json_encode($item), true);
+            switch ($item['appliedR13nRule']['decision']) {
+                case 1 :
+                    break;                         //Можно делать перемещение без ограничений
+                case 2 ://Можно делать перемещение при соблюдении условий
+                    $requirements = !array_key_exists('relatedDisease', $item['appliedR13nRule']['requirement']) ? $item['appliedR13nRule']['requirement'] : [$item['appliedR13nRule']['requirement']];
+                    foreach ($requirements as $requirement) {
+                        $conditions[$requirement['relatedDisease']['name']] = $this->getConditions($requirement);
+                    }
+                    break;
+                case 3 :
+                    throw new Exception('Пересещение запрещено правилами регионализации (' . $item['appliedR13nRule']['requirement']['relatedDisease']['name'] . ')!');
+            }
+        }
+
+        return $conditions;
+    }
+
+    private function getConditions($requirement) {
+        $conditions = null;
+        switch ($requirement['type']) {
+            case 1 :
+                break;                         //Можно делать перемещение без ограничений
+            case 2 ://Можно делать перемещение при соблюдении условий
+                    $conditionGroups = is_array($requirement["conditionGroup"]) ? $requirement["conditionGroup"] : [$requirement["conditionGroup"]];
+                    $i = 0;
+                    foreach ($conditionGroups as $group) {
+                        $group = !array_key_exists('condition', $group) ? $group : $group['condition'];
+                        $condition = !array_key_exists('guid', $group) ? $group : [$group];
+                        foreach ($condition as $cond) {
+                            if ($cond['active'] && $cond['last']) {
+                                $conditions[$i] = ['guid' => $cond['guid'],
+                                'text' => $cond['text']];
+                            }
+                        }
+                        $i++;
+                    }
+                break;
+            case 3 :
+                throw new Exception('Пересещение запрещено правилами регионализации (' . $requirement['relatedDisease']['name'] . ')!');
+        }
+
+        return $conditions;
+    }
 }
+

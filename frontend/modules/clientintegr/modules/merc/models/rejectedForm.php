@@ -22,6 +22,7 @@ class rejectedForm extends Model {
     public $uuid;
     public $decision;
     public $conditions;
+    public $conditionsDescription;
     public $mode = self::INPUT_MODE;
 
     public function rules()
@@ -34,8 +35,24 @@ class rejectedForm extends Model {
                 return $newValue;
             }],
             [['reason', 'description'], 'string', 'max' => 255],
-            [['uuid','conditions', 'mode'], 'safe']
+            [['conditions'], 'checkConditions'],
+            [['uuid','conditions', 'mode', 'conditionsDescription'], 'safe']
         ];
+    }
+
+    public function checkConditions($attribute, $params)
+    {
+        if($this->mode == self::CONFIRM_MODE) {
+            $count = 0;
+            foreach ($this->conditions as $cond) {
+                if ($cond == "0") {
+                    $count ++;
+                }
+            }
+            if ($count == count($this->conditions)) {
+                    $this->addError($attribute, "Должны быть выбраны условия регионализации");
+            }
+        }
     }
 
     /**

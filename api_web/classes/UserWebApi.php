@@ -340,6 +340,12 @@ class UserWebApi extends \api_web\components\WebApi
             $result[] = WebApiHelper::prepareOrganization($model);
         }
 
+        $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($result, 'id'));
+        $result = array_map(function ($item) use ($licenses) {
+            $item['license_is_active'] = isset($licenses[$item['id']]);
+            return $item;
+        }, $result);
+
         return $result;
     }
 

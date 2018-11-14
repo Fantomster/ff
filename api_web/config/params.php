@@ -24,7 +24,8 @@ return [
     'allow_methods_without_license' => [
         '/user/login',
         '/user/get-available-businesses',
-        '/user/set-organization'
+        '/user/set-organization',
+        '/user/organization'
     ],
     'api_web_url' => 'https://api-dev.mixcart.ru'
 ];

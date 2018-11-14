@@ -46,12 +46,12 @@ class EdiController extends WebApiController
      *                             2
      *                         },
      *                         "create_date": {
-     *                             "from": "23.08.2018",
-     *                             "to": "24.08.2018"
+     *                             "start": "23.08.2018",
+     *                             "end": "24.08.2018"
      *                         },
      *                         "completion_date": {
-     *                             "from": "23.08.2018",
-     *                             "to": "24.08.2018"
+     *                             "start": "23.08.2018",
+     *                             "end": "24.08.2018"
      *                         }
      *                      },
      *                      "pagination": {
@@ -84,16 +84,6 @@ class EdiController extends WebApiController
      *                              "2",
      *                              "3"
      *                          }
-     *                      },
-     *                      {
-     *                          "id": 14,
-     *                          "created_at": "10.10.2016",
-     *                          "status_updated_at": "11.10.2016",
-     *                          "status": 1,
-     *                          "status_text": "Ожидает подтверждения поставщика",
-     *                          "vendor": "POSTAVKA CORP INC",
-     *                          "create_user": "Vasya",
-     *                          "comment": "Коментариев гнет"
      *                      }
      *                  },
      *                  "pagination": {

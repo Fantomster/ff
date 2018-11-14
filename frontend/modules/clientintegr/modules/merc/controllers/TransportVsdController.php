@@ -35,12 +35,12 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 // We will override the default rule config with the new AccessRule class
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
                         'allow' => false,
                         // Allow restaurant managers
@@ -51,7 +51,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                         ],
                     ],
                     [
-                        'allow' => TRUE,
+                        'allow' => true,
                         'roles' => ['@'],
                     ],
 
@@ -81,7 +81,6 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
     {
         return $this->render('/default/_nolic');
     }
-
 
     public function actionStep1()
     {
@@ -185,31 +184,100 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         $session->remove('TrVsd_step4');
 
         $post = Yii::$app->request->post();
-        if ($model->load($post)) {
-            if ($model->validate()) {
-                $session->set('TrVsd_step4', $model->attributes);
-                $request = new CreatePrepareOutgoingConsignmentRequest();
-                $request->step4 = $model->attributes;
-                $request->step1 = $session->get('TrVsd_step1');
-                $request->step2 = $session->get('TrVsd_step2');
-                $request->step3 = $session->get('TrVsd_step3');
+        if ($model->load($post) && $model->validate()) {
+            $session->set('TrVsd_step4', $model->attributes);
+            $request = new CreatePrepareOutgoingConsignmentRequest();
+            $request->step4 = $model->attributes;
+            $request->step1 = $session->get('TrVsd_step1');
+            $request->step2 = $session->get('TrVsd_step2');
+            $request->step3 = $session->get('TrVsd_step3');
 
-                try {
-                    mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($request);
-                    Yii::$app->session->setFlash('success', 'Транспортный ВСД успешно создан!');
-                    $session->remove('TrVsd_step1');
-                    $session->remove('TrVsd_step2');
-                    $session->remove('TrVsd_step3');
-                    $session->remove('TrVsd_step4');
-                } catch (\SoapFault $e) {
-                    Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                } catch (\Exception $e) {
-                    Yii::$app->session->setFlash('error', $this->getErrorText($e));
+            if ($model->mode == step4Form::INPUT_MODE) {
+                $request->checkShipmentRegionalizationOperation();
+
+                /*$request->conditionsDescription = json_encode(
+                    ['Говядина'   => [
+                        "Высокопатогенный грипп птиц" =>
+                            [
+                                [
+                                    "guid" => "50e98f85-25f9-4594-acdc-4f5a7a812674",
+                                    "text" => "Продукты убоя получены от убоя птицы, которая содержались (обитала) на территории, имеющей зоосанитарный статус, указанный в левом столбце данной строки или более благополучный, с вылупления или в течение последних 12 месяцев."
+                                ],
+                                [
+                                    "guid" => "14a85e2f-8531-49b5-83fb-5c7751d5da09",
+                                    "text" => "Убой птицы был осуществлен на бойне, работающей под надзором ветеринарной службы региона и расположенной на территории, имеющей зоосанитарный статус, указанный в левом столбце данной строки или более благополучный."
+                                ]
+                            ],
+                        "Грипп птиц"                  =>
+                            [
+                                [
+                                    "guid" => "9151cbda-171e-4510-a753-7f56e16bf8a0",
+                                    "text" => "Продукты убоя получены от убоя птицы, которая содержались (обитала) на территории, имеющей зоосанитарный статус, указанный в левом столбце данной строки или более благополучный, с вылупления или в течение последних 12 месяцев."
+                                ],
+                                [
+                                    "guid" => "3ed77f43-6bf6-4e4b-acda-2c2c0ff1edfd",
+                                    "text" => "Убой птицы был осуществлен на бойне, работающей под надзором ветеринарной службы региона и расположенной на территории, имеющей зоосанитарный статус, указанный в левом столбце данной строки или более благополучный."
+                                ]
+                            ]
+                    ],
+                     'окорок-777' => [
+                         "Высокопатогенный грипп птиц" =>
+                             [
+                                 [
+                                     "guid" => "50e98f85-25f9-4594-acdc-4f5a7a812674",
+                                     "text" => "Продукты убоя получены от убоя птицы, которая содержались (обитала) на территории, имеющей зоосанитарный статус, указанный в левом столбце данной строки или более благополучный, с вылупления или в течение последних 12 месяцев."
+                                 ],
+                                 [
+                                     "guid" => "14a85e2f-8531-49b5-83fb-5c7751d5da09",
+                                     "text" => "Убой птицы был осуществлен на бойне, работающей под надзором ветеринарной службы региона и расположенной на территории, имеющей зоосанитарный статус, указанный в левом столбце данной строки или более благополучный."
+                                 ]
+                             ],
+                         "Грипп птиц"                  =>
+                             [
+                                 [
+                                     "guid" => "9151cbda-171e-4510-a753-7f56e16bf8a0",
+                                     "text" => "Продукты убоя получены от убоя птицы, которая содержались (обитала) на территории, имеющей зоосанитарный статус, указанный в левом столбце данной строки или более благополучный, с вылупления или в течение последних 12 месяцев."
+                                 ],
+                                 [
+                                     "guid" => "3ed77f43-6bf6-4e4b-acda-2c2c0ff1edfd",
+                                     "text" => "Убой птицы был осуществлен на бойне, работающей под надзором ветеринарной службы региона и расположенной на территории, имеющей зоосанитарный статус, указанный в левом столбце данной строки или более благополучный."
+                                 ]
+                             ]
+                     ]
+                    ]
+                );*/
+
+                if (isset($request->conditionsDescription)) {
+                    $model->mode = step4Form::CONFIRM_MODE;
+                    $model->conditionsDescription = $request->conditionsDescription;
+                    return $this->render('conditionsConfirm', [
+                        'model' => $model,
+                    ]);
                 }
-                return $this->redirect(['/clientintegr/merc/stock-entry']);
             }
+
+            $request->conditions = $post['conditions'] ?? null;
+              try {
+                  mercuryApi::getInstance()->prepareOutgoingConsignmentOperation($request);
+                  Yii::$app->session->setFlash('success', 'Транспортный ВСД успешно создан!');
+                  $session->remove('TrVsd_step1');
+                  $session->remove('TrVsd_step2');
+                  $session->remove('TrVsd_step3');
+                  $session->remove('TrVsd_step4');
+              } catch (\SoapFault $e) {
+                  Yii::$app->session->setFlash('error', $this->getErrorText($e));
+              } catch (\Exception $e) {
+                  Yii::$app->session->setFlash('error', $this->getErrorText($e));
+              }
+            return $this->redirect(['/clientintegr/merc/stock-entry']);
         }
-        return $this->render('step-4', ['model' => $model]);
+        if ($model->mode == step4Form::INPUT_MODE) {
+            return $this->render('step-4', ['model' => $model]);
+        } else {
+            return $this->render('conditionsConfirm', [
+                'model' => $model,
+            ]);
+        }
     }
 
     public function actionAutocomplete($type = 1)
@@ -246,15 +314,13 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         Yii::$app->response->format = Response::FORMAT_JSON;
         try {
             $hc = cerberApi::getInstance()->getEnterpriseByGuid($recipient_guid);
-            if(!isset($hc)) {
-                return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
-            }
-            else {
-                if(isset($hc->owner)) {
+            if (!isset($hc)) {
+                return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
+            } else {
+                if (isset($hc->owner)) {
                     $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
-                }
-                else {
-                    return (['result' => false, 'name'=>'Не удалось загрузить Фирму-получателя']);
+                } else {
+                    return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
                 }
             }
         } catch (\SoapFault $e) {
@@ -272,7 +338,6 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
         }
     }
-
 
     public function actionConversionStep1()
     {
@@ -323,7 +388,6 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         }
         return $this->render('conversion-step-1', ['list' => $list]);
     }
-
 
     public function actionConversionStep2()
     {
@@ -376,13 +440,13 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         if (!is_null($q)) {
             $producer = mercDicconst::getSetting('issuer_id');
             $res = [];
-            $list = VetisProductItem::find()->where("name LIKE '%$q%'")->andWhere(['active'=>true, 'last' => true, 'producer_guid' => $producer])->limit(20)->all();
+            $list = VetisProductItem::find()->where("name LIKE '%$q%'")->andWhere(['active' => true, 'last' => true, 'producer_guid' => $producer])->limit(20)->all();
             if (isset($list)) {
                 $res = [];
                 foreach ($list as $item) {
                     if (($item->last) && ($item->active))
-                        $res[] = ['id' => $item->guid,
-                            'text' => $item->name];
+                        $res[] = ['id'   => $item->guid,
+                                  'text' => $item->name];
                 }
             }
         }

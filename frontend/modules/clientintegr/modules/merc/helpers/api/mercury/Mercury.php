@@ -342,6 +342,8 @@ class MedicinalDrug{
     var $producer;//BusinessMember
 }
 class RegionalizationCondition{
+    var $uuid; //UUID
+    var $guid; //UUID
     var $referenceNumber;//Identifier
     var $text;//Text
     var $strict;//boolean
@@ -558,7 +560,7 @@ class TransportNumber{
 }
 class ShipmentRoutePoint{
     var $sqnId;//SequenceNumber
-    var $location;//Location
+    //var $location;//Location
     var $enterprise;//Enterprise
     var $transshipment;//boolean
     var $nextTransport;//TransportInfo
@@ -913,6 +915,8 @@ class UpdateVeterinaryEventsResponse{
     var $stockEntry;//StockEntry
 }
 class CheckShipmentRegionalizationRequest{
+    var $initiator;//User
+    var $localTransactionId;//Identifier
     var $cargoType;//SubProduct
     var $shipmentRoute;//ShipmentRoute
 }

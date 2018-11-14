@@ -162,10 +162,10 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     {
         return [
             'timestamp' => [
-                'class' => TimestampBehavior::class,
+                'class'              => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',
-                'value' => \gmdate('Y-m-d H:i:s'),
+                'value'              => \gmdate('Y-m-d H:i:s'),
             ],
         ];
     }
@@ -338,13 +338,13 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
                 $queueName = $queue->consumer_class_name;
             }
 
-            $data['job_uid'] = base64_encode(strtolower('MercVSDList').time());
-            $data['startDate'] = $start_date ?? gmdate("Y-m-d H:i:s", time() - 60*60*24);
+            $data['job_uid'] = base64_encode(strtolower('MercVSDList') . time());
+            $data['startDate'] = $start_date ?? gmdate("Y-m-d H:i:s", time() - 60 * 60 * 24);
             $data['listOptions']['count'] = 100;
             $data['listOptions']['offset'] = 0;
             $data['enterpriseGuid'] = $enterpriseGuid;
 
-            if(isset($start_date)) {
+            if (isset($start_date)) {
                 $queue->data_request = json_encode($data);
             }
 

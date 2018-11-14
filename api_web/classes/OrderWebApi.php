@@ -619,19 +619,19 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $obDateTime->format("d.m.Y H:i:s");
                 }
                 $obCreateAt = new \DateTime($model->created_at);
-                $obUpdatedAt = new \DateTime($model->updated_at);
+                $obUpdatedAt = new \DateTime($model->status_updated_at);
                 $orderInfo = [
-                    'id'              => (int)$model->id,
-                    'created_at'      => $obCreateAt->format("d.m.Y H:i:s"),
-                    'updated_at'      => $obUpdatedAt->format("d.m.Y H:i:s"),
-                    'completion_date' => $date ?? null,
-                    'status'          => (int)$model->status,
-                    'status_text'     => $model->statusText,
-                    'vendor'          => $model->vendor->name,
-                    'currency_id'     => $model->currency_id,
-                    'create_user'     => $model->createdByProfile->full_name ?? '',
-                    'accept_user'     => $model->acceptedByProfile->full_name ?? '',
-                    'count_position'  => count($model->orderContent),
+                    'id'                => (int)$model->id,
+                    'created_at'        => $obCreateAt->format("d.m.Y H:i:s"),
+                    'status_updated_at' => $obUpdatedAt->format("d.m.Y H:i:s"),
+                    'completion_date'   => $date ?? null,
+                    'status'            => (int)$model->status,
+                    'status_text'       => $model->statusText,
+                    'vendor'            => $model->vendor->name,
+                    'currency_id'       => $model->currency_id,
+                    'create_user'       => $model->createdByProfile->full_name ?? '',
+                    'accept_user'       => $model->acceptedByProfile->full_name ?? '',
+                    'count_position'    => count($model->orderContent),
                 ];
                 if ($model->service_id == Registry::EDI_SERVICE_ID) {
                     if (!empty($model->orderContent)) {

@@ -163,17 +163,15 @@ EOXML;
     {
         $action = 'send';
         $string = base64_encode($string);
-        $login = $this->ediOrganization['login'];
-        $pass = $this->ediOrganization['pass'];
         $documentType = ($done) ? 'RECADV' : 'ORDERS';
-        $relationId = $this->getRelation($documentType, $login, $pass, $this->ediOrganization['gln_code']);
+        $relationId = $this->getRelation($documentType);
         $soap_request = <<<EOXML
 <soapenv:Envelope xmlns:soapenv="$this->schema" xmlns:edi="$this->wsdl">
    <soapenv:Header/>
    <soapenv:Body>
       <edi:SendInput>
-         <edi:Name>$login</edi:Name>
-         <edi:Password>$pass</edi:Password>
+         <edi:Name>$this->login</edi:Name>
+         <edi:Password>$this->pass</edi:Password>
          <edi:RelationId>$relationId</edi:RelationId>
          <edi:DocumentContent>$string</edi:DocumentContent>
       </edi:SendInput>

@@ -17,6 +17,7 @@ use common\models\Organization;
 use common\models\RelationSuppRest;
 use common\models\User;
 use frontend\controllers\OrderController;
+use yii\base\Controller;
 use yii\db\Expression;
 use Yii;
 
@@ -333,7 +334,8 @@ class EDIClass extends Component
             $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
         } else {
             if (!$rel->cat_id) {
-                $rel->cat_id = $baseCatalog->id;
+                $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
+                $rel->cat_id = $relationCatalogID;
                 $rel->save();
             }
             $relationCatalogID = $rel->cat_id;
@@ -390,6 +392,31 @@ class EDIClass extends Component
         } else {
             return false;
         }
+    }
+
+    private function createCatalog(Organization $organization, Currency $currency, Organization $rest): int
+    {
+        $catalog = new Catalog();
+        $catalog->type = Catalog::CATALOG;
+        $catalog->supp_org_id = $organization->id;
+        $catalog->name = $organization->name;
+        $catalog->status = Catalog::STATUS_ON;
+        $catalog->created_at = new Expression('NOW()');
+        $catalog->updated_at = new Expression('NOW()');
+        $catalog->currency_id = $currency->id ?? 1;
+        $catalog->save();
+        $catalogID = $catalog->id;
+
+        $rel = new RelationSuppRest();
+        $rel->rest_org_id = $rest->id;
+        $rel->supp_org_id = $organization->id;
+        $rel->cat_id = $catalogID;
+        $rel->invite = 1;
+        $rel->created_at = new Expression('NOW()');
+        $rel->updated_at = new Expression('NOW()');
+        $rel->status = RelationSuppRest::CATALOG_STATUS_ON;
+        $rel->save();
+        return $catalogID;
     }
 
     /**

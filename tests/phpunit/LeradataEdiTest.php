@@ -19,18 +19,18 @@ use common\models\edi\EdiProvider;
  *
  * @package tests\phpunit
  */
-class KorusEdiTest extends TestCase
+class LeradataEdiTest extends TestCase
 {
 
     public function orderProvider()
     {
-        $ediProvider = EdiProvider::findOne(['provider_class' => 'KorusProvider']);
+        $ediProvider = EdiProvider::findOne(['provider_class' => 'LeradataProvider']);
         $this->assertNotEmpty($ediProvider);
 
-        $ordrspPath = 'tests/edi_xml/test_ordrsp_korus.php';
-        $desadvPath = 'tests/edi_xml/test_desadv_korus.php';
+        $ordrspPath = 'tests/edi_xml/test_ordrsp_leradata.php';
+        $desadvPath = 'tests/edi_xml/test_desadv_leradata.php';
 
-        $paramsFirst = \Yii::$app->params['unitTestsData']['korus']['firstTest'];
+        $paramsFirst = \Yii::$app->params['unitTestsData']['leradata']['firstTest'];
         $this->assertNotEmpty($paramsFirst);
 
         $arr = [
@@ -46,12 +46,12 @@ class KorusEdiTest extends TestCase
      */
     public function testUploadEdiFilesListToTable($restOrgID, $vendorOrgID, $userID, $goodsArray, $providerID, $ordrspPath, $desadvPath): void
     {
-        $ediIntegration = new EDIIntegration(['orgId' => $vendorOrgID, 'providerID' => $providerID]);
+        $ediIntegration = new EDIIntegration(['orgId' => $restOrgID, 'providerID' => $providerID]);
         $this->assertNotEmpty($ediIntegration);
 
         $ediIntegration->handleFilesList();
 
-        $list = $ediIntegration->provider->getFilesList($vendorOrgID);
+        $list = $ediIntegration->provider->getFilesList($restOrgID);
 
         $rows = (new \yii\db\Query())
             ->select(['id', 'name'])
@@ -79,7 +79,7 @@ class KorusEdiTest extends TestCase
         $string = $controller->renderFile($ordrspPath, ['order' => $order]);
         $this->assertNotEmpty($string);
 
-        $ediIntegration = new EDIIntegration(['orgId' => $vendorOrgID, 'providerID' => $providerID]);
+        $ediIntegration = new EDIIntegration(['orgId' => $restOrgID, 'providerID' => $providerID]);
         $this->assertNotEmpty($ediIntegration);
 
         $ediIntegration->handleFilesListQueue();
@@ -89,7 +89,7 @@ class KorusEdiTest extends TestCase
         $stringDesadv = $controller->renderFile($desadvPath, ['order' => $order]);
         $this->assertNotEmpty($stringDesadv);
 
-        $ediIntegration2 = new EDIIntegration(['orgId' => $vendorOrgID, 'providerID' => $providerID]);
+        $ediIntegration2 = new EDIIntegration(['orgId' => $restOrgID, 'providerID' => $providerID]);
         $this->assertNotEmpty($ediIntegration2);
 
         $ediIntegration2->handleFilesListQueue();

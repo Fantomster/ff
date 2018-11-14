@@ -709,7 +709,7 @@ class Order extends \yii\db\ActiveRecord
                 throw new BadRequestHttpException($errorText);
             }
         }
-        if ($this->status == OrderStatus::STATUS_DONE) {
+        if ($this->status == OrderStatus::STATUS_DONE && !Yii::$app instanceof \yii\console\Application) {
             AutoWaybillHelper::processWaybill($this->id);
         }
     }

@@ -32,42 +32,40 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
      */
     public $realization;
     public $content;
-    public $ediFilesQueueID;
+    public $ediFilesQueueID = 0;
     private $url;
     private $ediProvider;
     private $token;
-    private $varGln;
     private $intUserID;
     private $providerID;
+    public $ediOrganization;
+    private $glnCode;
+    private $orgID;
 
     /**
      * Provider constructor.
      */
-    public function __construct()
+    public function __construct($ediOrganization)
     {
         $this->ediProvider = new EDIProvidersClass();
         $this->url = \Yii::$app->params['edi_api_data']['edi_api_leradata_url'];
-        $pos = strrpos(self::class, '\\');
-        $class = substr(self::class, $pos + 1);
-        $provider = EdiProvider::findOne(['provider_class' => $class]);
-        $this->providerID = $provider->id;
+        $this->providerID = parent::getProviderID(self::class);
+        $this->ediOrganization = $ediOrganization;
+        $this->intUserID = $this->ediOrganization['int_user_id'];
+        $this->token = $this->ediOrganization['token'];
+        $this->glnCode = $this->ediOrganization['gln_code'];
+        $this->orgID = $this->ediOrganization['organization_id'];
     }
 
     /**
      * Get files list from provider and insert to table
      */
-    public function handleFilesList($orgID): void
+    public function handleFilesList(): void
     {
-        $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgID, 'provider_id' => $this->providerID]);
-        if ($ediOrganization) {
-            $this->token = $ediOrganization['token'];
-            $this->varGln = $ediOrganization['gln_code'];
-            $this->intUserID = $ediOrganization['int_user_id'];
-            try {
-                $objectList = $this->getFilesListForInsertingInQueue();
-            } catch (\Throwable $e) {
-                Yii::error($e->getMessage());
-            }
+        try {
+            $this->getFilesListForInsertingInQueue();
+        } catch (\Throwable $e) {
+            Yii::error($e->getMessage());
         }
     }
 
@@ -89,7 +87,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     {
         $paramsArray = [
             "docType" => $type,
-            "GLNs"    => [$this->varGln]
+            "GLNs"    => [$this->glnCode]
         ];
 
         $obj = $this->executeCurl($paramsArray, 'edi_getDocument');
@@ -115,7 +113,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         return [];
     }
 
-    public function sendOrderInfo($order, $orgId, $done = false): bool
+    public function sendOrderInfo($order, $done = false): bool
     {
         $transaction = Yii::$app->db_api->beginTransaction();
         $result = false;
@@ -131,14 +129,6 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);
             $dateArray = $this->ediProvider->getDateData($order);
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
-            $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId, 'provider_id' => $this->providerID]);
-            if (!$ediOrganization) {
-                throw new BadRequestHttpException();
-                $transaction->rollback();
-            }
-            $this->token = $ediOrganization['token'];
-            $this->varGln = $ediOrganization['gln_code'];
-            $this->intUserID = $ediOrganization['int_user_id'];
             $result = $this->sendDoc($string, $done);
             $transaction->commit();
         } catch (Exception $e) {
@@ -189,7 +179,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     {
         $requestArray = [
             "token"     => "$this->token",
-            "varGln"    => "$this->varGln",
+            "varGln"    => "$this->glnCode",
             "intUserID" => "$this->intUserID",
             "params"    => $paramsArray
         ];
@@ -211,18 +201,4 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             $this->updateQueue($this->ediFilesQueueID, parent::STATUS_HANDLED, '');
         }
     }
-
-    /**
-     * @return array
-     */
-    public function getFilesList($organizationId): array
-    {
-        return (new \yii\db\Query())
-            ->select(['id', 'name', 'json_data'])
-            ->from('edi_files_queue')
-            ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
-            ->andWhere(['organization_id' => $organizationId])
-            ->all();
-    }
-
 }

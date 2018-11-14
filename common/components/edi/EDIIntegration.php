@@ -17,6 +17,7 @@ class EDIIntegration extends Component
     public $orgId;
     public $clientId;
     public $providerID;
+    public $ediOrganization;
 
     /**
      * @var array
@@ -53,8 +54,9 @@ class EDIIntegration extends Component
             $ediOrganization = EdiOrganization::findOne(['organization_id' => $this->orgId, 'provider_id' => $this->providerID]);
         }
         if (!$ediOrganization) {
-            throw new BadRequestHttpException("Config not set for this vendor");
+            throw new BadRequestHttpException("Config not set for this organization");
         }
+        $this->ediOrganization = $ediOrganization;
 
         $this->setProvider($this->createClass('providers\\', $ediOrganization->ediProvider->provider_class));
         $this->setRealization($this->createClass('realization\\', $ediOrganization->ediProvider->realization_class));
@@ -71,13 +73,13 @@ class EDIIntegration extends Component
         if (array_key_exists($className, $this->obConf)) {
             return new $strClassName($this->obConf[$className]);
         }
-        return new $strClassName();
+        return new $strClassName($this->ediOrganization);
     }
 
     /**
      * @param \common\components\edi\ProviderInterface $provider
      */
-    public function setProvider(ProviderInterface $provider)
+    public function setProvider($provider)
     {
         $this->provider = $provider;
     }
@@ -85,7 +87,7 @@ class EDIIntegration extends Component
     /**
      * @param \common\components\edi\RealizationInterface $realization
      */
-    public function setRealization(RealizationInterface $realization)
+    public function setRealization($realization)
     {
         $this->provider->realization = $realization;
     }
@@ -116,8 +118,8 @@ class EDIIntegration extends Component
      * @param $order
      * @param $isNewOrder
      */
-    public function sendOrderInfo($order, $isNewOrder)
+    public function sendOrderInfo($order, $done)
     {
-        $this->provider->sendOrderInfo($order, $this->orgId, $isNewOrder, $this->providerID);
+        $this->provider->sendOrderInfo($order, $done);
     }
 }

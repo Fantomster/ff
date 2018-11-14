@@ -17,6 +17,7 @@ use common\models\search\OrderProductsSearch;
 use frontend\helpers\GenerationTime;
 use Yii;
 use common\components\SearchOrdersComponent;
+use yii\base\Controller;
 use yii\db\Expression;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -2068,7 +2069,12 @@ class OrderController extends DefaultController
             $newMessage->recipient_id = $order->client_id;
         }
         $newMessage->save();
-        $body = Yii::$app->controller->renderPartial('@frontend/views/order/_chat-message', [
+        if (Yii::$app instanceof \yii\console\Application) {
+            $controller = new Controller("", "");
+        } else {
+            $controller = Yii::$app->controller;
+        }
+        $body = $controller->renderPartial('@frontend/views/order/_chat-message', [
             'name'      => '',
             'message'   => $newMessage->message,
             'time'      => $newMessage->created_at,
@@ -2310,7 +2316,7 @@ class OrderController extends DefaultController
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification)
                     if ($notification->order_processing) {
-                        $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        $result = $mailer->compose('@common/mail/orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                             ->setTo($email)
                             ->setSubject($subject)
                             ->send();

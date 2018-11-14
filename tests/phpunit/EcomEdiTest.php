@@ -7,30 +7,30 @@ use common\components\edi\EDIIntegration;
 use common\models\Cart;
 use common\models\CartContent;
 use common\models\CatalogBaseGoods;
+use common\models\edi\EdiProvider;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OrderStatus;
 use PHPUnit\Framework\TestCase;
 use yii\base\Controller;
-use common\models\edi\EdiProvider;
 
 /**
  * Class EdiTest
  *
  * @package tests\phpunit
  */
-class KorusEdiTest extends TestCase
+class EcomEdiTest extends TestCase
 {
 
     public function orderProvider()
     {
-        $ediProvider = EdiProvider::findOne(['provider_class' => 'KorusProvider']);
+        $ediProvider = EdiProvider::findOne(['provider_class' => 'EcomProvider']);
         $this->assertNotEmpty($ediProvider);
 
-        $ordrspPath = 'tests/edi_xml/test_ordrsp_korus.php';
-        $desadvPath = 'tests/edi_xml/test_desadv_korus.php';
+        $ordrspPath = 'tests/edi_xml/test_ordrsp_ecom.php';
+        $desadvPath = 'tests/edi_xml/test_desadv_ecom.php';
 
-        $paramsFirst = \Yii::$app->params['unitTestsData']['korus']['firstTest'];
+        $paramsFirst = \Yii::$app->params['unitTestsData']['ecom']['firstTest'];
         $this->assertNotEmpty($paramsFirst);
 
         $arr = [

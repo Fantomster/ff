@@ -195,7 +195,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             if ($model->mode == step4Form::INPUT_MODE) {
                 $request->checkShipmentRegionalizationOperation();
 
-                $request->conditionsDescription = json_encode(
+                /*$request->conditionsDescription = json_encode(
                     ['Говядина'   => [
                         "Высокопатогенный грипп птиц" =>
                             [
@@ -245,7 +245,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                              ]
                      ]
                     ]
-                );
+                );*/
 
                 if (isset($request->conditionsDescription)) {
                     $model->mode = step4Form::CONFIRM_MODE;

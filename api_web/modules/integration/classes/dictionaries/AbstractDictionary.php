@@ -357,7 +357,6 @@ class AbstractDictionary extends WebApi
                     ->andWhere(['os.service_id' => $this->service_id])
                     ->orderBy('p.`left`')
                     ->all(\Yii::$app->db_api);
-                $_ = [];
                 $tree = $this->createTree($result);
                 return ['stores' => empty($tree) ? null : reset($tree)];
             }

@@ -15,6 +15,7 @@ return [
     'protocol'              => 'http',
     'franchiseeHost'        => '//partner.mixcart.ru',
     'integratAdminID'       => [],
+    'operatorsReportAdminIDs' => [85, 16, 8832],
     #id франчази к которому крепим организации, для которых не нашли франчей
     'default_franchisee_id' => 1,
     //static urls

@@ -5,6 +5,7 @@ namespace api_web\modules\integration\modules\egais\models;
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\egais\helpers\EgaisHelper;
 use api_web\modules\integration\modules\egais\classes\egoisXmlFiles;
+use api\common\models\egais\egaisSettings;
 
 class EgaisMethods extends WebApi
 {
@@ -29,8 +30,17 @@ class EgaisMethods extends WebApi
      */
     public function getQueryRests($request)
     {
-        $xml=(new egoisXmlFiles())->QueryRests('030000443640');
-        $return = $this->helper->sendEgaisQuery('http://192.168.1.70:8090', 'QueryRests', $xml);
-        return $return;
+        if (empty($request)) {
+            $settings = (new egaisSettings())::find()->where(['org_id' => $this->helper->orgId])->one();
+            $xml = (new egoisXmlFiles())->QueryRests($settings->fsrar_id);
+            $return = $this->helper->sendEgaisQuery($settings->egais_url, $xml,'QueryRests');
+            return ['result' => $return];
+        }
+        return ['result' => false];
+    }
+
+    public function setEgaisSettings($request)
+    {
+        return (new EgaisHelper())->setSettings($request);
     }
 }

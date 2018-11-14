@@ -154,6 +154,7 @@ class EmailIntegrationController extends Controller
         /**
          * @var $setting IntegrationSettingFromEmail
          */
+        ini_set('memory_limit', '256M');
         error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
         
         //Получаем все активные настройки или конкретную настройку
@@ -299,8 +300,11 @@ class EmailIntegrationController extends Controller
             //print $setting->language.PHP_EOL;
             //Узнаём тип вложения
             $mime_type = array_keys($file)[0];
+            //Декодируем имя файла
+            $name_file    = iconv_mime_decode($name_file, 0, "UTF-8");
+            $excelExtension = (substr(mb_strtolower($name_file), -4) === ".xls") || (substr(mb_strtolower($name_file), -5) === ".xlsx");
             //Собираем только разрешённые вложения
-            if (!in_array(trim($mime_type), $allow_mime_types)) {
+            if (!(in_array(trim($mime_type), $allow_mime_types) || $excelExtension)) {
                 //echo '- Missed File MIME-TYPE:' . $mime_type . PHP_EOL;
                 continue;
             }
@@ -314,8 +318,6 @@ class EmailIntegrationController extends Controller
 
             //Получаем тело файла
             $content      = array_values($file)[0];
-            //Декодируем имя файла
-            $name_file    = iconv_mime_decode($name_file, 0, "UTF-8");
             //Темповый файл, для прочтения и парсинга
             $temp_file    = \Yii::getAlias('@app') . '/runtime/' . md5($email['id']) . '_' . $name_file;
             //Тело файла в BASE64 для возможности записи в базу

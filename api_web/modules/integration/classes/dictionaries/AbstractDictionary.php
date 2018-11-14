@@ -337,26 +337,7 @@ class AbstractDictionary extends WebApi
                 $orgId = $request['search']['business_id'];
             }
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
-                $result = (new Query())->distinct()->select([
-                    'p.name',
-                    'p.level',
-                    'p.id',
-                    'p.outer_uid',
-                    'p.store_type',
-                    'p.created_at',
-                    'p.updated_at',
-                    'p.`left`',
-                    'p.`right`',
-                    'if(p.is_deleted, 0,1) as is_active',
-                ])->from('outer_store os, outer_store p')
-                    ->andWhere('os.`left` BETWEEN p.`left` and p.`right`')
-                    ->andWhere(['like', 'os.name', $request['search']['name']])
-                    ->andWhere(['p.org_id' => $orgId])
-                    ->andWhere(['os.org_id' => $orgId])
-                    ->andWhere(['p.service_id' => $this->service_id])
-                    ->andWhere(['os.service_id' => $this->service_id])
-                    ->orderBy('p.`left`')
-                    ->all(\Yii::$app->db_api);
+                $result = $this->likeQueryNestedSets('outer_store', $request['search']['name'], $orgId);
                 $tree = $this->createTree($result);
                 return ['stores' => empty($tree) ? null : reset($tree)];
             }
@@ -597,17 +578,17 @@ class AbstractDictionary extends WebApi
         $search = OuterCategory::find()->where(['service_id' => $this->service_id, 'is_deleted' => 0]);
         $orgId = $this->user->organization->id;
 
-        /**
-         * TODO Не работает фильтр
-         */
         if (isset($request['search'])) {
-            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
-                $search->andWhere(['like', 'name', $request['search']['name']]);
-            }
-
             if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
                 $orgId = $request['search']['business_id'];
             }
+
+            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+                $result = $this->likeQueryNestedSets('outer_category', $request['search']['name'], $orgId);
+                $tree = $this->createTree($result);
+                return ['categories' => empty($tree) ? null : reset($tree)];
+            }
+
         }
 
         $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
@@ -695,5 +676,35 @@ class AbstractDictionary extends WebApi
         foreach ($items as $item) {
             yield $item;
         }
+    }
+
+    /**
+     * Универсальный запрос для получения обратного дерева от найденного листа для Nested Sets
+     *
+     * @param $table
+     * @param $strSearch
+     * @param $orgId
+     * @return array
+     */
+    private function likeQueryNestedSets($table, $strSearch, $orgId){
+        return (new Query())->distinct()->select([
+            'p.name',
+            'p.level',
+            'p.id',
+            'p.outer_uid',
+            'p.created_at',
+            'p.updated_at',
+            'p.`left`',
+            'p.`right`',
+            'if(p.is_deleted, 0,1) as is_active',
+        ])->from($table . ' os, ' . $table . ' p')
+            ->andWhere('os.`left` BETWEEN p.`left` and p.`right`')
+            ->andWhere(['like', 'os.name', $strSearch])
+            ->andWhere(['p.org_id' => $orgId])
+            ->andWhere(['os.org_id' => $orgId])
+            ->andWhere(['p.service_id' => $this->service_id])
+            ->andWhere(['os.service_id' => $this->service_id])
+            ->orderBy('p.`left`')
+            ->all(\Yii::$app->db_api);
     }
 }

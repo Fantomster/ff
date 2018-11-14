@@ -154,7 +154,8 @@ class IntegrationSettingsWebApi extends WebApi
         $arRes = [];
         foreach ($arSettings['arOrgs']['result'] as $item) {
             $setting = $arSettings['arSettingToOrg'][$item['id']] ?? null;
-            $item['main_org'] = $item['checked'] = false;
+            $item['main_org'] = $arRes[$item['id']]['main_org'] ?? false;
+            $item['checked'] = false;
             $item['parent_id'] = $setting['parent_id'] != "" ? $setting['parent_id'] : null;
             $arRes[$item['id']] = $item;
             if (!is_null($setting)) {

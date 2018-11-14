@@ -36,9 +36,7 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                 <div class="callout callout-fk-info">
                     <p>Подтвердите выполнение условий регионализации</p>
                 </div>
-                <?php $form = ActiveForm::begin(['id' => 'StockEntryForm']);
-                $model->confirm = true;
-                ?>
+                <?php $form = ActiveForm::begin(['id' => 'StockEntryForm']); ?>
                 <?= $form->field($model, 'type', ['enableClientValidation' => false])->hiddenInput()->label(false); ?>
                 <?= $form->field($model, 'type_name')->hiddenInput()->label(false) ?>
                 <?= $form->field($model, 'car_number')->hiddenInput()->label(false) ?>
@@ -49,24 +47,58 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
 
                 <?= $form->field($model, 'storage_type')->hiddenInput()->label(false) ?>
 
-                <?= $form->field($model, 'confirm')->hiddenInput()->label(false) ?>
+                <?= $form->field($model, 'mode')->hiddenInput()->label(false) ?>
 
                 <?php
-                echo Html::hiddenInput('conditions', $conditions);
-                $conditions = json_decode($conditions, true);
-                 echo " <div style=\"padding-left: 15px;padding-right: 15px;\">";
-                    foreach ($conditions as $key => $item) {
-                        echo "<p style=\"font-weight: bold;text-decoration: underline;\">" . $key ."</p>";
-                        foreach ($item as $cond) {
-                            echo "<li style=\"padding-bottom: 10px;\">" . $cond . "</li>";
-                        }
-                        echo "</ul>";
-                    }
-                echo "</div>";
-                ?>
+                echo $form->field($model, 'conditionsDescription')->hiddenInput()->label(false);
+                $conditions = json_decode($model->conditionsDescription, true);
+                  $style= <<< CSS
+   .checkbox {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+CSS;
+        $this->registerCss($style);
+
+        echo "<h4>Подтвердите выполнение условий регионализации: </h4>";
+        $conditions = json_decode($model->conditionsDescription, true);
+        /*echo "<pre>";
+        var_dump($conditions); die();*/
+       foreach ($conditions as $product => $data) {
+        $step = 0;
+        echo "<p><b><u>".$product."</u></b></p>";
+        echo "<div style=\"-webkit-border-radius: 3px;border-radius: 3px;padding: 10px;border: 1px solid #ddd;\">";
+        echo " <div style=\"padding-bottom: 15px;\">";
+        foreach ($data as $key => $block) {
+            if($step > 0) {
+                echo "<p><b>и</b></p>";
+            }
+            echo "<div style=\"-webkit-border-radius: 3px;border-radius: 3px;padding: 10px;border: 1px solid #ddd;\">";
+            echo "<p><b><u>".$key."</u></b></p>";
+            $i = 0;
+            foreach ($block as $item) {
+                if($i > 0) {
+                    echo "<p><b>или</b></p>";
+                }
+                echo $form->field($model, "conditions[$product]",['template' => '{input}{error}'])
+                    ->checkbox([
+                        'label' => $item['text'],
+                        //'name' => "conditions[$product]",
+                        'labelOptions' => [
+                            'style' => 'padding-left:20px;'
+                        ],
+                        'value' => $item['guid']
+                    ]);
+                $i++;
+            }
+            echo "</div>";
+            $step++;
+        }
+        echo "</div></div>";
+    } ?>
             </div>
             <div class="form-group">
-                <?php echo Html::submitButton('Подтвердить', ['class' => 'btn btn-success']) ?>
+                <?php echo Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.save', ['ru' => 'Сохранить']), ['class' => 'btn btn-success']) ?>
             </div>
             <?php ActiveForm::end(); ?>
         </div>

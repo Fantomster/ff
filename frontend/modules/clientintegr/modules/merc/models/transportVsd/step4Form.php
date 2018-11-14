@@ -12,13 +12,18 @@ use yii\base\Model;
 
 class step4Form extends Model
 {
+    const INPUT_MODE = 1;
+    const CONFIRM_MODE = 2;
+
     public $type = 1;
     public $type_name = 'Автомобильный';
     public $car_number;
     public $trailer_number;
     public $container_number;
     public $storage_type;
-    public $confirm = false;
+    public $conditions;
+    public $conditionsDescription;
+    public $mode = self::INPUT_MODE;
 
     public function rules()
     {
@@ -26,8 +31,25 @@ class step4Form extends Model
             [['type', 'car_number', 'trailer_number', 'container_number', 'storage_type'], 'required'],
             [['type'],'integer'],
             [['car_number', 'trailer_number', 'container_number', 'storage_type', 'type_name'], 'string'],
-            [['confirm'], 'safe']
+            [['conditions'], 'checkConditions'],
+            [['conditions', 'mode', 'conditionsDescription'], 'safe']
         ];
+    }
+
+    public function checkConditions($attribute, $params)
+    {
+        if($this->mode == self::CONFIRM_MODE) {
+            $count = [];
+            foreach ($this->conditions as $key => $cond) {
+                if ($cond != "0") {
+                    $count[$key] = 1;
+                }
+            }
+
+            if (count($count) != count($this->conditions)) {
+                $this->addError($attribute, "Должны быть выбраны условия регионализации");
+            }
+        }
     }
 
     /**

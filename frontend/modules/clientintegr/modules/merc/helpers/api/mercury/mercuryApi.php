@@ -1026,7 +1026,7 @@ class mercuryApi extends baseApi
             }
         }
 
-        return $conditions;
+        return $сonditions;
     }
 
     private function getConditions($requirement) {

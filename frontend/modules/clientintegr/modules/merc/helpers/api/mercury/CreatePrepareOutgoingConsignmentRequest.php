@@ -20,6 +20,7 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
     public $localTransactionId;
     public $initiator;
     public $conditions;
+    public $conditionsDescription;
     //step-1
     public $step1;
     //step-2
@@ -150,39 +151,9 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
         foreach ($this->step1 as $id => $product) {
             $stock = MercStockEntry::findOne(['id' => $id]);
             $stock_raw = json_decode(json_encode(unserialize($stock->raw_data)), true);
-            $result = mercuryApi::getInstance()->checkShipmentRegionalizationOperation($this->step3['recipient'], mercDicconst::getSetting('enterprise_guid'), $stock_raw["batch"]["subProduct"]['guid']);
-            if ($result == null) {
-                throw new \Exception('CheckShipmentRegionalizationOperation error');
-            }
-
-            $result = is_array($result) ? $result : [$result];
-            $this->conditions = null;
-            foreach ($result as $item) {
-                $item = json_decode(json_encode($item), true);
-                switch ($item['appliedR13nRule']['decision']) {
-                    case 1 :
-                        break;                         //Можно делать перемещение без ограничений
-                    case 2 ://Можно делать перемещение при соблюдении условий
-                        foreach ($item['appliedR13nRule']['requirement'] as $requirement) {
-                            $conditionGroup = is_array($requirement["conditionGroup"]) ? $requirement["conditionGroup"] : [$requirement["conditionGroup"]];
-                            foreach ($conditionGroup as $group) {
-                                $group = !array_key_exists('condition', $group) ? $group : $group['condition'];
-                                $condition = !array_key_exists('guid', $group) ? $group : [$group];
-                                foreach ($condition as $cond) {
-                                    if ($cond['active'] && $cond['last']) {
-                                        $conditions[$product][$cond['guid']] = $cond['text'];
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case 3 :
-                        throw new Exception('Пересещение запрещено правилами регионализации (' . $item['appliedR13nRule']['requirement']['relatedDisease']['name'] . ')!');
-                }
-            }
+            $this->conditionsDescription[$product['product_name']] = mercuryApi::getInstance()->getRegionalizationConditions($this->step3['recipient'], mercDicconst::getSetting('enterprise_guid'), $stock_raw["batch"]["subProduct"]['guid']);
         }
-
-        $this->conditions = (isset($this->conditions)) ?  json_encode($this->conditions) : null;
+        $this->conditionsDescription = (isset($this->conditionsDescription)) ?  json_encode($this->conditionsDescription) : null;
 
     }
 }

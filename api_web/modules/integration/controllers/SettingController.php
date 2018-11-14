@@ -287,4 +287,50 @@ class SettingController extends \api_web\components\WebApiController
     {
         $this->response = $this->container->get('IntegrationSettingsWebApi')->setMainOrganizations($this->request);
     }
+    /**
+     * @SWG\Post(path="/integration/setting/reset-main-org-setting",
+     *     tags={"Integration/settings"},
+     *     summary="Сброс настройки главного бизнеса для дочерних",
+     *     description="Сброс настройки главного бизнеса для дочерних",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id":2
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                   "result": false
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * )
+     * @throws \Exception
+     */
+
+    public function actionResetMainOrgSetting()
+    {
+        $this->response = $this->container->get('IntegrationSettingsWebApi')->resetMainOrgSetting($this->request);
+    }
 }

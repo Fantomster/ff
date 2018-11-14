@@ -41,13 +41,9 @@ class SyncServiceFactory extends WebApi
      */
     public function __construct($serviceId = 0, array $params = [], string $callbackTaskId = null)
     {
-        # 1. Load integration script with application environment params
         parent::__construct();
-        SyncLog::trace('Loaded integration script with env and post params');
-
         # 2. Identify Service ID or CALLLBACK
         if (!$callbackTaskId) {
-
             # 2.1.1. Identify Service ID
             if (!array_key_exists($serviceId, self::ALL_SERVICE_MAP)) {
                 SyncLog::trace('Invalid service_id: "' . $serviceId . '"');
@@ -55,15 +51,12 @@ class SyncServiceFactory extends WebApi
             } else {
                 SyncLog::trace('Identified Service ID: ' . $serviceId);
             }
-
             # 2.1.2. Use entity class (by factory)
             $entity = $this->factory((int)$serviceId, (string)self::ALL_SERVICE_MAP[$serviceId]);
             SyncLog::trace('Initialized entity class: ' . get_class($entity), self::ALL_SERVICE_MAP[$serviceId]);
-
             # 2.1.3. Load dictionary data
             /** AbstractSyncFactory $entity */
             $this->syncResult = $entity->loadDictionary($params);
-
         } elseif ($callbackTaskId == self::TASK_SYNC_GET_LOG) {
             SyncLog::trace('Show log!');
             SyncLog::showLog($params);
@@ -82,11 +75,9 @@ class SyncServiceFactory extends WebApi
                 SyncLog::trace('Invalid service_id!');
                 throw new BadRequestHttpException("empty_param|service_id");
             }
-
             # 2.2.2. Use entity class (by factory)
             $entity = $this->factory((int)$serviceId, $serviceName);
             SyncLog::trace('Initialized entity class: ' . get_class($entity), self::ALL_SERVICE_MAP[$serviceId]);
-
             # 2.1.3. Load dictionary data
             /** AbstractSyncFactory $entity */
             $this->syncResult = $entity->getObjects();
@@ -103,17 +94,7 @@ class SyncServiceFactory extends WebApi
      */
     public function factory(int $serviceId, string $serviceName = null): AbstractSyncFactory
     {
-        if (!$serviceName) {
-            $serviceName = (string)self::ALL_SERVICE_MAP[$serviceId];
-        }
-
-        $className = __NAMESPACE__ . '\\sync\\Service' . $serviceName;
-        if (class_exists($className)) {
-            return new $className($serviceName, $serviceId);
-        } else {
-            SyncLog::trace("The requested service class does not exist!");
-            throw new BadRequestHttpException("class_not_exist");
-        }
+        return self::init($serviceId, $serviceName);
     }
 
     /**

@@ -121,19 +121,10 @@ abstract class AbstractSyncFactory extends WebApi
      */
     public function loadDictionary(array $params): array
     {
-
         # 1. Initialize new procedure "Load dictionary"
-        if (isset($params['dictionary'])) {
-            SyncLog::trace('Initialized new procedure "Load dictionary" in ' . __METHOD__);
-            if (!$this->dictionaryAvailable || !in_array($params['dictionary'], $this->dictionaryAvailable)) {
-                SyncLog::trace('"param[dictionary]" is not valid!');
-                throw new BadRequestHttpException("param_not_valid|param[dictionary]");
-            } else {
-                SyncLog::trace('Validated dictionary name (specified in params): "' . $params['dictionary'] . '"');
-            }
-        } else {
+        if (!isset($params['dictionary'])) {
             SyncLog::trace('"param[dictionary]" is required and empty!');
-            throw new BadRequestHttpException("empty_param|param[dictionary]");
+            throw new BadRequestHttpException("empty_param|dictionary");
         }
 
         # 2. Use entity class (by factory)
@@ -172,15 +163,12 @@ abstract class AbstractSyncFactory extends WebApi
     {
         # 1. Check if curl connection params are not empty
         if ($sendUrl && $sendData) {
-
             # 1.1.1. Prepare curl headers
             $headers = [
                 "Content-type: application/xml; charset=utf-8",
                 "Content-length: " . strlen($sendData),
                 "Connection: close",
             ];
-            SyncLog::trace('Curl headers were just prepared (length: ' . strlen($sendData));
-
             # 1.1.2. Init curl
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $sendUrl);
@@ -190,16 +178,13 @@ abstract class AbstractSyncFactory extends WebApi
             curl_setopt($ch, CURLOPT_POSTFIELDS, $sendData);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_VERBOSE, true);
-
             # 1.1.3. Use session code in cookie or use login acess params in post data
             if ($cookie) {
                 curl_setopt($ch, CURLOPT_COOKIE, $cookie);
-                SyncLog::trace('Curl options include cookie session code [' . substr($cookie, 0, 24) . '...]');
             } else {
                 curl_setopt($ch, CURLOPT_HEADER, 1);
                 // Раскомментировать в случае дебага, иначе header лезет в $data строкой и не получается XML
                 // curl_setopt($ch, CURLOPT_STDERR, $fp); // (xsupervisor 04.07.2017)
-                SyncLog::trace('Curl options use access params in data post!');
             }
 
             # 1.1.4. Exercute curl
@@ -214,9 +199,6 @@ abstract class AbstractSyncFactory extends WebApi
             }
 
         } else {
-
-            # 1.2.1. Fix empty params
-            SyncLog::trace('Curl data for old session error: curl content or curl url is empty');
             throw new BadRequestHttpException("curl_params_bad");
         }
     }
@@ -265,22 +247,6 @@ abstract class AbstractSyncFactory extends WebApi
     public function sendWaybill($request): array
     {
         return ['Не определена функция отправки накладной в классе: ' . get_class($this)];
-    }
-
-    /**
-     * @return array
-     */
-    public static function getAllSyncOperations(): array
-    {
-        return [
-            RkwsAgent::$OperDenom    => RkwsAgent::class,
-            RkwsCategory::$OperDenom => RkwsCategory::class,
-            RkwsUnit::$OperDenom     => RkwsUnit::class,
-            RkwsStore::$OperDenom    => RkwsStore::class,
-            RkwsProduct::$OperDenom  => RkwsProduct::class,
-            RkwsWaybill::$OperDenom  => RkwsWaybill::class
-
-        ];
     }
 
     /**

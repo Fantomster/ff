@@ -86,9 +86,9 @@ class LicenseOrganizationBehavior extends Behavior
 
                     if (!$exists) {
                         $model = new IntegrationSettingValue([
-                            'outer_dic_id' => $setting->id,
-                            'org_id'       => $this->model->org_id,
-                            'value'        => $setting->default_value
+                            'setting_id' => $setting->id,
+                            'org_id'     => $this->model->org_id,
+                            'value'      => $setting->default_value
                         ]);
                         $model->save();
                     }

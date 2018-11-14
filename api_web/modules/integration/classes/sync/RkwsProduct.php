@@ -27,7 +27,7 @@ class RkwsProduct extends ServiceRkws
      * @return array
      * @throws BadRequestHttpException
      */
-    public function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
+    public function parsingXml(string $data = null): array
     {
         $dictionary = $this->getOrganizationDictionary($this->serviceId, $this->orgId);
 

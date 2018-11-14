@@ -25,7 +25,7 @@ class RkwsStore extends ServiceRkws
      * @return array
      * @throws BadRequestHttpException
      */
-    public function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
+    public function parsingXml(string $data = null): array
     {
         $myXML = simplexml_load_string($data);
         SyncLog::trace('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);

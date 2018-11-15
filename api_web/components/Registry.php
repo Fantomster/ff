@@ -97,4 +97,11 @@ class Registry
         self::TILLYPAD_SERVICE_ID => 5,
         self::ONE_S_CLIENT_SERVICE_ID => 0
     ];
+
+    /** @var array Список ставок НДС */
+    static $nds_list = [
+        0,
+        10,
+        18
+    ];
 }

@@ -109,7 +109,8 @@ class EmailIntegrationController extends Controller
         //$temp_file[65] = '/app/console/runtime/testnac62.xlsx';
         //$temp_file[66] = '/app/console/runtime/testnac63.xlsx';
         //$temp_file[67] = '/app/console/runtime/testnac64.xlsx';
-        $temp_file[68] = '/app/console/runtime/testnac65.xls';
+        //$temp_file[68] = '/app/console/runtime/testnac65.xls';
+        $temp_file[69] = '/app/console/runtime/testnac66.xlsx';
 
 
         $i = 1;

@@ -115,7 +115,7 @@ class Waybill extends \yii\db\ActiveRecord
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
-            if ($this->oldAttributes['status_id'] != Registry::WAYBILL_UNLOADED) {
+            if ($this->getOldAttribute('status_id') != Registry::WAYBILL_UNLOADED) {
                 if ($this->getAttribute('status_id') == Registry::WAYBILL_UNLOADED) {
                     $this->exported_at = gmdate("Y-m-d H:i:s");
                 }

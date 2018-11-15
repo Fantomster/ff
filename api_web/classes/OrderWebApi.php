@@ -506,7 +506,6 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function getHistory(array $post)
     {
-
         $sort_field = (!empty($post['sort']) ? $post['sort'] : null);
         $page = (!empty($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (!empty($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
@@ -514,6 +513,10 @@ class OrderWebApi extends \api_web\components\WebApi
         $search = new OrderSearch();
 
         WebApiHelper::clearRequest($post);
+
+        if (!isset($post['search']['service_id'])) {
+            $search->service_id = Registry::MC_BACKEND;
+        }
 
         if (isset($post['search'])) {
 
@@ -601,7 +604,6 @@ class OrderWebApi extends \api_web\components\WebApi
          * Собираем результат
          */
         $orders = [];
-        $headers = [];
         $models = $dataProvider->models;
         if (!empty($models)) {
             /**

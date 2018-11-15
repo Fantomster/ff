@@ -424,7 +424,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                     LEFT JOIN `$apiShema`.outer_store as os on os.id = w.outer_store_id         
                     WHERE (o.orders = 0 OR wc.id is null) AND w.service_id = :service_id AND w.acquirer_id = :business_id
                 ) as documents
-                LEFT JOIN organization as org on org.id1 = vendor_id
+                LEFT JOIN organization as org on org.id = vendor_id
                 WHERE documents.id is not null $where_all";
 
         if ($sort) {

@@ -613,14 +613,16 @@ class ServiceRkws extends AbstractSyncFactory
                 $model = $models[$v['rid']] ?? null;
                 if (!$model) {
                     $model = new $entityTableName([
-                        'outer_uid'  => $v['rid'],
-                        'org_id'     => $task->org_id,
-                        'service_id' => $this->serviceId,
-                        'is_deleted' => 0
+                        'outer_uid'        => $v['rid'],
+                        'parent_outer_uid' => $v['parent'] ?? null,
+                        'org_id'           => $task->org_id,
+                        'service_id'       => $this->serviceId,
+                        'is_deleted'       => 0
                     ]);
                 } else {
                     $model->is_deleted = 0;
                     $model->name = $v['name'];
+                    $model->parent_outer_uid = $v['parent'] ?? null;
                     if ($model->dirtyAttributes) {
                         $model->save();
                     }

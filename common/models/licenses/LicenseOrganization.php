@@ -53,7 +53,8 @@ class LicenseOrganization extends ActiveRecord
     {
         return [
             [['license_id', 'org_id', 'status_id', 'is_deleted'], 'integer'],
-            [['fd', 'td', 'created_at', 'updated_at', 'outer_last_active'], 'safe'],
+            [['fd', 'td', 'created_at', 'updated_at', 'outer_last_active', 'price'], 'safe'],
+            [['price'], 'number'],
             [['object_id'], 'string', 'max' => 64],
             [['license_id'], 'exist', 'skipOnError' => true, 'targetClass' => License::class, 'targetAttribute' => ['license_id' => 'id']],
         ];
@@ -76,6 +77,7 @@ class LicenseOrganization extends ActiveRecord
             'outer_last_active' => 'Время последней зарегистрированной активности',
             'status_id'         => 'Статус лицензии - идентификатор',
             'is_deleted'        => 'Признак soft-delete',
+            'price'             => 'Стоимость лицензии'
         ];
     }
 

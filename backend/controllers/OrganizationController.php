@@ -63,6 +63,7 @@ class OrganizationController extends Controller
                             'notifications',
                             'ajax-update-status',
                             'ajax-update-edi-list',
+                            'ajax-update-license-organization',
                             'list-organizations-for-licenses',
                             'add-license',
                             'edi-settings',
@@ -385,6 +386,25 @@ class OrganizationController extends Controller
         $tenDaysBefore = $date->format('Y-m-d H:i:s');
 
         return $this->render('add-license', ['licenses' => $licenses, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'tenDaysBefore' => $tenDaysBefore]);
+    }
+
+    public function actionAjaxUpdateLicenseOrganization()
+    {
+        if (Yii::$app->request->isAjax) {
+            $licenseOrgId = Yii::$app->request->post('licenseOrgId');
+            $priceInputValue = Yii::$app->request->post('priceInputValue');
+            $isDeletedValue = Yii::$app->request->post('isDeletedValue');
+            $licenseOrganization = LicenseOrganization::findOne(['id' => $licenseOrgId]);
+            if($licenseOrganization) {
+                $licenseOrganization->price = (float)$priceInputValue;
+                $licenseOrganization->is_deleted = ($isDeletedValue == 'true') ? 1 : 0;
+                $licenseOrganization->save();
+                return 'success';
+            }
+            return 'error';
+        } else {
+            return false;
+        }
     }
 
     /**

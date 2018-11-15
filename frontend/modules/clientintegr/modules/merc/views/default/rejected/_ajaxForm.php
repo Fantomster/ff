@@ -97,6 +97,21 @@ CSS;
     </div>
     <div class="modal-footer">
         <?php echo Html::button('<i class="icon fa fa-save save-form"></i> '.Yii::t('message', 'frontend.views.layouts.client.integration.save', ['ru' => 'Сохранить']), ['class' => 'btn btn-success save-form']); ?>
+        <?php
+        if($model->mode == \frontend\modules\clientintegr\modules\merc\models\rejectedForm::CONFIRM_MODE) {
+            echo Html::button(Yii::t('message', 'frontend.views.layouts.client.integration.check_all', ['ru' => 'Выделить все']), ['class' => 'btn btn-primary', 'id'=>"select_all_conditions"]);
+        }
+        ?>
         <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'Close') ?></a>
     </div>
 <?php ActiveForm::end(); ?>
+<?php
+$customJs = <<< JS
+    $("#select_all_conditions").click( function()
+          {
+              $('#ajax-form input[type="checkbox"]').prop('checked', true);
+           }
+        );
+JS;
+$this->registerJs($customJs, \yii\web\View::POS_END);
+?>

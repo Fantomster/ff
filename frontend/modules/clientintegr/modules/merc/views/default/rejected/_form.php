@@ -8,7 +8,7 @@ use kartik\form\ActiveForm;
 <div class="production-act-defect-form">
 
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin(['id' => 'act_form']); ?>
     <?php
     echo $form->field($model, 'mode')->hiddenInput()->label(false);
     if($model->mode == \frontend\modules\clientintegr\modules\merc\models\rejectedForm::INPUT_MODE) {
@@ -69,8 +69,23 @@ CSS;
 
     <div class="form-group">
         <?= Html::submitButton(Yii::t('message', 'frontend.views.layouts.client.integration.save', ['ru' => 'Сохранить']), ['class' => 'btn btn-success']) ?>
+        <?php
+        if($model->mode == \frontend\modules\clientintegr\modules\merc\models\rejectedForm::CONFIRM_MODE) {
+            echo Html::button(Yii::t('message', 'frontend.views.layouts.client.integration.check_all', ['ru' => 'Выделить все']), ['class' => 'btn btn-primary', 'id'=>"select_all_conditions"]);
+        }
+        ?>
     </div>
 
     <?php ActiveForm::end(); ?>
 
 </div>
+<?php
+$customJs = <<< JS
+    $("#select_all_conditions").click( function()
+          {
+              $('#act_form input[type="checkbox"]').prop('checked', true);
+           }
+        );
+JS;
+$this->registerJs($customJs, \yii\web\View::POS_END);
+?>

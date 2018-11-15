@@ -179,9 +179,11 @@ class AbstractDictionary extends WebApi
         $page = (isset($pag['page']) ? $pag['page'] : 1);
         $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
 
-        $search = OuterAgent::find()->joinWith(['store', 'nameWaybills'])
+        $search = OuterAgent::find()
+            ->joinWith(['store', 'nameWaybills'])
             ->where([
-                '`outer_agent`.service_id' => $this->service_id
+                '`outer_agent`.service_id' => $this->service_id,
+                '`outer_agent`.is_deleted' => 0
             ]);
         $orgId = $this->user->organization->id;
 
@@ -686,7 +688,8 @@ class AbstractDictionary extends WebApi
      * @param $orgId
      * @return array
      */
-    private function likeQueryNestedSets($table, $strSearch, $orgId){
+    private function likeQueryNestedSets($table, $strSearch, $orgId)
+    {
         return (new Query())->distinct()->select([
             'p.name',
             'p.level',

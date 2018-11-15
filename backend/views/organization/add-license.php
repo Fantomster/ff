@@ -149,7 +149,6 @@ $(".alCheckbox").on("click", function () {
     } else {
         $('input[name="td[' + value + ']"]').attr('disabled', 'disabled');
     }
-    console.log(checked);
 }); 
 JS;
 $this->registerJs($customJs, View::POS_READY);

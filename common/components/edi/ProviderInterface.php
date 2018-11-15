@@ -16,11 +16,11 @@ namespace common\components\edi;
  */
 interface ProviderInterface
 {
-    public function handleFilesList($orgId);
+    public function handleFilesList();
 
-    public function sendOrderInfo($order, $orgId, $done);
+    public function sendOrderInfo($order, $done);
 
-    public function getFilesList($organizationId);
+    public function getFilesList($orgID);
 
-    public function getFile($item, $orgId);
+    public function getFile($item);
 }

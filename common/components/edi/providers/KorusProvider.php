@@ -11,9 +11,7 @@ namespace common\components\edi\providers;
 use common\components\edi\AbstractProvider;
 use common\components\edi\AbstractRealization;
 use common\components\edi\ProviderInterface;
-use common\models\edi\EdiProvider;
 use common\models\EdiOrder;
-use common\models\edi\EdiOrganization;
 use common\models\OrderContent;
 use yii\base\Exception;
 use yii\web\BadRequestHttpException;
@@ -32,43 +30,44 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
     public $client;
     public $realization;
     public $content;
-    public $ediFilesQueueID;
+    public $ediFilesQueueID = 0;
     private $schema;
     private $wsdl;
     private $providerID;
+    public $ediOrganization;
+    private $login;
+    private $pass;
+    private $glnCode;
+    private $orgID;
 
     /**
      * Provider constructor.
      */
-    public function __construct()
+    public function __construct($ediOrganization)
     {
         $this->client = \Yii::$app->siteApiKorus;
         $this->schema = "http://schemas.xmlsoap.org/soap/envelope/";
         $this->wsdl = "http://edi-express.esphere.ru/";
-        $pos = strrpos(self::class, '\\');
-        $class = substr(self::class, $pos + 1);
-        $provider = EdiProvider::findOne(['provider_class' => $class]);
-        $this->providerID = $provider->id;
+        $this->providerID = parent::getProviderID(self::class);
+        $this->ediOrganization = $ediOrganization;
+        $this->login = $this->ediOrganization['login'];
+        $this->pass = $this->ediOrganization['pass'];
+        $this->glnCode = $this->ediOrganization['gln_code'];
+        $this->orgID = $this->ediOrganization['organization_id'];
     }
 
     /**
      * Get files list from provider and insert to table
      */
-    public function handleFilesList($orgID): void
+    public function handleFilesList(): void
     {
-        $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgID, 'provider_id' => $this->providerID]);
-        if ($ediOrganization) {
-            $login = $ediOrganization['login'];
-            $pass = $ediOrganization['pass'];
-            $glnCode = $ediOrganization['gln_code'];
-            try {
-                $objectList = $this->getFilesListForInsertingInQueue($login, $pass, $glnCode);
-            } catch (\Throwable $e) {
-                Yii::error($e->getMessage());
-            }
-            if (!empty($objectList)) {
-                $this->insertFilesInQueue($objectList, $orgID);
-            }
+        try {
+            $objectList = $this->getFilesListForInsertingInQueue();
+        } catch (\Throwable $e) {
+            Yii::error($e->getMessage());
+        }
+        if (!empty($objectList)) {
+            $this->insertFilesInQueue($objectList, $this->orgID);
         }
     }
 
@@ -78,67 +77,29 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
      * @return null
      * @throws \yii\base\Exception
      */
-    public function getFilesListForInsertingInQueue($login, $pass, $glnCode)
+    public function getFilesListForInsertingInQueue()
     {
         $action = 'listmb';
-        $pricatList = $this->getOneTypeFilesList('PRICAT', $login, $pass, $glnCode, $action);
-        $desadvList = $this->getOneTypeFilesList('DESADV', $login, $pass, $glnCode, $action);
-        $ordrspList = $this->getOneTypeFilesList('ORDRSP', $login, $pass, $glnCode, $action);
+        $pricatList = $this->getOneTypeFilesList('PRICAT', $action);
+        $desadvList = $this->getOneTypeFilesList('DESADV', $action);
+        $ordrspList = $this->getOneTypeFilesList('ORDRSP', $action);
         $list = array_merge($pricatList, $desadvList, $ordrspList);
         if (!count($list)) {
-            throw new Exception('No files for ' . $login);
+            throw new Exception('No files for ' . $this->login);
         }
         return $list;
     }
 
-    /**
-     * @return array
-     */
-    public function getFilesList($organizationId): array
+    private function getOneTypeFilesList($type, $action)
     {
-        return (new \yii\db\Query())
-            ->select(['id', 'name'])
-            ->from('edi_files_queue')
-            ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
-            ->andWhere(['organization_id' => $organizationId])
-            ->all();
-    }
-
-    /**
-     * @param array $list
-     * @throws \yii\db\Exception
-     */
-    public function insertFilesInQueue(array $list, $orgId)
-    {
-        $batch = [];
-        $files = (new \yii\db\Query())
-            ->select(['name'])
-            ->from('edi_files_queue')
-            ->where(['name' => $list])
-            ->indexBy('name')
-            ->all();
-
-        foreach ($list as $name) {
-            if (!array_key_exists($name, $files)) {
-                $batch[] = ['name' => $name, 'organization_id' => $orgId];
-            }
-        }
-
-        if (!empty($batch)) {
-            \Yii::$app->db->createCommand()->batchInsert('edi_files_queue', ['name', 'organization_id'], $batch)->execute();
-        }
-    }
-
-    private function getOneTypeFilesList($type, $login, $pass, $glnCode, $action)
-    {
-        $relationId = $this->getRelation($type, $login, $pass, $glnCode);
+        $relationId = $this->getRelation($type);
         $soap_request = <<<EOXML
 <soapenv:Envelope xmlns:soapenv="$this->schema" xmlns:edi="$this->wsdl">
    <soapenv:Header/>
    <soapenv:Body>
       <edi:ListMBInput>
-         <edi:Name>$login</edi:Name>
-         <edi:Password>$pass</edi:Password>
+         <edi:Name>$this->login</edi:Name>
+         <edi:Password>$this->pass</edi:Password>
          <edi:RelationId>$relationId</edi:RelationId>
       </edi:ListMBInput>
    </soapenv:Body>
@@ -159,7 +120,7 @@ EOXML;
         return $trackingIdList;
     }
 
-    public function sendOrderInfo($order, $orgId, $done = false): bool
+    public function sendOrderInfo($order, $done = false): bool
     {
         $transaction = Yii::$app->db_api->beginTransaction();
         $result = false;
@@ -180,9 +141,8 @@ EOXML;
                 return $result;
             }
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
-            $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId, 'provider_id' => $this->providerID]);
 
-            $result = $this->sendDoc($string, $ediOrganization, $done);
+            $result = $this->sendDoc($string, $done);
             $transaction->commit();
         } catch (Exception $e) {
             Yii::error($e);
@@ -199,21 +159,19 @@ EOXML;
      * @param String                      $pass
      * @return bool
      */
-    public function sendDoc(String $string, $ediOrganization, $done = false): bool
+    public function sendDoc(String $string, $done = false): bool
     {
         $action = 'send';
         $string = base64_encode($string);
-        $login = $ediOrganization['login'];
-        $pass = $ediOrganization['pass'];
         $documentType = ($done) ? 'RECADV' : 'ORDERS';
-        $relationId = $this->getRelation($documentType, $login, $pass, $ediOrganization['gln_code']);
+        $relationId = $this->getRelation($documentType);
         $soap_request = <<<EOXML
 <soapenv:Envelope xmlns:soapenv="$this->schema" xmlns:edi="$this->wsdl">
    <soapenv:Header/>
    <soapenv:Body>
       <edi:SendInput>
-         <edi:Name>$login</edi:Name>
-         <edi:Password>$pass</edi:Password>
+         <edi:Name>$this->login</edi:Name>
+         <edi:Password>$this->pass</edi:Password>
          <edi:RelationId>$relationId</edi:RelationId>
          <edi:DocumentContent>$string</edi:DocumentContent>
       </edi:SendInput>
@@ -260,18 +218,18 @@ EOXML;
         return $array;
     }
 
-    private function getRelation($documentType, $login, $pass, $glnCode)
+    private function getRelation($documentType)
     {
         $relationId = 0;
         $client = $this->client;
-        $res = $client->process(["Name" => $login, 'Password' => $pass]);
+        $res = $client->process(["Name" => $this->login, 'Password' => $this->pass]);
         $cnt = $res->Cnt;
         $arr = (array)$cnt;
         $relations = $arr['relation-response'];
         $relations = $relations->relation;
         foreach ($relations as $relation) {
             $rel = (array)$relation;
-            if (isset($rel['document-type']) && $rel['document-type'] == $documentType && $rel['partner-iln'] == $glnCode) {
+            if (isset($rel['document-type']) && $rel['document-type'] == $documentType && $rel['partner-iln'] == $this->glnCode) {
                 $relationId = $rel['relation-id'];
             }
         }
@@ -285,10 +243,10 @@ EOXML;
      * @return string
      * @throws \yii\db\Exception
      */
-    public function getDocContent(String $fileName, String $login, String $pass, $glnCode): String
+    public function getDocContent(String $fileName): String
     {
         $action = 'receive';
-        $relationId = $this->getRelation('PRICAT', $login, $pass, $glnCode);
+        $relationId = $this->getRelation('PRICAT');
         if (!$relationId) {
             throw new BadRequestHttpException('no relation');
         }
@@ -297,8 +255,8 @@ EOXML;
    <soapenv:Header/>
    <soapenv:Body>
       <edi:ReceiveInput>
-         <edi:Name>$login</edi:Name>
-         <edi:Password>$pass</edi:Password>
+         <edi:Name>$this->login</edi:Name>
+         <edi:Password>$this->pass</edi:Password>
          <edi:RelationId>$relationId</edi:RelationId>
          <edi:TrackingId>$fileName</edi:TrackingId>   
       </edi:ReceiveInput>
@@ -315,15 +273,14 @@ EOXML;
         return base64_decode($array['ns2ReceiveResponse']['ns2Cnt']);
     }
 
-    public function getFile($item, $orgId)
+    public function getFile($item)
     {
         try {
             $this->ediFilesQueueID = $item['id'];
             $this->realization->fileName = $item['name'];
-            $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
             $this->updateQueue($this->ediFilesQueueID, self::STATUS_PROCESSING, '');
             try {
-                $content = $this->getDocContent($item['name'], $ediOrganization['login'], $ediOrganization['pass'], $ediOrganization['gln_code']);
+                $content = $this->getDocContent($item['name'], $this->ediOrganization['login'], $this->ediOrganization['pass'], $this->ediOrganization['gln_code']);
             } catch (\Throwable $e) {
                 $this->updateQueue($this->ediFilesQueueID, self::STATUS_ERROR, $e->getMessage());
                 Yii::error($e->getMessage());

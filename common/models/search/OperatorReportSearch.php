@@ -20,6 +20,8 @@ class OperatorReportSearch extends Order
      * @var
      */
     public $user_id;
+    public $date_from;
+    public $date_to;
 
     /**
      * @param $params
@@ -27,6 +29,16 @@ class OperatorReportSearch extends Order
      */
     public function search($params)
     {
+        /**
+         * Фильтр по дате заказа
+         */
+        if (!empty($params['date_from']) && !empty($params['date_to'])) {
+            $dateFrom = date('Y-m-d H:i:s', strtotime(trim($params['date_from'])));
+            $dateTo = date('Y-m-d H:i:s', strtotime(trim($params['date_to'])));
+            $timeCondition = "a.created_at between '$dateFrom' and '$dateTo'";
+        } else {
+            $timeCondition = "a.created_at between now() - interval 7 day and now()";
+        }
         $query = (new Query())->select(["
             count(a.order_id) cnt_order, 
             count(distinct d.order_id) cnt_order_changed,
@@ -53,19 +65,10 @@ class OperatorReportSearch extends Order
                                 and d.message like '%изменил детали заказа%'")
             ->where("a.order_id = b.id
                                 and a.operator_id = c.id
-                                and a.created_at between now() - interval 7 day and now()
+                                and $timeCondition
                                 and b.status in (3, 4)")
             ->groupBy("c.email, a.created_at, status, status_call_id")
             ->orderBy("a.created_at, email, status");
-        /**
-         * Фильтр по дате заказа
-         */
-        if (!empty($params['OperatorReportSearch']['created_at'])) {
-            $created_at = trim($params['OperatorReportSearch']['created_at']);
-            $query->andWhere('CAST(a.created_at as DATE) = CAST(:created_at as DATE)', [
-                ':created_at' => date('Y-m-d', strtotime($created_at))
-            ]);
-        }
 
         $dataProvider = new ActiveDataProvider([
             'query'      => $query,

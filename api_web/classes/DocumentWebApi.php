@@ -362,6 +362,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                    o.vendor_id, 
                    oa.id as agent_id,
                    oa.name as agent_name,
+                   ifnull(oa.agent_count,0) as agent_count,
                    null as store_id,
                    null as store_name,
                    null as waybill_status,
@@ -379,7 +380,10 @@ class DocumentWebApi extends \api_web\components\WebApi
                        left join `$apiShema`.waybill_content as wc on wc.order_content_id = oc.id
                        group by (order_id)
                    ) as counts on counts.order_id = o.id
-                   LEFT JOIN `$apiShema`.outer_agent as oa on oa.vendor_id = o.vendor_id
+                   LEFT JOIN (
+                       SELECT *, count(id) as agent_count 
+                       FROM `$apiShema`.outer_agent where org_id = :business_id and service_id = :service_id group by vendor_id
+                   ) as oa on oa.vendor_id = o.vendor_id
                    LEFT JOIN (
                        SELECT 
                           order_id, 
@@ -413,6 +417,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                     os.name as store_name,
                     status_id as waybill_status,
                     doc_date as waybill_date,
+                    1 as agent_count,
                     null as order_date,
                     null as replaced_order_id
                     FROM `$apiShema`.waybill w
@@ -495,6 +500,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                         [
                             "id"   => $model['agent_id'],
                             "name" => $model['agent_name'],
+                            "count" => $model['agent_count'],
                         ],
                     "store"                    => (!(isset($model['store_id']) && isset($model['store_name']))) ? null :
                         [

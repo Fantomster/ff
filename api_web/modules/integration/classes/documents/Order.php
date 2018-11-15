@@ -55,7 +55,7 @@ class Order extends BaseOrder implements DocumentInterface
             "difer" => false,
         ];
 
-        $agent = OuterAgent::findOne(['vendor_id' => $vendor->id]);
+        $agent = OuterAgent::findOne(['vendor_id' => $vendor->id, 'org_id' => $this->client_id]);
         if (!empty($agent)) {
             $return["agent"] = [
                 'id'   => (int)$agent->id,

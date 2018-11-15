@@ -78,15 +78,11 @@ class Order extends BaseOrder implements DocumentInterface
      * Загрузка модели и получение данных
      *
      * @param $key
-     * @param $serviceId
      * @return array
      */
-    public static function prepareModel($key, $serviceId = null)
+    public static function prepareModel($key)
     {
         $where = ['id' => $key];
-        if (!is_null($serviceId)){
-            $where['service_id'] = $serviceId;
-        }
         $model = self::findOne($where);
         if ($model === null) {
             return [];

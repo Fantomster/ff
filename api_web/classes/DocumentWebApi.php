@@ -17,6 +17,7 @@ use common\helpers\DBNameHelper;
 use common\models\RelationUserOrganization;
 use common\models\Order as OrderMC;
 use yii\data\SqlDataProvider;
+use yii\db\ActiveQuery;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
@@ -753,6 +754,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         if (array_key_exists($request['type'], self::$models)) {
             $modelClass = self::$models[$request['type']];
+            /**@var ActiveQuery $query */
             $query = $modelClass::find()->where(['id' => $request['document_id']]);
             if ($request['type'] == self::TYPE_WAYBILL) {
                 $field = 'acquirer_id';

@@ -2,6 +2,8 @@
 
 namespace backend\controllers;
 
+use common\models\OperatorCall;
+use common\models\search\OperatorReportSearch;
 use Yii;
 use common\models\Organization;
 use common\models\forms\ServiceDesk;
@@ -53,6 +55,13 @@ class ServiceDeskController extends Controller
                             Role::ROLE_ADMIN,
                         ],
                     ],
+                    [
+                        'actions'       => ['operators-report'],
+                        'allow'         => true,
+                        'matchCallback' => function ($rule, $action) {
+                            return in_array(Yii::$app->user->id, Yii::$app->params['operatorsReportAdminIDs']);
+                        }
+                    ],
                 ],
             ],
         ];
@@ -60,6 +69,7 @@ class ServiceDeskController extends Controller
 
     /**
      * Lists all Organization models.
+     *
      * @return mixed
      */
     public function actionIndex()
@@ -70,7 +80,7 @@ class ServiceDeskController extends Controller
             $objClientAuth->setApplicationName(CLIENT_APP_NAME);
             $objClientAuth->setClientId(SERVICE_ACCOUNT_CLIENT_ID);
             $objClientAuth->setAssertionCredentials(new \Google_Auth_AssertionCredentials(
-                    SERVICE_ACCOUNT_EMAIL, array('https://spreadsheets.google.com/feeds', 'https://docs.google.com/feeds'), file_get_contents(SERVICE_ACCOUNT_PKCS12_FILE_PATH), CLIENT_KEY_PW
+                SERVICE_ACCOUNT_EMAIL, ['https://spreadsheets.google.com/feeds', 'https://docs.google.com/feeds'], file_get_contents(SERVICE_ACCOUNT_PKCS12_FILE_PATH), CLIENT_KEY_PW
             ));
             /* putenv('GOOGLE_APPLICATION_CREDENTIALS='. SERVICE_ACCOUNT_JSON_FILE_PATH);
               $objClientAuth->useApplicationDefaultCredentials();
@@ -89,19 +99,19 @@ class ServiceDeskController extends Controller
             ServiceRequestFactory::setInstance($serviceRequest);
 
             /**
-             * Get spreadsheet by title 
+             * Get spreadsheet by title
              */
-            $spreadsheetTitle   = 'f-keeper';
+            $spreadsheetTitle = 'f-keeper';
             $spreadsheetService = new SpreadsheetService();
-            $spreadsheetFeed    = $spreadsheetService->getSpreadsheetFeed();
-            $spreadsheet        = $spreadsheetFeed->getByTitle($spreadsheetTitle);
+            $spreadsheetFeed = $spreadsheetService->getSpreadsheetFeed();
+            $spreadsheet = $spreadsheetFeed->getByTitle($spreadsheetTitle);
             /**
              * Get particular worksheet of the selected spreadsheet
              */
-            $worksheetTitle     = 'ServiceDesk';
-            $worksheetFeed      = $spreadsheet->getWorksheetFeed();
-            $worksheet          = $worksheetFeed->getByTitle($worksheetTitle);
-            $listFeed           = $worksheet->getListFeed();
+            $worksheetTitle = 'ServiceDesk';
+            $worksheetFeed = $spreadsheet->getWorksheetFeed();
+            $worksheet = $worksheetFeed->getByTitle($worksheetTitle);
+            $listFeed = $worksheet->getListFeed();
 
             $listFeed->insert([
                 'author'        => 'Менеджер',
@@ -113,13 +123,28 @@ class ServiceDeskController extends Controller
             ]);
             if (Yii::$app->request->isPjax) {
                 return $this->renderAjax('index', [
-                            'model' => $model,
+                    'model' => $model,
                 ]);
             }
         }
         return $this->render('index', [
-                    'model' => $model,
+            'model' => $model,
         ]);
+    }
+
+    /**
+     * Страница оператора заказов
+     *
+     * @return string
+     */
+    public function actionOperatorsReport()
+    {
+        $searchModel = new OperatorReportSearch();
+        $searchModel->user_id = \Yii::$app->user->getId();
+        $searchModel->load(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('operator', ['dataProvider' => $dataProvider, 'searchModel' => $searchModel]);
     }
 
 }

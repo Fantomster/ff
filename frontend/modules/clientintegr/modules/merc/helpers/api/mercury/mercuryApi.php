@@ -1018,7 +1018,7 @@ class mercuryApi extends baseApi
                 case 2 ://Можно делать перемещение при соблюдении условий
                     $requirements = !array_key_exists('relatedDisease', $item['appliedR13nRule']['requirement']) ? $item['appliedR13nRule']['requirement'] : [$item['appliedR13nRule']['requirement']];
                     foreach ($requirements as $requirement) {
-                        $conditions[$requirement['relatedDisease']['name']] = $this->getConditions($requirement);
+                        $сonditions[$requirement['relatedDisease']['name']] = $this->getConditions($requirement);
                     }
                     break;
                 case 3 :
@@ -1052,7 +1052,6 @@ class mercuryApi extends baseApi
             case 3 :
                 throw new Exception('Пересещение запрещено правилами регионализации (' . $requirement['relatedDisease']['name'] . ')!');
         }
-
         return $conditions;
     }
 }

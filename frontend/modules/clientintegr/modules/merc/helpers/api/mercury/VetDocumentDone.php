@@ -246,6 +246,13 @@ class VetDocumentDone extends Component
 
         $accompanyingForms->vetCertificate = new VetDocument();
         $accompanyingForms->vetCertificate->uuid = $this->UUID;
+        $authentication['locationProsperity'] =  $doc->authentication->locationProsperity;
+        $authentication['purpose']= ['guid' => $doc->authentication->purpose->guid];
+
+        if(isset($doc->authentication->animalSpentPeriod)) {
+            $authentication['animalSpentPeriod'] =  $doc->authentication->animalSpentPeriod;
+        }
+
 
         //Заполняем условия регионализации при необходимости
         if(isset($this->conditions)) {
@@ -261,10 +268,11 @@ class VetDocumentDone extends Component
                     $conditions[] = $r13nClause;
                 }
             }
+
             $authentication['r13nClause'] = $conditions;
-            $accompanyingForms->vetCertificate->authentication = $authentication;
         }
 
+        $accompanyingForms->vetCertificate->authentication = $authentication;
         //$accompanyingForms->vetCertificate->authentication = $doc->authentication;
         $retuned->accompanyingForms = $accompanyingForms;
 

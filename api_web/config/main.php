@@ -53,7 +53,7 @@ return [
             'baseUrl'         => 'https://api-dev.mixcart.ru',
             'enablePrettyUrl' => true,
             'showScriptName'  => false,
-            'rules'           => [
+            /*'rules'           => [
                 'product/<id:\d+>'                                       => 'site/product',
                 'restaurant/<id:\d+>'                                    => 'site/restaurant',
                 'supplier/<id:\d+>'                                      => 'site/supplier',
@@ -78,7 +78,7 @@ return [
                 'forgot'                                                 => 'user/forgot',
                 'resend'                                                 => 'user/resend',
                 'reset'                                                  => 'user/reset',
-            ],
+            ],*/
         ],
     ],
     'modules'             => [

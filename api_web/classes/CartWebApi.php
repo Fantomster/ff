@@ -136,21 +136,14 @@ class CartWebApi extends \api_web\components\WebApi
     public function clear(array $post)
     {
         $client = $this->user->organization;
-        $query = Cart::find()->where(['organization_id' => $client->id]);
-        if (isset($post['vendor_id'])) {
-            $query->distinct()
-                ->joinWith('cartContents')
-                ->andWhere('cart_content.vendor_id = :vendor_id', [
-                    ':vendor_id' => (int)$post['vendor_id']
-                ]);
-        }
+        $carts = Cart::find()->where(['organization_id' => $client->id])->all();
+        $vendor_id = $post['vendor_id'] ?? null;
         /**
          * @var $cart     Cart
          * @var $position CartContent
          */
-        $carts = $query->all();
         foreach ($this->iterator($carts) as $cart) {
-            $cartContents = $cart->cartContents;
+            $cartContents = $cart->getCartContents($vendor_id)->all();
             foreach ($this->iterator($cartContents) as $position) {
                 $position->delete();
             }

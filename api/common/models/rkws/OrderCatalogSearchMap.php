@@ -105,7 +105,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
 
         if (!empty($this->searchString)) {
-            $where .= ' AND (acp.product  LIKE :searchString OR acp.article LIKE :searchString)';
+            $where .= ' (acp.product  LIKE :searchString OR acp.article LIKE :searchString)';
             $params_sql[':searchString'] = "%" . $this->searchString . "%";
         }
 
@@ -220,16 +220,13 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                 " FROM ($assigned_catalog_products) `acp`
             LEFT JOIN `$dbName`.`all_map` `amap` ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
             LEFT JOIN `$dbName`.`all_service` `aser` ON amap.service_id = aser.id " . $joins[$this->service_id] . "
-            WHERE acp.rest_org_id = " . $client_id . " 
-              AND acp.supp_org_id in (" . $vendorInList . ") 
-              AND amap.service_id = 0" . $where;
+            WHERE amap.service_id = 0" . empty($where) ? "" : " AND " . $where;
         } else {
             $sql = "SELECT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id] .
                 " FROM ($assigned_catalog_products) `acp`
             LEFT JOIN `$dbName`.`all_map` `amap` ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
-            LEFT JOIN `$dbName`.`all_service` `aser` ON amap.service_id = aser.id " . $joins[$this->service_id] . "
-            WHERE acp.rest_org_id = " . $client_id . " 
-              AND acp.supp_org_id in (" . $vendorInList . ")" . $where;
+            LEFT JOIN `$dbName`.`all_service` `aser` ON amap.service_id = aser.id " . $joins[$this->service_id] .
+            empty($where) ? "" : " WHERE " . $where;
         }
 
         $dataProvider = new SqlDataProvider([

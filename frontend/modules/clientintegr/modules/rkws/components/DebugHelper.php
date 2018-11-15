@@ -22,7 +22,7 @@ class DebugHelper
 
     public function logAppendString($text) {
 
-        file_put_contents($this->_logfile, $text. PHP_EOL, FILE_APPEND);
-
+        //file_put_contents($this->_logfile, $text. PHP_EOL, FILE_APPEND);
+        \Yii::info($text, 'rkws_callback_default');
     }
 }

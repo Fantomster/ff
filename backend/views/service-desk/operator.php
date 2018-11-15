@@ -1,11 +1,63 @@
 <?php
 
+use kartik\date\DatePicker;
+use yii\widgets\Pjax;
+use yii\widgets\ActiveForm;
+
 $this->title = Yii::t('app', 'Отчет по операторам');
 $this->params['breadcrumbs'][] = $this->title;
+
+$js = <<< JS
+$("document").ready(function () {
+    var justSubmitted = false;
+    $(".order-index").on("change", "#filter-date, #filter-date-2", function () {
+        if (!justSubmitted) {
+            $("#search-form").submit();
+            justSubmitted = true;
+            setTimeout(function () {
+                justSubmitted = false;
+            }, 500);
+        }
+    });
+});   
+JS;
+$this->registerJs($js);
 
 ?>
 <div class="order-index">
     <h1><?= \yii\helpers\Html::encode($this->title) ?></h1>
+    <?php Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
+    $form = ActiveForm::begin([
+        'options'                => [
+            'data-pjax' => true,
+            'id'        => 'search-form',
+            'role'      => 'search',
+        ],
+        'enableClientValidation' => false,
+        'method'                 => 'get',
+    ]);
+    ?>
+    <div class="form-group">
+        <?=
+        DatePicker::widget([
+            'name'          => 'date_from',
+            'id'            => 'filter-date',
+            'value'         => $filterValues['date_from'],
+            'type'          => DatePicker::TYPE_RANGE,
+            'name2'         => 'date_to',
+            'value2'        => $filterValues['date_to'],
+            'separator'     => '-',
+            'pluginOptions' => [
+                'autoclose'      => true,
+                'format'         => 'dd-mm-yyyy',
+                'todayHighlight' => true,
+                'endDate'        => "0d",
+            ],
+            'removeButton'  => false,
+        ]);
+        ?>
+    </div>
+
     <?php
 
     echo \kartik\grid\GridView::widget([
@@ -26,20 +78,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label'     => 'Оператор'
             ],
             [
-                'attribute'      => 'created_at',
-                'filter'         => \kartik\date\DatePicker::widget([
-                    'attribute' => 'created_at',
-                    'model'     => $searchModel,
-                    'language'  => 'ru',
-                    'type'      => 1
-                ]),
-                'value'          => function ($data) {
-                    return \Yii::$app->formatter->asDatetime($data['created_at'], 'php:d.m.Y');
+                'attribute' => 'created_at',
+                'label'     => 'Дата',
+                'value'     => function ($data) {
+                    return \Yii::$app->formatter->asDatetime($data['created_at'], 'php:d-m-Y');
                 },
-                'contentOptions' => [
-                    'style' => 'width:120px'
-                ],
-                'label'          => 'Дата'
+                'filter'    => false
             ],
             [
                 'attribute' => 'cnt_vendor',
@@ -62,4 +106,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ]
     ]);
     ?>
+    <?php ActiveForm::end(); ?>
+    <?php Pjax::end() ?>
 </div>

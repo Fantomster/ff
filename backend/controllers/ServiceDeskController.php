@@ -141,10 +141,13 @@ class ServiceDeskController extends Controller
     {
         $searchModel = new OperatorReportSearch();
         $searchModel->user_id = \Yii::$app->user->getId();
-        $searchModel->load(Yii::$app->request->queryParams);
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $params = Yii::$app->request->queryParams;
+        $searchModel->load($params);
+        $filterValues['date_from'] = $params['date_from'] ?? ((new \DateTime('-7 day'))->format('d-m-Y'));
+        $filterValues['date_to'] = $params['date_to'] ?? ((new \DateTime())->format('d-m-Y'));
+        $dataProvider = $searchModel->search($params);
 
-        return $this->render('operator', ['dataProvider' => $dataProvider, 'searchModel' => $searchModel]);
+        return $this->render('operator', ['dataProvider' => $dataProvider, 'searchModel' => $searchModel, 'filterValues' => $filterValues]);
     }
 
 }

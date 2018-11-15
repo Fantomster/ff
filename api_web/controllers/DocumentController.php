@@ -126,12 +126,19 @@ class DocumentController extends \api_web\components\WebApiController
      *                           "total_price": "3390.00",
      *                           "doc_date": "2018-04-11T18:41:34+03:00",
      *                           "vendor": {
-     *                           "id": "4749",
-     *                           "name": "Demo1",
-     *                           "difer": false
+     *                              "id": "4749",
+     *                              "name": "Demo1",
+     *                              "difer": false
      *                           },
-     *                           "agent": null,
-     *                           "store": null,
+     *                           "agent": {
+     *                              "id": 1111,
+     *                              "name": "Test",
+     *                              "count": 1
+     *                           },
+     *                           "store":  {
+     *                              "id": 2222,
+     *                              "name": "Test"
+     *                           },
      *                           "replaced_order_id": null
      *                           },
      *                           {

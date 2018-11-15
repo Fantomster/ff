@@ -287,6 +287,9 @@ class EDIClass extends Component
             $baseCatalog->created_at = new Expression('NOW()');
         }
         $currency = Currency::findOne(['iso_code' => $xml->CURRENCY]);
+        if(!$currency) {
+            $currency = Currency::findOne(['iso_code' => 'RUB']);
+        }
         $baseCatalog->currency_id = $currency->id ?? 1;
         $baseCatalog->updated_at = new Expression('NOW()');
         $baseCatalog->save();

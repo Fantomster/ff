@@ -378,7 +378,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                        left join `$apiShema`.waybill_content as wc on wc.order_content_id = oc.id
                        group by (order_id)
                    ) as counts on counts.order_id = o.id
-                   LEFT JOIN `$apiShema`.outer_agent as oa on oa.vendor_id = o.vendor_id
+                   LEFT JOIN `$apiShema`.outer_agent as oa on oa.vendor_id = o.vendor_id and oa.org_id = o.client_id and oa.service_id = :service_id
                    LEFT JOIN (
                        SELECT 
                           order_id, 
@@ -424,7 +424,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                     LEFT JOIN `$apiShema`.outer_store as os on os.id = w.outer_store_id         
                     WHERE (o.orders = 0 OR wc.id is null) AND w.service_id = :service_id AND w.acquirer_id = :business_id
                 ) as documents
-                LEFT JOIN organization as org on org.id = vendor_id
+                LEFT JOIN organization as org on org.id1 = vendor_id
                 WHERE documents.id is not null $where_all";
 
         if ($sort) {

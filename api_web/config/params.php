@@ -25,7 +25,11 @@ return [
         '/user/login',
         '/user/get-available-businesses',
         '/user/set-organization',
-        '/user/organization'
+        '/user/organization',
+        '/order/update-order-by-unconfirmed-vendor',
+        '/order/products-list-for-unconfirmed-vendor',
+        '/order/categories-for-unconfirmed-vendor',
+        '/order/cancel-order-by-unconfirmed-vendor ',
     ],
     'api_web_url' => 'https://api-dev.mixcart.ru',
     'staticUrl'             => [

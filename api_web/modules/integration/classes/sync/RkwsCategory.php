@@ -20,7 +20,7 @@ class RkwsCategory extends ServiceRkws
     public $useNestedSets = true;
 
     /** @var array Поле во входящем xml -> поле в нашей модели данных */
-    public $additionalXmlFields = ['parent' => 'parent_rid'];
+    public $additionalXmlFields = ['parent' => 'parent_outer_uid'];
 
     public function parsingXml(string $data = null): array
     {

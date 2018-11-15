@@ -26,6 +26,7 @@ return [
         '/user/get-available-businesses',
         '/user/set-organization',
         '/user/organization',
+        '/payment/currency-list',
         '/order/info',
         '/order/update-order-by-unconfirmed-vendor',
         '/order/products-list-for-unconfirmed-vendor',

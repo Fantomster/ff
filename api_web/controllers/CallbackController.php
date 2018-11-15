@@ -39,7 +39,7 @@ class CallbackController extends WebApiNoAuthController
     public $container;
 
     /**
-     * @SWG\Post(path="/integration/callback/load-dictionary",
+     * @SWG\Post(path="/callback/load-dictionary",
      *     tags={"Callback"},
      *     summary="Загрузка справочников с помощью коллбека",
      *     description="Загрузка справочников с помощью коллбека",

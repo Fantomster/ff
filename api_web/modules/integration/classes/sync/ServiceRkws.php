@@ -599,8 +599,18 @@ class ServiceRkws extends AbstractSyncFactory
             array_unshift($arrayNew, ['rid' => $root_rid, 'name' => 'Все', 'parent' => null]);
             # 5.1.3. Перебираем данные
             $list = [];
+            $arRids = array_map(function ($el) {
+                return $el['rid'];
+            }, $arrayNew);
+            $models = $entityTableName::find()
+                ->where([
+                    'outer_uid'  => $arRids,
+                    'org_id'     => $task->org_id,
+                    'service_id' => $this->serviceId
+                ])->indexBy('outer_uid')->all();
+
             foreach ($this->iterator($arrayNew) as $k => $v) {
-                $model = $entityTableName::findOne(['outer_uid' => $v['rid'], 'org_id' => $task->org_id, 'service_id' => $this->serviceId]);
+                $model = $models[$v['rid']] ?? null;
                 if (!$model) {
                     $model = new $entityTableName([
                         'outer_uid'  => $v['rid'],

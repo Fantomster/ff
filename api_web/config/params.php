@@ -27,5 +27,47 @@ return [
         '/user/set-organization',
         '/user/organization'
     ],
-    'api_web_url' => 'https://api-dev.mixcart.ru'
+    'api_web_url' => 'https://api-dev.mixcart.ru',
+    'staticUrl'             => [
+        'ru' => [
+            'market'    => 'https://market.mixcart.ru/',
+            'franchise' => 'http://fr.mixcart.ru/',
+            'client'    => 'https://client.mixcart.ru/',
+            'home'      => 'https://mixcart.ru/',
+            'about'     => 'https://mixcart.ru/about.html',
+            'contacts'  => 'https://mixcart.ru/contacts.html',
+        ],
+        'en' => [
+            'market'    => 'https://market.mixcart.ru/',
+            'franchise' => 'http://fr.mixcart.ru/',
+            'client'    => 'https://client.mixcart.ru/',
+            'home'      => 'https://mixcart.ru/',
+            'about'     => 'https://mixcart.ru/about.html',
+            'contacts'  => 'https://mixcart.ru/contacts.html',
+        ],
+        'es' => [
+            'market'    => 'https://market.mixcart.ru/es/',
+            'franchise' => 'http://fr.mixcart.ru/',
+            'client'    => 'https://client.mixcart.ru/',
+            'home'      => 'https://mixcart.ru/es/',
+            'about'     => 'https://mixcart.ru/es/about.html',
+            'contacts'  => 'https://mixcart.ru/es/contacts.html',
+        ],
+        'md' => [
+            'market'    => 'https://market.mixcart.ru/md/',
+            'franchise' => 'http://fr.mixcart.ru/',
+            'client'    => 'https://client.mixcart.ru/',
+            'home'      => 'https://mixcart.ru/md/',
+            'about'     => 'https://mixcart.ru/md/about.html',
+            'contacts'  => 'https://mixcart.ru/md/contacts.html',
+        ],
+        'ua' => [
+            'market'    => 'https://market.mixcart.ru/ua/',
+            'franchise' => 'http://fr.mixcart.ru/',
+            'client'    => 'https://client.mixcart.ru/',
+            'home'      => 'https://mixcart.ru/ua/',
+            'about'     => 'https://mixcart.ru/ua/about.html',
+            'contacts'  => 'https://mixcart.ru/ua/contacts.html',
+        ],
+    ],
 ];

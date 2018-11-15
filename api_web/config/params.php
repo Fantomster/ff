@@ -27,6 +27,7 @@ return [
         '/user/set-organization',
         '/user/organization',
         '/payment/currency-list',
+        '/market/products',
         '/order/info',
         '/order/update-order-by-unconfirmed-vendor',
         '/order/products-list-for-unconfirmed-vendor',

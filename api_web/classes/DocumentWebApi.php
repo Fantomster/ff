@@ -246,8 +246,8 @@ class DocumentWebApi extends \api_web\components\WebApi
             }
         }
 
-        if (isset($post['search']['waybill_status_id']) && !empty($post['search']['waybill_status_id'])) {
-            $where_all .= " AND status_id = :status";
+        if (isset($post['search']['waybill_status']) && !empty($post['search']['waybill_status'])) {
+            $where_all .= " AND waybill_status_id = :status";
             $params_sql[':status'] = $post['search']['waybill_status'];
         }
 

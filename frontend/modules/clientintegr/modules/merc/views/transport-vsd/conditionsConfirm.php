@@ -77,7 +77,7 @@ CSS;
             echo "<p><b><u>".$key."</u></b></p>";
             $i = 0;
             foreach ($block as $item) {
-                if($i > 0) {
+                if($i > 0 && $i != $item['group']) {
                     echo "<p><b>или</b></p>";
                 }
                 echo $form->field($model, "conditions[$product]",['template' => '{input}{error}'])
@@ -89,7 +89,7 @@ CSS;
                         ],
                         'value' => $item['guid']
                     ]);
-                $i++;
+                $i = $item['group'];
             }
             echo "</div>";
             $step++;

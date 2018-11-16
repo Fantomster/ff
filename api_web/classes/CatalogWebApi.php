@@ -212,7 +212,7 @@ class CatalogWebApi extends WebApi
 
         $this->validateRequest($request, ['vendor_id', 'product_id']);
 
-        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (empty($catalog)) {
             throw new BadRequestHttpException('catalog_not_found');
         }
@@ -239,7 +239,7 @@ class CatalogWebApi extends WebApi
     {
         $this->validateRequest($request, ['vendor_id']);
 
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($catalogTemp)) {
             throw new BadRequestHttpException('catalog_temp_not_found');
@@ -346,7 +346,7 @@ class CatalogWebApi extends WebApi
 
         $this->validateRequest($request, ['vendor_id']);
 
-        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
 
         if (empty($catalog)) {
             throw new BadRequestHttpException('catalog_not_found');
@@ -424,7 +424,7 @@ class CatalogWebApi extends WebApi
 
         $this->validateRequest($request, ['vendor_id']);
 
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (!$catalog) {
             throw new BadRequestHttpException("catalog.not_found");
         }
@@ -465,7 +465,7 @@ class CatalogWebApi extends WebApi
     {
         $this->validateRequest($request, ['vendor_id', 'currency_id']);
 
-        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
 
         if (empty($catalog)) {
             throw new BadRequestHttpException('catalog_not_found');

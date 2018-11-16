@@ -95,7 +95,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             'placeholder' => 'Дата окончания',
                             'class'       => 'delivery-date',
                             'label'       => 'Дата окончания',
-                            'disabled'    => 'disabled'
+                            'disabled'    => 'disabled',
+                            'autocomplete' => 'off'
                         ],
                         'type'          => DatePicker::TYPE_COMPONENT_APPEND,
                         'layout'        => '{picker}{input}{remove}',

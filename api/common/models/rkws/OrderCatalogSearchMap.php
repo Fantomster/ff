@@ -176,7 +176,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                                         `b`.`type` AS `catalog_type`,
                                         `b`.`name` AS `catalog_name`,
                                         `b`.`status` AS `catalog_status`,
-                                        `c`.`id` AS `product_id`,
+                                        `d`.`id` AS `product_id`,
                                         `d`.`article` AS `article`,
                                         `d`.`product` AS `product`,
                                         `d`.`status` AS `status`,

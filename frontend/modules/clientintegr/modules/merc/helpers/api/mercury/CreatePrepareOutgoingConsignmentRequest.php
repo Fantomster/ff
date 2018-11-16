@@ -61,12 +61,16 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
 
         $delivery = new Delivery();
         $delivery->consignor = new BusinessMember();
-        $delivery->consignor->enterprise = (cerberApi::getInstance()->getEnterpriseByGuid($enterprise));
-        $delivery->consignor->businessEntity = (cerberApi::getInstance()->getBusinessEntityByGuid($hc));
+        $delivery->consignor->enterprise = new \frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Enterprise();
+        $delivery->consignor->enterprise->guid = $enterprise;
+        $delivery->consignor->businessEntity = new \frontend\modules\clientintegr\modules\merc\helpers\api\cerber\BusinessEntity();
+        $delivery->consignor->businessEntity->guid = $hc;
 
         $delivery->consignee = new BusinessMember();
-        $delivery->consignee->enterprise = (cerberApi::getInstance()->getEnterpriseByGuid($this->step3['recipient']));
-        $delivery->consignee->businessEntity = (cerberApi::getInstance()->getBusinessEntityByGuid($this->step3['hc']));
+        $delivery->consignee->enterprise = new \frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Enterprise();
+        $delivery->consignor->enterprise->guid = $this->step3['recipient'];
+        $delivery->consignee->businessEntity = new \frontend\modules\clientintegr\modules\merc\helpers\api\cerber\BusinessEntity();
+        $delivery->consignor->businessEntity->guid = $this->step3['hc'];
 
         $consigments = [];
         $vetCertificates = [];

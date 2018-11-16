@@ -120,7 +120,7 @@ class MercuryCronController extends Controller
     {
         $load = new Products();
 
-        $org_id = 0;
+        $org_id = 5144;
         $queue = null;
         echo "START" . PHP_EOL;
         //Формируем данные для запроса
@@ -129,12 +129,11 @@ class MercuryCronController extends Controller
                            'listItemName' => 'enterprise'
         ];
 
-        $listOptions = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\ListOptions();
-        $listOptions->count = 1000;
-        $listOptions->offset = 0;
+        $listOptions['count']  = 1000;
+        $listOptions['offset'] = 0;
 
-        $startDate = ($queue === null) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queue->last_executed;
-        $instance = cerberApi::getInstance($org_id);
+        $startDate       = gmdate("Y-m-d H:i:s", time() - 60*60*24*80);
+        $instance        = cerberApi::getInstance($org_id);
         $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
         $w = new MercRussianEnterpriseList($org_id);

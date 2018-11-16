@@ -5,7 +5,6 @@ namespace api_web\classes;
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogTempContent;
 use common\models\ManagerAssociate;
-use common\models\notifications\EmailNotification;
 use common\models\RelationUserOrganization;
 use Yii;
 use api_web\exceptions\ValidationException;
@@ -19,8 +18,6 @@ use common\models\Organization;
 use common\models\RelationSuppRest;
 use yii\validators\NumberValidator;
 use yii\web\BadRequestHttpException;
-use yii\web\HttpException;
-use yii\web\UploadedFile;
 use api_web\helpers\Excel;
 
 /**

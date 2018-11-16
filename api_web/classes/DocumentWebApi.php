@@ -247,12 +247,12 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (isset($post['search']['waybill_status']) && !empty($post['search']['waybill_status'])) {
-            $where_all .= " AND status_id = :status";
+            $where_all .= " AND waybill_status_id = :status";
             $params_sql[':status'] = $post['search']['waybill_status'];
         }
 
         if (isset($post['search']['number']) && !empty($post['search']['number'])) {
-            $where_all .= " AND doc_number = :doc_number";
+            $where_all .= " AND dat.supply = :doc_number";
             $params_sql[':doc_number'] = $post['search']['number'];
         }
 
@@ -294,57 +294,23 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
             $vendors = implode(",", $post['search']['vendor']);
-            $where_all .= " AND vendor_id in ($vendors)";
+            $where_all .= " AND dat.order_vendor_id in ($vendors)";
         }
 
         if (isset($post['search']['store']) && !empty($post['search']['store'])) {
             $stories = implode(",", $post['search']['store']);
-            $where_all .= " AND store_id in ($stories)";
+            $where_all .= " AND if(order_id IS NULL , osw.id in ($stories), ov.id in ($stories))";
         }
 
         $apiShema = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
 
-        /*$sql = "
-        SELECT DISTINCT * FROM (
-            SELECT 
-                o.id as id, 
-                edi_number as doc_number, 
-                '" . self::TYPE_ORDER . "' as type, 
-                null as waybill_status_id, 
-                created_at as doc_date, 
-                null as agent,
-                vendor_id as vendor, 
-                null as store
-            FROM `order` as o
-            LEFT JOIN (
-             SELECT id, order_id, edi_number
-				FROM order_content 
-				order by char_length(edi_number) desc limit 1
-            ) as oc on oc.order_id = o.id
-            WHERE client_id = {$client->id}
-        UNION ALL
-            SELECT
-                w.id as id, 
-                outer_number_code as doc_number,  
-                '" . self::TYPE_WAYBILL . "' as type, 
-                status_id as waybill_status_id, 
-                doc_date, 
-                o.vendor_id as vendor, 
-                outer_store_id as store
-            FROM `$apiShema`.waybill w
-            LEFT JOIN `$apiShema`.waybill_content wc ON wc.waybill_id = w.id
-            LEFT JOIN order_content oc ON oc.id = wc.order_content_id
-            LEFT JOIN `order` o ON o.id = oc.order_id
-            WHERE 
-                oc.order_id is null 
-            AND 
-                w.service_id = :service_id
-        ) as documents
-        WHERE 
-        id is not null $where_all
-       ";*/
+        $params_sql[':WAYBILL_COMPARED'] = Registry::WAYBILL_COMPARED;
+        $params_sql[':WAYBILL_FORMED'] = Registry::WAYBILL_FORMED;
+        $params_sql[':WAYBILL_ERROR'] = Registry::WAYBILL_ERROR;
+        $params_sql[':WAYBILL_RESET'] = Registry::WAYBILL_RESET;
+        $params_sql[':WAYBILL_UNLOADED'] = Registry::WAYBILL_UNLOADED;
 
-        $sql = "SELECT DISTINCT documents.*, org.name as vendor_name FROM (
+        /*$sql = "SELECT DISTINCT documents.*, org.name as vendor_name FROM (
                 SELECT 
                    o.id as id, 
                    edi_number as doc_number, 
@@ -431,19 +397,126 @@ class DocumentWebApi extends \api_web\components\WebApi
                     WHERE (o.orders = 0 OR wc.id is null) AND w.service_id = :service_id AND w.acquirer_id = :business_id
                 ) as documents
                 LEFT JOIN organization as org on org.id = vendor_id
-                WHERE documents.id is not null $where_all";
+                WHERE documents.id is not null $where_all";*/
+
+        $sql = "SELECT
+                  if(order_id IS NULL, waybill_id, order_id)     id,
+                  if(order_id IS NULL, 'waybill', 'order')       `type`,
+                  dat.sort_doc                                   doc_date,
+                  group_concat(DISTINCT dat.supply)              documents,
+                  dat.order_acquirer_id                          order_acquirer_id,
+                  dat.order_vendor_id                            order_vendor_id,
+                  if(merc_uuid IS NULL, 0, 1)                    is_mercury_cert,
+                  dat.replaced_order_id                          replaced_order_id,
+                  oav.id                                         object_agent_id,
+                  oav.name                                       object_agent_name,
+                  COUNT(DISTINCT oav.id)                         object_agent_count,
+                  if(order_id IS NULL, osw.id, ov.id)            object_store_id,
+                  if(order_id IS NULL, osw.name, ov.name)        object_store_name,
+                  dat.order_service_id                           order_service_id,
+                  if(order_id IS NULL, waybill_status_id, NULL)  wb_status_id,
+                  if(order_id IS NULL, waybill_service_id, NULL) wb_service_id,
+                  group_concat(DISTINCT dat.waybill_id)          wbs,
+                  count(*)                                       object_position_count,
+                  sum(tatal_price)                               object_total_price,
+                  dat.sort_doc                                   sort_doc,
+                  if(order_id IS NOT NULL,
+                     CASE max(
+                         CASE dat.waybill_status_id
+                         WHEN :WAYBILL_COMPARED
+                           THEN 1
+                         WHEN :WAYBILL_RESET
+                           THEN 1
+                         WHEN :WAYBILL_UNLOADED
+                           THEN 0
+                         ELSE 2
+                         END
+                     )
+                     WHEN 0
+                       THEN :WAYBILL_ERROR
+                     WHEN 1
+                       THEN :WAYBILL_COMPARED
+                     WHEN 2
+                       THEN :WAYBILL_FORMED
+                     ELSE 0 END,
+                     waybill_status_id
+                  )                                              object_group_status_id,
+                  waybill_date,
+                  order_date
+                FROM (
+                       SELECT
+                         d.id                                             order_id,
+                         d.client_id                                      order_acquirer_id,
+                         d.vendor_id                                      order_vendor_id,
+                         d.service_id                                     order_service_id,
+                         d.replaced_order_id,
+                         a.id                                             waybill_id,
+                         a.status_id                                      waybill_status_id,
+                         a.service_id                                     waybill_service_id,
+                         a.acquirer_id                                    waybill_acquirer_id,
+                         a.outer_store_id                                 waybill_outer_store_id,
+                         a.outer_agent_id                                 waybill_outer_agent_id,
+                         b.id                                             waybill_content_id,
+                         coalesce(b.sum_with_vat, 0)                      tatal_price,
+                         c.id                                             order_content_id,
+                         c.edi_number                                     supply,
+                         c.merc_uuid,
+                         coalesce(d.created_at, a.doc_date, a.created_at) sort_doc,
+                         coalesce(a.doc_date, a.created_at)               sort_waybill,
+                         coalesce(a.doc_date, a.created_at)               waybill_date,
+                         null                                             order_date
+                       FROM `$apiShema`.waybill a
+                         LEFT JOIN `$apiShema`.waybill_content b ON b.waybill_id = a.id
+                         LEFT JOIN order_content c ON c.id = b.order_content_id
+                         LEFT JOIN `order` d ON d.id = c.order_id
+                       WHERE a.acquirer_id = :business_id AND a.service_id = :service_id
+                       UNION
+                       SELECT
+                         a.id                                                   order_id,
+                         a.client_id                                            order_acquirer_id,
+                         a.vendor_id                                            order_vendor_id,
+                         a.service_id                                           order_service_id,
+                         a.replaced_order_id,
+                         d.id                                                   waybill_id,
+                         d.status_id                                            waybill_status_id,
+                         d.service_id                                           waybill_service_id,
+                         d.acquirer_id                                          waybill_acquirer_id,
+                         d.outer_store_id                                       waybill_outer_store_id,
+                         d.outer_agent_id                                       waybill_outer_agent_id,
+                         c.id                                                   waybill_content_id,
+                         coalesce(if(c.id IS NULL, b.price, 0) * b.quantity, 0) total_price,
+                         b.id                                                   order_content_id,
+                         b.edi_number                                           supply,
+                         b.merc_uuid,
+                         coalesce(a.created_at, d.doc_date, d.created_at)       sort_doc,
+                         coalesce(d.doc_date, d.created_at)                     sort_waybill,
+                         null                                                   waybill_date,
+                         a.created_at                                           order_date
+                       FROM `order` a
+                         JOIN order_content b ON b.order_id = a.id
+                         LEFT JOIN `$apiShema`.waybill_content c ON c.order_content_id = b.id
+                         LEFT JOIN `$apiShema`.waybill d ON d.id = c.waybill_id AND d.service_id = :service_id
+                       WHERE a.client_id = :business_id
+                     ) dat
+                  LEFT JOIN `$apiShema`.outer_agent oav ON oav.org_id = :business_id AND oav.service_id = :service_id AND
+                                               if(dat.order_id IS NULL, dat.waybill_outer_agent_id, dat.order_vendor_id) =
+                                               if(dat.order_id IS NULL, oav.id, oav.vendor_id)
+                  LEFT JOIN organization ov ON ov.id = dat.order_vendor_id
+                  LEFT JOIN `$apiShema`.outer_store osw ON osw.org_id = :business_id AND osw.service_id = :service_id AND dat.waybill_outer_store_id = osw.id
+                WHERE 1 $where_all  
+                GROUP BY id, dat.order_acquirer_id, dat.order_service_id, wb_status_id, wb_service_id, sort_doc";
 
         if ($sort) {
             $order = (preg_match('#^-(.+?)$#', $sort) ? 'DESC' : 'ASC');
             $sort_field = str_replace('-', '', $sort);
             //$where_all .= " AND $sort_field is not null ";
             if ($sort_field == 'number') {
-                $sql .= ' ORDER BY char_length(doc_number) ' . $order;
+                $sql .= ' ORDER BY documents ' . $order;
             } elseif ($sort_field == 'doc_date') {
                 $sql .= ' ORDER BY doc_date ' . $order;
             }
         } else {
-            $sql .= ' ORDER BY doc_date DESC';
+            $sql .= ' ORDER BY sort_doc DESC, order_id';
         }
 
         //var_dump($sql); die();
@@ -473,39 +546,43 @@ class DocumentWebApi extends \api_web\components\WebApi
             foreach ($this->iterator($result) as $model) {
 
                 if ($model['type'] == self::TYPE_WAYBILL) {
-                    $statusText = \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['status_id']]);
+                    $statusText = \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['wb_status_id']]);
+                    $status_id = $model['wb_status_id'];
+                    $service_id = $model['service_id'];
                 } else {
-                    $statusText = \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$model['status_id']]);
+                    $statusText = \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$model['object_group_status_id']]);
+                    $status_id = $model['object_group_status_id'];
+                    $service_id = $model['order_service_id'];
                 }
 
                 $documents[] = $return = [
                     "id"                       => (int)$model['id'],
                     "number"                   => isset($model['documents']) ? explode(",", $model['documents']) : [],
                     "type"                     => $model['type'],
-                    "status_id"                => (int)$model['status_id'],
+                    "status_id"                => (int)$status_id,
                     "status_text"              => $statusText,
-                    "service_id"               => (int)$model['service_id'],
+                    "service_id"               => (int)$service_id,
                     "is_mercury_cert"          => (int)($model['is_mercury_cert'] > 0),
-                    "count"                    => (int)$model['count'],
-                    "total_price"              => CurrencyHelper::asDecimal($model['total_price']),
-                    "total_price_with_out_vat" => CurrencyHelper::asDecimal($model['total_price_with_out_vat'], 2, null),
+                    "count"                    => (int)$model['object_position_count'],
+                    "total_price"              => CurrencyHelper::asDecimal($model['object_total_price']),
+                    //"total_price_with_out_vat" => CurrencyHelper::asDecimal($model['total_price_with_out_vat'], 2, null),
                     "doc_date"                 => date("Y-m-d H:i:s T", strtotime($model['doc_date'])),
-                    "vendor"                   => (!(isset($model['vendor_id']) && isset($model['vendor_name']))) ? null :
+                    "vendor"                   => (!(isset($model['order_vendor_id']) && isset($model['object_store_name']))) ? null :
                         [
-                            "id"    => $model['vendor_id'],
-                            "name"  => $model['vendor_name'],
+                            "id"    => $model['order_vendor_id'],
+                            "name"  => $model['object_store_name'],
                             "difer" => false,
                         ],
-                    "agent"                    => (!(isset($model['agent_id']) && isset($model['agent_name']))) ? null :
+                    "agent" => (!(isset($model['object_agent_id']) && isset($model['object_agent_name']))) ? null :
                         [
-                            "id"   => $model['agent_id'],
-                            "name" => $model['agent_name'],
-                            "count" => $model['agent_count'],
+                            "id"    => $model['object_agent_id'],
+                            "name"  => $model['object_agent_name'],
+                            "count" => $model['object_agent_count'],
                         ],
-                    "store"                    => (!(isset($model['store_id']) && isset($model['store_name']))) ? null :
+                    "store"                    => (!(isset($model['object_store_id']) && isset($model['object_store_name']))) ? null :
                         [
-                            "id"   => $model['store_id'],
-                            "name" => $model['store_name'],
+                            "id"   => $model['object_store_id'],
+                            "name" => $model['object_store_name'],
                         ],
                     "replaced_order_id"        => isset($model['replaced_order_id']) ? (int)$model['replaced_order_id'] : null
                 ];

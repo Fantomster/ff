@@ -1025,7 +1025,6 @@ class mercuryApi extends baseApi
                     throw new Exception('Пересещение запрещено правилами регионализации (' . $item['appliedR13nRule']['requirement']['relatedDisease']['name'] . ')!');
             }
         }
-
         return $сonditions;
     }
 
@@ -1038,15 +1037,16 @@ class mercuryApi extends baseApi
                     $conditionGroups = is_array($requirement["conditionGroup"]) ? $requirement["conditionGroup"] : [$requirement["conditionGroup"]];
                     $i = 0;
                     foreach ($conditionGroups as $group) {
+                        $i++;
                         $group = !array_key_exists('condition', $group) ? $group : $group['condition'];
                         $condition = !array_key_exists('guid', $group) ? $group : [$group];
                         foreach ($condition as $cond) {
                             if ($cond['active'] && $cond['last']) {
-                                $conditions[$i] = ['guid' => $cond['guid'],
-                                'text' => $cond['text']];
+                                $conditions[] = ['guid' => $cond['guid'],
+                                'text' => $cond['text'],
+                                    'group' => $i];
                             }
                         }
-                        $i++;
                     }
                 break;
             case 3 :

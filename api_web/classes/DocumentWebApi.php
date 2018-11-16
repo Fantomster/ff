@@ -315,7 +315,10 @@ class DocumentWebApi extends \api_web\components\WebApi
         $params_sql[':DOC_GROUP_STATUS_WAIT_FORMING'] = Registry::DOC_GROUP_STATUS_WAIT_FORMING;
         $params_sql[':DOC_GROUP_STATUS_WAIT_SENDING'] = Registry::DOC_GROUP_STATUS_WAIT_SENDING;
 
-        $sql = "SELECT
+
+        \Yii::$app->db_api->createCommand("SET @order_v_id = null;SET @waybill_v_id = null;")->execute();
+        $sql = "
+              SELECT
                   if(order_id IS NULL, waybill_id, order_id)     id,
                   if(order_id IS NULL, 'waybill', 'order')       `type`,
                   dat.sort_doc                                   doc_date,
@@ -368,6 +371,8 @@ class DocumentWebApi extends \api_web\components\WebApi
                   order_date
                 FROM (
                        SELECT
+                         @order_v_id := case when @waybill_v_id = a.id and order_id is null then @order_v_id else order_id end order_z_id,
+                         @waybill_v_id := a.id,
                          d.id                                             order_id,
                          d.client_id                                      order_acquirer_id,
                          d.vendor_id                                      order_vendor_id,
@@ -397,6 +402,8 @@ class DocumentWebApi extends \api_web\components\WebApi
                        WHERE a.acquirer_id = :business_id AND a.service_id = :service_id
                        UNION
                        SELECT
+                         1,
+                         1,
                          a.id                                                   order_id,
                          a.client_id                                            order_acquirer_id,
                          a.vendor_id                                            order_vendor_id,
@@ -430,7 +437,9 @@ class DocumentWebApi extends \api_web\components\WebApi
                                                if(dat.order_id IS NULL, oav.id, oav.vendor_id)
                   LEFT JOIN organization ov ON ov.id = dat.order_vendor_id
                   LEFT JOIN `$apiShema`.outer_store osw ON osw.org_id = :business_id AND osw.service_id = :service_id AND dat.waybill_outer_store_id = osw.id
-                WHERE 1 $where_all  
+                WHERE 1
+                  and if(if(order_id IS NULL, waybill_id, order_id) = waybill_id and order_z_id is not null, 1, 2) = 2
+                $where_all  
                 GROUP BY id, dat.order_acquirer_id, dat.order_service_id, wb_status_id, wb_service_id, sort_doc";
 
         if ($sort) {
@@ -442,7 +451,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 $sql .= ' ORDER BY doc_date ' . $order;
             }
         } else {
-            $sql .= ' ORDER BY sort_doc DESC, order_id';
+            $sql .= ' ORDER BY sort_doc DESC, order_id, sort_waybill desc, waybill_id';
         }
 
         $dataProvider = new SqlDataProvider([

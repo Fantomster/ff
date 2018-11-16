@@ -157,18 +157,8 @@ class ServiceRkws extends AbstractSyncFactory
             $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
             if ($xmlData) {
                 $xml = (array)simplexml_load_string($xmlData);
-                //Если ошибка
-                if (isset($xml['ERROR']) || (isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 5)) {
-                    if (isset($xml['ERROR'])) {
-                        $error = (array)$xml['ERROR'];
-                        $code = $error['@attributes']['code'];
-                        $text = $error['@attributes']['Text'];
-                    } else {
-                        $code = $xml['@attributes']['code'];
-                        $text = $xml['@attributes']['Text'];
-                    }
-                    throw new BadRequestHttpException("RESPONSE WS: " . $text . ' (code: ' . $code . ')');
-                }
+                //Проверка ошибок
+                $this->checkErrorResponse($xml);
 
                 if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
                     $operation = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => static::$OperDenom]);
@@ -528,6 +518,9 @@ class ServiceRkws extends AbstractSyncFactory
 
             if ($xmlData) {
                 $xml = (array)simplexml_load_string($xmlData);
+                //Проверка ошибок
+                $this->checkErrorResponse($xml);
+
                 if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
                     $transaction = $this->createTransaction();
                     $waybill->status_id = Registry::WAYBILL_UNLOADING;
@@ -774,6 +767,28 @@ class ServiceRkws extends AbstractSyncFactory
             return ['result' => true];
         } catch (\Exception $e) {
             return ['result' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Проверка ошибок в респонсе от WS
+     *
+     * @param $xml
+     * @throws BadRequestHttpException
+     */
+    private function checkErrorResponse($xml)
+    {
+        //Если ошибка
+        if (isset($xml['ERROR']) || (isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 5)) {
+            if (isset($xml['ERROR'])) {
+                $error = (array)$xml['ERROR'];
+                $code = $error['@attributes']['code'];
+                $text = $error['@attributes']['Text'];
+            } else {
+                $code = $xml['@attributes']['code'];
+                $text = $xml['@attributes']['Text'];
+            }
+            throw new BadRequestHttpException("RESPONSE WS: " . $text . ' (code: ' . $code . ')');
         }
     }
 }

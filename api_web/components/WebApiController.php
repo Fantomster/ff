@@ -115,7 +115,7 @@ class WebApiController extends \yii\rest\Controller
         $headers = \Yii::$app->response->headers;
         $headers->add('Access-Control-Allow-Origin', '*');
         $headers->add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        $headers->add('Access-Control-Allow-Headers', 'Content-Type, Authorization, GMT');
+        $headers->add('Access-Control-Allow-Headers', 'Content-Type, Authorization, GMT, License-Expire, License-Manager-Phone');
 
         if (\Yii::$app->request->isOptions) {
             \Yii::$app->response->statusCode = 200;

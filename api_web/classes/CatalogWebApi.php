@@ -500,7 +500,7 @@ class CatalogWebApi extends WebApi
     /**
      * @param int          $vendorID
      * @param Organization $restOrganization
-     * @param bool         $kostilForInvitedVendor
+     * @param bool         $kostilForInvitedVendor //todo_refactoring
      * @return Catalog|null|static
      * @throws ValidationException
      */
@@ -513,7 +513,6 @@ class CatalogWebApi extends WebApi
             ]);
         if (!$kostilForInvitedVendor) {
             $relQuery->andWhere([">", "cat_id", 0]);
-
         }
         $rel = $relQuery->one();
 

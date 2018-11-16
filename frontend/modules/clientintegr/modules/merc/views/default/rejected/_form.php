@@ -59,6 +59,7 @@ CSS;
                         ],
                         'value' => $item['guid']
                     ]);
+                echo "gr: ".$item['group'];
                 $i++;
             }
             echo "</div>";

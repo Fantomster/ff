@@ -316,9 +316,8 @@ class DocumentWebApi extends \api_web\components\WebApi
         $params_sql[':DOC_GROUP_STATUS_WAIT_SENDING'] = Registry::DOC_GROUP_STATUS_WAIT_SENDING;
 
 
-        \Yii::$app->db_api->createCommand("SET @order_v_id = null;SET @waybill_v_id = null;")->execute();
-        $sql = "
-              SELECT
+        \Yii::$app->db->createCommand("SET @order_v_id = null;SET @waybill_v_id = null;")->execute();
+        $sql = "SELECT
                   if(order_id IS NULL, waybill_id, order_id)     id,
                   if(order_id IS NULL, 'waybill', 'order')       `type`,
                   dat.sort_doc                                   doc_date,

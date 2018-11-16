@@ -432,4 +432,20 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
 
     }
 
+    public function afterSave()
+    {
+        if ($this->catalog->type == 1) {
+            $item = CatalogGoods::find()->where(['cat_id' => $this->cat_id, 'base_goods_id' => $this->id])->exists();
+            if ($item === false) {
+                $new_item = new CatalogGoods;
+                $new_item->cat_id = $this->cat_id;
+                $new_item->base_goods_id = $this->id;
+                $new_item->vat = null;
+                if (!$new_item->save()) {
+                    Yii::error('Не удалось сохранить для каталога ' . $this->cat_id . ' в таблице catalog_goods новую запись из catalog_base_goods ' . $this->id);
+                }
+            }
+        }
+    }
+
 }

@@ -25,34 +25,36 @@ use yii\helpers\Url;
 /**
  * GoodsController implements the CRUD actions for CatalogBaseGoods model.
  */
-class GoodsController extends Controller {
+class GoodsController extends Controller
+{
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
+            'verbs'  => [
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
                         'actions' => ['ajax-clear-category', 'ajax-set-category', 'ajax-clear-category-multi', 'ajax-set-category-multi', 'ajax-update-product-market-place', 'import-catalog', 'import'],
-                        'allow' => true,
-                        'roles' => [Role::ROLE_ADMIN],
+                        'allow'   => true,
+                        'roles'   => [Role::ROLE_ADMIN],
                     ],
                     [
                         'actions' => ['index', 'vendor', 'view', 'category', 'get-sub-cat', 'mp-country', 'uploaded-catalogs'],
-                        'allow' => true,
-                        'roles' => [
+                        'allow'   => true,
+                        'roles'   => [
                             Role::ROLE_ADMIN,
 //                            Role::ROLE_FKEEPER_OBSERVER,
                         ],
@@ -64,20 +66,23 @@ class GoodsController extends Controller {
 
     /**
      * Lists all CatalogBaseGoods models.
+     *
      * @return mixed
      */
-    public function actionIndex() {
+    public function actionIndex()
+    {
         $searchModel = new CatalogBaseGoodsSearch();
         $params = Yii::$app->request->queryParams;
         $dataProvider = $searchModel->search($params);
 
         return $this->render('index', [
-                    'searchModel' => $searchModel,
-                    'dataProvider' => $dataProvider,
+            'searchModel'  => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
-    public function actionVendor($id) {
+    public function actionVendor($id)
+    {
         $searchModel = new CatalogBaseGoodsSearch();
         $params = Yii::$app->request->queryParams;
         $dataProvider = $searchModel->search($params);
@@ -86,10 +91,11 @@ class GoodsController extends Controller {
         return $this->render('vendor', compact('id', 'searchModel', 'dataProvider', 'isEditable'));
     }
 
-    public function actionAjaxUpdateProductMarketPlace($id, $cat_id = null, $supp_org_id = null) {
-        if($id){
+    public function actionAjaxUpdateProductMarketPlace($id, $cat_id = null, $supp_org_id = null)
+    {
+        if ($id) {
             $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
-        }else{
+        } else {
             $catalogBaseGoods = new CatalogBaseGoods();
         }
         $catalogBaseGoods->scenario = 'marketPlace';
@@ -105,7 +111,7 @@ class GoodsController extends Controller {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
-                if($id)
+                if ($id)
                     $checkBaseGood = CatalogBaseGoods::find()->where(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product])->andWhere(['not in', 'id', [$catalogBaseGoods->id]])->all();
                 else
                     $checkBaseGood = CatalogBaseGoods::findAll(['cat_id' => $catalogBaseGoods->cat_id, 'product' => $catalogBaseGoods->product, 'deleted' => 0]);
@@ -141,7 +147,8 @@ class GoodsController extends Controller {
         return $this->renderAjax('_form', compact('catalogBaseGoods', 'countrys', 'supp_org_id'));
     }
 
-    public function actionMpCountryList($q) {
+    public function actionMpCountryList($q)
+    {
         if (Yii::$app->request->isAjax) {
             $model = new \common\models\MpCountry();
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -151,14 +158,15 @@ class GoodsController extends Controller {
         return false;
     }
 
-    public function actionGetSubCat() {
+    public function actionGetSubCat()
+    {
         $out = [];
         if (isset($_POST['depdrop_parents'])) {
             $id = end($_POST['depdrop_parents']);
             $list = \common\models\MpCategory::find()->select(['id', 'name'])->
-                    andWhere(['parent' => $id])->
-                    asArray()->
-                    all();
+            andWhere(['parent' => $id])->
+            asArray()->
+            all();
             $selected = null;
             if ($id != null && count($list) > 0) {
                 $selected = '';
@@ -186,7 +194,8 @@ class GoodsController extends Controller {
         echo Json::encode(['output' => '', 'selected' => '']);
     }
 
-    public function actionCategory($vendor_id, $id=0) {
+    public function actionCategory($vendor_id, $id = 0)
+    {
         $vendor = \common\models\Organization::findOne(['id' => $vendor_id]);
 
         $searchSetModel = new CatalogBaseGoodsSetSearch();
@@ -200,16 +209,17 @@ class GoodsController extends Controller {
         $dataProviderEmpty->query->andWhere('(category_id is null) OR (category_id = 0)');
 
         $subCategory = MpCategory::findOne(['id' => $id]);
-        if($subCategory === null)
+        if ($subCategory === null)
             $subCategory = new MpCategory();
         $category = MpCategory::findOne(['id' => $subCategory->parent]);
-        if($category === null)
+        if ($category === null)
             $category = new MpCategory();
 
         return $this->render('category', compact('id', 'dataProviderCategory', 'dataProviderEmpty', 'vendor', 'subCategory', 'category', 'searchModel', 'searchSetModel'));
     }
 
-    public function actionAjaxClearCategory() {
+    public function actionAjaxClearCategory()
+    {
         $post = Yii::$app->request->post();
         if ($post) {
             $product = CatalogBaseGoods::findOne(['id' => $post['id']]);
@@ -219,23 +229,25 @@ class GoodsController extends Controller {
         return false;
     }
 
-    public function actionAjaxSetCategoryMulti() {
+    public function actionAjaxSetCategoryMulti()
+    {
         $post = Yii::$app->request->post();
         if ($post) {
             Yii::$app->db->createCommand()
                 ->update(CatalogBaseGoods::tableName(), ['category_id' => $post['category_id']], ['in', 'id', $post['pk']])
                 ->execute();
-           /* $products = CatalogBaseGoods::find()->where(['in', 'id', $post['pk']])->all();
-            foreach ($products as $product) {
-                $product->category_id = $post['category_id'];
-                $product->save(false);
-            }*/
+            /* $products = CatalogBaseGoods::find()->where(['in', 'id', $post['pk']])->all();
+             foreach ($products as $product) {
+                 $product->category_id = $post['category_id'];
+                 $product->save(false);
+             }*/
             return true;
         }
         return false;
     }
 
-    public function actionAjaxClearCategoryMulti() {
+    public function actionAjaxClearCategoryMulti()
+    {
         $post = Yii::$app->request->post();
         if ($post) {
             Yii::$app->db->createCommand()
@@ -251,7 +263,8 @@ class GoodsController extends Controller {
         return false;
     }
 
-    public function actionAjaxSetCategory() {
+    public function actionAjaxSetCategory()
+    {
         $post = Yii::$app->request->post();
         if ($post) {
             $product = CatalogBaseGoods::findOne(['id' => $post['id']]);
@@ -261,7 +274,8 @@ class GoodsController extends Controller {
         return false;
     }
 
-    public function actionUploadedCatalogs() {
+    public function actionUploadedCatalogs()
+    {
         $query = RelationSuppRest::find()->where('uploaded_catalog is not null')->andWhere(['uploaded_processed' => RelationSuppRest::UPLOADED_NOT_PROCESSED]);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -303,7 +317,7 @@ class GoodsController extends Controller {
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
             //Память для Кэширования
             $cacheMethod = \PHPExcel_CachedObjectStorageFactory::cache_to_phpTemp;
-            $cacheSettings = array('memoryCacheSize ' => '64MB');
+            $cacheSettings = ['memoryCacheSize ' => '64MB'];
             \PHPExcel_Settings::setCacheStorageMethod($cacheMethod, $cacheSettings);
             //Оптимизируем чтение файла
             $objReader->setReadDataOnly(true);
@@ -358,7 +372,18 @@ class GoodsController extends Controller {
                                 $row_units = 0;
                             }
                             if (!in_array(mb_strtolower($row_product), $arr)) {
-                                $data_insert[] = [
+                                $new_item = new CatalogBaseGoods;
+                                $new_item->cat_id = $id;
+                                $new_item->supp_org_id = $vendor_id;
+                                $new_item->article = $row_article;
+                                $new_item->product = $row_product;
+                                $new_item->units = $row_units;
+                                $new_item->price = $row_price;
+                                $new_item->ed = $row_ed;
+                                $new_item->note = $row_note;
+                                $new_item->status = CatalogBaseGoods::STATUS_ON;
+                                $new_item->save();
+                                /*$data_insert[] = [
                                     $id,
                                     $vendor_id,
                                     $row_article,
@@ -368,12 +393,12 @@ class GoodsController extends Controller {
                                     $row_ed,
                                     $row_note,
                                     CatalogBaseGoods::STATUS_ON
-                                ];
+                                ];*/
                             }
                         }
                     }
                     unset($worksheet);
-                    if (!empty($data_insert)) {
+                    /*if (!empty($data_insert)) {
                         $db = Yii::$app->db;
                         $data_chunks = array_chunk($data_insert, 1000);
                         unset($data_insert);
@@ -383,7 +408,7 @@ class GoodsController extends Controller {
                             ], $data_insert);
                             Yii::$app->db->createCommand($sql)->execute();
                         }
-                    }
+                    }*/
                     $transaction->commit();
                     unlink($path);
                     return $this->redirect(Url::to(['goods/vendor', 'id' => $vendor_id]));
@@ -479,7 +504,8 @@ class GoodsController extends Controller {
         return $this->renderAjax('_importForm', compact('importModel', 'id'));
     }
 
-    public function actionImportCatalog($id) {
+    public function actionImportCatalog($id)
+    {
         $relation = RelationSuppRest::findOne(['id' => $id]);
 
         if (empty($relation)) {
@@ -490,7 +516,7 @@ class GoodsController extends Controller {
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
-                Yii::$app->session->setFlash('fail', Yii::t('error', 'backend.controllers.goods.file_error', ['ru'=>'Ошибка загрузки файла!']));
+                Yii::$app->session->setFlash('fail', Yii::t('error', 'backend.controllers.goods.file_error', ['ru' => 'Ошибка загрузки файла!']));
                 return $this->render("import-catalog", compact("relation", "importModel"));
             }
             $localFile = \PHPExcel_IOFactory::identify($path);
@@ -540,13 +566,14 @@ class GoodsController extends Controller {
             } catch (Exception $e) {
                 unlink($path);
                 $transaction->rollback();
-                Yii::$app->session->setFlash('fail', Yii::t('error', 'backend.controllers.goods.save_error', ['ru'=>'Ошибка сохранения, повторите действие!']));
+                Yii::$app->session->setFlash('fail', Yii::t('error', 'backend.controllers.goods.save_error', ['ru' => 'Ошибка сохранения, повторите действие!']));
             }
         }
         return $this->render("import-catalog", compact("relation", "importModel"));
     }
 
-    private function fillNewBaseCatalog($worksheet, $highestRow, $catalogId, $vendorId) {
+    private function fillNewBaseCatalog($worksheet, $highestRow, $catalogId, $vendorId)
+    {
         for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
             $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
             $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
@@ -584,15 +611,17 @@ class GoodsController extends Controller {
     /**
      * Finds the CatalogBaseGoods model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
+     *
      * @param integer $id
      * @return CatalogBaseGoods the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id) {
+    protected function findModel($id)
+    {
         if (($model = CatalogBaseGoods::findOne($id)) !== null) {
             return $model;
         } else {
-            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.goods.page_error', ['ru'=>'The requested page does not exist.']));
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.goods.page_error', ['ru' => 'The requested page does not exist.']));
         }
     }
 

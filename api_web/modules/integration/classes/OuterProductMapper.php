@@ -160,6 +160,7 @@ class OuterProductMapper
     }
 
     /**
+     * @throws BadRequestHttpException
      * @throws ValidationException
      */
     public function updateModel()
@@ -195,7 +196,6 @@ class OuterProductMapper
         if (!$model->outerProduct){
             throw new BadRequestHttpException('outer product not found');
         }
-        var_dump($model->product);exit();
         $model->outer_unit_id = $model->outerProduct->outer_unit_id;
         if (!$model->product){
             throw new BadRequestHttpException('product_not_found');
@@ -207,3 +207,4 @@ class OuterProductMapper
     }
 
 }
+

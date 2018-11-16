@@ -22,7 +22,7 @@
                                 </td>
                                 <td align="center" valign="middle" width="33">
                                     <a href="mailto:info@mixcart.ru" target="_blank" style="text-decoration: none;">
-                                        <img src="<?= \Yii::$app->urlManagerFrontend->baseUrl ?>/img-host/mail.png" alt="Mail" width="24" height="18" border="0" style="border:0; outline:none; text-decoration:none; display:block;">
+                                        <img src="https://mixcart.ru/img-host/mail.png" alt="Mail" width="24" height="18" border="0" style="border:0; outline:none; text-decoration:none; display:block;">
                                     </a>
                                 </td>
                                 <td align="left" valign="middle" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
@@ -32,7 +32,7 @@
                                 </td>
                                 <td align="center" valign="middle" width="30">
                                     <a href="https://mixcart.ru/" target="_blank" style="text-decoration: none;">
-                                        <img src="<?= \Yii::$app->urlManagerFrontend->baseUrl ?>/img-host/web.png" alt="Web" width="21" height="21" border="0" style="border:0; outline:none; text-decoration:none; display:block;">
+                                        <img src="https://mixcart.ru/img-host/web.png" alt="Web" width="21" height="21" border="0" style="border:0; outline:none; text-decoration:none; display:block;">
                                     </a>
                                 </td>
                                 <td align="left" valign="middle" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color: #2a2c2e;">
@@ -57,10 +57,11 @@
                         <table cellspacing="0" cellspacing="0" width="70" style="max-width: 70px;">
                             <tr>
                                 <td align="left">
-                                    <a href="https://www.facebook.com/mixcartru/" target="_blank"><img src="<?= \Yii::$app->urlManagerFrontend->baseUrl ?>/img-host/facebook.png" alt="Facebook Logo" width="25" height="25" style="border:0; outline:none; text-decoration:none;"></a>
+                                    <a href="https://www.facebook.com/mixcartru/" target="_blank"><img src="https://mixcart.ru/img-host/facebook.png" alt="Facebook Logo" width="25" height="25" style="border:0; outline:none; text-decoration:none;"></a>
                                 </td>
                                 <td align="right">
-                                    <a href="https://www.instagram.com/mixcart_ru/?hl=ru" target="_blank"><img src="<?= \Yii::$app->urlManagerFrontend->baseUrl ?>/img-host/instagram.png" alt="Facebook Logo" width="25" height="25" style="border:0; outline:none; text-decoration:none;"></a>
+
+                                    <a href="https://www.instagram.com/mixcart_ru/?hl=ru" target="_blank"><img src="https://mixcart.ru/img-host/instagram.png" alt="Facebook Logo" width="25" height="25" style="border:0; outline:none; text-decoration:none;"></a>
                                 </td>
                             </tr>
                         </table>

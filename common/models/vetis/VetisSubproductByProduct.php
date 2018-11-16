@@ -123,7 +123,7 @@ class VetisSubproductByProduct extends \yii\db\ActiveRecord implements UpdateDic
 
             $queueDate = $queue->last_executed ?? $queue->start_executing;
 
-            $startDate =  !isset($queueDate) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queueDate;
+            $startDate =  gmdate("Y-m-d H:i:s", time() - 60*60*24*80); //!isset($queueDate) ?  date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)): $queueDate;
             $instance = productApi::getInstance($org_id);
             $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 

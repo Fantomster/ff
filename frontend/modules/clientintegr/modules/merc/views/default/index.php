@@ -128,7 +128,7 @@ Modal::widget([
                     if (!empty($enterprise)) {
                         return $enterprise->name.'('. $enterprise->addressView .')';
                     }
-                    return $data['recipient_name'];
+                    return isset($data['recipient_name']) ? $data['recipient_name'] : "Неизвестно";
                 },
                 'visible' => ($searchModel->type == 2),
             ],
@@ -146,7 +146,7 @@ Modal::widget([
                     if (!empty($enterprise)) {
                         return $enterprise->name.'('. $enterprise->addressView .')';
                     }
-                    return $data['recipient_name'];
+                    return isset($data['sender_name']) ? $data['sender_name'] : "Неизвестно";
                 },
                 'visible' => ($searchModel->type != 2),
             ],

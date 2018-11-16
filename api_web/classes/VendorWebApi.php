@@ -505,7 +505,7 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|data');
         }
 
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendorID, $this->user->organization);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendorID, $this->user->organization, true);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
         }
@@ -556,7 +556,7 @@ class VendorWebApi extends \api_web\components\WebApi
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException('empty_param|vendor_id');
         }
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (!$catalog) {
             throw new BadRequestHttpException("Catalog not found");
         }
@@ -674,7 +674,7 @@ class VendorWebApi extends \api_web\components\WebApi
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException('empty_param|vendor_id');
         }
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
 
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {

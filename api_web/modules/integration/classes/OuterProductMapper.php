@@ -88,7 +88,7 @@ class OuterProductMapper
 
     /**
      * @param $outerStoreId
-     * @return array|null|\yii\db\ActiveRecord
+     * @return bool
      */
     public function storeExists($outerStoreId)
     {
@@ -96,7 +96,7 @@ class OuterProductMapper
             ->where(['id' => $outerStoreId])
             ->andWhere(['org_id' => $this->orgId])
             ->andWhere(['service_id' => $this->serviceId])
-            ->one();
+            ->exists();
     }
 
     /**
@@ -166,14 +166,8 @@ class OuterProductMapper
     {
         $mainOrgModel = null;
         $model = $this->getModel($this->orgId);
-        if (!$model) {
-            if (!$this->isMainOrg) {
-                $mainOrgModel = $this->getModel($this->mainOrgId);
-            } else {
-                $model = new OuterProductMap();
-                $model->service_id = $this->serviceId;
-                $model->organization_id = $this->orgId;
-            }
+        if (!$model && !$this->isMainOrg) {
+            $mainOrgModel = $this->getModel($this->mainOrgId);
         }
 
         if ($mainOrgModel) {
@@ -190,9 +184,22 @@ class OuterProductMapper
             $model->coefficient = $mainAttributes['coefficient'];
             $model->vat = $mainAttributes['vat'];
         }
+        if (!$model) {
+            $model = new OuterProductMap();
+            $model->service_id = $this->serviceId;
+            $model->organization_id = $this->orgId;
+
+        }
 
         $model->attributes = $this->request;
+        if (!$model->outerProduct){
+            throw new BadRequestHttpException('outer product not found');
+        }
+        var_dump($model->product);exit();
         $model->outer_unit_id = $model->outerProduct->outer_unit_id;
+        if (!$model->product){
+            throw new BadRequestHttpException('product_not_found');
+        }
         $model->vendor_id = $model->product->supp_org_id;
         if (!$model->save()) {
             throw new ValidationException($model->getFirstErrors());

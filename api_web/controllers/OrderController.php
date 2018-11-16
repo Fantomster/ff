@@ -1462,4 +1462,66 @@ class OrderController extends WebApiController
         $this->response = $this->container->get('ChatWebApi')->getDialogMessages($this->request);
     }
 
+    /**
+     * @SWG\Post(path="/order/send-message-by-unconfirmed-vendor",
+     *     tags={"Order"},
+     *     summary="Отправка сообщения в чат по заказу для поставщика (неподтвержденного)",
+     *     description="Отправка сообщения в чат по заказу для поставщика (неподтвержденного)",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                      "dialog_id":1,
+     *                      "message": "Текст сообщения"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *              "result":{
+     *                 {
+     *                      "message_id": 6328,
+     *                      "message": "El postavshik подтвердил заказ!",
+     *                      "sender": "MixCart Bot",
+     *                      "recipient_name": "Космическая пятница",
+     *                      "recipient_id": 1,
+     *                      "is_my_message": false,
+     *                      "is_system": true,
+     *                      "viewed": true,
+     *                      "date": "2018-02-12",
+     *                      "time": "06:33:16"
+     *                 }
+     *              },
+     *              "pagination":{
+     *                  "page":1,
+     *                  "page_size":12,
+     *                  "total_page":3
+     *              }
+     *         }),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionSendMessageByUnconfirmedVendor()
+    {
+        $this->response = $this->container->get('ChatWebApi')->addMessage($this->request);
+    }
 }

@@ -1465,8 +1465,8 @@ class OrderController extends WebApiController
     /**
      * @SWG\Post(path="/order/send-message-by-unconfirmed-vendor",
      *     tags={"Order"},
-     *     summary="Отправка сообщения в чат по заказу для поставщика (неподтвержденного)",
-     *     description="Отправка сообщения в чат по заказу для поставщика (неподтвержденного)",
+     *     summary="Отправка сообщения поставщика (неподтвержденного) в чат по заказу для ресторана",
+     *     description="Отправка сообщения поставщика (неподтвержденного) в чат по заказу для ресторана",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",

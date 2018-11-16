@@ -138,9 +138,9 @@ class VetisForeignEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
 
             //ставим задачу в очередь
             //\Yii::$app->get('sqsQueue')->sendMessage(Yii::$app->params['sqsQueues']['vetis']['enterprise'], $data);
-//            \Yii::$app->get('rabbit')
-//                ->setQueue($queueName)
-//                ->addRabbitQueue(json_encode($data));
+            \Yii::$app->get('rabbit')
+                ->setQueue($queueName)
+                ->addRabbitQueue(json_encode($data));
         } catch (\Exception $e) {
             Yii::error($e->getMessage());
         }

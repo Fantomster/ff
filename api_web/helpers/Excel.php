@@ -38,7 +38,7 @@ class Excel
             $cells = [];
             $i = 0;
             foreach ($cellIterator as $cell) {
-                if ($i > 5) {
+                if ($i > 5 && !$cell->getValue()) {
                     break;
                 }
                 $cells[] = htmlspecialchars($cell->getValue(), ENT_QUOTES);

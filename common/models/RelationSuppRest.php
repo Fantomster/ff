@@ -207,22 +207,22 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if ($this->catalog->type == 1) {
-            $products = CatalogBaseGoods::find()->where(['cat_id' => $this->cat_id, 'deleted' => 0])->all();
-            /** @var CatalogBaseGoods $product */
-            foreach ($products as $product) {
-                $item = CatalogGoods::find()->where(['cat_id' => $this->cat_id, 'base_goods_id' => $product->id])->exists();
-                if ($item === false) {
-                    $new_item = new CatalogGoods;
-                    $new_item->cat_id = $this->cat_id;
-                    $new_item->base_goods_id = $product->id;
-                    $new_item->vat = null;
-                    if (!$new_item->save()) {
-                        Yii::info('Не удалось сохранить для каталога ' . $this->cat_id . ' в таблице catalog_goods новую запись из catalog_base_goods ' . $product->id);
-                    }
-                }
-            }
-        }
+//        if ($this->catalog->type == 1) {
+//            $products = CatalogBaseGoods::find()->where(['cat_id' => $this->cat_id, 'deleted' => 0])->all();
+//            /** @var CatalogBaseGoods $product */
+//            foreach ($products as $product) {
+//                $item = CatalogGoods::find()->where(['cat_id' => $this->cat_id, 'base_goods_id' => $product->id])->exists();
+//                if ($item === false) {
+//                    $new_item = new CatalogGoods;
+//                    $new_item->cat_id = $this->cat_id;
+//                    $new_item->base_goods_id = $product->id;
+//                    $new_item->vat = null;
+//                    if (!$new_item->save()) {
+//                        Yii::info('Не удалось сохранить для каталога ' . $this->cat_id . ' в таблице catalog_goods новую запись из catalog_base_goods ' . $product->id);
+//                    }
+//                }
+//            }
+//        }
     }
 
 }

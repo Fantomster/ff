@@ -19,6 +19,7 @@ class m181116_154600_copy_products_base_catalogs_to_table_catalog_goods extends 
             $row = new CatalogGoods;
             $row->cat_id = $product->cat_id;
             $row->base_goods_id = $product->id;
+            $row->price = $product->price;
             $row->vat = null;
             if (!$row->save()) {
                 throw new \Exception('Не удалось сохранить для каталога ' . $product->cat_id . ' в таблице catalog_goods новую запись из catalog_base_goods ' . $product->id);

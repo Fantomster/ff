@@ -759,10 +759,16 @@ class ServiceRkws extends AbstractSyncFactory
         try {
             $cook = $this->prepareServiceWithAuthCheck();
             $url = $this->getUrlCmd();
-            $xml = '<?xml version="1.0" encoding="utf-8"?><RQ cmd="get_objects"><PARAM name="start" val="1"/><PARAM name="limit" val="1"/><PARAM name="onlyactive" val="1" /></RQ>';
+            $xml = '<?xml version="1.0" encoding="utf-8"?>
+            <RQ cmd="get_objectinfo">
+                <PARAM name="object_id" val="' . $this->licenseCode . '"/>
+            </RQ>';
             $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
-            if (empty($xmlData)) {
-                return ['result' => false];
+            if (!empty($xmlData)) {
+                $xml = (array)simplexml_load_string($xmlData);
+                $this->checkErrorResponse($xml);
+            } else {
+                throw new BadRequestHttpException('Bad connection.');
             }
             return ['result' => true];
         } catch (\Exception $e) {

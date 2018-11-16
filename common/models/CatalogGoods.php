@@ -4,6 +4,7 @@ namespace common\models;
 
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "catalog_goods".
@@ -17,6 +18,7 @@ use yii\data\ActiveDataProvider;
  * @property integer $discount_fixed
  * @property string $created_at
  * @property string $updated_at
+ * @property integer $vat
  *
  * @property CatalogBaseGoods $baseProduct
  * @property Organization $organization
@@ -35,12 +37,10 @@ class CatalogGoods extends \yii\db\ActiveRecord {
     {
         return [
             'timestamp' => [
-                'class' => \yii\behaviors\TimestampBehavior::className(),
-                'attributes' => [
-                    \yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
-                    \yii\db\ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
-                ],
-                'value' => new \yii\db\Expression('NOW()'),
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
             ],
         ];
     }

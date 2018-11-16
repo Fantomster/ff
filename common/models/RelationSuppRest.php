@@ -206,35 +206,19 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
-//        $rows = User::find()->where(['organization_id' => $this->supp_org_id, 'role_id'=>Role::ROLE_SUPPLIER_MANAGER])->all();
-//        foreach ($rows as $row) {
-//                $managerAssociate = ManagerAssociate::findOne(['manager_id'=>$row->id, 'organization_id'=>$this->supp_org_id]);
-//                if(!$managerAssociate){
-//                    $managerAssociate = new ManagerAssociate();
-//                    $managerAssociate->manager_id = $row->id;
-//                    $managerAssociate->organization_id = $this->rest_org_id;
-//                    $managerAssociate->save();
-//                }
-//        }
 
-//        if (!is_a(Yii::$app, 'yii\console\Application')) {
-//            \api\modules\v1\modules\mobile\components\NotificationHelper::actionRelation($this->id);
-//        }
-        $catalog = Catalog::find()->where(['id' => $this->id])->one();
-        if ($catalog->type == 1) {
-            $products = CatalogBaseGoods::find()->where(['cat_id' => $catalog->id, 'deleted' => 0])->all();
+        if ($this->catalog->type == 1) {
+            $products = CatalogBaseGoods::find()->where(['cat_id' => $this->cat_id, 'deleted' => 0])->all();
+            /** @var CatalogBaseGoods $product */
             foreach ($products as $product) {
-                $item = CatalogGoods::find()->where(['cat_id' => $catalog->id, 'base_goods_id' => $product->id])->exists();
+                $item = CatalogGoods::find()->where(['cat_id' => $this->cat_id, 'base_goods_id' => $product->id])->exists();
                 if ($item === false) {
                     $new_item = new CatalogGoods;
-                    $new_item->cat_id = $catalog->id;
+                    $new_item->cat_id = $this->cat_id;
                     $new_item->base_goods_id = $product->id;
-                    $new_item->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-                    $new_item->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                     $new_item->vat = null;
-                    $new_item->save();
                     if (!$new_item->save()) {
-                        throw new \Exception('Не удалось сохранить для каталога ' . $catalog->id . ' в таблице catalog_goods новую запись из catalog_base_goods ' . $product->id);
+                        Yii::info('Не удалось сохранить для каталога ' . $this->cat_id . ' в таблице catalog_goods новую запись из catalog_base_goods ' . $product->id);
                     }
                 }
             }

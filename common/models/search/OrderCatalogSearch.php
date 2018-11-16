@@ -36,6 +36,7 @@ class OrderCatalogSearch extends \yii\base\Model
 
     /**
      * Search
+     *
      * @param array $params
      * @return ActiveDataProvider
      */
@@ -125,7 +126,7 @@ class OrderCatalogSearch extends \yii\base\Model
                LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
                LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
               WHERE 
-              cg.cat_id IN (" . $this->catalogs . ")
+              cat.id IN (" . $this->catalogs . ")
               " . $where . "
               AND (cbg.status = 1 AND cbg.deleted = 0)
             UNION ALL
@@ -136,25 +137,25 @@ class OrderCatalogSearch extends \yii\base\Model
                  LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
                  LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
                WHERE
-               cat_id IN (" . $this->catalogs . ")
+               cat.id IN (" . $this->catalogs . ")
                " . $where . "
                AND (cbg.status = 1 AND cbg.deleted = 0)
-        ) as c WHERE id != 0 " . $where_all . " group by c.id";
+        ) AS c WHERE id != 0 " . $where_all . " GROUP BY c.id";
         $dataProvider = new SqlDataProvider([
-            'sql' => $sql,
-            'params' => $params_sql,
+            'sql'        => $sql,
+            'params'     => $params_sql,
             'pagination' => [
-                'page' => isset($params['page']) ? ($params['page'] - 1) : 0,
+                'page'     => isset($params['page']) ? ($params['page'] - 1) : 0,
                 'pageSize' => isset($params['pageSize']) ? $params['pageSize'] : null,
-                'params' => [
+                'params'   => [
                     'sort' => isset($params['sort']) ? $params['sort'] : 'product',
                 ]
             ],
-            'sort' => [
-                'attributes' => [
+            'sort'       => [
+                'attributes'   => [
                     'product' => [
-                        'asc' => ['alf_cyr' => SORT_DESC, 'product' => SORT_ASC],
-                        'desc' => ['alf_cyr' => SORT_ASC, 'product' => SORT_DESC],
+                        'asc'     => ['alf_cyr' => SORT_DESC, 'product' => SORT_ASC],
+                        'desc'    => ['alf_cyr' => SORT_ASC, 'product' => SORT_DESC],
                         'default' => SORT_ASC
                     ],
                     'price',
@@ -166,9 +167,9 @@ class OrderCatalogSearch extends \yii\base\Model
                     'i'
                 ],
                 'defaultOrder' => [
-                    'product' => SORT_ASC,
+                    'product'     => SORT_ASC,
                     'c_article_1' => SORT_ASC,
-                    'c_article' => SORT_ASC
+                    'c_article'   => SORT_ASC
                 ]
             ],
         ]);

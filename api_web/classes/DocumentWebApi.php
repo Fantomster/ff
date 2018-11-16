@@ -548,7 +548,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 if ($model['type'] == self::TYPE_WAYBILL) {
                     $statusText = \Yii::t('api_web', 'waybill.' . Registry::$waybill_statuses[$model['wb_status_id']]);
                     $status_id = $model['wb_status_id'];
-                    $service_id = $model['service_id'];
+                    $service_id = $model['wb_service_id'];
                 } else {
                     $statusText = \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$model['object_group_status_id']]);
                     $status_id = $model['object_group_status_id'];

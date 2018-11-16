@@ -178,7 +178,16 @@ class Catalog extends \yii\db\ActiveRecord
         }
     }
 
-    public function addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, $currency = null)
+    /**
+     * @param               $check
+     * @param               $get_supp_org_id
+     * @param               $currentUser
+     * @param               $arrCatalog
+     * @param Currency|null $currency
+     * @return int
+     * @throws ValidationException
+     */
+    public function addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, Currency $currency = null)
     {
         /**
          *
@@ -191,10 +200,12 @@ class Catalog extends \yii\db\ActiveRecord
             $newBaseCatalog->name = Yii::t('app', 'Главный каталог');
             $newBaseCatalog->type = Catalog::BASE_CATALOG;
             $newBaseCatalog->status = Catalog::STATUS_ON;
-            if (isset($currency)) {
+            if (!is_null($currency)) {
                 $newBaseCatalog->currency_id = $currency->id;
             }
-            $newBaseCatalog->save();
+            if (!$newBaseCatalog->save()){
+                throw new ValidationException($newBaseCatalog->getFirstErrors());
+            }
             $newBaseCatalog->refresh();
             $lastInsert_base_cat_id = $newBaseCatalog->id;
         } else {
@@ -212,7 +223,9 @@ class Catalog extends \yii\db\ActiveRecord
                 if (isset($currency)) {
                     $newBaseCatalog->currency_id = $currency->id;
                 }
-                $newBaseCatalog->save();
+                if (!$newBaseCatalog->save()){
+                    throw new ValidationException($newBaseCatalog->getFirstErrors());
+                }
                 $newBaseCatalog->refresh();
                 $lastInsert_base_cat_id = $newBaseCatalog->id;
             }
@@ -226,7 +239,9 @@ class Catalog extends \yii\db\ActiveRecord
         if (isset($currency)) {
             $newCatalog->currency_id = $currency->id;
         }
-        $newCatalog->save();
+        if (!$newCatalog->save()){
+            throw new ValidationException($newBaseCatalog->getFirstErrors());
+        }
         $lastInsert_cat_id = $newCatalog->id;
         $newCatalog->refresh();
 
@@ -267,7 +282,9 @@ class Catalog extends \yii\db\ActiveRecord
             $newProduct->status = CatalogBaseGoods::STATUS_ON;
             $newProduct->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
             $newProduct->deleted = CatalogBaseGoods::DELETED_OFF;
-            $newProduct->save();
+            if (!$newProduct->save()){
+                throw new ValidationException($newBaseCatalog->getFirstErrors());
+            }
             $newProduct->refresh();
 
             $lastInsert_base_goods_id = $newProduct->id;
@@ -276,7 +293,9 @@ class Catalog extends \yii\db\ActiveRecord
             $newGoods->cat_id = $lastInsert_cat_id;
             $newGoods->base_goods_id = $lastInsert_base_goods_id;
             $newGoods->price = $price;
-            $newGoods->save();
+            if (!$newGoods->save()){
+                throw new ValidationException($newBaseCatalog->getFirstErrors());
+            }
             $newGoods->refresh();
         }
         return $lastInsert_cat_id;

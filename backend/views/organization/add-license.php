@@ -92,10 +92,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         'name'          => 'td[' . $id . ']',
                         'value'         => date('d.m.Y'),
                         'options'       => [
-                            'placeholder' => 'Дата окончания',
-                            'class'       => 'delivery-date',
-                            'label'       => 'Дата окончания',
-                            'disabled'    => 'disabled'
+                            'placeholder'  => 'Дата окончания',
+                            'class'        => 'delivery-date',
+                            'label'        => 'Дата окончания',
+                            'disabled'     => 'disabled',
+                            'autocomplete' => 'off'
                         ],
                         'type'          => DatePicker::TYPE_COMPONENT_APPEND,
                         'layout'        => '{picker}{input}{remove}',

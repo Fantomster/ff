@@ -593,7 +593,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (!empty($post['agent_uid'])) {
             $agent = OuterAgent::findOne(['id' => $post['agent_uid'], 'org_id' => $this->user->organization_id]);
             if (!$agent) {
-                throw new BadRequestHttpException('Агент не найден.');
+                throw new BadRequestHttpException('agent.not_found');
             }
             $waybill->outer_agent_id = $agent->id;
         }
@@ -601,11 +601,11 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (!empty($post['store_uid'])) {
             $store = OuterStore::findOne(['id' => $post['store_uid'], 'org_id' => $this->user->organization_id]);
             if (!$store) {
-                throw new BadRequestHttpException('Склад не найден.');
+                throw new BadRequestHttpException('store.not_found');
             }
             //Если это категория а не склад
             if (!$store->isLeaf()) {
-                throw new BadRequestHttpException('Категория не может быть выбрана в качестве склада.');
+                throw new BadRequestHttpException('store.is_category');
             }
             $waybill->outer_store_id = $store->id;
         }

@@ -837,11 +837,12 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * @param string $indexByField
      * @return array
      */
-    public function getUserOrganizationBusinessList()
+    public function getUserOrganizationBusinessList(string $indexByField = null)
     {
-        $res = (new Query())
+        $resQuery = (new Query())
             ->select(['a.id', 'a.name'])
             ->distinct()
             ->from('organization a')
@@ -856,7 +857,11 @@ class UserWebApi extends \api_web\components\WebApi
                     Role::ROLE_RESTAURANT_BUYER,
                     Role::ROLE_ADMIN,
                 ]
-            ])->all();
+            ]);
+        if (!is_null($indexByField)){
+            $resQuery->indexBy($indexByField);
+        }
+            $res = $resQuery->all();
 
         $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($res, 'id'));
         $res = array_map(function ($item) use ($licenses) {

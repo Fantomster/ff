@@ -304,19 +304,18 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         $apiShema = DBNameHelper::getApiName();
-
         /** Статусы накладной */
+        $params_sql[':WAYBILL_FORMED'] = Registry::WAYBILL_FORMED;
         $params_sql[':WAYBILL_COMPARED'] = Registry::WAYBILL_COMPARED;
-        $params_sql[':WAYBILL_RESET'] = Registry::WAYBILL_RESET;
+        $params_sql[':WAYBILL_ERROR'] = Registry::WAYBILL_ERROR;
         $params_sql[':WAYBILL_UNLOADED'] = Registry::WAYBILL_UNLOADED;
+        $params_sql[':WAYBILL_UNLOADING'] = Registry::WAYBILL_UNLOADING;
 
         /** Групповые статусы */
         $params_sql[':DOC_GROUP_STATUS_SENT'] = Registry::DOC_GROUP_STATUS_SENT;
         $params_sql[':DOC_GROUP_STATUS_WAIT_FORMING'] = Registry::DOC_GROUP_STATUS_WAIT_FORMING;
         $params_sql[':DOC_GROUP_STATUS_WAIT_SENDING'] = Registry::DOC_GROUP_STATUS_WAIT_SENDING;
 
-
-        \Yii::$app->db->createCommand("SET @order_v_id = null;SET @waybill_v_id = null;")->execute();
         $sql = "SELECT
                   if(order_id IS NULL, waybill_id, order_id)     id,
                   if(order_id IS NULL, 'waybill', 'order')       `type`,
@@ -345,33 +344,21 @@ class DocumentWebApi extends \api_web\components\WebApi
                   dat.sort_doc                                   sort_doc,
                   dat.outer_number_code                          outer_number_code,
                   dat.outer_number_additional                    outer_number_additional,
-                  if(order_id IS NOT NULL,
-                     CASE max(
-                         CASE dat.waybill_status_id
-                         WHEN :WAYBILL_COMPARED
-                           THEN 1
-                         WHEN :WAYBILL_RESET
-                           THEN 1
-                         WHEN :WAYBILL_UNLOADED
-                           THEN 0
-                         ELSE 2
-                         END
-                     )
-                     WHEN 0
+                  IF(order_id IS NOT NULL,
+                     CASE
+                     WHEN group_concat(DISTINCT dat.waybill_status_id) = :WAYBILL_UNLOADED
                        THEN :DOC_GROUP_STATUS_SENT
-                     WHEN 1
+                     WHEN instr(group_concat(DISTINCT dat.waybill_status_id), :WAYBILL_FORMED) > 0
                        THEN :DOC_GROUP_STATUS_WAIT_FORMING
-                     WHEN 2
+                     WHEN group_concat(DISTINCT dat.waybill_status_id) IN (:WAYBILL_ERROR, :WAYBILL_UNLOADED, :WAYBILL_UNLOADING)
                        THEN :DOC_GROUP_STATUS_WAIT_SENDING
-                     ELSE 0 END,
+                     ELSE :DOC_GROUP_STATUS_WAIT_SENDING END,
                      waybill_status_id
                   )                                              object_group_status_id,
-                  waybill_date,
-                  order_date
+                  waybill_date                                   waybill_date,
+                  order_date                                     order_date
                 FROM (
                        SELECT
-                         @order_v_id := case when @waybill_v_id = a.id and order_id is null then @order_v_id else order_id end order_z_id,
-                         @waybill_v_id := a.id,
                          d.id                                             order_id,
                          d.client_id                                      order_acquirer_id,
                          d.vendor_id                                      order_vendor_id,
@@ -399,10 +386,14 @@ class DocumentWebApi extends \api_web\components\WebApi
                          LEFT JOIN order_content c ON c.id = b.order_content_id
                          LEFT JOIN `order` d ON d.id = c.order_id
                        WHERE a.acquirer_id = :business_id AND a.service_id = :service_id
+                       AND NOT EXISTS(
+                               SELECT sqwc.waybill_id
+                               FROM `$apiShema`.waybill_content sqwc
+                                 JOIN order_content sqoc ON sqoc.id = sqwc.order_content_id
+                               WHERE sqwc.waybill_id = a.id
+                           )
                        UNION
                        SELECT
-                         1,
-                         1,
                          a.id                                                   order_id,
                          a.client_id                                            order_acquirer_id,
                          a.vendor_id                                            order_vendor_id,
@@ -436,9 +427,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                                                if(dat.order_id IS NULL, oav.id, oav.vendor_id)
                   LEFT JOIN organization ov ON ov.id = dat.order_vendor_id
                   LEFT JOIN `$apiShema`.outer_store osw ON osw.org_id = :business_id AND osw.service_id = :service_id AND dat.waybill_outer_store_id = osw.id
-                WHERE 1
-                  and if(if(order_id IS NULL, waybill_id, order_id) = waybill_id and order_z_id is not null, 1, 2) = 2
-                $where_all  
+                WHERE 1  $where_all  
                 GROUP BY id, dat.order_acquirer_id, dat.order_service_id, wb_status_id, wb_service_id, sort_doc";
 
         if ($sort) {

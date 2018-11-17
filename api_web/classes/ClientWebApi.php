@@ -94,22 +94,29 @@ class ClientWebApi extends WebApi
                 $model->is_allowed_for_franchisee = (int)$post['is_allowed_for_franchisee'];
             }
 
+            $strAddress = '';
+
             if (isset($post['address']) && $post['address'] !== null) {
                 if (isset($post['address']['country']) && $post['address']['country'] !== null) {
                     $model->country = $post['address']['country'];
+                    $strAddress .= $post['address']['country'];
                 }
                 if (isset($post['address']['region']) && $post['address']['region'] !== null) {
                     $model->administrative_area_level_1 = $post['address']['region'];
+                    $strAddress .= ', ' . $post['address']['region'];
                 }
                 if (isset($post['address']['locality']) && $post['address']['locality'] !== null) {
                     $model->locality = $post['address']['locality'];
                     $model->city = $post['address']['locality'];
+                    $strAddress .= ', ' . $post['address']['locality'];
                 }
                 if (isset($post['address']['route']) && $post['address']['route'] !== null) {
                     $model->route = $post['address']['route'];
+                    $strAddress .= ', ' . $post['address']['route'];
                 }
-                if (isset($post['address']['house']) && $post['address']['house'] !== null) {
+                if (isset($post['address']['house']) && !empty($post['address']['house'])) {
                     $model->street_number = $post['address']['house'];
+                    $strAddress .= ', ' . $post['address']['house'];
                 }
                 if (isset($post['address']['lat']) && $post['address']['lat'] !== null) {
                     $model->lat = $post['address']['lat'];
@@ -123,7 +130,7 @@ class ClientWebApi extends WebApi
                 unset($post['address']['lat']);
                 unset($post['address']['lng']);
                 unset($post['address']['place_id']);
-                $model->address = implode(', ', $post['address']);
+                $model->address = $strAddress;
                 $model->formatted_address = $model->address;
             }
 

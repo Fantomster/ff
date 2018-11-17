@@ -49,8 +49,6 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function update($post, bool $isUnconfirmedVendor = false)
     {
-        WebApiHelper::clearRequest($post);
-
         if (empty($post['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');
         }

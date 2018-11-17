@@ -14,6 +14,8 @@ use api_web\modules\integration\classes\documents\OrderEmail;
 use api_web\modules\integration\classes\documents\Waybill;
 use api_web\modules\integration\classes\documents\WaybillContent;
 use common\helpers\DBNameHelper;
+use common\models\OuterAgent;
+use common\models\OuterStore;
 use common\models\RelationUserOrganization;
 use common\models\Order as OrderMC;
 use yii\data\SqlDataProvider;
@@ -589,11 +591,23 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (!empty($post['agent_uid'])) {
-            $waybill->outer_agent_id = $post['agent_uid'];
+            $agent = OuterAgent::findOne(['outer_uid' => $post['agent_uid'], 'org_id' => $this->user->organization_id]);
+            if (!$agent) {
+                throw new BadRequestHttpException('Агент не найден.');
+            }
+            $waybill->outer_agent_id = $agent->id;
         }
 
         if (!empty($post['store_uid'])) {
-            $waybill->outer_store_id = $post['store_uid'];
+            $store = OuterStore::findOne(['outer_uid' => $post['store_uid'], 'org_id' => $this->user->organization_id]);
+            if (!$store) {
+                throw new BadRequestHttpException('Склад не найден.');
+            }
+            //Если это категория а не склад
+            if (!$store->isLeaf()) {
+                throw new BadRequestHttpException('Категория не может быть выбрана в качестве склада.');
+            }
+            $waybill->outer_store_id = $store->id;
         }
 
         if (!empty($post['doc_date'])) {

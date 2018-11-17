@@ -4,6 +4,7 @@ namespace api_web\modules\integration\classes\sync;
 
 use api_web\classes\RabbitWebApi;
 use api_web\components\Registry;
+use api_web\modules\integration\classes\documents\Waybill;
 use api_web\modules\integration\models\iikoWaybill;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
@@ -103,9 +104,9 @@ class ServiceIiko extends AbstractSyncFactory
             foreach ($records as $model) {
                 if (!in_array($model->status_id, [Registry::WAYBILL_COMPARED, Registry::WAYBILL_ERROR])) {
                     if ($model->status_id == Registry::WAYBILL_UNLOADED) {
-                        $this->response($res, $model->id, \Yii::t('api_web', 'service_iiko.already_success_unloading_waybill'));
+                        $this->response($res, $model, \Yii::t('api_web', 'service_iiko.already_success_unloading_waybill'));
                     } else {
-                        $this->response($res, $model->id, \Yii::t('api_web', 'service_iiko.no_ready_unloading_waybill'), false);
+                        $this->response($res, $model, \Yii::t('api_web', 'service_iiko.no_ready_unloading_waybill'), false);
                     }
                     continue;
                 }
@@ -114,11 +115,11 @@ class ServiceIiko extends AbstractSyncFactory
                 try {
                     $response = $api->sendWaybill($model);
                     if ($response !== true) {
-                        $this->response($res, $model->id, $response, false);
+                        $this->response($res, $model, $response, false);
                     }
                     $model->status_id = Registry::WAYBILL_UNLOADED;
                     $model->save();
-                    $this->response($res, $model->id, \Yii::t('api_web', 'service_iiko.success_unloading_waybill'));
+                    $this->response($res, $model, \Yii::t('api_web', 'service_iiko.success_unloading_waybill'));
                     $transaction->commit();
                 } catch (\Exception $e) {
                     $transaction->rollBack();
@@ -130,7 +131,7 @@ class ServiceIiko extends AbstractSyncFactory
                     if ($this->countWaybillSend == 1) {
                         $api->logout();
                     }
-                    $this->response($res, $model->id, $e->getMessage(), false);
+                    $this->response($res, $model, $e->getMessage(), false);
                 }
             }
             $api->logout();
@@ -161,22 +162,19 @@ class ServiceIiko extends AbstractSyncFactory
     }
 
     /**
-     * @param      $res
-     * @param      $model_id
-     * @param      $message
-     * @param bool $success
+     * @param           $res
+     * @param   Waybill $model
+     * @param           $message
+     * @param bool      $success
      * @return mixed
      * @throws BadRequestHttpException
      */
-    private function response(&$res, $model_id, $message, $success = true)
+    private function response(&$res, $model, $message, $success = true)
     {
         if ($this->countWaybillSend == 1 and $success === false) {
             throw new BadRequestHttpException($message);
         } else {
-            $res[$model_id] = [
-                'success' => $success,
-                'message' => $message
-            ];
+            $res[] = $model->prepare();
         }
         return $res;
     }

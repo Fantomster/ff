@@ -6,7 +6,7 @@ use api_web\components\Registry;
 use common\models\IntegrationSettingValue;
 use common\models\Order;
 use common\models\OrderContent;
-use common\models\Waybill;
+use api_web\modules\integration\classes\documents\Waybill;
 use common\models\WaybillContent;
 
 class iikoWaybill extends Waybill

@@ -458,11 +458,9 @@ class ServiceRkws extends AbstractSyncFactory
         $result = [];
         foreach ($request['ids'] as $waybill_id) {
             # 2. Ищем накладную
-            $waybill = Waybill::findOne(['id' => $waybill_id, 'service_id' => $this->serviceId]);
-            if (!isset($waybill)) {
-                $result[$waybill_id] = false;
-                SyncLog::trace('Waybill not found in ' . __METHOD__);
-                continue;
+            $waybill = \api_web\modules\integration\classes\documents\Waybill::findOne(['id' => $waybill_id, 'service_id' => $this->serviceId]);
+            if (empty($waybill)) {
+                throw new BadRequestHttpException('Накладная ' . $waybill_id . ' не найдена ');
             }
 
             # 3. Выбираем даные по накладной для отправки
@@ -544,17 +542,17 @@ class ServiceRkws extends AbstractSyncFactory
                         $transaction->commit();
                         SyncLog::trace('SUCCESS. json-response-data: ' .
                             str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
-                        $result[$waybill_id] = true;
+                        $result[] = $waybill->prepare();
                     } else {
                         $transaction->rollBack();
                         SyncLog::trace('Cannot save task!');
-                        $result[$waybill_id] = false;
+                        $result[] = $waybill->prepare();
                         //throw new BadRequestHttpException('rkws_task_save_error');
                     }
                 }
             } else {
                 SyncLog::trace('Service connection parameters for final transaction are wrong');
-                $result[$waybill_id] = false;
+                $result[] = $waybill->prepare();
             }
         }
 

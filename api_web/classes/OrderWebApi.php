@@ -115,7 +115,8 @@ class OrderWebApi extends \api_web\components\WebApi
             //Тут операции с продуктами в этом заказе
             if (isset($post['products']) && !empty($post['products'])) {
                 if (is_array($post['products'])) {
-
+                    $changed = [];
+                    $deleted = [];
                     foreach ($post['products'] as $product) {
                         $operation = strtolower($product['operation']);
                         if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
@@ -124,9 +125,11 @@ class OrderWebApi extends \api_web\components\WebApi
                         switch ($operation) {
                             case 'delete':
                                 $this->deleteProduct($order, $product['id']);
+                                $deleted[] = OrderContent::findOne(['order_id' => $order->id, 'product_id' => $product['id']]);
                                 break;
                             case 'add':
                                 $this->addProduct($order, $product);
+                                $changed[] = OrderContent::findOne(['order_id' => $order->id, 'product_id' => $product['id']]);
                                 break;
                             case 'edit':
                                 if ($order->service_id == Registry::EDI_SERVICE_ID) {
@@ -134,6 +137,8 @@ class OrderWebApi extends \api_web\components\WebApi
                                 } else {
                                     $this->editProduct($order, $product);
                                 }
+                                $changed[] = OrderContent::findOne(['order_id' => $order->id, 'product_id' => $product['id']]);
+
                                 break;
                         }
                     }
@@ -165,6 +170,12 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new ValidationException($order->getFirstErrors());
             }
             $tr->commit();
+            if ($order->vendor_id == $this->user->organization_id) {
+                $sender = $order->client;
+            } elseif ($order->client_id == $this->user->organization_id) {
+                $sender = $order->vendor;
+            }
+            Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted);
             return $this->getInfo(['order_id' => $order->id]);
         } catch (\Exception $e) {
             $tr->rollBack();

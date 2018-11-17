@@ -70,7 +70,7 @@ class EmailRoboWebApi extends WebApi
     public function update(array $post): array
     {
         $this->validateRequest($post, ['id']);
-        $orgId = $this->validateOrgId($post['org_id']) ?? $this->user->organization_id;
+        $orgId = isset($post['org_id']) && !empty($post['org_id']) ? $this->validateOrgId($post['org_id']) : $this->user->organization_id;
         $model = IntegrationSettingFromEmail::findOne([
             'id' => $post['id'],
             'organization_id' => $orgId, //$post['org_id'] ?? $this->user->organization_id,

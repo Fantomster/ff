@@ -7,6 +7,7 @@ use common\models\Message;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
 use common\models\OrderChat;
+use common\models\OrderContent;
 use common\models\search\OrderContentSearch;
 use common\models\User;
 use Yii;
@@ -343,4 +344,50 @@ class OrderNotice
         return (int)OrderChat::find()->where(['viewed' => 0, 'is_system' => 1, 'recipient_id' => $organizaion->id])->count();
     }
 
+    /**
+     * Sends email informing both sides about order change details
+     *
+     * @param Organization   $senderOrg
+     * @param Order          $order
+     * @param OrderContent[] $changed
+     * @param OrderContent[] $deleted
+     */
+    public function sendOrderChange($senderOrg, $order, $changed = [], $deleted = [])
+    {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = '@api_web/views/mail/order';
+        // send email
+        $subject = Yii::t('message', 'frontend.controllers.order.change_in_order', ['ru' => "Измененения в заказе №"]) . $order->id;
+
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
+        $orgs[] = $order->vendor_id;
+        $orgs[] = $order->client_id;
+        foreach ($order->recipientsList as $recipient) {
+            $email = $recipient->email;
+            foreach ($orgs as $org) {
+                $notification = $recipient->getEmailNotification($org);
+                if ($notification)
+                    if ($notification->order_changed) {
+                        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider", "recipient", "changed", "deleted"))
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
+                    }
+                $notification = $recipient->getSmsNotification($org);
+                if ($notification)
+                    if ($recipient->profile->phone && $notification->order_changed) {
+                        $text = Yii::$app->sms->prepareText('sms.order_changed', [
+                            'name' => $senderOrg->name,
+                            'url'  => $order->getUrlForUser($recipient)
+                        ]);
+                        Yii::$app->sms->send($text, $recipient->profile->phone);
+                    }
+            }
+        }
+    }
 }

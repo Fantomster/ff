@@ -41,6 +41,9 @@ class EdiOrganization extends \yii\db\ActiveRecord
             [['token'], 'string', 'max' => 150],
             [['organization_id', 'provider_id'], 'unique', 'targetAttribute' => ['organization_id', 'provider_id'], 'when' => function ($model) {
                 return $model->isNewRecord;
+            }],
+            [['gln_code', 'provider_id'], 'unique', 'targetAttribute' => ['gln_code', 'provider_id'], 'when' => function ($model) {
+                return $model->isNewRecord;
             }]
         ];
     }

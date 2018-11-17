@@ -410,8 +410,7 @@ class ChatWebApi extends WebApi
             'is_my_message'  => $is_my_message,
             'is_system'      => $model->is_system ? true : false,
             'viewed'         => $model->viewed ? true : false,
-            'date'           => date('Y-m-d', strtotime($model->created_at)),
-            'time'           => date('H:i:s', strtotime($model->created_at)),
+            'date'           => date('Y-m-d H:i:s', strtotime($model->created_at)),
         ];
     }
 }

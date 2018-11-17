@@ -591,7 +591,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (!empty($post['agent_uid'])) {
-            $agent = OuterAgent::findOne(['outer_uid' => $post['agent_uid'], 'org_id' => $this->user->organization_id]);
+            $agent = OuterAgent::findOne(['id' => $post['agent_uid'], 'org_id' => $this->user->organization_id]);
             if (!$agent) {
                 throw new BadRequestHttpException('Агент не найден.');
             }
@@ -599,7 +599,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (!empty($post['store_uid'])) {
-            $store = OuterStore::findOne(['outer_uid' => $post['store_uid'], 'org_id' => $this->user->organization_id]);
+            $store = OuterStore::findOne(['id' => $post['store_uid'], 'org_id' => $this->user->organization_id]);
             if (!$store) {
                 throw new BadRequestHttpException('Склад не найден.');
             }

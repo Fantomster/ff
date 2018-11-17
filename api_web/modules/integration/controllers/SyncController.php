@@ -29,6 +29,16 @@ use api_web\components\WebApiController;
 class SyncController extends WebApiController
 {
     /**
+     * @param \yii\base\Action $action
+     * @return bool
+     */
+    public function beforeAction($action)
+    {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
+        return parent::beforeAction($action);
+    }
+
+    /**
      * @SWG\Post(path="/integration/sync/run",
      *     tags={"Integration/sync"},
      *     summary="Универсальный метод интеграционных действий",

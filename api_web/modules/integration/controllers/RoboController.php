@@ -11,6 +11,16 @@ namespace api_web\modules\integration\controllers;
 class RoboController extends \api_web\components\WebApiController
 {
     /**
+     * @param \yii\base\Action $action
+     * @return bool
+     */
+    public function beforeAction($action)
+    {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
+        return parent::beforeAction($action);
+    }
+
+    /**
      * @SWG\Post(path="/integration/robo/list",
      *     tags={"Integration/robo"},
      *     summary="Список email роботов",

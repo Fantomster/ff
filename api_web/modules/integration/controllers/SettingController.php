@@ -5,6 +5,16 @@ namespace api_web\modules\integration\controllers;
 class SettingController extends \api_web\components\WebApiController
 {
     /**
+     * @param \yii\base\Action $action
+     * @return bool
+     */
+    public function beforeAction($action)
+    {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
+        return parent::beforeAction($action);
+    }
+
+    /**
      * @SWG\Post(path="/integration/setting/list",
      *     tags={"Integration/settings"},
      *     summary="Список настроек интеграции",
@@ -287,6 +297,7 @@ class SettingController extends \api_web\components\WebApiController
     {
         $this->response = $this->container->get('IntegrationSettingsWebApi')->setMainOrganizations($this->request);
     }
+
     /**
      * @SWG\Post(path="/integration/setting/reset-main-org-setting",
      *     tags={"Integration/settings"},

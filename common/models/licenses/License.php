@@ -271,4 +271,33 @@ class License extends ActiveRecord
             throw new HttpException(402, 'license.payment_required', 402);
         }
     }
+
+    /**
+     * @param       $org_id
+     * @param array $service_ids
+     * @throws HttpException
+     */
+    public static function checkLicense($org_id, $service_ids = [])
+    {
+        $result = self::getAllLicense($org_id, $service_ids, true);
+        if (!empty($result)) {
+            $l = current($result);
+            $licenseDate = $l['to_date'];
+            $licenseName = $l['name'];
+        } else {
+            $licenseDate = date('Y-m-d H:i:s', strtotime("-1 day"));
+            $licenseName = "";
+        }
+
+        \Yii::$app->response->headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
+        \Yii::$app->response->headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
+        #Проверяем, не стухла ли лицензия
+        if (strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
+            $message = \Yii::t('api_web', 'license.payment_required');
+            if ($licenseName) {
+                $message .= ': ' . $licenseName;
+            }
+            throw new HttpException(402, $message, 402);
+        }
+    }
 }

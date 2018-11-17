@@ -35,11 +35,14 @@ class EdiOrganization extends \yii\db\ActiveRecord
     {
         return [
             [['organization_id', 'gln_code', 'provider_id', 'provider_priority'], 'integer'],
-            [['provider_id'], 'required'],
+            [['provider_id', 'gln_code'], 'required'],
             [['login', 'pass'], 'string', 'max' => 255],
             [['int_user_id'], 'string', 'max' => 50],
             [['token'], 'string', 'max' => 150],
             [['organization_id', 'provider_id'], 'unique', 'targetAttribute' => ['organization_id', 'provider_id'], 'when' => function ($model) {
+                return $model->isNewRecord;
+            }],
+            [['gln_code', 'provider_id'], 'unique', 'targetAttribute' => ['gln_code', 'provider_id'], 'when' => function ($model) {
                 return $model->isNewRecord;
             }]
         ];

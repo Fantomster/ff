@@ -31,6 +31,9 @@ class Integration
      */
     public function __construct($serviceId)
     {
+        if (empty($serviceId)) {
+            throw new BadRequestHttpException('У вас не выбран сервис интеграции');
+        }
         $this->service_id = $serviceId;
         $this->serviceName = self::$service_map[$serviceId];
     }

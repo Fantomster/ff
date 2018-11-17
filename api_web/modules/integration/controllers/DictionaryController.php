@@ -160,10 +160,6 @@ class DictionaryController extends \api_web\components\WebApiController
      */
     public function actionProductList()
     {
-        if (empty($this->request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
-        }
-
         $this->response = (new Dictionary($this->request['service_id'], 'Product'))->productList($this->request);
     }
 

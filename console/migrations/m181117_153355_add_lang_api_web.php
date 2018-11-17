@@ -17,13 +17,13 @@ class m181117_153355_add_lang_api_web extends Migration
      * {@inheritdoc}
      */
     public function safeUp() {
-        \console\helpers\BatchTranslations::insertCategory('ru', 'message', $this->translations);
+        \console\helpers\BatchTranslations::insertCategory('ru', 'api_web', $this->translations);
     }
 
     /**
      * {@inheritdoc}
      */
     public function safeDown() {
-        \console\helpers\BatchTranslations::deleteCategory('ru', 'message', $this->translations);
+        \console\helpers\BatchTranslations::deleteCategory('ru', 'api_web', $this->translations);
     }
 }

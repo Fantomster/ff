@@ -61,16 +61,16 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
 
         $delivery = new Delivery();
         $delivery->consignor = new BusinessMember();
-        $delivery->consignor->enterprise = new \frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Enterprise();
+        $delivery->consignor->enterprise = new Enterprise();
         $delivery->consignor->enterprise->guid = $enterprise;
-        $delivery->consignor->businessEntity = new \frontend\modules\clientintegr\modules\merc\helpers\api\cerber\BusinessEntity();
+        $delivery->consignor->businessEntity = new BusinessEntity();
         $delivery->consignor->businessEntity->guid = $hc;
 
         $delivery->consignee = new BusinessMember();
-        $delivery->consignee->enterprise = new \frontend\modules\clientintegr\modules\merc\helpers\api\cerber\Enterprise();
-        $delivery->consignor->enterprise->guid = $this->step3['recipient'];
-        $delivery->consignee->businessEntity = new \frontend\modules\clientintegr\modules\merc\helpers\api\cerber\BusinessEntity();
-        $delivery->consignor->businessEntity->guid = $this->step3['hc'];
+        $delivery->consignee->enterprise = new Enterprise();
+        $delivery->consignee->enterprise->guid = $this->step3['recipient'];
+        $delivery->consignee->businessEntity = new BusinessEntity();
+        $delivery->consignee->businessEntity->guid = $this->step3['hc'];
 
         $consigments = [];
         $vetCertificates = [];
@@ -155,8 +155,13 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
         foreach ($this->step1 as $id => $product) {
             $stock = MercStockEntry::findOne(['id' => $id]);
             $stock_raw = json_decode(json_encode(unserialize($stock->raw_data)), true);
-            $this->conditionsDescription[$product['product_name']] = mercuryApi::getInstance()->getRegionalizationConditions($this->step3['recipient'], mercDicconst::getSetting('enterprise_guid'), $stock_raw["batch"]["subProduct"]['guid']);
+
+            $cond = mercuryApi::getInstance()->getRegionalizationConditions($this->step3['recipient'], mercDicconst::getSetting('enterprise_guid'), $stock_raw["batch"]["subProduct"]['guid']);
+            if(isset($cond)) {
+                $this->conditionsDescription[$product['product_name']] = $cond;
+            }
         }
+
         $this->conditionsDescription = (isset($this->conditionsDescription)) ?  json_encode($this->conditionsDescription) : null;
 
     }

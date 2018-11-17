@@ -11,6 +11,7 @@ use common\models\OuterCategory;
 use common\models\OuterStore;
 use common\models\Waybill;
 use Yii;
+use yii\db\ActiveRecord;
 use yii\db\Transaction;
 use yii\db\mssql\PDO;
 use yii\web\BadRequestHttpException;
@@ -601,19 +602,24 @@ class ServiceRkws extends AbstractSyncFactory
                 ])->indexBy('outer_uid')->all();
 
             foreach ($this->iterator($arrayNew) as $k => $v) {
+                /** @var ActiveRecord $model */
                 $model = $models[$v['rid']] ?? null;
                 if (!$model) {
                     $model = new $entityTableName([
-                        'outer_uid'        => $v['rid'],
-                        'parent_outer_uid' => $v['parent'] ?? null,
-                        'org_id'           => $task->org_id,
-                        'service_id'       => $this->serviceId,
-                        'is_deleted'       => 0
+                        'outer_uid'  => $v['rid'],
+                        'org_id'     => $task->org_id,
+                        'service_id' => $this->serviceId,
+                        'is_deleted' => 0
                     ]);
+                    if ($model->hasAttribute('parent_outer_uid')) {
+                        $model->parent_outer_uid = $v['parent'] ?? null;
+                    }
                 } else {
                     $model->is_deleted = 0;
                     $model->name = $v['name'];
-                    $model->parent_outer_uid = $v['parent'] ?? null;
+                    if ($model->hasAttribute('parent_outer_uid')) {
+                        $model->parent_outer_uid = $v['parent'] ?? null;
+                    }
                     if ($model->dirtyAttributes) {
                         $model->save();
                     }

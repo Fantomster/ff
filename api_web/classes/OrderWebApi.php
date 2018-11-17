@@ -172,7 +172,12 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new ValidationException($order->getFirstErrors());
             }
             $tr->commit();
-            Notice::init('Order')->sendOrderChange($order->vendor, $order, $changed, $deleted);
+            if ($order->vendor_id == $this->user->organization_id){
+                $sender = $order->vendor;
+            } elseif($order->client_id == $this->user->organization_id){
+                $sender = $order->client;
+            }
+            Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted);
             return $this->getInfo(['order_id' => $order->id]);
         } catch (\Exception $e) {
             $tr->rollBack();

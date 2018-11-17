@@ -70,7 +70,7 @@ class EmailRoboWebApi extends WebApi
     public function update(array $post): array
     {
         $this->validateRequest($post, ['id']);
-        $orgId = isset($post['org_id']) && !empty($post['org_id']) ? $this->validateOrgId($post['org_id']) : $this->user->organization_id;
+        $orgId = isset($post['organization_id']) && !empty($post['organization_id']) ? $this->validateOrgId($post['organization_id']) : $this->user->organization_id;
         $model = IntegrationSettingFromEmail::findOne([
             'id' => $post['id'],
             'organization_id' => $orgId, //$post['org_id'] ?? $this->user->organization_id,
@@ -81,7 +81,7 @@ class EmailRoboWebApi extends WebApi
         }
         try {
             foreach ($post as $key => $field) {
-                if (!in_array($key, ['id', 'org_id'])) {
+                if (!in_array($key, ['id', 'organization_id'])) {
                     $model->setAttribute($key, $field);
                 }
             }
@@ -104,11 +104,11 @@ class EmailRoboWebApi extends WebApi
      */
     public function add(array $post): array
     {
-        $orgId = $this->validateOrgId($post['org_id']) ?? $this->user->organization_id;
+        $orgId = isset($post['organization_id']) && !empty($post['organization_id']) ? $this->validateOrgId($post['organization_id']) : $this->user->organization_id;
         $model = new IntegrationSettingFromEmail();
         try {
             foreach ($post as $key => $field) {
-                if (!in_array($key, ['id', 'org_id'])) {
+                if (!in_array($key, ['id', 'organization_id'])) {
                     $model->setAttribute($key, $field);
                 }
             }

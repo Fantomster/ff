@@ -35,7 +35,7 @@ class EdiOrganization extends \yii\db\ActiveRecord
     {
         return [
             [['organization_id', 'gln_code', 'provider_id', 'provider_priority'], 'integer'],
-            [['provider_id'], 'required'],
+            [['provider_id', 'gln_code'], 'required'],
             [['login', 'pass'], 'string', 'max' => 255],
             [['int_user_id'], 'string', 'max' => 50],
             [['token'], 'string', 'max' => 150],

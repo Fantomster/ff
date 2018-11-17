@@ -190,6 +190,7 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionDetailUpdateLogo()
     {

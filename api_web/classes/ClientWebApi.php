@@ -165,7 +165,7 @@ class ClientWebApi extends WebApi
         //прошли все проверки, будем обновлять
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $model->scenario = "settings";
+            $model->scenario = "logo";
             $model->picture = WebApiHelper::convertLogoFile($post['image_source']);
 
             if (!$model->validate() || !$model->save()) {

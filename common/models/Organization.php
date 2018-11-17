@@ -150,7 +150,7 @@ class Organization extends \yii\db\ActiveRecord
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
             [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => EdiOrganization::className(), 'targetAttribute' => ['id' => 'organization_id']],
-            [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
+            [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => ['settings', 'logo']],
             [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
             [['inn'], 'match', 'pattern' => '/^[0-9]{10}$|^[0-9]{12}$/', 'message' => Yii::t('app', 'common.models.organization_inn_error', ['ru' => 'Поле должно состоять из 10 или 12 цифр'])],
             [['kpp'], 'match', 'pattern' => '/^[0-9]{9}$/', 'message' => Yii::t('app', 'common.models.organization_kpp_error', ['ru' => 'Поле должно состоять из 9 цифр'])],
@@ -172,7 +172,7 @@ class Organization extends \yii\db\ActiveRecord
             [
                 'class'     => ImageUploadBehavior::className(),
                 'attribute' => 'picture',
-                'scenarios' => ['settings'],
+                'scenarios' => ['settings', 'logo'],
                 'path'      => '@app/web/upload/temp',
                 'url'       => '/upload/temp',
                 'thumbs'    => [

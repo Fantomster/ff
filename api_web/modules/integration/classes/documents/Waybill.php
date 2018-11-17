@@ -68,7 +68,11 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "outer_number_additional"  => $this->outer_number_additional ?? null,
         ];
 
-        $agent = OuterAgent::findOne(['id' => $this->outer_agent_id, 'service_id' => $this->service_id]);
+        $agent = OuterAgent::findOne([
+            'id' => $this->outer_agent_id,
+            'org_id' => $this->acquirer_id,
+            'service_id' => $this->service_id
+        ]);
         if (!empty($agent)) {
             $return["agent"] = [
                 "id"   => (int)$agent->id,
@@ -91,7 +95,11 @@ class Waybill extends BaseWaybill implements DocumentInterface
             }
         }
 
-        $store = OuterStore::findOne(['id' => $this->outer_store_id, 'service_id' => $this->service_id]);
+        $store = OuterStore::findOne([
+            'id'         => $this->outer_store_id,
+            'org_id'     => $this->acquirer_id,
+            'service_id' => $this->service_id
+        ]);
         if (!empty($store)) {
             $return ["store"] = [
                 "id"   => (int)$store->id,

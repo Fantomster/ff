@@ -55,7 +55,8 @@ class RkwsProduct extends ServiceRkws
             ->where([
                 'service_id' => $this->serviceId,
                 'org_id'     => $this->orgId,
-                'selected'   => 1
+                'selected'   => 1,
+                'is_deleted' => 0
             ])->asArray()
             ->all();
         if (!empty($selectedGategory)) {

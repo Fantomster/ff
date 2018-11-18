@@ -116,13 +116,10 @@ class AbstractDictionary extends WebApi
             if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
                 $orgId = $request['search']['business_id'];
             }
-
-//            if (isset($request['search']['is_active'])) {
-//                $search->andWhere(['is_active' => (int)$request['search']['is_active']]);
-//            }
         }
 
         $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
+        $search->andWhere('is_deleted = 0');
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $search->all()
@@ -346,6 +343,7 @@ class AbstractDictionary extends WebApi
         }
 
         $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
+        $search->andWhere('is_deleted = 0');
 
         $rootModels = $search->roots()->indexBy('id')->all();
 
@@ -390,6 +388,7 @@ class AbstractDictionary extends WebApi
         }
 
         $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
+        $search->andWhere('is_deleted = 0');
         $models = $search->orderBy(['left' => SORT_ASC])->all();
         $result = [];
 
@@ -541,6 +540,7 @@ class AbstractDictionary extends WebApi
         }
 
         $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
+        $search->andWhere('is_deleted = 0');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $search

@@ -157,21 +157,17 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         //Позиции заказа вне накладной
+        $existsQuery = (new Query())
+            ->select(['w.id'])
+            ->from(\common\models\Waybill::tableName() . ' as w')
+            ->join(\common\models\WaybillContent::tableName() . ' as wc on wc.waybill_id = w.id')
+            ->where('w.service_id = :servie_id and wc.order_content_id = oc.id', [':service_id' => $service_id]);
+
         $result['positions'] = (new Query())
-            ->select([
-                'order_content.id'
-            ])
-            ->from('order_content')
-            ->leftJoin(
-                $apiDb . '.' . \common\models\WaybillContent::tableName() . ' as wc',
-                'wc.order_content_id = order_content.id'
-            )
-            ->leftJoin(
-                $apiDb . '.' . \common\models\Waybill::tableName() . ' as w',
-                'w.id = wc.waybill_id and w.service_id = :service_id', [':service_id' => (int)$service_id]
-            )
-            ->where('w.id is null')
-            ->andWhere('order_content.order_id = :doc_id', [':doc_id' => (int)$document_id])
+            ->select(['oc.id'])
+            ->from(\common\models\OrderContent::tableName() . ' as oc')
+            ->where('oc.order_id = :order_id', [':order_id' => $document_id])
+            ->andWhere(['exists', $existsQuery])
             ->all();
 
         if (!empty($result['positions'])) {

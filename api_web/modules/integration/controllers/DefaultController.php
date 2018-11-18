@@ -7,16 +7,6 @@ use api_web\modules\integration\classes\SyncServiceFactory;
 class DefaultController extends \api_web\components\WebApiController
 {
     /**
-     * @param \yii\base\Action $action
-     * @return bool
-     */
-    public function beforeAction($action)
-    {
-        $this->license_service_id = $this->user->integration_service_id ?? 0;
-        return parent::beforeAction($action);
-    }
-
-    /**
      * @SWG\Post(path="/integration/default/service-list",
      *     tags={"Integration"},
      *     summary="Список сервисов интерграции",
@@ -181,6 +171,7 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionMapList()
     {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
         $this->response = $this->container->get('IntegrationWebApi')->getProductMapList($this->request);
     }
 
@@ -249,6 +240,7 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionMapUpdate()
     {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
         $this->response = $this->container->get('IntegrationWebApi')->mapUpdate($this->request);
     }
 
@@ -293,6 +285,7 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionCheckConnect()
     {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
         $this->response = SyncServiceFactory::init($this->request['service_id'])->checkConnect();
     }
 }

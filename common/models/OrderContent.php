@@ -7,6 +7,7 @@ use common\helpers\DBNameHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Query;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "order_content".

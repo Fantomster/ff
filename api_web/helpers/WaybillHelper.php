@@ -368,8 +368,11 @@ class WaybillHelper
      */
     private function checkOrderForWaybillContent(Waybill $waybill, OrderContent $orderContent)
     {
-        if ($orderContent->waybillContent) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_allready_has_waybill_content') . '-' . $orderContent->waybillContent->id);
+        if ($orderContent->getWaybillContent()
+            ->onCondition(['waybill_id' => $waybill->id])
+            ->exists()
+        ) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_allready_has_waybill_content') . ' - ' . $orderContent->waybillContent->id);
         }
 
         $waybillContent = WaybillContent::find()

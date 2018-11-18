@@ -2,6 +2,8 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\components\Registry;
+
 /**
  * Class RoboController
  * Робот парсер рассылок
@@ -10,15 +12,7 @@ namespace api_web\modules\integration\controllers;
  */
 class RoboController extends \api_web\components\WebApiController
 {
-    /**
-     * @param \yii\base\Action $action
-     * @return bool
-     */
-    public function beforeAction($action)
-    {
-        $this->license_service_id = $this->user->integration_service_id ?? 0;
-        return parent::beforeAction($action);
-    }
+    public $license_service_id = Registry::VENDOR_DOC_MAIL_SERVICE_ID;
 
     /**
      * @SWG\Post(path="/integration/robo/list",

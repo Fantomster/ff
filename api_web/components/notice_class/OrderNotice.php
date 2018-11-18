@@ -378,7 +378,7 @@ class OrderNotice
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification)
                     if ($notification->order_changed) {
-                        $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider", "recipient", "changed", "deleted"))
+                        $mailer->compose('@api_web/views/mail/orderChange', compact("subject", "senderOrg", "order", "dataProvider", "recipient", "changed", "deleted"))
                             ->setTo($email)
                             ->setSubject($subject)
                             ->send();

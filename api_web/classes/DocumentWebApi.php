@@ -160,7 +160,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         $existsQuery = (new Query())
             ->select(['w.id'])
             ->from($apiDb . '.' .\common\models\Waybill::tableName() . ' as w')
-            ->join($apiDb . '.' .\common\models\WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
+            ->innerJoin($apiDb . '.' .\common\models\WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
             ->where('wc.order_content_id = oc.id')
             ->andWhere('w.service_id = :servie_id', [':service_id' => $service_id]);
 
@@ -168,7 +168,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             ->select(['oc.id'])
             ->from(\common\models\OrderContent::tableName() . ' as oc')
             ->where('oc.order_id = :order_id', [':order_id' => $document_id])
-            ->andWhere(['exists', $existsQuery])
+            ->andWhere(['not exists', $existsQuery])
             ->all();
 
         if (!empty($result['positions'])) {

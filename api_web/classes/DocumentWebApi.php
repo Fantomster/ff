@@ -166,6 +166,10 @@ class DocumentWebApi extends \api_web\components\WebApi
                 $apiDb . '.' . \common\models\WaybillContent::tableName() . ' as wc',
                 'wc.order_content_id = order_content.id'
             )
+            ->leftJoin(
+                $apiDb . '.' . \common\models\Waybill::tableName() . ' as w',
+                'wc.waybill_id = w.id and w.service_id = :service_id', [':service_id' => (int)$service_id]
+            )
             ->where('wc.order_content_id is null')
             ->andWhere('order_id = :doc_id', [':doc_id' => (int)$document_id])
             ->all();

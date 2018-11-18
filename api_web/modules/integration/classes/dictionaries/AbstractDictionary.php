@@ -632,6 +632,8 @@ class AbstractDictionary extends WebApi
             throw new ValidationException($model->getFirstErrors());
         }
 
+        $model->selectedParent();
+
         return ['selected' => (bool)$model->selected];
     }
 

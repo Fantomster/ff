@@ -29,10 +29,12 @@ return [
         '/payment/currency-list',
         '/market/products',
         '/order/info',
+        '/order/info-by-unconfirmed-vendor',
         '/order/update-order-by-unconfirmed-vendor',
         '/order/products-list-for-unconfirmed-vendor',
         '/order/categories-for-unconfirmed-vendor',
-        '/order/cancel-order-by-unconfirmed-vendor'
+        '/order/cancel-order-by-unconfirmed-vendor',
+        '/order/complete-order-by-unconfirmed-vendor'
     ],
     'api_web_url' => 'https://api-dev.mixcart.ru',
     'staticUrl' => [

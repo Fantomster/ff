@@ -2,6 +2,8 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\components\Registry;
+
 /**
  * Class RoboController
  * Робот парсер рассылок
@@ -10,6 +12,8 @@ namespace api_web\modules\integration\controllers;
  */
 class RoboController extends \api_web\components\WebApiController
 {
+    public $license_service_id = Registry::VENDOR_DOC_MAIL_SERVICE_ID;
+
     /**
      * @SWG\Post(path="/integration/robo/list",
      *     tags={"Integration/robo"},

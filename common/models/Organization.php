@@ -261,7 +261,6 @@ class Organization extends \yii\db\ActiveRecord
         return $this->hasMany(EdiOrganization::className(), ['organization_id' => 'id']);
     }
 
-
     public function getGlnCode()
     {
         return $this->ediOrganization->gln_code;
@@ -271,12 +270,12 @@ class Organization extends \yii\db\ActiveRecord
     {
         $clientEdiOrganizations = EdiOrganization::findAll(['organization_id' => $clientID]);
         $vendorEdiOrganizations = EdiOrganization::findAll(['organization_id' => $vendorID]);
-        foreach ($clientEdiOrganizations as $client){
-            foreach ($vendorEdiOrganizations as $vendor){
-                if($client->provider_id == $vendor->provider_id){
+        foreach ($clientEdiOrganizations as $client) {
+            foreach ($vendorEdiOrganizations as $vendor) {
+                if ($client->provider_id == $vendor->provider_id) {
                     return [
-                        'client_gln' => $client->gln_code,
-                        'vendor_gln' => $vendor->gln_code,
+                        'client_gln'  => $client->gln_code,
+                        'vendor_gln'  => $vendor->gln_code,
                         'provider_id' => $vendor->provider_id
                     ];
                 }
@@ -293,10 +292,9 @@ class Organization extends \yii\db\ActiveRecord
     public function isEdi()
     {
         $query = $this->ediOrganization;
+
         if (!empty($query)) {
-            if (isset($query->gln_code) && $query->gln_code > 0) {
-                return true;
-            }
+            return true;
         }
         return false;
     }

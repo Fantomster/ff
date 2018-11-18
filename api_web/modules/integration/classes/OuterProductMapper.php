@@ -119,7 +119,12 @@ class OuterProductMapper
                 //Проверяем что сопоставляемый склад связан с нашей организацией
                 if ($key == 'outer_store_id') {
                     if (!$this->storeExists($value)) {
-                        throw new BadRequestHttpException('outer store not found');
+                        throw new BadRequestHttpException('store.not_found');
+                    }
+                    $store = OuterStore::findOne($value);
+                    //Если это категория а не склад
+                    if (!$store->isLeaf()) {
+                        throw new BadRequestHttpException('store.is_category');
                     }
                 }
             }

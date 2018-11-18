@@ -171,6 +171,7 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionMapList()
     {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
         $this->response = $this->container->get('IntegrationWebApi')->getProductMapList($this->request);
     }
 
@@ -239,6 +240,7 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionMapUpdate()
     {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
         $this->response = $this->container->get('IntegrationWebApi')->mapUpdate($this->request);
     }
 
@@ -283,6 +285,7 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionCheckConnect()
     {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
         $this->response = SyncServiceFactory::init($this->request['service_id'])->checkConnect();
     }
 }

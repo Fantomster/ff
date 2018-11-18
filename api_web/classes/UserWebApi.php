@@ -112,6 +112,11 @@ class UserWebApi extends \api_web\components\WebApi
             $user->setRelationUserOrganization($organization->id, $user->role_id);
             $profile = $this->createProfile($post, $user);
 
+            if (empty($organization->name)) {
+                $organization->name = $user->email;
+                $organization->save();
+            }
+
             $userToken = UserToken::generate($user->id, UserToken::TYPE_EMAIL_ACTIVATE);
             Notice::init('User')->sendSmsCodeToActivate($userToken->getAttribute('pin'), $profile->phone);
             $transaction->commit();
@@ -858,10 +863,10 @@ class UserWebApi extends \api_web\components\WebApi
                     Role::ROLE_ADMIN,
                 ]
             ]);
-        if (!is_null($indexByField)){
+        if (!is_null($indexByField)) {
             $resQuery->indexBy($indexByField);
         }
-            $res = $resQuery->all();
+        $res = $resQuery->all();
 
         $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($res, 'id'));
         $res = array_map(function ($item) use ($licenses) {

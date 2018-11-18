@@ -79,6 +79,7 @@ class OrderContent extends \yii\db\ActiveRecord
         return [
             'order_id'         => 'Order ID',
             'product_id'       => 'Product ID',
+            'product_name'     => Yii::t('app', 'common.models.product_name', ['ru' => 'Продукт']),
             'quantity'         => Yii::t('app', 'common.models.amount', ['ru' => 'Количество']),
             'initial_quantity' => Yii::t('app', 'common.models.asked_amount', ['ru' => 'Запрошенное количество']),
             'price'            => Yii::t('app', 'common.models.price_three', ['ru' => 'Цена']),

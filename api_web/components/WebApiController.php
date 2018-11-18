@@ -60,6 +60,11 @@ class WebApiController extends \yii\rest\Controller
     public $not_log_actions = [];
 
     /**
+     * @var null
+     */
+    public $license_service_id = null;
+
+    /**
      * Получаем контейнер
      */
     public function init()
@@ -128,6 +133,7 @@ class WebApiController extends \yii\rest\Controller
         $this->enableCsrfValidation = false;
         $user = \Yii::$app->request->getBodyParam('user');
 
+        \Yii::$app->language = \Yii::$app->language ?? 'ru';
         if (isset($user['language'])) {
             \Yii::$app->language = mb_strtolower($user['language']);
         }
@@ -149,6 +155,9 @@ class WebApiController extends \yii\rest\Controller
                 //Если метода нет в разрешенных, проверяем лицензию
                 if (!in_array(\Yii::$app->request->getUrl(), $allow_methods_without_license)) {
                     License::checkMixCartLicenseResponse($this->user->organization_id);
+                }
+                if (!is_null($this->license_service_id)) {
+                    License::checkLicense($this->user->organization->id, $this->license_service_id);
                 }
             }
 

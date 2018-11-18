@@ -197,7 +197,7 @@ class EdiWebApi extends WebApi
                             $difference = [
                                 'trend_type'       => $priceChangeDirection,
                                 'price'       => $oldPrice,
-                                'priceChange' => $priceChangeValue,
+                                'priceChange' => round($priceChangeValue, 2),
                                 'percent'     => round($v['price'] * 100 / $oldPrice - 100, 2),
                             ];
                         }

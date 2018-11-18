@@ -14,6 +14,8 @@ use api_web\modules\integration\classes\documents\OrderEmail;
 use api_web\modules\integration\classes\documents\Waybill;
 use api_web\modules\integration\classes\documents\WaybillContent;
 use common\helpers\DBNameHelper;
+use common\models\OuterAgent;
+use common\models\OuterStore;
 use common\models\RelationUserOrganization;
 use common\models\Order as OrderMC;
 use yii\data\SqlDataProvider;
@@ -164,8 +166,12 @@ class DocumentWebApi extends \api_web\components\WebApi
                 $apiDb . '.' . \common\models\WaybillContent::tableName() . ' as wc',
                 'wc.order_content_id = order_content.id'
             )
-            ->where('wc.order_content_id is null')
-            ->andWhere('order_id = :doc_id', [':doc_id' => (int)$document_id])
+            ->leftJoin(
+                $apiDb . '.' . \common\models\Waybill::tableName() . ' as w',
+                'w.id = wc.waybill_id and w.service_id = :service_id', [':service_id' => (int)$service_id]
+            )
+            ->where('w.id is null')
+            ->andWhere('order_content.order_id = :doc_id', [':doc_id' => (int)$document_id])
             ->all();
 
         if (!empty($result['positions'])) {
@@ -589,11 +595,23 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (!empty($post['agent_uid'])) {
-            $waybill->outer_agent_id = $post['agent_uid'];
+            $agent = OuterAgent::findOne(['id' => $post['agent_uid'], 'org_id' => $this->user->organization_id]);
+            if (!$agent) {
+                throw new BadRequestHttpException('agent.not_found');
+            }
+            $waybill->outer_agent_id = $agent->id;
         }
 
         if (!empty($post['store_uid'])) {
-            $waybill->outer_store_id = $post['store_uid'];
+            $store = OuterStore::findOne(['id' => $post['store_uid'], 'org_id' => $this->user->organization_id]);
+            if (!$store) {
+                throw new BadRequestHttpException('store.not_found');
+            }
+            //Если это категория а не склад
+            if (!$store->isLeaf()) {
+                throw new BadRequestHttpException('store.is_category');
+            }
+            $waybill->outer_store_id = $store->id;
         }
 
         if (!empty($post['doc_date'])) {

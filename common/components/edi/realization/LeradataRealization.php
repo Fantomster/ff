@@ -241,7 +241,12 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
                     }
                 }
             }
-            Yii::$app->db->createCommand()->update('order', ['status' => OrderStatus::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
+            if ($isDesadv) {
+                $orderStatus = OrderStatus::STATUS_EDI_SENT_BY_VENDOR;
+            } else {
+                $orderStatus = OrderStatus::STATUS_PROCESSING;
+            }
+            Yii::$app->db->createCommand()->update('order', ['status' => $orderStatus, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
             $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
 
             if ($ediOrder) {

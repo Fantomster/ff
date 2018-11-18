@@ -15,6 +15,16 @@ use yii\web\BadRequestHttpException;
 class DictionaryController extends \api_web\components\WebApiController
 {
     /**
+     * @param \yii\base\Action $action
+     * @return bool
+     */
+    public function beforeAction($action)
+    {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
+        return parent::beforeAction($action);
+    }
+
+    /**
      * @SWG\Post(path="/integration/dictionary/list",
      *     tags={"Integration/dictionary"},
      *     summary="Список справочников",
@@ -150,10 +160,6 @@ class DictionaryController extends \api_web\components\WebApiController
      */
     public function actionProductList()
     {
-        if (empty($this->request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
-        }
-
         $this->response = (new Dictionary($this->request['service_id'], 'Product'))->productList($this->request);
     }
 
@@ -723,7 +729,7 @@ class DictionaryController extends \api_web\components\WebApiController
         if (!isset($this->request['service_id'])) {
             throw new BadRequestHttpException('empty_param|service_id');
         }
-        /** @var  $factory \api_web\modules\integration\classes\dictionaries\RkwsCategory*/
+        /** @var  $factory \api_web\modules\integration\classes\dictionaries\RkwsCategory */
         $factory = (new Dictionary($this->request['service_id'], 'Category'));
         $this->response = $factory->categorySetSelected($this->request);
     }

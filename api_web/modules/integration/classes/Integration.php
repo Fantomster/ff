@@ -31,6 +31,9 @@ class Integration
      */
     public function __construct($serviceId)
     {
+        if (empty($serviceId)) {
+            throw new BadRequestHttpException('choose_integration_service');
+        }
         $this->service_id = $serviceId;
         $this->serviceName = self::$service_map[$serviceId];
     }

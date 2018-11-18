@@ -11,6 +11,7 @@ use common\models\OuterCategory;
 use common\models\OuterStore;
 use common\models\Waybill;
 use Yii;
+use yii\db\ActiveRecord;
 use yii\db\Transaction;
 use yii\db\mssql\PDO;
 use yii\web\BadRequestHttpException;
@@ -458,11 +459,9 @@ class ServiceRkws extends AbstractSyncFactory
         $result = [];
         foreach ($request['ids'] as $waybill_id) {
             # 2. Ищем накладную
-            $waybill = Waybill::findOne(['id' => $waybill_id, 'service_id' => $this->serviceId]);
-            if (!isset($waybill)) {
-                $result[$waybill_id] = false;
-                SyncLog::trace('Waybill not found in ' . __METHOD__);
-                continue;
+            $waybill = \api_web\modules\integration\classes\documents\Waybill::findOne(['id' => $waybill_id, 'service_id' => $this->serviceId]);
+            if (empty($waybill)) {
+                throw new BadRequestHttpException('Накладная ' . $waybill_id . ' не найдена ');
             }
 
             # 3. Выбираем даные по накладной для отправки
@@ -544,17 +543,17 @@ class ServiceRkws extends AbstractSyncFactory
                         $transaction->commit();
                         SyncLog::trace('SUCCESS. json-response-data: ' .
                             str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
-                        $result[$waybill_id] = true;
+                        $result[] = $waybill->prepare();
                     } else {
                         $transaction->rollBack();
                         SyncLog::trace('Cannot save task!');
-                        $result[$waybill_id] = false;
+                        $result[] = $waybill->prepare();
                         //throw new BadRequestHttpException('rkws_task_save_error');
                     }
                 }
             } else {
                 SyncLog::trace('Service connection parameters for final transaction are wrong');
-                $result[$waybill_id] = false;
+                $result[] = $waybill->prepare();
             }
         }
 
@@ -603,19 +602,24 @@ class ServiceRkws extends AbstractSyncFactory
                 ])->indexBy('outer_uid')->all();
 
             foreach ($this->iterator($arrayNew) as $k => $v) {
+                /** @var ActiveRecord $model */
                 $model = $models[$v['rid']] ?? null;
                 if (!$model) {
                     $model = new $entityTableName([
-                        'outer_uid'        => $v['rid'],
-                        'parent_outer_uid' => $v['parent'] ?? null,
-                        'org_id'           => $task->org_id,
-                        'service_id'       => $this->serviceId,
-                        'is_deleted'       => 0
+                        'outer_uid'  => $v['rid'],
+                        'org_id'     => $task->org_id,
+                        'service_id' => $this->serviceId,
+                        'is_deleted' => 0
                     ]);
+                    if ($model->hasAttribute('parent_outer_uid')) {
+                        $model->parent_outer_uid = $v['parent'] ?? null;
+                    }
                 } else {
                     $model->is_deleted = 0;
                     $model->name = $v['name'];
-                    $model->parent_outer_uid = $v['parent'] ?? null;
+                    if ($model->hasAttribute('parent_outer_uid')) {
+                        $model->parent_outer_uid = $v['parent'] ?? null;
+                    }
                     if ($model->dirtyAttributes) {
                         $model->save();
                     }

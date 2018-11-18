@@ -8,13 +8,13 @@ use Yii;
  * This is the model class for table "order_chat".
  *
  * @property integer $id
+ * @peoperty integer $recipient_id
  * @property integer $order_id
  * @property integer $sent_by_id
  * @property integer $is_system
  * @property string $message
  * @property string $created_at
  * @property integer $viewed
- * @peoperty integer $recipient_id
  * @property integer $danger
  *
  * @property Order $order

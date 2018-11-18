@@ -3,6 +3,7 @@
 namespace api_web\modules\integration\classes\sync;
 
 use api_web\modules\integration\classes\SyncLog;
+use common\models\OuterCategory;
 use common\models\OuterProduct;
 use common\models\OuterUnit;
 use yii\helpers\ArrayHelper;
@@ -50,9 +51,26 @@ class RkwsProduct extends ServiceRkws
             $units = ArrayHelper::map($units, 'outer_uid', 'id');
         }
 
+        $selectedGategory = OuterCategory::find()
+            ->where([
+                'service_id' => $this->serviceId,
+                'org_id'     => $this->orgId,
+                'selected'   => 1,
+                'is_deleted' => 0
+            ])->asArray()
+            ->all();
+        if (!empty($selectedGategory)) {
+            $selectedGategory = ArrayHelper::map($selectedGategory, 'outer_uid', 'id');
+        }
+
         $array = [];
         $pcount = 0;
+        /** @var \SimpleXMLElement $group */
         foreach ($this->iterator($myXML->ITEM) as $group) {
+            $group_rid = ((array)$group->attributes())['@attributes']['rid'];
+            if (!isset($selectedGategory[$group_rid])) {
+                continue;
+            }
             if (!isset($group->GOODS_LIST) OR empty($group->GOODS_LIST)) {
                 continue;
             }

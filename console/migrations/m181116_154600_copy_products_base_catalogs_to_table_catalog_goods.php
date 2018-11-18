@@ -9,11 +9,11 @@ class m181116_154600_copy_products_base_catalogs_to_table_catalog_goods extends 
 {
     public function safeUp()
     {
+        /**
         $sql = 'SELECT DISTINCT `cat_id` FROM `relation_supp_rest` `rsr` LEFT JOIN `catalog` `c` ON `rsr`.`cat_id` = `c`.`id` WHERE `c`.`type` = 1';
         $array_catalogs = Yii::$app->db->createCommand($sql)->queryAll();
         $array_1 = ArrayHelper::getColumn($array_catalogs, 'cat_id');
         $products = CatalogBaseGoods::find()->where(['cat_id' => $array_1])->andWhere(['deleted' => 0])->all();
-        /** @var CatalogBaseGoods $product */
         foreach ($products as $product) {
             $result = CatalogGoods::find()->where(['base_goods_id' => $product->id])->exists();
             if ($result === false) {
@@ -27,6 +27,8 @@ class m181116_154600_copy_products_base_catalogs_to_table_catalog_goods extends 
                 }
             }
         }
+         * */
+        return true;
     }
 
     public function safeDown()

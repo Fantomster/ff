@@ -163,7 +163,7 @@ class WaybillHelper
             }
         }
 
-        if ($cntEmptyRows == count($licenses)){
+        if ($cntEmptyRows == count($licenses)) {
             throw new BadRequestHttpException('waybill.you_dont_have_mapped_products');
         }
 
@@ -286,9 +286,14 @@ class WaybillHelper
             throw new BadRequestHttpException('empty_param|order_content_id');
         }
 
+        if (!isset($request['service_id'])) {
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+
         $waybill = Waybill::findOne([
-            'id'        => (int)$request['waybill_id'],
-            'status_id' => [
+            'id'         => (int)$request['waybill_id'],
+            'service_id' => (int)$request['service_id'],
+            'status_id'  => [
                 Registry::WAYBILL_COMPARED,
                 Registry::WAYBILL_ERROR,
                 Registry::WAYBILL_FORMED,

@@ -162,13 +162,13 @@ class DocumentWebApi extends \api_web\components\WebApi
             ->from($apiDb . '.' .\common\models\Waybill::tableName() . ' as w')
             ->innerJoin($apiDb . '.' .\common\models\WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
             ->where('wc.order_content_id = oc.id')
-            ->andWhere('w.service_id = :servie_id', [':service_id' => $service_id]);
+            ->andWhere('w.service_id = :servie_id');
 
         $result['positions'] = (new Query())
             ->select(['oc.id'])
             ->from(\common\models\OrderContent::tableName() . ' as oc')
             ->where('oc.order_id = :order_id', [':order_id' => $document_id])
-            ->andWhere(['not exists', $existsQuery])
+            ->andWhere(['not exists', $existsQuery], [':service_id' => $service_id])
             ->all();
 
         if (!empty($result['positions'])) {

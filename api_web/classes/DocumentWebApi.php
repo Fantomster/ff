@@ -160,8 +160,9 @@ class DocumentWebApi extends \api_web\components\WebApi
         $existsQuery = (new Query())
             ->select(['w.id'])
             ->from(\common\models\Waybill::tableName() . ' as w')
-            ->join(\common\models\WaybillContent::tableName() . ' as wc on wc.waybill_id = w.id')
-            ->where('w.service_id = :servie_id and wc.order_content_id = oc.id', [':service_id' => $service_id]);
+            ->join(\common\models\WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
+            ->where('wc.order_content_id = oc.id')
+            ->andWhere('w.service_id = :servie_id', [':service_id' => $service_id]);
 
         $result['positions'] = (new Query())
             ->select(['oc.id'])

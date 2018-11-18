@@ -163,7 +163,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             ->innerJoin($apiDb . '.' . \common\models\WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
             ->where('wc.order_content_id = oc.id')
             ->andWhere('w.service_id = :servie_id', [':service_id' => (int)$service_id])
-            ->params();
+            ->prepare();
 
         $result['positions'] = (new Query())
             ->select(['oc.id'])

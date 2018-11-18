@@ -159,8 +159,8 @@ class DocumentWebApi extends \api_web\components\WebApi
         //Позиции заказа вне накладной
         $existsQuery = (new Query())
             ->select(['w.id'])
-            ->from(\common\models\Waybill::tableName() . ' as w')
-            ->join(\common\models\WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
+            ->from($apiDb . '.' .\common\models\Waybill::tableName() . ' as w')
+            ->join($apiDb . '.' .\common\models\WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
             ->where('wc.order_content_id = oc.id')
             ->andWhere('w.service_id = :servie_id', [':service_id' => $service_id]);
 

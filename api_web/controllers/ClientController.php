@@ -854,7 +854,8 @@ class ClientController extends WebApiController
      *                  "updated_at": null,
      *                  "login_allowed": "1",
      *                  "to_date": "2019-03-31T03:00:00+03:00",
-     *                  "org_id": "1"
+     *                  "org_id": "1",
+     *                  "manager_phone": "8 (499) 404-10-18"
      *              }
      *          ),
      *     ),
@@ -870,6 +871,8 @@ class ClientController extends WebApiController
      */
     public function actionGetLicenseMixCart()
     {
-        $this->response = current(License::getMixCartLicenses($this->user->organization->id));
+        $response = current(License::getMixCartLicenses($this->user->organization->id));
+        $response['manager_phone'] = \Yii::$app->params['licenseManagerPhone'];
+        $this->response = $response;
     }
 }

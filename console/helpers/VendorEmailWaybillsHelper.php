@@ -50,7 +50,7 @@ class VendorEmailWaybillsHelper
      */
     public function processFile($invoice)
     {
-        $arAgentName = $this->prepareAgentName($invoice['invoice']['namePostav']);
+        $arAgentName = $this->prepareAgentName($invoice['invoice']['realVendorName']);
         $outerAgentNameWaybill = OuterAgentNameWaybill::find()
             ->leftJoin(OuterAgent::tableName() .' oa', 'oa.id='. OuterAgentNameWaybill::tableName() . '.agent_id')
             ->where([OuterAgentNameWaybill::tableName() . '.name' => $arAgentName, 'oa.org_id' => $this->orgId])->one();

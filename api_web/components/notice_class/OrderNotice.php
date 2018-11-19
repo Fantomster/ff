@@ -408,9 +408,9 @@ class OrderNotice
         if (!empty($changed)) {
             $getterAttribute = function (OrderContent $model, string $attr) {
                 $result = $model->$attr;
-                if ($model->isAttributeChanged($attr)) {
+                /*if ($model->isAttributeChanged($attr)) {
                     $result = $model->getOldAttribute($attr) . ' => ' . $result;
-                }
+                }*/
                 return $result;
             };
 
@@ -427,7 +427,7 @@ class OrderNotice
                 $row[] = $orderContent->product_name;
                 $row[] = $getterAttribute($orderContent, 'quantity');
                 $row[] = $getterAttribute($orderContent, 'price');
-                $systemMessage[] = implode(' | ', $row) . PHP_EOL;
+                $systemMessage[] = implode(' | ', $row);
             }
         }
 

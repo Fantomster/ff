@@ -23,6 +23,7 @@ return [
     ],
     'allow_methods_without_license' => [
         '/user/login',
+        '/user/get',
         '/user/get-available-businesses',
         '/user/set-organization',
         '/user/organization',

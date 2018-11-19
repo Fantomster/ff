@@ -626,7 +626,7 @@ class IntegrationWebApi extends WebApi
                 $this->editProductMap($post['service_id'], $item);
                 $result[$item['product_id']] = ['success' => true];
             } catch (\Exception $e) {
-                $result[$item['product_id']] = ['success' => false, 'error' => $e->getMessage()];
+                $result[$item['product_id']] = ['success' => false, 'error' => \Yii::t('api_web', $e->getMessage())];
             }
         }
         return $result;

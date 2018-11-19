@@ -246,70 +246,53 @@ class FullmapController extends DefaultController
     public function actionEditstore($service_id)
     {
 
-        $attr = Yii::$app->request->post('editableAttribute');
-        $prod = Yii::$app->request->post('editableKey');
+        $prod_id = Yii::$app->request->post('editableKey');
         $store = Yii::$app->request->post('store');
+        $org_id = $this->currentUser->organization->id;
 
-        $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $this->currentUser->organization->id,])
-            ->andWhere('service_id = ' . $service_id . ' and is_active =1')
-            ->andWhere('product_id = :prod', [':prod' => $prod])->one();
+        $Product = AllMaps::find()->andWhere('org_id = :org', [':org' => $org_id])
+            ->andWhere('service_id = :serv', [':serv' => $service_id])
+            ->andWhere('is_active = :active', [':active' => 1])
+            ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
 
-        if (!empty($hasProduct)) { // Product link already mapped in table
-            $hasProduct->store_rid = $store;
-            $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        if (!empty($Product)) { // Product link already mapped in table
+            $Product->store_rid = $store;
 
-            if (!$hasProduct->save()) {
+            if (!$Product->save()) {
                 throw new \RuntimeException('Cant update allmaps table.');
             }
-
-            $res = $hasProduct->store;
         } else { // New link for mapping creation
-            $newProduct = new AllMaps();
+            $Product = new AllMaps();
 
-            if ($service_id == Registry::IIKO_SERVICE_ID) {
-                $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
-                if (isset($mainOrg)) {
-                    $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
-                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
-                        ->andWhere('product_id = :prod', [':prod' => $prod])->one();
-                    if (isset($hasProduct)) {
-                        $newProduct->setAttributes($hasProduct->attributes);
-                    }
-                }
-            }
+            $Product->service_id = $service_id;
+            $Product->org_id = $org_id;
+            $Product->product_id = $prod_id;
+            $Product->supp_id = CatalogBaseGoods::getSuppById($Product->product_id);
+            $Product->is_active = 1;
+            $Product->store_rid = $store;
 
-            $newProduct->service_id = $service_id;
-            $newProduct->org_id = $this->currentUser->organization->id;
-            $newProduct->product_id = $prod;
-            $newProduct->supp_id = CatalogBaseGoods::getSuppById($newProduct->product_id);
-            $newProduct->is_active = 1;
-            $newProduct->store_rid = $store;
-            $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-            $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-
-            if (!$newProduct->save()) {
+            if (!$Product->save()) {
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
-
-            $res = $newProduct->store;
         }
+        $res = $Product->store;
 
         switch ($service_id) {
             case Registry::RK_SERVICE_ID :
-                $res = $res->name;
+                $res_name = $res->name;
                 break;
             case Registry::IIKO_SERVICE_ID :
-                $res = $res->denom;
+                $res_name = $res->denom;
                 break;
             case Registry::ONE_S_CLIENT_SERVICE_ID :
-                $res = $res->name;
+                $res_name = $res->name;
                 break;
             case Registry::TILLYPAD_SERVICE_ID :
-                $res = $res->denom;
+                $res_name = $res->denom;
                 break;
         }
 
-        return Json::encode(['output' => $res, 'message' => '']);
+        return Json::encode(['output' => $res_name, 'message' => '']);
     }
 
     public function actionChvat() // устанавливает ставку НДС для одной позиции в глобальном сопоставлении

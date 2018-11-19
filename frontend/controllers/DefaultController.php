@@ -44,12 +44,21 @@ class DefaultController extends Controller {
             $token = Yii::$app->request->get("token");
             $order_id = Yii::$app->request->get("id");
             $order = \common\models\Order::findOne(['id' => $order_id]);
-            $user = \common\models\User::findOne(['access_token' => $token]);
-            $organization = (isset($order) && isset($user)) ? $order->getOrganizationByUser($user) : null;
-            if ($user && isset($order) && isset($organization)) {
+            
+            $jwtToken = Yii::$app->jwt->getParser()->parse((string) $token);
+            $data = Yii::$app->jwt->getValidationData(); // It will use the current time to validate (iat, nbf and exp)
+            $data->setIssuer('mixcart.ru');
+            $data->setId('ololo123');
+
+//            $user = \common\models\User::findOne(['access_token' => $token]);
+//            $organization = (isset($order) && isset($user)) ? $order->getOrganizationByUser($user) : null;
+//            if ($user && isset($order) && isset($organization)) {
+            if ($jwtToken->validate($data) && isset($order)) {
+                $user = \common\models\User::findOne(['access_token' => $jwtToken->getClaim('access_token')]);
+                $organization = (isset($order) && isset($user)) ? $order->getOrganizationByUser($user) : null;
                 Yii::$app->user->logout();
                 Yii::$app->user->login($user, 0);
-                (new \api_web\classes\UserWebApi())->setOrganization(['organization_id' => $organization->id]);
+                (new \api_web\classes\UserWebApi())->setOrganization(['organization_id' => $organization->id ?? null]);
                 Yii::$app->user->identity->refresh();
                 $this->loadCurrentUser();
                 $this->setLayout($organization->type_id);

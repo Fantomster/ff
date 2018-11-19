@@ -741,11 +741,28 @@ class Order extends \yii\db\ActiveRecord
                 ]);
             }
 
+            $token = Yii::$app->jwt->getBuilder()
+                        ->setIssuer('mixcart.ru')
+                        ->setId('ololo123', true)
+                        ->set('access_token', $user->access_token)
+                        ->getToken();
             if ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
+                /*
+                 * Yii::$app->jwt->getBuilder()
+            ->setIssuer('http://example.com') // Configures the issuer (iss claim)
+            ->setAudience('http://example.org') // Configures the audience (aud claim)
+            ->setId('4f1g23a12aa', true) // Configures the id (jti claim), replicating as a header item
+            ->setIssuedAt(time()) // Configures the time that the token was issue (iat claim)
+            ->setNotBefore(time() + 60) // Configures the time before which the token cannot be accepted (nbf claim)
+            ->setExpiration(time() + 3600) // Configures the expiration time of the token (exp claim)
+            ->set('uid', 1) // Configures a new claim, called "uid"
+            ->getToken();
+                 */
+                
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                     "/order/view",
                     "id"    => $this->id,
-                    "token" => $user->access_token
+                    "token" => $token,//$user->access_token
                 ]);
             }
 
@@ -755,7 +772,7 @@ class Order extends \yii\db\ActiveRecord
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                     "/order/view",
                     "id"    => $this->id,
-                    "token" => $user->access_token
+                    "token" => $token, //$user->access_token
                 ]);
             }
 

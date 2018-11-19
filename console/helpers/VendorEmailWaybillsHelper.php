@@ -53,7 +53,7 @@ class VendorEmailWaybillsHelper
         $arAgentName = $this->prepareAgentName($invoice['invoice']['namePostav']);
         $outerAgentNameWaybill = OuterAgentNameWaybill::find()
             ->leftJoin(OuterAgent::tableName() .' oa', 'oa.id=outer_agent_name_waybill.agent_id')
-            ->where(['outer_agent_name_waybill.name' => $arAgentName, 'oa.org_id' => $this->orgId])->all();
+            ->where(['outer_agent_name_waybill.name' => $arAgentName, 'oa.org_id' => $this->orgId])->one();
         if ($outerAgentNameWaybill) {
             $vendorId = $outerAgentNameWaybill->agent->vendor_id;
             $catRelation = RelationSuppRest::findOne([

@@ -85,6 +85,7 @@ class WaybillHelper
         }
 
         $cntEmptyRows = 0;
+        $cntNotInWaybillContent = 0;
         $waybillModels = [];
         foreach ($licenses as $license) {
             $serviceId = $license['service_id'];
@@ -99,7 +100,8 @@ class WaybillHelper
             $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
 
             if (empty($notInWaybillContent)) {
-                throw new BadRequestHttpException('waybill.you_dont_have_order_content_for_waybills');
+                $cntNotInWaybillContent++;
+                continue;
             }
 
             try {
@@ -118,7 +120,7 @@ class WaybillHelper
             $defaultStoreAgent = null;
             if ($supplierOrgId) {
                 $agent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
-                if ($agent && $agent->store_id) {
+                if ($agent && !empty($agent->store_id)) {
                     $defaultStoreAgent = $agent->store_id;
                 }
             } else {
@@ -165,6 +167,10 @@ class WaybillHelper
 
         if ($cntEmptyRows == count($licenses)) {
             throw new BadRequestHttpException('waybill.you_dont_have_mapped_products');
+        }
+
+        if ($cntNotInWaybillContent == count($licenses)) {
+            throw new BadRequestHttpException('waybill.you_dont_have_order_content_for_waybills');
         }
 
         return $waybillModels;

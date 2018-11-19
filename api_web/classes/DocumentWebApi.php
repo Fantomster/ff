@@ -776,16 +776,17 @@ class DocumentWebApi extends \api_web\components\WebApi
             $modelClass = self::$models[$request['type']];
             /**@var ActiveQuery $query */
             $query = $modelClass::find()->where(['id' => $request['document_id']]);
+            $field = 'client_id';
             if ($request['type'] == self::TYPE_WAYBILL) {
                 $field = 'acquirer_id';
-            } elseif ($request['type'] == self::TYPE_ORDER) {
-                $field = 'client_id';
             }
             if (!$query->andWhere([$field => $this->user->organization_id])->exists()) {
                 throw new BadRequestHttpException($request['type'] . '_not_found');
             }
 
             $document = $modelClass::prepareModel($request['document_id'], $request['service_id']);
+        } else {
+            throw new BadRequestHttpException($request['type'] . '_not_found');
         }
 
         return array_merge(['document' => $document], $this->getDocumentContents($request));

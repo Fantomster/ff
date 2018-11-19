@@ -1023,7 +1023,7 @@ class User extends \amnah\yii2\user\models\User
         $signer = new \Lcobucci\JWT\Signer\Hmac\Sha256();
         return (string) $jwt->getBuilder()
                         ->setIssuer('mixcart.ru')
-                        ->set('access_token', $user->access_token)
+                        ->set('access_token', $this->access_token)
                         ->sign($signer, $jwt->key)
                         ->getToken();
     }

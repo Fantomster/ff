@@ -64,7 +64,8 @@ class OrderContent extends \yii\db\ActiveRecord
         return [
             [['order_id', 'product_id', 'quantity', 'price', 'product_name'], 'required'],
             [['order_id', 'product_id', 'updated_user_id', 'vat_product', 'invoice_content_id'], 'integer'],
-            [['price', 'quantity', 'initial_quantity', 'units', 'plan_price', 'plan_quantity'], 'number'],
+            [['quantity', 'initial_quantity', 'units', 'plan_price', 'plan_quantity'], 'number'],
+            [['price'], 'number', 'numberPattern' => '/(^\d+\,\d+\.\d+$)|(^\d+\.\d+$)/'],
             [['merc_uuid', 'edi_desadv', 'edi_alcdes', 'edi_number', 'edi_recadv', 'edi_invoice'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['order_id' => 'id']],

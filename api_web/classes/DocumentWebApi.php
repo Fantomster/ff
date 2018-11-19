@@ -448,9 +448,6 @@ class DocumentWebApi extends \api_web\components\WebApi
             $sql .= ' ORDER BY sort_doc DESC, order_id, sort_waybill desc, waybill_id';
         }
 
-        echo $sql;
-        exit;
-
         $dataProvider = new SqlDataProvider([
             'sql'        => $sql,
             'params'     => $params_sql,

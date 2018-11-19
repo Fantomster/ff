@@ -21,6 +21,7 @@ use yii\data\ArrayDataProvider;
 use yii\db\Exception;
 use yii\db\Expression;
 use yii\web\BadRequestHttpException;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
 
 /**
  * User model
@@ -1020,12 +1021,23 @@ class User extends \amnah\yii2\user\models\User
 
     public function getJWTToken($jwt)
     {
-        $signer = new \Lcobucci\JWT\Signer\Hmac\Sha256();
+        $signer = new Sha256();
         return (string) $jwt->getBuilder()
                         ->setIssuer('mixcart.ru')
                         ->set('access_token', $this->access_token)
                         ->sign($signer, $jwt->key)
                         ->getToken();
+    }
+
+    public static function getByJWTToken($jwt, $token)
+    {
+        $data   = Yii::$app->jwt->getValidationData(); // It will use the current time to validate (iat, nbf and exp)
+        $data->setIssuer('mixcart.ru');
+        $signer = new Sha256();
+        if ($token->validate($data) && $jwt->verifyToken($token)) {
+            return self::findOne(['access_token' => $token->getClaim('access_token')]);
+        }
+        return null;
     }
 
 }

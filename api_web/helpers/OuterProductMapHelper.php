@@ -46,7 +46,9 @@ class OuterProductMapHelper
                 'a.organization_id' => empty($mainOrg) ? $order->client_id : $mainOrg,
                 'a.product_id'      => $arProductIds,
                 'a.service_id'      => $serviceId,
+                'b.service_id'      => $serviceId,
                 'a.vendor_id'       => $order->vendor_id,
+                'b.vendor_id'       => $order->vendor_id,
             ])->all(\Yii::$app->db_api);
     }
 

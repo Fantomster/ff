@@ -85,6 +85,7 @@ class WaybillHelper
         }
 
         $cntEmptyRows = 0;
+        $cntNotInWaybillContent = 0;
         $waybillModels = [];
         foreach ($licenses as $license) {
             $serviceId = $license['service_id'];
@@ -99,7 +100,8 @@ class WaybillHelper
             $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
 
             if (empty($notInWaybillContent)) {
-                throw new BadRequestHttpException('waybill.you_dont_have_order_content_for_waybills');
+                $cntNotInWaybillContent++;
+                continue;
             }
 
             try {
@@ -118,7 +120,7 @@ class WaybillHelper
             $defaultStoreAgent = null;
             if ($supplierOrgId) {
                 $agent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
-                if ($agent && $agent->store_id) {
+                if ($agent && !empty($agent->store_id)) {
                     $defaultStoreAgent = $agent->store_id;
                 }
             } else {
@@ -167,6 +169,10 @@ class WaybillHelper
             throw new BadRequestHttpException('waybill.you_dont_have_mapped_products');
         }
 
+        if ($cntNotInWaybillContent == count($licenses)) {
+            throw new BadRequestHttpException('waybill.you_dont_have_order_content_for_waybills');
+        }
+
         return $waybillModels;
     }
 
@@ -200,6 +206,7 @@ class WaybillHelper
         $model->status_id = Registry::WAYBILL_COMPARED;
         //для каждого может быть разный
         $model->outer_number_code = $this->generateEdiNumber($arOuterMappedProducts, $serviceId);
+        $model->outer_number_additional = $this->generateEdiNumber($arOuterMappedProducts, $serviceId, true);
 
         /** @var Transaction $transaction */
         $transaction = \Yii::$app->db_api->beginTransaction();
@@ -416,15 +423,17 @@ class WaybillHelper
 
     /**
      * @param $arOuterStoreProducts
-     * @param $serviceId
+     * @param int $serviceId
+     * @param bool $onlyByOrderId
      * @return int|mixed|string
      */
-    private function generateEdiNumber($arOuterStoreProducts, $serviceId)
+    private function generateEdiNumber($arOuterStoreProducts, $serviceId, $onlyByOrderId = false)
     {
         /**@var OrderContent $orderContent */
         $orderContent = current($arOuterStoreProducts)['orderContent'];
         $tmp_ed_num = $orderContent->order_id;
-        if ($orderContent->edi_number) {
+        $waybillSearchField =  $onlyByOrderId ? 'outer_number_additional' : 'outer_number_code';
+        if ($orderContent->edi_number && !$onlyByOrderId) {
             $tmp_ed_num = $orderContent->edi_number;
         }
         $ed_num = $tmp_ed_num . '-1';
@@ -433,11 +442,16 @@ class WaybillHelper
             ->andWhere(['order_id' => $orderContent->order_id])
             ->orderBy(['edi_number' => SORT_DESC])->limit(1)->one();
         if ($existOrderContent) {
-            return $this->getLastEdiNumber($existOrderContent->edi_number);
-        } else {
-            $existWaybill = Waybill::find()->where(['like', 'outer_number_code', $tmp_ed_num])
+            $existWaybill = Waybill::find()->where(['like', $waybillSearchField, $tmp_ed_num])
                 ->andWhere(['service_id' => $serviceId])
-                ->orderBy(['outer_number_code' => SORT_DESC])->limit(1)->one();
+                ->orderBy([$waybillSearchField => SORT_DESC])->limit(1)->one();
+            $ediNumber = $existWaybill->outer_number_code ?? $existOrderContent->edi_number;
+
+            return $this->getLastEdiNumber($ediNumber);
+        } else {
+            $existWaybill = Waybill::find()->where(['like', $waybillSearchField, $tmp_ed_num])
+                ->andWhere(['service_id' => $serviceId])
+                ->orderBy([$waybillSearchField => SORT_DESC])->limit(1)->one();
             if ($existWaybill) {
                 return $this->getLastEdiNumber($existWaybill->outer_number_code);
             }
@@ -452,11 +466,16 @@ class WaybillHelper
      */
     private function getLastEdiNumber($ediNumber)
     {
-        $ed_nums = explode('-', $ediNumber);
-        $ed_num = array_pop($ed_nums);
-        $ed_num = (int)$ed_num + 1;
-        array_push($ed_nums, $ed_num);
-        $ed_num = implode('-', $ed_nums);
+        if (strpos($ediNumber, '-') != false) {
+            $ed_nums = explode('-', $ediNumber);
+            $ed_num = array_pop($ed_nums);
+            $ed_num = (int)$ed_num + 1;
+            array_push($ed_nums, $ed_num);
+            $ed_num = implode('-', $ed_nums);
+        } else {
+            $ed_num = $ediNumber . '-1';
+        }
+
         return $ed_num;
     }
 

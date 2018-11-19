@@ -351,7 +351,10 @@ class DocumentWebApi extends \api_web\components\WebApi
                      CASE
                      WHEN group_concat(DISTINCT dat.waybill_status_id) = :WAYBILL_UNLOADED
                        THEN :DOC_GROUP_STATUS_SENT
-                     WHEN instr(group_concat(DISTINCT dat.waybill_status_id), :WAYBILL_FORMED) > 0
+                     WHEN 
+                        instr(group_concat(DISTINCT dat.waybill_status_id), :WAYBILL_FORMED) > 0
+                        OR 
+                        group_concat(DISTINCT dat.waybill_id) is null
                        THEN :DOC_GROUP_STATUS_WAIT_FORMING
                      WHEN group_concat(DISTINCT dat.waybill_status_id) IN (:WAYBILL_ERROR, :WAYBILL_UNLOADED, :WAYBILL_UNLOADING)
                        THEN :DOC_GROUP_STATUS_WAIT_SENDING

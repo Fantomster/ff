@@ -126,6 +126,7 @@ class VendorEmailWaybillsHelper
                         'product_id'         => $product->id,
                         'product_name'       => $row['name'],
                         'units'              => $product->units,
+                        'edi_number'         => $invoice['invoice']['number'],
                     ]);
                     if (!$content->save()) {
                         $this->addLog(implode(' ', $content->getFirstErrors()) . ' № = ' . $invoice['invoice']['number'], 'order_create');

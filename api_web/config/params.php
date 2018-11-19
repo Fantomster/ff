@@ -35,7 +35,8 @@ return [
         '/order/products-list-for-unconfirmed-vendor',
         '/order/categories-for-unconfirmed-vendor',
         '/order/cancel-order-by-unconfirmed-vendor',
-        '/order/complete-order-by-unconfirmed-vendor'
+        '/order/complete-order-by-unconfirmed-vendor',
+        '/client/get-license-mix-cart'
     ],
     'api_web_url' => 'https://api-dev.mixcart.ru',
     'staticUrl' => [

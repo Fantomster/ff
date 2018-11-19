@@ -98,8 +98,7 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
                         'updated_at' => \gmdate('Y-m-d H:i:s')
                     ], ['outer_uid'  => $this->updates_uuid,
                         'service_id' => self::SERVICE_ID,
-                    ])
-                    ->execute();
+                    ])->execute();
             }
         }
         //Обновляем колличество полученных объектов
@@ -133,13 +132,20 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
             }
 
             if (!empty($item['mainUnit'])) {
-                $obUnitModel = OuterUnit::findOne(['name' => $item['mainUnit'], 'service_id' => self::SERVICE_ID, 'org_id' => $this->orgId]);
+                $obUnitModel = OuterUnit::findOne([
+                    'name'       => $item['mainUnit'],
+                    'service_id' => self::SERVICE_ID,
+                    'org_id'     => $this->orgId
+                ]);
+
                 if (!$obUnitModel) {
                     $obUnitModel = new OuterUnit();
                     $obUnitModel->name = $item['mainUnit'];
                     $obUnitModel->service_id = self::SERVICE_ID;
                     $obUnitModel->org_id = $this->orgId;
                     $obUnitModel->outer_uid = md5($item['mainUnit']);
+                } else {
+                    $obUnitModel->updated_at = \gmdate('Y-m-d H:i:s');
                 }
 
                 $obUnitModel->is_deleted = 0;

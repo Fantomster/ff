@@ -6,6 +6,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVsd;
 use api_web\classes\UserWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use api_web\modules\integration\modules\vetis\api\mercury\mercuryApi;
@@ -45,7 +46,7 @@ class VetisWaybill extends WebApi
      */
     public function getGroupsList($request)
     {
-        $license = LicenseOrganization::getLicenseForOrganizationService($this->user->organization_id,4);
+        $license = LicenseOrganization::getLicenseForOrganizationService($this->user->organization_id,Registry::MERC_SERVICE_ID);
         if(!isset($license)) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.active_license_not_found', ['ru' => 'Нет активной лицензии для доступа к этой функции']));
         }
@@ -87,7 +88,7 @@ class VetisWaybill extends WebApi
             else {
                 $businessList = (new UserWebApi())->getUserOrganizationBusinessList($this->user->organization_id);
                 foreach ($businessList['result'] as $item) {
-                    $license = LicenseOrganization::getLicenseForOrganizationService($item['id'], 4);
+                    $license = LicenseOrganization::getLicenseForOrganizationService($item['id'], Registry::MERC_SERVICE_ID);
                     if (isset($license)) {
                         MercVsd::getUpdateData($item['id']);
                     }

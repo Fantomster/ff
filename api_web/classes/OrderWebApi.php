@@ -210,7 +210,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $orderContent->comment = $product['comment'] ?? '';
 
         if (!empty($product['price'])) {
-            $orderContent->price = $product['price'];
+            $orderContent->price = round($product['price'], 3);
         }
 
         if ($orderContent->validate() && $orderContent->save()) {

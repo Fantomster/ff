@@ -1,4 +1,7 @@
 <?= '<?xml version="1.0" encoding="utf-8"?>'; ?>
+<?php if (!isset($glnArray)) {
+    $glnArray = $order->client->getGlnCodes($order->client->id, $order->vendor->id);
+} ?>
 <RECADV>
     <NUMBER><?= $order->id ?></NUMBER>
     <DOCACTION><?= Yii::$app->params['edi_api_data']['edi_api_recadv_document_id'] ?></DOCACTION>

@@ -206,6 +206,7 @@ class WaybillHelper
         $model->status_id = Registry::WAYBILL_COMPARED;
         //для каждого может быть разный
         $model->outer_number_code = $this->generateEdiNumber($arOuterMappedProducts, $serviceId);
+        $model->outer_number_additional = $this->generateEdiNumber($arOuterMappedProducts, $serviceId, true);
 
         /** @var Transaction $transaction */
         $transaction = \Yii::$app->db_api->beginTransaction();
@@ -422,15 +423,16 @@ class WaybillHelper
 
     /**
      * @param $arOuterStoreProducts
-     * @param $serviceId
+     * @param int $serviceId
+     * @param bool $onlyByOrderId
      * @return int|mixed|string
      */
-    private function generateEdiNumber($arOuterStoreProducts, $serviceId)
+    private function generateEdiNumber($arOuterStoreProducts, $serviceId, $onlyByOrderId = false)
     {
         /**@var OrderContent $orderContent */
         $orderContent = current($arOuterStoreProducts)['orderContent'];
         $tmp_ed_num = $orderContent->order_id;
-        if ($orderContent->edi_number) {
+        if ($orderContent->edi_number && !$onlyByOrderId) {
             $tmp_ed_num = $orderContent->edi_number;
         }
         $ed_num = $tmp_ed_num . '-1';

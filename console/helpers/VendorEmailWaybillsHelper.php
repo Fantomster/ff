@@ -16,8 +16,10 @@ use common\models\IntegrationInvoice;
 use common\models\Journal;
 use common\models\Order;
 use common\models\OrderContent;
+use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
 use common\models\RelationSuppRest;
+use yii\db\Query;
 
 /**
  * Class VendorEmailWaybillsHelper
@@ -48,8 +50,10 @@ class VendorEmailWaybillsHelper
      */
     public function processFile($invoice)
     {
-        $agentName = $invoice['invoice']['namePostav'];
-        $outerAgentNameWaybill = OuterAgentNameWaybill::findOne(['name' => $agentName]);
+        $arAgentName = $this->prepareAgentName($invoice['invoice']['namePostav']);
+        $outerAgentNameWaybill = OuterAgentNameWaybill::find()
+            ->leftJoin(OuterAgent::tableName() .' oa', 'oa.id='. OuterAgentNameWaybill::tableName() . '.agent_id')
+            ->where([OuterAgentNameWaybill::tableName() . '.name' => $arAgentName, 'oa.org_id' => $this->orgId])->one();
         if ($outerAgentNameWaybill) {
             $vendorId = $outerAgentNameWaybill->agent->vendor_id;
             $catRelation = RelationSuppRest::findOne([
@@ -126,13 +130,14 @@ class VendorEmailWaybillsHelper
                     ]);
                     if (!$content->save()) {
                         $this->addLog(implode(' ', $content->getFirstErrors()) . ' № = ' . $invoice['invoice']['number'], 'order_create');
-
                     }
                 }
 
                 if (count($invoice['invoice']['rows']) == $cntErrors) {
                     $transaction->rollBack();
                     return false;
+                } else {
+                    $this->addLog('Заказ успешно создан, №=' . $order->id, 'order_create', 'success');
                 }
                 $order->calculateTotalPrice();
 
@@ -211,4 +216,18 @@ class VendorEmailWaybillsHelper
 
     }
 
+    /**
+     * @param $name
+     * @return array
+     */
+    private function prepareAgentName($name){
+        $result = (new Query())->select('*')->from('ooo')->all();
+        foreach ($result as $item) {
+            if (strpos($name, $item['name_short']) === 0){
+                $newAgentName = str_replace($item['name_short'], $item['name_long'], $name);
+                return [$name, $newAgentName];
+            }
+        }
+        return [$name];
+    }
 }

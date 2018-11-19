@@ -13,7 +13,6 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
 
 /**
  * This is the model class for table "order".
@@ -742,12 +741,7 @@ class Order extends \yii\db\ActiveRecord
                 ]);
             }
 
-            $signer = new Sha256();
-            $token = (string) Yii::$app->jwt->getBuilder()
-                        ->setIssuer('mixcart.ru')
-                        ->set('access_token', $user->access_token)
-                        ->sign($signer, 'ololo')
-                        ->getToken();
+            $token = $user->getJWTToken(Yii::$app->jwt);
             if ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
                 /*
                  * Yii::$app->jwt->getBuilder()

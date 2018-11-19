@@ -247,7 +247,7 @@ return [
         ],
         'jwt'                   => [
             'class' => 'sizeg\jwt\Jwt',
-            'key'   => 'secret',
+            'key'   => 'DDA19FBF32BC8D66A5D3A22EA15F7',
         ],
     ],
     'modules'        => [

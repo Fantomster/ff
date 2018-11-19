@@ -8,6 +8,8 @@ Yii::setAlias('@franchise', dirname(dirname(__DIR__)) . '/franchise');
 Yii::setAlias('@api', dirname(dirname(__DIR__)) . '/api');
 Yii::setAlias('@api_web', dirname(dirname(__DIR__)) . '/api_web');
 Yii::setAlias('@mxct', dirname(dirname(__DIR__)) . '/mxct');
+Yii::setAlias('@mail_views', dirname(dirname(__DIR__)) . '/common/mail');
+
 //Yii::setAlias('@bower', dirname(dirname(__DIR__)) . '/vendor/bower-asset');
 //Yii::setAlias('@npm', dirname(dirname(__DIR__)) . '/vendor/npm-asset');
 

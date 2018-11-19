@@ -7,6 +7,7 @@ use yii\web\Controller;
 use common\models\Organization;
 use common\models\Role;
 use common\models\User;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
 
 /**
  * Description of DefaultController
@@ -48,12 +49,12 @@ class DefaultController extends Controller {
             $jwtToken = Yii::$app->jwt->getParser()->parse((string) $token);
             $data = Yii::$app->jwt->getValidationData(); // It will use the current time to validate (iat, nbf and exp)
             $data->setIssuer('mixcart.ru');
-            $data->setId('ololo123');
-
+            $signer = new Sha256();
+            
 //            $user = \common\models\User::findOne(['access_token' => $token]);
 //            $organization = (isset($order) && isset($user)) ? $order->getOrganizationByUser($user) : null;
 //            if ($user && isset($order) && isset($organization)) {
-            if ($jwtToken->validate($data) && isset($order)) {
+            if ($jwtToken->validate($data) && $jwtToken->verify($signer, 'ololo') && isset($order)) {
                 $user = \common\models\User::findOne(['access_token' => $jwtToken->getClaim('access_token')]);
                 $organization = (isset($order) && isset($user)) ? $order->getOrganizationByUser($user) : null;
                 Yii::$app->user->logout();

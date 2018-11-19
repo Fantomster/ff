@@ -213,7 +213,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $orderContent->price = round($product['price'], 3);
         }
 
-        if ($orderContent->validate() && $orderContent->save()) {
+        if ($orderContent->save()) {
             return $orderContent;
         } else {
             throw new ValidationException($orderContent->getFirstErrors());

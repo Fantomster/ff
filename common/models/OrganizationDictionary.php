@@ -137,6 +137,7 @@ class OrganizationDictionary extends ActiveRecord
                 'outer_dic_id' => self::IIKO_UNIT_DICT_ID,
                 'status_id'    => $status
             ]);
+            $dictionary->save();
         }
 
         if ($status == self::STATUS_ACTIVE) {

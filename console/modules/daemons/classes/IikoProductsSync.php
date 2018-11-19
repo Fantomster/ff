@@ -143,9 +143,8 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
                 }
 
                 $obUnitModel->is_deleted = 0;
-                if ($obUnitModel->validate()) {
-                    $obUnitModel->save();
-                }
+                $obUnitModel->save();
+
                 $model->outer_unit_id = $obUnitModel->id;
             }
 

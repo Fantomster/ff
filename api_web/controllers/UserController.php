@@ -382,7 +382,7 @@ class UserController extends WebApiController
     {
         $this->response = [
             'result' => $this->container->get('UserWebApi')->setOrganization($this->request),
-            'jwt_token' => $this->user->getJWTToken(Yii::$app->jwt),
+            'jwt_token' => $this->user->getJWTToken(\Yii::$app->jwt),
         ];
     }
 

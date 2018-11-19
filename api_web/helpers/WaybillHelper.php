@@ -439,7 +439,12 @@ class WaybillHelper
             ->andWhere(['order_id' => $orderContent->order_id])
             ->orderBy(['edi_number' => SORT_DESC])->limit(1)->one();
         if ($existOrderContent) {
-            return $this->getLastEdiNumber($existOrderContent->edi_number);
+            $existWaybill = Waybill::find()->where(['like', 'outer_number_code', $tmp_ed_num])
+                ->andWhere(['service_id' => $serviceId])
+                ->orderBy(['outer_number_code' => SORT_DESC])->limit(1)->one();
+            $ediNumber = $existWaybill->outer_number_code ?? $existOrderContent->edi_number;
+
+            return $this->getLastEdiNumber($ediNumber);
         } else {
             $existWaybill = Waybill::find()->where(['like', 'outer_number_code', $tmp_ed_num])
                 ->andWhere(['service_id' => $serviceId])
@@ -458,11 +463,16 @@ class WaybillHelper
      */
     private function getLastEdiNumber($ediNumber)
     {
-        $ed_nums = explode('-', $ediNumber);
-        $ed_num = array_pop($ed_nums);
-        $ed_num = (int)$ed_num + 1;
-        array_push($ed_nums, $ed_num);
-        $ed_num = implode('-', $ed_nums);
+        if (strpos($ediNumber, '-') != false) {
+            $ed_nums = explode('-', $ediNumber);
+            $ed_num = array_pop($ed_nums);
+            $ed_num = (int)$ed_num + 1;
+            array_push($ed_nums, $ed_num);
+            $ed_num = implode('-', $ed_nums);
+        } else {
+            $ed_num = $ediNumber . '-1';
+        }
+
         return $ed_num;
     }
 

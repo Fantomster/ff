@@ -50,10 +50,9 @@ class VendorEmailWaybillsHelper
      */
     public function processFile($invoice)
     {
-        $arAgentName = $this->prepareAgentName($invoice['invoice']['namePostav']);
         $outerAgentNameWaybill = OuterAgentNameWaybill::find()
             ->leftJoin(OuterAgent::tableName() .' oa', 'oa.id='. OuterAgentNameWaybill::tableName() . '.agent_id')
-            ->where([OuterAgentNameWaybill::tableName() . '.name' => $arAgentName, 'oa.org_id' => $this->orgId])->one();
+            ->where([OuterAgentNameWaybill::tableName() . '.name' => $invoice['invoice']['realVendorName'], 'oa.org_id' => $this->orgId])->one();
         if ($outerAgentNameWaybill) {
             $vendorId = $outerAgentNameWaybill->agent->vendor_id;
             $catRelation = RelationSuppRest::findOne([
@@ -171,7 +170,7 @@ class VendorEmailWaybillsHelper
             }
 
         } else {
-            $this->addLog('Dont have outer agent relation with vendor name = ' . $invoice['invoice']['namePostav'], 'order_create');
+            $this->addLog('Dont have outer agent relation with vendor name = ' . $invoice['invoice']['realVendorName'], 'order_create');
         }
 
         return true;

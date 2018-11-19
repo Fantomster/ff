@@ -704,6 +704,7 @@ class ParserTorg12
             else
                 $valueFromCell = $cellValue; //если совпадение полное, то работаем с ячейкой справа иначе работаем с текущей ячейкой
             $temp1 = explode(',', $valueFromCell); //разбиваем значение ячейки по запятой, наименование поставщика всегда идёт первым реквизитом
+            $this->invoice->realVendorName = $valueFromCell;
             $temp0 = $temp1[0]; //переменная, которая по идее должна хранить наименование поставщика
 
             if ($this->invoice->innPostav == '') {

@@ -210,10 +210,10 @@ class OrderWebApi extends \api_web\components\WebApi
         $orderContent->comment = $product['comment'] ?? '';
 
         if (!empty($product['price'])) {
-            $orderContent->price = $product['price'];
+            $orderContent->price = round($product['price'], 3);
         }
 
-        if ($orderContent->validate() && $orderContent->save()) {
+        if ($orderContent->save()) {
             return $orderContent;
         } else {
             throw new ValidationException($orderContent->getFirstErrors());
@@ -648,6 +648,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     'create_user'       => $model->createdByProfile->full_name ?? '',
                     'accept_user'       => $model->acceptedByProfile->full_name ?? '',
                     'count_position'    => count($model->orderContent),
+                    'total_price'       => round($model->total_price, 2) ?? 0
                 ];
                 if ($model->service_id == Registry::EDI_SERVICE_ID) {
                     if (!empty($model->orderContent)) {

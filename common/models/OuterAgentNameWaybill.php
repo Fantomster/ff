@@ -37,7 +37,7 @@ class OuterAgentNameWaybill extends \yii\db\ActiveRecord
     {
         return [
             [['agent_id'], 'integer'],
-            [['name'], 'string', 'max' => 255],
+            [['name'], 'string', 'max' => 400],
         ];
     }
 

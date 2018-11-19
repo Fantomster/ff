@@ -700,6 +700,8 @@ class ServiceRkws extends AbstractSyncFactory
         SyncLog::trace('No rows were inserted or updated!');
         $saveErr = ['save' => 'no_save_data'];
         $transaction->rollback();
+        $orgDic->status_id = $orgDic::STATUS_ERROR;
+        $orgDic->save();
         SyncLog::trace('Fixed save errors: ' . json_encode($saveErr));
         return self::XML_LOAD_RESULT_FAULT;
     }

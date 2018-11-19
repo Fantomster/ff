@@ -26,7 +26,6 @@ class m181118_194527_lenght_400_agent_name extends Migration
      */
     public function safeDown()
     {
-        echo "m181118_194527_lenght_400_agent_name cannot be reverted.\n";
-        return false;
+        return true;
     }
 }

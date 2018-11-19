@@ -351,7 +351,10 @@ class DocumentWebApi extends \api_web\components\WebApi
                      CASE
                      WHEN group_concat(DISTINCT dat.waybill_status_id) = :WAYBILL_UNLOADED
                        THEN :DOC_GROUP_STATUS_SENT
-                     WHEN instr(group_concat(DISTINCT dat.waybill_status_id), :WAYBILL_FORMED) > 0
+                     WHEN 
+                        instr(group_concat(DISTINCT dat.waybill_status_id), :WAYBILL_FORMED) > 0
+                        OR 
+                        group_concat(DISTINCT dat.waybill_id) is null
                        THEN :DOC_GROUP_STATUS_WAIT_FORMING
                      WHEN group_concat(DISTINCT dat.waybill_status_id) IN (:WAYBILL_ERROR, :WAYBILL_UNLOADED, :WAYBILL_UNLOADING)
                        THEN :DOC_GROUP_STATUS_WAIT_SENDING
@@ -773,16 +776,17 @@ class DocumentWebApi extends \api_web\components\WebApi
             $modelClass = self::$models[$request['type']];
             /**@var ActiveQuery $query */
             $query = $modelClass::find()->where(['id' => $request['document_id']]);
+            $field = 'client_id';
             if ($request['type'] == self::TYPE_WAYBILL) {
                 $field = 'acquirer_id';
-            } elseif ($request['type'] == self::TYPE_ORDER) {
-                $field = 'client_id';
             }
             if (!$query->andWhere([$field => $this->user->organization_id])->exists()) {
                 throw new BadRequestHttpException($request['type'] . '_not_found');
             }
 
             $document = $modelClass::prepareModel($request['document_id'], $request['service_id']);
+        } else {
+            throw new BadRequestHttpException($request['type'] . '_not_found');
         }
 
         return array_merge(['document' => $document], $this->getDocumentContents($request));

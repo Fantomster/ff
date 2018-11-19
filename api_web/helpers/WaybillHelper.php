@@ -445,7 +445,7 @@ class WaybillHelper
             $existWaybill = Waybill::find()->where(['like', $waybillSearchField, $tmp_ed_num])
                 ->andWhere(['service_id' => $serviceId])
                 ->orderBy([$waybillSearchField => SORT_DESC])->limit(1)->one();
-            $ediNumber = $existWaybill->outer_number_code ?? $existOrderContent->edi_number;
+            $ediNumber = $existWaybill->{$waybillSearchField} ?? $existOrderContent->edi_number;
 
             return $this->getLastEdiNumber($ediNumber);
         } else {

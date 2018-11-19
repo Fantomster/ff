@@ -432,6 +432,7 @@ class WaybillHelper
         /**@var OrderContent $orderContent */
         $orderContent = current($arOuterStoreProducts)['orderContent'];
         $tmp_ed_num = $orderContent->order_id;
+        $waybillSearchField =  $onlyByOrderId ? 'outer_number_additional' : 'outer_number_code';
         if ($orderContent->edi_number && !$onlyByOrderId) {
             $tmp_ed_num = $orderContent->edi_number;
         }
@@ -441,16 +442,16 @@ class WaybillHelper
             ->andWhere(['order_id' => $orderContent->order_id])
             ->orderBy(['edi_number' => SORT_DESC])->limit(1)->one();
         if ($existOrderContent) {
-            $existWaybill = Waybill::find()->where(['like', 'outer_number_code', $tmp_ed_num])
+            $existWaybill = Waybill::find()->where(['like', $waybillSearchField, $tmp_ed_num])
                 ->andWhere(['service_id' => $serviceId])
-                ->orderBy(['outer_number_code' => SORT_DESC])->limit(1)->one();
+                ->orderBy([$waybillSearchField => SORT_DESC])->limit(1)->one();
             $ediNumber = $existWaybill->outer_number_code ?? $existOrderContent->edi_number;
 
             return $this->getLastEdiNumber($ediNumber);
         } else {
-            $existWaybill = Waybill::find()->where(['like', 'outer_number_code', $tmp_ed_num])
+            $existWaybill = Waybill::find()->where(['like', $waybillSearchField, $tmp_ed_num])
                 ->andWhere(['service_id' => $serviceId])
-                ->orderBy(['outer_number_code' => SORT_DESC])->limit(1)->one();
+                ->orderBy([$waybillSearchField => SORT_DESC])->limit(1)->one();
             if ($existWaybill) {
                 return $this->getLastEdiNumber($existWaybill->outer_number_code);
             }

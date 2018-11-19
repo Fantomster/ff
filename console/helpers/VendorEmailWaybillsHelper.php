@@ -16,6 +16,7 @@ use common\models\IntegrationInvoice;
 use common\models\Journal;
 use common\models\Order;
 use common\models\OrderContent;
+use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
 use common\models\RelationSuppRest;
 use yii\db\Query;
@@ -51,8 +52,8 @@ class VendorEmailWaybillsHelper
     {
         $arAgentName = $this->prepareAgentName($invoice['invoice']['namePostav']);
         $outerAgentNameWaybill = OuterAgentNameWaybill::find()
-            ->leftJoin('outer_agent oa', 'oa.id=outer_agent_name_waybill.agent_id')
-            ->where(['outer_agent_name_waybill.name' => $arAgentName, 'oa.org_id' => $this->orgId])->one();
+            ->leftJoin(OuterAgent::tableName() .' oa', 'oa.id=outer_agent_name_waybill.agent_id')
+            ->where(['outer_agent_name_waybill.name' => $arAgentName, 'oa.org_id' => $this->orgId])->all();
         if ($outerAgentNameWaybill) {
             $vendorId = $outerAgentNameWaybill->agent->vendor_id;
             $catRelation = RelationSuppRest::findOne([

@@ -401,7 +401,7 @@ class AbstractDictionary extends WebApi
                     'level_name'  => str_pad('', $model->level, "-"),
                     'name'        => $model->name,
                     'is_active'   => (bool)!$model->is_deleted,
-                    'is_category' => (bool)$model->isRoot()
+                    'is_category' => (bool)(!$model->isLeaf())
                 ];
             }
         }
@@ -450,14 +450,15 @@ class AbstractDictionary extends WebApi
             return $arReturn;
         };
         return [
-            'id'         => $model->id,
-            'outer_uid'  => $model->outer_uid,
-            'name'       => $model->name,
-            'store_type' => $model->store_type,
-            'created_at' => $model->created_at,
-            'updated_at' => $model->updated_at,
-            'is_active'  => (int)!$model->is_deleted,
-            'childs'     => $model->isLeaf() ? [] : $child($model),
+            'id'          => $model->id,
+            'outer_uid'   => $model->outer_uid,
+            'name'        => $model->name,
+            'store_type'  => $model->store_type,
+            'created_at'  => $model->created_at,
+            'updated_at'  => $model->updated_at,
+            'is_active'   => (int)!$model->is_deleted,
+            'is_category' => (bool)(!$model->isLeaf()),
+            'childs'      => $model->isLeaf() ? [] : $child($model),
         ];
     }
 

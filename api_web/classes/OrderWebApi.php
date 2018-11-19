@@ -646,6 +646,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     'create_user'       => $model->createdByProfile->full_name ?? '',
                     'accept_user'       => $model->acceptedByProfile->full_name ?? '',
                     'count_position'    => count($model->orderContent),
+                    'total_price'       => round($model->total_price, 2) ?? 0
                 ];
                 if ($model->service_id == Registry::EDI_SERVICE_ID) {
                     if (!empty($model->orderContent)) {

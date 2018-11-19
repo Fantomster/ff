@@ -3,7 +3,7 @@ return [
     'adminEmail' => 'noreply@mixcart.ru',
     'notificationsUrl' => 'https://notifications.f-keeper.ru:443',
     'maindUrl' => 'http://testama.f-keeper.ru',
-    'licenseManagerPhone' => '8(499)404-10-18',
+    'licenseManagerPhone' => '8 (499) 404-10-18',
     /**
      * Методы которые не требуют авторизации в АПИ
      */
@@ -35,7 +35,8 @@ return [
         '/order/products-list-for-unconfirmed-vendor',
         '/order/categories-for-unconfirmed-vendor',
         '/order/cancel-order-by-unconfirmed-vendor',
-        '/order/complete-order-by-unconfirmed-vendor'
+        '/order/complete-order-by-unconfirmed-vendor',
+        '/client/get-license-mix-cart'
     ],
     'api_web_url' => 'https://api-dev.mixcart.ru',
     'staticUrl' => [

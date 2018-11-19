@@ -297,7 +297,7 @@ class License extends ActiveRecord
             if ($licenseName) {
                 $message .= ': ' . $licenseName;
             }
-            throw new HttpException(402, $message, 402);
+            throw new HttpException(400, $message, 400);
         }
     }
 }

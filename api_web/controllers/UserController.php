@@ -365,7 +365,7 @@ class UserController extends WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *            default={"result":1}
+     *            default={"result":1, "jwt_token":"jwt_token"}
      *         )
      *     ),
      *     @SWG\Response(
@@ -381,7 +381,8 @@ class UserController extends WebApiController
     public function actionSetOrganization()
     {
         $this->response = [
-            'result' => $this->container->get('UserWebApi')->setOrganization($this->request)
+            'result' => $this->container->get('UserWebApi')->setOrganization($this->request),
+            'jwt_token' => $this->user->getJWTToken(\Yii::$app->jwt),
         ];
     }
 

@@ -140,7 +140,11 @@ class OrganizationDictionary extends ActiveRecord
         }
 
         if ($status == self::STATUS_ACTIVE) {
-            $count = OuterUnit::find()->where(['org_id' => $this->org_id])->count();
+            $count = OuterUnit::find()->where([
+                'org_id'     => $this->org_id,
+                'service_id' => Registry::IIKO_SERVICE_ID,
+                'is_deleted' => 0
+            ])->count();
             $dictionary->successSync($count);
         } else {
             $dictionary->errorSync();

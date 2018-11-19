@@ -180,7 +180,7 @@ class Order extends \yii\db\ActiveRecord
             }
 
             /**
-             * Если ресторан и поставщик EDI 
+             * Если ресторан и поставщик EDI
              **/
             if ($this->client->isEdi() && $this->vendor->isEdi()) {
                 $this->service_id = Registry::EDI_SERVICE_ID;
@@ -689,14 +689,14 @@ class Order extends \yii\db\ActiveRecord
             }
         }
 
-        if ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == OrderStatus::STATUS_DONE)) {
+        if ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == OrderStatus::STATUS_DONE || $this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED)) {
             $vendor = $this->vendor;
             $client = $this->client;
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
             $glnArray = $client->getGlnCodes($client->id, $vendor->id);
             if (isset($glnArray['client_gln']) && isset($glnArray['vendor_gln']) && $glnArray['client_gln'] > 0 && $glnArray['vendor_gln'] > 0) {
                 $ediIntegration = new EDIIntegration(['orgId' => $vendor->id, 'clientId' => $client->id, 'providerID' => $glnArray['provider_id']]);
-                if ($this->status == OrderStatus::STATUS_DONE) {
+                if ($this->status == OrderStatus::STATUS_DONE || $this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED) {
                     $result = $ediIntegration->sendOrderInfo($this, true);
                 } else {
                     $result = $ediIntegration->sendOrderInfo($this, false);

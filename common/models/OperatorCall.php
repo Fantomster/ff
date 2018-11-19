@@ -82,8 +82,8 @@ class OperatorCall extends ActiveRecord
     {
         if($attribute == 'status_call_id') {
             if ($this->$attribute == 4) {
-                if (self::find()->where(['operator_id' => $this->operator_id, $attribute => self::STATUS_CONTROLL])->count() == 10) {
-                    $this->addError($attribute, "Одновременно на контроле может быть не более 10 заказаов!");
+                if (self::find()->where(['operator_id' => $this->operator_id, $attribute => self::STATUS_CONTROLL])->count() == Yii::$app->params['countControlsOperator']) {
+                    $this->addError($attribute, "Одновременно на контроле может быть не более ".Yii::$app->params['countControlsOperator']." заказаов!");
                 }
             }
         }

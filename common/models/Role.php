@@ -20,7 +20,7 @@ namespace common\models;
  */
 class Role extends \amnah\yii2\user\models\Role
 {
-
+    //todo_refactor add localization for roles names to use in responses messages (api_web)
     /**
      * @var int admin role
      */

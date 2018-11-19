@@ -112,11 +112,11 @@ class OrderWebApi extends \api_web\components\WebApi
         }
         $tr = \Yii::$app->db->beginTransaction();
         try {
+            $changed = [];
+            $deleted = [];
             //Тут операции с продуктами в этом заказе
             if (isset($post['products']) && !empty($post['products'])) {
                 if (is_array($post['products'])) {
-                    $changed = [];
-                    $deleted = [];
                     foreach ($post['products'] as $product) {
                         $operation = strtolower($product['operation']);
                         if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
@@ -170,7 +170,9 @@ class OrderWebApi extends \api_web\components\WebApi
             } elseif ($order->client_id == $this->user->organization_id) {
                 $sender = $order->vendor;
             }
-            Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted);
+            if (!empty($changed) || !empty($deleted)) {
+                Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted);
+            }
             return $this->getInfo(['order_id' => $order->id]);
         } catch (\Exception $e) {
             $tr->rollBack();
@@ -208,10 +210,10 @@ class OrderWebApi extends \api_web\components\WebApi
         $orderContent->comment = $product['comment'] ?? '';
 
         if (!empty($product['price'])) {
-            $orderContent->price = $product['price'];
+            $orderContent->price = round($product['price'], 3);
         }
 
-        if ($orderContent->validate() && $orderContent->save()) {
+        if ($orderContent->save()) {
             return $orderContent;
         } else {
             throw new ValidationException($orderContent->getFirstErrors());
@@ -646,6 +648,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     'create_user'       => $model->createdByProfile->full_name ?? '',
                     'accept_user'       => $model->acceptedByProfile->full_name ?? '',
                     'count_position'    => count($model->orderContent),
+                    'total_price'       => round($model->total_price, 2) ?? 0
                 ];
                 if ($model->service_id == Registry::EDI_SERVICE_ID) {
                     if (!empty($model->orderContent)) {

@@ -421,9 +421,9 @@ class EdiController extends WebApiController
      * )
      * @throws \Exception
      */
-    public function actionCancelOrder()
+    public function actionOrderCancel()
     {
-        $this->response = $this->container->get('EdiWebApi')->cancelOrder($this->request);
+        $this->response = $this->container->get('EdiWebApi')->orderCancel($this->request);
     }
 
     /**

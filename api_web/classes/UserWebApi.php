@@ -767,12 +767,10 @@ class UserWebApi extends \api_web\components\WebApi
             }
         }
 
-        if ($model->invite == RelationSuppRest::INVITE_ON) {
-            if ($model->status == RelationSuppRest::CATALOG_STATUS_ON) {
-                $status = $status_list[1];
-            } else {
-                $status = $status_list[2];
-            }
+        if ($model->invite == RelationSuppRest::INVITE_ON && $model->cat_id != 0 && $model->status == RelationSuppRest::CATALOG_STATUS_ON) {
+            $status = $status_list[1];
+        } elseif ($model->cat_id == 0) {
+            $status = $status_list[2];
         } else {
             $status = $status_list[3];
         }

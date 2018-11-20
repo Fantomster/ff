@@ -575,12 +575,11 @@ class RequestWebApi extends WebApi
             "comment"           => $model->comment,
             "client"            => WebApiHelper::prepareOrganization($model->client),
             "vendor"            => WebApiHelper::prepareOrganization($model->vendor) ?? null,
-            "hits"              => (int)$model->count_views ?? 0,
+            "hits"              => (int)$model->hits ?? 0,
             "count_callback"    => (int)$model->countCallback ?? 0,
             "urgent"            => (int)$model->rush_order ?? 0,
             "payment_method"    => $model->payment_method,
             "deferment_payment" => $model->deferment_payment,
-            "count_views"       => $model->count_views,
             "regular"           => (int)$model->regular,
             "regular_name"      => $model->regularName
         ];
@@ -595,14 +594,15 @@ class RequestWebApi extends WebApi
     private function prepareRequestCallback(RequestCallback $model)
     {
         return [
-            'id'          => (int)$model->id,
-            "request_id"  => (int)$model->request_id,
-            "client"      => WebApiHelper::prepareOrganization($model->request->client),
-            "vendor"      => WebApiHelper::prepareOrganization($model->organization),
-            "price"       => $model->price,
-            "comment"     => $model->comment,
-            "created_at"  => \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:mm:ss'),
-            "updated_at"  => \Yii::$app->formatter->asDate($model->updated_at, 'dd.MM.yyyy HH:mm:ss'),
+            'id'         => (int)$model->id,
+            "request_id" => (int)$model->request_id,
+            "client"     => WebApiHelper::prepareOrganization($model->request->client),
+            "vendor"     => WebApiHelper::prepareOrganization($model->organization),
+            "price"      => $model->price,
+            "hits"       => (int)$model->request->hits ?? 0,
+            "comment"    => $model->comment,
+            "created_at" => \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:mm:ss'),
+            "updated_at" => \Yii::$app->formatter->asDate($model->updated_at, 'dd.MM.yyyy HH:mm:ss'),
         ];
     }
 }

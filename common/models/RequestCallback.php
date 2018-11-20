@@ -15,7 +15,6 @@ use Yii;
  * @property string       $comment
  * @property string       $created_at
  * @property string       $updated_at
- * @property integer      $count_views
  * @property Organization $organization
  * @property Request      $request
  */
@@ -37,7 +36,7 @@ class RequestCallback extends \yii\db\ActiveRecord
     {
         return [
             [['request_id', 'supp_org_id', 'price'], 'required'],
-            [['request_id', 'supp_org_id', 'supp_user_id', 'count_views'], 'integer'],
+            [['request_id', 'supp_org_id', 'supp_user_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['price'], 'string', 'max' => 100],
             [['comment'], 'string', 'max' => 255],
@@ -55,7 +54,6 @@ class RequestCallback extends \yii\db\ActiveRecord
             'request_id'   => 'Request ID',
             'supp_org_id'  => 'Supp Org ID',
             'supp_user_id' => 'Supp User ID',
-            'count_views'  => 'View count',
             'price'        => 'Price',
             'comment'      => 'Comment',
             'created_at'   => 'Created At',

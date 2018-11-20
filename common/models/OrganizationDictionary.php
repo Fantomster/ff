@@ -138,7 +138,7 @@ class OrganizationDictionary extends ActiveRecord
             'plain_executed' => $plainExec,
             'status_text'    => $this->statusText,
             'status_id'      => $this->status_id,
-            'count'          => \Yii::$app->get('rabbit')->setQueue($queueName)->checkQueueCount(),
+            'count'          => $this->count ?? 0
         ]);
     }
 

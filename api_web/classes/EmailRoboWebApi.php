@@ -72,9 +72,9 @@ class EmailRoboWebApi extends WebApi
         $this->validateRequest($post, ['id']);
         $orgId = isset($post['organization_id']) && !empty($post['organization_id']) ? $this->validateOrgId($post['organization_id']) : $this->user->organization_id;
         $model = IntegrationSettingFromEmail::findOne([
-            'id' => $post['id'],
+            'id'              => $post['id'],
             'organization_id' => $orgId, //$post['org_id'] ?? $this->user->organization_id,
-            'version' => 2,
+            'version'         => 2,
         ]);
         if (!$model) {
             throw new BadRequestHttpException('integration.email.setting_not_found');
@@ -82,6 +82,11 @@ class EmailRoboWebApi extends WebApi
         try {
             foreach ($post as $key => $field) {
                 if (!in_array($key, ['id', 'organization_id'])) {
+                    if ($key == 'password') {
+                        if (strlen($field) == strlen($model->password) && $field == str_pad('', strlen($model->password), '*')){
+                            continue;
+                        }
+                    }
                     $model->setAttribute($key, $field);
                 }
             }
@@ -155,9 +160,10 @@ class EmailRoboWebApi extends WebApi
      * @return mixed
      * @throws BadRequestHttpException
      */
-    public function validateOrgId($orgId){
+    public function validateOrgId($orgId)
+    {
         $availableBusinesses = (new UserWebApi())->getUserOrganizationBusinessList('id');
-        if (!in_array($orgId, array_keys($availableBusinesses['result']))){
+        if (!in_array($orgId, array_keys($availableBusinesses['result']))) {
             throw new BadRequestHttpException('integration.email.bad_organization_id');
         }
 

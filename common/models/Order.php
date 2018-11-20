@@ -180,7 +180,7 @@ class Order extends \yii\db\ActiveRecord
             }
 
             /**
-             * Если ресторан и поставщик EDI 
+             * Если ресторан и поставщик EDI
              **/
             if ($this->client->isEdi() && $this->vendor->isEdi()) {
                 $this->service_id = Registry::EDI_SERVICE_ID;
@@ -689,14 +689,14 @@ class Order extends \yii\db\ActiveRecord
             }
         }
 
-        if ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == OrderStatus::STATUS_DONE)) {
+        if ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == OrderStatus::STATUS_DONE || $this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED)) {
             $vendor = $this->vendor;
             $client = $this->client;
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
             $glnArray = $client->getGlnCodes($client->id, $vendor->id);
             if (isset($glnArray['client_gln']) && isset($glnArray['vendor_gln']) && $glnArray['client_gln'] > 0 && $glnArray['vendor_gln'] > 0) {
                 $ediIntegration = new EDIIntegration(['orgId' => $vendor->id, 'clientId' => $client->id, 'providerID' => $glnArray['provider_id']]);
-                if ($this->status == OrderStatus::STATUS_DONE) {
+                if ($this->status == OrderStatus::STATUS_DONE || $this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED) {
                     $result = $ediIntegration->sendOrderInfo($this, true);
                 } else {
                     $result = $ediIntegration->sendOrderInfo($this, false);
@@ -741,11 +741,24 @@ class Order extends \yii\db\ActiveRecord
                 ]);
             }
 
+            $token = $user->getJWTToken(Yii::$app->jwt);
             if ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
+                /*
+                 * Yii::$app->jwt->getBuilder()
+            ->setIssuer('http://example.com') // Configures the issuer (iss claim)
+            ->setAudience('http://example.org') // Configures the audience (aud claim)
+            ->setId('4f1g23a12aa', true) // Configures the id (jti claim), replicating as a header item
+            ->setIssuedAt(time()) // Configures the time that the token was issue (iat claim)
+            ->setNotBefore(time() + 60) // Configures the time before which the token cannot be accepted (nbf claim)
+            ->setExpiration(time() + 3600) // Configures the expiration time of the token (exp claim)
+            ->set('uid', 1) // Configures a new claim, called "uid"
+            ->getToken();
+                 */
+                
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                     "/order/view",
                     "id"    => $this->id,
-                    "token" => $user->access_token
+                    "token" => $token,//$user->access_token
                 ]);
             }
 
@@ -755,7 +768,7 @@ class Order extends \yii\db\ActiveRecord
                 $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                     "/order/view",
                     "id"    => $this->id,
-                    "token" => $user->access_token
+                    "token" => $token, //$user->access_token
                 ]);
             }
 

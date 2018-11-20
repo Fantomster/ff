@@ -118,6 +118,9 @@ class OrganizationDictionary extends ActiveRecord
     {
         $this->status_id = self::STATUS_ERROR;
         $this->updated_at = \gmdate('Y-m-d H:i:s');
+        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID && $this->outerDic->name == 'product') {
+            $this->updateIikoUnitDictionary(self::STATUS_ERROR);
+        }
         return $this->save();
     }
 
@@ -140,8 +143,15 @@ class OrganizationDictionary extends ActiveRecord
         }
 
         if ($status == self::STATUS_ACTIVE) {
-            $count = OuterUnit::find()->where(['org_id' => $this->org_id])->count();
-            $dictionary->successSync($count);
+            $count = OuterUnit::find()->where([
+                'org_id'     => $this->org_id,
+                'service_id' => Registry::IIKO_SERVICE_ID,
+                'is_deleted' => 0
+            ])->count();
+            $dictionary->status_id = $status;
+            $dictionary->count = (int)$count;
+            $dictionary->updated_at = \gmdate('Y-m-d H:i:s');
+            $dictionary->save();
         } else {
             $dictionary->errorSync();
         }

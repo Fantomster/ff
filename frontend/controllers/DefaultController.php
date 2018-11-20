@@ -12,7 +12,8 @@ use common\models\User;
  * Description of DefaultController
  *
  */
-class DefaultController extends Controller {
+class DefaultController extends Controller
+{
 
     /**
      *
@@ -24,42 +25,72 @@ class DefaultController extends Controller {
      *  Load current user
      */
 
-    protected function loadCurrentUser() {
+    protected function loadCurrentUser()
+    {
         $this->currentUser = Yii::$app->user->identity;
     }
-    
-    protected function setLayout($orgType) {
+
+    protected function setLayout($orgType)
+    {
         switch ($orgType) {
-                case Organization::TYPE_RESTAURANT:
-                    $this->layout = 'main-client';
-                    break;
-                case Organization::TYPE_SUPPLIER:
-                    $this->layout = 'main-vendor';
-                    break;
-            }
+            case Organization::TYPE_RESTAURANT:
+                $this->layout = 'main-client';
+                break;
+            case Organization::TYPE_SUPPLIER:
+                $this->layout = 'main-vendor';
+                break;
+        }
     }
 
-    public function beforeAction($action) {
+    public function beforeAction($action)
+    {
         if (Yii::$app->request->get("token")) {
-            $token = Yii::$app->request->get("token");
+            $token    = Yii::$app->request->get("token");
             $order_id = Yii::$app->request->get("id");
-            $order = \common\models\Order::findOne(['id' => $order_id]);
-            $user = \common\models\User::findOne(['access_token' => $token]);
-            $organization = (isset($order) && isset($user)) ? $order->getOrganizationByUser($user) : null;
-            if ($user && isset($order) && isset($organization)) {
-                Yii::$app->user->logout();
-                Yii::$app->user->login($user, 0);
-                (new \api_web\classes\UserWebApi())->setOrganization(['organization_id' => $organization->id]);
-                Yii::$app->user->identity->refresh();
-                $this->loadCurrentUser();
-                $this->setLayout($organization->type_id);
+            $order    = \common\models\Order::findOne(['id' => $order_id]);
+
+            $data = explode('.', $token);
+
+            if (count($data) != 3) {
+                //TODO: remove legacy shit
+                $user         = \common\models\User::findOne(['access_token' => $token]);
+                $organization = (isset($order) && isset($user)) ? $order->getOrganizationByUser($user) : null;
+                if ($user && isset($order) && isset($organization)) {
+                    $user         = \common\models\User::findOne(['access_token' => $token]);
+                    $organization = (isset($order) && isset($user)) ? $order->getOrganizationByUser($user) : null;
+                    Yii::$app->user->logout();
+                    Yii::$app->user->login($user, 0);
+                    (new \api_web\classes\UserWebApi())->setOrganization(['organization_id' => $organization->id ?? null]);
+                    Yii::$app->user->identity->refresh();
+                    $this->loadCurrentUser();
+                    $this->setLayout($this->currentUser->organization->type_id);
+                }
+            } else {
+
+                $jwtToken = Yii::$app->jwt->getParser()->parse((string) $token);
+
+//            $user = \common\models\User::findOne(['access_token' => $token]);
+//            $organization = (isset($order) && isset($user)) ? $order->getOrganizationByUser($user) : null;
+//            if ($user && isset($order) && isset($organization)) {
+                $user = User::getByJWTToken(Yii::$app->jwt, $jwtToken);
+                if (isset($user)) {
+                    $organization = (isset($order) && isset($user)) ? $order->getOrganizationByUser($user) : null;
+                    Yii::$app->user->logout();
+                    Yii::$app->user->login($user, 0);
+                    if (isset($organization)) {
+                        (new \api_web\classes\UserWebApi())->setOrganization(['organization_id' => $organization->id]);
+                    }
+                    Yii::$app->user->identity->refresh();
+                    $this->loadCurrentUser();
+                    $this->setLayout($this->currentUser->organization->type_id);
+                }
             }
         } elseif (!Yii::$app->user->isGuest) {
             $this->loadCurrentUser();
             $this->currentUser->update();
             $organization = $this->currentUser->organization;
-            if(!$organization){
-                throw new \yii\web\HttpException(403, Yii::t('error', 'frontend.controllers.def.access_denied', ['ru'=>'Доступ запрещен']));
+            if (!$organization) {
+                throw new \yii\web\HttpException(403, Yii::t('error', 'frontend.controllers.def.access_denied', ['ru' => 'Доступ запрещен']));
             }
             if ($organization->type_id == Organization::TYPE_RESTAURANT) {
                 $this->view->params['orders'] = $organization->getCart();
@@ -70,7 +101,7 @@ class DefaultController extends Controller {
 //                $this->redirectIfNotHome($organization);
 //            }
             if (($this->currentUser->status === \common\models\User::STATUS_UNCONFIRMED_EMAIL) && (Yii::$app->controller->id != 'order')) {
-                throw new \yii\web\HttpException(403, Yii::t('error', 'frontend.controllers.def.access_denied_two', ['ru'=>'Доступ запрещен']));
+                throw new \yii\web\HttpException(403, Yii::t('error', 'frontend.controllers.def.access_denied_two', ['ru' => 'Доступ запрещен']));
             }
         }
         if (!parent::beforeAction($action)) {
@@ -78,11 +109,13 @@ class DefaultController extends Controller {
         }
         return true;
     }
-    
-    private function redirectIfNotHome($organization) { 
+
+    private function redirectIfNotHome($organization)
+    {
         $organizationHome = ($organization->type_id == Organization::TYPE_RESTAURANT) ? 'client' : 'vendor';
         if (Yii::$app->controller->id != $organizationHome || Yii::$app->controller->action->id != 'index') {
-            return $this->redirect(['/'.$organizationHome.'/index']);
+            return $this->redirect(['/' . $organizationHome . '/index']);
         }
     }
+
 }

@@ -64,6 +64,7 @@ class IikoAgentSync extends IikoSyncConsumer implements ConsumerInterface
 
     /**
      * Синхронизация контрагентов
+     *
      * @return int
      * @throws ValidationException
      */
@@ -90,8 +91,7 @@ class IikoAgentSync extends IikoSyncConsumer implements ConsumerInterface
             }
         }
         //Обновляем колличество полученных объектов
-        return OuterAgent::find()->where(['is_deleted' => 0, 'org_id' => $this->orgId])->count();
+        return OuterAgent::find()->where(['is_deleted' => 0, 'org_id' => $this->orgId, 'service_id' => self::SERVICE_ID])->count();
     }
-
 
 }

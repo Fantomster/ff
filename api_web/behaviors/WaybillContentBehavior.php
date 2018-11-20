@@ -21,8 +21,9 @@ class WaybillContentBehavior extends Behavior
     {
         return [
             //Пересчет стоимости заказа
-            ActiveRecord::EVENT_AFTER_INSERT => 'recalculateOrderTotalPrice',
             ActiveRecord::EVENT_AFTER_DELETE => 'recalculateOrderTotalPrice',
+            //Пересчет стоимости заказа и обновление статуса
+            ActiveRecord::EVENT_AFTER_INSERT => 'afterUpdate',
             ActiveRecord::EVENT_AFTER_UPDATE => 'afterUpdate'
         ];
     }
@@ -77,6 +78,15 @@ class WaybillContentBehavior extends Behavior
      */
     private function changeStatusWaybill($event)
     {
+        //Если нет агента в накладной, нечего там проверять
+        if (empty($this->model->waybill->outer_agent_id)) {
+            return true;
+        }
+        //Если нет номера накладной
+        if (empty($this->model->waybill->outer_number_code)) {
+            return true;
+        }
+
         $contents = $this->model->waybill->waybillContents;
         /** @var \common\models\WaybillContent $waybillContent */
         //Проверяем все позиции накладной, что они готовы к выгрузке

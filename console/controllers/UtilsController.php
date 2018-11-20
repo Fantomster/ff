@@ -9,6 +9,10 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentsChangeList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\Products;
 use yii\console\Controller;
+use yii\helpers\ArrayHelper;
+use common\models\Catalog;
+use common\models\CatalogGoods;
+use common\models\CatalogBaseGoods;
 
 class UtilsController extends Controller
 {
@@ -270,9 +274,9 @@ class UtilsController extends Controller
     {
         $product = new Products();
         $all_count = VetisProductItem::find()->count();
-        echo "Update ".$all_count." rows".PHP_EOL;
+        echo "Update " . $all_count . " rows" . PHP_EOL;
         $offset = 0;
-        $i=0;
+        $i = 0;
 
         do {
             $query = (new \yii\db\Query())
@@ -285,9 +289,9 @@ class UtilsController extends Controller
                 ->offset($offset)
                 ->indexBy('uuid');
 
-            echo "start SQL".PHP_EOL;
+            echo "start SQL" . PHP_EOL;
             $rows = $query->all(\Yii::$app->get('db_api'));
-            echo "end SQL".PHP_EOL;
+            echo "end SQL" . PHP_EOL;
             $this->vetisWork($rows, $i, $all_count);
             $offset += $count;
         } while ($i < $all_count);
@@ -306,14 +310,14 @@ class UtilsController extends Controller
             $dataPackaging = (unserialize($row['data']))->packaging;
             if (isset($dataPackaging)) {
                 $params = ['packagingType_guid' => isset($dataPackaging->packagingType->guid) ? $dataPackaging->packagingType->guid : null,
-                    'packagingType_uuid' => isset($dataPackaging->packagingType->uuid) ? $dataPackaging->packagingType->uuid : null,
-                    'unit_uuid' => isset($dataPackaging->unit->uuid) ? $dataPackaging->unit->uuid : null,
-                    'unit_guid' => isset($dataPackaging->unit->guid) ? $dataPackaging->unit->guid : null,
-                    'packagingQuantity' => isset($dataPackaging->quantity) ? $dataPackaging->quantity : null,
-                    'packagingVolume' => isset($dataPackaging->volumne) ? $dataPackaging->volumne : null
+                           'packagingType_uuid' => isset($dataPackaging->packagingType->uuid) ? $dataPackaging->packagingType->uuid : null,
+                           'unit_uuid'          => isset($dataPackaging->unit->uuid) ? $dataPackaging->unit->uuid : null,
+                           'unit_guid'          => isset($dataPackaging->unit->guid) ? $dataPackaging->unit->guid : null,
+                           'packagingQuantity'  => isset($dataPackaging->quantity) ? $dataPackaging->quantity : null,
+                           'packagingVolume'    => isset($dataPackaging->volumne) ? $dataPackaging->volumne : null
                 ];
                 $arWhere['uuid'] = $row['uuid'];
-                (new \yii\db\Query())->createCommand(\Yii::$app->db_api)->update(VetisProductItem::tableName(),$params, $arWhere)->execute();
+                (new \yii\db\Query())->createCommand(\Yii::$app->db_api)->update(VetisProductItem::tableName(), $params, $arWhere)->execute();
             }
             echo $i . "/" . $all_count . PHP_EOL;
         }
@@ -323,9 +327,9 @@ class UtilsController extends Controller
     {
         $mercury = new Mercury();
         $all_count = MercVsd::find()->count();
-        echo "Update ".$all_count." rows".PHP_EOL;
+        echo "Update " . $all_count . " rows" . PHP_EOL;
         $offset = 0;
-        $i=0;
+        $i = 0;
 
         do {
             $query = (new \yii\db\Query())
@@ -338,9 +342,9 @@ class UtilsController extends Controller
                 ->offset($offset)
                 ->indexBy('uuid');
 
-            echo "start SQL".PHP_EOL;
+            echo "start SQL" . PHP_EOL;
             $rows = $query->all(\Yii::$app->get('db_api'));
-            echo "end SQL".PHP_EOL;
+            echo "end SQL" . PHP_EOL;
             $this->mercVSDWork($rows, $i, $all_count);
             $offset += $count;
         } while ($i < $all_count);
@@ -361,6 +365,35 @@ class UtilsController extends Controller
             $doc = (unserialize($row['raw_data']));
             $vsd->updateDocumentsList($doc);
             echo $i . "/" . $all_count . PHP_EOL;
+        }
+    }
+
+    public function actionCopyBaseCatalogs()
+    {
+        {
+            $array_catalogs = Catalog::find()->where(['type' => 1])->all();
+            $array_1 = ArrayHelper::getColumn($array_catalogs, 'id');
+            unset($array_catalogs);
+            foreach ($array_1 as $cat) {
+                $products = CatalogBaseGoods::find()->where(['cat_id' => $cat])->andWhere(['deleted' => 0])->all();
+                $transaction = \Yii::$app->db->beginTransaction();
+                /** @var CatalogBaseGoods $product */
+                foreach ($products as $product) {
+                    $result = CatalogGoods::find()->where(['base_goods_id' => $product->id])->exists();
+                    if ($result === false) {
+                        $row = new CatalogGoods;
+                        $row->cat_id = $product->cat_id;
+                        $row->base_goods_id = $product->id;
+                        $row->price = $product->price;
+                        $row->vat = null;
+                        if (!$row->save()) {
+                            $transaction->rollBack();
+                            throw new \Exception('Не удалось сохранить для каталога ' . $product->cat_id . ' в таблице catalog_goods новую запись из catalog_base_goods ' . $product->id);
+                        }
+                    }
+                }
+                $transaction->commit();
+            }
         }
     }
 }

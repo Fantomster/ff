@@ -76,32 +76,9 @@ class WaybillContentBehavior extends Behavior
      * @param $event
      * @return bool
      */
-    private function changeStatusWaybill($event)
+    public function changeStatusWaybill($event)
     {
         //Если нет агента в накладной, нечего там проверять
-        if (empty($this->model->waybill->outer_agent_id)) {
-            return true;
-        }
-        //Если нет номера накладной
-        if (empty($this->model->waybill->outer_number_code)) {
-            return true;
-        }
-
-        $contents = $this->model->waybill->waybillContents;
-        /** @var \common\models\WaybillContent $waybillContent */
-        //Проверяем все позиции накладной, что они готовы к выгрузке
-        //Если хоть одна не готова, статус не меняем
-        foreach ($contents as $waybillContent) {
-            if ($waybillContent->readyToExport === false) {
-                return true;
-            }
-        }
-        //Если дошли сюда
-        //И накладная в статусе "Cформирована" или "Сброшена"
-        if (in_array($this->model->waybill->status_id, [Registry::WAYBILL_FORMED, Registry::WAYBILL_RESET])) {
-            //то ставим статус накладной "Сопоставлена"
-            $this->model->waybill->status_id = Registry::WAYBILL_COMPARED;
-            return $this->model->waybill->save();
-        }
+        return $this->model->waybill->changeStatusToCompared();
     }
 }

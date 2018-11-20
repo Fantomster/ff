@@ -568,6 +568,17 @@ class ServiceRkws extends AbstractSyncFactory
     public function callbackData(OuterTask $task, string $data = null)
     {
         $orgDic = $this->getOrganizationDictionary($task->service_id, $task->org_id);
+
+        try {
+            $this->checkErrorResponse((array)simplexml_load_string($data));
+        } catch (\Exception $e) {
+            SyncLog::trace('ERROR RK: ' . $e->getMessage());
+            $orgDic->status_id = $orgDic::STATUS_ERROR;
+            $orgDic->save();
+            $orgDic->noticeToFCM();
+            return self::XML_LOAD_RESULT_FAULT;
+        }
+
         # 2. Получаем массив входящих данных
         $arrayNew = $this->parsingXml($data);
         # 3. Таблица справочника

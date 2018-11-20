@@ -113,13 +113,12 @@ class OrganizationDictionary extends ActiveRecord
         return $this->save();
     }
 
-
     /**
      * send to FCM when consumer complete work
      * */
     public function noticeToFCM(): void
     {
-        $consumerName =  Integration::$service_map[$this->outerDic->service_id] . ucfirst($this->outerDic->name) . 'Sync';
+        $consumerName = Integration::$service_map[$this->outerDic->service_id] . ucfirst($this->outerDic->name) . 'Sync';
         $consumerFullName = 'console\modules\daemons\classes\\' . $consumerName;
         $queueName = $consumerName . '_' . $this->org_id;
         $arFB = [
@@ -134,6 +133,7 @@ class OrganizationDictionary extends ActiveRecord
             'last_executed'  => $lastExec->format('Y-m-d H:i:s'),
             'plain_executed' => date('Y-m-d H:i:s', $plainExec),
             'status_text'    => \Yii::t('api_web', $this->statusText),
+            'status_id'      => $this->status_id,
             'count'          => \Yii::$app->get('rabbit')->setQueue($queueName)->checkQueueCount(),
         ]);
     }

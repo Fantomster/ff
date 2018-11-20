@@ -648,12 +648,16 @@ class OrderWebApi extends \api_web\components\WebApi
                     'create_user'       => $model->createdByProfile->full_name ?? '',
                     'accept_user'       => $model->acceptedByProfile->full_name ?? '',
                     'count_position'    => count($model->orderContent),
-                    'total_price'       => round($model->total_price, 2) ?? 0
+                    'total_price'       => round($model->total_price, 2) ?? 0,
+                    'edi_number'        => []
                 ];
                 if (!empty($model->orderContent)) {
                     $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
                         return $el->edi_number;
                     }, $model->orderContent)));
+                    if (!empty($arWaybillNames)) {
+                        $orderInfo['edi_number'] = $arWaybillNames;
+                    }
                     $orderInfo = array_merge($orderInfo, ['edi_number' => $arWaybillNames]);
                 }
                 $orders[] = $orderInfo;

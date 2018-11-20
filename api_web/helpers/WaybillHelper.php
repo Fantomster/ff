@@ -119,12 +119,13 @@ class WaybillHelper
             //Склад по умолчанию, у контрагента
             $defaultStoreAgent = null;
             if ($supplierOrgId) {
-                $agent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
-                if ($agent && !empty($agent->store_id)) {
-                    $defaultStoreAgent = $agent->store_id;
-                }
+                $vendorId = $supplierOrgId;
             } else {
-                $agent = OuterAgent::findOne(['vendor_id' => $order->vendor_id, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
+                $vendorId = $order->vendor_id;
+            }
+            $agent = OuterAgent::findOne(['vendor_id' => $vendorId, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
+            if ($agent && !empty($agent->store_id)) {
+                $defaultStoreAgent = $agent->store_id;
             }
             //Склад по умолчанию в настройках
             $defaultStoreConfig = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id, ['defStore']);
@@ -422,8 +423,8 @@ class WaybillHelper
     }
 
     /**
-     * @param $arOuterStoreProducts
-     * @param int $serviceId
+     * @param      $arOuterStoreProducts
+     * @param int  $serviceId
      * @param bool $onlyByOrderId
      * @return int|mixed|string
      */
@@ -432,7 +433,7 @@ class WaybillHelper
         /**@var OrderContent $orderContent */
         $orderContent = current($arOuterStoreProducts)['orderContent'];
         $tmp_ed_num = $orderContent->order_id;
-        $waybillSearchField =  $onlyByOrderId ? 'outer_number_additional' : 'outer_number_code';
+        $waybillSearchField = $onlyByOrderId ? 'outer_number_additional' : 'outer_number_code';
         if ($orderContent->edi_number && !$onlyByOrderId) {
             $tmp_ed_num = $orderContent->edi_number;
         }

@@ -344,13 +344,12 @@ class EDIClass extends Component
         } else {
             $relationCatalogID = $rel->cat_id;
             $cat = Catalog::findOne(['id' => $relationCatalogID]);
-            if (!$rel->cat_id || $cat->type == Catalog::BASE_CATALOG) {
+            if (!$relationCatalogID || $cat->type == Catalog::BASE_CATALOG) {
                 $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
                 $rel->cat_id = $relationCatalogID;
                 $rel->status = Catalog::STATUS_ON;
                 $rel->save();
             }
-            $relationCatalogID = $rel->cat_id;
         }
         foreach ($goodsArray as $barcode => $good) {
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);

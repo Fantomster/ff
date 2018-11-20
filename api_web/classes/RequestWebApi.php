@@ -599,7 +599,6 @@ class RequestWebApi extends WebApi
             "client"     => WebApiHelper::prepareOrganization($model->request->client),
             "vendor"     => WebApiHelper::prepareOrganization($model->organization),
             "price"      => $model->price,
-            "hits"       => (int)$model->request->hits ?? 0,
             "comment"    => $model->comment,
             "created_at" => \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:mm:ss'),
             "updated_at" => \Yii::$app->formatter->asDate($model->updated_at, 'dd.MM.yyyy HH:mm:ss'),

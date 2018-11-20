@@ -15,11 +15,11 @@ use console\modules\daemons\components\IikoSyncConsumer;
 use api_web\helpers\iikoApi;
 
 /**
- * Class IikoProductsSync
+ * Class IikoProductSync
  *
  * @package console\modules\daemons\classes
  */
-class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
+class IikoProductSync extends IikoSyncConsumer implements ConsumerInterface
 {
     /**@var array $items */
     private $items;

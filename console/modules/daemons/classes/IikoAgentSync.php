@@ -66,7 +66,7 @@ class IikoAgentSync extends IikoSyncConsumer implements ConsumerInterface
      * Синхронизация контрагентов
      *
      * @return int
-     * @throws ValidationException
+     * @throws ValidationException|\Exception
      */
     protected function agent()
     {

@@ -13,7 +13,9 @@
 
 namespace common\models;
 
+use api_web\components\FireBase;
 use api_web\components\Registry;
+use api_web\modules\integration\classes\Integration;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
@@ -111,11 +113,38 @@ class OrganizationDictionary extends ActiveRecord
         return $this->save();
     }
 
+
+    /**
+     * send to FCM when consumer complete work
+     * */
+    public function noticeToFCM(): void
+    {
+        $consumerName =  Integration::$service_map[$this->outerDic->service_id] . ucfirst($this->outerDic->name) . 'Sync';
+        $consumerFullName = 'console\modules\daemons\classes\\' . $consumerName;
+        $queueName = $consumerName . '_' . $this->org_id;
+        $arFB = [
+            'dictionaries',
+            'queue' => $queueName,
+        ];
+
+        $lastExec = $this->updated_at;
+        $lastTimeout = new \DateTime($lastExec);
+        $plainExec = $lastTimeout->getTimestamp() + $consumerFullName::$timeout;
+
+        FireBase::getInstance()->update($arFB, [
+            'last_executed'  => $lastExec,
+            'plain_executed' => date('Y-m-d H:i:s', $plainExec),
+            'status_text'    => $this->statusText,
+            'count'          => \Yii::$app->get('rabbit')->setQueue($queueName)->checkQueueCount(),
+        ]);
+    }
+
     /**
      * @return bool
      */
     public function errorSync()
     {
+
         $this->status_id = self::STATUS_ERROR;
         $this->updated_at = \gmdate('Y-m-d H:i:s');
         if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID && $this->outerDic->name == 'product') {

@@ -182,6 +182,7 @@ class EmailIntegration2Controller extends Controller
                         ]);
                     }
                 }
+                $this->connect->disconnect();
             } catch (\Throwable $e) {
                 $this->helper->addLog($e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine(), 'auth');
             }

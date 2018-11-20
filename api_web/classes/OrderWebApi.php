@@ -658,7 +658,6 @@ class OrderWebApi extends \api_web\components\WebApi
                     if (!empty($arWaybillNames)) {
                         $orderInfo['edi_number'] = $arWaybillNames;
                     }
-                    $orderInfo = array_merge($orderInfo, ['edi_number' => $arWaybillNames]);
                 }
                 $orders[] = $orderInfo;
             }

@@ -184,6 +184,7 @@ class OrganizationDictionary extends ActiveRecord
         } else {
             $dictionary->errorSync();
         }
+        $dictionary->noticeToFCM();
     }
 
     /**

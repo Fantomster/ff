@@ -693,6 +693,7 @@ class ServiceRkws extends AbstractSyncFactory
             $orgDic->status_id = $orgDic::STATUS_ACTIVE;
             $orgDic->save();
             $transaction->commit();
+            $orgDic->noticeToFCM();
             SyncLog::trace('Number of save counts while there were no errors is ' . $saveCount);
             return self::XML_LOAD_RESULT_SUCCESS;
         }
@@ -702,6 +703,7 @@ class ServiceRkws extends AbstractSyncFactory
         $transaction->rollback();
         $orgDic->status_id = $orgDic::STATUS_ERROR;
         $orgDic->save();
+        $orgDic->noticeToFCM();
         SyncLog::trace('Fixed save errors: ' . json_encode($saveErr));
         return self::XML_LOAD_RESULT_FAULT;
     }

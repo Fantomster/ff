@@ -216,6 +216,7 @@ class Waybill extends \yii\db\ActiveRecord
             'outer_agent_id',
             'outer_store_id',
             'outer_number_code',
+            'outer_number_additional'
         ];
         //Проверяем их в текущей моделе
         foreach ($requireAttributes as $attribute) {
@@ -239,7 +240,7 @@ class Waybill extends \yii\db\ActiveRecord
         if ($this->readyToExport === false) {
             return true;
         }
-
+        //Если в накладной нет позиций, никогда не переведем ее в статус "Сопоставлена"
         $contents = $this->waybillContents;
         if (empty($contents)) {
             return true;

@@ -67,7 +67,7 @@ class ServiceIiko extends AbstractSyncFactory
             }
         } catch (\Throwable $e) {
             \Yii::error($e->getMessage());
-            return ['success' => false, 'message' => $e->getMessage()];
+            return ['success' => false, 'message' => $e->getMessage() . $e->getTraceAsString()];
         }
     }
 

@@ -82,12 +82,14 @@ class IikoSyncConsumer extends AbstractConsumer
                 $dictionary->successSync($count);
                 //Убиваем сессию, а то закончатся на сервере iiko
                 iikoApi::getInstance($this->orgId)->logout();
-                return ['success' => true];
             } catch (\Exception $e) {
                 $dictionary->errorSync();
                 iikoApi::getInstance($this->orgId)->logout();
                 throw $e;
+            } finally {
+                $dictionary->noticeToFCM();
             }
+            return ['success' => true];
         } else {
             throw new BadRequestHttpException('Not found method [iikoSync->' . $model->name . '()]');
         }

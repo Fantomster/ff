@@ -14,6 +14,7 @@ use common\models\vetis\VetisPurpose;
 use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
+use console\modules\daemons\classes\IikoProductSync;
 use console\modules\daemons\classes\MercRussianEnterpriseList;
 use console\modules\daemons\classes\MercStockEntryList;
 use console\modules\daemons\classes\MercStoreEntryList;
@@ -113,7 +114,7 @@ class MercuryCronController extends Controller
 
     public function actionTest3()
     {
-        IikoProductsSync::getUpdateData(5144);
+        IikoProductSync::getUpdateData(5144);
     }
 
     public function actionTestOne()

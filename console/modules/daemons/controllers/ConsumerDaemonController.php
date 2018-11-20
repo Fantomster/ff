@@ -40,8 +40,8 @@ class ConsumerDaemonController extends AbstractDaemonController
                 $this->consumer->getData();
                 $success = $this->consumer->saveData();
                 $this->loggingExecutedTime();
-                $this->noticeToFCM();
             }
+            $this->noticeToFCM();
 
             if ($success) {
                 $this->ask($job);

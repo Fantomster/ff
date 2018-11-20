@@ -670,13 +670,14 @@ class FullmapController extends DefaultController
                     $childProduct = AllMaps::findOne($child_product->id);
                     (is_null($child_product->store_rid)) ? $childProduct->store_rid = null : $childProduct->store_rid = $child_product->store_rid;
                     (is_null($child_product->vat)) ? $childProduct->vat = null : $childProduct->vat = $child_product->vat;
+                    ($child_product->koef == 1) ? $childProduct->koef = $main_product->koef : $childProduct->koef = $child_product->koef;
                 } else {
                     $childProduct = new AllMaps();
                     $childProduct->store_rid = null;
                     $childProduct->vat = $main_product->vat;
+                    $childProduct->koef = $main_product->koef;
                 }
                 $childProduct->service_id = $main_product->service_id;
-                $childProduct->koef = $main_product->koef;
                 $childProduct->org_id = $child->org;
                 $childProduct->product_id = $main_product->product_id;
                 $childProduct->supp_id = $main_product->supp_id;

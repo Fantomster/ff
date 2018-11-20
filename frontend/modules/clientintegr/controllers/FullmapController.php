@@ -250,8 +250,7 @@ class FullmapController extends DefaultController
         $store = Yii::$app->request->post('store');
         $org_id = $this->currentUser->organization->id;
 
-        $product = AllMaps::find()->where('org_id = :org and service_id = :serv and is_active = :active and product_id = :prod',
-                                                    [':org' => $org_id, ':serv' => $service_id, ':active' => 1, ':prod' => $prod_id])->one();
+        $product = AllMaps::find()->where(['org_id' => $org_id, 'service_id' => $service_id, 'is_active' => 1, 'product_id' => $prod_id])->one();
 
         if (!empty($product)) { // Product link already mapped in table
             $product->store_rid = $store;

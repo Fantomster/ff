@@ -67,7 +67,7 @@ class ServiceIiko extends AbstractSyncFactory
             }
         } catch (\Throwable $e) {
             \Yii::error($e->getMessage());
-            return ['success' => false, 'message' => $e->getMessage() . $e->getTraceAsString()];
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
 
@@ -102,6 +102,9 @@ class ServiceIiko extends AbstractSyncFactory
             $api->auth();
             /** @var iikoWaybill $model */
             foreach ($records as $model) {
+                if(empty($model->waybillContents)) {
+                    $this->response($res, $model, \Yii::t('api_web', 'service_iiko.empty_waybill_content'));
+                }
                 if (!in_array($model->status_id, [Registry::WAYBILL_COMPARED, Registry::WAYBILL_ERROR])) {
                     if ($model->status_id == Registry::WAYBILL_UNLOADED) {
                         $this->response($res, $model, \Yii::t('api_web', 'service_iiko.already_success_unloading_waybill'));

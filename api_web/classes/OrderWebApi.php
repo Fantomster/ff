@@ -648,15 +648,15 @@ class OrderWebApi extends \api_web\components\WebApi
                     'create_user'       => $model->createdByProfile->full_name ?? '',
                     'accept_user'       => $model->acceptedByProfile->full_name ?? '',
                     'count_position'    => count($model->orderContent),
-                    'total_price'       => round($model->total_price, 2) ?? 0
+                    'total_price'       => round($model->total_price, 2) ?? 0,
+                    'edi_number'        => []
                 ];
-                if ($model->service_id == Registry::EDI_SERVICE_ID) {
-                    if (!empty($model->orderContent)) {
-                        $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
-                            return $el->edi_number;
-                        }, $model->orderContent)));
-                        $orderInfo = array_merge($orderInfo, ['edi_number' => $arWaybillNames]);
-                    }
+                if (!empty($model->orderContent)) {
+                    array_map(function (OrderContent $el) use ($orderInfo) {
+                        if(!empty($el->edi_number) && !in_array($el->edi_number, $orderInfo['edi_number'])) {
+                            $orderInfo['edi_number'][] = $el->edi_number;
+                        }
+                    }, $model->orderContent);
                 }
                 $orders[] = $orderInfo;
             }

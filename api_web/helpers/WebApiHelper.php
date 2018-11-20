@@ -61,7 +61,7 @@ class WebApiHelper
      * @param array $needle_array
      * @return bool
      */
-    private static function checkDateAttribute($string, $needle_array = ['_at', '_date', 'date_'])
+    private static function checkDateAttribute($string, $needle_array = ['_at', '_date', 'date_', '_delivery'])
     {
         if (is_numeric($string)) {
             return false;

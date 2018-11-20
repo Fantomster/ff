@@ -361,7 +361,7 @@ class OrganizationController extends Controller
 
         $childOrganizations = ArrayHelper::map(Organization::findAll(['parent_id' => $id]), 'id', 'name');
         $organizations = ArrayHelper::merge($organizations, $childOrganizations);
-        $licenses = ArrayHelper::map(License::findAll(['is_active' => true]), 'id', 'name');
+        $licenses = ArrayHelper::map(License::find()->where(['is_active' => true])->orderBy('sort_index')->all(), 'id', 'name');
         if (Yii::$app->request->isPost && !empty(Yii::$app->request->post())) {
             $post = Yii::$app->request->post();
             foreach ($post['organizations'] as $organizationID) {
@@ -382,10 +382,10 @@ class OrganizationController extends Controller
 
         $date = new \DateTime('+10 day');
         $tenDaysAfter = $date->format('Y-m-d H:i:s');
-        $date = new \DateTime('-10 month');
-        $tenDaysBefore = $date->format('Y-m-d H:i:s');
+        $date2 = new \DateTime();
+        $nowDate = $date2->format('Y-m-d H:i:s');
 
-        return $this->render('add-license', ['licenses' => $licenses, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'tenDaysBefore' => $tenDaysBefore]);
+        return $this->render('add-license', ['licenses' => $licenses, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'nowDate' => $nowDate]);
     }
 
     public function actionAjaxUpdateLicenseOrganization()
@@ -395,7 +395,7 @@ class OrganizationController extends Controller
             $priceInputValue = Yii::$app->request->post('priceInputValue');
             $isDeletedValue = Yii::$app->request->post('isDeletedValue');
             $licenseOrganization = LicenseOrganization::findOne(['id' => $licenseOrgId]);
-            if($licenseOrganization) {
+            if ($licenseOrganization) {
                 $licenseOrganization->price = (float)$priceInputValue;
                 $licenseOrganization->is_deleted = ($isDeletedValue == 'true') ? 1 : 0;
                 $licenseOrganization->save();

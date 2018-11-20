@@ -215,8 +215,7 @@ class Waybill extends \yii\db\ActiveRecord
         $requireAttributes = [
             'outer_agent_id',
             'outer_store_id',
-            'outer_number_code',
-            'outer_number_additional'
+            'outer_number_code'
         ];
         //Проверяем их в текущей моделе
         foreach ($requireAttributes as $attribute) {

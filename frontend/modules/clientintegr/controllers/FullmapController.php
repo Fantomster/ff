@@ -123,7 +123,7 @@ class FullmapController extends DefaultController
         }
     }
 
-    public function actionEditpdenom($service_id)
+    /*public function actionEditpdenom($service_id)
     {
         $attr = Yii::$app->request->post('editableAttribute');
         $prod = Yii::$app->request->post('editableKey');
@@ -184,7 +184,7 @@ class FullmapController extends DefaultController
         //if ($rk_product==='') $res->prod='пусто';
         //if ($rk_product===null) $res->prod='нуль';
         return Json::encode(['output' => $res, 'message' => '']);
-    }
+    }*/
 
     public function actionEditkoef($service_id)
     {
@@ -250,10 +250,8 @@ class FullmapController extends DefaultController
         $store = Yii::$app->request->post('store');
         $org_id = $this->currentUser->organization->id;
 
-        $product = AllMaps::find()->andWhere('org_id = :org', [':org' => $org_id])
-            ->andWhere('service_id = :serv', [':serv' => $service_id])
-            ->andWhere('is_active = :active', [':active' => 1])
-            ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
+        $product = AllMaps::find()->where('org_id = :org and service_id = :serv and is_active = :active and product_id = :prod',
+                                                    [':org' => $org_id, ':serv' => $service_id, ':active' => 1, ':prod' => $prod_id])->one();
 
         if (!empty($product)) { // Product link already mapped in table
             $product->store_rid = $store;

@@ -250,32 +250,32 @@ class FullmapController extends DefaultController
         $store = Yii::$app->request->post('store');
         $org_id = $this->currentUser->organization->id;
 
-        $Product = AllMaps::find()->andWhere('org_id = :org', [':org' => $org_id])
+        $product = AllMaps::find()->andWhere('org_id = :org', [':org' => $org_id])
             ->andWhere('service_id = :serv', [':serv' => $service_id])
             ->andWhere('is_active = :active', [':active' => 1])
             ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
 
-        if (!empty($Product)) { // Product link already mapped in table
-            $Product->store_rid = $store;
+        if (!empty($product)) { // Product link already mapped in table
+            $product->store_rid = $store;
 
-            if (!$Product->save()) {
+            if (!$product->save()) {
                 throw new \RuntimeException('Cant update allmaps table.');
             }
         } else { // New link for mapping creation
-            $Product = new AllMaps();
+            $product = new AllMaps();
 
-            $Product->service_id = $service_id;
-            $Product->org_id = $org_id;
-            $Product->product_id = $prod_id;
-            $Product->supp_id = CatalogBaseGoods::getSuppById($Product->product_id);
-            $Product->is_active = 1;
-            $Product->store_rid = $store;
+            $product->service_id = $service_id;
+            $product->org_id = $org_id;
+            $product->product_id = $prod_id;
+            $product->supp_id = CatalogBaseGoods::getSuppById($product->product_id);
+            $product->is_active = 1;
+            $product->store_rid = $store;
 
-            if (!$Product->save()) {
+            if (!$product->save()) {
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
         }
-        $res = $Product->store;
+        $res = $product->store;
 
         switch ($service_id) {
             case Registry::RK_SERVICE_ID :
@@ -302,7 +302,7 @@ class FullmapController extends DefaultController
         $vat = Yii::$app->request->post('vat');
         $service_id = Yii::$app->request->post('service_id');
         $org_id = $this->currentUser->organization->id;
-        $Product = AllMaps::find()->andWhere('org_id = :org', [':org' => $org_id])
+        $product = AllMaps::find()->andWhere('org_id = :org', [':org' => $org_id])
             ->andWhere('service_id = :serv', [':serv' => $service_id])
             ->andWhere('is_active = :active', [':active' => 1])
             ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();

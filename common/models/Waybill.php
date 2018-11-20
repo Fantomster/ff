@@ -241,6 +241,9 @@ class Waybill extends \yii\db\ActiveRecord
         }
 
         $contents = $this->waybillContents;
+        if (empty($contents)) {
+            return true;
+        }
         /** @var \common\models\WaybillContent $waybillContent */
         //Проверяем все позиции накладной, что они готовы к выгрузке
         //Если хоть одна не готова, статус не меняем

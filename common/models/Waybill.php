@@ -221,7 +221,7 @@ class Waybill extends \yii\db\ActiveRecord
         foreach ($requireAttributes as $attribute) {
             $value = $this->getAttribute($attribute);
             //Если хоть какое то значение не задано, возвращаем false
-            if (is_null($value)) {
+            if (is_null($value) or empty($value)) {
                 return false;
             }
         }

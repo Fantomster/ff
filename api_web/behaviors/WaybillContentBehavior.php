@@ -78,6 +78,15 @@ class WaybillContentBehavior extends Behavior
      */
     private function changeStatusWaybill($event)
     {
+        //Если нет агента в накладной, нечего там проверять
+        if (empty($this->model->waybill->outer_agent_id)) {
+            return true;
+        }
+        //Если нет номера накладной
+        if (empty($this->model->waybill->outer_number_code)) {
+            return true;
+        }
+
         $contents = $this->model->waybill->waybillContents;
         /** @var \common\models\WaybillContent $waybillContent */
         //Проверяем все позиции накладной, что они готовы к выгрузке

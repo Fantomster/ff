@@ -148,7 +148,8 @@ class OrganizationDictionary extends ActiveRecord
                 'service_id' => Registry::IIKO_SERVICE_ID,
                 'is_deleted' => 0
             ])->count();
-            $dictionary->count = $count;
+            $dictionary->status_id = $status;
+            $dictionary->count = (int)$count;
             $dictionary->updated_at = \gmdate('Y-m-d H:i:s');
             $dictionary->save();
         } else {

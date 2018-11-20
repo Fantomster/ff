@@ -362,6 +362,7 @@ class OrganizationController extends Controller
         $childOrganizations = ArrayHelper::map(Organization::findAll(['parent_id' => $id]), 'id', 'name');
         $organizations = ArrayHelper::merge($organizations, $childOrganizations);
         $licenses = ArrayHelper::map(License::findAll(['is_active' => true]), 'id', 'name');
+        dd(count($licenses));
         if (Yii::$app->request->isPost && !empty(Yii::$app->request->post())) {
             $post = Yii::$app->request->post();
             foreach ($post['organizations'] as $organizationID) {

@@ -65,13 +65,20 @@ class VsdHttp extends \yii\base\Component
 
     private function auth()
     {
+        //TODO: переписать нахуй все
         $step0 = $this->getPage($this->authLink, false);
 
         $step1 = $this->getPage($step0['redirect_url'], true, $step0['cookies']);
+        
+        $client = new \GuzzleHttp\Client();
+        $res0 = $client->request('GET', $this->authLink, ['decode_content' => false]);
 
         $srv_id = explode(";", $step0['cookies'])[0] . ";";
 
-        $data = \darkdrim\simplehtmldom\SimpleHTMLDom::str_get_html($step1['content']);
+        //$headers = $res0->getHeaders();
+        $body = (string) $res0->getBody();
+//        $data = \darkdrim\simplehtmldom\SimpleHTMLDom::str_get_html($step1['content']);
+        $data = \darkdrim\simplehtmldom\SimpleHTMLDom::str_get_html($body);
 
         $forms = $data->find('form');
 
@@ -121,7 +128,7 @@ class VsdHttp extends \yii\base\Component
             CURLOPT_RETURNTRANSFER => true, // return web page
             CURLOPT_HEADER => true, //return headers in addition to content
             CURLOPT_FOLLOWLOCATION => $follow, // follow redirects
-            CURLOPT_ENCODING => "", // handle all encodings
+            CURLOPT_ENCODING => "identity", // handle all encodings
             CURLOPT_AUTOREFERER => true, // set referer on redirect
             CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
             CURLOPT_TIMEOUT => 120, // timeout on response
@@ -130,7 +137,7 @@ class VsdHttp extends \yii\base\Component
             CURLOPT_SSL_VERIFYPEER => true, // Validate SSL Certificates
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_COOKIE => $cookiesIn,
-            CURLOPT_HTTPHEADER => ['User-Agent: Mozilla/5.0 (X11; Ubuntu; Linu…) Gecko/20100101 Firefox/61.0'],
+            CURLOPT_HTTPHEADER => ['User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0'],
         );
 
         $ch = curl_init($url);

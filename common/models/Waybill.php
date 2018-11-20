@@ -241,8 +241,7 @@ class Waybill extends \yii\db\ActiveRecord
             //Если накладная была сопоставлена, но стала не готова к выгрузке
             //Меняем статус на сформирована
             if ($this->status_id == Registry::WAYBILL_COMPARED) {
-                $this->status_id = Registry::WAYBILL_FORMED;
-                $this->save(false);
+                $this->changeStatusToFormed();
             }
             return true;
         }
@@ -254,10 +253,19 @@ class Waybill extends \yii\db\ActiveRecord
         /** @var \common\models\WaybillContent $waybillContent */
         //Проверяем все позиции накладной, что они готовы к выгрузке
         //Если хоть одна не готова, статус не меняем
+        $waybillContentCompared = true;
         foreach ($contents as $waybillContent) {
             if ($waybillContent->readyToExport === false) {
-                return true;
+                $waybillContentCompared = false;
+                break;
             }
+        }
+
+        if ($waybillContentCompared === false) {
+            if ($this->status_id == Registry::WAYBILL_COMPARED) {
+                $this->changeStatusToFormed();
+            }
+            return true;
         }
         //Если дошли сюда
         //И накладная в статусе "Cформирована" или "Сброшена"
@@ -266,5 +274,14 @@ class Waybill extends \yii\db\ActiveRecord
             $this->status_id = Registry::WAYBILL_COMPARED;
             return $this->save(false);
         }
+    }
+
+    /**
+     * @return bool
+     */
+    private function changeStatusToFormed()
+    {
+        $this->status_id = Registry::WAYBILL_FORMED;
+        return $this->save(false);
     }
 }

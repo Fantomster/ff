@@ -424,8 +424,8 @@ class DocumentWebApi extends \api_web\components\WebApi
                          a.created_at                                           order_date
                        FROM `order` a
                          JOIN order_content b ON b.order_id = a.id
-                         LEFT JOIN `$apiShema`.waybill_content c ON c.order_content_id = b.id
-                         JOIN `$apiShema`.waybill d ON d.id = c.waybill_id AND d.service_id = :service_id
+                         LEFT JOIN `$apiShema`.waybill_content c ON c.order_content_id = b.id and c.id in (select id from `$apiShema`.waybill where service_id = 2)
+                         LEFT JOIN `$apiShema`.waybill d ON d.id = c.waybill_id AND d.service_id = :service_id
                        WHERE a.client_id = :business_id
                      ) dat
                   LEFT JOIN `$apiShema`.outer_agent oav ON oav.org_id = :business_id AND oav.service_id = :service_id AND
@@ -447,7 +447,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         } else {
             $sql .= ' ORDER BY sort_doc DESC, order_id, sort_waybill desc, waybill_id';
         }
-        
+
         $dataProvider = new SqlDataProvider([
             'sql'        => $sql,
             'params'     => $params_sql,

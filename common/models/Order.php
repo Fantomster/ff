@@ -58,6 +58,7 @@ use yii\web\BadRequestHttpException;
  * @property EmailQueue[]       $relatedEmails
  * @property integer            $replaced_order_id
  * @property IntegrationInvoice $invoice
+ * @property array              $ediNumber
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -198,6 +199,7 @@ class Order extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'accepted_by_id']);
     }
 
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -253,6 +255,20 @@ class Order extends \yii\db\ActiveRecord
     {
         return $this->hasMany(OrderContent::className(), ['order_id' => 'id'])->indexBy('id');
     }
+
+    /**
+     * @return array
+     */
+    public function getEdiNumber(): array
+    {
+        if(empty($this->orderContent)) {
+            return [];
+        }
+        return array_values(array_filter(array_unique(array_map(function (OrderContent $oc) {
+            return $oc->edi_number;
+        }, $this->orderContent))));
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery

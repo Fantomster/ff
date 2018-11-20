@@ -128,6 +128,7 @@ class OrganizationDictionary extends ActiveRecord
 
         $lastExec = new \DateTime();
         $plainExec = $lastExec->getTimestamp() + $consumerFullName::$timeout;
+        \Yii::$app->language = $this->org->lang ?? 'ru';
 
         FireBase::getInstance()->update($arFB, [
             'last_executed'  => $lastExec->format('Y-m-d H:i:s'),

@@ -37,7 +37,7 @@ class cerberApi extends baseApi
         catch (\Throwable $e) {
             return false;
         }
-        $list = $response->activityLocationList->location;
+        $list = is_array($response->activityLocationList->location) ? $response->activityLocationList->location : [$response->activityLocationList->location];
         foreach ($list as $item) {
             if($item->enterprise->guid == $enterpriseGuid) {
                 return true;

@@ -133,7 +133,7 @@ class OrganizationDictionary extends ActiveRecord
         FireBase::getInstance()->update($arFB, [
             'last_executed'  => $lastExec->format('Y-m-d H:i:s'),
             'plain_executed' => date('Y-m-d H:i:s', $plainExec),
-            'status_text'    => $this->statusText,
+            'status_text'    => \Yii::t('api_web', $this->statusText),
             'count'          => \Yii::$app->get('rabbit')->setQueue($queueName)->checkQueueCount(),
         ]);
     }

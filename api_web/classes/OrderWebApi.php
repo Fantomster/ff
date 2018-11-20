@@ -653,7 +653,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 ];
                 if (!empty($model->orderContent)) {
                     array_map(function (OrderContent $el) use ($orderInfo) {
-                        if(!empty($el->edi_number) && !in_array($el->edi_number, $orderInfo['edi_number'])) {
+                        if (!empty($el->edi_number) && !in_array($el->edi_number, $orderInfo['edi_number'])) {
                             $orderInfo['edi_number'][] = $el->edi_number;
                         }
                     }, $model->orderContent);
@@ -749,7 +749,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 $searchSupplier = $organizationID;
                 $client = Organization::findOne(['id' => $order->client_id]);
                 $vendors = [$organizationID];
-                $catalogs = $vendors ? $client->getCatalogs(null) : "(0)";
+                $catalogs = $vendors ? $client->getCatalogs(null) : false;
             } else {
                 throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
             }
@@ -757,27 +757,13 @@ class OrderWebApi extends \api_web\components\WebApi
             $searchSupplier = $post['search']['supplier_id'] ?? null;
             $client = $this->user->organization;
             $vendors = $client->getSuppliers('', false);
-            $catalogs = $vendors ? $client->getCatalogs(null) : "(0)";
+            $catalogs = $vendors ? $client->getCatalogs(null) : false;
         }
 
         $searchCategory = $post['search']['category_id'] ?? null;
         $searchPrice = (isset($post['search']['price']) ? $post['search']['price'] : null);
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
-
-        $searchModel = new OrderCatalogSearch();
-
-        $searchModel->client = $client;
-        $searchModel->catalogs = $catalogs;
-
-        /**
-         * @var $dataProvider SqlDataProvider
-         */
-        $searchModel->searchString = $searchString;
-        $searchModel->selectedVendor = $searchSupplier;
-        $searchModel->searchCategory = $searchCategory;
-        $searchModel->searchPrice = $searchPrice;
-        $dataProvider = $searchModel->search(['page' => $page, 'pageSize' => $pageSize]);
 
         //Готовим ответ
         $return = [
@@ -786,54 +772,72 @@ class OrderWebApi extends \api_web\components\WebApi
             'pagination' => [
                 'page'       => $page,
                 'page_size'  => $pageSize,
-                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+                'total_page' => 0,
             ]
         ];
 
-        //Результат
-        if ($sort) {
-            $order = (preg_match('#^-(.+?)$#', $sort) ? SORT_DESC : SORT_ASC);
+        if ($catalogs) {
+            $searchModel = new OrderCatalogSearch();
 
-            $field = str_replace('-', '', $sort);
+            $searchModel->client = $client;
+            $searchModel->catalogs = $catalogs;
 
-            if ($field == 'supplier' || $field == 'supplier_id') {
-                $field = 'name';
+            /**
+             * @var $dataProvider SqlDataProvider
+             */
+            $searchModel->searchString = $searchString;
+            $searchModel->selectedVendor = $searchSupplier;
+            $searchModel->searchCategory = $searchCategory;
+            $searchModel->searchPrice = $searchPrice;
+            $dataProvider = $searchModel->search(['page' => $page, 'pageSize' => $pageSize]);
+            $return['pagination']['total_page'] = ceil($dataProvider->totalCount / $pageSize);
+
+            //Результат
+            if ($sort) {
+                $order = (preg_match('#^-(.+?)$#', $sort) ? SORT_DESC : SORT_ASC);
+
+                $field = str_replace('-', '', $sort);
+
+                if ($field == 'supplier' || $field == 'supplier_id') {
+                    $field = 'name';
+                }
+
+                $dataProvider->sort->defaultOrder = [$field => $order];
+                $return['sort'] = $sort;
             }
 
-            $dataProvider->sort->defaultOrder = [$field => $order];
-            $return['sort'] = $sort;
-        }
+            $result = $dataProvider->getModels();
+            foreach ($result as $model) {
+                $return['products'][] = [
+                    'id'          => (int)$model['id'],
+                    'product_id'  => (int)$model['id'],
+                    'product'     => $model['product'],
+                    'article'     => $model['article'],
+                    'supplier'    => $model['name'],
+                    'supp_org_id' => (int)$model['supp_org_id'],
+                    'cat_id'      => (int)$model['cat_id'],
+                    'category_id' => (int)$model['category_id'],
+                    'price'       => round($model['price'], 2),
+                    'ed'          => $model['ed'],
+                    'units'       => round(($model['units'] ?? 0), 3),
+                    'currency'    => $model['symbol'],
+                    'currency_id' => (int)$model['currency_id'],
+                    'image'       => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
+                    'in_basket'   => $this->container->get('CartWebApi')->countProductInCart($model['id']),
+                    'edi_product' => $model['edi_supplier_article'] > 0 ? true : false,
+                ];
+            }
 
-        $result = $dataProvider->getModels();
-        foreach ($result as $model) {
-            $return['products'][] = [
-                'id'          => (int)$model['id'],
-                'product_id'  => (int)$model['id'],
-                'product'     => $model['product'],
-                'article'     => $model['article'],
-                'supplier'    => $model['name'],
-                'supp_org_id' => (int)$model['supp_org_id'],
-                'cat_id'      => (int)$model['cat_id'],
-                'category_id' => (int)$model['category_id'],
-                'price'       => round($model['price'], 2),
-                'ed'          => $model['ed'],
-                'units'       => round(($model['units'] ?? 0), 3),
-                'currency'    => $model['symbol'],
-                'currency_id' => (int)$model['currency_id'],
-                'image'       => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
-                'in_basket'   => $this->container->get('CartWebApi')->countProductInCart($model['id']),
-                'edi_product' => $model['edi_supplier_article'] > 0 ? true : false,
-            ];
-        }
-
-        /**
-         * @var CatalogBaseGoods $model
-         */
-        if (isset($return['products'][0])) {
-            foreach (array_keys($return['products'][0]) as $key) {
-                $return['headers'][$key] = (new CatalogBaseGoods())->getAttributeLabel($key);
+            /**
+             * @var CatalogBaseGoods $model
+             */
+            if (isset($return['products'][0])) {
+                foreach (array_keys($return['products'][0]) as $key) {
+                    $return['headers'][$key] = (new CatalogBaseGoods())->getAttributeLabel($key);
+                }
             }
         }
+
         return $return;
     }
 

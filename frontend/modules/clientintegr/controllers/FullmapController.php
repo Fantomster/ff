@@ -238,7 +238,7 @@ class FullmapController extends DefaultController
                             $product = new AllMaps();
 
                             $product->service_id = $service_id;
-                            $product->org_id = $child;
+                            $product->org_id = $child->org;
                             $product->product_id = $prod_id;
                             $product->supp_id = CatalogBaseGoods::getSuppById($product->product_id);
                             $product->is_active = 1;

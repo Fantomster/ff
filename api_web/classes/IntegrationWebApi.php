@@ -568,20 +568,18 @@ class IntegrationWebApi extends WebApi
      */
     public function getProductMapList(array $post): array
     {
+        $this->validateRequest($post, ['business_id']);
+
         $page = (!empty($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (!empty($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-        $client = $this->user->organization;
-        //Фильтр по бизнесу
-        if (!empty($post['search']['business_id']) && $post['search']['business_id'] != $this->user->organization_id) {
-            $searchBusiness = (int)$post['search']['business_id'];
-            $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
-            $checkOrg = in_array($searchBusiness, ArrayHelper::map($businessList['result'] ?? [], 'id', 'id')) ?? false;
-            if (!$checkOrg) {
-                return [];
-            } else {
-                $client = \common\models\Organization::findOne($searchBusiness);
-            }
+        $searchBusiness = (int)$post['business_id'];
+        $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
+        $checkOrg = in_array($searchBusiness, ArrayHelper::map($businessList['result'] ?? [], 'id', 'id')) ?? false;
+        if (!$checkOrg) {
+            return [];
+        } else {
+            $client = \common\models\Organization::findOne($searchBusiness);
         }
 
         /** @var SqlDataProvider $dataProvider */
@@ -618,12 +616,11 @@ class IntegrationWebApi extends WebApi
      */
     public function mapUpdate(array $post)
     {
-        $this->validateRequest($post, ['service_id', 'map']);
-
+        $this->validateRequest($post, ['business_id', 'service_id', 'map']);
         $result = [];
         foreach ($post['map'] as $item) {
             try {
-                $this->editProductMap($post['service_id'], $item);
+                $this->editProductMap($post['service_id'], $item, $post['business_id']);
                 $result[$item['product_id']] = ['success' => true];
             } catch (\Exception $e) {
                 $result[$item['product_id']] = ['success' => false, 'error' => \Yii::t('api_web', $e->getMessage())];
@@ -635,17 +632,15 @@ class IntegrationWebApi extends WebApi
     /**
      * Изменение атрибутов сопоставления
      *
-     * @param int $service_id
-     * @param     $request
-     * @throws Exception
-     * @throws ValidationException
+     * @param int  $service_id
+     * @param      $request
+     * @param null $business_id
      */
-    private function editProductMap(int $service_id, $request)
+    private function editProductMap(int $service_id, $request, $business_id = null)
     {
         $this->validateRequest($request, ['product_id']);
-
         //Загружаем данные по базовому и дочерним бизнесам (если бизнес главный)
-        $mapper = new OuterProductMapper($this->user->organization_id, $service_id);
+        $mapper = new OuterProductMapper($business_id, $service_id);
         $mapper->loadRequest($request);
         $mapper->updateChildsMap();
         $mapper->updateModel();

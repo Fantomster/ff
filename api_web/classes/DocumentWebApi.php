@@ -492,6 +492,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                     "doc_date"                => date("Y-m-d H:i:s T", strtotime($model['doc_date'])),
                     "outer_number_code"       => $model['outer_number_code'] ?? null,
                     "outer_number_additional" => $model['outer_number_additional'] ?? null,
+                    "order_acquirer_id"       => $model['order_acquirer_id'],
                     "vendor"                  => (!(isset($model['order_vendor_id']) && isset($model['object_store_name']))) ? null :
                         [
                             "id"    => $model['order_vendor_id'],

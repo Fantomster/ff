@@ -311,14 +311,8 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     {
         $vsdHttp = $this->generateVsdHttp();
         $data = $vsdHttp->getPdfData($uuid);
-        Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
-        header('Content-Disposition: attachment; filename=' . $uuid . 'pdf');
-        header("Content-type:application/pdf");
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: public');
-        flush();
-        echo $data;
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
+        \Yii::$app->response->data = $data;
     }
     
     public function actionCheckAuthData()

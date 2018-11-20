@@ -127,12 +127,11 @@ class OrganizationDictionary extends ActiveRecord
             'queue' => $queueName,
         ];
 
-        $lastExec = $this->updated_at;
-        $lastTimeout = new \DateTime($lastExec);
-        $plainExec = $lastTimeout->getTimestamp() + $consumerFullName::$timeout;
+        $lastExec = new \DateTime();
+        $plainExec = $lastExec->getTimestamp() + $consumerFullName::$timeout;
 
         FireBase::getInstance()->update($arFB, [
-            'last_executed'  => $lastExec,
+            'last_executed'  => date('Y-m-d H:i:s', $lastExec),
             'plain_executed' => date('Y-m-d H:i:s', $plainExec),
             'status_text'    => $this->statusText,
             'count'          => \Yii::$app->get('rabbit')->setQueue($queueName)->checkQueueCount(),

@@ -652,12 +652,11 @@ class OrderWebApi extends \api_web\components\WebApi
                     'edi_number'        => []
                 ];
                 if (!empty($model->orderContent)) {
-                    $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
-                        return $el->edi_number;
-                    }, $model->orderContent)));
-                    if (!empty($arWaybillNames)) {
-                        $orderInfo['edi_number'] = $arWaybillNames;
-                    }
+                    array_map(function (OrderContent $el) use ($orderInfo) {
+                        if(!empty($el->edi_number) && !in_array($el->edi_number, $orderInfo['edi_number'])) {
+                            $orderInfo['edi_number'][] = $el->edi_number;
+                        }
+                    }, $model->orderContent);
                 }
                 $orders[] = $orderInfo;
             }

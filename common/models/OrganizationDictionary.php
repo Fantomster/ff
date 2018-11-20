@@ -127,12 +127,15 @@ class OrganizationDictionary extends ActiveRecord
         ];
 
         $lastExec = new \DateTime();
-        $plainExec = $lastExec->getTimestamp() + $consumerFullName::$timeout;
+        $plainExec = null;
+        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID) {
+            $plainExec = date('Y-m-d H:i:s', $lastExec->getTimestamp() + $consumerFullName::$timeout);
+        }
         \Yii::$app->language = $this->org->lang ?? 'ru';
 
         FireBase::getInstance()->update($arFB, [
             'last_executed'  => $lastExec->format('Y-m-d H:i:s'),
-            'plain_executed' => date('Y-m-d H:i:s', $plainExec),
+            'plain_executed' => $plainExec,
             'status_text'    => $this->statusText,
             'status_id'      => $this->status_id,
             'count'          => \Yii::$app->get('rabbit')->setQueue($queueName)->checkQueueCount(),

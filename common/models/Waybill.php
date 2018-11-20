@@ -238,6 +238,12 @@ class Waybill extends \yii\db\ActiveRecord
     {
         //Если нет агента в накладной, нечего там проверять
         if ($this->readyToExport === false) {
+            //Если накладная была сопоставлена, но стала не готова к выгрузке
+            //Меняем статус на сформирована
+            if ($this->status_id == Registry::WAYBILL_COMPARED) {
+                $this->status_id = Registry::WAYBILL_FORMED;
+                $this->save(false);
+            }
             return true;
         }
         //Если в накладной нет позиций, никогда не переведем ее в статус "Сопоставлена"
@@ -258,7 +264,7 @@ class Waybill extends \yii\db\ActiveRecord
         if (in_array($this->status_id, [Registry::WAYBILL_FORMED, Registry::WAYBILL_RESET])) {
             //то ставим статус накладной "Сопоставлена"
             $this->status_id = Registry::WAYBILL_COMPARED;
-            return $this->save();
+            return $this->save(false);
         }
     }
 }

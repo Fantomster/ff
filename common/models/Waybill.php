@@ -248,6 +248,9 @@ class Waybill extends \yii\db\ActiveRecord
         //Если в накладной нет позиций, никогда не переведем ее в статус "Сопоставлена"
         $contents = $this->waybillContents;
         if (empty($contents)) {
+            if ($this->status_id == Registry::WAYBILL_COMPARED) {
+                $this->changeStatusToFormed();
+            }
             return true;
         }
         /** @var \common\models\WaybillContent $waybillContent */

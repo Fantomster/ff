@@ -140,9 +140,7 @@ class VendorWebApi extends \api_web\components\WebApi
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 if ($check['eventType'] == 5) {
-                    /**
-                     * Создаем нового поставщика и организацию
-                     * */
+//                    Создаем нового поставщика и организацию
                     $user->email = $email;
                     $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
                     $user->status = User::STATUS_UNCONFIRMED_EMAIL;
@@ -176,7 +174,7 @@ class VendorWebApi extends \api_web\components\WebApi
                     $organization->save();
                     $user->setOrganization($organization)->save();
                     $relId = $user->createRelationUserOrganization($user->organization->id, $user->role_id);
-                    if (!ManagerAssociate::find()->where(['manager_id' => $user->id, 'organization_id' => $user->organization->id])->exists()) {
+                    if (!ManagerAssociate::find()->where(['manager_id' => $user->id, 'organization_id' => $this->user->organization->id])->exists()) {
                         $managerAssociate = new ManagerAssociate();
                         $managerAssociate->manager_id = $user->id;
                         $managerAssociate->organization_id = $this->user->organization->id;

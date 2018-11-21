@@ -16,7 +16,7 @@ $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['r
 if ($recipientIsClient) {
     $link = \Yii::$app->urlManagerFrontend->baseUrl . "/client/history/order/" . $order->id;
 } else {
-    $link = \Yii::$app->urlManagerFrontend->baseUrl . "/vendor/order/" . $order->id . "?token=" . $recipient->getJWTToken(\Yii::$app->jwt);
+    $link = \Yii::$app->urlManagerFrontend->baseUrl . "/vendor/order/" . $order->id . "?token=" . $recipient->access_token;//getJWTToken(\Yii::$app->jwt);
 }
 
 ?>

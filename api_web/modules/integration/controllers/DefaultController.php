@@ -98,10 +98,10 @@ class DefaultController extends \api_web\components\WebApiController
      *                  property="request",
      *                  default={
      *                      "service_id": 1,
+     *                      "business_id": 1,
      *                      "search": {
      *                              "product": "Апельсины",
      *                              "vendor": 1,
-     *                              "business_id": 1,
      *                              "product_id": 2,
      *                       },
      *                      "pagination": {
@@ -190,6 +190,7 @@ class DefaultController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
+     *                          "business_id": 1,
      *                          "service_id": 2,
      *                          "map": {
      *                              {

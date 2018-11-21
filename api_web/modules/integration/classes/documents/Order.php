@@ -28,18 +28,9 @@ class Order extends BaseOrder implements DocumentInterface
             return [];
         }
 
-        if (!empty($this->orderContent)) {
-            $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
-                return $el->edi_number;
-            }, $this->orderContent)));
-            if (is_null(reset($arWaybillNames))) {
-                $arWaybillNames = null;
-            }
-        }
-
         $return = [
             "id"                => (int)$this->id,
-            "number"            => $arWaybillNames ?? [],
+            "number"            => $this->ediNumber,
             "type"              => DocumentWebApi::TYPE_ORDER,
             "status_id"         => (int)$this->status,
             "status_text"       => \Yii::t('api_web', 'doc_group.' . $this->getGroupStatus()),

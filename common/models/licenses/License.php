@@ -18,6 +18,7 @@ use yii\web\HttpException;
  * @property int                   $id         Уникальный ID
  * @property string                $name       Наименование лицензии
  * @property int                   $is_active  Флаг активности
+ * @property int                   $sort_index  Индекс сортировки
  * @property int                   $service_id id service
  * @property string                $created_at Дата создания
  * @property string                $updated_at Дата обновления
@@ -48,8 +49,8 @@ class License extends ActiveRecord
     public function rules()
     {
         return [
-            [['is_active', 'service_id', 'login_allowed'], 'integer'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['is_active', 'service_id', 'login_allowed', 'sort_index'], 'integer'],
+            [['created_at', 'updated_at', 'sort_index'], 'safe'],
             [['name'], 'string', 'max' => 255],
         ];
     }
@@ -65,6 +66,7 @@ class License extends ActiveRecord
             'is_active'  => 'Флаг активности',
             'created_at' => 'Дата создания',
             'updated_at' => 'Дата обновления',
+            'sort_index' => 'Индекс сортировки'
         ];
     }
 

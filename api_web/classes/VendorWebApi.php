@@ -16,19 +16,37 @@ use common\models\Catalog;
 use common\models\CatalogTemp;
 use common\models\Organization;
 use common\models\RelationSuppRest;
+use yii\helpers\ArrayHelper;
 use yii\validators\NumberValidator;
 use yii\web\BadRequestHttpException;
 use api_web\helpers\Excel;
 
 /**
  * Class VendorWebApi
+ *
  * @package api_web\classes
  */
 class VendorWebApi extends \api_web\components\WebApi
 {
+    /**
+     * Информация о поставщике
+     *
+     * @param $post
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+    public function get($post)
+    {
+        $this->validateRequest($post, ['vendor_id']);
+        if (!ArrayHelper::keyExists($post['vendor_id'], $this->user->organization->getSuppliers('', false))) {
+            throw new BadRequestHttpException('vendor.you_are_not_working_with_this_supplier');
+        }
+        return WebApiHelper::prepareOrganization(Organization::findOne($post['vendor_id']));
+    }
 
     /**
      * Создание нового поставщика в системе, находясь в аккаунте ресторана
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -47,7 +65,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
             $organization = Organization::findOne(['id' => $vendorID]);
             if (!$organization) {
-                throw new BadRequestHttpException('No such organization');
+                throw new BadRequestHttpException('vendor_not_found');
             }
 
             $relation = RelationSuppRest::findOne(['supp_org_id' => $vendorID, 'rest_org_id' => $this->user->organization->id]);
@@ -68,15 +86,15 @@ class VendorWebApi extends \api_web\components\WebApi
                 $relation->invite = RelationSuppRest::INVITE_ON;
                 $relation->save();
                 $result = [
-                    'success' => true,
+                    'success'         => true,
                     'organization_id' => $organization->id,
-                    'message' => "Приглашение отправлено."
+                    'message'         => "Приглашение отправлено."
                 ];
             } else {
                 $result = [
-                    'success' => true,
+                    'success'         => true,
                     'organization_id' => $organization->id,
-                    'message' => "Приглашение уже было отправлено."
+                    'message'         => "Приглашение уже было отправлено."
                 ];
             }
             return $result;
@@ -179,15 +197,11 @@ class VendorWebApi extends \api_web\components\WebApi
                     $lastInsert_cat_id = 0;
                 }
                 /**
-                 *
                  * 5) Связь ресторана и поставщика
-                 *
                  * */
                 $relation = $this->createRelation($currentUser->organization_id, $get_supp_org_id, $lastInsert_cat_id);
                 /**
-                 *
                  * Отправка почты
-                 *
                  * */
                 $relation->invite = RelationSuppRest::INVITE_ON;
                 $relation->save();
@@ -206,9 +220,9 @@ class VendorWebApi extends \api_web\components\WebApi
                 $currentUser->sendInviteToVendor($user);
 
                 $result = [
-                    'success' => true,
+                    'success'         => true,
                     'organization_id' => $organization->id,
-                    'user_id' => $user->id
+                    'user_id'         => $user->id
                 ];
 
                 if ($check['eventType'] == 5) {
@@ -227,8 +241,8 @@ class VendorWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * @param $client_id
-     * @param $vendor_id
+     * @param     $client_id
+     * @param     $vendor_id
      * @param int $cat_id
      * @return RelationSuppRest
      * @throws ValidationException
@@ -252,6 +266,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Поиск поставщика по емайл
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -283,11 +298,11 @@ class VendorWebApi extends \api_web\components\WebApi
 
                 if ($user = RelationUserOrganization::find()->joinWith('user')->where([
                     'relation_user_organization.organization_id' => $model->id,
-                    'user.email' => $email
+                    'user.email'                                 => $email
                 ])->one()) {
                     $r['user'] = [
                         'email' => $user->user->email,
-                        'name' => $user->user->profile->full_name,
+                        'name'  => $user->user->profile->full_name,
                         'phone' => $user->user->profile->phone,
                     ];
                 }
@@ -301,6 +316,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Обновление поставщика
+     *
      * @param array $post
      * @return mixed
      * @throws BadRequestHttpException
@@ -331,15 +347,15 @@ class VendorWebApi extends \api_web\components\WebApi
                     $vendor_ids[] = $vendor->supp_org_id;
                 }
                 if (!in_array($model->id, array_unique($vendor_ids))) {
-                    throw new BadRequestHttpException('You are not working with this supplier.');
+                    throw new BadRequestHttpException('vendor.you_are_not_working_with_this_supplier');
                 }
             } else {
-                throw new BadRequestHttpException('You need to add vendors.');
+                throw new BadRequestHttpException('vendor.not_found_vendors');
             }
 
             //Можно ли ресторану редактировать этого поставщика
             if ($model->allow_editing == 0) {
-                throw new BadRequestHttpException('Vendor not allow editing.');
+                throw new BadRequestHttpException('vendor.not_allow_editing');
             }
         }
 
@@ -347,7 +363,7 @@ class VendorWebApi extends \api_web\components\WebApi
         if ($this->user->organization->type_id == Organization::TYPE_SUPPLIER) {
             //Разрешаем редактировать только свои данные
             if ($model->id != $this->user->organization->id) {
-                throw new BadRequestHttpException('Вы можете редактировать только свои данные.');
+                throw new BadRequestHttpException('vendor.not_you_editing');
             }
         }
 
@@ -434,6 +450,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Обновление логотипа поставщика
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -455,12 +472,12 @@ class VendorWebApi extends \api_web\components\WebApi
         }
 
         if ($vendor->type_id !== Organization::TYPE_SUPPLIER) {
-            throw new BadRequestHttpException('The organization is not a vendor.');
+            throw new BadRequestHttpException('vendor.is_not_vendor');
         }
 
         //Можно ли ресторану редактировать этого поставщика
         if ($vendor->allow_editing == 0) {
-            throw new BadRequestHttpException('Vendor not allow editing.');
+            throw new BadRequestHttpException('vendor.not_allow_editing');
         }
 
         /**
@@ -482,6 +499,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Загрузка индивид. каталога
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
@@ -525,9 +543,9 @@ class VendorWebApi extends \api_web\components\WebApi
                 $newTempCatalog->excel_file = $file->name;
                 $newTempCatalog->save();
                 return [
-                    'result' => true,
+                    'result'  => true,
                     'temp_id' => $newTempCatalog->id,
-                    'rows' => Excel::get20Rows($file->tempName)
+                    'rows'    => Excel::get20Rows($file->tempName)
                 ];
             } catch (\yii\base\Exception $e) {
                 throw $e;
@@ -539,6 +557,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Валидация и импорт уже загруженного файла инд. каталога
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
@@ -566,7 +585,7 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|mapping');
         }
 
-        if (!CatalogTempContent::find()->where(['temp_id' => $tempCatalog->id])->exists()){
+        if (!CatalogTempContent::find()->where(['temp_id' => $tempCatalog->id])->exists()) {
             $request['mapping'] = isset($request['mapping']) ? array_flip($request['mapping']) : null;
             $mapping = $request['mapping'] ?? $tempCatalog->cat->mapping;
             if (is_string($mapping)) {
@@ -586,7 +605,7 @@ class VendorWebApi extends \api_web\components\WebApi
             }
         }
         $dubles = $this->container->get('CatalogWebApi')->getTempDuplicatePosition($request);
-        if ($dubles){
+        if ($dubles) {
             return ['duplicates' => $dubles];
         }
 
@@ -595,6 +614,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Загрузка индивидуального каталога
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
@@ -607,6 +627,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Валидация и импорт уже загруженного основного каталога
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
@@ -619,6 +640,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Удаление основного каталога
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
@@ -639,6 +661,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Смена уникального индекса главного каталога
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
@@ -658,6 +681,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Удаление загруженного необработанного каталога
+     *
      * @param array $request
      * @return array
      * @throws \Exception
@@ -680,6 +704,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Список ключей для выбора
+     *
      * @return array
      */
     public function getListMainIndex()
@@ -689,6 +714,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Статус загруженного, но не импортированного каталога
+     *
      * @param array $request
      * @return array
      */
@@ -697,8 +723,8 @@ class VendorWebApi extends \api_web\components\WebApi
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
             return [
-                'exists' => true,
-                'rows' => Excel::get20RowsFromTempUploaded($tempCatalog),
+                'exists'  => true,
+                'rows'    => Excel::get20RowsFromTempUploaded($tempCatalog),
                 'mapping' => $tempCatalog->mapping,
             ];
         } else {

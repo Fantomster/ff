@@ -102,7 +102,7 @@ class ServiceIiko extends AbstractSyncFactory
             $api->auth();
             /** @var iikoWaybill $model */
             foreach ($records as $model) {
-                if(empty($model->waybillContents)) {
+                if (empty($model->waybillContents)) {
                     $this->response($res, $model, \Yii::t('api_web', 'service_iiko.empty_waybill_content'));
                 }
                 if (!in_array($model->status_id, [Registry::WAYBILL_COMPARED, Registry::WAYBILL_ERROR])) {
@@ -139,11 +139,17 @@ class ServiceIiko extends AbstractSyncFactory
             }
             $api->logout();
         } catch (\Exception $e) {
+            $api->logout();
             $message = $e->getMessage();
             if (strpos($message, '401') !== false) {
                 $message = "Ошибка авторизации, проверьте настройки подключения к iiko";
             }
+            if (strpos($message, '403') !== false) {
+                $message = "Видимо на сервере iiko закончились свободные лицензии.";
+            }
             throw new BadRequestHttpException($message);
+        } finally {
+            $api->logout();
         }
         return ['result' => $res];
     }
@@ -156,11 +162,11 @@ class ServiceIiko extends AbstractSyncFactory
         $api = iikoApi::getInstance();
         try {
             $api->auth();
+            $api->logout();
             return ['result' => true];
         } catch (\Exception $e) {
-            throw $e;
-        } finally {
             $api->logout();
+            throw $e;
         }
     }
 

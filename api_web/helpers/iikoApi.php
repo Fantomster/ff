@@ -450,6 +450,7 @@ class iikoApi
     {
         if (!file_exists(\Yii::getAlias('@api_web') . '/runtime/iiko_auth')) {
             mkdir(\Yii::getAlias('@api_web') . '/runtime/iiko_auth');
+            chmod(\Yii::getAlias('@api_web') . '/runtime/iiko_auth', 7777);
         }
 
         file_put_contents($this->getTokenFile(), '');

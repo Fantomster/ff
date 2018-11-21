@@ -42,7 +42,7 @@ use api_web\components\Registry;
 class FullmapController extends DefaultController
 {
 
-    public function actionIndex()
+    public function actionIndex() // метод загрузки данных и открытия страницы Массового сопоставления
     {
 
         $session = Yii::$app->session;
@@ -78,7 +78,7 @@ class FullmapController extends DefaultController
         //$services = ['0' => 'Выберите сервис'] + $services;
 
         $searchModel->client = $client;
-        $services = ArrayHelper::map(AllService::find()->andWhere('type_id = 1')->all(), 'id', 'denom'); // Add check license
+        $services = ArrayHelper::map(AllService::find()->where('type_id = 1')->all(), 'id', 'denom'); // Add check license
         $services = ['0' => 'Выберите сервис'] + $services;
         $searchModel->vendors = $vendors;
         //$searchModel->catalogs = $catalogs;
@@ -109,7 +109,7 @@ class FullmapController extends DefaultController
         $selected = $session->get('selectedmap', []);
 
         $stores = AllMaps::getStoreListService($searchModel->service_id, $client->id);
-        if ($session['service_id'] == 2) {
+        if ($session['service_id'] == Registry::IIKO_SERVICE_ID) {
             $mainOrg = iikoService::getMainOrg($client->id);
             ($orgId == $mainOrg) ? $editCan = 1 : $editCan = 0;
         } else {
@@ -123,7 +123,7 @@ class FullmapController extends DefaultController
         }
     }
 
-    public function actionEditpdenom($service_id)
+    /*public function actionEditpdenom($service_id) // старый метод сопоставления товара, оставлен закоментированным на всякий случай
     {
         $attr = Yii::$app->request->post('editableAttribute');
         $prod = Yii::$app->request->post('editableKey');
@@ -184,132 +184,126 @@ class FullmapController extends DefaultController
         //if ($rk_product==='') $res->prod='пусто';
         //if ($rk_product===null) $res->prod='нуль';
         return Json::encode(['output' => $res, 'message' => '']);
-    }
+    }*/
 
-    public function actionEditkoef($service_id)
+    public function actionEditkoef($service_id) // метод установки коэффициента для товаров
     {
 
-        $attr = Yii::$app->request->post('editableAttribute');
-        $prod = Yii::$app->request->post('editableKey');
-        $koef = Yii::$app->request->post('koef');
+        $prod_id = Yii::$app->request->post('editableKey');
+        $koef_old = Yii::$app->request->post('koef');
+        $koef = str_replace(',', '.', $koef_old);
+        $koef = round($koef, 6);
+        $org_id = $this->currentUser->organization->id;
 
-        $res = null;
+        $product = AllMaps::find()->where(['org_id' => $org_id, 'service_id' => $service_id, 'is_active' => 1, 'product_id' => $prod_id])->one();
 
-        $orgs[] = $this->currentUser->organization->id;
+        if (!empty($product)) {
+            $product->koef = $koef;
 
-        if ($service_id == Registry::IIKO_SERVICE_ID) {
-            $orgs = iikoService::getChildOrgsId($this->currentUser->organization->id);
-            $orgs[] = $this->currentUser->organization->id;
-        }
-
-        $orgs = implode(",", $orgs);
-
-        $hasProducts = AllMaps::find()->andWhere("org_id in ($orgs)")
-            ->andWhere('service_id = ' . $service_id . ' and is_active =1')
-            ->andWhere('product_id = :prod', [':prod' => $prod])->all();
-
-        foreach ($hasProducts as $hasProduct) {
-            $hasProduct->koef = $koef;
-            $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-
-            $hasProduct->setScenario('koef');
-            if (!$hasProduct->save()) {
+            if (!$product->save()) {
                 throw new \RuntimeException('Cant update allmaps table.');
             }
+        } else {
+            $product = new AllMaps();
 
-            if ($hasProduct->org_id == $this->currentUser->organization->id) {
-                $res = $hasProduct->koef;
-            }
-        }
-        if ($res === null) { // New link for mapping creation
-            $newProduct = new AllMaps();
+            $product->service_id = $service_id;
+            $product->org_id = $org_id;
+            $product->product_id = $prod_id;
+            $product->supp_id = CatalogBaseGoods::getSuppById($product->product_id);
+            $product->is_active = 1;
+            $product->koef = $koef;
 
-            $newProduct->service_id = $service_id;
-            $newProduct->org_id = $this->currentUser->organization->id;
-            $newProduct->product_id = $prod;
-            $newProduct->supp_id = CatalogBaseGoods::getSuppById($newProduct->product_id);
-            $newProduct->is_active = 1;
-            $newProduct->koef = $koef;
-            $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-            $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-
-            $newProduct->setScenario('koef');
-            if (!$newProduct->save()) {
+            if (!$product->save()) {
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
-
-            $res = $newProduct->koef;
         }
-        return Json::encode(['output' => $res, 'message' => '']);
-    }
 
-    public function actionEditstore($service_id)
-    {
+        if ($service_id == Registry::IIKO_SERVICE_ID) {
+            $mainOrg = iikoService::getMainOrg($org_id);
+            if ($org_id == $mainOrg) {
+                $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+                $arChildsModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'value' => $mainOrg])->all();
+                if ($arChildsModels) {
+                    foreach ($arChildsModels as $child) {
+                        $product = AllMaps::find()->where(['org_id' => $child->org, 'service_id' => $service_id, 'is_active' => 1, 'product_id' => $prod_id])->one();
+                        if (!empty($product)) {
+                            if ($product->koef == 1) {
+                                $product->koef = $koef;
 
-        $attr = Yii::$app->request->post('editableAttribute');
-        $prod = Yii::$app->request->post('editableKey');
-        $store = Yii::$app->request->post('store');
+                                if (!$product->save()) {
+                                    throw new \RuntimeException('Cant update allmaps table.');
+                                }
+                            }
+                        } else {
+                            $product = new AllMaps();
 
-        $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $this->currentUser->organization->id,])
-            ->andWhere('service_id = ' . $service_id . ' and is_active =1')
-            ->andWhere('product_id = :prod', [':prod' => $prod])->one();
+                            $product->service_id = $service_id;
+                            $product->org_id = $child->org;
+                            $product->product_id = $prod_id;
+                            $product->supp_id = CatalogBaseGoods::getSuppById($product->product_id);
+                            $product->is_active = 1;
+                            $product->koef = $koef;
 
-        if (!empty($hasProduct)) { // Product link already mapped in table
-            $hasProduct->store_rid = $store;
-            $hasProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-
-            if (!$hasProduct->save()) {
-                throw new \RuntimeException('Cant update allmaps table.');
-            }
-
-            $res = $hasProduct->store;
-        } else { // New link for mapping creation
-            $newProduct = new AllMaps();
-
-            if ($service_id == Registry::IIKO_SERVICE_ID) {
-                $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
-                if (isset($mainOrg)) {
-                    $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
-                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
-                        ->andWhere('product_id = :prod', [':prod' => $prod])->one();
-                    if (isset($hasProduct)) {
-                        $newProduct->setAttributes($hasProduct->attributes);
+                            if (!$product->save()) {
+                                throw new \RuntimeException('Cant save new allmaps model.');
+                            }
+                        }
                     }
                 }
             }
+        }
 
-            $newProduct->service_id = $service_id;
-            $newProduct->org_id = $this->currentUser->organization->id;
-            $newProduct->product_id = $prod;
-            $newProduct->supp_id = CatalogBaseGoods::getSuppById($newProduct->product_id);
-            $newProduct->is_active = 1;
-            $newProduct->store_rid = $store;
-            $newProduct->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-            $newProduct->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        $res = $koef;
+        return Json::encode(['output' => $res, 'message' => '']);
+    }
 
-            if (!$newProduct->save()) {
+    public function actionEditstore($service_id) // метод установки склада для товаров
+    {
+
+        $prod_id = Yii::$app->request->post('editableKey');
+        $store = Yii::$app->request->post('store');
+        $org_id = $this->currentUser->organization->id;
+
+        $product = AllMaps::find()->where(['org_id' => $org_id, 'service_id' => $service_id, 'is_active' => 1, 'product_id' => $prod_id])->one();
+
+        if (!empty($product)) { // Product link already mapped in table
+            $product->store_rid = $store;
+
+            if (!$product->save()) {
+                throw new \RuntimeException('Cant update allmaps table.');
+            }
+        } else { // New link for mapping creation
+            $product = new AllMaps();
+
+            $product->service_id = $service_id;
+            $product->org_id = $org_id;
+            $product->product_id = $prod_id;
+            $product->supp_id = CatalogBaseGoods::getSuppById($product->product_id);
+            $product->is_active = 1;
+            $product->store_rid = $store;
+
+            if (!$product->save()) {
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
-
-            $res = $newProduct->store;
         }
+        $res = $product->store;
 
         switch ($service_id) {
             case Registry::RK_SERVICE_ID :
-                $res = $res->name;
+                $res_name = $res->name;
                 break;
             case Registry::IIKO_SERVICE_ID :
-                $res = $res->denom;
+                $res_name = $res->denom;
                 break;
             case Registry::ONE_S_CLIENT_SERVICE_ID :
-                $res = $res->name;
+                $res_name = $res->name;
                 break;
             case Registry::TILLYPAD_SERVICE_ID :
-                $res = $res->denom;
+                $res_name = $res->denom;
                 break;
         }
 
-        return Json::encode(['output' => $res, 'message' => '']);
+        return Json::encode(['output' => $res_name, 'message' => '']);
     }
 
     public function actionChvat() // устанавливает ставку НДС для одной позиции в глобальном сопоставлении
@@ -319,27 +313,24 @@ class FullmapController extends DefaultController
         $vat = Yii::$app->request->post('vat');
         $service_id = Yii::$app->request->post('service_id');
         $org_id = $this->currentUser->organization->id;
-        $Product = AllMaps::find()->andWhere('org_id = :org', [':org' => $org_id])
-            ->andWhere('service_id = :serv', [':serv' => $service_id])
-            ->andWhere('is_active = :active', [':active' => 1])
-            ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
+        $product = AllMaps::find()->where(['org_id' => $org_id, 'service_id' => $service_id, 'is_active' => 1, 'product_id' => $prod_id])->one();
 
-        if (!empty($Product)) { // Product link already mapped in table
-            $Product->vat = $vat;
+        if (!empty($product)) { // Product link already mapped in table
+            $product->vat = $vat;
 
-            if (!$Product->save()) {
+            if (!$product->save()) {
                 throw new \RuntimeException('Cant update allmaps table.');
             }
         } else { // New link for mapping creation
-            $Product = new AllMaps();
-            $Product->service_id = $service_id;
-            $Product->org_id = $this->currentUser->organization->id;
-            $Product->product_id = $prod_id;
-            $Product->supp_id = CatalogBaseGoods::getSuppById($prod_id);
-            $Product->is_active = 1;
-            $Product->vat = $vat;
+            $product = new AllMaps();
+            $product->service_id = $service_id;
+            $product->org_id = $this->currentUser->organization->id;
+            $product->product_id = $prod_id;
+            $product->supp_id = CatalogBaseGoods::getSuppById($prod_id);
+            $product->is_active = 1;
+            $product->vat = $vat;
 
-            if (!$Product->save()) {
+            if (!$product->save()) {
                 throw new \RuntimeException('Cant save new allmaps model.');
             }
         }
@@ -348,10 +339,7 @@ class FullmapController extends DefaultController
             $childs = iikoService::getChildOrgsId($org_id);
             if (!empty($childs)) {
                 foreach ($childs as $child) {
-                    $child_product = AllMaps::find()->andWhere('org_id = :org', [':org' => $child,])
-                        ->andWhere('service_id = :serv', [':serv' => $service_id])
-                        ->andWhere('is_active = :active', [':active' => 1])
-                        ->andWhere('product_id = :prod', [':prod' => $prod_id])->one();
+                    $child_product = AllMaps::find()->where(['org_id' => $child, 'service_id' => $service_id, 'is_active' => 1, 'product_id' => $prod_id])->one();
                     if (!empty($child_product)) {
                         if ($child_product->vat === null) {
                             $child_product->vat = $vat;
@@ -366,10 +354,10 @@ class FullmapController extends DefaultController
                         $child_product->org_id = $child;
                         $child_product->product_id = $prod_id;
                         $child_product->supp_id = CatalogBaseGoods::getSuppById($prod_id);
-                        $child_product->serviceproduct_id = $Product->serviceproduct_id;
+                        $child_product->serviceproduct_id = $product->serviceproduct_id;
                         $child_product->unit_rid = null;
                         $child_product->store_rid = null;
-                        $child_product->koef = $Product->koef ?? 1;
+                        $child_product->koef = $product->koef ?? 1;
                         $child_product->is_active = 1;
                         if (!$child_product->save()) {
                             throw new \RuntimeException('Cant save new allmaps model.');
@@ -379,11 +367,11 @@ class FullmapController extends DefaultController
             }
         }
 
-        $res = $Product->vat;
+        $res = $product->vat;
         return Json::encode(['output' => $res, 'message' => '']);
     }
 
-    public function getLastUrl()
+    public function getLastUrl() // метод получения предыдущего URL
     {
 
         $lastUrl = Url::previous();
@@ -399,7 +387,7 @@ class FullmapController extends DefaultController
         return $lastUrl;
     }
 
-    public function actionAutocomplete($service_id, $term = null)
+    /*public function actionAutocomplete($service_id, $term = null) // старый метод подстановки значений в сопоставлении товаров при вводе букв названия товара, оставлен закоментированным на всякий случай
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
@@ -453,9 +441,9 @@ class FullmapController extends DefaultController
         }
 
         return $out;
-    }
+    }*/
 
-    public function actionApplyFullmap()
+    public function actionApplyFullmap() // метод групповой обработки данных, отмеченных "флажками"
     {
 
         $koef = Yii::$app->request->post('koef_set');
@@ -487,9 +475,7 @@ class FullmapController extends DefaultController
         if (empty($selected))
             return true;
 
-        $hasProducts = AllMaps::find()->select('product_id')->andWhere('org_id = :org', [':org' => $this->currentUser->organization->id,])
-            ->andWhere('service_id = :s_id and is_active =1', [':s_id' => $service_id])
-            ->andWhere(['IN', 'product_id', $selected])->column();
+        $hasProducts = AllMaps::find()->select('product_id')->where(['org_id' => $this->currentUser->organization->id, 'service_id' => $service_id, 'is_active' => 1, 'product_id' => $selected])->column();
 
         if (!empty($hasProducts)) {   // Case we have intersection of arrays
             $noProducts = array_diff($selected, $hasProducts);
@@ -511,9 +497,7 @@ class FullmapController extends DefaultController
             $model = new AllMaps();
             if ($service_id == Registry::IIKO_SERVICE_ID) {
                 if (isset($mainOrg)) {
-                    $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
-                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
-                        ->andWhere('product_id = :prod', [':prod' => $prod])->one();
+                    $hasProduct = AllMaps::find()->where(['org_id' => $mainOrg, 'service_id' => $service_id, 'is_active' => 1, 'product_id' => $prod])->one();
                     if (isset($hasProduct)) {
                         $model->setAttributes($hasProduct->attributes);
                     }
@@ -522,9 +506,7 @@ class FullmapController extends DefaultController
 
             if ($service_id == Registry::TILLYPAD_SERVICE_ID) {
                 if (isset($mainOrg)) {
-                    $hasProduct = AllMaps::find()->andWhere('org_id = :org', [':org' => $mainOrg,])
-                        ->andWhere('service_id = ' . $service_id . ' and is_active =1')
-                        ->andWhere('product_id = :prod', [':prod' => $prod])->one();
+                    $hasProduct = AllMaps::find()->where(['org_id' => $mainOrg, 'service_id' => $service_id, 'is_active' => 1, 'product_id' => $prod])->one();
                     if (isset($hasProduct)) {
                         $model->setAttributes($hasProduct->attributes);
                     }
@@ -563,7 +545,7 @@ class FullmapController extends DefaultController
         return true;
     }
 
-    public function actionClearFullmap()
+    public function actionClearFullmap() // метод снятия всех "флажков"
     {
 
         $session = Yii::$app->session;
@@ -572,7 +554,7 @@ class FullmapController extends DefaultController
         return true;
     }
 
-    public function actionSaveSelectedMaps()
+    public function actionSaveSelectedMaps() // метод сохранения изменений для товаров, отмеченных "флажками"
     {
         $selected = Yii::$app->request->get('selected');
         $state = Yii::$app->request->get('state');
@@ -604,7 +586,7 @@ class FullmapController extends DefaultController
         return true;
     }
 
-    protected function findModel($id)
+    protected function findModel($id) // метод нахождения одной товарной позиции
     {
         if (($model = AllMaps::findOne(['product_id' => $id])) !== null) {
             return $model;
@@ -613,7 +595,7 @@ class FullmapController extends DefaultController
         }
     }
 
-    public function actionAutoCompleteSelectedProducts()
+    public function actionAutoCompleteSelectedProducts() // метод подстановки значений в сопоставлении товаров при вводе букв названия товара для доступных товаров
     {
         $orgId = User::findOne(Yii::$app->user->id)->organization_id;
         $constId = iikoDicconst::findOne(['denom' => 'main_org']);
@@ -628,7 +610,7 @@ class FullmapController extends DefaultController
         return $result;
     }
 
-    public function actionAutoCompleteNew()
+    public function actionAutoCompleteNew() // метод подстановки значений в сопоставлении товаров при вводе букв названия товара
     {
         $term = Yii::$app->request->post('stroka');
         $us = Yii::$app->request->post('us');
@@ -654,7 +636,7 @@ class FullmapController extends DefaultController
         return $out;
     }
 
-    public function actionEditNew()
+    public function actionEditNew() // метод сопоставления товаров
     {
         $us = Yii::$app->request->post('us');
         switch ($us) {
@@ -685,26 +667,27 @@ class FullmapController extends DefaultController
             foreach ($allMainProducts as $main_product) {
                 $child_product = AllMaps::find()->select('id, store_rid, vat')->where(['org_id' => $child->org, 'service_id' => Registry::IIKO_SERVICE_ID, 'product_id' => $main_product->product_id])->one();
                 if ($child_product) {
-                    $ChildProduct = AllMaps::findOne($child_product->id);
-                    (is_null($child_product->store_rid)) ? $ChildProduct->store_rid = null : $ChildProduct->store_rid = $child_product->store_rid;
-                    (is_null($child_product->vat)) ? $ChildProduct->vat = null : $ChildProduct->vat = $child_product->vat;
+                    $childProduct = AllMaps::findOne($child_product->id);
+                    (is_null($child_product->store_rid)) ? $childProduct->store_rid = null : $childProduct->store_rid = $child_product->store_rid;
+                    (is_null($child_product->vat)) ? $childProduct->vat = null : $childProduct->vat = $child_product->vat;
+                    ($child_product->koef == 1) ? $childProduct->koef = $main_product->koef : $childProduct->koef = $child_product->koef;
                 } else {
-                    $ChildProduct = new AllMaps();
-                    $ChildProduct->store_rid = null;
-                    $ChildProduct->vat = $main_product->vat;
+                    $childProduct = new AllMaps();
+                    $childProduct->store_rid = null;
+                    $childProduct->vat = $main_product->vat;
+                    $childProduct->koef = $main_product->koef;
                 }
-                $ChildProduct->service_id = $main_product->service_id;
-                $ChildProduct->koef = $main_product->koef;
-                $ChildProduct->org_id = $child->org;
-                $ChildProduct->product_id = $main_product->product_id;
-                $ChildProduct->supp_id = $main_product->supp_id;
-                $ChildProduct->serviceproduct_id = $main_product->serviceproduct_id;
-                $ChildProduct->is_active = $main_product->is_active;
-                if (!is_null($ChildProduct->serviceproduct_id)) {
-                    $ChildProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+                $childProduct->service_id = $main_product->service_id;
+                $childProduct->org_id = $child->org;
+                $childProduct->product_id = $main_product->product_id;
+                $childProduct->supp_id = $main_product->supp_id;
+                $childProduct->serviceproduct_id = $main_product->serviceproduct_id;
+                $childProduct->is_active = $main_product->is_active;
+                if (!is_null($childProduct->serviceproduct_id)) {
+                    $childProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                 }
                 try {
-                    if (!$ChildProduct->save()) {
+                    if (!$childProduct->save()) {
                         throw new \Exception('Не удалось сохранить продукт дочернего бизнеса.');
                     }
                 } catch (\Exception $e) {
@@ -722,30 +705,30 @@ class FullmapController extends DefaultController
     {
         $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']); // Получаем идентификатор константы бизнеса для сопоставления
         $arChildsModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'value' => $parent_id])->all(); //получаем дочерние бизнесы
-        $main_product = AllMaps::find()->select('service_id, product_id, supp_id, serviceproduct_id, koef, vat, is_active')->where(['org_id' => $parent_id, 'service_id' => 2, 'product_id' => $product_id])->one();
+        $main_product = AllMaps::find()->select('service_id, product_id, supp_id, serviceproduct_id, koef, vat, is_active')->where(['org_id' => $parent_id, 'service_id' => Registry::IIKO_SERVICE_ID, 'product_id' => $product_id])->one();
         foreach ($arChildsModels as $child) {
             $child_product = AllMaps::find()->select('id, store_rid, vat')->where(['org_id' => $child->org, 'service_id' => Registry::IIKO_SERVICE_ID, 'product_id' => $main_product->product_id])->one();
             if ($child_product) {
-                $ChildProduct = AllMaps::findOne($child_product->id);
-                (is_null($child_product->store_rid)) ? $ChildProduct->store_rid = null : $ChildProduct->store_rid = $child_product->store_rid;
-                (is_null($child_product->vat)) ? $ChildProduct->vat = null : $ChildProduct->vat = $child_product->vat;
+                $childProduct = AllMaps::findOne($child_product->id);
+                (is_null($child_product->store_rid)) ? $childProduct->store_rid = null : $childProduct->store_rid = $child_product->store_rid;
+                (is_null($child_product->vat)) ? $childProduct->vat = null : $childProduct->vat = $child_product->vat;
             } else {
-                $ChildProduct = new AllMaps();
-                $ChildProduct->store_rid = null;
-                $ChildProduct->vat = $main_product->vat;
+                $childProduct = new AllMaps();
+                $childProduct->store_rid = null;
+                $childProduct->vat = $main_product->vat;
             }
-            $ChildProduct->service_id = $main_product->service_id;
-            $ChildProduct->koef = $main_product->koef;
-            $ChildProduct->org_id = $child->org;
-            $ChildProduct->product_id = $main_product->product_id;
-            $ChildProduct->supp_id = $main_product->supp_id;
-            $ChildProduct->serviceproduct_id = $main_product->serviceproduct_id;
-            $ChildProduct->is_active = $main_product->is_active;
-            if (!is_null($ChildProduct->serviceproduct_id)) {
-                $ChildProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+            $childProduct->service_id = $main_product->service_id;
+            $childProduct->koef = $main_product->koef;
+            $childProduct->org_id = $child->org;
+            $childProduct->product_id = $main_product->product_id;
+            $childProduct->supp_id = $main_product->supp_id;
+            $childProduct->serviceproduct_id = $main_product->serviceproduct_id;
+            $childProduct->is_active = $main_product->is_active;
+            if (!is_null($childProduct->serviceproduct_id)) {
+                $childProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             }
             try {
-                if (!$ChildProduct->save()) {
+                if (!$childProduct->save()) {
                     throw new \Exception('Не удалось сохранить продукт дочернего бизнеса.');
                 }
             } catch (\Exception $e) {

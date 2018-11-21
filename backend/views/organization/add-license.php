@@ -26,18 +26,20 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
     <?php $i = 0; ?>
     <?php foreach ($organizations as $id => $name): ?>
-        <?php $allLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->orderBy(['td' => SORT_DESC])->groupBy('license_id')->leftJoin('license', 'license.id=license_organization.license_id')->orderBy('license.sort_index')->all(); ?>
+        <?php
+        $allLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->groupBy('license_id')->leftJoin('license', 'license.id=license_organization.license_id')->with('license')->orderBy('license.sort_index')->all();
+        ?>
         <div class="row">
             <div class="col-md-3">
                 <div class="checkbox">
                     <?php if ($i == 0): ?>
                 <p style="font-weight: bold">
                 <?php else: ?>
-                    <p style="padding-left: 15px;">
+                    <p style="padding-left: 15px; position: relative;">
                         <?php endif; ?>
                         <?= Html::checkbox('organizations[]', true, [
                             'value' => $id,
-                            'label' => "<span style='font-size: 30px;'>" . $name . "</span>",
+                            'label' => "<span style='font-size: 30px; position: absolute; top: -7px; left: 50px;'>" . $name . "</span>",
                             'class' => 'checkbox alOneOrgCheckbox',
                         ]);
                         ?>
@@ -50,15 +52,18 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="col-md-9">
                 <?php foreach ($allLicenseOrganization as $value): ?>
+                    <?php
+                    $maxTd = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id, 'license_id' => $value->license_id])->max('td');
+                    ?>
                     <div class="row">
                         <div class="col-md-4">
                             <span <?php
-                            if ($value->td < $tenDaysAfter && $value->td > $nowDate) {
+                            if ($maxTd < $tenDaysAfter && $maxTd > $nowDate) {
                                 echo 'style ="color: orange;"';
-                            } elseif ($value->td < $nowDate) {
-                                echo 'style ="color: red;"';
+                            } elseif ($maxTd < $nowDate) {
+                                echo 'style ="color: red; font-weight: bold;"';
                             } ?>>
-                                <?= $value->license->name . " : " . $value->td ?>
+                                <?= $value->license->name . " : " . $maxTd ?>
                             </span>
                         </div>
                         <div class="col-md-4">

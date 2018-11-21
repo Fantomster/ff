@@ -13,12 +13,6 @@ $recipientIsFranchisee = isset($recipient->role_id) && in_array($recipient->role
 $self = MailHelper::isSelf($senderOrg, $recipient);
 $orgType = $senderIsClient ? Yii::t('app', 'common.mail.order_created.rest', ['ru' => "Ресторан"]) : Yii::t('app', 'common.mail.order_created.vendor', ['ru' => "Поставщик"]);
 
-if ($recipientIsClient) {
-    $link = \Yii::$app->urlManagerFrontend->baseUrl . "/client/history/order/" . $order->id;
-} else {
-    $link = \Yii::$app->urlManagerFrontend->baseUrl . "/vendor/order/" . $order->id . "?token=" . $recipient->getJWTToken(\Yii::$app->jwt);
-}
-
 ?>
     <!-- ШАПКА -->
     <table cellpadding="0" cellspacing="0" border="0" width="100%"
@@ -53,7 +47,7 @@ if ($recipientIsClient) {
                                     </td>
                                     <td align="center" valign="top"
                                         style="color: #ffffff;font-family: 'Open Sans', Arial, sans-serif;text-transform: uppercase;font-size: 16px;">
-                                        <a href="<?= $link ?>" target="_blank" class="btn"
+                                        <a href="<?= $order->getUrlForUser($recipient, 2) ?>" target="_blank" class="btn"
                                            style="font-family: 'Open Sans', Arial, sans-serif;text-decoration: none;color: #ffffff;display: block;width: 230px;height: 50px;font-size: 16px;background-color: #2dbd5c;border-radius: 4px;-webkit-box-shadow: 0px 5px 20px 1px rgba(45, 189, 92, 0.4);-moz-box-shadow: 0px 5px 20px 1px rgba(45, 189, 92, 0.4);box-shadow: 0px 5px 20px 1px rgba(45, 189, 92, 0.4);">
                                             <span style="font-family: 'Open Sans', Arial, sans-serif;color: #ffffff;text-transform: uppercase;font-size: 16px;line-height: 3.3;"><?= Yii::t('app', 'common.mail.order_created.string1', ['ru' => 'Перейти к заказу']) ?></span>
                                         </a>

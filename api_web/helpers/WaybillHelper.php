@@ -88,6 +88,11 @@ class WaybillHelper
         $cntNotInWaybillContent = 0;
         $waybillModels = [];
         foreach ($licenses as $license) {
+            //Счетчики для выброса Exception
+            $mapCount = 0;
+            $skipCount = 0;
+            $skipByStore = 0;
+            $arMappedForStores = [];
             $serviceId = $license['service_id'];
             if (!empty($arExcludedService) && in_array($serviceId, $arExcludedService)) {
                 continue;
@@ -123,24 +128,23 @@ class WaybillHelper
             } else {
                 $vendorId = $order->vendor_id;
             }
-            $agent = OuterAgent::findOne(['vendor_id' => $vendorId, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
+            $agent = OuterAgent::findOne(['vendor_id' => $vendorId, 'org_id' => $order->client_id, 'service_id' => $serviceId, 'is_deleted' => 0]);
             if ($agent && !empty($agent->store_id)) {
                 $defaultStoreAgent = $agent->store_id;
             }
             //Склад по умолчанию в настройках
             $defaultStoreConfig = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id, ['defStore']);
-            //Счетчики для выброса Exception
-            $mapCount = 0;
-            $skipCount = 0;
-            $skipByStore = 0;
+
             // Remap for 1 store = 1 waybill
-            $arMappedForStores = [];
+
             foreach ($rows as $row) {
                 $arMappedForStores[$row['outer_store_id']][$row['product_id']] = $row;
             }
             foreach ($arMappedForStores as $storeId => $storeProducts) {
                 //Пытаемся найти хоть какой то склад
-                $storeId = $storeId ?? $defaultStoreAgent ?? $defaultStoreConfig ?? null;
+                if (!$storeId) {
+                    $storeId = $defaultStoreAgent ?? $defaultStoreConfig ?? null;
+                }
                 if (!$storeId) {
                     $skipByStore++;
                     continue;
@@ -154,16 +158,16 @@ class WaybillHelper
                     $skipCount++;
                 }
             }
+        }
 
-            // Если количество складов = числу пропусков, бросаем throw
-            if (count($arMappedForStores) === $skipByStore) {
-                throw new BadRequestHttpException('waybill.no_store_for_create_waybill');
-            }
+        // Если количество складов = числу пропусков, бросаем throw
+        if (count($arMappedForStores) === $skipByStore) {
+            throw new BadRequestHttpException('waybill.no_store_for_create_waybill');
+        }
 
-            // Если количество маппингов = числу пропусков, бросаем throw
-            if ($mapCount === $skipCount) {
-                throw new BadRequestHttpException('waybill.no_map_for_create_waybill');
-            }
+        // Если количество маппингов = числу пропусков, бросаем throw
+        if ($mapCount === $skipCount) {
+            throw new BadRequestHttpException('waybill.no_map_for_create_waybill');
         }
 
         if ($cntEmptyRows == count($licenses)) {

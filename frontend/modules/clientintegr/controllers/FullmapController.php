@@ -665,7 +665,7 @@ class FullmapController extends DefaultController
         $allMainProducts = AllMaps::find()->select('service_id, product_id, supp_id, serviceproduct_id, koef, vat, is_active')->where(['org_id' => $parent_id, 'service_id' => Registry::IIKO_SERVICE_ID])->all();
         foreach ($arChildsModels as $child) {
             foreach ($allMainProducts as $main_product) {
-                $child_product = AllMaps::find()->select('id, store_rid, vat')->where(['org_id' => $child->org, 'service_id' => Registry::IIKO_SERVICE_ID, 'product_id' => $main_product->product_id])->one();
+                $child_product = AllMaps::find()->select('id, store_rid, vat, koef')->where(['org_id' => $child->org, 'service_id' => Registry::IIKO_SERVICE_ID, 'product_id' => $main_product->product_id])->one();
                 if ($child_product) {
                     $childProduct = AllMaps::findOne($child_product->id);
                     (is_null($child_product->store_rid)) ? $childProduct->store_rid = null : $childProduct->store_rid = $child_product->store_rid;
@@ -707,18 +707,18 @@ class FullmapController extends DefaultController
         $arChildsModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'value' => $parent_id])->all(); //получаем дочерние бизнесы
         $main_product = AllMaps::find()->select('service_id, product_id, supp_id, serviceproduct_id, koef, vat, is_active')->where(['org_id' => $parent_id, 'service_id' => Registry::IIKO_SERVICE_ID, 'product_id' => $product_id])->one();
         foreach ($arChildsModels as $child) {
-            $child_product = AllMaps::find()->select('id, store_rid, vat')->where(['org_id' => $child->org, 'service_id' => Registry::IIKO_SERVICE_ID, 'product_id' => $main_product->product_id])->one();
+            $child_product = AllMaps::find()->select('id, store_rid, vat, koef')->where(['org_id' => $child->org, 'service_id' => Registry::IIKO_SERVICE_ID, 'product_id' => $main_product->product_id])->one();
             if ($child_product) {
                 $childProduct = AllMaps::findOne($child_product->id);
                 (is_null($child_product->store_rid)) ? $childProduct->store_rid = null : $childProduct->store_rid = $child_product->store_rid;
                 (is_null($child_product->vat)) ? $childProduct->vat = null : $childProduct->vat = $child_product->vat;
+                ($child_product->koef == 1) ? $childProduct->koef = $main_product->koef : $childProduct->koef = $child_product->koef;
             } else {
                 $childProduct = new AllMaps();
                 $childProduct->store_rid = null;
                 $childProduct->vat = $main_product->vat;
             }
             $childProduct->service_id = $main_product->service_id;
-            $childProduct->koef = $main_product->koef;
             $childProduct->org_id = $child->org;
             $childProduct->product_id = $main_product->product_id;
             $childProduct->supp_id = $main_product->supp_id;

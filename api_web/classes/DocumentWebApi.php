@@ -392,7 +392,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                          LEFT JOIN order_content c ON c.id = b.order_content_id
                          LEFT JOIN `order` d ON d.id = c.order_id
                        WHERE a.acquirer_id = :business_id AND a.service_id = :service_id
-                       AND NOT EXISTS(
+                       AND a.id not IN (
                                SELECT sqwc.waybill_id
                                FROM `$apiShema`.waybill_content sqwc
                                  JOIN order_content sqoc ON sqoc.id = sqwc.order_content_id

@@ -346,11 +346,17 @@ class OrderContent extends \yii\db\ActiveRecord
      */
     public function isComparised($serviceId)
     {
+        $orgId = $this->order->client_id;
+        $settingMainOrg = IntegrationSettingValue::getSettingsByServiceId($serviceId, $orgId, ['main_org']);
+        if ($settingMainOrg){
+            $orgId = $settingMainOrg;
+        }
+
         return (new Query())->from(self::tableName() . ' as oc')
             ->leftJoin(DBNameHelper::getApiName() . '.' . OuterProductMap::tableName() . ' as opm', 'opm.product_id=oc.product_id AND opm.service_id = :serviceId', [':serviceId' => $serviceId])
             ->where([
                 'oc.id'           => $this->id,
-                'organization_id' => $this->order->client_id,
+                'organization_id' => $orgId,
                 'vendor_id'       => $this->order->vendor_id,
             ])->exists();
     }

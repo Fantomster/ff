@@ -230,6 +230,7 @@ $js = <<<JS
         $(document).on("click", ".cancel-order", function(e) {
             e.preventDefault();
             var clicked = $(this);
+            clicked.prop('disabled', true);
             swal({
                 title: "$arr[9]",
                 input: "textarea",
@@ -258,6 +259,7 @@ $js = <<<JS
                 if (result.value.type == "success") {
                     swal(result.value);
                 } else if (result.dismiss === "cancel") {
+                    clicked.prop('disabled', false);
                     swal.close();
                 } else {
                     swal({title: "$arr[13]", text: "$arr[14]", type: "error"});

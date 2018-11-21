@@ -84,7 +84,8 @@ class VetisHelper
         if (isset($this->vsdModel->referencedDocument)) {
             $this->setTransportWaybill($this->vsdModel->referencedDocument);
         }
-        $this->vehicle_number = $this->vsdModel->vehicle_number;
+        $transportInfo = json_decode($this->vsdModel->transport_info, true);
+        $this->vehicle_number = isset($transportInfo['transportNumber']['vehicleNumber']) ? $transportInfo['transportNumber']['vehicleNumber'] : null;
         $other = json_decode($this->vsdModel->other_info, true);
         if (isset($other['cargoExpertized'])) {
             $this->cargo_expertized = \Yii::t('api_web', self::$expertizeList[$other['cargoExpertized']]);
@@ -97,6 +98,7 @@ class VetisHelper
         $this->type = MercVsd::$types[$this->vsdModel->type];
         $this->status = $this->vsdModel->status;
         $this->recipient_name = $this->vsdModel->recipient_name;
+        $this->sender_name = $this->vsdModel->sender_name;
         return $this;
     }
 

@@ -140,13 +140,7 @@ class ServiceIiko extends AbstractSyncFactory
             $api->logout();
         } catch (\Exception $e) {
             $api->logout();
-            $message = $e->getMessage();
-            if (strpos($message, '401') !== false) {
-                $message = "Ошибка авторизации, проверьте настройки подключения к iiko";
-            }
-            if (strpos($message, '403') !== false) {
-                $message = "Видимо на сервере iiko закончились свободные лицензии.";
-            }
+            $message = $this->prepareErrorMessage($e->getMessage(), $api);
             throw new BadRequestHttpException($message);
         } finally {
             $api->logout();
@@ -165,8 +159,10 @@ class ServiceIiko extends AbstractSyncFactory
             $api->logout();
             return ['result' => true];
         } catch (\Exception $e) {
+            $message = $this->prepareErrorMessage($e->getMessage(), $api);
+            throw new BadRequestHttpException($message);
+        } finally {
             $api->logout();
-            throw $e;
         }
     }
 
@@ -222,5 +218,22 @@ class ServiceIiko extends AbstractSyncFactory
             'created_at'  => $model->created_at ?? null,
             'updated_at'  => $model->updated_at ?? null
         ];
+    }
+
+    /**
+     * @param         $message
+     * @param IikoApi $api
+     * @return string
+     */
+    private function prepareErrorMessage($message, $api)
+    {
+        if (strpos($message, '401') !== false) {
+            $message = "Ошибка авторизации, проверьте настройки подключения к iiko";
+        }
+        if (strpos($message, '403') !== false) {
+            $message = "Видимо на сервере iiko закончились свободные лицензии." . PHP_EOL;
+            $message .= "Лицензий свободно: " . $api->getLicenseCount();
+        }
+        return $message;
     }
 }

@@ -417,4 +417,14 @@ class iikoApi
         }
         return $headers;
     }
+
+    /**
+     * Количество свободных лицензий на iikoServer
+     * @return bool|string
+     */
+    public function getLicenseCount()
+    {
+        $url = $this->host . "/licence/info?moduleId=2000";
+        return file_get_contents($url);
+    }
 }

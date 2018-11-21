@@ -108,9 +108,13 @@ class iikoApi
         try {
             $this->token = $this->sendAuth('/auth', $params);
             $this->writeToken();
-            return true;
+            if ($this->token) {
+                return true;
+            } else {
+                return false;
+            }
         } catch (\Exception $e) {
-            return false;
+            throw $e;
         }
     }
 

@@ -155,9 +155,10 @@ class ServiceIiko extends AbstractSyncFactory
     {
         $api = iikoApi::getInstance();
         try {
-            $api->auth();
-            $api->logout();
-            return ['result' => true];
+            if($api->auth()) {
+                $api->logout();
+                return ['result' => true];
+            }
         } catch (\Exception $e) {
             $message = $this->prepareErrorMessage($e->getMessage(), $api);
             throw new BadRequestHttpException($message);

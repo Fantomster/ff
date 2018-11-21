@@ -9,6 +9,7 @@ use api_web\helpers\OuterProductMapHelper;
 use api_web\modules\integration\classes\OuterProductMapper;
 use common\models\AllService;
 use common\models\CatalogBaseGoods;
+use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
@@ -590,10 +591,16 @@ class IntegrationWebApi extends WebApi
         $dataProvider->setPagination($pagination);
         $models = $dataProvider->getModels();
 
+        if (IntegrationSettingValue::getSettingsByServiceId($post['service_id'], $client->id, ['main_org'])) {
+            $isChildOrganization = true;
+        } else {
+            $isChildOrganization = false;
+        }
+
         $result = [];
         if (!empty($models)) {
             foreach ($models as $model) {
-                $result[] = $this->prepareOutProductMap($model);
+                $result[] = $this->prepareOutProductMap($model, $isChildOrganization);
             }
         }
 
@@ -652,22 +659,23 @@ class IntegrationWebApi extends WebApi
      * @param array $model
      * @return array
      */
-    private function prepareOutProductMap(array $model)
+    private function prepareOutProductMap(array $model, $isChild = false)
     {
         $result = [
-            "id"              => $model['id'],
-            "service_id"      => (int)$model['service_id'],
-            "organization_id" => (int)$model['organization_id'],
-            "product"         => null,
-            "unit"            => null,
-            "vendor"          => null,
-            "outer_product"   => null,
-            "outer_unit"      => null,
-            "outer_store"     => null,
-            "coefficient"     => !empty($model['coefficient']) ? round($model['coefficient'], 10) : 1,
-            "vat"             => (int)$model['vat'],
-            "created_at"      => $model['created_at'] ?? null,
-            "updated_at"      => $model['updated_at'] ?? null,
+            "id"                            => $model['id'],
+            "service_id"                    => (int)$model['service_id'],
+            "organization_id"               => (int)$model['organization_id'],
+            "product"                       => null,
+            "unit"                          => null,
+            "vendor"                        => null,
+            "outer_product"                 => null,
+            "outer_unit"                    => null,
+            "outer_store"                   => null,
+            "coefficient"                   => !empty($model['coefficient']) ? round($model['coefficient'], 10) : 1,
+            "vat"                           => (int)$model['vat'],
+            "created_at"                    => $model['created_at'] ?? null,
+            "updated_at"                    => $model['updated_at'] ?? null,
+            "is_child_organization_for_map" => $isChild,
         ];
 
         if (isset($model['vendor_id'])) {

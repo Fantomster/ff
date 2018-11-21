@@ -18,7 +18,7 @@ class OrderContent extends BaseOrderContent implements DocumentInterface
      * @var
      */
     public static $serviceId;
-    private static $isChildrganization = null;
+    private static $isChildOrganization = null;
 
     /**
      * Порлучение данных из модели
@@ -67,13 +67,13 @@ class OrderContent extends BaseOrderContent implements DocumentInterface
      */
     public function getExistsMainOrg()
     {
-        if (is_null(self::$isChildrganization)) {
+        if (is_null(self::$isChildOrganization)) {
             if (IntegrationSettingValue::getSettingsByServiceId(self::$serviceId, $this->order->client_id, ['main_org'])) {
-                self::$isChildrganization = true;
+                self::$isChildOrganization = true;
             } else {
-                self::$isChildrganization = false;
+                self::$isChildOrganization = false;
             }
         }
-        return self::$isChildrganization;
+        return self::$isChildOrganization;
     }
 }

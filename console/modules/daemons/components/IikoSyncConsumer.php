@@ -33,6 +33,13 @@ class IikoSyncConsumer extends AbstractConsumer
     public $type;
 
     /**
+     * Description
+     *
+     * @var iikoApi
+     */
+    public $iikoApi;
+
+    /**
      * IikoSyncConsumer constructor.
      *
      * @param null $orgId
@@ -40,6 +47,7 @@ class IikoSyncConsumer extends AbstractConsumer
     public function __construct($orgId = null)
     {
         $this->orgId = $orgId;
+        $this->iikoApi = iikoApi::getInstance($this->orgId);
     }
 
     /**
@@ -73,7 +81,7 @@ class IikoSyncConsumer extends AbstractConsumer
         if (method_exists($this, $model->name) === true) {
             try {
                 //Пробуем пролезть в iko
-                if (!iikoApi::getInstance($this->orgId)->auth()) {
+                if (!$this->iikoApi->auth()) {
                     throw new BadRequestHttpException('Не удалось авторизоваться в iiko - Office');
                 }
                 //Синхронизируем нужное нам и
@@ -81,11 +89,12 @@ class IikoSyncConsumer extends AbstractConsumer
                 $count = $this->{$model->name}();
                 $dictionary->successSync($count);
                 //Убиваем сессию, а то закончатся на сервере iiko
+                $this->iikoApi->logout();
             } catch (\Exception $e) {
                 $dictionary->errorSync();
                 throw $e;
             } finally {
-                iikoApi::getInstance($this->orgId)->logout();
+                $this->iikoApi->logout();
                 $dictionary->noticeToFCM();
             }
             return ['success' => true];

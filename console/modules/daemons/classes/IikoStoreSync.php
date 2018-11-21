@@ -40,7 +40,7 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
     /**
      * @var int
      */
-    public static $timeoutExecuting = 300;
+    public static $timeoutExecuting = 2400;
 
     /**
      * @var string

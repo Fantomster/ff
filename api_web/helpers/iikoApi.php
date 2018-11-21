@@ -82,6 +82,11 @@ class iikoApi
     {
     }
 
+    public function __destruct()
+    {
+        $this->logout();
+    }
+
     /**
      * Авторизация
      *

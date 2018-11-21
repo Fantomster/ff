@@ -99,45 +99,46 @@ class ServiceIiko extends AbstractSyncFactory
 
         $api = iikoApi::getInstance();
         try {
-            $api->auth();
-            /** @var iikoWaybill $model */
-            foreach ($records as $model) {
-                if (empty($model->waybillContents)) {
-                    $this->response($res, $model, \Yii::t('api_web', 'service_iiko.empty_waybill_content'));
-                }
-                if (!in_array($model->status_id, [Registry::WAYBILL_COMPARED, Registry::WAYBILL_ERROR])) {
-                    if ($model->status_id == Registry::WAYBILL_UNLOADED) {
-                        $this->response($res, $model, \Yii::t('api_web', 'service_iiko.already_success_unloading_waybill'));
-                    } else {
-                        $this->response($res, $model, \Yii::t('api_web', 'service_iiko.no_ready_unloading_waybill'), false);
+            if ($api->auth()) {
+                /** @var iikoWaybill $model */
+                foreach ($records as $model) {
+                    if (empty($model->waybillContents)) {
+                        $this->response($res, $model, \Yii::t('api_web', 'service_iiko.empty_waybill_content'));
                     }
-                    continue;
-                }
-                /** @var Transaction $transaction */
-                $transaction = \Yii::$app->db_api->beginTransaction();
-                try {
-                    $response = $api->sendWaybill($model);
-                    if ($response !== true) {
-                        $this->response($res, $model, $response, false);
+                    if (!in_array($model->status_id, [Registry::WAYBILL_COMPARED, Registry::WAYBILL_ERROR])) {
+                        if ($model->status_id == Registry::WAYBILL_UNLOADED) {
+                            $this->response($res, $model, \Yii::t('api_web', 'service_iiko.already_success_unloading_waybill'));
+                        } else {
+                            $this->response($res, $model, \Yii::t('api_web', 'service_iiko.no_ready_unloading_waybill'), false);
+                        }
+                        continue;
                     }
-                    $model->status_id = Registry::WAYBILL_UNLOADED;
-                    $model->save();
-                    $this->response($res, $model, \Yii::t('api_web', 'service_iiko.success_unloading_waybill'));
-                    $transaction->commit();
-                } catch (\Exception $e) {
-                    $transaction->rollBack();
-                    $model->status_id = Registry::WAYBILL_ERROR;
-                    $model->save();
-                    //Если одна накладная к выгрузке, и произошла ошибка
-                    //то в $this->response() будет Exception и мы тупо займем лицензию
-                    //Надо отконектиться
-                    if ($this->countWaybillSend == 1) {
-                        $api->logout();
+                    /** @var Transaction $transaction */
+                    $transaction = \Yii::$app->db_api->beginTransaction();
+                    try {
+                        $response = $api->sendWaybill($model);
+                        if ($response !== true) {
+                            $this->response($res, $model, $response, false);
+                        }
+                        $model->status_id = Registry::WAYBILL_UNLOADED;
+                        $model->save();
+                        $this->response($res, $model, \Yii::t('api_web', 'service_iiko.success_unloading_waybill'));
+                        $transaction->commit();
+                    } catch (\Exception $e) {
+                        $transaction->rollBack();
+                        $model->status_id = Registry::WAYBILL_ERROR;
+                        $model->save();
+                        //Если одна накладная к выгрузке, и произошла ошибка
+                        //то в $this->response() будет Exception и мы тупо займем лицензию
+                        //Надо отконектиться
+                        if ($this->countWaybillSend == 1) {
+                            $api->logout();
+                        }
+                        $this->response($res, $model, $e->getMessage(), false);
                     }
-                    $this->response($res, $model, $e->getMessage(), false);
                 }
+                $api->logout();
             }
-            $api->logout();
         } catch (\Exception $e) {
             $api->logout();
             $message = $this->prepareErrorMessage($e->getMessage(), $api);
@@ -155,7 +156,7 @@ class ServiceIiko extends AbstractSyncFactory
     {
         $api = iikoApi::getInstance();
         try {
-            if($api->auth()) {
+            if ($api->auth()) {
                 $api->logout();
                 return ['result' => true];
             }

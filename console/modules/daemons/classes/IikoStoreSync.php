@@ -72,7 +72,8 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
     protected function store()
     {
         //Получаем список складов
-        $stores = iikoApi::getInstance($this->orgId)->getStores();
+        $stores = $this->iikoApi->getStores();
+        $this->iikoApi->logout();
         /** Вставляем корневой склад для iiko потому что там таких нет*/
         array_unshift($stores['corporateItemDto'], ['id' => md5($this->orgId), 'name' => 'Все склады', 'type' => 'rootnode']);
         if (!empty($stores['corporateItemDto'])) {

@@ -5,7 +5,6 @@ namespace api_web\classes;
 use api_web\helpers\WebApiHelper;
 use common\models\CatalogTempContent;
 use common\models\ManagerAssociate;
-use common\models\notifications\EmailNotification;
 use common\models\RelationUserOrganization;
 use Yii;
 use api_web\exceptions\ValidationException;
@@ -19,8 +18,6 @@ use common\models\Organization;
 use common\models\RelationSuppRest;
 use yii\validators\NumberValidator;
 use yii\web\BadRequestHttpException;
-use yii\web\HttpException;
-use yii\web\UploadedFile;
 use api_web\helpers\Excel;
 
 /**
@@ -505,7 +502,7 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|data');
         }
 
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendorID, $this->user->organization);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendorID, $this->user->organization, true);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
         }
@@ -556,7 +553,7 @@ class VendorWebApi extends \api_web\components\WebApi
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException('empty_param|vendor_id');
         }
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (!$catalog) {
             throw new BadRequestHttpException("Catalog not found");
         }
@@ -674,7 +671,7 @@ class VendorWebApi extends \api_web\components\WebApi
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException('empty_param|vendor_id');
         }
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
 
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {

@@ -3,8 +3,11 @@
 namespace common\models;
 
 use api_web\behaviors\OrderContentBehavior;
+use common\helpers\DBNameHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\Query;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "order_content".
@@ -61,7 +64,8 @@ class OrderContent extends \yii\db\ActiveRecord
         return [
             [['order_id', 'product_id', 'quantity', 'price', 'product_name'], 'required'],
             [['order_id', 'product_id', 'updated_user_id', 'vat_product', 'invoice_content_id'], 'integer'],
-            [['price', 'quantity', 'initial_quantity', 'units', 'plan_price', 'plan_quantity'], 'number'],
+            [['quantity', 'initial_quantity', 'units', 'plan_price', 'plan_quantity'], 'number'],
+            [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['merc_uuid', 'edi_desadv', 'edi_alcdes', 'edi_number', 'edi_recadv', 'edi_invoice'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['order_id' => 'id']],
@@ -77,6 +81,7 @@ class OrderContent extends \yii\db\ActiveRecord
         return [
             'order_id'         => 'Order ID',
             'product_id'       => 'Product ID',
+            'product_name'     => Yii::t('app', 'common.models.product_name', ['ru' => 'Продукт']),
             'quantity'         => Yii::t('app', 'common.models.amount', ['ru' => 'Количество']),
             'initial_quantity' => Yii::t('app', 'common.models.asked_amount', ['ru' => 'Запрошенное количество']),
             'price'            => Yii::t('app', 'common.models.price_three', ['ru' => 'Цена']),
@@ -333,5 +338,20 @@ class OrderContent extends \yii\db\ActiveRecord
     {
         #В случае если связь один ко многим, выдергиваем запись, которая последняя обновилась
         return $this->hasOne(WaybillContent::class, ['order_content_id' => 'id'])->orderBy(['updated_at' => SORT_DESC])->limit(1);
+    }
+
+    /**
+     * @param $serviceId
+     * @return bool
+     */
+    public function isComparised($serviceId)
+    {
+        return (new Query())->from(self::tableName() . ' as oc')
+            ->leftJoin(DBNameHelper::getApiName() . '.' . OuterProductMap::tableName() . ' as opm', 'opm.product_id=oc.product_id AND opm.service_id = :serviceId', [':serviceId' => $serviceId])
+            ->where([
+                'oc.id'           => $this->id,
+                'organization_id' => $this->order->client_id,
+                'vendor_id'       => $this->order->vendor_id,
+            ])->exists();
     }
 }

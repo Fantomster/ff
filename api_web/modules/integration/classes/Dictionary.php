@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Fanto
- * Date: 9/18/2018
- * Time: 10:55 AM
- */
 
 namespace api_web\modules\integration\classes;
 

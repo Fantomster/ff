@@ -36,6 +36,7 @@ class OrderCatalogSearch extends \yii\base\Model
 
     /**
      * Search
+     *
      * @param array $params
      * @return ActiveDataProvider
      */
@@ -44,21 +45,22 @@ class OrderCatalogSearch extends \yii\base\Model
 
         $this->load($params);
 
-        $fieldsCBG = [
-            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id', 'cbg.category_id',
-            'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
-            "(`cbg`.`article` + 0) AS c_article_1",
-            "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
-            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'cbg.updated_at',
-            'curr.id as currency_id'
-        ];
         $fieldsCG = [
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
             "(`cbg`.`article` + 0) AS c_article_1",
             "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
             "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'coalesce( cg.updated_at, cbg.updated_at) AS updated_at',
-            'curr.id as currency_id'
+            'curr.id as currency_id', '`cbg`.edi_supplier_article'
+        ];
+
+        $fieldsCBG = [
+            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id', 'cbg.category_id',
+            'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
+            "(`cbg`.`article` + 0) AS c_article_1",
+            "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
+            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'cbg.updated_at',
+            'curr.id as currency_id', '`cbg`.edi_supplier_article'
         ];
 
         $where = '';
@@ -124,7 +126,7 @@ class OrderCatalogSearch extends \yii\base\Model
                LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
                LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
               WHERE 
-              cg.cat_id IN (" . $this->catalogs . ")
+              cat.id IN (" . $this->catalogs . ")
               " . $where . "
               AND (cbg.status = 1 AND cbg.deleted = 0)
             UNION ALL
@@ -135,25 +137,25 @@ class OrderCatalogSearch extends \yii\base\Model
                  LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
                  LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
                WHERE
-               cat_id IN (" . $this->catalogs . ")
+               cat.id IN (" . $this->catalogs . ")
                " . $where . "
                AND (cbg.status = 1 AND cbg.deleted = 0)
-        ) as c WHERE id != 0 " . $where_all . " group by c.id";
+        ) AS c WHERE id != 0 " . $where_all . " GROUP BY c.id";
         $dataProvider = new SqlDataProvider([
-            'sql' => $sql,
-            'params' => $params_sql,
+            'sql'        => $sql,
+            'params'     => $params_sql,
             'pagination' => [
-                'page' => isset($params['page']) ? ($params['page'] - 1) : 0,
+                'page'     => isset($params['page']) ? ($params['page'] - 1) : 0,
                 'pageSize' => isset($params['pageSize']) ? $params['pageSize'] : null,
-                'params' => [
+                'params'   => [
                     'sort' => isset($params['sort']) ? $params['sort'] : 'product',
                 ]
             ],
-            'sort' => [
-                'attributes' => [
+            'sort'       => [
+                'attributes'   => [
                     'product' => [
-                        'asc' => ['alf_cyr' => SORT_DESC, 'product' => SORT_ASC],
-                        'desc' => ['alf_cyr' => SORT_ASC, 'product' => SORT_DESC],
+                        'asc'     => ['alf_cyr' => SORT_DESC, 'product' => SORT_ASC],
+                        'desc'    => ['alf_cyr' => SORT_ASC, 'product' => SORT_DESC],
                         'default' => SORT_ASC
                     ],
                     'price',
@@ -165,9 +167,9 @@ class OrderCatalogSearch extends \yii\base\Model
                     'i'
                 ],
                 'defaultOrder' => [
-                    'product' => SORT_ASC,
+                    'product'     => SORT_ASC,
                     'c_article_1' => SORT_ASC,
-                    'c_article' => SORT_ASC
+                    'c_article'   => SORT_ASC
                 ]
             ],
         ]);

@@ -12,7 +12,6 @@ use common\components\edi\AbstractRealization;
 use common\components\edi\EDIClass;
 use common\components\edi\RealizationInterface;
 
-
 /**
  * Class Realization
  *
@@ -32,9 +31,9 @@ class KorusRealization extends AbstractRealization implements RealizationInterfa
         $this->edi->fileName = $this->fileName;
     }
 
-    public function parseFile($content)
+    public function parseFile($content, $providerID)
     {
-        return $this->edi->parseFile($content);
+        return $this->edi->parseFile($content, $providerID);
     }
 
     /**

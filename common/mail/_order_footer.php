@@ -60,6 +60,7 @@
                                     <a href="https://www.facebook.com/mixcartru/" target="_blank"><img src="https://mixcart.ru/img-host/facebook.png" alt="Facebook Logo" width="25" height="25" style="border:0; outline:none; text-decoration:none;"></a>
                                 </td>
                                 <td align="right">
+
                                     <a href="https://www.instagram.com/mixcart_ru/?hl=ru" target="_blank"><img src="https://mixcart.ru/img-host/instagram.png" alt="Facebook Logo" width="25" height="25" style="border:0; outline:none; text-decoration:none;"></a>
                                 </td>
                             </tr>
@@ -76,7 +77,7 @@
             <table  cellpadding="0" cellspacing="0" border="0" width="680" style="border-radius: 0 0 4px 4px;background: #ffffff; max-width: 680px; min-width: 320px;">
                 <tr>
                     <td align="center" valign="middle" height="20" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;">
-                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;"><a href="https://mixcart.ru/" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;text-decoration: underline;"><?= Yii::t('app', 'common.mail.layouts.unsubscribe', ['ru' => 'Отписаться']) ?></a> <?= Yii::t('app', 'common.mail.layouts.from_this_mailing', ['ru' => 'от этой рассылки']) ?></span>
+                        <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;"><a href="<?= \Yii::$app->urlManagerFrontend->baseUrl ?>/" target="_blank" style="font-family: 'Open Sans', Arial, sans-serif;font-size: 14px;font-weight: 300;color: #6a6a6a;text-decoration: underline;"><?= Yii::t('app', 'common.mail.layouts.unsubscribe', ['ru' => 'Отписаться']) ?></a> <?= Yii::t('app', 'common.mail.layouts.from_this_mailing', ['ru' => 'от этой рассылки']) ?></span>
                     </td>
                 </tr>
                 <tr>

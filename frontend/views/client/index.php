@@ -350,6 +350,8 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                                     case OrderStatus::STATUS_CANCELLED:
                                         $statusClass = 'cancelled';
                                         break;
+                                    default:
+                                        $statusClass = 'new';
                                 }
                                 return Html::a('<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>' ?? '', Url::to(['order/view', 'id' => $data->id]), [ 'class' => 'target-blank', 'data-pjax'=>"0"]);
                             },

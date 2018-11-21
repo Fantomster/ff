@@ -23,6 +23,7 @@ use common\models\OuterUnit;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -104,16 +105,21 @@ class AbstractDictionary extends WebApi
         $page = (isset($pag['page']) ? $pag['page'] : 1);
         $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
 
-        $search = OuterProduct::find()->where(['org_id' => $this->user->organization->id, 'service_id' => $this->service_id]);
+        $search = OuterProduct::find()->where(['service_id' => $this->service_id]);
+        $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
-            if (isset($request['search']['name'])) {
+            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', 'name', $request['search']['name']]);
             }
-//            if (isset($request['search']['is_active'])) {
-//                $search->andWhere(['is_active' => (int)$request['search']['is_active']]);
-//            }
+
+            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
+                $orgId = $request['search']['business_id'];
+            }
         }
+
+        $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
+        $search->andWhere('is_deleted = 0');
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $search->all()
@@ -130,7 +136,7 @@ class AbstractDictionary extends WebApi
         }
 
         $return = [
-            'products'   => $result,
+            'products'   => empty($result) ? null : $result,
             'pagination' => [
                 'page'       => ($dataProvider->pagination->page + 1),
                 'page_size'  => $dataProvider->pagination->pageSize,
@@ -170,17 +176,25 @@ class AbstractDictionary extends WebApi
         $page = (isset($pag['page']) ? $pag['page'] : 1);
         $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
 
-        $search = OuterAgent::find()->joinWith(['store', 'nameWaybills'])
+        $search = OuterAgent::find()
+            ->joinWith(['store', 'nameWaybills'])
             ->where([
-                '`outer_agent`.org_id'     => $this->user->organization->id,
-                '`outer_agent`.service_id' => $this->service_id
+                '`outer_agent`.service_id' => $this->service_id,
+                '`outer_agent`.is_deleted' => 0
             ]);
+        $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', '`outer_agent`.name', $request['search']['name']]);
             }
+
+            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
+                $orgId = $request['search']['business_id'];
+            }
         }
+
+        $search->andWhere('`outer_agent`.org_id = :org_id', [':org_id' => $orgId]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $search
@@ -197,7 +211,7 @@ class AbstractDictionary extends WebApi
         }
 
         $return = [
-            'agents'     => $result,
+            'agents'     => empty($result) ? null : $result,
             'pagination' => [
                 'page'       => ($dataProvider->pagination->page + 1),
                 'page_size'  => $dataProvider->pagination->pageSize,
@@ -314,13 +328,22 @@ class AbstractDictionary extends WebApi
      * */
     public function storeList($request): array
     {
-        $search = OuterStore::find()->where(['org_id' => $this->user->organization->id, 'service_id' => $this->service_id]);
+        $search = OuterStore::find()->where(['service_id' => $this->service_id]);
+        $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
+            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
+                $orgId = $request['search']['business_id'];
+            }
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
-                $search->andWhere(['like', 'name', $request['search']['name']]);
+                $result = $this->likeQueryNestedSets('outer_store', $request['search']['name'], $orgId);
+                $tree = $this->createTree($result);
+                return ['stores' => empty($tree) ? null : reset($tree)];
             }
         }
+
+        $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
+        $search->andWhere('is_deleted = 0');
 
         $rootModels = $search->roots()->indexBy('id')->all();
 
@@ -330,7 +353,7 @@ class AbstractDictionary extends WebApi
             $result = $this->prepareStore($rootModel);
         }
 
-        return ['stores' => $result];
+        return ['stores' => empty($result) ? null : $result];
     }
 
     /**
@@ -343,6 +366,7 @@ class AbstractDictionary extends WebApi
     public function storeFlatList($request)
     {
         $search = OuterStore::find()->where(['service_id' => $this->service_id]);
+        $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
@@ -350,21 +374,21 @@ class AbstractDictionary extends WebApi
             }
         }
 
-        if (isset($request['search']['organization_id'])) {
-            $find_org_id = (int)$request['search']['organization_id'];
+        if (isset($request['search']['business_id'])) {
+            $find_org_id = (int)$request['search']['business_id'];
             $organizations = (new UserWebApi())->getUserOrganizationBusinessList();
             if (!empty($organizations['result'])) {
                 $organizations = ArrayHelper::map($organizations['result'], 'id', 'name');
                 if (isset($organizations[$find_org_id])) {
-                    $search->andWhere(['org_id' => $find_org_id]);
+                    $orgId = $find_org_id;
                 } else {
                     throw new BadRequestHttpException('dictionary.access_denied');
                 }
             }
-        } else {
-            $search->andWhere(['org_id' => $this->user->organization->id]);
         }
 
+        $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
+        $search->andWhere('is_deleted = 0');
         $models = $search->orderBy(['left' => SORT_ASC])->all();
         $result = [];
 
@@ -374,14 +398,15 @@ class AbstractDictionary extends WebApi
                 $result[] = [
                     'id'          => $model->id,
                     'outer_uid'   => $model->outer_uid,
-                    'name'        => str_pad('', $model->level, "-") . $model->name,
+                    'level_name'  => str_pad('', $model->level, "-"),
+                    'name'        => $model->name,
                     'is_active'   => (bool)!$model->is_deleted,
-                    'is_category' => (bool)$model->isRoot()
+                    'is_category' => (bool)(!$model->isLeaf())
                 ];
             }
         }
 
-        return ['stores' => $result];
+        return ['stores' => empty($result) ? null : $result];
     }
 
     /***
@@ -415,23 +440,52 @@ class AbstractDictionary extends WebApi
     private function prepareStore($model)
     {
         $child = function ($model) {
-            $childrens = $model->children()->all();
+            $childrens = $model->children(1)->all();
             $arReturn = [];
-            foreach ($childrens as $children) {
-                $arReturn[] = $this->prepareStore($children);
+            if (!empty($childrens)) {
+                foreach ($childrens as $children) {
+                    $arReturn[] = $this->prepareStore($children);
+                }
             }
             return $arReturn;
         };
         return [
-            'id'         => $model->id,
-            'outer_uid'  => $model->outer_uid,
-            'name'       => $model->name,
-            'store_type' => $model->store_type,
-            'created_at' => $model->created_at,
-            'updated_at' => $model->updated_at,
-            'is_active'  => (int)!$model->is_deleted,
-            'childs'     => $child($model),
+            'id'          => $model->id,
+            'outer_uid'   => $model->outer_uid,
+            'name'        => $model->name,
+            'store_type'  => $model->store_type,
+            'created_at'  => $model->created_at,
+            'updated_at'  => $model->updated_at,
+            'is_active'   => (int)!$model->is_deleted,
+            'is_category' => (bool)(!$model->isLeaf()),
+            'childs'      => $model->isLeaf() ? [] : $child($model),
         ];
+    }
+
+    /**
+     * Функция создания дерева для Nested Sets
+     *
+     * @param      $category
+     * @param int  $left
+     * @param null $right
+     * @return array
+     */
+    private function createTree($category, $left = 0, $right = null)
+    {
+        $tree = [];
+        foreach ($category as $cat => $range) {
+            if (($range['left'] == $left + 1 || $range['left'] > $left) && (is_null($right) || $range['right'] < $right)) {
+                $tree[$cat] = [];
+                $tree[$cat] = $range;
+                if ($range['right'] - $range['left'] > 1) {
+                    $tree[$cat]['childs'] = $this->createTree($category, $range['left'], $range['right']);
+                } else {
+                    $tree[$cat]['childs'] = [];
+                }
+                $left = $range['right'];
+            }
+        }
+        return array_values($tree);
     }
 
     /**
@@ -473,13 +527,21 @@ class AbstractDictionary extends WebApi
         $page = (isset($pag['page']) ? $pag['page'] : 1);
         $pageSize = (isset($pag['page_size']) ? $pag['page_size'] : 12);
 
-        $search = OuterUnit::find()->where(['org_id' => $this->user->organization->id, 'service_id' => $this->service_id]);
+        $search = OuterUnit::find()->where(['service_id' => $this->service_id]);
+        $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
                 $search->andWhere(['like', 'name', $request['search']['name']]);
             }
+
+            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
+                $orgId = $request['search']['business_id'];
+            }
         }
+
+        $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
+        $search->andWhere('is_deleted = 0');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $search
@@ -497,7 +559,7 @@ class AbstractDictionary extends WebApi
         }
 
         $return = [
-            'units'      => $result,
+            'units'      => empty($result) ? null : $result,
             'pagination' => [
                 'page'       => ($dataProvider->pagination->page + 1),
                 'page_size'  => $dataProvider->pagination->pageSize,
@@ -516,27 +578,64 @@ class AbstractDictionary extends WebApi
      * */
     public function categoryList($request): array
     {
-        $search = OuterCategory::find()->where([
-            'org_id'     => $this->user->organization->id,
-            'service_id' => $this->service_id,
-            'is_deleted' => 0
-        ]);
+        $search = OuterCategory::find()->where(['service_id' => $this->service_id, 'is_deleted' => 0]);
+        $orgId = $this->user->organization->id;
 
-        /**
-         * TODO Не работает фильтр
-         */
         if (isset($request['search'])) {
-            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
-                $search->andWhere(['like', 'name', $request['search']['name']]);
+            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
+                $orgId = $request['search']['business_id'];
             }
+
+            if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+                $result = $this->likeQueryNestedSets('outer_category', $request['search']['name'], $orgId);
+                $tree = $this->createTree($result);
+                return ['categories' => empty($tree) ? null : reset($tree)];
+            }
+
         }
 
-        $rootModels = $search->roots()->all();
-        $result = [];
+        $search->andWhere('org_id = :org_id', [':org_id' => $orgId]);
+        $rootModels = $search->roots()->indexBy('id')->all();
+
+        $result = null;
         foreach ($this->iterator($rootModels) as $rootModel) {
             $result = $this->prepareCategory($rootModel);
         }
         return ['categories' => $result];
+    }
+
+    /**
+     * Выбор категории для загрузки
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function categorySetSelected($request): array
+    {
+        $model = OuterCategory::findOne([
+            'id'         => (int)$request['category_id'],
+            'org_id'     => $request['business_id'] ?? $this->user->organization->id,
+            'service_id' => $this->service_id
+        ]);
+
+        if (empty($model)) {
+            throw new BadRequestHttpException('dictionary.category_not_found');
+        }
+
+        if (!$model->isLeaf()) {
+            throw new BadRequestHttpException('dictionary.directory_cannot_be_selected');
+        }
+
+        $model->selected = (int)$request['selected'] ?? 0;
+        if (!$model->save()) {
+            throw new ValidationException($model->getFirstErrors());
+        }
+
+        $model->selectedParent();
+
+        return ['selected' => (bool)$model->selected];
     }
 
     /**
@@ -552,7 +651,7 @@ class AbstractDictionary extends WebApi
          * @return array
          */
         $child = function ($model) {
-            $childrens = $model->children()->all();
+            $childrens = $model->children(1)->all();
             $arReturn = [];
             if (!empty($childrens)) {
                 foreach ($this->iterator($childrens) as $children) {
@@ -563,10 +662,13 @@ class AbstractDictionary extends WebApi
         };
 
         return [
-            'id'        => $model->id,
-            'outer_uid' => $model->outer_uid,
-            'name'      => $model->name,
-            'childs'    => $model->isLeaf() ? [] : $child($model),
+            'id'         => $model->id,
+            'outer_uid'  => $model->outer_uid,
+            'name'       => $model->name,
+            'selected'   => (bool)$model->selected,
+            'created_at' => $model->created_at,
+            'updated_at' => $model->updated_at,
+            'childs'     => $model->isLeaf() ? [] : $child($model),
         ];
     }
 
@@ -579,5 +681,36 @@ class AbstractDictionary extends WebApi
         foreach ($items as $item) {
             yield $item;
         }
+    }
+
+    /**
+     * Универсальный запрос для получения обратного дерева от найденного листа для Nested Sets
+     *
+     * @param $table
+     * @param $strSearch
+     * @param $orgId
+     * @return array
+     */
+    private function likeQueryNestedSets($table, $strSearch, $orgId)
+    {
+        return (new Query())->distinct()->select([
+            'p.name',
+            'p.level',
+            'p.id',
+            'p.outer_uid',
+            'p.created_at',
+            'p.updated_at',
+            'p.`left`',
+            'p.`right`',
+            'if(p.is_deleted, 0,1) as is_active',
+        ])->from($table . ' os, ' . $table . ' p')
+            ->andWhere('os.`left` BETWEEN p.`left` and p.`right`')
+            ->andWhere(['like', 'os.name', $strSearch])
+            ->andWhere(['p.org_id' => $orgId])
+            ->andWhere(['os.org_id' => $orgId])
+            ->andWhere(['p.service_id' => $this->service_id])
+            ->andWhere(['os.service_id' => $this->service_id])
+            ->orderBy('p.`left`')
+            ->all(\Yii::$app->db_api);
     }
 }

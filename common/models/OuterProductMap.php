@@ -8,26 +8,29 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "outer_product_map".
  *
- * @property int          $id               первичный ключ
- * @property string       $created_at       Дата создания записи
- * @property string       $updated_at       Дата последнего изменения записи
- * @property int          $service_id       id сервиса из таблицы all_service
- * @property int          $organization_id  id ресторана
- * @property int          $vendor_id        id поставщика
- * @property int          $product_id       id продукта в MC
- * @property int          $outer_product_id id продукта из у.с. таблицы outer_product
- * @property int          $outer_unit_id    id единицы измерения у.с. таблицы outer_unit
- * @property int          $outer_store_id   id склада у.с. таблицы outer_store
- * @property double       $coefficient      коэффициент
- * @property double       $vat              НДС
- * @property AllService   $service
- * @property OuterProduct $outerProduct
- * @property OuterStore   $outerStore
- * @property OuterUnit    $outerUnit
- * @property Product      $product
+ * @property int              $id               первичный ключ
+ * @property string           $created_at       Дата создания записи
+ * @property string           $updated_at       Дата последнего изменения записи
+ * @property int              $service_id       id сервиса из таблицы all_service
+ * @property int              $organization_id  id ресторана
+ * @property int              $vendor_id        id поставщика
+ * @property int              $product_id       id продукта в MC
+ * @property int              $outer_product_id id продукта из у.с. таблицы outer_product
+ * @property int              $outer_unit_id    id единицы измерения у.с. таблицы outer_unit
+ * @property int              $outer_store_id   id склада у.с. таблицы outer_store
+ * @property double           $coefficient      коэффициент
+ * @property double           $vat              НДС
+ * @property AllService       $service
+ * @property OuterProduct     $outerProduct
+ * @property OuterStore       $outerStore
+ * @property OuterUnit        $outerUnit
+ * @property CatalogBaseGoods $product
  */
 class OuterProductMap extends \yii\db\ActiveRecord
 {
+    /**
+     * @return array
+     */
     public function behaviors()
     {
         return [
@@ -134,6 +137,10 @@ class OuterProductMap extends \yii\db\ActiveRecord
         return $this->hasOne(OuterUnit::className(), ['id' => 'outer_unit_id']);
     }
 
+    /**
+     * @param $org_id
+     * @return null|string
+     */
     public static function getMainOrg($org_id)
     {
         $obDicConstModel = IntegrationSetting::findOne(['name' => 'main_org']);
@@ -141,6 +148,10 @@ class OuterProductMap extends \yii\db\ActiveRecord
         return $obConstModel->value ?? null;
     }
 
+    /**
+     * @param $org_id
+     * @return array
+     */
     public static function getChildOrgsId($org_id)
     {
         $obDicConstModel = IntegrationSetting::findOne(['name' => 'main_org']);

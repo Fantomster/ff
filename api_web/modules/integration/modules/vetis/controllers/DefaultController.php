@@ -2,6 +2,7 @@
 
 namespace api_web\modules\integration\modules\vetis\controllers;
 
+use api_web\components\Registry;
 use api_web\components\WebApiController;
 use api_web\modules\integration\modules\vetis\models\VetisWaybill;
 
@@ -12,6 +13,12 @@ use api_web\modules\integration\modules\vetis\models\VetisWaybill;
  */
 class DefaultController extends WebApiController
 {
+    /**
+     * Для контроллера нужна лицензия меркурия
+     *
+     * @var int
+     */
+    public $license_service_id = Registry::MERC_SERVICE_ID;
 
     /**
      * @SWG\Post(path="/integration/vetis/groups-list",

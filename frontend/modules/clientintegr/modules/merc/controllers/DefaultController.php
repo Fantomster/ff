@@ -15,6 +15,7 @@ use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\getVetDocumen
 use frontend\modules\clientintegr\modules\merc\models\rejectedForm;
 use Yii;
 use common\components\AccessRule;
+use yii\base\Exception;
 use yii\filters\AccessControl;
 use common\models\Role;
 
@@ -170,7 +171,28 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         try {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $api = mercuryApi::getInstance();
-                
+
+                if($model->mode == rejectedForm::INPUT_MODE) {
+                    $vsd = MercVsd::findOne(['uuid' => $uuid]);
+                    $conditions = $api->getRegionalizationConditions($vsd->recipient_guid, $vsd->sender_guid, $vsd->sub_product_guid);
+
+                    if (isset($conditions)) {
+                        $model->conditionsDescription = json_encode($conditions);
+                        $model->mode = rejectedForm::CONFIRM_MODE;
+                        if (Yii::$app->request->isAjax) {
+                            return $this->renderAjax('rejected/_ajaxForm', [
+                                'model'  => $model,
+                                'volume' => $model->volume,
+                            ]);
+                        }
+
+                        return $this->render('rejected/rejectedAct', [
+                            'model'  => $model,
+                            'volume' => $model->volume,
+                        ]);
+                    }
+                }
+
                 if (!$api->getVetDocumentDone($uuid, $model->attributes)) {
                     throw new \Exception('Done error');
                 }

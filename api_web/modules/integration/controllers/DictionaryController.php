@@ -15,6 +15,16 @@ use yii\web\BadRequestHttpException;
 class DictionaryController extends \api_web\components\WebApiController
 {
     /**
+     * @param \yii\base\Action $action
+     * @return bool
+     */
+    public function beforeAction($action)
+    {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
+        return parent::beforeAction($action);
+    }
+
+    /**
      * @SWG\Post(path="/integration/dictionary/list",
      *     tags={"Integration/dictionary"},
      *     summary="Список справочников",
@@ -99,7 +109,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                  default={
      *                      "service_id": 2,
      *                      "search": {
-     *                          "name": "название"
+     *                          "name": "название",
+     *                          "business_id": "бизнес id"
      *                      },
      *                      "pagination":{
      *                          "page": 1,
@@ -149,10 +160,6 @@ class DictionaryController extends \api_web\components\WebApiController
      */
     public function actionProductList()
     {
-        if (empty($this->request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
-        }
-
         $this->response = (new Dictionary($this->request['service_id'], 'Product'))->productList($this->request);
     }
 
@@ -173,7 +180,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                  default={
      *                      "service_id": 2,
      *                      "search": {
-     *                          "name": "название"
+     *                          "name": "название",
+     *                          "business_id": "бизнес id"
      *                      },
      *                      "pagination":{
      *                          "page": 1,
@@ -332,7 +340,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                  default={
      *                      "service_id": 2,
      *                      "search": {
-     *                          "name": "название"
+     *                          "name": "название",
+     *                          "business_id": "бизнес id"
      *                      }
      *                    }
      *              )
@@ -434,7 +443,7 @@ class DictionaryController extends \api_web\components\WebApiController
      *                      "service_id": 2,
      *                      "search": {
      *                          "name": "название",
-     *                          "organization_id": 10
+     *                          "business_id": "бизнес id"
      *                      }
      *                    }
      *              )
@@ -508,7 +517,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                  default={
      *                      "service_id": 2,
      *                      "search": {
-     *                          "name": "наименование"
+     *                          "name": "наименование",
+     *                          "business_id": "бизнес id"
      *                      },
      *                      "pagination":{
      *                          "page": 1,
@@ -589,7 +599,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                  default={
      *                      "service_id": 2,
      *                      "search": {
-     *                          "name": "наименование"
+     *                          "name": "наименование",
+     *                          "business_id": "бизнес id"
      *                      }
      *                    }
      *              )
@@ -604,29 +615,44 @@ class DictionaryController extends \api_web\components\WebApiController
      *                      "id": 5,
      *                      "outer_uid": "c9319967c038f9b923068dabdf60cfe3",
      *                      "name": "Каталог",
+     *                      "selected": false,
+     *                      "created_at": "2018-10-20T12:35:19+03:00",
+     *                      "updated_at": "2018-10-26T16:13:24+03:00",
      *                      "childs": {
      *                          {
      *                              "id": 9,
      *                              "name": "Алкоголь",
      *                              "outer_uid": "91e0dd93-0923-4509-9435-6cc6224768af",
+     *                              "selected": false,
+     *                              "created_at": "2018-10-20T12:35:19+03:00",
+     *                              "updated_at": "2018-10-26T16:13:24+03:00",
      *                              "childs": {}
      *                          },
      *                          {
      *                              "id": 8,
      *                              "outer_uid": "73045059-5e4f-4358-90a4-23b2c0641e0f",
      *                              "name": "Алкоголь",
+     *                              "selected": false,
+     *                              "created_at": "2018-10-20T12:35:19+03:00",
+     *                              "updated_at": "2018-10-26T16:13:24+03:00",
      *                              "childs": {}
      *                          },
      *                          {
      *                              "id": 7,
      *                              "outer_uid": "a3acc051-bfbb-45a9-9e1a-87d2f605f76e",
      *                              "name": "Алкоголь",
+     *                              "selected": false,
+     *                              "created_at": "2018-10-20T12:35:19+03:00",
+     *                              "updated_at": "2018-10-26T16:13:24+03:00",
      *                              "childs": {}
      *                          },
      *                          {
      *                              "id": 6,
      *                              "outer_uid": "1239d270-1bbe-f64f-b7ea-5f00518ef508",
      *                              "name": "Алкоголь",
+     *                              "selected": false,
+     *                              "created_at": "2018-10-20T12:35:19+03:00",
+     *                              "updated_at": "2018-10-26T16:13:24+03:00",
      *                              "childs": {}
      *                          }
      *                      }
@@ -651,7 +677,61 @@ class DictionaryController extends \api_web\components\WebApiController
         if (!isset($this->request['service_id'])) {
             throw new BadRequestHttpException('empty_param|service_id');
         }
-        $this->response = (new Dictionary($this->request['service_id'], 'Unit'))->categoryList($this->request);
+        $this->response = (new Dictionary($this->request['service_id'], 'Category'))->categoryList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/category-set-selected",
+     *     tags={"Integration/dictionary"},
+     *     summary="Выбор категории для загрузки номенклатуры",
+     *     description="Используется для R-keeper",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 1,
+     *                      "category_id": 123,
+     *                      "selected": true,
+     *                      "business_id": 1
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "selected": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     */
+
+    public function actionCategorySetSelected()
+    {
+        if (!isset($this->request['service_id'])) {
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+        /** @var  $factory \api_web\modules\integration\classes\dictionaries\RkwsCategory */
+        $factory = (new Dictionary($this->request['service_id'], 'Category'));
+        $this->response = $factory->categorySetSelected($this->request);
     }
 
     /**

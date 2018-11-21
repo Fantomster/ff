@@ -11,6 +11,7 @@ use yii\rest\Controller;
 
 /**
  * Class WebApiNoAuth
+ *
  * @package api_web\components
  */
 class WebApiNoAuthController extends Controller
@@ -41,7 +42,6 @@ class WebApiNoAuthController extends Controller
      */
     public function init()
     {
-
         $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         if ($task_id) {
             $mcTask = OuterTask::findOne(['inner_guid' => $task_id]);
@@ -53,7 +53,6 @@ class WebApiNoAuthController extends Controller
             $task_id = null;
         }
         SyncLog::trace('Initialized init Controller as ' . __METHOD__, WebApiNoAuth::LOG_INDEX, $task_id);
-        SyncLog::trace('Try to initialized Controller->container as Component...');
         $this->container = (new WebApiNoAuth())->container;
     }
 
@@ -64,13 +63,12 @@ class WebApiNoAuthController extends Controller
     {
         $behaviors = parent::behaviors();
         $my['contentNegotiator'] = [
-            'class' => yii\filters\ContentNegotiator::class,
+            'class'   => yii\filters\ContentNegotiator::class,
             'formats' => [
                 'application/xml' => yii\web\Response::FORMAT_XML
             ]
         ];
         $behaviors = array_merge($behaviors, $my);
-        SyncLog::trace('Setup behaviors: content = application/xml');
         return $behaviors;
     }
 
@@ -80,26 +78,21 @@ class WebApiNoAuthController extends Controller
      */
     public function beforeAction($action)
     {
-
         $this->enableCsrfValidation = false;
-        SyncLog::trace('Setuped Response CsrfValidation to false');
 
         Yii::$app->response->headers->add('Access-Control-Allow-Origin', '*');
         Yii::$app->response->headers->add('Access-Control-Allow-Methods', '*');
-        SyncLog::trace('Created Response headers: Access-Control-Allow-Origin, Access-Control-Allow-Methods (*)');
 
         if (parent::beforeAction($action)) {
             Yii::$app->setTimeZone('Etc/GMT');
-            SyncLog::trace('Setup time zone');
             return true;
         }
-        SyncLog::trace('Error beforeAction');
         return false;
     }
 
     /**
      * @param yii\base\Action $action
-     * @param mixed $result
+     * @param mixed           $result
      * @return array|string
      */
     public function afterAction($action, $result)

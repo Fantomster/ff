@@ -80,6 +80,7 @@ class WaybillController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
+     *                      "service_id": 1,
      *                      "waybill_id": 5,
      *                      "order_content_id": 123
      *                  }

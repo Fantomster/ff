@@ -126,7 +126,8 @@ class UserController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  type="object",
-     *                  default={"user": {"email": "neo@neo.com","password": "new"},"profile": {"phone": "+79182225588"},"organization": {"type_id": 1}}
+     *                  default={"user": {"email": "neo@neo.com","password": "new"},"profile": {"phone":
+     *                  "+79182225588"},"organization": {"type_id": 1}}
      *              )
      *         )
      *     ),
@@ -364,7 +365,7 @@ class UserController extends WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *            default={"result":1}
+     *            default={"result":1, "jwt_token":"jwt_token"}
      *         )
      *     ),
      *     @SWG\Response(
@@ -380,7 +381,8 @@ class UserController extends WebApiController
     public function actionSetOrganization()
     {
         $this->response = [
-            'result' => $this->container->get('UserWebApi')->setOrganization($this->request)
+            'result' => $this->container->get('UserWebApi')->setOrganization($this->request),
+            'jwt_token' => $this->user->getJWTToken(\Yii::$app->jwt),
         ];
     }
 
@@ -565,7 +567,8 @@ class UserController extends WebApiController
      *                                       "email": "testsellfknm4@yandex.ru",
      *                                       "phone": "+7 925 764-84-45",
      *                                       "status": "Партнер. Каталог не назначен",
-     *                                       "picture": "https://fkeeper.s3.amazonaws.com/org-picture/b2d4e76a753e40a60fbb4002339771ca",
+     *                                       "picture":
+     *                                       "https://fkeeper.s3.amazonaws.com/org-picture/b2d4e76a753e40a60fbb4002339771ca",
      *                                       "address": "Россия, Москва, Волгоградский проспект",
      *                                       "rating": 31,
      *                                       "allow_editing": 1
@@ -589,6 +592,7 @@ class UserController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionVendors()
     {
@@ -844,18 +848,18 @@ class UserController extends WebApiController
      *                  "result": {
      *                      {
      *                          "id": "4300",
-     *                          "parent_id": "4398",
-     *                          "name": "1йцу"
+     *                          "name": "test346346",
+     *                          "license_is_active": true
      *                      },
      *                      {
-     *                          "id": "4392",
-     *                          "parent_id": "4398",
-     *                          "name": "тест сортировка"
+     *                          "id": "4300",
+     *                          "name": "test346346",
+     *                          "license_is_active": true
      *                      },
      *                      {
-     *                          "id": "4400",
-     *                          "parent_id": "4398",
-     *                          "name": "421"
+     *                          "id": "4300",
+     *                          "name": "test346346",
+     *                          "license_is_active": false
      *                      }
      *                  }
      *              }
@@ -875,6 +879,94 @@ class UserController extends WebApiController
     public function actionGetAvailableBusinesses()
     {
         $this->response = $this->container->get('UserWebApi')->getUserOrganizationBusinessList();
+    }
+
+    /**
+     * @SWG\Post(path="/user/set-agreement",
+     *     tags={"User"},
+     *     summary="Метод сохранения принятия/отказа от соглашений",
+     *     description="Доступные типы [type] соглашений: user_agreement | confidencial_policy",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "type": "user_agreement",
+     *                      "value":1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      "id": 3768,
+     *                      "type_id": 1,
+     *                      "name": "капотник",
+     *                      "city": "Омская область",
+     *                      "address": "Россия, Омск, Омская область, улица Гагарина, 14",
+     *                      "zip_code": "",
+     *                      "phone": "+7 977 879-77-83",
+     *                      "email": "yemail@yemail.ru",
+     *                      "website": "www.dmitov.com",
+     *                      "created_at": "2017-09-27 08:57:32",
+     *                      "updated_at": "2018-11-09 07:49:06",
+     *                      "step": 0,
+     *                      "legal_entity": "Legal Entity",
+     *                      "contact_name": "John Doe",
+     *                      "about": "CV",
+     *                      "picture": "5ac77834ceb67.jpg",
+     *                      "es_status": 1,
+     *                      "rating": 0,
+     *                      "white_list": 0,
+     *                      "partnership": 0,
+     *                      "lat": 54.9852,
+     *                      "lng": 73.3795,
+     *                      "country": "Россия",
+     *                      "locality": "Омская область",
+     *                      "route": "улица Гагарина",
+     *                      "street_number": "14",
+     *                      "place_id": "ChIJVVVFARD-qkMRqJukZRInTYU",
+     *                      "formatted_address": "Россия, Омск, Омская область, улица Гагарина, 14",
+     *                      "administrative_area_level_1": "Омск",
+     *                      "franchisee_sorted": 1,
+     *                      "blacklisted": 0,
+     *                      "parent_id": 4398,
+     *                      "manager_id": null,
+     *                      "is_allowed_for_franchisee": 1,
+     *                      "is_work": null,
+     *                      "inn": null,
+     *                      "kpp": null,
+     *                      "gmt": 3,
+     *                      "lang": "ru",
+     *                      "user_agreement": 1,
+     *                      "confidencial_policy": 1
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionSetAgreement()
+    {
+        $this->response = $this->container->get('UserWebApi')->setAgreement($this->request);
     }
 
 }

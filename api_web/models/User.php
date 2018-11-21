@@ -73,7 +73,7 @@ class User extends BaseUser implements RateLimitInterface
         /** @var Mailer $mailer */
         /** @var Message $message */
         // modify view path to module views
-        Yii::$app->mailer->htmlLayout = '@common/mail/layouts/mail';
+        Yii::$app->mailer->htmlLayout = '@api_web/views/mail/layouts/mail';
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
@@ -82,7 +82,7 @@ class User extends BaseUser implements RateLimitInterface
         $name = $this->profile->full_name;
         $user = $this;
         $subject = "Добро пожаловать на  MixCart";
-        $result = $mailer->compose('@common/mail/welcome', compact("subject", "type", "name", "user"))
+        $result = $mailer->compose('@api_web/views/mail/welcome', compact("subject", "type", "name", "user"))
             ->setTo($this->email)
             ->setSubject($subject)
             ->send();

@@ -97,6 +97,7 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
             ->where(['isv.org_id' => $orgId])
             ->andFilterWhere(['is.name' => $settingNames, 'is.service_id' => $serviceId])
             ->all(\Yii::$app->db_api);
+        
         if (count($dbResult) > 1 && (count($settingNames) > 1 || empty($settingNames))) {
             foreach ($dbResult as $item) {
                 $result[$item['name']] = $item['value'];

@@ -2,8 +2,10 @@
 
 namespace common\models;
 
+use api_web\components\Registry;
 use common\helpers\DBNameHelper;
 use Yii;
+use yii\behaviors\AttributesBehavior;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -33,6 +35,7 @@ use yii\behaviors\TimestampBehavior;
  * @property OuterAgent       $outerAgent
  * @property string           $edi_recadv
  * @property string           $edi_invoice
+ * @property string           $outer_document_id
  * @property WaybillContent[] $waybillContents
  */
 class Waybill extends \yii\db\ActiveRecord
@@ -77,7 +80,7 @@ class Waybill extends \yii\db\ActiveRecord
         return [
             [['acquirer_id', 'service_id'], 'required'],
             [['acquirer_id', 'status_id', 'service_id', 'vat_included', 'is_duedate', 'payment_delay'], 'integer'],
-            [['outer_duedate', 'doc_date', 'created_at', 'updated_at', 'exported_at', 'payment_delay_date'], 'safe'],
+            [['outer_duedate', 'doc_date', 'created_at', 'updated_at', 'exported_at', 'payment_delay_date', 'outer_document_id'], 'safe'],
             [['outer_number_code', 'outer_number_additional', 'outer_note', 'outer_order_date'], 'string', 'max' => 45],
             [['outer_store_id', 'outer_agent_id'], 'integer'],
         ];
@@ -100,8 +103,26 @@ class Waybill extends \yii\db\ActiveRecord
             'outer_note'              => 'Outer Note',
             'outer_order_date'        => 'Outer Order Date',
             'outer_agent_id'          => 'Outer Agent Id',
-            'vat_included'            => 'Vat Included'
+            'vat_included'            => 'Vat Included',
+            'outer_document_id'       => 'Outer Document Id'
         ];
+    }
+
+    /**
+     * @param bool $insert
+     * @return bool
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->getOldAttribute('status_id') != Registry::WAYBILL_UNLOADED) {
+                if ($this->getAttribute('status_id') == Registry::WAYBILL_UNLOADED) {
+                    $this->exported_at = gmdate("Y-m-d H:i:s");
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**

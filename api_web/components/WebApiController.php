@@ -60,6 +60,11 @@ class WebApiController extends \yii\rest\Controller
     public $not_log_actions = [];
 
     /**
+     * @var null
+     */
+    public $license_service_id = null;
+
+    /**
      * Получаем контейнер
      */
     public function init()
@@ -116,6 +121,7 @@ class WebApiController extends \yii\rest\Controller
         $headers->add('Access-Control-Allow-Origin', '*');
         $headers->add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
         $headers->add('Access-Control-Allow-Headers', 'Content-Type, Authorization, GMT');
+        $headers->add('Access-Control-Expose-Headers', 'License-Expire, License-Manager-Phone');
 
         if (\Yii::$app->request->isOptions) {
             \Yii::$app->response->statusCode = 200;
@@ -127,6 +133,7 @@ class WebApiController extends \yii\rest\Controller
         $this->enableCsrfValidation = false;
         $user = \Yii::$app->request->getBodyParam('user');
 
+        \Yii::$app->language = \Yii::$app->language ?? 'ru';
         if (isset($user['language'])) {
             \Yii::$app->language = mb_strtolower($user['language']);
         }
@@ -141,14 +148,16 @@ class WebApiController extends \yii\rest\Controller
         if (parent::beforeAction($action)) {
             $this->user = $this->container->get('UserWebApi')->getUser();
             $this->request = \Yii::$app->request->getBodyParam('request');
-            #Проверка лицензии
+            #Проверка лицензии только если это пользователь
             if (!empty($this->user)) {
-                $licenseDate = License::getDateMixCartLicense($this->user->organization_id);
-                $headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
-                $headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
-                #Проверяем, не стухла ли лицензия
-                if (strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
-                    throw new HttpException(402, 'license.payment_required', 402);
+                //Методы к которым пускаем без лицензии
+                $allow_methods_without_license = \Yii::$app->params['allow_methods_without_license'] ?? [];
+                //Если метода нет в разрешенных, проверяем лицензию
+                if (!in_array(\Yii::$app->request->getUrl(), $allow_methods_without_license)) {
+                    License::checkMixCartLicenseResponse($this->user->organization_id);
+                }
+                if (!is_null($this->license_service_id)) {
+                    License::checkLicense($this->user->organization->id, $this->license_service_id);
                 }
             }
 
@@ -192,7 +201,8 @@ class WebApiController extends \yii\rest\Controller
      * @param mixed            $result
      * @return array|string
      */
-    public function afterAction($action, $result)
+    public
+    function afterAction($action, $result)
     {
         parent::afterAction($action, $result);
         if (!empty($this->response)) {

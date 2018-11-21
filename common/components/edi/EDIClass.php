@@ -9,7 +9,7 @@ use common\models\CatalogGoods;
 use common\models\Currency;
 use common\models\EdiOrder;
 use common\models\EdiOrderContent;
-use common\models\EdiOrganization;
+use common\models\edi\EdiOrganization;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OrderStatus;
@@ -17,6 +17,7 @@ use common\models\Organization;
 use common\models\RelationSuppRest;
 use common\models\User;
 use frontend\controllers\OrderController;
+use yii\base\Controller;
 use yii\db\Expression;
 use Yii;
 
@@ -25,7 +26,7 @@ class EDIClass extends Component
     public $ediDocumentType;
     public $fileName;
 
-    public function parseFile($content)
+    public function parseFile($content, $providerID)
     {
         if (!$content) {
             return false;
@@ -36,25 +37,25 @@ class EDIClass extends Component
 
         $success = false;
         if (strpos($content, 'PRICAT>')) {
-            $success = $this->handlePriceListUpdating($simpleXMLElement);
+            $success = $this->handlePriceListUpdating($simpleXMLElement, $providerID);
         } elseif (strpos($content, 'ORDRSP>')) {
             $this->ediDocumentType = 'ORDRSP';
-            $success = $this->handleOrderResponse($simpleXMLElement, 1);
+            $success = $this->handleOrderResponse($simpleXMLElement, 1, false, $providerID);
         } elseif (strpos($content, 'DESADV>')) {
             $this->ediDocumentType = 'DESADV';
-            $success = $this->handleOrderResponse($simpleXMLElement, 2);
+            $success = $this->handleOrderResponse($simpleXMLElement, 2, false, $providerID);
         } elseif (strpos($content, 'ALCDES>')) {
             $this->ediDocumentType = 'ALCDES';
-            $success = $this->handleOrderResponse($simpleXMLElement, 3, true);
+            $success = $this->handleOrderResponse($simpleXMLElement, 3, true, $providerID);
         }
         return $success;
     }
 
-    public function handleOrderResponse(\SimpleXMLElement $simpleXMLElement, $documentType, $isAlcohol = false)
+    public function handleOrderResponse(\SimpleXMLElement $simpleXMLElement, $documentType, $isAlcohol = false, $providerID)
     {
         $orderID = $simpleXMLElement->ORDERNUMBER;
         $supplier = $simpleXMLElement->HEAD->SUPPLIER;
-        $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
+        $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier, 'provider_id' => $providerID]);
         if (!$ediOrganization) {
             return 'no EDI organization found';
         }
@@ -227,7 +228,12 @@ class EDIClass extends Component
                 }
             }
         }
-        Yii::$app->db->createCommand()->update('order', ['status' => OrderStatus::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
+        if ($isDesadv) {
+            $orderStatus = OrderStatus::STATUS_EDI_SENT_BY_VENDOR;
+        } else {
+            $orderStatus = OrderStatus::STATUS_PROCESSING;
+        }
+        Yii::$app->db->createCommand()->update('order', ['status' => $orderStatus, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
         $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
         if ($ediOrder) {
             $ediOrder->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
@@ -262,12 +268,11 @@ class EDIClass extends Component
      * @return bool
      * @throws \yii\db\Exception
      */
-    public function handlePriceListUpdating($xml, $isLeradata = false): bool
+    public function handlePriceListUpdating($xml, $providerID): bool
     {
         $supplierGLN = $xml->SUPPLIER;
         $buyerGLN = $xml->BUYER;
-        $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplierGLN]);
-
+        $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplierGLN, 'provider_id' => $providerID]);
         if (!$ediOrganization) {
             \Yii::error('No EDI organization');
             return false;
@@ -287,6 +292,9 @@ class EDIClass extends Component
             $baseCatalog->created_at = new Expression('NOW()');
         }
         $currency = Currency::findOne(['iso_code' => $xml->CURRENCY]);
+        if (!$currency) {
+            $currency = Currency::findOne(['iso_code' => 'RUB']);
+        }
         $baseCatalog->currency_id = $currency->id ?? 1;
         $baseCatalog->updated_at = new Expression('NOW()');
         $baseCatalog->save();
@@ -303,7 +311,7 @@ class EDIClass extends Component
             $goodsArray[$barcode]['article'] = (isset($good->IDBUYER) && $good->IDBUYER != '') ? (String)$good->IDBUYER : $barcode;
             $goodsArray[$barcode]['ed'] = $good->UNIT ?? (String)$good->QUANTITYOFCUINTUUNIT ?? 'шт';
             $goodsArray[$barcode]['units'] = (float)$good->PACKINGMULTIPLENESS ?? $good->UNIT;
-            $goodsArray[$barcode]['edi_supplier_article'] = $good->IDSUPPLIER ?? $barcode ?? null;
+            $goodsArray[$barcode]['edi_supplier_article'] = (String)$good->IDSUPPLIER ?? $barcode ?? null;
             $goodsArray[$barcode]['vat'] = (int)$good->TAXRATE ?? null;
         }
 
@@ -333,9 +341,13 @@ class EDIClass extends Component
         if (!$rel) {
             $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
         } else {
+            if (!$rel->cat_id) {
+                $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
+                $rel->cat_id = $relationCatalogID;
+                $rel->save();
+            }
             $relationCatalogID = $rel->cat_id;
         }
-
         foreach ($goodsArray as $barcode => $good) {
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
             if (!$catalogBaseGood) {
@@ -390,6 +402,21 @@ class EDIClass extends Component
         }
     }
 
+    private function createCatalog(Organization $organization, $currency, Organization $rest): int
+    {
+        $catalog = new Catalog();
+        $catalog->type = Catalog::CATALOG;
+        $catalog->supp_org_id = $organization->id;
+        $catalog->name = $organization->name;
+        $catalog->status = Catalog::STATUS_ON;
+        $catalog->created_at = new Expression('NOW()');
+        $catalog->updated_at = new Expression('NOW()');
+        $catalog->currency_id = $currency->id ?? 1;
+        $catalog->save();
+        $catalogID = $catalog->id;
+        return $catalogID;
+    }
+
     /**
      * @return array
      */
@@ -406,7 +433,14 @@ class EDIClass extends Component
     {
         $vendor = $order->vendor;
         $client = $order->client;
-        $string = Yii::$app->controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'vendor', 'client', 'dateArray', 'orderContent'));
+        if (Yii::$app instanceof \yii\console\Application) {
+            $controller = new Controller("", "");
+        } else {
+            $controller = Yii::$app->controller;
+        }
+
+        $glnArray = $client->getGlnCodes($client->id, $vendor->id);
+        $string = $controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'glnArray', 'dateArray', 'orderContent'));
         return $string;
     }
 

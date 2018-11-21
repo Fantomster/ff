@@ -9,13 +9,10 @@
 namespace common\components\edi\providers;
 
 use common\components\edi\AbstractProvider;
-use common\components\edi\AbstractRealization;
 use common\components\edi\ProviderInterface;
 use common\models\EdiOrder;
-use common\models\EdiOrganization;
 use common\models\OrderContent;
 use yii\base\Exception;
-use yii\web\BadRequestHttpException;
 use Yii;
 
 /**
@@ -31,34 +28,40 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
     public $client;
     public $realization;
     public $content;
-    public $ediFilesQueueID;
+    public $ediFilesQueueID = 0;
+    private $providerID;
+    public $ediOrganization;
+    private $login;
+    private $pass;
+    private $glnCode;
+    private $orgID;
 
     /**
      * Provider constructor.
      */
-    public function __construct()
+    public function __construct($ediOrganization)
     {
         $this->client = \Yii::$app->siteApi;
+        $this->providerID = parent::getProviderID(self::class);
+        $this->ediOrganization = $ediOrganization;
+        $this->login = $this->ediOrganization['login'];
+        $this->pass = $this->ediOrganization['pass'];
+        $this->glnCode = $this->ediOrganization['gln_code'];
+        $this->orgID = $this->ediOrganization['organization_id'];
     }
 
     /**
      * Get files list from provider and insert to table
      */
-    public function handleFilesList($orgId): void
+    public function handleFilesList(): void
     {
-        $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
-        if ($ediOrganization) {
-            $login = $ediOrganization['login'];
-            $pass = $ediOrganization['pass'];
-            $glnCode = $ediOrganization['gln_code'];
-            try {
-                $objectList = $this->getFilesListForInsertingInQueue($login, $pass, $glnCode);
-            } catch (\Throwable $e) {
-                Yii::error($e->getMessage());
-            }
-            if (!empty($objectList)) {
-                $this->insertFilesInQueue($objectList, $orgId);
-            }
+        try {
+            $objectList = $this->getFilesListForInsertingInQueue();
+        } catch (\Throwable $e) {
+            Yii::error($e->getMessage());
+        }
+        if (!empty($objectList)) {
+            $this->insertFilesInQueue($objectList, $this->orgID);
         }
     }
 
@@ -68,11 +71,11 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
      * @return null
      * @throws \yii\base\Exception
      */
-    public function getFilesListForInsertingInQueue($login, $pass)
+    public function getFilesListForInsertingInQueue()
     {
         $client = $this->client;
         try {
-            $object = $client->getList(['user' => ['login' => $login, 'pass' => $pass]]);
+            $object = $client->getList(['user' => ['login' => $this->login, 'pass' => $this->pass]]);
         } catch (\Throwable $e) {
             Yii::error($e->getMessage());
         }
@@ -82,50 +85,12 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
         $list = $object->result->list ?? null;
 
         if (!$list) {
-            Yii::error('No files for ' . $login);
+            Yii::error('No files for ' . $this->login);
         }
         return $list;
     }
 
-    /**
-     * @return array
-     */
-    public function getFilesList($organizationId): array
-    {
-        return (new \yii\db\Query())
-            ->select(['id', 'name'])
-            ->from('edi_files_queue')
-            ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
-            ->andWhere(['organization_id' => $organizationId])
-            ->all();
-    }
-
-    /**
-     * @param array $list
-     * @throws \yii\db\Exception
-     */
-    public function insertFilesInQueue(array $list, $orgId)
-    {
-        $batch = [];
-        $files = (new \yii\db\Query())
-            ->select(['name'])
-            ->from('edi_files_queue')
-            ->where(['name' => $list])
-            ->indexBy('name')
-            ->all();
-
-        foreach ($list as $name) {
-            if (!array_key_exists($name, $files)) {
-                $batch[] = ['name' => $name, 'organization_id' => $orgId];
-            }
-        }
-
-        if (!empty($batch)) {
-            \Yii::$app->db->createCommand()->batchInsert('edi_files_queue', ['name', 'organization_id'], $batch)->execute();
-        }
-    }
-
-    public function sendOrderInfo($order, $orgId, $done = false): bool
+    public function sendOrderInfo($order, $done = false): bool
     {
         $transaction = Yii::$app->db_api->beginTransaction();
         $result = false;
@@ -145,10 +110,8 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
                 $transaction->rollback();
                 return $result;
             }
-
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
-            $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
-            $result = $this->sendDoc($string, $ediOrganization, $done, $order);
+            $result = $this->sendDoc($string, $done, $order);
             $transaction->commit();
         } catch (Exception $e) {
             Yii::error($e);
@@ -165,13 +128,13 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
      * @param String                      $pass
      * @return bool
      */
-    public function sendDoc(String $string, $ediOrganization, $done = false, $order): bool
+    public function sendDoc(String $string, $done = false, $order): bool
     {
         $currentDate = date("Ymdhis");
         $fileName = $done ? 'recadv_' : 'order_';
         $remoteFile = $fileName . $currentDate . '_' . $order->id . '.xml';
 
-        $obj = $this->client->sendDoc(['user' => ['login' => $ediOrganization['login'], 'pass' => $ediOrganization['pass']], 'fileName' => $remoteFile, 'content' => $string]);
+        $obj = $this->client->sendDoc(['user' => ['login' => $this->login, 'pass' => $this->pass], 'fileName' => $remoteFile, 'content' => $string]);
         if (isset($obj) && isset($obj->result->errorCode) && $obj->result->errorCode == 0) {
             return true;
         } else {
@@ -187,10 +150,10 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
      * @return string
      * @throws \yii\db\Exception
      */
-    public function getDocContent(String $fileName, String $login, String $pass, $glnCode): String
+    public function getDocContent(String $fileName): String
     {
         try {
-            $doc = $this->client->getDoc(['user' => ['login' => $login, 'pass' => $pass], 'fileName' => $fileName]);
+            $doc = $this->client->getDoc(['user' => ['login' => $this->login, 'pass' => $this->pass], 'fileName' => $fileName]);
         } catch (\Throwable $e) {
             $this->updateQueue($this->ediFilesQueueID, self::STATUS_ERROR, $e->getMessage());
             Yii::error($e->getMessage());
@@ -206,15 +169,14 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
         return $content;
     }
 
-    public function getFile($item, $orgId)
+    public function getFile($item)
     {
         try {
             $this->ediFilesQueueID = $item['id'];
             $this->realization->fileName = $item['name'];
-            $ediOrganization = EdiOrganization::findOne(['organization_id' => $orgId]);
             $this->updateQueue($this->ediFilesQueueID, self::STATUS_PROCESSING, '');
             try {
-                $content = $this->getDocContent($item['name'], $ediOrganization['login'], $ediOrganization['pass'], $ediOrganization['gln_code']);
+                $content = $this->getDocContent($item['name']);
             } catch (\Throwable $e) {
                 $this->updateQueue($this->ediFilesQueueID, self::STATUS_ERROR, $e->getMessage());
                 Yii::error($e->getMessage());
@@ -235,7 +197,7 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
 
     public function parseFile($content)
     {
-        $success = $this->realization->parseFile($content);
+        $success = $this->realization->parseFile($content, $this->providerID);
         if ($success) {
             $this->updateQueue($this->ediFilesQueueID, parent::STATUS_HANDLED, '');
         } else {

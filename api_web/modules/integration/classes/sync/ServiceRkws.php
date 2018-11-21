@@ -1,19 +1,7 @@
 <?php
 
-/**
- * Class ServiceRkws
- *
- * @package   api_web\module\integration\sync
- * @createdBy Basil A Konakov
- * @createdAt 2018-09-20
- * @author    Mixcart
- * @module    WEB-API
- * @version   2.0
- */
-
 namespace api_web\modules\integration\classes\sync;
 
-use api\common\models\RkDicconst;
 use api_web\components\Registry;
 use api_web\modules\integration\classes\documents\WaybillContent;
 use common\models\IntegrationSettingValue;
@@ -23,6 +11,7 @@ use common\models\OuterCategory;
 use common\models\OuterStore;
 use common\models\Waybill;
 use Yii;
+use yii\db\ActiveRecord;
 use yii\db\Transaction;
 use yii\db\mssql\PDO;
 use yii\web\BadRequestHttpException;
@@ -30,23 +19,13 @@ use creocoder\nestedsets\NestedSetsBehavior;
 use common\models\AllServiceOperation;
 use common\models\OuterTask;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
-use api\common\models\RkService;
 use api\common\models\RkAccess;
 use api\common\models\RkSession;
 use api_web\modules\integration\classes\SyncLog;
+use common\models\OrganizationDictionary;
 
 class ServiceRkws extends AbstractSyncFactory
 {
-
-    /** List of dictionaries awailable for a service - By default it is an empty array */
-    public $dictionaryAvailable = [
-        self::DICTIONARY_AGENT,
-        self::DICTIONARY_CATEGORY,
-        self::DICTIONARY_PRODUCT,
-        self::DICTIONARY_UNIT,
-        self::DICTIONARY_STORE,
-    ];
-
     /** @var string $licenseCode License record CODE */
     public $licenseCode;
     /** @var string $licenseMixcartId License record ID */
@@ -59,6 +38,9 @@ class ServiceRkws extends AbstractSyncFactory
     public $entityTableName;
 
     public $index;
+
+    /** @var  int Заполняется при ответе от r-keeper */
+    public $orgId;
 
     public $urlCmdInit = 'http://ws.ucs.ru/WSClient/api/Client/Cmd';
     public $urlLoginInit = 'http://ws.ucs.ru/WSClient/api/Client/Login';
@@ -111,7 +93,13 @@ class ServiceRkws extends AbstractSyncFactory
 
     }
 
-    function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
+    /**
+     * Разбор полученного xml
+     *
+     * @param string|null $data
+     * @return array
+     */
+    function parsingXml(string $data = null): array
     {
         return [];
     }
@@ -133,10 +121,8 @@ class ServiceRkws extends AbstractSyncFactory
             SyncLog::trace('Cannot authorize with session or login data');
             throw new BadRequestHttpException('Cannot authorize with curl');
         }
-
-        #Если пришел запрос на обновление продуктов, и нет конкретной группы, обновляем все группы
-        # которые выбраны
-        if ($params['dictionary'] == 'product' && empty($params['product_group'])) {
+        #Если пришел запрос на обновление продуктов
+        if ($params['dictionary'] == 'product') {
 
             $models = OuterCategory::find()->where([
                 'service_id' => Registry::RK_SERVICE_ID,
@@ -147,7 +133,6 @@ class ServiceRkws extends AbstractSyncFactory
             if (empty($models)) {
                 throw new BadRequestHttpException('Не выбраны категории для загрузки товаров');
             }
-
             $params['product_group'] = $models;
         }
 
@@ -155,55 +140,68 @@ class ServiceRkws extends AbstractSyncFactory
     }
 
     /**
-     * Приватный метод отправки запроса
-     *
      * @param array $params
      * @param       $cook
      * @return array
-     * @throws BadRequestHttpException | \Exception
+     * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     private function sendRequestPrivate(array $params = [], $cook): array
     {
         $url = $this->getUrlCmd();
         $guid = UUID::uuid4();
-        $xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
-        $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
-        if ($xmlData) {
-            $xml = (array)simplexml_load_string($xmlData);
-            if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
-                $transaction = $this->createTransaction();
-                $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => static::$OperDenom]);
-                $task = new OuterTask([
-                    'service_id'     => $this->serviceId,
-                    'retry'          => 0,
-                    'org_id'         => $this->user->organization_id,
-                    'inner_guid'     => $guid,
-                    'salespoint_id'  => (string)$this->licenseMixcartId,
-                    'int_status_id'  => OuterTask::STATUS_REQUESTED,
-                    'outer_guid'     => $xml['@attributes']['taskguid'],
-                    'broker_version' => $xml['@attributes']['version'],
-                    'oper_code'      => $oper->id,
-                ]);
-                if ($task->save()) {
+
+        $dictionary = $this->getOrganizationDictionary($this->serviceId, $this->user->organization_id);
+        $transaction = $this->createTransaction();
+        try {
+            $xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
+            $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
+            if ($xmlData) {
+                $xml = (array)simplexml_load_string($xmlData);
+                //Проверка ошибок
+                $this->checkErrorResponse($xml);
+
+                if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
+                    $operation = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => static::$OperDenom]);
+                    $task = new OuterTask([
+                        'service_id'     => $this->serviceId,
+                        'retry'          => 0,
+                        'org_id'         => $this->user->organization_id,
+                        'inner_guid'     => $guid,
+                        'salespoint_id'  => (string)$this->licenseMixcartId,
+                        'int_status_id'  => OuterTask::STATUS_REQUESTED,
+                        'outer_guid'     => $xml['@attributes']['taskguid'],
+                        'broker_version' => $xml['@attributes']['version'],
+                        'oper_code'      => $operation->code
+                    ]);
+                    $task->save();
+
+                    $dictionary->status_id = $dictionary::STATUS_SEND_REQUEST;
+                    $dictionary->save();
+
                     $transaction->commit();
-                    SyncLog::trace('SUCCESS. json-response-data: ' .
-                        str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
-                    return [
-                        'task_id'        => $task->id,
-                        'task_status'    => $task->int_status_id,
-                        'service_prefix' => SyncLog::$servicePrefix,
-                        'log_index'      => SyncLog::$logIndex,
-                    ];
+                    SyncLog::trace('SUCCESS. json-response-data: ' . str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
+                    return $this->prepareModel($dictionary);
                 }
-                $transaction->rollBack();
-                SyncLog::trace('Cannot save task!');
-                throw new BadRequestHttpException('rkws_task_save_error');
             }
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            $dictionary->status_id = $dictionary::STATUS_ERROR;
+            $dictionary->save();
+            throw $e;
         }
+
         SyncLog::trace('Service connection parameters for final transaction are wrong');
         throw new BadRequestHttpException('empty_service_response_for_transaction');
     }
 
+    /**
+     * @return null|string
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
+     */
     public function prepareServiceWithAuthCheck(): ?string
     {
 
@@ -211,44 +209,27 @@ class ServiceRkws extends AbstractSyncFactory
         SyncLog::trace('Begin "auth check" in ' . __METHOD__);
         $this->now = date('Y-m-d H:i:s', time());
 
-        # 2. Find license Mixcart data
-        /**@var License $licenseMixcart */
-        $licenseMixcart = License::checkByServiceId($this->user->organization_id, Registry::RK_SERVICE_ID);
-        if (!$licenseMixcart) {
-            SyncLog::trace('Mixcart licence record with active state not found!');
+        # 2. Find license
+        /**@var License $license */
+        $license = License::checkByServiceId($this->user->organization_id, Registry::RK_SERVICE_ID);
+        if (!$license) {
+            SyncLog::trace('Нет лицензии на R-keeper для организации ' . $this->user->organization_id . '!');
             throw new BadRequestHttpException('no_active_mixcart_license');
         }
 
-        # 3. Find license Rkeeper data
-//        $license = RkService::findOne([
-//            'id'         => $licenseMixcart->service_id,
-//            // 'org' => $this->user->organization_id, поле не используется!
-//            'status_id'  => 1,
-//            'is_deleted' => 0
-//        ]);
-//        if (!$license || !$license->code || ($license->td <= $this->now)) {
-//            SyncLog::trace('RKeeper licence record with active state not found!');
-//            throw new BadRequestHttpException('no_active_rkeeper_license');
-//        }
-
         # 3. Remember license codes
         $this->licenseCode = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['code']);
-//        $this->licenseMixcartId = $licenseMixcart->id;
+        if (!$this->licenseCode) {
+            throw new BadRequestHttpException('Не задана настройка [code] для R-keeper.');
+        }
 
         # 5. Фиксируем активную лицензия найдена и инициализируем транзакции в БД
-        SyncLog::trace('Service licence record for organization #' . $this->user->organization_id .
-            ' was found (Service code and final date are ' . $this->licenseCode . '/' . $licenseMixcart['td'] . ')');
-        SyncLog::trace('Mixcart licence record for organization #' . $this->user->organization_id .
-            ' was found (License ID and final date are ' . $licenseMixcart['id'] . '/' . $licenseMixcart['td'] . ')');
         $transaction = $this->createTransaction();
 
         # 6. Пытаемся найти активную сессию и если все хорошо - то используем ее
         $sess = RkSession::findOne(['acc' => $this->user->organization_id, 'status' => 1]);
         if ($sess && $sess->cook) {
-
             # 6.1. Активная лицензия найдена - проверяем сессию в куки
-            SyncLog::trace('Service licence session with active state found with cook: [' .
-                substr($sess->cook, 0, 16) . '...]');
             $cookie = self::COOK_AUTH_PREFIX_SESSION . "=" . $sess->cook . ";";
             $xmlData = $this->sendByCurl($this->getUrlCmd(), $this->prepareXmlForTestConnection($this->licenseCode), $cookie);
 
@@ -276,7 +257,6 @@ class ServiceRkws extends AbstractSyncFactory
         $access = RkAccess::findOne(['locked' => 0]);
         if ($access) {
             SyncLog::trace('Service licence connection parameters found - try to use it');
-
             # 7.1. Try to prepare new session
             $xmlData = $this->sendByCurl($this->getUrlLogin(), $this->prepareXmlWithAuthParams($access));
             if ($xmlData) {
@@ -354,7 +334,7 @@ class ServiceRkws extends AbstractSyncFactory
      */
     public function createTransaction(): Transaction
     {
-        return \Yii::$app->db_api->beginTransaction();
+        return \Yii::$app->db_api->beginTransaction(Transaction::READ_UNCOMMITTED);
     }
 
     /**
@@ -368,14 +348,10 @@ class ServiceRkws extends AbstractSyncFactory
             $url = $this->urlCmdInit;
             if (isset(Yii::$app->params['rkeepCmdURL']) && Yii::$app->params['rkeepCmdURL']) {
                 $url = Yii::$app->params['rkeepCmdURL'];
-                SyncLog::trace('Upade request url from app:params: ' . $url);
-            } else {
-                SyncLog::trace('Upade request url from service config: ' . $url);
             }
             $this->urlCmd = $url;
-        } else {
-            SyncLog::trace('Use previously used request url: ' . $this->urlCmd);
         }
+        SyncLog::trace('Request URL getUrlCmd() : ' . $this->urlCmd);
         return $this->urlCmd;
     }
 
@@ -390,14 +366,10 @@ class ServiceRkws extends AbstractSyncFactory
             $url = $this->urlLoginInit;
             if (isset(Yii::$app->params['rkeepAuthURL']) && Yii::$app->params['rkeepAuthURL']) {
                 $url = Yii::$app->params['rkeepAuthURL'];
-                SyncLog::trace('Upade request url from app:params: ' . $url);
-            } else {
-                SyncLog::trace('Upade request url from service config: ' . $url);
             }
             $this->urlLogin = $url;
-        } else {
-            SyncLog::trace('Use previously used request url: ' . $this->urlCmd);
         }
+        SyncLog::trace('Request URL getUrlLogin() : ' . $this->urlLogin);
         return $this->urlLogin;
     }
 
@@ -409,7 +381,6 @@ class ServiceRkws extends AbstractSyncFactory
      */
     public function prepareXmlForTestConnection(string $code): string
     {
-        SyncLog::trace('Prepare XML-data type "Service test" in ' . __METHOD__);
         return '<?xml version="1.0" encoding="utf-8" ?>
     <RQ cmd="get_objectinfo">
         <PARAM name="object_id" val="' . $code . '" />
@@ -433,6 +404,9 @@ class ServiceRkws extends AbstractSyncFactory
         return '<?xml version="1.0" encoding="UTF-8"?><AUTHCMD key="' . $key . '" usr="' . base64_encode($usr) . '" />';
     }
 
+    /**
+     * @return string
+     */
     public function getCallbackURL(): string
     {
         return Yii::$app->params['rkeepCallBackURL'] . '?';
@@ -485,11 +459,9 @@ class ServiceRkws extends AbstractSyncFactory
         $result = [];
         foreach ($request['ids'] as $waybill_id) {
             # 2. Ищем накладную
-            $waybill = Waybill::findOne(['id' => $waybill_id, 'service_id' => $this->serviceId]);
-            if (!isset($waybill)) {
-                $result[$waybill_id] = false;
-                SyncLog::trace('Waybill not found in ' . __METHOD__);
-                continue;
+            $waybill = \api_web\modules\integration\classes\documents\Waybill::findOne(['id' => $waybill_id, 'service_id' => $this->serviceId]);
+            if (empty($waybill)) {
+                throw new BadRequestHttpException('Накладная ' . $waybill_id . ' не найдена ');
             }
 
             # 3. Выбираем даные по накладной для отправки
@@ -545,10 +517,13 @@ class ServiceRkws extends AbstractSyncFactory
 
             if ($xmlData) {
                 $xml = (array)simplexml_load_string($xmlData);
+                //Проверка ошибок
+                $this->checkErrorResponse($xml);
+
                 if (isset($xml['@attributes']['taskguid']) && isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 0) {
                     $transaction = $this->createTransaction();
                     $waybill->status_id = Registry::WAYBILL_UNLOADING;
-                    if (!$waybill->save()){
+                    if (!$waybill->save()) {
                         SyncLog::trace('Error while saving waybill status');
                     }
                     $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => 'sh_doc_receiving_report']);
@@ -561,53 +536,51 @@ class ServiceRkws extends AbstractSyncFactory
                         'int_status_id'  => OuterTask::STATUS_REQUESTED,
                         'outer_guid'     => $xml['@attributes']['taskguid'],
                         'broker_version' => $xml['@attributes']['version'],
-                        'oper_code'      => $oper->id,
+                        'oper_code'      => $oper->code,
                         'waybill_id'     => $waybill->id,
                     ]);
                     if ($task->save()) {
                         $transaction->commit();
                         SyncLog::trace('SUCCESS. json-response-data: ' .
                             str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
-                        $result[$waybill_id] = true;
+                        $result[] = $waybill->prepare();
                     } else {
                         $transaction->rollBack();
                         SyncLog::trace('Cannot save task!');
-                        $result[$waybill_id] = false;
+                        $result[] = $waybill->prepare();
                         //throw new BadRequestHttpException('rkws_task_save_error');
                     }
                 }
             } else {
                 SyncLog::trace('Service connection parameters for final transaction are wrong');
-                $result[$waybill_id] = false;
+                $result[] = $waybill->prepare();
             }
         }
 
         return $result;
     }
 
-    public function receiveXMLData(OuterTask $task, string $data = null)
+    /**
+     * @param OuterTask   $task
+     * @param string|null $data
+     * @return string
+     */
+    public function callbackData(OuterTask $task, string $data = null)
     {
-
-        # 1. Проверяем что данный типа справочника для организации доступен
         $orgDic = $this->getOrganizationDictionary($task->service_id, $task->org_id);
-
         # 2. Получаем массив входящих данных
-        $arrayNew = $this->makeArrayFromReceivedDictionaryXmlData($data);
-
+        $arrayNew = $this->parsingXml($data);
         # 3. Таблица справочника
-        $entityTableName = $this->entityTableName;
         /** @var yii\db\ActiveRecord $entityTableName */
-
+        $entityTableName = $this->entityTableName;
         # 4. Фиксируем вспомагательные переменные для контроля ошибок записи/обновления данных в БД
         $transaction = $this->createTransaction();
         $saveCount = 0;
         $saveErr = [];
+        # 5.2.1. Помечаем все данные как удаленные
+        $entityTableName::updateAll(['is_deleted' => 1], ['org_id' => $task->org_id, 'service_id' => $this->serviceId]);
 
         if ($this->useNestedSets) {
-
-            # 5.1.1. Обнуляем все существующие данные
-            $entityTableName::updateAll(['is_deleted' => 1], ['org_id' => $task->org_id, 'service_id' => $this->serviceId]);
-
             # 5.1.2. Получаем сведения о существовании записи root для nestedSets
             $rootModel = $entityTableName::findOne(['org_id' => $task->org_id, 'service_id' => $this->serviceId, 'level' => 0]);
             if ($rootModel && isset($rootModel->outer_uid)) {
@@ -616,18 +589,42 @@ class ServiceRkws extends AbstractSyncFactory
                 $root_rid = md5($task->org_id . $this->serviceId . microtime(true));
             }
             array_unshift($arrayNew, ['rid' => $root_rid, 'name' => 'Все', 'parent' => null]);
-
             # 5.1.3. Перебираем данные
             $list = [];
+            $arRids = array_map(function ($el) {
+                return $el['rid'];
+            }, $arrayNew);
+            $models = $entityTableName::find()
+                ->where([
+                    'outer_uid'  => $arRids,
+                    'org_id'     => $task->org_id,
+                    'service_id' => $this->serviceId
+                ])->indexBy('outer_uid')->all();
 
-            foreach ($arrayNew as $k => $v) {
-                $model = $entityTableName::findOne(['outer_uid' => $v['rid'], 'org_id' => $task->org_id, 'service_id' => $this->serviceId]);
+            foreach ($this->iterator($arrayNew) as $k => $v) {
+                /** @var ActiveRecord $model */
+                $model = $models[$v['rid']] ?? null;
                 if (!$model) {
                     $model = new $entityTableName([
                         'outer_uid'  => $v['rid'],
                         'org_id'     => $task->org_id,
                         'service_id' => $this->serviceId,
+                        'is_deleted' => 0
                     ]);
+                    if ($model->hasAttribute('parent_outer_uid')) {
+                        $model->parent_outer_uid = $v['parent'] ?? null;
+                    }
+                } else {
+                    $model->is_deleted = 0;
+                    $model->name = $v['name'];
+                    if ($model->hasAttribute('parent_outer_uid')) {
+                        $model->parent_outer_uid = $v['parent'] ?? null;
+                    }
+                    if ($model->dirtyAttributes) {
+                        $model->save();
+                    }
+                    $saveCount++;
+                    continue;
                 }
                 if (!$v['parent']) {
                     $v['parent'] = $root_rid;
@@ -637,8 +634,6 @@ class ServiceRkws extends AbstractSyncFactory
                     }
                 }
                 $list[$v['rid']] = $model;
-                /** @noinspection PhpUndefinedFieldInspection */
-                $model->is_deleted = 0;
                 /** @noinspection PhpUndefinedFieldInspection */
                 $model->name = $v['name'];
                 /** @var $model NestedSetsBehavior */
@@ -652,30 +647,24 @@ class ServiceRkws extends AbstractSyncFactory
                 } else {
                     $model->prependTo($list[$v['parent']]);
                 }
-                /** @var yii\db\ActiveRecord $model */
-                if ($model->validate() && $model->save()) {
-                    $saveCount++;
-                } else {
-                    /** @noinspection PhpUndefinedFieldInspection */
-                    $saveErr['dicElement'][$model->id][] = $model->errors;
-                }
+                $saveCount++;
             }
-
         } else {
-
-            # 5.2.1. Надохим все имеющиеся данные
-            $arrayInit = $entityTableName::findAll(['org_id' => $task->org_id, 'service_id' => $task->service_id]);
-
             # 5.2.2. Перебираем новые данные и пробуем добавить/обновить записи в БД
-            foreach ($arrayNew as $elementNew) {
-                $entity = $entityTableName::findOne(['org_id'     => $task->org_id, 'outer_uid' => $elementNew['rid'],
-                                                     'service_id' => $task->service_id]);
+            foreach ($this->iterator($arrayNew) as $elementNew) {
+                $entity = $entityTableName::findOne([
+                    'org_id'     => $task->org_id,
+                    'outer_uid'  => $elementNew['rid'],
+                    'service_id' => $task->service_id
+                ]);
+
                 if (!$entity) {
                     $entity = new $entityTableName();
                     $entity->org_id = $task->org_id;
                     $entity->outer_uid = $elementNew['rid'];
                     $entity->service_id = $task->service_id;
                 }
+
                 /** @noinspection PhpUndefinedFieldInspection */
                 foreach ($this->additionalXmlFields as $k => $v) {
                     if (isset($elementNew[$k])) {
@@ -684,64 +673,48 @@ class ServiceRkws extends AbstractSyncFactory
                 }
                 /** @noinspection PhpUndefinedFieldInspection */
                 $entity->is_deleted = 0;
-                if ($entity->save()) {
-                    $saveCount++;
-                } else {
-                    /** @noinspection PhpUndefinedFieldInspection */
-                    $saveErr['dicElement'][$entity->id][] = $entity->errors;
-                }
-                if (/** @noinspection PhpUndefinedFieldInspection */
-                array_key_exists($entity->id, $arrayInit)) {
-                    /** @noinspection PhpUndefinedFieldInspection */
-                    unset($arrayInit[$entity->id]);
+                if ($entity->dirtyAttributes) {
+                    if ($entity->save()) {
+                        $saveCount++;
+                    } else {
+                        /** @noinspection PhpUndefinedFieldInspection */
+                        $saveErr['dicElement'][$entity->id][] = $entity->errors;
+                    }
                 }
             }
-
-            # 5.2.3. Перебираем существующие данные которые подлежат удалению
-            foreach ($arrayInit as $element) {
-                /** @noinspection PhpUndefinedFieldInspection */
-                $element->is_deleted = 1;
-                if ($element->save()) {
-                    $saveCount++;
-                } else {
-                    /** @noinspection PhpUndefinedFieldInspection */
-                    $saveErr['dicElement'][$element->id][] = $element->errors;
-                }
-            }
-
         }
 
         # 6. Фиксируем изменения в текущей задаче
         if ($saveCount && !$saveErr) {
             $task->int_status_id = OuterTask::STATUS_CALLBACKED;
             $task->retry++;
-            $orgDic->count = count($arrayNew);
-            if (!$task->save() || !$orgDic->save()) {
-                $saveErr['task'][] = $task->errors;
-                /** @noinspection PhpUndefinedFieldInspection */
-                $saveErr['orgDic'][$orgDic->id][] = $orgDic->errors;
-            }
-        }
-
-        # 7. Если были запросы и нет ошибок сохранения
-        if ($saveCount && !$saveErr) {
+            $task->save();
+            $orgDic->count = $saveCount;
+            $orgDic->status_id = $orgDic::STATUS_ACTIVE;
+            $orgDic->save();
             $transaction->commit();
             SyncLog::trace('Number of save counts while there were no errors is ' . $saveCount);
             return self::XML_LOAD_RESULT_SUCCESS;
-        } elseif (!$saveErr) {
-            SyncLog::trace('No rows were inserted or updated!');
-            $saveErr = ['save' => 'no_save_data'];
         }
 
+        SyncLog::trace('No rows were inserted or updated!');
+        $saveErr = ['save' => 'no_save_data'];
         $transaction->rollback();
+        $orgDic->status_id = $orgDic::STATUS_ERROR;
+        $orgDic->save();
         SyncLog::trace('Fixed save errors: ' . json_encode($saveErr));
         return self::XML_LOAD_RESULT_FAULT;
     }
 
+    /**
+     * @param OuterTask   $task
+     * @param string|null $data
+     * @return string
+     */
     public function receiveXMLDataWaybill(OuterTask $task, string $data = null)
     {
         # 1. Получаем массив входящих данных
-        $arrayNew = $this->makeArrayFromReceivedDictionaryXmlData($data);
+        $arrayNew = $this->parsingXml($data);
 
         # 2. Фиксируем изменения в текущей задаче
         if (!empty($arrayNew['0'])) {
@@ -763,4 +736,71 @@ class ServiceRkws extends AbstractSyncFactory
         return self::XML_LOAD_RESULT_FAULT;
     }
 
+    /**
+     * Ответ на запрос синхронизации
+     *
+     * @param $model OrganizationDictionary
+     * @return array
+     */
+    private function prepareModel($model)
+    {
+        $defaultStatusText = OrganizationDictionary::getStatusTextList()[OrganizationDictionary::STATUS_DISABLED];
+        return [
+            'id'          => $model->id,
+            'name'        => $model->outerDic->name,
+            'title'       => \Yii::t('api_web', 'dictionary.' . $model->outerDic->name),
+            'count'       => $model->count ?? 0,
+            'status_id'   => $model->status_id ?? 0,
+            'status_text' => $model->statusText ?? $defaultStatusText,
+            'created_at'  => $model->created_at ?? null,
+            'updated_at'  => $model->updated_at ?? null
+        ];
+    }
+
+    /**
+     * @return array|bool
+     */
+    public function checkConnect()
+    {
+        try {
+            $cook = $this->prepareServiceWithAuthCheck();
+            $url = $this->getUrlCmd();
+            $xml = '<?xml version="1.0" encoding="utf-8"?>
+            <RQ cmd="get_objectinfo">
+                <PARAM name="object_id" val="' . $this->licenseCode . '"/>
+            </RQ>';
+            $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
+            if (!empty($xmlData)) {
+                $xml = (array)simplexml_load_string($xmlData);
+                $this->checkErrorResponse($xml);
+            } else {
+                throw new BadRequestHttpException('Bad connection.');
+            }
+            return ['result' => true];
+        } catch (\Exception $e) {
+            return ['result' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Проверка ошибок в респонсе от WS
+     *
+     * @param $xml
+     * @throws BadRequestHttpException
+     */
+    private function checkErrorResponse($xml)
+    {
+        //Если ошибка
+        if (isset($xml['ERROR']) || (isset($xml['@attributes']['code']) && $xml['@attributes']['code'] == 5)) {
+            if (isset($xml['ERROR'])) {
+                $error = (array)$xml['ERROR'];
+                $code = $error['@attributes']['code'];
+                $text = $error['@attributes']['Text'];
+            } else {
+                $code = $xml['@attributes']['code'];
+                $text = $xml['@attributes']['Text'];
+            }
+            throw new BadRequestHttpException("RESPONSE WS: " . $text . ' (code: ' . $code . ')');
+        }
+    }
 }

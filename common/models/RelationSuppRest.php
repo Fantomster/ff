@@ -10,23 +10,22 @@ use yii\helpers\ArrayHelper;
 /**
  * This is the model class for table "relation_supp_rest".
  *
- * @property integer $id
- * @property integer $rest_org_id
- * @property integer $supp_org_id
- * @property integer $cat_id
- * @property integer $invite
- * @property integer $status
- * @property string $created_at
- * @property string $updated_at
- * @property string $uploaded_catalog
- * @property booolean $uploaded_processed
- * @property booolean $is_from_market
- * @property booolean $deleted
- * 
- * @property Catalog $catalog
+ * @property integer      $id
+ * @property integer      $rest_org_id
+ * @property integer      $supp_org_id
+ * @property integer      $cat_id
+ * @property integer      $invite
+ * @property integer      $status
+ * @property string       $created_at
+ * @property string       $updated_at
+ * @property string       $uploaded_catalog
+ * @property booolean     $uploaded_processed
+ * @property booolean     $is_from_market
+ * @property booolean     $deleted
+ * @property Catalog      $catalog
  * @property Organization $client
  * @property Organization $vendor
- * @property Order $lastOrder
+ * @property Order        $lastOrder
  */
 class RelationSuppRest extends \yii\db\ActiveRecord
 {
@@ -57,19 +56,19 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public function behaviors()
     {
         return ArrayHelper::merge(parent::behaviors(), [
-                    'timestamp' => [
-                        'class' => 'yii\behaviors\TimestampBehavior',
-                        'value' => function ($event) {
-                            return gmdate("Y-m-d H:i:s");
-                        },
-                    ],
-                    [
-                        'class' => UploadBehavior::className(),
-                        'attribute' => 'uploaded_catalog',
-                        'scenarios' => ['default'],
-                        'path' => '@app/web/upload/temp/',
-                        'url' => '/upload/temp/',
-                    ],
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+            [
+                'class'     => UploadBehavior::className(),
+                'attribute' => 'uploaded_catalog',
+                'scenarios' => ['default'],
+                'path'      => '@app/web/upload/temp/',
+                'url'       => '/upload/temp/',
+            ],
         ]);
     }
 
@@ -92,10 +91,10 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'          => 'ID',
             'rest_org_id' => 'Rest Org ID',
             'supp_org_id' => 'Supp Org ID',
-            'cat_id' => Yii::t('app', 'common.models.catalogue', ['ru' => 'Каталог']),
+            'cat_id'      => Yii::t('app', 'common.models.catalogue', ['ru' => 'Каталог']),
         ];
     }
 
@@ -114,11 +113,11 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public static function GetRelationCatalogs()
     {
         $catalog = RelationSuppRest::
-                find()
-                ->select(['id', 'cat_id', 'rest_org_id', 'invite'])
-                ->where(['supp_org_id' => User::getOrganizationUser(Yii::$app->user->id)])
-                ->andWhere(['not', ['cat_id' => null]])
-                ->all();
+        find()
+            ->select(['id', 'cat_id', 'rest_org_id', 'invite'])
+            ->where(['supp_org_id' => User::getOrganizationUser(Yii::$app->user->id)])
+            ->andWhere(['not', ['cat_id' => null]])
+            ->all();
         return $catalog;
     }
 
@@ -134,16 +133,16 @@ class RelationSuppRest extends \yii\db\ActiveRecord
         $org_id = !empty($vendor_id) ? $vendor_id : $currentUser->organization_id;
         if ($const == RelationSuppRest::PAGE_CLIENTS) {
             $query = RelationSuppRest::find()
-                    ->where(['supp_org_id' => $org_id]);
+                ->where(['supp_org_id' => $org_id]);
         }
         if ($const == RelationSuppRest::PAGE_SUPPLIERS) {
             $query = RelationSuppRest::find()
-                    ->where(['rest_org_id' => $org_id]);
+                ->where(['rest_org_id' => $org_id]);
         }
         if ($const == RelationSuppRest::PAGE_CATALOG) {
             $query = RelationSuppRest::find()
-                    ->where(['supp_org_id' => $org_id])
-                    ->andWhere(['invite' => RelationSuppRest::INVITE_ON]);
+                ->where(['supp_org_id' => $org_id])
+                ->andWhere(['invite' => RelationSuppRest::INVITE_ON]);
         }
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -167,8 +166,8 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public static function row_count($id)
     {
         $count = RelationSuppRest::find()
-                ->where(['cat_id' => $id])
-                ->count();
+            ->where(['cat_id' => $id])
+            ->count();
         return $count;
     }
 
@@ -207,20 +206,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
-//        $rows = User::find()->where(['organization_id' => $this->supp_org_id, 'role_id'=>Role::ROLE_SUPPLIER_MANAGER])->all();
-//        foreach ($rows as $row) {
-//                $managerAssociate = ManagerAssociate::findOne(['manager_id'=>$row->id, 'organization_id'=>$this->supp_org_id]);
-//                if(!$managerAssociate){
-//                    $managerAssociate = new ManagerAssociate();
-//                    $managerAssociate->manager_id = $row->id;
-//                    $managerAssociate->organization_id = $this->rest_org_id;
-//                    $managerAssociate->save();
-//                }
-//        }
 
-        if (!is_a(Yii::$app, 'yii\console\Application')) {
-//            \api\modules\v1\modules\mobile\components\NotificationHelper::actionRelation($this->id);
-        }
     }
 
 }

@@ -3,6 +3,7 @@
 namespace franchise\controllers;
 
 use common\models\Catalog;
+use common\models\CatalogGoods;
 use common\models\Currency;
 use common\models\FranchiseeAssociate;
 use common\models\RelationManagerLeader;
@@ -31,7 +32,6 @@ use yii\web\UploadedFile;
 use Google\Spreadsheet\DefaultServiceRequest;
 use Google\Spreadsheet\ServiceRequestFactory;
 use Google\Spreadsheet\SpreadsheetService;
-
 
 define('CLIENT_APP_NAME', 'sonorous-dragon-167308');
 define('SERVICE_ACCOUNT_CLIENT_ID', '114798227950751078238');
@@ -66,17 +66,17 @@ class SiteController extends DefaultController
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 // We will override the default rule config with the new AccessRule class
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'requests', 'orders'],
-                'rules' => [
+                'only'       => ['index', 'setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'requests', 'orders'],
+                'rules'      => [
                     [
                         'actions' => ['index', 'setting', 'setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'requests', 'orders'],
-                        'allow' => true,
-                        'roles' => [
+                        'allow'   => true,
+                        'roles'   => [
                             Role::ROLE_FRANCHISEE_OWNER,
                             Role::ROLE_FRANCHISEE_OPERATOR,
                             Role::ROLE_FRANCHISEE_ACCOUNTANT,
@@ -90,8 +90,8 @@ class SiteController extends DefaultController
 //              throw new \yii\web\HttpException(404 ,Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
 //              } 
             ],
-            'verbs' => [
-                'class' => VerbFilter::className(),
+            'verbs'  => [
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'logout' => ['post'],
                 ],
@@ -108,9 +108,9 @@ class SiteController extends DefaultController
     {
         $currencyList = Currency::getFullCurrencyList($this->currentFranchisee->id);
         $iso_code = Currency::getMostPopularIsoCode($this->currentFranchisee->id) ?? "RUB";
-        $currencyId =  key($currencyList);
+        $currencyId = key($currencyList);
 
-        if(Yii::$app->request->get() && Yii::$app->request->isPjax) {
+        if (Yii::$app->request->get() && Yii::$app->request->isPjax) {
             $currencyId = Yii::$app->request->get('filter_currency');
             $currency = Currency::findOne($currencyId);
             $iso_code = $currency->iso_code;
@@ -120,8 +120,8 @@ class SiteController extends DefaultController
             . "FROM `order` LEFT JOIN `franchisee_associate` ON `order`.vendor_id = `franchisee_associate`.organization_id "
             . "where status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
             . "and `order`.created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY AND `franchisee_associate`.franchisee_id = " . $this->currentFranchisee->id . " ";
-        if($currencyId){
-            $query.= " AND `currency_id`=" . $currencyId . " ";
+        if ($currencyId) {
+            $query .= " AND `currency_id`=" . $currencyId . " ";
         }
         $query .= "group by year(`order`.created_at), month(`order`.created_at), day(`order`.created_at)";
         $command = Yii::$app->db->createCommand($query);
@@ -161,15 +161,14 @@ class SiteController extends DefaultController
         $searchModel = new \franchise\models\OrderSearch();
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true, $currencyId);
         $totalIncome = 0;
-        foreach ($dataProvider->getModels('Order') as $one){
-            $totalIncome+=$one->total_price;
+        foreach ($dataProvider->getModels('Order') as $one) {
+            $totalIncome += $one->total_price;
         }
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true, null);
 
         $franchiseeType = $this->currentFranchisee->type;
         return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'total30Count', 'totalCount', 'clientsCount', 'vendorsCount', 'vendorsStats30', 'vendorsStats', 'franchiseeType', 'totalIncome', 'currencyList', 'iso_code', 'currencyId'));
     }
-
 
     public function actionSettings()
     {
@@ -198,16 +197,16 @@ class SiteController extends DefaultController
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = "01.02.2017";
-        if(\Yii::$app->request->get('searchString')){
+        if (\Yii::$app->request->get('searchString')) {
             $searchModel['searchString'] = trim(\Yii::$app->request->get('searchString'));
         }
-        if(\Yii::$app->request->get('status')){
+        if (\Yii::$app->request->get('status')) {
             $searchModel['status'] = trim(\Yii::$app->request->get('status'));
         }
-        if(\Yii::$app->request->get('date_from')){
+        if (\Yii::$app->request->get('date_from')) {
             $searchModel['date_from'] = $searchModel->date_from = trim(\Yii::$app->request->get('date_from'));
         }
-        if(\Yii::$app->request->get('date_to')){
+        if (\Yii::$app->request->get('date_to')) {
             $searchModel['date_to'] = $searchModel->date_to = trim(\Yii::$app->request->get('date_to'));
         }
         $params = Yii::$app->request->getQueryParams();
@@ -240,7 +239,7 @@ class SiteController extends DefaultController
 
                 $objClientAuth->setAssertionCredentials(new \Google_Auth_AssertionCredentials (
                     SERVICE_ACCOUNT_EMAIL,
-                    array('https://spreadsheets.google.com/feeds', 'https://docs.google.com/feeds'),
+                    ['https://spreadsheets.google.com/feeds', 'https://docs.google.com/feeds'],
                     file_get_contents(SERVICE_ACCOUNT_PKCS12_FILE_PATH),
                     CLIENT_KEY_PW
                 ));
@@ -276,13 +275,13 @@ class SiteController extends DefaultController
                 $listFeed = $worksheet->getListFeed();
 
                 $listFeed->insert([
-                    'fid' => $franchise->id,
-                    'fuid' => $franchise_user->user_id,
-                    'region' => $model->region,
-                    'fio' => $model->fio,
-                    'phone' => $model->phone,
-                    'priority' => $model->priority,
-                    'message' => $model->body,
+                    'fid'           => $franchise->id,
+                    'fuid'          => $franchise_user->user_id,
+                    'region'        => $model->region,
+                    'fio'           => $model->fio,
+                    'phone'         => $model->phone,
+                    'priority'      => $model->priority,
+                    'message'       => $model->body,
                     'startdatetime' => date("Y-m-d H:i:s")
                 ]);
             }
@@ -366,8 +365,8 @@ class SiteController extends DefaultController
                 if ($user->validate() && $profile->validate()) {
                     $user->setRegisterAttributes($user->role_id, $post['User']['status'])->save();
                     $profile->setUser($user->id)->save();
-                    if ($user->role_id==Role::ROLE_FRANCHISEE_MANAGER){
-                        $rel->manager_id=$user->id;
+                    if ($user->role_id == Role::ROLE_FRANCHISEE_MANAGER) {
+                        $rel->manager_id = $user->id;
                         $rel->save();
                     }
                     $user->setFranchisee($this->currentFranchisee->id);
@@ -375,7 +374,7 @@ class SiteController extends DefaultController
                     // send email
                     $model = new Organization();
                     $model->sendGenerationPasswordEmail($user, true);
-                    $message = Yii::t('app', 'franchise.controllers.user_added', ['ru'=>'Пользователь добавлен!']);
+                    $message = Yii::t('app', 'franchise.controllers.user_added', ['ru' => 'Пользователь добавлен!']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
             }
@@ -395,14 +394,14 @@ class SiteController extends DefaultController
             ->joinWith("franchiseeUser")
             ->where([
                 'franchisee_user.franchisee_id' => $this->currentFranchisee->id,
-                'user.id' => $id
+                'user.id'                       => $id
             ])
             ->one();
         $user->setScenario("manage");
         $profile = $user->profile;
         $organizationType = Organization::TYPE_FRANCHISEE;
-        $rel = RelationManagerLeader::findOne(['manager_id'=>$id]);
-        if(!$rel){
+        $rel = RelationManagerLeader::findOne(['manager_id' => $id]);
+        if (!$rel) {
             $rel = new RelationManagerLeader();
         }
         if (Yii::$app->request->isAjax) {
@@ -414,12 +413,12 @@ class SiteController extends DefaultController
                 if ($user->validate() && $profile->validate()) {
                     $user->save();
                     $profile->save();
-                    if(empty($post['RelationManagerLeader']['leader_id'])){
+                    if (empty($post['RelationManagerLeader']['leader_id'])) {
                         $rel->delete();
-                    }else{
+                    } else {
                         $rel->save();
                     }
-                    $message = Yii::t('app', 'franchise.controllers.user_updated', ['ru'=>'Пользователь обновлен!']);
+                    $message = Yii::t('app', 'franchise.controllers.user_updated', ['ru' => 'Пользователь обновлен!']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
             }
@@ -442,25 +441,25 @@ class SiteController extends DefaultController
                     ->joinWith("franchiseeUser")
                     ->where([
                         'franchisee_user.franchisee_id' => $this->currentFranchisee->id,
-                        'user.id' => $post["id"],
+                        'user.id'                       => $post["id"],
                     ])
                     ->one();
                 $usersCount = count($this->currentFranchisee->franchiseeUsers);
                 if ($user->id == $this->currentUser->id) {
-                    $message = Yii::t('app', 'franchise.controllers.remove_yourself', ['ru'=>'Может воздержимся от удаления себя?']);
+                    $message = Yii::t('app', 'franchise.controllers.remove_yourself', ['ru' => 'Может воздержимся от удаления себя?']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
                 if ($user && ($usersCount > 1) && ($user->role_id !== Role::ROLE_FRANCHISEE_AGENT)) {
                     $user->role_id = Role::ROLE_USER;
                     $user->organization_id = null;
                     if ($user->save() && $user->franchiseeUser->delete()) {
-                        $message = Yii::t('app', 'franchise.controllers.removed', ['ru'=>'Пользователь удален!']);
+                        $message = Yii::t('app', 'franchise.controllers.removed', ['ru' => 'Пользователь удален!']);
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                 }
             }
         }
-        $message = Yii::t('app', 'franchise.controllers.cant_remove', ['ru'=>'Не удалось удалить пользователя!']);
+        $message = Yii::t('app', 'franchise.controllers.cant_remove', ['ru' => 'Не удалось удалить пользователя!']);
         return $this->renderAjax('settings/_success', ['message' => $message]);
     }
 
@@ -473,7 +472,6 @@ class SiteController extends DefaultController
     {
         return $this->render('promotion');
     }
-
 
     public function actionAjaxEditCatalogForm($catalog = null, $catId = null)
     {
@@ -520,7 +518,7 @@ class SiteController extends DefaultController
                     $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                     $catalogBaseGoods->save();
 
-                    $message = Yii::t('app', 'franchise.controllers.product_updated', ['ru'=>'Продукт обновлен!']);
+                    $message = Yii::t('app', 'franchise.controllers.product_updated', ['ru' => 'Продукт обновлен!']);
                     return $this->renderAjax('catalog/_success', ['message' => $message]);
                 }
             }
@@ -568,7 +566,7 @@ class SiteController extends DefaultController
 
             $product_id = \Yii::$app->request->post('id');
             $catalogBaseGoods = CatalogBaseGoods::updateAll([
-                'deleted' => CatalogBaseGoods::DELETED_ON,
+                'deleted'   => CatalogBaseGoods::DELETED_ON,
                 'es_status' => CatalogBaseGoods::ES_DELETED
             ], ['id' => $product_id]);
 
@@ -582,7 +580,7 @@ class SiteController extends DefaultController
     {
         set_time_limit(180);
         $cat = \common\models\Catalog::find()->where([
-            'id' => $id,
+            'id'   => $id,
             'type' => \common\models\Catalog::BASE_CATALOG
         ])->one();
 
@@ -601,8 +599,8 @@ class SiteController extends DefaultController
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
-                Yii::$app->session->setFlash('success', Yii::t('app', 'franchise.controllers.download_error', ['ru'=>'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'])
-                    . Yii::t('app', 'franchise.controllers.repeat_error', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
+                Yii::$app->session->setFlash('success', Yii::t('app', 'franchise.controllers.download_error', ['ru' => 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'])
+                    . Yii::t('app', 'franchise.controllers.repeat_error', ['ru' => '<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -623,14 +621,14 @@ class SiteController extends DefaultController
                 }
             }
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
-                Yii::$app->session->setFlash('success', Yii::t('app', 'franchise.controllers.upload_error', ['ru'=>'Ошибка загрузки каталога<br>'])
-                    . Yii::t('app', 'franchise.controllers.trying_to_upload', ['ru'=>'<small>Вы пытаетесь загрузить каталог объемом больше ']) . CatalogBaseGoods::MAX_INSERT_FROM_XLS . Yii::t('app', 'franchise.controllers.positions', ['ru'=>' позиций (Новых позиций), обратитесь к нам и мы вам поможем'])
+                Yii::$app->session->setFlash('success', Yii::t('app', 'franchise.controllers.upload_error', ['ru' => 'Ошибка загрузки каталога<br>'])
+                    . Yii::t('app', 'franchise.controllers.trying_to_upload', ['ru' => '<small>Вы пытаетесь загрузить каталог объемом больше ']) . CatalogBaseGoods::MAX_INSERT_FROM_XLS . Yii::t('app', 'franchise.controllers.positions', ['ru' => ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'])
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             if (max(array_count_values($xlsArray)) > 1) {
-                Yii::$app->session->setFlash('success', Yii::t('app', 'franchise.controllers.upload_error_two', ['ru'=>'Ошибка загрузки каталога<br>'])
-                    . Yii::t('app', 'franchise.controllers.same_art', ['ru'=>'<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '])
+                Yii::$app->session->setFlash('success', Yii::t('app', 'franchise.controllers.upload_error_two', ['ru' => 'Ошибка загрузки каталога<br>'])
+                    . Yii::t('app', 'franchise.controllers.same_art', ['ru' => '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '])
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -649,7 +647,18 @@ class SiteController extends DefaultController
                             $row_units = 0;
                         }
                         if (!in_array($row_article, $arr)) {
-                            $data_insert[] = [
+                            $new_item = new CatalogBaseGoods;
+                            $new_item->cat_id = $id;
+                            $new_item->supp_org_id = $vendor->id;
+                            $new_item->article = $row_article;
+                            $new_item->product = $row_product;
+                            $new_item->units = $row_units;
+                            $new_item->price = $row_price;
+                            $new_item->ed = $row_ed;
+                            $new_item->note = $row_note;
+                            $new_item->status = CatalogBaseGoods::STATUS_ON;
+                            $new_item->save();
+                            /*$data_insert[] = [
                                 $id,
                                 $vendor->id,
                                 $row_article,
@@ -659,10 +668,10 @@ class SiteController extends DefaultController
                                 $row_ed,
                                 $row_note,
                                 CatalogBaseGoods::STATUS_ON
-                            ];
+                            ];*/
                         } else {
                             $CatalogBaseGoods = CatalogBaseGoods::find()->where([
-                                'cat_id' => $id,
+                                'cat_id'  => $id,
                                 'article' => $row_article,
                                 'deleted' => CatalogBaseGoods::DELETED_OFF
                             ])->one();
@@ -676,27 +685,26 @@ class SiteController extends DefaultController
                         }
                     }
                 }
-                if (!empty($data_insert)) {
+                /*if (!empty($data_insert)) {
                     $db = Yii::$app->db;
                     $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
                         'cat_id', 'supp_org_id', 'article', 'product', 'units', 'price', 'ed', 'note', 'status'
                     ], $data_insert);
                     Yii::$app->db->createCommand($sql)->execute();
-                }
+                }*/
                 $transaction->commit();
                 unlink($path);
-                return $this->redirect(['catalog/basecatalog', 'vendor_id'=>$vendor_id, 'id' => $id]);
+                return $this->redirect(['catalog/basecatalog', 'vendor_id' => $vendor_id, 'id' => $id]);
             } catch (Exception $e) {
                 unlink($path);
                 $transaction->rollback();
-                Yii::$app->session->setFlash('success', Yii::t('app', 'franchise.controllers.saving_error', ['ru'=>'Ошибка сохранения, повторите действие'])
-                    . Yii::t('app', 'franchise.controllers.error_repeat', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
+                Yii::$app->session->setFlash('success', Yii::t('app', 'franchise.controllers.saving_error', ['ru' => 'Ошибка сохранения, повторите действие'])
+                    . Yii::t('app', 'franchise.controllers.error_repeat', ['ru' => '<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             }
         }
         return $this->renderAjax('catalog/_importCatalog', compact('importModel', 'vendor_id'));
     }
-
 
     /**
      * Displays general settings
@@ -711,13 +719,13 @@ class SiteController extends DefaultController
         $searchModel->date_from = "01.02.2017";
         $params = Yii::$app->request->getQueryParams();
 
-        if(\Yii::$app->request->get('searchString')){
+        if (\Yii::$app->request->get('searchString')) {
             $searchModel['searchString'] = trim(\Yii::$app->request->get('searchString'));
         }
-        if(\Yii::$app->request->get('date_from')){
+        if (\Yii::$app->request->get('date_from')) {
             $searchModel['date_from'] = $searchModel->date_from = trim(\Yii::$app->request->get('date_from'));
         }
-        if(\Yii::$app->request->get('date_to')){
+        if (\Yii::$app->request->get('date_to')) {
             $searchModel['date_to'] = $searchModel->date_to = trim(\Yii::$app->request->get('date_to'));
         }
         if (Yii::$app->request->post("RequestSearch")) {
@@ -734,7 +742,6 @@ class SiteController extends DefaultController
         }
     }
 
-
     /**
      * Displays general settings
      *
@@ -748,14 +755,13 @@ class SiteController extends DefaultController
         $request = Request::find()->where(['id' => $id])->one();
         $author = Organization::findOne(['id' => $request->rest_org_id]);
         $dataCallback = new ActiveDataProvider([
-            'query' => RequestCallback::find()->where(['request_id' => $id])->orderBy('id DESC'),
+            'query'      => RequestCallback::find()->where(['request_id' => $id])->orderBy('id DESC'),
             'pagination' => [
                 'pageSize' => 15,
             ],
         ]);
         return $this->render("request/view", compact('request', 'author', 'dataCallback'));
     }
-
 
     /**
      * Displays general settings
@@ -764,8 +770,8 @@ class SiteController extends DefaultController
      */
     public function actionUpdateRequest($id)
     {
-        $model = Request::find()->rightJoin('franchisee_associate', 'franchisee_associate.organization_id=request.rest_org_id')->where(['request.id'=>$id])->andWhere(['franchisee_associate.franchisee_id'=>$this->currentFranchisee->id])->one();
-        if(!$model){
+        $model = Request::find()->rightJoin('franchisee_associate', 'franchisee_associate.organization_id=request.rest_org_id')->where(['request.id' => $id])->andWhere(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id])->one();
+        if (!$model) {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
 

@@ -63,10 +63,16 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "count"                    => (int)$this->getTotalCount(),
             "total_price"              => CurrencyHelper::asDecimal($this->getTotalPrice()),
             "total_price_with_out_vat" => CurrencyHelper::asDecimal($this->getTotalPriceWithOutVat()),
-            "doc_date"                 => date("Y-m-d H:i:s T", strtotime($this->doc_date))
+            "doc_date"                 => date("Y-m-d H:i:s T", strtotime($this->doc_date)),
+            "outer_number_code"        => $this->outer_number_code ?? null,
+            "outer_number_additional"  => $this->outer_number_additional ?? null,
         ];
 
-        $agent = OuterAgent::findOne(['id' => $this->outer_agent_id]);
+        $agent = OuterAgent::findOne([
+            'id' => $this->outer_agent_id,
+            'org_id' => $this->acquirer_id,
+            'service_id' => $this->service_id
+        ]);
         if (!empty($agent)) {
             $return["agent"] = [
                 "id"   => (int)$agent->id,
@@ -89,7 +95,11 @@ class Waybill extends BaseWaybill implements DocumentInterface
             }
         }
 
-        $store = OuterStore::findOne(['id' => $this->outer_store_id]);
+        $store = OuterStore::findOne([
+            'id'         => $this->outer_store_id,
+            'org_id'     => $this->acquirer_id,
+            'service_id' => $this->service_id
+        ]);
         if (!empty($store)) {
             $return ["store"] = [
                 "id"   => (int)$store->id,

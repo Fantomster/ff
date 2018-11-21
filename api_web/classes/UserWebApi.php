@@ -19,6 +19,7 @@ use api_web\components\Notice;
 use common\models\RelationSuppRestPotential;
 use common\models\Organization;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
 
@@ -110,6 +111,11 @@ class UserWebApi extends \api_web\components\WebApi
             $user->setOrganization($organization, true);
             $user->setRelationUserOrganization($organization->id, $user->role_id);
             $profile = $this->createProfile($post, $user);
+
+            if (empty($organization->name)) {
+                $organization->name = $user->email;
+                $organization->save();
+            }
 
             $userToken = UserToken::generate($user->id, UserToken::TYPE_EMAIL_ACTIVATE);
             Notice::init('User')->sendSmsCodeToActivate($userToken->getAttribute('pin'), $profile->phone);
@@ -282,9 +288,13 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('Нет организации с таким id');
             }
 
+            //Список доступных бизнесов
             if (!$this->user->isAllowOrganization($organization->id)) {
                 throw new BadRequestHttpException('Нет прав переключиться на эту организацию');
             }
+
+            #Расскоментировать после отказа от первой версии
+            //License::checkMixCartLicenseResponse($organization->id);
 
             $roleID = RelationUserOrganization::getRelationRole($organization->id, $this->user->id);
 
@@ -334,6 +344,12 @@ class UserWebApi extends \api_web\components\WebApi
             $model = Organization::findOne($item['id']);
             $result[] = WebApiHelper::prepareOrganization($model);
         }
+
+        $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($result, 'id'));
+        $result = array_map(function ($item) use ($licenses) {
+            $item['license_is_active'] = isset($licenses[$item['id']]);
+            return $item;
+        }, $result);
 
         return $result;
     }
@@ -424,23 +440,15 @@ class UserWebApi extends \api_web\components\WebApi
 
         //Сортировка
         if (isset($post['sort'])) {
-
             $field = $post['sort'];
             $sort = 'ASC';
-
             if (strstr($post['sort'], '-') !== false) {
                 $field = str_replace('-', '', $field);
                 $sort = 'DESC';
             }
-
             if ($field == 'name') {
                 $field = 'vendor_name ' . $sort;
             }
-
-            if ($field == 'address') {
-                //$field = 'organization.locality ' . $sort;
-            }
-
             if ($field == 'status') {
                 switch ($sort) {
                     case 'DESC':
@@ -452,18 +460,11 @@ class UserWebApi extends \api_web\components\WebApi
                 }
                 $field = "invite {$sort}, `status` {$sort}";
             }
-
             $dataProvider->query->orderBy($field);
         }
         //Данные для ответа
         foreach ($dataProvider->models as $model) {
             $return['vendors'][] = $this->prepareVendor($model);
-        }
-        //Названия полей
-        if (isset($return['vendors'][0])) {
-            foreach (array_keys($return['vendors'][0]) as $key) {
-                $return['headers'][$key] = (new Organization())->getAttributeLabel($key);
-            }
         }
 
         return $return;
@@ -789,7 +790,7 @@ class UserWebApi extends \api_web\components\WebApi
             'address'       => implode(', ', $locality),
             'rating'        => $model->vendor->rating ?? 0,
             'allow_editing' => $model->vendor->allow_editing,
-            'is_edi'        => !empty($model->vendor->organizationGln) ? true : false
+            'is_edi'        => $model->vendor->isEdi(),
         ];
     }
 
@@ -841,11 +842,15 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
+     * @param string $indexByField
      * @return array
      */
-    public function getUserOrganizationBusinessList()
+    public function getUserOrganizationBusinessList(string $indexByField = null)
     {
-        $res = (new Query())->select(['a.id', 'a.name'])->distinct()->from('organization a')
+        $resQuery = (new Query())
+            ->select(['a.id', 'a.name'])
+            ->distinct()
+            ->from('organization a')
             ->leftJoin('relation_user_organization b', 'a.id = b.organization_id, (select id, parent_id from organization where id = :orgId) c', [':orgId' => $this->user->organization_id])
             ->where('coalesce(a.parent_id, a.id) = coalesce(c.parent_id, c.id)')
             ->andWhere([
@@ -857,7 +862,17 @@ class UserWebApi extends \api_web\components\WebApi
                     Role::ROLE_RESTAURANT_BUYER,
                     Role::ROLE_ADMIN,
                 ]
-            ])->all();
+            ]);
+        if (!is_null($indexByField)) {
+            $resQuery->indexBy($indexByField);
+        }
+        $res = $resQuery->all();
+
+        $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($res, 'id'));
+        $res = array_map(function ($item) use ($licenses) {
+            $item['license_is_active'] = isset($licenses[$item['id']]);
+            return $item;
+        }, $res);
 
         return ['result' => $res];
     }
@@ -971,5 +986,34 @@ class UserWebApi extends \api_web\components\WebApi
             $transaction->rollback();
             throw $e;
         }
+    }
+
+    /**
+     * Установка флага принятого соглашения  для текущей органищации
+     * Нельзя установить уже "принятое" соглашение в "не принятое"
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function setAgreement($request)
+    {
+        $org = $this->user->organization;
+        $this->validateRequest($request, ['type', 'value']);
+        $user_agreement = $org->user_agreement;
+        $confidencial_policy = $org->confidencial_policy;
+        if (!array_key_exists($request['type'], get_defined_vars())) {
+            throw new BadRequestHttpException('user.wrong_agreement_name');
+        }
+        if ($request['value'] == 0 && ${$request['type']} == 1) {
+            throw new BadRequestHttpException('user.cannot_disable_accepted_agreement');
+        }
+        $org->{$request['type']} = $request['value'];
+        if (!$org->save()) {
+            throw new ValidationException($org->getFirstErrors());
+        }
+
+        return ['result' => $org];
     }
 }

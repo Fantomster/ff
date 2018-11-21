@@ -9,6 +9,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 use api\common\models\RkServicedata;
+use common\models\edi\EdiOrganization;
 use common\models\licenses\LicenseOrganization;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -57,6 +58,8 @@ use common\models\guides\Guide;
  * @property string              $kpp
  * @property integer             $parent_id
  * @property integer             $gmt
+ * @property integer             $user_agreement
+ * @property integer             $confidencial_policy
  * @property string              $action
  * @property integer             $blacklisted
  * @property OrganizationType    $type
@@ -76,7 +79,8 @@ use common\models\guides\Guide;
  * @property Guide[]             $guides
  * @property Catalog             $baseCatalog
  * @property EdiOrganization     $ediOrganization
- * @property AdditionalEmail[]   additionalEmail
+ * @property AdditionalEmail[]   $additionalEmail
+ * @property OrganizationGln     $organizationGln
  */
 class Organization extends \yii\db\ActiveRecord
 {
@@ -136,7 +140,7 @@ class Organization extends \yii\db\ActiveRecord
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
             [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'common.models.organization_address_error', ['ru' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'])],
             [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id', 'blacklisted', 'gmt'], 'integer'],
-            [['created_at', 'updated_at', 'white_list', 'partnership', 'inn', 'kpp', 'lang'], 'safe'],
+            [['created_at', 'updated_at', 'white_list', 'partnership', 'inn', 'kpp', 'lang', 'user_agreement', 'confidencial_policy'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1', 'action'], 'string', 'max' => 255],
             [['gln_code'], 'integer', 'min' => 1000000000000, 'max' => 99999999999999999, 'tooSmall' => 'Too small value', 'tooBig' => 'To big value'],
             [['gln_code'], 'unique'],
@@ -145,8 +149,8 @@ class Organization extends \yii\db\ActiveRecord
             [['email'], 'email'],
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
-            [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationGln::className(), 'targetAttribute' => ['id' => 'org_id']],
-            [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
+            [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => EdiOrganization::className(), 'targetAttribute' => ['id' => 'organization_id']],
+            [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => ['settings', 'logo']],
             [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
             [['inn'], 'match', 'pattern' => '/^[0-9]{10}$|^[0-9]{12}$/', 'message' => Yii::t('app', 'common.models.organization_inn_error', ['ru' => 'Поле должно состоять из 10 или 12 цифр'])],
             [['kpp'], 'match', 'pattern' => '/^[0-9]{9}$/', 'message' => Yii::t('app', 'common.models.organization_kpp_error', ['ru' => 'Поле должно состоять из 9 цифр'])],
@@ -168,7 +172,7 @@ class Organization extends \yii\db\ActiveRecord
             [
                 'class'     => ImageUploadBehavior::className(),
                 'attribute' => 'picture',
-                'scenarios' => ['settings'],
+                'scenarios' => ['settings', 'logo'],
                 'path'      => '@app/web/upload/temp',
                 'url'       => '/upload/temp',
                 'thumbs'    => [
@@ -254,17 +258,30 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getEdiOrganization(): ActiveQuery
     {
-        return $this->hasOne(EdiOrganization::className(), ['organization_id' => 'id']);
-    }
-
-    public function getOrganizationGln(): ActiveQuery
-    {
-        return $this->hasOne(OrganizationGln::className(), ['org_id' => 'id']);
+        return $this->hasMany(EdiOrganization::className(), ['organization_id' => 'id']);
     }
 
     public function getGlnCode()
     {
-        return $this->organizationGln->gln_number;
+        return $this->ediOrganization->gln_code;
+    }
+
+    public function getGlnCodes($clientID, $vendorID)
+    {
+        $clientEdiOrganizations = EdiOrganization::findAll(['organization_id' => $clientID]);
+        $vendorEdiOrganizations = EdiOrganization::findAll(['organization_id' => $vendorID]);
+        foreach ($clientEdiOrganizations as $client) {
+            foreach ($vendorEdiOrganizations as $vendor) {
+                if ($client->provider_id == $vendor->provider_id) {
+                    return [
+                        'client_gln'  => $client->gln_code,
+                        'vendor_gln'  => $vendor->gln_code,
+                        'provider_id' => $vendor->provider_id
+                    ];
+                }
+            }
+        }
+        return [];
     }
 
     /**
@@ -275,10 +292,9 @@ class Organization extends \yii\db\ActiveRecord
     public function isEdi()
     {
         $query = $this->ediOrganization;
+
         if (!empty($query)) {
-            if (isset($query->gln_code) && $query->gln_code > 0) {
-                return true;
-            }
+            return true;
         }
         return false;
     }

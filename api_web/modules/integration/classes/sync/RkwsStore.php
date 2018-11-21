@@ -1,15 +1,5 @@
 <?php
 
-/**
- * Class RkwsStore
- * @package api_web\module\integration\sync
- * @createdBy Basil A Konakov
- * @createdAt 2018-09-20
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
- */
-
 namespace api_web\modules\integration\classes\sync;
 
 use api_web\modules\integration\classes\SyncLog;
@@ -27,9 +17,15 @@ class RkwsStore extends ServiceRkws
     /** @var string $OperDenom Поле Denom в таблице all_service_operation */
     public static $OperDenom = 'sh_get_stores';
 
+    /** @var bool */
     public $useNestedSets = true;
 
-    public function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
+    /**
+     * @param string|null $data
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function parsingXml(string $data = null): array
     {
         $myXML = simplexml_load_string($data);
         SyncLog::trace('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);
@@ -39,13 +35,13 @@ class RkwsStore extends ServiceRkws
         }
         $array = [];
         $scount = 0;
-        foreach ($myXML->STOREGROUP as $storegroup) {
+        foreach ($this->iterator($myXML->STOREGROUP) as $storegroup) {
             $scount++;
             $grid = (string)$storegroup->attributes()->rid;
             $array[$scount]['rid'] = $grid;
             $array[$scount]['name'] = (string)$storegroup->attributes()->name;
             $array[$scount]['parent'] = null;
-            foreach ($storegroup->STORE as $store) {
+            foreach ($this->iterator($storegroup->STORE) as $store) {
                 $scount++;
                 foreach ($store->attributes() as $k => $v) {
                     $array[$scount][$k] = strval($v[0]);

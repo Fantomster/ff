@@ -39,6 +39,8 @@ class OrderBehavior extends Behavior
     {
         //Если настройки автосоздания выключены для всех сервисов, тогда выход
         $obj = new WaybillHelper();
+        $obj->user = $this->model->createdBy;
+        $obj->orgId = $this->model->client_id;
         $arExcludedServices = $obj->getExcludedServices();
         if (count($obj->settings) == count($arExcludedServices)) {
             return;

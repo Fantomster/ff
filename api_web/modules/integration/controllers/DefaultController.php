@@ -2,6 +2,8 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\modules\integration\classes\SyncServiceFactory;
+
 class DefaultController extends \api_web\components\WebApiController
 {
     /**
@@ -99,7 +101,8 @@ class DefaultController extends \api_web\components\WebApiController
      *                      "search": {
      *                              "product": "Апельсины",
      *                              "vendor": 1,
-     *                              "business_id": 1
+     *                              "business_id": 1,
+     *                              "product_id": 2,
      *                       },
      *                      "pagination": {
      *                          "page": 1,
@@ -168,6 +171,7 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionMapList()
     {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
         $this->response = $this->container->get('IntegrationWebApi')->getProductMapList($this->request);
     }
 
@@ -236,6 +240,52 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionMapUpdate()
     {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
         $this->response = $this->container->get('IntegrationWebApi')->mapUpdate($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/default/check-connect",
+     *     tags={"Integration"},
+     *     summary="Проверка, доступно ли подключение к серверу интеграции",
+     *     description="Проверка, доступно ли подключение к серверу интеграции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                          "service_id": 2
+     *                       }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={ "result":true }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * )
+     * @throws \Exception
+     */
+    public function actionCheckConnect()
+    {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
+        $this->response = SyncServiceFactory::init($this->request['service_id'])->checkConnect();
     }
 }

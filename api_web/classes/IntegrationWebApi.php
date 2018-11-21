@@ -6,13 +6,14 @@ use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\OuterProductMapHelper;
+use api_web\modules\integration\classes\OuterProductMapper;
+use common\models\AllService;
 use common\models\CatalogBaseGoods;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OuterAgent;
 use common\models\OuterProduct;
-use common\models\OuterProductMap;
 use common\models\OuterStore;
 use common\models\OuterUnit;
 use common\models\search\OuterProductMapSearch;
@@ -72,13 +73,12 @@ class IntegrationWebApi extends WebApi
      */
     public function list()
     {
-        $result = array_values(License::getAllLicense($this->user->organization_id, Registry::$integration_services));
+        $result = array_values(AllService::getAllServiceAndLicense($this->user->organization_id, Registry::$integration_services));
         $user_service_id = $this->user->integration_service_id;
         $result = array_map(function ($item) use ($user_service_id) {
-            $item['is_default'] = $user_service_id == $item['service_id'] ? true : false;
+            $item['is_default'] = $user_service_id == $item['id'] ? true : false;
             return $item;
         }, $result);
-
         return [
             'services' => $result
         ];
@@ -626,7 +626,7 @@ class IntegrationWebApi extends WebApi
                 $this->editProductMap($post['service_id'], $item);
                 $result[$item['product_id']] = ['success' => true];
             } catch (\Exception $e) {
-                $result[$item['product_id']] = ['success' => false, 'error' => $e->getMessage()];
+                $result[$item['product_id']] = ['success' => false, 'error' => \Yii::t('api_web', $e->getMessage())];
             }
         }
         return $result;
@@ -645,81 +645,10 @@ class IntegrationWebApi extends WebApi
         $this->validateRequest($request, ['product_id']);
 
         //Загружаем данные по базовому и дочерним бизнесам (если бизнес главный)
-        $mainOrg = OuterProductMap::getMainOrg($this->user->organization_id);
-        $orgs = OuterProductMap::getChildOrgsId($this->user->organization_id);
-        $orgs[] = $this->user->organization_id;
-
-        if (isset($request['outer_product_id'])) {
-            //Если бизнес не главный то менять соспоставление с продуктом нельзя
-            if ($mainOrg) {
-                unset($request['outer_product_id']);
-            } else {
-                //Проверяем что сопоставляемый продукт свзан с нашей организацией
-                $check = OuterProduct::find()
-                    ->where(['id' => $request['outer_product_id']])
-                    ->andWhere(['org_id' => $this->user->organization_id])
-                    ->one();
-
-                if (!$check) {
-                    throw new Exception('outer product not found');
-                }
-            }
-        }
-
-        //Проверяем что сопоставляемый склад свзан с нашей организацией
-        if (isset($request['outer_store_id'])) {
-            $check = OuterStore::find()->where(['id' => $request['outer_store_id']])
-                ->andWhere(['org_id' => $this->user->organization_id])
-                ->one();
-
-            if (!$check) {
-                throw new Exception('outer store not found');
-            }
-        }
-
-        //Если меняется сопоставление с продуктом, и бищнес главнй и есть дочерние бизнесы, то обновляем соспоставление в их записях
-        if (isset($request['outer_product_id']) && count($orgs) > 1 && !$mainOrg) {
-            $condition = [
-                'and',
-                ['service_id' => $service_id],
-                ['product_id' => $request['product_id']],
-                ['in', 'organization_id', $orgs]
-            ];
-
-            OuterProductMap::updateAll(['outer_product_id' => $request['outer_product_id']], $condition);
-        }
-
-        //Ищем запись для редактирования
-        $model = OuterProductMap::findOne(['product_id' => $request['product_id'], 'service_id' => $service_id, 'organization_id' => $this->user->organization_id]);
-        if (!$mainOrg) {
-            if (!$model) {
-                $model = new OuterProductMap();
-                $model->service_id = $service_id;
-                $model->organization_id = $this->user->organization_id;
-            }
-        } else {
-            //Создаем дубликат запииси для дочерней организации при необходимости или новую запись
-            if ($model->organization_id != $this->user->organization_id) {
-                $mainAttributes = $model->attributes();
-                $model = new OuterProductMap();
-                $model->service_id = $mainAttributes['service_id'];
-                $model->organization_id = $this->user->organization_id;
-                $model->vendor_id = $mainAttributes['vendor_id'];
-                $model->product_id = $mainAttributes['product_id'];
-                $model->outer_product_id = $mainAttributes['outer_product_id'];
-                $model->outer_unit_id = $mainAttributes['outer_unit_id'];
-                $model->outer_store_id = $mainAttributes['outer_store_id'];
-                $model->coefficient = $mainAttributes['coefficient'];
-                $model->vat = $mainAttributes['vat'];
-            }
-        }
-
-        $model->attributes = $request;
-        $model->outer_unit_id = $model->outerProduct->outer_unit_id;
-        $model->vendor_id = $model->product->supp_org_id;
-        if (!$model->save()) {
-            throw new ValidationException($model->getFirstErrors());
-        }
+        $mapper = new OuterProductMapper($this->user->organization_id, $service_id);
+        $mapper->loadRequest($request);
+        $mapper->updateChildsMap();
+        $mapper->updateModel();
     }
 
     /**

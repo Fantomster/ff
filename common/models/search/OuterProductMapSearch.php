@@ -20,8 +20,7 @@ class OuterProductMapSearch extends OuterProductMap
      * @param $post
      * @return SqlDataProvider
      */
-    public function search($client, $post)
-    {
+    public function search($client, $post) {
         $dbName = "`" . DBNameHelper::getApiName() . "`.";
         $outerProductMapTableName = $dbName . OuterProductMap::tableName();
         $outerProductTableName = $dbName . OuterProduct::tableName();
@@ -71,21 +70,29 @@ class OuterProductMapSearch extends OuterProductMap
 
         if (isset($post['search'])) {
             /**
-             * фильтр по продукту
+             * фильтр по id продукта
              */
-            if (!empty($post['search']['product'])) {
-                $query->andFilterWhere(['like', "$outerProductTableName.`name`", $post['search']['product']]);
-                $query->orFilterWhere(['like', "`$catalogBaseGoodsTableName`.`product`", $post['search']['product']]);
-            }
-            /**
-             * фильтр по поставщику
-             */
-            if (!empty($post['search']['vendor'])) {
-                $vendors = [$post['search']['vendor']];
+            if (!empty($post['search']['product_id'])) {
+                $query->andFilterWhere(["=", "`$catalogBaseGoodsTableName`.`id`", $post['search']['product_id']]);
+            } else {
+                /**
+                 * фильтр по продукту
+                 */
+                if (!empty($post['search']['product'])) {
+                    $query->andFilterWhere(['like', "$outerProductTableName.`name`", $post['search']['product']]);
+                    $query->orFilterWhere(['like', "`$catalogBaseGoodsTableName`.`product`", $post['search']['product']]);
+                }
+                /**
+                 * фильтр по поставщику
+                 */
+                if (!empty($post['search']['vendor'])) {
+                    $vendors = [$post['search']['vendor']];
+                }
             }
         }
 
         $query->andWhere(['in', "$catalogBaseGoodsTableName.supp_org_id", $vendors]);
+
         $query->orderBy([
             'IF(outer_product_id is null, 0, 1)' => SORT_DESC,
             'outer_product_id' => SORT_ASC,
@@ -93,7 +100,8 @@ class OuterProductMapSearch extends OuterProductMap
         ]);
 
         $dataProvider = new SqlDataProvider([
-            'sql' => $query->createCommand()->getRawSql()
+            'sql' => $query->createCommand()->getRawSql(),
+            'key' => 'product_id'
         ]);
 
         return $dataProvider;

@@ -19,6 +19,8 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
 
     public $localTransactionId;
     public $initiator;
+    public $conditions;
+    public $conditionsDescription;
     //step-1
     public $step1;
     //step-2
@@ -59,15 +61,24 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
 
         $delivery = new Delivery();
         $delivery->consignor = new BusinessMember();
-        $delivery->consignor->enterprise = (cerberApi::getInstance()->getEnterpriseByGuid($enterprise));
-        $delivery->consignor->businessEntity = (cerberApi::getInstance()->getBusinessEntityByGuid($hc));
+        $delivery->consignor->enterprise = new Enterprise();
+        $delivery->consignor->enterprise->guid = $enterprise;
+        $delivery->consignor->businessEntity = new BusinessEntity();
+        $delivery->consignor->businessEntity->guid = $hc;
 
         $delivery->consignee = new BusinessMember();
-        $delivery->consignee->enterprise = (cerberApi::getInstance()->getEnterpriseByGuid($this->step3['recipient']));
-        $delivery->consignee->businessEntity = (cerberApi::getInstance()->getBusinessEntityByGuid($this->step3['hc']));
+        $delivery->consignee->enterprise = new Enterprise();
+        $delivery->consignee->enterprise->guid = $this->step3['recipient'];
+        $delivery->consignee->businessEntity = new BusinessEntity();
+        $delivery->consignee->businessEntity->guid = $this->step3['hc'];
 
         $consigments = [];
         $vetCertificates = [];
+
+        if(isset($this->conditions)) {
+            $this->conditions = json_decode($this->conditions, true);
+        }
+
         foreach ($this->step1 as $id => $product) {
             $consigment = new Consignment();
             $consigment->id = 'con'.$id;
@@ -89,12 +100,24 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
 
             $vetCertificate = new VetDocument();
             $vetCertificate->for = 'con'.$id;
-            $vetCertificate->authentication = new VeterinaryAuthentication();
-            $vetCertificate->authentication->purpose = new Purpose();
-            $vetCertificate->authentication->purpose->guid = $this->step2['purpose'];
-            $vetCertificate->authentication->cargoExpertized = $this->step2['cargoExpertized'];
-            $vetCertificate->authentication->locationProsperity = $this->step2['locationProsperity'];
+            $authentication['purpose']['guid'] = $this->step2['purpose'];
+            $authentication['cargoExpertized'] = $this->step2['cargoExpertized'];
+            $authentication['locationProsperity'] = $this->step2['locationProsperity'];
 
+            //Заполняем условия регионализации при необходимости
+           //var_dump($this->conditions); die();
+            if(isset($this->conditions[$product['product_name']])) {
+                $conditions = null;
+                $buff = $this->conditions[$product['product_name']];
+                foreach ($buff as $key=>$item) {
+                    $r13nClause = new RegionalizationClause();
+                    $r13nClause->condition = new RegionalizationCondition();
+                    $r13nClause->condition->guid = $key;
+                    $conditions[] = $r13nClause;
+                }
+                $authentication['r13nClause'] = $conditions;
+            }
+            $vetCertificate->authentication = $authentication;
             $vetCertificates[] = $vetCertificate;
         }
 
@@ -127,4 +150,19 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
         return $request;
     }
 
+    public function checkShipmentRegionalizationOperation ()
+    {
+        foreach ($this->step1 as $id => $product) {
+            $stock = MercStockEntry::findOne(['id' => $id]);
+            $stock_raw = json_decode(json_encode(unserialize($stock->raw_data)), true);
+
+            $cond = mercuryApi::getInstance()->getRegionalizationConditions($this->step3['recipient'], mercDicconst::getSetting('enterprise_guid'), $stock_raw["batch"]["subProduct"]['guid']);
+            if(isset($cond)) {
+                $this->conditionsDescription[$product['product_name']] = $cond;
+            }
+        }
+
+        $this->conditionsDescription = (isset($this->conditionsDescription)) ?  json_encode($this->conditionsDescription) : null;
+
+    }
 }

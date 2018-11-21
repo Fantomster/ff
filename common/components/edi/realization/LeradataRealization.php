@@ -12,19 +12,12 @@ use common\components\edi\AbstractRealization;
 use common\components\edi\EDIClass;
 use common\components\edi\RealizationInterface;
 use common\models\EdiFilesQueue;
-use yii\base\Component;
-use common\models\Catalog;
 use common\models\CatalogBaseGoods;
-use common\models\CatalogGoods;
-use common\models\Currency;
 use common\models\EdiOrder;
-use common\models\EdiOrderContent;
-use common\models\EdiOrganization;
+use common\models\edi\EdiOrganization;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\OrderStatus;
-use common\models\Organization;
-use common\models\RelationSuppRest;
 use common\models\User;
 use frontend\controllers\OrderController;
 use yii\base\Exception;
@@ -51,18 +44,18 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
         $this->edi->fileName = $this->fileName;
     }
 
-    public function parseFile($content)
+    public function parseFile($content, $providerID)
     {
-        return $this->edi->parseFile($content);
+        return $this->edi->parseFile($content, $providerID);
     }
 
     /**
      * @return bool
      * @throws \yii\db\Exception
      */
-    public function handlePriceListUpdating($key, $xml): bool
+    public function handlePriceListUpdating($key, $xml, $providerID): bool
     {
-        return $this->edi->handlePriceListUpdating($xml, true);
+        return $this->edi->handlePriceListUpdating($xml, $providerID);
     }
 
     protected function insertGood(int $catID, int $catalogBaseGoodID, float $price): bool
@@ -70,14 +63,14 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
         return $this->edi->insertGood($catID, $catalogBaseGoodID, $price);
     }
 
-    public function handleOrderResponse($simpleXMLElement, $documentType, $isAlcohol = false, $exceptionArray)
+    public function handleOrderResponse($simpleXMLElement, $documentType, $isAlcohol = false, $exceptionArray, $providerID)
     {
         try {
             $simpleXMLElement = json_decode(json_encode($simpleXMLElement, JSON_UNESCAPED_UNICODE));
             $orderID = $simpleXMLElement->NUMBER;
             $head = $simpleXMLElement->HEAD[0];
             $supplier = $head->BUYER;
-            $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier]);
+            $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplier, 'provider_id' => $providerID]);
             if (!$ediOrganization) {
                 throw new Exception('no EDI organization found');
             }
@@ -145,7 +138,7 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
             $summ = 0;
             $ordContArr = [];
             foreach ($order->orderContent as $orderContent) {
-                $index = $orderContent->article;
+                $index = $orderContent->id;
                 $ordContArr[] = $orderContent->id;
                 if (!isset($arr[$index]['BARCODE'])) {
                     if (isset($orderContent->ediOrderContent)) {
@@ -199,6 +192,7 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
 
                     $orderContent->vat_product = $arr[$index]['TAXRATE'] ?? 0.00;
                     $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
+                    $orderContent->edi_shipment_quantity = $arr[$index]['DELIVEREDQUANTITY'] ?? $arr[$index]['ACCEPTEDQUANTITY'] ?? $orderContent->quantity;
                     $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
                     if ($documentType == 2) {
                         $orderContent->edi_desadv = $exceptionArray['file_id'];
@@ -247,7 +241,12 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
                     }
                 }
             }
-            Yii::$app->db->createCommand()->update('order', ['status' => OrderStatus::STATUS_PROCESSING, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
+            if ($isDesadv) {
+                $orderStatus = OrderStatus::STATUS_EDI_SENT_BY_VENDOR;
+            } else {
+                $orderStatus = OrderStatus::STATUS_PROCESSING;
+            }
+            Yii::$app->db->createCommand()->update('order', ['status' => $orderStatus, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
             $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
 
             if ($ediOrder) {

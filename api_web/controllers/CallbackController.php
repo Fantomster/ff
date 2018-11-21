@@ -25,7 +25,6 @@ use yii\web\BadRequestHttpException;
  */
 class CallbackController extends WebApiNoAuthController
 {
-
     /**
      * @var array $request
      */
@@ -40,7 +39,7 @@ class CallbackController extends WebApiNoAuthController
     public $container;
 
     /**
-     * @SWG\Post(path="/integration/callback/load-dictionary",
+     * @SWG\Post(path="/callback/load-dictionary",
      *     tags={"Callback"},
      *     summary="Загрузка справочников с помощью коллбека",
      *     description="Загрузка справочников с помощью коллбека",
@@ -75,14 +74,11 @@ class CallbackController extends WebApiNoAuthController
      */
     public function actionLoadDictionary()
     {
-
         $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         if (!$task_id) {
             SyncLog::trace('Required variable "task_id" is wrong!');
             throw new BadRequestHttpException("empty_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
-        SyncLog::trace('Task_id" is valid!');
-
 
         $mcTask = OuterTask::findOne(['inner_guid' => $task_id]);
         if (!$mcTask || $mcTask->int_status_id != OuterTask::STATUS_REQUESTED) {
@@ -91,7 +87,6 @@ class CallbackController extends WebApiNoAuthController
         }
 
         $this->response = $this->container->get('NoAuthWebApi')->loadDictionary($mcTask);
-
     }
 
     /**
@@ -130,13 +125,11 @@ class CallbackController extends WebApiNoAuthController
      */
     public function actionSendWaybill()
     {
-
         $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         if (!$task_id) {
             SyncLog::trace('Required variable "task_id" is wrong!');
             throw new BadRequestHttpException("empty_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
-        SyncLog::trace('Task_id" is valid!');
 
         $mcTask = OuterTask::findOne(['inner_guid' => $task_id]);
         if (!$mcTask || $mcTask->int_status_id != OuterTask::STATUS_REQUESTED) {
@@ -145,7 +138,6 @@ class CallbackController extends WebApiNoAuthController
         }
 
         $this->response = $this->container->get('NoAuthWebApi')->sendWaybill($mcTask);
-
     }
 
 }

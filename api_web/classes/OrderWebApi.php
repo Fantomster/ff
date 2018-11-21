@@ -49,8 +49,6 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function update($post, bool $isUnconfirmedVendor = false)
     {
-        WebApiHelper::clearRequest($post);
-
         if (empty($post['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');
         }
@@ -76,17 +74,17 @@ class OrderWebApi extends \api_web\components\WebApi
                     $delivery->save();
                 }
             } else {
-                throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
+                throw new BadRequestHttpException("order.access.change.denied");
             }
         }
         if (!$this->accessAllow($order)) {
-            throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
+            throw new BadRequestHttpException("order.access.change.denied");
         }
         //OrderStatus::checkEdiOrderPermissions($order, 'edit');
 
         //Проверим статус заказа
         if (in_array($order->status, [OrderStatus::STATUS_CANCELLED, OrderStatus::STATUS_REJECTED])) {
-            throw new BadRequestHttpException("Заказ в статусе 'Отменен' нельзя редактировать.");
+            throw new BadRequestHttpException("order.access.change.canceled_status");
         }
         //Если сменили комментарий
         if (!empty($post['comment']) && !$isUnconfirmedVendor) {
@@ -99,49 +97,50 @@ class OrderWebApi extends \api_web\components\WebApi
         //Если поменяли скидку
         if (isset($post['discount']) && !empty($post['discount'])) {
             if (empty($post['discount']['type']) || !in_array(strtoupper($post['discount']['type']), ['FIXED', 'PERCENT'])) {
-                throw new BadRequestHttpException("Discount type FIXED or PERCENT");
+                throw new BadRequestHttpException("order.discount.types");
             }
             if (!isset($post['discount']['amount'])) {
-                throw new BadRequestHttpException("Discount amount empty");
+                throw new BadRequestHttpException("order.discount.empty_amount");
             }
             $order->discount_type = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
 
             if ($order->discount_type == Order::DISCOUNT_PERCENT && 100 < $post['discount']['amount']) {
-                throw new BadRequestHttpException("Discount amount > 100%");
+                throw new BadRequestHttpException("order.discount.100_percent");
             }
 
             $order->discount = $post['discount']['amount'];
         }
         $tr = \Yii::$app->db->beginTransaction();
         try {
+            $changed = [];
+            $deleted = [];
             //Тут операции с продуктами в этом заказе
             if (isset($post['products']) && !empty($post['products'])) {
                 if (is_array($post['products'])) {
-
                     foreach ($post['products'] as $product) {
                         $operation = strtolower($product['operation']);
                         if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
-                            throw new BadRequestHttpException("I don't know of such an operation: " . $product['operation']);
+                            throw new BadRequestHttpException("error.request");
                         }
                         switch ($operation) {
                             case 'delete':
-                                $this->deleteProduct($order, $product['id']);
+                                $deleted[] = $this->deleteProduct($order, $product['id']);
                                 break;
                             case 'add':
-                                $this->addProduct($order, $product);
+                                $changed[] = $this->addProduct($order, $product);
                                 break;
                             case 'edit':
                                 if ($order->service_id == Registry::EDI_SERVICE_ID) {
-                                    $this->editProductEdo($order, $product);
+                                    $changed[] = $this->editProductEdo($order, $product);
                                 } else {
-                                    $this->editProduct($order, $product);
+                                    $changed[] = $this->editProduct($order, $product);
                                 }
                                 break;
                         }
                     }
                     if (isset($post['discount']['amount'])) {
                         if ($order->discount_type == Order::DISCOUNT_FIXED && $order->getTotalPriceWithOutDiscount() < $post['discount']['amount']) {
-                            throw new BadRequestHttpException("Discount amount > Total Price");
+                            throw new BadRequestHttpException("order.discount.big_amount");
                         }
                     }
 
@@ -154,10 +153,9 @@ class OrderWebApi extends \api_web\components\WebApi
                                 $order->status = OrderStatus::STATUS_CANCELLED;
                                 break;
                         }
-
                     }
                 } else {
-                    throw new BadRequestHttpException("products not array");
+                    throw new BadRequestHttpException("error.request");
                 }
             }
 
@@ -167,6 +165,14 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new ValidationException($order->getFirstErrors());
             }
             $tr->commit();
+            if ($order->vendor_id == $this->user->organization_id) {
+                $sender = $order->client;
+            } elseif ($order->client_id == $this->user->organization_id) {
+                $sender = $order->vendor;
+            }
+            if (!empty($changed) || !empty($deleted)) {
+                Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted);
+            }
             return $this->getInfo(['order_id' => $order->id]);
         } catch (\Exception $e) {
             $tr->rollBack();
@@ -179,7 +185,7 @@ class OrderWebApi extends \api_web\components\WebApi
      *
      * @param Order $order
      * @param array $product
-     * @return bool
+     * @return OrderContent
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
@@ -204,11 +210,11 @@ class OrderWebApi extends \api_web\components\WebApi
         $orderContent->comment = $product['comment'] ?? '';
 
         if (!empty($product['price'])) {
-            $orderContent->price = $product['price'];
+            $orderContent->price = round($product['price'], 3);
         }
 
-        if ($orderContent->validate() && $orderContent->save()) {
-            return true;
+        if ($orderContent->save()) {
+            return $orderContent;
         } else {
             throw new ValidationException($orderContent->getFirstErrors());
         }
@@ -251,6 +257,7 @@ class OrderWebApi extends \api_web\components\WebApi
      *
      * @param Order $order
      * @param int   $id
+     * @return string
      * @throws BadRequestHttpException
      */
     private function deleteProduct(Order $order, int $id)
@@ -259,13 +266,16 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("DELETE CANCELED product id empty");
         }
 
+        /** @var OrderContent $orderContentRow */
         $orderContentRow = $order->getOrderContent()->where(['product_id' => $id])->one();
 
         if (empty($orderContentRow)) {
             throw new BadRequestHttpException("DELETE CANCELED not found product: " . $id);
         }
 
+        $product_name = $orderContentRow->product_name;
         $orderContentRow->delete();
+        return $product_name;
     }
 
     /**
@@ -273,7 +283,7 @@ class OrderWebApi extends \api_web\components\WebApi
      *
      * @param Order $order
      * @param array $product
-     * @return bool
+     * @return OrderContent
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
@@ -302,7 +312,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $orderContent->units = $productModel['units'];
             $orderContent->article = $productModel['article'];
             if ($orderContent->validate() && $orderContent->save()) {
-                return true;
+                return $orderContent;
             } else {
                 throw new ValidationException($orderContent->getFirstErrors());
             }
@@ -506,7 +516,6 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function getHistory(array $post)
     {
-
         $sort_field = (!empty($post['sort']) ? $post['sort'] : null);
         $page = (!empty($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (!empty($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
@@ -514,6 +523,10 @@ class OrderWebApi extends \api_web\components\WebApi
         $search = new OrderSearch();
 
         WebApiHelper::clearRequest($post);
+
+        if (!isset($post['search']['service_id'])) {
+            $search->service_id = Registry::MC_BACKEND;
+        }
 
         if (isset($post['search'])) {
 
@@ -601,7 +614,6 @@ class OrderWebApi extends \api_web\components\WebApi
          * Собираем результат
          */
         $orders = [];
-        $headers = [];
         $models = $dataProvider->models;
         if (!empty($models)) {
             /**
@@ -619,17 +631,24 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $obDateTime->format("d.m.Y H:i:s");
                 }
                 $obCreateAt = new \DateTime($model->created_at);
+                $obUpdatedAt = null;
+                if (!is_null($model->status_updated_at) && $model->status_updated_at != '0000-00-00 00:00:00') {
+                    $obUpdatedAt = (new \DateTime(trim($model->status_updated_at)))->format("d.m.Y H:i:s");
+                }
+
                 $orderInfo = [
-                    'id'              => (int)$model->id,
-                    'created_at'      => $obCreateAt->format("d.m.Y H:i:s"),
-                    'completion_date' => $date ?? null,
-                    'status'          => (int)$model->status,
-                    'status_text'     => $model->statusText,
-                    'vendor'          => $model->vendor->name,
-                    'currency_id'     => $model->currency_id,
-                    'create_user'     => $model->createdByProfile->full_name ?? '',
-                    'accept_user'     => $model->acceptedByProfile->full_name ?? '',
-                    'count_position'  => count($model->orderContent),
+                    'id'                => (int)$model->id,
+                    'created_at'        => $obCreateAt->format("d.m.Y H:i:s"),
+                    'status_updated_at' => $obUpdatedAt,
+                    'completion_date'   => $date ?? null,
+                    'status'            => (int)$model->status,
+                    'status_text'       => $model->statusText,
+                    'vendor'            => $model->vendor->name,
+                    'currency_id'       => $model->currency_id,
+                    'create_user'       => $model->createdByProfile->full_name ?? '',
+                    'accept_user'       => $model->acceptedByProfile->full_name ?? '',
+                    'count_position'    => count($model->orderContent),
+                    'total_price'       => round($model->total_price, 2) ?? 0
                 ];
                 if ($model->service_id == Registry::EDI_SERVICE_ID) {
                     if (!empty($model->orderContent)) {
@@ -735,7 +754,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
             }
         } else {
-            $searchSupplier = (isset($post['search']['supplier_id']) ? $post['search']['supplier_id'] : null);
+            $searchSupplier = $post['search']['supplier_id'] ?? null;
             $client = $this->user->organization;
             $vendors = $client->getSuppliers('', false);
             $catalogs = $vendors ? $client->getCatalogs(null) : "(0)";
@@ -803,6 +822,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 'currency_id' => (int)$model['currency_id'],
                 'image'       => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
                 'in_basket'   => $this->container->get('CartWebApi')->countProductInCart($model['id']),
+                'edi_product' => $model['edi_supplier_article'] > 0 ? true : false,
             ];
         }
 
@@ -1176,6 +1196,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if ($model->order->service_id == Registry::EDI_SERVICE_ID) {
             $item['edi_number'] = $model->edi_number;
         }
+        $item['edi_product'] = $model->product->edi_supplier_article > 0 ? true : false;
         return $item;
     }
 

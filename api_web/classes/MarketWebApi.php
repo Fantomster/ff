@@ -29,9 +29,9 @@ class MarketWebApi extends WebApi
      */
     public function products($post)
     {
-        $sort = (isset($post['sort']) ? $post['sort'] : null);
-        $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
-        $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
+        $sort = $post['sort'] ?? null;
+        $page = $post['pagination']['page'] ?? 1;
+        $pageSize = $post['pagination']['page_size'] ?? 12;
 
         $currentUser = $this->user;
 
@@ -100,6 +100,7 @@ class MarketWebApi extends WebApi
                     }
                 }
 
+                //todo_refactoring, why "in_array" on one element array three times? do it simpler
                 if (in_array($key, ['category_id'])) {
                     if (!empty($value)) {
                         if (is_array($value)) {
@@ -154,18 +155,10 @@ class MarketWebApi extends WebApi
         } else {
             $result->orderBy(['rating' => SORT_DESC]);
         }
-//Результат
+        //Результат
         $result = $result->all();
         foreach ($result as $model) {
             $return['products'][] = $this->prepareProduct($model);
-        }
-        /**
-         * @var CatalogBaseGoods $model
-         */
-        if (isset($return['products'][0])) {
-            foreach (array_keys($return['products'][0]) as $key) {
-                $return['headers'][$key] = $model->getAttributeLabel($key);
-            }
         }
         return $return;
     }
@@ -359,8 +352,7 @@ class MarketWebApi extends WebApi
      * @param CatalogBaseGoods $model
      * @return mixed
      */
-    public
-    function prepareProduct($model)
+    public function prepareProduct($model)
     {
         $catalogGoodsModel = CatalogGoods::findOne(['base_goods_id' => $model->id, 'cat_id' => $model->cat_id]);
 
@@ -389,6 +381,8 @@ class MarketWebApi extends WebApi
         $item['currency_id'] = (int)$model->catalog->currency->id;
         $item['image'] = $this->getProductImage($model);
         $item['in_basket'] = $this->container->get('CartWebApi')->countProductInCart($model->id);
+        $item['edi_product'] = $model->edi_supplier_article > 0 ? true : false;
+
         return $item;
     }
 

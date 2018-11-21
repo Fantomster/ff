@@ -3,9 +3,11 @@
 namespace api_web\controllers;
 
 use api_web\components\WebApiController;
+use common\models\licenses\License;
 
 /**
  * Class ClientController
+ *
  * @package api_web\controllers
  */
 class ClientController extends WebApiController
@@ -13,6 +15,7 @@ class ClientController extends WebApiController
     /**
      * Список методов которые не нужно логировать
      * Можно выключать передачу файлов в base64, так как бывает очень жирные файлы попадаются
+     *
      * @var array
      */
     public $not_log_actions = [
@@ -50,7 +53,8 @@ class ClientController extends WebApiController
      *                          "email": "investor@f-keeper.ru",
      *                          "site": "mixcart.ru",
      *                          "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
-     *                          "image": "https://fkeeper.s3.amazonaws.com/org-picture/20d9d738e5498f36654cda93a071622e.jpg",
+     *                          "image":
+     *                          "https://fkeeper.s3.amazonaws.com/org-picture/20d9d738e5498f36654cda93a071622e.jpg",
      *                          "type_id": 1,
      *                          "type": "Ресторан",
      *                          "rating": 0,
@@ -168,7 +172,8 @@ class ClientController extends WebApiController
      *                          "email": "investor@f-keeper.ru",
      *                          "site": "mixcart.ru",
      *                          "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
-     *                          "image": "https://fkeeper.s3.amazonaws.com/org-picture/20d9d738e5498f36654cda93a071622e.jpg",
+     *                          "image":
+     *                          "https://fkeeper.s3.amazonaws.com/org-picture/20d9d738e5498f36654cda93a071622e.jpg",
      *                          "type_id": 1,
      *                          "type": "Ресторан",
      *                          "rating": 0,
@@ -190,6 +195,7 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionDetailUpdateLogo()
     {
@@ -816,5 +822,57 @@ class ClientController extends WebApiController
     public function actionEmployeeRoles()
     {
         $this->response = $this->container->get('ClientWebApi')->employeeRoles($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/client/get-license-mix-cart",
+     *     tags={"Client"},
+     *     summary="Информация о лицензии MixCart",
+     *     description="Информация о лицензии MixCart",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object"
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "id": "11",
+     *                  "name": "MC Light",
+     *                  "is_active": "1",
+     *                  "created_at": null,
+     *                  "updated_at": null,
+     *                  "login_allowed": "1",
+     *                  "to_date": "2019-03-31T03:00:00+03:00",
+     *                  "org_id": "1",
+     *                  "manager_phone": "8 (499) 404-10-18"
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionGetLicenseMixCart()
+    {
+        $response = current(License::getMixCartLicenses($this->user->organization->id));
+        $response['manager_phone'] = \Yii::$app->params['licenseManagerPhone'];
+        $this->response = $response;
     }
 }

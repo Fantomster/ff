@@ -3,10 +3,9 @@
 namespace api_web\classes;
 
 use api_web\components\Registry;
-use common\models\EdiOrganization;
-use common\models\Organization;
+use common\components\edi\EDIIntegration;
+use common\models\edi\EdiOrganization;
 use api_web\components\WebApi;
-use common\components\EComIntegration;
 use common\models\Order;
 use common\models\OrderStatus;
 use yii\db\Query;
@@ -53,9 +52,9 @@ class EdiWebApi extends WebApi
         if (!$eComAccess) {
             throw new BadRequestHttpException("Отсутствуют параметры доступа к EDI");
         }
-
-        if ((new EComIntegration())->sendOrderInfo($order, Organization::findOne($order->vendor_id),
-            Organization::findOne($order->client_id), $eComAccess->login, $eComAccess->pass, true)) {
+        $glnArray = $order->client->getGlnCodes($order->client->id, $order->vendor->id);
+        $ediIntegration = new EDIIntegration(['orgId' => $order->vendor_id, 'clientId' => $order->client_id, 'providerID' => $glnArray['provider_id']]);
+        if ($ediIntegration) {
             $order->status = OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED;
             $order->save();
             return ['result' => true];
@@ -195,9 +194,9 @@ class EdiWebApi extends WebApi
                         }
                         if ($priceChangeValue) {
                             $difference = [
-                                'trend_type'       => $priceChangeDirection,
+                                'trend_type'  => $priceChangeDirection,
                                 'price'       => $oldPrice,
-                                'priceChange' => $priceChangeValue,
+                                'priceChange' => round($priceChangeValue, 2),
                                 'percent'     => round($v['price'] * 100 / $oldPrice - 100, 2),
                             ];
                         }

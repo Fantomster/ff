@@ -6,6 +6,7 @@ use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
+use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -137,6 +138,129 @@ class IntegrationSettingsWebApi extends WebApi
         }
 
         return $model->value;
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function getMainOrganizations($request)
+    {
+        $this->validateRequest($request, ['service_id']);
+        $arSettings = $this->getSettingsToOrgByService($request['service_id']);
+        $arRes = [];
+        foreach ($arSettings['arOrgs']['result'] as $item) {
+            $setting = $arSettings['arSettingToOrg'][$item['id']] ?? null;
+            $item['main_org'] = $arRes[$item['id']]['main_org'] ?? false;
+            $item['checked'] = false;
+            $item['parent_id'] = $setting['parent_id'] != "" ? $setting['parent_id'] : null;
+            $arRes[$item['id']] = $item;
+            if (!is_null($setting)) {
+                if ($setting['parent_id']) {
+                    $arRes[$setting['parent_id']]['main_org'] = true;
+                    $arRes[$setting['org_id']]['checked'] = true;
+                }
+            }
+        }
+
+        return ['result' => array_values($arRes)];
+    }
+
+    /**
+     * @param $serviceId
+     * @return array
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    private function getSettingsToOrgByService($serviceId)
+    {
+        $arOrgs = $this->container->get('UserWebApi')->getUserOrganizationBusinessList();
+        $arOrgIds = array_map(function ($el) {
+            return (int)$el['id'];
+        }, $arOrgs['result']);
+        $arSettingToOrg = $this->getSettingsByOrgIds('main_org', $arOrgIds, $serviceId);
+
+        return compact('arOrgs', 'arSettingToOrg', 'arOrgIds');
+    }
+
+    /**
+     * Получение настройки для всех организаций
+     *
+     * @param string $settingName
+     * @param array  $arOrgIds
+     * @param int    $serviceId
+     * @return array
+     */
+    public function getSettingsByOrgIds(string $settingName, array $arOrgIds, int $serviceId)
+    {
+        return (new Query())->select(['isv.org_id', 'isv.value parent_id', 'isv.id'])
+            ->from(IntegrationSettingValue::tableName() . ' as isv')
+            ->leftJoin(IntegrationSetting::tableName() . ' as is', 'is.id=isv.setting_id')
+            ->where(['is.name' => $settingName, 'isv.org_id' => $arOrgIds, 'is.service_id' => $serviceId])
+            ->indexBy('org_id')
+            ->all(\Yii::$app->db_api);
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function setMainOrganizations($request)
+    {
+        $this->validateRequest($request, ['checked', 'main_org', 'service_id']);
+        $settingToService = IntegrationSetting::find()->select(['id', 'service_id'])
+            ->andWhere(['name' => 'main_org'])
+            ->indexBy('service_id')->all();
+        $settingId = $settingToService[$request['service_id']]->id;
+        $this->resetMainOrgSetting($request);
+
+        $arResult = [];
+        foreach ($request['checked'] as $orgId) {
+            if ($orgId == $request['main_org']){
+                throw new BadRequestHttpException('setting.main_org_equal_child_org');
+            }
+            $settingModel = IntegrationSettingValue::findOne(['setting_id' => $settingId, 'org_id' => $orgId]);
+            if (!$settingModel) {
+                $settingModel = new IntegrationSettingValue();
+            }
+            $settingModel->setting_id = $settingId;
+            $settingModel->org_id = $orgId;
+            $settingModel->value = (string)$request['main_org'];
+            if (!$settingModel->save()) {
+                throw new ValidationException($settingModel->getFirstErrors());
+            }
+            $arResult[$orgId] = (bool)$settingModel->id;
+        }
+
+        return ['result' => $arResult];
+    }
+
+    /**
+     * Сброс настройки главная организация для всех доступных бизнесов
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function resetMainOrgSetting($request)
+    {
+        $this->validateRequest($request, ['service_id']);
+        $arSettings = $this->getSettingsToOrgByService($request['service_id']);
+        $arSettingIds = array_map(function($el){
+            return $el['id'];
+        }, $arSettings['arSettingToOrg']);
+        $result = IntegrationSettingValue::updateAll(['value' => ''], ['id' => $arSettingIds]);
+
+        return ['result' => (bool)$result];
     }
 
 }

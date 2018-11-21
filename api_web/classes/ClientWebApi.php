@@ -94,40 +94,47 @@ class ClientWebApi extends WebApi
                 $model->is_allowed_for_franchisee = (int)$post['is_allowed_for_franchisee'];
             }
 
+            $strAddress = '';
+
             if (isset($post['address']) && $post['address'] !== null) {
-                if (isset($post['address']['country']) && $post['address']['country'] !== null) {
+                if (isset($post['address']['country']) && !empty($post['address']['country'])) {
                     $model->country = $post['address']['country'];
+                    $strAddress .= $post['address']['country'];
                 }
-                if (isset($post['address']['region']) && $post['address']['region'] !== null) {
+                if (isset($post['address']['region']) && !empty($post['address']['region'])) {
                     $model->administrative_area_level_1 = $post['address']['region'];
+                    $strAddress .= ', ' . $post['address']['region'];
                 }
-                if (isset($post['address']['locality']) && $post['address']['locality'] !== null) {
+                if (isset($post['address']['locality']) && !empty($post['address']['locality'])) {
                     $model->locality = $post['address']['locality'];
                     $model->city = $post['address']['locality'];
+                    $strAddress .= ', ' . $post['address']['locality'];
                 }
-                if (isset($post['address']['route']) && $post['address']['route'] !== null) {
+                if (isset($post['address']['route']) && !empty($post['address']['route'])) {
                     $model->route = $post['address']['route'];
+                    $strAddress .= ', ' . $post['address']['route'];
                 }
-                if (isset($post['address']['house']) && $post['address']['house'] !== null) {
+                if (isset($post['address']['house']) && !empty($post['address']['house'])) {
                     $model->street_number = $post['address']['house'];
+                    $strAddress .= ', ' . $post['address']['house'];
                 }
-                if (isset($post['address']['lat']) && $post['address']['lat'] !== null) {
+                if (isset($post['address']['lat']) && !empty($post['address']['lat'])) {
                     $model->lat = $post['address']['lat'];
                 }
-                if (isset($post['address']['lng']) && $post['address']['lng'] !== null) {
+                if (isset($post['address']['lng']) && !empty($post['address']['lng'])) {
                     $model->lng = $post['address']['lng'];
                 }
-                if (isset($post['address']['place_id']) && $post['address']['place_id'] !== null) {
+                if (isset($post['address']['place_id']) && !empty($post['address']['place_id'])) {
                     $model->place_id = $post['address']['place_id'];
                 }
                 unset($post['address']['lat']);
                 unset($post['address']['lng']);
                 unset($post['address']['place_id']);
-                $model->address = implode(', ', $post['address']);
+                $model->address = $strAddress;
                 $model->formatted_address = $model->address;
             }
 
-            if (!$model->validate() || !$model->save()) {
+            if (!$model->validate($model->getDirtyAttributes()) || !$model->save()) {
                 throw new ValidationException($model->getFirstErrors());
             }
 
@@ -165,7 +172,7 @@ class ClientWebApi extends WebApi
         //прошли все проверки, будем обновлять
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $model->scenario = "settings";
+            $model->scenario = "logo";
             $model->picture = WebApiHelper::convertLogoFile($post['image_source']);
 
             if (!$model->validate() || !$model->save()) {

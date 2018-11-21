@@ -30,18 +30,22 @@ class RkwsAgent extends ServiceRkws
     /** @var array $additionalXmlFields Поле во входящем xml -> поле в нашей модели данных */
     public $additionalXmlFields = ['name' => 'name'];
 
-    public function makeArrayFromReceivedDictionaryXmlData(string $data = null): array
+    /**
+     * @param string|null $data
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function parsingXml(string $data = null): array
     {
         $myXML = simplexml_load_string($data);
-        SyncLog::trace('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);
         if (!$myXML) {
             SyncLog::trace('Empty XML data!');
             throw new BadRequestHttpException("empty_result_xml_data");
         }
         $array = [];
         $gcount = 0;
-        foreach ($myXML->CORRGROUP as $corrgroup) {
-            foreach ($corrgroup->CORR as $corr) {
+        foreach ($this->iterator($myXML->CORRGROUP) as $corrgroup) {
+            foreach ($this->iterator($corrgroup->CORR) as $corr) {
                 $gcount++;
                 foreach ($corr->attributes() as $k => $v) {
                     $array[$gcount][$k] = strval($v[0]);

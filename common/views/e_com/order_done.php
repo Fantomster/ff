@@ -1,4 +1,7 @@
 <?= '<?xml version="1.0" encoding="utf-8"?>'; ?>
+<?php if (!isset($glnArray)) {
+    $glnArray = $order->client->getGlnCodes($order->client->id, $order->vendor->id);
+} ?>
 <RECADV>
     <NUMBER><?= $order->id ?></NUMBER>
     <DOCACTION><?= Yii::$app->params['edi_api_data']['edi_api_recadv_document_id'] ?></DOCACTION>
@@ -13,11 +16,11 @@
     <WAYBILLDATE><?= $dateArray['requested_delivery_date'] ?></WAYBILLDATE>
     <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?? '' ?></RECEPTIONDATE>
     <HEAD>
-        <SUPPLIER><?= $vendor->ediOrganization->gln_code ?></SUPPLIER>
-        <BUYER><?= $client->ediOrganization->gln_code ?></BUYER>
-        <DELIVERYPLACE><?= $client->ediOrganization->gln_code ?></DELIVERYPLACE>
-        <SENDER><?= $client->ediOrganization->gln_code ?></SENDER>
-        <RECIPIENT><?= $vendor->ediOrganization->gln_code ?></RECIPIENT>
+        <SUPPLIER><?= $glnArray['vendor_gln'] ?></SUPPLIER>
+        <BUYER><?= $glnArray['client_gln'] ?></BUYER>
+        <DELIVERYPLACE><?= $glnArray['client_gln'] ?></DELIVERYPLACE>
+        <SENDER><?= $glnArray['client_gln'] ?></SENDER>
+        <RECIPIENT><?= $glnArray['vendor_gln'] ?></RECIPIENT>
         <PACKINGSEQUENCE>
             <HIERARCHICALID><?= $order->id ?></HIERARCHICALID>
             <?php
@@ -40,7 +43,7 @@
                     <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
                     <DELIVEREDQUANTITY><?= $position['quantity'] ?></DELIVEREDQUANTITY>
                     <ORDEREDQUANTITY><?= $position['plan_quantity'] ?></ORDEREDQUANTITY>
-                    <ACCEPTEDQUANTITY><?= $position['edi_shipment_quantity'] ?></ACCEPTEDQUANTITY>
+                    <ACCEPTEDQUANTITY><?= (float)$position['edi_shipment_quantity'] ?? $position['quantity'] ?></ACCEPTEDQUANTITY>
                     <ORDERUNIT><?= $measure ?></ORDERUNIT>
                     <EGAISCODE><?= $position['id'] ?></EGAISCODE>
                     <EGAISQUANTITY><?= $position['quantity'] ?></EGAISQUANTITY>

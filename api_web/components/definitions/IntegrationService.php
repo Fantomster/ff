@@ -14,16 +14,28 @@ class IntegrationService
     public $id;
 
     /**
-     * @SWG\Property(@SWG\Xml(name="name"), example="R-keeper")
+     * @SWG\Property(@SWG\Xml(name="type_id"), example="1")
      * @var string
      */
-    public $name;
+    public $type_id;
 
     /**
      * @SWG\Property(@SWG\Xml(name="is_active"), example="1")
      * @var string
      */
     public $is_active;
+
+    /**
+     * @SWG\Property(@SWG\Xml(name="denom"), example="R-keeper")
+     * @var string
+     */
+    public $denom;
+
+    /**
+     * @SWG\Property(@SWG\Xml(name="vendor"), example="UCS")
+     * @var string
+     */
+    public $vendor;
 
     /**
      * @SWG\Property(@SWG\Xml(name="created_at"), example="2018-10-15T10:17:45+03:00")
@@ -38,15 +50,8 @@ class IntegrationService
     public $updated_at;
 
     /**
-     * @SWG\Property(@SWG\Xml(name="login_allowed"), example="1")
-     * @var string
+     * @SWG\Property(ref="#/definitions/LicenseService")
      */
-    public $login_allowed;
-
-    /**
-     * @SWG\Property(@SWG\Xml(name="to_date"), example="2022-07-20T14:41:44+03:00")
-     * @var string
-     */
-    public $to_date;
+    public $license;
 
 }

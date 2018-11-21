@@ -47,11 +47,18 @@ class UserNotice
             throw new BadRequestHttpException('empty Email');
         }
 
-        if (!User::findOne(['email' => $email])) {
+        $user = User::findOne(['email' => $email]);
+        if (!$user) {
             throw new BadRequestHttpException('Пользователь с таким Email не найден в системе.');
         }
         $model = new ForgotForm();
         $model->email = $email;
+
+        $model->newPassword = $model->generatePassword(8);
+        $user->setScenario("reset");
+        $user->newPassword = $model->newPassword;
+        $user->newPasswordConfirm = $model->newPassword;
+        $user->save();
         return $model->sendForgotEmail();
     }
 

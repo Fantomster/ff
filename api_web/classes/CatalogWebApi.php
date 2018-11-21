@@ -87,7 +87,7 @@ class CatalogWebApi extends WebApi
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException("empty_param|vendor_id");
         }
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (empty($catalog)) {
             throw new BadRequestHttpException("base_catalog_not_found");
         }
@@ -212,7 +212,7 @@ class CatalogWebApi extends WebApi
 
         $this->validateRequest($request, ['vendor_id', 'product_id']);
 
-        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (empty($catalog)) {
             throw new BadRequestHttpException('catalog_not_found');
         }
@@ -239,7 +239,7 @@ class CatalogWebApi extends WebApi
     {
         $this->validateRequest($request, ['vendor_id']);
 
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($catalogTemp)) {
             throw new BadRequestHttpException('catalog_temp_not_found');
@@ -346,7 +346,7 @@ class CatalogWebApi extends WebApi
 
         $this->validateRequest($request, ['vendor_id']);
 
-        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
 
         if (empty($catalog)) {
             throw new BadRequestHttpException('catalog_not_found');
@@ -424,7 +424,7 @@ class CatalogWebApi extends WebApi
 
         $this->validateRequest($request, ['vendor_id']);
 
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (!$catalog) {
             throw new BadRequestHttpException("catalog.not_found");
         }
@@ -465,7 +465,7 @@ class CatalogWebApi extends WebApi
     {
         $this->validateRequest($request, ['vendor_id', 'currency_id']);
 
-        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
 
         if (empty($catalog)) {
             throw new BadRequestHttpException('catalog_not_found');
@@ -500,18 +500,21 @@ class CatalogWebApi extends WebApi
     /**
      * @param int          $vendorID
      * @param Organization $restOrganization
+     * @param bool         $kostilForInvitedVendor //todo_refactoring
      * @return Catalog|null|static
      * @throws ValidationException
      */
-    public function getPersonalCatalog(int $vendorID, Organization $restOrganization)
+    public function getPersonalCatalog(int $vendorID, Organization $restOrganization, $kostilForInvitedVendor = false)
     {
-        $rel = RelationSuppRest::find()
+        $relQuery = RelationSuppRest::find()
             ->where([
                 'supp_org_id' => $vendorID,
                 'rest_org_id' => $restOrganization->id
-            ])
-            ->andWhere([">", "cat_id", 0])
-            ->one();
+            ]);
+        if (!$kostilForInvitedVendor) {
+            $relQuery->andWhere([">", "cat_id", 0]);
+        }
+        $rel = $relQuery->one();
 
         if (!isset($rel->cat_id) || $rel->cat_id == 0) {
             $catalog = new Catalog();

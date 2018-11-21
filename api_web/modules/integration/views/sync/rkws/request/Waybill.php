@@ -5,6 +5,7 @@ use api_web\modules\integration\classes\SyncLog;
 /* @var $this yii\web\View */
 /* @var $cb string */
 /* @var $code string */
+/* @var $waybill \common\models\Waybill */
 
 SyncLog::trace('Render template: ' . __NAMESPACE__ . __FILE__);
 

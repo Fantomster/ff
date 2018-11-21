@@ -8,6 +8,7 @@
 
 namespace common\components\edi;
 
+use common\models\edi\EdiProvider;
 use yii\db\Expression;
 use Yii;
 
@@ -24,17 +25,28 @@ abstract class AbstractProvider
 
     /**
      * Подключение к провайдеру, подключать в __construct
+     *
      * @var
      */
     private $client;
+    private $isDebug = false;
 
     /**
      * Получение файла от провадера
+     *
      * @param $item
      */
-    public function getFile($item, $orgId)
+    public function getFile($item)
     {
         $this->realization->file = '';
+    }
+
+    protected function getProviderID($className)
+    {
+        $pos = strrpos($className, '\\');
+        $class = substr($className, $pos + 1);
+        $provider = EdiProvider::findOne(['provider_class' => $class]);
+        return $provider->id;
     }
 
     /**
@@ -48,15 +60,54 @@ abstract class AbstractProvider
     /**
      * Отправка файла на сервер EDI
      */
-    public function sendOrderInfo($order, $orgId, $done)
+    public function sendOrderInfo($order, $done)
     {
         $file = $this->realization->getSendingOrderContent();
         //sending order
     }
 
-
     public function updateQueue(int $ediFilesQueueID, int $status, String $errorText = '', String $jsonData = ''): void
     {
-        Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText, 'json_data' => $jsonData], 'id=' . $ediFilesQueueID)->execute();
+        if (!$this->isDebug) {
+            Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText, 'json_data' => $jsonData], 'id=' . $ediFilesQueueID)->execute();
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getFilesList($orgID): array
+    {
+        return (new \yii\db\Query())
+            ->select(['id', 'name'])
+            ->from('edi_files_queue')
+            ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
+            ->andWhere(['organization_id' => $orgID])
+            ->all();
+    }
+
+    /**
+     * @param array $list
+     * @throws \yii\db\Exception
+     */
+    public function insertFilesInQueue(array $list, $orgID)
+    {
+        $batch = [];
+        $files = (new \yii\db\Query())
+            ->select(['name'])
+            ->from('edi_files_queue')
+            ->where(['name' => $list])
+            ->indexBy('name')
+            ->all();
+
+        foreach ($list as $name) {
+            if (!array_key_exists($name, $files)) {
+                $batch[] = ['name' => $name, 'organization_id' => $orgID];
+            }
+        }
+
+        if (!empty($batch)) {
+            \Yii::$app->db->createCommand()->batchInsert('edi_files_queue', ['name', 'organization_id'], $batch)->execute();
+        }
     }
 }

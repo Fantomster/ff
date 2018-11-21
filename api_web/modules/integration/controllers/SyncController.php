@@ -29,6 +29,16 @@ use api_web\components\WebApiController;
 class SyncController extends WebApiController
 {
     /**
+     * @param \yii\base\Action $action
+     * @return bool
+     */
+    public function beforeAction($action)
+    {
+        $this->license_service_id = $this->user->integration_service_id ?? 0;
+        return parent::beforeAction($action);
+    }
+
+    /**
      * @SWG\Post(path="/integration/sync/run",
      *     tags={"Integration/sync"},
      *     summary="Универсальный метод интеграционных действий",
@@ -94,13 +104,10 @@ class SyncController extends WebApiController
 
         # 1. Get `task_id` if in query params
         $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
-
         # 2. Checkout other params and fix callback
         if ($task_id) {
-
             # 2.1.1.Trace callback operation with task_id
             SyncLog::trace('Callback operation `task_id` params is ' . $task_id);
-
             # 2.1.2. Check root script params
             if (!isset($this->request['service_id'])) {
                 $this->request['service_id'] = null;
@@ -110,25 +117,17 @@ class SyncController extends WebApiController
                 $this->request['params'] = [];
             }
             SyncLog::trace('Request params are: ' . json_encode($this->request['params']));
-
         } else {
-
-            # 2.2.1. Check root script params
             if (!isset($this->request['service_id']) || !$this->request['service_id'] || !is_int($this->request['service_id'])) {
-                SyncLog::trace('"Service ID" is required and empty!');
                 throw new BadRequestHttpException("empty_param|service_id");
             }
             if (!isset($this->request['params']) || !is_array($this->request['params']) || !$this->request['params']) {
                 SyncLog::trace('Required variable "params" is empty!');
                 throw new BadRequestHttpException("empty_param|params");
             }
-            SyncLog::trace('Fix non-callback operation scenario');
-
         }
-
         # 3. Load integration script with env and post params
         $this->response = (new SyncServiceFactory($this->request['service_id'], $this->request['params'], $task_id))->syncResult;
-
     }
 
     /**

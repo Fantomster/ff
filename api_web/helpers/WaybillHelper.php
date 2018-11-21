@@ -207,6 +207,7 @@ class WaybillHelper
         $model = $this->buildWaybill($orgId);
         $model->outer_store_id = $outerStoreId;
         $model->outer_agent_id = $agent->id ?? null;
+        $model->payment_delay = $agent->payment_delay ?? null;
         $model->service_id = $serviceId;
         $model->status_id = Registry::WAYBILL_COMPARED;
         //для каждого может быть разный

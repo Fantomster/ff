@@ -6,18 +6,63 @@ use api_web\components\WebApiController;
 
 /**
  * Class VendorController
+ *
  * @package api_web\controllers
  */
 class VendorController extends WebApiController
 {
     /**
      * Отключение логирования
+     *
      * @var array
      */
     public $not_log_actions = [
         'upload-main-catalog',
         'upload-personal-catalog'
     ];
+
+    /**
+     * @SWG\Post(path="/vendor/get",
+     *     tags={"Vendor"},
+     *     summary="Информация о поставщике",
+     *     description="Информация о поставщике",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                              "vendor_id": 1
+     *                      }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              ref="#/definitions/Vendor"
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionGet()
+    {
+        $this->response = $this->container->get('VendorWebApi')->get($this->request);
+    }
 
     /**
      * @SWG\Post(path="/vendor/create",
@@ -65,7 +110,8 @@ class VendorController extends WebApiController
      *                "success": true,
      *                "organization_id": 2222,
      *                "user_id": 1111,
-     *                "message": "Поставщик ООО Рога и Копыта и каталог добавлен! Инструкция по авторизации была отправлена на почту test@test.ru"
+     *                "message": "Поставщик ООО Рога и Копыта и каталог добавлен! Инструкция по авторизации была
+     *                отправлена на почту test@test.ru"
      *              }
      *          ),
      *     ),
@@ -274,6 +320,7 @@ class VendorController extends WebApiController
     {
         $this->response = $this->container->get('CatalogWebApi')->getGoodsInCatalog($this->request);
     }
+
     /**
      * @SWG\Post(path="/vendor/temp-catalog-list",
      *     tags={"Vendor/Catalog"},
@@ -339,7 +386,8 @@ class VendorController extends WebApiController
      *                  property="request",
      *                  default={
      *                      "vendor_id": 3010,
-     *                      "data": "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,BASE64_ENCODE_SOURCE"
+     *                      "data":
+     *                      "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,BASE64_ENCODE_SOURCE"
      *                  }
      *              )
      *         )
@@ -400,8 +448,8 @@ class VendorController extends WebApiController
      * @SWG\Post(path="/vendor/get-list-main-index",
      *     tags={"Vendor/Catalog"},
      *     summary="Список ключей для загрузки каталога",
-     *     description="Список ключей, доступных для выбора пользователю. Далее по этому ключу будет осуществляться поиск дублей.
-     * Передавать в метод /vendor/import-personal-catalog параметр index_field",
+     *     description="Список ключей, доступных для выбора пользователю. Далее по этому ключу будет осуществляться
+     *     поиск дублей. Передавать в метод /vendor/import-personal-catalog параметр index_field",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -446,10 +494,9 @@ class VendorController extends WebApiController
      * @SWG\Post(path="/vendor/prepare-temporary",
      *     tags={"Vendor/Catalog"},
      *     summary="Маппинг, валидация и импорт индивидуального каталога",
-     *     description="Метод Импортирует файл с сервера во временную таблицу БД, по правилам которые переданы в параметре mapping
-     * vendor_id = ID вендора
-     * index_field = ключ поиска дублей
-     * mapping = очередность колонок, при загрузке файла
+     *     description="Метод Импортирует файл с сервера во временную таблицу БД, по правилам которые переданы в
+     *     параметре mapping vendor_id = ID вендора index_field = ключ поиска дублей mapping = очередность колонок, при
+     *     загрузке файла
      *
      *     Пример:
      *     POST /vendor/upload-personal-catalog вернул результат
@@ -850,7 +897,6 @@ class VendorController extends WebApiController
     {
         $this->response = $this->container->get('CatalogWebApi')->autoDeleteDuplicateTemporary($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/vendor/set-currency-for-personal-catalog",

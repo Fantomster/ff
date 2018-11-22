@@ -181,7 +181,7 @@ class License extends ActiveRecord
             ->select([
                 'license.id',
                 'license.name',
-                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active',
+                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active_license',
                 'license.created_at',
                 'license.updated_at',
                 'license.login_allowed',
@@ -189,7 +189,10 @@ class License extends ActiveRecord
             ])
             ->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
-            ->where(['lo.org_id' => $orgId])
+            ->where([
+                'lo.org_id'  => $orgId,
+                'license.id' => Registry::$mc_licenses_id
+            ])
             ->groupBy([
                 'license.id',
                 'license.name',
@@ -200,8 +203,7 @@ class License extends ActiveRecord
             ])
             ->indexBy('id');
 
-        $license->andWhere(['in', 'license.id', Registry::$mc_licenses_id]);
-        $license->andWhere(['=', 'is_active', 1]);
+        $license->having(['=', 'is_active_license', 1]);
         $license->orderBy(['`license`.sort_index' => SORT_DESC]);
 
         $result = $license->all(\Yii::$app->db_api);
@@ -252,9 +254,9 @@ class License extends ActiveRecord
                 'lo.org_id'
             ])
             ->indexBy('org_id');
-        
+
         $license->having(['=', 'is_active_license', 1]);
-        $license->orderBy(['to_date' => SORT_DESC]);
+        $license->orderBy(['`license`.sort_index' => SORT_ASC]);
 
         return $license->all(\Yii::$app->db_api);
     }

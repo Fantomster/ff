@@ -91,14 +91,14 @@
                 <li>
                     <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin:0;">
                         <?= Yii::t('app', 'common.mail.welcome.instruction_restaurant', ['ru' => 'для ресторанов']) ?>
-                        <a href="<?= \Yii::$app->urlManagerFrontend->baseUrl ?>/restaurant-help.html" target="_blank"
-                           style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color:#00a9ff;"><?= \Yii::$app->urlManagerFrontend->baseUrl ?>/restaurant-help.html</a>
+                        <a href="<?= \Yii::$app->params['help']['restoran'] ?>" target="_blank"
+                           style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color:#00a9ff;"><?= \Yii::$app->params['help']['restoran'] ?></a>
                     </p></li>
                 <li>
                     <p style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;margin:0;">
                         <?= Yii::t('app', 'common.mail.welcome.instruction_supplier', ['ru' => 'для поставщиков']) ?>
-                        <a href="<?= \Yii::$app->urlManagerFrontend->baseUrl ?>/supplier-help.html" target="_blank"
-                           style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color:#00a9ff"><?= \Yii::$app->urlManagerFrontend->baseUrl ?>/supplier-help.html</a>
+                        <a href="<?= \Yii::$app->params['help']['vendor'] ?>" target="_blank"
+                           style="font-family: 'Open Sans', Arial, sans-serif;font-size: 16px;color:#00a9ff"><?= \Yii::$app->params['help']['vendor'] ?></a>
                     </p></li>
             </ul>
         </td>

@@ -202,7 +202,7 @@ class License extends ActiveRecord
 
         $license->andWhere(['in', 'license.id', Registry::$mc_licenses_id]);
         $license->andWhere(['=', 'is_active', 1]);
-        $license->orderBy(['to_date' => SORT_DESC]);
+        $license->orderBy(['`license`.sort_index' => SORT_DESC]);
 
         $result = $license->all(\Yii::$app->db_api);
 

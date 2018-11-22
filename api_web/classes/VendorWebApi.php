@@ -76,8 +76,12 @@ class VendorWebApi extends \api_web\components\WebApi
             if (empty($relation)) {
                 $relation = $this->createRelation($this->user->organization->id, $organization->id);
             }
-            $arVendorUsers = User::findAll(['organization_id' => $vendorID]);
+            $arVendorUsers = User::find()
+                ->leftJoin(RelationUserOrganization::tableName() . ' ruo', 'ruo.user_id=user.id')
+                ->where(['ruo.organization_id' => $vendorID])->all();
+
             foreach ($arVendorUsers as $vendorUser) {
+                /**@var User $vendorUser*/
                 $this->createAssociateManager($vendorUser);
             }
 

@@ -192,7 +192,7 @@ class OrderWebApi extends \api_web\components\WebApi
     private function editProduct(Order $order, array $product)
     {
         if (empty($product['id'])) {
-            throw new BadRequestHttpException("EDIT CANCELED product id empty");
+            throw new BadRequestHttpException("order.edit_product_empty");
         }
 
         /**
@@ -200,7 +200,7 @@ class OrderWebApi extends \api_web\components\WebApi
          */
         $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
         if (empty($orderContent)) {
-            throw new BadRequestHttpException("EDIT CANCELED the product is not found in the order: product_id = " . $product['id']);
+            throw new BadRequestHttpException("order_content.not_found");
         }
 
         if (!empty($product['quantity'])) {
@@ -232,13 +232,13 @@ class OrderWebApi extends \api_web\components\WebApi
     private function editProductEdo(Order $order, array $product)
     {
         if (empty($product['id'])) {
-            throw new BadRequestHttpException("EDIT CANCELED product id empty");
+            throw new BadRequestHttpException("order.edit_product_empty");
         }
 
         /** @var OrderContent $orderContent */
         $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
         if (empty($orderContent)) {
-            throw new BadRequestHttpException("EDIT CANCELED the product is not found in the order: product_id = " . $product['id']);
+            throw new BadRequestHttpException("order_content.not_found");
         }
 
         if (!empty($product['quantity'])) {
@@ -263,14 +263,13 @@ class OrderWebApi extends \api_web\components\WebApi
     private function deleteProduct(Order $order, int $id)
     {
         if (empty($id)) {
-            throw new BadRequestHttpException("DELETE CANCELED product id empty");
+            throw new BadRequestHttpException("order.delete_product_empty");
         }
 
         /** @var OrderContent $orderContentRow */
         $orderContentRow = $order->getOrderContent()->where(['product_id' => $id])->one();
-
         if (empty($orderContentRow)) {
-            throw new BadRequestHttpException("DELETE CANCELED not found product: " . $id);
+            throw new BadRequestHttpException("order_content.not_found");
         }
 
         $product_name = $orderContentRow->product_name;
@@ -290,7 +289,7 @@ class OrderWebApi extends \api_web\components\WebApi
     private function addProduct(Order $order, array $product)
     {
         if (empty($product['id'])) {
-            throw new BadRequestHttpException("ADD CANCELED product id empty");
+            throw new BadRequestHttpException("order.add_product_empty");
         }
 
         $orderContentRow = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
@@ -298,7 +297,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if (empty($orderContentRow)) {
             $productModel = (new Product())->findFromCatalogs($product['id'], $this->user->organization->getCatalogs());
             if (!in_array($productModel['supp_org_id'], [$order->vendor->id])) {
-                throw new BadRequestHttpException("В этот заказ можно добавлять только товары поставщика: " . $order->vendor->name);
+                throw new BadRequestHttpException("order.bad_vendor|" . $order->vendor->name);
             }
 
             $orderContent = new OrderContent();
@@ -317,7 +316,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new ValidationException($orderContent->getFirstErrors());
             }
         } else {
-            throw new BadRequestHttpException("ADD CANCELED the product is already in the order: " . $product['id']);
+            throw new BadRequestHttpException("order.add_product_is_already_in_order|" . $product['id']);
         }
     }
 
@@ -342,7 +341,7 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         if (!$this->accessAllow($order)) {
-            throw new BadRequestHttpException("У вас нет прав на изменение комментария к заказу");
+            throw new BadRequestHttpException("order.edit_comment_access_denied");
         }
         OrderStatus::checkEdiOrderPermissions($order, 'edit', [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]);
 
@@ -383,14 +382,14 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         if (!$this->accessAllow($order)) {
-            throw new BadRequestHttpException("У вас нет прав на изменение комментария к заказу");
+            throw new BadRequestHttpException("order.edit_comment_access_denied");
         }
         OrderStatus::checkEdiOrderPermissions($order, 'edit', [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]);
 
         $orderContent = OrderContent::findOne(['order_id' => $order->id, 'product_id' => (int)$post['product_id']]);
 
         if (empty($orderContent)) {
-            throw new BadRequestHttpException("Product not found in Order");
+            throw new BadRequestHttpException("order_content.not_found");
         }
 
         $orderContent->comment = $post['comment'];
@@ -429,7 +428,7 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         if (!$this->accessAllow($order)) {
-            throw new BadRequestHttpException("У вас нет прав для просмотра этого заказа.");
+            throw new BadRequestHttpException("order.view_access_denied");
         }
 
         $result = $order->attributes;
@@ -744,7 +743,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 $vendors = [$organizationID];
                 $catalogs = $vendors ? $client->getCatalogs(null) : false;
             } else {
-                throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
+                throw new BadRequestHttpException("order.edit_access_denied");
             }
         } else {
             $searchSupplier = $post['search']['supplier_id'] ?? null;
@@ -837,9 +836,10 @@ class OrderWebApi extends \api_web\components\WebApi
     /**
      * Список доступных категорий
      *
-     * @param      $post
+     * @param null $post
      * @param bool $isUnconfirmedVendor
      * @return array
+     * @throws BadRequestHttpException
      */
     public function categories($post = null, bool $isUnconfirmedVendor = false)
     {
@@ -853,7 +853,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 $suppliers = [$this->user->organization_id];
                 $organizationID = $order->client_id;
             } else {
-                throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
+                throw new BadRequestHttpException("order.edit_access_denied");
             }
         } else {
             $suppliers = RelationSuppRest::find()
@@ -942,8 +942,12 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
+        if ($order->status == OrderStatus::STATUS_DONE) {
+            throw new BadRequestHttpException("order.already_done");
+        }
+
         if ($order->status == OrderStatus::STATUS_CANCELLED) {
-            throw new BadRequestHttpException("This order has been cancelled.");
+            throw new BadRequestHttpException("order.already_cancel");
         }
         OrderStatus::checkEdiOrderPermissions($order, 'cancel');
 
@@ -955,7 +959,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
                     $order->status = OrderStatus::STATUS_REJECTED;
                 } else {
-                    throw new BadRequestHttpException("У вас нет прав на изменение заказа.");
+                    throw new BadRequestHttpException("order.edit_access_denied");
                 }
             } else {
                 $order->status = OrderStatus::STATUS_CANCELLED;
@@ -1004,7 +1008,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
             $content = $order->orderContent;
             if (empty($content)) {
-                throw new BadRequestHttpException("Order content is empty.");
+                throw new BadRequestHttpException("order_content.empty");
             }
 
             $request = [];
@@ -1048,7 +1052,7 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         if ($order->status == OrderStatus::STATUS_DONE) {
-            throw new BadRequestHttpException("This order has been completed.");
+            throw new BadRequestHttpException("order.already_done");
         }
 
         OrderStatus::checkEdiOrderPermissions($order, 'complete');

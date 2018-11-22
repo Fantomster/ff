@@ -280,7 +280,7 @@ class UserController extends WebApiController
      */
     public function actionLogin()
     {
-        $this->response = ['token' => $this->user->access_token];
+        $this->response = ['token' => $this->user->getJWTToken(\Yii::$app->jwt)];
     }
 
     /**

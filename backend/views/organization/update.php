@@ -18,7 +18,6 @@ $this->params['breadcrumbs'][] = 'Update';
         'model' => $model,
         'franchiseeList' => $franchiseeList,
         'franchiseeModel' => $franchiseeModel,
-        'ediModel' => $ediModel,
     ]) ?>
 
 </div>

@@ -218,8 +218,7 @@ class WaybillContent extends \yii\db\ActiveRecord
             'price_with_vat',
             'sum_with_vat',
             'sum_without_vat',
-            'koef',
-            'outer_unit_id'
+            'koef'
         ];
         //Проверяем их в текущей моделе
         foreach ($requireAttributes as $attribute) {

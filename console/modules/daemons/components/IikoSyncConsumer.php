@@ -139,4 +139,9 @@ class IikoSyncConsumer extends AbstractConsumer
             \Yii::error($e->getMessage());
         }
     }
+
+    public function __destruct()
+    {
+        $this->iikoApi->logout();
+    }
 }

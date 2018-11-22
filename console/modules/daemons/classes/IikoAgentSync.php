@@ -39,7 +39,7 @@ class IikoAgentSync extends IikoSyncConsumer implements ConsumerInterface
     /**
      * @var int
      */
-    public static $timeoutExecuting = 300;
+    public static $timeoutExecuting = 600;
 
     /**
      * @var string

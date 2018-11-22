@@ -89,6 +89,7 @@ return [
             'controllerMap' => [
                 'default' => 'api_web\controllers\UserController',
             ],
+            'emailViewPath' => '@mail_views',
         ],
         'integration' => [
             'class' => 'api_web\modules\integration\Module',

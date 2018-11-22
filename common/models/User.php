@@ -391,6 +391,30 @@ class User extends \amnah\yii2\user\models\User
     }
 
     /**
+     * Отправляем Email с приглашением существуюущему вендору
+     *
+     * @param Request $request
+     * @param User    $vendor
+     */
+    public function sendClientInviteSupplier(User $recipient)
+    {
+        #Готовим сообщения
+        $restoran = $this->organization;
+        //var_dump($restoran->name); die();
+        $mailer = Yii::$app->mailer;
+        $oldViewPath      = $mailer->viewPath;
+        $mailer->viewPath = $this->module->emailViewPath;
+        $subject            = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru' => "Ресторан "]) . $restoran->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru' => " приглашает вас в систему"]);
+        $mailer->htmlLayout = '@mail_views/layouts/html';
+        $mailer->compose('@mail_views/clientInviteSupplier', compact("restoran"))
+            ->setTo($recipient->email)
+            ->setSubject($subject)
+            ->send();
+        // restore view path and return result
+        $mailer->viewPath = $oldViewPath;
+    }
+
+    /**
      * Send email invite to restaurant
      * @param User $client
      * @return int

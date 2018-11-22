@@ -76,8 +76,14 @@ class VendorWebApi extends \api_web\components\WebApi
             if (empty($relation)) {
                 $relation = $this->createRelation($this->user->organization->id, $organization->id);
             }
+            $arVendorUsers = User::find()
+                ->leftJoin(RelationUserOrganization::tableName() . ' ruo', 'ruo.user_id=user.id')
+                ->where(['ruo.organization_id' => $vendorID])->all();
 
-            $this->createAssociateManager(User::findOne($vendorID));
+            foreach ($arVendorUsers as $vendorUser) {
+                /**@var User $vendorUser*/
+                $this->createAssociateManager($vendorUser);
+            }
 
             if ($relation->invite != RelationSuppRest::INVITE_ON) {
                 foreach ($organization->users as $recipient) {
@@ -872,14 +878,14 @@ class VendorWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * @param User $vendor
+     * @param User $vendorUser
      */
-    private function createAssociateManager($vendor): void
+    private function createAssociateManager($vendorUser): void
     {
-        if (!$vendor->organization->vendor_is_work) {
-            if (!ManagerAssociate::find()->where(['manager_id' => $vendor->id, 'organization_id' => $this->user->organization->id])->exists()) {
+        if (!$vendorUser->organization->vendor_is_work) {
+            if (!ManagerAssociate::find()->where(['manager_id' => $vendorUser->id, 'organization_id' => $this->user->organization->id])->exists()) {
                 $managerAssociate = new ManagerAssociate();
-                $managerAssociate->manager_id = $vendor->id;
+                $managerAssociate->manager_id = $vendorUser->id;
                 $managerAssociate->organization_id = $this->user->organization->id;
                 $managerAssociate->save();
             }

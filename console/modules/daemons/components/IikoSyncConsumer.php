@@ -88,14 +88,14 @@ class IikoSyncConsumer extends AbstractConsumer
                 //ответ получим, сколько записей у нас в боевом состоянии
                 $count = $this->{$model->name}();
                 $dictionary->successSync($count);
-                //Убиваем сессию, а то закончатся на сервере iiko
-                $this->iikoApi->logout();
             } catch (\Exception $e) {
                 $dictionary->errorSync();
                 throw $e;
             } finally {
-                $this->iikoApi->logout();
+                //Информацию шлем в FCM
                 $dictionary->noticeToFCM();
+                //Убиваем сессию, а то закончатся на сервере iiko
+                $this->iikoApi->logout();
             }
             return ['success' => true];
         } else {

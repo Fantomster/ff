@@ -779,6 +779,7 @@ class UserWebApi extends \api_web\components\WebApi
             'id'            => (int)$vendor->id,
             'name'          => $vendor->name ?? "",
             'contact_name'  => $vendor->contact_name ?? "",
+            'email' => $vendor->email ?? "",
             'inn'           => $vendor->inn ?? null,
             'cat_id'        => (int)$model->cat_id,
             'email'         => $vendor->email ?? "",
@@ -787,7 +788,7 @@ class UserWebApi extends \api_web\components\WebApi
             'picture'       => $vendor->getPictureUrl() ?? "",
             'address'       => implode(', ', $locality),
             'rating'        => $vendor->rating ?? 0,
-            'allow_editing' => $vendor->type_id == Organization::TYPE_SUPPLIER ? !$vendor->vendor_is_work : $vendor->allow_editing,
+            'allow_editing' => ($vendor->type_id == Organization::TYPE_SUPPLIER) ? !$vendor->vendor_is_work : $vendor->allow_editing,
             'is_edi'        => $vendor->isEdi(),
         ];
     }

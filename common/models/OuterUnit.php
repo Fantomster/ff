@@ -82,7 +82,7 @@ class OuterUnit extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getInnerName($outerName, $serviceID)
+    public static function getInnerName($outerName, $serviceID)
     {
         $unit = self::findOne(['outer_uid' => $outerName, 'service_id' => $serviceID]);
         if ($unit) {
@@ -91,7 +91,7 @@ class OuterUnit extends \yii\db\ActiveRecord
         return $outerName;
     }
 
-    public function getOuterName($innerName, $serviceID)
+    public static function getOuterName($innerName, $serviceID)
     {
         $unit = self::findOne(['name' => $innerName, 'service_id' => $serviceID]);
         if ($unit) {

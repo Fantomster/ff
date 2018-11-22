@@ -20,11 +20,7 @@ class m181122_082553_fill_outer_units_for_edi extends Migration
     public function safeUp()
     {
         $serviceID = \api_web\components\Registry::EDI_SERVICE_ID;
-        $ediOrganization = \common\models\edi\EdiOrganization::find()->one();
-        if (!$ediOrganization) {
-            return false;
-        }
-        $orgID = $ediOrganization->organization_id;
+        $orgID = 1;
 
         $columns = ['name', 'outer_uid', 'service_id', 'org_id'];
         $array = [

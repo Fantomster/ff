@@ -31,8 +31,12 @@ class WebApiAuth extends AuthMethod
                 //Авторизация по токену
                 if (isset($params['user']['token'])) {
                     //Для методов неподтвержденного поставщика используем JWT
-                    $jwtToken = \Yii::$app->jwt->getParser()->parse((string)$params['user']['token']);
-                    $identity = User::getByJWTToken(\Yii::$app->jwt, $jwtToken);
+                    try {
+                        $jwtToken = \Yii::$app->jwt->getParser()->parse((string)$params['user']['token']);
+                        $identity = User::getByJWTToken(\Yii::$app->jwt, $jwtToken);
+                    } catch(\Exception $e) {
+                        $this->handleFailure($e->getMessage());
+                    }
                 }
                 //Авторизация по логину и паролю в параметрах запроса
                 if (isset($params['request']['email']) && isset($params['request']['password'])) {

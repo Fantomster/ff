@@ -245,7 +245,7 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function confirm(array $post)
     {
-        $this->validateRequest($post, ['user_id', 'code']);
+        //$this->validateRequest($post, ['user_id', 'code']);
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $user_id = (int)trim($post['user_id']);

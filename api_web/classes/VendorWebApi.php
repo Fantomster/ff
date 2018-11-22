@@ -112,9 +112,9 @@ class VendorWebApi extends \api_web\components\WebApi
         $org = $post['user']['organization_name'];
         $phone = $post['user']['phone'];
 
-        $vendor = $this->vendorExists($email);
+        $vendorUser= $this->vendorExists($email);
 
-        if ($vendor) {
+        if ($vendorUser) {
             $user = User::find()->where(['email' => $email])->one();
         } else {
             $user = new User();
@@ -131,13 +131,13 @@ class VendorWebApi extends \api_web\components\WebApi
         $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
         $currentUser = $this->user;
         $arrCatalog = $post['catalog']['products'] ?? [];
-        if (!$vendor->organization->vendor_is_work) {
+        if (!$vendorUser->organization->vendor_is_work) {
             Catalog::addCatalog($arrCatalog, true);
         }
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            if (!$vendor) {
+            if (!$vendorUser) {
 //                    Создаем нового поставщика и организацию
                 $user->email = $email;
                 $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
@@ -180,9 +180,9 @@ class VendorWebApi extends \api_web\components\WebApi
                 }
             } else {
                 //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
-                $get_supp_org_id = $vendor->organization_id;
+                $get_supp_org_id = $vendorUser->organization_id;
             }
-            $this->createAssociateManager($vendor);
+            $this->createAssociateManager($vendorUser);
 
             if (count($arrCatalog)) {
                 $lastInsert_cat_id = $this->addBaseCatalog($get_supp_org_id, $currentUser, $arrCatalog, $currency);
@@ -506,8 +506,8 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|data');
         }
         $vendorID = $request['vendor_id'];
-        $vendor = User::findOne($vendorID);
-        if ($vendor->organization->vendor_is_work) {
+        $vendorUser = User::findOne($vendorID);
+        if ($vendorUser->organization->vendor_is_work) {
             throw new BadRequestHttpException('vendor.is_work');
         }
 

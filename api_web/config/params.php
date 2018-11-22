@@ -81,4 +81,9 @@ return [
             'contacts'  => 'https://mixcart.ru/ua/contacts.html',
         ],
     ],
+
+    'help' => [
+        'restoran' => 'https://mixcart.ru/restaurant-help.html',
+        'vendor' => 'https://mixcart.ru/supplier-help.html'
+    ]
 ];

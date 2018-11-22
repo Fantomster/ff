@@ -141,7 +141,8 @@ class cerberApi extends baseApi
      */
     public function getForeignEnterpriseList($name, $country_guid)
     {
-        $result = VetisForeignEnterprise::find()->where(['active' => true, 'last' => true, 'country_guid' => $country_guid])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")->all();
+        $result = VetisForeignEnterprise::find()->where(['active' => true, 'last' => true, 'country_guid' => $country_guid])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")
+            ->limit(20)->all();
 
         if (!empty($result)) {
             $list = [];
@@ -163,7 +164,9 @@ class cerberApi extends baseApi
      */
     public function getRussianEnterpriseList($name)
     {
-        $result = VetisRussianEnterprise::find()->where(['active' => true, 'last' => true])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")->all();
+        $result = VetisRussianEnterprise::find()->where(['active' => true, 'last' => true])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")
+            ->limit(20)
+            ->all();
 
         if (!empty($result)) {
             $list = [];

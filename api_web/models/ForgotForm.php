@@ -75,7 +75,7 @@ class ForgotForm extends BaseForm
      * @param $number length
      * @return string
      */
-    public function generatePassword($number)
+    public static function generatePassword($number)
     {
         $arr = ['a', 'b', 'c', 'd', 'e', 'f',
             'g', 'h', 'i', 'j', 'k', 'l',
@@ -92,13 +92,20 @@ class ForgotForm extends BaseForm
             '[', ']', '{', '}', ';', ':'];
         $ranges = [0, 26, 52, 62];
         // Генерируем пароль
-        $pass = "";
-        for ($i = 0; $i < $number; $i++) {
-            // Вычисляем случайный индекс массива
-            $start = rand(0, count($ranges) - 1);
-            $index = rand($start, count($arr) - 1);
-            $pass .= $arr[$index];
+        $user = new User();
+        {
+            $pass = "";
+            for ($i = 0; $i < $number; $i++) {
+                // Вычисляем случайный индекс массива
+                $start = rand(0, count($ranges) - 1);
+                $index = rand($start, count($arr) - 1);
+                $pass .= $arr[$index];
+            }
+
+            $user->newPassword = $pass;
         }
+        while (!$user->validate(['newPassword']));
+
         return $pass;
     }
 }

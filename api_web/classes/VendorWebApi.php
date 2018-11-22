@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
+use api_web\models\ForgotForm;
 use common\models\CatalogTempContent;
 use common\models\ManagerAssociate;
 use common\models\RelationUserOrganization;
@@ -57,7 +58,11 @@ class VendorWebApi extends \api_web\components\WebApi
 
             if ($relation->invite != RelationSuppRest::INVITE_ON) {
                 foreach ($organization->users as $recipient) {
-                    $this->user->sendInviteToVendor($recipient);
+                    if($recipient->role_id != Role::ROLE_SUPPLIER_MANAGER) {
+                        continue;
+                    }
+                    //$this->user->sendInviteToVendor($recipient);
+                    $this->user->sendClientInviteSupplier($recipient);
                     if ($recipient->profile->phone && $recipient->profile->sms_allow) {
                         $text = Yii::$app->sms->prepareText('sms.client_invite_repeat', [
                             'name' => $this->user->organization->name
@@ -129,6 +134,8 @@ class VendorWebApi extends \api_web\components\WebApi
                      * */
                     $user->email = $email;
                     $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
+                    $user->newPassword = ForgotForm::generatePassword(8);
+                    $user->newPasswordConfirm = $user->newPassword;
                     $user->status = User::STATUS_UNCONFIRMED_EMAIL;
                     if (!$user->validate()) {
                         throw new ValidationException($user->getFirstErrors());

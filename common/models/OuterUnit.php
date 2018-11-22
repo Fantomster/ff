@@ -82,27 +82,20 @@ class OuterUnit extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getInnerName($outerName, $denom)
+    public function getInnerName($outerName, $serviceID)
     {
-        $allService = AllService::findOne(['denom' => $denom]);
-        if ($allService) {
-            $unit = self::findOne(['outer_uid' => $outerName, 'service_id' => $allService->id]);
-            if ($unit) {
-                return $unit->name;
-            }
+        $unit = self::findOne(['outer_uid' => $outerName, 'service_id' => $serviceID]);
+        if ($unit) {
+            return $unit->name;
         }
-
         return $outerName;
     }
 
-    public function getOuterName($innerName, $denom)
+    public function getOuterName($innerName, $serviceID)
     {
-        $allService = AllService::findOne(['denom' => $denom]);
-        if ($allService) {
-            $unit = self::findOne(['name' => $innerName, 'service_id' => $allService->id]);
-            if ($unit) {
-                return $unit->outer_uid;
-            }
+        $unit = self::findOne(['name' => $innerName, 'service_id' => $serviceID]);
+        if ($unit) {
+            return $unit->outer_uid;
         }
         return $innerName;
     }

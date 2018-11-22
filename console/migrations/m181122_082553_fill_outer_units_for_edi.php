@@ -19,11 +19,7 @@ class m181122_082553_fill_outer_units_for_edi extends Migration
      */
     public function safeUp()
     {
-        $allService = \common\models\AllService::findOne(['denom' => 'EDI']);
-        if (!$allService) {
-            return false;
-        }
-        $serviceID = $allService->id;
+        $serviceID = \api_web\components\Registry::EDI_SERVICE_ID;
         $ediOrganization = \common\models\edi\EdiOrganization::find()->one();
         if (!$ediOrganization) {
             return false;

@@ -226,9 +226,9 @@ class WaybillHelper
                 $ordCont = $mappedProduct['orderContent'];
                 $price = $ordCont->price;
                 $quantity = $ordCont->quantity;
-                $taxRate = $mappedProduct['vat'];
+                $taxRate = in_array($serviceId, [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID]) &&
+                    !is_null($ordCont->vat_product) ? $ordCont->vat_product : $mappedProduct['vat'];
                 $priceWithVat = (float)($price + ($price * ($taxRate / 100)));
-
                 $modelWaybillContent = new WaybillContent();
                 $modelWaybillContent->order_content_id = $ordCont->id;
                 $modelWaybillContent->waybill_id = $model->id;

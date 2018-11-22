@@ -2,7 +2,7 @@
 
 namespace common\components\edi;
 
-use common\models\EdiUnit;
+use common\models\OuterUnit;
 use yii\base\Component;
 use common\models\Catalog;
 use common\models\CatalogBaseGoods;
@@ -308,7 +308,7 @@ class EDIClass extends Component
             if (!$barcode) continue;
             $barcodeArray[] = $barcode;
             $ed = (String)$good->UNIT ?? (String)$good->QUANTITYOFCUINTUUNIT;
-            $ed = EdiUnit::getInnerName($ed);
+            $ed = OuterUnit::getInnerName($ed, 'EDI');
             $goodsArray[$barcode]['name'] = (String)$good->PRODUCTNAME ?? '';
             $goodsArray[$barcode]['price'] = (float)$good->UNITPRICE ?? 0.0;
             $goodsArray[$barcode]['article'] = (isset($good->IDBUYER) && $good->IDBUYER != '') ? (String)$good->IDBUYER : $barcode;

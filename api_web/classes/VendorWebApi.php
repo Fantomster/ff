@@ -183,11 +183,12 @@ class VendorWebApi extends \api_web\components\WebApi
                     $currentOrganization->step = Organization::STEP_OK;
                     $currentOrganization->save();
                 }
+                $this->createAssociateManager($user);
             } else {
                 //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
                 $get_supp_org_id = $vendorUser->organization_id;
+                $this->createAssociateManager($vendorUser);
             }
-            $this->createAssociateManager($vendorUser);
 
             if (count($arrCatalog)) {
                 $lastInsert_cat_id = $this->addBaseCatalog($get_supp_org_id, $currentUser, $arrCatalog, $currency);
@@ -223,7 +224,7 @@ class VendorWebApi extends \api_web\components\WebApi
                 'user_id'         => $user->id
             ];
 
-            if (!$vendor) {
+            if (!$vendorUser) {
                 $result['message'] = Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
                     $organization->name .
                     Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email;

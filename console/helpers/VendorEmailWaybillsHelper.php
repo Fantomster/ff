@@ -221,7 +221,7 @@ class VendorEmailWaybillsHelper
      * @return array
      */
     private function prepareAgentName($name){
-        $result = (new Query())->select('*')->from('ooo')->all();
+        $result = (new Query())->select('*')->from('organization_forms')->all();
         foreach ($result as $item) {
             if (strpos($name, $item['name_short']) === 0){
                 $newAgentName = str_replace($item['name_short'], $item['name_long'], $name);

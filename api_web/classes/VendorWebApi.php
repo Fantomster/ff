@@ -136,9 +136,7 @@ class VendorWebApi extends \api_web\components\WebApi
         $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
         $currentUser = $this->user;
         $arrCatalog = $post['catalog']['products'] ?? [];
-        if (!$vendorUser->organization->vendor_is_work) {
-            Catalog::addCatalog($arrCatalog, true);
-        }
+        Catalog::addCatalog($arrCatalog, true);
 
         $transaction = Yii::$app->db->beginTransaction();
         try {

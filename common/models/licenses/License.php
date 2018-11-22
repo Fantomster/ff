@@ -15,13 +15,13 @@ use yii\web\HttpException;
 /**
  * This is the model class for table "license".
  *
- * @property int                   $id         Уникальный ID
- * @property string                $name       Наименование лицензии
- * @property int                   $is_active  Флаг активности
+ * @property int                   $id          Уникальный ID
+ * @property string                $name        Наименование лицензии
+ * @property int                   $is_active   Флаг активности
  * @property int                   $sort_index  Индекс сортировки
- * @property int                   $service_id id service
- * @property string                $created_at Дата создания
- * @property string                $updated_at Дата обновления
+ * @property int                   $service_id  id service
+ * @property string                $created_at  Дата создания
+ * @property string                $updated_at  Дата обновления
  * @property LicenseService[]      $licenseServices
  * @property LicenseOrganization[] $licenseOrganizations
  */
@@ -229,7 +229,7 @@ class License extends ActiveRecord
             ->select([
                 'license.id',
                 'license.name',
-                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active',
+                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active_license',
                 'license.created_at',
                 'license.updated_at',
                 'license.login_allowed',
@@ -251,7 +251,7 @@ class License extends ActiveRecord
             ->indexBy('org_id');
 
         $license->andWhere(['in', 'license.id', Registry::$mc_licenses_id]);
-        $license->andWhere(['=', 'is_active', 1]);
+        $license->andWhere(['=', 'is_active_license', 1]);
         $license->orderBy(['to_date' => SORT_DESC]);
 
         return $license->all(\Yii::$app->db_api);

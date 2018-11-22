@@ -313,7 +313,7 @@ class EDIClass extends Component
             $goodsArray[$barcode]['price'] = (float)$good->UNITPRICE ?? 0.0;
             $goodsArray[$barcode]['article'] = (isset($good->IDBUYER) && $good->IDBUYER != '') ? (String)$good->IDBUYER : $barcode;
             $goodsArray[$barcode]['ed'] = $ed;
-            $goodsArray[$barcode]['units'] = (float)$good->PACKINGMULTIPLENESS ?? $good->UNIT;
+            $goodsArray[$barcode]['units'] = (float)$good->PACKINGMULTIPLENESS ?? $good->MINORDERQUANTITY;
             $goodsArray[$barcode]['edi_supplier_article'] = (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String)$good->IDSUPPLIER : $barcode;
             $goodsArray[$barcode]['vat'] = (int)$good->TAXRATE ?? null;
         }

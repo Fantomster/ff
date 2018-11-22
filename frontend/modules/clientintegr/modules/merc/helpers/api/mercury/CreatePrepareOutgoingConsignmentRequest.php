@@ -93,7 +93,7 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
             $consigment->unit = $stock_raw->batch->unit;
 
             $consigment->sourceStockEntry = new StockEntry();
-            $consigment->sourceStockEntry->uuid = $stock->uuid;
+            //$consigment->sourceStockEntry->uuid = $stock->uuid;
             $consigment->sourceStockEntry->guid = $stock->guid;
 
             $consigments[] = $consigment;

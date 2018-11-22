@@ -197,18 +197,11 @@ class OrganizationController extends Controller
     {
         $model = $this->findModel($id);
         $franchiseeModel = $this->findFranchiseeAssociateModel($id);
-        $ediModel = EdiOrganization::findOne(['organization_id' => $id]);
-        if (!$ediModel) {
-            $ediModel = new EdiOrganization();
-            $ediModel->organization_id = $id;
-            $ediModel->save();
-        }
         $franchiseeList = ArrayHelper::map(Franchisee::find()->all(), 'id', 'legal_entity');
-        if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save() && $ediModel->load(Yii::$app->request->post())) {
-            $ediModel->save();
+        if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
-            return $this->render('update', compact('model', 'franchiseeModel', 'franchiseeList', 'ediModel'));
+            return $this->render('update', compact('model', 'franchiseeModel', 'franchiseeList'));
         }
     }
 
@@ -484,7 +477,9 @@ class OrganizationController extends Controller
 
     private function handleEdiSettings($model, $id, $post, $isCreate = true)
     {
-        $model->organization_id = $id;
+        if ($isCreate) {
+            $model->organization_id = $id;
+        }
         if ($model->load($post) && $model->validate() && $model->save()) {
             if (isset($post['organizations'])) {
                 foreach ($post['organizations'] as $organizationID) {
@@ -495,7 +490,12 @@ class OrganizationController extends Controller
                     $roamingMap->save();
                 }
             }
-            return $this->redirect(Url::to(['organization/edi-settings', 'id' => $id]));
+            if ($isCreate) {
+                return $this->redirect(Url::to(['organization/edi-settings', 'id' => $id]));
+            } else {
+                return $this->redirect(Url::to(['organization/edi-settings', 'id' => $model->organization_id]));
+            }
+
         }
         $providers = ArrayHelper::map(EdiProvider::find()->asArray()->all(), 'id', 'name');
 

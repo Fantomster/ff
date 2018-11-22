@@ -238,7 +238,10 @@ class License extends ActiveRecord
             ])
             ->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
-            ->where(['lo.org_id' => $orgIds])
+            ->where([
+                'lo.org_id'  => $orgIds,
+                'license.id' => Registry::$mc_licenses_id
+            ])
             ->groupBy([
                 'license.id',
                 'license.name',
@@ -249,9 +252,8 @@ class License extends ActiveRecord
                 'lo.org_id'
             ])
             ->indexBy('org_id');
-
-        $license->andWhere(['in', 'license.id', Registry::$mc_licenses_id]);
-        $license->andWhere(['=', 'is_active_license', 1]);
+        
+        $license->having(['=', 'is_active_license', 1]);
         $license->orderBy(['to_date' => SORT_DESC]);
 
         return $license->all(\Yii::$app->db_api);

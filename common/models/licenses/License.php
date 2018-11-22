@@ -177,36 +177,7 @@ class License extends ActiveRecord
      */
     public static function getDateMixCartLicense($orgId)
     {
-        $license = (new Query())
-            ->select([
-                'license.id',
-                'license.name',
-                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active_license',
-                'license.created_at',
-                'license.updated_at',
-                'license.login_allowed',
-                'max(lo.td) as to_date'
-            ])
-            ->from(self::tableName())
-            ->leftJoin('license_organization lo', 'lo.license_id=license.id')
-            ->where([
-                'lo.org_id'  => $orgId,
-                'license.id' => Registry::$mc_licenses_id
-            ])
-            ->groupBy([
-                'license.id',
-                'license.name',
-                'license.is_active',
-                'license.created_at',
-                'license.updated_at',
-                'license.login_allowed'
-            ])
-            ->indexBy('id');
-
-        $license->having(['=', 'is_active_license', 1]);
-        $license->orderBy(['`license`.sort_index' => SORT_DESC]);
-
-        $result = $license->all(\Yii::$app->db_api);
+        $result = self::getMixCartLicenses($orgId);
 
         if (!empty($result)) {
             return current($result)['to_date'];
@@ -235,7 +206,7 @@ class License extends ActiveRecord
                 'license.created_at',
                 'license.updated_at',
                 'license.login_allowed',
-                'max(lo.td) as to_date',
+                'lo.td as to_date',
                 'lo.org_id',
             ])
             ->from(self::tableName())
@@ -243,15 +214,6 @@ class License extends ActiveRecord
             ->where([
                 'lo.org_id'  => $orgIds,
                 'license.id' => Registry::$mc_licenses_id
-            ])
-            ->groupBy([
-                'license.id',
-                'license.name',
-                'license.is_active',
-                'license.created_at',
-                'license.updated_at',
-                'license.login_allowed',
-                'lo.org_id'
             ])
             ->indexBy('org_id');
 

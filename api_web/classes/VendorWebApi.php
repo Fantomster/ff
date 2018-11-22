@@ -517,13 +517,17 @@ class VendorWebApi extends \api_web\components\WebApi
         if (empty($request['data'])) {
             throw new BadRequestHttpException('empty_param|data');
         }
-        $vendorID = $request['vendor_id'];
-        $vendorUser = User::findOne($vendorID);
+        $vendorId = $request['vendor_id'];
+        $vendorUser = User::findOne(['organization_id' => $vendorId]);
+        if(empty($vendorUser)) {
+            //todo_refactor no migration localization
+            throw new BadRequestHttpException('vendor.not_found');
+        }
         if ($vendorUser->organization->vendor_is_work) {
             throw new BadRequestHttpException('vendor.is_work');
         }
 
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendorID, $this->user->organization, true);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendorId, $this->user->organization, true);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
         }

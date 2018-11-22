@@ -39,6 +39,7 @@ class iikoApi
      */
     private $token;
 
+    private $orgId;
     /**
      * @var string
      */
@@ -61,6 +62,7 @@ class iikoApi
             self::$_instance->host = $settings['URL'];
             self::$_instance->login = $settings['auth_login'];
             self::$_instance->pass = $settings['auth_password'];
+            self::$_instance->orgId = $orgId;
         }
 
         return self::$_instance;
@@ -78,6 +80,11 @@ class iikoApi
      */
     private function __clone()
     {
+    }
+
+    public function __destruct()
+    {
+        $this->logout();
     }
 
     /**
@@ -103,10 +110,16 @@ class iikoApi
             'pass'  => hash('sha1', $password)
         ];
 
-        if ($this->token = $this->sendAuth('/auth', $params)) {
-            return true;
-        } else {
-            return false;
+        try {
+            $this->token = $this->sendAuth('/auth', $params);
+            $this->writeToken();
+            if ($this->token) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (\Exception $e) {
+            throw $e;
         }
     }
 
@@ -120,6 +133,7 @@ class iikoApi
         if (!empty($this->token)) {
             try {
                 $this->sendAuth('/logout');
+                $this->deleteToken();
                 $this->token = null;
             } catch (\Exception $e) {
                 throw $e;
@@ -420,11 +434,37 @@ class iikoApi
 
     /**
      * Количество свободных лицензий на iikoServer
+     *
      * @return bool|string
      */
     public function getLicenseCount()
     {
         $url = $this->host . "/licence/info?moduleId=2000";
         return file_get_contents($url);
+    }
+
+    /**
+     * @return string
+     */
+    private function getTokenFile()
+    {
+        return \Yii::getAlias('@api_web') . '/runtime/iiko_auth/' . self::$_instance->orgId . '_' . $this->token . '.t';
+    }
+
+    private function writeToken()
+    {
+        if (!file_exists(\Yii::getAlias('@api_web') . '/runtime/iiko_auth')) {
+            mkdir(\Yii::getAlias('@api_web') . '/runtime/iiko_auth');
+            chmod(\Yii::getAlias('@api_web') . '/runtime/iiko_auth', 7777);
+        }
+
+        file_put_contents($this->getTokenFile(), '');
+    }
+
+    private function deleteToken()
+    {
+        if (file_exists($this->getTokenFile())) {
+            unlink($this->getTokenFile());
+        }
     }
 }

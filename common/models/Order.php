@@ -751,8 +751,8 @@ class Order extends \yii\db\ActiveRecord
             }
 
             $relationExists = RelationUserOrganization::find()->where(['user_id' => $user->id, 'organization_id' => $this->vendor_id])->exists();
-            $token = $user->getJWTToken(Yii::$app->jwt);
-            
+            $token          = $user->getJWTToken(Yii::$app->jwt);
+
             if ($appVersion == 1) {
                 if ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
                     $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
@@ -763,7 +763,7 @@ class Order extends \yii\db\ActiveRecord
                 }
 
                 //Если получает вендор, и он не работает в системе, добавляем токен
-                
+
                 if ($relationExists && (($this->vendor->blacklisted == Organization::STATUS_BLACKISTED) || ($this->vendor->blacklisted == Organization::STATUS_UNSORTED))) {
                     $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
                         "/order/view",
@@ -784,10 +784,15 @@ class Order extends \yii\db\ActiveRecord
 
         //Если пришла модель с дополнительного Емайла
         if ($user instanceof AdditionalEmail) {
-            return Yii::$app->urlManagerFrontend->createAbsoluteUrl([
-                        "/order/view",
-                        "id" => $this->id
-            ]);
+            $additonalEmail = AdditionalEmail::findOne(['email' => $user->email]);
+            if (($appVersion === 2) && ($additonalEmail->organization->type_id === Organization::TYPE_RESTAURANT)) {
+                return \Yii::$app->urlManagerFrontend->baseUrl . "/client/history/order/" . $this->id;
+            } else {
+                return Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                            "/order/view",
+                            "id" => $this->id
+                ]);
+            }
         }
     }
 

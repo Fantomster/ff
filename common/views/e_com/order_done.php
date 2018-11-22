@@ -28,6 +28,7 @@
             foreach ($orderContent as $position): ?>
                 <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
                 $measure = $product->ed ?? 'шт';
+                $measure = \common\models\EdiUnit::getOuterName($measure);
                 $catalogGood = \common\models\CatalogGoods::findOne(['base_goods_id' => $product->id]);
                 $barcode = $product->barcode;
                 $vat = isset($catalogGood->vat) ? $catalogGood->vat : 0;

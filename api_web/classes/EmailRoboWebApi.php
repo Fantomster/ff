@@ -74,7 +74,7 @@ class EmailRoboWebApi extends WebApi
 
         $model = IntegrationSettingFromEmail::findOne([
             'id'              => $post['id'],
-            'organization_id' => $post['organization_id'] ?? $this->user->organization_id, //$post['org_id'] ?? $this->user->organization_id,
+            'organization_id' => $post['organization_id'] ?? $this->user->organization_id,
             'version'         => 2,
         ]);
         if (!$model) {

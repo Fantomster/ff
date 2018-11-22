@@ -112,7 +112,6 @@ class VendorWebApi extends \api_web\components\WebApi
         $org = $post['user']['organization_name'];
         $phone = $post['user']['phone'];
 
-//        $check = RestaurantChecker::checkEmail($email);
         $vendor = $this->vendorExists($email);
 
         if ($vendor) {
@@ -186,7 +185,7 @@ class VendorWebApi extends \api_web\components\WebApi
             $this->createAssociateManager($vendor);
 
             if (count($arrCatalog)) {
-                $lastInsert_cat_id = $this->addBaseCatalog($vendor, $get_supp_org_id, $currentUser, $arrCatalog, $currency);
+                $lastInsert_cat_id = $this->addBaseCatalog($get_supp_org_id, $currentUser, $arrCatalog, $currency);
             } else {
                 $lastInsert_cat_id = 0;
             }
@@ -735,33 +734,32 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     private function vendorExists($email)
     {
-        $currentUser = User::findIdentity(\Yii::$app->user->id);
-        $vendor = User::findOne(['email' => $email]);
+        $vendorUser = User::findOne(['email' => $email]);
 
-        if (!$vendor) {
+        if (!$vendorUser) {
             return false;
-        } elseif (empty($vendor->organization_id)) {
+        } elseif (empty($vendorUser->organization_id)) {
             throw new BadRequestHttpException('Пользователь с емайлом:' . $email . ' найден у нас в системе, но он не завершил регистрацию. Как только он пройдет процедуру регистрации поставщика, вы сможете добавить его.');
         }
 
-        if (!$vendor->organization->type_id == Organization::TYPE_SUPPLIER) {
+        if ($vendorUser->organization->type_id != Organization::TYPE_SUPPLIER) {
             //найден email ресторана
             throw new BadRequestHttpException(\Yii::t('app', 'common.models.already_in_use',
                 ['ru' => 'Данный email не может быть использован']));
         }
 
         $userRelationSuppRest = RelationSuppRest::find()
-            ->where(['rest_org_id' => $currentUser->organization_id, 'supp_org_id' => $vendor->organization_id, 'deleted' => false])
+            ->where(['rest_org_id' => $this->user->organization_id, 'supp_org_id' => $vendorUser->organization_id, 'deleted' => false])
             ->one();
         if (!$userRelationSuppRest) {
-            $managersIsActive = User::find()->where(['organization_id' => $vendor->organization_id, 'status' => 1])->count();
+            $managersIsActive = User::find()->where(['organization_id' => $vendorUser->organization_id, 'status' => 1])->count();
             if ($managersIsActive == 0) {
                 //поставщик не авторизован
                 //добавляем к базовому каталогу поставщика каталог ресторана и создаем связь
 //                throw new BadRequestHttpException(\Yii::t('app', 'common.models.vendor_not_auth', ['ru' => 'Поставщик еще не авторизован / добавляем каталог']));
 //                $result = ['success'      => true, 'eventType' => self::NO_AUTH_ADD_RELATION_AND_CATALOG, 'message' => ),
 
-                return $vendor;
+                return $vendorUser;
             } else {
                 //поставщик авторизован
                 throw new BadRequestHttpException(\Yii::t('app', 'common.models.already_register', ['ru' => 'Поставщик уже зарегистрирован в системе, Вы можете его добавить нажав кнопку Пригласить']));
@@ -778,66 +776,43 @@ class VendorWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * @param               $vendor
      * @param               $get_supp_org_id
-     * @param               $currentUser
+     * @param User          $currentUser
      * @param               $arrCatalog
      * @param Currency|null $currency
      * @return int
      * @throws ValidationException
      */
-    private function addBaseCatalog($vendor, $get_supp_org_id, $currentUser, $arrCatalog, Currency $currency = null)
+    private function addBaseCatalog($get_supp_org_id, $currentUser, $arrCatalog, Currency $currency = null)
     {
         /**
          * 2) Создаем базовый и каталог для ресторана
          * */
-        if (!$vendor) {
-            $newBaseCatalog = new Catalog();
-            $newBaseCatalog->supp_org_id = $get_supp_org_id;
-            $newBaseCatalog->name = Yii::t('app', 'Главный каталог');
-            $newBaseCatalog->type = Catalog::BASE_CATALOG;
-            $newBaseCatalog->status = Catalog::STATUS_ON;
-            if (!is_null($currency)) {
-                $newBaseCatalog->currency_id = $currency->id;
+        //Поставщик зарегистрирован, но не авторизован
+        //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
+        $vendorBaseCatalog = Catalog::findOne(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG]);
+        if (!$vendorBaseCatalog) {
+            $vendorBaseCatalog = new Catalog();
+            $vendorBaseCatalog->supp_org_id = $get_supp_org_id;
+            $vendorBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);
+            $vendorBaseCatalog->type = Catalog::BASE_CATALOG;
+            $vendorBaseCatalog->status = Catalog::STATUS_ON;
+            $vendorBaseCatalog->currency_id = !is_null($currency) ? $currency->id : 1;
+            if (!$vendorBaseCatalog->save()) {
+                throw new ValidationException($vendorBaseCatalog->getFirstErrors());
             }
-            if (!$newBaseCatalog->save()) {
-                throw new ValidationException($newBaseCatalog->getFirstErrors());
-            }
-            $newBaseCatalog->refresh();
-            $lastInsert_base_cat_id = $newBaseCatalog->id;
-        } else {
-            //Поставщик зарегистрирован, но не авторизован
-            //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
-            if (Catalog::find()->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
-                $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->one();
-                $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
-            } else {
-                $newBaseCatalog = new Catalog();
-                $newBaseCatalog->supp_org_id = $get_supp_org_id;
-                $newBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);
-                $newBaseCatalog->type = Catalog::BASE_CATALOG;
-                $newBaseCatalog->status = Catalog::STATUS_ON;
-                if (isset($currency)) {
-                    $newBaseCatalog->currency_id = $currency->id;
-                }
-                if (!$newBaseCatalog->save()) {
-                    throw new ValidationException($newBaseCatalog->getFirstErrors());
-                }
-                $newBaseCatalog->refresh();
-                $lastInsert_base_cat_id = $newBaseCatalog->id;
-            }
+            $vendorBaseCatalog->refresh();
         }
+        $lastInsert_base_cat_id = $vendorBaseCatalog->id;
 
         $newCatalog = new Catalog();
         $newCatalog->supp_org_id = $get_supp_org_id;
         $newCatalog->name = ($currentUser->organization->name == "") ? $currentUser->email : $currentUser->organization->name;
         $newCatalog->type = Catalog::CATALOG;
         $newCatalog->status = Catalog::STATUS_ON;
-        if (isset($currency)) {
-            $newCatalog->currency_id = $currency->id;
-        }
+        $newCatalog->currency_id = !is_null($currency) ? $currency->id : 1;
         if (!$newCatalog->save()) {
-            throw new ValidationException($newBaseCatalog->getFirstErrors());
+            throw new ValidationException($newCatalog->getFirstErrors());
         }
         $lastInsert_cat_id = $newCatalog->id;
         $newCatalog->refresh();
@@ -845,16 +820,9 @@ class VendorWebApi extends \api_web\components\WebApi
         /**
          * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
          * */
-        $article_create = 0;
+        $article = 1;
         foreach ($arrCatalog as $arrCatalogs) {
-            $article_create++;
-            $article = $article_create;
             $product = strip_tags(trim($arrCatalogs['product']));
-            $units = null;
-
-            if (empty($units) || $units < 0) {
-                $units = null;
-            }
             $price = strip_tags(trim($arrCatalogs['price']));
             $ed = strip_tags(trim($arrCatalogs['ed']));
             $price = str_replace(',', '.', $price);
@@ -871,14 +839,14 @@ class VendorWebApi extends \api_web\components\WebApi
             $newProduct->supp_org_id = $get_supp_org_id;
             $newProduct->article = (string)$article;
             $newProduct->product = $product;
-            $newProduct->units = $units;
+//            $newProduct->units = null;
             $newProduct->price = $price;
             $newProduct->ed = $ed;
             $newProduct->status = CatalogBaseGoods::STATUS_ON;
             $newProduct->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
             $newProduct->deleted = CatalogBaseGoods::DELETED_OFF;
             if (!$newProduct->save()) {
-                throw new ValidationException($newBaseCatalog->getFirstErrors());
+                throw new ValidationException($newProduct->getFirstErrors());
             }
             $newProduct->refresh();
 
@@ -889,9 +857,10 @@ class VendorWebApi extends \api_web\components\WebApi
             $newGoods->base_goods_id = $lastInsert_base_goods_id;
             $newGoods->price = $price;
             if (!$newGoods->save()) {
-                throw new ValidationException($newBaseCatalog->getFirstErrors());
+                throw new ValidationException($newGoods->getFirstErrors());
             }
             $newGoods->refresh();
+            $article++;
         }
         return $lastInsert_cat_id;
     }

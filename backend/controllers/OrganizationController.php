@@ -62,6 +62,7 @@ class OrganizationController extends Controller
                             'start-test-vendors-updating',
                             'notifications',
                             'ajax-update-status',
+                            'ajax-update-vendor-is-work',
                             'ajax-update-edi-list',
                             'ajax-update-license-organization',
                             'list-organizations-for-licenses',
@@ -306,6 +307,19 @@ class OrganizationController extends Controller
             $organizationId = str_replace('blacklisted_', '', Yii::$app->request->post('id'));
             $organization = Organization::findOne(['id' => $organizationId]);
             $organization->blacklisted = $status;
+            $organization->save();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public function actionAjaxUpdateVendorIsWork()
+    {
+        if (Yii::$app->request->isAjax) {
+            $status = Yii::$app->request->post('value');
+            $organizationId = str_replace('vendor_is_work_', '', Yii::$app->request->post('id'));
+            $organization = Organization::findOne(['id' => $organizationId]);
+            $organization->vendor_is_work = $status;
             $organization->save();
             return true;
         } else {

@@ -753,12 +753,12 @@ class UserWebApi extends \api_web\components\WebApi
     public function prepareVendor(RelationSuppRest $model)
     {
         $status_list = $this->getVendorStatusList();
-
+        $vendor = $model->vendor;
         $locality = [
-            $model->vendor->country,
-            $model->vendor->administrative_area_level_1,
-            $model->vendor->locality,
-            $model->vendor->route
+            $vendor->country,
+            $vendor->administrative_area_level_1,
+            $vendor->locality,
+            $vendor->route
         ];
 
         foreach ($locality as $key => $val) {
@@ -776,19 +776,19 @@ class UserWebApi extends \api_web\components\WebApi
         }
 
         return [
-            'id'            => (int)$model->vendor->id,
-            'name'          => $model->vendor->name ?? "",
-            'contact_name'  => $model->vendor->contact_name ?? "",
-            'inn'           => $model->vendor->inn ?? null,
+            'id'            => (int)$vendor->id,
+            'name'          => $vendor->name ?? "",
+            'contact_name'  => $vendor->contact_name ?? "",
+            'inn'           => $vendor->inn ?? null,
             'cat_id'        => (int)$model->cat_id,
-            'email'         => $model->vendor->email ?? "",
-            'phone'         => $model->vendor->phone ?? "",
+            'email'         => $vendor->email ?? "",
+            'phone'         => $vendor->phone ?? "",
             'status'        => $status,
-            'picture'       => $model->vendor->getPictureUrl() ?? "",
+            'picture'       => $vendor->getPictureUrl() ?? "",
             'address'       => implode(', ', $locality),
-            'rating'        => $model->vendor->rating ?? 0,
-            'allow_editing' => $model->vendor->allow_editing,
-            'is_edi'        => $model->vendor->isEdi(),
+            'rating'        => $vendor->rating ?? 0,
+            'allow_editing' => $vendor->type_id == Organization::TYPE_SUPPLIER ? !$vendor->vendor_is_work : $vendor->allow_editing,
+            'is_edi'        => $vendor->isEdi(),
         ];
     }
 

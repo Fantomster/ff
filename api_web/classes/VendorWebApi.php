@@ -3,7 +3,10 @@
 namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
+use common\models\CatalogBaseGoods;
+use common\models\CatalogGoods;
 use common\models\CatalogTempContent;
+use common\models\Currency;
 use common\models\ManagerAssociate;
 use common\models\RelationUserOrganization;
 use Yii;
@@ -22,6 +25,7 @@ use api_web\helpers\Excel;
 
 /**
  * Class VendorWebApi
+ *
  * @package api_web\classes
  */
 class VendorWebApi extends \api_web\components\WebApi
@@ -29,6 +33,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Создание нового поставщика в системе, находясь в аккаунте ресторана
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -55,6 +60,8 @@ class VendorWebApi extends \api_web\components\WebApi
                 $relation = $this->createRelation($this->user->organization->id, $organization->id);
             }
 
+            $this->createAssociateManager(User::findOne($vendorID));
+
             if ($relation->invite != RelationSuppRest::INVITE_ON) {
                 foreach ($organization->users as $recipient) {
                     $this->user->sendInviteToVendor($recipient);
@@ -68,15 +75,15 @@ class VendorWebApi extends \api_web\components\WebApi
                 $relation->invite = RelationSuppRest::INVITE_ON;
                 $relation->save();
                 $result = [
-                    'success' => true,
+                    'success'         => true,
                     'organization_id' => $organization->id,
-                    'message' => "Приглашение отправлено."
+                    'message'         => "Приглашение отправлено."
                 ];
             } else {
                 $result = [
-                    'success' => true,
+                    'success'         => true,
                     'organization_id' => $organization->id,
-                    'message' => "Приглашение уже было отправлено."
+                    'message'         => "Приглашение уже было отправлено."
                 ];
             }
             return $result;
@@ -89,13 +96,10 @@ class VendorWebApi extends \api_web\components\WebApi
         $org = $post['user']['organization_name'];
         $phone = $post['user']['phone'];
 
-        $check = RestaurantChecker::checkEmail($email);
+//        $check = RestaurantChecker::checkEmail($email);
+        $vendor = $this->vendorExists($email);
 
-        if ($check['eventType'] == 7) {
-            throw new BadRequestHttpException('Пользователь с емайлом:' . $email . ' найден у нас в системе, но он не завершил регистрацию. Как только он пройдет процедуру регистрации поставщика, вы сможете добавить его.');
-        }
-
-        if ($check['eventType'] != 5) {
+        if ($vendor) {
             $user = User::find()->where(['email' => $email])->one();
         } else {
             $user = new User();
@@ -112,123 +116,111 @@ class VendorWebApi extends \api_web\components\WebApi
         $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
         $currentUser = $this->user;
         $arrCatalog = $post['catalog']['products'] ?? [];
-        Catalog::addCatalog($arrCatalog, true);
-
-        if (in_array($check['eventType'], [1, 2, 4, 6])) {
-            throw new BadRequestHttpException(Yii::t('app', 'common.models.already_in_use', ['ru' => 'Данный email не может быть использован']));
+        if (!$vendor->organization->vendor_is_work) {
+            Catalog::addCatalog($arrCatalog, true);
         }
 
-        if ($check['eventType'] == 3 || $check['eventType'] == 5) {
-            $transaction = Yii::$app->db->beginTransaction();
-            try {
-                if ($check['eventType'] == 5) {
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            if (!$vendor) {
 //                    Создаем нового поставщика и организацию
-                    $user->email = $email;
-                    $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
-                    $user->status = User::STATUS_UNCONFIRMED_EMAIL;
-                    if (!$user->validate()) {
-                        throw new ValidationException($user->getFirstErrors());
-                    }
-                    $user->save();
-                    $profile->setUser($user->id);
-                    $profile->full_name = $fio;
-                    $profile->phone = $phone;
-                    $profile->sms_allow = Profile::SMS_ALLOW;
-                    if (!$profile->validate()) {
-                        throw new ValidationException($profile->getFirstErrors());
-                    }
-                    $profile->save();
-                    if (!$vendorID) {
-                        $organization->name = $org;
-                    }
-
-                    if (!empty($post['user']['inn']) && !$vendorID) {
-                        $organization->inn = $post['user']['inn'];
-                    }
-
-                    if (!empty($post['user']['contact_name']) && !$vendorID) {
-                        $organization->contact_name = $post['user']['contact_name'];
-                    }
-
-                    if (!$organization->validate()) {
-                        throw new ValidationException($organization->getFirstErrors());
-                    }
-                    $organization->save();
-                    $user->setOrganization($organization)->save();
-                    $relId = $user->createRelationUserOrganization($user->organization->id, $user->role_id);
-                    if (!ManagerAssociate::find()->where(['manager_id' => $user->id, 'organization_id' => $this->user->organization->id])->exists()) {
-                        $managerAssociate = new ManagerAssociate();
-                        $managerAssociate->manager_id = $user->id;
-                        $managerAssociate->organization_id = $this->user->organization->id;
-                        $managerAssociate->save();
-                    }
-                    $get_supp_org_id = $organization->id;
-                    $currentOrganization = $currentUser->organization;
-                    if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
-                        $currentOrganization->step = Organization::STEP_OK;
-                        $currentOrganization->save();
-                    }
-                } else {
-                    //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
-                    $get_supp_org_id = $check['org_id'];
+                $user->email = $email;
+                $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
+                $user->status = User::STATUS_UNCONFIRMED_EMAIL;
+                if (!$user->validate()) {
+                    throw new ValidationException($user->getFirstErrors());
+                }
+                $user->save();
+                $profile->setUser($user->id);
+                $profile->full_name = $fio;
+                $profile->phone = $phone;
+                $profile->sms_allow = Profile::SMS_ALLOW;
+                if (!$profile->validate()) {
+                    throw new ValidationException($profile->getFirstErrors());
+                }
+                $profile->save();
+                if (!$vendorID) {
+                    $organization->name = $org;
                 }
 
-                if (count($arrCatalog)) {
-                    $lastInsert_cat_id = Catalog::addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, $currency);
-                } else {
-                    $lastInsert_cat_id = 0;
+                if (!empty($post['user']['inn']) && !$vendorID) {
+                    $organization->inn = $post['user']['inn'];
                 }
-                /**
-                 *
-                 * 5) Связь ресторана и поставщика
-                 *
-                 * */
-                $relation = $this->createRelation($currentUser->organization_id, $get_supp_org_id, $lastInsert_cat_id);
-                /**
-                 *
-                 * Отправка почты
-                 *
-                 * */
-                $relation->invite = RelationSuppRest::INVITE_ON;
-                $relation->save();
 
+                if (!empty($post['user']['contact_name']) && !$vendorID) {
+                    $organization->contact_name = $post['user']['contact_name'];
+                }
+
+                if (!$organization->validate()) {
+                    throw new ValidationException($organization->getFirstErrors());
+                }
+                $organization->save();
+                $user->setOrganization($organization)->save();
+                $relId = $user->createRelationUserOrganization($user->organization->id, $user->role_id);
+
+                $get_supp_org_id = $organization->id;
                 $currentOrganization = $currentUser->organization;
-                $currentOrganization->step = Organization::STEP_OK;
-                $currentOrganization->save();
-
-                $transaction->commit();
-                if (!empty($profile->phone)) {
-                    $text = Yii::$app->sms->prepareText('sms.client_invite', [
-                        'name' => $currentUser->organization->name
-                    ]);
-                    Yii::$app->sms->send($text, $profile->phone);
+                if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
+                    $currentOrganization->step = Organization::STEP_OK;
+                    $currentOrganization->save();
                 }
-                $currentUser->sendInviteToVendor($user);
-
-                $result = [
-                    'success' => true,
-                    'organization_id' => $organization->id,
-                    'user_id' => $user->id
-                ];
-
-                if ($check['eventType'] == 5) {
-                    $result['message'] = Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
-                        $organization->name .
-                        Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email;
-                } else {
-                    $result['message'] = Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . '';
-                }
-                return $result;
-            } catch (\Exception $e) {
-                $transaction->rollback();
-                throw $e;
+            } else {
+                //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
+                $get_supp_org_id = $vendor->organization_id;
             }
+            $this->createAssociateManager($vendor);
+
+            if (count($arrCatalog)) {
+                $lastInsert_cat_id = $this->addBaseCatalog($vendor, $get_supp_org_id, $currentUser, $arrCatalog, $currency);
+            } else {
+                $lastInsert_cat_id = 0;
+            }
+            /**
+             * 5) Связь ресторана и поставщика
+             * */
+            $relation = $this->createRelation($currentUser->organization_id, $get_supp_org_id, $lastInsert_cat_id);
+            /**
+             * Отправка почты
+             * */
+            $relation->invite = RelationSuppRest::INVITE_ON;
+            $relation->save();
+
+            $currentOrganization = $currentUser->organization;
+            $currentOrganization->step = Organization::STEP_OK;
+            $currentOrganization->save();
+
+            $transaction->commit();
+            if (!empty($profile->phone)) {
+                $text = Yii::$app->sms->prepareText('sms.client_invite', [
+                    'name' => $currentUser->organization->name
+                ]);
+                Yii::$app->sms->send($text, $profile->phone);
+            }
+            $currentUser->sendInviteToVendor($user);
+
+            $result = [
+                'success'         => true,
+                'organization_id' => $organization->id,
+                'user_id'         => $user->id
+            ];
+
+            if (!$vendor) {
+                $result['message'] = Yii::t('message', 'frontend.controllers.client.vendor', ['ru' => 'Поставщик ']) .
+                    $organization->name .
+                    Yii::t('message', 'frontend.controllers.client.and_catalog', ['ru' => ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ']) . $email;
+            } else {
+                $result['message'] = Yii::t('message', 'frontend.controllers.client.catalog_added', ['ru' => 'Каталог добавлен! приглашение было отправлено на почту  ']) . $email . '';
+            }
+            return $result;
+        } catch (\Exception $e) {
+            $transaction->rollback();
+            throw $e;
         }
     }
 
     /**
-     * @param $client_id
-     * @param $vendor_id
+     * @param     $client_id
+     * @param     $vendor_id
      * @param int $cat_id
      * @return RelationSuppRest
      * @throws ValidationException
@@ -252,6 +244,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Поиск поставщика по емайл
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -283,11 +276,11 @@ class VendorWebApi extends \api_web\components\WebApi
 
                 if ($user = RelationUserOrganization::find()->joinWith('user')->where([
                     'relation_user_organization.organization_id' => $model->id,
-                    'user.email' => $email
+                    'user.email'                                 => $email
                 ])->one()) {
                     $r['user'] = [
                         'email' => $user->user->email,
-                        'name' => $user->user->profile->full_name,
+                        'name'  => $user->user->profile->full_name,
                         'phone' => $user->user->profile->phone,
                     ];
                 }
@@ -301,6 +294,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Обновление поставщика
+     *
      * @param array $post
      * @return mixed
      * @throws BadRequestHttpException
@@ -434,6 +428,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Обновление логотипа поставщика
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -482,6 +477,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Загрузка индивид. каталога
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
@@ -492,10 +488,13 @@ class VendorWebApi extends \api_web\components\WebApi
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException('empty_param|vendor_id');
         }
-        $vendorID = $request['vendor_id'];
-
         if (empty($request['data'])) {
             throw new BadRequestHttpException('empty_param|data');
+        }
+        $vendorID = $request['vendor_id'];
+        $vendor = User::findOne($vendorID);
+        if ($vendor->organization->vendor_is_work) {
+            throw new BadRequestHttpException('vendor.is_work');
         }
 
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendorID, $this->user->organization, true);
@@ -525,9 +524,9 @@ class VendorWebApi extends \api_web\components\WebApi
                 $newTempCatalog->excel_file = $file->name;
                 $newTempCatalog->save();
                 return [
-                    'result' => true,
+                    'result'  => true,
                     'temp_id' => $newTempCatalog->id,
-                    'rows' => Excel::get20Rows($file->tempName)
+                    'rows'    => Excel::get20Rows($file->tempName)
                 ];
             } catch (\yii\base\Exception $e) {
                 throw $e;
@@ -539,6 +538,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Валидация и импорт уже загруженного файла инд. каталога
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
@@ -566,7 +566,7 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|mapping');
         }
 
-        if (!CatalogTempContent::find()->where(['temp_id' => $tempCatalog->id])->exists()){
+        if (!CatalogTempContent::find()->where(['temp_id' => $tempCatalog->id])->exists()) {
             $request['mapping'] = isset($request['mapping']) ? array_flip($request['mapping']) : null;
             $mapping = $request['mapping'] ?? $tempCatalog->cat->mapping;
             if (is_string($mapping)) {
@@ -586,7 +586,7 @@ class VendorWebApi extends \api_web\components\WebApi
             }
         }
         $dubles = $this->container->get('CatalogWebApi')->getTempDuplicatePosition($request);
-        if ($dubles){
+        if ($dubles) {
             return ['duplicates' => $dubles];
         }
 
@@ -595,6 +595,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Загрузка индивидуального каталога
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
@@ -607,6 +608,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Валидация и импорт уже загруженного основного каталога
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
@@ -619,6 +621,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Удаление основного каталога
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
@@ -639,6 +642,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Смена уникального индекса главного каталога
+     *
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
@@ -658,6 +662,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Удаление загруженного необработанного каталога
+     *
      * @param array $request
      * @return array
      * @throws \Exception
@@ -680,6 +685,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Список ключей для выбора
+     *
      * @return array
      */
     public function getListMainIndex()
@@ -689,6 +695,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
     /**
      * Статус загруженного, но не импортированного каталога
+     *
      * @param array $request
      * @return array
      */
@@ -697,8 +704,8 @@ class VendorWebApi extends \api_web\components\WebApi
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
             return [
-                'exists' => true,
-                'rows' => Excel::get20RowsFromTempUploaded($tempCatalog),
+                'exists'  => true,
+                'rows'    => Excel::get20RowsFromTempUploaded($tempCatalog),
                 'mapping' => $tempCatalog->mapping,
             ];
         } else {
@@ -706,4 +713,186 @@ class VendorWebApi extends \api_web\components\WebApi
         }
     }
 
+    /**
+     * @param $email
+     * @return bool|User|null
+     * @throws BadRequestHttpException
+     */
+    private function vendorExists($email)
+    {
+        $currentUser = User::findIdentity(\Yii::$app->user->id);
+        $vendor = User::findOne(['email' => $email]);
+
+        if (!$vendor) {
+            return false;
+        } elseif (empty($vendor->organization_id)) {
+            throw new BadRequestHttpException('Пользователь с емайлом:' . $email . ' найден у нас в системе, но он не завершил регистрацию. Как только он пройдет процедуру регистрации поставщика, вы сможете добавить его.');
+        }
+
+        if (!$vendor->organization->type_id == Organization::TYPE_SUPPLIER) {
+            //найден email ресторана
+            throw new BadRequestHttpException(\Yii::t('app', 'common.models.already_in_use',
+                ['ru' => 'Данный email не может быть использован']));
+        }
+
+        $userRelationSuppRest = RelationSuppRest::find()
+            ->where(['rest_org_id' => $currentUser->organization_id, 'supp_org_id' => $vendor->organization_id, 'deleted' => false])
+            ->one();
+        if (!$userRelationSuppRest) {
+            $managersIsActive = User::find()->where(['organization_id' => $vendor->organization_id, 'status' => 1])->count();
+            if ($managersIsActive == 0) {
+                //поставщик не авторизован
+                //добавляем к базовому каталогу поставщика каталог ресторана и создаем связь
+//                throw new BadRequestHttpException(\Yii::t('app', 'common.models.vendor_not_auth', ['ru' => 'Поставщик еще не авторизован / добавляем каталог']));
+//                $result = ['success'      => true, 'eventType' => self::NO_AUTH_ADD_RELATION_AND_CATALOG, 'message' => ),
+
+                return $vendor;
+            } else {
+                //поставщик авторизован
+                throw new BadRequestHttpException(\Yii::t('app', 'common.models.already_register', ['ru' => 'Поставщик уже зарегистрирован в системе, Вы можете его добавить нажав кнопку Пригласить']));
+            }
+        }
+
+        if ($userRelationSuppRest->invite == RelationSuppRest::INVITE_ON) {
+            //есть связь с поставщиком invite_on
+            throw new BadRequestHttpException(\Yii::t('app', 'common.models.already_exists_two', ['ru' => 'Данный поставщик уже имеется в вашем списке контактов!']));
+        } else {
+            //поставщику было отправлено приглашение, но поставщик еще не добавил этот ресторан
+            throw new BadRequestHttpException(\Yii::t('app', 'common.models.already_sent', ['ru' => 'Вы уже отправили приглашение этому поставщику, ожидается подтверждение от поставщика']));
+        }
+    }
+
+    /**
+     * @param               $vendor
+     * @param               $get_supp_org_id
+     * @param               $currentUser
+     * @param               $arrCatalog
+     * @param Currency|null $currency
+     * @return int
+     * @throws ValidationException
+     */
+    private function addBaseCatalog($vendor, $get_supp_org_id, $currentUser, $arrCatalog, Currency $currency = null)
+    {
+        /**
+         * 2) Создаем базовый и каталог для ресторана
+         * */
+        if (!$vendor) {
+            $newBaseCatalog = new Catalog();
+            $newBaseCatalog->supp_org_id = $get_supp_org_id;
+            $newBaseCatalog->name = Yii::t('app', 'Главный каталог');
+            $newBaseCatalog->type = Catalog::BASE_CATALOG;
+            $newBaseCatalog->status = Catalog::STATUS_ON;
+            if (!is_null($currency)) {
+                $newBaseCatalog->currency_id = $currency->id;
+            }
+            if (!$newBaseCatalog->save()) {
+                throw new ValidationException($newBaseCatalog->getFirstErrors());
+            }
+            $newBaseCatalog->refresh();
+            $lastInsert_base_cat_id = $newBaseCatalog->id;
+        } else {
+            //Поставщик зарегистрирован, но не авторизован
+            //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
+            if (Catalog::find()->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
+                $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->one();
+                $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
+            } else {
+                $newBaseCatalog = new Catalog();
+                $newBaseCatalog->supp_org_id = $get_supp_org_id;
+                $newBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);
+                $newBaseCatalog->type = Catalog::BASE_CATALOG;
+                $newBaseCatalog->status = Catalog::STATUS_ON;
+                if (isset($currency)) {
+                    $newBaseCatalog->currency_id = $currency->id;
+                }
+                if (!$newBaseCatalog->save()) {
+                    throw new ValidationException($newBaseCatalog->getFirstErrors());
+                }
+                $newBaseCatalog->refresh();
+                $lastInsert_base_cat_id = $newBaseCatalog->id;
+            }
+        }
+
+        $newCatalog = new Catalog();
+        $newCatalog->supp_org_id = $get_supp_org_id;
+        $newCatalog->name = ($currentUser->organization->name == "") ? $currentUser->email : $currentUser->organization->name;
+        $newCatalog->type = Catalog::CATALOG;
+        $newCatalog->status = Catalog::STATUS_ON;
+        if (isset($currency)) {
+            $newCatalog->currency_id = $currency->id;
+        }
+        if (!$newCatalog->save()) {
+            throw new ValidationException($newBaseCatalog->getFirstErrors());
+        }
+        $lastInsert_cat_id = $newCatalog->id;
+        $newCatalog->refresh();
+
+        /**
+         * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
+         * */
+        $article_create = 0;
+        foreach ($arrCatalog as $arrCatalogs) {
+            $article_create++;
+            $article = $article_create;
+            $product = strip_tags(trim($arrCatalogs['product']));
+            $units = null;
+
+            if (empty($units) || $units < 0) {
+                $units = null;
+            }
+            $price = strip_tags(trim($arrCatalogs['price']));
+            $ed = strip_tags(trim($arrCatalogs['ed']));
+            $price = str_replace(',', '.', $price);
+            if (substr($price, -3, 1) == '.') {
+                $price = explode('.', $price);
+                $last = array_pop($price);
+                $price = join($price, '') . '.' . $last;
+            } else {
+                $price = str_replace('.', '', $price);
+            }
+            $newProduct = new CatalogBaseGoods();
+            $newProduct->scenario = "import";
+            $newProduct->cat_id = $lastInsert_base_cat_id;
+            $newProduct->supp_org_id = $get_supp_org_id;
+            $newProduct->article = (string)$article;
+            $newProduct->product = $product;
+            $newProduct->units = $units;
+            $newProduct->price = $price;
+            $newProduct->ed = $ed;
+            $newProduct->status = CatalogBaseGoods::STATUS_ON;
+            $newProduct->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
+            $newProduct->deleted = CatalogBaseGoods::DELETED_OFF;
+            if (!$newProduct->save()) {
+                throw new ValidationException($newBaseCatalog->getFirstErrors());
+            }
+            $newProduct->refresh();
+
+            $lastInsert_base_goods_id = $newProduct->id;
+
+            $newGoods = new CatalogGoods();
+            $newGoods->cat_id = $lastInsert_cat_id;
+            $newGoods->base_goods_id = $lastInsert_base_goods_id;
+            $newGoods->price = $price;
+            if (!$newGoods->save()) {
+                throw new ValidationException($newBaseCatalog->getFirstErrors());
+            }
+            $newGoods->refresh();
+        }
+        return $lastInsert_cat_id;
+    }
+
+    /**
+     * @param User $vendor
+     */
+    private function createAssociateManager($vendor): void
+    {
+        if (!$vendor->organization->vendor_is_work) {
+            if (!ManagerAssociate::find()->where(['manager_id' => $vendor->id, 'organization_id' => $this->user->organization->id])->exists()) {
+                $managerAssociate = new ManagerAssociate();
+                $managerAssociate->manager_id = $vendor->id;
+                $managerAssociate->organization_id = $this->user->organization->id;
+                $managerAssociate->save();
+            }
+        }
+    }
 }

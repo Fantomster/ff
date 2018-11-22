@@ -54,7 +54,7 @@ class UserNotice
         $model = new ForgotForm();
         $model->email = $email;
 
-        $model->newPassword = $model->generatePassword(8);
+        $model->newPassword = ForgotForm::generatePassword(8);
         $user->setScenario("reset");
         $user->newPassword = $model->newPassword;
         $user->newPasswordConfirm = $model->newPassword;

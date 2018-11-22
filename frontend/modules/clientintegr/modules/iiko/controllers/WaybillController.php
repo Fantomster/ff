@@ -558,15 +558,15 @@ SQL;
         $out = [];
         if (!is_null($term)) {
             $orgId = User::findOne(Yii::$app->user->id)->organization_id;
-            $constId = iikoDicconst::findOne(['denom' => 'main_org']);
-            $parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
+            //$constId = iikoDicconst::findOne(['denom' => 'main_org']);
+            //$parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
             // $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
 
-            $organizationID = (isset($parentId, $parentId->value) && strlen((int)$parentId->value) ==
-                strlen($parentId->value) && $parentId->value > 0) ? $parentId->value : $orgId;
+            //$organizationID = (isset($parentId, $parentId->value) && strlen((int)$parentId->value) ==
+                //strlen($parentId->value) && $parentId->value > 0) ? $parentId->value : $orgId;
 
             $andWhere = '';
-            $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $organizationID])->all(), 'id', 'product_id');
+            $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $orgId])->all(), 'id', 'product_id');
             if (count($arr)) {
                 $andWhere = 'AND id in (' . implode(',', $arr) . ')';
             }

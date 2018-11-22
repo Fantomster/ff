@@ -115,7 +115,7 @@ CSS;
 $customJs = <<< JS
     $("#select_all_conditions").click( function()
           {
-              $('#act_form input[type="checkbox"]').prop('checked', true);
+              $('#StockEntryForm input[type="checkbox"]').prop('checked', true);
            }
         );
 JS;

@@ -15,6 +15,9 @@ use yii\web\Response;
  */
 class WebApiErrorHandler extends ErrorHandler
 {
+    const HTTP_BAD_REQUEST_CODE = 400;
+    const HTTP_FORBIDDEN_CODE = 403;
+    const HTTP_INTERNAL_SERVER_ERROR_CODE = 500;
     /**
      * @param \Error|\Exception $exception
      */
@@ -29,11 +32,15 @@ class WebApiErrorHandler extends ErrorHandler
         $response->format = Response::FORMAT_JSON;
         $response->data = $this->convertExceptionToArray($exception);
 
-        if ($exception->statusCode != 0) {
-            $response->setStatusCode($exception->statusCode);
-            \Yii::$app->response->statusCode = $exception->statusCode;
+        $statusCode = $exception->statusCode;
+        if(empty($statusCode)) {
+            $statusCode = self::HTTP_BAD_REQUEST_CODE;
+        }
+
+        if ($statusCode != 0) {
+            $response->setStatusCode($statusCode);
         } elseif ($response->data['code'] == 42000) {
-            $response->setStatusCode(500);
+            $response->setStatusCode(self::HTTP_INTERNAL_SERVER_ERROR_CODE);
         }
 
         $response->send();
@@ -46,7 +53,7 @@ class WebApiErrorHandler extends ErrorHandler
     protected function convertExceptionToArray($exception)
     {
         $error = [
-            'code' => (int)$exception->statusCode ?? 0,
+            'code' => (int)$exception->getCode() ?? 0,
             'type' => (string)$this->get_class_name($exception),
             'message' => (string)$this->prepareMessage($exception->getMessage())
         ];

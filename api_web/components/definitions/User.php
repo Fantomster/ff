@@ -20,7 +20,7 @@ class UserNoAuth
 class User extends UserNoAuth
 {
     /**
-     * @SWG\Property(@SWG\Xml(name="token"), example="LFs6jAYHKWB2FZ1qQl1R234PBBIb4BP63WwO7")
+     * @SWG\Property(@SWG\Xml(name="token"), example="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJtaXhjYXJ0LnJ1IiwiYWNjZXNzX3Rva2VuIjoiTEZzNmpBWUhLV0IyRloxcVFsMVIyMzRQQkJJYjRCUDYzV3dPNyJ9.OifBDvnREw9M_Eefr3XdMg8regDdvnSFgYah0A0qj_A")
      * @var string
      */
     public $token;

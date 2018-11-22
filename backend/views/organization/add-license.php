@@ -16,21 +16,31 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php $form = \yii\widgets\ActiveForm::begin(); ?>
     <h3>Выберите организации</h3>
+    <div class="row">
+        <div class="checkbox">
+            <p style="padding-left: 35px;">
+                <input type="checkbox" checked="checked" id="alCheckAllOrg"> Выбрать все организации
+            </p>
+        </div>
+        <hr>
+    </div>
     <?php $i = 0; ?>
     <?php foreach ($organizations as $id => $name): ?>
-        <?php $allLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->with('license')->asArray()->all(); ?>
+        <?php
+        $allLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->groupBy('license_id')->leftJoin('license', 'license.id=license_organization.license_id')->with('license')->orderBy('license.sort_index')->all();
+        ?>
         <div class="row">
             <div class="col-md-3">
                 <div class="checkbox">
                     <?php if ($i == 0): ?>
                 <p style="font-weight: bold">
                 <?php else: ?>
-                    <p style="padding-left: 15px;">
+                    <p style="padding-left: 15px; position: relative;">
                         <?php endif; ?>
                         <?= Html::checkbox('organizations[]', true, [
                             'value' => $id,
-                            'label' => $name,
-                            'class' => 'checkbox',
+                            'label' => "<span style='font-size: 30px; position: absolute; top: -7px; left: 50px;'>" . $name . "</span>",
+                            'class' => 'checkbox alOneOrgCheckbox',
                         ]);
                         ?>
                         <?php if ($i == 0): ?>
@@ -42,25 +52,33 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="col-md-9">
                 <?php foreach ($allLicenseOrganization as $value): ?>
+                    <?php
+                    $maxTd = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id, 'license_id' => $value->license_id])->max('td');
+                    ?>
                     <div class="row">
                         <div class="col-md-4">
-                            <span <?php if ($value['td'] < $tenDaysAfter) echo 'style ="color: red;"' ?>>
-                                <?= $value['license']['name'] . " : " . $value['td'] ?>
+                            <span <?php
+                            if ($maxTd < $tenDaysAfter && $maxTd > $nowDate) {
+                                echo 'style ="color: orange;"';
+                            } elseif ($maxTd < $nowDate) {
+                                echo 'style ="color: red; font-weight: bold;"';
+                            } ?>>
+                                <?= $value->license->name . " : " . $maxTd ?>
                             </span>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <?= Html::label('Стоимость лицензии', 'price') ?>
-                                <?= Html::input('number', 'price', $value['price'], ['style' => "width: 200px", 'class' => 'form-control form-control-sm', 'id' => 'alPrice_' . $value['id']]) ?>
-                                <div id="alResult_<?= $value['id'] ?>"></div>
+                                <?= Html::input('number', 'price', $value->price, ['style' => "width: 200px", 'class' => 'form-control form-control-sm', 'id' => 'alPrice_' . $value->id]) ?>
+                                <div id="alResult_<?= $value->id ?>"></div>
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <?= Html::label('Удалена?', 'is_deleted') ?>
-                            <?= Html::checkbox('is_deleted', $value['is_deleted'], ['id' => 'alIsDeleted_' . $value['id']]) ?>
+                            <?= Html::label('Удалена', 'is_deleted') ?>
+                            <?= Html::checkbox('is_deleted', $value->is_deleted, ['id' => 'alIsDeleted_' . $value->id]) ?>
                         </div>
                         <div class="col-md-2">
-                            <?= Html::button('Сохранить', ['license_organization_id' => $value['id'], 'class' => 'btn btn-sm alUpdateLicense']) ?>
+                            <?= Html::button('Сохранить', ['license_organization_id' => $value->id, 'class' => 'btn btn-sm alUpdateLicense']) ?>
                         </div>
                     </div>
                     <hr>
@@ -149,6 +167,15 @@ $(".alCheckbox").on("click", function () {
         $('input[name="td[' + value + ']"]').removeAttr('disabled');
     } else {
         $('input[name="td[' + value + ']"]').attr('disabled', 'disabled');
+    }
+}); 
+
+$("#alCheckAllOrg").on("click", function () {
+    var checked = $(this).prop('checked');
+    if (checked) {
+        $('.alOneOrgCheckbox').prop('checked', 'checked');
+    } else {
+        $('.alOneOrgCheckbox').prop('checked', false);
     }
 }); 
 JS;

@@ -42,7 +42,7 @@ class IikoProductSync extends IikoSyncConsumer implements ConsumerInterface
     /**
      * @var int
      */
-    public static $timeoutExecuting = 300;
+    public static $timeoutExecuting = 1200;
 
     /**
      * @var string
@@ -73,8 +73,8 @@ class IikoProductSync extends IikoSyncConsumer implements ConsumerInterface
      */
     protected function product()
     {
-        $this->items = iikoApi::getInstance($this->orgId)->getProducts();
-
+        $this->items = $this->iikoApi->getProducts();
+        $this->iikoApi->logout();
         //Если пришли продукты, обновляем их
         if (!empty($this->items['products'])) {
             //поскольку мы не можем отследить изменения на стороне провайдера

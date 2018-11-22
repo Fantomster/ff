@@ -20,9 +20,7 @@ class WaybillContentBehavior extends Behavior
     public function events()
     {
         return [
-            //Пересчет стоимости заказа
-            ActiveRecord::EVENT_AFTER_DELETE => 'recalculateOrderTotalPrice',
-            //Пересчет стоимости заказа и обновление статуса
+            ActiveRecord::EVENT_AFTER_DELETE => 'afterUpdate',
             ActiveRecord::EVENT_AFTER_INSERT => 'afterUpdate',
             ActiveRecord::EVENT_AFTER_UPDATE => 'afterUpdate'
         ];

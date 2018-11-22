@@ -108,7 +108,20 @@ class OrganizationDictionary extends ActiveRecord
         $this->count = $count;
         $this->updated_at = \gmdate('Y-m-d H:i:s');
         if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID && $this->outerDic->name == 'product') {
-            $this->updateIikoUnitDictionary(self::STATUS_ACTIVE);
+            self::updateIikoUnitDictionary(self::STATUS_ACTIVE, $this->org_id);
+        }
+        return $this->save();
+    }
+
+    /**
+     * @return bool
+     */
+    public function errorSync()
+    {
+        $this->status_id = self::STATUS_ERROR;
+        $this->updated_at = \gmdate('Y-m-d H:i:s');
+        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID && $this->outerDic->name == 'product') {
+            self::updateIikoUnitDictionary(self::STATUS_ERROR, $this->org_id);
         }
         return $this->save();
     }
@@ -127,45 +140,34 @@ class OrganizationDictionary extends ActiveRecord
         ];
 
         $lastExec = new \DateTime();
-        $plainExec = $lastExec->getTimestamp() + $consumerFullName::$timeout;
+        $plainExec = null;
+        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID) {
+            $plainExec = date('Y-m-d H:i:s', $lastExec->getTimestamp() + $consumerFullName::$timeout);
+        }
         \Yii::$app->language = $this->org->lang ?? 'ru';
 
         FireBase::getInstance()->update($arFB, [
             'last_executed'  => $lastExec->format('Y-m-d H:i:s'),
-            'plain_executed' => date('Y-m-d H:i:s', $plainExec),
+            'plain_executed' => $plainExec,
             'status_text'    => $this->statusText,
             'status_id'      => $this->status_id,
-            'count'          => \Yii::$app->get('rabbit')->setQueue($queueName)->checkQueueCount(),
+            'count'          => $this->count ?? 0
         ]);
-    }
-
-    /**
-     * @return bool
-     */
-    public function errorSync()
-    {
-
-        $this->status_id = self::STATUS_ERROR;
-        $this->updated_at = \gmdate('Y-m-d H:i:s');
-        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID && $this->outerDic->name == 'product') {
-            $this->updateIikoUnitDictionary(self::STATUS_ERROR);
-        }
-        return $this->save();
     }
 
     /**
      * @param $status
+     * @param $org_id
      */
-    private function updateIikoUnitDictionary($status)
+    private static function updateIikoUnitDictionary($status, $org_id)
     {
         $dictionary = self::findOne([
-            'org_id'       => $this->org_id,
+            'org_id'       => $org_id,
             'outer_dic_id' => self::IIKO_UNIT_DICT_ID
         ]);
-
         if (empty($dictionary)) {
             $dictionary = new self([
-                'org_id'       => $this->org_id,
+                'org_id'       => $org_id,
                 'outer_dic_id' => self::IIKO_UNIT_DICT_ID,
                 'status_id'    => $status
             ]);
@@ -173,17 +175,16 @@ class OrganizationDictionary extends ActiveRecord
 
         if ($status == self::STATUS_ACTIVE) {
             $count = OuterUnit::find()->where([
-                'org_id'     => $this->org_id,
+                'org_id'     => $org_id,
                 'service_id' => Registry::IIKO_SERVICE_ID,
                 'is_deleted' => 0
             ])->count();
-            $dictionary->status_id = $status;
             $dictionary->count = (int)$count;
-            $dictionary->updated_at = \gmdate('Y-m-d H:i:s');
-            $dictionary->save();
         } else {
-            $dictionary->errorSync();
+            $dictionary->updated_at = \gmdate('Y-m-d H:i:s');
+            $dictionary->status_id = $status;
         }
+        $dictionary->save();
     }
 
     /**

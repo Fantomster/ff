@@ -19,6 +19,7 @@ use common\models\Catalog;
 use common\models\CatalogTemp;
 use common\models\Organization;
 use common\models\RelationSuppRest;
+use yii\helpers\ArrayHelper;
 use yii\validators\NumberValidator;
 use yii\web\BadRequestHttpException;
 use api_web\helpers\Excel;
@@ -30,6 +31,21 @@ use api_web\helpers\Excel;
  */
 class VendorWebApi extends \api_web\components\WebApi
 {
+    /**
+     * Информация о поставщике
+     *
+     * @param $post
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+    public function get($post)
+    {
+        $this->validateRequest($post, ['vendor_id']);
+        if (!ArrayHelper::keyExists($post['vendor_id'], $this->user->organization->getSuppliers('', false))) {
+            throw new BadRequestHttpException('vendor.you_are_not_working_with_this_supplier');
+        }
+        return WebApiHelper::prepareOrganization(Organization::findOne($post['vendor_id']));
+    }
 
     /**
      * Создание нового поставщика в системе, находясь в аккаунте ресторана
@@ -52,7 +68,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
             $organization = Organization::findOne(['id' => $vendorID]);
             if (!$organization) {
-                throw new BadRequestHttpException('No such organization');
+                throw new BadRequestHttpException('vendor_not_found');
             }
 
             $relation = RelationSuppRest::findOne(['supp_org_id' => $vendorID, 'rest_org_id' => $this->user->organization->id]);
@@ -157,7 +173,6 @@ class VendorWebApi extends \api_web\components\WebApi
                 $organization->save();
                 $user->setOrganization($organization)->save();
                 $relId = $user->createRelationUserOrganization($user->organization->id, $user->role_id);
-
                 $get_supp_org_id = $organization->id;
                 $currentOrganization = $currentUser->organization;
                 if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
@@ -325,15 +340,15 @@ class VendorWebApi extends \api_web\components\WebApi
                     $vendor_ids[] = $vendor->supp_org_id;
                 }
                 if (!in_array($model->id, array_unique($vendor_ids))) {
-                    throw new BadRequestHttpException('You are not working with this supplier.');
+                    throw new BadRequestHttpException('vendor.you_are_not_working_with_this_supplier');
                 }
             } else {
-                throw new BadRequestHttpException('You need to add vendors.');
+                throw new BadRequestHttpException('vendor.not_found_vendors');
             }
 
             //Можно ли ресторану редактировать этого поставщика
             if ($model->allow_editing == 0) {
-                throw new BadRequestHttpException('Vendor not allow editing.');
+                throw new BadRequestHttpException('vendor.not_allow_editing');
             }
         }
 
@@ -341,7 +356,7 @@ class VendorWebApi extends \api_web\components\WebApi
         if ($this->user->organization->type_id == Organization::TYPE_SUPPLIER) {
             //Разрешаем редактировать только свои данные
             if ($model->id != $this->user->organization->id) {
-                throw new BadRequestHttpException('Вы можете редактировать только свои данные.');
+                throw new BadRequestHttpException('vendor.not_you_editing');
             }
         }
 
@@ -450,12 +465,12 @@ class VendorWebApi extends \api_web\components\WebApi
         }
 
         if ($vendor->type_id !== Organization::TYPE_SUPPLIER) {
-            throw new BadRequestHttpException('The organization is not a vendor.');
+            throw new BadRequestHttpException('vendor.is_not_vendor');
         }
 
         //Можно ли ресторану редактировать этого поставщика
         if ($vendor->allow_editing == 0) {
-            throw new BadRequestHttpException('Vendor not allow editing.');
+            throw new BadRequestHttpException('vendor.not_allow_editing');
         }
 
         /**

@@ -9,6 +9,7 @@ use api_web\helpers\OuterProductMapHelper;
 use api_web\modules\integration\classes\OuterProductMapper;
 use common\models\AllService;
 use common\models\CatalogBaseGoods;
+use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
@@ -568,20 +569,18 @@ class IntegrationWebApi extends WebApi
      */
     public function getProductMapList(array $post): array
     {
+        $this->validateRequest($post, ['business_id']);
+
         $page = (!empty($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (!empty($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-        $client = $this->user->organization;
-        //Фильтр по бизнесу
-        if (!empty($post['search']['business_id']) && $post['search']['business_id'] != $this->user->organization_id) {
-            $searchBusiness = (int)$post['search']['business_id'];
-            $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
-            $checkOrg = in_array($searchBusiness, ArrayHelper::map($businessList['result'] ?? [], 'id', 'id')) ?? false;
-            if (!$checkOrg) {
-                return [];
-            } else {
-                $client = \common\models\Organization::findOne($searchBusiness);
-            }
+        $searchBusiness = (int)$post['business_id'];
+        $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
+        $checkOrg = in_array($searchBusiness, ArrayHelper::map($businessList['result'] ?? [], 'id', 'id')) ?? false;
+        if (!$checkOrg) {
+            return [];
+        } else {
+            $client = \common\models\Organization::findOne($searchBusiness);
         }
 
         /** @var SqlDataProvider $dataProvider */
@@ -592,10 +591,16 @@ class IntegrationWebApi extends WebApi
         $dataProvider->setPagination($pagination);
         $models = $dataProvider->getModels();
 
+        if (IntegrationSettingValue::getSettingsByServiceId($post['service_id'], $client->id, ['main_org'])) {
+            $isChildOrganization = true;
+        } else {
+            $isChildOrganization = false;
+        }
+
         $result = [];
         if (!empty($models)) {
             foreach ($models as $model) {
-                $result[] = $this->prepareOutProductMap($model);
+                $result[] = $this->prepareOutProductMap($model, $isChildOrganization);
             }
         }
 
@@ -618,12 +623,11 @@ class IntegrationWebApi extends WebApi
      */
     public function mapUpdate(array $post)
     {
-        $this->validateRequest($post, ['service_id', 'map']);
-
+        $this->validateRequest($post, ['business_id', 'service_id', 'map']);
         $result = [];
         foreach ($post['map'] as $item) {
             try {
-                $this->editProductMap($post['service_id'], $item);
+                $this->editProductMap($post['service_id'], $item, $post['business_id']);
                 $result[$item['product_id']] = ['success' => true];
             } catch (\Exception $e) {
                 $result[$item['product_id']] = ['success' => false, 'error' => \Yii::t('api_web', $e->getMessage())];
@@ -635,17 +639,15 @@ class IntegrationWebApi extends WebApi
     /**
      * Изменение атрибутов сопоставления
      *
-     * @param int $service_id
-     * @param     $request
-     * @throws Exception
-     * @throws ValidationException
+     * @param int  $service_id
+     * @param      $request
+     * @param null $business_id
      */
-    private function editProductMap(int $service_id, $request)
+    private function editProductMap(int $service_id, $request, $business_id = null)
     {
         $this->validateRequest($request, ['product_id']);
-
         //Загружаем данные по базовому и дочерним бизнесам (если бизнес главный)
-        $mapper = new OuterProductMapper($this->user->organization_id, $service_id);
+        $mapper = new OuterProductMapper($business_id, $service_id);
         $mapper->loadRequest($request);
         $mapper->updateChildsMap();
         $mapper->updateModel();
@@ -657,22 +659,23 @@ class IntegrationWebApi extends WebApi
      * @param array $model
      * @return array
      */
-    private function prepareOutProductMap(array $model)
+    private function prepareOutProductMap(array $model, $isChild = false)
     {
         $result = [
-            "id"              => $model['id'],
-            "service_id"      => (int)$model['service_id'],
-            "organization_id" => (int)$model['organization_id'],
-            "product"         => null,
-            "unit"            => null,
-            "vendor"          => null,
-            "outer_product"   => null,
-            "outer_unit"      => null,
-            "outer_store"     => null,
-            "coefficient"     => !empty($model['coefficient']) ? round($model['coefficient'], 10) : 1,
-            "vat"             => (int)$model['vat'],
-            "created_at"      => $model['created_at'] ?? null,
-            "updated_at"      => $model['updated_at'] ?? null,
+            "id"                            => $model['id'],
+            "service_id"                    => (int)$model['service_id'],
+            "organization_id"               => (int)$model['organization_id'],
+            "product"                       => null,
+            "unit"                          => null,
+            "vendor"                        => null,
+            "outer_product"                 => null,
+            "outer_unit"                    => null,
+            "outer_store"                   => null,
+            "coefficient"                   => !empty($model['coefficient']) ? round($model['coefficient'], 10) : 1,
+            "vat"                           => (int)$model['vat'],
+            "created_at"                    => $model['created_at'] ?? null,
+            "updated_at"                    => $model['updated_at'] ?? null,
+            "is_child_organization_for_map" => $isChild,
         ];
 
         if (isset($model['vendor_id'])) {

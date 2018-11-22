@@ -568,6 +568,17 @@ class ServiceRkws extends AbstractSyncFactory
     public function callbackData(OuterTask $task, string $data = null)
     {
         $orgDic = $this->getOrganizationDictionary($task->service_id, $task->org_id);
+
+        try {
+            $this->checkErrorResponse((array)simplexml_load_string($data));
+        } catch (\Exception $e) {
+            SyncLog::trace('ERROR RK: ' . $e->getMessage());
+            $orgDic->status_id = $orgDic::STATUS_ERROR;
+            $orgDic->save();
+            $orgDic->noticeToFCM();
+            return self::XML_LOAD_RESULT_FAULT;
+        }
+
         # 2. Получаем массив входящих данных
         $arrayNew = $this->parsingXml($data);
         # 3. Таблица справочника
@@ -693,6 +704,7 @@ class ServiceRkws extends AbstractSyncFactory
             $orgDic->status_id = $orgDic::STATUS_ACTIVE;
             $orgDic->save();
             $transaction->commit();
+            $orgDic->noticeToFCM();
             SyncLog::trace('Number of save counts while there were no errors is ' . $saveCount);
             return self::XML_LOAD_RESULT_SUCCESS;
         }
@@ -702,6 +714,7 @@ class ServiceRkws extends AbstractSyncFactory
         $transaction->rollback();
         $orgDic->status_id = $orgDic::STATUS_ERROR;
         $orgDic->save();
+        $orgDic->noticeToFCM();
         SyncLog::trace('Fixed save errors: ' . json_encode($saveErr));
         return self::XML_LOAD_RESULT_FAULT;
     }

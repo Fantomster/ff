@@ -339,14 +339,17 @@ class EDIClass extends Component
 
         $rel = RelationSuppRest::findOne(['rest_org_id' => $rest->id, 'supp_org_id' => $organization->id]);
         if (!$rel) {
-            $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
+            \Yii::error('No relation');
+            return false;
         } else {
-            if (!$rel->cat_id) {
+            $relationCatalogID = $rel->cat_id;
+            $cat = Catalog::findOne(['id' => $relationCatalogID]);
+            if (!$relationCatalogID || $cat->type == Catalog::BASE_CATALOG) {
                 $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
                 $rel->cat_id = $relationCatalogID;
+                $rel->status = Catalog::STATUS_ON;
                 $rel->save();
             }
-            $relationCatalogID = $rel->cat_id;
         }
         foreach ($goodsArray as $barcode => $good) {
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);

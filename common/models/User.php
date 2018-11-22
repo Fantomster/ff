@@ -405,8 +405,8 @@ class User extends \amnah\yii2\user\models\User
         $oldViewPath      = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
         $subject            = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru' => "Ресторан "]) . $restoran->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru' => " приглашает вас в систему"]);
-        $mailer->htmlLayout = '@mail_views/layouts/html';
-        $mailer->compose('@mail_views/clientInviteSupplier', compact("restoran"))
+        $mailer->htmlLayout = $this->module->emailViewPath.'/layouts/html';
+        $mailer->compose('clientInviteSupplier', compact("restoran"))
             ->setTo($recipient->email)
             ->setSubject($subject)
             ->send();

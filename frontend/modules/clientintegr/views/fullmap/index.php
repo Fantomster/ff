@@ -711,7 +711,7 @@ $js = <<< JS
                                 $("#bukv-tovar").attr( 'placeholder', cont_old);
                             }
                             var us = $('#service_id').val();
-                            if (us==2 || us==10)
+                            if (us==2)
                             {
                                 var url_auto_complete_selected_products = '$url_auto_complete_selected_products';
                                 $.post(url_auto_complete_selected_products).done(

@@ -111,6 +111,7 @@ class License extends ActiveRecord
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
             ->where(['lo.org_id' => $orgId, 'license.service_id' => $serviceId, 'license.is_active' => 1])
             ->andWhere(['>', 'lo.td', $now->format('Y-m-d h:s:i')])
+            ->andWhere('lo.is_deleted = 0 OR lo.is_deleted is null')
             ->groupBy(['license.id', 'license.name', 'license.is_active', 'license.created_at', 'license.updated_at', 'license.login_allowed'])
             ->indexBy('id')
             ->all(\Yii::$app->db_api);
@@ -146,6 +147,7 @@ class License extends ActiveRecord
             ->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
             ->where(['lo.org_id' => $orgId])
+            ->andWhere('lo.is_deleted = 0 OR lo.is_deleted is null')
             ->groupBy([
                 'license.id',
                 'license.name',
@@ -215,6 +217,7 @@ class License extends ActiveRecord
                 'lo.org_id'  => $orgIds,
                 'license.id' => Registry::$mc_licenses_id
             ])
+            ->andWhere('lo.is_deleted = 0 OR lo.is_deleted is null')
             ->indexBy('org_id');
 
         $license->having(['=', 'is_active_license', 1]);

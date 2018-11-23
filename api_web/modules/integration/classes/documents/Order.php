@@ -39,7 +39,7 @@ class Order extends BaseOrder implements DocumentInterface
             "service_id"        => (int)$this->service_id,
             "is_mercury_cert"   => $this->getIsMercuryCert(),
             "count"             => (int)$this->positionCount,
-            "total_price"       => CurrencyHelper::asDecimal($this->total_price),
+            "total_price"       => CurrencyHelper::asDecimal($this->getTotalPriceFromDb(self::$waybill_service_id)),
             "doc_date"          => date("Y-m-d H:i:s T", strtotime($this->created_at)),
             "vendor"            => null,
             "agent"             => null,

@@ -27,7 +27,7 @@ class expiryDate extends dateForm
         $expiry_date = !empty($this->second_date) ? $this->second_date : $this->first_date;
         if (strtotime($this->production_date) > strtotime($expiry_date)) {
             $attribute = (!empty($this->second_date)) ? 'second_date' : 'first_date';
-            $this->addError($attribute, 'Дата выработки должна быть меньше Срока годности');
+            $this->addError($attribute, 'Дата истечения срока годности должна быть позже даты выработки');
         }
     }
 }

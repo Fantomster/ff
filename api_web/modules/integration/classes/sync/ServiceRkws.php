@@ -613,7 +613,7 @@ class ServiceRkws extends AbstractSyncFactory
                 ])->indexBy('outer_uid')->all();
 
             foreach ($this->iterator($arrayNew) as $k => $v) {
-                /** @var ActiveRecord $model */
+                /** @var OuterCategory $model */
                 $model = $models[$v['rid']] ?? null;
                 if (!$model) {
                     $model = new $entityTableName([
@@ -635,6 +635,7 @@ class ServiceRkws extends AbstractSyncFactory
                         $model->save();
                     }
                     $saveCount++;
+                    $list[$model->outer_uid] = $model;
                     continue;
                 }
                 if (!$v['parent']) {

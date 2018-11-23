@@ -32,8 +32,8 @@ class Order extends BaseOrder implements DocumentInterface
             "id"                => (int)$this->id,
             "number"            => $this->ediNumber,
             "type"              => DocumentWebApi::TYPE_ORDER,
-            "status_id"         => (int)$this->status,
-            "status_text"       => \Yii::t('api_web', 'doc_group.' . $this->getGroupStatus()),
+            "status_id"         => (int)$this->getGroupStatus(),
+            "status_text"       => \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$this->getGroupStatus()]),
             "order_status_text" => $this->statusText,
             "service_id"        => (int)$this->service_id,
             "is_mercury_cert"   => $this->getIsMercuryCert(),
@@ -113,7 +113,6 @@ class Order extends BaseOrder implements DocumentInterface
         if (in_array(Registry::WAYBILL_FORMED, $waybill_status) || empty($waybill_status)) {
             $index_group_status = Registry::DOC_GROUP_STATUS_WAIT_FORMING;
         }
-
-        return Registry::$doc_group_status[$index_group_status];
+        return $index_group_status;
     }
 }

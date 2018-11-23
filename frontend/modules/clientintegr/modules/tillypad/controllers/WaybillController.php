@@ -1181,4 +1181,83 @@ return $out;
         }
         return $munit;
     }
+
+    /**
+     * @param null $term
+     * @return mixed
+     */
+    public function actionAutoCompleteNew($term = null)
+    {
+        $term = Yii::$app->request->post('stroka');
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        if ($term == '') {
+            $term = null;
+        }
+        $out = [];
+        if (!is_null($term)) {
+            $orgId = User::findOne(Yii::$app->user->id)->organization_id;
+            //$constId = iikoDicconst::findOne(['denom' => 'main_org']);
+            //$parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
+            // $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
+
+            //$organizationID = (isset($parentId, $parentId->value) && strlen((int)$parentId->value) ==
+            //strlen($parentId->value) && $parentId->value > 0) ? $parentId->value : $orgId;
+
+            //$andWhere = '';
+            //$arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $orgId])->all(), 'id', 'product_id');
+            //if (count($arr)) {
+            //    $andWhere = 'AND id in (' . implode(',', $arr) . ')';
+            //}
+
+            $sql = <<<SQL
+            SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as `text` FROM (
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term)
+                    UNION
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ LIMIT 15)
+                    UNION
+                  (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ LIMIT 10)
+                  ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
+                     THEN 1
+                     ELSE 2
+                  END
+            ) as t
+SQL;
+
+            /**
+             * @var $db Connection
+             */
+            $db = Yii::$app->db_api;
+            $data = $db->createCommand($sql)
+                ->bindValues([
+                    'term'   => $term,
+                    'term_'  => $term . '%',
+                    '_term_' => '%' . $term . '%',
+                    'org_id' => $orgId
+                ])
+                ->queryAll();
+            $out = array_values($data);
+        } else {
+            $orgId = User::findOne(Yii::$app->user->id)->organization_id;
+            //$constId = iikoDicconst::findOne(['denom' => 'main_org']);
+            //$parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
+            //$organizationID = !is_null($parentId) ? $parentId->value : $orgId;
+
+            //$andWhere = '';
+            //$arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $organizationID])->all(), 'id', 'product_id');
+            //if (count($arr)) {
+            //    $andWhere = ' AND id in (' . implode(',', $arr) . ')';
+            //}
+
+            $sql = "SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as `text` FROM iiko_product WHERE is_active = 1 AND org_id = " . $orgId . ' ORDER BY denom LIMIT 100';
+
+            /**
+             * @var $db Connection
+             */
+            $db = Yii::$app->db_api;
+            $data = $db->createCommand($sql)->queryAll();
+            $out = array_values($data);
+        }
+        return $out;
+    }
 }

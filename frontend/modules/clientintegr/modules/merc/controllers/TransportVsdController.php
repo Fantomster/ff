@@ -98,7 +98,6 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 $list = step1Form::find()->where("id in ($selected)")->all();
                 foreach ($list as $key => $item) {
                     $list[$key]->attributes = $attributes[$item->id];
-                    $list[$key]->validate(['select_amount']);
                 }
             }
         } else {
@@ -112,10 +111,6 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
         if (!isset($list)) {
             $list = step1Form::find()->where("id in ($selected)")->all();
-            foreach ($list as $key => $item) {
-                $list[$key]->select_amount = $item->amount;
-                $list[$key]->validate(['select_amount']);
-            }
         }
         if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
             $attributes = [];
@@ -362,7 +357,9 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 $model->country = "1";
                 $model->producer = "1";
                 $model->vsd_issueNumber = "1";
-                $res = $model->validate() && $productionDate->validate() && $expiryDate->validate();
+                $res = $model->validate() && $productionDate->validate();
+                $expiryDate->production_date = !empty($productionDate->second_date) ? $productionDate->second_date : $productionDate->first_date;
+                $res = $res && $expiryDate->validate();
                 if ($res) {
                     $model->dateOfProduction = $productionDate;
                     $model->expiryDate = $expiryDate;

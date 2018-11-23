@@ -8,6 +8,7 @@ use api\common\models\RkAccess;
 use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
 use common\models\User;
 use yii\base\Object;
+use Yii;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

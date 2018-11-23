@@ -83,6 +83,7 @@ class EdismHelper extends AuthHelper
         $getr   = Yii::$app->request->getRawBody();
         $myXML  = simplexml_load_string($getr);
         $gcount = 0;
+        $array = [];
 
         foreach ($myXML->ITEM as $itemgroup) {
             foreach ($itemgroup->attributes() as $c => $d) {

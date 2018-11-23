@@ -101,6 +101,7 @@ class WaybillHelper extends AuthHelper
         $getr   = Yii::$app->request->getRawBody();
         $myXML  = simplexml_load_string($getr);
         $gcount = 0;
+        $array = [];
 
         if (!isset($myXML->ERROR)) {
             $cmdguid = strval($myXML['cmdguid']);

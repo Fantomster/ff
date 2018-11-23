@@ -88,6 +88,7 @@ class AgentHelper extends AuthHelper
 
         $myXML  = simplexml_load_string($getr);
         $gcount = 0;
+        $array = [];
 
         foreach ($myXML->CORRGROUP as $corrgroup) {
             foreach ($corrgroup->attributes() as $c => $d) {

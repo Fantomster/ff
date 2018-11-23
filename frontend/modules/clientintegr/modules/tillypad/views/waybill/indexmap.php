@@ -637,13 +637,13 @@ $js = <<< JS
                             {
                                 $("#bukv-tovar").attr( 'placeholder', cont_old);
                             }
-                            $.post('auto-complete-selected-products').done(
+                            /*$.post('auto-complete-selected-products').done(
                                 function(data){
                                     if (data!=0) {
                                         $('#bukv-tovar4').html('<i><span style="color:orange">Поиск осуществляется по '+data+' выбранным позициям.</span></i>');
                                     }
                                 }
-                            )
+                            )*/
                             $.post('auto-complete-new', {stroka: a}).done(
                                 function(data){
                                     if (data.length>0) {

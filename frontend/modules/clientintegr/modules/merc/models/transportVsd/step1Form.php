@@ -25,6 +25,7 @@ class step1Form extends MercStockEntry
                 return $newValue;
             }],
             [['select_amount'], 'checkNax'],
+            [['select_amount'], 'checkExpiryDate'],
             [['product_name'], 'string'],
         ];
     }
@@ -41,8 +42,14 @@ class step1Form extends MercStockEntry
 
     public function checkNax($attribute, $params)
     {
-
             if ($this->$attribute > $this->amount)
                 $this->addError($attribute, 'Введенное количество больше доступного ('.$this->amount.').');
+    }
+
+    public function checkExpiryDate($attribute, $params)
+    {
+        if (strtotime($this->expiry_date) < time()) {
+            $this->addError($attribute, 'Дата выработки должна быть больше Срока годности');
+        }
     }
 }

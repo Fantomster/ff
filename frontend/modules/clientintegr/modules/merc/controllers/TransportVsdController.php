@@ -98,6 +98,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 $list = step1Form::find()->where("id in ($selected)")->all();
                 foreach ($list as $key => $item) {
                     $list[$key]->attributes = $attributes[$item->id];
+                    $list[$key]->validate(['select_amount']);
                 }
             }
         } else {
@@ -111,6 +112,10 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
 
         if (!isset($list)) {
             $list = step1Form::find()->where("id in ($selected)")->all();
+            foreach ($list as $key => $item) {
+                $list[$key]->select_amount = $item->amount;
+                $list[$key]->validate(['select_amount']);
+            }
         }
         if (MultiModel::loadMultiple($list, Yii::$app->request->post()) && empty(ActiveForm::validateMultiple($list))) {
             $attributes = [];

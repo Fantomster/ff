@@ -18,9 +18,10 @@ class Order extends BaseOrder implements DocumentInterface
     public static $waybill_service_id = null;
 
     /**
-     * Порлучение данных из модели
+     * Получение данных из модели
      *
-     * @return mixed
+     * @return array
+     * @throws BadRequestHttpException
      */
     public function prepare()
     {
@@ -76,7 +77,8 @@ class Order extends BaseOrder implements DocumentInterface
      *
      * @param      $key
      * @param null $serviceId
-     * @return array|mixed
+     * @return array
+     * @throws BadRequestHttpException
      */
     public static function prepareModel($key, $serviceId = null)
     {
@@ -94,8 +96,9 @@ class Order extends BaseOrder implements DocumentInterface
     /**
      * Групповой статус документа
      *
-     * @return mixed
+     * @return int
      * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
     public function getGroupStatus()
     {
@@ -110,7 +113,7 @@ class Order extends BaseOrder implements DocumentInterface
             $index_group_status = Registry::DOC_GROUP_STATUS_SENT;
         }
         //Если есть хоть одна в статусе сформирована, или вообще нет накладных
-        if (in_array(Registry::WAYBILL_FORMED, $waybill_status) || empty($waybill_status)) {
+        if (in_array(Registry::WAYBILL_FORMED, $waybill_status) || empty($waybill_status) || count($this->getOrderContentWithOutWaybill()) > 0) {
             $index_group_status = Registry::DOC_GROUP_STATUS_WAIT_FORMING;
         }
         return $index_group_status;

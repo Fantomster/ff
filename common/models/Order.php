@@ -911,4 +911,26 @@ class Order extends \yii\db\ActiveRecord
         return number_format(round($total_price, 2), 2, '.', '');
     }
 
+    /**
+     * Список позиций в заказе, которые не привязаны к накладным
+     *
+     * @return array|null
+     * @throws \yii\db\Exception
+     */
+    public function getOrderContentWithOutWaybill()
+    {
+        $query = new Query();
+        $query->select('oc.id');
+        $query->from(['`order` o', 'order_content oc']);
+        $query->leftJoin(DBNameHelper::getApiName() . '.waybill_content wc', 'wc.order_content_id = oc.id');
+        $query->leftJoin(DBNameHelper::getApiName() . '.waybill w', 'w.id = wc.waybill_id');
+        $query->where(['o.id' => $this->id]);
+        $query->andWhere('oc.order_id = o.id');
+        $query->andWhere('w.service_id is null');
+        $result = $query->createCommand(\Yii::$app->db)->queryColumn();
+        if (empty($result)) {
+            return null;
+        }
+        return $result;
+    }
 }

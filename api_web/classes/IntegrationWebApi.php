@@ -114,7 +114,7 @@ class IntegrationWebApi extends WebApi
             if ($outerAgent) {
                 $outerAgentId = $outerAgent->id;
             }
-            $outerStore = OuterStore::findOne(['org_id' => $organizationID]);
+            $outerStore = OuterStore::find()->where(['org_id' => $organizationID])->andWhere('`right` - `left` = 1')->orderBy('`left`')->one();
             if ($outerStore) {
                 $outerStoreId = $outerStore->id;
             }

@@ -355,6 +355,8 @@ class DocumentWebApi extends \api_web\components\WebApi
                         instr(group_concat(DISTINCT dat.waybill_status_id), :WAYBILL_FORMED) > 0
                         OR 
                         group_concat(DISTINCT dat.waybill_id) is null
+                        OR
+                        count(dat.order_content_id) != count(dat.waybill_content_id)
                        THEN :DOC_GROUP_STATUS_WAIT_FORMING
                      WHEN group_concat(DISTINCT dat.waybill_status_id) IN (:WAYBILL_ERROR, :WAYBILL_UNLOADED, :WAYBILL_UNLOADING)
                        THEN :DOC_GROUP_STATUS_WAIT_SENDING

@@ -227,7 +227,7 @@ class WaybillHelper
                 $price = $ordCont->price;
                 $quantity = $ordCont->quantity;
                 $taxRate = in_array($serviceId, [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID]) &&
-                    !is_null($ordCont->vat_product) ? $ordCont->vat_product : $mappedProduct['vat'];
+                !is_null($ordCont->vat_product) ? $ordCont->vat_product : $mappedProduct['vat'];
                 $priceWithVat = (float)($price + ($price * ($taxRate / 100)));
                 $modelWaybillContent = new WaybillContent();
                 $modelWaybillContent->order_content_id = $ordCont->id;
@@ -348,10 +348,10 @@ class WaybillHelper
             $waybillContent->quantity_waybill = (float)$quantity;
             $waybillContent->vat_waybill = $taxRate;
             $waybillContent->koef = $coefficient;
-            $waybillContent->sum_with_vat = (int)(isset($priceWithVat) ? $priceWithVat * $quantity * 100 : null);
-            $waybillContent->sum_without_vat = (int)($price * $quantity * 100);
-            $waybillContent->price_with_vat = (int)(isset($priceWithVat) ? $priceWithVat * 100 : null);
-            $waybillContent->price_without_vat = (int)($price * 100);
+            $waybillContent->sum_with_vat = (isset($priceWithVat) ? round($priceWithVat * $quantity, 3) : null);
+            $waybillContent->sum_without_vat = round($price * $quantity, 3);
+            $waybillContent->price_with_vat = (isset($priceWithVat) ? round($priceWithVat, 3) : null);
+            $waybillContent->price_without_vat = round($price, 3);
             if (!$waybillContent->validate() || !$waybillContent->save()) {
                 throw new ValidationException($waybillContent->getFirstErrors());
             }

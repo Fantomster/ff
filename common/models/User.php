@@ -16,6 +16,9 @@ use common\models\notifications\EmailFails;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
 use common\models\Job;
+use Lcobucci\JWT\Token;
+use Lcobucci\JWT\ValidationData;
+use sizeg\jwt\Jwt;
 use Yii;
 use yii\data\ArrayDataProvider;
 use yii\db\Exception;
@@ -403,10 +406,10 @@ class User extends \amnah\yii2\user\models\User
         $restoran = $this->organization;
         //var_dump($restoran->name); die();
         $mailer = Yii::$app->mailer;
-        $oldViewPath      = $mailer->viewPath;
+        $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
-        $subject            = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru' => "Ресторан "]) . $restoran->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru' => " приглашает вас в систему"]);
-        $mailer->htmlLayout = $this->module->emailViewPath.'/layouts/html';
+        $subject = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru' => "Ресторан "]) . $restoran->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru' => " приглашает вас в систему"]);
+        $mailer->htmlLayout = $this->module->emailViewPath . '/layouts/html';
         $mailer->compose('clientInviteSupplier', compact("restoran"))
             ->setTo($recipient->email)
             ->setSubject($subject)
@@ -1018,7 +1021,7 @@ class User extends \amnah\yii2\user\models\User
             $smsNotification->save();
         }
     }
-
+    
     public function setNotifications()
     {
         $toBeSet = [
@@ -1043,6 +1046,10 @@ class User extends \amnah\yii2\user\models\User
         }
     }
 
+    /**
+     * @param bool $empty
+     * @return array
+     */
     public static function getMixManagersList($empty = false)
     {
         $managers = self::find()
@@ -1054,7 +1061,11 @@ class User extends \amnah\yii2\user\models\User
         return \yii\helpers\ArrayHelper::map($managers, 'id', 'full_name');
     }
 
-    public function getJWTToken($jwt)
+    /**
+     * @param Jwt $jwt
+     * @return string
+     */
+    public function getJWTToken(Jwt $jwt)
     {
         if (empty($this->access_token)) {
             $this->auth_key = \Yii::$app->security->generateRandomString();
@@ -1070,11 +1081,16 @@ class User extends \amnah\yii2\user\models\User
             ->getToken();
     }
 
-    public static function getByJWTToken($jwt, $token)
+    /**
+     * @param Jwt   $jwt
+     * @param Token $token
+     * @return null|static
+     */
+    public static function getByJWTToken(Jwt $jwt, Token $token)
     {
-        $data = Yii::$app->jwt->getValidationData(); // It will use the current time to validate (iat, nbf and exp)
+        /** @var ValidationData $data */
+        $data = Yii::$app->jwt->getValidationData();
         $data->setIssuer('mixcart.ru');
-        $signer = new Sha256();
         if ($token->validate($data) && $jwt->verifyToken($token)) {
             return self::findOne(['access_token' => $token->getClaim('access_token')]);
         }

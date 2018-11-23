@@ -78,7 +78,8 @@ class VendorWebApi extends \api_web\components\WebApi
             }
             $arVendorUsers = User::find()
                 ->leftJoin(RelationUserOrganization::tableName() . ' ruo', 'ruo.user_id=user.id')
-                ->where(['ruo.organization_id' => $vendorID])->all();
+                ->leftJoin(Organization::tableName() . ' o', 'o.id=ruo.organization_id')
+                ->where(['ruo.organization_id' => $vendorID, 'o.type_id' => Organization::TYPE_SUPPLIER])->all();
 
             foreach ($arVendorUsers as $vendorUser) {
                 /**@var User $vendorUser*/

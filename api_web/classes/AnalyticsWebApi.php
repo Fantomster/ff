@@ -518,7 +518,8 @@ class AnalyticsWebApi extends WebApi
             ->leftJoin('order', 'order.id = order_content.order_id')
             ->leftJoin('currency c', 'c.id = order.currency_id')
             ->andWhere(['order.client_id' => $this->user->organization->id])
-            ->groupBy('order.currency_id')->orderBy(['SUM(order_content.quantity * order_content.price)' => SORT_DESC]);
+            ->groupBy('order.currency_id')
+            ->orderBy(['SUM(order_content.quantity * order_content.price)' => SORT_DESC]);
 
         $result = [];
         foreach ($query->all() as $data) {
@@ -526,6 +527,15 @@ class AnalyticsWebApi extends WebApi
                 'id'       => round($data['currency_id'], 0),
                 'iso_code' => $data['iso_code'],
                 'name'     => $data['name'],
+            ];
+        }
+
+        if (empty($result)) {
+            $default = Currency::findOne(['iso_code' => 'RUB']);
+            $result[] = [
+                'id'       => round($default->id, 0),
+                'iso_code' => $default->symbol,
+                'name'     => $default->text
             ];
         }
 

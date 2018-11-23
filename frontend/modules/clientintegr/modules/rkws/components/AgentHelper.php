@@ -2,6 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\components;
 
+use Yii;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use api\common\models\RkTasks;
 use api\common\models\RkAgent;

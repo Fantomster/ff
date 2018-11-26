@@ -94,11 +94,12 @@ CSS;
                         'enableError' => true,
                         'type' => \kartik\widgets\TouchSpin::className(),
                         'options' => function ($data) { return [
+                            'defaultOptions' => ['class' => 'amount_input' ],
                             'pluginOptions' => [
                                 'initval' => isset($data->select_amount) ? $data->select_amount : $data->amount,
                                 'min' => 0.0001,
                                 'max' => $data->amount,
-                                'step' =>  0.01,
+                                'step' =>  0.001,
                                 'decimals' => 3,
                                 //'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
                                 //'forcestepdivisibility' => (isset($data['units']) && $data['units'] && (floor($data['units']) == $data['units'])) ? 'floor' : 'none',
@@ -107,7 +108,7 @@ CSS;
                                 'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
                                 'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                             ],
-                        ];}
+                        ];},
                     ],
                     [
                         'name'  => 'amount',
@@ -147,6 +148,13 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
       }
   });
 }
+
+$(\'.amount_input\').keyup(function(e) { 
+    var val = $(this).val().replace(\',\', \'.\');
+    $(this).val(val);
+ });
+ 
+
 $(".step-2").click(function(e){
 e.preventDefault();
 $("#product_list_form" ).submit();

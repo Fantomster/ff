@@ -127,9 +127,12 @@ class CreatePrepareOutgoingConsignmentRequest extends Component{
         $delivery->transportInfo->transportType = $this->step4['type'];
         $delivery->transportInfo->transportNumber = new TransportNumber();
         $delivery->transportInfo->transportNumber->vehicleNumber = $this->step4['car_number'];
-        $delivery->transportInfo->transportNumber->trailerNumber = $this->step4['trailer_number'];
-        $delivery->transportInfo->transportNumber->containerNumber = $this->step4['container_number'];
-
+        if (isset($this->step4['trailer_number'])) {
+            $delivery->transportInfo->transportNumber->trailerNumber = $this->step4['trailer_number'];
+        }
+        if (isset($this->step4['container_number'])) {
+            $delivery->transportInfo->transportNumber->containerNumber = $this->step4['container_number'];
+        }
         $delivery->transportStorageType = $this->step4['storage_type'];
 
         $delivery->accompanyingForms = new ConsignmentDocumentList();

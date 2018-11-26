@@ -44,7 +44,6 @@ class FullmapController extends DefaultController
 
     public function actionIndex() // метод загрузки данных и открытия страницы Массового сопоставления
     {
-
         $session = Yii::$app->session;
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearchMap();

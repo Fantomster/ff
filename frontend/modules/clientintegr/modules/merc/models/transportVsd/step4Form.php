@@ -28,11 +28,11 @@ class step4Form extends Model
     public function rules()
     {
         return [
-            [['type', 'car_number', 'trailer_number', 'container_number', 'storage_type'], 'required'],
+            [['type', 'car_number', 'storage_type'], 'required'],
             [['type'],'integer'],
             [['car_number', 'trailer_number', 'container_number', 'storage_type', 'type_name'], 'string'],
             [['conditions'], 'checkConditions'],
-            [['conditions', 'mode', 'conditionsDescription'], 'safe']
+            [['conditions', 'mode', 'conditionsDescription', 'trailer_number', 'container_number'], 'safe']
         ];
     }
 

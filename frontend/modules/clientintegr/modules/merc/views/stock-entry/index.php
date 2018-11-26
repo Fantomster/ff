@@ -2,7 +2,8 @@
 
 use yii\widgets\Breadcrumbs;
 use yii\widgets\Pjax;
-use yii\grid\GridView;
+//use yii\grid\GridView;
+use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\bootstrap\Modal;
 use yii\web\View;
@@ -22,8 +23,8 @@ $this->registerCss('
 
 <?=
 Modal::widget([
-    'id' => 'ajax-load',
-    'size' => 'modal-md',
+    'id'            => 'ajax-load',
+    'size'          => 'modal-md',
     'clientOptions' => false,
 ])
 ?>
@@ -38,10 +39,10 @@ Modal::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'links' => [
+        'links'   => [
             [
                 'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru' => 'Интеграция']),
-                'url' => ['/clientintegr/default'],
+                'url'   => ['/clientintegr/default'],
             ],
             Yii::t('message', 'frontend.client.integration.mercury', ['ru' => 'Интеграция с системой ВЕТИС "Меркурий"']),
         ],
@@ -53,53 +54,99 @@ Modal::widget([
     $this->render('/default/_license_no_active.php', ['lic' => $lic]);
     ?>
     <?php
+    $urlSaveSelected = Url::to(['save-selected-entry']);
     $timestamp_now = time();
     ($lic->status_id == 1) && ($timestamp_now <= (strtotime($lic->td))) ? $lic_merc = 1 : $lic_merc = 0;
-    $columns = array(
+    $columns = [
         [
-            'class' => 'yii\grid\CheckboxColumn',
-            'contentOptions' => ['class' => 'small_cell_checkbox'],
-            'headerOptions' => ['style' => 'text-align:center; '],
-            'checkboxOptions' => function ($model, $key, $index, $widget) use ($searchModel) {
-                return ['value' => $model->uuid, 'class' => 'checkbox-group_operations'];
-            }
+            'class'           => 'common\components\multiCheck\CheckboxColumn',
+            'contentOptions'  => function ($model) {
+                return ["id"    => "check" . $model['id'],
+                        'class' => 'small_cell_checkbox width150'];
+            },
+            'headerOptions'   => ['style' => 'text-align:center; width150'],
+            'onChangeEvents'  => [
+                'changeAll'  => 'function(e) {
+                                                            url      = window.location.href;
+                                                            var value = [];
+                                                            state = $(this).prop("checked") ? 1 : 0;
+                                                            
+                                                           $(".checkbox-export").each(function() {
+                                                                value.push($(this).val());
+                                                            });    
+                                                
+                                                           value = value.toString();  
+                                                           
+                                                           $.ajax({
+                                                             url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
+                                                             type: "POST",
+                                                             data: {selected: value, state: state},
+                                                             success: function(data){
+                                                             $.pjax.reload({container: "#pjax-vsd-list", url: url, timeout:30000});
+                                                             }
+                                                           }); }',
+                'changeCell' => 'function(e) { 
+                                                             state = $(this).prop("checked") ? 1 : 0;
+       
+                                                            url = window.location.href;
+                                                            var value = $(this).val();
+                                                          
+                                                           $.ajax({
+                                                             url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
+                                                             type: "POST",
+                                                             data: {selected: value, state: state},
+                                                             success: function(data){
+                                                             $.pjax.reload({container: "#pjax-vsd-list", url: url, timeout:30000});                                                             
+                                                                
+                                                             }
+                                                           });}'
+            ],
+            'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
+                return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => (in_array($model['id'], $selected)) ? 'checked' : ""];
+            },
+
+            /* 'class' => 'yii\grid\CheckboxColumn',
+         'contentOptions' => ['class' => 'small_cell_checkbox'],
+         'headerOptions' => ['style' => 'text-align:center; '],
+
+         }*/
         ],
         [
             'attribute' => 'entryNumber',
-            'format' => 'raw',
-            'value' => function ($data) {
+            'format'    => 'raw',
+            'value'     => function ($data) {
                 return $data['entryNumber'];
             },
         ],
         [
             'attribute' => 'create_date',
-            'label' => Yii::t('message', 'frontend.client.integration.create_date', ['ru' => 'Дата добавления']),
-            'format' => 'raw',
-            'value' => function ($data) {
+            'label'     => Yii::t('message', 'frontend.client.integration.create_date', ['ru' => 'Дата добавления']),
+            'format'    => 'raw',
+            'value'     => function ($data) {
                 return Yii::$app->formatter->asDatetime($data['create_date'], "php:j M Y");
             },
         ],
         [
             'attribute' => 'product_name',
-            'label' => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
-            'format' => 'raw',
-            'value' => function ($data) {
+            'label'     => Yii::t('message', 'frontend.client.integration.product_name', ['ru' => 'Наименование продукции']),
+            'format'    => 'raw',
+            'value'     => function ($data) {
                 return $data['product_name'];
             },
         ],
         [
             'attribute' => 'amount',
-            'label' => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
-            'format' => 'raw',
-            'value' => function ($data) {
+            'label'     => Yii::t('message', 'frontend.client.integration.volume', ['ru' => 'Объём']),
+            'format'    => 'raw',
+            'value'     => function ($data) {
                 return $data['amount'] . " " . $data['unit'];
             },
         ],
         [
             'attribute' => 'production_date',
-            'label' => Yii::t('message', 'frontend.client.integration.production_date', ['ru' => 'Дата производство']),
-            'format' => 'raw',
-            'value' => function ($data) {
+            'label'     => Yii::t('message', 'frontend.client.integration.production_date', ['ru' => 'Дата производство']),
+            'format'    => 'raw',
+            'value'     => function ($data) {
                 $res = $data['production_date'];
                 try {
                     $res = Yii::$app->formatter->asDatetime($data['production_date'], "php:j M Y");
@@ -111,9 +158,9 @@ Modal::widget([
         ],
         [
             'attribute' => 'expiry_date',
-            'label' => Yii::t('message', 'frontend.client.integration.expiry_date', ['ru' => 'Срок годности']),
-            'format' => 'raw',
-            'value' => function ($data) {
+            'label'     => Yii::t('message', 'frontend.client.integration.expiry_date', ['ru' => 'Срок годности']),
+            'format'    => 'raw',
+            'value'     => function ($data) {
                 $res = $data['expiry_date'];
                 try {
                     $res = Yii::$app->formatter->asDatetime($data['expiry_date'], "php:j M Y");
@@ -150,17 +197,17 @@ Modal::widget([
         ],*/
         [
             'attribute' => 'producer_country',
-            'label' => Yii::t('message', 'frontend.client.integration.producer_country', ['ru' => 'Страна происхождения']),
-            'format' => 'raw',
-            'value' => function ($data) {
+            'label'     => Yii::t('message', 'frontend.client.integration.producer_country', ['ru' => 'Страна происхождения']),
+            'format'    => 'raw',
+            'value'     => function ($data) {
                 return $data['producer_country'];
             },
         ],
         [
             'attribute' => 'producer_name',
-            'label' => Yii::t('message', 'frontend.client.integration.producer_name', ['ru' => 'Производитель']),
-            'format' => 'raw',
-            'value' => function ($data) {
+            'label'     => Yii::t('message', 'frontend.client.integration.producer_name', ['ru' => 'Производитель']),
+            'format'    => 'raw',
+            'value'     => function ($data) {
                 return $data['producer_name'];
             },
         ],
@@ -173,53 +220,53 @@ Modal::widget([
             },
         ],*/
         [
-            'class' => 'yii\grid\ActionColumn',
+            'class'          => 'yii\grid\ActionColumn',
             'contentOptions' => ['style' => 'width: 7%;'],
-            'template' => '{view}&nbsp;&nbsp;&nbsp;{create}&nbsp;&nbsp;&nbsp;{inventory}',
-            'buttons' => [
-                'view' => function ($url, $model, $key) use ($lic_merc) {
+            'template'       => '{view}&nbsp;&nbsp;&nbsp;{create}&nbsp;&nbsp;&nbsp;{inventory}',
+            'buttons'        => [
+                'view'      => function ($url, $model, $key) use ($lic_merc) {
                     $options = [
-                        'title' => Yii::t('message', 'frontend.client.integration.view', ['ru' => 'Просмотр']),
+                        'title'      => Yii::t('message', 'frontend.client.integration.view', ['ru' => 'Просмотр']),
                         'aria-label' => Yii::t('message', 'frontend.client.integration.view', ['ru' => 'Просмотр']),
-                        'data' => [
+                        'data'       => [
                             //'pjax'=>0,
-                            'target' => '#ajax-load',
-                            'toggle' => 'modal',
+                            'target'   => '#ajax-load',
+                            'toggle'   => 'modal',
                             'backdrop' => 'static'
                         ],
                         //'data-pjax' => '0',
                     ];
                     $icon = Html::tag('img', '', [
-                        'src' => Yii::$app->request->baseUrl . '/img/view_vsd.png',
+                        'src'   => Yii::$app->request->baseUrl . '/img/view_vsd.png',
                         'style' => 'width: 16px'
                     ]);
                     return Html::a($icon, ['view', 'uuid' => $model->uuid], $options);
                 },
-                'create' => function ($url, $model) {
+                'create'    => function ($url, $model) {
                     $customurl = Url::to(['transport-vsd/step-1', 'selected' => $model->id]);
                     return \yii\helpers\Html::a('<i class="fa fa-truck" aria-hidden="true"></i>', $customurl,
                         ['title' => Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), 'data-pjax' => "0"]);
                 },
                 'inventory' => function ($url, $model, $key) use ($searchModel) {
                     $options = [
-                        'title' => Yii::t('message', 'frontend.client.integration.inventory', ['ru' => 'Инвентаризация']),
+                        'title'      => Yii::t('message', 'frontend.client.integration.inventory', ['ru' => 'Инвентаризация']),
                         'aria-label' => Yii::t('message', 'frontend.client.integration.inventory', ['ru' => 'Инвентаризация']),
-                        'data' => [
+                        'data'       => [
                             //'pjax'=>0,
-                            'target' => '#ajax-load',
-                            'toggle' => 'modal',
+                            'target'   => '#ajax-load',
+                            'toggle'   => 'modal',
                             'backdrop' => 'static',
                         ],
                     ];
                     $icon = Html::tag('img', '', [
-                        'src' => Yii::$app->request->baseUrl . '/img/partial_confirmed.png',
+                        'src'   => Yii::$app->request->baseUrl . '/img/partial_confirmed.png',
                         'style' => 'width: 24px'
                     ]);
                     return Html::a($icon, ['inventory', 'id' => $model->id], $options);
                 },
             ]
         ]
-    );
+    ];
     ?>
     <?= $this->render('/default/_menu.php', ['lic' => $lic]); ?>
     <h4><?= Yii::t('message', 'frontend.client.integration.mercury.store_entry_list', ['ru' => 'Журнал входной продукци']) ?>
@@ -249,19 +296,19 @@ Modal::widget([
                     <?php endif; ?>
                     <?=
                     Html::a('<i class="fa fa-plus" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> Добавление входной продукции на предприятие  </span>', ['create'], [
-                        'class' => 'btn btn-success',
+                        'class'     => 'btn btn-success',
                         'data-pjax' => 0,
                     ]);
                     ?>
                     <?php
                     $form = ActiveForm::begin([
-                        'options' => [
+                        'options'                => [
                             'data-pjax' => true,
-                            'id' => 'search-form',
-                            'role' => 'search',
+                            'id'        => 'search-form',
+                            'role'      => 'search',
                         ],
                         'enableClientValidation' => false,
-                        'method' => 'get',
+                        'method'                 => 'get',
                     ]); ?>
                     <div class="col-md-12">
                         <div class="col-sm-2">
@@ -305,18 +352,18 @@ Modal::widget([
                             <div class="form-group" style="height: 44px;">
                                 <?=
                                 DatePicker::widget([
-                                    'model' => $searchModel,
-                                    'attribute' => 'date_from_production_date',
-                                    'attribute2' => 'date_to_production_date',
-                                    'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFromProductionDate'],
-                                    'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateToProductionDate'],
-                                    'separator' => '-',
-                                    'type' => DatePicker::TYPE_RANGE,
+                                    'model'         => $searchModel,
+                                    'attribute'     => 'date_from_production_date',
+                                    'attribute2'    => 'date_to_production_date',
+                                    'options'       => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFromProductionDate'],
+                                    'options2'      => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateToProductionDate'],
+                                    'separator'     => '-',
+                                    'type'          => DatePicker::TYPE_RANGE,
                                     'pluginOptions' => [
                                         'orientation' => 'bottom left',
-                                        'format' => 'dd.mm.yyyy', //'d M yyyy',//
-                                        'autoclose' => true,
-                                        'endDate' => "0d",
+                                        'format'      => 'dd.mm.yyyy', //'d M yyyy',//
+                                        'autoclose'   => true,
+                                        'endDate'     => "0d",
                                     ]
                                 ])
                                 ?>
@@ -327,18 +374,18 @@ Modal::widget([
                             <div class="form-group" style="height: 44px;">
                                 <?=
                                 DatePicker::widget([
-                                    'model' => $searchModel,
-                                    'attribute' => 'date_from_expiry_date',
-                                    'attribute2' => 'date_to_expiry_date',
-                                    'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFromExpiryDate'],
-                                    'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateToExpiryDate'],
-                                    'separator' => '-',
-                                    'type' => DatePicker::TYPE_RANGE,
+                                    'model'         => $searchModel,
+                                    'attribute'     => 'date_from_expiry_date',
+                                    'attribute2'    => 'date_to_expiry_date',
+                                    'options'       => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru' => 'Дата']), 'id' => 'dateFromExpiryDate'],
+                                    'options2'      => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru' => 'Конечная дата']), 'id' => 'dateToExpiryDate'],
+                                    'separator'     => '-',
+                                    'type'          => DatePicker::TYPE_RANGE,
                                     'pluginOptions' => [
                                         'orientation' => 'bottom left',
-                                        'format' => 'dd.mm.yyyy', //'d M yyyy',//
-                                        'autoclose' => true,
-                                        'endDate' => "0d",
+                                        'format'      => 'dd.mm.yyyy', //'d M yyyy',//
+                                        'autoclose'   => true,
+                                        'endDate'     => "0d",
                                     ]
                                 ])
                                 ?>
@@ -361,15 +408,15 @@ Modal::widget([
                         <?php
                         //$checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
                         echo GridView::widget([
-                            'id' => 'vetStoreEntryList',
+                            'id'           => 'vetStoreEntryList',
                             'dataProvider' => $dataProvider,
-                            'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                            'formatter'    => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
                             //'filterModel' => $searchModel,
                             //'filterPosition' => false,
-                            'summary' => '',
-                            'options' => ['class' => ''],
+                            'summary'      => '',
+                            'options'      => ['class' => ''],
                             'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
-                            'columns' => $columns
+                            'columns'      => $columns
                         ]);
                         ?>
                     </div>
@@ -388,23 +435,25 @@ $urlCreateVSD = Url::to(['transport-vsd/step-1']);
 $urlCreateVSDConversion = Url::to(['transport-vsd/conversion-step-1']);
 $loading = Yii::t('message', 'frontend.client.integration.loading', ['ru' => 'Загрузка']);
 $urlInventoryVSD = Url::to(['inventory-all']);
+$selectedCount = count($selected);
 $customJs = <<< JS
+var selectedCount = $selectedCount;
 var justSubmitted = false;
 $(document).on("click", ".create_vsd", function(e) {
-        if($("#vetStoreEntryList").yiiGridView("getSelectedRows").length > 0){
-            window.location.href =  "$urlCreateVSD?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
+        if(($("#vetStoreEntryList").yiiGridView("getSelectedRows").length + selectedCount) > 0){
+            window.location.href =  "$urlCreateVSD";  
         }
     });
 
 $(document).on("click", ".create_vsd_conversion", function(e) {
-        if($("#vetStoreEntryList").yiiGridView("getSelectedRows").length > 0){
-            window.location.href =  "$urlCreateVSDConversion?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
+        if(($("#vetStoreEntryList").yiiGridView("getSelectedRows").length + selectedCount) > 0){
+            window.location.href =  "$urlCreateVSDConversion";  
         }
     });
 
 $(document).on("click", ".inventory_all", function(e) {
-        if($("#vetStoreEntryList").yiiGridView("getSelectedRows").length > 0){
-            window.location.href =  "$urlInventoryVSD?selected=" +  $("#vetStoreEntryList").yiiGridView("getSelectedRows");  
+       if(($("#vetStoreEntryList").yiiGridView("getSelectedRows").length + selectedCount) > 0){
+            window.location.href =  "$urlInventoryVSD";
         }
     });
 

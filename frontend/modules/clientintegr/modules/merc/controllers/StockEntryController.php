@@ -33,12 +33,12 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 // We will override the default rule config with the new AccessRule class
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
                         'allow' => false,
                         // Allow restaurant managers
@@ -49,7 +49,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
                         ],
                     ],
                     [
-                        'allow' => TRUE,
+                        'allow' => true,
                         'roles' => ['@'],
                     ],
 
@@ -83,15 +83,46 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
         $lic = mercService::getLicense();
         $searchModel = new mercStockEntrySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $params = ['searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'lic' => $lic];
+
+        $session = Yii::$app->session;
+        $selected = $session->get('selectedentry', []);
+
+        $params = ['searchModel'  => $searchModel,
+                   'dataProvider' => $dataProvider,
+                   'lic'          => $lic,
+                   'selected'     => $selected];
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', $params);
         } else {
             return $this->render('index', $params);
         }
+    }
+
+    public function actionSaveSelectedEntry() // метод сохранения изменений выделения "флажками" товаров
+    {
+        $selected = Yii::$app->request->get('selected');
+        $state = Yii::$app->request->get('state');
+
+        $session = Yii::$app->session;
+
+        $list = $session->get('selectedentry', []);
+
+        $current = !empty($selected) ? explode(",", $selected) : [];
+
+        foreach ($current as $item) {
+
+            if ($state) {
+                if (!in_array($item, $list))
+                    $list[] = $item;
+            } else {
+                $key = array_search($item, $list);
+                unset($list[$key]);
+            }
+        }
+
+        $session->set('selectedentry', $list);
+        return true;
     }
 
     public function actionNolic()
@@ -101,14 +132,13 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
     public function actionView($uuid)
     {
-       try {
-        $document = new getStockEntry();
-        $document->loadStockEntry($uuid);
-       }catch (\Error $e) {
+        try {
+            $document = new getStockEntry();
+            $document->loadStockEntry($uuid);
+        } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
-        }
-        catch (\Exception $e){
+        } catch (\Exception $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->redirect(['index']);
         }
@@ -138,7 +168,7 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
                     try {
                         $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($model);
-                        if(!isset($result))
+                        if (!isset($result))
                             throw new \Exception('Error create Stock entry');
 
                         Yii::$app->session->setFlash('success', 'Позиция добавлена на склад!');
@@ -165,25 +195,25 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
     {
         $model = new rejectedForm();
         $data = MercStockEntry::findOne(['id' => $id]);
-        $volume = $data->amount." ".$data->unit;
+        $volume = $data->amount . " " . $data->unit;
         if ($model->load(Yii::$app->request->post())) {
-                if ($model->validate()) {
-                   try {
-                        $form = new createStoreEntryForm();
-                        $form->attributes = $model->attributes;
-                        $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT, [$data->raw_data]);
-                        if(!isset($result))
-                            throw new \Exception('Error create Stock entry');
-                        Yii::$app->session->setFlash('success', 'Позиция изменена!');
-                        return $this->redirect(['index']);
-                    } catch (\Error $e) {
-                        Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                        return $this->redirect(['index']);
-                    } catch (\Exception $e) {
-                        Yii::$app->session->setFlash('error', $this->getErrorText($e));
-                        return $this->redirect(['index']);
-                    }
+            if ($model->validate()) {
+                try {
+                    $form = new createStoreEntryForm();
+                    $form->attributes = $model->attributes;
+                    $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT, [$data->raw_data]);
+                    if (!isset($result))
+                        throw new \Exception('Error create Stock entry');
+                    Yii::$app->session->setFlash('success', 'Позиция изменена!');
+                    return $this->redirect(['index']);
+                } catch (\Error $e) {
+                    Yii::$app->session->setFlash('error', $this->getErrorText($e));
+                    return $this->redirect(['index']);
+                } catch (\Exception $e) {
+                    Yii::$app->session->setFlash('error', $this->getErrorText($e));
+                    return $this->redirect(['index']);
                 }
+            }
         }
         $params = ['model' => $model, 'volume' => $volume];
         if (Yii::$app->request->isAjax) {
@@ -195,9 +225,8 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
     public function actionInventoryAll()
     {
-        $selected = Yii::$app->request->get('selected');
+        $selected = Yii::$app->session->get('selectedentry', []);
         try {
-            $selected = explode(',', $selected);
             $datas = [];
             foreach ($selected as $id) {
                 $datas[] = (MercStockEntry::findOne(['id' => $id]))->raw_data;
@@ -205,8 +234,8 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
             $form = new createStoreEntryForm();
             $result = mercuryApi::getInstance()->resolveDiscrepancyOperation($form, createStoreEntryForm::INV_PRODUCT_ALL, $datas);
-            if(!isset($result))
-              throw new \Exception('Error create Stock entry');
+            if (!isset($result))
+                throw new \Exception('Error create Stock entry');
             Yii::$app->session->setFlash('success', 'Позиции списаны!');
             return $this->redirect(['index']);
         } catch (\Error $e) {
@@ -223,38 +252,38 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
         MercStockEntry::getUpdateData((\Yii::$app->user->identity)->organization_id);
     }
 
-    public function actionProducersList($q = null, $c=null)
+    public function actionProducersList($q = null, $c = null)
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $out =  ['results' => ['id' => '', 'text' => '']];
+        $out = ['results' => ['id' => '', 'text' => '']];
         $res = [];
         if (!is_null($q)) {
-            if($c !== '74a3cbb1-56fa-94f3-ab3f-e8db4940d96b' && $c != null) {
+            if ($c !== '74a3cbb1-56fa-94f3-ab3f-e8db4940d96b' && $c != null) {
                 $res = [];
-                $list = cerberApi::getInstance()->getForeignEnterpriseList($q,$c);
+                $list = cerberApi::getInstance()->getForeignEnterpriseList($q, $c);
                 if (isset($list)) {
                     $res = [];
                     foreach ($list as $item) {
                         if (($item->last) && ($item->active))
-                            $res[] = ['id' => $item->guid,
-                                'text' => $item->name . '(' .
-                                    $item->address->addressView
-                                    . ')'
+                            $res[] = ['id'   => $item->guid,
+                                      'text' => $item->name . '(' .
+                                          $item->address->addressView
+                                          . ')'
                             ];
                     }
                 }
             }
 
-            if($c == '74a3cbb1-56fa-94f3-ab3f-e8db4940d96b' || $c == null) {
+            if ($c == '74a3cbb1-56fa-94f3-ab3f-e8db4940d96b' || $c == null) {
                 $list = cerberApi::getInstance()->getRussianEnterpriseList($q);
                 if (isset($list)) {
 
                     foreach ($list as $item) {
                         if (($item->last) && ($item->active))
-                            $res[] = ['id' => $item->guid,
-                                'text' => $item->name . '(' .
-                                    $item->address->addressView
-                                    . ')'
+                            $res[] = ['id'   => $item->guid,
+                                      'text' => $item->name . '(' .
+                                          $item->address->addressView
+                                          . ')'
                             ];
                     }
                 }

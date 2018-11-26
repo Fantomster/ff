@@ -245,13 +245,13 @@ class IntegrationWebApi extends WebApi
         $arr['outer_product'] = [
             'name'     => null,
             'id'       => null,
-            'equality' => false
+            'equality' => true
         ];
 
         $arr['outer_store'] = [
             'name'     => null,
             'id'       => null,
-            'equality' => false
+            'equality' => true
         ];
 
         $arr['outer_unit'] = [
@@ -261,12 +261,12 @@ class IntegrationWebApi extends WebApi
 
         $arr['vat_waybill'] = [
             'value'    => $waybillContent->vat_waybill,
-            'equality' => false
+            'equality' => true
         ];
 
         $arr['koef'] = [
             'value'    => $waybillContent->koef,
-            'equality' => false
+            'equality' => true
         ];
 
         $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id]);
@@ -308,19 +308,19 @@ class IntegrationWebApi extends WebApi
                 $outerProductMap = (object)current($outerProductMap);
                 //Если отличаются продукты, надо подсвечивать на фронте
                 if ($outerProductMap->outer_product_id != $waybillContent->outer_product_id) {
-                    $arr['outer_product']['equality'] = true;
+                    $arr['outer_product']['equality'] = false;
                 }
                 //Если отличаются склады, надо подсвечивать на фронте
                 if ($outerProductMap->outer_store_id != $waybillContent->waybill->outer_store_id) {
-                    $arr['outer_store']['equality'] = true;
+                    $arr['outer_store']['equality'] = false;
                 }
                 //Если ставка НДС отличается, то надо подсвечивать на фронте
                 if ($outerProductMap->vat != $waybillContent->vat_waybill) {
-                    $arr['vat_waybill']['equality'] = true;
+                    $arr['vat_waybill']['equality'] = false;
                 }
                 //Если коэффициент отличается, то надо подсвечивать на фронте
                 if ($outerProductMap->coefficient != $waybillContent->koef) {
-                    $arr['koef']['equality'] = true;
+                    $arr['koef']['equality'] = false;
                 }
             }
         }

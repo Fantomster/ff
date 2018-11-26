@@ -107,8 +107,10 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                 try {
                     //Записываем в базу данные о текущем шаге
                     $this->data['request'] = json_encode($this->request);
-                    $this->queue->data_request = json_encode($this->data);
-                    $this->queue->save();
+                    if(isset($this->queue)) {
+                        $this->queue->data_request = json_encode($this->data);
+                        $this->queue->save();
+                    }
 
                     //Выполняем запрос и обработку полученных данных
                     $response = $this->instance->sendRequest($this->method, $this->request);
@@ -163,8 +165,10 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
 
         $this->log("Complete operation success");
 
-        $this->queue->data_request = new Expression('NULL');
-        $this->queue->save();
+        if(isset($this->queue)) {
+            $this->queue->data_request = new Expression('NULL');
+            $this->queue->save();
+        }
 
         mercLogger::getInstance()->addMercLogDict('COMPLETE', BaseStringHelper::basename(static::class), null);
     }

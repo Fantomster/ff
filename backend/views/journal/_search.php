@@ -36,11 +36,11 @@ use yii\widgets\ActiveForm;
             $organizations = \common\models\Journal::find()
                 ->distinct()->select('organization_id')->all();
             $items = [null => 'Все'];
-            if (!empty($organizations)) {
+            /*if (!empty($organizations)) {
                 foreach ($organizations as $organization) {
                     $items[$organization->organization_id] = isset($organization->organization_id) ? \common\models\Organization::findOne($organization->organization_id)->name : '';
                 }
-            }
+            }*/
 
             echo $form->field($model, 'organization_id')->widget(\kartik\select2\Select2::classname(), [
                 'data' => $items,
@@ -53,8 +53,12 @@ use yii\widgets\ActiveForm;
             ?>
         </div>
         <div class="col-sm-3">
-            <?php  echo $form->field($model, 'operation_code')->widget(\kartik\select2\Select2::classname(), [
-                'data' => \yii\helpers\ArrayHelper::map(\common\models\AllServiceOperation::find()->select('code, ifnull(`comment`, `denom`) as denom')->all(), 'code', 'denom'),
+            <?php
+            $service_id = $model->service_id ?? 1;
+            echo $form->field($model, 'operation_code')->widget(\kartik\select2\Select2::classname(), [
+                'data' => \yii\helpers\ArrayHelper::map(\common\models\AllServiceOperation::find()->select('code, ifnull(`comment`, `denom`) as denom')
+                    ->where(['service_id' => $service_id])
+                    ->all(), 'code', 'denom'),
                 'attribute' => 'operation_code',
                 'pluginOptions' => [
                     'selected' => \Yii::$app->request->get('code') ?? '',

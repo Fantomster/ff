@@ -71,8 +71,12 @@ class MercVSDList extends MercDictConsumer
                     $this->data['listOptions']['offset'] = $curr_offset;
                     $this->data['listOptions']['count'] = $curr_step;
                     $this->data['listOptions'] = $this->data['listOptions'];
-                    $this->queue->data_request = json_encode($this->data);
-                    $this->queue->save();
+                    //var_dump($this->queue); die();
+                    //if( is_a($this->queue, ))
+                    if(isset($this->queue)) {
+                        $this->queue->data_request = json_encode($this->data);
+                        $this->queue->save();
+                    }
                     echo "============================" . PHP_EOL;
                     //Выполняем запрос и обработку полученных данных
                     $load_data_succ = false;

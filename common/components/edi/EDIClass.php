@@ -2,6 +2,8 @@
 
 namespace common\components\edi;
 
+use api_web\components\Registry;
+use common\models\OuterUnit;
 use yii\base\Component;
 use common\models\Catalog;
 use common\models\CatalogBaseGoods;
@@ -306,12 +308,14 @@ class EDIClass extends Component
             $barcode = (String)$barcode;
             if (!$barcode) continue;
             $barcodeArray[] = $barcode;
+            $ed = (String)$good->UNIT ?? (String)$good->QUANTITYOFCUINTUUNIT;
+            $ed = OuterUnit::getInnerName($ed, Registry::EDI_SERVICE_ID);
             $goodsArray[$barcode]['name'] = (String)$good->PRODUCTNAME ?? '';
             $goodsArray[$barcode]['price'] = (float)$good->UNITPRICE ?? 0.0;
             $goodsArray[$barcode]['article'] = (isset($good->IDBUYER) && $good->IDBUYER != '') ? (String)$good->IDBUYER : $barcode;
-            $goodsArray[$barcode]['ed'] = $good->UNIT ?? (String)$good->QUANTITYOFCUINTUUNIT ?? 'шт';
-            $goodsArray[$barcode]['units'] = (float)$good->PACKINGMULTIPLENESS ?? $good->UNIT;
-            $goodsArray[$barcode]['edi_supplier_article'] = (String)$good->IDSUPPLIER ?? $barcode ?? null;
+            $goodsArray[$barcode]['ed'] = $ed;
+            $goodsArray[$barcode]['units'] = (float)$good->PACKINGMULTIPLENESS ?? $good->MINORDERQUANTITY;
+            $goodsArray[$barcode]['edi_supplier_article'] = (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String)$good->IDSUPPLIER : $barcode;
             $goodsArray[$barcode]['vat'] = (int)$good->TAXRATE ?? null;
         }
 
@@ -339,14 +343,17 @@ class EDIClass extends Component
 
         $rel = RelationSuppRest::findOne(['rest_org_id' => $rest->id, 'supp_org_id' => $organization->id]);
         if (!$rel) {
-            $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
+            \Yii::error('No relation');
+            return false;
         } else {
-            if (!$rel->cat_id) {
+            $relationCatalogID = $rel->cat_id;
+            $cat = Catalog::findOne(['id' => $relationCatalogID]);
+            if (!$relationCatalogID || $cat->type == Catalog::BASE_CATALOG) {
                 $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
                 $rel->cat_id = $relationCatalogID;
+                $rel->status = Catalog::STATUS_ON;
                 $rel->save();
             }
-            $relationCatalogID = $rel->cat_id;
         }
         foreach ($goodsArray as $barcode => $good) {
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);

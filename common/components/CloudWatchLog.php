@@ -137,7 +137,7 @@ class CloudWatchLog extends Component
             return true;
         } catch (\Throwable $e) {
             \Yii::error($e->getCode() . PHP_EOL . $e->getMessage() .  PHP_EOL . $e->getTraceAsString());
-            return false;
+            return false;//
         }
     }
 

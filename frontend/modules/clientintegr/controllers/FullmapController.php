@@ -44,7 +44,6 @@ class FullmapController extends DefaultController
 
     public function actionIndex() // метод загрузки данных и открытия страницы Массового сопоставления
     {
-
         $session = Yii::$app->session;
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearchMap();
@@ -443,7 +442,7 @@ class FullmapController extends DefaultController
         return $out;
     }*/
 
-    public function actionApplyFullmap() // метод групповой обработки данных, отмеченных "флажками"
+    public function actionApplyFullmap() // метод установки данных для всех товарных позиций, отмеченных "флажками"
     {
 
         $koef = Yii::$app->request->post('koef_set');
@@ -554,7 +553,7 @@ class FullmapController extends DefaultController
         return true;
     }
 
-    public function actionSaveSelectedMaps() // метод сохранения изменений для товаров, отмеченных "флажками"
+    public function actionSaveSelectedMaps() // метод сохранения изменений выделения "флажками" товаров
     {
         $selected = Yii::$app->request->get('selected');
         $state = Yii::$app->request->get('state');

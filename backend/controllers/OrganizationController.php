@@ -62,6 +62,7 @@ class OrganizationController extends Controller
                             'start-test-vendors-updating',
                             'notifications',
                             'ajax-update-status',
+                            'ajax-update-vendor-is-work',
                             'ajax-update-edi-list',
                             'ajax-update-license-organization',
                             'list-organizations-for-licenses',
@@ -197,18 +198,11 @@ class OrganizationController extends Controller
     {
         $model = $this->findModel($id);
         $franchiseeModel = $this->findFranchiseeAssociateModel($id);
-        $ediModel = EdiOrganization::findOne(['organization_id' => $id]);
-        if (!$ediModel) {
-            $ediModel = new EdiOrganization();
-            $ediModel->organization_id = $id;
-            $ediModel->save();
-        }
         $franchiseeList = ArrayHelper::map(Franchisee::find()->all(), 'id', 'legal_entity');
-        if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save() && $ediModel->load(Yii::$app->request->post())) {
-            $ediModel->save();
+        if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
-            return $this->render('update', compact('model', 'franchiseeModel', 'franchiseeList', 'ediModel'));
+            return $this->render('update', compact('model', 'franchiseeModel', 'franchiseeList'));
         }
     }
 
@@ -312,6 +306,19 @@ class OrganizationController extends Controller
             return false;
         }
     }
+    public function actionAjaxUpdateVendorIsWork()
+    {
+        if (Yii::$app->request->isAjax) {
+            $status = Yii::$app->request->post('value');
+            $organizationId = str_replace('vendor_is_work_', '', Yii::$app->request->post('id'));
+            $organization = Organization::findOne(['id' => $organizationId]);
+            $organization->vendor_is_work = $status;
+            $organization->save();
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /**
      * Lists all Organization models.
@@ -361,7 +368,7 @@ class OrganizationController extends Controller
 
         $childOrganizations = ArrayHelper::map(Organization::findAll(['parent_id' => $id]), 'id', 'name');
         $organizations = ArrayHelper::merge($organizations, $childOrganizations);
-        $licenses = ArrayHelper::map(License::findAll(['is_active' => true]), 'id', 'name');
+        $licenses = ArrayHelper::map(License::find()->where(['is_active' => true])->orderBy('sort_index')->all(), 'id', 'name');
         if (Yii::$app->request->isPost && !empty(Yii::$app->request->post())) {
             $post = Yii::$app->request->post();
             foreach ($post['organizations'] as $organizationID) {
@@ -382,10 +389,10 @@ class OrganizationController extends Controller
 
         $date = new \DateTime('+10 day');
         $tenDaysAfter = $date->format('Y-m-d H:i:s');
-        $date = new \DateTime('-10 month');
-        $tenDaysBefore = $date->format('Y-m-d H:i:s');
+        $date2 = new \DateTime();
+        $nowDate = $date2->format('Y-m-d H:i:s');
 
-        return $this->render('add-license', ['licenses' => $licenses, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'tenDaysBefore' => $tenDaysBefore]);
+        return $this->render('add-license', ['licenses' => $licenses, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'nowDate' => $nowDate]);
     }
 
     public function actionAjaxUpdateLicenseOrganization()
@@ -395,7 +402,7 @@ class OrganizationController extends Controller
             $priceInputValue = Yii::$app->request->post('priceInputValue');
             $isDeletedValue = Yii::$app->request->post('isDeletedValue');
             $licenseOrganization = LicenseOrganization::findOne(['id' => $licenseOrgId]);
-            if($licenseOrganization) {
+            if ($licenseOrganization) {
                 $licenseOrganization->price = (float)$priceInputValue;
                 $licenseOrganization->is_deleted = ($isDeletedValue == 'true') ? 1 : 0;
                 $licenseOrganization->save();
@@ -484,7 +491,9 @@ class OrganizationController extends Controller
 
     private function handleEdiSettings($model, $id, $post, $isCreate = true)
     {
-        $model->organization_id = $id;
+        if ($isCreate) {
+            $model->organization_id = $id;
+        }
         if ($model->load($post) && $model->validate() && $model->save()) {
             if (isset($post['organizations'])) {
                 foreach ($post['organizations'] as $organizationID) {
@@ -495,7 +504,12 @@ class OrganizationController extends Controller
                     $roamingMap->save();
                 }
             }
-            return $this->redirect(Url::to(['organization/edi-settings', 'id' => $id]));
+            if ($isCreate) {
+                return $this->redirect(Url::to(['organization/edi-settings', 'id' => $id]));
+            } else {
+                return $this->redirect(Url::to(['organization/edi-settings', 'id' => $model->organization_id]));
+            }
+
         }
         $providers = ArrayHelper::map(EdiProvider::find()->asArray()->all(), 'id', 'name');
 

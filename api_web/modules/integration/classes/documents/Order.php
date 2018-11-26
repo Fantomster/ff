@@ -18,9 +18,10 @@ class Order extends BaseOrder implements DocumentInterface
     public static $waybill_service_id = null;
 
     /**
-     * Порлучение данных из модели
+     * Получение данных из модели
      *
-     * @return mixed
+     * @return array
+     * @throws BadRequestHttpException
      */
     public function prepare()
     {
@@ -28,26 +29,17 @@ class Order extends BaseOrder implements DocumentInterface
             return [];
         }
 
-        if (!empty($this->orderContent)) {
-            $arWaybillNames = array_values(array_unique(array_map(function (OrderContent $el) {
-                return $el->edi_number;
-            }, $this->orderContent)));
-            if (is_null(reset($arWaybillNames))) {
-                $arWaybillNames = null;
-            }
-        }
-
         $return = [
             "id"                => (int)$this->id,
-            "number"            => $arWaybillNames ?? [],
+            "number"            => $this->ediNumber,
             "type"              => DocumentWebApi::TYPE_ORDER,
-            "status_id"         => (int)$this->status,
-            "status_text"       => \Yii::t('api_web', 'doc_group.' . $this->getGroupStatus()),
+            "status_id"         => (int)$this->getGroupStatus(),
+            "status_text"       => \Yii::t('api_web', 'doc_group.' . Registry::$doc_group_status[$this->getGroupStatus()]),
             "order_status_text" => $this->statusText,
             "service_id"        => (int)$this->service_id,
             "is_mercury_cert"   => $this->getIsMercuryCert(),
             "count"             => (int)$this->positionCount,
-            "total_price"       => CurrencyHelper::asDecimal($this->total_price),
+            "total_price"       => CurrencyHelper::asDecimal($this->getTotalPriceFromDb(self::$waybill_service_id)),
             "doc_date"          => date("Y-m-d H:i:s T", strtotime($this->created_at)),
             "vendor"            => null,
             "agent"             => null,
@@ -61,7 +53,7 @@ class Order extends BaseOrder implements DocumentInterface
             "difer" => false,
         ];
 
-        $agent = OuterAgent::findOne(['vendor_id' => $vendor->id, 'org_id' => $this->client_id]);
+        $agent = OuterAgent::findOne(['vendor_id' => $vendor->id, 'org_id' => $this->client_id, 'service_id' => self::$waybill_service_id]);
         if (!empty($agent)) {
             $return["agent"] = [
                 'id'   => (int)$agent->id,
@@ -85,7 +77,8 @@ class Order extends BaseOrder implements DocumentInterface
      *
      * @param      $key
      * @param null $serviceId
-     * @return array|mixed
+     * @return array
+     * @throws BadRequestHttpException
      */
     public static function prepareModel($key, $serviceId = null)
     {
@@ -103,8 +96,9 @@ class Order extends BaseOrder implements DocumentInterface
     /**
      * Групповой статус документа
      *
-     * @return mixed
+     * @return int
      * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
     public function getGroupStatus()
     {
@@ -119,10 +113,9 @@ class Order extends BaseOrder implements DocumentInterface
             $index_group_status = Registry::DOC_GROUP_STATUS_SENT;
         }
         //Если есть хоть одна в статусе сформирована, или вообще нет накладных
-        if (in_array(Registry::WAYBILL_FORMED, $waybill_status) || empty($waybill_status)) {
+        if (in_array(Registry::WAYBILL_FORMED, $waybill_status) || empty($waybill_status) || count($this->getOrderContentWithOutWaybill()) > 0) {
             $index_group_status = Registry::DOC_GROUP_STATUS_WAIT_FORMING;
         }
-
-        return Registry::$doc_group_status[$index_group_status];
+        return $index_group_status;
     }
 }

@@ -19,38 +19,43 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'partnership')->checkBox(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'legal_entity')->textInput(['maxlength' => true]) ?>
-    <style>#map{width:100%;height:250px;}</style>
-    <?='адрес в базе: ' . $model->address;?>
+    <style>#map {
+            width: 100%;
+            height: 250px;
+        }</style>
+    <?= 'адрес в базе: ' . $model->address; ?>
     <?= $form->field($model, 'address')->textInput(['maxlength' => true]) ?>
     <div id="map"></div>
-    <script type="text/javascript"> 
+    <script type="text/javascript">
 
-function stopRKey(evt) { 
-var evt = (evt) ? evt : ((event) ? event : null); 
-var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null); 
-if ((evt.keyCode == 13) && (node.type=="text")) {return false;} 
-} 
+        function stopRKey(evt) {
+            var evt = (evt) ? evt : ((event) ? event : null);
+            var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+            if ((evt.keyCode == 13) && (node.type == "text")) {
+                return false;
+            }
+        }
 
-document.onkeypress = stopRKey; 
+        document.onkeypress = stopRKey;
 
-</script> 
-    <?= Html::activeHiddenInput($model, 'lat'); //широта ?>
-    <?= Html::activeHiddenInput($model, 'lng'); //долгота ?>
-    <?= Html::activeHiddenInput($model, 'country'); //страна ?> 
-    <?= Html::activeHiddenInput($model, 'locality'); //Город ?>
-    <?= Html::activeHiddenInput($model, 'route'); //улица ?>
-    <?= Html::activeHiddenInput($model, 'street_number'); //дом ?>
-    <?= Html::activeHiddenInput($model, 'place_id'); //уникальный индификатор места ?>
-    <?= Html::activeHiddenInput($model, 'formatted_address'); //полный адрес ?>
-    <?= Html::activeHiddenInput($model, 'administrative_area_level_1'); //область ?>
+    </script>
+    <?= Html::activeHiddenInput($model, 'lat'); //широта  ?>
+    <?= Html::activeHiddenInput($model, 'lng'); //долгота  ?>
+    <?= Html::activeHiddenInput($model, 'country'); //страна  ?>
+    <?= Html::activeHiddenInput($model, 'locality'); //Город  ?>
+    <?= Html::activeHiddenInput($model, 'route'); //улица  ?>
+    <?= Html::activeHiddenInput($model, 'street_number'); //дом  ?>
+    <?= Html::activeHiddenInput($model, 'place_id'); //уникальный индификатор места  ?>
+    <?= Html::activeHiddenInput($model, 'formatted_address'); //полный адрес  ?>
+    <?= Html::activeHiddenInput($model, 'administrative_area_level_1'); //область  ?>
     <?php
-    $gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
+    $gpJsLink = 'https://maps.googleapis.com/maps/api/js?' . http_build_query([
             'libraries' => 'places',
-            'key'=>Yii::$app->params['google-api']['key-id'],
-            'language'=>Yii::$app->params['google-api']['language'],
-            'callback'=>'initMap'
-        ));
-    $this->registerJsFile($gpJsLink, ['async'=>true, 'defer'=>true]);
+            'key'       => Yii::$app->params['google-api']['key-id'],
+            'language'  => Yii::$app->params['google-api']['language'],
+            'callback'  => 'initMap'
+        ]);
+    $this->registerJsFile($gpJsLink, ['async' => true, 'defer' => true]);
     $this->registerJs("
     function initMap() {
     var fields = {
@@ -285,20 +290,20 @@ function changeFields(fields, results) {
     }
 }
 
-    ",yii\web\View::POS_END);
+    ", yii\web\View::POS_END);
     ?>
     <?= $form->field($model, 'zip_code')->textInput(['maxlength' => true]) ?>
 
-    <?= ''//$form->field($model, 'phone')->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])->textInput(['maxlength' => true]) ?>
+    <?= ''//$form->field($model, 'phone')->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])->textInput(['maxlength' => true])  ?>
 
     <?=
     $form->field($model, 'phone')->widget(\common\widgets\PhoneInput::className(), [
         'jsOptions' => [
             'preferredCountries' => ['ru'],
-            'nationalMode' => false,
-            'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input'). '/build/js/utils.js',
+            'nationalMode'       => false,
+            'utilsScript'        => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
         ],
-        'options' => [
+        'options'   => [
             'class' => 'form-control',
         ]
     ])
@@ -312,27 +317,21 @@ function changeFields(fields, results) {
 
     <?= $form->field($model, 'blacklisted')->dropDownList(common\models\Organization::getStatusList())->label('Статус') ?>
 
-    <?= $form->field($ediModel, 'gln_code')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($ediModel, 'login')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($ediModel, 'pass')->textInput(['maxlength' => true]) ?>
-
     <?= $form->field($model, 'about')->textarea() ?>
 
     <?= $form->field($franchiseeModel, 'franchisee_id')->dropDownList($franchiseeList,
         ['options' =>
-            [
-                (isset($model->franchisee->id)) ? $model->franchisee->id : null => ['selected' => true]
-            ]
+             [
+                 (isset($model->franchisee->id)) ? $model->franchisee->id : null => ['selected' => true]
+             ]
         ])->label('Название франшизы') ?>
 
 
-    <?php if($model->type_id == \common\models\Organization::TYPE_SUPPLIER):?>
+    <?php if ($model->type_id == \common\models\Organization::TYPE_SUPPLIER): ?>
         <?= $form->field($model, 'is_work')->dropDownList(['1' => 'Да', '0' => 'Нет'])->label('Поствщик работает в системе') ?>
     <?php endif; ?>
 
-    <?= Html::activeHiddenInput($franchiseeModel, 'organization_id', ['value'=>$model->id]); ?>
+    <?= Html::activeHiddenInput($franchiseeModel, 'organization_id', ['value' => $model->id]); ?>
 
 
     <div class="form-group">

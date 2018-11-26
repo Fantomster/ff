@@ -355,6 +355,8 @@ class DocumentWebApi extends \api_web\components\WebApi
                         instr(group_concat(DISTINCT dat.waybill_status_id), :WAYBILL_FORMED) > 0
                         OR 
                         group_concat(DISTINCT dat.waybill_id) is null
+                        OR
+                        count(dat.order_content_id) != count(dat.waybill_content_id)
                        THEN :DOC_GROUP_STATUS_WAIT_FORMING
                      WHEN group_concat(DISTINCT dat.waybill_status_id) IN (:WAYBILL_ERROR, :WAYBILL_UNLOADED, :WAYBILL_UNLOADING)
                        THEN :DOC_GROUP_STATUS_WAIT_SENDING
@@ -392,7 +394,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                          LEFT JOIN order_content c ON c.id = b.order_content_id
                          LEFT JOIN `order` d ON d.id = c.order_id
                        WHERE a.acquirer_id = :business_id AND a.service_id = :service_id
-                       AND NOT EXISTS(
+                       AND a.id not IN (
                                SELECT sqwc.waybill_id
                                FROM `$apiShema`.waybill_content sqwc
                                  JOIN order_content sqoc ON sqoc.id = sqwc.order_content_id
@@ -424,7 +426,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                          a.created_at                                           order_date
                        FROM `order` a
                          JOIN order_content b ON b.order_id = a.id
-                         LEFT JOIN `$apiShema`.waybill_content c ON c.order_content_id = b.id
+                         LEFT JOIN `$apiShema`.waybill_content c ON c.order_content_id = b.id and c.waybill_id in (select id from `$apiShema`.waybill where service_id = :service_id and acquirer_id = :business_id)
                          LEFT JOIN `$apiShema`.waybill d ON d.id = c.waybill_id AND d.service_id = :service_id
                        WHERE a.client_id = :business_id
                      ) dat
@@ -492,6 +494,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                     "doc_date"                => date("Y-m-d H:i:s T", strtotime($model['doc_date'])),
                     "outer_number_code"       => $model['outer_number_code'] ?? null,
                     "outer_number_additional" => $model['outer_number_additional'] ?? null,
+                    "order_acquirer_id"       => $model['order_acquirer_id'],
                     "vendor"                  => (!(isset($model['order_vendor_id']) && isset($model['object_store_name']))) ? null :
                         [
                             "id"    => $model['order_vendor_id'],

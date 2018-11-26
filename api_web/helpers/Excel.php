@@ -3,9 +3,9 @@
 namespace api_web\helpers;
 
 /**
- *
  * @author elbabuino
  */
+
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use common\models\CatalogTempContent;
 
@@ -21,7 +21,6 @@ class Excel
 
     /**
      * @param string $excelFile
-     *
      * @return array
      */
     public static function get20Rows($excelFile)
@@ -32,22 +31,44 @@ class Excel
 
         $rows = [];
         $rowsCount = 0;
+        $maxCellsCount = 0;
         foreach ($worksheet->getRowIterator() as $row) {
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
             $cells = [];
             $i = 0;
+            $emptyCellsCount = 0;
             foreach ($cellIterator as $cell) {
                 if ($i > 5 && !$cell->getValue()) {
                     break;
                 }
-                $cells[] = htmlspecialchars($cell->getValue(), ENT_QUOTES);
+                $cellValue = trim(htmlspecialchars($cell->getValue(), ENT_QUOTES));
+                $cells[] = $cellValue;
                 $i++;
+                if (!$cellValue) {
+                    $emptyCellsCount++;
+                }
+
             }
-            $rows[] = $cells;
+            if (count($cells) > $maxCellsCount) {
+                $maxCellsCount = count($cells);
+            }
+            if (count($cells) != $emptyCellsCount) {
+                $rows[] = $cells;
+            }
             $rowsCount++;
             if ($rowsCount == 20) {
-                return $rows;
+                /**
+                 * Заполняем каждый элемент массива до кол-ва, равному наибольшей длинне его элементов
+                 */
+                return array_map(function ($el) use ($maxCellsCount) {
+                    if (count($el) < $maxCellsCount) {
+                        end($el);
+                        $fillForFront = array_fill(key($el), $maxCellsCount - count($el), '');
+                        return array_merge($el, $fillForFront);
+                    }
+                    return $el;
+                }, $rows);
             }
         }
 
@@ -55,7 +76,6 @@ class Excel
     }
 
     /**
-     *
      * @param \common\models\CatalogTemp $tempCatalog
      * @return array
      */
@@ -70,10 +90,11 @@ class Excel
     }
 
     /**
-     * @param string $excelFile
+     * @param string  $excelFile
      * @param integer $tmpCatId
-     * @param array $mapping ['article', 'price', 'units', 'note', 'ed', 'product', 'other'] - в указанном при добавлении каталога порядке
-     * @param string $index
+     * @param array   $mapping ['article', 'price', 'units', 'note', 'ed', 'product', 'other'] - в указанном при
+     *                         добавлении каталога порядке
+     * @param string  $index
      * @return bool
      */
     public static function writeToTempTable($excelFile, $tmpCatId, $mapping, $index = 'article')
@@ -89,7 +110,7 @@ class Excel
             $attributes['temp_id'] = $tmpCatId;
             $write = true;
             foreach ($cellIterator as $cell) {
-                if($cellsCount > 6){
+                if ($cellsCount > 6) {
                     break;
                 }
                 if (!array_key_exists($cellsCount, $mapping)) {
@@ -102,7 +123,7 @@ class Excel
                     break;
                 }
 
-                if ($mapping[$cellsCount] == 'price' && !is_numeric($value)){
+                if ($mapping[$cellsCount] == 'price' && !is_numeric($value)) {
                     $write = false;
                     break;
                 }
@@ -112,7 +133,7 @@ class Excel
                     break;
                 }
 
-                if ($mapping[$cellsCount] == 'units' && !empty($value)){
+                if ($mapping[$cellsCount] == 'units' && !empty($value)) {
                     $value = (float)(str_replace(',', '.', $value));
                 }
 
@@ -120,7 +141,7 @@ class Excel
                 $cellsCount++;
             }
 
-            if (!array_search('units', $mapping) || empty($attributes['units'])){
+            if (!array_search('units', $mapping) || empty($attributes['units'])) {
                 $attributes['units'] = 0;
             }
 

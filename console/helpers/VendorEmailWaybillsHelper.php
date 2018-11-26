@@ -126,6 +126,7 @@ class VendorEmailWaybillsHelper
                         'product_id'         => $product->id,
                         'product_name'       => $row['name'],
                         'units'              => $product->units,
+                        'edi_number'         => $invoice['invoice']['number'],
                     ]);
                     if (!$content->save()) {
                         $this->addLog(implode(' ', $content->getFirstErrors()) . ' № = ' . $invoice['invoice']['number'], 'order_create');
@@ -220,7 +221,7 @@ class VendorEmailWaybillsHelper
      * @return array
      */
     private function prepareAgentName($name){
-        $result = (new Query())->select('*')->from('ooo')->all();
+        $result = (new Query())->select('*')->from('organization_forms')->all();
         foreach ($result as $item) {
             if (strpos($name, $item['name_short']) === 0){
                 $newAgentName = str_replace($item['name_short'], $item['name_long'], $name);

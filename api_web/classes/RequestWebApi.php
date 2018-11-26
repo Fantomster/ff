@@ -21,6 +21,7 @@ class RequestWebApi extends WebApi
 {
     /**
      * Список заявок для ресторана
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -67,10 +68,10 @@ class RequestWebApi extends WebApi
         }
 
         $return = [
-            'result' => $result,
+            'result'     => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -80,6 +81,7 @@ class RequestWebApi extends WebApi
 
     /**
      * Список заявок для поставщика
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -144,10 +146,10 @@ class RequestWebApi extends WebApi
         }
 
         $return = [
-            'result' => $result,
+            'result'     => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -157,6 +159,7 @@ class RequestWebApi extends WebApi
 
     /**
      * Список категорий
+     *
      * @return array
      */
     public function getCategoryList()
@@ -175,6 +178,7 @@ class RequestWebApi extends WebApi
 
     /**
      * Список откликов на заявку
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -182,6 +186,7 @@ class RequestWebApi extends WebApi
     public function getCallbackList(array $post)
     {
         if ($this->user->organization->type_id !== Organization::TYPE_RESTAURANT) {
+            //todo_refactor localization
             throw new BadRequestHttpException('Вы не можете смотреть предложения, могут только рестораны...');
         }
         $this->validateRequest($post, ['request_id']);
@@ -211,10 +216,10 @@ class RequestWebApi extends WebApi
         }
 
         $return = [
-            'result' => $result,
+            'result'     => $result,
             'pagination' => [
-                'page' => ($dataProvider->pagination->page + 1),
-                'page_size' => $dataProvider->pagination->pageSize,
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
                 'total_page' => ceil($dataProvider->totalCount / $pageSize)
             ]
         ];
@@ -224,6 +229,7 @@ class RequestWebApi extends WebApi
 
     /**
      * Карточка заявки
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -244,6 +250,7 @@ class RequestWebApi extends WebApi
 
     /**
      * Создание заявки
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -301,6 +308,7 @@ class RequestWebApi extends WebApi
 
     /**
      * Снять заявку
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -323,6 +331,7 @@ class RequestWebApi extends WebApi
 
     /**
      * Добавить предложение
+     *
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
@@ -459,6 +468,7 @@ class RequestWebApi extends WebApi
 
     /**
      * Проверка на доступ к заявке
+     *
      * @param Request $model
      * @return bool
      * @throws BadRequestHttpException
@@ -547,47 +557,49 @@ class RequestWebApi extends WebApi
 
     /**
      * Информация по заявке
+     *
      * @param Request $model
      * @return array
      */
     private function prepareRequest(Request $model)
     {
         return [
-            'id' => (int)$model->id,
-            "name" => $model->product,
-            "status" => (int)$model->active_status,
-            "created_at" => \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:mm:ss'),
-            "end_at" => !empty($model->end) ? \Yii::$app->formatter->asDate($model->end, 'dd.MM.yyyy HH:mm:ss') : null,
-            "category" => $model->categoryName->name,
-            "category_id" => (int)$model->category,
-            "amount" => $model->amount,
-            "comment" => $model->comment,
-            "client" => WebApiHelper::prepareOrganization($model->client),
-            "vendor" => WebApiHelper::prepareOrganization($model->vendor) ?? null,
-            "hits" => (int)$model->count_views ?? 0,
-            "count_callback" => (int)$model->countCallback ?? 0,
-            "urgent" => (int)$model->rush_order ?? 0,
-            "payment_method" => $model->payment_method,
+            'id'                => (int)$model->id,
+            "name"              => $model->product,
+            "status"            => (int)$model->active_status,
+            "created_at"        => \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:mm:ss'),
+            "end_at"            => !empty($model->end) ? \Yii::$app->formatter->asDate($model->end, 'dd.MM.yyyy HH:mm:ss') : null,
+            "category"          => $model->categoryName->name,
+            "category_id"       => (int)$model->category,
+            "amount"            => $model->amount,
+            "comment"           => $model->comment,
+            "client"            => WebApiHelper::prepareOrganization($model->client),
+            "vendor"            => WebApiHelper::prepareOrganization($model->vendor) ?? null,
+            "hits"              => (int)$model->hits ?? 0,
+            "count_callback"    => (int)$model->countCallback ?? 0,
+            "urgent"            => (int)$model->rush_order ?? 0,
+            "payment_method"    => $model->payment_method,
             "deferment_payment" => $model->deferment_payment,
-            "regular" => (int)$model->regular,
-            "regular_name" => $model->regularName
+            "regular"           => (int)$model->regular,
+            "regular_name"      => $model->regularName
         ];
     }
 
     /**
      * Информация о предложении
+     *
      * @param RequestCallback $model
      * @return array
      */
     private function prepareRequestCallback(RequestCallback $model)
     {
         return [
-            'id' => (int)$model->id,
+            'id'         => (int)$model->id,
             "request_id" => (int)$model->request_id,
-            "client" => WebApiHelper::prepareOrganization($model->request->client),
-            "vendor" => WebApiHelper::prepareOrganization($model->organization),
-            "price" => round($model->price, 2),
-            "comment" => $model->comment,
+            "client"     => WebApiHelper::prepareOrganization($model->request->client),
+            "vendor"     => WebApiHelper::prepareOrganization($model->organization),
+            "price"      => $model->price,
+            "comment"    => $model->comment,
             "created_at" => \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:mm:ss'),
             "updated_at" => \Yii::$app->formatter->asDate($model->updated_at, 'dd.MM.yyyy HH:mm:ss'),
         ];

@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Organization;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -12,6 +13,7 @@ use kartik\export\ExportMenu;
 $this->title = 'Общий список организаций';
 $this->params['breadcrumbs'][] = $this->title;
 $url = \yii\helpers\Url::to(['organization/ajax-update-status']);
+$urlVendorIsWork = \yii\helpers\Url::to(['organization/ajax-update-vendor-is-work']);
 
 $gridColumns = [
     [
@@ -86,6 +88,30 @@ $gridColumns = [
             ]);
         }
     ],
+    [
+        'attribute' => 'vendor_is_work',
+        'label' => 'Работает ли поставщик',
+        'format' => 'raw',
+        'filter' => [0 => 'Не работает', 1 => 'Работает'],
+        'value' => function ($model) use($urlVendorIsWork) {
+            if ($model->type_id == Organization::TYPE_SUPPLIER) {
+                //return $data->getStatus();
+                return \kartik\select2\Select2::widget([
+                    'model'      => $model,
+                    'attribute'  => 'vendor_is_work',
+                    'data'       => [1 => 'Работает', 0 => 'Не работает'],
+                    'hideSearch' => true,
+                    'options'    => [
+                        'id'         => 'vendor_is_work_' . $model->id,
+                        'name'       => 'vendor_is_work_' . $model->id,
+                        'class'      => 'alVendorIsWork',
+                        'allowClear' => true
+                    ],
+                ]);
+            }
+            return '';
+        }
+    ],
 //    'website',
     // 'created_at',
     // 'updated_at',
@@ -146,6 +172,20 @@ $(document).on('change', '.alBlacklistClass', function(e) {
     var id = $(this).prop('id');
     $.ajax({
         url: "$url",
+        type: "POST",
+        data: {'value' : value, 'id' : id},
+        cache: false,
+        failure: function(errMsg) {
+            console.log(errMsg);
+        }
+    });
+})
+
+$(document).on('change', '.alVendorIsWork', function(e) {
+    var value = $(this).val();
+    var id = $(this).prop('id');
+    $.ajax({
+        url: "$urlVendorIsWork",
         type: "POST",
         data: {'value' : value, 'id' : id},
         cache: false,

@@ -60,6 +60,7 @@ use common\models\guides\Guide;
  * @property integer             $gmt
  * @property integer             $user_agreement
  * @property integer             $confidencial_policy
+ * @property integer             $vendor_is_work
  * @property string              $action
  * @property integer             $blacklisted
  * @property OrganizationType    $type

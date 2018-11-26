@@ -142,7 +142,7 @@ class RoboController extends \api_web\components\WebApiController
      *                  property="request",
      *                  default={
      *                      "id": 1,
-     *                      "org_id": 1,
+     *                      "organization_id": 1,
      *                      "server_type": "imap",
      *                      "server_host": "imap.yandex.ru",
      *                      "server_port": 993,
@@ -209,7 +209,7 @@ class RoboController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "org_id": 1,
+     *                      "organization_id": 1,
      *                      "server_type": "imap",
      *                      "server_host": "imap.yandex.ru",
      *                      "server_port": 993,

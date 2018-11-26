@@ -12,7 +12,6 @@ use Yii;
  * @property integer $user_id
  * @property string $created_at
  * @property string $updated_at
- *
  * @property Request $request
  * @property User $user
  */
@@ -68,6 +67,15 @@ class RequestCounters extends \yii\db\ActiveRecord
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
+    }
+
+    /**
+     * Get hits count
+     *
+     * @param $request_id
+     */
+    public static function hits($request_id) {
+        return self::find()->where(['request_id' => $request_id])->count();
     }
 
     /**

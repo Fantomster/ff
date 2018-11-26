@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api_web\behaviors\WaybillBehavior;
 use api_web\components\Registry;
 use common\helpers\DBNameHelper;
 use Yii;
@@ -33,7 +34,7 @@ use yii\behaviors\TimestampBehavior;
  * @property Order            $order
  * @property OuterStore       $outerStore
  * @property OuterAgent       $outerAgent
- * @property string           $edi_recadv
+ * @property bool             $readyToExport
  * @property string           $edi_invoice
  * @property string           $outer_document_id
  * @property WaybillContent[] $waybillContents
@@ -63,6 +64,10 @@ class Waybill extends \yii\db\ActiveRecord
     public function behaviors()
     {
         return [
+            [
+                'class' => WaybillBehavior::class,
+                'model' => $this
+            ],
             [
                 'class'              => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
@@ -197,5 +202,88 @@ class Waybill extends \yii\db\ActiveRecord
             return $wcModel->orderContent->order;
         }
         return null;
+    }
+
+    /**
+     * Проверка, готова ли запись накладной к выгрузке
+     *
+     * @return bool
+     */
+    public function getReadyToExport()
+    {
+        //Атрибуты, обязательные для заполнения при выгрузке
+        $requireAttributes = [
+            'outer_agent_id',
+            'outer_store_id',
+            'outer_number_code'
+        ];
+        //Проверяем их в текущей моделе
+        foreach ($requireAttributes as $attribute) {
+            $value = $this->getAttribute($attribute);
+            //Если хоть какое то значение не задано, возвращаем false
+            if (is_null($value) or empty($value)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Смена статуса накладной в "Сопоставлена"
+     *
+     * @return bool
+     */
+    public function changeStatusToCompared()
+    {
+        //Если нет агента в накладной, нечего там проверять
+        if ($this->readyToExport === false) {
+            //Если накладная была сопоставлена, но стала не готова к выгрузке
+            //Меняем статус на сформирована
+            if ($this->status_id == Registry::WAYBILL_COMPARED) {
+                $this->changeStatusToFormed();
+            }
+            return true;
+        }
+        //Если в накладной нет позиций, никогда не переведем ее в статус "Сопоставлена"
+        $contents = $this->waybillContents;
+        if (empty($contents)) {
+            if ($this->status_id == Registry::WAYBILL_COMPARED) {
+                $this->changeStatusToFormed();
+            }
+            return true;
+        }
+        /** @var \common\models\WaybillContent $waybillContent */
+        //Проверяем все позиции накладной, что они готовы к выгрузке
+        //Если хоть одна не готова, статус не меняем
+        $waybillContentCompared = true;
+        foreach ($contents as $waybillContent) {
+            if ($waybillContent->readyToExport === false) {
+                $waybillContentCompared = false;
+                break;
+            }
+        }
+
+        if ($waybillContentCompared === false) {
+            if ($this->status_id == Registry::WAYBILL_COMPARED) {
+                $this->changeStatusToFormed();
+            }
+            return true;
+        }
+        //Если дошли сюда
+        //И накладная в статусе "Cформирована" или "Сброшена"
+        if (in_array($this->status_id, [Registry::WAYBILL_FORMED, Registry::WAYBILL_RESET])) {
+            //то ставим статус накладной "Сопоставлена"
+            $this->status_id = Registry::WAYBILL_COMPARED;
+            return $this->save(false);
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    private function changeStatusToFormed()
+    {
+        $this->status_id = Registry::WAYBILL_FORMED;
+        return $this->save(false);
     }
 }

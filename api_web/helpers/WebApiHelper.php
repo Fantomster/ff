@@ -61,7 +61,7 @@ class WebApiHelper
      * @param array $needle_array
      * @return bool
      */
-    private static function checkDateAttribute($string, $needle_array = ['_at', '_date', 'date_'])
+    private static function checkDateAttribute($string, $needle_array = ['_at', '_date', 'date_', '_delivery'])
     {
         if (is_numeric($string)) {
             return false;
@@ -127,10 +127,10 @@ class WebApiHelper
 
         $item['id'] = (int)$model->id;
         $item['name'] = $model->name ?? "";
-        $item['legal_entity'] = $model->legal_entity ?? "";
+        $item['legal_entity'] = $model->buisinessInfo->legal_entity ?? $model->legal_entity ?? "";
         $item['contact_name'] = $model->contact_name ?? "";
         $item['phone'] = $model->phone ?? "";
-        $item['email'] = $model->email ?? "";
+        $item['email'] = $model->buisinessInfo->legal_email ?? $model->email ?? "";
         $item['site'] = $model->website ?? "";
         $item['address'] = $model->address ?? "";
         $item['image'] = $model->pictureUrl;
@@ -150,7 +150,7 @@ class WebApiHelper
         $item['confidencial_policy'] = $model->confidencial_policy;
 
         if ($model->type_id == Organization::TYPE_SUPPLIER) {
-            $item['inn'] = $model->inn ?? null;
+            $item['inn'] = $model->buisinessInfo->inn ?? $model->inn ?? null;
             $item['allow_editing'] = $model->allow_editing;
             $item['min_order_price'] = round($model->delivery->min_order_price, 2);
             $item['min_free_delivery_charge'] = round($model->delivery->min_free_delivery_charge, 2);
@@ -160,7 +160,7 @@ class WebApiHelper
             foreach ($days as $day) {
                 $item['delivery_days'][$day] = (int)$model->delivery->{$day};
             }
-            $item['is_edi'] = !empty($model->organizationGln) ? true : false;
+            $item['is_edi'] = $model->isEdi();
         }
 
         return $item;

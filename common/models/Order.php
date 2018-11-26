@@ -58,26 +58,27 @@ use yii\web\BadRequestHttpException;
  * @property EmailQueue[]       $relatedEmails
  * @property integer            $replaced_order_id
  * @property IntegrationInvoice $invoice
+ * @property array              $ediNumber
  */
 class Order extends \yii\db\ActiveRecord
 {
 
     const STATUS_AWAITING_ACCEPT_FROM_VENDOR = 1;
     const STATUS_AWAITING_ACCEPT_FROM_CLIENT = 2;
-    const STATUS_PROCESSING                  = 3;
-    const STATUS_DONE                        = 4;
-    const STATUS_REJECTED                    = 5;
-    const STATUS_CANCELLED                   = 6;
-    const STATUS_FORMING                     = 7;
-    const STATUS_EDI_SENT_BY_VENDOR          = 8;
-    const STATUS_EDI_ACCEPTANCE_FINISHED     = 9;
-    const STATUS_EDI_SENDING_TO_VENDOR       = 10;
-    const STATUS_EDI_SENDING_ERROR           = 11;
-    const DISCOUNT_NO_DISCOUNT               = null;
-    const DISCOUNT_FIXED                     = 1;
-    const DISCOUNT_PERCENT                   = 2;
-    const DELAY_WITH_DELIVERY_DATE           = 86400; //sec - 1 day
-    const DELAY_WITHOUT_DELIVERY_DATE        = 86400; //sec - 1 day
+    const STATUS_PROCESSING = 3;
+    const STATUS_DONE = 4;
+    const STATUS_REJECTED = 5;
+    const STATUS_CANCELLED = 6;
+    const STATUS_FORMING = 7;
+    const STATUS_EDI_SENT_BY_VENDOR = 8;
+    const STATUS_EDI_ACCEPTANCE_FINISHED = 9;
+    const STATUS_EDI_SENDING_TO_VENDOR = 10;
+    const STATUS_EDI_SENDING_ERROR = 11;
+    const DISCOUNT_NO_DISCOUNT = null;
+    const DISCOUNT_FIXED = 1;
+    const DISCOUNT_PERCENT = 2;
+    const DELAY_WITH_DELIVERY_DATE = 86400; //sec - 1 day
+    const DELAY_WITHOUT_DELIVERY_DATE = 86400; //sec - 1 day
 
     /**
      * @inheritdoc
@@ -176,7 +177,7 @@ class Order extends \yii\db\ActiveRecord
             if ($this->discount_type == Order::DISCOUNT_FIXED) {
                 $this->discount = round($this->discount, 2);
             } else {
-                $this->discount = abs((int) $this->discount);
+                $this->discount = abs((int)$this->discount);
             }
 
             /**
@@ -255,6 +256,19 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return array
+     */
+    public function getEdiNumber(): array
+    {
+        if (empty($this->orderContent)) {
+            return [];
+        }
+        return array_values(array_filter(array_unique(array_map(function (OrderContent $oc) {
+            return $oc->edi_number;
+        }, $this->orderContent))));
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getOrderChat()
@@ -300,11 +314,11 @@ class Order extends \yii\db\ActiveRecord
         $today = time();
         if (empty($this->requested_delivery)) {
             $updatedAt = strtotime($this->updated_at);
-            $interval  = $today - $updatedAt;
+            $interval = $today - $updatedAt;
             return $interval > self::DELAY_WITHOUT_DELIVERY_DATE;
         } else {
             $deliveryDate = strtotime($this->requested_delivery);
-            $interval     = $today - $deliveryDate;
+            $interval = $today - $deliveryDate;
             return $interval > self::DELAY_WITH_DELIVERY_DATE;
         }
     }
@@ -516,7 +530,7 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getTotalPriceWithOutDiscount()
     {
-        $total_price   = $this->getTotalPriceFromDb();
+        $total_price = $this->getTotalPriceFromDb();
         $free_delivery = $this->vendor->delivery->min_free_delivery_charge;
         if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
             $total_price += floatval($this->vendor->delivery->delivery_charge);
@@ -525,36 +539,37 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return false|null|string
+     * @return false|string|null
      */
-    private function getTotalPriceFromDb()
+    public function getTotalPriceFromDb($service_id = null)
     {
-        if (!empty($this->waybills)) {
+        $waybills = $this->getWaybills($service_id);
+        if (!empty($waybills)) {
             $query_waybill = (new Query)
-                            ->select('sum_without_vat')
-                            ->from(WaybillContent::tableName() . ' as w')
-                            ->where('w.order_content_id = oc.id')
-                            ->orderBy(['updated_at' => SORT_DESC])
-                            ->limit(1)->createCommand()->getRawSql();
+                ->select('sum_without_vat')
+                ->from(WaybillContent::tableName() . ' as w')
+                ->where('w.order_content_id = oc.id')
+                ->orderBy(['updated_at' => SORT_DESC])
+                ->limit(1)->createCommand()->getRawSql();
 
             $query = (new Query())
-                            ->select([
-                                'waybill_sum' => "(" . $query_waybill . ")",
-                                'oc_sum'      => '(oc.quantity * oc.price)'
-                            ])
-                            ->from(DBNameHelper::getMainName() . '.' . OrderContent::tableName() . ' as oc')
-                            ->where('oc.order_id = :o_id', [':o_id' => $this->id])
-                            ->createCommand()->getRawSql();
+                ->select([
+                    'waybill_sum' => "(" . $query_waybill . ")",
+                    'oc_sum'      => '(oc.quantity * oc.price)'
+                ])
+                ->from(DBNameHelper::getMainName() . '.' . OrderContent::tableName() . ' as oc')
+                ->where('oc.order_id = :o_id', [':o_id' => $this->id])
+                ->createCommand()->getRawSql();
 
             $total_price = (new Query())
-                    ->select('SUM(COALESCE(`waybill_sum`, `oc_sum`))')
-                    ->from("(" . $query . ") as t")
-                    ->scalar(\Yii::$app->db_api);
+                ->select('SUM(COALESCE(`waybill_sum`, `oc_sum`))')
+                ->from("(" . $query . ") as t")
+                ->scalar(\Yii::$app->db_api);
         } else {
             $total_price = OrderContent::find()
-                    ->select('SUM(quantity*price)')
-                    ->where(['order_id' => $this->id])
-                    ->scalar();
+                ->select('SUM(quantity*price)')
+                ->where(['order_id' => $this->id])
+                ->scalar();
         }
         return $total_price;
     }
@@ -597,7 +612,7 @@ class Order extends \yii\db\ActiveRecord
         }
         $franchiseeClientsManagers = $this->client->getRelatedFranchisee();
         $franchiseeVendorsManagers = $this->vendor->getRelatedFranchisee();
-        $recipients                = array_merge($recipients, $franchiseeClientsManagers, $franchiseeVendorsManagers);
+        $recipients = array_merge($recipients, $franchiseeClientsManagers, $franchiseeVendorsManagers);
 
         //Получаем дополнительные Емайлы для рассылки
         //Для заказчика
@@ -683,10 +698,10 @@ class Order extends \yii\db\ActiveRecord
         }
 
         if ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == OrderStatus::STATUS_DONE || $this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED)) {
-            $vendor    = $this->vendor;
-            $client    = $this->client;
+            $vendor = $this->vendor;
+            $client = $this->client;
             $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
-            $glnArray  = $client->getGlnCodes($client->id, $vendor->id);
+            $glnArray = $client->getGlnCodes($client->id, $vendor->id);
             if (isset($glnArray['client_gln']) && isset($glnArray['vendor_gln']) && $glnArray['client_gln'] > 0 && $glnArray['vendor_gln'] > 0) {
                 $ediIntegration = new EDIIntegration(['orgId' => $vendor->id, 'clientId' => $client->id, 'providerID' => $glnArray['provider_id']]);
                 if ($this->status == OrderStatus::STATUS_DONE || $this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED) {
@@ -735,7 +750,7 @@ class Order extends \yii\db\ActiveRecord
             }
 
             $relationExists = RelationUserOrganization::find()->where(['user_id' => $user->id, 'organization_id' => $this->vendor_id])->exists();
-            $token          = $user->getJWTToken(Yii::$app->jwt);
+            $token = $user->getJWTToken(Yii::$app->jwt);
 
             if ($appVersion == 1) {
                 if ($user->status == User::STATUS_UNCONFIRMED_EMAIL) {
@@ -773,8 +788,8 @@ class Order extends \yii\db\ActiveRecord
                 return \Yii::$app->urlManagerFrontend->baseUrl . "/client/history/order/" . $this->id;
             } else {
                 return Yii::$app->urlManagerFrontend->createAbsoluteUrl([
-                            "/order/view",
-                            "id" => $this->id
+                    "/order/view",
+                    "id" => $this->id
                 ]);
             }
         }
@@ -855,6 +870,7 @@ class Order extends \yii\db\ActiveRecord
 
     /**
      * @return string
+     * @throws \yii\base\InvalidConfigException
      */
     public function getFormattedCreationDate()
     {
@@ -867,21 +883,21 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getWaybills($service_id = null)
     {
-        $db_instance = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
-
         $query = (new Query())
-                ->distinct()
-                ->select(['w.id'])
-                ->from(Waybill::tableName() . ' as w')
-                ->leftJoin(WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
-                ->innerJoin($db_instance . '.' . OrderContent::tableName() . ' as oc', 'oc.id = wc.order_content_id')
-                ->where('oc.order_id = :id', [':id' => $this->id]);
+            ->distinct()
+            ->select(['w.id'])
+            ->from(Waybill::tableName() . ' as w')
+            ->leftJoin(WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
+            ->innerJoin(DBNameHelper::getMainName() . '.' . OrderContent::tableName() . ' as oc', 'oc.id = wc.order_content_id')
+            ->where('oc.order_id = :id', [':id' => $this->id]);
 
         if ($service_id) {
             $query->andWhere('w.service_id = :s_id', [':s_id' => $service_id]);
         }
 
-        return Waybill::find()->where(['in', 'id', $query->createCommand(\Yii::$app->db_api)->queryColumn()])->all() ?? [];
+        $ids = $query->column(\Yii::$app->db_api);
+
+        return Waybill::find()->where(['id' => $ids])->all() ?? [];
     }
 
     /**
@@ -895,4 +911,26 @@ class Order extends \yii\db\ActiveRecord
         return number_format(round($total_price, 2), 2, '.', '');
     }
 
+    /**
+     * Список позиций в заказе, которые не привязаны к накладным
+     *
+     * @return array|null
+     * @throws \yii\db\Exception
+     */
+    public function getOrderContentWithOutWaybill()
+    {
+        $query = new Query();
+        $query->select('oc.id');
+        $query->from(['`order` o', 'order_content oc']);
+        $query->leftJoin(DBNameHelper::getApiName() . '.waybill_content wc', 'wc.order_content_id = oc.id');
+        $query->leftJoin(DBNameHelper::getApiName() . '.waybill w', 'w.id = wc.waybill_id');
+        $query->where(['o.id' => $this->id]);
+        $query->andWhere('oc.order_id = o.id');
+        $query->andWhere('w.service_id is null');
+        $result = $query->createCommand(\Yii::$app->db)->queryColumn();
+        if (empty($result)) {
+            return null;
+        }
+        return $result;
+    }
 }

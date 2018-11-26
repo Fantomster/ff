@@ -2,21 +2,27 @@
 
 namespace api_web\handler;
 
-use api_web\exceptions\ValidationException;
-use api_web\helpers\Logger;
 use Yii;
-use yii\base\ErrorHandler;
-use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use yii\base\ErrorHandler;
+use api_web\helpers\Logger;
+use yii\web\NotFoundHttpException;
+use api_web\exceptions\ValidationException;
 
 /**
  * Class WebApiErrorHandler
+ *
  * @package api_web\handler
  */
 class WebApiErrorHandler extends ErrorHandler
 {
+    const HTTP_BAD_REQUEST_CODE = 400;
+    const HTTP_FORBIDDEN_CODE = 403;
+    const HTTP_INTERNAL_SERVER_ERROR_CODE = 500;
+
     /**
-     * @param \Error|\Exception $exception
+     * @param \Exception $exception
+     * @throws \Exception
      */
     protected function renderException($exception)
     {
@@ -25,29 +31,28 @@ class WebApiErrorHandler extends ErrorHandler
         } else {
             $response = new Response();
         }
-
+        /** @var Response format */
         $response->format = Response::FORMAT_JSON;
         $response->data = $this->convertExceptionToArray($exception);
-
-        if ($exception->statusCode != 0) {
-            $response->setStatusCode($exception->statusCode);
-            \Yii::$app->response->statusCode = $exception->statusCode;
-        } elseif ($response->data['code'] == 42000) {
-            $response->setStatusCode(500);
+        $statusCode = isset($exception->statusCode) ? $exception->statusCode : self::HTTP_BAD_REQUEST_CODE;
+        if ($statusCode != 0) {
+            $response->setStatusCode($statusCode);
+        } elseif ($exception->getCode() == 42000) {
+            $response->setStatusCode(self::HTTP_INTERNAL_SERVER_ERROR_CODE);
         }
-
         $response->send();
     }
 
     /**
-     * @param \Error|\Exception $exception
-     * @return array
+     * @param \Exception $exception
+     * @return array|string
+     * @throws \Exception
      */
     protected function convertExceptionToArray($exception)
     {
         $error = [
-            'code' => (int)$exception->statusCode ?? 0,
-            'type' => (string)$this->get_class_name($exception),
+            'code'    => (int)$exception->getCode() ?? 0,
+            'type'    => (string)$this->get_class_name($exception),
             'message' => (string)$this->prepareMessage($exception->getMessage())
         ];
 
@@ -78,7 +83,7 @@ class WebApiErrorHandler extends ErrorHandler
 
     /**
      * @param $msg
-     * @return string
+     * @return array|string
      */
     private function prepareMessage($msg)
     {

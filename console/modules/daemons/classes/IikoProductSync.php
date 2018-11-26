@@ -15,11 +15,11 @@ use console\modules\daemons\components\IikoSyncConsumer;
 use api_web\helpers\iikoApi;
 
 /**
- * Class IikoProductsSync
+ * Class IikoProductSync
  *
  * @package console\modules\daemons\classes
  */
-class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
+class IikoProductSync extends IikoSyncConsumer implements ConsumerInterface
 {
     /**@var array $items */
     private $items;
@@ -37,12 +37,12 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
     /**
      * @var int
      */
-    public static $timeout = 600;
+    public static $timeout = 30;
 
     /**
      * @var int
      */
-    public static $timeoutExecuting = 300;
+    public static $timeoutExecuting = 1200;
 
     /**
      * @var string
@@ -73,8 +73,8 @@ class IikoProductsSync extends IikoSyncConsumer implements ConsumerInterface
      */
     protected function product()
     {
-        $this->items = iikoApi::getInstance($this->orgId)->getProducts();
-
+        $this->items = $this->iikoApi->getProducts();
+        $this->iikoApi->logout();
         //Если пришли продукты, обновляем их
         if (!empty($this->items['products'])) {
             //поскольку мы не можем отследить изменения на стороне провайдера

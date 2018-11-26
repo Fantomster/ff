@@ -15,12 +15,13 @@ use yii\web\HttpException;
 /**
  * This is the model class for table "license".
  *
- * @property int                   $id         Уникальный ID
- * @property string                $name       Наименование лицензии
- * @property int                   $is_active  Флаг активности
- * @property int                   $service_id id service
- * @property string                $created_at Дата создания
- * @property string                $updated_at Дата обновления
+ * @property int                   $id          Уникальный ID
+ * @property string                $name        Наименование лицензии
+ * @property int                   $is_active   Флаг активности
+ * @property int                   $sort_index  Индекс сортировки
+ * @property int                   $service_id  id service
+ * @property string                $created_at  Дата создания
+ * @property string                $updated_at  Дата обновления
  * @property LicenseService[]      $licenseServices
  * @property LicenseOrganization[] $licenseOrganizations
  */
@@ -48,8 +49,8 @@ class License extends ActiveRecord
     public function rules()
     {
         return [
-            [['is_active', 'service_id', 'login_allowed'], 'integer'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['is_active', 'service_id', 'login_allowed', 'sort_index'], 'integer'],
+            [['created_at', 'updated_at', 'sort_index'], 'safe'],
             [['name'], 'string', 'max' => 255],
         ];
     }
@@ -65,6 +66,7 @@ class License extends ActiveRecord
             'is_active'  => 'Флаг активности',
             'created_at' => 'Дата создания',
             'updated_at' => 'Дата обновления',
+            'sort_index' => 'Индекс сортировки'
         ];
     }
 
@@ -109,6 +111,7 @@ class License extends ActiveRecord
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
             ->where(['lo.org_id' => $orgId, 'license.service_id' => $serviceId, 'license.is_active' => 1])
             ->andWhere(['>', 'lo.td', $now->format('Y-m-d h:s:i')])
+            ->andWhere('lo.is_deleted = 0 OR lo.is_deleted is null')
             ->groupBy(['license.id', 'license.name', 'license.is_active', 'license.created_at', 'license.updated_at', 'license.login_allowed'])
             ->indexBy('id')
             ->all(\Yii::$app->db_api);
@@ -134,7 +137,7 @@ class License extends ActiveRecord
             ->select([
                 'license.id',
                 'license.name',
-                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active',
+                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active_license',
                 'license.created_at',
                 'license.updated_at',
                 'license.login_allowed',
@@ -144,6 +147,7 @@ class License extends ActiveRecord
             ->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
             ->where(['lo.org_id' => $orgId])
+            ->andWhere('lo.is_deleted = 0 OR lo.is_deleted is null')
             ->groupBy([
                 'license.id',
                 'license.name',
@@ -160,7 +164,7 @@ class License extends ActiveRecord
         }
 
         if (!is_null($is_active)) {
-            $license->andWhere(['=', 'is_active', (int)$is_active]);
+            $license->having(['=', 'is_active_license', (int)$is_active]);
             $license->orderBy(['to_date' => SORT_DESC]);
         }
 
@@ -175,34 +179,7 @@ class License extends ActiveRecord
      */
     public static function getDateMixCartLicense($orgId)
     {
-        $license = (new Query())
-            ->select([
-                'license.id',
-                'license.name',
-                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active',
-                'license.created_at',
-                'license.updated_at',
-                'license.login_allowed',
-                'max(lo.td) as to_date'
-            ])
-            ->from(self::tableName())
-            ->leftJoin('license_organization lo', 'lo.license_id=license.id')
-            ->where(['lo.org_id' => $orgId])
-            ->groupBy([
-                'license.id',
-                'license.name',
-                'license.is_active',
-                'license.created_at',
-                'license.updated_at',
-                'license.login_allowed'
-            ])
-            ->indexBy('id');
-
-        $license->andWhere(['in', 'license.id', Registry::$mc_licenses_id]);
-        $license->andWhere(['=', 'is_active', 1]);
-        $license->orderBy(['to_date' => SORT_DESC]);
-
-        $result = $license->all(\Yii::$app->db_api);
+        $result = self::getMixCartLicenses($orgId);
 
         if (!empty($result)) {
             return current($result)['to_date'];
@@ -227,30 +204,25 @@ class License extends ActiveRecord
             ->select([
                 'license.id',
                 'license.name',
-                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active',
+                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active_license',
                 'license.created_at',
                 'license.updated_at',
                 'license.login_allowed',
-                'max(lo.td) as to_date',
+                'lo.td as to_date',
                 'lo.org_id',
+                'phone_manager' => "'" . \Yii::$app->params['licenseManagerPhone'] . "'"
             ])
             ->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
-            ->where(['lo.org_id' => $orgIds])
-            ->groupBy([
-                'license.id',
-                'license.name',
-                'license.is_active',
-                'license.created_at',
-                'license.updated_at',
-                'license.login_allowed',
-                'lo.org_id'
+            ->where([
+                'lo.org_id'  => $orgIds,
+                'license.id' => Registry::$mc_licenses_id
             ])
+            ->andWhere('lo.is_deleted = 0 OR lo.is_deleted is null')
             ->indexBy('org_id');
 
-        $license->andWhere(['in', 'license.id', Registry::$mc_licenses_id]);
-        $license->andWhere(['=', 'is_active', 1]);
-        $license->orderBy(['to_date' => SORT_DESC]);
+        $license->having(['=', 'is_active_license', 1]);
+        $license->orderBy(['`license`.sort_index' => SORT_ASC]);
 
         return $license->all(\Yii::$app->db_api);
     }
@@ -260,6 +232,7 @@ class License extends ActiveRecord
      *
      * @param $org_id
      * @throws HttpException
+     * @throws \yii\base\InvalidConfigException
      */
     public static function checkMixCartLicenseResponse($org_id)
     {
@@ -276,6 +249,7 @@ class License extends ActiveRecord
      * @param       $org_id
      * @param array $service_ids
      * @throws HttpException
+     * @throws \yii\base\InvalidConfigException
      */
     public static function checkLicense($org_id, $service_ids = [])
     {
@@ -283,10 +257,17 @@ class License extends ActiveRecord
         if (!empty($result)) {
             $l = current($result);
             $licenseDate = $l['to_date'];
-            $licenseName = $l['name'];
         } else {
             $licenseDate = date('Y-m-d H:i:s', strtotime("-1 day"));
-            $licenseName = "";
+        }
+
+        $licenseName = null;
+        if (!empty($service_ids)) {
+            $service_id = is_array($service_ids) ? current($service_ids) : $service_ids;
+            $l = self::findOne(['service_id' => $service_id]);
+            if (!empty($l)) {
+                $licenseName = $l->name;
+            }
         }
 
         \Yii::$app->response->headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));

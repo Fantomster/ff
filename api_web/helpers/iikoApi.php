@@ -39,6 +39,7 @@ class iikoApi
      */
     private $token;
 
+    private $orgId;
     /**
      * @var string
      */
@@ -61,6 +62,7 @@ class iikoApi
             self::$_instance->host = $settings['URL'];
             self::$_instance->login = $settings['auth_login'];
             self::$_instance->pass = $settings['auth_password'];
+            self::$_instance->orgId = $orgId;
         }
 
         return self::$_instance;
@@ -80,14 +82,21 @@ class iikoApi
     {
     }
 
+    public function __destruct()
+    {
+        $this->logout();
+    }
+
     /**
      * Авторизация
-     * @param $login
-     * @param $password
-     * @throws \Exception
+     *
+     * @param null $login
+     * @param null $password
+     * @param null $timeout
      * @return bool
+     * @throws \Exception
      */
-    public function auth($login = null, $password = null)
+    public function auth($login = null, $password = null, $timeout = null)
     {
         if (is_null($login)) {
             $login = $this->login;
@@ -102,26 +111,40 @@ class iikoApi
             'pass'  => hash('sha1', $password)
         ];
 
-        if ($this->token = $this->sendAuth('/auth', $params)) {
-            return true;
-        } else {
-            return false;
+        try {
+            $this->token = $this->sendAuth('/auth', $params, 'GET', [], $timeout);
+            $this->writeToken();
+            if ($this->token) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (\Exception $e) {
+            throw $e;
         }
     }
 
     /**
      * Выход с апи
+     *
      * @throws \Exception
      */
     public function logout()
     {
         if (!empty($this->token)) {
-            $this->sendAuth('/logout');
+            try {
+                $this->sendAuth('/logout');
+                $this->deleteToken();
+                $this->token = null;
+            } catch (\Exception $e) {
+                throw $e;
+            }
         }
     }
 
     /**
      * Список категорий и продуктов
+     *
      * @throws \Exception
      * @return array
      */
@@ -154,9 +177,9 @@ class iikoApi
         ];
     }
 
-
     /**
      * Список складов
+     *
      * @throws \Exception
      * @return mixed
      */
@@ -167,6 +190,7 @@ class iikoApi
 
     /**
      * Список контрагентов
+     *
      * @throws \Exception
      * @return mixed
      */
@@ -182,7 +206,7 @@ class iikoApi
      */
     public function sendWaybill($model)
     {
-        if ($model instanceof iikoWaybill || $model instanceof \api_web\modules\integration\models\iikoWaybill){
+        if ($model instanceof iikoWaybill || $model instanceof \api_web\modules\integration\models\iikoWaybill) {
             $url = '/documents/import/incomingInvoice';
             return $this->sendXml($url, $model->getXmlDocument());
         }
@@ -192,14 +216,16 @@ class iikoApi
     /**
      * Обычный SEND без чанков. Копия обычной SEND() для авторизации,
      * так как авторизация не поддерживает запрос только с HEADERS для определения чанков
+     *
      * @param        $url
      * @param array  $params
      * @param string $method
      * @param array  $headers
-     * @return mixed
+     * @param int    $timeout
+     * @return bool|string
      * @throws \Exception
      */
-    private function sendAuth($url, $params = [], $method = 'GET', $headers = [])
+    private function sendAuth($url, $params = [], $method = 'GET', $headers = [], $timeout = 300)
     {
         $logger = new iikoLogger();
         $logger->setOperation($url);
@@ -215,7 +241,7 @@ class iikoApi
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         curl_setopt($ch, CURLOPT_COOKIE, 'key=' . $this->token);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, implode(PHP_EOL, $header));
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
@@ -298,7 +324,7 @@ class iikoApi
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 
         if ($chunked) {
-            curl_setopt($ch, CURLOPT_WRITEFUNCTION, array($this, 'Callback'));
+            curl_setopt($ch, CURLOPT_WRITEFUNCTION, [$this, 'Callback']);
             curl_exec($ch);
         } else {
             $response = curl_exec($ch);
@@ -395,7 +421,7 @@ class iikoApi
 
     public static function getHeadersCurl($response)
     {
-        $headers = array();
+        $headers = [];
         $header_text = substr($response, 0, strpos($response, "\r\n\r\n"));
         foreach (explode("\r\n", $header_text) as $i => $line) {
             if ($i === 0)
@@ -406,5 +432,41 @@ class iikoApi
             }
         }
         return $headers;
+    }
+
+    /**
+     * Количество свободных лицензий на iikoServer
+     *
+     * @return bool|string
+     */
+    public function getLicenseCount()
+    {
+        $url = $this->host . "/licence/info?moduleId=2000";
+        return file_get_contents($url);
+    }
+
+    /**
+     * @return string
+     */
+    private function getTokenFile()
+    {
+        return \Yii::getAlias('@api_web') . '/runtime/iiko_auth/' . self::$_instance->orgId . '_' . $this->token . '.t';
+    }
+
+    private function writeToken()
+    {
+        if (!file_exists(\Yii::getAlias('@api_web') . '/runtime/iiko_auth')) {
+            mkdir(\Yii::getAlias('@api_web') . '/runtime/iiko_auth');
+            chmod(\Yii::getAlias('@api_web') . '/runtime/iiko_auth', 7777);
+        }
+
+        file_put_contents($this->getTokenFile(), '');
+    }
+
+    private function deleteToken()
+    {
+        if (file_exists($this->getTokenFile())) {
+            unlink($this->getTokenFile());
+        }
     }
 }

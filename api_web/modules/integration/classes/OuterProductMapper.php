@@ -198,11 +198,12 @@ class OuterProductMapper
         }
 
         $model->attributes = $this->request;
-        if (!$model->outerProduct){
-            throw new BadRequestHttpException('outer product not found');
+
+        if ($model->outerProduct) {
+            $model->outer_unit_id = $model->outerProduct->outer_unit_id;
         }
-        $model->outer_unit_id = $model->outerProduct->outer_unit_id;
-        if (!$model->product){
+
+        if (!$model->product) {
             throw new BadRequestHttpException('product_not_found');
         }
         $model->vendor_id = $model->product->supp_org_id;

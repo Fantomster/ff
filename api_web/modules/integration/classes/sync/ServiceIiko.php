@@ -58,9 +58,19 @@ class ServiceIiko extends AbstractSyncFactory
             ]);
 
             if ($sendToRabbit) {
+                /** @var OrganizationDictionary $model */
                 $model = $this->getModel();
                 $model->status_id = OrganizationDictionary::STATUS_SEND_REQUEST;
                 $model->save();
+                if ($model->outerDic->name == 'product') {
+                    $unitDictionary = OuterDictionary::findOne(['service_id' => $this->serviceId, 'name' => 'unit']);
+                    $unitModel = OrganizationDictionary::findOne([
+                        'org_id'       => $this->user->organization_id,
+                        'outer_dic_id' => $unitDictionary->id
+                    ]);
+                    $unitModel->status_id = OrganizationDictionary::STATUS_SEND_REQUEST;
+                    $unitModel->save();
+                }
                 return $this->prepareModel($model);
             } else {
                 throw new HttpException(402, 'Error send request to RabbitMQ');
@@ -99,74 +109,82 @@ class ServiceIiko extends AbstractSyncFactory
 
         $api = iikoApi::getInstance();
         try {
-            $api->auth();
-            /** @var iikoWaybill $model */
-            foreach ($records as $model) {
-                if (!in_array($model->status_id, [Registry::WAYBILL_COMPARED, Registry::WAYBILL_ERROR])) {
-                    if ($model->status_id == Registry::WAYBILL_UNLOADED) {
-                        $this->response($res, $model, \Yii::t('api_web', 'service_iiko.already_success_unloading_waybill'));
-                    } else {
-                        $this->response($res, $model, \Yii::t('api_web', 'service_iiko.no_ready_unloading_waybill'), false);
+            if ($api->auth()) {
+                /** @var iikoWaybill $model */
+                foreach ($records as $model) {
+                    if (empty($model->waybillContents)) {
+                        $this->response($res, $model, \Yii::t('api_web', 'service_iiko.empty_waybill_content'));
                     }
-                    continue;
+                    if (!in_array($model->status_id, [Registry::WAYBILL_COMPARED, Registry::WAYBILL_ERROR])) {
+                        if ($model->status_id == Registry::WAYBILL_UNLOADED) {
+                            $this->response($res, $model, \Yii::t('api_web', 'service_iiko.already_success_unloading_waybill'));
+                        } else {
+                            $this->response($res, $model, \Yii::t('api_web', 'service_iiko.no_ready_unloading_waybill'), false);
+                        }
+                        continue;
+                    }
+                    /** @var Transaction $transaction */
+                    $transaction = \Yii::$app->db_api->beginTransaction();
+                    try {
+                        $response = $api->sendWaybill($model);
+                        if ($response !== true) {
+                            $this->response($res, $model, $response, false);
+                        }
+                        $model->status_id = Registry::WAYBILL_UNLOADED;
+                        $model->save();
+                        $this->response($res, $model, \Yii::t('api_web', 'service_iiko.success_unloading_waybill'));
+                        $transaction->commit();
+                    } catch (\Exception $e) {
+                        $transaction->rollBack();
+                        $model->status_id = Registry::WAYBILL_ERROR;
+                        $model->save();
+                        //Если одна накладная к выгрузке, и произошла ошибка
+                        //то в $this->response() будет Exception и мы тупо займем лицензию
+                        //Надо отконектиться
+                        if ($this->countWaybillSend == 1) {
+                            $api->logout();
+                        }
+                        $this->response($res, $model, $e->getMessage(), false);
+                    }
                 }
-                /** @var Transaction $transaction */
-                $transaction = \Yii::$app->db_api->beginTransaction();
-                try {
-                    $response = $api->sendWaybill($model);
-                    if ($response !== true) {
-                        $this->response($res, $model, $response, false);
-                    }
-                    $model->status_id = Registry::WAYBILL_UNLOADED;
-                    $model->save();
-                    $this->response($res, $model, \Yii::t('api_web', 'service_iiko.success_unloading_waybill'));
-                    $transaction->commit();
-                } catch (\Exception $e) {
-                    $transaction->rollBack();
-                    $model->status_id = Registry::WAYBILL_ERROR;
-                    $model->save();
-                    //Если одна накладная к выгрузке, и произошла ошибка
-                    //то в $this->response() будет Exception и мы тупо займем лицензию
-                    //Надо отконектиться
-                    if ($this->countWaybillSend == 1) {
-                        $api->logout();
-                    }
-                    $this->response($res, $model, $e->getMessage(), false);
-                }
+                $api->logout();
             }
-            $api->logout();
         } catch (\Exception $e) {
-            $message = $e->getMessage();
-            if (strpos($message, '401') !== false) {
-                $message = "Ошибка авторизации, проверьте настройки подключения к iiko";
-            }
+            $api->logout();
+            $message = $this->prepareErrorMessage($e->getMessage(), $api);
             throw new BadRequestHttpException($message);
+        } finally {
+            $api->logout();
         }
         return ['result' => $res];
     }
 
     /**
-     * Проверка соединения с iiko
+     * Проверка коннекта
+     *
+     * @return array
+     * @throws BadRequestHttpException
      */
     public function checkConnect()
     {
         $api = iikoApi::getInstance();
         try {
-            $api->auth();
-            return ['result' => true];
+            if ($api->auth(null, null, 2)) {
+                $api->logout();
+                return ['result' => true];
+            }
         } catch (\Exception $e) {
-            throw $e;
-        } finally {
-            $api->logout();
+            $message = $this->prepareErrorMessage($e->getMessage(), $api);
+            throw new BadRequestHttpException($message);
         }
     }
 
     /**
-     * @param           $res
-     * @param   Waybill $model
-     * @param           $message
-     * @param bool      $success
-     * @return mixed
+     * @param      $res
+     * @param      $model
+     * @param      $message
+     * @param bool $success
+     * @return array
      * @throws BadRequestHttpException
      */
     private function response(&$res, $model, $message, $success = true)
@@ -213,5 +231,25 @@ class ServiceIiko extends AbstractSyncFactory
             'created_at'  => $model->created_at ?? null,
             'updated_at'  => $model->updated_at ?? null
         ];
+    }
+
+    /**
+     * @param         $message
+     * @param IikoApi $api
+     * @return string
+     */
+    private function prepareErrorMessage($message, $api)
+    {
+        if (strpos($message, 'Код ответа сервера: 0') !== false) {
+            $message = "Не удалось соединиться с сервером, проверьте настройки подключения к iiko";
+        }
+        if (strpos($message, '401') !== false) {
+            $message = "Ошибка авторизации, проверьте настройки подключения к iiko";
+        }
+        if (strpos($message, '403') !== false) {
+            $message = "Видимо на сервере iiko закончились свободные лицензии." . PHP_EOL;
+            $message .= "Лицензий свободно: " . $api->getLicenseCount();
+        }
+        return $message;
     }
 }

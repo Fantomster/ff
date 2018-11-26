@@ -551,7 +551,7 @@ class ParserTorg12
             $this->tip_ooo_short[] = '';
         }
 
-        $result = (new Query())->select('*')->from('ooo')->all(); //получаем все значения коротких и длинных названий типов организаций
+        $result = (new Query())->select('*')->from('organization_forms')->all(); //получаем все значения коротких и длинных названий типов организаций
 
         foreach ($result as $row) { //загоняем эти названия в массив
             $this->tip_ooo_long[] = mb_strtolower($row['name_long']);

@@ -33,6 +33,13 @@ class IikoSyncConsumer extends AbstractConsumer
     public $type;
 
     /**
+     * Description
+     *
+     * @var iikoApi
+     */
+    public $iikoApi;
+
+    /**
      * IikoSyncConsumer constructor.
      *
      * @param null $orgId
@@ -40,6 +47,7 @@ class IikoSyncConsumer extends AbstractConsumer
     public function __construct($orgId = null)
     {
         $this->orgId = $orgId;
+        $this->iikoApi = iikoApi::getInstance($this->orgId);
     }
 
     /**
@@ -73,21 +81,26 @@ class IikoSyncConsumer extends AbstractConsumer
         if (method_exists($this, $model->name) === true) {
             try {
                 //Пробуем пролезть в iko
-                if (!iikoApi::getInstance($this->orgId)->auth()) {
+                if (!$this->iikoApi->auth()) {
                     throw new BadRequestHttpException('Не удалось авторизоваться в iiko - Office');
                 }
                 //Синхронизируем нужное нам и
                 //ответ получим, сколько записей у нас в боевом состоянии
                 $count = $this->{$model->name}();
                 $dictionary->successSync($count);
-                //Убиваем сессию, а то закончатся на сервере iiko
-                iikoApi::getInstance($this->orgId)->logout();
-                return ['success' => true];
             } catch (\Exception $e) {
                 $dictionary->errorSync();
-                iikoApi::getInstance($this->orgId)->logout();
                 throw $e;
+            } finally {
+                //Убиваем сессию, а то закончатся на сервере iiko
+                $this->iikoApi->logout();
+                //Информацию шлем в FCM
+                $dictionary->noticeToFCM();
+                if ($dictionary->outerDic->service_id == Registry::IIKO_SERVICE_ID && $dictionary->outerDic->name == 'product') {
+                    OrganizationDictionary::updateIikoUnitDictionary($dictionary->status_id, $dictionary->org_id);
+                }
             }
+            return ['success' => true];
         } else {
             throw new BadRequestHttpException('Not found method [iikoSync->' . $model->name . '()]');
         }
@@ -128,5 +141,10 @@ class IikoSyncConsumer extends AbstractConsumer
         } catch (\Exception $e) {
             \Yii::error($e->getMessage());
         }
+    }
+
+    public function __destruct()
+    {
+        $this->iikoApi->logout();
     }
 }

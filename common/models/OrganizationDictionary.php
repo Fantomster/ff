@@ -13,7 +13,9 @@
 
 namespace common\models;
 
+use api_web\components\FireBase;
 use api_web\components\Registry;
+use api_web\modules\integration\classes\Integration;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
@@ -105,9 +107,6 @@ class OrganizationDictionary extends ActiveRecord
         $this->status_id = self::STATUS_ACTIVE;
         $this->count = $count;
         $this->updated_at = \gmdate('Y-m-d H:i:s');
-        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID && $this->outerDic->name == 'product') {
-            $this->updateIikoUnitDictionary(self::STATUS_ACTIVE);
-        }
         return $this->save();
     }
 
@@ -118,42 +117,71 @@ class OrganizationDictionary extends ActiveRecord
     {
         $this->status_id = self::STATUS_ERROR;
         $this->updated_at = \gmdate('Y-m-d H:i:s');
-        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID && $this->outerDic->name == 'product') {
-            $this->updateIikoUnitDictionary(self::STATUS_ERROR);
-        }
         return $this->save();
     }
 
     /**
-     * @param $status
+     * @throws \Exception
      */
-    private function updateIikoUnitDictionary($status)
+    public function noticeToFCM(): void
     {
-        $dictionary = self::findOne([
-            'org_id'       => $this->org_id,
+        $consumerName = Integration::$service_map[$this->outerDic->service_id] . ucfirst($this->outerDic->name) . 'Sync';
+        $consumerFullName = 'console\modules\daemons\classes\\' . $consumerName;
+        $queueName = $consumerName . '_' . $this->org_id;
+        $arFB = [
+            'dictionaries',
+            'queue' => $queueName,
+        ];
+
+        $lastExec = new \DateTime();
+        $plainExec = null;
+        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID) {
+            $plainExec = date('Y-m-d H:i:s', $lastExec->getTimestamp() + $consumerFullName::$timeout);
+        }
+        \Yii::$app->language = $this->org->lang ?? 'ru';
+
+        FireBase::getInstance()->update($arFB, [
+            'last_executed'  => $lastExec->format('Y-m-d H:i:s'),
+            'plain_executed' => $plainExec,
+            'status_text'    => $this->statusText,
+            'status_id'      => $this->status_id,
+            'count'          => $this->count ?? 0
+        ]);
+    }
+
+    /**
+     * @param $status
+     * @param $org_id
+     */
+    public static function updateIikoUnitDictionary($status, $org_id): void
+    {
+        $dictionaryUnit = self::findOne([
+            'org_id'       => $org_id,
             'outer_dic_id' => self::IIKO_UNIT_DICT_ID
         ]);
 
-        if (empty($dictionary)) {
-            $dictionary = new self([
-                'org_id'       => $this->org_id,
+        if (empty($dictionaryUnit)) {
+            $dictionaryUnit = new self([
+                'org_id'       => $org_id,
                 'outer_dic_id' => self::IIKO_UNIT_DICT_ID,
-                'status_id'    => $status
+                'status_id'    => $status,
+                'count'        => 0
             ]);
         }
 
         if ($status == self::STATUS_ACTIVE) {
             $count = OuterUnit::find()->where([
-                'org_id'     => $this->org_id,
+                'org_id'     => $org_id,
                 'service_id' => Registry::IIKO_SERVICE_ID,
                 'is_deleted' => 0
             ])->count();
-            $dictionary->count = $count;
-            $dictionary->updated_at = \gmdate('Y-m-d H:i:s');
-            $dictionary->save();
+            $dictionaryUnit->count = (int)$count;
         } else {
-            $dictionary->errorSync();
+            $dictionaryUnit->updated_at = \gmdate('Y-m-d H:i:s');
         }
+
+        $dictionaryUnit->status_id = $status;
+        $dictionaryUnit->save();
     }
 
     /**

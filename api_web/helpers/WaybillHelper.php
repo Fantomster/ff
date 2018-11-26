@@ -88,6 +88,11 @@ class WaybillHelper
         $cntNotInWaybillContent = 0;
         $waybillModels = [];
         foreach ($licenses as $license) {
+            //Счетчики для выброса Exception
+            $mapCount = 0;
+            $skipCount = 0;
+            $skipByStore = 0;
+            $arMappedForStores = [];
             $serviceId = $license['service_id'];
             if (!empty($arExcludedService) && in_array($serviceId, $arExcludedService)) {
                 continue;
@@ -119,27 +124,27 @@ class WaybillHelper
             //Склад по умолчанию, у контрагента
             $defaultStoreAgent = null;
             if ($supplierOrgId) {
-                $agent = OuterAgent::findOne(['vendor_id' => $supplierOrgId, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
-                if ($agent && !empty($agent->store_id)) {
-                    $defaultStoreAgent = $agent->store_id;
-                }
+                $vendorId = $supplierOrgId;
             } else {
-                $agent = OuterAgent::findOne(['vendor_id' => $order->vendor_id, 'org_id' => $order->client_id, 'service_id' => $serviceId]);
+                $vendorId = $order->vendor_id;
+            }
+            $agent = OuterAgent::findOne(['vendor_id' => $vendorId, 'org_id' => $order->client_id, 'service_id' => $serviceId, 'is_deleted' => 0]);
+            if ($agent && !empty($agent->store_id)) {
+                $defaultStoreAgent = $agent->store_id;
             }
             //Склад по умолчанию в настройках
             $defaultStoreConfig = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id, ['defStore']);
-            //Счетчики для выброса Exception
-            $mapCount = 0;
-            $skipCount = 0;
-            $skipByStore = 0;
+
             // Remap for 1 store = 1 waybill
-            $arMappedForStores = [];
+
             foreach ($rows as $row) {
                 $arMappedForStores[$row['outer_store_id']][$row['product_id']] = $row;
             }
             foreach ($arMappedForStores as $storeId => $storeProducts) {
                 //Пытаемся найти хоть какой то склад
-                $storeId = $storeId ?? $defaultStoreAgent ?? $defaultStoreConfig ?? null;
+                if (!$storeId) {
+                    $storeId = $defaultStoreAgent ?? $defaultStoreConfig ?? null;
+                }
                 if (!$storeId) {
                     $skipByStore++;
                     continue;
@@ -153,16 +158,16 @@ class WaybillHelper
                     $skipCount++;
                 }
             }
+        }
 
-            // Если количество складов = числу пропусков, бросаем throw
-            if (count($arMappedForStores) === $skipByStore) {
-                throw new BadRequestHttpException('waybill.no_store_for_create_waybill');
-            }
+        // Если количество складов = числу пропусков, бросаем throw
+        if (count($arMappedForStores) === $skipByStore) {
+            throw new BadRequestHttpException('waybill.no_store_for_create_waybill');
+        }
 
-            // Если количество маппингов = числу пропусков, бросаем throw
-            if ($mapCount === $skipCount) {
-                throw new BadRequestHttpException('waybill.no_map_for_create_waybill');
-            }
+        // Если количество маппингов = числу пропусков, бросаем throw
+        if ($mapCount === $skipCount) {
+            throw new BadRequestHttpException('waybill.no_map_for_create_waybill');
         }
 
         if ($cntEmptyRows == count($licenses)) {
@@ -202,6 +207,7 @@ class WaybillHelper
         $model = $this->buildWaybill($orgId);
         $model->outer_store_id = $outerStoreId;
         $model->outer_agent_id = $agent->id ?? null;
+        $model->payment_delay = $agent->payment_delay ?? null;
         $model->service_id = $serviceId;
         $model->status_id = Registry::WAYBILL_COMPARED;
         //для каждого может быть разный
@@ -220,9 +226,9 @@ class WaybillHelper
                 $ordCont = $mappedProduct['orderContent'];
                 $price = $ordCont->price;
                 $quantity = $ordCont->quantity;
-                $taxRate = $mappedProduct['vat'];
+                $taxRate = in_array($serviceId, [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID]) &&
+                !is_null($ordCont->vat_product) ? $ordCont->vat_product : $mappedProduct['vat'];
                 $priceWithVat = (float)($price + ($price * ($taxRate / 100)));
-
                 $modelWaybillContent = new WaybillContent();
                 $modelWaybillContent->order_content_id = $ordCont->id;
                 $modelWaybillContent->waybill_id = $model->id;
@@ -342,10 +348,10 @@ class WaybillHelper
             $waybillContent->quantity_waybill = (float)$quantity;
             $waybillContent->vat_waybill = $taxRate;
             $waybillContent->koef = $coefficient;
-            $waybillContent->sum_with_vat = (int)(isset($priceWithVat) ? $priceWithVat * $quantity * 100 : null);
-            $waybillContent->sum_without_vat = (int)($price * $quantity * 100);
-            $waybillContent->price_with_vat = (int)(isset($priceWithVat) ? $priceWithVat * 100 : null);
-            $waybillContent->price_without_vat = (int)($price * 100);
+            $waybillContent->sum_with_vat = (isset($priceWithVat) ? round($priceWithVat * $quantity, 3) : null);
+            $waybillContent->sum_without_vat = round($price * $quantity, 3);
+            $waybillContent->price_with_vat = (isset($priceWithVat) ? round($priceWithVat, 3) : null);
+            $waybillContent->price_without_vat = round($price, 3);
             if (!$waybillContent->validate() || !$waybillContent->save()) {
                 throw new ValidationException($waybillContent->getFirstErrors());
             }
@@ -422,8 +428,8 @@ class WaybillHelper
     }
 
     /**
-     * @param $arOuterStoreProducts
-     * @param int $serviceId
+     * @param      $arOuterStoreProducts
+     * @param int  $serviceId
      * @param bool $onlyByOrderId
      * @return int|mixed|string
      */
@@ -432,7 +438,7 @@ class WaybillHelper
         /**@var OrderContent $orderContent */
         $orderContent = current($arOuterStoreProducts)['orderContent'];
         $tmp_ed_num = $orderContent->order_id;
-        $waybillSearchField =  $onlyByOrderId ? 'outer_number_additional' : 'outer_number_code';
+        $waybillSearchField = $onlyByOrderId ? 'outer_number_additional' : 'outer_number_code';
         if ($orderContent->edi_number && !$onlyByOrderId) {
             $tmp_ed_num = $orderContent->edi_number;
         }

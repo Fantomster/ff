@@ -139,7 +139,6 @@ class EmailIntegration2Controller extends Controller
         \Yii::$app->db->createCommand('SET SESSION wait_timeout = 28800;')->execute();
         //Побежали по серверам
         foreach ($settings as $setting) {
-
             $message_console = 'SETTING: ' . $setting->id . '  ' . 'ORGANIZATION: ' . $setting->organization->id;
 
             $this->log([
@@ -183,10 +182,9 @@ class EmailIntegration2Controller extends Controller
                         ]);
                     }
                 }
-            } catch (\Exception $e) {
-                $this->helper->addLog($e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine(), 'auth');
-            } finally {
                 $this->connect->disconnect();
+            } catch (\Throwable $e) {
+                $this->helper->addLog($e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine(), 'auth');
             }
         }
     }

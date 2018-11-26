@@ -34,12 +34,12 @@ class IikoAgentSync extends IikoSyncConsumer implements ConsumerInterface
     /**
      * @var int
      */
-    public static $timeout = 600;
+    public static $timeout = 30;
 
     /**
      * @var int
      */
-    public static $timeoutExecuting = 300;
+    public static $timeoutExecuting = 600;
 
     /**
      * @var string
@@ -66,11 +66,13 @@ class IikoAgentSync extends IikoSyncConsumer implements ConsumerInterface
      * Синхронизация контрагентов
      *
      * @return int
-     * @throws ValidationException
+     * @throws ValidationException|\Exception
      */
     protected function agent()
     {
-        $agents = iikoApi::getInstance($this->orgId)->getSuppliers();
+        $agents = $this->iikoApi->getSuppliers();
+        $this->iikoApi->logout();
+
         if (!empty($agents['employee'])) {
             //поскольку мы не можем отследить изменения на стороне провайдера
             OuterAgent::updateAll(['is_deleted' => 1], ['org_id' => $this->orgId, 'service_id' => self::SERVICE_ID]);

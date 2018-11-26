@@ -7,17 +7,16 @@ use Yii;
 /**
  * This is the model class for table "request_callback".
  *
- * @property integer $id
- * @property integer $request_id
- * @property integer $supp_org_id
- * @property integer $supp_user_id
- * @property string $price
- * @property string $comment
- * @property string $created_at
- * @property string $updated_at
- *
+ * @property integer      $id
+ * @property integer      $request_id
+ * @property integer      $supp_org_id
+ * @property integer      $supp_user_id
+ * @property string       $price
+ * @property string       $comment
+ * @property string       $created_at
+ * @property string       $updated_at
  * @property Organization $organization
- * @property Request $request
+ * @property Request      $request
  */
 class RequestCallback extends \yii\db\ActiveRecord
 {
@@ -51,14 +50,14 @@ class RequestCallback extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'request_id' => 'Request ID',
-            'supp_org_id' => 'Supp Org ID',
+            'id'           => 'ID',
+            'request_id'   => 'Request ID',
+            'supp_org_id'  => 'Supp Org ID',
             'supp_user_id' => 'Supp User ID',
-            'price' => 'Price',
-            'comment' => 'Comment',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
+            'price'        => 'Price',
+            'comment'      => 'Comment',
+            'created_at'   => 'Created At',
+            'updated_at'   => 'Updated At',
         ];
     }
 
@@ -73,7 +72,7 @@ class RequestCallback extends \yii\db\ActiveRecord
             ],
         ];
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -82,11 +81,17 @@ class RequestCallback extends \yii\db\ActiveRecord
         return $this->hasOne(Request::className(), ['id' => 'request_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getOrganization()
     {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getUser()
     {
         return $this->hasOne(User::className(), ['id' => 'supp_user_id']);

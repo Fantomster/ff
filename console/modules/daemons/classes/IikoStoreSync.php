@@ -35,12 +35,12 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
     /**
      * @var int
      */
-    public static $timeout = 600;
+    public static $timeout = 30;
 
     /**
      * @var int
      */
-    public static $timeoutExecuting = 300;
+    public static $timeoutExecuting = 2400;
 
     /**
      * @var string
@@ -72,7 +72,8 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
     protected function store()
     {
         //Получаем список складов
-        $stores = iikoApi::getInstance($this->orgId)->getStores();
+        $stores = $this->iikoApi->getStores();
+        $this->iikoApi->logout();
         /** Вставляем корневой склад для iiko потому что там таких нет*/
         array_unshift($stores['corporateItemDto'], ['id' => md5($this->orgId), 'name' => 'Все склады', 'type' => 'rootnode']);
         if (!empty($stores['corporateItemDto'])) {

@@ -21,6 +21,7 @@
         foreach ($orderContent as $position): ?>
             <?php $product = \common\models\CatalogBaseGoods::findOne(['id' => $position['product_id']]);
             $measure = $product->ed ?? 'шт';
+            $measure = \common\models\OuterUnit::getOuterName($measure, \api_web\components\Registry::EDI_SERVICE_ID);
             $catalogGood = \common\models\CatalogGoods::findOne(['base_goods_id' => $product->id]);
             $barcode = $product->barcode;
             $vat = isset($catalogGood->vat) ? $catalogGood->vat : 0;

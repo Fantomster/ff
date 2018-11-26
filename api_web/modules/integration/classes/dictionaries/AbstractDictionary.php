@@ -136,7 +136,7 @@ class AbstractDictionary extends WebApi
         }
 
         $return = [
-            'products'   => empty($result) ? null : $result,
+            'products'   => empty($result) ? [] : $result,
             'pagination' => [
                 'page'       => ($dataProvider->pagination->page + 1),
                 'page_size'  => $dataProvider->pagination->pageSize,
@@ -211,7 +211,7 @@ class AbstractDictionary extends WebApi
         }
 
         $return = [
-            'agents'     => empty($result) ? null : $result,
+            'agents'     => empty($result) ? [] : $result,
             'pagination' => [
                 'page'       => ($dataProvider->pagination->page + 1),
                 'page_size'  => $dataProvider->pagination->pageSize,
@@ -559,7 +559,7 @@ class AbstractDictionary extends WebApi
         }
 
         $return = [
-            'units'      => empty($result) ? null : $result,
+            'units'      => empty($result) ? [] : $result,
             'pagination' => [
                 'page'       => ($dataProvider->pagination->page + 1),
                 'page_size'  => $dataProvider->pagination->pageSize,

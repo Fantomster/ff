@@ -103,14 +103,7 @@ class RkwsProduct extends ServiceRkws
                 }
             }
         }
-
-        if (!$array) {
-            $dictionary->status_id = $dictionary::STATUS_ACTIVE;
-            $dictionary->count = 0;
-            $dictionary->save();
-            SyncLog::trace('Wrong XML data!');
-            throw new BadRequestHttpException("wrong_xml_data");
-        }
+        
         return $array;
     }
 }

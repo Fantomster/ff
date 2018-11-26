@@ -6,12 +6,14 @@ use api_web\components\WebApiController;
 
 /**
  * Class ChatController
+ *
  * @package api_web\controllers
  */
 class ChatController extends WebApiController
 {
     /**
      * Список методов которые не нужно логировать
+     *
      * @var array
      */
     public $not_log_actions = [
@@ -60,7 +62,8 @@ class ChatController extends WebApiController
      *                      "count_message": 9,
      *                      "unread_message": 2,
      *                      "last_message":"Последнее сообщение",
-     *                      "last_message_date": "2016-10-17 06:59:29"
+     *                      "last_message_date": "2016-10-17 06:59:29",
+     *                      "is_edi": true
      *                 }
      *              },
      *              "pagination":{

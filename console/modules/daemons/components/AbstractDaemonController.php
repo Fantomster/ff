@@ -171,9 +171,7 @@ abstract class AbstractDaemonController extends DaemonController
             'dictionaries',
             'queue' => $this->queueName,
         ];
-        if (!is_null($this->orgId)) {
-            $arFB['organization'] = $this->orgId;
-        }
+
         $count = \Yii::$app->get('rabbit')->setQueue($this->queueName)->checkQueueCount();
 
         FireBase::getInstance()->update($arFB, [

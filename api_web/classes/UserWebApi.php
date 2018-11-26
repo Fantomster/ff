@@ -192,6 +192,7 @@ class UserWebApi extends \api_web\components\WebApi
      * @param $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\ErrorException
      */
     public function registrationRepeatSms($post)
     {
@@ -241,7 +242,9 @@ class UserWebApi extends \api_web\components\WebApi
      *
      * @param array $post
      * @return string
-     * @throws \Exception
+     * @throws BadRequestHttpException
+     * @throws \Throwable
+     * @throws \yii\db\Exception
      */
     public function confirm(array $post)
     {
@@ -272,7 +275,6 @@ class UserWebApi extends \api_web\components\WebApi
     /**
      * Выбор бизнеса
      *
-     * @param array $post
      * @param array $post
      * @return bool
      * @throws \Exception
@@ -348,6 +350,7 @@ class UserWebApi extends \api_web\components\WebApi
         $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($result, 'id'));
         $result = array_map(function ($item) use ($licenses) {
             $item['license_is_active'] = isset($licenses[$item['id']]);
+            $item['license'] = isset($licenses[$item['id']]) ? $licenses[$item['id']] : null;
             return $item;
         }, $result);
 
@@ -753,12 +756,12 @@ class UserWebApi extends \api_web\components\WebApi
     public function prepareVendor(RelationSuppRest $model)
     {
         $status_list = $this->getVendorStatusList();
-
+        $vendor = $model->vendor;
         $locality = [
-            $model->vendor->country,
-            $model->vendor->administrative_area_level_1,
-            $model->vendor->locality,
-            $model->vendor->route
+            $vendor->country,
+            $vendor->administrative_area_level_1,
+            $vendor->locality,
+            $vendor->route
         ];
 
         foreach ($locality as $key => $val) {
@@ -767,30 +770,28 @@ class UserWebApi extends \api_web\components\WebApi
             }
         }
 
-        if ($model->invite == RelationSuppRest::INVITE_ON) {
-            if ($model->status == RelationSuppRest::CATALOG_STATUS_ON) {
-                $status = $status_list[1];
-            } else {
-                $status = $status_list[2];
-            }
+        if ($model->invite == RelationSuppRest::INVITE_ON && $model->cat_id != 0 && $model->status == RelationSuppRest::CATALOG_STATUS_ON) {
+            $status = $status_list[1];
+        } elseif ($model->cat_id == 0) {
+            $status = $status_list[2];
         } else {
             $status = $status_list[3];
         }
 
         return [
-            'id'            => (int)$model->vendor->id,
-            'name'          => $model->vendor->name ?? "",
-            'contact_name'  => $model->vendor->contact_name ?? "",
-            'inn'           => $model->vendor->inn ?? null,
+            'id'            => (int)$vendor->id,
+            'name'          => $vendor->name ?? "",
+            'contact_name'  => $vendor->contact_name ?? "",
+            'inn'           => $vendor->buisinessInfo->inn ?? null,
             'cat_id'        => (int)$model->cat_id,
-            'email'         => $model->vendor->email ?? "",
-            'phone'         => $model->vendor->phone ?? "",
+            'email'         => $vendor->buisinessInfo->legal_email ?? $vendor->email ?? "",
+            'phone'         => $vendor->phone ?? "",
             'status'        => $status,
-            'picture'       => $model->vendor->getPictureUrl() ?? "",
+            'picture'       => $vendor->getPictureUrl() ?? "",
             'address'       => implode(', ', $locality),
-            'rating'        => $model->vendor->rating ?? 0,
-            'allow_editing' => $model->vendor->allow_editing,
-            'is_edi'        => $model->vendor->isEdi(),
+            'rating'        => $vendor->rating ?? 0,
+            'allow_editing' => ($vendor->type_id == Organization::TYPE_SUPPLIER) ? !$vendor->vendor_is_work : $vendor->allow_editing,
+            'is_edi'        => $vendor->isEdi(),
         ];
     }
 

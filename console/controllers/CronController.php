@@ -389,7 +389,7 @@ class CronController extends Controller
                 $orgId = $organization->organization_id;
                 $providerID = $organization->provider_id;
                 $provider = EdiProvider::findOne(['id' => $providerID]);
-                if ($provider == 'LeradataProvider' && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
+                if ($provider->provider_class == 'LeradataProvider' && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
                 $ediIntegration = new EDIIntegration(['orgId' => $orgId, 'providerID' => $providerID]);
                 $ediIntegration->handleFilesList();
             }
@@ -405,7 +405,7 @@ class CronController extends Controller
                 $orgId = $organization->organization_id;
                 $providerID = $organization->provider_id;
                 $provider = EdiProvider::findOne(['id' => $providerID]);
-                if ($provider == 'LeradataProvider' && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
+                if ($provider->provider_class == 'LeradataProvider' && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
                 $ediIntegration = new EDIIntegration(['orgId' => $orgId, 'providerID' => $providerID]);
                 $ediIntegration->handleFilesListQueue();
             }

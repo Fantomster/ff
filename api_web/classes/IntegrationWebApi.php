@@ -9,6 +9,7 @@ use api_web\helpers\OuterProductMapHelper;
 use api_web\modules\integration\classes\OuterProductMapper;
 use common\models\AllService;
 use common\models\CatalogBaseGoods;
+use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
@@ -113,7 +114,7 @@ class IntegrationWebApi extends WebApi
             if ($outerAgent) {
                 $outerAgentId = $outerAgent->id;
             }
-            $outerStore = OuterStore::findOne(['org_id' => $organizationID]);
+            $outerStore = OuterStore::find()->where(['org_id' => $organizationID])->andWhere('`right` - `left` = 1')->orderBy('`left`')->one();
             if ($outerStore) {
                 $outerStoreId = $outerStore->id;
             }
@@ -235,38 +236,39 @@ class IntegrationWebApi extends WebApi
         }
 
         $arr = $waybillContent->attributes;
-
-        $arr['product'] = [
-            'name' => null,
-            'id'   => null
-        ];
-
-        $arr['outer_product'] = [
-            'name'     => null,
-            'id'       => null,
-            'equality' => false
-        ];
-
-        $arr['outer_store'] = [
-            'name'     => null,
-            'id'       => null,
-            'equality' => false
-        ];
-
-        $arr['outer_unit'] = [
-            'name' => null,
-            'id'   => null
-        ];
-
+        $arr['product'] = null;
+        $arr['outer_product'] = null;
+        $arr['outer_store'] = null;
+        $arr['outer_unit'] = null;
         $arr['vat_waybill'] = [
             'value'    => $waybillContent->vat_waybill,
-            'equality' => false
+            'equality' => true
         ];
-
         $arr['koef'] = [
             'value'    => $waybillContent->koef,
-            'equality' => false
+            'equality' => true
         ];
+
+        $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id]);
+        if ($outerProduct) {
+            $arr['outer_product']['id'] = $outerProduct->id;
+            $arr['outer_product']['name'] = $outerProduct->name;
+            $arr['outer_product']['equality'] = true;
+        }
+
+        $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id]);
+        if ($outerStore) {
+            $arr['outer_store']['id'] = $outerStore->id;
+            $arr['outer_store']['name'] = $outerStore->name;
+            $arr['outer_store']['equality'] = true;
+        }
+
+        $outerUnit = OuterUnit::findOne(['id' => $waybillContent->outer_unit_id]);
+        if ($outerUnit) {
+            $arr['outer_unit']['id'] = $outerUnit->id;
+            $arr['outer_unit']['name'] = $outerUnit->name;
+            $arr['outer_unit']['equality'] = true;
+        }
 
         //Если есть связь, с заказом
         $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
@@ -283,45 +285,21 @@ class IntegrationWebApi extends WebApi
                 $outerProductMap = (object)current($outerProductMap);
                 //Если отличаются продукты, надо подсвечивать на фронте
                 if ($outerProductMap->outer_product_id != $waybillContent->outer_product_id) {
-                    $arr['outer_product']['equality'] = true;
+                    $arr['outer_product']['equality'] = false;
                 }
                 //Если отличаются склады, надо подсвечивать на фронте
                 if ($outerProductMap->outer_store_id != $waybillContent->waybill->outer_store_id) {
-                    $arr['outer_store']['equality'] = true;
+                    $arr['outer_store']['equality'] = false;
                 }
                 //Если ставка НДС отличается, то надо подсвечивать на фронте
                 if ($outerProductMap->vat != $waybillContent->vat_waybill) {
-                    $arr['vat_waybill']['equality'] = true;
+                    $arr['vat_waybill']['equality'] = false;
                 }
                 //Если коэффициент отличается, то надо подсвечивать на фронте
                 if ($outerProductMap->coefficient != $waybillContent->koef) {
-                    $arr['koef']['equality'] = true;
+                    $arr['koef']['equality'] = false;
                 }
             }
-        }
-
-        $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id]);
-        if ($outerProduct) {
-            $arr['outer_product'] = [
-                'name' => $outerProduct->name,
-                'id'   => $outerProduct->id
-            ];
-        }
-
-        $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id]);
-        if ($outerStore) {
-            $arr['outer_store'] = [
-                'name' => $outerStore->name,
-                'id'   => $outerStore->id
-            ];
-        }
-
-        $outerUnit = OuterUnit::findOne(['id' => $waybillContent->outer_unit_id]);
-        if ($outerUnit) {
-            $arr['outer_unit'] = [
-                'name' => $outerUnit->name,
-                'id'   => $outerUnit->id
-            ];
         }
 
         return $arr;
@@ -568,20 +546,18 @@ class IntegrationWebApi extends WebApi
      */
     public function getProductMapList(array $post): array
     {
+        $this->validateRequest($post, ['business_id']);
+
         $page = (!empty($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (!empty($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-        $client = $this->user->organization;
-        //Фильтр по бизнесу
-        if (!empty($post['search']['business_id']) && $post['search']['business_id'] != $this->user->organization_id) {
-            $searchBusiness = (int)$post['search']['business_id'];
-            $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
-            $checkOrg = in_array($searchBusiness, ArrayHelper::map($businessList['result'] ?? [], 'id', 'id')) ?? false;
-            if (!$checkOrg) {
-                return [];
-            } else {
-                $client = \common\models\Organization::findOne($searchBusiness);
-            }
+        $searchBusiness = (int)$post['business_id'];
+        $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
+        $checkOrg = in_array($searchBusiness, ArrayHelper::map($businessList['result'] ?? [], 'id', 'id')) ?? false;
+        if (!$checkOrg) {
+            return [];
+        } else {
+            $client = \common\models\Organization::findOne($searchBusiness);
         }
 
         /** @var SqlDataProvider $dataProvider */
@@ -592,10 +568,16 @@ class IntegrationWebApi extends WebApi
         $dataProvider->setPagination($pagination);
         $models = $dataProvider->getModels();
 
+        if (IntegrationSettingValue::getSettingsByServiceId($post['service_id'], $client->id, ['main_org'])) {
+            $isChildOrganization = true;
+        } else {
+            $isChildOrganization = false;
+        }
+
         $result = [];
         if (!empty($models)) {
             foreach ($models as $model) {
-                $result[] = $this->prepareOutProductMap($model);
+                $result[] = $this->prepareOutProductMap($model, $isChildOrganization);
             }
         }
 
@@ -618,12 +600,11 @@ class IntegrationWebApi extends WebApi
      */
     public function mapUpdate(array $post)
     {
-        $this->validateRequest($post, ['service_id', 'map']);
-
+        $this->validateRequest($post, ['business_id', 'service_id', 'map']);
         $result = [];
         foreach ($post['map'] as $item) {
             try {
-                $this->editProductMap($post['service_id'], $item);
+                $this->editProductMap($post['service_id'], $item, $post['business_id']);
                 $result[$item['product_id']] = ['success' => true];
             } catch (\Exception $e) {
                 $result[$item['product_id']] = ['success' => false, 'error' => \Yii::t('api_web', $e->getMessage())];
@@ -635,17 +616,15 @@ class IntegrationWebApi extends WebApi
     /**
      * Изменение атрибутов сопоставления
      *
-     * @param int $service_id
-     * @param     $request
-     * @throws Exception
-     * @throws ValidationException
+     * @param int  $service_id
+     * @param      $request
+     * @param null $business_id
      */
-    private function editProductMap(int $service_id, $request)
+    private function editProductMap(int $service_id, $request, $business_id = null)
     {
         $this->validateRequest($request, ['product_id']);
-
         //Загружаем данные по базовому и дочерним бизнесам (если бизнес главный)
-        $mapper = new OuterProductMapper($this->user->organization_id, $service_id);
+        $mapper = new OuterProductMapper($business_id, $service_id);
         $mapper->loadRequest($request);
         $mapper->updateChildsMap();
         $mapper->updateModel();
@@ -657,22 +636,23 @@ class IntegrationWebApi extends WebApi
      * @param array $model
      * @return array
      */
-    private function prepareOutProductMap(array $model)
+    private function prepareOutProductMap(array $model, $isChild = false)
     {
         $result = [
-            "id"              => $model['id'],
-            "service_id"      => (int)$model['service_id'],
-            "organization_id" => (int)$model['organization_id'],
-            "product"         => null,
-            "unit"            => null,
-            "vendor"          => null,
-            "outer_product"   => null,
-            "outer_unit"      => null,
-            "outer_store"     => null,
-            "coefficient"     => !empty($model['coefficient']) ? round($model['coefficient'], 10) : 1,
-            "vat"             => (int)$model['vat'],
-            "created_at"      => $model['created_at'] ?? null,
-            "updated_at"      => $model['updated_at'] ?? null,
+            "id"                            => $model['id'],
+            "service_id"                    => (int)$model['service_id'],
+            "organization_id"               => (int)$model['organization_id'],
+            "product"                       => null,
+            "unit"                          => null,
+            "vendor"                        => null,
+            "outer_product"                 => null,
+            "outer_unit"                    => null,
+            "outer_store"                   => null,
+            "coefficient"                   => !empty($model['coefficient']) ? round($model['coefficient'], 10) : 1,
+            "vat"                           => (int)$model['vat'],
+            "created_at"                    => $model['created_at'] ?? null,
+            "updated_at"                    => $model['updated_at'] ?? null,
+            "is_child_organization_for_map" => $isChild,
         ];
 
         if (isset($model['vendor_id'])) {

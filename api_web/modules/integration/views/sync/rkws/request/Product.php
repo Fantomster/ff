@@ -12,7 +12,7 @@ SyncLog::trace('Render template: ' . __NAMESPACE__ . __FILE__);
 
 // http://apidocs.ucs.ru/doku.php/whiteserver:api:sh_get_goods
 ?><?= '<' ?>?xml version = "1.0" encoding = "utf-8"?>
-<RQ cmd="sh_get_goodgroups" tasktype="any_call" callback="<?= $cb ?>">
+<RQ cmd="sh_get_goodgroups" tasktype="any_call" callback="<?= $cb ?>" timeout="1200">
     <PARAM name="object_id" val="<?= $code ?>"/>
     <GROUPS>
         <?php foreach ($productGroup as $group_model): ?>

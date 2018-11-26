@@ -137,7 +137,7 @@ class License extends ActiveRecord
             ->select([
                 'license.id',
                 'license.name',
-                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active',
+                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active_license',
                 'license.created_at',
                 'license.updated_at',
                 'license.login_allowed',
@@ -164,7 +164,7 @@ class License extends ActiveRecord
         }
 
         if (!is_null($is_active)) {
-            $license->andWhere(['=', 'is_active', (int)$is_active]);
+            $license->having(['=', 'is_active_license', (int)$is_active]);
             $license->orderBy(['to_date' => SORT_DESC]);
         }
 

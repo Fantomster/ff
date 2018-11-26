@@ -236,34 +236,14 @@ class IntegrationWebApi extends WebApi
         }
 
         $arr = $waybillContent->attributes;
-
-        $arr['product'] = [
-            'name' => null,
-            'id'   => null
-        ];
-
-        $arr['outer_product'] = [
-            'name'     => null,
-            'id'       => null,
-            'equality' => true
-        ];
-
-        $arr['outer_store'] = [
-            'name'     => null,
-            'id'       => null,
-            'equality' => true
-        ];
-
-        $arr['outer_unit'] = [
-            'name' => null,
-            'id'   => null
-        ];
-
+        $arr['product'] = null;
+        $arr['outer_product'] = null;
+        $arr['outer_store'] = null;
+        $arr['outer_unit'] = null;
         $arr['vat_waybill'] = [
             'value'    => $waybillContent->vat_waybill,
             'equality' => true
         ];
-
         $arr['koef'] = [
             'value'    => $waybillContent->koef,
             'equality' => true
@@ -271,26 +251,23 @@ class IntegrationWebApi extends WebApi
 
         $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id]);
         if ($outerProduct) {
-            $arr['outer_product'] = [
-                'name' => $outerProduct->name,
-                'id'   => $outerProduct->id
-            ];
+            $arr['outer_product']['id'] = $outerProduct->id;
+            $arr['outer_product']['name'] = $outerProduct->name;
+            $arr['outer_product']['equality'] = true;
         }
 
         $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id]);
         if ($outerStore) {
-            $arr['outer_store'] = [
-                'name' => $outerStore->name,
-                'id'   => $outerStore->id
-            ];
+            $arr['outer_store']['id'] = $outerStore->id;
+            $arr['outer_store']['name'] = $outerStore->name;
+            $arr['outer_store']['equality'] = true;
         }
 
         $outerUnit = OuterUnit::findOne(['id' => $waybillContent->outer_unit_id]);
         if ($outerUnit) {
-            $arr['outer_unit'] = [
-                'name' => $outerUnit->name,
-                'id'   => $outerUnit->id
-            ];
+            $arr['outer_unit']['id'] = $outerUnit->id;
+            $arr['outer_unit']['name'] = $outerUnit->name;
+            $arr['outer_unit']['equality'] = true;
         }
 
         //Если есть связь, с заказом

@@ -69,7 +69,6 @@ class OperatorReportSearch extends Order
                                 and b.status in (3, 4)")
             ->groupBy("c.email, a.created_at, status, status_call_id")
             ->orderBy("a.created_at, email, status");
-        //dd($query->createCommand()->rawSql);
 
         $dataProvider = new ActiveDataProvider([
             'query'      => $query,

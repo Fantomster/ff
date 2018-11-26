@@ -662,8 +662,7 @@ class IntegrationWebApi extends WebApi
     private function prepareOutProductMap(array $model, $isChild = false)
     {
         $result = [
-            "parent_id"                     => $model['parent_id'],
-            "child_id"                      => $model['child_id'],
+            "id"                            => $model['id'],
             "service_id"                    => (int)$model['service_id'],
             "organization_id"               => (int)$model['organization_id'],
             "product"                       => null,

@@ -32,7 +32,8 @@ class OuterProductMapSearch extends OuterProductMap
         $catalogBaseGoodsTableName = CatalogBaseGoods::tableName();
 
         $this->service_id = $post['service_id'] ?? 0;
-        $mainOrgId = OuterProductMap::getMainOrg($client->id) ?? $client->id;
+        $mainOrgSetting = OuterProductMap::getMainOrg($client->id);
+        $mainOrgId = !empty($mainOrgSetting) ? $mainOrgSetting : $client->id;
 
         $query = (new Query())->select([
             "IF(b.id=a.id, b.id, a.id) id",
@@ -107,7 +108,6 @@ class OuterProductMapSearch extends OuterProductMap
             'a.outer_product_id'                   => SORT_ASC,
             'product_id'                           => SORT_ASC,
         ]);
-        print_r($query->createCommand()->getRawSql());exit();
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query->createCommand()->getRawSql(),

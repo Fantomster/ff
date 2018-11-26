@@ -221,10 +221,15 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                 ],
             ]);
             if (in_array(Yii::$app->user->id, Yii::$app->params['operatorsReportAdminIDs'])) {
+                $reportFast = [
+                    'label' => 'Быстрый отчет по операторам',
+                    'url'   => ['/service-desk/fast-operators-report'],
+                ];
                 $report = [
                     'label' => 'Отчет по операторам',
                     'url'   => ['/service-desk/operators-report'],
                 ];
+                $menuItems[2]['items'][] = $reportFast;
                 $menuItems[2]['items'][] = $report;
             }
             //  if ((Yii::$app->user->id === 467) || (Yii::$app->user->id === 3529) || (Yii::$app->user->id === 4435) || (Yii::$app->user->id === 7761)) {

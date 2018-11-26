@@ -21,7 +21,7 @@ class AuthHelper extends Object
 
     public $org;
     public $restr;
-    public $logCategory = "rkws_callback_log";
+    public $logCategory = "rkws_log";
 
     public function init()
     {

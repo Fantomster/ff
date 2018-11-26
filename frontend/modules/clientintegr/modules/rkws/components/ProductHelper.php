@@ -22,8 +22,6 @@ use api\common\models\RkDic;
 class ProductHelper extends AuthHelper
 {
 
-    public $logCategory = "rkws_log";
-
     //  const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/product";
 
     public function getProduct()

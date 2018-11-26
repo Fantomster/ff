@@ -1,21 +1,22 @@
 <?php
 
 return [
-    'google-api'            => [
+    'google-api'              => [
         'key-id'   => 'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
         'language' => 'ru-RU'
     ],
-    'pictures'              => [
+    'pictures'                => [
         'org-noavatar'    => 'https://static.mixcart.ru/rest-noavatar.gif',
         'client-noavatar' => 'https://static.mixcart.ru/restaurant-noavatar.gif',
         'vendor-noavatar' => 'https://static.mixcart.ru/vendor-noavatar.gif',
         'bill-logo'       => 'https://static.mixcart.ru/logo-mix.png',
     ],
-    'password_generation'   => Yii::t('app', 'common.config.params.pass', ['ru' => 'Создание пароля для входа в систему MixCart']),
-    'protocol'              => 'http',
-    'franchiseeHost'        => '//partner.mixcart.ru',
-    'integratAdminID'       => [],
+    'password_generation'     => Yii::t('app', 'common.config.params.pass', ['ru' => 'Создание пароля для входа в систему MixCart']),
+    'protocol'                => 'http',
+    'franchiseeHost'          => '//partner.mixcart.ru',
+    'integratAdminID'         => [],
     'operatorsReportAdminIDs' => [1, 85, 16, 8832],
+    'licenseManagerPhone'     => '8 (499) 404-10-18',
     #id франчази к которому крепим организации, для которых не нашли франчей
     'default_franchisee_id' => 1,
     //static urls
@@ -69,20 +70,17 @@ return [
      *  /runtime/logs/iiko_api_response_{ID}.log
      */
     'iikoLogOrganization'   => [],
-
     'web'         => 'https://mixcart.ru/',
     /**
      * Логирование запросов к ВебАпи
      */
     'web_api_log' => true,
-
     'e_com' => [
         'login'       => 'markettest',
         'pass'        => 'e1fa52810ea9d18a5af901c147c804e6',
         'loginClient' => 'markettest1',
         'passClient'  => '32da77b28033f8fcd7d6d64a9801062d',
     ],
-
     'fireBase' => [
         'DEFAULT_URL'       => 'https://mixcart-test.firebaseio.com',
         'DEFAULT_TOKEN'     => '',
@@ -93,16 +91,15 @@ return [
         'storageBucket'     => "mixcart-test.appspot.com",
         'messagingSenderId' => "1068392671931"
     ],
-
-    'vtsHttp'              => [
+    'vtsHttp'      => [
         'authLink'       => 'https://t2-mercury.vetrf.ru/hs/',
         'vsdLink'        => 'https://t2-mercury.vetrf.ru/pub/operatorui?_language=ru&_action=showVetDocumentFormByUuid&uuid=',
         'pdfLink'        => 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=1&preview=false&_action=printVetDocumentList&_language=ru&isplayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=&printPk=',
         'chooseFirmLink' => 'https://t2-mercury.vetrf.ru/hs/operatorui?_action=chooseServicedFirm&_language=ru&firmGuid=',
     ],
     'edi_api_data' => [
-        'edi_api_leradata_url' => 'https://leradata.pro/api/vetis/api.php',
-        'edi_api_order_document_id' => 220,
+        'edi_api_leradata_url'       => 'https://leradata.pro/api/vetis/api.php',
+        'edi_api_order_document_id'  => 220,
         'edi_api_recadv_document_id' => 351
     ]
 ];

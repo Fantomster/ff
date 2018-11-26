@@ -89,7 +89,7 @@ class OuterProductMapSearch extends OuterProductMap
                  * фильтр по продукту
                  */
                 if (!empty($post['search']['product'])) {
-                    $query->andFilterWhere(['like', "a.`name`", $post['search']['product']]);
+                    $query->andFilterWhere(['like', "$outerProductTableName.`name`", $post['search']['product']]);
                     $query->orFilterWhere(['like', "cbg.`product`", $post['search']['product']]);
                 }
                 /**

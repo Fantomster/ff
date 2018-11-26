@@ -257,10 +257,17 @@ class License extends ActiveRecord
         if (!empty($result)) {
             $l = current($result);
             $licenseDate = $l['to_date'];
-            $licenseName = $l['name'];
         } else {
             $licenseDate = date('Y-m-d H:i:s', strtotime("-1 day"));
-            $licenseName = "";
+        }
+
+        $licenseName = null;
+        if (!empty($service_ids)) {
+            $service_id = is_array($service_ids) ? current($service_ids) : $service_ids;
+            $l = self::findOne(['service_id' => $service_id]);
+            if (!empty($l)) {
+                $licenseName = $l->name;
+            }
         }
 
         \Yii::$app->response->headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));

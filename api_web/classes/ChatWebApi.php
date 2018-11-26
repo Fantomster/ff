@@ -384,6 +384,7 @@ class ChatWebApi extends WebApi
             'unread_message'    => (int)$model->getOrderChatUnreadCount($this->user->organization_id) ?? 0,
             'last_message'      => $last_message,
             'last_message_date' => $model->orderChatLastMessage->created_at ?? null,
+            'is_edi'            => empty($model->ediNumber) ? false : true,
         ];
     }
 

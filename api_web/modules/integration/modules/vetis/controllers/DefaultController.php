@@ -857,7 +857,8 @@ class DefaultController extends WebApiController
      *                  property="request",
      *                  default={
      *                      "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
-     *                      "base64_encode":1
+     *                      "full": 1,
+     *                      "base64_encode": 1
      *                  }
      *              )
      *         )

@@ -83,15 +83,46 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
         $lic = mercService::getLicense();
         $searchModel = new mercStockEntrySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        $session = Yii::$app->session;
+        $selected = $session->get('selectedentry', []);
+
         $params = ['searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'lic' => $lic];
+            'lic' => $lic,
+            'selected' => $selected];
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index', $params);
         } else {
             return $this->render('index', $params);
         }
+    }
+
+    public function actionSaveSelectedEntry() // метод сохранения изменений выделения "флажками" товаров
+    {
+        $selected = Yii::$app->request->get('selected');
+        $state = Yii::$app->request->get('state');
+
+        $session = Yii::$app->session;
+
+        $list = $session->get('selectedentry', []);
+
+        $current = !empty($selected) ? explode(",", $selected) : [];
+
+        foreach ($current as $item) {
+
+            if ($state) {
+                if (!in_array($item, $list))
+                    $list[] = $item;
+            } else {
+                $key = array_search($item, $list);
+                unset($list[$key]);
+            }
+        }
+
+        $session->set('selectedentry', $list);
+        return true;
     }
 
     public function actionNolic()
@@ -195,9 +226,8 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
 
     public function actionInventoryAll()
     {
-        $selected = Yii::$app->request->get('selected');
+        $selected = Yii::$app->session->get('selectedentry', []);
         try {
-            $selected = explode(',', $selected);
             $datas = [];
             foreach ($selected as $id) {
                 $datas[] = (MercStockEntry::findOne(['id' => $id]))->raw_data;

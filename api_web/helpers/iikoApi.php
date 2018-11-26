@@ -90,12 +90,13 @@ class iikoApi
     /**
      * Авторизация
      *
-     * @param $login
-     * @param $password
-     * @throws \Exception
+     * @param null $login
+     * @param null $password
+     * @param null $timeout
      * @return bool
+     * @throws \Exception
      */
-    public function auth($login = null, $password = null)
+    public function auth($login = null, $password = null, $timeout = null)
     {
         if (is_null($login)) {
             $login = $this->login;
@@ -111,7 +112,7 @@ class iikoApi
         ];
 
         try {
-            $this->token = $this->sendAuth('/auth', $params);
+            $this->token = $this->sendAuth('/auth', $params, 'GET', [], $timeout);
             $this->writeToken();
             if ($this->token) {
                 return true;
@@ -220,10 +221,11 @@ class iikoApi
      * @param array  $params
      * @param string $method
      * @param array  $headers
-     * @return mixed
+     * @param int    $timeout
+     * @return bool|string
      * @throws \Exception
      */
-    private function sendAuth($url, $params = [], $method = 'GET', $headers = [])
+    private function sendAuth($url, $params = [], $method = 'GET', $headers = [], $timeout = 300)
     {
         $logger = new iikoLogger();
         $logger->setOperation($url);
@@ -239,7 +241,7 @@ class iikoApi
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         curl_setopt($ch, CURLOPT_COOKIE, 'key=' . $this->token);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, implode(PHP_EOL, $header));
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);

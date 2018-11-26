@@ -107,9 +107,6 @@ class OrganizationDictionary extends ActiveRecord
         $this->status_id = self::STATUS_ACTIVE;
         $this->count = $count;
         $this->updated_at = \gmdate('Y-m-d H:i:s');
-        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID && $this->outerDic->name == 'product') {
-            self::updateIikoUnitDictionary(self::STATUS_ACTIVE, $this->org_id);
-        }
         return $this->save();
     }
 
@@ -120,15 +117,12 @@ class OrganizationDictionary extends ActiveRecord
     {
         $this->status_id = self::STATUS_ERROR;
         $this->updated_at = \gmdate('Y-m-d H:i:s');
-        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID && $this->outerDic->name == 'product') {
-            self::updateIikoUnitDictionary(self::STATUS_ERROR, $this->org_id);
-        }
         return $this->save();
     }
 
     /**
-     * send to FCM when consumer complete work
-     * */
+     * @throws \Exception
+     */
     public function noticeToFCM(): void
     {
         $consumerName = Integration::$service_map[$this->outerDic->service_id] . ucfirst($this->outerDic->name) . 'Sync';
@@ -159,17 +153,19 @@ class OrganizationDictionary extends ActiveRecord
      * @param $status
      * @param $org_id
      */
-    private static function updateIikoUnitDictionary($status, $org_id)
+    public static function updateIikoUnitDictionary($status, $org_id): void
     {
-        $dictionary = self::findOne([
+        $dictionaryUnit = self::findOne([
             'org_id'       => $org_id,
             'outer_dic_id' => self::IIKO_UNIT_DICT_ID
         ]);
-        if (empty($dictionary)) {
-            $dictionary = new self([
+
+        if (empty($dictionaryUnit)) {
+            $dictionaryUnit = new self([
                 'org_id'       => $org_id,
                 'outer_dic_id' => self::IIKO_UNIT_DICT_ID,
-                'status_id'    => $status
+                'status_id'    => $status,
+                'count'        => 0
             ]);
         }
 
@@ -179,12 +175,13 @@ class OrganizationDictionary extends ActiveRecord
                 'service_id' => Registry::IIKO_SERVICE_ID,
                 'is_deleted' => 0
             ])->count();
-            $dictionary->count = (int)$count;
+            $dictionaryUnit->count = (int)$count;
         } else {
-            $dictionary->updated_at = \gmdate('Y-m-d H:i:s');
-            $dictionary->status_id = $status;
+            $dictionaryUnit->updated_at = \gmdate('Y-m-d H:i:s');
         }
-        $dictionary->save();
+
+        $dictionaryUnit->status_id = $status;
+        $dictionaryUnit->save();
     }
 
     /**

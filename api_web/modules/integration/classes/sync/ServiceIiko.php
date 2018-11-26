@@ -58,9 +58,19 @@ class ServiceIiko extends AbstractSyncFactory
             ]);
 
             if ($sendToRabbit) {
+                /** @var OrganizationDictionary $model */
                 $model = $this->getModel();
                 $model->status_id = OrganizationDictionary::STATUS_SEND_REQUEST;
                 $model->save();
+                if ($model->outerDic->name == 'product') {
+                    $unitDictionary = OuterDictionary::findOne(['service_id' => $this->serviceId, 'name' => 'unit']);
+                    $unitModel = OrganizationDictionary::findOne([
+                        'org_id'       => $this->user->organization_id,
+                        'outer_dic_id' => $unitDictionary->id
+                    ]);
+                    $unitModel->status_id = OrganizationDictionary::STATUS_SEND_REQUEST;
+                    $unitModel->save();
+                }
                 return $this->prepareModel($model);
             } else {
                 throw new HttpException(402, 'Error send request to RabbitMQ');
@@ -150,30 +160,31 @@ class ServiceIiko extends AbstractSyncFactory
     }
 
     /**
-     * Проверка соединения с iiko
+     * Проверка коннекта
+     *
+     * @return array
+     * @throws BadRequestHttpException
      */
     public function checkConnect()
     {
         $api = iikoApi::getInstance();
         try {
-            if ($api->auth()) {
+            if ($api->auth(null, null, 2)) {
                 $api->logout();
                 return ['result' => true];
             }
         } catch (\Exception $e) {
             $message = $this->prepareErrorMessage($e->getMessage(), $api);
             throw new BadRequestHttpException($message);
-        } finally {
-            $api->logout();
         }
     }
 
     /**
-     * @param           $res
-     * @param   Waybill $model
-     * @param           $message
-     * @param bool      $success
-     * @return mixed
+     * @param      $res
+     * @param      $model
+     * @param      $message
+     * @param bool $success
+     * @return array
      * @throws BadRequestHttpException
      */
     private function response(&$res, $model, $message, $success = true)
@@ -229,6 +240,9 @@ class ServiceIiko extends AbstractSyncFactory
      */
     private function prepareErrorMessage($message, $api)
     {
+        if (strpos($message, 'Код ответа сервера: 0') !== false) {
+            $message = "Не удалось соединиться с сервером, проверьте настройки подключения к iiko";
+        }
         if (strpos($message, '401') !== false) {
             $message = "Ошибка авторизации, проверьте настройки подключения к iiko";
         }

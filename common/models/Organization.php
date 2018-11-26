@@ -513,7 +513,7 @@ class Organization extends \yii\db\ActiveRecord
         $query = RelationSuppRest::find()
             ->select(['relation_supp_rest.cat_id as cat_id'])
             ->leftJoin('catalog', 'relation_supp_rest.cat_id = catalog.id')
-            ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false])
+            ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false, 'relation_supp_rest.status' => 1])
             ->andWhere(['catalog.status' => Catalog::STATUS_ON]);
         if ($vendor_id) {
             $query->andFilterWhere(['relation_supp_rest.supp_org_id' => $vendor_id]);

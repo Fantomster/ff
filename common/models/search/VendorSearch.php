@@ -71,7 +71,7 @@ class VendorSearch extends RelationSuppRest {
                 $orgTable.name as vendor_name, $catTable.status as catalog_status, $orgTable.country, $orgTable.locality")
                 ->joinWith('catalog')
                 ->joinWith('vendor');
-        $query->where(["$rspTable.rest_org_id" => $client_id, "$rspTable.deleted" => false]);
+        $query->where(["$rspTable.rest_org_id" => $client_id, "$rspTable.deleted" => false, "$rspTable.status" => 1]);
 //            ->andWhere([">", "$rspTable.cat_id", 0]);
 
         if(isset($this->search_address)) {

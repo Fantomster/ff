@@ -141,8 +141,17 @@ class cerberApi extends baseApi
      */
     public function getForeignEnterpriseList($name, $country_guid)
     {
-        $result = VetisForeignEnterprise::find()->where(['active' => true, 'last' => true, 'country_guid' => $country_guid])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")
-            ->limit(20)->all();
+        $mask = '/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/';
+        preg_match_all($mask, $name, $list);
+        $list = $list[0];
+        if (count($list) != 0) {
+            $result = VetisForeignEnterprise::find()->where(['active' => true, 'last' => true, 'guid' => $name])
+                ->limit(20)->all();
+        }
+        else {
+            $result = VetisForeignEnterprise::find()->where(['active' => true, 'last' => true, 'country_guid' => $country_guid])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")
+                ->limit(20)->all();
+        }
 
         if (!empty($result)) {
             $list = [];
@@ -164,9 +173,18 @@ class cerberApi extends baseApi
      */
     public function getRussianEnterpriseList($name)
     {
-        $result = VetisRussianEnterprise::find()->where(['active' => true, 'last' => true])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")
-            ->limit(20)
-            ->all();
+        $mask = '/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/';
+        preg_match_all($mask, $name, $list);
+        $list = $list[0];
+        if (count($list) != 0) {
+            $result = VetisRussianEnterprise::find()->where(['active' => true, 'last' => true, 'guid' => $name])
+                ->limit(20)
+                ->all();
+        } else {
+            $result = VetisRussianEnterprise::find()->where(['active' => true, 'last' => true])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")
+                ->limit(20)
+                ->all();
+        }
 
         if (!empty($result)) {
             $list = [];

@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\helpers\DBNameHelper;
 use common\models\CatalogBaseGoods;
+use common\models\IntegrationSettingValue;
 use common\models\Organization;
 use common\models\OuterProduct;
 use common\models\OuterProductMap;
@@ -32,7 +33,7 @@ class OuterProductMapSearch extends OuterProductMap
         $catalogBaseGoodsTableName = CatalogBaseGoods::tableName();
 
         $this->service_id = $post['service_id'] ?? 0;
-        $mainOrgSetting = OuterProductMap::getMainOrg($client->id);
+        $mainOrgSetting = IntegrationSettingValue::getSettingsByServiceId($this->service_id, $client->id, ['main_org']);
         $mainOrgId = !empty($mainOrgSetting) ? $mainOrgSetting : $client->id;
 
         $query = (new Query())->select([

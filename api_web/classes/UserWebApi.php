@@ -192,6 +192,7 @@ class UserWebApi extends \api_web\components\WebApi
      * @param $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\ErrorException
      */
     public function registrationRepeatSms($post)
     {
@@ -241,7 +242,9 @@ class UserWebApi extends \api_web\components\WebApi
      *
      * @param array $post
      * @return string
-     * @throws \Exception
+     * @throws BadRequestHttpException
+     * @throws \Throwable
+     * @throws \yii\db\Exception
      */
     public function confirm(array $post)
     {
@@ -272,7 +275,6 @@ class UserWebApi extends \api_web\components\WebApi
     /**
      * Выбор бизнеса
      *
-     * @param array $post
      * @param array $post
      * @return bool
      * @throws \Exception
@@ -348,6 +350,7 @@ class UserWebApi extends \api_web\components\WebApi
         $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($result, 'id'));
         $result = array_map(function ($item) use ($licenses) {
             $item['license_is_active'] = isset($licenses[$item['id']]);
+            $item['license'] = isset($licenses[$item['id']]) ? $licenses[$item['id']] : null;
             return $item;
         }, $result);
 

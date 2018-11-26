@@ -210,6 +210,7 @@ class License extends ActiveRecord
                 'license.login_allowed',
                 'lo.td as to_date',
                 'lo.org_id',
+                'phone_manager' => "'" . \Yii::$app->params['licenseManagerPhone'] . "'"
             ])
             ->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
@@ -231,6 +232,7 @@ class License extends ActiveRecord
      *
      * @param $org_id
      * @throws HttpException
+     * @throws \yii\base\InvalidConfigException
      */
     public static function checkMixCartLicenseResponse($org_id)
     {
@@ -247,6 +249,7 @@ class License extends ActiveRecord
      * @param       $org_id
      * @param array $service_ids
      * @throws HttpException
+     * @throws \yii\base\InvalidConfigException
      */
     public static function checkLicense($org_id, $service_ids = [])
     {

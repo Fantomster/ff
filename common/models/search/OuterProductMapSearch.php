@@ -82,7 +82,7 @@ class OuterProductMapSearch extends OuterProductMap
              * фильтр по id продукта
              */
             if (!empty($post['search']['product_id'])) {
-                $query->andFilterWhere(["=", "`$catalogBaseGoodsTableName`.`id`", $post['search']['product_id']]);
+                $query->andFilterWhere(["=", "cbg.`id`", $post['search']['product_id']]);
             } else {
                 /**
                  * фильтр по продукту

@@ -269,6 +269,30 @@ class IntegrationWebApi extends WebApi
             'equality' => false
         ];
 
+        $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id]);
+        if ($outerProduct) {
+            $arr['outer_product'] = [
+                'name' => $outerProduct->name,
+                'id'   => $outerProduct->id
+            ];
+        }
+
+        $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id]);
+        if ($outerStore) {
+            $arr['outer_store'] = [
+                'name' => $outerStore->name,
+                'id'   => $outerStore->id
+            ];
+        }
+
+        $outerUnit = OuterUnit::findOne(['id' => $waybillContent->outer_unit_id]);
+        if ($outerUnit) {
+            $arr['outer_unit'] = [
+                'name' => $outerUnit->name,
+                'id'   => $outerUnit->id
+            ];
+        }
+
         //Если есть связь, с заказом
         $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
         if ($orderContent) {
@@ -299,30 +323,6 @@ class IntegrationWebApi extends WebApi
                     $arr['koef']['equality'] = true;
                 }
             }
-        }
-
-        $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id]);
-        if ($outerProduct) {
-            $arr['outer_product'] = [
-                'name' => $outerProduct->name,
-                'id'   => $outerProduct->id
-            ];
-        }
-
-        $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id]);
-        if ($outerStore) {
-            $arr['outer_store'] = [
-                'name' => $outerStore->name,
-                'id'   => $outerStore->id
-            ];
-        }
-
-        $outerUnit = OuterUnit::findOne(['id' => $waybillContent->outer_unit_id]);
-        if ($outerUnit) {
-            $arr['outer_unit'] = [
-                'name' => $outerUnit->name,
-                'id'   => $outerUnit->id
-            ];
         }
 
         return $arr;

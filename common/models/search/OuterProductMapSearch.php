@@ -107,6 +107,7 @@ class OuterProductMapSearch extends OuterProductMap
             'a.outer_product_id'                   => SORT_ASC,
             'product_id'                           => SORT_ASC,
         ]);
+        print_r($query->createCommand()->getRawSql());exit();
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query->createCommand()->getRawSql(),

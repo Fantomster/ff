@@ -13,10 +13,10 @@ use api\common\models\RkTasks;
 class ApiHelper
 {
 
-    public $logCategory = "rkws_log";
+    const logCategory = "rkws_log";
     
-    protected function log($message) {
-        \Yii::info($message, $this->logCategory);
+    protected static function log($message) {
+        \Yii::info($message, self::logCategory);
     }
     
     public static function sendCurl($xml, $restr)
@@ -78,15 +78,15 @@ class ApiHelper
         $data = curl_exec($ch);
         $info = curl_getinfo($ch);
 
-        $this->log('**************');
-        $this->log(date("Y-m-d H:i:s"));
-        $this->log('**************');
-        $this->log(print_r($xml, true));
-        $this->log(print_r($url, true));
-        $this->log(print_r($data, true));
-        $this->log('**************');
-        $this->log(print_r($info, true));
-        $this->log('^^^^^^^^^^^^^^');
+        self::log('**************');
+        self::log(date("Y-m-d H:i:s"));
+        self::log('**************');
+        self::log(print_r($xml, true));
+        self::log(print_r($url, true));
+        self::log(print_r($data, true));
+        self::log('**************');
+        self::log(print_r($info, true));
+        self::log('^^^^^^^^^^^^^^');
 
         $myXML = simplexml_load_string($data);
 

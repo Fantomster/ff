@@ -81,7 +81,7 @@ $this->registerJs($js);
                 'attribute' => 'created_at',
                 'label'     => 'Дата',
                 'value'     => function ($data) {
-                    return \Yii::$app->formatter->asDatetime($data['created_at'], 'php:d-m-Y');
+                    return \Yii::$app->formatter->asDatetime($data['dt'], 'php:d-m-Y');
                 },
                 'filter'    => false
             ],

@@ -43,8 +43,7 @@ class OperatorReportSearch extends Order
             count(a.order_id) cnt_order, 
             count(distinct d.order_id) cnt_order_changed,
             coalesce(c.username, c.email) operator_name,
-            a.created_at,
-            DATE(a.created_at),
+            DATE_FORMAT(a.created_at, '%Y-%m-%d') dt,
             count(distinct b.vendor_id) cnt_vendor, 
             case b.status
                 when 1 then 'Ожидает подтверждения поставщика'
@@ -68,7 +67,7 @@ class OperatorReportSearch extends Order
                                 and a.operator_id = c.id
                                 and $timeCondition
                                 and b.status in (3, 4)")
-            ->groupBy("c.email, DATE(a.created_at), status, status_call_id")
+            ->groupBy("c.email, dt, status, status_call_id")
             ->orderBy("a.created_at, email, status");
 
         $dataProvider = new ActiveDataProvider([

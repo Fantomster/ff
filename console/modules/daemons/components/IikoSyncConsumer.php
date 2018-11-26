@@ -92,10 +92,13 @@ class IikoSyncConsumer extends AbstractConsumer
                 $dictionary->errorSync();
                 throw $e;
             } finally {
-                //Информацию шлем в FCM
-                $dictionary->noticeToFCM();
                 //Убиваем сессию, а то закончатся на сервере iiko
                 $this->iikoApi->logout();
+                //Информацию шлем в FCM
+                $dictionary->noticeToFCM();
+                if ($dictionary->outerDic->service_id == Registry::IIKO_SERVICE_ID && $dictionary->outerDic->name == 'product') {
+                    OrganizationDictionary::updateIikoUnitDictionary($dictionary->status_id, $dictionary->org_id);
+                }
             }
             return ['success' => true];
         } else {

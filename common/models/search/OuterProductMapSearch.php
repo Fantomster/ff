@@ -35,8 +35,7 @@ class OuterProductMapSearch extends OuterProductMap
         $mainOrgId = OuterProductMap::getMainOrg($client->id) ?? $client->id;
 
         $query = (new Query())->select([
-            "a.id parent_id",
-            "b.id child_id",
+            "IF(b.id=a.id, b.id, a.id) id",
             "$outerStoreTableName.id outer_store_id",
             "IFNULL(a.service_id, 2)            as service_id",
             "IFNULL(a . organization_id, 3768)    as organization_id",
@@ -89,7 +88,7 @@ class OuterProductMapSearch extends OuterProductMap
                  * фильтр по продукту
                  */
                 if (!empty($post['search']['product'])) {
-                    $query->andFilterWhere(['like', "a.`name`", $post['search']['product']]);
+                    $query->andFilterWhere(['like', "$outerProductTableName.`name`", $post['search']['product']]);
                     $query->orFilterWhere(['like', "cbg.`product`", $post['search']['product']]);
                 }
                 /**

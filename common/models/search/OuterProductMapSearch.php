@@ -37,8 +37,8 @@ class OuterProductMapSearch extends OuterProductMap
         $query = (new Query())->select([
             "IF(b.id=a.id, b.id, a.id) id",
             "$outerStoreTableName.id outer_store_id",
-            "IFNULL(a.service_id, 2)            as service_id",
-            "IFNULL(a . organization_id, 3768)    as organization_id",
+            "IFNULL(a.service_id, :service_id)            as service_id",
+            "IFNULL(a.organization_id, :real_org_id)    as organization_id",
             "cbg.supp_org_id vendor_id",
             "vendor.name vendor_name",
             "cbg.id product_id",
@@ -56,7 +56,7 @@ class OuterProductMapSearch extends OuterProductMap
         ])
             ->from("catalog_base_goods cbg")
             ->leftJoin("$outerProductMapTableName a", "a.product_id=cbg.id and a.service_id=:service_id and 
-            a.organization_id=:parent_org", [':service_id' => $this->service_id, ':parent_org' => $mainOrgId]);
+            a.organization_id=:parent_org");
         $strChildJoin = 'b.product_id = a.product_id and b.service_id=:service_id and b.organization_id=:real_org_id';
         if ($client->id == $mainOrgId) {
             $strChildJoin .= ' and b.id=a.id';
@@ -66,7 +66,7 @@ class OuterProductMapSearch extends OuterProductMap
             ->leftJoin("$outerUnitTableName", "$outerUnitTableName.id = a.outer_unit_id")
             ->leftJoin("$outerStoreTableName", "$outerStoreTableName.id = b.outer_store_id")
             ->leftJoin("organization vendor", "cbg.supp_org_id = vendor.id")
-            ->leftJoin("relation_supp_rest rsr", "cbg.supp_org_id=rsr.supp_org_id and rsr.rest_org_id=:real_org_id")
+            ->leftJoin("relation_supp_rest rsr", "cbg.supp_org_id=rsr.supp_org_id and rsr.rest_org_id=:real_org_id and rsr.status=1")
             ->leftJoin("catalog_goods cg", "cg.cat_id=rsr.cat_id and cg.base_goods_id=cbg.id")
             ->where(["cbg.deleted" => 0])
             ->params([':service_id' => $this->service_id, ':real_org_id' => $client->id, ':parent_org' => $mainOrgId]);

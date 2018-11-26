@@ -81,14 +81,14 @@ class AuthHelper extends Object
         //   throw new Exception(print_r($res,true));
 
         if ($res['respcode']['code'] == '0') {
-            file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . '========EVENT==START=================' . PHP_EOL, FILE_APPEND);
-            file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . date("Y-m-d H:i:s") . ':CHECKAUTHBOLL:SUCCESS' . PHP_EOL, FILE_APPEND);
-            file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . '========EVENT==END===================' . PHP_EOL, FILE_APPEND);
+            $this->log('========EVENT==START=================');
+            $this->log(date("Y-m-d H:i:s") . ':CHECKAUTHBOLL:SUCCESS');
+            $this->log('========EVENT==END===================');
             return true;
         } else {
-            file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . '========EVENT==START=================' . PHP_EOL, FILE_APPEND);
-            file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . date("Y-m-d H:i:s") . ':CHECKAUTHBOLL:FAILED' . PHP_EOL, FILE_APPEND);
-            file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . '========EVENT==END===================' . PHP_EOL, FILE_APPEND);
+            $this->log('========EVENT==START=================');
+            $this->log(date("Y-m-d H:i:s") . ':CHECKAUTHBOLL:FAILED');
+            $this->log('========EVENT==END===================');
             return false;
         }
     }
@@ -165,9 +165,8 @@ class AuthHelper extends Object
         $objectinfo = $array['Error']['@attributes'];
 
         if ($cook && $respcode === '0') {
-            file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . '========EVENT==START=================' . PHP_EOL, FILE_APPEND);
-            file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . date("Y-m-d H:i:s") . ':SENDAUTH OK RECEIVED' . PHP_EOL, FILE_APPEND);
-
+            $this->log('========EVENT==START=================');
+            $this->log(date("Y-m-d H:i:s") . ':SENDAUTH OK RECEIVED');
 
             $sess = RkSession::find()->andwhere('acc= :acc', [':acc' => 1])->andwhere('status = 1')->one();
 
@@ -197,9 +196,8 @@ class AuthHelper extends Object
                 if ($sess->save(false) && $newsess->save(false)) {
 
                     $transaction->commit();
-                    file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . 'NEW SESSION IS CREATED (ID:' . $newsess->id . ')' . PHP_EOL, FILE_APPEND);
+                    $this->log('NEW SESSION IS CREATED (ID:' . $newsess->id . ')');
                 } else {
-
                     var_dump($sess->getErrors());
                     var_dump($newsess->getErrors());
 
@@ -218,11 +216,11 @@ class AuthHelper extends Object
                     var_dump($newsess->getErrors());
                     exit;
                 } else {
-                    file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . '=================' . PHP_EOL, FILE_APPEND);
-                    file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . print_r($objectinfo, true) . PHP_EOL, FILE_APPEND);
-                    file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . '=================' . PHP_EOL, FILE_APPEND);
-                    file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . print_r($respcode, true) . PHP_EOL, FILE_APPEND);
-                    file_put_contents(Yii::getAlias('@app') . '/runtime/logs/auth.log', PHP_EOL . '========EVENT==END===================' . PHP_EOL, FILE_APPEND);
+                    $this->log('=================');
+                    $this->log(print_r($objectinfo, true));
+                    $this->log('=================');
+                    $this->log(print_r($respcode, true));
+                    $this->log('========EVENT==END===================');
                 }
             }
         } else {

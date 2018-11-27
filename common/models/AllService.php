@@ -93,7 +93,7 @@ class AllService extends \yii\db\ActiveRecord
         }
 
         $result = $services->asArray()->all(\Yii::$app->db_api);
-        $licenses = License::getAllLicense($org_id, $service_ids, $is_active);
+        $licenses = ArrayHelper::index(License::getAllLicense($org_id, $service_ids, $is_active), 'service_id');
 
         foreach ($result as &$service) {
             if (isset($licenses[$service['id']])) {

@@ -259,6 +259,10 @@ class VetDocumentDone extends Component
             $authentication['animalSpentPeriod'] =  $doc->authentication->animalSpentPeriod;
         }
 
+        if(isset($doc->authentication->specialMarks)) {
+            $authentication['specialMarks'] =  $doc->authentication->specialMarks;
+        }
+
 
         //Заполняем условия регионализации при необходимости
         if(isset($this->conditions)) {

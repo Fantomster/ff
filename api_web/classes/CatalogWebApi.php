@@ -108,7 +108,7 @@ class CatalogWebApi extends WebApi
         try {
             CatalogBaseGoods::updateAll([
                 'status' => CatalogBaseGoods::STATUS_OFF,
-                'deleted' => CatalogBaseGoods::DELETED_OFF,
+                'deleted' => CatalogBaseGoods::DELETED_ON,
             ], [
                 'supp_org_id' => $catalog->supp_org_id,
                 'cat_id'      => $catalog->id

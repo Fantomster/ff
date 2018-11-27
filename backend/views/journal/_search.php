@@ -36,11 +36,11 @@ use yii\widgets\ActiveForm;
             $organizations = \common\models\Journal::find()
                 ->distinct()->select('organization_id')->all();
             $items = [null => 'Все'];
-            /*if (!empty($organizations)) {
+            if (!empty($organizations)) {
                 foreach ($organizations as $organization) {
                     $items[$organization->organization_id] = isset($organization->organization_id) ? \common\models\Organization::findOne($organization->organization_id)->name : '';
                 }
-            }*/
+            }
 
             echo $form->field($model, 'organization_id')->widget(\kartik\select2\Select2::classname(), [
                 'data' => $items,

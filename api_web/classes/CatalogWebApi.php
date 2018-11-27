@@ -106,6 +106,13 @@ class CatalogWebApi extends WebApi
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
+            CatalogBaseGoods::updateAll([
+                'status' => CatalogBaseGoods::STATUS_OFF,
+                'deleted' => CatalogBaseGoods::DELETED_ON,
+            ], [
+                'supp_org_id' => $catalog->supp_org_id,
+                'cat_id'      => $catalog->id
+            ]);
             /**
              * @var CatalogTempContent $tempRow
              */

@@ -51,16 +51,6 @@ if (!$senderIsClient && !$self) {
                             <tr>
                                 <td height="30"></td>
                             </tr>
-                            <tr>
-                                <td align="center" valign="top" style="color: #ffffff;font-family: 'Open Sans', Arial, sans-serif;text-transform: uppercase;font-size: 16px;">
-                                    <a href="<?= $order->getUrlForUser($recipient) ?>" target="_blank" class="btn" style="font-family: 'Open Sans', Arial, sans-serif;text-decoration: none;color: #ffffff;display: block;width: 230px;height: 50px;font-size: 16px;background-color: #2dbd5c;border-radius: 4px;-webkit-box-shadow: 0px 5px 20px 1px rgba(45, 189, 92, 0.4);-moz-box-shadow: 0px 5px 20px 1px rgba(45, 189, 92, 0.4);box-shadow: 0px 5px 20px 1px rgba(45, 189, 92, 0.4);">
-                                        <span style="font-family: 'Open Sans', Arial, sans-serif;color: #ffffff;text-transform: uppercase;font-size: 16px;line-height: 3.3;"><?= Yii::t('app', 'common.mail.order_created.string1', ['ru' => 'Перейти к заказу']) ?></span>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td height="30"></td>
-                            </tr>
                         </table>
                     </td>
                 </tr>

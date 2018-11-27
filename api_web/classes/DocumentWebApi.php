@@ -416,7 +416,14 @@ class DocumentWebApi extends \api_web\components\WebApi
                          d.outer_number_code                                    outer_number_code,
                          d.outer_number_additional                              outer_number_additional,
                          c.id                                                   waybill_content_id,
-                         coalesce(if(c.id IS NULL, b.price, 0) * b.quantity, 0) total_price,
+                         coalesce(
+                          if(
+                            c.id IS NULL, 
+                            b.price * b.quantity, 
+                            c.price_without_vat *  c.quantity_waybill
+                          ), 
+                          0
+                         )                                                      total_price,
                          b.id                                                   order_content_id,
                          b.edi_number                                           supply,
                          b.merc_uuid,

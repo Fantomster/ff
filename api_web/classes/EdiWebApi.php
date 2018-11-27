@@ -63,6 +63,10 @@ class EdiWebApi extends WebApi
             }
         }
 
+        if (is_null($order->created_by_id)) {
+            $order->created_by_id = $this->user->id;
+        }
+
         $order->status = OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED;
         $order->save();
         return ['result' => true];

@@ -77,9 +77,7 @@ class CatalogWebApi extends WebApi
      * @param $request
      * @return array
      * @throws \Throwable
-     * @throws \yii\base\InvalidConfigException
      * @throws \yii\db\Exception
-     * @throws \yii\di\NotInstantiableException
      * @throws \yii\web\BadRequestHttpException
      */
     public function uploadTemporary($request)
@@ -87,12 +85,12 @@ class CatalogWebApi extends WebApi
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException("empty_param|vendor_id");
         }
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
+        $vendorBaseCatalog = Catalog::findOne(['supp_org_id' => $request['vendor_id'], 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
             throw new BadRequestHttpException("base_catalog_not_found");
         }
-        $catalogID = $catalog->id;
-        $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalogID, 'user_id' => $this->user->id]);
+        $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($catalogTemp)) {
             throw new BadRequestHttpException("catalog_temp_not_found");
         }
@@ -108,26 +106,20 @@ class CatalogWebApi extends WebApi
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            CatalogBaseGoods::updateAll([
-                'status' => CatalogBaseGoods::STATUS_OFF
-            ], [
-                'supp_org_id' => $catalog->supp_org_id,
-                'cat_id'      => $catalogID
-            ]);
             /**
-             * @var $tempRow CatalogTempContent
+             * @var CatalogTempContent $tempRow
              */
             foreach ($catalogTempContent as $tempRow) {
                 //Поиск товара в главном каталоге
                 $model = CatalogBaseGoods::findOne([
-                    'cat_id'  => $catalogID,
+                    'cat_id'  => $vendorBaseCatalog->id,
                     'article' => $tempRow->article,
                     'product' => $tempRow->product
                 ]);
                 //Если не нашли, создаем его
                 if (empty($model)) {
                     $model = new CatalogBaseGoods([
-                        'cat_id'      => $catalogID,
+                        'cat_id'      => $vendorBaseCatalog->id,
                         'article'     => $tempRow->article,
                         'product'     => $tempRow->product,
                         'supp_org_id' => $catalog->supp_org_id
@@ -140,16 +132,21 @@ class CatalogWebApi extends WebApi
                 $model->note = $tempRow->note;
                 $model->status = CatalogBaseGoods::STATUS_ON;
                 //Если атрибуты изменились или новая запись, сохраняем модель
-                $model->save();
-                $catalogGood = CatalogGoods::findOne(['base_goods_id' => $model->id, 'cat_id' => $catalogID]);
+                if (!$model->save()) {
+                    throw new ValidationException($model->getFirstErrors());
+                }
+                $catalogGood = CatalogGoods::findOne(['base_goods_id' => $model->id, 'cat_id' => $catalog->id]);
                 if (empty($catalogGood)) {
                     $catalogGood = new CatalogGoods();
-                    $catalogGood->cat_id = $catalogID;
+                    $catalogGood->cat_id = $catalog->id;
                     $catalogGood->base_goods_id = $model->id;
                 }
                 $catalogGood->price = $model->price;
-                $catalogGood->save();
+                if (!$catalogGood->save()) {
+                    throw new ValidationException($catalogGood->getFirstErrors());
+                }
             }
+
             //Убиваем временный каталог
             CatalogTempContent::deleteAll(['temp_id' => $catalogTemp->id]);
             $catalogTemp->delete();

@@ -170,6 +170,9 @@ class OrderWebApi extends \api_web\components\WebApi
             } elseif ($order->client_id == $this->user->organization_id) {
                 $sender = $order->vendor;
             }
+            if ($isUnconfirmedVendor) {
+                $sender = $order->vendor;
+            }
             if (!empty($changed) || !empty($deleted)) {
                 Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted);
             }
@@ -1029,11 +1032,12 @@ class OrderWebApi extends \api_web\components\WebApi
      * Заверщить заказ
      *
      * @param array $post
+     * @param bool  $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
      * @throws \Throwable
      */
-    public function complete(array $post)
+    public function complete(array $post, bool $isUnconfirmedVendor = false)
     {
         $this->validateRequest($post, ['order_id']);
 
@@ -1054,7 +1058,6 @@ class OrderWebApi extends \api_web\components\WebApi
         if ($order->status == OrderStatus::STATUS_DONE) {
             throw new BadRequestHttpException("order.already_done");
         }
-
         OrderStatus::checkEdiOrderPermissions($order, 'complete');
 
         $t = \Yii::$app->db->beginTransaction();
@@ -1066,7 +1069,12 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new ValidationException($order->getFirstErrors());
             }
             $t->commit();
-            Notice::init('Order')->doneOrder($order, $this->user);
+            if ($isUnconfirmedVendor) {
+                $sender = $order->vendor;
+            } else {
+                $sender = $order->client;
+            }
+            Notice::init('Order')->doneOrder($order, $this->user, $sender);
             return $this->getInfo(['order_id' => $order->id]);
         } catch (\Throwable $e) {
             $t->rollBack();

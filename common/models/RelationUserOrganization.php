@@ -29,7 +29,11 @@ class RelationUserOrganization extends \yii\db\ActiveRecord
      */
     public function behaviors()
     {
-        return [];
+        return [
+            [
+                "class" => \common\behaviors\LogDeletedBehavior::class,
+            ],
+        ];
     }
 
     /**

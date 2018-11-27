@@ -7,7 +7,6 @@ namespace api_web\components;
  *
  * @package api\modules\v1\modules\web\components
  */
-
 use api_web\helpers\Logger;
 use api_web\helpers\WebApiHelper;
 use common\models\licenses\License;
@@ -37,18 +36,22 @@ use yii\web\HttpException;
  */
 class WebApiController extends \yii\rest\Controller
 {
+
     /**
      * @var \common\models\User $user
      */
     protected $user;
+
     /**
      * @var array $request
      */
     protected $request;
+
     /**
      * @var array $response
      */
     protected $response;
+
     /**
      * @var \yii\di\Container $container
      */
@@ -86,15 +89,15 @@ class WebApiController extends \yii\rest\Controller
                 WebApiAuth::className(),
                 \yii\filters\auth\HttpBearerAuth::className(),
                 \yii\filters\auth\QueryParamAuth::className(),
-                /*[
-                    'class' => \yii\filters\auth\HttpBasicAuth::className(),
-                    'auth' => function ($username, $password) {
-                        $model = new \common\models\forms\LoginForm();
-                        $model->email = $username;
-                        $model->password = $password;
-                        return ($model->validate()) ? $model->getUser() : null;
-                    }
-                ]*/
+            /* [
+              'class' => \yii\filters\auth\HttpBasicAuth::className(),
+              'auth' => function ($username, $password) {
+              $model = new \common\models\forms\LoginForm();
+              $model->email = $username;
+              $model->password = $password;
+              return ($model->validate()) ? $model->getUser() : null;
+              }
+              ] */
             ]
         ];
 
@@ -125,13 +128,13 @@ class WebApiController extends \yii\rest\Controller
 
         if (\Yii::$app->request->isOptions) {
             \Yii::$app->response->statusCode = 200;
-            \Yii::$app->response->content = ' ';
+            \Yii::$app->response->content    = ' ';
             \Yii::$app->response->send();
             \Yii::$app->end(200, \Yii::$app->response);
         }
 
         $this->enableCsrfValidation = false;
-        $user = \Yii::$app->request->getBodyParam('user');
+        $user                       = \Yii::$app->request->getBodyParam('user');
 
         \Yii::$app->language = \Yii::$app->language ?? 'ru';
         if (isset($user['language'])) {
@@ -146,7 +149,7 @@ class WebApiController extends \yii\rest\Controller
         }
 
         if (parent::beforeAction($action)) {
-            $this->user = $this->container->get('UserWebApi')->getUser();
+            $this->user    = $this->container->get('UserWebApi')->getUser();
             $this->request = \Yii::$app->request->getBodyParam('request');
             #Проверка лицензии только если это пользователь
             if (!empty($this->user)) {
@@ -201,17 +204,19 @@ class WebApiController extends \yii\rest\Controller
      * @param mixed            $result
      * @return array|string
      */
-    public
-    function afterAction($action, $result)
+    public function afterAction($action, $result)
     {
         parent::afterAction($action, $result);
-        if (!empty($this->response)) {
-            if (!in_array($action->id, $this->not_log_actions)) {
-                Logger::getInstance()::response($this->response);
+        if (is_array($result)) {
+            if (!empty($this->response)) {
+                if (!in_array($action->id, $this->not_log_actions)) {
+                    Logger::getInstance()::response($this->response);
+                }
+                return \api_web\helpers\WebApiHelper::response($this->response);
+            } else {
+                return [];
             }
-            return \api_web\helpers\WebApiHelper::response($this->response);
-        } else {
-            return [];
         }
     }
+
 }

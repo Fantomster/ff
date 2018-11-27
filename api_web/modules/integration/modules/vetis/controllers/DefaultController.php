@@ -857,7 +857,6 @@ class DefaultController extends WebApiController
      *                  property="request",
      *                  default={
      *                      "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
-     *                      "full": 1,
      *                      "base64_encode": 1
      *                  }
      *              )
@@ -883,13 +882,15 @@ class DefaultController extends WebApiController
     public function actionGetVsdPdf()
     {
         $result = (new VetisWaybill())->getVsdPdf($this->request);
-        if (is_array($result)) {
-            $this->response = $result;
-        } else {
-            header('Access-Control-Allow-Origin:*');
-            header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
-            header('Access-Control-Allow-Headers:Content-Type, Authorization');
-            exit($result);
-        }
+//        if (is_array($result)) {
+//            $this->response = $result;
+//        } else {
+//            header('Access-Control-Allow-Origin:*');
+//            header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
+//            header('Access-Control-Allow-Headers:Content-Type, Authorization');
+//            exit($result);
+//        }
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
+        \Yii::$app->response->data = $data;
     }
 }

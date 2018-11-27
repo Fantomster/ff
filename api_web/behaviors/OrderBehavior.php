@@ -84,7 +84,7 @@ class OrderBehavior extends Behavior
             $user = User::findOne($this->model->created_by_id);
             $body = [
                 "user"    => [
-                    "token"    => $user->access_token,
+                    "token"    => $user->getJWTToken(\Yii::$app->jwt),
                     "language" => $user->language ?? \Yii::$app->language,
                 ],
                 "request" => $request

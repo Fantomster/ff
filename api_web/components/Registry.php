@@ -29,8 +29,12 @@ class Registry
     const VENDOR_DOC_MAIL_SERVICE_ID = 3;
     /**@var int const for mercuriy service id in all_service table */
     const MERC_SERVICE_ID = 4;
+    /**@var int const for EGAIS service id in all_service table */
+    const EGAIS_SERVICE_ID = 5;
     /**@var int const for EDI service id in all_service table */
     const EDI_SERVICE_ID = 6;
+    /**@var int const for 1C (rest) service id in all_service table */
+    const ONE_S_VENDOR_SERVICE_ID = 7;
     /**@var int const for 1C (rest) service id in all_service table */
     const ONE_S_CLIENT_SERVICE_ID = 8;
     /**@var int const for 1C (rest) service id in all_service table */

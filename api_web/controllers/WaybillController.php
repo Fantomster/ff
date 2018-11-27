@@ -462,6 +462,9 @@ class WaybillController extends WebApiController
 
     /**
      * Асинхронный метод создания и отправки накладных
+     *
+     * @throws \api_web\exceptions\ValidationException
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionCreateAndSendWaybillAsync()
     {

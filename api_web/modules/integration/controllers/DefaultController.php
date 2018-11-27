@@ -249,7 +249,7 @@ class DefaultController extends \api_web\components\WebApiController
      * @SWG\Post(path="/integration/default/check-connect",
      *     tags={"Integration"},
      *     summary="Проверка, доступно ли подключение к серверу интеграции",
-     *     description="Проверка, доступно ли подключение к серверу интеграции",
+     *     description="Проверка, доступно ли подключение к серверу интеграции, если params пустой, будут браться настройки из базы",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -260,7 +260,12 @@ class DefaultController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                          "service_id": 2
+     *                          "service_id": 2,
+     *                          "params":{
+     *                              "URL":"http://192.168.100.39:8080/resto/api",
+     *                              "auth_login":"admin",
+     *                              "auth_password":"password",
+     *                           }
      *                       }
      *              )
      *         )
@@ -287,6 +292,6 @@ class DefaultController extends \api_web\components\WebApiController
     public function actionCheckConnect()
     {
         $this->license_service_id = $this->user->integration_service_id ?? 0;
-        $this->response = SyncServiceFactory::init($this->request['service_id'])->checkConnect();
+        $this->response = SyncServiceFactory::init($this->request['service_id'])->checkConnect($this->request);
     }
 }

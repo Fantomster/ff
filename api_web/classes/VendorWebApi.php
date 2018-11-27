@@ -153,19 +153,18 @@ class VendorWebApi extends \api_web\components\WebApi
                 $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
                 $user->newPassword = ForgotForm::generatePassword(8);
                 $user->newPasswordConfirm = $user->newPassword;
-                $user->status = User::STATUS_UNCONFIRMED_EMAIL;
-                if (!$user->validate()) {
+                $user->status = User::STATUS_ACTIVE;
+                if (!$user->validate() || !$user->save()) {
                     throw new ValidationException($user->getFirstErrors());
                 }
-                $user->save();
                 $profile->setUser($user->id);
                 $profile->full_name = $fio;
                 $profile->phone = $phone;
                 $profile->sms_allow = Profile::SMS_ALLOW;
-                if (!$profile->validate()) {
+                if (!$profile->validate() || !$profile->save()) {
                     throw new ValidationException($profile->getFirstErrors());
                 }
-                $profile->save();
+
                 if (!$vendorID) {
                     $organization->name = $org;
                 }
@@ -178,10 +177,10 @@ class VendorWebApi extends \api_web\components\WebApi
                     $organization->contact_name = $post['user']['contact_name'];
                 }
 
-                if (!$organization->validate()) {
+                if (!$organization->validate() || !$organization->save()) {
                     throw new ValidationException($organization->getFirstErrors());
                 }
-                $organization->save();
+
                 $user->setOrganization($organization)->save();
                 $relId = $user->createRelationUserOrganization($user->organization->id, $user->role_id);
                 $get_supp_org_id = $organization->id;

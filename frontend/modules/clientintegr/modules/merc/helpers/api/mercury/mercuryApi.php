@@ -274,9 +274,11 @@ class mercuryApi extends baseApi
             } while ($status == 'IN_PROCESS');
 
             //Пишем лог
-            try {
-                mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
-            } catch (\Exception $e) {
+            if(!isset($result->application->errors)) {
+                try {
+                    mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
+                } catch (\Exception $e) {}
+            } else {
                 $errors = is_array($result->application->errors->error) ? $result->application->errors->error : [$result->application->errors->error];
                 $err = true;
                 foreach ($errors as $error) {
@@ -304,9 +306,10 @@ class mercuryApi extends baseApi
                     }
                 }
                 if ($err) {
-                    throw $e;
+                    mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
                 }
             }
+            
             if ($status == 'COMPLETED') {
                 $doc[] = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
                 (new VetDocumentsChangeList())->updateDocumentsList($doc[0]);

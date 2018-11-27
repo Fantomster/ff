@@ -202,15 +202,21 @@ class OrderNotice
      *
      * @param Order $order
      * @param User  $user
+     * @param       $sender
      */
-    public function doneOrder(Order $order, User $user)
+    public function doneOrder(Order $order, User $user, $sender = null)
     {
         /** @var Mailer $mailer */
         /** @var Message $message */
-        $sender = $order->createdBy;
+        if (!$sender) {
+            $sender = $order->createdBy;
+            $senderOrg = $sender->organization;
+        } else {
+            $senderOrg = $sender;
+        }
+
         $mailer = Yii::$app->mailer;
         $mailer->htmlLayout = '@mail_views/order';
-        $senderOrg = $sender->organization;
         $subject = Yii::t('message', 'frontend.controllers.order.complete', ['ru' => "Заказ № {order_id} выполнен!", 'order_id' => $order->id]);
 
         $searchModel = new OrderContentSearch();
@@ -388,7 +394,7 @@ class OrderNotice
                     if ($recipient->profile->phone && $notification->order_changed) {
                         $text = Yii::$app->sms->prepareText('sms.order_changed', [
                             'client_name' => $senderOrg->name,
-                            'url'  => $order->getUrlForUser($recipient)
+                            'url'         => $order->getUrlForUser($recipient)
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);
                     }

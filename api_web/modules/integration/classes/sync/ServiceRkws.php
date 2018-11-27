@@ -772,9 +772,10 @@ class ServiceRkws extends AbstractSyncFactory
     }
 
     /**
-     * @return array|bool
+     * @param array $request
+     * @return array
      */
-    public function checkConnect()
+    public function checkConnect($request = [])
     {
         try {
             $cook = $this->prepareServiceWithAuthCheck();

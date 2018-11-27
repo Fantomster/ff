@@ -14,6 +14,7 @@ use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
 use common\models\IntegrationSettingValue;
 use common\models\Waybill;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class iikoApi
@@ -66,6 +67,20 @@ class iikoApi
         }
 
         return self::$_instance;
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     * @throws BadRequestHttpException
+     */
+    public function setAttribute($name, $value)
+    {
+        if (isset(self::$_instance->{$name})) {
+            self::$_instance->{$name} = $value;
+        } else {
+            throw new BadRequestHttpException('iikoApi attribute not found: ' . $name);
+        }
     }
 
     /**

@@ -393,7 +393,7 @@ class OrganizationController extends Controller
         $date2 = new \DateTime();
         $nowDate = $date2->format('Y-m-d H:i:s');
 
-        return $this->render('add-license', ['licenses' => $licenses, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'nowDate' => $nowDate, 'licenseID' => $id]);
+        return $this->render('add-license', ['licenses' => $licenses, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'nowDate' => $nowDate, 'organizationID' => $id]);
     }
 
     public function actionAjaxUpdateLicenseOrganization()

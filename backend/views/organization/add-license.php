@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php foreach ($organizations as $id => $name): ?>
         <?php
         $allLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->groupBy('license_id')->leftJoin('license', 'license.id=license_organization.license_id')->with('license')->orderBy('license.sort_index')->all();
-        if ($id == $licenseID) {
+        if ($id == $organizationID) {
             $checked = true;
         } else {
             $checked = false;

@@ -19,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
         <div class="checkbox">
             <p style="padding-left: 35px;">
-                <input type="checkbox" checked="checked" id="alCheckAllOrg"> Выбрать все организации
+                <input type="checkbox" id="alCheckAllOrg"> Выбрать все организации
             </p>
         </div>
         <hr>
@@ -28,6 +28,11 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php foreach ($organizations as $id => $name): ?>
         <?php
         $allLicenseOrganization = \common\models\licenses\LicenseOrganization::find()->where(['org_id' => $id])->groupBy('license_id')->leftJoin('license', 'license.id=license_organization.license_id')->with('license')->orderBy('license.sort_index')->all();
+        if ($id == $licenseID) {
+            $checked = true;
+        } else {
+            $checked = false;
+        }
         ?>
         <div class="row">
             <div class="col-md-3">
@@ -37,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php else: ?>
                     <p style="padding-left: 15px; position: relative;">
                         <?php endif; ?>
-                        <?= Html::checkbox('organizations[]', true, [
+                        <?= Html::checkbox('organizations[]', $checked, [
                             'value' => $id,
                             'label' => "<span style='font-size: 30px; position: absolute; top: -7px; left: 50px;'>" . $name . "</span>",
                             'class' => 'checkbox alOneOrgCheckbox',

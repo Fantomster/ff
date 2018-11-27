@@ -86,10 +86,24 @@ class CatalogWebApi extends WebApi
             throw new BadRequestHttpException("empty_param|vendor_id");
         }
         $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
-        $vendorBaseCatalog = Catalog::findOne(['supp_org_id' => $request['vendor_id'], 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
             throw new BadRequestHttpException("base_catalog_not_found");
         }
+
+        $vendorBaseCatalog = Catalog::findOne(['supp_org_id' => $request['vendor_id'], 'type' => Catalog::BASE_CATALOG]);
+        if (empty($vendorBaseCatalog)) {
+            $vendorBaseCatalog = new Catalog([
+                'supp_org_id'  => $request['vendor_id'],
+                'type'         => Catalog::BASE_CATALOG,
+                'name'         => 'Главный каталог',
+                'status'       => Catalog::STATUS_ON,
+                'currency_id'  => $catalog->currency_id,
+                'main_index'   => $catalog->main_index,
+                'index_column' => $catalog->index_column
+            ]);
+            $vendorBaseCatalog->save();
+        }
+
         $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($catalogTemp)) {
             throw new BadRequestHttpException("catalog_temp_not_found");
@@ -107,7 +121,7 @@ class CatalogWebApi extends WebApi
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             CatalogBaseGoods::updateAll([
-                'status' => CatalogBaseGoods::STATUS_OFF,
+                'status'  => CatalogBaseGoods::STATUS_OFF,
                 'deleted' => CatalogBaseGoods::DELETED_ON,
             ], [
                 'supp_org_id' => $catalog->supp_org_id,

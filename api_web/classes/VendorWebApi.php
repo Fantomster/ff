@@ -82,13 +82,13 @@ class VendorWebApi extends \api_web\components\WebApi
                 ->where(['ruo.organization_id' => $vendorID, 'o.type_id' => Organization::TYPE_SUPPLIER])->all();
 
             foreach ($arVendorUsers as $vendorUser) {
-                /**@var User $vendorUser*/
+                /**@var User $vendorUser */
                 $this->createAssociateManager($vendorUser);
             }
 
             if ($relation->invite != RelationSuppRest::INVITE_ON) {
                 foreach ($organization->users as $recipient) {
-                    if($recipient->role_id != Role::ROLE_SUPPLIER_MANAGER) {
+                    if ($recipient->role_id != Role::ROLE_SUPPLIER_MANAGER) {
                         continue;
                     }
                     //$this->user->sendInviteToVendor($recipient);
@@ -124,7 +124,7 @@ class VendorWebApi extends \api_web\components\WebApi
         $org = $post['user']['organization_name'];
         $phone = $post['user']['phone'];
 
-        $vendorUser= $this->vendorExists($email);
+        $vendorUser = $this->vendorExists($email);
 
         if ($vendorUser) {
             $user = User::find()->where(['email' => $email])->one();
@@ -507,7 +507,11 @@ class VendorWebApi extends \api_web\components\WebApi
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
      * @throws \yii\base\Exception
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\StaleObjectException
+     * @throws \yii\di\NotInstantiableException
      */
     public function uploadFile(array $request)
     {
@@ -518,16 +522,16 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|data');
         }
         $vendorId = $request['vendor_id'];
-        $vendorUser = User::findOne(['organization_id' => $vendorId]);
-        if(empty($vendorUser)) {
+        $vendor = Organization::findOne($vendorId);
+        if (empty($vendor) || $vendor->type_id != Organization::TYPE_SUPPLIER) {
             //todo_refactor no migration localization
             throw new BadRequestHttpException('vendor.not_found');
         }
-        if ($vendorUser->organization->vendor_is_work) {
+        if ($vendor->vendor_is_work) {
             throw new BadRequestHttpException('vendor.is_work');
         }
 
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendorId, $this->user->organization, true);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendor->id, $this->user->organization, true);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
         }

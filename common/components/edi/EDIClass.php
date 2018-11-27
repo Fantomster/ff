@@ -386,6 +386,13 @@ class EDIClass extends Component
                     $catalogGood->price = $good['price'];
                     $catalogGood->save();
                 }
+                Yii::$app->db->createCommand()->update('catalog_base_goods', [
+                    'units'                => $good['units'],
+                    'product'              => $good['name'],
+                    'article'              => $good['article'],
+                    'ed'                   => $good['ed'],
+                    'edi_supplier_article' => $good['edi_supplier_article']
+                ], ['id' => $catalogBaseGood->id])->execute();
             }
             \Yii::$app->db->createCommand()->update('catalog_base_goods', ['updated_at' => new Expression('NOW()'), 'status' => CatalogBaseGoods::STATUS_ON], 'id=' . $catalogBaseGood->id)->execute();
         }

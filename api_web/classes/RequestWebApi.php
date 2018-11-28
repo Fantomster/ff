@@ -593,6 +593,8 @@ class RequestWebApi extends WebApi
      */
     private function prepareRequestCallback(RequestCallback $model)
     {
+        $createdAt = (empty($model->created_at)) ? (new \DateTime())->format('Y-m-d H:i:s') : \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:mm:ss');
+        $updatedAt = (empty($model->updated_at)) ? (new \DateTime())->format('Y-m-d H:i:s') : \Yii::$app->formatter->asDate($model->updated_at, 'dd.MM.yyyy HH:mm:ss');
         return [
             'id'         => (int)$model->id,
             "request_id" => (int)$model->request_id,
@@ -600,8 +602,8 @@ class RequestWebApi extends WebApi
             "vendor"     => WebApiHelper::prepareOrganization($model->organization),
             "price"      => $model->price,
             "comment"    => $model->comment,
-            "created_at" => \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:mm:ss'),
-            "updated_at" => \Yii::$app->formatter->asDate($model->updated_at, 'dd.MM.yyyy HH:mm:ss'),
+            "created_at" => $createdAt,
+            "updated_at" => $updatedAt,
         ];
     }
 }

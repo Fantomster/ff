@@ -349,7 +349,11 @@ class DocumentWebApi extends \api_web\components\WebApi
                   dat.outer_number_additional                    outer_number_additional,
                   IF(order_id IS NOT NULL,
                      CASE
-                     WHEN group_concat(DISTINCT dat.waybill_status_id) = ':WAYBILL_UNLOADED'
+                     WHEN instr(group_concat(DISTINCT dat.waybill_status_id),:WAYBILL_UNLOADED) > 0
+                          AND
+                          instr(group_concat(DISTINCT dat.waybill_status_id),':WAYBILL_UNLOADED,') = 0
+                          AND
+                          instr(group_concat(DISTINCT dat.waybill_status_id),',:WAYBILL_UNLOADED') = 0
                        THEN :DOC_GROUP_STATUS_SENT
                      WHEN 
                         instr(group_concat(DISTINCT dat.waybill_status_id), :WAYBILL_FORMED) > 0

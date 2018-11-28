@@ -81,10 +81,19 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
     {
         Yii::$app->cache->flush();
         $lic = mercService::getLicense();
+        $params = Yii::$app->request->getQueryParams();
         $searchModel = new mercStockEntrySearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
         $session = Yii::$app->session;
+
+        if (Yii::$app->request->post("mercStockEntrySearch")) {
+            $params['mercStockEntrySearch'] = Yii::$app->request->post("mercStockEntrySearch");
+            $session['mercStockEntrySearch'] = Yii::$app->request->post("mercStockEntrySearch");
+        }
+
+        $params['mercStockEntrySearch'] = $session['mercStockEntrySearch'];
+
+        $dataProvider = $searchModel->search($params);
+
         $selected = $session->get('selectedentry', []);
 
         $params = ['searchModel'  => $searchModel,

@@ -263,6 +263,8 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param int   $id
      * @return string
      * @throws BadRequestHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     private function deleteProduct(Order $order, int $id)
     {
@@ -730,6 +732,8 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param bool $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function products($post, bool $isUnconfirmedVendor = false)
     {
@@ -844,6 +848,8 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param bool $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function categories($post = null, bool $isUnconfirmedVendor = false)
     {
@@ -1093,9 +1099,9 @@ class OrderWebApi extends \api_web\components\WebApi
     /**
      * Сохранение заказа в PDF
      *
-     * @param array           $post
-     * @param OrderController $c
-     * @return string
+     * @param array            $post
+     * @param WebApiController $c
+     * @return false|string
      * @throws BadRequestHttpException
      */
     public function saveToPdf(array $post, WebApiController $c)
@@ -1148,6 +1154,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
     public function setDocumentNumber($post)
     {

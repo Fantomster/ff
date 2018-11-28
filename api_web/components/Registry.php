@@ -81,7 +81,8 @@ class Registry
     static $mc_licenses_id = [
         self::MC_LITE_LICENSE_ID,
         self::MC_BUSINESS_LICENSE_ID,
-        self::MC_ENTERPRICE_LICENSE_ID
+        self::MC_ENTERPRICE_LICENSE_ID,
+        self::MERC_SERVICE_ID
     ];
 
     const DOC_GROUP_STATUS_WAIT_SENDING = 1;
@@ -96,9 +97,9 @@ class Registry
 
     /** @var array коды операций выгрузки накладныхх по сервисам */
     static $operation_code_send_waybill = [
-        self::RK_SERVICE_ID => 33,
-        self::IIKO_SERVICE_ID => 5,
-        self::TILLYPAD_SERVICE_ID => 5,
+        self::RK_SERVICE_ID           => 33,
+        self::IIKO_SERVICE_ID         => 5,
+        self::TILLYPAD_SERVICE_ID     => 5,
         self::ONE_S_CLIENT_SERVICE_ID => 0
     ];
 

@@ -537,10 +537,9 @@ class CatalogWebApi extends WebApi
 
         if (!isset($rel->cat_id) || $rel->cat_id == 0) {
             $catalog = new Catalog();
-            $vendorOrganization = Organization::findOne(['id' => $vendorID]);
             $catalog->type = Catalog::CATALOG;
             $catalog->supp_org_id = $vendorID;
-            $catalog->name = $vendorOrganization->name;
+            $catalog->name = $restOrganization->name . ' ' . date('d.m.Y');
             $catalog->status = Catalog::STATUS_ON;
             $catalog->currency_id = 1;
             $mainCatalog = Catalog::findOne(['supp_org_id' => $vendorID]);

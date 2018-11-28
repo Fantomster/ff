@@ -46,11 +46,6 @@ class VsdHttp extends \yii\base\Component
         $vsdNumber = $this->getVsdNumberByUuid($uuid);
         $step = $this->getPage($full ? $this->pdfLink  . $vsdNumber : $this->shortPdfLink . $vsdNumber, true, \Yii::$app->session[$this->sessionName]);
         $data = $step['content'];
-        \Yii::$app->response->headers->add('Content-Disposition','attachment; filename=' . $uuid . '.pdf');
-        \Yii::$app->response->headers->add("Content-type", "application/pdf");
-        \Yii::$app->response->headers->add('Expires', '0');
-        \Yii::$app->response->headers->add('Cache-Control', 'must-revalidate, post-check=0, pre-check=0');
-        \Yii::$app->response->headers->add('Cache-Control', 'public');
         return $data;
     }
 

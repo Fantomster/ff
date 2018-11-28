@@ -201,8 +201,7 @@ class WebApiController extends \yii\rest\Controller
      * @param mixed            $result
      * @return array|string
      */
-    public
-    function afterAction($action, $result)
+    public function afterAction($action, $result)
     {
         parent::afterAction($action, $result);
         if (!empty($this->response)) {

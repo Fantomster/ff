@@ -334,6 +334,11 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     {
         $vsdHttp = $this->generateVsdHttp();
         $data = $vsdHttp->getPdfData($uuid, $full);
+        \Yii::$app->response->headers->add('Content-Disposition','attachment; filename=' . $uuid . '.pdf');
+        \Yii::$app->response->headers->add("Content-type", "application/pdf");
+        \Yii::$app->response->headers->add('Expires', '0');
+        \Yii::$app->response->headers->add('Cache-Control', 'must-revalidate, post-check=0, pre-check=0');
+        \Yii::$app->response->headers->add('Cache-Control', 'public');
         \Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
         \Yii::$app->response->data = $data;
     }

@@ -1642,7 +1642,7 @@ class OrderController extends WebApiController
 
     /**
      * @SWG\Post(path="/order/messages-by-unconfirmed-vendor",
-     *     tags={"Order"},
+     *     tags={"Order/UnconfirmedVendorActions"},
      *     summary="Список сообщений диалога неподтвержденного вендора",
      *     description="Получить список всех сообщений дилога неподтвержденного вендора",
      *     produces={"application/json"},
@@ -1708,7 +1708,7 @@ class OrderController extends WebApiController
 
     /**
      * @SWG\Post(path="/order/send-message-by-unconfirmed-vendor",
-     *     tags={"Order"},
+     *     tags={"Order/UnconfirmedVendorActions"},
      *     summary="Отправка сообщения поставщика (неподтвержденного) в чат по заказу для ресторана",
      *     description="Отправка сообщения поставщика (неподтвержденного) в чат по заказу для ресторана",
      *     produces={"application/json"},

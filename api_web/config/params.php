@@ -27,17 +27,15 @@ return [
         '/user/set-organization',
         '/user/organization',
         '/payment/currency-list',
-        '/market/products',
-        '/order/info',
         '/order/info-by-unconfirmed-vendor',
         '/order/update-order-by-unconfirmed-vendor',
         '/order/products-list-for-unconfirmed-vendor',
         '/order/categories-for-unconfirmed-vendor',
         '/order/cancel-order-by-unconfirmed-vendor',
         '/order/complete-order-by-unconfirmed-vendor',
-        '/client/get-license-mix-cart',
         '/order/messages-by-unconfirmed-vendor',
-        '/order/send-message-by-unconfirmed-vendor'
+        '/order/send-message-by-unconfirmed-vendor',
+        '/client/get-license-mix-cart'
     ],
     'api_web_url' => 'https://api-dev.mixcart.ru',
     'staticUrl' => [

@@ -152,6 +152,7 @@ class CatalogWebApi extends WebApi
                 $model->price = $tempRow->price;
                 $model->note = $tempRow->note;
                 $model->status = CatalogBaseGoods::STATUS_ON;
+                $model->deleted = CatalogBaseGoods::DELETED_OFF;
                 //Если атрибуты изменились или новая запись, сохраняем модель
                 if (!$model->save()) {
                     throw new ValidationException($model->getFirstErrors());

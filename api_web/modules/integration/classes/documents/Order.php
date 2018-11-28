@@ -22,6 +22,7 @@ class Order extends BaseOrder implements DocumentInterface
      *
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
     public function prepare()
     {

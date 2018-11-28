@@ -1591,6 +1591,7 @@ class OrderController extends WebApiController
             header('Access-Control-Allow-Origin:*');
             header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
             header('Access-Control-Allow-Headers:Content-Type, Authorization');
+            header('Content-Disposition','attachment; filename=mixcart_order_' . $this->request['order_id'] . '.pdf');
             header("Content-type:application/pdf");
             exit($result);
         }

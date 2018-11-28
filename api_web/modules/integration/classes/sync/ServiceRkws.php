@@ -21,7 +21,6 @@ use common\models\OuterTask;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use api\common\models\RkAccess;
 use api\common\models\RkSession;
-use api_web\modules\integration\classes\SyncLog;
 use common\models\OrganizationDictionary;
 
 class ServiceRkws extends AbstractSyncFactory
@@ -63,6 +62,8 @@ class ServiceRkws extends AbstractSyncFactory
     /** @var array $additionalXmlFields Поле во входящем xml -> поле в нашей модели данных */
     public $additionalXmlFields = [];
 
+    protected $logCategory = "rkws_log";
+    
     /**
      * Basic service method "Send request"
      *
@@ -72,7 +73,7 @@ class ServiceRkws extends AbstractSyncFactory
     public function sendRequestForObjects(): ?array
     {
         # 1. Start "Send request" action
-        SyncLog::trace('Initialized new procedure action "Send request" in ' . __METHOD__);
+        $this->log('Initialized new procedure action "Send request" in ' . __METHOD__);
         $cook = $this->prepareServiceWithAuthCheck();
 
         $url = $this->getUrlCmd();
@@ -84,11 +85,12 @@ class ServiceRkws extends AbstractSyncFactory
         </RQ>';
         $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
 
-        SyncLog::trace('Result XML-data for objects is: ' . PHP_EOL . $xmlData);
+        $this->log('Result XML-data for objects is: ' . PHP_EOL . $xmlData);
 
         return [
-            'service_prefix' => SyncLog::$servicePrefix,
-            'log_index'      => SyncLog::$logIndex,
+            //wtf
+//            'service_prefix' => SyncLog::$servicePrefix,
+//            'log_index'      => SyncLog::$logIndex,
         ];
 
     }
@@ -114,7 +116,7 @@ class ServiceRkws extends AbstractSyncFactory
     public function sendRequest(array $params = []): array
     {
         # 1. Start "Send request" action
-        SyncLog::trace('Initialized new procedure action "Send request" in ' . __METHOD__);
+        $this->log('Initialized new procedure action "Send request" in ' . __METHOD__);
         $cook = $this->prepareServiceWithAuthCheck();
         # 2. Если нет сессии - завершаем с ошибкой
         if (!$cook) {
@@ -179,7 +181,7 @@ class ServiceRkws extends AbstractSyncFactory
                     $dictionary->save();
 
                     $transaction->commit();
-                    SyncLog::trace('SUCCESS. json-response-data: ' . str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
+                    $this->log('SUCCESS. json-response-data: ' . str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
                     return $this->prepareModel($dictionary);
                 }
             }
@@ -204,7 +206,7 @@ class ServiceRkws extends AbstractSyncFactory
     {
 
         # 1. Check if authorization is required && active license exists
-        SyncLog::trace('Begin "auth check" in ' . __METHOD__);
+        $this->log('Begin "auth check" in ' . __METHOD__);
         $this->now = date('Y-m-d H:i:s', time());
 
         # 2. Find license
@@ -238,7 +240,7 @@ class ServiceRkws extends AbstractSyncFactory
                     if (isset($xml['@attributes']['id']) && $xml['@attributes']['id'] == $this->licenseCode && !$err) {
 
                         # 6.1.1. Активная сессия в куки подтверждена - используем ее и прекращаем процедуры
-                        SyncLog::trace('Service licence session with active state id good - use it');
+                        $this->log('Service licence session with active state id good - use it');
                         /** @var PDO $transaction */
                         $transaction->rollback();
                         return $sess->cook;
@@ -253,7 +255,7 @@ class ServiceRkws extends AbstractSyncFactory
         # Checkout existing valig connection params
         $access = RkAccess::findOne(['locked' => 0]);
         if ($access) {
-            SyncLog::trace('Service licence connection parameters found - try to use it');
+            $this->log('Service licence connection parameters found - try to use it');
             # 7.1. Try to prepare new session
             $xmlData = $this->sendByCurl($this->getUrlLogin(), $this->prepareXmlWithAuthParams($access));
             if ($xmlData) {
@@ -338,7 +340,7 @@ class ServiceRkws extends AbstractSyncFactory
             }
             $this->urlCmd = $url;
         }
-        SyncLog::trace('Request URL getUrlCmd() : ' . $this->urlCmd);
+        $this->log('Request URL getUrlCmd() : ' . $this->urlCmd);
         return $this->urlCmd;
     }
 
@@ -356,7 +358,7 @@ class ServiceRkws extends AbstractSyncFactory
             }
             $this->urlLogin = $url;
         }
-        SyncLog::trace('Request URL getUrlLogin() : ' . $this->urlLogin);
+        $this->log('Request URL getUrlLogin() : ' . $this->urlLogin);
         return $this->urlLogin;
     }
 
@@ -382,7 +384,7 @@ class ServiceRkws extends AbstractSyncFactory
      */
     public function prepareXmlWithAuthParams(RkAccess $access): string
     {
-        SyncLog::trace('Prepare XML-data type "Service new login and password connection" in ' . __METHOD__);
+        $this->log('Prepare XML-data type "Service new login and password connection" in ' . __METHOD__);
         $key = $access->lic;
         $usr = $access->login . ';';
         $usr .= strtolower(md5($access->login . $access->password)) . ';';
@@ -409,7 +411,7 @@ class ServiceRkws extends AbstractSyncFactory
     public function prepareXmlWithTaskAndServiceCode($index, $code, $guid, array $params = []): string
     {
         $cb = $this->getCallbackURL() . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
-        SyncLog::trace('Callback URL and salespoint code for the template are:' . $cb . ' (' . $code . ')');
+        $this->log('Callback URL and salespoint code for the template are:' . $cb . ' (' . $code . ')');
 
         $renderParams = [
             'cb'   => $cb,
@@ -420,12 +422,12 @@ class ServiceRkws extends AbstractSyncFactory
             $renderParams['productGroup'] = $params['product_group'];
         }
         if (isset($params['code']) && $params['code']) {
-            SyncLog::trace('Made object code replacement:' . $code . ' -> ' . $params['code']);
+            $this->log('Made object code replacement:' . $code . ' -> ' . $params['code']);
             $renderParams['code'] = $params['code'];
         }
         $template = Yii::$app->view->render($this->dirResponseXml . '/' . ucfirst($index), $renderParams);
         $template = trim($template);
-        SyncLog::trace('Template result is:' . PHP_EOL . $template);
+        $this->log('Template result is:' . PHP_EOL . $template);
         return $template;
     }
 
@@ -462,17 +464,17 @@ class ServiceRkws extends AbstractSyncFactory
 
             if (!isset($records)) {
                 $result[$waybill_id] = false;
-                SyncLog::trace('No records found to be sent in ' . __METHOD__);
+                $this->log('No records found to be sent in ' . __METHOD__);
                 continue;
             }
 
             # 4. Start "Send waybill" action
-            SyncLog::trace('Initialized new procedure action "Send request" in ' . __METHOD__);
+            $this->log('Initialized new procedure action "Send request" in ' . __METHOD__);
             $cook = $this->prepareServiceWithAuthCheck();
 
             # 2. Если нет сессии - завершаем с ошибкой
             if (!$cook) {
-                SyncLog::trace('Cannot authorize with session or login data');
+                $this->log('Cannot authorize with session or login data');
                 throw new BadRequestHttpException('Cannot authorize with curl');
             }
 
@@ -482,7 +484,7 @@ class ServiceRkws extends AbstractSyncFactory
             //$xml = $this->prepareXmlWithTaskAndServiceCode($this->index, $this->licenseCode, $guid, $params);
 
             $cb = str_replace('load-dictionary', '', Yii::$app->params['rkeepCallBackURL']) . "send-waybill?" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
-            SyncLog::trace('Callback URL and salespoint code for the template are:' . $cb . ' (' . $this->licenseCode . ')');
+            $this->log('Callback URL and salespoint code for the template are:' . $cb . ' (' . $this->licenseCode . ')');
 
             $exportApproved = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['useAcceptedDocs']);
 
@@ -499,7 +501,7 @@ class ServiceRkws extends AbstractSyncFactory
                     'guid'           => $guid,
                     'cb'             => $cb,
                 ]);
-            SyncLog::trace($xml);
+            $this->log($xml);
             $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
 
             if ($xmlData) {
@@ -511,7 +513,7 @@ class ServiceRkws extends AbstractSyncFactory
                     $transaction = $this->createTransaction();
                     $waybill->status_id = Registry::WAYBILL_UNLOADING;
                     if (!$waybill->save()) {
-                        SyncLog::trace('Error while saving waybill status');
+                        $this->log('Error while saving waybill status');
                     }
                     $oper = AllServiceOperation::findOne(['service_id' => $this->serviceId, 'denom' => 'sh_doc_receiving_report']);
                     $task = new OuterTask([
@@ -528,18 +530,18 @@ class ServiceRkws extends AbstractSyncFactory
                     ]);
                     if ($task->save()) {
                         $transaction->commit();
-                        SyncLog::trace('SUCCESS. json-response-data: ' .
+                        $this->log('SUCCESS. json-response-data: ' .
                             str_replace(',', PHP_EOL . '      ', json_encode($task->attributes)));
                         $result[] = $waybill->prepare();
                     } else {
                         $transaction->rollBack();
-                        SyncLog::trace('Cannot save task!');
+                        $this->log('Cannot save task!');
                         $result[] = $waybill->prepare();
                         //throw new BadRequestHttpException('rkws_task_save_error');
                     }
                 }
             } else {
-                SyncLog::trace('Service connection parameters for final transaction are wrong');
+                $this->log('Service connection parameters for final transaction are wrong');
                 $result[] = $waybill->prepare();
             }
         }
@@ -693,17 +695,17 @@ class ServiceRkws extends AbstractSyncFactory
             $orgDic->save();
             $transaction->commit();
             $orgDic->noticeToFCM();
-            SyncLog::trace('Number of save counts while there were no errors is ' . $saveCount);
+            $this->log('Number of save counts while there were no errors is ' . $saveCount);
             return self::XML_LOAD_RESULT_SUCCESS;
         }
 
-        SyncLog::trace('No rows were inserted or updated!');
+        $this->log('No rows were inserted or updated!');
         $saveErr = ['save' => 'no_save_data'];
         $transaction->rollback();
         $orgDic->status_id = $orgDic::STATUS_ERROR;
         $orgDic->save();
         $orgDic->noticeToFCM();
-        SyncLog::trace('Fixed save errors: ' . json_encode($saveErr));
+        $this->log('Fixed save errors: ' . json_encode($saveErr));
         return self::XML_LOAD_RESULT_FAULT;
     }
 
@@ -726,14 +728,14 @@ class ServiceRkws extends AbstractSyncFactory
                 /** @noinspection PhpUndefinedFieldInspection */
                 $saveErr['waybill'] = $arrayNew[0];
             } else {
-                SyncLog::trace('Waybill successfully send');
+                $this->log('Waybill successfully send');
                 return self::XML_LOAD_RESULT_SUCCESS;
             }
         } else {
-            SyncLog::trace('No rows were inserted or updated!');
+            $this->log('No rows were inserted or updated!');
             $saveErr = ['save' => 'no_save_data'];
         }
-        SyncLog::trace('Fixed save errors: ' . json_encode($saveErr));
+        $this->log('Fixed save errors: ' . json_encode($saveErr));
         return self::XML_LOAD_RESULT_FAULT;
     }
 

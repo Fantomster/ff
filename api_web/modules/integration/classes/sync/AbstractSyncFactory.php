@@ -51,6 +51,8 @@ abstract class AbstractSyncFactory extends WebApi
     public $serviceId;
     /** Service Name identified by service_id in $_POST params and SyncServiceFactory->$allServicesMap */
     public $serviceName;
+    
+    protected $logCategory = "sync_log";
 
     /**
      * Construct method for Class SyncServiceFactory
@@ -65,6 +67,14 @@ abstract class AbstractSyncFactory extends WebApi
         if ($serviceId) {
             $this->serviceId = $serviceId;
         }
+    }
+    
+    /**
+     * @param string $message
+     */
+    public function log($message)
+    {
+        \Yii::info($message, $this->logCategory);
     }
 
     /**

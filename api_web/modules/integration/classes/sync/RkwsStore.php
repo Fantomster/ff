@@ -2,7 +2,6 @@
 
 namespace api_web\modules\integration\classes\sync;
 
-use api_web\modules\integration\classes\SyncLog;
 use common\models\OuterStore;
 use yii\web\BadRequestHttpException;
 
@@ -28,7 +27,7 @@ class RkwsStore extends ServiceRkws
     public function parsingXml(string $data = null): array
     {
         $myXML = simplexml_load_string($data);
-        SyncLog::trace('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);
+        $this->log('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);
         if (!$myXML) {
             throw new BadRequestHttpException("empty_result_xml_data");
         }

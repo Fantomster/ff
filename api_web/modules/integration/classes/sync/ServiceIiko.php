@@ -40,6 +40,8 @@ class ServiceIiko extends AbstractSyncFactory
      */
     private $countWaybillSend = 0;
 
+    protected $logCategory = "iiko_log";
+    
     /**
      * @param array $params
      * @return array

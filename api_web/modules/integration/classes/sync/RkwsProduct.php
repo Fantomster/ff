@@ -2,7 +2,6 @@
 
 namespace api_web\modules\integration\classes\sync;
 
-use api_web\modules\integration\classes\SyncLog;
 use common\models\OuterCategory;
 use common\models\OuterProduct;
 use common\models\OuterUnit;
@@ -11,6 +10,7 @@ use yii\web\BadRequestHttpException;
 
 class RkwsProduct extends ServiceRkws
 {
+
     /** @var string $index Символьный идентификатор справочника */
     public $index = self::DICTIONARY_PRODUCT;
 
@@ -33,7 +33,7 @@ class RkwsProduct extends ServiceRkws
         $dictionary = $this->getOrganizationDictionary($this->serviceId, $this->orgId);
 
         $myXML = simplexml_load_string($data);
-        SyncLog::trace('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);
+        $this->log('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);
         if (!$myXML) {
             $dictionary->status_id = $dictionary::STATUS_ERROR;
             $dictionary->save();
@@ -41,32 +41,32 @@ class RkwsProduct extends ServiceRkws
         }
 
         $units = OuterUnit::find()
-            ->where([
-                'service_id' => $this->serviceId,
-                'org_id'     => $this->orgId
-            ])->asArray()
-            ->all();
+                ->where([
+                    'service_id' => $this->serviceId,
+                    'org_id'     => $this->orgId
+                ])->asArray()
+                ->all();
         if (!empty($units)) {
             $units = ArrayHelper::map($units, 'outer_uid', 'id');
         }
 
         $selectedGategory = OuterCategory::find()
-            ->where([
-                'service_id' => $this->serviceId,
-                'org_id'     => $this->orgId,
-                'selected'   => 1,
-                'is_deleted' => 0
-            ])->asArray()
-            ->all();
+                ->where([
+                    'service_id' => $this->serviceId,
+                    'org_id'     => $this->orgId,
+                    'selected'   => 1,
+                    'is_deleted' => 0
+                ])->asArray()
+                ->all();
         if (!empty($selectedGategory)) {
             $selectedGategory = ArrayHelper::map($selectedGategory, 'outer_uid', 'id');
         }
 
-        $array = [];
+        $array  = [];
         $pcount = 0;
         /** @var \SimpleXMLElement $group */
         foreach ($this->iterator($myXML->ITEM) as $group) {
-            $group_rid = ((array)$group->attributes())['@attributes']['rid'];
+            $group_rid = ((array) $group->attributes())['@attributes']['rid'];
             if (!isset($selectedGategory[$group_rid])) {
                 continue;
             }
@@ -86,14 +86,14 @@ class RkwsProduct extends ServiceRkws
                             if (isset($units[$unit_rid])) {
                                 $unit_id = $units[$unit_rid];
                             } else {
-                                $unitModel = new OuterUnit();
-                                $unitModel->org_id = $this->orgId;
+                                $unitModel             = new OuterUnit();
+                                $unitModel->org_id     = $this->orgId;
                                 $unitModel->service_id = $this->serviceId;
-                                $unitModel->name = strval($v->attributes()['name'][0]);
-                                $unitModel->outer_uid = $unit_rid;
+                                $unitModel->name       = strval($v->attributes()['name'][0]);
+                                $unitModel->outer_uid  = $unit_rid;
                                 $unitModel->save();
-                                $unit_id = $unitModel->id;
-                                $units[$unit_rid] = $unitModel->id;
+                                $unit_id               = $unitModel->id;
+                                $units[$unit_rid]      = $unitModel->id;
                             }
                             $array[$pcount]['outer_unit_id'] = $unit_id;
                             break;
@@ -102,7 +102,8 @@ class RkwsProduct extends ServiceRkws
                 }
             }
         }
-        
+
         return $array;
     }
+
 }

@@ -13,7 +13,6 @@
 namespace api_web\controllers;
 
 use api_web\modules\integration\classes\sync\AbstractSyncFactory;
-use api_web\modules\integration\classes\SyncLog;
 use common\models\OuterTask;
 use \Yii;
 use api_web\components\WebApiNoAuthController;

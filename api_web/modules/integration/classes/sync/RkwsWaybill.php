@@ -4,10 +4,10 @@ namespace api_web\modules\integration\classes\sync;
 
 use common\models\Waybill;
 use yii\web\BadRequestHttpException;
-use api_web\modules\integration\classes\SyncLog;
 
 class RkwsWaybill extends ServiceRkws
 {
+
     /** @var string $index Символьный идентификатор справочника */
     public $index = 'waybill';
 
@@ -28,11 +28,11 @@ class RkwsWaybill extends ServiceRkws
     public function parsingXml(string $data = null): array
     {
         $myXML = simplexml_load_string($data);
-        SyncLog::trace('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);
+        $this->log('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);
         if (!$myXML) {
             throw new BadRequestHttpException("empty_result_xml_data");
         }
-        $array = [];
+        $array  = [];
         $gcount = 0;
 
         if (!isset($myXML->ERROR)) {
@@ -41,7 +41,6 @@ class RkwsWaybill extends ServiceRkws
                 foreach ($doc->attributes() as $a => $b) {
                     $array[$gcount][$a] = strval($b[0]);
                 }
-
             }
         } else {
             $array['stat'] = 4;
@@ -49,9 +48,9 @@ class RkwsWaybill extends ServiceRkws
                 foreach ($doc->attributes() as $a => $b) {
                     $array[$gcount][$a] = strval($b[0]);
                 }
-
             }
         }
         return $array;
     }
+
 }

@@ -31,12 +31,12 @@ class LogDeletedBehavior extends Behavior
         if (!is_a($this->owner, '\yii\db\ActiveRecord')) {
             return;
         }
-        if (!is_a(\Yii::$app, 'yii\console\Application')) {
+        if (is_a(\Yii::$app, 'yii\console\Application')) {
             $user = "console application";
             $location = \Yii::$app->controller->id . '/' . \Yii::$app->controller->action->id;
         } else {
             $user = \Yii::$app->user->isGuest ? 'user unknown' : 'user ' . \Yii::$app->user->id;
-            $location = \Yii::app()->request->userHostAddress ?? 'location unknown';
+            $location = \Yii::$app->request->userIP ?? 'location unknown';
         }
         $attributes = $this->owner->attributes ?? [];
         $message = "Object " . $this->owner::className() . "(" . Json::encode($attributes) . ") was deleted by $user from $location";

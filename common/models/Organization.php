@@ -1806,7 +1806,10 @@ class Organization extends \yii\db\ActiveRecord
 
     public function wipeBusiness()
     {
-        RelationUserOrganization::deleteAll(['organization_id' => $this->id]);
+        $relations = RelationUserOrganization::findAll(['organization_id' => $this->id]);
+        foreach ($relations as $relation) {
+            $relation->delete();
+        }
         $this->blacklisted = true;
         $this->parent_id = null;
         return $this->save();

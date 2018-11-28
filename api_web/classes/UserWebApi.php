@@ -265,7 +265,7 @@ class UserWebApi extends \api_web\components\WebApi
             Notice::init('User')->sendEmailWelcome($user);
             $userToken->delete();
             $transaction->commit();
-            return $user->access_token;
+            return $user->getJWTToken();
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;

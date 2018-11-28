@@ -1021,7 +1021,7 @@ class User extends \amnah\yii2\user\models\User
             $smsNotification->save();
         }
     }
-    
+
     public function setNotifications()
     {
         $toBeSet = [
@@ -1062,23 +1062,31 @@ class User extends \amnah\yii2\user\models\User
     }
 
     /**
-     * @param Jwt $jwt
+     * @param null $jwt
      * @return string
+     * @throws \yii\base\Exception
      */
-    public function getJWTToken(Jwt $jwt)
+    public function getJWTToken($jwt = null)
     {
-        if (empty($this->access_token)) {
-            $this->auth_key = \Yii::$app->security->generateRandomString();
-            $this->access_token = \Yii::$app->security->generateRandomString();
-            $this->save();
+        if (is_null($jwt)) {
+            $jwt = \Yii::$app->jwt;
         }
 
-        $signer = new Sha256();
-        return (string)$jwt->getBuilder()
-            ->setIssuer('mixcart.ru')
-            ->set('access_token', $this->access_token)
-            ->sign($signer, $jwt->key)
-            ->getToken();
+        if ($jwt instanceof Jwt) {
+            if (empty($this->access_token)) {
+                $this->auth_key = \Yii::$app->security->generateRandomString();
+                $this->access_token = \Yii::$app->security->generateRandomString();
+                $this->save();
+            }
+
+            $signer = new Sha256();
+            return (string)$jwt->getBuilder()
+                ->setIssuer('mixcart.ru')
+                ->set('access_token', $this->access_token)
+                ->sign($signer, $jwt->key)
+                ->getToken();
+        }
+        throw new \yii\base\Exception('Bad Jwt class');
     }
 
     /**

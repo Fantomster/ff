@@ -275,7 +275,7 @@ Modal::widget([
         <div class="box-header with-border">
             <div class="panel-body">
                 <div class="box-body table-responsive no-padding grid-category">
-                    <?php Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]); ?>
+                    <?php /*Pjax::begin(['id' => 'pjax-vsd-list', 'timeout' => 15000, 'scrollTo' => true, 'enablePushState' => false]); */?>
                     <?php if (Yii::$app->session->hasFlash('success')): ?>
                         <div class="alert alert-success alert-dismissable">
                             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
@@ -308,7 +308,7 @@ Modal::widget([
                             'role'      => 'search',
                         ],
                         'enableClientValidation' => false,
-                        'method'                 => 'get',
+                        //'method'                 => 'get',
                     ]); ?>
                     <div class="col-md-12">
                         <div class="col-sm-2">
@@ -409,6 +409,7 @@ Modal::widget([
                         //$checkBoxColumnStyle = ($searchModel->type == 2) ? "display: none;" : "";
                         echo GridView::widget([
                             'id'           => 'vetStoreEntryList',
+                            'pjax' => true,
                             'dataProvider' => $dataProvider,
                             'formatter'    => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
                             //'filterModel' => $searchModel,
@@ -420,7 +421,7 @@ Modal::widget([
                         ]);
                         ?>
                     </div>
-                    <?php Pjax::end(); ?>
+                    <?php /*Pjax::end();*/ ?>
                     <?= '<div class="col-md-3">' . Html::submitButton(Yii::t('app', 'frontend.client.integration.store_entry.inventory_all', ['ru' => 'Списать все']), ['class' => 'btn btn-danger inventory_all']) . '</div>' ?>
                     <?= '<div class="col-md-3">' . Html::submitButton(Yii::t('message', 'frontend.client.integration.store_entry.create_vsd', ['ru' => 'Оформить транспортное ВСД']), ['class' => 'btn btn-success create_vsd']) . '</div>' ?>
                     <?= '<div class="col-md-3">' . Html::submitButton(Yii::t('app', 'frontend.client.integration.store_entry.conversion', ['ru' => 'Переработка']), ['class' => 'btn btn-primary create_vsd_conversion']) . '</div>' ?>

@@ -25,7 +25,7 @@ class ModelsCollection extends Model
      * @param ActiveRecord[] $models
      * @return array
      */
-    public function saveMultiple(array $models)
+    public function saveMultiple(array $models, string $dbName = 'db_api')
     {
         if (count($models) > 0) { // если массив дочерних бизнесов ненулевой,
 
@@ -45,7 +45,7 @@ class ModelsCollection extends Model
 
             $transaction = \Yii::$app->db->beginTransaction(); // начинаем транзакцию
             try {
-                $numberAffectedRows = \Yii::$app->db_api->createCommand()
+                $numberAffectedRows = \Yii::$app->{$dbName}->createCommand()
                     ->batchInsert($firstModel->tableName(), $columnsToInsert, $rowsToInsert)
                     ->execute(); // вставляем в таблицу массив значений дочерних бизнесов
                 $transaction->commit(); // заканчиваем транзакцию

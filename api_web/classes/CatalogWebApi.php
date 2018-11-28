@@ -4,6 +4,7 @@ namespace api_web\classes;
 
 use api\modules\v1\modules\mobile\resources\RelationSuppRest;
 use api_web\exceptions\ValidationException;
+use common\helpers\ModelsCollection;
 use common\models\CatalogGoods;
 use common\models\CatalogTemp;
 use common\models\CatalogTempContent;
@@ -109,7 +110,42 @@ class CatalogWebApi extends WebApi
             throw new BadRequestHttpException("catalog_temp_not_found");
         }
 
-        $catalogTempContent = CatalogTempContent::find()->where(['temp_id' => $catalogTemp->id])->all();
+        $catalogTempContent = (new Query())->select([
+            'ctc.id',
+            'ctc.article',
+            'ctc.product',
+            'coalesce(cbg.id, 0) cbg_id',
+            'ctc.ed',
+            'ctc.units',
+            'ctc.price',
+            'ctc.note',
+            'cbg.status',
+            'cbg.market_place',
+            'cbg.created_at',
+            'cbg.updated_at',
+            'cbg.supp_org_id',
+            'cbg.category_id',
+            'cbg.image',
+            'cbg.brand',
+            'cbg.region',
+            'cbg.weight',
+            'cbg.es_status',
+            'cbg.mp_show_price',
+            'cbg.rating',
+            'cbg.barcode',
+            'cbg.edi_supplier_article',
+            'cbg.ssid',
+            'coalesce(cg.id, 0) cg_id',
+            'cg.base_goods_id',
+            'cg.vat cg_vat'
+        ])
+            ->from(CatalogTempContent::tableName() . ' ctc')
+            ->leftJoin(CatalogBaseGoods::tableName() . ' cbg', 'cbg.article=ctc.article and' .
+                ' cbg.cat_id=:vendorBaseCatId and cbg.product=ctc.product',
+                [':vendorBaseCatId' => $vendorBaseCatalog->id])
+            ->leftJoin(CatalogGoods::tableName() . ' cg', 'cg.base_goods_id=cbg.id and cg.cat_id=cbg.cat_id')
+            ->where(['temp_id' => $catalogTemp->id])->all();
+
         if (empty($catalogTempContent)) {
             throw new BadRequestHttpException("catalog_temp_content_not_found");
         }
@@ -127,48 +163,81 @@ class CatalogWebApi extends WebApi
                 'supp_org_id' => $catalog->supp_org_id,
                 'cat_id'      => $catalog->id
             ]);
+            $arBatchInsert = [];
             /**
              * @var CatalogTempContent $tempRow
              */
-            foreach ($catalogTempContent as $tempRow) {
-                //Поиск товара в главном каталоге
-                $model = CatalogBaseGoods::findOne([
-                    'cat_id'  => $vendorBaseCatalog->id,
-                    'article' => $tempRow->article,
-                    'product' => $tempRow->product
-                ]);
-                //Если не нашли, создаем его
-                if (empty($model)) {
+            foreach ($this->gen($catalogTempContent) as $tempRow) {
+                if ($tempRow['cbg_id'] == 0) {
                     $model = new CatalogBaseGoods([
                         'cat_id'      => $vendorBaseCatalog->id,
-                        'article'     => $tempRow->article,
-                        'product'     => $tempRow->product,
+                        'article'     => $tempRow['article'],
+                        'product'     => $tempRow['product'],
                         'supp_org_id' => $catalog->supp_org_id
+                    ]);
+                } else {
+                    /**@var CatalogBaseGoods $model */
+                    $model = \Yii::createObject([
+                        'class'                => '\common\models\CatalogBaseGoods',
+                        'cat_id'               => $vendorBaseCatalog->id,
+                        'article'              => $tempRow['article'],
+                        'product'              => $tempRow['product'],
+                        'status'               => $tempRow['status'],
+                        'deleted'              => CatalogBaseGoods::DELETED_OFF,
+                        'created_at'           => $tempRow['created_at'],
+                        'updated_at'           => $tempRow['updated_at'],
+                        'supp_org_id'          => $tempRow['supp_org_id'],
+                        'category_id'          => $tempRow['category_id'],
+                        'image'                => $tempRow['image'],
+                        'brand'                => $tempRow['brand'],
+                        'region'               => $tempRow['region'],
+                        'weight'               => $tempRow['weight'],
+                        'es_status'            => $tempRow['es_status'],
+                        'mp_show_price'        => $tempRow['mp_show_price'],
+                        'rating'               => $tempRow['rating'],
+                        'barcode'              => $tempRow['barcode'],
+                        'edi_supplier_article' => $tempRow['edi_supplier_article'],
+                        'ssid'                 => $tempRow['ssid'],
+                    ]);
+                    $model->setOldAttributes([
+                        'id'                   => $tempRow['cbg_id'],
                     ]);
                 }
                 //Заполняем аттрибуты
-                $model->ed = $tempRow->ed;
-                $model->units = $tempRow->units;
-                $model->price = $tempRow->price;
-                $model->note = $tempRow->note;
+                $model->ed = $tempRow['ed'];
+                $model->units = $tempRow['units'];
+                $model->price = $tempRow['price'];
+                $model->note = $tempRow['note'];
                 $model->status = CatalogBaseGoods::STATUS_ON;
                 $model->deleted = CatalogBaseGoods::DELETED_OFF;
                 //Если атрибуты изменились или новая запись, сохраняем модель
                 if (!$model->save()) {
                     throw new ValidationException($model->getFirstErrors());
                 }
-                $catalogGood = CatalogGoods::findOne(['base_goods_id' => $model->id, 'cat_id' => $catalog->id]);
-                if (empty($catalogGood)) {
+                if ($tempRow['cg_id'] != 0) {
+//                    $catalogGood = CatalogGoods::findOne(['base_goods_id' => $model->id, 'cat_id' => $catalog->id]);
+                    $catalogGood = \Yii::createObject([
+                        'class'         => '\common\models\CatalogGoods',
+                        'cat_id'        => $vendorBaseCatalog->id,
+                        'base_goods_id' => $tempRow['base_goods_id'],
+                        'vat'           => $tempRow['cg_vat'],
+                    ]);
+                    $catalogGood->setOldAttributes([
+                        'id'            => $tempRow['cg_id'],
+                    ]);
+                    $catalogGood->price = $model->price;
+                    if (!$catalogGood->save()) {
+                        throw new ValidationException($catalogGood->getFirstErrors());
+                    }
+                } else {
                     $catalogGood = new CatalogGoods();
                     $catalogGood->cat_id = $catalog->id;
                     $catalogGood->base_goods_id = $model->id;
-                }
-                $catalogGood->price = $model->price;
-                if (!$catalogGood->save()) {
-                    throw new ValidationException($catalogGood->getFirstErrors());
+                    $catalogGood->price = $model->price;
+                    $arBatchInsert[] = $catalogGood;
                 }
             }
-
+            $batchResult = (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');
             //Убиваем временный каталог
             CatalogTempContent::deleteAll(['temp_id' => $catalogTemp->id]);
             $catalogTemp->delete();
@@ -177,6 +246,17 @@ class CatalogWebApi extends WebApi
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
+        }
+    }
+
+    /**
+     * @param $catalogTempContent
+     * @return \Generator
+     */
+    function gen($catalogTempContent)
+    {
+        foreach ($catalogTempContent as $item) {
+            yield $item;
         }
     }
 

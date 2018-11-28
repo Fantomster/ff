@@ -117,7 +117,7 @@ class Excel
                     $cellsCount++;
                     continue;
                 }
-                $value = $cell->getValue();
+                $value = trim($cell->getValue());
                 if ($mapping[$cellsCount] == 'article' && $value == 'Артикул') {
                     $write = false;
                     break;
@@ -128,7 +128,7 @@ class Excel
                     break;
                 }
 
-                if ($mapping[$cellsCount] == $index && empty($value)) {
+                if (in_array($mapping[$cellsCount], [$index, 'ed', 'product']) && empty($value)) {
                     $write = false;
                     break;
                 }

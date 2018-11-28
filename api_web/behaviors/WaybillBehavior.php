@@ -28,8 +28,9 @@ class WaybillBehavior extends Behavior
      */
     public function afterUpdate($event)
     {
+        $this->model->changeStatusToCompared();
         $this->sendNoticeFcm();
-        return $this->model->changeStatusToCompared();
+        return true;
     }
 
     /**

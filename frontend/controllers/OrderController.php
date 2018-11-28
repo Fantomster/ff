@@ -1771,7 +1771,7 @@ class OrderController extends DefaultController
             ],
             'cssFile'     => '../web/css/pdf_styles.css'
         ]);
-        \Yii::$app->response->headers->add('Content-Disposition','attachment; filename=order_' . $order->id . 'pdf');
+        \Yii::$app->response->headers->add('Content-Disposition','attachment; filename=mixcart_order_' . $order->id . '.pdf');
         \Yii::$app->response->headers->add("Content-type", "application/pdf");
         \Yii::$app->response->headers->add('Expires', '0');
         \Yii::$app->response->headers->add('Cache-Control', 'must-revalidate, post-check=0, pre-check=0');

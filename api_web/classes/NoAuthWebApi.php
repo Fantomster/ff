@@ -51,7 +51,6 @@ class NoAuthWebApi
         SyncLog::trace('`task_id` : ' . $task->id);
         $operation = AllServiceOperation::findOne(['code' => $task->oper_code, 'service_id' => $task->service_id]);
         if (!$operation) {
-            SyncLog::trace('Operation code (' . $task->oper_code . ') is wrong!');
             throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
 
@@ -91,7 +90,6 @@ class NoAuthWebApi
         SyncLog::trace('Callback operation `task_id` params is ' . $task->id);
         $operation = AllServiceOperation::findOne(['code' => $task->oper_code, 'service_id' => $task->service_id]);
         if (!$operation) {
-            SyncLog::trace('Operation code (' . $task->oper_code . ') is wrong!');
             throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
 

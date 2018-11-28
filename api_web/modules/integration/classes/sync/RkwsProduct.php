@@ -37,7 +37,6 @@ class RkwsProduct extends ServiceRkws
         if (!$myXML) {
             $dictionary->status_id = $dictionary::STATUS_ERROR;
             $dictionary->save();
-            SyncLog::trace('Empty XML data!');
             throw new BadRequestHttpException("empty_result_xml_data");
         }
 

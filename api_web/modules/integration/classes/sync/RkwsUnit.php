@@ -30,7 +30,6 @@ class RkwsUnit extends ServiceRkws
         $myXML = simplexml_load_string($data);
         SyncLog::trace('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);
         if (!$myXML) {
-            SyncLog::trace('Empty XML data!');
             throw new BadRequestHttpException("empty_result_xml_data");
         }
         $array = [];
@@ -51,7 +50,6 @@ class RkwsUnit extends ServiceRkws
             }
         }
         if (!$array) {
-            SyncLog::trace('Wrong XML data!');
             throw new BadRequestHttpException("wrong_xml_data");
         }
         return $array;

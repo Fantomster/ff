@@ -118,7 +118,6 @@ class ServiceRkws extends AbstractSyncFactory
         $cook = $this->prepareServiceWithAuthCheck();
         # 2. Если нет сессии - завершаем с ошибкой
         if (!$cook) {
-            SyncLog::trace('Cannot authorize with session or login data');
             throw new BadRequestHttpException('Cannot authorize with curl');
         }
         #Если пришел запрос на обновление продуктов
@@ -191,7 +190,6 @@ class ServiceRkws extends AbstractSyncFactory
             throw $e;
         }
 
-        SyncLog::trace('Service connection parameters for final transaction are wrong');
         throw new BadRequestHttpException('empty_service_response_for_transaction');
     }
 
@@ -213,7 +211,6 @@ class ServiceRkws extends AbstractSyncFactory
         /**@var License $license */
         $license = License::checkByServiceId($this->user->organization_id, Registry::RK_SERVICE_ID);
         if (!$license) {
-            SyncLog::trace('Нет лицензии на R-keeper для организации ' . $this->user->organization_id . '!');
             throw new BadRequestHttpException('no_active_mixcart_license');
         }
 
@@ -281,27 +278,21 @@ class ServiceRkws extends AbstractSyncFactory
                     $sess->status = 1;
                     if (!$sess->save()) {
                         $transaction->rollback();
-                        SyncLog::trace('New session could not be created');
                         throw new BadRequestHttpException('rkws_session_create_error');
                     }
 
                     # 7.2. Use valid session
                     $transaction->commit();
-                    SyncLog::trace('Active session was just created - use it');
                     return $sess->cook;
                 }
 
                 $transaction->rollback();
-                SyncLog::trace('No session code created');
                 throw new BadRequestHttpException('rkws_session_no_cookie');
-
             } else {
-                SyncLog::trace('Service connection parameters are wrong');
                 throw new BadRequestHttpException('empty_service_response');
             }
 
         }
-        SyncLog::trace('Empty service connection params');
         throw new BadRequestHttpException('empty_service_access_params');
 
     }
@@ -317,15 +308,11 @@ class ServiceRkws extends AbstractSyncFactory
     public function deactivateSessionWithoutCommit(RkSession $sess, Transaction $transaction)
     {
         # 6.2. Активная сессия в куки не подтверждена
-        SyncLog::trace('Service licence session with active state id bad - deactivate it');
         $sess->status = 0;
         $sess->td = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         if (!$sess->save()) {
             $transaction->rollback();
-            SyncLog::trace('Fault session could not be deactivated');
             throw new BadRequestHttpException('rkws_session_update_error');
-        } else {
-            SyncLog::trace('Fault session was just deactivated');
         }
     }
 
@@ -572,7 +559,7 @@ class ServiceRkws extends AbstractSyncFactory
         try {
             $this->checkErrorResponse((array)simplexml_load_string($data));
         } catch (\Exception $e) {
-            SyncLog::trace('ERROR RK: ' . $e->getMessage());
+            \Yii::error('ERROR RK: ' . $e->getMessage());
             $orgDic->status_id = $orgDic::STATUS_ERROR;
             $orgDic->save();
             $orgDic->noticeToFCM();

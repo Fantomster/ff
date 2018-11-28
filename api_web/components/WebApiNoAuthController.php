@@ -3,8 +3,6 @@
 namespace api_web\components;
 
 use api_web\modules\integration\classes\sync\AbstractSyncFactory;
-use api_web\modules\integration\classes\SyncLog;
-use common\models\AllServiceOperation;
 use common\models\OuterTask;
 use \Yii;
 use yii\rest\Controller;
@@ -52,7 +50,6 @@ class WebApiNoAuthController extends Controller
         if (!$task_id) {
             $task_id = null;
         }
-        SyncLog::trace('Initialized init Controller as ' . __METHOD__, WebApiNoAuth::LOG_INDEX, $task_id);
         $this->container = (new WebApiNoAuth())->container;
     }
 
@@ -97,7 +94,6 @@ class WebApiNoAuthController extends Controller
      */
     public function afterAction($action, $result)
     {
-        SyncLog::trace('Prepare final response');
         parent::afterAction($action, $result);
         if (!empty($this->response)) {
             return $this->response;

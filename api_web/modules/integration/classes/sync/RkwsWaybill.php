@@ -30,7 +30,6 @@ class RkwsWaybill extends ServiceRkws
         $myXML = simplexml_load_string($data);
         SyncLog::trace('XML data: ' . $data . PHP_EOL . ' ---------------- ' . PHP_EOL);
         if (!$myXML) {
-            SyncLog::trace('Empty XML data!');
             throw new BadRequestHttpException("empty_result_xml_data");
         }
         $array = [];

@@ -2,6 +2,9 @@
 
 namespace api_web\behaviors;
 
+use api_web\classes\DocumentWebApi;
+use api_web\components\FireBase;
+use api_web\components\Registry;
 use yii\base\Behavior;
 use yii\db\ActiveRecord;
 
@@ -25,6 +28,25 @@ class WaybillBehavior extends Behavior
      */
     public function afterUpdate($event)
     {
+        $this->sendNoticeFcm();
         return $this->model->changeStatusToCompared();
+    }
+
+    /**
+     * Отправка информации о накладной в FCM
+     */
+    private function sendNoticeFcm()
+    {
+        if (in_array($this->model->status_id, [Registry::WAYBILL_UNLOADED, Registry::WAYBILL_ERROR])) {
+            FireBase::getInstance()->update([
+                'organization' => $this->model->acquirer_id
+            ], [
+                'document_refresh' => [
+                    'type'        => $this->model->order ? DocumentWebApi::TYPE_ORDER : DocumentWebApi::TYPE_WAYBILL,
+                    'document_id' => $this->model->order ? $this->model->order->id : $this->model->id,
+                    'service_id'  => $this->model->service_id
+                ]
+            ]);
+        }
     }
 }

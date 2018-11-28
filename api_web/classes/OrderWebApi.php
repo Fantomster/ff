@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\components\notice_class\OrderNotice;
 use api_web\components\Registry;
 use api_web\components\WebApiController;
 use api_web\controllers\OrderController;
@@ -1074,7 +1075,14 @@ class OrderWebApi extends \api_web\components\WebApi
             } else {
                 $sender = $order->client;
             }
-            Notice::init('Order')->doneOrder($order, $this->user, $sender);
+            /** @var OrderNotice $notice */
+            $notice = Notice::init('Order');
+            if ($order->status == Order::STATUS_PROCESSING) {
+                $notice->processingOrder($order, $this->user, $sender);
+            } elseif ($order->status == Order::STATUS_DONE) {
+                $notice->doneOrder($order, $this->user, $sender);
+            }
+
             return $this->getInfo(['order_id' => $order->id]);
         } catch (\Throwable $e) {
             $t->rollBack();

@@ -45,7 +45,8 @@ class WaybillBehavior extends Behavior
                 'document_refresh' => [
                     'type'        => $this->model->order ? DocumentWebApi::TYPE_ORDER : DocumentWebApi::TYPE_WAYBILL,
                     'document_id' => $this->model->order ? $this->model->order->id : $this->model->id,
-                    'service_id'  => $this->model->service_id
+                    'service_id'  => $this->model->service_id,
+                    'time' => time()
                 ]
             ]);
         }

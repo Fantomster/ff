@@ -101,8 +101,8 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
                    'lic'          => $lic,
                    'selected'     => $selected];
 
-        if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('index', $params);
+        if (Yii::$app->request->isAjax || Yii::$app->request->isPjax) {
+            return $this->renderAjax('index', $params);
         } else {
             return $this->render('index', $params);
         }

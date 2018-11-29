@@ -324,7 +324,8 @@ class DocumentWebApi extends \api_web\components\WebApi
                   if(order_id IS NULL, 'waybill', 'order')       `type`,
                   dat.sort_doc                                   doc_date,
                   group_concat(DISTINCT dat.supply)              documents,
-                  dat.order_acquirer_id                          order_acquirer_id,
+                  coalesce(dat.order_acquirer_id, dat.waybill_acquirer_id)
+                                                                 order_acquirer_id,
                   dat.order_vendor_id                            order_vendor_id,
                   if(merc_uuid IS NULL, 0, 1)                    is_mercury_cert,
                   dat.replaced_order_id                          replaced_order_id,

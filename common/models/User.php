@@ -550,11 +550,13 @@ class User extends \amnah\yii2\user\models\User
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
+        $mailer->htmlLayout = $this->module->emailViewPath . '/layouts/mail';
 
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::generate($user->id, $userToken::TYPE_EMAIL_ACTIVATE);
         $email = $user->email;
         $newPassword = $user->newPassword;
+
         $subject = Yii::t('app', 'common.models.confirm', ['ru' => "Подтвердите аккаунт на MixCart"]);
         $view = $isNewConfirm ? 'confirmEmailTwo' : 'confirmEmail';
         $result = $mailer->compose($view, compact("subject", "user", "profile", "userToken", "newPassword"))
@@ -587,6 +589,7 @@ class User extends \amnah\yii2\user\models\User
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
+        $mailer->htmlLayout = $this->module->emailViewPath . '/layouts/mail';
 
         // send email
         $user = $this;

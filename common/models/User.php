@@ -286,6 +286,11 @@ class User extends \amnah\yii2\user\models\User
     {
         return $this->hasMany(RelationUserOrganization::className(), ['user_id' => 'id']);
     }
+    
+    public function getRelationUserOrganization()
+    {
+        return $this->hasOne(RelationUserOrganization::className(), ['user_id' => 'id', 'organization_id' => 'organization_id']);
+    }
 
     public function getRelationUserOrganizationRoleID($organizationId)
     {

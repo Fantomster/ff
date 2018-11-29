@@ -441,9 +441,12 @@ class DocumentWebApi extends \api_web\components\WebApi
                          LEFT JOIN `$apiShema`.waybill d ON d.id = c.waybill_id AND d.service_id = :service_id
                        WHERE a.client_id = :business_id
                      ) dat
-                  LEFT JOIN `$apiShema`.outer_agent oav ON oav.org_id = :business_id AND oav.service_id = :service_id AND
-                                               if(dat.order_id IS NULL, dat.waybill_outer_agent_id, dat.order_vendor_id) =
-                                               if(dat.order_id IS NULL, oav.id, oav.vendor_id)
+                  
+                  LEFT JOIN (SELECT * FROM `$apiShema`.outer_agent WHERE org_id = :business_id AND service_id = :service_id LIMIT 1) as oav
+                   ON
+                   if(dat.order_id IS NULL, dat.waybill_outer_agent_id, dat.order_vendor_id) =
+                   if(dat.order_id IS NULL, oav.id, oav.vendor_id)
+                  
                   LEFT JOIN organization ov ON ov.id = dat.order_vendor_id
                   LEFT JOIN `$apiShema`.outer_store osw ON osw.org_id = :business_id AND osw.service_id = :service_id AND dat.waybill_outer_store_id = osw.id
                 WHERE 1  $where_all  

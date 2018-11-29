@@ -75,28 +75,47 @@ Modal::widget([
                                                                 value.push($(this).val());
                                                             });    
                                                 
+                                                           var count = value.length;
                                                            value = value.toString();  
+                                                           
+                                                           $(\'.inventory_all\').attr(\'disabled\',\'disabled\');
+                                                           $(\'.create_vsd\').attr(\'disabled\',\'disabled\');
+                                                           $(\'.create_vsd_conversion\').attr(\'disabled\',\'disabled\');
                                                            
                                                            $.ajax({
                                                              url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
                                                              type: "POST",
                                                              data: {selected: value, state: state},
                                                              success: function(data){
-                                                             $.pjax.reload({container: "#pjax-vsd-list", url: url, timeout:30000});
+                                                             if(state) {
+                                                                selectedCount += count;
+                                                             } else {
+                                                                selectedCount -= count;
+                                                             }
+                                                             $.pjax.reload({container: "#vetStoreEntryList-pjax", url: url, timeout:30000});
                                                              }
                                                            }); }',
-                'changeCell' => 'function(e) { 
+                'changeCell' => 'function(e) {
                                                              state = $(this).prop("checked") ? 1 : 0;
        
                                                             url = window.location.href;
                                                             var value = $(this).val();
+                
+                                                            $(\'.inventory_all\').attr(\'disabled\',\'disabled\');
+                                                            $(\'.create_vsd\').attr(\'disabled\',\'disabled\');
+                                                            $(\'.create_vsd_conversion\').attr(\'disabled\',\'disabled\');
                                                           
                                                            $.ajax({
                                                              url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
                                                              type: "POST",
                                                              data: {selected: value, state: state},
                                                              success: function(data){
-                                                             $.pjax.reload({container: "#pjax-vsd-list", url: url, timeout:30000});                                                             
+                                                             if(state) {
+                                                                selectedCount++;
+                                                             } else {
+                                                                selectedCount--;
+                                                             }
+                                                             $.pjax.reload({container: "#vetStoreEntryList-pjax", url: url, timeout:30000});
                                                                 
                                                              }
                                                            });}'
@@ -440,6 +459,15 @@ $selectedCount = count($selected);
 $customJs = <<< JS
 var selectedCount = $selectedCount;
 var justSubmitted = false;
+
+$(document).on('pjax:complete', function() {
+    if(selectedCount > 0) {
+        $('.inventory_all').removeAttr('disabled');
+        $('.create_vsd').removeAttr('disabled');
+        $('.create_vsd_conversion').removeAttr('disabled');
+    }
+});
+
 $(document).on("click", ".create_vsd", function(e) {
         if(($("#vetStoreEntryList").yiiGridView("getSelectedRows").length + selectedCount) > 0){
             window.location.href =  "$urlCreateVSD";  
@@ -481,7 +509,7 @@ $("#ajax-load").on("click", ".save-form", function() {
             form.serialize()
             )
             .done(function(result) {
-            $.pjax.reload("#pjax-vsd-list", {timeout:30000});
+            $.pjax.reload("#vetStoreEntryList-pjax", {timeout:30000});
             if(result != true)    
                 form.replaceWith(result);
             else

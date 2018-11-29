@@ -69,18 +69,18 @@ $organization = $user->organization;
 $lisences = $organization->getLicenseList();
 $listIntegration = '';
 $links = [
-    'rkws' => [
+    'rkws'      => [
         'alter' => 'R_keeper',
         'title' => 'R_keeper',
-        'url' => '/clientintegr/rkws/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
+        'url'   => '/clientintegr/rkws/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
     ],
-    'iiko' => [
+    'iiko'      => [
         'title' => 'iiko Office',
-        'url' => '/clientintegr/iiko/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
+        'url'   => '/clientintegr/iiko/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
     ],
     'odinsobsh' => [
         'title' => '1C',
-        'url' => '/clientintegr/odinsobsh/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
+        'url'   => '/clientintegr/odinsobsh/waybill/index?OrderSearch2%5Bid%5D=' . $order->id . '&way=' . $order->id,
     ]
 ];
 $numLicences = 0;
@@ -94,10 +94,14 @@ foreach ($links as $key => $val) {
 }
 $titleIntegration = 'Накладная успешно привязана!';
 if ($numLicences) {
-    $textIntegration = 'Перейти в интеграцию: '.$listIntegration;
+    $textIntegration = 'Перейти в интеграцию: ' . $listIntegration;
 } else {
-    $titleIntegration = 'Заказ завершен';
-    $textIntegration = 'Просьба активировать лицензию';
+    if ($order->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
+        $titleIntegration = 'Заказ подтвержден';
+    } else {
+        $titleIntegration = 'Заказ завершен';
+    }
+    $textIntegration = '';
 }
 
 $js = <<<JS
@@ -297,14 +301,14 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
     </h1>
     <?=
     Breadcrumbs::widget([
-        'options' => [
+        'options'  => [
             'class' => 'breadcrumb',
         ],
         'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru' => 'Главная']), 'url' => '/'],
-        'links' => [
+        'links'    => [
             [
                 'label' => Yii::t('message', 'frontend.views.order.history', ['ru' => 'История заказов']),
-                'url' => ['order/index'],
+                'url'   => ['order/index'],
             ],
             Yii::t('message', 'frontend.views.order.order_three', ['ru' => 'Заказ №']) . $order->id,
         ],
@@ -335,14 +339,14 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                         <?php
                         foreach ($order->orderChat as $chat) {
                             echo $this->render('_chat-message', [
-                                'id' => $chat->id,
-                                'name' => $chat->sentBy->profile->full_name,
-                                'sender_id' => $chat->sent_by_id,
-                                'message' => $chat->message,
-                                'time' => $chat->created_at,
-                                'isSystem' => $chat->is_system,
-                                'ajax' => 0,
-                                'danger' => $chat->danger,
+                                'id'               => $chat->id,
+                                'name'             => $chat->sentBy->profile->full_name,
+                                'sender_id'        => $chat->sent_by_id,
+                                'message'          => $chat->message,
+                                'time'             => $chat->created_at,
+                                'isSystem'         => $chat->is_system,
+                                'ajax'             => 0,
+                                'danger'           => $chat->danger,
                                 'organizationType' => (isset($chat->sentBy->organization) ? $chat->sentBy->organization->type_id : 1)]);
                         }
                         ?>
@@ -356,8 +360,8 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                         <div class="message-wrap">
                             <?=
                             Html::textInput('message', null, [
-                                'id' => 'message-field',
-                                'class' => 'message',
+                                'id'          => 'message-field',
+                                'class'       => 'message',
                                 'placeholder' => Yii::t('message', 'frontend.views.order.send_message', ['ru' => 'Отправить сообщение'])
                             ])
                             ?>

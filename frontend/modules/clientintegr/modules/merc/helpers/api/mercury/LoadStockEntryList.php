@@ -49,7 +49,7 @@ class LoadStockEntryList extends Model
                 'article' => $item->batch->productItem->code,
                 'production_date' => MercStockEntry::getDate($item->batch->dateOfProduction),
                 'expiry_date' => MercStockEntry::getDate($item->batch->expiryDate),
-                'batch_id' => $item->batch->batchID,
+                'batch_id' => is_array($item->batch->batchID) ? json_encode($item->batch->batchID) : $item->batch->batchID,
                 'perishable' =>  (int)$item->batch->perishable,
                 'producer_name' => isset($producer) ? ($producer->name.'('. $producer->address->addressView .')') : null,
                 'producer_country' => isset($country) ? $country->name : null,

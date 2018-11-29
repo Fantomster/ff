@@ -15,7 +15,6 @@ namespace api_web\modules\integration\controllers;
 
 use Yii;
 use yii\web\BadRequestHttpException;
-use api_web\modules\integration\classes\SyncLog;
 use api_web\modules\integration\classes\SyncServiceFactory;
 use api_web\modules\integration\classes\sync\AbstractSyncFactory;
 use api_web\components\WebApiController;
@@ -106,23 +105,18 @@ class SyncController extends WebApiController
         $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         # 2. Checkout other params and fix callback
         if ($task_id) {
-            # 2.1.1.Trace callback operation with task_id
-            SyncLog::trace('Callback operation `task_id` params is ' . $task_id);
             # 2.1.2. Check root script params
             if (!isset($this->request['service_id'])) {
                 $this->request['service_id'] = null;
             }
-            SyncLog::trace('Service ID is: ' . $this->request['service_id']);
             if (!isset($this->request['params'])) {
                 $this->request['params'] = [];
             }
-            SyncLog::trace('Request params are: ' . json_encode($this->request['params']));
         } else {
             if (!isset($this->request['service_id']) || !$this->request['service_id'] || !is_int($this->request['service_id'])) {
                 throw new BadRequestHttpException("empty_param|service_id");
             }
             if (!isset($this->request['params']) || !is_array($this->request['params']) || !$this->request['params']) {
-                SyncLog::trace('Required variable "params" is empty!');
                 throw new BadRequestHttpException("empty_param|params");
             }
         }
@@ -181,14 +175,11 @@ class SyncController extends WebApiController
     {
         # 2.2.1. Check root script params
         if (!isset($this->request['service_id']) || !$this->request['service_id'] || !is_int($this->request['service_id'])) {
-            SyncLog::trace('"Service ID" is required and empty!');
             throw new BadRequestHttpException("empty_param|service_id");
         }
         if (!isset($this->request['ids']) || !is_array($this->request['ids']) || !$this->request['ids']) {
-            SyncLog::trace('Required variable "ids" is empty!');
             throw new BadRequestHttpException("empty_param|ids");
         }
-        SyncLog::trace('Fix non-callback operation scenario');
 
         # 3. Load integration script with env and post params
         $factory = (new SyncServiceFactory($this->request['service_id'], [], SyncServiceFactory::TASK_SYNC_GET_LOG))->factory($this->request['service_id']);

@@ -68,7 +68,7 @@ class OuterProductMapSearch extends OuterProductMap
             ->leftJoin("$outerUnitTableName", "$outerUnitTableName.id = a.outer_unit_id")
             ->leftJoin("$outerStoreTableName", "$outerStoreTableName.id = b.outer_store_id")
             ->leftJoin("organization vendor", "cbg.supp_org_id = vendor.id")
-            ->leftJoin("relation_supp_rest rsr", "cbg.supp_org_id=rsr.supp_org_id and rsr.rest_org_id=:real_org_id and rsr.status=1")
+            ->leftJoin("relation_supp_rest rsr", "cbg.cat_id=rsr.cat_id and rsr.rest_org_id=:real_org_id and rsr.status=1")
             ->leftJoin("catalog_goods cg", "cg.cat_id=rsr.cat_id and cg.base_goods_id=cbg.id")
             ->where(["cbg.deleted" => 0])
             ->params([':service_id' => $this->service_id, ':real_org_id' => $client->id, ':parent_org' => $mainOrgId]);

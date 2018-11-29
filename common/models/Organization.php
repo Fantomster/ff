@@ -1053,12 +1053,17 @@ class Organization extends \yii\db\ActiveRecord
         $usrTable = User::tableName();
         $profTable = Profile::tableName();
         $assocTable = ManagerAssociate::tableName();
+        $relationTable = RelationUserOrganization::tableName();
 
         $managers = ArrayHelper::map(User::find()
             ->joinWith('profile')
             ->joinWith('associated')
+            ->joinWith('relationsUserOrganization')
             ->select(["$usrTable.id as id", "$profTable.full_name as name"])
-            ->where(["$usrTable.organization_id" => $vendor_id, "$assocTable.organization_id" => $this->id])
+            ->where([
+                "$relationTable.organization_id" => $vendor_id,
+                "$assocTable.organization_id" => $this->id,
+                    ])
             ->orderBy(['name' => SORT_ASC])
             ->asArray()
             ->all(), 'id', 'name');

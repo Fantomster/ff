@@ -1087,6 +1087,7 @@ class ClientController extends DefaultController
                     if (Catalog::find()->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
                         $supp_base_cat_id         = Catalog::find()->where(['supp_org_id' => $get_supp_org_id, 'type' => 1])->one()->id;
                         $relationSuppRest->cat_id = $supp_base_cat_id;
+                        $relationSuppRest->status = RelationSuppRest::CATALOG_STATUS_ON;
                     }
                     $relationSuppRest->rest_org_id = $currentUser->organization_id;
                     $relationSuppRest->supp_org_id = $get_supp_org_id;

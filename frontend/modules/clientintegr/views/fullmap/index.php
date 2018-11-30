@@ -653,7 +653,6 @@ $js = <<< JS
             }
             vatclick();
             variables_parse_first();
-            console.log(spisok);
         });
 
         $(document).ready(function() { // действия после полной загрузки страницы
@@ -662,31 +661,7 @@ $js = <<< JS
                 links_column4();
             }
             vatclick();
-            //var pos = 'positions';
-            //delete_cookie(pos);
-            //console.log(document.cookie);
-            //add_product_spisok(150);
-            //console.log(spisok);
-            //add_product_spisok(55);
-            //console.log(spisok);
-            //add_product_spisok();
-            //console.log(spisok);
-            //add_product_spisok(4);
-            //console.log(spisok);
-            //spisok = del_product_spisok(4);
-            //console.log(spisok);
-            //console.log(organization);
-            //service = 1;
-            //console.log(service);
             variables_parse_first();
-            console.log(spisok);
-            //console.log(spisok);
-            //var sdf = get_spisok();
-            //console.log(sdf);
-            //document.cookie = "positions=1,2,3,4";
-            //var p = get_cookie_positions();
-            //add_product_cookie(9);
-            //console.log(document.cookie);
         });
         
         function variables_parse_first() {

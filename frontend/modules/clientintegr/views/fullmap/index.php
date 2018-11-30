@@ -11,78 +11,15 @@ use yii\widgets\Breadcrumbs;
 use kartik\widgets\TouchSpin;
 use yii\web\View;
 use \yii\web\JsExpression;
-
-$js = <<<SCRIPT
-/* To initialize BS3 tooltips set this below */
-$(function () { 
-    $("[data-toggle='tooltip']").tooltip(); 
-});;
-SCRIPT;
-// Register tooltip/popover initialization javascript
-$this->registerJs($js);
-
-$this->title = Yii::t('message', 'frontend.views.order.set_order', ['ru' => 'Разместить заказ']);
-
-yii\jui\JuiAsset::register($this);
-
-$urlSaveSelected = Url::to(['fullmap/save-selected-maps']);
-$urlApply = Url::to(['fullmap/apply-fullmap']);
-$urlClear = Url::to(['fullmap/clear-fullmap']);
-$selectedCount = count($selected);
-
-if ($client->isEmpty()) { // если у бизнеса не задано имя или местонахождение организации в базе Google
-    $endMessage = Yii::t('message', 'frontend.views.request.continue_four', ['ru' => 'Продолжить']);
-    $content = Yii::t('message', 'frontend.views.order.hint', ['ru' => 'Чтобы делать заказы, добавьте поставщика!']);
-    $suppliersUrl = Url::to(['client/suppliers']);
-
-    frontend\assets\TutorializeAsset::register($this);
-    $customJs = <<< JS
-                    var _slides = [{
-                            title: '&nbsp;',
-                            content: '$content',
-                            position: 'right-center',
-                            overlayMode: 'focus',
-                            selector: '.step-vendor',
-                        },
-                    ];
-
-                    $.tutorialize({
-                            slides: _slides,
-                            bgColor: '#fff',
-                            buttonBgColor: '#84bf76',
-                            buttonFontColor: '#fff',
-                            fontColor: '#3f3e3e',
-                            showClose: true,
-                            arrowPath: '/arrows/arrow-green.png',
-                            fontSize: '14px',
-                            labelEnd: "$endMessage",
-                            onStop: function(currentSlideIndex, slideData, slideDom){
-                                document.location = '$suppliersUrl';
-                            },
-                    });
-
-                    if ($(window).width() > 767) {
-                        $.tutorialize.start();
-                    }
-
-JS;
-    $this->registerJs($customJs, View::POS_READY);
-}
+use common\models\Organization;
+use api\common\models\AllMaps;
+use common\models\CatalogBaseGoods;
 
 $this->registerJs(
 
-    'var selectedCount = ' . $selectedCount . ';
-    
+    '
     $(document).ready(function(){
     
-        /*$(document).on("change", "#selectedCategory", function(e) { //? на странице нет элементов с id = selectedCategory
-            var form = $("#searchForm");
-            form.submit();
-            $.post("' . Url::to(['/order/ajax-refresh-vendors']) . '", {"selectedCategory": $(this).val()}).done(function(result) {
-                $("#selectedVendor").replaceWith(result);
-            });
-        });*/
-        
         $(document).on("change", "#selectedVendor", function(e) { // реакция на выбор поставщика из выпадающего списка
             var form = $("#searchForm");
             form.submit();
@@ -102,135 +39,7 @@ $this->registerJs(
                 $("#searchForm").submit();
             }, 700);
         });
-        
-        $("body").on("hidden.bs.modal", "#changeQuantity, #showDetails", function() { //? на странице нет элементов с id = changeQuantity
-            $(this).data("bs.modal", null);
-        });
-        
-        $(document).on("click", ".pagination li a", function() { // реакция на нажатия кнопок пагинации
-            clearTimeout(timer);
-            return true;
-        });
-        
-        $(document).on("change", ".quantity", function(e) { // ? на странице нет элементов с классом quantity
-            value = $(this).val();
-            $(this).val(value.replace(",", "."));
-        });
     });
-        
-        $(document).on("click", ".apply-fullmap", function(e) { // реакция на нажатия кнопки "Применить"
-            if(($("#fullmapGrid").yiiGridView("getSelectedRows").length + selectedCount) == 0){  
-                alert("Ничего не выбрано!");
-                return false;
-            }
-            store_set = $("#store_set").val();
-            koef_set =  $("#koef_set").val();
-            vat_set  =  $("#vat_set").val();
-            service_set  =  $("#service_id option:selected").val();
-            if (typeof(koef_set) == "undefined" || koef_set == null || koef_set.length == 0 ) koef_set = -1;
-            
-            //console.log(store_set);
-            //console.log(koef_set);
-            //console.log(vat_set);
-            // Check selection at least one
-            
-            if (typeof(service_set) == "undefined" || service_set == null || service_set.length == 0 ) {
-                alert ("Не выбран сервис интеграции");
-                return false;
-            }
-            
-            if (store_set == -1 && koef_set == -1 && vat_set == -1) {
-                alert ("Не установлен ни один модификатор для массового применения");
-                return false;
-            }
-            
-            url = $(this).attr("href");
-
-            $.ajax({
-                url: "' . $urlApply . '",
-                type: "POST",
-                dataType: "json",
-                data: {store_set: store_set, koef_set: koef_set, vat_set : vat_set, service_set : service_set},
-                success: function(){
-                    selectedCount = 0;
-                    $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
-                }
-            });
-        });
-            
-            $(document).on("click", ".clear-fullmap", function(e) { // реакция на нажатие кнопки "Очистить весь выбор" 
-                if($("#fullmapGrid").yiiGridView("getSelectedRows").length > 0){
-                    url = $(this).attr("href");
-
-                    $.ajax({
-                        url: "' . $urlClear . '",
-                        type: "GET",
-                        success: function(){
-                            selectedCount = 0;
-                            $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
-                        }
-                    });
-                }
-            });
-        
-          
-       /*
-            $(document).on("change", ".select-on-check-all", function(e) { // реакция на изменение состояния флажка в чекбоксе в заголовке крайнего левого столбца
-   
-          //  e.preventDefault();
-           // url = $(this).attr("href");
-            url      = window.location.href;
-
-            var value = [];
-            state = $(this).prop("checked") ? 1 : 0;
-            
-           $(".checkbox-export").each(function() {
-                value.push($(this).val());
-            });    
-
-           value = value.toString();  
-           
-           //console.log(value);
-           //console.log(state);
-           //console.log(url);
-          
-           $.ajax({
-             url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
-             type: "GET",
-             success: function(){
-                 $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
-             }
-           });
-           
-    });
-    */
-    
-    /* $(document).on("change", ".checkbox-export", function(e) { // реакция на изменение состояния флажков в крайнем левом столбце
-   
-           // e.preventDefault();
-           // url = $(this).attr("href");
-              url      = window.location.href; 
-
-            state = $(this).prop("checked") ? 1 : 0;
-            value = $(this).val();    
-            
-            
-            //console.log(value);
-            //console.log(state);
-            //console.log(url);
-
-           $.ajax({
-             url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
-             type: "GET",
-             success: function(){
-                 //$.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
-                // $(#selected_info).val = selectedCount;
-                // alert("Good");
-             }
-           });
-           
-    });*/
-        
         
         '
 );
@@ -329,7 +138,7 @@ $this->registerJs(
                                 <?php echo Html::label('Склад:', 'store_set'); ?>
                                 <?php echo Html::dropDownList('store_set', null, $stores, ['class' => 'form-control', 'style' => 'width:30%', 'id' => 'store_set']); ?>
                                 <?php echo Html::label('Коэф:', 'koef_set'); ?>
-                                <?php echo Html::textInput("koef_set", '', ['class' => 'form-control', 'style' => 'width:15%;', 'id' => 'koef_set', 'readonly' => ($searchModel->service_id == 2 && $mainOrg != $client->id)]) ?>
+                                <?php echo Html::textInput("koef_set", '', ['class' => 'form-control', 'style' => 'width:15%;', 'id' => 'koef_set', 'readonly' => ($searchModel->service_id == \api_web\components\Registry::IIKO_SERVICE_ID && $mainOrg != $client->id)]) ?>
                                 <?php echo Html::label('НДС:', 'vat_set'); ?>
                                 <?php echo Html::dropDownList('vat_set', null, [-1 => 'Нет', 0 => '0%', 1000 => '10%', 1800 => '18%'],
                                     ['class' => 'form-control', 'style' => 'width:15%', 'id' => 'vat_set']); ?>
@@ -366,83 +175,88 @@ $this->registerJs(
                                     ],
                                     'columns'        => [
                                         [
-                                            'class'           => 'common\components\multiCheck\CheckboxColumn',
-                                            'contentOptions'  => function ($model) {
+                                            'contentOptions' => function ($model) {
                                                 return ["id"    => "check" . $model['id'],
                                                         'class' => 'small_cell_checkbox width150'];
                                             },
-                                            'headerOptions'   => ['style' => 'text-align:center; width150'],
-                                            'onChangeEvents'  => [
+                                            'headerOptions'  => ['style' => 'text-align:center; width150'],
+                                            'format'         => 'raw',
+                                            'header'         =>
+                                                "<input type='checkbox' class='select-on-check-all' name='selection_all' value='0'>",
+                                            'value'          => function ($model) {
+                                                return "<input type='checkbox' class='checkbox-export kv-row-checkbox' name='selection[]' value='" . $model['id'] . "'>";
+                                            }
+                                            /*'onChangeEvents'  => [
                                                 'changeAll'  => 'function(e) {
                                                             url      = window.location.href;
                                                             var value = [];
-                                                            state = $(this).prop("checked") ? 1 : 0;
-                                                            
-                                                         //  selectedCount = parseInt($("#selected_info").text());
-                                                         //   mode = 1;
-                                                                                                                       
-                                                        /*    if ((selectedCount+1) > 12 && state == 1) {
-                                                            alert("Превышен лимит для выбора продуктов в 300 позиций");
-                                                            // mode = 0;
-                                                            return false;        
-                                                            }
-                                                        */    
-                                                           $(".checkbox-export").each(function() {
-                                                                value.push($(this).val());
-                                                            });    
-                                                
-                                                           value = value.toString();  
-                                                           
-                                                           $.ajax({
-                                                             url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
-                                                             type: "POST",
-                                                             data: {selected: value, state: state},
-                                                             success: function(data){
-                                                             if (data == -1) {
-                                                             // alert ("Превышен лимит для выбора продуктов в 300 позиций");
-                                                              swal({title: "Ошибка", html:"Превышен лимит для выбора продуктов в 300 позиций", type: "error"});
-                                                             }
-                                                             $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
-                                                             }
-                                                           }); }',
-                                                'changeCell' => 'function(e) { 
-                                        
-                                                             // alert(mode);   
-                                                         
-                                                          //   if ((typeof(mode) != "undefined") && mode == 1) {
-                                                          //   return false;
-                                                          //   }
-                                                        
-                                                            //console.log(selectedCount);
-                                                             state = $(this).prop("checked") ? 1 : 0;
-                                                            selectedCount = parseInt($("#selected_info").text());
-                                                           // alert(selectedCount);
-                                                            
-                                                          /*  if ((selectedCount+1) > 12 && state == 1) {
-                                                            alert("Превышен лимит для выбора продуктов в 300 позиций");
-                                                            return false;        
-                                                            } */
-                                                                                                                      
-                                                            url = window.location.href;
-                                                            var value = $(this).val();
-                                                          
-                                                           $.ajax({
-                                                             url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
-                                                             type: "POST",
-                                                             data: {selected: value, state: state},
-                                                             success: function(data){
-                                                             if (data == -1) {
-                                                             // alert ("Превышен лимит для выбора продуктов в 300 позиций");
-                                                              swal({title: "Ошибка", html:"Превышен лимит для выбора продуктов в 300 позиций", type: "error"});
-                                                             }
-                                                             $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});                                                             
-                                                                
-                                                             }
-                                                           });}'
-                                            ],
-                                            'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
+                                                            state = $(this).prop("checked") ? 1 : 0;*/
+
+                                            //  selectedCount = parseInt($("#selected_info").text());
+                                            //   mode = 1;
+
+                                            /*    if ((selectedCount+1) > 12 && state == 1) {
+                                                alert("Превышен лимит для выбора продуктов в 300 позиций");
+                                                // mode = 0;
+                                                return false;
+                                                }
+                                            */
+                                            /*$(".checkbox-export").each(function() {
+                                                 value.push($(this).val());
+                                             });
+
+                                            value = value.toString();
+
+                                            $.ajax({
+                                              url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
+                                              type: "POST",
+                                              data: {selected: value, state: state},
+                                              success: function(data){
+                                              if (data == -1) {
+                                              // alert ("Превышен лимит для выбора продуктов в 300 позиций");
+                                               swal({title: "Ошибка", html:"Превышен лимит для выбора продуктов в 300 позиций", type: "error"});
+                                              }
+                                              $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
+                                              }
+                                            }); }',
+                                 'changeCell' => 'function(e) {
+
+                                              // alert(mode);
+
+                                           //   if ((typeof(mode) != "undefined") && mode == 1) {
+                                           //   return false;
+                                           //   }
+
+                                             //console.log(selectedCount);
+                                              state = $(this).prop("checked") ? 1 : 0;
+                                             selectedCount = parseInt($("#selected_info").text());*/
+                                            // alert(selectedCount);
+
+                                            /*  if ((selectedCount+1) > 12 && state == 1) {
+                                              alert("Превышен лимит для выбора продуктов в 300 позиций");
+                                              return false;
+                                              } */
+
+                                            /*url = window.location.href;
+                                            var value = $(this).val();
+
+                                           $.ajax({
+                                             url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
+                                             type: "POST",
+                                             data: {selected: value, state: state},
+                                             success: function(data){
+                                             if (data == -1) {
+                                             // alert ("Превышен лимит для выбора продуктов в 300 позиций");
+                                              swal({title: "Ошибка", html:"Превышен лимит для выбора продуктов в 300 позиций", type: "error"});
+                                             }
+                                             $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
+
+                                             }
+                                           });}'
+                            ],*/
+                                            /*'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
                                                 return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => (in_array($model['id'], $selected)) ? 'checked' : ""];
-                                            },
+                                            },*/
                                         ],
                                         ['attribute'      => 'service_denom',
                                          'contentOptions' => function ($model) {
@@ -460,6 +274,11 @@ $this->registerJs(
                                             'width'     => '400px',
                                             'value'     => function ($data) {
                                                 $note = "";
+                                                if ($data['article'] !== '#NULL!') {
+                                                    $article = $data['article'];
+                                                } else {
+                                                    $article = '-';
+                                                }
                                                 $productUrl = Html::a(Html::decode(Html::decode($data['product'])), Url::to(['/order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]), [
                                                     'data'  => [
                                                         'target'   => '#showDetails',
@@ -471,8 +290,8 @@ $this->registerJs(
                                                 ]);
                                                 $ed_id = 'ed' . $data['id'];
                                                 return "<div class='grid-prod'>" . $productUrl . '</div>' . $note . '<div id="' . $ed_id . '">' . $data['ed'] . "</div><div>" . Yii::t('message', 'frontend.views.order.vendor_two', ['ru' => 'Поставщик:']) . "  "
-                                                    . $data['product'] . "</div><div class='grid-article'>" . Yii::t('message', 'frontend.views.order.art', ['ru' => 'Артикул:']) . "  <span>"
-                                                    . $data['article'] . "</span></div>";
+                                                    . Organization::get_value(CatalogBaseGoods::getSuppById($data['id']))->name . "</div><div class='grid-article'>" . Yii::t('message', 'frontend.views.order.art', ['ru' => 'Артикул:']) . "  <span>"
+                                                    . $article . "</span></div>";
                                             },
                                             'label'     => Yii::t('message', 'frontend.fullmap.index.product_name_mixcart', ['ru' => 'Название продукта Mixcart']),
                                         ],
@@ -665,9 +484,19 @@ $url_auto_complete_selected_products = Url::toRoute('fullmap/auto-complete-selec
 $url_auto_complete_new = Url::toRoute('fullmap/auto-complete-new');
 $url_edit_new = Url::toRoute('fullmap/edit-new');
 $url_chvat = Url::toRoute('fullmap/chvat');
+$url_apply_new = Url::toRoute(['fullmap/apply-fullmap-new']);
 
 $js = <<< JS
     $(function () {
+        if (!spisok) {
+            var spisok = ',';
+        }
+        if (!service) {
+            var service = 0;
+        }
+        if (!organization) {
+            var organization = '$client->id';
+        }
         function links_column4 () { // реакция на нажатие строки в столбце "Наименование продукта"
             $('[data-col-seq='+4+']').each(function() {
                 var idtd = $(this).attr('id');
@@ -822,6 +651,7 @@ $js = <<< JS
                 links_column4();
             }
             vatclick();
+            variables_parse_first();
         });
 
         $(document).ready(function() { // действия после полной загрузки страницы
@@ -830,6 +660,187 @@ $js = <<< JS
                 links_column4();
             }
             vatclick();
+            variables_parse_first();
+        });
+        
+        function variables_parse_first() {
+            var client = '$client->id';
+            var service_current = $('#service_id').val();
+            if ((organization != client) || (service != service_current)) {
+                organization = client;
+                service = service_current;
+                spisok = ',';
+            }
+            $('.kv-row-checkbox').each(function() {
+                var temp = ',' + $(this).val() + ',';
+                if (spisok.indexOf(temp) != -1) {
+                    $(this).prop('checked', true);
+                    $(this).parents('tr').addClass('danger');
+                }
+            })
+            var vca = verify_check_all();
+            if (vca == 0) {
+                $('.select-on-check-all').val(1);
+                $('.select-on-check-all').prop('checked', true);
+            }
+            
+        }
+        
+        function get_spisok() {
+            var temp = spisok.length;
+            if (spisok == ',') {
+                var spisok_new = '';
+            } else {
+                var spisok_new = spisok.substring(1,temp-1);
+            }
+            return spisok_new;
+        }
+        
+        function add_product_spisok(product_id) {
+            if (spisok.indexOf(','+product_id+',') == -1) {
+                spisok = spisok + product_id + ',';
+            }    
+        }
+        
+        function del_product_spisok(product_id) {
+            var position = ',' + product_id + ',';
+            var temp = position.length;
+            var pos = spisok.indexOf(position);
+            if (pos != -1) {
+                var left = spisok.substring(0,pos + 1);
+                var right = spisok.substring(pos + temp);
+                spisok = left + right;
+            }
+        }
+        
+        $(document).on("change", ".kv-row-checkbox", function(e) { // реакция на изменение состояния флажков в крайнем левом столбце
+            e.preventDefault();
+            var id_row = $(this).val();
+            if ($(this).is(':checked')){
+                $(this).parents('tr').addClass('danger');
+                add_product_spisok(id_row);
+                var vca = verify_check_all();
+                if (vca == 0) {
+                    $('.select-on-check-all').val(1);
+                    $('.select-on-check-all').prop('checked', true);
+                }
+            } else {
+                $(this).parents('tr').removeClass('danger');
+                del_product_spisok(id_row);
+                var vca = verify_check_all();
+                if (vca == 1) {
+                    $('.select-on-check-all').val(0);
+                    $('.select-on-check-all').prop('checked', false);
+                }
+            }
+        });
+        
+        function verify_check_all () { // функция, возвращающая количество отмеченных галочками флажков
+            var count_all_checkbocks_on_page = 0;
+            var count_selected_checkbocks_on_page = 0;
+            $('.kv-row-checkbox').each(function() {
+                count_all_checkbocks_on_page++;
+                if ($(this).is(':checked')) {
+                    count_selected_checkbocks_on_page++;
+                }
+            })
+            var difference = count_all_checkbocks_on_page - count_selected_checkbocks_on_page;
+            return difference;
+        }
+        
+        $(document).on("change", ".select-on-check-all", function(e) { // реакция на изменение состояния флажка в чекбоксе в заголовке крайнего левого столбца
+            e.preventDefault();
+            if ($(this).is(':checked')) {
+                $('.kv-row-checkbox').each(function() {
+                    if (!$(this).is('checked')) {
+                        $(this).prop('checked', true);
+                        var id_row = $(this).val();
+                        $(this).parents('tr').addClass('danger');
+                        add_product_spisok(id_row);
+                    }
+                })
+            } else {
+                $('.kv-row-checkbox').each(function() {
+                    $(this).prop('checked', false);
+                    var id_row = $(this).val();
+                    $(this).parents('tr').removeClass('danger');
+                    del_product_spisok(id_row);
+                })
+            }
+        });
+        
+        $(document).on("click", ".clear-fullmap", function() { // реакция на нажатие кнопки "Очистить весь выбор" 
+            spisok = ',';
+            $('.kv-row-checkbox').each(function() {
+                    $(this).prop('checked', false);
+                    var id_row = $(this).val();
+                    $(this).parents('tr').removeClass('danger');
+            });
+            $('.select-on-check-all').val(0);
+            $('.select-on-check-all').prop('checked', false);
+        });
+        
+        $(document).on("click", ".apply-fullmap", function() { // реакция на нажатия кнопки "Применить"
+            if(spisok == ','){  
+                alert("Ничего не выбрано!");
+                return false;
+            }
+            var store_set = $("#store_set").val();
+            var koef_set =  $("#koef_set").val();
+            var vat_set  =  $("#vat_set").val();
+            var service_set  =  $("#service_id option:selected").val();
+            if (typeof(koef_set) == "undefined" || koef_set == null || koef_set.length == 0 ) {
+                koef_set = -1;
+            }
+            if (koef_set.match(/^[0-9.,]+$/) == null) {
+                alert ("В поле `Коэффициент` введены неправильные символы!");
+                return false;
+            }
+            if (typeof(service_set) == 0 || service_set == null || service_set.length == 0 ) {
+                alert ("Не выбран сервис интеграции");
+                return false;
+            }
+            if (store_set == -1 && koef_set == -1 && vat_set == -1) {
+                alert ("Не установлен ни один модификатор для массового применения");
+                return false;
+            }
+            var url_apply_new = '$url_apply_new';
+            var spisok_string = get_spisok();
+            $.post(url_apply_new, {store_set: store_set, koef_set: koef_set, vat_set : vat_set, service_set : service_set, spisok:spisok_string}).done(
+                function (data) {
+                    $('.kv-row-checkbox').each(function() {
+                        var id_row = $(this).val();
+                        var position = ',' + id_row + ',';
+                        var pos = spisok.indexOf(position);
+                        if (pos != -1) {
+                            if (store_set != -1) {
+                                $('#store' + id_row + ' button').text(data);
+                            }
+                            if (koef_set != -1) {
+                                koef_set = koef_set.replace(',','.');
+                                var koef_set_temp = Math.floor(koef_set * 1000000);
+                                koef_set_temp = '' + koef_set_temp;
+                                var koef_len = koef_set_temp.length;
+                                var koef_left = koef_set_temp.substring(0,koef_len-6);
+                                var koef_right = koef_set_temp.substring(koef_len-6);
+                                var koef_end = koef_left + ',' +koef_right;
+                                $('#koeff' + id_row + ' button').text(koef_end);
+                            }
+                            if (vat_set != -1) {
+                                var vat_number = vat_set / 100;
+                                $('#nalog' + id_row).text(vat_number);
+                                $('#buttn' + id_row + ' button').removeClass('label-success').addClass('label-default');
+                                if (vat_set == 0) {
+                                    var vat_end = '00';
+                                } else {
+                                    var vat_end = vat_number;
+                                }
+                                $('#buttn'+vat_end+id_row).removeClass('label-default').addClass('label-success');
+                            }
+                        }
+                    })
+                }
+            )
         });
         
         function vatclick() {

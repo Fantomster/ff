@@ -5,10 +5,13 @@ namespace frontend\modules\clientintegr\controllers;
 use api\common\models\AllMaps;
 use api\common\models\iiko\iikoProduct;
 use api\common\models\iiko\iikoService;
+use api\common\models\one_s\OneSStore;
+use api\common\models\RkStore;
 use api\common\models\RkStoretree;
 use api\common\models\rkws\OrderCatalogSearchMap;
 use api\modules\v1\modules\mobile\resources\OrderCatalogSearch;
 use api_web\classes\CartWebApi;
+use api_web\modules\integration\classes\sync\IikoStore;
 use common\models\AllService;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
@@ -44,7 +47,6 @@ class FullmapController extends DefaultController
 
     public function actionIndex() // метод загрузки данных и открытия страницы Массового сопоставления
     {
-        $session = Yii::$app->session;
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearchMap();
         $params = Yii::$app->request->getQueryParams();
@@ -52,18 +54,10 @@ class FullmapController extends DefaultController
 
         if (Yii::$app->request->post("OrderCatalogSearchMap")) {
             $params['OrderCatalogSearchMap'] = Yii::$app->request->post("OrderCatalogSearchMap");
-            $session['orderCatalogSearchMap'] = Yii::$app->request->post("OrderCatalogSearchMap");
+            $service = $params['OrderCatalogSearchMap']['service_id'];
+        } else {
+            $service = 0;
         }
-
-        $params['OrderCatalogSearchMap'] = $session['orderCatalogSearchMap'];
-
-        $currServiceId = isset($params['OrderCatalogSearchMap']) ? $params['OrderCatalogSearchMap']['service_id'] : 0;
-        if (isset($currServiceId)) {
-            if ($session['service_id'] != $currServiceId)
-                $this->actionClearFullmap();
-        }
-
-        $session['service_id'] = $currServiceId;
 
         $selectedCategory = null;
         $selectedVendor = null;
@@ -72,53 +66,52 @@ class FullmapController extends DefaultController
             $selectedVendor = !empty($params['OrderCatalogSearchMap']['selectedVendor']) ? (int)$params['OrderCatalogSearchMap']['selectedVendor'] : null;
         }
         $vendors = $client->getSuppliers($selectedCategory);
-        //$catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
-
-        //$services = ['0' => 'Выберите сервис'] + $services;
 
         $searchModel->client = $client;
-        $services = ArrayHelper::map(AllService::find()->where('type_id = 1')->all(), 'id', 'denom'); // Add check license
-        $services = ['0' => 'Выберите сервис'] + $services;
         $searchModel->vendors = $vendors;
-        //$searchModel->catalogs = $catalogs;
+        $searchModel->service_id = $service;
 
         $dataProvider = $searchModel->search($params);
 
         $dataProvider->pagination->params['OrderCatalogSearchMap[searchString]'] = isset($params['OrderCatalogSearchMap']['searchString']) ? $params['OrderCatalogSearchMap']['searchString'] : null;
         $dataProvider->pagination->params['OrderCatalogSearchMap[selectedVendor]'] = $selectedVendor;
         $dataProvider->pagination->params['OrderCatalogSearchMap[selectedCategory]'] = $selectedCategory;
+        $dataProvider->pagination->params['OrderCatalogSearchMap[service_id]'] = $service;
 
         $cart = (new CartWebApi())->items(); //$client->getCart();
         // Вывод по 10
         $dataProvider->pagination->pageSize = 10;
 
-        /*  $lic0 = Organization::getLicenseList();
-          //$lic = $this->checkLic();
-          $lic = $lic0['rkws'];
-          $licucs = $lic0['rkws_ucs'];
-          $vi = (($lic) && ($licucs)) ? 'index' : '/default/_nolic';
-         */
+        $services = ['0' => 'Выберите сервис'];
+        $lic0 = Organization::getLicenseList();
+        if ((isset($lic0['rkws'])) && (isset($lic0['rkws_ucs']))) {
+            $services = $services + ['1' => 'R-keeper'];
+        }
+        if (isset($lic0['iiko'])) {
+            $services = $services + ['2' => 'iiko'];
+        }
+        if (isset($lic0['odinsobsh'])) {
+            $services = $services + ['8' => '1С-Ресторан'];
+        }
+        if (isset($lic0['tillypad'])) {
+            $services = $services + ['10' => 'Tillypad'];
+        }
 
         $vi = 'index';
 
-        // $page = (array_key_exists('page', $params)) ? $params['page'] : 1;
-        // $selected = $session = Yii::$app->session->get('selectedmap', []);
-        // $selected = (array_key_exists($page, $selected)) ? $selected[$page] : [];
-
-        $selected = $session->get('selectedmap', []);
-
         $stores = AllMaps::getStoreListService($searchModel->service_id, $client->id);
-        if ($session['service_id'] == Registry::IIKO_SERVICE_ID) {
+        if ($service == Registry::IIKO_SERVICE_ID) {
             $mainOrg = iikoService::getMainOrg($client->id);
             ($orgId == $mainOrg) ? $editCan = 1 : $editCan = 0;
         } else {
             $editCan = 1;
+            $mainOrg = null;
         }
 
         if (Yii::$app->request->isAjax || Yii::$app->request->isPjax) {
-            return $this->renderAjax($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services', 'mainOrg', 'editCan'));
+            return $this->renderAjax($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'stores', 'services', 'mainOrg', 'editCan'));
         } else {
-            return $this->render($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'selected', 'stores', 'services', 'mainOrg', 'editCan'));
+            return $this->render($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'stores', 'services', 'mainOrg', 'editCan'));
         }
     }
 
@@ -442,7 +435,7 @@ class FullmapController extends DefaultController
         return $out;
     }*/
 
-    public function actionApplyFullmap() // метод установки данных для всех товарных позиций, отмеченных "флажками"
+    public function actionApplyFullmap() // метод установки данных для всех товарных позиций, отмеченных "флажками" (не используется)
     {
 
         $koef = Yii::$app->request->post('koef_set');
@@ -484,10 +477,6 @@ class FullmapController extends DefaultController
 
         $selected = implode(',', $selected);
         if ($service_id == Registry::IIKO_SERVICE_ID) {
-            $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
-        }
-
-        if ($service_id == Registry::TILLYPAD_SERVICE_ID) {
             $mainOrg = iikoService::getMainOrg($this->currentUser->organization->id);
         }
 
@@ -544,7 +533,7 @@ class FullmapController extends DefaultController
         return true;
     }
 
-    public function actionClearFullmap() // метод снятия всех "флажков"
+    public function actionClearFullmap() // метод снятия всех "флажков" (не используется)
     {
 
         $session = Yii::$app->session;
@@ -736,6 +725,124 @@ class FullmapController extends DefaultController
             }
         }
         return true;
+    }
+
+    public function actionApplyFullmapNew() // метод установки данных для всех товарных позиций, отмеченных "флажками"
+    {
+
+        $koef = Yii::$app->request->post('koef_set');
+        $store = Yii::$app->request->post('store_set');
+        $vat = Yii::$app->request->post('vat_set');
+        $service_id = Yii::$app->request->post('service_set');
+        $spisok_string = Yii::$app->request->post('spisok');
+
+        $koef = 0 + str_replace(',', '.', $koef);
+        $koef_end = round($koef, 4);
+        $spisok = explode(',', $spisok_string);
+        $org_id = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id;
+
+        foreach ($spisok as $tovar) {
+            $product = AllMaps::find()->where(['org_id' => $org_id, 'service_id' => $service_id, 'is_active' => 1, 'product_id' => $tovar])->one();
+            if ($product) {
+                if ($store != -1) {
+                    $product->store_rid = $store;
+                }
+
+                if ($vat != -1) {
+                    $product->vat = $vat;
+                }
+
+                if ($koef != -1) {
+                    $product->koef = $koef_end;
+                }
+
+                if (!$product->save()) {
+                    throw new \RuntimeException('Cant update allmaps table.');
+                }
+            } else {
+                $product = new AllMaps();
+
+                $product->service_id = $service_id;
+                $product->org_id = $org_id;
+                $product->product_id = $tovar;
+                $product->supp_id = CatalogBaseGoods::getSuppById($product->product_id);
+                $product->is_active = 1;
+                $product->serviceproduct_id = null;
+                $product->unit_rid = null;
+
+                ($store != -1) ? $product->store_rid = $store : $product->store_rid = null;
+                ($vat != -1) ? $product->vat = $vat : $product->vat = null;
+                ($koef != -1) ? $product->koef = $koef_end : $product->koef = null;
+
+                if (!$product->save()) {
+                    throw new \RuntimeException('Cant save new allmaps model.');
+                }
+            }
+        }
+        if (($service_id == Registry::IIKO_SERVICE_ID) and ($koef != -1)) {
+            $mainOrg = iikoService::getMainOrg($org_id);
+            if ($mainOrg == $org_id) {
+                $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
+                $arChildsModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'value' => $org_id])->all();
+                foreach ($spisok as $tovar) {
+                    $product = AllMaps::find()->where(['org_id' => $org_id, 'service_id' => $service_id, 'is_active' => 1, 'product_id' => $tovar])->one();
+                    foreach ($arChildsModels as $child) {
+                        $child_product = AllMaps::find()->select('id, store_rid, vat, koef')->where(['org_id' => $child->org, 'service_id' => Registry::IIKO_SERVICE_ID, 'product_id' => $product->product_id])->one();
+                        if ($child_product) {
+                            $childProduct = AllMaps::findOne($child_product->id);
+                            (is_null($child_product->store_rid)) ? $childProduct->store_rid = null : $childProduct->store_rid = $child_product->store_rid;
+                            (is_null($child_product->vat)) ? $childProduct->vat = null : $childProduct->vat = $child_product->vat;
+                            ($child_product->koef == 1) ? $childProduct->koef = $product->koef : $childProduct->koef = $child_product->koef;
+                        } else {
+                            $childProduct = new AllMaps();
+                            $childProduct->store_rid = null;
+                            $childProduct->vat = $product->vat;
+                        }
+                        $childProduct->service_id = $product->service_id;
+                        $childProduct->org_id = $child->org;
+                        $childProduct->product_id = $product->product_id;
+                        $childProduct->supp_id = $product->supp_id;
+                        $childProduct->serviceproduct_id = $product->serviceproduct_id;
+                        $childProduct->is_active = $product->is_active;
+                        if (!is_null($childProduct->serviceproduct_id)) {
+                            $childProduct->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+                        }
+                        try {
+                            if (!$childProduct->save()) {
+                                throw new \Exception('Не удалось сохранить продукт дочернего бизнеса.');
+                            }
+                        } catch (\Exception $e) {
+                            \yii::error('Не удалось сохранить продукт ' . $product->id . ' дочернего бизнеса ' . $child->org);
+                            return false;
+                        }
+                    }
+
+                }
+            }
+        }
+
+        $res_name = '';
+        if ($store != -1) {
+            switch ($service_id) {
+                case Registry::RK_SERVICE_ID :
+                    $res = RkStoretree::find()->where(['id' => $store])->one();
+                    $res_name = $res->name;
+                    break;
+                case Registry::IIKO_SERVICE_ID :
+                    $res = \api\common\models\iiko\iikoStore::find()->where(['id' => $store])->one();
+                    $res_name = $res->denom;
+                    break;
+                case Registry::ONE_S_CLIENT_SERVICE_ID :
+                    $res = OneSStore::find()->where(['id' => $store])->one();
+                    $res_name = $res->name;
+                    break;
+                case Registry::TILLYPAD_SERVICE_ID :
+                    $res = \api\common\models\iiko\iikoStore::find()->where(['id' => $store])->one();
+                    $res_name = $res->denom;
+                    break;
+            }
+        }
+        return $res_name;
     }
 
 }

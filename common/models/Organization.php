@@ -396,7 +396,7 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         if ($all) {
-            $vendors[''] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
+            $vendors['0'] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
         }
         ksort($vendors);
         return $vendors;
@@ -425,7 +425,7 @@ class Organization extends \yii\db\ActiveRecord
             ->all();
         $res = ArrayHelper::map($res, 'id', 'name');
         if ($addAllOption) {
-            $res[''] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
+            $res['0'] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
         }
         ksort($res);
         return $res;
@@ -458,7 +458,7 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         if ($all) {
-            $vendors[''] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
+            $vendors['0'] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
         }
         ksort($vendors);
         return $vendors;
@@ -1062,8 +1062,8 @@ class Organization extends \yii\db\ActiveRecord
             ->select(["$usrTable.id as id", "$profTable.full_name as name"])
             ->where([
                 "$relationTable.organization_id" => $vendor_id,
-                "$assocTable.organization_id" => $this->id,
-                    ])
+                "$assocTable.organization_id"    => $this->id,
+            ])
             ->orderBy(['name' => SORT_ASC])
             ->asArray()
             ->all(), 'id', 'name');

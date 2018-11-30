@@ -27,6 +27,7 @@ return [
             'enableLanguageDetection' => true,
             'rules'                   => [
                 'integration/vetis/<action>' => '/integration/vetis/default/<action>',
+                'integration/egais/<action>' => '/integration/egais/default/<action>',
             ],
         ],
         'user'               => [

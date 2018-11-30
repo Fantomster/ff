@@ -509,6 +509,20 @@ class OrderWebApi extends \api_web\components\WebApi
         $result['client'] = WebApiHelper::prepareOrganization($order->client);
         $result['vendor'] = WebApiHelper::prepareOrganization($order->vendor);
 
+        if (!is_null($order->status_updated_at) && $order->status_updated_at != '0000-00-00 00:00:00') {
+            $obUpdatedAt = (new \DateTime(trim($order->status_updated_at)))->format("d.m.Y H:i:s");
+        } else {
+            $obUpdatedAt = (new \DateTime())->format("d.m.Y H:i:s");
+        }
+
+        if (!is_null($order->edi_doc_date) && $order->edi_doc_date != '0000-00-00 00:00:00') {
+            $ediDocDate = (new \DateTime(trim($order->edi_doc_date)))->format("d.m.Y H:i:s");
+        } else {
+            $ediDocDate = (new \DateTime())->format("d.m.Y H:i:s");
+        }
+        $result['status_updated_at'] = $obUpdatedAt;
+        $result['edi_doc_date'] = $ediDocDate;
+
         return $result;
     }
 
@@ -636,15 +650,23 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $obDateTime->format("d.m.Y H:i:s");
                 }
                 $obCreateAt = new \DateTime($model->created_at);
-                $obUpdatedAt = null;
                 if (!is_null($model->status_updated_at) && $model->status_updated_at != '0000-00-00 00:00:00') {
                     $obUpdatedAt = (new \DateTime(trim($model->status_updated_at)))->format("d.m.Y H:i:s");
+                } else {
+                    $obUpdatedAt = (new \DateTime())->format("d.m.Y H:i:s");
+                }
+
+                if (!is_null($model->edi_doc_date) && $model->edi_doc_date != '0000-00-00 00:00:00') {
+                    $ediDocDate = (new \DateTime(trim($model->edi_doc_date)))->format("d.m.Y H:i:s");
+                } else {
+                    $ediDocDate = (new \DateTime())->format("d.m.Y H:i:s");
                 }
 
                 $orderInfo = [
                     'id'                => (int)$model->id,
                     'created_at'        => $obCreateAt->format("d.m.Y H:i:s"),
                     'status_updated_at' => $obUpdatedAt,
+                    'edi_doc_date'      => $ediDocDate,
                     'completion_date'   => $date ?? null,
                     'status'            => (int)$model->status,
                     'status_text'       => $model->statusText,

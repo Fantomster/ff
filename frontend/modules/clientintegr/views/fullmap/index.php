@@ -818,10 +818,8 @@ $js = <<< JS
                             }
                             if (koef_set != -1) {
                                 koef_set = koef_set.replace(',','.');
-                                koef_set = 1000000 * koef_set;
-                                console.log(koef_set);
-                                //var koef_set_temp = Math.floor(koef_set * 1000000);
-                                var koef_set_temp = '' + koef_set_temp;
+                                var koef_set_temp = Math.floor(koef_set * 1000000);
+                                koef_set_temp = '' + koef_set_temp;
                                 var koef_len = koef_set_temp.length;
                                 var koef_left = koef_set_temp.substring(0,koef_len-6);
                                 var koef_right = koef_set_temp.substring(koef_len-6);

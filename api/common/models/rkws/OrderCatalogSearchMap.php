@@ -245,9 +245,11 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                 'sort'       => [
                     'attributes'   => [
                         'product',
+                        'id'
                     ],
                     'defaultOrder' => [
                         'product' => SORT_ASC,
+                        'id'      => SORT_ASC,
                     ]
                 ],
             ]);

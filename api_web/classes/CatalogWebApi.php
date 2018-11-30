@@ -143,7 +143,7 @@ class CatalogWebApi extends WebApi
             ->leftJoin(CatalogBaseGoods::tableName() . ' cbg', 'cbg.article=ctc.article and' .
                 ' cbg.cat_id=:vendorBaseCatId and cbg.product=ctc.product',
                 [':vendorBaseCatId' => $vendorBaseCatalog->id])
-            ->leftJoin(CatalogGoods::tableName() . ' cg', 'cg.base_goods_id=cbg.id and cg.cat_id=cbg.cat_id')
+            ->leftJoin(CatalogGoods::tableName() . ' cg', 'cg.base_goods_id=cbg.id')
             ->where(['temp_id' => $catalogTemp->id])->all();
 
         if (empty($catalogTempContent)) {

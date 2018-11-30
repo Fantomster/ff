@@ -81,6 +81,17 @@ class Registry
     static $mc_licenses_id = [
         self::MC_LITE_LICENSE_ID,
         self::MC_BUSINESS_LICENSE_ID,
+        self::MC_ENTERPRICE_LICENSE_ID
+    ];
+
+    /**
+     * Список сервисов, которые разрешают войти в систему
+     *
+     * @var array
+     */
+    static $allow_enter_services = [
+        self::MC_LITE_LICENSE_ID,
+        self::MC_BUSINESS_LICENSE_ID,
         self::MC_ENTERPRICE_LICENSE_ID,
         self::MERC_SERVICE_ID
     ];

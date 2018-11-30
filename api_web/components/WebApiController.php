@@ -154,7 +154,7 @@ class WebApiController extends \yii\rest\Controller
                 $allow_methods_without_license = \Yii::$app->params['allow_methods_without_license'] ?? [];
                 //Если метода нет в разрешенных, проверяем лицензию
                 if (!in_array(\Yii::$app->request->getUrl(), $allow_methods_without_license)) {
-                    License::checkMixCartLicenseResponse($this->user->organization_id);
+                    License::checkEnterLicenseResponse($this->user->organization_id);
                 }
                 if (!is_null($this->license_service_id)) {
                     License::checkLicense($this->user->organization->id, $this->license_service_id);

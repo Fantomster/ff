@@ -75,7 +75,12 @@ class EgaisMethods extends WebApi
     {
         if (empty($request)) {
             $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $this->user->organization_id);
-            $xml = (new EgaisXmlFiles())->QueryRests($settings['fsrar_id']);
+
+            if (empty($settings)) {
+                throw new BadRequestHttpException('dictionary.egais_get_setting_error');
+            }
+
+            $xml = (new EgaisXmlFiles())->queryRests($settings['fsrar_id']);
             $return = EgaisHelper::sendEgaisQuery($settings['egais_url'], $xml, 'QueryRests');
 
             return ['result' => $return];
@@ -98,7 +103,7 @@ class EgaisMethods extends WebApi
         $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $orgId);
 
         if (empty($settings)) {
-            throw new BadRequestHttpException('dictionary.organization_not_found');
+            throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
 
         return EgaisHelper::getAllIncomingDoc($settings['egais_url'], $request);
@@ -128,7 +133,7 @@ class EgaisMethods extends WebApi
         $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $orgId);
 
         if (empty($settings)) {
-            throw new BadRequestHttpException('dictionary.organization_not_found');
+            throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
 
         return EgaisHelper::getOneDocument($settings['egais_url'], $request);

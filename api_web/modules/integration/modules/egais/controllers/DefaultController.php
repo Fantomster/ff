@@ -162,7 +162,8 @@ class DefaultController extends WebApiController
      * )
      * @throws \Exception
      */
-    public function actionOneIncomingDoc(){
+    public function actionOneIncomingDoc()
+    {
         return $this->response = (new EgaisMethods())->getOneIncomingDoc($this->request);
     }
 

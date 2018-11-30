@@ -497,7 +497,6 @@ $js = <<< JS
         if (!organization) {
             var organization = '$client->id';
         }
-        //console.log(organization);
         function links_column4 () { // реакция на нажатие строки в столбце "Наименование продукта"
             $('[data-col-seq='+4+']').each(function() {
                 var idtd = $(this).attr('id');
@@ -761,7 +760,6 @@ $js = <<< JS
                     }
                 })
             } else {
-                console.log('qwe0');
                 $('.kv-row-checkbox').each(function() {
                     $(this).prop('checked', false);
                     var id_row = $(this).val();

@@ -31,7 +31,7 @@ use yii\web\BadRequestHttpException;
 /**
  * Waybills class for generate\update\delete\ actions
  * */
-class WaybillHelper extends WebApi
+class WaybillHelper
 {
     /**
      * @var OuterProductMapHelper
@@ -58,7 +58,6 @@ class WaybillHelper extends WebApi
      */
     public function __construct()
     {
-        parent::__construct();
         $this->helper = new OuterProductMapHelper();
     }
 
@@ -75,6 +74,7 @@ class WaybillHelper extends WebApi
         if (!$order) {
             throw new BadRequestHttpException('order_not_found');
         }
+        $this->user = $order->createdBy;
         if (is_null($arOrderContentForCreate)) {
             $arOrderContentForCreate = $order->orderContent;
         }

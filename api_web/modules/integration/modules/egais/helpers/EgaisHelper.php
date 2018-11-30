@@ -2,8 +2,8 @@
 
 namespace api_web\modules\integration\modules\egais\helpers;
 
+use api_web\components\WebApi;
 use api_web\modules\integration\modules\egais\classes\XmlParser;
-use api\common\models\egais\egaisSettings;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
 use yii\httpclient\Client;
@@ -12,11 +12,8 @@ use yii\web\BadRequestHttpException;
 /**
  * Класс для работы с ЕГАИС
  * */
-class EgaisHelper
+class EgaisHelper extends WebApi
 {
-    /**@var int organization id */
-    public $orgId;
-
     /**@var array типы входящих документов */
     static $type_document = [
         'TICKET',
@@ -24,14 +21,6 @@ class EgaisHelper
         //'FORMF2REGINFO',
         //'TTNHISTORYF2REG'
     ];
-
-    /**
-     * EgaisHelper constructor.
-     */
-    public function __construct()
-    {
-        $this->orgId = \Yii::$app->user->identity->organization_id;
-    }
 
     /**
      * @param $url
@@ -42,7 +31,7 @@ class EgaisHelper
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    public function sendEgaisQuery($url, $data, $queryType)
+    public static function sendEgaisQuery($url, $data, $queryType)
     {
         $client = new Client();
         $queryRests = $client->createRequest()
@@ -52,7 +41,7 @@ class EgaisHelper
             ->send();
 
         if (!$queryRests->isOk) {
-            throw new BadRequestHttpException('The response invalid!');
+            throw new BadRequestHttpException('dictionary.request_error');
         }
 
         $replyId = (new XmlParser())->parseEgaisQuery($queryRests->content);
@@ -65,42 +54,16 @@ class EgaisHelper
             ->send();
 
         if (!$getUrlDoc->isOk) {
-            throw new BadRequestHttpException('The response invalid!');
+            throw new BadRequestHttpException('dictionary.request_error');
         }
 
         $getDataDoc = (new XmlParser())->parseUrlDoc($getUrlDoc->content);
 
         if (!empty($getDataDoc)) {
-            return $this->getOneDocument($url, $getDataDoc);
+            return self::getOneDocument($url, $getDataDoc);
         }
 
         return true;
-    }
-
-    /**
-     * @param $url
-     * @param $type
-     * @param $id
-     * @return bool|string
-     * @throws \Exception
-     */
-    public function getEgaisDocument($url, $type, $id)
-    {
-        $client = new Client();
-        if (is_int($id)) {
-            $id = '/' . $id;
-        } else {
-            throw new \Exception('id must be integer');
-        }
-        $response = $client->createRequest()
-            ->setMethod('get')
-            ->setUrl($url . '/opt/out/' . $type . $id)
-            ->send();
-        if ($response->isOk) {
-            return $response->content;
-        } else {
-            return false;
-        }
     }
 
     // Получение всех входящих документов типа $request['type'] или без
@@ -113,7 +76,7 @@ class EgaisHelper
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    public function getAllIncomingDoc($url, $request)
+    public static function getAllIncomingDoc($url, $request)
     {
         $page = (isset($request['pagination']['page']) ? $request['pagination']['page'] : 1);
         $pageSize = (isset($request['pagination']['page_size']) ? $request['pagination']['page_size'] : 12);
@@ -127,7 +90,7 @@ class EgaisHelper
             ->send();
 
         if (!$response->isOk) {
-            throw new BadRequestHttpException('The response invalid!');
+            throw new BadRequestHttpException('dictionary.request_error');
         }
 
         $docs = (new XmlParser())->parseIncomingDocs($response->content);
@@ -170,7 +133,7 @@ class EgaisHelper
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    public function getOneDocument($url, $request)
+    public static function getOneDocument($url, $request)
     {
         $query = "{$url}/opt/out/{$request['type']}/{$request['id']}";
         $parser = "parse{$request['type']}";
@@ -182,17 +145,9 @@ class EgaisHelper
             ->send();
 
         if (!$response->isOk) {
-            throw new BadRequestHttpException('The response invalid!');
+            throw new BadRequestHttpException('dictionary.request_error');
         }
 
         return (new XmlParser())->$parser($response->content);
-    }
-
-    public function setSettings($request)
-    {
-        $settings = new egaisSettings();
-        $result = $settings->setSettings($request, $this->orgId);
-
-        return $result;
     }
 }

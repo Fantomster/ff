@@ -147,20 +147,7 @@ class DefaultController extends WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  "documents" : {
-     *                       {
-     *                         "field": "020x4E794272-40D1-42E1-AE42-8A5EB329D782",
-     *                         "replyId" : "de1b394d-50fd-45ce-b1b4-3e8d164798b1",
-     *                         "timestamp": "2018-10-18T17:04:14.505+0300",
-     *                         "type": "Ticket",
-     *                         "id": 227
-     *                       }
-     *                   },
-     *                  "pagination": {
-     *                      "page": 1,
-     *                      "page_size": 12,
-     *                      "total_page": 7
-     *                  },
+     *                  "result": "В зависимости от типа документа получится разный результат."
      *              }
      *          )
      *     ),
@@ -194,8 +181,8 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                    "egaisUrl": "http://192.168.1.70:8090",
-     *                    "fsrarId": "030000443640",
+     *                    "egais_url": "http://192.168.1.70:8090",
+     *                    "fsrar_id": "030000443640",
      *                  }
      *              )
      *         )
@@ -222,6 +209,6 @@ class DefaultController extends WebApiController
      */
     public function actionSetEgaisSettings()
     {
-        $this->response = (new EgaisMethods())->setEgaisSettings($this->request);
+        $this->response = (new EgaisMethods())->setEgaisSettings($this->request, $this->user->organization_id);
     }
 }

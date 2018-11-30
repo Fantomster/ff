@@ -445,5 +445,4 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             }
         }
     }
-
 }

@@ -109,6 +109,10 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             $selected = implode(",", $res);
         }
 
+        if(empty($selected)) {
+            return $this->redirect(['/clientintegr/merc/stock-entry']);
+        }
+
         if (!isset($list)) {
             $list = step1Form::find()->where("id in ($selected)")->all();
         }
@@ -320,6 +324,10 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 $res[] = $item['id'];
             }
             $selected = implode(",", $res);
+        }
+
+        if(empty($selected)) {
+            return $this->redirect(['/clientintegr/merc/stock-entry']);
         }
 
         if (!isset($list)) {

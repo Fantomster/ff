@@ -179,6 +179,7 @@ class CatalogWebApi extends WebApi
                     /**@var CatalogBaseGoods $model */
                     $model = \Yii::createObject([
                         'class'                => '\common\models\CatalogBaseGoods',
+                        'id'                   => $tempRow['cbg_id'],
                         'cat_id'               => $vendorBaseCatalog->id,
                         'article'              => $tempRow['article'],
                         'product'              => $tempRow['product'],
@@ -218,8 +219,8 @@ class CatalogWebApi extends WebApi
 //                    $catalogGood = CatalogGoods::findOne(['base_goods_id' => $model->id, 'cat_id' => $catalog->id]);
                     $catalogGood = \Yii::createObject([
                         'class'         => '\common\models\CatalogGoods',
-                        'cat_id'        => $vendorBaseCatalog->id,
-                        'base_goods_id' => $tempRow['base_goods_id'],
+                        'cat_id'        => $catalog->id,
+                        'base_goods_id' => $tempRow['cbg_id'],
                         'vat'           => $tempRow['cg_vat'],
                     ]);
                     $catalogGood->setOldAttributes([

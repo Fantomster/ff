@@ -2,10 +2,10 @@
 
 namespace api_web\classes;
 
+use api_web\components\ExcelRenderer;
 use api_web\components\notice_class\OrderNotice;
 use api_web\components\Registry;
 use api_web\components\WebApiController;
-use api_web\controllers\OrderController;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
 use api_web\models\User;
@@ -1277,4 +1277,27 @@ class OrderWebApi extends \api_web\components\WebApi
         }
         return false;
     }
+
+    /**
+     * Сохранение заказа в Excel
+     *
+     * @param array            $post
+     * @return false|string
+     * @throws BadRequestHttpException
+     */
+    public function saveToExcel(array $post)
+    {
+        $this->validateRequest($post, ['order_id']);
+
+        $objPHPExcel = (new ExcelRenderer())->OrderRender($post, ['order_id']);
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+        $objWriter->save(tempnam("/tmp", "excel"));
+        ob_start();
+        $objWriter->save('php://output');
+        $content = ob_get_clean();
+        $base64 = (isset($post['base64_encode']) && $post['base64_encode'] == 1 ? true : false);
+        return ($base64 ? base64_encode($content) : $content);
+    }
+
+
 }

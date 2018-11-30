@@ -167,9 +167,9 @@ class OrderWebApi extends \api_web\components\WebApi
             }
             $tr->commit();
             if ($order->vendor_id == $this->user->organization_id) {
-                $sender = $order->client;
-            } elseif ($order->client_id == $this->user->organization_id) {
                 $sender = $order->vendor;
+            } elseif ($order->client_id == $this->user->organization_id) {
+                $sender = $order->client;
             }
             if ($isUnconfirmedVendor) {
                 $sender = $order->vendor;

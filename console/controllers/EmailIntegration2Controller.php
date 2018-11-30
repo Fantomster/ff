@@ -172,7 +172,7 @@ class EmailIntegration2Controller extends Controller
                                 $transaction->commit();
                             } catch (\Exception $e) {
                                 $transaction->rollBack();
-                                $this->helper->addLog($e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine(), 'parsing');
+                                $this->helper->addLog($e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getTraceAsString(), 'parsing');
                             }
                         }
                         $this->log([

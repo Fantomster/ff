@@ -55,6 +55,8 @@ class FullmapController extends DefaultController
         if (Yii::$app->request->post("OrderCatalogSearchMap")) {
             $params['OrderCatalogSearchMap'] = Yii::$app->request->post("OrderCatalogSearchMap");
             $service = $params['OrderCatalogSearchMap']['service_id'];
+        } else if (isset($params['OrderCatalogSearchMap']['service_id'])) {
+            $service = $params['OrderCatalogSearchMap']['service_id'];
         } else {
             $service = 0;
         }
@@ -772,7 +774,7 @@ class FullmapController extends DefaultController
 
                 ($store != -1) ? $product->store_rid = $store : $product->store_rid = null;
                 ($vat != -1) ? $product->vat = $vat : $product->vat = null;
-                ($koef != -1) ? $product->koef = $koef_end : $product->koef = null;
+                ($koef != -1) ? $product->koef = $koef_end : $product->koef = 1;
 
                 if (!$product->save()) {
                     throw new \RuntimeException('Cant save new allmaps model.');
@@ -797,6 +799,7 @@ class FullmapController extends DefaultController
                             $childProduct = new AllMaps();
                             $childProduct->store_rid = null;
                             $childProduct->vat = $product->vat;
+                            $childProduct->koef = 1;
                         }
                         $childProduct->service_id = $product->service_id;
                         $childProduct->org_id = $child->org;

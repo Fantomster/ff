@@ -12,6 +12,7 @@ use api_web\components\Registry;
 use common\models\AllServiceOperation;
 use common\models\Catalog;
 use common\models\CatalogBaseGoods;
+use common\models\CatalogGoods;
 use common\models\IntegrationInvoice;
 use common\models\Journal;
 use common\models\Order;
@@ -51,7 +52,7 @@ class VendorEmailWaybillsHelper
     public function processFile($invoice)
     {
         $outerAgentNameWaybill = OuterAgentNameWaybill::find()
-            ->leftJoin(OuterAgent::tableName() .' oa', 'oa.id='. OuterAgentNameWaybill::tableName() . '.agent_id')
+            ->leftJoin(OuterAgent::tableName() . ' oa', 'oa.id=' . OuterAgentNameWaybill::tableName() . '.agent_id')
             ->where([OuterAgentNameWaybill::tableName() . '.name' => $invoice['invoice']['realVendorName'], 'oa.org_id' => $this->orgId])->one();
         if ($outerAgentNameWaybill) {
             $vendorId = $outerAgentNameWaybill->agent->vendor_id;
@@ -88,8 +89,11 @@ class VendorEmailWaybillsHelper
                 $cntErrors = 0;
                 foreach ($invoice['invoice']['rows'] as $row) {
                     if ($catIndex == 'article' && (!isset($row['code']) || empty($row['code']))) {
-                        $cntErrors++;
-                        continue;
+                        if (isset($row['name']) && !empty($row['name'])) {
+                            $catIndex = 'product';
+                        } else {
+                            continue;
+                        }
                     }
                     $strSearch = ['article' => $row['code'], 'product' => $row['name']];
                     $product = CatalogBaseGoods::findOne([$catIndex => $strSearch[$catIndex], 'supp_org_id' => $vendorId]);
@@ -107,6 +111,18 @@ class VendorEmailWaybillsHelper
                         if (!$product->save()) {
                             $this->addLog(implode(' ', $product->getFirstErrors()) . ' Название продукта = ' . $row['name'], 'product_create');
                             continue;
+                        }
+                        if ($catalog->type == Catalog::CATALOG) {
+                            $catGood = new CatalogGoods();
+                            $catGood->base_goods_id = $product->id;
+                            $catGood->cat_id = $catalog->id;
+                            $catGood->price = round($row['price_without_tax'], 2);
+                            $catGood->vat = ceil($row['tax_rate']);
+                            if (!$catGood->save()) {
+                                $this->addLog(implode(' ', $catGood->getFirstErrors()), 'CatalogGoods_create');
+                            }
+                        } else {
+
                         }
                     }
 
@@ -220,10 +236,11 @@ class VendorEmailWaybillsHelper
      * @param $name
      * @return array
      */
-    private function prepareAgentName($name){
+    private function prepareAgentName($name)
+    {
         $result = (new Query())->select('*')->from('organization_forms')->all();
         foreach ($result as $item) {
-            if (strpos($name, $item['name_short']) === 0){
+            if (strpos($name, $item['name_short']) === 0) {
                 $newAgentName = str_replace($item['name_short'], $item['name_long'], $name);
                 return [$name, $newAgentName];
             }

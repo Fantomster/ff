@@ -16,7 +16,6 @@ $gridColumns = [
     [
         'format'    => 'raw',
         'attribute' => 'id',
-        'filter'    => false,
         'value'     => function ($data) {
             return Html::a($data['id'], ['organization/view', 'id' => $data['id']]);
         },

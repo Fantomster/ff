@@ -50,8 +50,9 @@ class VendorEmailWaybillsHelper
      */
     public function processFile($invoice)
     {
+        /**@var OuterAgentNameWaybill $outerAgentNameWaybill */
         $outerAgentNameWaybill = OuterAgentNameWaybill::find()
-            ->leftJoin(OuterAgent::tableName() .' oa', 'oa.id='. OuterAgentNameWaybill::tableName() . '.agent_id')
+            ->leftJoin(OuterAgent::tableName() . ' oa', 'oa.id=' . OuterAgentNameWaybill::tableName() . '.agent_id')
             ->where([OuterAgentNameWaybill::tableName() . '.name' => $invoice['invoice']['realVendorName'], 'oa.org_id' => $this->orgId])->one();
         if ($outerAgentNameWaybill) {
             $vendorId = $outerAgentNameWaybill->agent->vendor_id;
@@ -88,6 +89,9 @@ class VendorEmailWaybillsHelper
                 $cntErrors = 0;
                 foreach ($invoice['invoice']['rows'] as $row) {
                     if ($catIndex == 'article' && (!isset($row['code']) || empty($row['code']))) {
+                        if (isset($row['errors']) && !empty($row['errors'])) {
+                            $this->addLog($row['name'] . ' - ' . implode(' ', $row['errors']), 'order_create');
+                        }
                         $cntErrors++;
                         continue;
                     }
@@ -220,10 +224,11 @@ class VendorEmailWaybillsHelper
      * @param $name
      * @return array
      */
-    private function prepareAgentName($name){
+    private function prepareAgentName($name)
+    {
         $result = (new Query())->select('*')->from('organization_forms')->all();
         foreach ($result as $item) {
-            if (strpos($name, $item['name_short']) === 0){
+            if (strpos($name, $item['name_short']) === 0) {
                 $newAgentName = str_replace($item['name_short'], $item['name_long'], $name);
                 return [$name, $newAgentName];
             }

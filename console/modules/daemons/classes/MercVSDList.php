@@ -176,8 +176,8 @@ class MercVSDList extends MercDictConsumer
             }
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
+            $this->addFCMMessage('MercVSDList', $this->org_id);
             mercLogger::getInstance()->addMercLogDict('ERROR', 'AutoLoad' . BaseStringHelper::basename(static::class), $e->getMessage(), $this->org_id);
-            $this->addFCMMessage('MercVSDList', $this->data['enterpriseGuid']);
             throw new \Exception('Error operation');
         }
         $this->log("Complete operation success");
@@ -191,7 +191,7 @@ class MercVSDList extends MercDictConsumer
             $this->queue->save();
         }
 
-        $this->addFCMMessage('MercVSDList', $this->data['enterpriseGuid']);
+        $this->addFCMMessage('MercVSDList', $this->org_id);
 
         $curr_job_uid = isset($this->data['job_uid']) ? $this->data['job_uid'] : null;
         if($this->queue_job_uid != $curr_job_uid) {

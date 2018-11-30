@@ -19,7 +19,7 @@ $autoNumber = 'textcode="' . $waybill->outer_number_code . '" numcode="' . $wayb
     <?= '>' . PHP_EOL ?>
     <?php
     foreach ($records as $rec) {
-        echo '<ITEM rid="' . $rec['product_rid'] . '" quant="' . ($rec["quantity_waybill"] * 1000) . '" mu="' . $rec["unit_rid"] . '" sum="' . ($rec['sum_without_vat'] * 100) . '" vatrate="' . ($rec['vat_waybill']*10000) . '" />' . PHP_EOL;
+        echo '<ITEM rid="' . $rec['product_rid'] . '" quant="' . ($rec["quantity_waybill"] * 1000) . '" mu="' . $rec["unit_rid"] . '" sum="' . ($rec['sum_without_vat'] * 100) . '" vatrate="' . ($rec['vat_waybill']*100) . '" />' . PHP_EOL;
     }
     echo '</DOC>' . PHP_EOL;
     ?>

@@ -12,6 +12,7 @@ use api_web\components\Registry;
 use common\models\AllServiceOperation;
 use common\models\Catalog;
 use common\models\CatalogBaseGoods;
+use common\models\CatalogGoods;
 use common\models\IntegrationInvoice;
 use common\models\Journal;
 use common\models\Order;
@@ -89,11 +90,12 @@ class VendorEmailWaybillsHelper
                 $cntErrors = 0;
                 foreach ($invoice['invoice']['rows'] as $row) {
                     if ($catIndex == 'article' && (!isset($row['code']) || empty($row['code']))) {
-                        if (isset($row['errors']) && !empty($row['errors'])) {
-                            $this->addLog($row['name'] . ' - ' . implode(' ', $row['errors']), 'order_create');
+                        if (isset($row['name']) && !empty($row['name'])) {
+                            $catIndex = 'product';
+                        } else {
+                            $cntErrors++;
+                            continue;
                         }
-                        $cntErrors++;
-                        continue;
                     }
                     $strSearch = ['article' => $row['code'], 'product' => $row['name']];
                     $product = CatalogBaseGoods::findOne([$catIndex => $strSearch[$catIndex], 'supp_org_id' => $vendorId]);
@@ -111,6 +113,18 @@ class VendorEmailWaybillsHelper
                         if (!$product->save()) {
                             $this->addLog(implode(' ', $product->getFirstErrors()) . ' Название продукта = ' . $row['name'], 'product_create');
                             continue;
+                        }
+                        if ($catalog->type == Catalog::CATALOG) {
+                            $catGood = new CatalogGoods();
+                            $catGood->base_goods_id = $product->id;
+                            $catGood->cat_id = $catalog->id;
+                            $catGood->price = round($row['price_without_tax'], 2);
+                            $catGood->vat = ceil($row['tax_rate']);
+                            if (!$catGood->save()) {
+                                $this->addLog(implode(' ', $catGood->getFirstErrors()), 'CatalogGoods_create');
+                            }
+                        } else {
+
                         }
                     }
 

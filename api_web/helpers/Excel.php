@@ -125,14 +125,20 @@ class Excel
                     continue;
                 }
                 $value = trim($cell->getValue());
+                if ($value == 'Наименование'){
+                    $_ = empty(false);
+                }
                 if ($mapping[$cellsCount] == 'article' && $value == 'Артикул') {
                     $write = false;
                     break;
                 }
 
-                if ($mapping[$cellsCount] == 'price' && !is_numeric($value)) {
-                    $write = false;
-                    break;
+                if ($mapping[$cellsCount] == 'price') {
+                    $value = filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT);
+                    if (empty($value) || !is_numeric($value)){
+                        $write = false;
+                        break;
+                    }
                 }
 
                 if (in_array($mapping[$cellsCount], [$index, 'ed', 'product']) && empty($value)) {

@@ -216,7 +216,6 @@ class CatalogWebApi extends WebApi
                     throw new ValidationException($model->getFirstErrors());
                 }
                 if ($tempRow['cg_id'] != 0) {
-//                    $catalogGood = CatalogGoods::findOne(['base_goods_id' => $model->id, 'cat_id' => $catalog->id]);
                     $catalogGood = \Yii::createObject([
                         'class'         => '\common\models\CatalogGoods',
                         'cat_id'        => $catalog->id,

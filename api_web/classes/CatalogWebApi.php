@@ -140,9 +140,8 @@ class CatalogWebApi extends WebApi
             'cg.vat cg_vat'
         ])
             ->from(CatalogTempContent::tableName() . ' ctc')
-            ->leftJoin(CatalogBaseGoods::tableName() . ' cbg', 'cbg.article=ctc.article and' .
-                ' cbg.cat_id=:vendorBaseCatId and cbg.product=ctc.product',
-                [':vendorBaseCatId' => $vendorBaseCatalog->id])
+            ->leftJoin(CatalogBaseGoods::tableName() . ' cbg', "cbg.$catalog->main_index=ctc.$catalog->main_index"
+                . " and cbg.cat_id=:vendorBaseCatId", [':vendorBaseCatId' => $vendorBaseCatalog->id])
             ->leftJoin(CatalogGoods::tableName() . ' cg', 'cg.base_goods_id=cbg.id')
             ->where(['temp_id' => $catalogTemp->id])->all();
 
@@ -201,7 +200,7 @@ class CatalogWebApi extends WebApi
                         'ssid'                 => $tempRow['ssid'],
                     ]);
                     $model->setOldAttributes([
-                        'id'                   => $tempRow['cbg_id'],
+                        'id' => $tempRow['cbg_id'],
                     ]);
                 }
                 //Заполняем аттрибуты
@@ -223,7 +222,7 @@ class CatalogWebApi extends WebApi
                         'vat'           => $tempRow['cg_vat'],
                     ]);
                     $catalogGood->setOldAttributes([
-                        'id'            => $tempRow['cg_id'],
+                        'id' => $tempRow['cg_id'],
                     ]);
                     $catalogGood->price = $model->price;
                     if (!$catalogGood->save()) {
@@ -235,6 +234,10 @@ class CatalogWebApi extends WebApi
                     $catalogGood->base_goods_id = $model->id;
                     $catalogGood->price = $model->price;
                     $arBatchInsert[] = $catalogGood;
+                }
+                if (count($arBatchInsert) > 499) {
+                    $batchResult = (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');
+                    $arBatchInsert = [];
                 }
             }
             $batchResult = (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');

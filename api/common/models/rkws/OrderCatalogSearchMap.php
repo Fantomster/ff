@@ -215,7 +215,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                                             AND `b`.`status` = 1
                                             AND `a`.deleted = 0
 	";
-        if ($this->service_id==0) {
+        if ($this->service_id == 0) {
             $sql = "SELECT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id] .
                 " FROM ($assigned_catalog_products) `acp`
             LEFT JOIN `$dbName`.`all_map` `amap` ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
@@ -226,30 +226,44 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                 " FROM ($assigned_catalog_products) `acp`
             LEFT JOIN `$dbName`.`all_map` `amap` ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
             LEFT JOIN `$dbName`.`all_service` `aser` ON amap.service_id = aser.id " . $joins[$this->service_id] .
-            (empty($where) ? "" : " WHERE " . $where);
+                (empty($where) ? "" : " WHERE " . $where);
         }
 
-        $dataProvider = new SqlDataProvider([
-            'sql'    => $sql,
-            'params' => $params_sql,
+        if ($vendorInList) {
+            $dataProvider = new SqlDataProvider([
+                'sql'    => $sql,
+                'params' => $params_sql,
 
-            'pagination' => [
-                'page'     => isset($params['page']) ? ($params['page'] - 1) : 0,
-                'pageSize' => isset($params['pageSize']) ? $params['pageSize'] : null,
-                'params'   => [
-                    'sort' => isset($params['sort']) ? $params['sort'] : 'product',
-                ]
-            ],
-            'key'        => 'id',
-            'sort'       => [
-                'attributes'   => [
-                    'product',
+                'pagination' => [
+                    'page'     => isset($params['page']) ? ($params['page'] - 1) : 0,
+                    'pageSize' => isset($params['pageSize']) ? $params['pageSize'] : null,
+                    'params'   => [
+                        'sort' => isset($params['sort']) ? $params['sort'] : 'product',
+                    ]
                 ],
-                'defaultOrder' => [
-                    'product' => SORT_ASC,
-                ]
-            ],
-        ]);
+                'key'        => 'id',
+                'sort'       => [
+                    'attributes'   => [
+                        'product',
+                        'id'
+                    ],
+                    'defaultOrder' => [
+                        'product' => SORT_ASC,
+                        'id'      => SORT_ASC,
+                    ]
+                ],
+            ]);
+        } else {
+            $sql = "SELECT id from `catalog_base_goods` WHERE id = 100000000"; // Запрос, заведомо возвращающий пустой результат во избежание ошибки у ресторана,
+                                                                               // у которого нет ни одной записи в relation_supp_rest
+            $dataProvider = new SqlDataProvider([
+                'sql'        => $sql,
+                'pagination' => [
+                    'page'     => isset($params['page']) ? ($params['page'] - 1) : 0,
+                    'pageSize' => isset($params['pageSize']) ? $params['pageSize'] : null,
+                ],
+            ]);
+        }
         return $dataProvider;
     }
 

@@ -43,7 +43,7 @@ try {
     $messageVSD = 'Время последнего обновления списка ВСД (Следующее обновление будет произведено в течении 15 минут): ';
     $messageStock = 'Время последнего обновления журнала входной продукции (Следующее обновление будет произведено в течении 15 минут): ';
     $customJs = <<< JS
-        var refVSD = firebase.database().ref('/mercury/operation/MercVSDList/enterpriseGuid/$enterpriseGuid');
+        var refVSD = firebase.database().ref('/mercury/operation/MercVSDList_$lic->org');
         refVSD.on("value", (snapshot) => {
             if (typeof(snapshot.val()) == "undefined" || snapshot.val() == null || snapshot.val().length == 0)
              {
@@ -63,7 +63,7 @@ try {
                 //console.log(snapshot.val().update_date); //Вывод значения в консоль
         }
     });
-        var refStock = firebase.database().ref('/mercury/operation/MercStockEntryList/enterpriseGuid/$enterpriseGuid');
+        var refStock = firebase.database().ref('/mercury/operation/MercStockEntryList_$lic->org');
         refStock.on("value", (snapshot) => {
          if (typeof(snapshot.val()) == "undefined" || snapshot.val() == null || snapshot.val().length == 0 || isNaN(snapshot.val())) 
           {

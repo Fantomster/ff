@@ -51,6 +51,7 @@ class VendorEmailWaybillsHelper
      */
     public function processFile($invoice)
     {
+        /**@var OuterAgentNameWaybill $outerAgentNameWaybill */
         $outerAgentNameWaybill = OuterAgentNameWaybill::find()
             ->leftJoin(OuterAgent::tableName() . ' oa', 'oa.id=' . OuterAgentNameWaybill::tableName() . '.agent_id')
             ->where([OuterAgentNameWaybill::tableName() . '.name' => $invoice['invoice']['realVendorName'], 'oa.org_id' => $this->orgId])->one();
@@ -92,6 +93,7 @@ class VendorEmailWaybillsHelper
                         if (isset($row['name']) && !empty($row['name'])) {
                             $catIndex = 'product';
                         } else {
+                            $cntErrors++;
                             continue;
                         }
                     }

@@ -181,12 +181,11 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
         return true;
     }
 
-    public function addFCMMessage($operation, $enterpriseGuid)
+    public function addFCMMessage($operation, $org_id)
     {
         FireBase::getInstance()->update([
             'mercury',
-            'operation' => $operation,
-            'enterpriseGuid' => $enterpriseGuid,
+            'operation' => $operation."_".$org_id,
         ], [
             'update_date' => strtotime(gmdate("M d Y H:i:s")),
         ]);

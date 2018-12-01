@@ -27,6 +27,7 @@ return [
             'enableLanguageDetection' => true,
             'rules'                   => [
                 'integration/vetis/<action>' => '/integration/vetis/default/<action>',
+                'integration/egais/<action>' => '/integration/egais/default/<action>',
             ],
         ],
         'user'               => [
@@ -52,34 +53,8 @@ return [
             'class'           => 'yii\web\urlManager',
             'baseUrl'         => 'https://api-dev.mixcart.ru',
             'enablePrettyUrl' => true,
-            'showScriptName'  => false,
-            /*'rules'           => [
-                'product/<id:\d+>'                                       => 'site/product',
-                'restaurant/<id:\d+>'                                    => 'site/restaurant',
-                'supplier/<id:\d+>'                                      => 'site/supplier',
-                'category/<slug:[a-z0-9_-]+>'                            => 'site/category',
-                '<controller:\w+>/<id:\d+>'                              => '<controller>/view',
-                '<controller:[a-z0-9_-]+>/<action:[a-z0-9_-]+>/<id:\d+>' => '<controller>/<action>',
-                '<controller:[a-z0-9_-]+>/<action:[a-z0-9_-]+>'          => '<controller>/<action>',
-                '<module:\w+>/<controller:\w+>/<action:\w+>/<id:\d+>'    => '<module>/<controller>/<action>/<id>',
-                '<module:\w+>/<controller:\w+>/<action:\w+>'             => '<module>/<controller>/<action>',
-                '/'                                                      => 'site/index',
-                'client'                                                 => 'client/index',
-                'vendor'                                                 => 'vendor/index',
-                'about'                                                  => 'site/about',
-                'faq'                                                    => 'site/faq',
-                'contacts'                                               => 'site/contacts',
-                'supplier'                                               => 'site/supplier',
-                'restaurant'                                             => 'site/restaurant',
-                'login'                                                  => 'user/login',
-                'business'                                               => 'user/default/business',
-                'logout'                                                 => 'user/logout',
-                'register'                                               => 'user/register',
-                'forgot'                                                 => 'user/forgot',
-                'resend'                                                 => 'user/resend',
-                'reset'                                                  => 'user/reset',
-            ],*/
-        ],
+            'showScriptName'  => false
+        ]
     ],
     'modules'             => [
         'user'        => [

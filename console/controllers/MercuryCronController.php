@@ -168,7 +168,7 @@ class MercuryCronController extends Controller
         echo "ORG: " .$org_id. PHP_EOL;
         echo "EnterpriseGuid: " .$enterpriseGuid. PHP_EOL;
         echo "Start date: " .$start_date. PHP_EOL;
-        $w = new MercStockEntryList(5144);
+        $w = new MercStockEntryList($org_id);
         MercStockEntry::getUpdateData($org_id);
         $data['startDate'] = $start_date ?? MercVisits::getLastVisit($org_id, 'MercStockEntryList', $enterpriseGuid);
         $data['listOptions']['count'] = 100;

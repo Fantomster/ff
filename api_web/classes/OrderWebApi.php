@@ -2,10 +2,10 @@
 
 namespace api_web\classes;
 
+use api_web\components\ExcelRenderer;
 use api_web\components\notice_class\OrderNotice;
 use api_web\components\Registry;
 use api_web\components\WebApiController;
-use api_web\controllers\OrderController;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
 use api_web\models\User;
@@ -167,9 +167,9 @@ class OrderWebApi extends \api_web\components\WebApi
             }
             $tr->commit();
             if ($order->vendor_id == $this->user->organization_id) {
-                $sender = $order->client;
-            } elseif ($order->client_id == $this->user->organization_id) {
                 $sender = $order->vendor;
+            } elseif ($order->client_id == $this->user->organization_id) {
+                $sender = $order->client;
             }
             if ($isUnconfirmedVendor) {
                 $sender = $order->vendor;
@@ -509,6 +509,20 @@ class OrderWebApi extends \api_web\components\WebApi
         $result['client'] = WebApiHelper::prepareOrganization($order->client);
         $result['vendor'] = WebApiHelper::prepareOrganization($order->vendor);
 
+        if (!is_null($order->status_updated_at) && $order->status_updated_at != '0000-00-00 00:00:00') {
+            $obUpdatedAt = (new \DateTime(trim($order->status_updated_at)))->format("d.m.Y H:i:s");
+        } else {
+            $obUpdatedAt = (new \DateTime())->format("d.m.Y H:i:s");
+        }
+
+        if (!is_null($order->edi_doc_date) && $order->edi_doc_date != '0000-00-00 00:00:00') {
+            $ediDocDate = (new \DateTime(trim($order->edi_doc_date)))->format("d.m.Y H:i:s");
+        } else {
+            $ediDocDate = (new \DateTime())->format("d.m.Y H:i:s");
+        }
+        $result['status_updated_at'] = $obUpdatedAt;
+        $result['edi_doc_date'] = $ediDocDate;
+
         return $result;
     }
 
@@ -636,15 +650,23 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $obDateTime->format("d.m.Y H:i:s");
                 }
                 $obCreateAt = new \DateTime($model->created_at);
-                $obUpdatedAt = null;
                 if (!is_null($model->status_updated_at) && $model->status_updated_at != '0000-00-00 00:00:00') {
                     $obUpdatedAt = (new \DateTime(trim($model->status_updated_at)))->format("d.m.Y H:i:s");
+                } else {
+                    $obUpdatedAt = (new \DateTime())->format("d.m.Y H:i:s");
+                }
+
+                if (!is_null($model->edi_doc_date) && $model->edi_doc_date != '0000-00-00 00:00:00') {
+                    $ediDocDate = (new \DateTime(trim($model->edi_doc_date)))->format("d.m.Y H:i:s");
+                } else {
+                    $ediDocDate = (new \DateTime())->format("d.m.Y H:i:s");
                 }
 
                 $orderInfo = [
                     'id'                => (int)$model->id,
                     'created_at'        => $obCreateAt->format("d.m.Y H:i:s"),
                     'status_updated_at' => $obUpdatedAt,
+                    'edi_doc_date'      => $ediDocDate,
                     'completion_date'   => $date ?? null,
                     'status'            => (int)$model->status,
                     'status_text'       => $model->statusText,
@@ -1277,4 +1299,27 @@ class OrderWebApi extends \api_web\components\WebApi
         }
         return false;
     }
+
+    /**
+     * Сохранение заказа в Excel
+     *
+     * @param array            $post
+     * @return false|string
+     * @throws BadRequestHttpException
+     */
+    public function saveToExcel(array $post)
+    {
+        $this->validateRequest($post, ['order_id']);
+
+        $objPHPExcel = (new ExcelRenderer())->OrderRender($post, ['order_id']);
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+        $objWriter->save(tempnam("/tmp", "excel"));
+        ob_start();
+        $objWriter->save('php://output');
+        $content = ob_get_clean();
+        $base64 = (isset($post['base64_encode']) && $post['base64_encode'] == 1 ? true : false);
+        return ($base64 ? base64_encode($content) : $content);
+    }
+
+
 }

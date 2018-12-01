@@ -2189,7 +2189,7 @@ class OrderController extends DefaultController
                 if ($notification)
                     if ($recipient->profile->phone && $notification->order_changed) {
                         $text = Yii::$app->sms->prepareText('sms.order_changed', [
-                            'name' => $senderOrg->name,
+                            'client_name' => $senderOrg->name,
                             'url'  => $order->getUrlForUser($recipient)
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);

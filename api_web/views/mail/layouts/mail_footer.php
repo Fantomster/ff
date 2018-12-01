@@ -7,8 +7,8 @@
        style="background: #ffffff; min-width: 340px; font-size: 1px; line-height: normal;">
     <tr>
         <td align="center" valign="top">
-            <table cellpadding="0" cellspacing="0" border="0" width="500"
-                   style="max-width: 500px; min-width: 320px; background: #ffffff;">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%"
+                   style="max-width: 600px; min-width: 320px; background: #ffffff;">
                 <tr>
                     <td align="center" valign="middle" width="28">
                         <a href="tel:84994041018" target="_blank" style="text-decoration: none;">

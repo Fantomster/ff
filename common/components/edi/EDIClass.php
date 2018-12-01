@@ -301,6 +301,7 @@ class EDIClass extends Component
         $baseCatalog->updated_at = new Expression('NOW()');
         $baseCatalog->save();
         $goods = $xml->CATALOGUE->POSITION ?? $xml->CATALOGUE[0]->POSITION;
+
         $goodsArray = [];
         $barcodeArray = [];
         foreach ($goods as $good) {
@@ -314,11 +315,11 @@ class EDIClass extends Component
             $goodsArray[$barcode]['price'] = (float)$good->UNITPRICE ?? 0.0;
             $goodsArray[$barcode]['article'] = (isset($good->IDBUYER) && $good->IDBUYER != '') ? (String)$good->IDBUYER : $barcode;
             $goodsArray[$barcode]['ed'] = $ed;
-            $goodsArray[$barcode]['units'] = (float)$good->PACKINGMULTIPLENESS ?? $good->MINORDERQUANTITY;
+            $goodsArray[$barcode]['units'] = (float)$good->QUANTITYOFCUINTU ?? (float)$good->PACKINGMULTIPLENESS ?? $good->MINORDERQUANTITY;
             $goodsArray[$barcode]['edi_supplier_article'] = (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String)$good->IDSUPPLIER : $barcode;
             $goodsArray[$barcode]['vat'] = (int)$good->TAXRATE ?? null;
         }
-
+        
         $catalog_base_goods = (new \yii\db\Query())
             ->select(['id', 'barcode'])
             ->from('catalog_base_goods')

@@ -236,6 +236,10 @@ class CatalogWebApi extends WebApi
                     $catalogGood->price = $model->price;
                     $arBatchInsert[] = $catalogGood;
                 }
+                if (count($arBatchInsert) > 499){
+                    $batchResult = (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');
+                    $arBatchInsert = [];
+                }
             }
             $batchResult = (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');
             //Убиваем временный каталог

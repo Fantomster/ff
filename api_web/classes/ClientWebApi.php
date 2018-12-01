@@ -252,40 +252,55 @@ class ClientWebApi extends WebApi
         }
         $result = [];
 
-        $rel = RelationUserOrganization::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
-
-        if (empty($rel)) {
-            throw new BadRequestHttpException('RelationUserOrganization_not_found');
+        if ($this->user->role_id == Role::ROLE_RESTAURANT_MANAGER) {
+            $searchModel = new UserSearch();
+            $params['UserSearch']['organization_id'] = $this->user->organization->id;
+            $dataProvider = $searchModel->search($params);
+            $users = ArrayHelper::getColumn((array)$dataProvider->models, 'id');
+            $rel = RelationUserOrganization::findAll(['organization_id' => $this->user->organization->id, 'user_id' => $users]);
+            $relations = ArrayHelper::getColumn((array)$rel, 'id');
+        } else {
+            $rel = RelationUserOrganization::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
+            if (empty($rel)) {
+                throw new BadRequestHttpException('RelationUserOrganization_not_found');
+            }
+            $users[] = $this->user->id;
+            $relations[] = $rel->id;
         }
 
-        $user_phone = SmsNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $rel->id]);
-        if (!empty($user_phone)) {
-            $result[] = [
-                'id'               => $user_phone->id,
-                'value'            => $this->user->profile->phone,
-                'type'             => 'user_phone',
-                'order_created'    => $user_phone['order_created'],
-                'order_canceled'   => $user_phone['order_canceled'],
-                'order_changed'    => $user_phone['order_changed'],
-                'order_processing' => $user_phone['order_processing'],
-                'order_done'       => $user_phone['order_done'],
-                'request_accept'   => $user_phone['request_accept']
-            ];
+        $user_phones = SmsNotification::find()->where(['user_id' => $users, 'rel_user_org_id' => $relations])->orderBy('created_at')->all();
+        if (!empty($user_phones)) {
+            /** @var SmsNotification $user_phone */
+            foreach ($user_phones as $user_phone) {
+                $result[] = [
+                    'id'               => $user_phone->id,
+                    'value'            => $user_phone->user->profile->phone,
+                    'type'             => 'user_phone',
+                    'order_created'    => $user_phone['order_created'],
+                    'order_canceled'   => $user_phone['order_canceled'],
+                    'order_changed'    => $user_phone['order_changed'],
+                    'order_processing' => $user_phone['order_processing'],
+                    'order_done'       => $user_phone['order_done'],
+                    'request_accept'   => $user_phone['request_accept']
+                ];
+            }
         }
 
-        $user_email = EmailNotification::findOne(['user_id' => $this->user->id, 'rel_user_org_id' => $rel->id]);
-        if (!empty($user_email)) {
-            $result[] = [
-                'id'               => $user_email->id,
-                'value'            => $this->user->email,
-                'type'             => 'user_email',
-                'order_created'    => $user_email['order_created'],
-                'order_canceled'   => $user_email['order_canceled'],
-                'order_changed'    => $user_email['order_changed'],
-                'order_processing' => $user_email['order_processing'],
-                'order_done'       => $user_email['order_done'],
-                'request_accept'   => $user_email['request_accept'],
-            ];
+        $user_emails = EmailNotification::find()->where(['user_id' => $users, 'rel_user_org_id' => $relations])->orderBy('created_at')->all();
+        if (!empty($user_emails)) {
+            foreach ($user_emails as $user_email) {
+                $result[] = [
+                    'id'               => $user_email->id,
+                    'value'            => $user_email->user->email,
+                    'type'             => 'user_email',
+                    'order_created'    => $user_email['order_created'],
+                    'order_canceled'   => $user_email['order_canceled'],
+                    'order_changed'    => $user_email['order_changed'],
+                    'order_processing' => $user_email['order_processing'],
+                    'order_done'       => $user_email['order_done'],
+                    'request_accept'   => $user_email['request_accept'],
+                ];
+            }
         }
 
         $additional_emails = $this->user->organization->additionalEmail;
@@ -327,26 +342,43 @@ class ClientWebApi extends WebApi
                 throw new BadRequestHttpException('empty_param|id');
             }
 
-            $rel = RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $this->user->organization->id]);
-
-            if (empty($rel)) {
-                throw new BadRequestHttpException('RelationUserOrganization_not_found');
-            }
-
             switch ($post['type']) {
                 case 'user_phone':
-                    $model = SmsNotification::findOne(['id' => $post['id'], 'rel_user_org_id' => $rel->id]);
+                    $model = SmsNotification::findOne(['id' => $post['id']]);
                     break;
                 case 'user_email':
-                    $model = EmailNotification::findOne(['id' => $post['id'], 'rel_user_org_id' => $rel->id]);
+                    $model = EmailNotification::findOne(['id' => $post['id']]);
                     break;
                 case 'additional_email':
-                    $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $rel->organization_id]);
+                    $model = AdditionalEmail::findOne(['id' => $post['id']]);
                     break;
             }
 
             if (empty($model)) {
                 throw new BadRequestHttpException('model_not_found');
+            }
+
+            //Если пользователь не руководитель, он обновлять может только свои уведомления
+            if ($this->user->role_id != Role::ROLE_RESTAURANT_MANAGER) {
+                $rel = RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $this->user->organization->id]);
+                if (empty($rel)) {
+                    throw new BadRequestHttpException('RelationUserOrganization_not_found');
+                }
+
+                if ($model instanceof AdditionalEmail) {
+                    /** @var AdditionalEmail $model */
+                    if ($model->organization_id != $this->user->organization->id) {
+                        throw new BadRequestHttpException('model_not_found');
+                    }
+                } else {
+                    /** @var SmsNotification $model */
+                    if ($model->user_id != $this->user->id) {
+                        throw new BadRequestHttpException('model_not_found');
+                    }
+                    if ($model->rel_user_org_id != $rel->id) {
+                        throw new BadRequestHttpException('model_not_found');
+                    }
+                }
             }
 
             $t = \Yii::$app->db->beginTransaction();
@@ -637,6 +669,12 @@ class ClientWebApi extends WebApi
         try {
             $user = $this->userGet($post['id']);
 
+            if ($user->id != $this->user->id) {
+                if ($this->user->role_id != Role::ROLE_RESTAURANT_MANAGER) {
+                    throw new BadRequestHttpException('user.employee.update.access_denied');
+                }
+            }
+
             $relation = RelationUserOrganization::findOne([
                 'user_id'         => $user->id,
                 'organization_id' => $this->user->organization->id
@@ -711,6 +749,10 @@ class ClientWebApi extends WebApi
 
         if ($post['id'] === $this->user->id) {
             throw new BadRequestHttpException('user.delete_myself');
+        }
+
+        if ($this->user->role_id != Role::ROLE_RESTAURANT_MANAGER) {
+            throw new BadRequestHttpException('user.employee.delete.access_denied');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();

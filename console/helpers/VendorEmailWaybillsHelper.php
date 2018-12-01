@@ -81,6 +81,7 @@ class VendorEmailWaybillsHelper
             $order->client_id = $invoice['organization_id'];
             $order->service_id = $this->serviceId;
             $order->status = Order::STATUS_EDI_SENT_BY_VENDOR;
+            $order->currency_id = $catalog->currency_id;
             if (!$order->save()) {
                 $this->addLog(implode(' ', $order->getFirstErrors()), 'order_create');
                 return false;

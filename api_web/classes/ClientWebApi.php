@@ -251,8 +251,9 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
         $result = [];
+        $isHeadOfOrganisation = (bool)($this->user->role_id == Role::ROLE_RESTAURANT_MANAGER);
 
-        if ($this->user->role_id == Role::ROLE_RESTAURANT_MANAGER) {
+        if ($isHeadOfOrganisation) {
             $searchModel = new UserSearch();
             $params['UserSearch']['organization_id'] = $this->user->organization->id;
             $dataProvider = $searchModel->search($params);
@@ -268,13 +269,41 @@ class ClientWebApi extends WebApi
             $relations[] = $rel->id;
         }
 
+        $user_emails = EmailNotification::find()->where(['user_id' => $users, 'rel_user_org_id' => $relations])->orderBy('created_at')->all();
+        if (!empty($user_emails)) {
+            foreach ($user_emails as $user_email) {
+                $value = $user_email->user->email;
+                if ($isHeadOfOrganisation) {
+                    $value = $user_email->user->profile->full_name . ": " . $value;
+                }
+
+                $result[] = [
+                    'id'               => $user_email->id,
+                    'value'            => $value,
+                    'user_id'          => $user_email->user->id,
+                    'type'             => 'user_email',
+                    'order_created'    => $user_email['order_created'],
+                    'order_canceled'   => $user_email['order_canceled'],
+                    'order_changed'    => $user_email['order_changed'],
+                    'order_processing' => $user_email['order_processing'],
+                    'order_done'       => $user_email['order_done'],
+                    'request_accept'   => $user_email['request_accept'],
+                ];
+            }
+        }
+
         $user_phones = SmsNotification::find()->where(['user_id' => $users, 'rel_user_org_id' => $relations])->orderBy('created_at')->all();
         if (!empty($user_phones)) {
             /** @var SmsNotification $user_phone */
             foreach ($user_phones as $user_phone) {
+                $value = $user_phone->user->profile->phone;
+                if ($isHeadOfOrganisation) {
+                    $value = $user_phone->user->profile->full_name . ": " . $value;
+                }
                 $result[] = [
                     'id'               => $user_phone->id,
-                    'value'            => $user_phone->user->profile->phone,
+                    'value'            => $value,
+                    'user_id'          => $user_phone->user->id,
                     'type'             => 'user_phone',
                     'order_created'    => $user_phone['order_created'],
                     'order_canceled'   => $user_phone['order_canceled'],
@@ -286,22 +315,7 @@ class ClientWebApi extends WebApi
             }
         }
 
-        $user_emails = EmailNotification::find()->where(['user_id' => $users, 'rel_user_org_id' => $relations])->orderBy('created_at')->all();
-        if (!empty($user_emails)) {
-            foreach ($user_emails as $user_email) {
-                $result[] = [
-                    'id'               => $user_email->id,
-                    'value'            => $user_email->user->email,
-                    'type'             => 'user_email',
-                    'order_created'    => $user_email['order_created'],
-                    'order_canceled'   => $user_email['order_canceled'],
-                    'order_changed'    => $user_email['order_changed'],
-                    'order_processing' => $user_email['order_processing'],
-                    'order_done'       => $user_email['order_done'],
-                    'request_accept'   => $user_email['request_accept'],
-                ];
-            }
-        }
+        ArrayHelper::multisort($result, 'user_id', SORT_ASC, SORT_REGULAR);
 
         $additional_emails = $this->user->organization->additionalEmail;
         if (!empty($additional_emails)) {

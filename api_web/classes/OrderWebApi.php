@@ -1223,9 +1223,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
-        if (in_array($model->order->service_id, [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID])) {
-            $item['edi_number'] = $model->edi_number;
-        }
+        $item['edi_number'] = $model->edi_number;
         $item['edi_product'] = $model->product->edi_supplier_article > 0 ? true : false;
         return $item;
     }
@@ -1287,7 +1285,7 @@ class OrderWebApi extends \api_web\components\WebApi
     /**
      * Сохранение заказа в Excel
      *
-     * @param array            $post
+     * @param array $post
      * @return false|string
      * @throws BadRequestHttpException
      */
@@ -1304,6 +1302,5 @@ class OrderWebApi extends \api_web\components\WebApi
         $base64 = (isset($post['base64_encode']) && $post['base64_encode'] == 1 ? true : false);
         return ($base64 ? base64_encode($content) : $content);
     }
-
 
 }

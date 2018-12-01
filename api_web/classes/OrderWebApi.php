@@ -481,22 +481,6 @@ class OrderWebApi extends \api_web\components\WebApi
         $dataProvider->pagination = false;
         $products = $dataProvider->models;
 
-        # корректируем данные заказа на данные из накладной если это документ EDI
-        # editedBy Basil A Konakov 2018-09-17 [DEV-1872]
-        if ($order->service_id == Registry::EDI_SERVICE_ID) {
-            $productsEdo = [];
-            /**@var OrderContent $model */
-            foreach ($products as $k => $model) {
-                $wbContent = WaybillContent::findOne(['order_content_id' => $model->id]);
-                if ($wbContent) {
-                    $model->quantity = $wbContent->quantity_waybill;
-                    $model->price = $wbContent->price_with_vat;
-                }
-                $productsEdo[$k] = $model;
-            }
-            $products = $productsEdo;
-        }
-
         if (!empty($products)) {
             foreach ($products as $model) {
                 /**
@@ -1239,7 +1223,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
-        if ($model->order->service_id == Registry::EDI_SERVICE_ID) {
+        if (in_array($model->order->service_id, [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID])) {
             $item['edi_number'] = $model->edi_number;
         }
         $item['edi_product'] = $model->product->edi_supplier_article > 0 ? true : false;

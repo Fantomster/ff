@@ -90,7 +90,7 @@ class EdiWebApi extends WebApi
 
         if (empty($order)) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found'));
-        } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
+        } elseif (!in_array($order->service_id, [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID])) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
         } elseif ($order->status != OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order.status_must_be') . \Yii::t('app', 'common.models.order_status.status_edo_acceptance_finished'));
@@ -119,7 +119,7 @@ class EdiWebApi extends WebApi
 
         if (empty($order)) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found'));
-        } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
+        } elseif (!in_array($order->service_id, [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID])) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
         } elseif ($order->status != OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order.status_must_be') . \Yii::t('app', 'common.models.order_status.status_awaiting_accept_from_vendor'));
@@ -235,7 +235,10 @@ class EdiWebApi extends WebApi
                 ['client_id' => $this->user->organization->id],
                 ['vendor_id' => $this->user->organization->id],
             ])
-            ->andWhere(['service_id' => Registry::EDI_SERVICE_ID])
+            ->andWhere(['service_id' => [
+                Registry::EDI_SERVICE_ID,
+                Registry::VENDOR_DOC_MAIL_SERVICE_ID
+            ]])
             ->groupBy('status')
             ->all();
 

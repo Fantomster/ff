@@ -1239,7 +1239,7 @@ class OrderController extends WebApiController
      */
     public function actionInfoByUnconfirmedVendor()
     {
-        $this->response = $this->container->get('OrderWebApi')->getInfo($this->request, true);
+        $this->response = $this->container->get('OrderWebApi')->getInfo($this->request);
     }
 
     /**

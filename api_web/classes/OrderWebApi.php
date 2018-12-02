@@ -388,25 +388,23 @@ class OrderWebApi extends \api_web\components\WebApi
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      */
-    public function getInfo(array $post, $edo = false)
+    public function getInfo(array $post, $edo = null)
     {
         if (empty($post['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');
         }
 
-        $where = ['id' => $post['order_id']];
-        if ($edo) {
-            $where['service_id'] = Registry::$edo_documents;
-        }
-
         /**@var Order $order */
-        $order = Order::find()->where($where)->one();
+        $query = Order::find()->where(['id' => $post['order_id']]);
 
-        if (empty($order)) {
-            throw new BadRequestHttpException("order_not_found");
+        if ($edo === true) {
+            $query->andWhere(['service_id' => Registry::$edo_documents]);
+        } elseif ($edo === false) {
+            $query->andWhere(['service_id' => Registry::MC_BACKEND]);
         }
 
-        if ($edo === false && in_array($order->service_id, Registry::$edo_documents)) {
+        $order = $query->one();
+        if (empty($order)) {
             throw new BadRequestHttpException("order_not_found");
         }
 
@@ -414,6 +412,17 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order.view_access_denied");
         }
 
+        return $this->getOrderInfo($order);
+    }
+
+    /**
+     * @param Order $order
+     * @return array
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    private function getOrderInfo(Order $order)
+    {
         $result = $order->attributes;
         $currency = $order->currency->symbol ?? "RUB";
         $currency_id = $order->currency->id;

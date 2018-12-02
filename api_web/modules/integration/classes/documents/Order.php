@@ -21,7 +21,6 @@ class Order extends BaseOrder implements DocumentInterface
      * Получение данных из модели
      *
      * @return array
-     * @throws BadRequestHttpException
      * @throws \yii\db\Exception
      */
     public function prepare()
@@ -79,7 +78,7 @@ class Order extends BaseOrder implements DocumentInterface
      * @param      $key
      * @param null $serviceId
      * @return array
-     * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
     public static function prepareModel($key, $serviceId = null)
     {
@@ -98,13 +97,12 @@ class Order extends BaseOrder implements DocumentInterface
      * Групповой статус документа
      *
      * @return int
-     * @throws BadRequestHttpException
      * @throws \yii\db\Exception
      */
     public function getGroupStatus()
     {
         if (is_null(self::$waybill_service_id)) {
-            throw new BadRequestHttpException("empty_param|service_id");
+            return Registry::DOC_GROUP_STATUS_WAIT_FORMING;
         }
         $waybill_status = ArrayHelper::getColumn($this->getWaybills(self::$waybill_service_id), 'status_id');
         $waybill_status = array_unique($waybill_status);

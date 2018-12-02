@@ -2,7 +2,7 @@
 
 namespace api_web\classes;
 
-use api\modules\v1\modules\mobile\resources\RelationSuppRest;
+use common\models\RelationSuppRest;
 use api_web\exceptions\ValidationException;
 use common\helpers\ModelsCollection;
 use common\models\CatalogGoods;
@@ -142,7 +142,8 @@ class CatalogWebApi extends WebApi
             ->from(CatalogTempContent::tableName() . ' ctc')
             ->leftJoin(CatalogBaseGoods::tableName() . ' cbg', "cbg.$catalog->main_index=ctc.$catalog->main_index"
                 . " and cbg.cat_id=:vendorBaseCatId", [':vendorBaseCatId' => $vendorBaseCatalog->id])
-            ->leftJoin(CatalogGoods::tableName() . ' cg', 'cg.base_goods_id=cbg.id')
+            ->leftJoin(CatalogGoods::tableName() . ' cg', 'cg.base_goods_id=cbg.id and cg.cat_id=:cat_id',
+                [':cat_id' => $catalog->id])
             ->where(['temp_id' => $catalogTemp->id])->all();
 
         if (empty($catalogTempContent)) {
@@ -611,7 +612,9 @@ class CatalogWebApi extends WebApi
         $relQuery = RelationSuppRest::find()
             ->where([
                 'supp_org_id' => $vendorID,
-                'rest_org_id' => $restOrganization->id
+                'rest_org_id' => $restOrganization->id,
+                'status' => RelationSuppRest::CATALOG_STATUS_ON,
+                'deleted' => 0,
             ]);
         if (!$kostilForInvitedVendor) {
             $relQuery->andWhere([">", "cat_id", 0]);
@@ -625,7 +628,7 @@ class CatalogWebApi extends WebApi
             $catalog->name = $restOrganization->name . ' ' . date('d.m.Y');
             $catalog->status = Catalog::STATUS_ON;
             $catalog->currency_id = 1;
-            $mainCatalog = Catalog::findOne(['supp_org_id' => $vendorID]);
+            $mainCatalog = Catalog::findOne(['supp_org_id' => $vendorID, 'type' => Catalog::BASE_CATALOG]);
             if ($mainCatalog) {
                 $catalog->currency_id = $mainCatalog->currency_id;
                 $catalog->main_index = $mainCatalog->main_index;
@@ -651,6 +654,7 @@ class CatalogWebApi extends WebApi
             $rel->cat_id = $catalog->id;
             $rel->invite = 1;
             $rel->status = 1;
+            $rel->deleted = 0;
             if (!$rel->save()) {
                 throw new ValidationException($rel->getFirstErrors());
             }

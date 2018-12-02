@@ -96,6 +96,16 @@ class Registry
         self::MERC_SERVICE_ID
     ];
 
+    /**
+     * Документы ЕДО
+     *
+     * @var array
+     */
+    static $edo_documents = [
+        self::EDI_SERVICE_ID,
+        self::VENDOR_DOC_MAIL_SERVICE_ID
+    ];
+
     const DOC_GROUP_STATUS_WAIT_SENDING = 1;
     const DOC_GROUP_STATUS_WAIT_FORMING = 2;
     const DOC_GROUP_STATUS_SENT = 3;

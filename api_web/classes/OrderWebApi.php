@@ -131,11 +131,7 @@ class OrderWebApi extends \api_web\components\WebApi
                                 $changed[] = $this->addProduct($order, $product);
                                 break;
                             case 'edit':
-                                if ($order->service_id == Registry::EDI_SERVICE_ID) {
-                                    $changed[] = $this->editProductEdo($order, $product);
-                                } else {
-                                    $changed[] = $this->editProduct($order, $product);
-                                }
+                                $changed[] = $this->editProduct($order, $product);
                                 break;
                         }
                     }
@@ -225,44 +221,13 @@ class OrderWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Редактирвание продукта в заказе типа EDI (меняем данные в накладной)
-     *
-     * @param Order $order
-     * @param array $product
-     * @return WaybillContent | OrderContent
-     * @throws BadRequestHttpException | ValidationException | \Exception
-     * @editedBy Basil A Konakov
-     */
-    private function editProductEdo(Order $order, array $product)
-    {
-        if (empty($product['id'])) {
-            throw new BadRequestHttpException("order.edit_product_empty");
-        }
-
-        /** @var OrderContent $orderContent */
-        $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
-        if (empty($orderContent)) {
-            throw new BadRequestHttpException("order_content.not_found");
-        }
-
-        if (!empty($product['quantity'])) {
-            $orderContent->setAttribute('quantity', $product['quantity']);
-        }
-
-        if ($orderContent->validate() && $orderContent->save()) {
-            return $orderContent;
-        } else {
-            throw new ValidationException($orderContent->getFirstErrors());
-        }
-    }
-
-    /**
      * Удаление продукта из заказа
      *
      * @param Order $order
      * @param int   $id
      * @return string
      * @throws BadRequestHttpException
+     * @throws \Exception
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
@@ -417,19 +382,31 @@ class OrderWebApi extends \api_web\components\WebApi
      * Информация о заказе
      *
      * @param array $post
+     * @param bool  $edo
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
-    public function getInfo(array $post)
+    public function getInfo(array $post, $edo = false)
     {
         if (empty($post['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');
         }
+
+        $where = ['id' => $post['order_id']];
+        if ($edo) {
+            $where['service_id'] = Registry::$edo_documents;
+        }
+
         /**@var Order $order */
-        $order = Order::find()->where(['id' => $post['order_id']])->one();
+        $order = Order::find()->where($where)->one();
 
         if (empty($order)) {
+            throw new BadRequestHttpException("order_not_found");
+        }
+
+        if ($edo === false && in_array($order->service_id, Registry::$edo_documents)) {
             throw new BadRequestHttpException("order_not_found");
         }
 
@@ -540,7 +517,7 @@ class OrderWebApi extends \api_web\components\WebApi
             if (isset($post['search']['service_id']) && !empty($post['search']['service_id'])) {
                 $search->service_id = $post['search']['service_id'];
             } else {
-                $search->service_id_excluded = [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID];
+                $search->service_id_excluded = Registry::$edo_documents;
             }
 
             if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
@@ -695,7 +672,7 @@ class OrderWebApi extends \api_web\components\WebApi
             ])
             ->andWhere(
                 ['OR',
-                    ['not in', 'service_id', [Registry::EDI_SERVICE_ID]],
+                    ['not in', 'service_id', Registry::$edo_documents],
                     ['service_id' => null]
                 ]
             )

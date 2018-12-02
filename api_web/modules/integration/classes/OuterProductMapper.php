@@ -180,7 +180,7 @@ class OuterProductMapper
             unset($this->request['outer_product_id']);
             $mainAttributes = $mainOrgModel->attributes();
             $model = new OuterProductMap();
-            $model->service_id = $mainAttributes['service_id'];
+            $model->service_id = $this->serviceId;
             $model->organization_id = $this->orgId;
             $model->vendor_id = $mainAttributes['vendor_id'];
             $model->product_id = $mainAttributes['product_id'];

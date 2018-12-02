@@ -17,6 +17,7 @@ use common\models\IntegrationInvoice;
 use common\models\Journal;
 use common\models\Order;
 use common\models\OrderContent;
+use common\models\Organization;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
 use common\models\RelationSuppRest;
@@ -66,14 +67,52 @@ class VendorEmailWaybillsHelper
             if ($catRelation) {
                 $catalog = Catalog::findOne($catRelation->cat_id);
                 $catIndex = $catalog->main_index;
+                $baseCatalog = Catalog::findOne(['type' => Catalog::BASE_CATALOG, 'supp_org_id' => $vendorId]);
             } else {
-                $catalog = Catalog::findOne(['supp_org_id' => $vendorId, 'type' => 1]);
-                $catIndex = $catalog->main_index;
+                $baseCatalog = Catalog::findOne(['supp_org_id' => $vendorId, 'type' => 1]);
+                if (!$baseCatalog) {
+                    $baseCatalog = new Catalog();
+                    $baseCatalog->type = Catalog::BASE_CATALOG;
+                    $baseCatalog->currency_id = 1;
+                    $baseCatalog->supp_org_id = $vendorId;
+                    $baseCatalog->name = Catalog::CATALOG_BASE_NAME;
+                    $baseCatalog->status = 1;
+                    if (!$baseCatalog->save()) {
+                        $this->addLog(implode(' ', $baseCatalog->getFirstErrors()), 'catalog_create');
+                        return false;
+                    }
+                    $baseCatalog->refresh();
+                }
+                $orgModel = Organization::findOne($invoice['organization_id']);
+                $catalog = new Catalog();
+                $catalog->type = Catalog::CATALOG;
+                $catalog->currency_id = 1;
+                $catalog->supp_org_id = $vendorId;
+                $catalog->name = $orgModel->name;
+                $catalog->status = 1;
+                if (!empty($baseCatalog->main_index)) {
+                    $catalog->main_index = $baseCatalog->main_index;
+                    $catIndex = $baseCatalog->main_index;
+                }
+                if (!$catalog->save()) {
+                    $this->addLog(implode(' ', $catalog->getFirstErrors()), 'personal_catalog_create');
+                    return false;
+                }
+                $catalog->refresh();
+                $newCatRelation = new RelationSuppRest();
+                $newCatRelation->rest_org_id = $invoice['organization_id'];
+                $newCatRelation->supp_org_id = $vendorId;
+                $newCatRelation->cat_id = $catalog->id;
+                $newCatRelation->invite = 1;
+                $newCatRelation->status = RelationSuppRest::CATALOG_STATUS_ON;
+                $newCatRelation->deleted = 0;
+                if (!$newCatRelation->save()) {
+                    $this->addLog(implode(' ', $newCatRelation->getFirstErrors()), 'personal_catalog_create');
+                    return false;
+                }
+
             }
-            if (!$catIndex) {
-                $this->addLog('VendorId = ' . $vendorId . ' dont have main_index in catalog', 'order_create');
-                return false;
-            }
+
             $transaction = \Yii::$app->db->beginTransaction();
             $order = new Order();
             $order->created_at = !empty($invoice['invoice']['date']) ? date('Y-m-d', strtotime($invoice['invoice']['date'])) : null;
@@ -97,13 +136,22 @@ class VendorEmailWaybillsHelper
                             $cntErrors++;
                             continue;
                         }
+                    } elseif (is_null($catIndex)) {
+                        if (isset($row['code']) && !empty($row['code'])) {
+                            $catIndex = 'article';
+                        } elseif (isset($row['name']) && !empty($row['name'])) {
+                            $catIndex = 'product';
+                        } else {
+                            $this->addLog('Не хватает данных для обработки', 'parsing');
+                            return false;
+                        }
                     }
                     $strSearch = ['article' => $row['code'], 'product' => $row['name']];
                     $product = CatalogBaseGoods::findOne([$catIndex => $strSearch[$catIndex], 'supp_org_id' => $vendorId]);
                     if (!$product) {
                         $product = new CatalogBaseGoods();
                         $product->product = $row['name'];
-                        $product->cat_id = $catalog->id;
+                        $product->cat_id = $baseCatalog->id;
                         $product->status = 1;
                         $product->article = $row['code'];
                         $product->deleted = 0;
@@ -115,17 +163,24 @@ class VendorEmailWaybillsHelper
                             $this->addLog(implode(' ', $product->getFirstErrors()) . ' Название продукта = ' . $row['name'], 'product_create');
                             continue;
                         }
-                        if ($catalog->type == Catalog::CATALOG) {
-                            $catGood = new CatalogGoods();
-                            $catGood->base_goods_id = $product->id;
-                            $catGood->cat_id = $catalog->id;
-                            $catGood->price = round($row['price_without_tax'], 2);
-                            $catGood->vat = ceil($row['tax_rate']);
-                            if (!$catGood->save()) {
-                                $this->addLog(implode(' ', $catGood->getFirstErrors()), 'CatalogGoods_create');
-                            }
-                        } else {
-
+                        $catGood = new CatalogGoods();
+                        $catGood->base_goods_id = $product->id;
+                        $catGood->cat_id = $catalog->id;
+                        $catGood->price = round($row['price_without_tax'], 2);
+                        $catGood->vat = ceil($row['tax_rate']);
+                        if (!$catGood->save()) {
+                            $this->addLog(implode(' ', $catGood->getFirstErrors()), 'CatalogGoods_create');
+                        }
+                    }
+                    $catalogGood = CatalogGoods::findOne(['base_goods_id' => $product->id, 'cat_id' => $catalog->id]);
+                    if (!$catalogGood){
+                        $catGood = new CatalogGoods();
+                        $catGood->base_goods_id = $product->id;
+                        $catGood->cat_id = $catalog->id;
+                        $catGood->price = round($row['price_without_tax'], 2);
+                        $catGood->vat = ceil($row['tax_rate']);
+                        if (!$catGood->save()) {
+                            $this->addLog(implode(' ', $catGood->getFirstErrors()), 'CatalogGoods_create');
                         }
                     }
 
@@ -227,12 +282,7 @@ class VendorEmailWaybillsHelper
         $journal->type = $type;
         $journal->response = $response;
         $journal->organization_id = $this->orgId;
-
         $journal->save();
-
-//        $journal->getErrors();
-        //$this->addInternalLog($response, $method, $localTransactionId, $request_xml, $response_xml);
-
     }
 
     /**

@@ -17,6 +17,7 @@ class EgaisHelper extends WebApi
     /**@var array типы входящих документов */
     static $type_document = [
         'TICKET',
+        'REPLYRESTS',
         //'WAYBILL_V2',
         //'FORMF2REGINFO',
         //'TTNHISTORYF2REG'

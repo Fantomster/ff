@@ -65,6 +65,32 @@ class EgaisMethods extends WebApi
     }
 
     /**
+     * @param array $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\httpclient\Exception
+     */
+    public function actWriteOff(array $request)
+    {
+        if (empty($request['xml'])) {
+            throw new BadRequestHttpException('dictionary.request_error');
+        }
+
+        $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $this->user->organization_id);
+
+        if (empty($settings)) {
+            throw new BadRequestHttpException('dictionary.egais_get_setting_error');
+        }
+
+        $return = (new EgaisHelper())->sendActWriteOff($settings['egais_url'], $request['xml'], 'ActWriteOff_v3');
+
+        return [
+            'result' => $return
+        ];
+    }
+
+    /**
      * @param $request
      * @return mixed
      * @throws BadRequestHttpException

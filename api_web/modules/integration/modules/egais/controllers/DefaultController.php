@@ -12,6 +12,92 @@ use api_web\modules\integration\modules\egais\models\EgaisMethods;
  */
 class DefaultController extends WebApiController
 {
+    /**
+     * @SWG\Post(path="/integration/egais/set-egais-settings",
+     *     tags={"Integration/egais"},
+     *     summary="Настройки ЕГАИС",
+     *     description="Задаём настройки для ЕГАИС",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                    "egais_url": "http://192.168.1.70:8090",
+     *                    "fsrar_id": "030000443640",
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                      "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionSetEgaisSettings()
+    {
+        $this->response = (new EgaisMethods())->setEgaisSettings($this->request, $this->user->organization_id);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/egais/act-write-off",
+     *     tags={"Integration/egais"},
+     *     summary="Акт списания",
+     *     description="Акт списания ЕГАИС",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(property="request", ref="#/definitions/ActWriteOffV3"),
+     *
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                      "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionActWriteOff()
+    {
+        $this->response = (new EgaisMethods())->actWriteOff($this->request);
+    }
 
     /**
      * @SWG\Post(path="/integration/egais/query-rests",
@@ -165,51 +251,5 @@ class DefaultController extends WebApiController
     public function actionOneIncomingDoc()
     {
         return $this->response = (new EgaisMethods())->getOneIncomingDoc($this->request);
-    }
-
-    /**
-     * @SWG\Post(path="/integration/egais/set-egais-settings",
-     *     tags={"Integration/egais"},
-     *     summary="Настройки ЕГАИС",
-     *     description="Задаём настройки для ЕГАИС",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                    "egais_url": "http://192.168.1.70:8090",
-     *                    "fsrar_id": "030000443640",
-     *                  }
-     *              )
-     *         )
-     *     ),
-     *    @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *            @SWG\Schema(
-     *              default={
-     *                      "result": true
-     *              }
-     *          )
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "error"
-     *     )
-     * )
-     * @throws \Exception
-     */
-    public function actionSetEgaisSettings()
-    {
-        $this->response = (new EgaisMethods())->setEgaisSettings($this->request, $this->user->organization_id);
     }
 }

@@ -6,6 +6,25 @@ use yii\helpers\ArrayHelper;
 
 class XmlParser
 {
+    public function parseInputActWriteOffV3($xml)
+    {
+        $xml_parser = simplexml_load_string($xml);
+        $namespaces = $xml_parser->getNamespaces(true);
+        $data = $xml_parser
+            ->children($namespaces['ns'])
+            ->Document
+            ->ActWriteOff_v3
+            ->children($namespaces['awr']);
+
+        return [
+            'identity' => (string)$data->Identity,
+            'ActNumber' => (string)$data->Header->ActNumber,
+            'ActDate' => (string)$data->Header->ActDate,
+            'TypeWriteOff' => (string)$data->Header->TypeWriteOff,
+            'Note' => (string)$data->Header->Note,
+        ];
+    }
+
     /**
      * @param $xml
      * @return array

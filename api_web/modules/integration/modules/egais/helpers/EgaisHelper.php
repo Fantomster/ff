@@ -4,6 +4,8 @@ namespace api_web\modules\integration\modules\egais\helpers;
 
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\egais\classes\XmlParser;
+use common\models\egais\EgaisTypeWriteOff;
+use common\models\egais\EgaisWriteOff;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
 use yii\httpclient\Client;
@@ -22,6 +24,38 @@ class EgaisHelper extends WebApi
         //'FORMF2REGINFO',
         //'TTNHISTORYF2REG'
     ];
+
+    /**
+     * @param string $url
+     * @param string $data
+     * @param string $queryType
+     * @return bool|string
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\httpclient\Exception
+     */
+    public function sendActWriteOff(string $url, string $data, string $queryType)
+    {
+        $result = (new XmlParser())->parseInputActWriteOffV3($data);
+        $typeWriteOff = EgaisTypeWriteOff::findOne(['type' => $result['TypeWriteOff']]);
+        $orgId = $this->user->organization_id;
+
+        if (EgaisWriteOff::find()->where(['org_id' => $orgId, 'act_number' => $result['ActNumber']])->exists()) {
+            throw new BadRequestHttpException('dictionary.act_write_off_number_error');
+        }
+
+        (new EgaisWriteOff([
+            'org_id' => $orgId,
+            'identity' => $result['identity'],
+            'act_number' => $result['ActNumber'],
+            'act_date' => $result['ActDate'],
+            'type_write_off' => $typeWriteOff ? $typeWriteOff->id : 8,
+            'note' => $result['Note'],
+            'status' => null,
+        ]))->save();
+
+        return self::sendEgaisQuery($url, $data, $queryType);
+    }
 
     /**
      * @param $url

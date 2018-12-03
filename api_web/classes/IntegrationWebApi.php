@@ -619,6 +619,8 @@ class IntegrationWebApi extends WebApi
      * @param int  $service_id
      * @param      $request
      * @param null $business_id
+     * @throws BadRequestHttpException
+     * @throws ValidationException
      */
     private function editProductMap(int $service_id, $request, $business_id = null)
     {
@@ -626,7 +628,7 @@ class IntegrationWebApi extends WebApi
         //Загружаем данные по базовому и дочерним бизнесам (если бизнес главный)
         $mapper = new OuterProductMapper($business_id, $service_id);
         $mapper->loadRequest($request);
-        $mapper->updateChildsMap();
+        $mapper->updateChildesMap();
         $mapper->updateModel();
     }
 

@@ -247,16 +247,8 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
             } else {
                 $orderStatus = OrderStatus::STATUS_PROCESSING;
             }
-            Yii::$app->db->createCommand()->update('order', ['status' => $orderStatus, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
-            $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
-
-            if ($ediOrder) {
-                $ediOrder->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
-                $ediOrder->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE ?? '';
-                if (!$ediOrder->save()) {
-                    throw new Exception('Error saving edi order');
-                }
-            }
+            $order->status = $orderStatus;
+            $order->total_price = $summ;
             $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
             $order->edi_ordersp = $exceptionArray['file_id'];
             $order->service_id = 6;

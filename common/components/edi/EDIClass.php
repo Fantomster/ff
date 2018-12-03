@@ -216,15 +216,8 @@ class EDIClass extends Component
         } else {
             $orderStatus = OrderStatus::STATUS_PROCESSING;
         }
-        Yii::$app->db->createCommand()->update('order', ['status' => $orderStatus, 'total_price' => $summ, 'updated_at' => new Expression('NOW()')], 'id=' . $order->id)->execute();
-        $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
-        if ($ediOrder) {
-            $ediOrder->invoice_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
-            $ediOrder->invoice_date = $simpleXMLElement->DELIVERYNOTEDATE ?? '';
-            if (!$ediOrder->save()) {
-                return 'Error saving edi order';
-            }
-        }
+        $order->status = $orderStatus;
+        $order->total_price = $summ;
         $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
         $order->edi_ordersp = $this->ediDocumentType;
         $order->service_id = 6;

@@ -187,8 +187,8 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
             'mercury',
             'operation' => $operation."_".$org_id,
         ], [
-            'last_executed' => gmdate("Y-m-d H:i:s"),
-            'plain_executed' => gmdate("Y-m-d H:i:s", time() + 15*60)
+            'last_executed' => gmdate("Y-m-d\TH:i:s"),
+            'plain_executed' => gmdate("Y-m-d\TH:i:s", time() + 15*60)
         ]);
     }
 }

@@ -287,7 +287,6 @@ class IntegrationSettingsWebApi extends WebApi
                 'popm.vendor_id=copm.vendor_id and popm.product_id=copm.product_id')
             ->where(['copm.organization_id' => $childOrg, 'popm.organization_id' => $mainOrg])
             ->all(\Yii::$app->db_api);
-        print_r($query);
         $data_update = '';
         foreach ($query as $item) {
             $outerProductId = $item['outer_product_id'];

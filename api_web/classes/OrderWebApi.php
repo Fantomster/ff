@@ -382,28 +382,20 @@ class OrderWebApi extends \api_web\components\WebApi
      * Информация о заказе
      *
      * @param array $post
-     * @param bool  $edo
      * @return array
      * @throws BadRequestHttpException
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      */
-    public function getInfo(array $post, $edo = null)
+    public function getInfo(array $post)
     {
         if (empty($post['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');
         }
 
         /**@var Order $order */
-        $query = Order::find()->where(['id' => $post['order_id']]);
+        $order = Order::find()->where(['id' => $post['order_id'], 'service_id' => Registry::MC_BACKEND])->one();
 
-        if ($edo === true) {
-            $query->andWhere(['service_id' => Registry::$edo_documents]);
-        } elseif ($edo === false) {
-            $query->andWhere(['service_id' => Registry::MC_BACKEND]);
-        }
-
-        $order = $query->one();
         if (empty($order)) {
             throw new BadRequestHttpException("order_not_found");
         }
@@ -421,7 +413,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
      */
-    private function getOrderInfo(Order $order)
+    public function getOrderInfo(Order $order)
     {
         $result = $order->attributes;
         $currency = $order->currency->symbol ?? "RUB";

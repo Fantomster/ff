@@ -136,14 +136,20 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
                 return true;
             }
             $summ = 0;
-            $ordContArr = [];
+            $orderContentArr = [];
             foreach ($order->orderContent as $orderContent) {
                 $index = $orderContent->id;
-                $ordContArr[] = $orderContent->id;
+                $orderContentArr[] = $orderContent->id;
+                if (!$orderContent) continue;
+                if (!in_array($index, $positionsArray)) {
+                    $orderContent->delete();
+                    $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
+                    continue;
+                }
                 if (!isset($arr[$index]['BARCODE'])) {
                     if (isset($orderContent->ediOrderContent)) {
                         $index = $orderContent->ediOrderContent->barcode;
-                        $ordContArr[] = $index;
+                        $orderContentArr[] = $index;
                     } else {
                         continue;
                     }
@@ -153,92 +159,87 @@ class LeradataRealization extends AbstractRealization implements RealizationInte
                 if (!$good) continue;
                 $barcodeArray[] = $good->barcode;
 
-                $ordCont = OrderContent::findOne(['id' => $orderContent->id]);
-                if (!$ordCont) continue;
-                if (!in_array($index, $positionsArray)) {
-                    $ordCont->delete();
-                    $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-                } else {
-                    $oldQuantity = (float)$ordCont->quantity;
-                    $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
+                $orderContent = OrderContent::findOne(['id' => $orderContent->id]);
+                $oldQuantity = (float)$orderContent->quantity;
+                $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
 
-                    if ($oldQuantity != $newQuantity) {
-                        if ($newQuantity == 0) {
-                            $ordCont->delete();
-                            $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
+                if ($oldQuantity != $newQuantity) {
+                    if ($newQuantity == 0) {
+                        $orderContent->delete();
+                        $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
+                    } else {
+                        if ($good->ed) {
+                            $measure = $good->ed;
                         } else {
-                            if ($good->ed) {
-                                $measure = $good->ed;
-                            } else {
-                                $measure = '';
-                            }
-                            $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $measure]) . " $newQuantity " . $measure;
+                            $measure = '';
                         }
+                        $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $orderContent->product_name, 'oldQuan' => $oldQuantity, 'ed' => $measure]) . " $newQuantity " . $measure;
                     }
+                }
 
-                    $oldPrice = (float)$ordCont->price;
-                    $newPrice = (float)$arr[$index]['PRICE'];
-                    if ($oldPrice != $newPrice) {
-                        if ($newPrice == 0) {
-                            $ordCont->delete();
-                            $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-                        } else {
-                            $change = " <br/>" . Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' => $orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol' => $order->currency->iso_code]) . " " . $newPrice . " руб";
-                            $message .= $change;
-                        }
+                $oldPrice = (float)$orderContent->price;
+                $newPrice = (float)$arr[$index]['PRICE'];
+                if ($oldPrice != $newPrice) {
+                    if ($newPrice == 0) {
+                        $orderContent->delete();
+                        $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
+                    } else {
+                        $change = " <br/>" . Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' => $orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol' => $order->currency->iso_code]) . " " . $newPrice . " руб";
+                        $message .= $change;
                     }
-                    $summ += $newQuantity * $newPrice;
-                    Yii::$app->db->createCommand()->update('order_content', ['price' => $newPrice, 'quantity' => $newQuantity, 'updated_at' => new Expression('NOW()')], 'id=' . $ordCont->id)->execute();
+                }
+                $summ += $newQuantity * $newPrice;
+                $orderContent->price = $newPrice;
+                $orderContent->quantity = $newQuantity;
+                $orderContent->vat_product = $arr[$index]['TAXRATE'] ?? 0.00;
+                $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
+                $orderContent->edi_shipment_quantity = $arr[$index]['DELIVEREDQUANTITY'] ?? $arr[$index]['ACCEPTEDQUANTITY'] ?? $orderContent->quantity;
+                $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
+                if ($documentType == 2) {
+                    $orderContent->edi_desadv = $exceptionArray['file_id'];
+                }
+                if ($documentType == 3) {
+                    $orderContent->edi_alcdes = $exceptionArray['file_id'];
+                }
 
-                    $orderContent->vat_product = $arr[$index]['TAXRATE'] ?? 0.00;
-                    $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
-                    $orderContent->edi_shipment_quantity = $arr[$index]['DELIVEREDQUANTITY'] ?? $arr[$index]['ACCEPTEDQUANTITY'] ?? $orderContent->quantity;
-                    $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
-                    if ($documentType == 2) {
-                        $orderContent->edi_desadv = $exceptionArray['file_id'];
-                    }
-                    if ($documentType == 3) {
-                        $orderContent->edi_alcdes = $exceptionArray['file_id'];
-                    }
-
-                    if (!$orderContent->save()) {
-                        throw new Exception('Error saving order content');
-                    }
+                if (!$orderContent->save()) {
+                    throw new Exception('Error saving order content');
                 }
             }
 
-            if (!$isDesadv) {
-                foreach ($positions as $position) {
-                    if ($position->ACCEPTEDQUANTITY == 0.00 || $position->PRICE == 0.00) continue;
-                    $contID = (int)$position->PRODUCTIDBUYER;
-                    if (!$contID) {
-                        $contID = (int)$position->PRODUCT;
+            foreach ($positions as $position) {
+                $quantity = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+                if ($quantity == 0.00 || $position->PRICE == 0.00) continue;
+                $contID = (int)$position->PRODUCTIDBUYER;
+                if (!$contID) {
+                    $contID = (int)$position->PRODUCT;
+                }
+                if (!$contID) continue;
+                $barcode = (int)$position->PRODUCT;
+                if (!in_array($contID, $orderContentArr) && !in_array($barcode, $barcodeArray)) {
+                    $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
+                    if (!$good) continue;
+                    if ($isDesadv) {
+                        $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
+                    } else {
+                        $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
                     }
-                    if (!$contID) continue;
-                    $barcode = (int)$position->PRODUCT;
-                    if (!in_array($contID, $ordContArr) && !in_array($barcode, $barcodeArray)) {
-                        $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
-                        if (!$good) continue;
-                        if ($isDesadv) {
-                            $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
-                        } else {
-                            $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
-                        }
-                        Yii::$app->db->createCommand()->insert('order_content', [
-                            'order_id'         => $order->id,
-                            'product_id'       => $good->id,
-                            'quantity'         => $quan,
-                            'price'            => (float)$position->PRICE,
-                            'initial_quantity' => $quan,
-                            'product_name'     => $good->product,
-                            'plan_quantity'    => $quan,
-                            'plan_price'       => (float)$position->PRICE,
-                            'units'            => $good->units,
-                            'updated_at'       => new Expression('NOW()'),
-                        ])->execute();
-                        $message .= Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
-                        $summ += $quan * $position->PRICE;
+                    $newOrderContent = new OrderContent();
+                    $newOrderContent->order_id = $order->id;
+                    $newOrderContent->product_id = $good->id;
+                    $newOrderContent->quantity = $quan;
+                    $newOrderContent->price = (float)$position->PRICE;
+                    $newOrderContent->initial_quantity = $quan;
+                    $newOrderContent->product_name = $good->product;
+                    $newOrderContent->plan_quantity = $quan;
+                    $newOrderContent->plan_price = (float)$position->PRICE;
+                    $newOrderContent->units = $good->units;
+                    if (!$newOrderContent->save()) {
+                        return 'Error saving new order content';
                     }
+                    $message .= " <br/>";
+                    $message .= Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
+                    $summ += $quan * $position->PRICE;
                 }
             }
             if ($isDesadv) {

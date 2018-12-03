@@ -9,6 +9,7 @@
     <DOCTYPE>O</DOCTYPE>
     <CAMPAIGNNUMBER><?= $order->id ?></CAMPAIGNNUMBER>
     <ORDRTYPE>ORIGINAL</ORDRTYPE>
+    <INFO><?= $order->comment ?? "" ?></INFO>
     <HEAD>
         <SUPPLIER><?= $glnArray['vendor_gln'] ?></SUPPLIER>
         <BUYER><?= $glnArray['client_gln'] ?></BUYER>
@@ -38,6 +39,7 @@
                 <ORDERUNIT><?= $measure ?></ORDERUNIT>
                 <ORDERPRICE><?= $position['price'] ?></ORDERPRICE>
                 <VAT><?= $vat ?></VAT>
+                <INFO><?= $position['comment'] ?? "" ?></INFO>
                 <CHARACTERISTIC>
                     <DESCRIPTION><?= $position['product_name'] ?></DESCRIPTION>
                 </CHARACTERISTIC>

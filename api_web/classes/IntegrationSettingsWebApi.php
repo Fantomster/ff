@@ -4,8 +4,10 @@ namespace api_web\classes;
 
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use common\helpers\DBNameHelper;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
+use common\models\OuterProductMap;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
@@ -137,6 +139,10 @@ class IntegrationSettingsWebApi extends WebApi
             throw new ValidationException($model->getFirstErrors());
         }
 
+        if ($modelSetting->name == 'main_org' && !empty($request['value'])) {
+            $this->updateOuterProductMap($this->user->organization_id, $request['value']);
+        }
+
         return $model->value;
     }
 
@@ -223,7 +229,7 @@ class IntegrationSettingsWebApi extends WebApi
 
         $arResult = [];
         foreach ($request['checked'] as $orgId) {
-            if ($orgId == $request['main_org']){
+            if ($orgId == $request['main_org']) {
                 throw new BadRequestHttpException('setting.main_org_equal_child_org');
             }
             $settingModel = IntegrationSettingValue::findOne(['setting_id' => $settingId, 'org_id' => $orgId]);
@@ -255,12 +261,39 @@ class IntegrationSettingsWebApi extends WebApi
     {
         $this->validateRequest($request, ['service_id']);
         $arSettings = $this->getSettingsToOrgByService($request['service_id']);
-        $arSettingIds = array_map(function($el){
+        $arSettingIds = array_map(function ($el) {
             return $el['id'];
         }, $arSettings['arSettingToOrg']);
         $result = IntegrationSettingValue::updateAll(['value' => ''], ['id' => $arSettingIds]);
 
         return ['result' => (bool)$result];
+    }
+
+    /**
+     * Установка бизнеса как дочернего должна обновлять все существующие записи на значения главного бизнеса
+     *
+     * @param $childOrg
+     * @param $mainOrg
+     */
+    private function updateOuterProductMap($childOrg, $mainOrg): void
+    {
+        $tableName = DBNameHelper::getApiName() . '.' . OuterProductMap::tableName();
+        $query = (new Query())->select([
+            'copm.id',
+            'popm.outer_product_id',
+        ])
+            ->from(OuterProductMap::tableName() . ' copm')
+            ->leftJoin(OuterProductMap::tableName() . ' popm',
+                'popm.vendor_id=copm.vendor_id and popm.product_id=copm.product_id')
+            ->where(['copm.organization_id' => $childOrg, 'popm.organization_id' => $mainOrg])
+            ->all(\Yii::$app->db_api);
+        $data_update = '';
+        foreach ($query as $item) {
+            $outerProductId = $item['outer_product_id'];
+            $id = $item['id'];
+            $data_update .= "UPDATE $tableName set outer_product_id = $outerProductId where id=$id;";
+        }
+        \Yii::$app->db_api->createCommand($data_update)->execute();
     }
 
 }

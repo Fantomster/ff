@@ -134,8 +134,9 @@ class OuterProductMapper
     /**
      * Если меняется сопоставление с продуктом, и бизнес главный и есть дочерние бизнесы, то обновляем сопоставление в
      * их записях
+     * todo_refactoring кажется тут есть баг при обновлении, потому что надо еще учитывать vendor_id
      */
-    public function updateChildsMap(): void
+    public function updateChildesMap(): void
     {
         if (!empty($this->childs) && $this->isMainOrg) {
             $condition = [

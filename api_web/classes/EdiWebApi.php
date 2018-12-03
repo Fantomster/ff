@@ -135,7 +135,9 @@ class EdiWebApi extends WebApi
      * История заказов
      *
      * @param array $post
-     * @return array
+     * @return mixed
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function getOrderHistory(array $post)
     {
@@ -155,17 +157,16 @@ class EdiWebApi extends WebApi
         $this->validateRequest($post, ['order_id']);
 
         $order = Order::findOne([
-            'id'        => $post['order_id'],
-            'client_id' => $this->user->organization->id,
+            'id'         => $post['order_id'],
+            'client_id'  => $this->user->organization->id,
+            'service_id' => Registry::$edo_documents
         ]);
 
         if (empty($order)) {
             throw new BadRequestHttpException("order_not_found");
-        } elseif (!in_array($order->service_id, Registry::$edo_documents)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
         }
 
-        $res = $this->container->get('OrderWebApi')->getInfo($post, true);
+        $res = $this->container->get('OrderWebApi')->getOrderInfo($order);
 
         if (isset($res['items']) && !empty($res['items'])) {
             $productIds = array_map(function ($el) {
@@ -235,10 +236,7 @@ class EdiWebApi extends WebApi
                 ['client_id' => $this->user->organization->id],
                 ['vendor_id' => $this->user->organization->id],
             ])
-            ->andWhere(['service_id' => [
-                Registry::EDI_SERVICE_ID,
-                Registry::VENDOR_DOC_MAIL_SERVICE_ID
-            ]])
+            ->andWhere(['service_id' => Registry::$edo_documents])
             ->groupBy('status')
             ->all();
 

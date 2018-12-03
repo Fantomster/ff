@@ -45,7 +45,7 @@ class OuterProductMapSearch extends OuterProductMap
             "e_m.service_id",
             "e_c.organization_id",
             "d_v.id vendor_id",
-            "coalesce(d_v.legal_entity, d_v.name) vendor_name",
+            "d_v.name vendor_name",
             "d.id product_id",
             "d.product product_name",
             "d.ed unit",

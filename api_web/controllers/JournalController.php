@@ -1,14 +1,19 @@
 <?php
-
 namespace api_web\controllers;
 
+use api_web\classes\JournalWebApi;
 use api_web\components\WebApiController;
 
+/**
+ * Class JournalController
+ *
+ * @package api_web\controllers
+ */
 class JournalController extends WebApiController
 {
     /**
      * @SWG\Post(path="/journal/list",
-     *     tags={"Default"},
+     *     tags={"Journal"},
      *     summary="Список записей журнала",
      *     description="Список записей журнала",
      *     produces={"application/json"},
@@ -23,12 +28,12 @@ class JournalController extends WebApiController
      *                  default={
      *                      "search": {
      *                         "date": {
-     *                             "from": "23.08.2018",
-     *                             "to": "24.08.2018"
+     *                             "start": "23.08.2018",
+     *                             "end": "24.08.2018"
      *                         },
      *                         "user_id": 3768,
      *                         "service_id": 2,
-     *                         "status": "error"
+     *                         "type": "error"
      *                      },
      *                      "pagination": {
      *                          "page": 1,
@@ -57,9 +62,10 @@ class JournalController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionList()
     {
-        $this->response = Registry::$nds_list;
+        $this->response = (new JournalWebApi())->list($this->request);
     }
 }

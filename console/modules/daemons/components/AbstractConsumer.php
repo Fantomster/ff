@@ -36,6 +36,6 @@ abstract class AbstractConsumer
         $message .= str_pad('', 80, '=') . PHP_EOL;
         $className = BaseStringHelper::basename(get_class($this));
         \Yii::info($className.": ($this->logPrefix) ".$message);
-        file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . $className . '.log', $message, FILE_APPEND);
+        //file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . $className . '.log', $message, FILE_APPEND);
     }
 }

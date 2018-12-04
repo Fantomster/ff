@@ -143,7 +143,7 @@ abstract class AbstractDaemonController extends DaemonController
         $message = $message . PHP_EOL;
         $message .= str_pad('', 80, '=') . PHP_EOL;
         \Yii::info(self::shortClassName().": ".$message);
-        file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . self::shortClassName() . '.log', $message, FILE_APPEND);
+        //file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . self::shortClassName() . '.log', $message, FILE_APPEND);
     }
 
     /**

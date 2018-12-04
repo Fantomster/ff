@@ -209,7 +209,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
         $orderContent->comment = $product['comment'] ?? '';
 
-        if (!empty($product['price'])) {
+        if (!empty($product['price']) || $product['price'] == 0) {
             $orderContent->price = round($product['price'], 3);
         }
 

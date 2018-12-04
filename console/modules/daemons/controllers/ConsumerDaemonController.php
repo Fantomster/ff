@@ -11,6 +11,7 @@ class ConsumerDaemonController extends AbstractDaemonController
 {
     /**
      * Имя очереди
+     *
      * @return string
      */
     public function getQueueName()
@@ -23,6 +24,7 @@ class ConsumerDaemonController extends AbstractDaemonController
 
     /**
      * Обработка полученных сообщений
+     *
      * @param $job
      * @return bool
      */
@@ -40,8 +42,8 @@ class ConsumerDaemonController extends AbstractDaemonController
                 $this->consumer->getData();
                 $success = $this->consumer->saveData();
                 $this->loggingExecutedTime();
+                $this->noticeToFCM();
             }
-            $this->noticeToFCM();
 
             if ($success) {
                 $this->ask($job);
@@ -57,7 +59,7 @@ class ConsumerDaemonController extends AbstractDaemonController
             (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
                 'start_executing' => new Expression('NULL')
             ], $arWhere)->execute();
-            $this->log(PHP_EOL . " ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
+//            $this->log(PHP_EOL . " ERROR: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
         return true;
     }

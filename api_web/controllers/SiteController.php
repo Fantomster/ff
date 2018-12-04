@@ -40,6 +40,7 @@ class SiteController extends Controller
             Yii::getAlias('@api_web/controllers/WaybillController.php'),
             Yii::getAlias('@api_web/controllers/CallbackController.php'),
             Yii::getAlias('@api_web/controllers/DocumentController.php'),
+            Yii::getAlias('@api_web/controllers/JournalController.php'),
         ];
 
         /**

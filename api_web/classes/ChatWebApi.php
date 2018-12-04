@@ -63,7 +63,7 @@ class ChatWebApi extends WebApi
             }
         }
 
-        $search->orderBy("last_message_date DESC");
+        $search->orderBy("last_message_date DESC, created_at DESC");
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $search->all()
@@ -383,7 +383,7 @@ class ChatWebApi extends WebApi
             'count_message'     => (int)$model->orderChatCount ?? 0,
             'unread_message'    => (int)$model->getOrderChatUnreadCount($this->user->organization_id) ?? 0,
             'last_message'      => $last_message,
-            'last_message_date' => $model->orderChatLastMessage->created_at ?? null,
+            'last_message_date' => $model->orderChatLastMessage->created_at ?? $model->created_at,
             'is_edi'            => empty($model->ediNumber) ? false : true,
         ];
     }

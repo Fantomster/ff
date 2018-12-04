@@ -180,7 +180,6 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \yii\web\BadRequestHttpException
      */
     public function actionList()
     {

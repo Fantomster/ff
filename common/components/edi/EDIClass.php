@@ -308,11 +308,6 @@ class EDIClass extends Component
             ->andWhere('`barcode` IS NOT NULL')
             ->all();
 
-        foreach ($catalog_base_goods as $base_good) {
-            if (!in_array($base_good['barcode'], $goodsArray)) {
-                \Yii::$app->db->createCommand()->delete('catalog_goods', 'base_goods_id=' . $base_good['id'])->execute();
-            }
-        }
         $ediRest = EdiOrganization::findOne(['gln_code' => $buyerGLN]);
         if (!$ediRest) {
             return false;
@@ -334,6 +329,11 @@ class EDIClass extends Component
                 $rel->cat_id = $relationCatalogID;
                 $rel->status = Catalog::STATUS_ON;
                 $rel->save();
+            }
+        }
+        foreach ($catalog_base_goods as $base_good) {
+            if (!in_array($base_good['barcode'], $goodsArray)) {
+                \Yii::$app->db->createCommand()->delete('catalog_goods', ['base_goods_id' => $base_good['id'], 'cat_id' => $relationCatalogID])->execute();
             }
         }
         foreach ($goodsArray as $barcode => $good) {

@@ -222,7 +222,7 @@ class EDIClass extends Component
         }
         $order->status = $orderStatus;
         $order->total_price = $summ;
-        $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? '';
+        $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? $simpleXMLElement->NUMBER ?? '';
         $order->edi_ordersp = $this->ediDocumentType;
         $order->service_id = 6;
         $order->edi_ordersp = $this->fileName;

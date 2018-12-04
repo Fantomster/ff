@@ -140,9 +140,9 @@ class VetisHelper
         $laboratory_research = json_decode($this->vsdModel->laboratory_research, true);
         $this->expertiseInfo = 'Экспертиза не проводилась';
         try {
-            if (array_key_exists('batchID', $laboratory_research)){
+            if (array_key_exists('batchID', $laboratory_research)) {
                 $this->expertiseInfo = mb_convert_encoding(
-                    $laboratory_research['indicator']['name'] . ' : ' . $laboratory_research['operator']['name'] . " эксп №" . $laboratory_research['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($laboratory_research['actualDateTime'])) . " ( " . $laboratory_research['conclusion'] . " )",  "UTF-8", "UTF-8");
+                    $laboratory_research['indicator']['name'] . ' : ' . $laboratory_research['operator']['name'] . " эксп №" . $laboratory_research['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($laboratory_research['actualDateTime'])) . " ( " . $laboratory_research['conclusion'] . " )", "UTF-8", "UTF-8");
             } else {
                 $arTmp = [];
                 foreach ($laboratory_research as $item) {
@@ -373,9 +373,11 @@ class VetisHelper
         $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
         foreach ($orgIds['result'] as $orgId) {
             $entGuid = $this->getSettings($orgId['id'], ['enterprise_guid']);
+            if (strlen($entGuid) < 36) {
+                continue;
+            }
             $enterpriseGuids[$entGuid] = $entGuid;
         }
-
         return $enterpriseGuids;
     }
 

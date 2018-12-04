@@ -263,6 +263,36 @@ class EDIClass extends Component
             \Yii::error('No such organization');
             return false;
         }
+        $ediRest = EdiOrganization::findOne(['gln_code' => $buyerGLN, 'provider_id' => $providerID]);
+        if (!$ediRest) {
+            \Yii::error('No EDI organization(rest)');
+            return false;
+        }
+        $rest = Organization::findOne(['id' => $ediRest->organization_id]);
+        if (!$rest) {
+            \Yii::error('No such organization(rest)');
+            return false;
+        }
+        $currency = Currency::findOne(['iso_code' => $xml->CURRENCY]);
+        if (!$currency) {
+            $currency = Currency::findOne(['iso_code' => 'RUB']);
+        }
+
+        $rel = RelationSuppRest::findOne(['rest_org_id' => $rest->id, 'supp_org_id' => $organization->id]);
+        if (!$rel) {
+            \Yii::error('No relation');
+            return false;
+        } else {
+            $relationCatalogID = $rel->cat_id;
+            $cat = Catalog::findOne(['id' => $relationCatalogID]);
+            if (!$relationCatalogID || $cat->type == Catalog::BASE_CATALOG) {
+                $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
+                $rel->cat_id = $relationCatalogID;
+                $rel->status = Catalog::STATUS_ON;
+                $rel->save();
+            }
+        }
+
         $baseCatalog = $organization->baseCatalog;
         if (!$baseCatalog) {
             $baseCatalog = new Catalog();
@@ -271,10 +301,7 @@ class EDIClass extends Component
             $baseCatalog->name = \Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);
             $baseCatalog->created_at = new Expression('NOW()');
         }
-        $currency = Currency::findOne(['iso_code' => $xml->CURRENCY]);
-        if (!$currency) {
-            $currency = Currency::findOne(['iso_code' => 'RUB']);
-        }
+
         $baseCatalog->currency_id = $currency->id ?? 1;
         $baseCatalog->updated_at = new Expression('NOW()');
         $baseCatalog->save();
@@ -305,29 +332,6 @@ class EDIClass extends Component
             ->andWhere('`barcode` IS NOT NULL')
             ->all();
 
-        $ediRest = EdiOrganization::findOne(['gln_code' => $buyerGLN]);
-        if (!$ediRest) {
-            return false;
-        }
-        $rest = Organization::findOne(['id' => $ediRest->organization_id]);
-        if (!$rest) {
-            return false;
-        }
-
-        $rel = RelationSuppRest::findOne(['rest_org_id' => $rest->id, 'supp_org_id' => $organization->id]);
-        if (!$rel) {
-            \Yii::error('No relation');
-            return false;
-        } else {
-            $relationCatalogID = $rel->cat_id;
-            $cat = Catalog::findOne(['id' => $relationCatalogID]);
-            if (!$relationCatalogID || $cat->type == Catalog::BASE_CATALOG) {
-                $relationCatalogID = $this->createCatalog($organization, $currency, $rest);
-                $rel->cat_id = $relationCatalogID;
-                $rel->status = Catalog::STATUS_ON;
-                $rel->save();
-            }
-        }
         foreach ($catalog_base_goods as $base_good) {
             if (!in_array($base_good['barcode'], $goodsArray)) {
                 \Yii::$app->db->createCommand()->delete('catalog_goods', ['base_goods_id' => $base_good['id'], 'cat_id' => $relationCatalogID])->execute();

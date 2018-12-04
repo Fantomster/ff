@@ -11,6 +11,7 @@ namespace api_web\modules\integration\classes\dictionaries;
 use api_web\classes\UserWebApi;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use api_web\modules\integration\classes\Dictionary;
 use common\models\Organization;
 use common\models\OrganizationDictionary;
 use common\models\OuterAgent;
@@ -277,8 +278,12 @@ class AbstractDictionary extends WebApi
                 'vendor_id'  => $request['vendor_id'],
                 'service_id' => (int)$request['service_id'],
                 'org_id'     => $this->user->organization_id
+            ])->andWhere([
+                'or',
+                ['is_deleted' => 0],
+                ['is_deleted' => null]
             ])->exists();
-            
+
             if ($exists) {
                 throw new BadRequestHttpException('dictionary.agent.update.vendor_exists');
             }

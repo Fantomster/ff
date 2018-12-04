@@ -110,7 +110,7 @@ class FullmapController extends DefaultController
             $mainOrg = null;
         }
 
-        if (Yii::$app->request->isAjax || Yii::$app->request->isPjax) {
+        if (Yii::$app->request->isPjax) {
             return $this->renderAjax($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'stores', 'services', 'mainOrg', 'editCan'));
         } else {
             return $this->render($vi, compact('dataProvider', 'searchModel', 'client', 'cart', 'vendors', 'selectedVendor', 'stores', 'services', 'mainOrg', 'editCan'));
@@ -186,6 +186,7 @@ class FullmapController extends DefaultController
         $prod_id = Yii::$app->request->post('editableKey');
         $koef_old = Yii::$app->request->post('koef');
         $koef = str_replace(',', '.', $koef_old);
+        $koef = floor($koef * 1000000)/1000000;
         $koef = round($koef, 6);
         $org_id = $this->currentUser->organization->id;
 
@@ -246,8 +247,14 @@ class FullmapController extends DefaultController
                 }
             }
         }
-
-        $res = $koef;
+        $koef_temp = $koef * 1000000;
+        $koef_len = strlen($koef_temp);
+        $koef_left = substr($koef_temp,0, $koef_len - 6);
+        if ($koef_left == '') {
+            $koef_left = '0';
+        }
+        $koef_right = substr($koef_temp, $koef_len-6);
+        $res = $koef_left.','.$koef_right;
         return Json::encode(['output' => $res, 'message' => '']);
     }
 
@@ -849,3 +856,7 @@ class FullmapController extends DefaultController
     }
 
 }
+
+
+
+

@@ -310,7 +310,7 @@ class EDIClass extends Component
 
         foreach ($catalog_base_goods as $base_good) {
             if (!in_array($base_good['barcode'], $goodsArray)) {
-                \Yii::$app->db->createCommand()->update('catalog_base_goods', ['status' => CatalogBaseGoods::STATUS_OFF], 'id=' . $base_good['id'])->execute();
+                \Yii::$app->db->createCommand()->delete('catalog_goods', 'base_goods_id=' . $base_good['id'])->execute();
             }
         }
 

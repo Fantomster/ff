@@ -23,6 +23,8 @@ class DefaultController extends \frontend\controllers\DefaultController {
     public $enableCsrfValidation = false;
     
     protected $authenticated = false;
+
+    protected $mercCategoryLog = 'merc_log';
     
     private $sessionId = '';
     private $username;
@@ -210,5 +212,4 @@ class DefaultController extends \frontend\controllers\DefaultController {
         $this->redirect('index');
 
     }
-   
 }

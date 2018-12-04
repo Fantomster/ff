@@ -11,8 +11,9 @@ use api_web\components\WebApi;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use api_web\modules\integration\modules\vetis\api\mercury\mercuryApi;
 use api_web\modules\integration\modules\vetis\api\mercury\VetDocumentDone;
+use common\models\IntegrationSettingValue;
+use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
-use common\models\licenses\LicenseService;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -46,8 +47,8 @@ class VetisWaybill extends WebApi
      */
     public function getGroupsList($request)
     {
-        $license = LicenseOrganization::getLicenseForOrganizationService($this->user->organization_id,Registry::MERC_SERVICE_ID);
-        if(!isset($license)) {
+        $license = LicenseOrganization::getLicenseForOrganizationService($this->user->organization_id, Registry::MERC_SERVICE_ID);
+        if (!isset($license)) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.active_license_not_found', ['ru' => 'Нет активной лицензии для доступа к этой функции']));
         }
 
@@ -81,21 +82,35 @@ class VetisWaybill extends WebApi
             ]
         ];
 
-        if($page == 1) {
-            if(isset($search->acquirer_id)) {
-                MercVsd::getUpdateData($search->acquirer_id);
-            }
-            else {
-                $businessList = (new UserWebApi())->getUserOrganizationBusinessList($this->user->organization_id);
+        if ($page == 1) {
+            if (isset($search->acquirer_id)) {
+                $this->sendRequestToUpdate($search->acquirer_id);
+            } else {
+                $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
                 foreach ($businessList['result'] as $item) {
-                    $license = LicenseOrganization::getLicenseForOrganizationService($item['id'], Registry::MERC_SERVICE_ID);
-                    if (isset($license)) {
-                        MercVsd::getUpdateData($item['id']);
+                    try {
+                        License::checkLicense($item['id'], Registry::MERC_SERVICE_ID);
+                        $this->sendRequestToUpdate($item['id']);
+                    } catch (\Exception $e) {
+                        continue;
                     }
                 }
             }
         }
         return $return;
+    }
+
+    /**
+     * Отправка запроса на обновление
+     *
+     * @param $org_id
+     */
+    private function sendRequestToUpdate($org_id)
+    {
+        $enterpriseGuid = IntegrationSettingValue::getSettingsByServiceId(Registry::MERC_SERVICE_ID, $org_id, ['enterprise_guid']);
+        if (!empty($enterpriseGuid) && strlen($enterpriseGuid) >= 36) {
+            MercVsd::getUpdateData($org_id, $enterpriseGuid);
+        }
     }
 
     /**

@@ -142,6 +142,10 @@ abstract class WatcherDaemonController extends DaemonController
      */
     public function isProcessRunning($pid)
     {
-        return !!posix_getpgid($pid);
+        try {
+            return !!posix_getpgid($pid);
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 }

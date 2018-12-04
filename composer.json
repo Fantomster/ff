@@ -54,6 +54,7 @@
         "kartik-v/yii2-widget-select2": "@dev",
         "kartik-v/yii2-widget-typeahead": "*",
         "kartik-v/yii2-widgets": "*",
+        "kartik-v/yii2-krajee-base": "2.0.3",
         "kop/yii2-scroll-pager": "dev-master",
         "ktamas77/firebase-php": "dev-master",
         "light/yii2-swagger": "^1.0",

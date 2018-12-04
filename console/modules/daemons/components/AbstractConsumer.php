@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: Konstantin Silukov
@@ -15,13 +16,13 @@ use yii\helpers\BaseStringHelper;
  */
 abstract class AbstractConsumer
 {
-    /**@var integer $timeout in seconds*/
-    public static $timeout = 300;
-    /**@var string $data data from queue message*/
-    public $data;
-    /**@var integer $timeoutExecuting timeout in seconds for execution consumer*/
-    public static $timeoutExecuting = 600;
+    /*     * @var integer $timeout in seconds */
 
+    public static $timeout          = 300;
+    /*     * @var string $data data from queue message */
+    public $data;
+    /*     * @var integer $timeoutExecuting timeout in seconds for execution consumer */
+    public static $timeoutExecuting = 600;
     public $logPrefix;
 
     /**
@@ -32,10 +33,13 @@ abstract class AbstractConsumer
         if (is_array($message)) {
             $message = print_r($message, true);
         }
-        $message = $message . PHP_EOL;
-        $message .= str_pad('', 80, '=') . PHP_EOL;
+        $message   = $message . PHP_EOL;
+        $message   .= str_pad('', 80, '=') . PHP_EOL;
         $className = BaseStringHelper::basename(get_class($this));
-        \Yii::info($className.": ($this->logPrefix) ".$message);
-        //file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . $className . '.log', $message, FILE_APPEND);
+        \Yii::info($className . ": ($this->logPrefix) " . $message);
+        if (!\Yii::$app->params['disable_daemon_logs']) {
+            file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . $className . '.log', $message, FILE_APPEND);
+        }
     }
+
 }

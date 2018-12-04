@@ -102,5 +102,6 @@ return [
         'edi_api_leradata_url'       => 'https://leradata.pro/api/vetis/api.php',
         'edi_api_order_document_id'  => 220,
         'edi_api_recadv_document_id' => 351
-    ]
+    ],
+    'disable_daemon_logs' => true,
 ];

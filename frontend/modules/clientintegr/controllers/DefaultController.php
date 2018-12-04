@@ -218,7 +218,7 @@ class DefaultController extends \frontend\controllers\DefaultController {
         if ($e->getCode() == 600) {
             return "При обращении к api Меркурий возникла ошибка. Ошибка зарегистрирована в журнале за номером №" . $e->getMessage() . ". Если ошибка повторяется обратитесь в техническую службу.";
         } else {
-            Yii::error($e->getMessage()." ".$e->getTraceAsString());
+            Yii::error($e->getMessage()." ".$e->getTraceAsString(), $this->mercCategoryLog);
             return "При обращении к api Меркурий возникла ошибка. Если ошибка повторяется обратитесь в техническую службу.";
         }
     }

@@ -313,7 +313,6 @@ class EDIClass extends Component
                 \Yii::$app->db->createCommand()->delete('catalog_goods', 'base_goods_id=' . $base_good['id'])->execute();
             }
         }
-
         $ediRest = EdiOrganization::findOne(['gln_code' => $buyerGLN]);
         if (!$ediRest) {
             return false;

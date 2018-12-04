@@ -48,7 +48,7 @@ class OrderBehavior extends Behavior
         //Если заказ из MC и если заказ перешел в статус "Завершен"
         if ($this->model->service_id == Registry::MC_BACKEND && $this->model->status == Order::STATUS_DONE) {
             $this->createAndSendWaybill();
-        } elseif (in_array($this->model->service_id, [Registry::VENDOR_DOC_MAIL_SERVICE_ID, Registry::EDI_SERVICE_ID])) {
+        } elseif (in_array($this->model->service_id, Registry::$edo_documents)) {
             if ($this->model->status == Order::STATUS_EDI_ACCEPTANCE_FINISHED) {
                 $this->createAndSendWaybill();
             }
@@ -84,7 +84,7 @@ class OrderBehavior extends Behavior
             $user = User::findOne($this->model->created_by_id);
             $body = [
                 "user"    => [
-                    "token"    => $user->access_token,
+                    "token"    => $user->getJWTToken(\Yii::$app->jwt),
                     "language" => $user->language ?? \Yii::$app->language,
                 ],
                 "request" => $request

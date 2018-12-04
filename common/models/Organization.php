@@ -341,7 +341,7 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id != self::TYPE_SUPPLIER) {
             return null;
         }
-        return $this->is_work === 1 ? 0 : 1;
+        return $this->vendor_is_work === 1 ? 0 : 1;
     }
 
     /**
@@ -381,7 +381,7 @@ class Organization extends \yii\db\ActiveRecord
 //        if (!$all) {
         $query->where(['relation_supp_rest.rest_org_id' => $this->id]);
 //        }
-        $query->andWhere(['relation_supp_rest.deleted' => false]);
+        $query->andWhere(['relation_supp_rest.deleted' => false, 'relation_supp_rest.status' => 1]);
         if ($category_id) {
             $query = $query->andWhere(['relation_category.category_id' => $category_id]);
         }
@@ -396,7 +396,7 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         if ($all) {
-            $vendors[''] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
+            $vendors['0'] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
         }
         ksort($vendors);
         return $vendors;
@@ -425,7 +425,7 @@ class Organization extends \yii\db\ActiveRecord
             ->all();
         $res = ArrayHelper::map($res, 'id', 'name');
         if ($addAllOption) {
-            $res[''] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
+            $res['0'] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
         }
         ksort($res);
         return $res;
@@ -458,7 +458,7 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         if ($all) {
-            $vendors[''] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
+            $vendors['0'] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
         }
         ksort($vendors);
         return $vendors;
@@ -513,7 +513,7 @@ class Organization extends \yii\db\ActiveRecord
         $query = RelationSuppRest::find()
             ->select(['relation_supp_rest.cat_id as cat_id'])
             ->leftJoin('catalog', 'relation_supp_rest.cat_id = catalog.id')
-            ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false])
+            ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false, 'relation_supp_rest.status' => 1])
             ->andWhere(['catalog.status' => Catalog::STATUS_ON]);
         if ($vendor_id) {
             $query->andFilterWhere(['relation_supp_rest.supp_org_id' => $vendor_id]);
@@ -1062,8 +1062,8 @@ class Organization extends \yii\db\ActiveRecord
             ->select(["$usrTable.id as id", "$profTable.full_name as name"])
             ->where([
                 "$relationTable.organization_id" => $vendor_id,
-                "$assocTable.organization_id" => $this->id,
-                    ])
+                "$assocTable.organization_id"    => $this->id,
+            ])
             ->orderBy(['name' => SORT_ASC])
             ->asArray()
             ->all(), 'id', 'name');
@@ -1811,7 +1811,10 @@ class Organization extends \yii\db\ActiveRecord
 
     public function wipeBusiness()
     {
-        RelationUserOrganization::deleteAll(['organization_id' => $this->id]);
+        $relations = RelationUserOrganization::findAll(['organization_id' => $this->id]);
+        foreach ($relations as $relation) {
+            $relation->delete();
+        }
         $this->blacklisted = true;
         $this->parent_id = null;
         return $this->save();

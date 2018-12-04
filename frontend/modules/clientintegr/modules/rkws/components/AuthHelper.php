@@ -69,7 +69,7 @@ class AuthHelper extends Object
 
         $xml = '<?xml version="1.0" encoding="utf-8" ?>
         <RQ cmd="get_objectinfo">
-        <PARAM name="object_id" val="199990046"/>
+        <PARAM name="object_id" val="'.$this->restr->code.'"/>
         </RQ>';
 
         $res = ApiHelper::sendCurl($xml, $this->restr);

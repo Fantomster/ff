@@ -14,7 +14,6 @@ namespace api_web\modules\integration\classes\sync;
 
 use yii\web\BadRequestHttpException;
 use common\models\OuterAgent;
-use api_web\modules\integration\classes\SyncLog;
 
 class RkwsAgent extends ServiceRkws
 {
@@ -39,7 +38,6 @@ class RkwsAgent extends ServiceRkws
     {
         $myXML = simplexml_load_string($data);
         if (!$myXML) {
-            SyncLog::trace('Empty XML data!');
             throw new BadRequestHttpException("empty_result_xml_data");
         }
         $array = [];
@@ -53,7 +51,6 @@ class RkwsAgent extends ServiceRkws
             }
         }
         if (!$array) {
-            SyncLog::trace('Wrong XML data!');
             throw new BadRequestHttpException("wrong_xml_data");
         }
         return $array;

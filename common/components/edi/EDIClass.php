@@ -71,7 +71,6 @@ class EDIClass extends Component
         if (!$user) {
             return 'No such user';
         }
-
         $positions = $simpleXMLElement->HEAD->POSITION;
         $isDesadv = false;
         if (!count($positions)) {
@@ -115,15 +114,21 @@ class EDIClass extends Component
             }
             return true;
         }
+
         $summ = 0;
-        $ordContArr = [];
+        $orderContentArr = [];
         foreach ($order->orderContent as $orderContent) {
             $index = $orderContent->id;
-            $ordContArr[] = $orderContent->id;
+            $orderContentArr[] = $orderContent->id;
+            if (!in_array($index, $positionsArray)) {
+                $orderContent->delete();
+                $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
+                continue;
+            }
             if (!isset($arr[$index]['BARCODE'])) {
                 if (isset($orderContent->ediOrderContent)) {
                     $index = $orderContent->ediOrderContent->barcode;
-                    $ordContArr[] = $index;
+                    $orderContentArr[] = $index;
                 } else {
                     continue;
                 }
@@ -132,104 +137,80 @@ class EDIClass extends Component
             $good = CatalogBaseGoods::findOne(['barcode' => $arr[$index]['BARCODE']]);
             if (!$good) continue;
             $barcodeArray[] = $good->barcode;
-
-            $ordCont = OrderContent::findOne(['id' => $orderContent->id]);
-            if (!$ordCont) continue;
-            if (!in_array($index, $positionsArray)) {
-                $ordCont->delete();
-                $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-            } else {
-                $oldQuantity = (float)$ordCont->quantity;
-                $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
-                if ($oldQuantity != $newQuantity) {
-                    if ($newQuantity == 0) {
-                        $ordCont->delete();
-                        $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-                    } else {
-                        $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $ordCont->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
-                    }
-                }
-
-                $oldPrice = (float)$ordCont->price;
-                $newPrice = (float)$arr[$index]['PRICE'];
-                if ($oldPrice != $newPrice) {
-                    if ($newPrice == 0) {
-                        $ordCont->delete();
-                        $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
-                    } else {
-                        $change = " <br/>" . Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' => $orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol' => $order->currency->iso_code]) . " " . $newPrice . " руб";
-                        $message .= $change;
-                    }
-                }
-                $summ += $newQuantity * $newPrice;
-                Yii::$app->db->createCommand()->update('order_content', ['price' => $newPrice, 'quantity' => $newQuantity, 'updated_at' => new Expression('NOW()')], 'id=' . $ordCont->id)->execute();
-
-                $docType = ($isAlcohol) ? EdiOrderContent::ALCDES : EdiOrderContent::DESADV;
-                $ediOrderContent = EdiOrderContent::findOne(['order_content_id' => $orderContent->id]);
-                if ($ediOrderContent) {
-                    $ediOrderContent->doc_type = $docType;
-                    $ediOrderContent->pricewithvat = $arr[$index]['PRICEWITHVAT'] ?? 0.00;
-                    $ediOrderContent->taxrate = $arr[$index]['TAXRATE'] ?? 0.00;
-                    $ediOrderContent->uuid = $arr[$index]['UUID'];
-                    $ediOrderContent->gtin = $arr[$index]['GTIN'];
-                    $ediOrderContent->waybill_date = $arr[$index]['WAYBILLDATE'];
-                    $ediOrderContent->waybill_number = $arr[$index]['WAYBILLNUMBER'];
-                    $ediOrderContent->delivery_note_date = $arr[$index]['DELIVERYNOTEDATE'];
-                    $ediOrderContent->delivery_note_number = $arr[$index]['DELIVERYNOTENUMBER'];
-                    $ediOrderContent->save();
-                    if (!$ediOrderContent->save()) {
-                        return 'Error saving edi order content';
-                    }
-                }
-                $orderContent->vat_product = $arr[$index]['TAXRATE'] ?? 0.00;
-                $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
-                $orderContent->edi_shipment_quantity = $arr[$index]['DELIVEREDQUANTITY'];
-                $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
-                if ($documentType == 2) {
-                    $orderContent->edi_desadv = $this->fileName;
-                }
-                if ($documentType == 3) {
-                    $orderContent->edi_alcdes = $this->fileName;
-                }
-                if (!$orderContent->save()) {
-                    return 'Error saving order content';
+            $oldQuantity = (float)$orderContent->quantity;
+            $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
+            if ($oldQuantity != $newQuantity) {
+                if ($newQuantity == 0) {
+                    $orderContent->delete();
+                    $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
+                } else {
+                    $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $orderContent->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
                 }
             }
-        }
-        if (!$isDesadv) {
-            foreach ($positions as $position) {
-                if ($position->ACCEPTEDQUANTITY == 0.00 || $position->PRICE == 0.00) continue;
-                $contID = (int)$position->PRODUCTIDBUYER;
-                if (!$contID) {
-                    $contID = (int)$position->PRODUCT;
-                }
-                if (!$contID) continue;
-                $barcode = (int)$position->PRODUCT;
-                if (!in_array($contID, $ordContArr) && !in_array($barcode, $barcodeArray)) {
-                    $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
-                    if (!$good) continue;
-                    if ($isDesadv) {
-                        $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
-                    } else {
-                        $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
-                    }
-                    Yii::$app->db->createCommand()->insert('order_content', [
-                        'order_id'         => $order->id,
-                        'product_id'       => $good->id,
-                        'quantity'         => $quan,
-                        'price'            => (float)$position->PRICE,
-                        'initial_quantity' => $quan,
-                        'product_name'     => $good->product,
-                        'plan_quantity'    => $quan,
-                        'plan_price'       => (float)$position->PRICE,
-                        'units'            => $good->units,
-                        'updated_at'       => new Expression('NOW()'),
-                    ])->execute();
-                    $message .= Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
-                    $summ += $quan * $position->PRICE;
+            $oldPrice = (float)$orderContent->price;
+            $newPrice = (float)$arr[$index]['PRICE'];
+            if ($oldPrice != $newPrice) {
+                if ($newPrice == 0) {
+                    $orderContent->delete();
+                    $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
+                } else {
+                    $change = " <br/>" . Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' => $orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol' => $order->currency->iso_code]) . " " . $newPrice . " руб";
+                    $message .= $change;
                 }
             }
+            $summ += $newQuantity * $newPrice;
+            $orderContent->price = $newPrice;
+            $orderContent->quantity = $newQuantity;
+            $orderContent->vat_product = $arr[$index]['TAXRATE'] ?? 0.00;
+            $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
+            $orderContent->edi_shipment_quantity = $arr[$index]['DELIVEREDQUANTITY'];
+            $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
+            if ($documentType == 2) {
+                $orderContent->edi_desadv = $this->fileName;
+            }
+            if ($documentType == 3) {
+                $orderContent->edi_alcdes = $this->fileName;
+            }
+            if (!$orderContent->save()) {
+                return 'Error saving order content';
+            }
         }
+        foreach ($positions as $position) {
+            $quantity = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+            if ($quantity == 0.00 || $position->PRICE == 0.00) continue;
+            $contID = (int)$position->PRODUCTIDBUYER;
+            if (!$contID) {
+                $contID = (int)$position->PRODUCT;
+            }
+            if (!$contID) continue;
+            $barcode = (int)$position->PRODUCT;
+            if (!in_array($contID, $orderContentArr) && !in_array($barcode, $barcodeArray)) {
+                $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
+                if (!$good) continue;
+                if ($isDesadv) {
+                    $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
+                } else {
+                    $quan = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
+                }
+                $newOrderContent = new OrderContent();
+                $newOrderContent->order_id = $order->id;
+                $newOrderContent->product_id = $good->id;
+                $newOrderContent->quantity = $quan;
+                $newOrderContent->price = (float)$position->PRICE;
+                $newOrderContent->initial_quantity = $quan;
+                $newOrderContent->product_name = $good->product;
+                $newOrderContent->plan_quantity = $quan;
+                $newOrderContent->plan_price = (float)$position->PRICE;
+                $newOrderContent->units = $good->units;
+                if (!$newOrderContent->save()) {
+                    return 'Error saving new order content';
+                }
+                $message .= " <br/>";
+                $message .= Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
+                $summ += $quan * $position->PRICE;
+            }
+        }
+
         if ($isDesadv) {
             $orderStatus = OrderStatus::STATUS_EDI_SENT_BY_VENDOR;
         } else {
@@ -301,6 +282,7 @@ class EDIClass extends Component
         $baseCatalog->updated_at = new Expression('NOW()');
         $baseCatalog->save();
         $goods = $xml->CATALOGUE->POSITION ?? $xml->CATALOGUE[0]->POSITION;
+
         $goodsArray = [];
         $barcodeArray = [];
         foreach ($goods as $good) {
@@ -314,7 +296,7 @@ class EDIClass extends Component
             $goodsArray[$barcode]['price'] = (float)$good->UNITPRICE ?? 0.0;
             $goodsArray[$barcode]['article'] = (isset($good->IDBUYER) && $good->IDBUYER != '') ? (String)$good->IDBUYER : $barcode;
             $goodsArray[$barcode]['ed'] = $ed;
-            $goodsArray[$barcode]['units'] = (float)$good->PACKINGMULTIPLENESS ?? $good->MINORDERQUANTITY;
+            $goodsArray[$barcode]['units'] = (float)$good->QUANTITYOFCUINTU ?? (float)$good->PACKINGMULTIPLENESS ?? $good->MINORDERQUANTITY;
             $goodsArray[$barcode]['edi_supplier_article'] = (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String)$good->IDSUPPLIER : $barcode;
             $goodsArray[$barcode]['vat'] = (int)$good->TAXRATE ?? null;
         }
@@ -386,6 +368,13 @@ class EDIClass extends Component
                     $catalogGood->price = $good['price'];
                     $catalogGood->save();
                 }
+                Yii::$app->db->createCommand()->update('catalog_base_goods', [
+                    'units'                => $good['units'],
+                    'product'              => $good['name'],
+                    'article'              => $good['article'],
+                    'ed'                   => $good['ed'],
+                    'edi_supplier_article' => $good['edi_supplier_article']
+                ], ['id' => $catalogBaseGood->id])->execute();
             }
             \Yii::$app->db->createCommand()->update('catalog_base_goods', ['updated_at' => new Expression('NOW()'), 'status' => CatalogBaseGoods::STATUS_ON], 'id=' . $catalogBaseGood->id)->execute();
         }

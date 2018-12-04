@@ -14,9 +14,6 @@ namespace api_web\components;
 
 use Yii;
 use yii\di\Container;
-use dosamigos\resourcemanager\ResourceManagerInterface;
-use common\components\resourcemanager\AmazonS3ResourceManager;
-use api_web\modules\integration\classes\SyncLog;
 use api_web\classes\NoAuthWebApi;
 
 /**
@@ -36,12 +33,8 @@ class WebApiNoAuth
 
     function __construct()
     {
-        SyncLog::trace('Initialized Component as ' . self::class);
         $this->getContainerClasses();
         $this->resourceManager = \Yii::$app->get('resourceManager');
-        /** @var AmazonS3ResourceManager $resource */
-        SyncLog::trace('Successfully initialized Component->resourceManager as ' .
-            AmazonS3ResourceManager::class);
     }
 
     /**
@@ -58,7 +51,6 @@ class WebApiNoAuth
                 $class = basename($file, '.php');
                 $this->container->set($class, '\api_web\classes\\' . $class);
             }
-            SyncLog::trace('Successfully initialized Component->container as ' . NoAuthWebApi::class);
         }
         return $this->container;
     }

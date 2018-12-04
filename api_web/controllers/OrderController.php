@@ -1239,7 +1239,7 @@ class OrderController extends WebApiController
      */
     public function actionInfoByUnconfirmedVendor()
     {
-        $this->response = $this->container->get('OrderWebApi')->getInfo($this->request, true);
+        $this->response = $this->container->get('OrderWebApi')->getInfo($this->request);
     }
 
     /**
@@ -1585,14 +1585,12 @@ class OrderController extends WebApiController
     public function actionSaveToPdf()
     {
         $result = $this->container->get('OrderWebApi')->saveToPdf($this->request, $this);
-        if (is_array($result)) {
-            $this->response = $result;
-        } else {
-            header('Access-Control-Allow-Origin:*');
-            header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
-            header('Access-Control-Allow-Headers:Content-Type, Authorization');
-            exit($result);
-        }
+        header('Access-Control-Allow-Origin:*');
+        header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
+        header('Access-Control-Allow-Headers:Content-Type, Authorization');
+        header('Content-Disposition:attachment; filename=mixcart_order_' . $this->request['order_id'] . '.pdf');
+        header("Content-type:application/pdf");
+        exit($result);
     }
 
     /**
@@ -1640,7 +1638,7 @@ class OrderController extends WebApiController
 
     /**
      * @SWG\Post(path="/order/messages-by-unconfirmed-vendor",
-     *     tags={"Order"},
+     *     tags={"Order/UnconfirmedVendorActions"},
      *     summary="Список сообщений диалога неподтвержденного вендора",
      *     description="Получить список всех сообщений дилога неподтвержденного вендора",
      *     produces={"application/json"},
@@ -1706,7 +1704,7 @@ class OrderController extends WebApiController
 
     /**
      * @SWG\Post(path="/order/send-message-by-unconfirmed-vendor",
-     *     tags={"Order"},
+     *     tags={"Order/UnconfirmedVendorActions"},
      *     summary="Отправка сообщения поставщика (неподтвержденного) в чат по заказу для ресторана",
      *     description="Отправка сообщения поставщика (неподтвержденного) в чат по заказу для ресторана",
      *     produces={"application/json"},
@@ -1765,5 +1763,54 @@ class OrderController extends WebApiController
     public function actionSendMessageByUnconfirmedVendor()
     {
         $this->response = $this->container->get('ChatWebApi')->addMessage($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/order/save-to-excel",
+     *     tags={"Order"},
+     *     summary="Сохранить заказ в Excel",
+     *     description="Сохранить заказ в Excel",
+     *     produces={"application/json", "application/vnd.ms-excel"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"order_id":1, "base64_encode":1}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description="Если все прошло хорошо вернет файл закодированый в base64",
+     *         @SWG\Schema(
+     *              default="JVBERi0xLjQKJeLjz9MKMyAwIG9iago8PC9UeXBlIC9QYWdlCi9QYXJlbnQgMSAwIFIKL01lZGlhQm94IFswIDAgNTk1LjI4MCA4NDEuOD"
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionSaveToExcel()
+    {
+        $result = $this->container->get('OrderWebApi')->saveToExcel($this->request);
+        header('Access-Control-Allow-Origin:*');
+        header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
+        header('Access-Control-Allow-Headers:Content-Type, Authorization');
+        header('Content-Type: Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition:attachment; filename=mixcart_order_' . $this->request['order_id'] . '.xls');
+        header('Cache-Control: max-age=0');
+        header('Content-Transfer-Encoding: binary');
+        exit ($result);
     }
 }

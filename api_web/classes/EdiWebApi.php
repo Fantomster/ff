@@ -34,7 +34,6 @@ class EdiWebApi extends WebApi
     public function acceptProducts(array $post): array
     {
         $this->validateRequest($post, ['order_id']);
-
         $order = Order::findOne([
             'id'        => $post['order_id'],
             'client_id' => $this->user->organization->id,
@@ -42,26 +41,35 @@ class EdiWebApi extends WebApi
 
         if (empty($order)) {
             throw new BadRequestHttpException("order_not_found");
-        } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
-            throw new BadRequestHttpException("Доступно только для документов ЭДО");
-        } elseif ($order->status != OrderStatus::STATUS_EDI_SENT_BY_VENDOR) {
+        }
+
+        if (!in_array($order->service_id, Registry::$edo_documents)) {
+            throw new BadRequestHttpException("Доступно только для документов ЭДО и Накладных поставщика");
+        }
+
+        if ($order->status != OrderStatus::STATUS_EDI_SENT_BY_VENDOR) {
             throw new BadRequestHttpException("Должен быть статус \"Отправлено поставщиком\"");
         }
 
-        $eComAccess = EdiOrganization::findOne(['organization_id' => $order->client_id]);
-        if (!$eComAccess) {
-            throw new BadRequestHttpException("Отсутствуют параметры доступа к EDI");
-        }
-        $glnArray = $order->client->getGlnCodes($order->client->id, $order->vendor->id);
-        $ediIntegration = new EDIIntegration(['orgId' => $order->vendor_id, 'clientId' => $order->client_id, 'providerID' => $glnArray['provider_id']]);
-        if ($ediIntegration) {
-            $order->status = OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED;
-            $order->save();
-            return ['result' => true];
+        if ($order->service_id == Registry::EDI_SERVICE_ID) {
+            $eComAccess = EdiOrganization::findOne(['organization_id' => $order->client_id]);
+            if (!$eComAccess) {
+                throw new BadRequestHttpException("Отсутствуют параметры доступа к EDI");
+            }
+            $glnArray = $order->client->getGlnCodes($order->client->id, $order->vendor->id);
+            $ediIntegration = new EDIIntegration(['orgId' => $order->vendor_id, 'clientId' => $order->client_id, 'providerID' => $glnArray['provider_id']]);
+            if (!$ediIntegration) {
+                throw new BadRequestHttpException("В процессе отправки данных возникла ошибка");
+            }
         }
 
-        throw new BadRequestHttpException("В процессе отправки данных возникла ошибка");
+        if (is_null($order->created_by_id)) {
+            $order->created_by_id = $this->user->id;
+        }
 
+        $order->status = OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED;
+        $order->save();
+        return ['result' => true];
     }
 
     /**
@@ -82,7 +90,7 @@ class EdiWebApi extends WebApi
 
         if (empty($order)) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found'));
-        } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
+        } elseif (!in_array($order->service_id, Registry::$edo_documents)) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
         } elseif ($order->status != OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order.status_must_be') . \Yii::t('app', 'common.models.order_status.status_edo_acceptance_finished'));
@@ -111,7 +119,7 @@ class EdiWebApi extends WebApi
 
         if (empty($order)) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found'));
-        } elseif ($order->service_id != Registry::EDI_SERVICE_ID) {
+        } elseif (!in_array($order->service_id, Registry::$edo_documents)) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
         } elseif ($order->status != OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order.status_must_be') . \Yii::t('app', 'common.models.order_status.status_awaiting_accept_from_vendor'));
@@ -127,11 +135,13 @@ class EdiWebApi extends WebApi
      * История заказов
      *
      * @param array $post
-     * @return array
+     * @return mixed
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function getOrderHistory(array $post)
     {
-        $post['search']['service_id'] = [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID];
+        $post['search']['service_id'] = Registry::$edo_documents;
         return $this->container->get('OrderWebApi')->getHistory($post);
     }
 
@@ -147,17 +157,16 @@ class EdiWebApi extends WebApi
         $this->validateRequest($post, ['order_id']);
 
         $order = Order::findOne([
-            'id'        => $post['order_id'],
-            'client_id' => $this->user->organization->id,
+            'id'         => $post['order_id'],
+            'client_id'  => $this->user->organization->id,
+            'service_id' => Registry::$edo_documents
         ]);
 
         if (empty($order)) {
             throw new BadRequestHttpException("order_not_found");
-        } elseif (!in_array($order->service_id, [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID])) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
         }
 
-        $res = $this->container->get('OrderWebApi')->getInfo($post);
+        $res = $this->container->get('OrderWebApi')->getOrderInfo($order);
 
         if (isset($res['items']) && !empty($res['items'])) {
             $productIds = array_map(function ($el) {
@@ -227,7 +236,7 @@ class EdiWebApi extends WebApi
                 ['client_id' => $this->user->organization->id],
                 ['vendor_id' => $this->user->organization->id],
             ])
-            ->andWhere(['service_id' => Registry::EDI_SERVICE_ID])
+            ->andWhere(['service_id' => Registry::$edo_documents])
             ->groupBy('status')
             ->all();
 

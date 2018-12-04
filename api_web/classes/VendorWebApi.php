@@ -82,13 +82,13 @@ class VendorWebApi extends \api_web\components\WebApi
                 ->where(['ruo.organization_id' => $vendorID, 'o.type_id' => Organization::TYPE_SUPPLIER])->all();
 
             foreach ($arVendorUsers as $vendorUser) {
-                /**@var User $vendorUser*/
+                /**@var User $vendorUser */
                 $this->createAssociateManager($vendorUser);
             }
 
             if ($relation->invite != RelationSuppRest::INVITE_ON) {
                 foreach ($organization->users as $recipient) {
-                    if($recipient->role_id != Role::ROLE_SUPPLIER_MANAGER) {
+                    if ($recipient->role_id != Role::ROLE_SUPPLIER_MANAGER) {
                         continue;
                     }
                     //$this->user->sendInviteToVendor($recipient);
@@ -124,7 +124,7 @@ class VendorWebApi extends \api_web\components\WebApi
         $org = $post['user']['organization_name'];
         $phone = $post['user']['phone'];
 
-        $vendorUser= $this->vendorExists($email);
+        $vendorUser = $this->vendorExists($email);
 
         if ($vendorUser) {
             $user = User::find()->where(['email' => $email])->one();
@@ -153,19 +153,18 @@ class VendorWebApi extends \api_web\components\WebApi
                 $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
                 $user->newPassword = ForgotForm::generatePassword(8);
                 $user->newPasswordConfirm = $user->newPassword;
-                $user->status = User::STATUS_UNCONFIRMED_EMAIL;
-                if (!$user->validate()) {
+                $user->status = User::STATUS_ACTIVE;
+                if (!$user->validate() || !$user->save()) {
                     throw new ValidationException($user->getFirstErrors());
                 }
-                $user->save();
                 $profile->setUser($user->id);
                 $profile->full_name = $fio;
                 $profile->phone = $phone;
                 $profile->sms_allow = Profile::SMS_ALLOW;
-                if (!$profile->validate()) {
+                if (!$profile->validate() || !$profile->save()) {
                     throw new ValidationException($profile->getFirstErrors());
                 }
-                $profile->save();
+
                 if (!$vendorID) {
                     $organization->name = $org;
                 }
@@ -178,10 +177,10 @@ class VendorWebApi extends \api_web\components\WebApi
                     $organization->contact_name = $post['user']['contact_name'];
                 }
 
-                if (!$organization->validate()) {
+                if (!$organization->validate() || !$organization->save()) {
                     throw new ValidationException($organization->getFirstErrors());
                 }
-                $organization->save();
+
                 $user->setOrganization($organization)->save();
                 $relId = $user->createRelationUserOrganization($user->organization->id, $user->role_id);
                 $get_supp_org_id = $organization->id;
@@ -508,7 +507,11 @@ class VendorWebApi extends \api_web\components\WebApi
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
      * @throws \yii\base\Exception
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\StaleObjectException
+     * @throws \yii\di\NotInstantiableException
      */
     public function uploadFile(array $request)
     {
@@ -519,16 +522,16 @@ class VendorWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('empty_param|data');
         }
         $vendorId = $request['vendor_id'];
-        $vendorUser = User::findOne(['organization_id' => $vendorId]);
-        if(empty($vendorUser)) {
+        $vendor = Organization::findOne($vendorId);
+        if (empty($vendor) || $vendor->type_id != Organization::TYPE_SUPPLIER) {
             //todo_refactor no migration localization
             throw new BadRequestHttpException('vendor.not_found');
         }
-        if ($vendorUser->organization->vendor_is_work) {
+        if ($vendor->vendor_is_work) {
             throw new BadRequestHttpException('vendor.is_work');
         }
 
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendorId, $this->user->organization, true);
+        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendor->id, $this->user->organization, true);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
         }

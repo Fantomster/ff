@@ -14,7 +14,6 @@
 namespace api_web\modules\integration\classes\sync;
 
 use api_web\components\WebApi;
-use api_web\modules\integration\classes\SyncLog;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
 use yii\web\BadRequestHttpException;
@@ -52,6 +51,8 @@ abstract class AbstractSyncFactory extends WebApi
     public $serviceId;
     /** Service Name identified by service_id in $_POST params and SyncServiceFactory->$allServicesMap */
     public $serviceName;
+    
+    protected $logCategory = "sync_log";
 
     /**
      * Construct method for Class SyncServiceFactory
@@ -67,6 +68,14 @@ abstract class AbstractSyncFactory extends WebApi
             $this->serviceId = $serviceId;
         }
     }
+    
+    /**
+     * @param string $message
+     */
+    public function log($message)
+    {
+        \Yii::info($message, $this->logCategory);
+    }
 
     /**
      * @param int $service_id
@@ -79,7 +88,6 @@ abstract class AbstractSyncFactory extends WebApi
 
         $outerDic = OuterDictionary::findOne(['service_id' => $service_id, 'name' => $this->index]);
         if (!$outerDic) {
-            SyncLog::trace('OuterDictionary not found!');
             throw new BadRequestHttpException("outer_dic_not_found");
         }
 
@@ -93,7 +101,6 @@ abstract class AbstractSyncFactory extends WebApi
             ]);
 
             if (!$orgDic->save()) {
-                SyncLog::trace('OrganizationDictionary cannot be updated!');
                 throw new BadRequestHttpException("org_dic_not_accessible");
             }
         }
@@ -123,29 +130,23 @@ abstract class AbstractSyncFactory extends WebApi
     {
         # 1. Initialize new procedure "Load dictionary"
         if (!isset($params['dictionary'])) {
-            SyncLog::trace('"param[dictionary]" is required and empty!');
             throw new BadRequestHttpException("empty_param|dictionary");
         }
 
         # 2. Use entity class (by factory)
         $entity = $this->factory($params['dictionary'], $this->serviceId);
-        SyncLog::trace('Initialized entity class: ' . get_class($entity));
 
         # 3. Make transaction "Send request"
         if (method_exists($entity, 'sendRequest')) {
-            SyncLog::trace('Target method "sendRequest" in the dictionary class "' . get_class($entity) . '" exist');
             $requestParams = $params ?? [];
             if (isset($params['product_group'])) {
-                SyncLog::trace('Found product grouping parameter: ' . $params['product_group']);
                 $requestParams['product_group'] = $params['product_group'];
             }
             if (isset($params['code'])) {
-                SyncLog::trace('Found object code parameter: ' . $params['code']);
                 $requestParams['code'] = $params['code'];
             }
             return $entity->sendRequest($requestParams);
         } else {
-            SyncLog::trace('Target method "sendRequest" in the dictionary class does not exist!');
             throw new BadRequestHttpException("method_not_exist");
         }
     }
@@ -191,13 +192,10 @@ abstract class AbstractSyncFactory extends WebApi
             $data = curl_exec($ch);
             $info = curl_getinfo($ch);
             if ($info['http_code'] == self::HTTP_CODE_OK) {
-                SyncLog::trace('Curl was just executed with HTTP CODE ' . $info['http_code']);
                 return $data;
             } else {
-                SyncLog::trace('Curl was just executed with bad http code: ' . $info['http_code']);
                 return null;
             }
-
         } else {
             throw new BadRequestHttpException("curl_params_bad");
         }
@@ -217,7 +215,6 @@ abstract class AbstractSyncFactory extends WebApi
         if (class_exists($className)) {
             return new $className($this->serviceName, $serviceId);
         } else {
-            SyncLog::trace('The requested dictionary class "' . $this->serviceName . ucfirst($dictionary) . '"does not exist!');
             throw new BadRequestHttpException("class_not_exist");
         }
     }
@@ -231,9 +228,10 @@ abstract class AbstractSyncFactory extends WebApi
     abstract public function sendRequest(array $params = []): array;
 
     /**
+     * @param $request
      * @return array
      */
-    public function checkConnect()
+    public function checkConnect($request = [])
     {
         return ['Не определена функция проверки соединения в классе: ' . get_class($this)];
     }

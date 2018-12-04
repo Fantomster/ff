@@ -131,7 +131,7 @@ class Catalog extends \yii\db\ActiveRecord
 
     public function addCatalog($arrCatalog, bool $isWebApi = false)
     {
-        if ($arrCatalog === Array() && !$isWebApi) {
+        if (empty($arrCatalog) && !$isWebApi) {
             throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.empty_catalog', ['ru' => 'Каталог пустой!']));
         }
 

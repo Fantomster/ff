@@ -15,6 +15,7 @@
     <WAYBILLNUMBER><?= $order->id ?></WAYBILLNUMBER>
     <WAYBILLDATE><?= $dateArray['requested_delivery_date'] ?></WAYBILLDATE>
     <RECEPTIONDATE><?= $dateArray['requested_delivery_date'] ?? '' ?></RECEPTIONDATE>
+    <INFO><?= $order->comment ?? "" ?></INFO>
     <HEAD>
         <SUPPLIER><?= $glnArray['vendor_gln'] ?></SUPPLIER>
         <BUYER><?= $glnArray['client_gln'] ?></BUYER>
@@ -43,14 +44,15 @@
                     <PRODUCTIDBUYER><?= $position['id'] ?></PRODUCTIDBUYER>
                     <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
                     <DELIVEREDQUANTITY><?= $position['quantity'] ?></DELIVEREDQUANTITY>
-                    <ORDEREDQUANTITY><?= $position['plan_quantity'] ?></ORDEREDQUANTITY>
-                    <ACCEPTEDQUANTITY><?= (float)$position['edi_shipment_quantity'] ?? $position['quantity'] ?></ACCEPTEDQUANTITY>
+                    <ORDEREDQUANTITY><?= ($position['plan_quantity'] > 0) ? (float)$position['plan_quantity'] : $position['quantity'] ?></ORDEREDQUANTITY>
+                    <ACCEPTEDQUANTITY><?= ($position['quantity'] > 0) ? (float)$position['quantity'] : $position['edi_shipment_quantity'] ?></ACCEPTEDQUANTITY>
                     <ORDERUNIT><?= $measure ?></ORDERUNIT>
                     <EGAISCODE><?= $position['id'] ?></EGAISCODE>
                     <EGAISQUANTITY><?= $position['quantity'] ?></EGAISQUANTITY>
                     <PRICE><?= $position['price'] ?></PRICE>
                     <PRICEWITHVAT><?= $priceWithVat ?></PRICEWITHVAT>
                     <TAXRATE><?= $vat ?></TAXRATE>
+                    <INFO><?= $position['comment'] ?? "" ?></INFO>
                     <BUYERPARTNUMBER><?= $article ?? '' ?></BUYERPARTNUMBER>
                     <DESCRIPTION><?= $position['product_name'] ?></DESCRIPTION>
                 </POSITION>

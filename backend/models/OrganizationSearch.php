@@ -72,7 +72,7 @@ class OrganizationSearch extends Organization
 
             $query3 = $this->getSQLQuery(3);
 
-            $query4 = Organization::find()->with('licenseOrganization')->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['like', 'address', $this->address]);
+            $query4 = Organization::find()->with('licenseOrganization')->andFilterWhere(['like', 'name', $this->name])->andFilterWhere(['organization.id' => $this->id]);
 
             $query1->union($query2)->union($query3)->union($query4);
             $sql = $query1->createCommand()->getRawSql();
@@ -87,12 +87,7 @@ class OrganizationSearch extends Organization
                             'asc'     => ['id' => SORT_ASC], // от А до Я
                             'desc'    => ['id' => SORT_DESC], // от Я до А
                             'default' => SORT_DESC
-                        ],
-                        'name' => [
-                            'asc'     => ['name' => SORT_ASC], // от А до Я
-                            'desc'    => ['name' => SORT_DESC], // от Я до А
-                            'default' => SORT_DESC
-                        ],
+                        ]
                     ],
                 ],
             ]);
@@ -168,7 +163,7 @@ class OrganizationSearch extends Organization
         }
 
         $query = $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'address', $this->address]);
+            ->andFilterWhere(['organization.id' => $this->id]);
         return $query;
     }
 }

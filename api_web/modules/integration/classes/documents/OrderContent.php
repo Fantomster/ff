@@ -38,7 +38,7 @@ class OrderContent extends BaseOrderContent implements DocumentInterface
             "product_name"                  => $this->product->product,
             "quantity"                      => $this->quantity,
             "unit"                          => $this->product->ed,
-            "sum_with_vat"                  => CurrencyHelper::asDecimal($this->price),
+            "sum_with_vat"                  => CurrencyHelper::asDecimal($this->price * $this->quantity),
             "merc_uuid"                     => $this->merc_uuid ?? null,
             "is_comparised"                 => $this->isComparised(self::$serviceId),
             "is_child_organization_for_map" => $this->getExistsMainOrg()

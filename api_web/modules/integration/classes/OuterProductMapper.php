@@ -134,8 +134,9 @@ class OuterProductMapper
     /**
      * Если меняется сопоставление с продуктом, и бизнес главный и есть дочерние бизнесы, то обновляем сопоставление в
      * их записях
+     * todo_refactoring кажется тут есть баг при обновлении, потому что надо еще учитывать vendor_id
      */
-    public function updateChildsMap(): void
+    public function updateChildesMap(): void
     {
         if (!empty($this->childs) && $this->isMainOrg) {
             $condition = [
@@ -175,20 +176,18 @@ class OuterProductMapper
         if (!$model && !$this->isMainOrg) {
             $mainOrgModel = $this->getModel($this->mainOrgId);
         }
-
         if ($mainOrgModel) {
             unset($this->request['outer_product_id']);
-            $mainAttributes = $mainOrgModel->attributes();
             $model = new OuterProductMap();
-            $model->service_id = $mainAttributes['service_id'];
+            $model->service_id = $mainOrgModel->service_id;
             $model->organization_id = $this->orgId;
-            $model->vendor_id = $mainAttributes['vendor_id'];
-            $model->product_id = $mainAttributes['product_id'];
-            $model->outer_product_id = $mainAttributes['outer_product_id'];
-            $model->outer_unit_id = $mainAttributes['outer_unit_id'];
-            $model->outer_store_id = $mainAttributes['outer_store_id'];
-            $model->coefficient = $mainAttributes['coefficient'];
-            $model->vat = $mainAttributes['vat'];
+            $model->vendor_id = $mainOrgModel->vendor_id;
+            $model->product_id = $mainOrgModel->product_id;
+            $model->outer_product_id = $mainOrgModel->outer_product_id;
+            $model->outer_unit_id = $mainOrgModel->outer_unit_id;
+            $model->outer_store_id = $mainOrgModel->outer_store_id;
+            $model->coefficient = $mainOrgModel->coefficient;
+            $model->vat = $mainOrgModel->vat;
         }
         if (!$model) {
             $model = new OuterProductMap();

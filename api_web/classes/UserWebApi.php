@@ -265,7 +265,7 @@ class UserWebApi extends \api_web\components\WebApi
             Notice::init('User')->sendEmailWelcome($user);
             $userToken->delete();
             $transaction->commit();
-            return $user->access_token;
+            return $user->getJWTToken();
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
@@ -349,7 +349,7 @@ class UserWebApi extends \api_web\components\WebApi
 
         $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($result, 'id'));
         $result = array_map(function ($item) use ($licenses) {
-            $item['license_is_active'] = isset($licenses[$item['id']]);
+            $item['license_is_active'] = !empty($licenses[$item['id']]);
             $item['license'] = isset($licenses[$item['id']]) ? $licenses[$item['id']] : null;
             return $item;
         }, $result);

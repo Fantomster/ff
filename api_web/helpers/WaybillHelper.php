@@ -9,6 +9,7 @@
 namespace api_web\helpers;
 
 use api_web\components\Registry;
+use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\models\User;
 use api_web\modules\integration\classes\SyncServiceFactory;
@@ -73,6 +74,7 @@ class WaybillHelper
         if (!$order) {
             throw new BadRequestHttpException('order_not_found');
         }
+        $this->user = $order->createdBy;
         if (is_null($arOrderContentForCreate)) {
             $arOrderContentForCreate = $order->orderContent;
         }
@@ -84,8 +86,6 @@ class WaybillHelper
             throw new BadRequestHttpException('waybill.you_dont_have_licenses_for_services');
         }
 
-        $cntEmptyRows = 0;
-        $cntNotInWaybillContent = 0;
         $waybillModels = [];
         foreach ($licenses as $license) {
             //Счетчики для выброса Exception
@@ -105,7 +105,7 @@ class WaybillHelper
             $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
 
             if (empty($notInWaybillContent)) {
-                $cntNotInWaybillContent++;
+                $this->throwException($serviceId, $order->client_id, 'waybill.you_dont_have_order_content_for_waybills');
                 continue;
             }
 
@@ -113,11 +113,11 @@ class WaybillHelper
                 $rows = $this->helper->getMapForOrder($order, $serviceId);
             } catch (\Throwable $t) {
                 \Yii::error($t->getMessage(), 'waybill_create');
-                $this->writeInJournal($t->getMessage(), $serviceId, 'error');
+                $this->writeInJournal($t->getMessage(), $serviceId, $order->client_id, 'error');
             }
 
             if (empty($rows)) {
-                $cntEmptyRows++;
+                $this->throwException($serviceId, $order->client_id, 'waybill.you_dont_have_mapped_products');
                 continue;
             }
 
@@ -136,7 +136,6 @@ class WaybillHelper
             $defaultStoreConfig = IntegrationSettingValue::getSettingsByServiceId($serviceId, $order->client_id, ['defStore']);
 
             // Remap for 1 store = 1 waybill
-
             foreach ($rows as $row) {
                 $arMappedForStores[$row['outer_store_id']][$row['product_id']] = $row;
             }
@@ -158,24 +157,16 @@ class WaybillHelper
                     $skipCount++;
                 }
             }
-        }
 
-        // Если количество складов = числу пропусков, бросаем throw
-        if (count($arMappedForStores) === $skipByStore) {
-            throw new BadRequestHttpException('waybill.no_store_for_create_waybill');
-        }
+            // Если количество маппингов = числу пропусков, бросаем throw
+            if ($mapCount === $skipCount) {
+                $this->throwException($serviceId, $order->client_id, 'waybill.no_map_for_create_waybill');
 
-        // Если количество маппингов = числу пропусков, бросаем throw
-        if ($mapCount === $skipCount) {
-            throw new BadRequestHttpException('waybill.no_map_for_create_waybill');
-        }
-
-        if ($cntEmptyRows == count($licenses)) {
-            throw new BadRequestHttpException('waybill.you_dont_have_mapped_products');
-        }
-
-        if ($cntNotInWaybillContent == count($licenses)) {
-            throw new BadRequestHttpException('waybill.you_dont_have_order_content_for_waybills');
+            }
+            // Если количество складов = числу пропусков, бросаем throw
+            if (count($arMappedForStores) === $skipByStore) {
+                $this->throwException($serviceId, $order->client_id, 'waybill.no_store_for_create_waybill');
+            }
         }
 
         return $waybillModels;
@@ -226,7 +217,7 @@ class WaybillHelper
                 $ordCont = $mappedProduct['orderContent'];
                 $price = $ordCont->price;
                 $quantity = $ordCont->quantity;
-                $taxRate = in_array($serviceId, [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID]) &&
+                $taxRate = in_array($serviceId, Registry::$edo_documents) &&
                 !is_null($ordCont->vat_product) ? $ordCont->vat_product : $mappedProduct['vat'];
                 $priceWithVat = (float)($price + ($price * ($taxRate / 100)));
                 $modelWaybillContent = new WaybillContent();
@@ -247,7 +238,7 @@ class WaybillHelper
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
-            $this->writeInJournal($e->getMessage(), $serviceId, 'error');
+            $this->writeInJournal($e->getMessage(), $serviceId, $orgId, 'error');
         }
         return $model;
     }
@@ -510,7 +501,7 @@ class WaybillHelper
                 $this->createWaybill($request['order_id'], null, $request['vendor_id'], $this->getExcludedServices());
             } catch (\Throwable $e) {
                 //Запись ошибки в журнал, здесь нет service_id
-                $this->writeInJournal($e->getMessage(), 0, 'error');
+                $this->writeInJournal($e->getMessage(), 0, $this->orgId, 'error');
             }
             $waybillToService = [];
             $query = $this->createQueryWyabillToOrder($request['order_id']);
@@ -541,17 +532,17 @@ class WaybillHelper
                                 'service_id' => $serviceId,
                                 'ids'        => $ids,
                             ]);
-                            $this->writeInJournal($message, $serviceId);
+                            $this->writeInJournal($message, $serviceId, $this->orgId);
                             $t->commit();
                         } catch (\Throwable $e) {
                             $t->rollBack();
-                            $this->writeInJournal($e->getMessage(), $serviceId, 'error');
+                            $this->writeInJournal($e->getMessage(), $serviceId, $this->orgId, 'error');
                         }
                     }
                 }
             } catch (\Throwable $e) {
                 //Запись ошибки в журнал, здесь нет service_id
-                $this->writeInJournal($e->getMessage(), 0, 'error');
+                $this->writeInJournal($e->getMessage(), 0, $this->orgId, 'error');
             } finally {
                 //Снятие лока с обработки
                 $redis->del($lockName);
@@ -567,14 +558,15 @@ class WaybillHelper
      * @param string $type
      * @throws ValidationException
      */
-    private function writeInJournal($message, $service_id, $type = 'success'): void
+    private function writeInJournal($message, $service_id, int $orgId = 0, $type = 'success'): void
     {
         $journal = new Journal();
         $journal->response = is_array($message) ? json_encode($message) : $message;
         $journal->service_id = (int)$service_id;
         $journal->type = $type;
-        $journal->organization_id = $this->orgId;
-        $journal->user_id = $this->user->id;
+        $journal->log_guide = 'CreateWaybill';
+        $journal->organization_id = $orgId;
+        $journal->user_id = \Yii::$app instanceof \Yii\web\Application ? $this->user->id : null;
         $journal->operation_code = (string)(Registry::$operation_code_send_waybill[$service_id] ?? 0);
         if (!$journal->save()) {
             throw new ValidationException($journal->getFirstErrors());
@@ -628,5 +620,25 @@ class WaybillHelper
         }
 
         return $arExcludedServices;
+    }
+
+    /**
+     * @param $serviceId
+     * @param $orgId
+     * @param $error
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function throwException($serviceId, $orgId, $error)
+    {
+        if (\Yii::$app instanceof \Yii\web\Application) {
+            if ($this->user->integration_service_id == $serviceId) {
+                throw new BadRequestHttpException($error);
+            } else {
+                $this->writeInJournal(\Yii::t('api_web', $error), $serviceId, $orgId, 'error');
+            }
+        } else {
+            $this->writeInJournal(\Yii::t('api_web', $error), $serviceId, $orgId, 'error');
+        }
     }
 }

@@ -18,10 +18,10 @@ return [
     'operatorsReportAdminIDs' => [1, 85, 16, 8832, 13580, 12814],
     'licenseManagerPhone'     => '8 (499) 404-10-18',
     #id франчази к которому крепим организации, для которых не нашли франчей
-    'default_franchisee_id' => 1,
+    'default_franchisee_id'   => 1,
     //static urls
-    'shortHome'             => 'mixcart.ru',
-    'staticUrl'             => [
+    'shortHome'               => 'mixcart.ru',
+    'staticUrl'               => [
         'ru' => [
             'market'    => 'https://market.mixcart.ru/',
             'franchise' => 'http://fr.mixcart.ru/',
@@ -63,25 +63,25 @@ return [
             'contacts'  => 'https://mixcart.ru/ua/contacts.html',
         ],
     ],
-    'enableYandexMetrics'   => 1,
+    'enableYandexMetrics'     => 1,
     /**
      * Массив ID организаций, у которых включено логирование ответов на запросы
      * Запись идет в файлы
      *  /runtime/logs/iiko_api_response_{ID}.log
      */
-    'iikoLogOrganization'   => [],
-    'web'         => 'https://mixcart.ru/',
+    'iikoLogOrganization'     => [],
+    'web'                     => 'https://mixcart.ru/',
     /**
      * Логирование запросов к ВебАпи
      */
-    'web_api_log' => true,
-    'e_com' => [
+    'web_api_log'             => true,
+    'e_com'                   => [
         'login'       => 'markettest',
         'pass'        => 'e1fa52810ea9d18a5af901c147c804e6',
         'loginClient' => 'markettest1',
         'passClient'  => '32da77b28033f8fcd7d6d64a9801062d',
     ],
-    'fireBase' => [
+    'fireBase'                => [
         'DEFAULT_URL'       => 'https://mixcart-test.firebaseio.com',
         'DEFAULT_TOKEN'     => '',
         'DEFAULT_PATH'      => '/',
@@ -91,15 +91,17 @@ return [
         'storageBucket'     => "mixcart-test.appspot.com",
         'messagingSenderId' => "1068392671931"
     ],
-    'vtsHttp'      => [
+    'vtsHttp'                 => [
         'authLink'       => 'https://t2-mercury.vetrf.ru/hs/',
         'vsdLink'        => 'https://t2-mercury.vetrf.ru/pub/operatorui?_language=ru&_action=showVetDocumentFormByUuid&uuid=',
-        'pdfLink'        => 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=1&preview=false&_action=printVetDocumentList&_language=ru&isplayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=&printPk=',
+        'pdfLink'        => 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=1&preview=false&_action=printVetDocumentList&_language=ru&displayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=&printPk=',
+        'shortPdfLink'   => 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=3&preview=false&_action=printVetDocumentList&_language=ru&displayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=&printPk=',
         'chooseFirmLink' => 'https://t2-mercury.vetrf.ru/hs/operatorui?_action=chooseServicedFirm&_language=ru&firmGuid=',
     ],
-    'edi_api_data' => [
+    'edi_api_data'            => [
         'edi_api_leradata_url'       => 'https://leradata.pro/api/vetis/api.php',
         'edi_api_order_document_id'  => 220,
         'edi_api_recadv_document_id' => 351
-    ]
+    ],
+    'disable_daemon_logs' => true,
 ];

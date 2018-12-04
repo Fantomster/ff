@@ -49,6 +49,7 @@ use Lcobucci\JWT\Signer\Hmac\Sha256;
  * @property Job               $job
  * @property EmailQueue        $lastEmail
  * @property RelationUserOrganization[] $relationsUserOrganization
+ * @property Profile $profile
  */
 class User extends \amnah\yii2\user\models\User
 {
@@ -556,17 +557,19 @@ class User extends \amnah\yii2\user\models\User
         $mailer           = Yii::$app->mailer;
         $oldViewPath      = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
+        $mailer->htmlLayout = $this->module->emailViewPath . '/layouts/mail';
 
         $userToken   = $this->module->model("UserToken");
         $userToken   = $userToken::generate($user->id, $userToken::TYPE_EMAIL_ACTIVATE);
         $email       = $user->email;
         $newPassword = $user->newPassword;
-        $subject     = Yii::t('app', 'common.models.confirm', ['ru' => "Подтвердите аккаунт на MixCart"]);
-        $view        = $isNewConfirm ? 'confirmEmailTwo' : 'confirmEmail';
-        $result      = $mailer->compose($view, compact("subject", "user", "profile", "userToken", "newPassword"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+      
+        $subject = Yii::t('app', 'common.models.confirm', ['ru' => "Подтвердите аккаунт на MixCart"]);
+        $view = $isNewConfirm ? 'confirmEmailTwo' : 'confirmEmail';
+        $result = $mailer->compose($view, compact("subject", "user", "profile", "userToken", "newPassword"))
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
@@ -593,6 +596,7 @@ class User extends \amnah\yii2\user\models\User
         $mailer           = Yii::$app->mailer;
         $oldViewPath      = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
+        $mailer->htmlLayout = $this->module->emailViewPath . '/layouts/mail';
 
         // send email
         $user    = $this;
@@ -1068,23 +1072,31 @@ class User extends \amnah\yii2\user\models\User
     }
 
     /**
-     * @param Jwt $jwt
+     * @param null $jwt
      * @return string
+     * @throws \yii\base\Exception
      */
-    public function getJWTToken(Jwt $jwt)
+    public function getJWTToken($jwt = null)
     {
-        if (empty($this->access_token)) {
-            $this->auth_key     = \Yii::$app->security->generateRandomString();
-            $this->access_token = \Yii::$app->security->generateRandomString();
-            $this->save();
+        if (is_null($jwt)) {
+            $jwt = \Yii::$app->jwt;
         }
 
-        $signer = new Sha256();
-        return (string) $jwt->getBuilder()
-                        ->setIssuer('mixcart.ru')
-                        ->set('access_token', $this->access_token)
-                        ->sign($signer, $jwt->key)
-                        ->getToken();
+        if ($jwt instanceof Jwt) {
+            if (empty($this->access_token)) {
+                $this->auth_key = \Yii::$app->security->generateRandomString();
+                $this->access_token = \Yii::$app->security->generateRandomString();
+                $this->save();
+            }
+
+            $signer = new Sha256();
+            return (string)$jwt->getBuilder()
+                ->setIssuer('mixcart.ru')
+                ->set('access_token', $this->access_token)
+                ->sign($signer, $jwt->key)
+                ->getToken();
+        }
+        throw new \yii\base\Exception('Bad Jwt class');
     }
 
     /**

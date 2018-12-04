@@ -1,12 +1,7 @@
 <?php
-
-use api_web\modules\integration\classes\SyncLog;
-
 /* @var $this yii\web\View */
 /* @var $cb string */
 /* @var $code string */
-
-SyncLog::trace('Render template: ' . __NAMESPACE__ . __FILE__);
 
 // http://apidocs.ucs.ru/doku.php/whiteserver:api:sh_get_goodgroups
 

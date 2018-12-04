@@ -402,7 +402,7 @@ class VetisWaybill extends WebApi
             throw new BadRequestHttpException($check['error']);
         }
 
-        $data = $vsdHttp->getPdfData($request['uuid']);
+        $data = $vsdHttp->getPdfData($request['uuid'], $request['full']);
         $base64 = (isset($request['base64_encode']) && $request['base64_encode'] == 1 ? true : false);
         return ($base64 ? base64_encode($data) : $data);
     }

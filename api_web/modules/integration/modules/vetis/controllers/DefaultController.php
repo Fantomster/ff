@@ -180,7 +180,6 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \yii\web\BadRequestHttpException
      */
     public function actionList()
     {
@@ -857,7 +856,8 @@ class DefaultController extends WebApiController
      *                  property="request",
      *                  default={
      *                      "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
-     *                      "base64_encode":1
+     *                      "full": 1,
+     *                      "base64_encode": 1
      *                  }
      *              )
      *         )
@@ -888,6 +888,8 @@ class DefaultController extends WebApiController
             header('Access-Control-Allow-Origin:*');
             header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
             header('Access-Control-Allow-Headers:Content-Type, Authorization');
+            header('Content-Disposition:attachment; filename=vsd_' . $this->request['uuid'] . '.pdf');
+            header("Content-type:application/pdf");
             exit($result);
         }
     }

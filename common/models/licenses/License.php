@@ -9,6 +9,7 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
 
@@ -137,12 +138,13 @@ class License extends ActiveRecord
             ->select([
                 'license.id',
                 'license.name',
-                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active_license',
+                '(CASE WHEN license.is_active = 1 AND max(lo.td) > NOW() THEN 1 ELSE 0 END) as  is_active_license',
                 'license.created_at',
                 'license.updated_at',
                 'license.login_allowed',
                 'max(lo.td) as to_date',
                 'license.service_id',
+                'lo.org_id',
             ])
             ->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
@@ -156,8 +158,9 @@ class License extends ActiveRecord
                 'license.updated_at',
                 'license.login_allowed',
                 'license.service_id',
+                'lo.org_id'
             ])
-            ->indexBy('id');
+            ->orderBy(['`license`.sort_index' => SORT_DESC]);
 
         if (!empty($service_ids)) {
             $license->andWhere(['in', 'license.service_id', $service_ids]);
@@ -165,14 +168,13 @@ class License extends ActiveRecord
 
         if (!is_null($is_active)) {
             $license->having(['=', 'is_active_license', (int)$is_active]);
-            $license->orderBy(['to_date' => SORT_DESC]);
         }
 
         return $license->all(\Yii::$app->db_api);
     }
 
     /**
-     * Проверка на активную лицензию микскарта
+     * Возвращает дату, до которой активна лицензия МиксКарт
      *
      * @param $orgId
      * @return string
@@ -180,7 +182,6 @@ class License extends ActiveRecord
     public static function getDateMixCartLicense($orgId)
     {
         $result = self::getMixCartLicenses($orgId);
-
         if (!empty($result)) {
             return current($result)['to_date'];
         } else {
@@ -199,55 +200,18 @@ class License extends ActiveRecord
         if (empty($orgIds)) {
             return [];
         }
-
-        $license = (new Query())
-            ->select([
-                'license.id',
-                'license.name',
-                '(CASE WHEN license.is_active = 1 AND lo.td > NOW() THEN 1 ELSE 0 END) as  is_active_license',
-                'license.created_at',
-                'license.updated_at',
-                'license.login_allowed',
-                'lo.td as to_date',
-                'lo.org_id',
-                'phone_manager' => "'" . \Yii::$app->params['licenseManagerPhone'] . "'"
-            ])
-            ->from(self::tableName())
-            ->leftJoin('license_organization lo', 'lo.license_id=license.id')
-            ->where([
-                'lo.org_id'  => $orgIds,
-                'license.id' => Registry::$mc_licenses_id
-            ])
-            ->andWhere('lo.is_deleted = 0 OR lo.is_deleted is null')
-            ->indexBy('org_id');
-
-        $license->having(['=', 'is_active_license', 1]);
-        $license->orderBy(['`license`.sort_index' => SORT_ASC]);
-
-        return $license->all(\Yii::$app->db_api);
-    }
-
-    /**
-     * Проверка лицензии MixCart
-     *
-     * @param $org_id
-     * @throws HttpException
-     * @throws \yii\base\InvalidConfigException
-     */
-    public static function checkMixCartLicenseResponse($org_id)
-    {
-        $licenseDate = self::getDateMixCartLicense($org_id);
-        \Yii::$app->response->headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
-        \Yii::$app->response->headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
-        #Проверяем, не стухла ли лицензия
-        if (strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
-            throw new HttpException(402, 'license.payment_required', 402);
+        $licenses = self::getAllLicense($orgIds, Registry::$mc_licenses_id, true);
+        $licenses = ArrayHelper::index($licenses, 'org_id');
+        foreach ($licenses as &$item) {
+            $item['phone_manager'] = \Yii::$app->params['licenseManagerPhone'];
         }
+        return $licenses;
     }
 
     /**
      * @param       $org_id
      * @param array $service_ids
+     * @return false|string
      * @throws HttpException
      * @throws \yii\base\InvalidConfigException
      */
@@ -279,6 +243,25 @@ class License extends ActiveRecord
                 $message .= ': ' . $licenseName;
             }
             throw new HttpException(400, $message, 400);
+        }
+        return $licenseDate;
+    }
+
+    /**
+     * Проверка лицензии для входа в систему
+     *
+     * @param $org_id
+     * @throws HttpException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function checkEnterLicenseResponse($org_id)
+    {
+        $licenseDate = self::checkLicense($org_id, Registry::$allow_enter_services);
+        \Yii::$app->response->headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
+        \Yii::$app->response->headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
+        #Проверяем, не стухла ли лицензия
+        if (strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
+            throw new HttpException(402, 'license.payment_required', 402);
         }
     }
 }

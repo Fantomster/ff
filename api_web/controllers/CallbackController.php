@@ -13,7 +13,6 @@
 namespace api_web\controllers;
 
 use api_web\modules\integration\classes\sync\AbstractSyncFactory;
-use api_web\modules\integration\classes\SyncLog;
 use common\models\OuterTask;
 use \Yii;
 use api_web\components\WebApiNoAuthController;
@@ -76,13 +75,11 @@ class CallbackController extends WebApiNoAuthController
     {
         $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         if (!$task_id) {
-            SyncLog::trace('Required variable "task_id" is wrong!');
             throw new BadRequestHttpException("empty_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
 
         $mcTask = OuterTask::findOne(['inner_guid' => $task_id]);
         if (!$mcTask || $mcTask->int_status_id != OuterTask::STATUS_REQUESTED) {
-            SyncLog::trace('Required variable "task_id" is wrong!');
             throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
 
@@ -127,13 +124,11 @@ class CallbackController extends WebApiNoAuthController
     {
         $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         if (!$task_id) {
-            SyncLog::trace('Required variable "task_id" is wrong!');
             throw new BadRequestHttpException("empty_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
 
         $mcTask = OuterTask::findOne(['inner_guid' => $task_id]);
         if (!$mcTask || $mcTask->int_status_id != OuterTask::STATUS_REQUESTED) {
-            SyncLog::trace('Required variable "task_id" is wrong!');
             throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
 

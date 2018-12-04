@@ -152,8 +152,8 @@ Modal::widget([
             ],
             [
                 'class' => 'yii\grid\ActionColumn',
-                'contentOptions' => ['style' => 'width: 7%;'],
-                'template' => '{view}&nbsp;&nbsp;{pdf}&nbsp;&nbsp;{done-partial}&nbsp;&nbsp;{rejected}',
+                'contentOptions' => ['style' => 'width: 9%;'],
+                'template' => '{view}&nbsp;&nbsp;{pdf}&nbsp;&nbsp;{shortPdf}&nbsp;&nbsp;{done-partial}&nbsp;&nbsp;{rejected}',
                 'buttons' => [
                     'view' => function ($url, $model, $key) use ($lic_merc) {
                         $options = [
@@ -215,9 +215,19 @@ Modal::widget([
                         return Html::a('<i class="fa fa-file-pdf-o" aria-hidden="true"></i>', '#', [
                             'data-pjax' => 0,
                             'class' => 'download-pdf',
-                            'data-url' => Url::to(['get-pdf', 'uuid' => $model->uuid]),
+                            'data-url' => Url::to(['get-pdf', 'uuid' => $model->uuid, 'full' => true]),
                             'data-name' => str_replace(' ', '_', $model->product_name . '_' . Yii::$app->formatter->asDatetime($model->date_doc, "php:j M Y") . '.pdf'),
                             'title' => Yii::t('message', 'frontend.client.integration.pdf', ['ru' => 'Загрузка PDF']),
+                        ]);
+                    },
+                    'shortPdf' => function ($url, $model, $key) {
+                        return Html::a('<i class="fa fa-file-pdf-o" aria-hidden="true"></i>', '#', [
+                            'data-pjax' => 0,
+                            'class' => 'download-pdf',
+                            'style' => 'color: orange;',
+                            'data-url' => Url::to(['get-pdf', 'uuid' => $model->uuid, 'full' => false]),
+                            'data-name' => str_replace(' ', '_', $model->product_name . '_' . Yii::$app->formatter->asDatetime($model->date_doc, "php:j M Y") . '.pdf'),
+                            'title' => Yii::t('message', 'frontend.client.integration.short_pdf', ['ru' => 'Загрузка сжатого PDF']),
                         ]);
                     },
                 ]
@@ -604,7 +614,7 @@ $(document).on("click", ".hand_loading", function(e) {
 		            url: '$checkVsdAuthDataUrl',
 		            method: 'GET',
 		            success: function (data) {
-		                if(data.success == false){
+		                if (data.success == false) {
 		                    FF.uploadPDF.reAuth(FF.uploadPDF.authData);
 		                } else {
 		                    FF.uploadPDF.uploadDPF();

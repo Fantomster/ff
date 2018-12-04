@@ -2,8 +2,9 @@
 
 namespace api_web\classes;
 
-use api\modules\v1\modules\mobile\resources\RelationSuppRest;
+use common\models\RelationSuppRest;
 use api_web\exceptions\ValidationException;
+use common\helpers\ModelsCollection;
 use common\models\CatalogGoods;
 use common\models\CatalogTemp;
 use common\models\CatalogTempContent;
@@ -77,9 +78,7 @@ class CatalogWebApi extends WebApi
      * @param $request
      * @return array
      * @throws \Throwable
-     * @throws \yii\base\InvalidConfigException
      * @throws \yii\db\Exception
-     * @throws \yii\di\NotInstantiableException
      * @throws \yii\web\BadRequestHttpException
      */
     public function uploadTemporary($request)
@@ -87,17 +86,66 @@ class CatalogWebApi extends WebApi
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException("empty_param|vendor_id");
         }
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
         if (empty($catalog)) {
             throw new BadRequestHttpException("base_catalog_not_found");
         }
-        $catalogID = $catalog->id;
-        $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalogID, 'user_id' => $this->user->id]);
+
+        $vendorBaseCatalog = Catalog::findOne(['supp_org_id' => $request['vendor_id'], 'type' => Catalog::BASE_CATALOG]);
+        if (empty($vendorBaseCatalog)) {
+            $vendorBaseCatalog = new Catalog([
+                'supp_org_id'  => $request['vendor_id'],
+                'type'         => Catalog::BASE_CATALOG,
+                'name'         => 'Главный каталог',
+                'status'       => Catalog::STATUS_ON,
+                'currency_id'  => $catalog->currency_id,
+                'main_index'   => $catalog->main_index,
+                'index_column' => $catalog->index_column
+            ]);
+            $vendorBaseCatalog->save();
+        }
+
+        $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($catalogTemp)) {
             throw new BadRequestHttpException("catalog_temp_not_found");
         }
 
-        $catalogTempContent = CatalogTempContent::find()->where(['temp_id' => $catalogTemp->id])->all();
+        $catalogTempContent = (new Query())->select([
+            'ctc.id',
+            'ctc.article',
+            'ctc.product',
+            'coalesce(cbg.id, 0) cbg_id',
+            'ctc.ed',
+            'ctc.units',
+            'ctc.price',
+            'ctc.note',
+            'cbg.status',
+            'cbg.market_place',
+            'cbg.created_at',
+            'cbg.updated_at',
+            'cbg.supp_org_id',
+            'cbg.category_id',
+            'cbg.image',
+            'cbg.brand',
+            'cbg.region',
+            'cbg.weight',
+            'cbg.es_status',
+            'cbg.mp_show_price',
+            'cbg.rating',
+            'cbg.barcode',
+            'cbg.edi_supplier_article',
+            'cbg.ssid',
+            'coalesce(cg.id, 0) cg_id',
+            'cg.base_goods_id',
+            'cg.vat cg_vat'
+        ])
+            ->from(CatalogTempContent::tableName() . ' ctc')
+            ->leftJoin(CatalogBaseGoods::tableName() . ' cbg', "cbg.$catalog->main_index=ctc.$catalog->main_index"
+                . " and cbg.cat_id=:vendorBaseCatId", [':vendorBaseCatId' => $vendorBaseCatalog->id])
+            ->leftJoin(CatalogGoods::tableName() . ' cg', 'cg.base_goods_id=cbg.id and cg.cat_id=:cat_id',
+                [':cat_id' => $catalog->id])
+            ->where(['temp_id' => $catalogTemp->id])->all();
+
         if (empty($catalogTempContent)) {
             throw new BadRequestHttpException("catalog_temp_content_not_found");
         }
@@ -109,47 +157,91 @@ class CatalogWebApi extends WebApi
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             CatalogBaseGoods::updateAll([
-                'status' => CatalogBaseGoods::STATUS_OFF
+                'status'  => CatalogBaseGoods::STATUS_OFF,
+                'deleted' => CatalogBaseGoods::DELETED_ON,
             ], [
                 'supp_org_id' => $catalog->supp_org_id,
-                'cat_id'      => $catalogID
+                'cat_id'      => $catalog->id
             ]);
+            $arBatchInsert = [];
             /**
-             * @var $tempRow CatalogTempContent
+             * @var CatalogTempContent $tempRow
              */
-            foreach ($catalogTempContent as $tempRow) {
-                //Поиск товара в главном каталоге
-                $model = CatalogBaseGoods::findOne([
-                    'cat_id'  => $catalogID,
-                    'article' => $tempRow->article,
-                    'product' => $tempRow->product
-                ]);
-                //Если не нашли, создаем его
-                if (empty($model)) {
+            foreach ($this->gen($catalogTempContent) as $tempRow) {
+                if ($tempRow['cbg_id'] == 0) {
                     $model = new CatalogBaseGoods([
-                        'cat_id'      => $catalogID,
-                        'article'     => $tempRow->article,
-                        'product'     => $tempRow->product,
+                        'cat_id'      => $vendorBaseCatalog->id,
+                        'article'     => $tempRow['article'],
+                        'product'     => $tempRow['product'],
                         'supp_org_id' => $catalog->supp_org_id
+                    ]);
+                } else {
+                    /**@var CatalogBaseGoods $model */
+                    $model = \Yii::createObject([
+                        'class'                => '\common\models\CatalogBaseGoods',
+                        'id'                   => $tempRow['cbg_id'],
+                        'cat_id'               => $vendorBaseCatalog->id,
+                        'article'              => $tempRow['article'],
+                        'product'              => $tempRow['product'],
+                        'status'               => $tempRow['status'],
+                        'deleted'              => CatalogBaseGoods::DELETED_OFF,
+                        'created_at'           => $tempRow['created_at'],
+                        'updated_at'           => $tempRow['updated_at'],
+                        'supp_org_id'          => $tempRow['supp_org_id'],
+                        'category_id'          => $tempRow['category_id'],
+                        'image'                => $tempRow['image'],
+                        'brand'                => $tempRow['brand'],
+                        'region'               => $tempRow['region'],
+                        'weight'               => $tempRow['weight'],
+                        'es_status'            => $tempRow['es_status'],
+                        'mp_show_price'        => $tempRow['mp_show_price'],
+                        'rating'               => $tempRow['rating'],
+                        'barcode'              => $tempRow['barcode'],
+                        'edi_supplier_article' => $tempRow['edi_supplier_article'],
+                        'ssid'                 => $tempRow['ssid'],
+                    ]);
+                    $model->setOldAttributes([
+                        'id' => $tempRow['cbg_id'],
                     ]);
                 }
                 //Заполняем аттрибуты
-                $model->ed = $tempRow->ed;
-                $model->units = $tempRow->units;
-                $model->price = $tempRow->price;
-                $model->note = $tempRow->note;
+                $model->ed = $tempRow['ed'];
+                $model->units = $tempRow['units'];
+                $model->price = $tempRow['price'];
+                $model->note = $tempRow['note'];
                 $model->status = CatalogBaseGoods::STATUS_ON;
+                $model->deleted = CatalogBaseGoods::DELETED_OFF;
                 //Если атрибуты изменились или новая запись, сохраняем модель
-                $model->save();
-                $catalogGood = CatalogGoods::findOne(['base_goods_id' => $model->id, 'cat_id' => $catalogID]);
-                if (empty($catalogGood)) {
-                    $catalogGood = new CatalogGoods();
-                    $catalogGood->cat_id = $catalogID;
-                    $catalogGood->base_goods_id = $model->id;
+                if (!$model->save()) {
+                    throw new ValidationException($model->getFirstErrors());
                 }
-                $catalogGood->price = $model->price;
-                $catalogGood->save();
+                if ($tempRow['cg_id'] != 0) {
+                    $catalogGood = \Yii::createObject([
+                        'class'         => '\common\models\CatalogGoods',
+                        'cat_id'        => $catalog->id,
+                        'base_goods_id' => $tempRow['cbg_id'],
+                        'vat'           => $tempRow['cg_vat'],
+                    ]);
+                    $catalogGood->setOldAttributes([
+                        'id' => $tempRow['cg_id'],
+                    ]);
+                    $catalogGood->price = $model->price;
+                    if (!$catalogGood->save()) {
+                        throw new ValidationException($catalogGood->getFirstErrors());
+                    }
+                } else {
+                    $catalogGood = new CatalogGoods();
+                    $catalogGood->cat_id = $catalog->id;
+                    $catalogGood->base_goods_id = $model->id;
+                    $catalogGood->price = $model->price;
+                    $arBatchInsert[] = $catalogGood;
+                }
+                if (count($arBatchInsert) > 499) {
+                    $batchResult = (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');
+                    $arBatchInsert = [];
+                }
             }
+            $batchResult = (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');
             //Убиваем временный каталог
             CatalogTempContent::deleteAll(['temp_id' => $catalogTemp->id]);
             $catalogTemp->delete();
@@ -158,6 +250,17 @@ class CatalogWebApi extends WebApi
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
+        }
+    }
+
+    /**
+     * @param $catalogTempContent
+     * @return \Generator
+     */
+    function gen($catalogTempContent)
+    {
+        foreach ($catalogTempContent as $item) {
+            yield $item;
         }
     }
 
@@ -509,7 +612,9 @@ class CatalogWebApi extends WebApi
         $relQuery = RelationSuppRest::find()
             ->where([
                 'supp_org_id' => $vendorID,
-                'rest_org_id' => $restOrganization->id
+                'rest_org_id' => $restOrganization->id,
+                'status' => RelationSuppRest::CATALOG_STATUS_ON,
+                'deleted' => 0,
             ]);
         if (!$kostilForInvitedVendor) {
             $relQuery->andWhere([">", "cat_id", 0]);
@@ -518,13 +623,12 @@ class CatalogWebApi extends WebApi
 
         if (!isset($rel->cat_id) || $rel->cat_id == 0) {
             $catalog = new Catalog();
-            $vendorOrganization = Organization::findOne(['id' => $vendorID]);
             $catalog->type = Catalog::CATALOG;
             $catalog->supp_org_id = $vendorID;
-            $catalog->name = $vendorOrganization->name;
+            $catalog->name = $restOrganization->name . ' ' . date('d.m.Y');
             $catalog->status = Catalog::STATUS_ON;
             $catalog->currency_id = 1;
-            $mainCatalog = Catalog::findOne(['supp_org_id' => $vendorID]);
+            $mainCatalog = Catalog::findOne(['supp_org_id' => $vendorID, 'type' => Catalog::BASE_CATALOG]);
             if ($mainCatalog) {
                 $catalog->currency_id = $mainCatalog->currency_id;
                 $catalog->main_index = $mainCatalog->main_index;
@@ -550,6 +654,7 @@ class CatalogWebApi extends WebApi
             $rel->cat_id = $catalog->id;
             $rel->invite = 1;
             $rel->status = 1;
+            $rel->deleted = 0;
             if (!$rel->save()) {
                 throw new ValidationException($rel->getFirstErrors());
             }

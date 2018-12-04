@@ -2,9 +2,10 @@
 
 namespace api_web\classes;
 
+use api_web\components\ExcelRenderer;
+use api_web\components\notice_class\OrderNotice;
 use api_web\components\Registry;
 use api_web\components\WebApiController;
-use api_web\controllers\OrderController;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
 use api_web\models\User;
@@ -130,11 +131,7 @@ class OrderWebApi extends \api_web\components\WebApi
                                 $changed[] = $this->addProduct($order, $product);
                                 break;
                             case 'edit':
-                                if ($order->service_id == Registry::EDI_SERVICE_ID) {
-                                    $changed[] = $this->editProductEdo($order, $product);
-                                } else {
-                                    $changed[] = $this->editProduct($order, $product);
-                                }
+                                $changed[] = $this->editProduct($order, $product);
                                 break;
                         }
                     }
@@ -166,8 +163,11 @@ class OrderWebApi extends \api_web\components\WebApi
             }
             $tr->commit();
             if ($order->vendor_id == $this->user->organization_id) {
-                $sender = $order->client;
+                $sender = $order->vendor;
             } elseif ($order->client_id == $this->user->organization_id) {
+                $sender = $order->client;
+            }
+            if ($isUnconfirmedVendor) {
                 $sender = $order->vendor;
             }
             if (!empty($changed) || !empty($deleted)) {
@@ -209,43 +209,11 @@ class OrderWebApi extends \api_web\components\WebApi
 
         $orderContent->comment = $product['comment'] ?? '';
 
-        if (!empty($product['price'])) {
+        if (!empty($product['price']) || $product['price'] == 0) {
             $orderContent->price = round($product['price'], 3);
         }
 
         if ($orderContent->save()) {
-            return $orderContent;
-        } else {
-            throw new ValidationException($orderContent->getFirstErrors());
-        }
-    }
-
-    /**
-     * Редактирвание продукта в заказе типа EDI (меняем данные в накладной)
-     *
-     * @param Order $order
-     * @param array $product
-     * @return WaybillContent | OrderContent
-     * @throws BadRequestHttpException | ValidationException | \Exception
-     * @editedBy Basil A Konakov
-     */
-    private function editProductEdo(Order $order, array $product)
-    {
-        if (empty($product['id'])) {
-            throw new BadRequestHttpException("order.edit_product_empty");
-        }
-
-        /** @var OrderContent $orderContent */
-        $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
-        if (empty($orderContent)) {
-            throw new BadRequestHttpException("order_content.not_found");
-        }
-
-        if (!empty($product['quantity'])) {
-            $orderContent->setAttribute('quantity', $product['quantity']);
-        }
-
-        if ($orderContent->validate() && $orderContent->save()) {
             return $orderContent;
         } else {
             throw new ValidationException($orderContent->getFirstErrors());
@@ -259,6 +227,9 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param int   $id
      * @return string
      * @throws BadRequestHttpException
+     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     private function deleteProduct(Order $order, int $id)
     {
@@ -413,15 +384,17 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function getInfo(array $post)
     {
         if (empty($post['order_id'])) {
             throw new BadRequestHttpException('empty_param|order_id');
         }
+
         /**@var Order $order */
-        $order = Order::find()->where(['id' => $post['order_id']])->one();
+        $order = Order::find()->where(['id' => $post['order_id'], 'service_id' => Registry::MC_BACKEND])->one();
 
         if (empty($order)) {
             throw new BadRequestHttpException("order_not_found");
@@ -431,6 +404,17 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order.view_access_denied");
         }
 
+        return $this->getOrderInfo($order);
+    }
+
+    /**
+     * @param Order $order
+     * @return array
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function getOrderInfo(Order $order)
+    {
         $result = $order->attributes;
         $currency = $order->currency->symbol ?? "RUB";
         $currency_id = $order->currency->id;
@@ -475,22 +459,6 @@ class OrderWebApi extends \api_web\components\WebApi
         $dataProvider->pagination = false;
         $products = $dataProvider->models;
 
-        # корректируем данные заказа на данные из накладной если это документ EDI
-        # editedBy Basil A Konakov 2018-09-17 [DEV-1872]
-        if ($order->service_id == Registry::EDI_SERVICE_ID) {
-            $productsEdo = [];
-            /**@var OrderContent $model */
-            foreach ($products as $k => $model) {
-                $wbContent = WaybillContent::findOne(['order_content_id' => $model->id]);
-                if ($wbContent) {
-                    $model->quantity = $wbContent->quantity_waybill;
-                    $model->price = $wbContent->price_with_vat;
-                }
-                $productsEdo[$k] = $model;
-            }
-            $products = $productsEdo;
-        }
-
         if (!empty($products)) {
             foreach ($products as $model) {
                 /**
@@ -502,6 +470,20 @@ class OrderWebApi extends \api_web\components\WebApi
 
         $result['client'] = WebApiHelper::prepareOrganization($order->client);
         $result['vendor'] = WebApiHelper::prepareOrganization($order->vendor);
+
+        if (!is_null($order->status_updated_at) && $order->status_updated_at != '0000-00-00 00:00:00') {
+            $obUpdatedAt = (new \DateTime(trim($order->status_updated_at)))->format("d.m.Y H:i:s");
+        } else {
+            $obUpdatedAt = (new \DateTime())->format("d.m.Y H:i:s");
+        }
+
+        if (!is_null($order->edi_doc_date) && $order->edi_doc_date != '0000-00-00 00:00:00') {
+            $ediDocDate = (new \DateTime(trim($order->edi_doc_date)))->format("d.m.Y H:i:s");
+        } else {
+            $ediDocDate = (new \DateTime())->format("d.m.Y H:i:s");
+        }
+        $result['status_updated_at'] = $obUpdatedAt;
+        $result['edi_doc_date'] = $ediDocDate;
 
         return $result;
     }
@@ -536,7 +518,7 @@ class OrderWebApi extends \api_web\components\WebApi
             if (isset($post['search']['service_id']) && !empty($post['search']['service_id'])) {
                 $search->service_id = $post['search']['service_id'];
             } else {
-                $search->service_id_excluded = [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID];
+                $search->service_id_excluded = Registry::$edo_documents;
             }
 
             if (isset($post['search']['vendor']) && !empty($post['search']['vendor'])) {
@@ -630,15 +612,23 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $obDateTime->format("d.m.Y H:i:s");
                 }
                 $obCreateAt = new \DateTime($model->created_at);
-                $obUpdatedAt = null;
                 if (!is_null($model->status_updated_at) && $model->status_updated_at != '0000-00-00 00:00:00') {
                     $obUpdatedAt = (new \DateTime(trim($model->status_updated_at)))->format("d.m.Y H:i:s");
+                } else {
+                    $obUpdatedAt = (new \DateTime())->format("d.m.Y H:i:s");
+                }
+
+                if (!is_null($model->edi_doc_date) && $model->edi_doc_date != '0000-00-00 00:00:00') {
+                    $ediDocDate = (new \DateTime(trim($model->edi_doc_date)))->format("d.m.Y H:i:s");
+                } else {
+                    $ediDocDate = (new \DateTime())->format("d.m.Y H:i:s");
                 }
 
                 $orderInfo = [
                     'id'                => (int)$model->id,
                     'created_at'        => $obCreateAt->format("d.m.Y H:i:s"),
                     'status_updated_at' => $obUpdatedAt,
+                    'edi_doc_date'      => $ediDocDate,
                     'completion_date'   => $date ?? null,
                     'status'            => (int)$model->status,
                     'status_text'       => $model->statusText,
@@ -683,7 +673,7 @@ class OrderWebApi extends \api_web\components\WebApi
             ])
             ->andWhere(
                 ['OR',
-                    ['not in', 'service_id', [Registry::EDI_SERVICE_ID]],
+                    ['not in', 'service_id', Registry::$edo_documents],
                     ['service_id' => null]
                 ]
             )
@@ -726,6 +716,8 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param bool $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function products($post, bool $isUnconfirmedVendor = false)
     {
@@ -840,6 +832,8 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param bool $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function categories($post = null, bool $isUnconfirmedVendor = false)
     {
@@ -1029,11 +1023,12 @@ class OrderWebApi extends \api_web\components\WebApi
      * Заверщить заказ
      *
      * @param array $post
+     * @param bool  $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
      * @throws \Throwable
      */
-    public function complete(array $post)
+    public function complete(array $post, bool $isUnconfirmedVendor = false)
     {
         $this->validateRequest($post, ['order_id']);
 
@@ -1054,7 +1049,6 @@ class OrderWebApi extends \api_web\components\WebApi
         if ($order->status == OrderStatus::STATUS_DONE) {
             throw new BadRequestHttpException("order.already_done");
         }
-
         OrderStatus::checkEdiOrderPermissions($order, 'complete');
 
         $t = \Yii::$app->db->beginTransaction();
@@ -1066,7 +1060,19 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new ValidationException($order->getFirstErrors());
             }
             $t->commit();
-            Notice::init('Order')->doneOrder($order, $this->user);
+            if ($isUnconfirmedVendor) {
+                $sender = $order->vendor;
+            } else {
+                $sender = $order->client;
+            }
+            /** @var OrderNotice $notice */
+            $notice = Notice::init('Order');
+            if ($order->status == Order::STATUS_PROCESSING) {
+                $notice->processingOrder($order, $this->user, $sender);
+            } elseif ($order->status == Order::STATUS_DONE) {
+                $notice->doneOrder($order, $this->user, $sender);
+            }
+
             return $this->getInfo(['order_id' => $order->id]);
         } catch (\Throwable $e) {
             $t->rollBack();
@@ -1077,9 +1083,9 @@ class OrderWebApi extends \api_web\components\WebApi
     /**
      * Сохранение заказа в PDF
      *
-     * @param array           $post
-     * @param OrderController $c
-     * @return string
+     * @param array            $post
+     * @param WebApiController $c
+     * @return false|string
      * @throws BadRequestHttpException
      */
     public function saveToPdf(array $post, WebApiController $c)
@@ -1132,6 +1138,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
     public function setDocumentNumber($post)
     {
@@ -1194,9 +1201,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
-        if ($model->order->service_id == Registry::EDI_SERVICE_ID) {
-            $item['edi_number'] = $model->edi_number;
-        }
+        $item['edi_number'] = $model->edi_number;
         $item['edi_product'] = $model->product->edi_supplier_article > 0 ? true : false;
         return $item;
     }
@@ -1254,4 +1259,26 @@ class OrderWebApi extends \api_web\components\WebApi
         }
         return false;
     }
+
+    /**
+     * Сохранение заказа в Excel
+     *
+     * @param array $post
+     * @return false|string
+     * @throws BadRequestHttpException
+     */
+    public function saveToExcel(array $post)
+    {
+        $this->validateRequest($post, ['order_id']);
+
+        $objPHPExcel = (new ExcelRenderer())->OrderRender($post, ['order_id']);
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+        $objWriter->save(tempnam("/tmp", "excel"));
+        ob_start();
+        $objWriter->save('php://output');
+        $content = ob_get_clean();
+        $base64 = (isset($post['base64_encode']) && $post['base64_encode'] == 1 ? true : false);
+        return ($base64 ? base64_encode($content) : $content);
+    }
+
 }

@@ -324,7 +324,8 @@ class DocumentWebApi extends \api_web\components\WebApi
                   if(order_id IS NULL, 'waybill', 'order')       `type`,
                   dat.sort_doc                                   doc_date,
                   group_concat(DISTINCT dat.supply)              documents,
-                  dat.order_acquirer_id                          order_acquirer_id,
+                  coalesce(dat.order_acquirer_id, dat.waybill_acquirer_id)
+                                                                 order_acquirer_id,
                   dat.order_vendor_id                            order_vendor_id,
                   if(merc_uuid IS NULL, 0, 1)                    is_mercury_cert,
                   dat.replaced_order_id                          replaced_order_id,
@@ -349,7 +350,11 @@ class DocumentWebApi extends \api_web\components\WebApi
                   dat.outer_number_additional                    outer_number_additional,
                   IF(order_id IS NOT NULL,
                      CASE
-                     WHEN group_concat(DISTINCT dat.waybill_status_id) = :WAYBILL_UNLOADED
+                     WHEN instr(group_concat(DISTINCT dat.waybill_status_id),:WAYBILL_UNLOADED) > 0
+                          AND
+                          instr(group_concat(DISTINCT dat.waybill_status_id),':WAYBILL_UNLOADED,') = 0
+                          AND
+                          instr(group_concat(DISTINCT dat.waybill_status_id),',:WAYBILL_UNLOADED') = 0
                        THEN :DOC_GROUP_STATUS_SENT
                      WHEN 
                         instr(group_concat(DISTINCT dat.waybill_status_id), :WAYBILL_FORMED) > 0
@@ -416,7 +421,14 @@ class DocumentWebApi extends \api_web\components\WebApi
                          d.outer_number_code                                    outer_number_code,
                          d.outer_number_additional                              outer_number_additional,
                          c.id                                                   waybill_content_id,
-                         coalesce(if(c.id IS NULL, b.price, 0) * b.quantity, 0) total_price,
+                         coalesce(
+                          if(
+                            c.id IS NULL, 
+                            b.price * b.quantity, 
+                            c.price_without_vat *  c.quantity_waybill
+                          ), 
+                          0
+                         )                                                      total_price,
                          b.id                                                   order_content_id,
                          b.edi_number                                           supply,
                          b.merc_uuid,
@@ -430,9 +442,12 @@ class DocumentWebApi extends \api_web\components\WebApi
                          LEFT JOIN `$apiShema`.waybill d ON d.id = c.waybill_id AND d.service_id = :service_id
                        WHERE a.client_id = :business_id
                      ) dat
-                  LEFT JOIN `$apiShema`.outer_agent oav ON oav.org_id = :business_id AND oav.service_id = :service_id AND
-                                               if(dat.order_id IS NULL, dat.waybill_outer_agent_id, dat.order_vendor_id) =
-                                               if(dat.order_id IS NULL, oav.id, oav.vendor_id)
+                  
+                  LEFT JOIN (SELECT * FROM `$apiShema`.outer_agent WHERE org_id = :business_id AND service_id = :service_id LIMIT 1) as oav
+                   ON
+                   if(dat.order_id IS NULL, dat.waybill_outer_agent_id, dat.order_vendor_id) =
+                   if(dat.order_id IS NULL, oav.id, oav.vendor_id)
+                  
                   LEFT JOIN organization ov ON ov.id = dat.order_vendor_id
                   LEFT JOIN `$apiShema`.outer_store osw ON osw.org_id = :business_id AND osw.service_id = :service_id AND dat.waybill_outer_store_id = osw.id
                 WHERE 1  $where_all  

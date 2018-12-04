@@ -38,6 +38,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string           $edi_invoice
  * @property string           $outer_document_id
  * @property WaybillContent[] $waybillContents
+ * @property Organization     $client
  */
 class Waybill extends \yii\db\ActiveRecord
 {
@@ -125,6 +126,9 @@ class Waybill extends \yii\db\ActiveRecord
                     $this->exported_at = gmdate("Y-m-d H:i:s");
                 }
             }
+            if (empty($this->doc_date)) {
+                $this->doc_date = \gmdate('Y-m-d H:i:s');
+            }
             return true;
         }
         return false;
@@ -136,6 +140,14 @@ class Waybill extends \yii\db\ActiveRecord
     public function getWaybillContents()
     {
         return $this->hasMany(WaybillContent::class, ['waybill_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClient()
+    {
+        return $this->hasOne(Organization::class, ['id' => 'acquirer_id']);
     }
 
     /**

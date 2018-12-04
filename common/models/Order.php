@@ -539,6 +539,7 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param null $service_id
      * @return false|string|null
      */
     public function getTotalPriceFromDb($service_id = null)

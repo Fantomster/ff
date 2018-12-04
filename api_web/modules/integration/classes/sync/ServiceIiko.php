@@ -40,6 +40,8 @@ class ServiceIiko extends AbstractSyncFactory
      */
     private $countWaybillSend = 0;
 
+    protected $logCategory = "iiko_log";
+    
     /**
      * @param array $params
      * @return array
@@ -162,12 +164,26 @@ class ServiceIiko extends AbstractSyncFactory
     /**
      * Проверка коннекта
      *
+     * @param array $request
      * @return array
      * @throws BadRequestHttpException
      */
-    public function checkConnect()
+    public function checkConnect($request = [])
     {
         $api = iikoApi::getInstance();
+
+        if (!empty($request['params'])) {
+            if (!empty($request['params']['URL'])) {
+                $api->setAttribute('host', $request['params']['URL']);
+            }
+            if (!empty($request['params']['auth_login'])) {
+                $api->setAttribute('login', $request['params']['auth_login']);
+            }
+            if (!empty($request['params']['auth_password'])) {
+                $api->setAttribute('pass', $request['params']['auth_password']);
+            }
+        }
+
         try {
             if ($api->auth(null, null, 2)) {
                 $api->logout();

@@ -155,7 +155,7 @@ class EmailIntegrationController extends Controller
         /**
          * @var $setting IntegrationSettingFromEmail
          */
-        ini_set('memory_limit', '256M');
+        ini_set('memory_limit', '384M');
         error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
         
         //Получаем все активные настройки или конкретную настройку

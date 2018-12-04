@@ -2,6 +2,8 @@
 
 namespace common\models;
 
+use common\behaviors\LogDeletedBehavior;
+
 /**
  * This is the model class for table "relation_user_organization".
  *
@@ -29,7 +31,11 @@ class RelationUserOrganization extends \yii\db\ActiveRecord
      */
     public function behaviors()
     {
-        return [];
+        return [
+            [
+                "class" => LogDeletedBehavior::class,
+            ],
+        ];
     }
 
     /**

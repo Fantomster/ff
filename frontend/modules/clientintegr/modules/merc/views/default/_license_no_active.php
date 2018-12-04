@@ -43,7 +43,7 @@ try {
     $messageVSD = 'Время последнего обновления списка ВСД (Следующее обновление будет произведено в течении 15 минут): ';
     $messageStock = 'Время последнего обновления журнала входной продукции (Следующее обновление будет произведено в течении 15 минут): ';
     $customJs = <<< JS
-        var refVSD = firebase.database().ref('/mercury/operation/MercVSDList/enterpriseGuid/$enterpriseGuid');
+        var refVSD = firebase.database().ref('/mercury/operation/MercVSDList_$lic->org');
         refVSD.on("value", (snapshot) => {
             if (typeof(snapshot.val()) == "undefined" || snapshot.val() == null || snapshot.val().length == 0)
              {
@@ -51,19 +51,19 @@ try {
             }
             else
              {
-                var now = new Date();
-                var timestamp = snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
-                if(isNaN(timestamp)) {
+                var now = new Date(snapshot.val().last_executed);//snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
+                var hourOffset = now.getTimezoneOffset() / 60;
+                now.setHours(now.getHours() - hourOffset);
+                if(isNaN(now)) {
                     $('#mercNotificationVsd').html('$messageVSD' + 'неизвестно');
                     return;
                 }
-                now = new Date(timestamp);
                 var formatted =  ('0' + now.getDate()).substr(-2,2) + '.' + ('0' + (now.getMonth() + 1)).substr(-2,2) + '.' + now.getFullYear() + ' ' + ('0' + now.getHours()).substr(-2,2) + ":" + ('0' + now.getMinutes()).substr(-2,2) + ":" + ('0' + now.getSeconds()).substr(-2,2);
                 $('#mercNotificationVsd').html('$messageVSD' + formatted);    
                 //console.log(snapshot.val().update_date); //Вывод значения в консоль
         }
     });
-        var refStock = firebase.database().ref('/mercury/operation/MercStockEntryList/enterpriseGuid/$enterpriseGuid');
+        var refStock = firebase.database().ref('/mercury/operation/MercStockEntryList_$lic->org');
         refStock.on("value", (snapshot) => {
          if (typeof(snapshot.val()) == "undefined" || snapshot.val() == null || snapshot.val().length == 0 || isNaN(snapshot.val())) 
           {
@@ -71,13 +71,13 @@ try {
         }
         else
          { 
-            var now = new Date();
-            var timestamp = snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
+            var now = new Date(snapshot.val().last_executed);//snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
+            var hourOffset = now.getTimezoneOffset() / 60;
+            now.setHours(now.getHours() - hourOffset);
              if(isNaN(timestamp)) {
                     $('#mercNotificationVsd').html('$messageStock' + 'неизвестно');
                     return;
                 }
-            now = new Date(timestamp);
             var formatted =  ('0' + now.getDate()).substr(-2,2) + '.' + ('0' + (now.getMonth() + 1)).substr(-2,2) + '.' + now.getFullYear() + ' ' + ('0' + now.getHours()).substr(-2,2) + ":" + ('0' + now.getMinutes()).substr(-2,2) + ":" + ('0' + now.getSeconds()).substr(-2,2);
             $('#mercNotificationStockEntr').html('$messageStock' + formatted);    
             //console.log(snapshot.val().update_date); //Вывод значения в консоль

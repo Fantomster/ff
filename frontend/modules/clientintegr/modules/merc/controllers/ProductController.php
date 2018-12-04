@@ -203,6 +203,7 @@ class ProductController extends \frontend\modules\clientintegr\controllers\Defau
         if ($e->getCode() == 600) {
             return "При обращении к api Меркурий возникла ошибка. Ошибка зарегистрирована в журнале за номером №" . $e->getMessage() . ". Если ошибка повторяется обратитесь в техническую службу.";
         } else {
+            Yii::error($e->getMessage()." ".$e->getTraceAsString());
             return "При обращении к api Меркурий возникла ошибка. Если ошибка повторяется обратитесь в техническую службу.";
 
         }

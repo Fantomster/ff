@@ -26,6 +26,8 @@ class MarketWebApi extends WebApi
      * @param $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function products($post)
     {
@@ -73,6 +75,10 @@ class MarketWebApi extends WebApi
                 if (!empty($relationSuppliers)) {
                     $result->andWhere(['not in', 'supp_org_id', $relationSuppliers]);
                 }
+            }
+        } else {
+            if (!empty($relationSuppliers)) {
+                $result->andWhere(['not in', 'supp_org_id', $relationSuppliers]);
             }
         }
 
@@ -135,11 +141,14 @@ class MarketWebApi extends WebApi
             }
         }
         //Готовим ответ
-        $return = ['headers'    => [],
-                   'products'   => [],
-                   'pagination' => ['page'       => $page,
-                                    'page_size'  => $pageSize,
-                                    'total_page' => ceil($result->count() / $pageSize)]];
+        $return = [
+            'products'   => [],
+            'pagination' => [
+                'page'       => $page,
+                'page_size'  => $pageSize,
+                'total_page' => ceil($result->count() / $pageSize)
+            ]
+        ];
         //Сортировка
         if ($sort) {
             $sort = str_replace('supplier_id', 'organization.id', $sort);
@@ -205,6 +214,8 @@ class MarketWebApi extends WebApi
      * @param $post
      * @return mixed
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function product($post)
     {
@@ -250,26 +261,16 @@ class MarketWebApi extends WebApi
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-        $currentUser = $this->user;
-
         $result = Organization::find()
-            ->where(['white_list' => Organization::WHITE_LIST_ON])
+            ->where([
+                'white_list' => Organization::WHITE_LIST_ON,
+                'type_id'    => Organization::TYPE_SUPPLIER
+            ])
             ->limit($pageSize)
             ->offset($pageSize * ($page - 1));
 
-        switch ($post['type_id']) {
-            case Organization::TYPE_SUPPLIER:
-                $result->andWhere(['type_id' => Organization::TYPE_SUPPLIER]);
-                break;
-            case Organization::TYPE_RESTAURANT:
-                $result->andWhere(['type_id' => Organization::TYPE_RESTAURANT]);
-                break;
-            default:
-                throw new BadRequestHttpException('Тип организаций не указан, или указан неверно');
-        }
-
-        if (!\Yii::$app->user->isGuest) {
-            $client = $currentUser->organization;
+        if ($this->user) {
+            $client = $this->user->organization;
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relation = RelationSuppRest::find()
                     ->select('supp_org_id as id,supp_org_id as supp_org_id')
@@ -296,6 +297,10 @@ class MarketWebApi extends WebApi
                     $result->andWhere(['not in', 'id', $relationSuppliers]);
                 }
             }
+        } else {
+            if (!empty($relationSuppliers)) {
+                $result->andWhere(['not in', 'id', $relationSuppliers]);
+            }
         }
 
         //Условия поиска
@@ -310,7 +315,6 @@ class MarketWebApi extends WebApi
         }
         //Готовим ответ
         $return = [
-            'headers'       => [],
             'organizations' => [],
             'pagination'    => [
                 'page'       => $page,
@@ -328,20 +332,15 @@ class MarketWebApi extends WebApi
             }
             $result->orderBy($sort . ' ' . $order);
         } else {
-            $result->orderBy(['rating' => SORT_DESC]);
+            $result->orderBy([
+                'name'   => SORT_ASC,
+                'rating' => SORT_DESC
+            ]);
         }
         //Результат
         $result = $result->all();
         foreach ($result as $model) {
             $return['organizations'][] = WebApiHelper::prepareOrganization($model);
-        }
-        /**
-         * @var CatalogBaseGoods $model
-         */
-        if (isset($return['organizations'][0])) {
-            foreach (array_keys($return['organizations'][0]) as $key) {
-                $return['headers'][$key] = $model->getAttributeLabel($key);
-            }
         }
         return $return;
     }
@@ -349,8 +348,10 @@ class MarketWebApi extends WebApi
     /**
      * Собираем массив для отдачи, из модели
      *
-     * @param CatalogBaseGoods $model
+     * @param $model
      * @return mixed
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function prepareProduct($model)
     {

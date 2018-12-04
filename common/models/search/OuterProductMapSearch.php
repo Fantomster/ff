@@ -36,9 +36,6 @@ class OuterProductMapSearch extends OuterProductMap
         $mainOrgSetting = IntegrationSettingValue::getSettingsByServiceId($this->service_id, $client->id, ['main_org']);
         $mainOrgId = !empty($mainOrgSetting) ? $mainOrgSetting : $client->id;
 
-//where a . rest_org_id = 6430
-//    and a . supp_org_id = 6559;
-
         $query = (new Query())->select([
             "coalesce(e_c.id, e_m.id) id",
             "e_c.outer_store_id",
@@ -85,7 +82,7 @@ class OuterProductMapSearch extends OuterProductMap
                  * фильтр по продукту
                  */
                 if (!empty($post['search']['product'])) {
-                    $query->andFilterWhere(['like', "$outerProductTableName.`name`", $post['search']['product']]);
+                    $query->andFilterWhere(['like', "f.`name`", $post['search']['product']]);
                     $query->orFilterWhere(['like', "d.`product`", $post['search']['product']]);
                 }
                 /**

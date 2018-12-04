@@ -88,7 +88,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order.access.change.canceled_status");
         }
         //Если сменили комментарий
-        if (!empty($post['comment']) && !$isUnconfirmedVendor) {
+        if (!$isUnconfirmedVendor) {
             $order->comment = trim($post['comment']);
         }
         //Если сменили дату доставки

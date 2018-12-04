@@ -106,7 +106,7 @@ class OuterProductMapper
     public function loadRequest($request): void
     {
         foreach ($request as $key => $value) {
-            if (!empty($value)) {
+            if (!empty($value) || $value == 0) {
                 $this->request[$key] = $value;
 
                 if ($key == 'outer_product_id') {

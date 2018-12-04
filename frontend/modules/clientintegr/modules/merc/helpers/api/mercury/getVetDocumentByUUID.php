@@ -313,11 +313,12 @@ class getVetDocumentByUUID extends Model
 
         $laboratory_research = [json_decode($doc->laboratory_research, true)];
         foreach ($laboratory_research as $item) {
-            $this->laboratory_research = [
-                $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($item['actualDateTime'])) . " ( " . $item['conclusion'] . " )"
-            ];
+            if(isset($item['operator']) && isset($item['expertiseID']) && isset($item['actualDateTime']) && isset($item['conclusion'])) {
+                $this->laboratory_research = [
+                    $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($item['actualDateTime'])) . " ( " . $item['conclusion'] . " )"
+                ];
+            }
         }
-
     }
 
     public function getWaybillNumber()

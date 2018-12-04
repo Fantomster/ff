@@ -74,7 +74,7 @@ return [
     /**
      * Логирование запросов к ВебАпи
      */
-    'web_api_log'             => true,
+    'web_api_log'             => false,
     'e_com'                   => [
         'login'       => 'markettest',
         'pass'        => 'e1fa52810ea9d18a5af901c147c804e6',

@@ -11,16 +11,14 @@ use yii\db\Exception;
  * User: MikeN
  * Date: 03.11.2017
  * Time: 14:04
- *
  * Отправка СМС через компонент Yii
  * Yii::$app->sms->send('test','+79162221133');
  */
 
 /**
  * @inheritdoc
- *
- * @property $provider
- * @property array $attributes
+ * @property                                         $provider
+ * @property array                                   $attributes
  * @property \common\components\sms\AbstractProvider $sender
  */
 class Sms extends Component
@@ -58,8 +56,6 @@ class Sms extends Component
             foreach ($this->attributes as $key => $value) {
                 if (property_exists($this->sender, $key)) {
                     $this->sender->setProperty($key, $value);
-                } else {
-                    throw new Exception(get_class($this->sender) . ' not property ' . $key);
                 }
             }
             parent::init();
@@ -70,6 +66,7 @@ class Sms extends Component
 
     /**
      * Отправка смс
+     *
      * @param $message
      * @param $target
      */
@@ -78,11 +75,11 @@ class Sms extends Component
         try {
             //Если пустой получатель, игнорируем
             if (empty($target)) {
-                throw new Exception(Yii::t('app', 'common.components.sms.empty', ['ru'=>'Поле получатель не может быть пустым. ']));
+                throw new Exception(Yii::t('app', 'common.components.sms.empty', ['ru' => 'Поле получатель не может быть пустым. ']));
             }
             //Если пустое сообщение, игнорируем
             if (empty($message)) {
-                throw new Exception(Yii::t('app', 'common.components.sms.cant_be', ['ru'=>'Сообщение не может быть пустым. ']));
+                throw new Exception(Yii::t('app', 'common.components.sms.cant_be', ['ru' => 'Сообщение не может быть пустым. ']));
             }
             //Отправка смс
             $this->sender->send($message, $target);
@@ -94,6 +91,7 @@ class Sms extends Component
 
     /**
      * Получить статус СМС сообщения
+     *
      * @param $sms_id
      * @return mixed
      */
@@ -120,15 +118,16 @@ class Sms extends Component
 
     /**
      * Сборщик текста СМС
-     * @param $source_message
+     *
+     * @param       $source_message
      * @param array $params
-     * @param bool $truncate 70 chars
+     * @param bool  $truncate 70 chars
      * @return string
      */
     public function prepareText($source_message, $params = [], $truncate = true)
     {
         $url = null;
-        if(isset($params['url'])) {
+        if (isset($params['url'])) {
             $url = Yii::$app->google->shortUrl(trim($params['url']));
         }
         //Получаем текст смс в текущей локализации
@@ -151,7 +150,7 @@ class Sms extends Component
             }
         } else {
             //Необходимо отправить смс полностью, чтобы то не стоило
-            if($url !== null) {
+            if ($url !== null) {
                 $text .= ' ' . $url;
             }
         }

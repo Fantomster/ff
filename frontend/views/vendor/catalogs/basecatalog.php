@@ -17,23 +17,23 @@ CroppieAsset::register($this);
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 kartik\select2\Select2Asset::register($this);
 
-$currencyList = Json::encode(Currency::getList());
-$currencySymbolList = Json::encode(Currency::getSymbolList());
-$indexesList = Json::encode(\common\models\Catalog::getMainIndexesList());
-$titleDeleteAll = Yii::t('message', 'frontend.views.vendor.delete_all', ['ru' => 'Удалить все']);
-$cancelText = Yii::t('message', 'frontend.views.vendor.cancel_eleven', ['ru' => 'Отмена']);
-$catalogDeleted = Yii::t('message', 'frontend.views.vendor.catalog_deleted', ['ru' => 'Каталог удален!']);
-$indexChanged = Yii::t('message', 'frontend.views.vendor.index_changed', ['ru' => 'Индекс изменен!']);
-$catalogNotEmpty = Yii::t('message', 'frontend.views.vendor.catalog_not_empty', ['ru' => 'Каталог не пустой']);
-$catalogDeletionFailed = Yii::t('message', 'frontend.views.vendor.catalog_deletion_failed', ['ru' => 'Не удалось удалить каталог']);
-$buttonDeleteRestore = Yii::t('message', 'frontend.views.vendor.btn_delete_restore', ['ru' => 'Удалить/восстановить каталог']);
-$buttonDelete = Yii::t('message', 'frontend.views.vendor.btn_delete', ['ru' => 'Удалить каталог']);
-$buttonRestore = Yii::t('message', 'frontend.views.vendor.btn_restore', ['ru' => 'Восстановить последнюю сохраненную копию каталога']);
-$titleRestoreCatalog = Yii::t('message', 'frontend.views.vendor.restore_catalog', ['ru' => 'Восстановить каталог']);
+$currencyList             = Json::encode(Currency::getList());
+$currencySymbolList       = Json::encode(Currency::getSymbolList());
+$indexesList              = Json::encode(\common\models\Catalog::getMainIndexesList());
+$titleDeleteAll           = Yii::t('message', 'frontend.views.vendor.delete_all', ['ru' => 'Удалить все']);
+$cancelText               = Yii::t('message', 'frontend.views.vendor.cancel_eleven', ['ru' => 'Отмена']);
+$catalogDeleted           = Yii::t('message', 'frontend.views.vendor.catalog_deleted', ['ru' => 'Каталог удален!']);
+$indexChanged             = Yii::t('message', 'frontend.views.vendor.index_changed', ['ru' => 'Индекс изменен!']);
+$catalogNotEmpty          = Yii::t('message', 'frontend.views.vendor.catalog_not_empty', ['ru' => 'Каталог не пустой']);
+$catalogDeletionFailed    = Yii::t('message', 'frontend.views.vendor.catalog_deletion_failed', ['ru' => 'Не удалось удалить каталог']);
+$buttonDeleteRestore      = Yii::t('message', 'frontend.views.vendor.btn_delete_restore', ['ru' => 'Удалить/восстановить каталог']);
+$buttonDelete             = Yii::t('message', 'frontend.views.vendor.btn_delete', ['ru' => 'Удалить каталог']);
+$buttonRestore            = Yii::t('message', 'frontend.views.vendor.btn_restore', ['ru' => 'Восстановить последнюю сохраненную копию каталога']);
+$titleRestoreCatalog      = Yii::t('message', 'frontend.views.vendor.restore_catalog', ['ru' => 'Восстановить каталог']);
 $catalogRestorationFailed = Yii::t('message', 'frontend.views.vendor.catalog_restoration_failed', ['ru' => 'Не удалось восстановить каталог']);
-$catalogRestored = Yii::t('message', 'frontend.views.vendor.catalog_restored', ['ru' => 'Каталог восстановлен!']);
+$catalogRestored          = Yii::t('message', 'frontend.views.vendor.catalog_restored', ['ru' => 'Каталог восстановлен!']);
 
-$changeCurrencyUrl = Url::to(['vendor/ajax-change-currency', 'id' => $cat_id]);
+$changeCurrencyUrl  = Url::to(['vendor/ajax-change-currency', 'id' => $cat_id]);
 $calculatePricesUrl = Url::to(['vendor/ajax-calculate-prices', 'id' => $cat_id]);
 ?>
 <?php
@@ -74,7 +74,7 @@ $this->registerJs("
 );
 ?>
 <?php
-$this->title = Yii::t('message', 'frontend.views.vendor.main_catalog_two', ['ru' => 'Главный каталог']);
+$this->title        = Yii::t('message', 'frontend.views.vendor.main_catalog_two', ['ru' => 'Главный каталог']);
 
 $this->registerCss('
 @media (max-width: 1485px){
@@ -90,13 +90,13 @@ display:none;
 ?>
 <?=
 Modal::widget([
-    'id' => 'add-edit-product',
+    'id'            => 'add-edit-product',
     'clientOptions' => false,
 ])
 ?>
 <?php
 $exportFilename = 'catalog_' . date("Y-m-d_H-m-s");
-$exportColumns = [
+$exportColumns  = [
     [
         'label' => Yii::t('message', 'frontend.views.vendor.art_five', ['ru' => 'Артикул']),
         'value' => 'article',
@@ -132,17 +132,17 @@ $exportColumns = [
 <?php
 Modal::begin([
     'header' => '<h4 class="modal-title">' . Yii::t('message', 'frontend.views.vendor.downl_cat', ['ru' => 'Загрузка каталога']) . ' </h4>',
-    'id' => 'instruction',
-    'size' => 'modal-lg',
+    'id'     => 'instruction',
+    'size'   => 'modal-lg',
 ]);
 echo '<iframe style="min-width: 320px;width: 100%;" width="854" height="480" id="video" src="https://www.youtube.com/embed/ElzNEsKR0dA" frameborder="0" allowfullscreen></iframe>';
 Modal::end();
 ?>
 <?php
 Modal::begin([
-    'id' => 'add-product-market-place',
+    'id'            => 'add-product-market-place',
     'clientOptions' => false,
-    'size' => 'modal-lg',
+    'size'          => 'modal-lg',
 ]);
 Modal::end();
 ?>
@@ -160,14 +160,14 @@ Modal::end();
     </h1>
     <?=
     Breadcrumbs::widget([
-        'options' => [
+        'options'  => [
             'class' => 'breadcrumb',
         ],
         'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru' => 'Главная']), 'url' => '/'],
-        'links' => [
+        'links'    => [
             [
                 'label' => Yii::t('message', 'frontend.views.vendor.catalogs_four', ['ru' => 'Каталоги']),
-                'url' => ['vendor/catalogs'],
+                'url'   => ['vendor/catalogs'],
             ],
             Yii::t('message', 'frontend.views.vendor.main_catalog_five', ['ru' => 'Главный каталог']),
         ],
@@ -206,14 +206,14 @@ Modal::end();
                     </div>
                     <?=
                     Modal::widget([
-                        'id' => 'add-product',
+                        'id'            => 'add-product',
                         'clientOptions' => ['style' => 'margin-top:13.2px;'],
-                        'toggleButton' => [
-                            'label' => '<i class="fa fa-plus-circle"></i> ' . Yii::t('message', 'frontend.views.vendor.new_good', ['ru' => 'Новый товар']),
-                            'tag' => 'a',
+                        'toggleButton'  => [
+                            'label'       => '<i class="fa fa-plus-circle"></i> ' . Yii::t('message', 'frontend.views.vendor.new_good', ['ru' => 'Новый товар']),
+                            'tag'         => 'a',
                             'data-target' => '#add-product-market-place',
-                            'class' => 'btn btn-fk-success btn-sm pull-right',
-                            'href' => Url::to(['/vendor/ajax-create-product-market-place', 'id' => $cat_id]),
+                            'class'       => 'btn btn-fk-success btn-sm pull-right',
+                            'href'        => Url::to(['/vendor/ajax-create-product-market-place', 'id' => $cat_id]),
                         ],
                     ])
                     ?>
@@ -239,50 +239,50 @@ Modal::end();
                     <div class="btn-group pull-right" placement="left" style="margin-right: 10px">
                         <?=
                         ExportMenu::widget([
-                            'dataProvider' => $dataProvider,
-                            'columns' => $exportColumns,
-                            'fontAwesome' => true,
-                            'filename' => Yii::t('message', 'frontend.views.vendor.main_catalog_six', ['ru' => 'Главный каталог - ']) . date('Y-m-d'),
-                            'encoding' => 'UTF-8',
-                            'target' => ExportMenu::TARGET_SELF,
-                            'showConfirmAlert' => false,
+                            'dataProvider'       => $dataProvider,
+                            'columns'            => $exportColumns,
+                            'fontAwesome'        => true,
+                            'filename'           => Yii::t('message', 'frontend.views.vendor.main_catalog_six', ['ru' => 'Главный каталог - ']) . date('Y-m-d'),
+                            'encoding'           => 'UTF-8',
+                            'target'             => ExportMenu::TARGET_SELF,
+                            'showConfirmAlert'   => false,
                             'showColumnSelector' => false,
-                            'batchSize' => 200,
-                            'timeout' => 0,
-                            'dropdownOptions' => [
+                            'batchSize'          => 200,
+                            'timeout'            => 0,
+                            'dropdownOptions'    => [
                                 'label' => '<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.export', ['ru' => 'экспорт']) . ' </span>',
                                 'class' => ['btn btn-outline-default btn-sm pull-right'],
                                 'title' => Yii::t('message', 'frontend.views.vendor.export', ['ru' => 'экспорт']),
                             ],
-                            'exportConfig' => [
-                                ExportMenu::FORMAT_HTML => false,
-                                ExportMenu::FORMAT_TEXT => false,
-                                ExportMenu::FORMAT_EXCEL => false,
-                                ExportMenu::FORMAT_PDF => false,
-                                ExportMenu::FORMAT_CSV => false,
+                            'exportConfig'       => [
+                                ExportMenu::FORMAT_HTML    => false,
+                                ExportMenu::FORMAT_TEXT    => false,
+                                ExportMenu::FORMAT_EXCEL   => false,
+                                ExportMenu::FORMAT_PDF     => false,
+                                ExportMenu::FORMAT_CSV     => false,
                                 ExportMenu::FORMAT_EXCEL_X => [
-                                    'label' => Yii::t('kvexport', 'Excel'),
-                                    'icon' => 'file-excel-o',
-                                    'iconOptions' => ['class' => 'text-success'],
-                                    'linkOptions' => [],
-                                    'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
-                                    'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
-                                    'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                                    'extension' => 'xlsx',
+                                    'label'        => Yii::t('kvexport', 'Excel'),
+                                    'icon'         => 'file-excel-o',
+                                    'iconOptions'  => ['class' => 'text-success'],
+                                    'linkOptions'  => [],
+                                    'options'      => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                                    'alertMsg'     => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
+                                    'mime'         => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                    'extension'    => 'xlsx',
                                     //'writer' => 'Excel2007',
                                     'styleOptions' => [
                                         'font' => [
-                                            'bold' => true,
+                                            'bold'  => true,
                                             'color' => [
                                                 'argb' => 'FFFFFFFF',
                                             ],
                                         ],
                                         'fill' => [
-                                            'type' => PHPExcel_Style_Fill::FILL_NONE,
+                                            'type'       => PHPExcel_Style_Fill::FILL_NONE,
                                             'startcolor' => [
                                                 'argb' => 'FFFFFFFF',
                                             ],
-                                            'endcolor' => [
+                                            'endcolor'   => [
                                                 'argb' => 'FFFFFFFF',
                                             ],
                                         ],
@@ -295,16 +295,16 @@ Modal::end();
 
                     <?=
                     Modal::widget([
-                        'id' => 'importToXls',
+                        'id'            => 'importToXls',
                         'clientOptions' => false,
-                        'size' => 'modal-md',
-                        'toggleButton' => [
-                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">' . Yii::t('message', 'frontend.views.vendor.import_five', ['ru' => 'импорт']) . ' </span>',
-                            'tag' => 'a',
+                        'size'          => 'modal-md',
+                        'toggleButton'  => [
+                            'label'       => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">' . Yii::t('message', 'frontend.views.vendor.import_five', ['ru' => 'импорт']) . ' </span>',
+                            'tag'         => 'a',
                             'data-target' => '#importToXls',
-                            'class' => 'btn btn-outline-default btn-sm pull-right',
-                            'href' => Url::to(['/vendor/import', 'id' => $cat_id]),
-                            'style' => 'margin-right:10px;',
+                            'class'       => 'btn btn-outline-default btn-sm pull-right',
+                            'href'        => Url::to(['/vendor/import', 'id' => $cat_id]),
+                            'style'       => 'margin-right:10px;',
                         ],
                     ])
                     ?>
@@ -312,14 +312,14 @@ Modal::end();
                     Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_index', ['ru' => 'Изменить индекс:']) . ' </span> <span class="base_index">' . common\models\Catalog::getMainIndexesList()["$currentCatalog->main_index"] . '</span>', [
                         'class' => 'btn btn-outline-default btn-sm pull-right',
                         'style' => ['margin-right' => '10px;'],
-                        'id' => 'changeBaseIndex',
+                        'id'    => 'changeBaseIndex',
                     ])
                     ?>
                     <?=
                     Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.vendor.change_curr', ['ru' => 'Изменить валюту:']) . ' </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
                         'class' => 'btn btn-outline-default btn-sm pull-right',
                         'style' => ['margin-right' => '10px;'],
-                        'id' => 'changeCurrency',
+                        'id'    => 'changeCurrency',
                     ])
                     ?>
 
@@ -328,79 +328,79 @@ Modal::end();
                     <?php
                     $gridColumnsBaseCatalog = [
                         [
-                            'attribute' => 'article',
-                            'label' => Yii::t('message', 'frontend.views.vendor.art_six', ['ru' => 'Артикул']),
-                            'value' => 'article',
+                            'attribute'      => 'article',
+                            'label'          => Yii::t('message', 'frontend.views.vendor.art_six', ['ru' => 'Артикул']),
+                            'value'          => 'article',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
                         [
                             'attribute' => 'product',
-                            'label' => Yii::t('message', 'frontend.views.vendor.name_of_good_two', ['ru' => 'Наименование']),
-                            'format' => 'raw',
-                            'value' => function ($data) {
+                            'label'     => Yii::t('message', 'frontend.views.vendor.name_of_good_two', ['ru' => 'Наименование']),
+                            'format'    => 'raw',
+                            'value'     => function ($data) {
                                 return Html::decode(Html::decode($data['product']));
                             },
                             'contentOptions' => ['style' => 'vertical-align:middle;width:20%'],
                         ],
                         [
                             'attribute' => 'units',
-                            'label' => Yii::t('message', 'frontend.views.vendor.multiplicity_six', ['ru' => 'Кратность']),
-                            'value' => function ($data) {
+                            'label'     => Yii::t('message', 'frontend.views.vendor.multiplicity_six', ['ru' => 'Кратность']),
+                            'value'     => function ($data) {
                                 return empty($data['units']) ? '' : $data['units'];
                             },
-                            'contentOptions' => ['style' => 'vertical-align:middle;'],
+                            'contentOptions'        => ['style' => 'vertical-align:middle;'],
                         ],
                         [
                             'attribute' => 'category_id',
-                            'label' => Yii::t('message', 'frontend.views.vendor.category_two', ['ru' => 'Категория']),
-                            'value' => function ($data) {
+                            'label'     => Yii::t('message', 'frontend.views.vendor.category_two', ['ru' => 'Категория']),
+                            'value'     => function ($data) {
                                 $data['category_id'] == 0 ? $category_name = '' : $category_name = Yii::t('app', \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name);
                                 return $category_name;
                             },
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
                         [
-                            'attribute' => 'price',
-                            'label' => Yii::t('message', 'frontend.views.vendor.price_five', ['ru' => 'Цена']) . ' ' . $currentCatalog->currency->iso_code,
-                            'value' => 'price',
+                            'attribute'      => 'price',
+                            'label'          => Yii::t('message', 'frontend.views.vendor.price_five', ['ru' => 'Цена']) . ' ' . $currentCatalog->currency->iso_code,
+                            'value'          => 'price',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
                         [
                             'attribute' => 'ed',
-                            'label' => Yii::t('message', 'frontend.views.vendor.measure_three', ['ru' => 'Ед. измерения']),
-                            'value' => function ($data) {
+                            'label'     => Yii::t('message', 'frontend.views.vendor.measure_three', ['ru' => 'Ед. измерения']),
+                            'value'     => function ($data) {
                                 return Yii::t('app', $data['ed']);
                             },
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
                         [
                             'attribute' => 'status',
-                            'label' => Yii::t('message', 'frontend.views.vendor.in_stock_three', ['ru' => 'Наличие']),
-                            'format' => 'raw',
-                            'value' => function ($data) {
+                            'label'     => Yii::t('message', 'frontend.views.vendor.in_stock_three', ['ru' => 'Наличие']),
+                            'format'    => 'raw',
+                            'value'     => function ($data) {
                                 $link = CheckboxX::widget([
-                                            'name' => 'status_' . $data['id'],
+                                            'name'          => 'status_' . $data['id'],
                                             'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                            'value' => $data['status'],
-                                            'autoLabel' => true,
-                                            'options' => ['id' => 'status_' . $data['id'], 'data-id' => $data['id'], 'event-type' => 'set-status', 'value' => $data['status']],
+                                            'value'         => $data['status'],
+                                            'autoLabel'     => true,
+                                            'options'       => ['id' => 'status_' . $data['id'], 'data-id' => $data['id'], 'event-type' => 'set-status', 'value' => $data['status']],
                                             'pluginOptions' => [
-                                                'threeState' => false,
-                                                'theme' => 'krajee-flatblue',
+                                                'threeState'    => false,
+                                                'theme'         => 'krajee-flatblue',
                                                 'enclosedLabel' => true,
-                                                'size' => 'lg',
+                                                'size'          => 'lg',
                                             ]
                                 ]);
                                 return $link;
                             },
                         ],
                         [
-                            'attribute' => 'market_place',
-                            'label' => 'MixMarket',
-                            'format' => 'raw',
+                            'attribute'      => 'market_place',
+                            'label'          => 'MixMarket',
+                            'format'         => 'raw',
                             'contentOptions' => ['style' => 'width:80px'],
-                            'headerOptions' => ['class' => 'text-center'],
-                            'value' => function ($data) {
+                            'headerOptions'  => ['class' => 'text-center'],
+                            'value'          => function ($data) {
                                 $data['market_place'] == 0 ?
                                         $res = '' :
                                         $res = '<center><i style="font-size: 28px;color:#84bf76;" class="fa fa-check-square-o"></i></center>';
@@ -408,27 +408,27 @@ Modal::end();
                             },
                         ],
                         [
-                            'attribute' => '',
-                            'label' => '',
-                            'format' => 'raw',
+                            'attribute'      => '',
+                            'label'          => '',
+                            'format'         => 'raw',
                             'contentOptions' => ['style' => 'width:80px'],
-                            'headerOptions' => ['class' => 'text-center'],
-                            'value' => function ($data) {
+                            'headerOptions'  => ['class' => 'text-center'],
+                            'value'          => function ($data) {
                                 $data['market_place'] == 0 ?
                                         $link = Html::a(Yii::t('message', 'frontend.views.vendor.change_two', ['ru' => 'ИЗМЕНИТЬ']), ['/vendor/ajax-update-product-market-place',
                                             'id' => $data['id']], [
-                                            'data' => [
-                                                'target' => '#add-product-market-place',
-                                                'toggle' => 'modal',
+                                            'data'  => [
+                                                'target'   => '#add-product-market-place',
+                                                'toggle'   => 'modal',
                                                 'backdrop' => 'static',
                                             ],
                                             'class' => 'btn btn-sm btn-outline-success'
                                         ]) :
                                         $link = Html::a(Yii::t('message', 'frontend.views.vendor.change_three', ['ru' => 'ИЗМЕНИТЬ']), ['/vendor/ajax-update-product-market-place',
                                             'id' => $data['id']], [
-                                            'data' => [
-                                                'target' => '#add-product-market-place',
-                                                'toggle' => 'modal',
+                                            'data'  => [
+                                                'target'   => '#add-product-market-place',
+                                                'toggle'   => 'modal',
                                                 'backdrop' => 'static',
                                             ],
                                             'class' => 'btn btn-sm btn-success'
@@ -437,14 +437,14 @@ Modal::end();
                             },
                         ],
                         [
-                            'attribute' => '',
-                            'label' => '',
-                            'format' => 'raw',
+                            'attribute'      => '',
+                            'label'          => '',
+                            'format'         => 'raw',
                             'contentOptions' => ['style' => 'width:50px;'],
-                            'value' => function ($data) {
+                            'value'          => function ($data) {
                                 $link = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
                                             'class' => 'btn btn-sm btn-danger del-product',
-                                            'data' => ['id' => $data['id']],
+                                            'data'  => ['id' => $data['id']],
                                 ]);
                                 return $link;
                             },
@@ -455,30 +455,30 @@ Modal::end();
                         <div class="box-body table-responsive no-padding">
                             <?=
                             GridView::widget([
-                                'dataProvider' => $dataProvider,
-                                'pjax' => true, // pjax is set to always true for this demo
-                                'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
-                                'filterPosition' => false,
-                                'columns' => $gridColumnsBaseCatalog,
+                                'dataProvider'     => $dataProvider,
+                                'pjax'             => true, // pjax is set to always true for this demo
+                                'pjaxSettings'     => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
+                                'filterPosition'   => false,
+                                'columns'          => $gridColumnsBaseCatalog,
                                 /* 'rowOptions' => function ($data, $key, $index, $grid) {
                                   return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
                                   }, */
-                                'options' => ['class' => 'table-responsive'],
-                                'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                                'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                                'bordered' => false,
-                                'striped' => true,
-                                'condensed' => false,
-                                'responsive' => false,
-                                'hover' => true,
+                                'options'          => ['class' => 'table-responsive'],
+                                'tableOptions'     => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                                'formatter'        => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                                'bordered'         => false,
+                                'striped'          => true,
+                                'condensed'        => false,
+                                'responsive'       => false,
+                                'hover'            => true,
                                 'resizableColumns' => false,
-                                'export' => [
+                                'export'           => [
                                     'fontAwesome' => true,
                                 ],
-                                'summary' => Yii::t('message', 'frontend.views.request.showed_three') . " {begin} - {end} " . Yii::t('app', 'из') . " {totalCount} " . Yii::t('app', 'записей'),
-                                'pager' => [
+                                'summary'          => Yii::t('message', 'frontend.views.request.showed_three') . " {begin} - {end} " . Yii::t('app', 'из') . " {totalCount} " . Yii::t('app', 'записей'),
+                                'pager'            => [
                                     'firstPageLabel' => false,
-                                    'lastPageLabel' => false,
+                                    'lastPageLabel'  => false,
                                 ],
                             ]);
                             ?>
@@ -500,31 +500,31 @@ Modal::end();
                         }
                     ],
                     [
-                        'label' => Yii::t('message', 'frontend.views.vendor.curr_cat', ['ru' => 'Текущий каталог']),
+                        'label'  => Yii::t('message', 'frontend.views.vendor.curr_cat', ['ru' => 'Текущий каталог']),
                         'format' => 'raw',
-                        'value' => function ($data) {
-                            $catalog = common\models\Catalog::find()->where(['id' => $data->cat_id])->one();
+                        'value'  => function ($data) {
+                            $catalog      = common\models\Catalog::find()->where(['id' => $data->cat_id])->one();
                             $catalog_name = ($data->cat_id == 0 || !$catalog) ? '' : $catalog->name;
                             return Yii::t('app', $catalog_name);
                         }
                     ],
                     [
-                        'attribute' => Yii::t('message', 'frontend.views.vendor.set_two', ['ru' => 'Назначить']),
-                        'format' => 'raw',
+                        'attribute'      => Yii::t('message', 'frontend.views.vendor.set_two', ['ru' => 'Назначить']),
+                        'format'         => 'raw',
                         'contentOptions' => ['style' => 'width:50px;'],
-                        'value' => function ($data) {
-                            $value = ($data->cat_id == Yii::$app->request->get('id')) ? 1 : 0;
-                            $link = CheckboxX::widget([
-                                        'name' => 'setcatalog_' . $data->id,
+                        'value'          => function ($data) {
+                            $value = $data->status && ($data->cat_id == Yii::$app->request->get('id'));
+                            $link  = CheckboxX::widget([
+                                        'name'          => 'setcatalog_' . $data->id,
                                         'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                        'value' => $value,
-                                        'autoLabel' => true,
-                                        'options' => ['id' => 'setcatalog_' . $data->id, 'data-id' => $data->rest_org_id, 'event-type' => 'set-catalog', 'value' => $value],
+                                        'value'         => $value,
+                                        'autoLabel'     => true,
+                                        'options'       => ['id' => 'setcatalog_' . $data->id, 'data-id' => $data->rest_org_id, 'event-type' => 'set-catalog', 'value' => $value],
                                         'pluginOptions' => [
-                                            'threeState' => false,
-                                            'theme' => 'krajee-flatblue',
+                                            'threeState'    => false,
+                                            'theme'         => 'krajee-flatblue',
                                             'enclosedLabel' => true,
-                                            'size' => 'lg',
+                                            'size'          => 'lg',
                                         ]
                             ]);
                             return $link;
@@ -537,19 +537,19 @@ Modal::end();
                         <?php Pjax::begin(['enablePushState' => false, 'id' => 'clients-list',]); ?>
                         <?=
                         GridView::widget([
-                            'dataProvider' => $dataProvider2,
-                            'filterModel' => $searchModel2,
+                            'dataProvider'   => $dataProvider2,
+                            'filterModel'    => $searchModel2,
                             'filterPosition' => false,
-                            'columns' => $gridColumnsCatalog,
-                            'options' => ['class' => 'table-responsive'],
-                            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                            'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                            'summary' => false,
-                            'bordered' => false,
-                            'striped' => true,
-                            'condensed' => false,
-                            'responsive' => false,
-                            'hover' => false,
+                            'columns'        => $gridColumnsCatalog,
+                            'options'        => ['class' => 'table-responsive'],
+                            'tableOptions'   => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                            'formatter'      => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                            'summary'        => false,
+                            'bordered'       => false,
+                            'striped'        => true,
+                            'condensed'      => false,
+                            'responsive'     => false,
+                            'hover'          => false,
                         ]);
                         ?>
                         <?php Pjax::end(); ?>
@@ -560,30 +560,30 @@ Modal::end();
     </div>
 </section>
 <?php
-$baseCatalogUrl = Url::to(['vendor/basecatalog', 'id' => $currentCatalog->id]);
-$changeCatalogPropUrl = Url::to(['vendor/changecatalogprop']);
-$changeSetCatalogUrl = Url::to(['vendor/changesetcatalog']);
-$deleteProductUrl = Url::to(['vendor/ajax-delete-product']);
-$deleteAllUrl = Url::to(["/vendor/ajax-delete-main-catalog"]);
+$baseCatalogUrl             = Url::to(['vendor/basecatalog', 'id' => $currentCatalog->id]);
+$changeCatalogPropUrl       = Url::to(['vendor/changecatalogprop']);
+$changeSetCatalogUrl        = Url::to(['vendor/changesetcatalog']);
+$deleteProductUrl           = Url::to(['vendor/ajax-delete-product']);
+$deleteAllUrl               = Url::to(["/vendor/ajax-delete-main-catalog"]);
 $restoreCatalogLastSnapshot = Url::to(["/vendor/ajax-restore-main-catalog-last-snapshot"]);
-$changeMainIndexUrl = Url::to(["/vendor/ajax-change-main-index"]);
-$restoreCatalogUrl = Url::to(["/vendor/ajax-restore-main-catalog-latest-snapshot"]);
+$changeMainIndexUrl         = Url::to(["/vendor/ajax-change-main-index"]);
+$restoreCatalogUrl          = Url::to(["/vendor/ajax-restore-main-catalog-latest-snapshot"]);
 
-$var1 = Yii::t('message', 'frontend.views.vendor.del_good', ['ru' => 'Удалить этот продукт?']);
-$var2 = Yii::t('message', 'frontend.views.vendor.will_remove', ['ru' => 'Продукт будет удален из всех каталогов']);
-$var3 = Yii::t('message', 'frontend.views.vendor.del_four', ['ru' => 'Удалить']);
-$var4 = Yii::t('message', 'frontend.views.vendor.cancel_eleven', ['ru' => 'Отмена']);
-$var5 = Yii::t('message', 'frontend.views.vendor.wrong', ['ru' => 'Что-то пошло не так']);
-$var6 = Yii::t('message', 'frontend.views.vendor.change_curr_two', ['ru' => 'Изменение валюты каталога']);
-$var7 = Yii::t('message', 'frontend.views.vendor.choose_curr', ['ru' => 'Выберите новую валюту каталога']);
-$var8 = Yii::t('message', 'frontend.views.vendor.choose_from_list', ['ru' => 'Выберите валюту из списка']);
-$var9 = Yii::t('message', 'frontend.views.vendor.in_use', ['ru' => 'Данная валюта уже используется!']);
-$var10 = Yii::t('message', 'frontend.views.vendor.curr_changed', ['ru' => 'Валюта каталога изменена!']);
-$var11 = Yii::t('message', 'frontend.views.vendor.set_prices', ['ru' => 'Пересчитать цены в каталоге?']);
-$var12 = Yii::t('message', 'frontend.views.vendor.prices_changed', ['ru' => 'Цены успешно изменены!']);
-$var13 = Yii::t('message', 'frontend.views.vendor.farther', ['ru' => 'Далее']);
+$var1             = Yii::t('message', 'frontend.views.vendor.del_good', ['ru' => 'Удалить этот продукт?']);
+$var2             = Yii::t('message', 'frontend.views.vendor.will_remove', ['ru' => 'Продукт будет удален из всех каталогов']);
+$var3             = Yii::t('message', 'frontend.views.vendor.del_four', ['ru' => 'Удалить']);
+$var4             = Yii::t('message', 'frontend.views.vendor.cancel_eleven', ['ru' => 'Отмена']);
+$var5             = Yii::t('message', 'frontend.views.vendor.wrong', ['ru' => 'Что-то пошло не так']);
+$var6             = Yii::t('message', 'frontend.views.vendor.change_curr_two', ['ru' => 'Изменение валюты каталога']);
+$var7             = Yii::t('message', 'frontend.views.vendor.choose_curr', ['ru' => 'Выберите новую валюту каталога']);
+$var8             = Yii::t('message', 'frontend.views.vendor.choose_from_list', ['ru' => 'Выберите валюту из списка']);
+$var9             = Yii::t('message', 'frontend.views.vendor.in_use', ['ru' => 'Данная валюта уже используется!']);
+$var10            = Yii::t('message', 'frontend.views.vendor.curr_changed', ['ru' => 'Валюта каталога изменена!']);
+$var11            = Yii::t('message', 'frontend.views.vendor.set_prices', ['ru' => 'Пересчитать цены в каталоге?']);
+$var12            = Yii::t('message', 'frontend.views.vendor.prices_changed', ['ru' => 'Цены успешно изменены!']);
+$var13            = Yii::t('message', 'frontend.views.vendor.farther', ['ru' => 'Далее']);
 $titleChangeIndex = Yii::t('message', 'frontend.views.vendor.change_index', ['ru' => 'Изменить индекс:']);
-$indexReject = Yii::t('message', 'frontend.views.vendor.index_reject', ['ru' => 'Этот индекс уже используется']);
+$indexReject      = Yii::t('message', 'frontend.views.vendor.index_reject', ['ru' => 'Этот индекс уже используется']);
 
 $customJs = <<< JS
 var timer;

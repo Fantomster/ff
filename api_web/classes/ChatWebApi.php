@@ -45,9 +45,9 @@ class ChatWebApi extends WebApi
 
         $search = Order::find()->select([
             'order.*',
-            '(
+            'IFNULL((
                 SELECT MAX(order_chat.created_at) FROM order_chat WHERE order_id = order.id AND recipient_id = :org_id
-             ) as last_message_date'
+             ), created_at) as last_message_date'
         ])->where($where)->params(['org_id' => $client->id]);
 
         if (empty($search)) {

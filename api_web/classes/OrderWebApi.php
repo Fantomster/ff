@@ -112,6 +112,9 @@ class OrderWebApi extends \api_web\components\WebApi
             $order->discount = $post['discount']['amount'];
         }
         $tr = \Yii::$app->db->beginTransaction();
+        if (is_null($order->created_by_id)) {
+            $order->created_by_id = $this->user->id;
+        }
         try {
             $changed = [];
             $deleted = [];
@@ -167,13 +170,13 @@ class OrderWebApi extends \api_web\components\WebApi
             } elseif ($order->client_id == $this->user->organization_id) {
                 $sender = $order->client;
             }
-            if ($isUnconfirmedVendor) {
+            if ($isUnconfirmedVendor || !isset($sender)) {
                 $sender = $order->vendor;
             }
             if (!empty($changed) || !empty($deleted)) {
                 Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted);
             }
-            return $this->getInfo(['order_id' => $order->id]);
+            return $this->getOrderInfo($order);
         } catch (\Throwable $e) {
             $tr->rollBack();
             throw $e;
@@ -412,6 +415,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @return array
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
+     * @throws \Exception
      */
     public function getOrderInfo(Order $order)
     {
@@ -767,7 +771,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $searchModel->catalogs = $catalogs;
 
             /**
-             * @var $dataProvider SqlDataProvider
+             * @var SqlDataProvider $dataProvider
              */
             $searchModel->searchString = $searchString;
             $searchModel->selectedVendor = $searchSupplier;
@@ -923,13 +927,14 @@ class OrderWebApi extends \api_web\components\WebApi
     public function cancel(array $post, bool $isUnconfirmedVendor = false)
     {
         $this->validateRequest($post, ['order_id']);
-
+        //todo_refactoring with $this->complete() method duplicate rows
         $query = Order::find()->where(['id' => $post['order_id']]);
         if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
             $query->andWhere(['client_id' => $this->user->organization->id]);
         } else {
             $query->andWhere(['vendor_id' => $this->user->organization->id]);
         }
+        /**@var Order $order */
         $order = $query->one();
 
         if (empty($order)) {
@@ -1040,6 +1045,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $vendor = true;
             $query->andWhere(['vendor_id' => $this->user->organization->id]);
         }
+        /**@var Order $order */
         $order = $query->one();
 
         if (empty($order)) {
@@ -1086,7 +1092,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array            $post
      * @param WebApiController $c
      * @return false|string
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|InvalidArgumentException
      */
     public function saveToPdf(array $post, WebApiController $c)
     {

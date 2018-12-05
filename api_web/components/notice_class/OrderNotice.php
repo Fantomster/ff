@@ -127,7 +127,7 @@ class OrderNotice
                     try {
                         $text = Yii::$app->sms->prepareText('sms.order_new', [
                             'name' => $senderOrg->name,
-                            'url'  => $order->getUrlForUser($recipient)
+                            'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);
                     } catch (\Exception $e) {
@@ -185,7 +185,7 @@ class OrderNotice
                     if (!empty($recipient->profile->phone) && $notification->order_canceled) {
                         $text = Yii::$app->sms->prepareText('sms.order_canceled', [
                             'name' => $senderOrg->name,
-                            'url'  => $order->getUrlForUser($recipient)
+                            'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);
                     }
@@ -245,7 +245,7 @@ class OrderNotice
                     if (!empty($recipient->profile->phone) && $notification->order_done) {
                         $text = Yii::$app->sms->prepareText('sms.order_done', [
                             'name' => $senderOrg->name,
-                            'url'  => $order->getUrlForUser($recipient)
+                            'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);
                     }
@@ -306,7 +306,7 @@ class OrderNotice
                         if (!empty($recipient->profile->phone) && $notification->order_processing) {
                             $text = Yii::$app->sms->prepareText('sms.order_processing', [
                                 'name' => $order->vendor->name,
-                                'url'  => $order->getUrlForUser($recipient)
+                                'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                             ]);
                             Yii::$app->sms->send($text, $recipient->profile->phone);
                         }
@@ -457,7 +457,7 @@ class OrderNotice
                     if ($recipient->profile->phone && $notification->order_changed) {
                         $text = Yii::$app->sms->prepareText('sms.order_changed', [
                             'client_name' => $senderOrg->name,
-                            'url'         => $order->getUrlForUser($recipient)
+                            'url'         => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);
                     }

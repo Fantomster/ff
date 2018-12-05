@@ -1,5 +1,6 @@
 <?php
 return [
+    'app_version' => 2,
     'adminEmail' => 'noreply@mixcart.ru',
     'notificationsUrl' => 'https://notifications.f-keeper.ru:443',
     'maindUrl' => 'http://testama.f-keeper.ru',

@@ -135,6 +135,7 @@ class UserWebApi extends \api_web\components\WebApi
      *
      * @param array   $post
      * @param integer $role_id
+     * @param null    $status
      * @return User
      * @throws BadRequestHttpException
      * @throws ValidationException
@@ -331,6 +332,8 @@ class UserWebApi extends \api_web\components\WebApi
     /**
      * Список бизнесов пользователя
      *
+     * @param null $searchString
+     * @param bool $showEmpty
      * @return array
      * @throws BadRequestHttpException
      */

@@ -12,8 +12,9 @@ interface DocumentInterface
 
     /**
      * Загрузка модели и получение данных
+     *
      * @param $key
-     * @return $array
+     * @return  $array
      */
     public static function prepareModel($key);
 

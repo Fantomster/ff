@@ -75,7 +75,8 @@ class one_sProduct extends WebApi
 
     /**
      * Подготовка продукта к выдаче
-     * @param \api\common\models\one_s\one_sProduct $model
+     *
+     * @param \api\common\models\one_s\OneSGood $model
      * @return array
      */
     private function prepareProduct(\api\common\models\one_s\OneSGood $model)

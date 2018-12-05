@@ -559,6 +559,7 @@ class RequestWebApi extends WebApi
      *
      * @param Request $model
      * @return array
+     * @throws \yii\base\InvalidConfigException
      */
     private function prepareRequest(Request $model)
     {
@@ -589,6 +590,7 @@ class RequestWebApi extends WebApi
      *
      * @param RequestCallback $model
      * @return array
+     * @throws \yii\base\InvalidConfigException
      */
     private function prepareRequestCallback(RequestCallback $model)
     {

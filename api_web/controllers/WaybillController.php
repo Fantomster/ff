@@ -101,7 +101,8 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\web\BadRequestHttpException
      */
     public function actionMoveOrderContentToWaybill()
     {

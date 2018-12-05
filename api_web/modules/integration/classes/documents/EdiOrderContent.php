@@ -22,8 +22,9 @@ class EdiOrderContent extends BaseOrderContent implements DocumentInterface
 
     /**
      * Загрузка модели и получение данных
+     *
      * @param $key
-     * @return $array
+     * @return array|mixed $array
      */
     public static function prepareModel($key)
     {

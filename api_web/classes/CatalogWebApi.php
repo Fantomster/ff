@@ -237,11 +237,11 @@ class CatalogWebApi extends WebApi
                     $arBatchInsert[] = $catalogGood;
                 }
                 if (count($arBatchInsert) > 499) {
-                    $batchResult = (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');
+                    (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');
                     $arBatchInsert = [];
                 }
             }
-            $batchResult = (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');
+            (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');
             //Убиваем временный каталог
             CatalogTempContent::deleteAll(['temp_id' => $catalogTemp->id]);
             $catalogTemp->delete();
@@ -337,6 +337,8 @@ class CatalogWebApi extends WebApi
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function getTempDuplicatePosition(array $request)
     {
@@ -441,6 +443,11 @@ class CatalogWebApi extends WebApi
 
     /**
      * Список товаров в каталоге
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
      */
     public function getGoodsInCatalog($request)
     {
@@ -563,6 +570,7 @@ class CatalogWebApi extends WebApi
      * @param $request
      * @return array
      * @throws BadRequestHttpException
+     * @throws ValidationException
      */
     public function setCurrencyForPersonalCatalog($request)
     {

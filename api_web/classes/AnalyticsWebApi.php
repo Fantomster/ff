@@ -61,7 +61,6 @@ class AnalyticsWebApi extends WebApi
      * @param $post
      * @param $limit int
      * @return array
-     * @throws BadRequestHttpException
      */
     public function vendorTurnover($post, $limit = null)
     {
@@ -133,7 +132,6 @@ class AnalyticsWebApi extends WebApi
      *
      * @param $post
      * @return array
-     * @throws BadRequestHttpException
      */
     public function clientGoods($post)
     {
@@ -221,7 +219,6 @@ class AnalyticsWebApi extends WebApi
      *
      * @param $post
      * @return array
-     * @throws BadRequestHttpException
      */
     public function clientPurchases($post)
     {
@@ -290,7 +287,6 @@ class AnalyticsWebApi extends WebApi
      *
      * @param $post
      * @return integer
-     * @throws BadRequestHttpException
      */
     public function turnover($post)
     {
@@ -502,7 +498,6 @@ class AnalyticsWebApi extends WebApi
      * Метод получения списка валют
      *
      * @return array
-     * @throws BadRequestHttpException
      */
     public function currencies()
     {

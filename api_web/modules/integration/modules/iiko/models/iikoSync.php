@@ -99,8 +99,8 @@ class iikoSync extends WebApi
 
     /**
      * Синхронизация складов
+     *
      * @return integer
-     * @throws BadRequestHttpException
      * @throws ValidationException
      */
     protected function store()
@@ -214,8 +214,9 @@ class iikoSync extends WebApi
 
     /**
      * Синхронизация продуктов
+     *
      * @return int
-     * @throws ValidationException
+     * @throws \Exception
      */
     protected function goods()
     {

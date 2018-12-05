@@ -69,11 +69,12 @@ class one_sAgent extends WebApi
         ];
     }
 
-
     /**
      * one_s: Создание сопоставлений номенклатуры накладной с продуктами MixCart
+     *
      * @param array $post
      * @return array
+     * @throws ValidationException
      */
     public function handleWaybillData(array $post): array
     {

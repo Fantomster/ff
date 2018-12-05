@@ -21,6 +21,8 @@ class WebApiAuth extends AuthMethod
      * @param \yii\web\Request  $request
      * @param \yii\web\Response $response
      * @return \amnah\yii2\user\models\User|null|\yii\web\IdentityInterface
+     * @throws UnauthorizedHttpException
+     * @throws \yii\base\InvalidConfigException
      */
     public function authenticate($user, $request, $response)
     {

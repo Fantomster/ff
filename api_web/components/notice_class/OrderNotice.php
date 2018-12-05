@@ -144,6 +144,7 @@ class OrderNotice
      * @param User         $user
      * @param Organization $organization
      * @param Order        $order
+     * @throws \Exception
      */
     public function cancelOrder(User $user, Organization $organization, Order $order)
     {
@@ -425,6 +426,7 @@ class OrderNotice
      * @param Order          $order
      * @param OrderContent[] $changed
      * @param OrderContent[] $deleted
+     * @throws \Exception
      */
     public function sendOrderChange($senderOrg, $order, $changed = [], $deleted = [])
     {

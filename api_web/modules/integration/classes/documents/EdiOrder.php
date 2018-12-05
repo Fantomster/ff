@@ -15,6 +15,7 @@ class EdiOrder extends BaseOrder implements DocumentInterface
      * Порлучение данных из модели
      *
      * @return mixed
+     * @throws \yii\db\Exception
      */
     public function prepare()
     {

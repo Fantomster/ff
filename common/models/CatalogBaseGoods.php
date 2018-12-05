@@ -38,6 +38,9 @@ use yii\helpers\ArrayHelper;
  * @property integer       $mp_show_price
  * @property string        $edi_supplier_article
  * @property string        $ssid
+ * @property string        $es_status
+ * @property string        $rating
+ * @property string        $barcode
  * @property MpCountry     $mpRegion
  * @property Organization  $vendor
  * @property MpCategory    $category
@@ -128,7 +131,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             [['units'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?(NULL)?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'min' => 0.00],
-            [['barcode'], 'integer', 'min' => 1000000000000, 'max' => 9999999999999],
+            [['barcode'], 'integer'],
             [['sub1', 'sub2'], 'required',
                 'when'       => function ($model) {
                     return $model->market_place == self::MARKETPLACE_ON;

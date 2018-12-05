@@ -593,6 +593,7 @@ class IntegrationWebApi extends WebApi
      * Информация по сопоставлению продукта
      *
      * @param array $model
+     * @param bool  $isChild
      * @return array
      */
     private function prepareOutProductMap(array $model, $isChild = false)

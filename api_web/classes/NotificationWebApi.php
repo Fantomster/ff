@@ -10,11 +10,17 @@ use yii\web\BadRequestHttpException;
 class NotificationWebApi extends WebApi
 {
 
+    /**
+     * @param array $post
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
     public function get(array $post)
     {
         $this->validateRequest($post, ['id']);
         $path = $this->getPath();
         $path['notifications'] = $post['id'];
+        /** @var string $r */
         $r = FireBase::getInstance()->get($path);
 
         if (empty($r)) {
@@ -24,6 +30,11 @@ class NotificationWebApi extends WebApi
         return \GuzzleHttp\json_decode($r, 1);
     }
 
+    /**
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
     public function push(array $post)
     {
         $this->validateRequest($post, ['body']);
@@ -33,6 +44,11 @@ class NotificationWebApi extends WebApi
         return ['result' => 1];
     }
 
+    /**
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
     public function pushAnyUser(array $post)
     {
         $this->validateRequest($post, ['body', 'user_id']);
@@ -50,6 +66,12 @@ class NotificationWebApi extends WebApi
         return ['result' => 1];
     }
 
+    /**
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \yii\web\HttpException
+     */
     public function delete(array $post)
     {
         $this->validateRequest($post, ['id']);
@@ -70,6 +92,9 @@ class NotificationWebApi extends WebApi
         return ['result' => 1];
     }
 
+    /**
+     * @return array
+     */
     private function getPath()
     {
         $path = [
@@ -80,6 +105,9 @@ class NotificationWebApi extends WebApi
         return $path;
     }
 
+    /**
+     * @return string
+     */
     private function generateId()
     {
         return uniqid();

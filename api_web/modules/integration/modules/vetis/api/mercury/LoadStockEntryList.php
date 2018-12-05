@@ -113,7 +113,6 @@ class LoadStockEntryList extends Model
         }
         $message = $message . PHP_EOL;
         $message .= str_pad('', 80, '=') . PHP_EOL;
-        $className = BaseStringHelper::basename(get_class($this));
         \Yii::info($message, $this->logCategory);
     }
 }

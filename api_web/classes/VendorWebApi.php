@@ -181,7 +181,7 @@ class VendorWebApi extends \api_web\components\WebApi
                 }
 
                 $user->setOrganization($organization)->save();
-                $relId = $user->createRelationUserOrganization($user->organization->id, $user->role_id);
+                $user->createRelationUserOrganization($user->organization->id, $user->role_id);
                 $get_supp_org_id = $organization->id;
                 $currentOrganization = $currentUser->organization;
                 if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
@@ -575,7 +575,8 @@ class VendorWebApi extends \api_web\components\WebApi
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function prepareTemporary(array $request)
     {
@@ -630,9 +631,7 @@ class VendorWebApi extends \api_web\components\WebApi
      * Загрузка индивидуального каталога
      *
      * @param array $request
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @return void
      */
     public function uploadCustomCatalog(array $request)
     {
@@ -643,9 +642,7 @@ class VendorWebApi extends \api_web\components\WebApi
      * Валидация и импорт уже загруженного основного каталога
      *
      * @param array $request
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @return void
      */
     public function importCustomCatalog(array $request)
     {
@@ -658,7 +655,8 @@ class VendorWebApi extends \api_web\components\WebApi
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function deleteMainCatalog(array $request)
     {
@@ -679,6 +677,8 @@ class VendorWebApi extends \api_web\components\WebApi
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function changeMainIndex(array $request)
     {
@@ -698,7 +698,11 @@ class VendorWebApi extends \api_web\components\WebApi
      *
      * @param array $request
      * @return array
-     * @throws \Exception
+     * @throws BadRequestHttpException
+     * @throws \Throwable
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\StaleObjectException
+     * @throws \yii\di\NotInstantiableException
      */
     public function cancelTemporary(array $request)
     {
@@ -720,6 +724,8 @@ class VendorWebApi extends \api_web\components\WebApi
      * Список ключей для выбора
      *
      * @return array
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function getListMainIndex()
     {

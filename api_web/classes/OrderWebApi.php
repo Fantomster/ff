@@ -165,12 +165,8 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new ValidationException($order->getFirstErrors());
             }
             $tr->commit();
-            if ($order->vendor_id == $this->user->organization_id) {
-                $sender = $order->vendor;
-            } elseif ($order->client_id == $this->user->organization_id || !isset($sender)) {
-                $sender = $order->client;
-            }
-            if ($isUnconfirmedVendor) {
+            $sender = $order->client;
+            if ($order->vendor_id == $this->user->organization_id || $isUnconfirmedVendor) {
                 $sender = $order->vendor;
             }
             if (!empty($changed) || !empty($deleted)) {

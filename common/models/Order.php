@@ -699,7 +699,7 @@ class Order extends \yii\db\ActiveRecord
                 }
             }
 
-            if ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == OrderStatus::STATUS_DONE || $this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED)) {
+            if ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED)) {
                 $vendor    = $this->vendor;
                 $client    = $this->client;
                 $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);

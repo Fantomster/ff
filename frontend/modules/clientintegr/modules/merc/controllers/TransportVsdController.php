@@ -91,7 +91,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 $selected = implode(",", $selected);
                 $session->remove('TrVsd_step1');
             } else {
-                $selected = $session->get('TrVsd_step1');
+                $selected = $session->get('TrVsd_step1', []);
                 $attributes = $selected;
                 $session->remove('TrVsd_step1');
                 $selected = implode(",", array_keys($selected));
@@ -298,7 +298,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 $selected = implode(",", $selected);
                 $session->remove('TrVsd_step1');
             } else {
-                $selected = $session->get('TrVsd_step1');
+                $selected = $session->get('TrVsd_step1', []);
                 $attributes = $selected;
                 $session->remove('TrVsd_step1');
                 $selected = implode(",", array_keys($selected));

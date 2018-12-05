@@ -329,9 +329,25 @@ class DocumentWebApi extends \api_web\components\WebApi
                   dat.order_vendor_id                            order_vendor_id,
                   if(merc_uuid IS NULL, 0, 1)                    is_mercury_cert,
                   dat.replaced_order_id                          replaced_order_id,
-                  oav.id                                         object_agent_id,
-                  oav.name                                       object_agent_name,
-                  COUNT(DISTINCT oav.id)                         object_agent_count,
+                  (
+                    SELECT id FROM  `$apiShema`.outer_agent oav WHERE
+                        org_id = :business_id AND service_id = :service_id
+                                                                  AND
+                        if(dat.order_id IS NULL, dat.waybill_outer_agent_id, dat.order_vendor_id)
+                        =
+                        if(dat.order_id IS NULL, oav.id, oav.vendor_id)
+                    LIMIT 1
+                  ) as object_agent_id,
+                  (
+                    SELECT name FROM  `$apiShema`.outer_agent oav WHERE
+                        org_id = :business_id AND service_id = :service_id
+                                                                  AND
+                        if(dat.order_id IS NULL, dat.waybill_outer_agent_id, dat.order_vendor_id)
+                        =
+                        if(dat.order_id IS NULL, oav.id, oav.vendor_id)
+                    LIMIT 1
+                  ) as object_agent_name,
+                  1                                              object_agent_count,
                   if(order_id IS NULL, osw.id, ov.id)            object_store_id,
                   if(order_id IS NULL, osw.name, ov.name)        object_store_name,
                   dat.order_service_id                           order_service_id,

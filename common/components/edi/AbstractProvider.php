@@ -102,6 +102,7 @@ abstract class AbstractProvider
 
         foreach ($list as $name) {
             if (!array_key_exists($name, $files)) {
+                if (strpos($name, 'rder_') || strpos($name, 'ecadv_')) continue;
                 $batch[] = ['name' => $name, 'organization_id' => $orgID];
             }
         }

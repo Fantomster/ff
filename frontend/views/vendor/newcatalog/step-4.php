@@ -76,7 +76,7 @@ $this->title = Yii::t('message', 'frontend.views.vendor.set_cat', ['ru'=>'Наз
             'format' => 'raw',
             'contentOptions' => ['style' => 'width:50px;'],
             'value' => function ($data) {
-                    $value = $data->cat_id ==Yii::$app->request->get('id') ? 1 : 0;
+                    $value = $data->status;
                 $link = CheckboxX::widget([
                     'name'=>'setcatalog_'.$data->rest_org_id,
                     'initInputType' => CheckboxX::INPUT_CHECKBOX,

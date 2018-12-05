@@ -3,7 +3,6 @@
 use common\models\Organization;
 use common\helpers\MailHelper;
 use common\models\Role;
-use common\models\OrderChat;
 
 $currencySymbol = $order->currency->symbol;
 $senderIsClient = ($senderOrg->type_id == Organization::TYPE_RESTAURANT);

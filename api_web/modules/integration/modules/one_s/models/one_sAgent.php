@@ -5,11 +5,6 @@ namespace api_web\modules\integration\modules\one_s\models;
 use api\common\models\one_s\one_sWaybill;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
-use api_web\modules\integration\interfaces\ServiceInterface;
-use common\models\Order;
-use common\models\search\OrderSearch;
-use Yii;
-use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
 
 class one_sAgent extends WebApi

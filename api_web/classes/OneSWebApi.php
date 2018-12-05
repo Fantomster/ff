@@ -5,7 +5,6 @@ namespace api_web\classes;
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\one_s\models\one_sAgent;
 use api_web\modules\integration\modules\one_s\models\one_sOrder;
-use api_web\modules\integration\modules\one_s\models\one_sSync;
 
 class OneSWebApi extends WebApi
 {

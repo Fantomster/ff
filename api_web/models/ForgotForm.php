@@ -6,7 +6,6 @@ use Yii;
 use yii\swiftmailer\Mailer;
 use yii\swiftmailer\Message;
 use amnah\yii2\user\models\forms\ForgotForm as BaseForm;
-use common\models\UserToken;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -72,7 +71,7 @@ class ForgotForm extends BaseForm
     }
 
     /**
-     * @param $number length
+     * @param $number int
      * @return string
      */
     public static function generatePassword($number)

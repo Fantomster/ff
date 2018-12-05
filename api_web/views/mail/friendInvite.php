@@ -1,7 +1,5 @@
 <?php
 
-use yii\helpers\Url;
-
 /**
  * @var string $subject
  * @var \common\models\User $vendor

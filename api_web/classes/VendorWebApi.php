@@ -13,7 +13,6 @@ use common\models\RelationUserOrganization;
 use Yii;
 use api_web\exceptions\ValidationException;
 use common\models\Profile;
-use common\models\restaurant\RestaurantChecker;
 use common\models\User;
 use common\models\Role;
 use common\models\Catalog;

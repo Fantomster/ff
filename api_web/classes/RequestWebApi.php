@@ -4,7 +4,6 @@ namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
 use yii\db\ActiveQuery;
-use yii\db\Expression;
 use yii\data\Pagination;
 use common\models\Request;
 use yii\helpers\ArrayHelper;

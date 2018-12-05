@@ -3,8 +3,6 @@
 namespace api_web\modules\integration\modules\one_s\models;
 
 use api\common\models\one_s\one_sWaybillData;
-use api_web\modules\integration\modules\one_s\helpers\one_sLogger;
-use common\models\Journal;
 use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
 use api\common\models\one_s\one_sAgent;

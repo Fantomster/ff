@@ -22,7 +22,6 @@ use common\models\search\OrderSearch;
 use common\models\Order;
 use common\models\Organization;
 use api_web\components\Notice;
-use common\models\WaybillContent;
 use kartik\mpdf\Pdf;
 use yii\data\Pagination;
 use yii\data\SqlDataProvider;

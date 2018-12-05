@@ -9,7 +9,6 @@ namespace api_web\components;
  */
 
 use api_web\helpers\Logger;
-use api_web\helpers\WebApiHelper;
 use common\models\licenses\License;
 use yii\web\HttpException;
 

@@ -11,6 +11,7 @@ class OrderEmail extends Order implements DocumentInterface
      * Порлучение данных из модели
      *
      * @return mixed
+     * @throws \yii\db\Exception
      */
     public function prepare()
     {

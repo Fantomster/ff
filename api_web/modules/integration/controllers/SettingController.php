@@ -7,6 +7,8 @@ class SettingController extends \api_web\components\WebApiController
     /**
      * @param \yii\base\Action $action
      * @return bool
+     * @throws \yii\web\BadRequestHttpException
+     * @throws \yii\web\HttpException
      */
     public function beforeAction($action)
     {

@@ -31,7 +31,7 @@ class one_sStore extends WebApi
     }
 
     /**
-     * @param \api\common\models\one_s\one_sStore $model
+     * @param OneSStore $model
      * @return array
      */
     private function prepareStore(\api\common\models\one_s\OneSStore $model)

@@ -99,7 +99,6 @@ class TillypadSync extends WebApi
      * Синхронизация складов
      *
      * @return integer
-     * @throws BadRequestHttpException
      * @throws ValidationException
      */
     protected function store()
@@ -217,7 +216,7 @@ class TillypadSync extends WebApi
      * Синхронизация продуктов
      *
      * @return int
-     * @throws ValidationException
+     * @throws \Exception
      */
     protected function goods()
     {
@@ -314,6 +313,7 @@ class TillypadSync extends WebApi
      *
      * @param array $post
      * @return array
+     * @throws ValidationException
      */
     public function handleWaybillData(array $post): array
     {

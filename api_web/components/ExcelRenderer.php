@@ -17,6 +17,8 @@ class ExcelRenderer
      * Генерация excel файла заказа
      *
      * @param $order_id
+     * @return \PHPExcel
+     * @throws BadRequestHttpException
      * @throws \PHPExcel_Exception
      * @throws \yii\base\InvalidConfigException
      */

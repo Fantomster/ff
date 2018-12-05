@@ -98,6 +98,7 @@ class ChatWebApi extends WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\ErrorException
      */
     public function getDialogMessages(array $post)
     {
@@ -165,6 +166,7 @@ class ChatWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
+     * @throws \yii\base\ErrorException
      */
     public function addMessage(array $post)
     {

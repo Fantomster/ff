@@ -61,12 +61,14 @@ class ServiceRkws extends AbstractSyncFactory
     public $additionalXmlFields = [];
 
     protected $logCategory = "rkws_log";
-    
+
     /**
      * Basic service method "Send request"
      *
      * @return array?
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      */
     public function sendRequestForObjects(): ?array
     {
@@ -110,6 +112,9 @@ class ServiceRkws extends AbstractSyncFactory
      * @param array $params
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      */
     public function sendRequest(array $params = []): array
     {
@@ -551,6 +556,8 @@ class ServiceRkws extends AbstractSyncFactory
      * @param OuterTask   $task
      * @param string|null $data
      * @return string
+     * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
     public function callbackData(OuterTask $task, string $data = null)
     {

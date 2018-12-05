@@ -112,7 +112,11 @@ class WebApiController extends \yii\rest\Controller
      * @param \yii\base\Action $action
      * @return bool
      * @throws HttpException
+     * @throws \yii\base\ExitException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      * @throws \yii\web\BadRequestHttpException
+     * @throws \yii\web\UnauthorizedHttpException
      */
     public function beforeAction($action)
     {
@@ -199,6 +203,7 @@ class WebApiController extends \yii\rest\Controller
      * @param \yii\base\Action $action
      * @param mixed            $result
      * @return array|string
+     * @throws \Exception
      */
     public function afterAction($action, $result)
     {

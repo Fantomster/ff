@@ -6,6 +6,7 @@ use api\common\models\one_s\one_sPconst;
 use api\common\models\one_s\one_sWaybill;
 use api\common\models\one_s\OneSDicconst;
 use api\common\models\one_s\OneSPconst;
+use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\modules\integration\interfaces\ServiceInterface;
@@ -18,6 +19,7 @@ class one_sService extends WebApi implements ServiceInterface
 {
     /**
      * Название сервиса
+     *
      * @return string
      */
     public function getServiceName()
@@ -27,24 +29,27 @@ class one_sService extends WebApi implements ServiceInterface
 
     /**
      * id сервиса из таблицы all_service
+     *
      * @return string
      */
     public static function getServiceId()
     {
-        return 2;
+        return Registry::ONE_S_CLIENT_SERVICE_ID;
     }
 
     /**
      * Информация о лицензии MixCart
+     *
      * @return \api\common\models\one_s\one_sService|array|null|\yii\db\ActiveRecord
      */
     public function getLicenseMixCart()
     {
-        return \api\common\models\one_s\OneSService::find(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
+        return \api\common\models\one_s\OneSService::find()->where(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
     }
 
     /**
      * Статус лицензии сервиса
+     *
      * @return bool
      */
     public function getLicenseMixCartActive()
@@ -70,9 +75,9 @@ class one_sService extends WebApi implements ServiceInterface
         $result = [];
         foreach ($query as $row) {
             $r = [
-                'name' => (string)$row['denom'],
+                'name'    => (string)$row['denom'],
                 'comment' => (string)$row['comment'],
-                'type' => (int)$row['type'],
+                'type'    => (int)$row['type'],
             ];
             switch ($row['type']) {
                 case 1:
@@ -94,6 +99,7 @@ class one_sService extends WebApi implements ServiceInterface
 
     /**
      * Установка настроек
+     *
      * @param $params
      * @return array|mixed
      * @throws BadRequestHttpException
@@ -110,7 +116,7 @@ class one_sService extends WebApi implements ServiceInterface
                 if (empty($pmodel)) {
                     $pmodel = new OneSPconst([
                         'const_id' => $model->id,
-                        'org' => $this->user->organization->id
+                        'org'      => $this->user->organization->id
                     ]);
                 }
                 $pmodel->value = (string)$value;
@@ -126,6 +132,7 @@ class one_sService extends WebApi implements ServiceInterface
 
     /**
      * Список опций, отображаемых на главной странице интеграции
+     *
      * @return array
      */
     public function getOptions()
@@ -140,7 +147,7 @@ class one_sService extends WebApi implements ServiceInterface
             }
         }
         return [
-            'waiting' => (int)OneSWaybill::find()->where(['org' => $this->user->organization->id, 'status_id' => 1])->count(),
+            'waiting'    => (int)OneSWaybill::find()->where(['org' => $this->user->organization->id, 'status_id' => 1])->count(),
             'not_formed' => $result
         ];
     }

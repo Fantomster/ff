@@ -54,7 +54,6 @@ class AbstractDictionary extends WebApi
      * Список справочников
      *
      * @return array
-     * @throws BadRequestHttpException
      */
     public function getList()
     {

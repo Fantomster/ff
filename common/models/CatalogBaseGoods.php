@@ -38,6 +38,9 @@ use yii\helpers\ArrayHelper;
  * @property integer       $mp_show_price
  * @property string        $edi_supplier_article
  * @property string        $ssid
+ * @property string        $es_status
+ * @property string        $rating
+ * @property string        $barcode
  * @property MpCountry     $mpRegion
  * @property Organization  $vendor
  * @property MpCategory    $category

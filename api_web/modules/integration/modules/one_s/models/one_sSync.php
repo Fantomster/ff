@@ -94,8 +94,8 @@ class one_sSync extends WebApi
 
     /**
      * Синхронизация складов
+     *
      * @return integer
-     * @throws BadRequestHttpException
      * @throws ValidationException
      */
     protected function store()

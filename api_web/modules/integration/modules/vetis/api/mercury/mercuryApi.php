@@ -134,7 +134,6 @@ class mercuryApi extends baseApi
      */
     public function getVetDocumentByUUID($UUID)
     {
-        $cache = \Yii::$app->cache;
         $doc = MercVsd::findOne(['uuid' => $UUID]);
 
         if ($doc != null) {
@@ -364,7 +363,6 @@ class mercuryApi extends baseApi
      */
     public function getStockEntryByGuid($GUID)
     {
-        $cache = \Yii::$app->cache;
         $doc = MercVsd::findOne(['guid' => $GUID]);
 
         if ($doc != null) {
@@ -380,7 +378,6 @@ class mercuryApi extends baseApi
      */
     public function getStockEntryByUuid($UUID)
     {
-        $cache = \Yii::$app->cache;
         $doc = MercVsd::findOne(['uuid' => $UUID]);
 
         if ($doc != null) {

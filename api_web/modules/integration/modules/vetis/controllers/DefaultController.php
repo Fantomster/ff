@@ -561,13 +561,11 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \yii\web\BadRequestHttpException
      */
     public function actionFullInfoVsd()
     {
         $this->response = (new VetisWaybill())->getFullInfoAboutVsd($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/integration/vetis/return-vsd",
@@ -611,7 +609,7 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \yii\web\BadRequestHttpException
+     * @throws \Exception
      */
     public function actionReturnVsd()
     {
@@ -661,7 +659,6 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
      */
     public function actionPartialAcceptance()
     {
@@ -710,7 +707,6 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
      */
     public function actionRepayVsd()
     {
@@ -771,7 +767,6 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
      */
     public function actionAcquirerFilter()
     {
@@ -833,7 +828,6 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
      */
     public function actionGetNotConfirmedVsd()
     {

@@ -253,7 +253,6 @@ class MarketWebApi extends WebApi
      *
      * @param $post
      * @return array
-     * @throws BadRequestHttpException
      */
     public function organizations($post)
     {

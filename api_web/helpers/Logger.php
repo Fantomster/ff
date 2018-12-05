@@ -114,6 +114,7 @@ class Logger
 
     /**
      * @param $columns
+     * @throws \yii\db\Exception
      */
     private static function insert($columns)
     {
@@ -124,6 +125,7 @@ class Logger
 
     /**
      * @param $columns
+     * @throws \yii\db\Exception
      */
     private static function update($columns)
     {

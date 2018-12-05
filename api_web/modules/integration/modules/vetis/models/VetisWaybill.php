@@ -151,7 +151,8 @@ class VetisWaybill extends WebApi
      * Формирование всех фильтров
      *
      * @return array
-     * */
+     * @throws \Exception
+     */
     public function getFilters()
     {
         return [

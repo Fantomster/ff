@@ -177,7 +177,9 @@ class OuterProductMapper
             $mainOrgModel = $this->getModel($this->mainOrgId);
         }
         if ($mainOrgModel) {
-            unset($this->request['outer_product_id']);
+            if (isset($this->request['outer_product_id'])) {
+                unset($this->request['outer_product_id']);
+            }
             $model = new OuterProductMap();
             $model->service_id = $mainOrgModel->service_id;
             $model->organization_id = $this->orgId;

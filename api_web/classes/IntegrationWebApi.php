@@ -20,6 +20,7 @@ use common\models\OuterUnit;
 use common\models\search\OuterProductMapSearch;
 use common\models\Waybill;
 use common\models\WaybillContent;
+use yii\base\InvalidArgumentException;
 use yii\data\SqlDataProvider;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
@@ -496,7 +497,7 @@ class IntegrationWebApi extends WebApi
      *
      * @param array $post
      * @return array
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|InvalidArgumentException
      */
     public function getProductMapList(array $post): array
     {
@@ -582,7 +583,9 @@ class IntegrationWebApi extends WebApi
         //Загружаем данные по базовому и дочерним бизнесам (если бизнес главный)
         $mapper = new OuterProductMapper($business_id, $service_id);
         $mapper->loadRequest($request);
-        $mapper->updateChildesMap();
+        if (isset($request['outer_product_id']) && !is_null($request['outer_product_id'])) {
+            $mapper->updateChildesMap();
+        }
         $mapper->updateModel();
     }
 

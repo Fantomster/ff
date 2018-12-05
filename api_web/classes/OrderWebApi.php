@@ -22,8 +22,8 @@ use common\models\search\OrderSearch;
 use common\models\Order;
 use common\models\Organization;
 use api_web\components\Notice;
-use common\models\WaybillContent;
 use kartik\mpdf\Pdf;
+use yii\base\InvalidArgumentException;
 use yii\data\Pagination;
 use yii\data\SqlDataProvider;
 use yii\db\Expression;
@@ -46,7 +46,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param bool $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws \Exception|\Throwable
      */
     public function update($post, bool $isUnconfirmedVendor = false)
     {
@@ -88,7 +88,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order.access.change.canceled_status");
         }
         //Если сменили комментарий
-        if (!$isUnconfirmedVendor) {
+        if (isset($post['comment']) && !$isUnconfirmedVendor) {
             $order->comment = trim($post['comment']);
         }
         //Если сменили дату доставки
@@ -174,7 +174,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted);
             }
             return $this->getInfo(['order_id' => $order->id]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $tr->rollBack();
             throw $e;
         }
@@ -196,7 +196,7 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         /**
-         * @var $orderContent OrderContent
+         * @var OrderContent $orderContent
          */
         $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
         if (empty($orderContent)) {
@@ -255,7 +255,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array $product
      * @return OrderContent
      * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @throws ValidationException|InvalidArgumentException
      */
     private function addProduct(Order $order, array $product)
     {
@@ -297,7 +297,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @throws ValidationException|InvalidArgumentException
      */
     public function addComment(array $post)
     {
@@ -1265,13 +1265,13 @@ class OrderWebApi extends \api_web\components\WebApi
      *
      * @param array $post
      * @return false|string
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|\Exception
      */
     public function saveToExcel(array $post)
     {
         $this->validateRequest($post, ['order_id']);
 
-        $objPHPExcel = (new ExcelRenderer())->OrderRender($post, ['order_id']);
+        $objPHPExcel = (new ExcelRenderer())->OrderRender($post['order_id']);
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
         $objWriter->save(tempnam("/tmp", "excel"));
         ob_start();

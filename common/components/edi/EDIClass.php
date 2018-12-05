@@ -290,6 +290,7 @@ class EDIClass extends Component
                 ];
                 $this->insertEdiErrorData($arr);
             }
+            return $e->getMessage();
         }
     }
 

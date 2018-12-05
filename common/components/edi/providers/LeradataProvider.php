@@ -77,8 +77,8 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
      */
     public function getFilesListForInsertingInQueue()
     {
-        //$this->getOneTypeFilesList('pricat');
-        //$this->getOneTypeFilesList('desadv');
+        $this->getOneTypeFilesList('pricat');
+        $this->getOneTypeFilesList('desadv');
         $this->getOneTypeFilesList('ordrsp');
         return true;
     }

@@ -9,6 +9,7 @@
 namespace common\components\edi;
 
 use common\models\Catalog;
+use common\models\CatalogGoods;
 use common\models\Currency;
 use common\models\edi\EdiFilesQueue;
 use common\models\Order;
@@ -198,7 +199,7 @@ abstract class AbstractRealization
      */
     public function insertGood(int $catID, int $catalogBaseGoodID, float $price, int $vat = null): bool
     {
-        $res = Yii::$app->db->createCommand()->insert('catalog_goods', [
+        $res = Yii::$app->db->createCommand()->insert(CatalogGoods::tableName(), [
             'cat_id'        => $catID,
             'base_goods_id' => $catalogBaseGoodID,
             'created_at'    => new Expression('NOW()'),

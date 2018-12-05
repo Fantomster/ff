@@ -370,6 +370,7 @@ class VetisHelper
      */
     public function getEnterpriseGuids()
     {
+        $enterpriseGuids = [];
         $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
         foreach ($orgIds['result'] as $orgId) {
             $entGuid = $this->getSettings($orgId['id'], ['enterprise_guid']);

@@ -5,8 +5,6 @@ namespace api_web\modules\integration\modules\vetis\api\dicts;
 use common\models\vetis\VetisPurpose;
 use common\models\vetis\VetisUnit;
 use api_web\modules\integration\modules\vetis\api\baseApi;
-use Yii;
-use yii\db\Exception;
 
 /**
  * Class dictsApi

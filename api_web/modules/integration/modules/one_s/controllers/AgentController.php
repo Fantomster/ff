@@ -3,8 +3,6 @@
 namespace api_web\modules\integration\modules\one_s\controllers;
 
 use api_web\components\WebApiController;
-use api_web\modules\integration\modules\one_s\models\one_sOrder;
-use api_web\modules\integration\modules\one_s\models\one_sService;
 
 class AgentController extends WebApiController
 {

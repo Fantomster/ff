@@ -10,7 +10,6 @@ use common\models\Order as BaseOrder;
 use common\models\OrderContent;
 use common\models\OuterAgent;
 use yii\helpers\ArrayHelper;
-use yii\web\BadRequestHttpException;
 
 class Order extends BaseOrder implements DocumentInterface
 {

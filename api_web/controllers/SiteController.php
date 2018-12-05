@@ -2,7 +2,6 @@
 
 namespace api_web\controllers;
 
-use api_web\components\WebApi;
 use api_web\components\WebApiSwaggerAction;
 use Yii;
 use yii\web\Controller;

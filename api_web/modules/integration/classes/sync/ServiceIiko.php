@@ -4,7 +4,6 @@ namespace api_web\modules\integration\classes\sync;
 
 use api_web\classes\RabbitWebApi;
 use api_web\components\Registry;
-use api_web\modules\integration\classes\documents\Waybill;
 use api_web\modules\integration\models\iikoWaybill;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;

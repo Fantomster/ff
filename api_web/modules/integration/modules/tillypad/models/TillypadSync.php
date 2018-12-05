@@ -3,8 +3,6 @@
 namespace api_web\modules\integration\modules\tillypad\models;
 
 use api\common\models\iiko\iikoWaybillData;
-use api_web\modules\integration\modules\tillypad\helpers\TillypadLogger;
-use common\models\Journal;
 use yii\db\Expression;
 use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
@@ -17,7 +15,6 @@ use api\common\models\iiko\iikoStore;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use frontend\modules\clientintegr\modules\tillypad\helpers\TillypadApi;
-use yii\web\Response;
 
 class TillypadSync extends WebApi
 {

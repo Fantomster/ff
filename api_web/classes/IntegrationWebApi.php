@@ -20,7 +20,7 @@ use common\models\OuterUnit;
 use common\models\search\OuterProductMapSearch;
 use common\models\Waybill;
 use common\models\WaybillContent;
-use yii\base\Exception;
+use yii\base\InvalidArgumentException;
 use yii\data\SqlDataProvider;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
@@ -363,51 +363,6 @@ class IntegrationWebApi extends WebApi
     }
 
     /**
-     * @param WaybillContent $waybillContent
-     * @param                $post
-     * @param                $quan
-     * @param                $koef
-     * @throws \Exception
-     * @return array
-     */
-    private function handleWaybillContent($waybillContent, $post, $quan, $koef)
-    {
-        return ['deprecated' => true];
-        //DEPRECATED this suck stub
-        if (!OuterProduct::find()->where(['id' => $post['outer_product_id']])->exists()) {
-            throw new BadRequestHttpException('outer_product_not_found');
-        }
-        if (isset($post['outer_product_id'])) {
-            $waybillContent->outer_product_id = $post['outer_product_id'];
-        }
-
-        $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
-        if (!$orderContent) {
-            if (isset($post['price_without_vat'])) {
-                $waybillContent->price_without_vat = (int)$post['price_without_vat'];
-                if (isset($post['vat_waybill'])) {
-                    $waybillContent->price_with_vat = (int)($post['price_without_vat'] + ($post['price_without_vat'] * $post['vat_waybill']));
-                    if (isset($post['quantity_waybill'])) {
-                        $waybillContent->sum_without_vat = (int)$post['price_without_vat'] * $post['quantity_waybill'];
-                        $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $post['quantity_waybill'];
-                    }
-                }
-            }
-        } else {
-            if (isset($post['quantity_waybill']) && !isset($post['koef'])) {
-                $koef = $post['quantity_waybill'] / $orderContent->quantity;
-            }
-            if (isset($post['koef']) && !isset($post['quantity_waybill'])) {
-                $quan = $orderContent->quantity * $post['koef'];
-            }
-        }
-        $waybillContent->quantity_waybill = $quan;
-        $waybillContent->koef = $koef;
-        $waybillContent->save();
-        return ['success' => true, 'koef' => $koef, 'quantity' => $quan];
-    }
-
-    /**
      * integration: Накладная (привязана к заказу) - Добавление позиции
      *
      * @param array $post
@@ -542,7 +497,7 @@ class IntegrationWebApi extends WebApi
      *
      * @param array $post
      * @return array
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|InvalidArgumentException
      */
     public function getProductMapList(array $post): array
     {
@@ -628,7 +583,9 @@ class IntegrationWebApi extends WebApi
         //Загружаем данные по базовому и дочерним бизнесам (если бизнес главный)
         $mapper = new OuterProductMapper($business_id, $service_id);
         $mapper->loadRequest($request);
-        $mapper->updateChildesMap();
+        if (isset($request['outer_product_id']) && !is_null($request['outer_product_id'])) {
+            $mapper->updateChildesMap();
+        }
         $mapper->updateModel();
     }
 

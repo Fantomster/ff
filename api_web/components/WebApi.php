@@ -20,7 +20,7 @@ class WebApi
      */
     public $user;
     /**
-     * @var \dosamigos\resourcemanager\ResourceManagerInterface
+     * @var \common\components\resourcemanager\AmazonS3ResourceManager
      */
     public $resourceManager;
 

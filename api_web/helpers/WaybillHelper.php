@@ -9,7 +9,6 @@
 namespace api_web\helpers;
 
 use api_web\components\Registry;
-use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\models\User;
 use api_web\modules\integration\classes\SyncServiceFactory;

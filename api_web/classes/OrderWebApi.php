@@ -22,8 +22,8 @@ use common\models\search\OrderSearch;
 use common\models\Order;
 use common\models\Organization;
 use api_web\components\Notice;
-use common\models\WaybillContent;
 use kartik\mpdf\Pdf;
+use yii\base\InvalidArgumentException;
 use yii\data\Pagination;
 use yii\data\SqlDataProvider;
 use yii\db\Expression;
@@ -46,7 +46,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param bool $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws \Exception|\Throwable
      */
     public function update($post, bool $isUnconfirmedVendor = false)
     {
@@ -88,7 +88,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order.access.change.canceled_status");
         }
         //Если сменили комментарий
-        if (!$isUnconfirmedVendor) {
+        if (isset($post['comment']) && !$isUnconfirmedVendor) {
             $order->comment = trim($post['comment']);
         }
         //Если сменили дату доставки
@@ -112,6 +112,9 @@ class OrderWebApi extends \api_web\components\WebApi
             $order->discount = $post['discount']['amount'];
         }
         $tr = \Yii::$app->db->beginTransaction();
+        if (is_null($order->created_by_id)) {
+            $order->created_by_id = $this->user->id;
+        }
         try {
             $changed = [];
             $deleted = [];
@@ -162,19 +165,15 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new ValidationException($order->getFirstErrors());
             }
             $tr->commit();
-            if ($order->vendor_id == $this->user->organization_id) {
-                $sender = $order->vendor;
-            } elseif ($order->client_id == $this->user->organization_id) {
-                $sender = $order->client;
-            }
-            if ($isUnconfirmedVendor) {
+            $sender = $order->client;
+            if ($order->vendor_id == $this->user->organization_id || $isUnconfirmedVendor) {
                 $sender = $order->vendor;
             }
             if (!empty($changed) || !empty($deleted)) {
                 Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted);
             }
-            return $this->getInfo(['order_id' => $order->id]);
-        } catch (\Exception $e) {
+            return $this->getOrderInfo($order);
+        } catch (\Throwable $e) {
             $tr->rollBack();
             throw $e;
         }
@@ -196,7 +195,7 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         /**
-         * @var $orderContent OrderContent
+         * @var OrderContent $orderContent
          */
         $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
         if (empty($orderContent)) {
@@ -255,7 +254,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array $product
      * @return OrderContent
      * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @throws ValidationException|InvalidArgumentException
      */
     private function addProduct(Order $order, array $product)
     {
@@ -297,7 +296,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @throws ValidationException|InvalidArgumentException
      */
     public function addComment(array $post)
     {
@@ -412,6 +411,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @return array
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
+     * @throws \Exception
      */
     public function getOrderInfo(Order $order)
     {
@@ -767,7 +767,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $searchModel->catalogs = $catalogs;
 
             /**
-             * @var $dataProvider SqlDataProvider
+             * @var SqlDataProvider $dataProvider
              */
             $searchModel->searchString = $searchString;
             $searchModel->selectedVendor = $searchSupplier;
@@ -923,13 +923,14 @@ class OrderWebApi extends \api_web\components\WebApi
     public function cancel(array $post, bool $isUnconfirmedVendor = false)
     {
         $this->validateRequest($post, ['order_id']);
-
+        //todo_refactoring with $this->complete() method duplicate rows
         $query = Order::find()->where(['id' => $post['order_id']]);
         if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
             $query->andWhere(['client_id' => $this->user->organization->id]);
         } else {
             $query->andWhere(['vendor_id' => $this->user->organization->id]);
         }
+        /**@var Order $order */
         $order = $query->one();
 
         if (empty($order)) {
@@ -1040,6 +1041,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $vendor = true;
             $query->andWhere(['vendor_id' => $this->user->organization->id]);
         }
+        /**@var Order $order */
         $order = $query->one();
 
         if (empty($order)) {
@@ -1086,7 +1088,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array            $post
      * @param WebApiController $c
      * @return false|string
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|InvalidArgumentException
      */
     public function saveToPdf(array $post, WebApiController $c)
     {
@@ -1265,13 +1267,13 @@ class OrderWebApi extends \api_web\components\WebApi
      *
      * @param array $post
      * @return false|string
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|\Exception
      */
     public function saveToExcel(array $post)
     {
         $this->validateRequest($post, ['order_id']);
 
-        $objPHPExcel = (new ExcelRenderer())->OrderRender($post, ['order_id']);
+        $objPHPExcel = (new ExcelRenderer())->OrderRender($post['order_id']);
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
         $objWriter->save(tempnam("/tmp", "excel"));
         ob_start();

@@ -80,6 +80,8 @@ class Order extends \yii\db\ActiveRecord
     const DELAY_WITH_DELIVERY_DATE           = 86400; //sec - 1 day
     const DELAY_WITHOUT_DELIVERY_DATE        = 86400; //sec - 1 day
 
+    public $ediProcessor = 0;
+
     /**
      * @inheritdoc
      */
@@ -699,7 +701,7 @@ class Order extends \yii\db\ActiveRecord
                 }
             }
 
-            if ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED)) {
+            if (!$this->ediProcessor && ($this->status != OrderStatus::STATUS_FORMING  && !$insert && (key_exists('total_price', $changedAttributes) || $this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED))) {
                 $vendor    = $this->vendor;
                 $client    = $this->client;
                 $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);

@@ -13,7 +13,6 @@ use common\models\EmailQueue;
 class Mailer extends \yii\mail\BaseMailer
 {
 
-    private $html;
     private $to;
     private $subject;
     public $sqsQueueUrl;

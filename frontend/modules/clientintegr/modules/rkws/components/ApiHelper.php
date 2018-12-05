@@ -19,7 +19,7 @@ class ApiHelper
         \Yii::info($message, self::logCategory);
     }
     
-    public static function sendCurl($xml, $restr)
+    public static function sendCurl($xml, $restr = null)
     {
         $objectinfo = [];
         $respcode   = [];

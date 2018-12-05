@@ -76,35 +76,34 @@ class ForgotForm extends BaseForm
      */
     public static function generatePassword($number)
     {
-        $arr = ['a', 'b', 'c', 'd', 'e', 'f',
-            'g', 'h', 'i', 'j', 'k', 'l',
-            'm', 'n', 'o', 'p', 'r', 's',
-            't', 'u', 'v', 'x', 'y', 'z',
-            'A', 'B', 'C', 'D', 'E', 'F',
-            'G', 'H', 'I', 'J', 'K', 'L',
-            'M', 'N', 'O', 'P', 'R', 'S',
-            'T', 'U', 'V', 'X', 'Y', 'Z',
-            '1', '2', '3', '4', '5', '6',
-            '7', '8', '9', '0', '!', '@',
-            '#', '$', '%', '^', '&', '*',
-            '(', ')', '-', '_', '=', '+',
-            '[', ']', '{', '}', ';', ':'];
-        $ranges = [0, 26, 52, 62];
-        // Генерируем пароль
-        $user = new User();
-        {
-            $pass = "";
-            for ($i = 0; $i < $number; $i++) {
-                // Вычисляем случайный индекс массива
-                $start = rand(0, count($ranges) - 1);
-                $index = rand($start, count($arr) - 1);
-                $pass .= $arr[$index];
-            }
-
-            $user->newPassword = $pass;
+        $chars = [];
+        $arr = [
+            [
+                'a', 'b', 'c', 'd', 'e', 'f',
+                'g', 'h', 'i', 'j', 'k', 'l',
+                'm', 'n', 'o', 'p', 'r', 's',
+                't', 'u', 'v', 'x', 'y', 'z'
+            ],
+            [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G',
+                'H', 'I', 'J', 'K', 'L', 'M', 'N',
+                'O', 'P', 'R', 'S', 'T', 'U', 'V',
+                'X', 'Y', 'Z'
+            ],
+            ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+            ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', ']', '{', '}', ';', ':']
+        ];
+        //по одному символу с каждого массива символов
+        foreach ($arr as $key => $item) {
+            $chars[] = $item[rand(0, count($item) - 1)];
         }
-        while (!$user->validate(['newPassword']));
-
-        return $pass;
+        //Добираем случайные символы
+        for ($i = 0; count($chars) < $number; $i++) {
+            $index = rand(0, count($arr) - 1);
+            $chars[] = $arr[$index][rand(0, count($arr[$index]) - 1)];
+        }
+        //Перемешиваем весь массив
+        shuffle($chars);
+        return implode('', $chars);
     }
 }

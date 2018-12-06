@@ -68,7 +68,7 @@ class SmsSend extends \yii\db\ActiveRecord
             'id'         => 'ID',
             'sms_id'     => 'Sms ID',
             'status_id'  => 'Status ID',
-            'status_id'  => 'Order ID',
+            'order_id'   => 'Order ID',
             'text'       => Yii::t('app', 'common.models.message', ['ru' => 'Сообщение']),
             'target'     => Yii::t('app', 'common.models.reciever', ['ru' => 'Получатель']),
             'created_at' => Yii::t('app', 'common.models.send_date', ['ru' => 'Дата отправки']),

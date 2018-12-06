@@ -117,7 +117,7 @@ class Mailer extends \yii\mail\BaseMailer
             }
         }
 
-        return $save;
+        return $save && $result;
     }
 
 }

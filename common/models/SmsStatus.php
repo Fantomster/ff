@@ -15,6 +15,17 @@ use Yii;
  */
 class SmsStatus extends \yii\db\ActiveRecord
 {
+    const STATUS_NEW = 0;
+    const STATUS_SENT = 1;
+    const STATUS_DELIVERED = 2;
+    const STATUS_TIMEOUT = 3;
+    const STATUS_FAILED = 5;
+    const STATUS_REJECTED = 8;
+    const STATUS_CANCELED = 20;
+    const STATUS_SYSTEM_ERROR = 21;
+    const STATUS_UNKNOWN = 22;
+    const STATUS_SENDING = 23;
+    
     /**
      * @inheritdoc
      */

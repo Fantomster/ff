@@ -15,8 +15,9 @@ namespace common\components\sms\providers;
  */
 class MixedProvider extends Qtelecom
 {
+
     public $sqsQueueUrl;
-    
+
     /**
      * Отправка сообщения
      * @param $message
@@ -25,15 +26,26 @@ class MixedProvider extends Qtelecom
      */
     public function send($message, $target, $order_id = null)
     {
-//        //Если массив из нескольких номеров, строим в строку через запятую
-//        if (is_array($target)) {
-//            $target = implode(',', $target);
-//        }
-//        $this->message = trim($message);
-//        $this->target = trim($target);
-//        //Отправляем сообщение
-//        $result = $this->post_message();
-//        //Смотрим ответ, записываем ошибки или логи об отправке
-//        $this->parseResponse($result);
+        $target   = is_array($target) ? $target : [$target];
+        $smsQueue = [];
+
+        foreach ($target as $recipient) {
+            $model      = new \common\models\SmsSend([
+                'provider'  => get_class($this),
+                'target'    => $recipient,
+                'text'      => $message,
+                'status_id' => \common\models\SmsStatus::STATUS_NEW,
+                'order_id'  => $order_id,
+            ]);
+            $model->save();
+            $smsQueue[] = $model->id;
+        }
+
+        try {
+            $result = \Yii::$app->get('sqsQueue')->sendMessage($this->sqsQueueUrl, $smsQueue);
+        } catch (\Exception $e) {
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
+        }
     }
+
 }

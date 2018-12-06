@@ -23,6 +23,7 @@ use yii\db\Exception;
  */
 class Sms extends Component
 {
+
     /**
      *  Класс с реализацией общения с API
      *  Class extends AbstractProvider
@@ -70,7 +71,7 @@ class Sms extends Component
      * @param $message
      * @param $target
      */
-    public function send($message, $target)
+    public function send($message, $target, $order_id = null)
     {
         try {
             //Если пустой получатель, игнорируем
@@ -82,10 +83,9 @@ class Sms extends Component
                 throw new Exception(Yii::t('app', 'common.components.sms.cant_be', ['ru' => 'Сообщение не может быть пустым. ']));
             }
             //Отправка смс
-            $this->sender->send($message, $target);
+            $this->sender->send($message, $target, $order_id);
         } catch (Exception $e) {
-            //Сохраняем ошибку в лог, чтобы ошибка при отправке, не рушила систему
-            $this->sender->setError($this->sender->message, $this->sender->target, $e->getMessage());
+            \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
     }
 
@@ -157,4 +157,5 @@ class Sms extends Component
         //Возвращаем подготовленный текст
         return $text;
     }
+
 }

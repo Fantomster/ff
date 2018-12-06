@@ -1566,6 +1566,7 @@ class OrderController extends DefaultController
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
             OrderStatus::STATUS_PROCESSING,
             OrderStatus::STATUS_DONE,
+            OrderStatus::STATUS_EDI_SENT_BY_VENDOR
         ];
         if ($user->organization->type_id == Organization::TYPE_SUPPLIER) {
             $order = $this->findOrder([Order::tableName() . '.id' => $id, Order::tableName() . '.status' => $editableOrders], Yii::$app->user->can('manage'));

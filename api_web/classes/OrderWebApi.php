@@ -611,7 +611,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     'created_at'        => WebApiHelper::asDatetime($model->created_at),
                     'status_updated_at' => $obUpdatedAt,
                     'edi_doc_date'      => $ediDocDate,
-                    'completion_date'   => WebApiHelper::asDatetime($date),
+                    'completion_date'   => isset($date) ? WebApiHelper::asDatetime($date) : null,
                     'status'            => (int)$model->status,
                     'status_text'       => $model->statusText,
                     'vendor'            => $model->vendor->name,

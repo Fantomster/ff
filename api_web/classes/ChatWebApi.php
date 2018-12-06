@@ -5,6 +5,7 @@ namespace api_web\classes;
 use api_web\components\Notice;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use api_web\helpers\WebApiHelper;
 use common\models\Order;
 use common\models\OrderChat;
 use common\models\Organization;
@@ -439,7 +440,7 @@ class ChatWebApi extends WebApi
             'count_message'     => (int)$model->count_message ?? 0,
             'unread_message'    => (int)$model->unread_message ?? 0,
             'last_message'      => $last_message,
-            'last_message_date' => $model->last_message_date,
+            'last_message_date' => WebApiHelper::asDatetime($model->last_message_date),
             'is_edi'            => empty($model->ediNumber) ? false : true,
         ];
     }
@@ -467,7 +468,7 @@ class ChatWebApi extends WebApi
             'is_my_message'  => $is_my_message,
             'is_system'      => $model->is_system ? true : false,
             'viewed'         => $model->viewed ? true : false,
-            'date'           => date('Y-m-d H:i:s', strtotime($model->created_at)),
+            'date'           => WebApiHelper::asDatetime($model->created_at),
         ];
     }
 }

@@ -11,6 +11,7 @@ use common\models\guides\GuideProduct;
 use common\models\Organization;
 use common\models\search\GuideProductsSearch;
 use common\models\search\GuideSearch;
+use yii\base\InvalidArgumentException;
 use yii\data\Pagination;
 use yii\data\Sort;
 use yii\db\Expression;
@@ -44,6 +45,7 @@ class GuideWebApi extends \api_web\components\WebApi
      *
      * @param array $post
      * @return array
+     * @throws InvalidArgumentException
      */
     public function getList(array $post)
     {
@@ -123,7 +125,7 @@ class GuideWebApi extends \api_web\components\WebApi
         if (!empty($dataProvider->models)) {
             $models = $dataProvider->models;
             /**
-             * @var $model Guide
+             * @var Guide $model
              */
             foreach ($models as $model) {
                 $result[] = $this->prepareGuide($model->id, $product_list, ['limit' => 4]);
@@ -491,7 +493,7 @@ class GuideWebApi extends \api_web\components\WebApi
         }
 
         /**
-         * @var $client Organization
+         * @var Organization $client
          */
         $client = $this->user->organization;
         foreach ($products_ids as $id) {
@@ -514,8 +516,10 @@ class GuideWebApi extends \api_web\components\WebApi
 
     /**
      * Записать продукты в базу
+     *
+     * @throws \Exception
      */
-    private function productInsert()
+    private function productInsert(): void
     {
         if (!empty($this->add_products)) {
             \Yii::$app->db->createCommand()->batchInsert(GuideProduct::tableName(), [
@@ -572,8 +576,8 @@ class GuideWebApi extends \api_web\components\WebApi
                 'id'            => (int)$model->id,
                 'name'          => $model->name,
                 'color'         => $model->color,
-                'created_at'    => $model->created_at,
-                'updated_at'    => $model->updated_at,
+                'created_at'    => WebApiHelper::asDatetime($model->created_at),
+                'updated_at'    => WebApiHelper::asDatetime($model->updated_at),
                 'product_count' => (int)$model->productCount,
             ];
 
@@ -618,7 +622,7 @@ class GuideWebApi extends \api_web\components\WebApi
         $item['units'] = $model->baseProduct->units ?? 0;
         $item['currency'] = $model->catalog->currency->symbol;
         $item['currency_id'] = (int)$model->catalog->currency->id;
-        $item['updated_at'] = $row['updated_at'] ?? null;
+        $item['updated_at'] = isset($row['updated_at']) ? WebApiHelper::asDatetime($row['updated_at']) : null;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->baseProduct);
         $item['in_basket'] = $this->container->get('CartWebApi')->countProductInCart($model->id);
         return $item;

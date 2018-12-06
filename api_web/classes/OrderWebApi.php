@@ -2,32 +2,25 @@
 
 namespace api_web\classes;
 
-use api_web\components\ExcelRenderer;
+use api_web\components\{ExcelRenderer, Registry, WebApiController};
 use api_web\components\notice_class\OrderNotice;
-use api_web\components\Registry;
-use api_web\components\WebApiController;
-use api_web\helpers\Product;
-use api_web\helpers\WebApiHelper;
+use api_web\helpers\{Product, WebApiHelper};
 use api_web\models\User;
-use common\models\CatalogBaseGoods;
-use common\models\Delivery;
-use common\models\MpCategory;
-use common\models\OrderContent;
-use common\models\OrderStatus;
-use common\models\RelationSuppRest;
-use common\models\Role;
-use common\models\search\OrderCatalogSearch;
-use common\models\search\OrderContentSearch;
-use common\models\search\OrderSearch;
-use common\models\Order;
-use common\models\Organization;
+use common\models\{CatalogBaseGoods,
+    Delivery,
+    MpCategory,
+    OrderContent,
+    OrderStatus,
+    RelationSuppRest,
+    Role,
+    Order,
+    Organization};
+use common\models\search\{OrderCatalogSearch, OrderContentSearch, OrderSearch};
 use api_web\components\Notice;
 use kartik\mpdf\Pdf;
 use yii\base\InvalidArgumentException;
-use yii\data\Pagination;
-use yii\data\SqlDataProvider;
-use yii\db\Expression;
-use yii\db\Query;
+use yii\data\{Pagination, SqlDataProvider};
+use yii\db\{Expression, Query};
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -401,14 +394,8 @@ class OrderWebApi extends \api_web\components\WebApi
         $result = $order->attributes;
         $currency = $order->currency->symbol ?? "RUB";
         $currency_id = $order->currency->id;
-        unset($result['updated_at']);
-        unset($result['status']);
-        unset($result['accepted_by_id']);
-        unset($result['created_by_id']);
-        unset($result['vendor_id']);
-        unset($result['client_id']);
-        unset($result['currency_id']);
-        unset($result['discount_type']);
+        unset($result['updated_at'], $result['status'], $result['accepted_by_id'], $result['created_by_id'],
+            $result['vendor_id'], $result['client_id'], $result['currency_id'], $result['discount_type']);
         $result['currency'] = $currency;
         $result['currency_id'] = $currency_id;
         $result['total_price'] = round($order->total_price, 2);
@@ -455,15 +442,15 @@ class OrderWebApi extends \api_web\components\WebApi
         $result['vendor'] = WebApiHelper::prepareOrganization($order->vendor);
 
         if (!is_null($order->status_updated_at) && $order->status_updated_at != '0000-00-00 00:00:00') {
-            $obUpdatedAt = (new \DateTime(trim($order->status_updated_at)))->format("d.m.Y H:i:s");
+            $obUpdatedAt = WebApiHelper::asDatetime(trim($order->status_updated_at));
         } else {
-            $obUpdatedAt = (new \DateTime())->format("d.m.Y H:i:s");
+            $obUpdatedAt = WebApiHelper::asDatetime();
         }
 
         if (!is_null($order->edi_doc_date) && $order->edi_doc_date != '0000-00-00 00:00:00') {
-            $ediDocDate = (new \DateTime(trim($order->edi_doc_date)))->format("d.m.Y H:i:s");
+            $ediDocDate = WebApiHelper::asDatetime(trim($order->edi_doc_date));
         } else {
-            $ediDocDate = (new \DateTime())->format("d.m.Y H:i:s");
+            $ediDocDate = WebApiHelper::asDatetime();
         }
         $result['status_updated_at'] = $obUpdatedAt;
         $result['edi_doc_date'] = $ediDocDate;
@@ -590,29 +577,24 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $model->updated_at;
                 }
 
-                if (!empty($date)) {
-                    $obDateTime = new \DateTime($date);
-                    $date = $obDateTime->format("d.m.Y H:i:s");
-                }
-                $obCreateAt = new \DateTime($model->created_at);
                 if (!is_null($model->status_updated_at) && $model->status_updated_at != '0000-00-00 00:00:00') {
-                    $obUpdatedAt = (new \DateTime(trim($model->status_updated_at)))->format("d.m.Y H:i:s");
+                    $obUpdatedAt = WebApiHelper::asDatetime(trim($model->status_updated_at));
                 } else {
-                    $obUpdatedAt = (new \DateTime())->format("d.m.Y H:i:s");
+                    $obUpdatedAt = WebApiHelper::asDatetime();
                 }
 
                 if (!is_null($model->edi_doc_date) && $model->edi_doc_date != '0000-00-00 00:00:00') {
-                    $ediDocDate = (new \DateTime(trim($model->edi_doc_date)))->format("d.m.Y H:i:s");
+                    $ediDocDate = WebApiHelper::asDatetime(trim($model->edi_doc_date));
                 } else {
-                    $ediDocDate = (new \DateTime())->format("d.m.Y H:i:s");
+                    $ediDocDate = WebApiHelper::asDatetime();
                 }
 
                 $orderInfo = [
                     'id'                => (int)$model->id,
-                    'created_at'        => $obCreateAt->format("d.m.Y H:i:s"),
+                    'created_at'        => WebApiHelper::asDatetime($model->created_at),
                     'status_updated_at' => $obUpdatedAt,
                     'edi_doc_date'      => $ediDocDate,
-                    'completion_date'   => $date ?? null,
+                    'completion_date'   => isset($date) ? WebApiHelper::asDatetime($date) : null,
                     'status'            => (int)$model->status,
                     'status_text'       => $model->statusText,
                     'vendor'            => $model->vendor->name,

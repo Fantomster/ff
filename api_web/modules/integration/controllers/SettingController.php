@@ -5,18 +5,6 @@ namespace api_web\modules\integration\controllers;
 class SettingController extends \api_web\components\WebApiController
 {
     /**
-     * @param \yii\base\Action $action
-     * @return bool
-     * @throws \yii\web\BadRequestHttpException
-     * @throws \yii\web\HttpException
-     */
-    public function beforeAction($action)
-    {
-        $this->license_service_id = $this->user->integration_service_id ?? 0;
-        return parent::beforeAction($action);
-    }
-
-    /**
      * @SWG\Post(path="/integration/setting/list",
      *     tags={"Integration/settings"},
      *     summary="Список настроек интеграции",
@@ -172,6 +160,7 @@ class SettingController extends \api_web\components\WebApiController
 
     public function actionUpdate()
     {
+        $this->license_service_id = $this->user->integration_service_id;
         $this->response = $this->container->get('IntegrationSettingsWebApi')->update($this->request);
     }
 
@@ -240,6 +229,7 @@ class SettingController extends \api_web\components\WebApiController
      */
     public function actionGetMainOrganizations()
     {
+        $this->license_service_id = $this->user->integration_service_id;
         $this->response = $this->container->get('IntegrationSettingsWebApi')->getMainOrganizations($this->request);
     }
 
@@ -297,6 +287,7 @@ class SettingController extends \api_web\components\WebApiController
 
     public function actionSetMainOrganizations()
     {
+        $this->license_service_id = $this->user->integration_service_id;
         $this->response = $this->container->get('IntegrationSettingsWebApi')->setMainOrganizations($this->request);
     }
 
@@ -344,6 +335,7 @@ class SettingController extends \api_web\components\WebApiController
 
     public function actionResetMainOrgSetting()
     {
+        $this->license_service_id = $this->user->integration_service_id;
         $this->response = $this->container->get('IntegrationSettingsWebApi')->resetMainOrgSetting($this->request);
     }
 }

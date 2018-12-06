@@ -640,7 +640,7 @@ $('.ajax-popover').click(function() {
             popover.applyPlacement(calculated_offset, popover.options.placement);
         },
       error: function(jqXHR, textStatus, errorThrown) {
-            return instance.content('Failed to load data');
+            //return instance.content('Failed to load data');
         }
     });
   }

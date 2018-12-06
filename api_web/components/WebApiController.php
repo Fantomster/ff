@@ -207,7 +207,7 @@ class WebApiController extends \yii\rest\Controller
             if (!in_array($action->id, $this->not_log_actions)) {
                 Logger::getInstance()::response($this->response);
             }
-            return \api_web\helpers\WebApiHelper::response($this->response);
+            return $this->response;
         } else {
             return [];
         }

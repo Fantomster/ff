@@ -745,27 +745,6 @@ class ServiceRkws extends AbstractSyncFactory
     }
 
     /**
-     * Ответ на запрос синхронизации
-     *
-     * @param $model OrganizationDictionary
-     * @return array
-     */
-    private function prepareModel($model)
-    {
-        $defaultStatusText = OrganizationDictionary::getStatusTextList()[OrganizationDictionary::STATUS_DISABLED];
-        return [
-            'id'          => $model->id,
-            'name'        => $model->outerDic->name,
-            'title'       => \Yii::t('api_web', 'dictionary.' . $model->outerDic->name),
-            'count'       => $model->count ?? 0,
-            'status_id'   => $model->status_id ?? 0,
-            'status_text' => $model->statusText ?? $defaultStatusText,
-            'created_at'  => $model->created_at ?? null,
-            'updated_at'  => $model->updated_at ?? null
-        ];
-    }
-
-    /**
      * @param array $request
      * @return array
      */

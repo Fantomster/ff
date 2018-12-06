@@ -5,6 +5,7 @@ namespace api_web\classes;
 use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\CurrencyHelper;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\classes\documents\EdiOrder;
 use api_web\modules\integration\classes\documents\EdiOrderContent;
 use api_web\modules\integration\classes\documents\Order;
@@ -523,7 +524,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                     "count"                   => (int)$model['object_position_count'],
                     "total_price"             => CurrencyHelper::asDecimal($model['object_total_price']),
                     //"total_price_with_out_vat" => CurrencyHelper::asDecimal($model['total_price_with_out_vat'], 2, null),
-                    "doc_date"                => date("Y-m-d H:i:s T", strtotime($model['doc_date'])),
+                    "doc_date"                => WebApiHelper::asDatetime($model['doc_date']),
                     "outer_number_code"       => $model['outer_number_code'] ?? null,
                     "outer_number_additional" => $model['outer_number_additional'] ?? null,
                     "order_acquirer_id"       => $model['order_acquirer_id'],

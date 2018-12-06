@@ -11,6 +11,7 @@ namespace api_web\modules\integration\modules\vetis\helpers;
 use api\common\models\merc\MercVsd;
 use api_web\classes\UserWebApi;
 use api_web\components\Registry;
+use api_web\helpers\WebApiHelper;
 use common\helpers\DBNameHelper;
 use common\models\IntegrationSettingValue;
 use api_web\modules\integration\modules\vetis\api\cerber\cerberApi;
@@ -81,9 +82,6 @@ class VetisHelper
         $country = VetisCountry::findOne(['guid' => $this->vsdModel->origin_country_guid]);
         $this->country_name = isset($country) ? $country->name : null;
 
-        if (isset($this->vsdModel->referencedDocument)) {
-            $this->setTransportWaybill($this->vsdModel->referencedDocument);
-        }
         $transportInfo = json_decode($this->vsdModel->transport_info, true);
         $this->vehicle_number = isset($transportInfo['transportNumber']['vehicleNumber']) ? $transportInfo['transportNumber']['vehicleNumber'] : null;
         $other = json_decode($this->vsdModel->other_info, true);
@@ -93,7 +91,7 @@ class VetisHelper
         $this->location_prosperity = $other['locationProsperity'];
         $this->special_marks = $other['specialMarks'];
         $this->issueNumber = (isset($this->vsdModel->number)) ? $this->vsdModel->number : null;
-        $this->issueDate = $this->vsdModel->date_doc;
+        $this->issueDate = WebApiHelper::asDatetime($this->vsdModel->date_doc);
         $this->form = $this->vsdModel->form;
         $this->type = MercVsd::$types[$this->vsdModel->type];
         $this->status = $this->vsdModel->status;
@@ -132,8 +130,8 @@ class VetisHelper
         $unit = VetisUnit::findOne(['guid' => $this->vsdModel->unit_guid]);;
         $this->volume = $this->vsdModel->amount . (isset($unit) ? " " . $unit->name : '');
 
-        $this->date_of_production = $this->vsdModel->production_date;
-        $this->expiry_date_of_production = $this->vsdModel->expiry_date;
+        $this->date_of_production = WebApiHelper::asDatetime($this->vsdModel->production_date);
+        $this->expiry_date_of_production = WebApiHelper::asDatetime($this->vsdModel->expiry_date);
         $this->perishable_products = isset($this->vsdModel->perishable) ? (($this->vsdModel->perishable == 'true') ? 'Да' :
             'Нет') : null;
 
@@ -147,7 +145,7 @@ class VetisHelper
                 $arTmp = [];
                 foreach ($laboratory_research as $item) {
                     $arTmp[] = mb_convert_encoding(
-                        $item['indicator']['name'] . ' : ' . $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($item['actualDateTime'])) . " ( " . $item['conclusion'] . " )", "UTF-8", "UTF-8");
+                        $item['indicator']['name'] . ' : ' . $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . WebApiHelper::asDatetime($item['actualDateTime']) . " ( " . $item['conclusion'] . " )", "UTF-8", "UTF-8");
                 }
                 $this->expertiseInfo = $arTmp;
             }
@@ -177,7 +175,7 @@ class VetisHelper
         $this->specified_person_post = $specPerson['post'] ?? "-";
 
         $this->waybillSeries = $this->vsdModel->waybill_number;
-        $this->waybillDate = $this->vsdModel->waybill_date;
+        $this->waybillDate = WebApiHelper::asDatetime($this->vsdModel->waybill_date);
         return $this;
     }
 

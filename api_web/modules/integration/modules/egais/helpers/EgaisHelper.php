@@ -3,6 +3,7 @@
 namespace api_web\modules\integration\modules\egais\helpers;
 
 use api_web\components\WebApi;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\egais\classes\XmlParser;
 use common\models\egais\EgaisActWriteOn;
 use common\models\egais\EgaisTypeChargeOn;

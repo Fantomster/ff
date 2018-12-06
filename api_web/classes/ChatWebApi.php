@@ -14,7 +14,8 @@ use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
- * @property int $updated_user_id       [int(11)]  Идентификатор пользователя, совершившего последние изменения записи в таблице
+ * @property int $updated_user_id       [int(11)]  Идентификатор пользователя, совершившего последние изменения записи
+ *           в таблице
  * @property int $edi_shipment_quantity [int(11)]  Отгруженное количество товара EDI
  * Class ChatWebApi
  * @package api_web\classes
@@ -43,12 +44,55 @@ class ChatWebApi extends WebApi
             throw new BadRequestHttpException('chat.access_denied');
         }
 
-        $search = Order::find()->select([
-            'order.*',
-            'IFNULL((
-                SELECT MAX(order_chat.created_at) FROM order_chat WHERE order_id = order.id AND recipient_id = :org_id
-             ), created_at) as last_message_date'
-        ])->where($where)->params(['org_id' => $client->id]);
+        $search = Order::find()
+            ->with(['vendor', 'client'])
+            ->select([
+                'order.*',
+                'last_message_date' => '(
+                    SELECT 
+                       COALESCE(MAX(order_chat.created_at), order.created_at) 
+                    FROM 
+                       order_chat 
+                    WHERE 
+                    order_id = order.id 
+                    AND
+                    recipient_id = :org_id
+                )',
+                'unread_message'    => '(
+                    SELECT 
+                       COUNT(*) 
+                    FROM 
+                       order_chat 
+                    WHERE 
+                    order_id = order.id 
+                    AND
+                    recipient_id = :org_id
+                    AND 
+                    viewed = 0
+                )',
+                'count_message'     => '(
+                    SELECT 
+                       COUNT(*) 
+                    FROM 
+                       order_chat 
+                    WHERE 
+                    order_id = order.id 
+                    AND
+                    recipient_id = :org_id
+                )',
+                'last_message'      => '(
+                    SELECT 
+                       message
+                    FROM 
+                       order_chat 
+                    WHERE 
+                    order_id = order.id 
+                    AND
+                    recipient_id = :org_id
+                    ORDER BY order_chat.created_at DESC
+                    LIMIT 1
+                )'
+            ])->where($where)->params(['org_id' => $client->id]);
 
         if (empty($search)) {
             throw new BadRequestHttpException("chat.dialogs_not_found");
@@ -117,8 +161,14 @@ class ChatWebApi extends WebApi
             throw new BadRequestHttpException("chat.dialog_not_found");
         }
 
+        $orderChat = OrderChat::find()
+            ->with(['recipient'])
+            ->where(['order_id' => $order->id])
+            ->orderBy(['created_at' => SORT_DESC])
+            ->all();
+
         $dataProvider = new ArrayDataProvider([
-            'allModels' => $order->getOrderChat()->orderBy(['created_at' => SORT_DESC])->all()
+            'allModels' => $orderChat
         ]);
 
         $pagination = new Pagination();
@@ -127,7 +177,7 @@ class ChatWebApi extends WebApi
         $dataProvider->setPagination($pagination);
 
         $result = [];
-
+        $modelsViewed = [];
         /**
          * @var $model OrderChat
          */
@@ -135,11 +185,14 @@ class ChatWebApi extends WebApi
             $message = $this->prepareMessage($model);
 
             if ($message['is_my_message'] === false && $message['viewed'] === false) {
-                $model->viewed = true;
-                $model->save();
+                $modelsViewed[] = $model->id;
             }
 
             $result[] = $message;
+        }
+
+        if (!empty($modelsViewed)) {
+            OrderChat::updateAll(['viewed' => 1], ['id' => $modelsViewed]);
         }
 
         /**
@@ -371,7 +424,7 @@ class ChatWebApi extends WebApi
      */
     private function prepareDialog(Order $model)
     {
-        $last_message = $model->orderChatLastMessage->message ?? \Yii::t('api_web', 'chat.not_message', ['ru' => 'Нет сообщений']);
+        $last_message = $model->last_message ?? \Yii::t('api_web', 'chat.not_message', ['ru' => 'Нет сообщений']);
         if (!empty($last_message)) {
             $last_message = stripcslashes(trim($last_message, "'"));
         }
@@ -383,10 +436,10 @@ class ChatWebApi extends WebApi
             'vendor'            => $model->vendor->name,
             'vendor_id'         => (int)$model->vendor->id,
             'image'             => $model->vendor->pictureUrl ?? '',
-            'count_message'     => (int)$model->orderChatCount ?? 0,
-            'unread_message'    => (int)$model->getOrderChatUnreadCount($this->user->organization_id) ?? 0,
+            'count_message'     => (int)$model->count_message ?? 0,
+            'unread_message'    => (int)$model->unread_message ?? 0,
             'last_message'      => $last_message,
-            'last_message_date' => $model->orderChatLastMessage->created_at ?? $model->created_at,
+            'last_message_date' => $model->last_message_date,
             'is_edi'            => empty($model->ediNumber) ? false : true,
         ];
     }

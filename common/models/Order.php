@@ -81,6 +81,10 @@ class Order extends \yii\db\ActiveRecord
     const DELAY_WITHOUT_DELIVERY_DATE        = 86400; //sec - 1 day
 
     public $ediProcessor = 0;
+    public $count_message = null;
+    public $unread_message = null;
+    public $last_message = null;
+    public $last_message_date = null;
 
     /**
      * @inheritdoc

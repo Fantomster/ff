@@ -15,14 +15,15 @@ use yii\web\BadRequestHttpException;
 class DictionaryController extends \api_web\components\WebApiController
 {
     /**
-     * @param \yii\base\Action $action
+     * @param $action
      * @return bool
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
      * @throws \yii\web\HttpException
      */
     public function beforeAction($action)
     {
-        $this->license_service_id = $this->user->integration_service_id ?? 0;
+        $this->license_service_id = $this->user->integration_service_id;
         return parent::beforeAction($action);
     }
 

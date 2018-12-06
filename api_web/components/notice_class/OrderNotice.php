@@ -377,7 +377,7 @@ class OrderNotice
                     'organization'  => $newMessage->recipient_id,
                     'notifications' => uniqid(),
                 ], [
-                    'body'     => $newMessage->message,
+                    'body'     => strip_tags($newMessage->message),
                     'date'     => \Yii::$app->formatter->asDatetime('now', 'php:' . \DateTime::ATOM),
                     'order_id' => $order_id
                 ]);
@@ -399,7 +399,7 @@ class OrderNotice
                     'organization'  => $newMessage->recipient_id,
                     'notifications' => uniqid(),
                 ], [
-                    'body'     => $newMessage->message,
+                    'body'     => strip_tags($newMessage->message),
                     'date'     => \Yii::$app->formatter->asDatetime('now', 'php:' . \DateTime::ATOM),
                     'order_id' => $order_id
                 ]);
@@ -475,45 +475,11 @@ class OrderNotice
             $senderUser = $order->acceptedBy ?? User::findOne(1);
         }
 
-        $systemMessage = [];
-        if (!empty($changed)) {
-            $getterAttribute = function (OrderContent $model, string $attr) {
-                $result = $model->$attr;
-                /*if ($model->isAttributeChanged($attr)) {
-                    $result = $model->getOldAttribute($attr) . ' => ' . $result;
-                }*/
-                return $result;
-            };
-
-            $systemMessage[] = \Yii::t('api_web', 'order.change.content');
-            $oc = new  OrderContent();
-            $systemMessage[] = implode(' | ', [
-                $oc->getAttributeLabel('product_name'),
-                $oc->getAttributeLabel('quantity'),
-                $oc->getAttributeLabel('price'),
+        if (!empty($changed) || !empty($deleted)) {
+            $systemMessage = \Yii::$app->view->renderFile('@mail_views/chat/order_change.php', [
+                'changed' => $changed,
+                'deleted' => $deleted
             ]);
-
-            foreach ($changed as $orderContent) {
-                $row = [];
-                $row[] = $orderContent->product_name;
-                $row[] = $getterAttribute($orderContent, 'quantity');
-                $row[] = $getterAttribute($orderContent, 'price');
-                $systemMessage[] = implode(' | ', $row);
-            }
-        }
-
-        if (!empty($deleted)) {
-            $systemMessage[] = \Yii::t('api_web', 'order.delete.content');
-            foreach ($deleted as $name) {
-                $systemMessage[] = $name;
-            }
-        }
-
-        $systemMessage = implode(PHP_EOL, $systemMessage);
-        if (!empty($systemMessage)) {
-            $systemMessage .= PHP_EOL . str_pad('', 20, '-');
-            $systemMessage .= PHP_EOL . \Yii::t('api_web', 'order.notice.total_price') . ' ' . $order->total_price;
-            $systemMessage .= ' ' . $order->currency->symbol;
             $this->sendSystemMessage($senderUser, $order->id, $systemMessage, false);
         }
     }

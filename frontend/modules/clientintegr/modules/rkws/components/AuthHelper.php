@@ -66,10 +66,12 @@ class AuthHelper extends Object
 
     public function checkAuthBool()
     {
+        //НЕМНОГО ЕБАНОЙ МАГИИ
+        $magicFuckingCode = $this->restr->code ?? 199990046;
 
         $xml = '<?xml version="1.0" encoding="utf-8" ?>
         <RQ cmd="get_objectinfo">
-        <PARAM name="object_id" val="'.$this->restr->code.'"/>
+        <PARAM name="object_id" val="' . $magicFuckingCode . '"/>
         </RQ>';
 
         $res = ApiHelper::sendCurl($xml, $this->restr);
@@ -239,7 +241,9 @@ class AuthHelper extends Object
         return ['resp' => $objectinfo, 'respcode' => $respcode];
     }
 
-    protected function log($message) {
+    protected function log($message)
+    {
         \Yii::info($message, $this->logCategory);
     }
+
 }

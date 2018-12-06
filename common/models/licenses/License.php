@@ -234,8 +234,6 @@ class License extends ActiveRecord
             }
         }
 
-        \Yii::$app->response->headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
-        \Yii::$app->response->headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
         #Проверяем, не стухла ли лицензия
         if (strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
             $message = \Yii::t('api_web', 'license.payment_required');

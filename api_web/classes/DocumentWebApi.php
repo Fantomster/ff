@@ -5,6 +5,7 @@ namespace api_web\classes;
 use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\CurrencyHelper;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\classes\documents\EdiOrder;
 use api_web\modules\integration\classes\documents\EdiOrderContent;
 use api_web\modules\integration\classes\documents\Order;

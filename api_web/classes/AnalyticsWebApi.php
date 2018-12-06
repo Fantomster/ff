@@ -59,14 +59,13 @@ class AnalyticsWebApi extends WebApi
      * Общий метод
      *
      * @param $post
-     * @param $limit int
+     * @param int $limit
      * @return array
-     * @throws BadRequestHttpException
      */
     public function vendorTurnover($post, $limit = null)
     {
         // ограничение на собственные заказы
-        $whereParams = ['order.client_id' => $this->user->organization->id];
+        $whereParams = ['order.client_id' => $this->user->organization_id];
 
         // фильтр - поставщик
         if (isset($post['search']['vendor_id'])) {
@@ -467,7 +466,6 @@ class AnalyticsWebApi extends WebApi
      *
      * @param $post
      * @return array
-     * @throws BadRequestHttpException
      */
     public function clientOrders($post)
     {
@@ -481,7 +479,6 @@ class AnalyticsWebApi extends WebApi
      *
      * @param $post
      * @return array
-     * @throws BadRequestHttpException
      */
     public function clientVendors($post)
     {
@@ -502,7 +499,6 @@ class AnalyticsWebApi extends WebApi
      * Метод получения списка валют
      *
      * @return array
-     * @throws BadRequestHttpException
      */
     public function currencies()
     {
@@ -517,14 +513,14 @@ class AnalyticsWebApi extends WebApi
             ->from('order_content')
             ->leftJoin('order', 'order.id = order_content.order_id')
             ->leftJoin('currency c', 'c.id = order.currency_id')
-            ->andWhere(['order.client_id' => $this->user->organization->id])
+            ->andWhere(['order.client_id' => $this->user->organization_id])
             ->groupBy('order.currency_id')
             ->orderBy(['SUM(order_content.quantity * order_content.price)' => SORT_DESC]);
 
         $result = [];
         foreach ($query->all() as $data) {
             $result[] = [
-                'id'       => round($data['currency_id'], 0),
+                'id'       => $data['currency_id'],
                 'iso_code' => $data['iso_code'],
                 'name'     => $data['name'],
             ];
@@ -533,7 +529,7 @@ class AnalyticsWebApi extends WebApi
         if (empty($result)) {
             $default = Currency::findOne(['iso_code' => 'RUB']);
             $result[] = [
-                'id'       => round($default->id, 0),
+                'id'       => $default->id,
                 'iso_code' => $default->symbol,
                 'name'     => $default->text
             ];

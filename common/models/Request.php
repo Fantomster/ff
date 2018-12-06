@@ -29,7 +29,7 @@ use yii\db\ActiveRecord;
  * @property Organization $vendor
  * @property Organization $client
  * @property string       $paymentMethodName
- * @property string       $categoryName
+ * @property MpCategory   $categoryName
  * @property string       $countCallback
  * @property array        $requestCallbacks
  */

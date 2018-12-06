@@ -8,15 +8,21 @@ use api_web\modules\integration\modules\egais\helpers\EgaisHelper;
 use api_web\modules\integration\modules\egais\classes\EgaisXmlFiles;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
+use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
 
+/**
+ * Class EgaisMethods
+ *
+ * @package api_web\modules\integration\modules\egais\models
+ */
 class EgaisMethods extends WebApi
 {
     /**
      * @param $request
      * @param $orgId
      * @return array
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|\Exception
      */
     public function setEgaisSettings($request, $orgId)
     {
@@ -31,30 +37,27 @@ class EgaisMethods extends WebApi
         if (empty($defaultSettings)) {
             throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
-
+        /**@var Transaction $transaction */
         $transaction = \Yii::$app->db_api->beginTransaction();
         foreach ($defaultSettings as $defaultSetting) {
-            $settingValue = IntegrationSettingValue::findOne([
-                'setting_id' => $defaultSetting->id,
-                'org_id' => $orgId
-            ]);
-
-            if (!empty($settingValue)) {
-                $settingValue->value = $request[$defaultSetting->name];
-                $settingValue->updated_at = date('Y-m-d h:i:s');
-            } else {
-                $settingValue = new IntegrationSettingValue([
+            if (array_key_exists($defaultSetting->name, $request)) {
+                $settingValue = IntegrationSettingValue::findOne([
                     'setting_id' => $defaultSetting->id,
-                    'org_id' => $orgId,
-                    'value' => $request[$defaultSetting->name],
-                    'created_at' => date('Y-m-d h:i:s'),
-                    'updated_at' => date('Y-m-d h:i:s'),
+                    'org_id'     => $orgId
                 ]);
-            }
-
-            if (!$settingValue->save()) {
-                $transaction->rollBack();
-                throw new BadRequestHttpException('dictionary.egais_set_setting_error');
+                if (!empty($settingValue)) {
+                    $settingValue->value = $request[$defaultSetting->name];
+                } else {
+                    $settingValue = new IntegrationSettingValue([
+                        'setting_id' => $defaultSetting->id,
+                        'org_id'     => $orgId,
+                        'value'      => $request[$defaultSetting->name],
+                    ]);
+                }
+                if (!$settingValue->save()) {
+                    $transaction->rollBack();
+                    throw new BadRequestHttpException('dictionary.egais_set_setting_error');
+                }
             }
         }
         $transaction->commit();

@@ -3,6 +3,7 @@
 namespace api_web\modules\integration\modules\egais\helpers;
 
 use api_web\components\WebApi;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\egais\classes\XmlParser;
 use common\models\egais\EgaisTypeWriteOff;
 use common\models\egais\EgaisWriteOff;
@@ -45,13 +46,13 @@ class EgaisHelper extends WebApi
         }
 
         (new EgaisWriteOff([
-            'org_id' => $orgId,
-            'identity' => $result['identity'],
-            'act_number' => $result['ActNumber'],
-            'act_date' => $result['ActDate'],
+            'org_id'         => $orgId,
+            'identity'       => $result['identity'],
+            'act_number'     => $result['ActNumber'],
+            'act_date'       => WebApiHelper::asDatetime($result['ActDate']),
             'type_write_off' => $typeWriteOff ? $typeWriteOff->id : 8,
-            'note' => $result['Note'],
-            'status' => null,
+            'note'           => $result['Note'],
+            'status'         => null,
         ]))->save();
 
         return self::sendEgaisQuery($url, $data, $queryType);

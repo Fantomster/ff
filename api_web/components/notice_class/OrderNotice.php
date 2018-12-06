@@ -3,6 +3,7 @@
 namespace api_web\components\notice_class;
 
 use api_web\components\FireBase;
+use api_web\helpers\WebApiHelper;
 use common\models\Message;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
@@ -349,7 +350,7 @@ class OrderNotice
             $body = Yii::$app->controller->renderPartial('@frontend/views/order/_chat-message', [
                 'name'      => '',
                 'message'   => $newMessage->message,
-                'time'      => $newMessage->created_at,
+                'time'      => WebApiHelper::asDatetime($newMessage->created_at),
                 'isSystem'  => 1,
                 'sender_id' => $user->id,
                 'ajax'      => 1,
@@ -377,7 +378,7 @@ class OrderNotice
                     'notifications' => uniqid(),
                 ], [
                     'body'     => $newMessage->message,
-                    'date'     => \Yii::$app->formatter->asDatetime('now', 'php:' . \DateTime::ATOM),
+                    'date'     => WebApiHelper::asDatetime(),
                     'order_id' => $order_id
                 ]);
             }
@@ -399,7 +400,7 @@ class OrderNotice
                     'notifications' => uniqid(),
                 ], [
                     'body'     => $newMessage->message,
-                    'date'     => \Yii::$app->formatter->asDatetime('now', 'php:' . \DateTime::ATOM),
+                    'date'     => WebApiHelper::asDatetime(),
                     'order_id' => $order_id
                 ]);
             }

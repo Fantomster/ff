@@ -8,10 +8,8 @@ use common\components\edi\EDIIntegration;
 use common\helpers\DBNameHelper;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
-use yii\behaviors\AttributesBehavior;
-use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveRecord;
-use yii\db\Query;
+use yii\behaviors\{AttributesBehavior, TimestampBehavior};
+use yii\db\{ActiveRecord, Query};
 use yii\web\BadRequestHttpException;
 
 /**

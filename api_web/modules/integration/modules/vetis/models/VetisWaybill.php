@@ -8,6 +8,7 @@ use api\common\models\merc\MercVsd;
 use api_web\classes\UserWebApi;
 use api_web\components\Registry;
 use api_web\components\WebApi;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use api_web\modules\integration\modules\vetis\api\mercury\mercuryApi;
 use api_web\modules\integration\modules\vetis\api\mercury\VetDocumentDone;
@@ -133,11 +134,11 @@ class VetisWaybill extends WebApi
                 'sender_name'     => $model->sender_name,
                 'status'          => $model->status,
                 'status_text'     => MercVsd::$statuses[$model->status],
-                'status_date'     => $model->last_update_date,
+                'status_date'     => WebApiHelper::asDatetime($model->last_update_date),
                 'amount'          => $model->amount,
                 'unit'            => $model->unit,
-                'production_date' => $model->production_date,
-                'date_doc'        => $model->date_doc,
+                'production_date' => WebApiHelper::asDatetime($model->production_date),
+                'date_doc'        => WebApiHelper::asDatetime($model->date_doc),
                 'vsd_direction'   => $arIncOut[$model->uuid] ?? null,
                 'last_error'      => $model->last_error,
                 'user_status'     => $model->user_status,

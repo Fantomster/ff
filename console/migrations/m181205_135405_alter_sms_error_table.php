@@ -16,8 +16,8 @@ class m181205_135405_alter_sms_error_table extends Migration
         $this->dropColumn("{{%sms_error}}", "message");
         $this->dropColumn("{{%sms_error}}", "target");
         $this->addColumn("{{%sms_error}}", "error_code", $this->integer()->notNull());
-        $this->addColumn("{{%sms_error}}", "sms_send_id", $this->integer()->notNull());
-        $this->addForeignKey("fk_sms_error", "{{%sms_error}}", "sms_send_id", "{{%sms_send}}", "id");
+        $this->addColumn("{{%sms_error}}", "sms_id", $this->string()->notNull());
+        $this->createIndex("idx_sms_error_sms_id", "{{%sms_error}}", "sms_id");
     }
 
     /**
@@ -25,7 +25,7 @@ class m181205_135405_alter_sms_error_table extends Migration
      */
     public function safeDown()
     {
-        $this->dropForeignKey("fk_sms_error", "{{%sms_error}}");
+        $this->dropIndex("idx_sms_error_sms_id", "{{%sms_error}}");
         $this->dropColumn("{{%sms_error}}", "error_code");
         $this->dropColumn("{{%sms_error}}", "sms_send_id");
         $this->addColumn("{{%sms_error}}", "message", $this->string()->null());

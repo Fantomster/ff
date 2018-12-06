@@ -165,7 +165,7 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
 
         if ($button == 'forever') {
             $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
-            $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 2, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+            $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => Registry::TILLYPAD_SERVICE_ID, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
             if ($existence == 0) {
                 /*$sql = "SELECT store_id,agent_uuid FROM iiko_waybill WHERE id = :w_wi";
                 $res = Yii::$app->db_api->createCommand($sql, [':w_wi' => $waybill_id])->queryAll();
@@ -242,7 +242,7 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
         $result = Yii::$app->db_api->createCommand($sql, [':w_quant' => $quant_new, ':w_koef' => $koef, ':w_id' => $koef_id])->execute();
         if ($buttons == 'forever') {
             $sql = "SELECT COUNT(*) FROM all_map WHERE service_id = :w_s AND org_id = :w_org AND product_id = :w_product";
-            $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => 2, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
+            $existence = Yii::$app->db_api->createCommand($sql, [':w_s' => Registry::TILLYPAD_SERVICE_ID, ':w_org' => $org_id, ':w_product' => $product_id])->queryScalar();
             if ($existence == 0) {
                 $sql = "SELECT store_id/*,agent_uuid*/ FROM iiko_waybill WHERE id = :w_wi";
                 $res = Yii::$app->db_api->createCommand($sql, [':w_wi' => $waybill_id])->queryAll();
@@ -510,7 +510,7 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
                   (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ $andWhere LIMIT 15)
                     UNION
                   (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :_term_ $andWhere LIMIT 10)
-                  ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term) 
+                  ORDER BY CASE WHEN CHAR_LENGTH(trim(denom)) = CHAR_LENGTH(:term)
                      THEN 1
                      ELSE 2
                   END
@@ -632,7 +632,8 @@ return $out;
 
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
-                $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+                //$model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+                $model->payment_delay_date = $model->doc_date;
                 $model->save();
                 return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
             } else {

@@ -115,12 +115,12 @@ abstract class AbstractProvider
      * @param $target
      * @param $error_message
      */
-    public function setError($sms_send_id, $error_code, $error_message)
+    public function setError($sms_id, $error_code, $error_message)
     {
         //Сохраняем ошибку в лог, чтобы ошибка при отправке, не рушила систему
         $model = new \common\models\SmsError([
             'error'       => $error_message,
-            'sms_send_id' => $sms_send_id,
+            'sms_id' => $sms_id,
             'error_code'  => $error_code,
         ]);
         $model->save();

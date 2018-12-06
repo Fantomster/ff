@@ -11,7 +11,7 @@ use Yii;
  * @property string $date
  * @property string $error
  * @property integer $error_code
- * @property integer $send_sms_id
+ * @property string $sms_id
  */
 class SmsError extends \yii\db\ActiveRecord
 {
@@ -49,8 +49,8 @@ class SmsError extends \yii\db\ActiveRecord
     {
         return [
             [['date'], 'safe'],
-            [['error_code', 'sms_send_id'], 'integer'],
-            [['message', 'target', 'error'], 'string', 'max' => 255],
+            [['error_code'], 'integer'],
+            [['message', 'target', 'error', 'sms_id'], 'string', 'max' => 255],
         ];
     }
 
@@ -64,16 +64,16 @@ class SmsError extends \yii\db\ActiveRecord
             'date'        => 'Date',
             'error'       => 'Error',
             'error_code'  => 'Error code',
-            'sms_send_id' => 'Sms ID',
+            'sms_id' => 'Sms ID',
         ];
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getStatus()
+    public function getSms()
     {
-        return $this->hasOne(SmsSend::className(), ['id' => 'sms_send_id']);
+        return $this->hasOne(SmsSend::className(), ['id' => 'sms_id']);
     }
 
 }

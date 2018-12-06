@@ -22,15 +22,15 @@ class DefaultController extends \frontend\modules\clientintegr\modules\iiko\cont
         $view = $license ? 'index' : '/default/_nolic';
         $params = ['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'lic' => $license];
         $spravoch_zagruzhen = iikoDicSearch::getDicsLoad();
-        /*if ($spravoch_zagruzhen) {
+        if ($spravoch_zagruzhen) {
             return Yii::$app->response->redirect(['clientintegr/tillypad/waybill/index']);
-        } else {*/
+        } else {
             if (Yii::$app->request->isPjax) {
                 return $this->renderPartial($view, $params);
             } else {
                 return $this->render($view, $params);
             }
-        //}
+        }
     }
 
     public function actionMain()
@@ -40,11 +40,11 @@ class DefaultController extends \frontend\modules\clientintegr\modules\iiko\cont
         $license = TillypadService::getLicense();
         $view = $license ? 'index' : '/default/_nolic';
         $params = ['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'lic' => $license];
-            if (Yii::$app->request->isPjax) {
-                return $this->renderPartial($view, $params);
-            } else {
-                return $this->render($view, $params);
-            }
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial($view, $params);
+        } else {
+            return $this->render($view, $params);
+        }
     }
 
     /*public function actionTest() {

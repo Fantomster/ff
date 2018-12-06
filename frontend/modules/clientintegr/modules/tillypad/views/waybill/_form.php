@@ -82,11 +82,11 @@ if (!$selectedStore || count($selectedStore) == 0) {
     } else {
         $model->doc_date = date('d.m.Y', strtotime($model->doc_date));
     }
-    if (!$model->payment_delay_date) {
+    /*if (!$model->payment_delay_date) {
         $model->payment_delay_date = date('d.m.Y', time());
     } else {
         $model->payment_delay_date = date('d.m.Y', strtotime($model->payment_delay_date));
-    }
+    }*/
     ?>
 
     <?= $form->field($model, 'doc_date')->label('Дата документа')->
@@ -102,7 +102,7 @@ if (!$selectedStore || count($selectedStore) == 0) {
     ]);
     ?>
 
-    <?php
+    <?php /*
     echo $form->field($model, 'payment_delay_date')->label('Дата отсрочки платежа')->
     widget(DatePicker::class, [
         'type'          => DatePicker::TYPE_COMPONENT_APPEND,
@@ -113,7 +113,7 @@ if (!$selectedStore || count($selectedStore) == 0) {
             'format'         => 'dd.MM.yyyy',
             'todayHighlight' => false,
         ],
-    ]);
+    ]);*/
     ?>
 
     <?php echo $form->field($model, 'note')->textInput(['maxlength' => true]) ?>

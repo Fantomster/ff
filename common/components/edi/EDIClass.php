@@ -374,14 +374,12 @@ class EDIClass extends Component
             $goodsArray[$barcode]['edi_supplier_article'] = (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String)$good->IDSUPPLIER : $barcode;
             $goodsArray[$barcode]['vat'] = (int)$good->TAXRATE ?? null;
         }
-
         $catalog_base_goods = (new \yii\db\Query())
             ->select(['id', 'barcode'])
             ->from(CatalogBaseGoods::tableName())
             ->where(['cat_id' => $baseCatalog->id])
             ->andWhere('`barcode` IS NOT NULL')
             ->all();
-
         foreach ($catalog_base_goods as $base_good) {
             if (!in_array($base_good['barcode'], $goodsArray)) {
                 \Yii::$app->db->createCommand()->delete(CatalogGoods::tableName(), ['base_goods_id' => $base_good['id'], 'cat_id' => $relationCatalogID])->execute();
@@ -398,12 +396,13 @@ class EDIClass extends Component
                 $catalogBaseGood->supp_org_id = $organization->id;
                 $catalogBaseGood->price = $good['price'];
                 $catalogBaseGood->units = $good['units'];
-                $catalogBaseGood->ed = $good['ed'];
+                $catalogBaseGood->ed = ($good['ed'] == '') ? "кг" : $good['ed'];
                 $catalogBaseGood->category_id = null;
                 $catalogBaseGood->deleted = 0;
                 $catalogBaseGood->barcode = $barcode;
                 $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
                 $res = $catalogBaseGood->save();
+
                 if (!$res) continue;
                 $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
                 $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price'], $good['vat']);
@@ -449,7 +448,7 @@ class EDIClass extends Component
         $catalog = new Catalog();
         $catalog->type = Catalog::CATALOG;
         $catalog->supp_org_id = $organization->id;
-        $catalog->name = $organization->name;
+        $catalog->name = $rest->name;
         $catalog->status = Catalog::STATUS_ON;
         $catalog->currency_id = $currency->id ?? 1;
         $catalog->save();

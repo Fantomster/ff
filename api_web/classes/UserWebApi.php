@@ -52,10 +52,12 @@ class UserWebApi extends \api_web\components\WebApi
         }
         if (empty($model->integration_service_id)) {
             foreach ([Registry::RK_SERVICE_ID, Registry::IIKO_SERVICE_ID] as $serviceId) {
-                if (!empty(License::checkByServiceId($this->user->organization_id, $serviceId))) {
-                    $model->integration_service_id = $serviceId;
-                    $model->save();
+                try {
+                    License::checkLicense($this->user->organization_id, $serviceId);
+                    $model->setIntegrationServiceId($serviceId);
                     break;
+                } catch (\Exception $e) {
+                    continue;
                 }
             }
         }

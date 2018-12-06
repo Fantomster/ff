@@ -58,9 +58,7 @@ class IntegrationWebApi extends WebApi
         $this->validateRequest($request, ['service_id']);
         $license = License::checkByServiceId($this->user->organization_id, $request['service_id']);
         if ($license) {
-            $this->user->integration_service_id = $request['service_id'];
-            $this->user->save();
-            return ['result' => true];
+            return ['result' => $this->user->setIntegrationServiceId($request['service_id'])];
         } else {
             throw new BadRequestHttpException('Dont have active license for this service');
         }
@@ -562,7 +560,7 @@ class IntegrationWebApi extends WebApi
                 $this->editProductMap($post['service_id'], $item, $post['business_id']);
                 $result[$item['product_id']] = ['success' => true];
             } catch (\Exception $e) {
-                $result[$item['product_id']] = ['success' => false, 'error' => \Yii::t('api_web', $e->getMessage())  . $e->getTraceAsString()];
+                $result[$item['product_id']] = ['success' => false, 'error' => \Yii::t('api_web', $e->getMessage()) . $e->getTraceAsString()];
             }
         }
         return $result;

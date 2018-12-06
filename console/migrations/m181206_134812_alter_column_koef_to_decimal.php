@@ -7,6 +7,12 @@ use yii\db\Migration;
  */
 class m181206_134812_alter_column_koef_to_decimal extends Migration
 {
+    public function init()
+    {
+        $this->db = 'db_api';
+        parent::init();
+    }
+
     /**
      * {@inheritdoc}
      */

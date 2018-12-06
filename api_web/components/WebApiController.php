@@ -225,10 +225,9 @@ class WebApiController extends \yii\rest\Controller
             if (!in_array($action->id, $this->not_log_actions)) {
                 Logger::getInstance()::response($this->response);
             }
-            $response = \api_web\helpers\WebApiHelper::response($this->response);
             $headers = \Yii::$app->response->headers;
             $headers->add('Backend-Time-Generation', round(\Yii::getLogger()->getElapsedTime(), 5));
-            return $response;
+            return $this->response;
         } else {
             return [];
         }

@@ -6,6 +6,7 @@ use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\OuterProductMapHelper;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\classes\OuterProductMapper;
 use common\models\AllService;
 use common\models\CatalogBaseGoods;
@@ -608,8 +609,8 @@ class IntegrationWebApi extends WebApi
             "outer_store"                   => null,
             "coefficient"                   => !empty($model['coefficient']) ? round($model['coefficient'], 10) : 1,
             "vat"                           => (int)$model['vat'],
-            "created_at"                    => $model['created_at'] ?? null,
-            "updated_at"                    => $model['updated_at'] ?? null,
+            "created_at"                    => WebApiHelper::asDatetime($model['created_at'] ?? null),
+            "updated_at"                    => WebApiHelper::asDatetime($model['updated_at'] ?? null),
             "is_child_organization_for_map" => $isChild,
         ];
 

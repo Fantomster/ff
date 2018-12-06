@@ -111,16 +111,16 @@ abstract class AbstractProvider
 
     /**
      * Запись ошибки в базу
-     * @param string $sms_id
+     * @param integer $sms_send_id
      * @param integer $error_code
      * @param string $error_message
      */
-    public function setError($sms_id, $error_code, $error_message)
+    public function setError($sms_send_id, $error_code, $error_message)
     {
         //Сохраняем ошибку в лог, чтобы ошибка при отправке, не рушила систему
         $model = new \common\models\SmsError([
             'error'       => $error_message,
-            'sms_id' => $sms_id,
+            'sms_send_id' => $sms_send_id,
             'error_code'  => $error_code,
         ]);
         $model->save();

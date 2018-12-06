@@ -84,7 +84,6 @@ class EDIClass extends Component
                 throw new Exception('No such order');
             }
 
-
             \Yii::$app->language = $order->edi_order->lang ?? 'ru';
             $user = User::findOne(['id' => $order->created_by_id]);
             if (!$user) {
@@ -111,6 +110,7 @@ class EDIClass extends Component
             $totalPrice = 0;
             $changed = [];
             $deleted = [];
+            $ordNotice = new OrderNotice();
 
             foreach ($positions as $position) {
                 if (!isset($position->PRODUCT)) continue;
@@ -136,7 +136,6 @@ class EDIClass extends Component
                 $totalPrice += $arr[$contID]['PRICE'];
             }
             if ($totalQuantity == 0.00 || $totalPrice == 0.00) {
-                $ordNotice = new OrderNotice();
                 $ordNotice->cancelOrder($user, $organization, $order);
                 $order->status = OrderStatus::STATUS_REJECTED;
                 if (!$order->save()) {
@@ -261,7 +260,6 @@ class EDIClass extends Component
             if (!$order->save()) {
                 throw new Exception('Error saving order');
             }
-            $ordNotice = new OrderNotice();
             $ordNotice->sendOrderChange($organization, $order, $changed, $deleted);
             $action = ($isDesadv) ? " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
             $systemMessage = $order->vendor->name . '' . $action;

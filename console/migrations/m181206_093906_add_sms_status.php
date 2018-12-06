@@ -14,7 +14,6 @@ class m181206_093906_add_sms_status extends Migration
     public function safeUp()
     {
         $this->insert('{{%sms_status}}', ['status' => 0, 'text' => 'готовится к отправлению']);
-        $this->insert('{{%sms_status}}', ['status' => 23, 'text' => 'отправляется']);
     }
 
     /**

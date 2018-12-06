@@ -24,7 +24,6 @@ class SmsStatus extends \yii\db\ActiveRecord
     const STATUS_CANCELED = 20;
     const STATUS_SYSTEM_ERROR = 21;
     const STATUS_UNKNOWN = 22;
-    const STATUS_SENDING = 23;
     
     /**
      * @inheritdoc

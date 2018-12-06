@@ -20,9 +20,9 @@ class MixedProvider extends Qtelecom
 
     /**
      * Отправка сообщения
-     * @param $message
-     * @param $target
-     * @return mixed
+     * @param string $message
+     * @param string $target
+     * @param integer $order_id
      */
     public function send($message, $target, $order_id = null)
     {

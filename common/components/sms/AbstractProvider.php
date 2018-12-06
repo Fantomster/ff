@@ -111,9 +111,9 @@ abstract class AbstractProvider
 
     /**
      * Запись ошибки в базу
-     * @param $message
-     * @param $target
-     * @param $error_message
+     * @param string $sms_id
+     * @param integer $error_code
+     * @param string $error_message
      */
     public function setError($sms_id, $error_code, $error_message)
     {

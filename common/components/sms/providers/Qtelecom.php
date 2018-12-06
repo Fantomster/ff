@@ -151,10 +151,10 @@ class Qtelecom extends AbstractProvider
         if (isset($array['errors'])) {
             if (is_array($array['errors']['error'])) {
                 foreach ($array['errors']['error'] as $error) {
-                    $this->setError($array['result']['sms']['@attributes']['id'], $array['errors']['error']['@attributes']['code'], $error);
+                    $this->setError(null, $array['errors']['error']['@attributes']['code'], $error);
                 }
             } else {
-                $this->setError($array['result']['sms']['@attributes']['id'], $array['errors']['error']['@attributes']['code'], $array['errors']['error']);
+                $this->setError(null, $array['errors']['error']['@attributes']['code'], $array['errors']['error']);
             }
             return;
         }

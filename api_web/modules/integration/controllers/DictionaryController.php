@@ -17,6 +17,8 @@ class DictionaryController extends \api_web\components\WebApiController
     /**
      * @param \yii\base\Action $action
      * @return bool
+     * @throws BadRequestHttpException
+     * @throws \yii\web\HttpException
      */
     public function beforeAction($action)
     {
@@ -722,6 +724,7 @@ class DictionaryController extends \api_web\components\WebApiController
      *     )
      * )
      * @throws BadRequestHttpException
+     * @throws \api_web\exceptions\ValidationException
      */
 
     public function actionCategorySetSelected()

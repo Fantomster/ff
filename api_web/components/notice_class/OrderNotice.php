@@ -128,7 +128,7 @@ class OrderNotice
                     try {
                         $text = Yii::$app->sms->prepareText('sms.order_new', [
                             'name' => $senderOrg->name,
-                            'url'  => $order->getUrlForUser($recipient)
+                            'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);
                     } catch (\Exception $e) {
@@ -145,6 +145,7 @@ class OrderNotice
      * @param User         $user
      * @param Organization $organization
      * @param Order        $order
+     * @throws \Exception
      */
     public function cancelOrder(User $user, Organization $organization, Order $order)
     {
@@ -186,7 +187,7 @@ class OrderNotice
                     if (!empty($recipient->profile->phone) && $notification->order_canceled) {
                         $text = Yii::$app->sms->prepareText('sms.order_canceled', [
                             'name' => $senderOrg->name,
-                            'url'  => $order->getUrlForUser($recipient)
+                            'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);
                     }
@@ -246,7 +247,7 @@ class OrderNotice
                     if (!empty($recipient->profile->phone) && $notification->order_done) {
                         $text = Yii::$app->sms->prepareText('sms.order_done', [
                             'name' => $senderOrg->name,
-                            'url'  => $order->getUrlForUser($recipient)
+                            'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);
                     }
@@ -307,7 +308,7 @@ class OrderNotice
                         if (!empty($recipient->profile->phone) && $notification->order_processing) {
                             $text = Yii::$app->sms->prepareText('sms.order_processing', [
                                 'name' => $order->vendor->name,
-                                'url'  => $order->getUrlForUser($recipient)
+                                'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                             ]);
                             Yii::$app->sms->send($text, $recipient->profile->phone);
                         }
@@ -426,6 +427,7 @@ class OrderNotice
      * @param Order          $order
      * @param OrderContent[] $changed
      * @param OrderContent[] $deleted
+     * @throws \Exception
      */
     public function sendOrderChange($senderOrg, $order, $changed = [], $deleted = [])
     {
@@ -458,7 +460,7 @@ class OrderNotice
                     if ($recipient->profile->phone && $notification->order_changed) {
                         $text = Yii::$app->sms->prepareText('sms.order_changed', [
                             'client_name' => $senderOrg->name,
-                            'url'         => $order->getUrlForUser($recipient)
+                            'url'         => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);
                     }
@@ -474,45 +476,11 @@ class OrderNotice
             $senderUser = $order->acceptedBy ?? User::findOne(1);
         }
 
-        $systemMessage = [];
-        if (!empty($changed)) {
-            $getterAttribute = function (OrderContent $model, string $attr) {
-                $result = $model->$attr;
-                /*if ($model->isAttributeChanged($attr)) {
-                    $result = $model->getOldAttribute($attr) . ' => ' . $result;
-                }*/
-                return $result;
-            };
-
-            $systemMessage[] = \Yii::t('api_web', 'order.change.content');
-            $oc = new  OrderContent();
-            $systemMessage[] = implode(' | ', [
-                $oc->getAttributeLabel('product_name'),
-                $oc->getAttributeLabel('quantity'),
-                $oc->getAttributeLabel('price'),
+        if (!empty($changed) || !empty($deleted)) {
+            $systemMessage = \Yii::$app->view->renderFile('@mail_views/chat/order_change.php', [
+                'changed' => $changed,
+                'deleted' => $deleted
             ]);
-
-            foreach ($changed as $orderContent) {
-                $row = [];
-                $row[] = $orderContent->product_name;
-                $row[] = $getterAttribute($orderContent, 'quantity');
-                $row[] = $getterAttribute($orderContent, 'price');
-                $systemMessage[] = implode(' | ', $row);
-            }
-        }
-
-        if (!empty($deleted)) {
-            $systemMessage[] = \Yii::t('api_web', 'order.delete.content');
-            foreach ($deleted as $name) {
-                $systemMessage[] = $name;
-            }
-        }
-
-        $systemMessage = implode(PHP_EOL, $systemMessage);
-        if (!empty($systemMessage)) {
-            $systemMessage .= PHP_EOL . str_pad('', 20, '-');
-            $systemMessage .= PHP_EOL . \Yii::t('api_web', 'order.notice.total_price') . ' ' . $order->total_price;
-            $systemMessage .= ' ' . $order->currency->symbol;
             $this->sendSystemMessage($senderUser, $order->id, $systemMessage, false);
         }
     }

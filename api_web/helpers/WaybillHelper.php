@@ -61,11 +61,13 @@ class WaybillHelper
     }
 
     /**
-     * @param      $order_id
-     * @param null $arOrderContentForCreate С EDI может приходить несколькими файлами orderContent для одного заказа
-     * @param null $supplierOrgId
-     * @throws \Exception
+     * @param       $order_id
+     * @param null  $arOrderContentForCreate С EDI может приходить несколькими файлами orderContent для одного заказа
+     * @param null  $supplierOrgId
+     * @param array $arExcludedService
      * @return mixed
+     * @throws BadRequestHttpException
+     * @throws ValidationException
      */
     public function createWaybill($order_id, $arOrderContentForCreate = null, $supplierOrgId = null, $arExcludedService = [])
     {
@@ -554,6 +556,7 @@ class WaybillHelper
      *
      * @param        $message
      * @param        $service_id
+     * @param int    $orgId
      * @param string $type
      * @throws ValidationException
      */
@@ -580,7 +583,6 @@ class WaybillHelper
      */
     public function createQueryWyabillToOrder($orderId)
     {
-        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
         return (new Query())->distinct()->select(['w.id', 'w.service_id'])
             ->from('waybill w')
             ->leftJoin('waybill_content wc', 'w.id=wc.waybill_id')

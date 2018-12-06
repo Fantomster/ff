@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'app_version' => 1,
     'google-api'              => [
         'key-id'   => 'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
         'language' => 'ru-RU'

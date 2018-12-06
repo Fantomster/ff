@@ -23,6 +23,7 @@ class rkeeperService extends WebApi implements ServiceInterface
 
     /**
      * Название сервиса
+     *
      * @return string
      */
     public function getServiceName()
@@ -32,15 +33,17 @@ class rkeeperService extends WebApi implements ServiceInterface
 
     /**
      * Информация о лицензии MixCart
+     *
      * @return RkService
      */
     public function getLicenseMixCart()
     {
-        return RkService::find(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
+        return RkService::find()->where(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
     }
 
     /**
      * Статус лицензии сервиса
+     *
      * @return bool
      */
     public function getLicenseMixCartActive()
@@ -56,6 +59,7 @@ class rkeeperService extends WebApi implements ServiceInterface
 
     /**
      * Настройки
+     *
      * @return array
      */
     public function getSettings()
@@ -69,9 +73,9 @@ class rkeeperService extends WebApi implements ServiceInterface
         $result = [];
         foreach ($query as $row) {
             $r = [
-                'name' => (string)$row['denom'],
+                'name'    => (string)$row['denom'],
                 'comment' => (string)$row['comment'],
-                'type' => (int)$row['type'],
+                'type'    => (int)$row['type'],
             ];
             switch ($row['type']) {
                 case 1:
@@ -93,6 +97,7 @@ class rkeeperService extends WebApi implements ServiceInterface
 
     /**
      * Установка настроек
+     *
      * @param $params
      * @return array|mixed
      * @throws BadRequestHttpException
@@ -109,7 +114,7 @@ class rkeeperService extends WebApi implements ServiceInterface
                 if (empty($pmodel)) {
                     $pmodel = new RkPconst([
                         'const_id' => $model->id,
-                        'org' => $this->user->organization->id
+                        'org'      => $this->user->organization->id
                     ]);
                 }
                 $pmodel->value = (string)$value;
@@ -125,6 +130,7 @@ class rkeeperService extends WebApi implements ServiceInterface
 
     /**
      * Список опций, отображаемых на главной странице интеграции
+     *
      * @return array
      */
     public function getOptions()
@@ -139,7 +145,7 @@ class rkeeperService extends WebApi implements ServiceInterface
             }
         }
         return [
-            'waiting' => (int)RkWaybill::find()->where(['org' => $this->user->organization->id, 'status_id' => 1])->count(),
+            'waiting'    => (int)RkWaybill::find()->where(['org' => $this->user->organization->id, 'status_id' => 1])->count(),
             'not_formed' => $result
         ];
     }

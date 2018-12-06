@@ -98,6 +98,7 @@ class CartWebApi extends \api_web\components\WebApi
      * Содержимое корзины
      *
      * @return array
+     * @throws ValidationException
      */
     public function items()
     {
@@ -139,6 +140,9 @@ class CartWebApi extends \api_web\components\WebApi
      *
      * @param array $post
      * @return array
+     * @throws \Throwable
+     * @throws \yii\base\ErrorException
+     * @throws \yii\db\StaleObjectException
      */
     public function clear(array $post)
     {
@@ -419,6 +423,7 @@ class CartWebApi extends \api_web\components\WebApi
      * @throws BadRequestHttpException
      * @throws ValidationException
      * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     private function setPosition(Cart $cart, array &$product, $quantity)
     {

@@ -27,7 +27,7 @@ class TillypadLogger
 
     /**
      * @param $denom
-     * @return array|bool
+     * @return void
      * @throws \Exception
      */
     public function setOperation($denom)

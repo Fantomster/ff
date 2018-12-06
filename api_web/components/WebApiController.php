@@ -112,7 +112,11 @@ class WebApiController extends \yii\rest\Controller
      * @param \yii\base\Action $action
      * @return bool
      * @throws HttpException
+     * @throws \yii\base\ExitException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      * @throws \yii\web\BadRequestHttpException
+     * @throws \yii\web\UnauthorizedHttpException
      */
     public function beforeAction($action)
     {
@@ -199,6 +203,7 @@ class WebApiController extends \yii\rest\Controller
      * @param \yii\base\Action $action
      * @param mixed            $result
      * @return array|string
+     * @throws \Exception
      */
     public function afterAction($action, $result)
     {
@@ -207,6 +212,8 @@ class WebApiController extends \yii\rest\Controller
             if (!in_array($action->id, $this->not_log_actions)) {
                 Logger::getInstance()::response($this->response);
             }
+            $headers = \Yii::$app->response->headers;
+            $headers->add('Backend-Time-Generation', round(\Yii::getLogger()->getElapsedTime(), 5));
             return $this->response;
         } else {
             return [];

@@ -319,6 +319,8 @@ class GuideWebApi extends \api_web\components\WebApi
      *
      * @param array $params
      * @throws BadRequestHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function delete(array $params)
     {
@@ -385,7 +387,10 @@ class GuideWebApi extends \api_web\components\WebApi
      *
      * @param array $post
      * @return array
-     * @throws BadRequestHttpException|\Exception
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function addToCart(array $post)
     {
@@ -529,7 +534,8 @@ class GuideWebApi extends \api_web\components\WebApi
     /**
      * @param $guide_id
      * @param $pid
-     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\db\Exception
      */
     private function operationRemoveProduct($guide_id, $pid)
     {
@@ -591,6 +597,8 @@ class GuideWebApi extends \api_web\components\WebApi
     /**
      * @param $row
      * @return mixed
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     private function prepareProduct($row)
     {

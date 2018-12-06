@@ -432,7 +432,8 @@ class ClientWebApi extends WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\db\Exception
      */
     public function additionalEmailDelete(array $post)
     {
@@ -751,7 +752,8 @@ class ClientWebApi extends WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\db\Exception
      */
     public function employeeDelete(array $post)
     {
@@ -800,7 +802,6 @@ class ClientWebApi extends WebApi
     /**
      * @param User $model
      * @return array
-     * @throws BadRequestHttpException
      */
     private function prepareEmployee(User $model)
     {

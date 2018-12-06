@@ -87,8 +87,10 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         $session = Yii::$app->session;
         if (Yii::$app->request->isGet) {
             $selected = Yii::$app->session->get('selectedentry', null);
+            $get = Yii::$app->request->get('selected');
+            $selected = isset($selected) ? $selected : $get;
             if (isset($selected)) {
-                $selected = implode(",", $selected);
+                $selected = is_array($selected) ? implode(",", $selected) : $selected;
                 $session->remove('TrVsd_step1');
             } else {
                 $selected = $session->get('TrVsd_step1', []);
@@ -294,8 +296,10 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         $session = Yii::$app->session;
         if (Yii::$app->request->isGet) {
             $selected = Yii::$app->session->get('selectedentry', null);
+            $get = Yii::$app->request->get('selected');
+            $selected = isset($selected) ? $selected : $get;
             if (isset($selected)) {
-                $selected = implode(",", $selected);
+                $selected = is_array($selected) ? implode(",", $selected) : $selected;
                 $session->remove('TrVsd_step1');
             } else {
                 $selected = $session->get('TrVsd_step1', []);

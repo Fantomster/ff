@@ -40,7 +40,7 @@ class iikoService extends WebApi implements ServiceInterface
      */
     public function getLicenseMixCart()
     {
-        return \api\common\models\iiko\iikoService::find(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
+        return \api\common\models\iiko\iikoService::find()->where(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
     }
 
     /**

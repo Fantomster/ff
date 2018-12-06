@@ -25,6 +25,8 @@ class Excel
     /**
      * @param string $excelFile
      * @return array
+     * @throws \PHPExcel_Exception
+     * @throws \PHPExcel_Reader_Exception
      */
     public static function get20Rows($excelFile)
     {
@@ -81,6 +83,7 @@ class Excel
     /**
      * @param \common\models\CatalogTemp $tempCatalog
      * @return array
+     * @throws \yii\base\InvalidConfigException
      */
     public static function get20RowsFromTempUploaded($tempCatalog)
     {

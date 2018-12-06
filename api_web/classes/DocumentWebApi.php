@@ -187,6 +187,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      *
      * @param      $document_id
      * @param null $service_id
+     * @param null $hasOrderContent
      * @return array
      */
     private function getDocumentWaybill($document_id, $service_id, $hasOrderContent = null)

@@ -30,6 +30,8 @@ class SyncController extends WebApiController
     /**
      * @param \yii\base\Action $action
      * @return bool
+     * @throws BadRequestHttpException
+     * @throws \yii\web\HttpException
      */
     public function beforeAction($action)
     {

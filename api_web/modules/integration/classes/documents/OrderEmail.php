@@ -18,6 +18,7 @@ class OrderEmail extends Order implements DocumentInterface
      *
      * @throws \Exception
      * @return mixed
+     * @throws \yii\db\Exception
      */
     public function prepare()
     {

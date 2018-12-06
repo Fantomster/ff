@@ -10,8 +10,10 @@ class RkeeperWebApi extends WebApi
 {
     /**
      * rkeeper: Список Накладных к заказу
+     *
      * @param array $post
      * @return array
+     * @throws \Exception
      */
     public function getOrderWaybillsList(array $post): array
     {
@@ -22,6 +24,7 @@ class RkeeperWebApi extends WebApi
      * rkeeper: Завершенные заказы
      * @param array $post
      * @return array
+     * @throws \Exception
      */
     public function getCompletedOrdersList(array $post): array
     {
@@ -32,6 +35,7 @@ class RkeeperWebApi extends WebApi
      * iiko: Создание или обновление накладной к заказу
      * @param array $post
      * @return array
+     * @throws \Exception
      */
     public function handleWaybill(array $post): array
     {
@@ -42,6 +46,7 @@ class RkeeperWebApi extends WebApi
      * rkeeper: Справочник складов
      * @param array $post
      * @return array
+     * @throws \Exception
      */
     public function getStoreList(array $post): array
     {

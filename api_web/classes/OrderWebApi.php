@@ -1093,20 +1093,21 @@ class OrderWebApi extends \api_web\components\WebApi
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
+        $pathView = \Yii::getAlias('@frontend') . '/views/order/';
         $pdf = new Pdf([
             'mode'        => Pdf::MODE_UTF8,
             'format'      => Pdf::FORMAT_A4,
             'orientation' => Pdf::ORIENT_PORTRAIT,
             'destination' => Pdf::DEST_BROWSER,
-            'content'     => $c->renderPartial('@app/../frontend/views/order/_pdf_order', compact('dataProvider', 'order')),
+            'content'     => $c->renderFile($pathView . '_pdf_order.php', compact('dataProvider', 'order')),
             'options'     => [
                 'defaultfooterline'      => false,
                 'defaultfooterfontstyle' => false,
             ],
             'methods'     => [
-                'SetFooter' => $c->renderPartial('@app/../frontend/views/order/_pdf_signature'),
+                'SetFooter' => $c->renderFile($pathView . '_pdf_signature.php'),
             ],
-            'cssFile'     => '@app/../frontend/web/css/pdf_styles.css'
+            'cssFile'     => \Yii::getAlias('@frontend') . '/web/css/pdf_styles.css'
         ]);
         $pdf->filename = 'mixcart_order_' . $post['order_id'] . '.pdf';
         ob_start();
@@ -1160,6 +1161,8 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * @param OrderContent $model
+     * @param null         $currency
+     * @param null         $currency_id
      * @return array
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException

@@ -19,6 +19,7 @@ use Yii;
  *
  * @property Order $order
  * @property User $sentBy
+ * @property Organization $recipient
  */
 class OrderChat extends \yii\db\ActiveRecord
 {
@@ -96,6 +97,9 @@ class OrderChat extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'sent_by_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getRecipient() {
         return $this->hasOne(Organization::className(), ['id' => 'recipient_id']);
     }

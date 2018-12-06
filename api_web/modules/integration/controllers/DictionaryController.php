@@ -88,7 +88,7 @@ class DictionaryController extends \api_web\components\WebApiController
     public function actionList()
     {
         if (empty($this->request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
+            throw new BadRequestHttpException (\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'service_id']));
         }
 
         $this->response = (new Dictionary($this->request['service_id'], 'Dictionary'))->getList();
@@ -249,7 +249,7 @@ class DictionaryController extends \api_web\components\WebApiController
     public function actionAgentList()
     {
         if (empty($this->request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
+            throw new BadRequestHttpException (\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'service_id']));
         }
 
         $this->response = (new Dictionary($this->request['service_id'], 'Agent'))->agentList($this->request);
@@ -319,7 +319,7 @@ class DictionaryController extends \api_web\components\WebApiController
     public function actionAgentUpdate()
     {
         if (empty($this->request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
+            throw new BadRequestHttpException (\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'service_id']));
         }
 
         $this->response = (new Dictionary($this->request['service_id'], 'Agent'))->agentUpdate($this->request);
@@ -422,7 +422,7 @@ class DictionaryController extends \api_web\components\WebApiController
     public function actionStoreList()
     {
         if (!isset($this->request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
+            throw new BadRequestHttpException (\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'service_id']));
         }
         $this->response = (new Dictionary($this->request['service_id'], 'Store'))->storeList($this->request);
     }
@@ -497,7 +497,7 @@ class DictionaryController extends \api_web\components\WebApiController
     public function actionStoreFlatList()
     {
         if (!isset($this->request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
+            throw new BadRequestHttpException (\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'service_id']));
         }
         $this->response = (new Dictionary($this->request['service_id'], 'Store'))->storeFlatList($this->request);
     }
@@ -579,7 +579,7 @@ class DictionaryController extends \api_web\components\WebApiController
     public function actionUnitList()
     {
         if (!isset($this->request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
+            throw new BadRequestHttpException (\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'service_id']));
         }
         $this->response = (new Dictionary($this->request['service_id'], 'Unit'))->unitList($this->request);
     }
@@ -677,7 +677,7 @@ class DictionaryController extends \api_web\components\WebApiController
     public function actionCategoryList()
     {
         if (!isset($this->request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
+            throw new BadRequestHttpException (\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'service_id']));
         }
         $this->response = (new Dictionary($this->request['service_id'], 'Category'))->categoryList($this->request);
     }
@@ -730,7 +730,7 @@ class DictionaryController extends \api_web\components\WebApiController
     public function actionCategorySetSelected()
     {
         if (!isset($this->request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
+            throw new BadRequestHttpException (\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'service_id']));
         }
         /** @var  $factory \api_web\modules\integration\classes\dictionaries\RkwsCategory */
         $factory = (new Dictionary($this->request['service_id'], 'Category'));

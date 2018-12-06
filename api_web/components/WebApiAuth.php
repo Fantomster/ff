@@ -79,6 +79,6 @@ class WebApiAuth extends AuthMethod
      */
     public function handleFailure($response)
     {
-        throw new UnauthorizedHttpException('auth_failed', 401);
+        throw new UnauthorizedHttpException(\Yii::t('api_web', 'auth_failed', ['ru'=>'Ошибка аутентификации']), 401);
     }
 }

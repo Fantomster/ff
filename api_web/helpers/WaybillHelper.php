@@ -73,18 +73,18 @@ class WaybillHelper
     {
         $order = Order::findOne($order_id);
         if (!$order) {
-            throw new BadRequestHttpException('order_not_found');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
         }
         $this->user = $order->createdBy;
         if (is_null($arOrderContentForCreate)) {
             $arOrderContentForCreate = $order->orderContent;
         }
         if (!$arOrderContentForCreate) {
-            throw new BadRequestHttpException('waybill.you_dont_have_order_content');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.you_dont_have_order_content', ['ru'=>'Нет содержимого заказа']));
         }
         $licenses = License::getAllLicense($order->client_id, Registry::$waybill_services, true);
         if (!$licenses) {
-            throw new BadRequestHttpException('waybill.you_dont_have_licenses_for_services');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.you_dont_have_licenses_for_services', ['ru'=>'Нет лицензии на эту услугу']));
         }
 
         $waybillModels = [];
@@ -106,7 +106,7 @@ class WaybillHelper
             $notInWaybillContent = array_diff_key($arOrderContentForCreate, $waybillContents);
 
             if (empty($notInWaybillContent)) {
-                $this->throwException($serviceId, $order->client_id, 'waybill.you_dont_have_order_content_for_waybills');
+                $this->throwException($serviceId, $order->client_id, \Yii::t('api_web', 'waybill.you_dont_have_order_content_for_waybills', ['ru'=>'У вас нет содержания заказа для накладных']));
                 continue;
             }
 
@@ -118,7 +118,7 @@ class WaybillHelper
             }
 
             if (empty($rows)) {
-                $this->throwException($serviceId, $order->client_id, 'waybill.you_dont_have_mapped_products');
+                $this->throwException($serviceId, $order->client_id, \Yii::t('api_web', 'waybill.you_dont_have_mapped_products', ['ru'=>'У Вас нет сопоставленных продуктов ']));
                 continue;
             }
 
@@ -161,12 +161,12 @@ class WaybillHelper
 
             // Если количество маппингов = числу пропусков, бросаем throw
             if ($mapCount === $skipCount) {
-                $this->throwException($serviceId, $order->client_id, 'waybill.no_map_for_create_waybill');
+                $this->throwException($serviceId, $order->client_id, \Yii::t('api_web', 'waybill.no_map_for_create_waybill', ['ru'=>'Нет сопоставлений для создания накладной']));
 
             }
             // Если количество складов = числу пропусков, бросаем throw
             if (count($arMappedForStores) === $skipByStore) {
-                $this->throwException($serviceId, $order->client_id, 'waybill.no_store_for_create_waybill');
+                $this->throwException($serviceId, $order->client_id, \Yii::t('api_web', 'waybill.no_store_for_create_waybill', ['ru'=>'Нет склада для создания накладной']));
             }
         }
 
@@ -266,7 +266,7 @@ class WaybillHelper
     public function createWaybillForApi($request)
     {
         if (empty($request['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
+            throw new BadRequestHttpException( \Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'order_id']));
         }
         $result = $this->createWaybill($request['order_id']);
 
@@ -284,15 +284,15 @@ class WaybillHelper
     public function moveOrderContentToWaybill($request)
     {
         if (!isset($request['waybill_id'])) {
-            throw new BadRequestHttpException('empty_param|waybill_id');
+            throw new BadRequestHttpException( \Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'waybill_id']));
         }
 
         if (!isset($request['order_content_id'])) {
-            throw new BadRequestHttpException('empty_param|order_content_id');
+            throw new BadRequestHttpException( \Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'order_content_id']));
         }
 
         if (!isset($request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
+            throw new BadRequestHttpException( \Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'service_id']));
         }
 
         $waybill = Waybill::findOne([
@@ -305,12 +305,18 @@ class WaybillHelper
             ]
         ]);
         if (!$waybill) {
-            throw new BadRequestHttpException('waybill cannot adding waybill_content with id ' . $request['waybill_id']);
+            throw new BadRequestHttpException(\Yii::t('api_web', "waybill cannot adding waybill_content with id {id}",
+                [
+                    'ru'=>'Накладная не может добавить waybill_content с идентификатором {id}',
+                    'id' => $request['waybill_id']]));
         }
 
         $orderContent = OrderContent::findOne($request['order_content_id']);
         if (!$orderContent) {
-            throw new BadRequestHttpException('OrderContent dont exists with id ' . $request['order_content_id']);
+            throw new BadRequestHttpException(\Yii::t('api_web', "OrderContent dont exists with id {id}",
+                [
+                    'ru'=>'Содержание заказа не существует с идентификатором {id}',
+                    'id' => $request['order_content_id']]));
         }
 
         $this->checkOrderForWaybillContent($waybill, $orderContent);
@@ -377,7 +383,10 @@ class WaybillHelper
             ->onCondition(['waybill_id' => $waybill->id])
             ->exists()
         ) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_allready_has_waybill_content') . ' - ' . $orderContent->waybillContent->id);
+            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_allready_has_waybill_content {id}',
+                [
+                    'ru' => 'Контент заказа уже имеет контент накладной {id}',
+                    'id' => $orderContent->waybillContent->id]));
         }
 
         $waybillContent = WaybillContent::find()

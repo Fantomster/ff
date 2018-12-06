@@ -771,10 +771,10 @@ class UserController extends WebApiController
     public function actionGetAgreement()
     {
         if (empty($this->request['type'])) {
-            throw new BadRequestHttpException('empty_param|type');
+            throw new BadRequestHttpException( \Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'type']));
         }
         if (!in_array($this->request['type'], ['UserAgreement', 'ConfidencialPolicy'])) {
-            throw new BadRequestHttpException('page_not_found');
+            throw new BadRequestHttpException(\Yii::t('api_web', "'page_not_found'", ['ru'=>'Страница не найдена']));
         }
 
         $this->response['text'] = \Yii::t('api_web', 'api_web.user.agreement.' . $this->request['type']);

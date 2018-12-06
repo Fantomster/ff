@@ -116,10 +116,10 @@ class SyncController extends WebApiController
             }
         } else {
             if (!isset($this->request['service_id']) || !$this->request['service_id'] || !is_int($this->request['service_id'])) {
-                throw new BadRequestHttpException("empty_param|service_id");
+                throw new BadRequestHttpException (\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'service_id']));
             }
             if (!isset($this->request['params']) || !is_array($this->request['params']) || !$this->request['params']) {
-                throw new BadRequestHttpException("empty_param|params");
+                throw new BadRequestHttpException (\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'params']));
             }
         }
         # 3. Load integration script with env and post params
@@ -177,10 +177,10 @@ class SyncController extends WebApiController
     {
         # 2.2.1. Check root script params
         if (!isset($this->request['service_id']) || !$this->request['service_id'] || !is_int($this->request['service_id'])) {
-            throw new BadRequestHttpException("empty_param|service_id");
+            throw new BadRequestHttpException (\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'service_id']));
         }
         if (!isset($this->request['ids']) || !is_array($this->request['ids']) || !$this->request['ids']) {
-            throw new BadRequestHttpException("empty_param|ids");
+            throw new BadRequestHttpException (\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'ids']));;
         }
 
         # 3. Load integration script with env and post params

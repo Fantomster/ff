@@ -112,19 +112,19 @@ class OuterProductMapper
                 if ($key == 'outer_product_id') {
                     if ($this->isMainOrg) {
                         if (!$this->productExists($value)) {
-                            throw new BadRequestHttpException('outer product not found');
+                            throw new BadRequestHttpException(\Yii::t('api_web', "waybill.outer_product_not_found", ['ru'=>'Позиция в учетной системе не найдена']));
                         }
                     }
                 }
                 //Проверяем что сопоставляемый склад связан с нашей организацией
                 if ($key == 'outer_store_id') {
                     if (!$this->storeExists($value)) {
-                        throw new BadRequestHttpException('store.not_found');
+                        throw new BadRequestHttpException(\Yii::t('api_web', 'store.not_found', ['ru'=>'Склад не найден']));
                     }
                     $store = OuterStore::findOne($value);
                     //Если это категория а не склад
                     if (!$store->isLeaf()) {
-                        throw new BadRequestHttpException('store.is_category');
+                        throw new BadRequestHttpException(\Yii::t('api_web', 'store.is_category', ['ru'=>'Это категория, а не склад']));
                     }
                 }
             }
@@ -205,7 +205,7 @@ class OuterProductMapper
         }
 
         if (!$model->product) {
-            throw new BadRequestHttpException('product_not_found');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'product_not_found', ['ru'=>'Позиция не найдена']));
         }
         $model->vendor_id = $model->product->supp_org_id;
         if (!$model->save()) {

@@ -79,7 +79,7 @@ class iikoApi
         if (isset(self::$_instance->{$name})) {
             self::$_instance->{$name} = $value;
         } else {
-            throw new BadRequestHttpException('iikoApi attribute not found: ' . $name);
+            throw new BadRequestHttpException(\Yii::t('api_web', "iikoApi attribute not found:{attr}", ['ru'=>'iikoApi атрибут не найден:{attr}', 'attr' => $name]));
         }
     }
 
@@ -267,7 +267,7 @@ class iikoApi
         if ($info['http_code'] != 200) {
             $logger->setType('error');
             $logger->response(['info' => $info, 'response' => $response]);
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ' . curl_error($ch));
+            throw new \Exception(\Yii::t('api_web', "Server response:{code}|{text}", ['ru'=>'Код ответа сервера:{code}|{text}', 'code' => $info['http_code'], 'text' =>curl_error($ch)]));
         }
         $logger->response($response);
         return $response;
@@ -318,7 +318,7 @@ class iikoApi
         if ($info['http_code'] != 200) {
             $logger->setType('error');
             $logger->response(['info' => $info, 'response' => $response]);
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ' . curl_error($ch));
+            throw new \Exception(\Yii::t('api_web', "Server response:{code}|{text}", ['ru'=>'Код ответа сервера:{code}|{text}', 'code' => $info['http_code'], 'text' =>curl_error($ch)]));
         }
 
         $response = '';
@@ -352,7 +352,7 @@ class iikoApi
         if ($info['http_code'] != 200) {
             $logger->setType('error');
             $logger->response(['info' => $info, 'response' => $response]);
-            throw new \Exception('Код ответа сервера: ' . $info['http_code'] . ' | ' . curl_error($ch));
+            throw new \Exception(\Yii::t('api_web', "Server response:{code}|{text}", ['ru'=>'Код ответа сервера:{code}|{text}', 'code' => $info['http_code'], 'text' =>curl_error($ch)]));
         }
 
         $logger->response($response);

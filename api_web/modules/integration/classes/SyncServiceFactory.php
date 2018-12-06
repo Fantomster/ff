@@ -46,7 +46,7 @@ class SyncServiceFactory extends WebApi
         if (!$callbackTaskId) {
             # 2.1.1. Identify Service ID
             if (!array_key_exists($serviceId, self::ALL_SERVICE_MAP)) {
-                throw new BadRequestHttpException("empty_param|params");
+                throw new BadRequestHttpException(\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'params']));
             }
             # 2.1.2. Use entity class (by factory)
             $entity = $this->factory((int)$serviceId, (string)self::ALL_SERVICE_MAP[$serviceId]);
@@ -62,11 +62,11 @@ class SyncServiceFactory extends WebApi
                 $serviceName = self::SYNC_TASK_SERVICE_MAPPING[$callbackTaskId];
             }
             if (!$serviceName) {
-                throw new BadRequestHttpException("Service was not recognized by task_id!");
+                throw new BadRequestHttpException(\Yii::t('api_web', "Service was not recognized by task_id!", ['ru'=>'Task_id не был признан службой']));
             }
             $serviceId = array_search($serviceName, self::ALL_SERVICE_MAP);
             if (!$serviceId) {
-                throw new BadRequestHttpException("empty_param|service_id");
+                throw new BadRequestHttpException(\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'service_id']));
             }
             # 2.2.2. Use entity class (by factory)
             $entity = $this->factory((int)$serviceId, $serviceName);

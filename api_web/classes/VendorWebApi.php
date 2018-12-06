@@ -42,7 +42,7 @@ class VendorWebApi extends \api_web\components\WebApi
     {
         $this->validateRequest($post, ['vendor_id']);
         if (!ArrayHelper::keyExists($post['vendor_id'], $this->user->organization->getSuppliers('', false))) {
-            throw new BadRequestHttpException('vendor.you_are_not_working_with_this_supplier');
+            throw new BadRequestHttpException(\Yii::t('api_web',  'vendor.you_are_not_working_with_this_supplier', ['ru'=>'Вы не работаете с этим поставщиком ']));
         }
         return WebApiHelper::prepareOrganization(Organization::findOne($post['vendor_id']));
     }
@@ -63,12 +63,12 @@ class VendorWebApi extends \api_web\components\WebApi
         if ($vendorID) {
             $validator = new NumberValidator();
             if (!$validator->validate($vendorID)) {
-                throw new ValidationException(['Field vendor_id mast be integer']);
+                throw new ValidationException([\Yii::t('api_web', 'Field vendor_id mast be integer', ['ru'=>'Поле vendor_id должно быть числом'])]);
             }
 
             $organization = Organization::findOne(['id' => $vendorID]);
             if (!$organization) {
-                throw new BadRequestHttpException('vendor_not_found');
+                throw new BadRequestHttpException(\Yii::t('api_web', 'vendor_not_found', ['ru'=>'Поставщик не найден']));
             }
 
             $relation = RelationSuppRest::findOne(['supp_org_id' => $vendorID, 'rest_org_id' => $this->user->organization->id]);
@@ -276,9 +276,7 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function search(array $post)
     {
-        if (empty($post['email'])) {
-            throw new BadRequestHttpException('empty_param|search attribute email');
-        }
+        $this->validateRequest($post, ['email']);
 
         $result = [];
         $email = $post['email'];
@@ -327,13 +325,11 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function update(array $post)
     {
-        if (empty($post['id'])) {
-            throw new BadRequestHttpException('empty_param|id');
-        }
+        $this->validateRequest($post, ['id']);
         //Поиск поставщика в системе
         $model = Organization::find()->where(['id' => $post['id'], 'type_id' => Organization::TYPE_SUPPLIER])->one();
         if (empty($model)) {
-            throw new BadRequestHttpException('vendor_not_found');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vendor_not_found', ['ru'=>'Поставщик не найден']));
         }
 
         //Если запрос от ресторана
@@ -350,15 +346,15 @@ class VendorWebApi extends \api_web\components\WebApi
                     $vendor_ids[] = $vendor->supp_org_id;
                 }
                 if (!in_array($model->id, array_unique($vendor_ids))) {
-                    throw new BadRequestHttpException('vendor.you_are_not_working_with_this_supplier');
+                    throw new BadRequestHttpException(\Yii::t('api_web',  'vendor.you_are_not_working_with_this_supplier', ['ru'=>'Вы не работаете с этим поставщиком ']));
                 }
             } else {
-                throw new BadRequestHttpException('vendor.not_found_vendors');
+                throw new BadRequestHttpException(\Yii::t('api_web', 'vendor.not_found_vendors', ['ru'=>'Не найдены поставщики']));
             }
 
             //Можно ли ресторану редактировать этого поставщика
             if ($model->allow_editing == 0) {
-                throw new BadRequestHttpException('vendor.not_allow_editing');
+                throw new BadRequestHttpException(\Yii::t('api_web', 'vendor.not_allow_editing', ['ru'=>'Нет прав на редактирование этого поставщика']));
             }
         }
 
@@ -366,7 +362,7 @@ class VendorWebApi extends \api_web\components\WebApi
         if ($this->user->organization->type_id == Organization::TYPE_SUPPLIER) {
             //Разрешаем редактировать только свои данные
             if ($model->id != $this->user->organization->id) {
-                throw new BadRequestHttpException('vendor.not_you_editing');
+                throw new BadRequestHttpException(\Yii::t('api_web', 'vendor.not_you_editing', ['ru'=>'Вы можете редактировать только свои данные']));
             }
         }
 
@@ -461,26 +457,22 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function uploadLogo(array $post)
     {
-        if (empty($post['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($post, ['vendor_id']);
 
         $vendor = Organization::findOne($post['vendor_id']);
         if (empty($vendor)) {
-            throw new BadRequestHttpException('vendor_not_found');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vendor_not_found', ['ru'=>'Поставщик не найден']));
         }
 
-        if (empty($post['image_source'])) {
-            throw new BadRequestHttpException('empty_param|image_source');
-        }
+        $this->validateRequest($post, ['image_source']);
 
         if ($vendor->type_id !== Organization::TYPE_SUPPLIER) {
-            throw new BadRequestHttpException('vendor.is_not_vendor');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vendor.is_not_vendor', ['ru'=>'Не поставщик']));
         }
 
         //Можно ли ресторану редактировать этого поставщика
         if ($vendor->allow_editing == 0) {
-            throw new BadRequestHttpException('vendor.not_allow_editing');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vendor.not_allow_editing', ['ru'=>'Нет прав на редактирование этого поставщика']));
         }
 
         /**
@@ -514,25 +506,21 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function uploadFile(array $request)
     {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
-        if (empty($request['data'])) {
-            throw new BadRequestHttpException('empty_param|data');
-        }
+        $this->validateRequest($request, ['vendor_id', 'data']);
+
         $vendorId = $request['vendor_id'];
         $vendor = Organization::findOne($vendorId);
         if (empty($vendor) || $vendor->type_id != Organization::TYPE_SUPPLIER) {
             //todo_refactor no migration localization
-            throw new BadRequestHttpException('vendor.not_found');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vendor_not_found', ['ru'=>'Поставщик не найден']));
         }
         if ($vendor->vendor_is_work) {
-            throw new BadRequestHttpException('vendor.is_work');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vendor.is_work', ['ru'=>'Поставщик работает']));
         }
 
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendor->id, $this->user->organization, true);
         if (empty($catalog)) {
-            throw new BadRequestHttpException('Catalog not found');
+            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_not_found", ['ru'=>'Каталог не найден']));
         }
         $catalogID = $catalog->id;
 
@@ -565,7 +553,7 @@ class VendorWebApi extends \api_web\components\WebApi
                 throw $e;
             }
         } else {
-            throw new BadRequestHttpException("The download format is different from XLSX");
+            throw new BadRequestHttpException(\Yii::t('api_web', "The download format is different from XLSX", ['ru'=>'Формат загрузки отличается от формата XLSX']));
         }
     }
 
@@ -580,25 +568,19 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function prepareTemporary(array $request)
     {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($request, ['vendor_id']);
+
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (!$catalog) {
-            throw new BadRequestHttpException("Catalog not found");
+            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_not_found", ['ru'=>'Каталог не найден']));
         }
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($tempCatalog)) {
-            throw new BadRequestHttpException("Temp catalog not found");
+            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_temp_not_found", ['ru'=>'Временный каталог не найден']));
         }
         $index = $request['index_field'] ?? $tempCatalog->cat->main_index ?? null;
-        if (empty($index)) {
-            throw new BadRequestHttpException('empty_param|index_field');
-        }
-
-        if (empty($request['mapping']) && empty($tempCatalog->cat->mapping)) {
-            throw new BadRequestHttpException('empty_param|mapping');
-        }
+        $mapping = $request['mapping'] ?? $tempCatalog->cat->mapping ?? null;
+        $this->validateRequest(['index' => $index, 'mapping' => $mapping], ['index', 'mapping']);
 
         if (!CatalogTempContent::find()->where(['temp_id' => $tempCatalog->id])->exists()) {
             $request['mapping'] = isset($request['mapping']) ? array_flip($request['mapping']) : null;
@@ -660,13 +642,11 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function deleteMainCatalog(array $request)
     {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
-        }
+        $this->validateRequest($request, ['cat_id']);
 
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
-            throw new BadRequestHttpException('Catalog not found');
+            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_not_found", ['ru'=>'Каталог не найден']));
         }
         return $this->container->get('CatalogWebApi')->deleteMainCatalog($catalog);
     }
@@ -682,13 +662,11 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function changeMainIndex(array $request)
     {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
-        }
+        $this->validateRequest($request, ['cat_id']);
 
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
-            throw new BadRequestHttpException('Catalog not found');
+            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_not_found", ['ru'=>'Каталог не найден']));
         }
         return $this->container->get('CatalogWebApi')->changeMainIndex($catalog, $request['index']);
     }
@@ -706,9 +684,8 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function cancelTemporary(array $request)
     {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($request, ['vendor_id']);
+
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
 
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
@@ -764,7 +741,9 @@ class VendorWebApi extends \api_web\components\WebApi
         if (!$vendorUser) {
             return false;
         } elseif (empty($vendorUser->organization_id)) {
-            throw new BadRequestHttpException('Пользователь с емайлом:' . $email . ' найден у нас в системе, но он не завершил регистрацию. Как только он пройдет процедуру регистрации поставщика, вы сможете добавить его.');
+            throw new BadRequestHttpException(\Yii::t('api_web', "User with email: {email} found in our system, but he did not complete the registration. As soon as he goes through the supplier registration procedure, you can add him. ",
+                ['ru'=>'Пользователь с емайлом: {email} найден у нас в системе, но он не завершил регистрацию. Как только он пройдет процедуру регистрации поставщика, вы сможете добавить его.',
+                 'email' => $vendorUser->email]));
         }
 
         if ($vendorUser->organization->type_id != Organization::TYPE_SUPPLIER) {

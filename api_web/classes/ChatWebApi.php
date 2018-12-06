@@ -41,7 +41,7 @@ class ChatWebApi extends WebApi
         } elseif ($client->type_id === Organization::TYPE_SUPPLIER) {
             $where = ['vendor_id' => $client->id];
         } else {
-            throw new BadRequestHttpException('chat.access_denied');
+            throw new BadRequestHttpException(\Yii::t('api_web', "'chat.access_denied'", ['ru'=>'Нет доступа к чату']));
         }
 
         $search = Order::find()
@@ -95,7 +95,7 @@ class ChatWebApi extends WebApi
             ])->where($where)->params(['org_id' => $client->id]);
 
         if (empty($search)) {
-            throw new BadRequestHttpException("chat.dialogs_not_found");
+            throw new BadRequestHttpException(\Yii::t('api_web', "chat.dialogs_not_found", ['ru'=>'Диалоги не найдены']));
         }
 
         if (isset($post['search'])) {
@@ -158,7 +158,7 @@ class ChatWebApi extends WebApi
             ->one();
 
         if (empty($order)) {
-            throw new BadRequestHttpException("chat.dialog_not_found");
+            throw new BadRequestHttpException(\Yii::t('api_web', "chat.dialog_not_found", ['ru'=>'Диалог не найден']));
         }
 
         $orderChat = OrderChat::find()
@@ -230,7 +230,7 @@ class ChatWebApi extends WebApi
             ->one();
 
         if (empty($order)) {
-            throw new BadRequestHttpException("chat.dialog_not_found");
+            throw new BadRequestHttpException(\Yii::t('api_web', "chat.dialog_not_found", ['ru'=>'Диалог не найден']));
         }
 
         if ($client->id == $order->client_id) {
@@ -284,7 +284,7 @@ class ChatWebApi extends WebApi
             $where = ['order.vendor_id' => $client->id];
             $joinWith = 'order.client_id';
         } else {
-            throw new BadRequestHttpException('chat.access_denied');
+            throw new BadRequestHttpException(\Yii::t('api_web', "'chat.access_denied'", ['ru'=>'Нет доступа к чату']));
         }
 
         $query = new Query();
@@ -368,7 +368,7 @@ class ChatWebApi extends WebApi
         ])->one();
 
         if (empty($order)) {
-            throw new BadRequestHttpException("chat.dialog_not_found");
+            throw new BadRequestHttpException(\Yii::t('api_web', "chat.dialog_not_found", ['ru'=>'Диалог не найден']));
         }
 
         $transaction = \Yii::$app->db->beginTransaction();

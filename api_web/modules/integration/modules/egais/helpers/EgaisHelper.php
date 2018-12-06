@@ -41,7 +41,7 @@ class EgaisHelper extends WebApi
         $orgId = $this->user->organization_id;
 
         if (EgaisWriteOff::find()->where(['org_id' => $orgId, 'act_number' => $result['ActNumber']])->exists()) {
-            throw new BadRequestHttpException('dictionary.act_write_off_number_error');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'dictionary.act_write_off_number_error', ['ru'=>'Акт не найден']));
         }
 
         (new EgaisWriteOff([
@@ -76,7 +76,7 @@ class EgaisHelper extends WebApi
             ->send();
 
         if (!$queryRests->isOk) {
-            throw new BadRequestHttpException('dictionary.request_error');
+            throw new BadRequestHttpException (\Yii::t('api_web', 'dictionary.request_error', ['ru'=>'Ошибка запроса']));
         }
 
         $replyId = (new XmlParser())->parseEgaisQuery($queryRests->content);
@@ -89,7 +89,7 @@ class EgaisHelper extends WebApi
             ->send();
 
         if (!$getUrlDoc->isOk) {
-            throw new BadRequestHttpException('dictionary.request_error');
+            throw new BadRequestHttpException (\Yii::t('api_web', 'dictionary.request_error', ['ru'=>'Ошибка запроса']));
         }
 
         $getDataDoc = (new XmlParser())->parseUrlDoc($getUrlDoc->content);
@@ -125,7 +125,7 @@ class EgaisHelper extends WebApi
             ->send();
 
         if (!$response->isOk) {
-            throw new BadRequestHttpException('dictionary.request_error');
+            throw new BadRequestHttpException (\Yii::t('api_web', 'dictionary.request_error', ['ru'=>'Ошибка запроса']));
         }
 
         $docs = (new XmlParser())->parseIncomingDocs($response->content);
@@ -180,7 +180,7 @@ class EgaisHelper extends WebApi
             ->send();
 
         if (!$response->isOk) {
-            throw new BadRequestHttpException('dictionary.request_error');
+            throw new BadRequestHttpException (\Yii::t('api_web', 'dictionary.request_error', ['ru'=>'Ошибка запроса']));
         }
 
         return (new XmlParser())->$parser($response->content);

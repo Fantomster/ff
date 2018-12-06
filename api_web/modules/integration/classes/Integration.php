@@ -32,7 +32,7 @@ class Integration
     public function __construct($serviceId)
     {
         if (empty($serviceId)) {
-            throw new BadRequestHttpException('choose_integration_service');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'choose_integration_service', ['ru'=>'Выберите сервис для интеграции']));
         }
         $this->service_id = $serviceId;
         $this->serviceName = self::$service_map[$serviceId];
@@ -68,7 +68,7 @@ class Integration
     public static function checkAgentNameExists($request)
     {
         if (!isset($request['name']) && !empty($request['name'])) {
-            throw new BadRequestHttpException('empty_param|name');
+            throw new BadRequestHttpException( \Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => 'name']));
         }
 
         $agents = (new Query())

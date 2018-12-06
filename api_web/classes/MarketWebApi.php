@@ -135,7 +135,7 @@ class MarketWebApi extends WebApi
                             $result->andWhere('price <= :price_end', [':price_end' => $value['to']]);
                         }
                     } else {
-                        throw new BadRequestHttpException('Filter "price" not array');
+                        throw new BadRequestHttpException(\Yii::t('api_web', "Filter \"price\" not array", ['ru'=>'Фильтр "Цена" не массив']));
                     }
                 }
             }
@@ -222,7 +222,7 @@ class MarketWebApi extends WebApi
         $this->validateRequest($post, ['id']);
         $model = CatalogBaseGoods::findOne(['id' => $post['id']]);
         if (empty($model)) {
-            throw new BadRequestHttpException('product_not_found');
+            throw new BadRequestHttpException(\Yii::t('api_web', "product_not_found", ['ru'=>'Позиция не найдена']));
         }
 
         $currentUser = $this->user;
@@ -239,7 +239,7 @@ class MarketWebApi extends WebApi
                 }
                 if (!empty($relationSuppliers)) {
                     if (in_array($model->supp_org_id, $relationSuppliers)) {
-                        throw new BadRequestHttpException('Нет доступа к продукту');
+                        throw new BadRequestHttpException(\Yii::t('api_web', "product_access_denied", ['ru'=>'Нет доступа к продукту']));
                     }
                 }
             }

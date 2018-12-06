@@ -44,12 +44,12 @@ class UserNotice
     public function sendEmailRecoveryPassword($email)
     {
         if (empty($email)) {
-            throw new BadRequestHttpException('empty Email');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'empty Email', ['ru'=>'Пустой Email']));
         }
 
         $user = User::findOne(['email' => $email]);
         if (!$user) {
-            throw new BadRequestHttpException('Пользователь с таким Email не найден в системе.');
+            throw new BadRequestHttpException(\Yii::t('api_web', "User with this Email was not found in the system.", ['ru'=> 'Пользователь с таким Email не найден в системе.']));
         }
         $model = new ForgotForm();
         $model->email = $email;

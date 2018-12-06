@@ -75,12 +75,12 @@ class CallbackController extends WebApiNoAuthController
     {
         $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         if (!$task_id) {
-            throw new BadRequestHttpException("empty_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
+            throw new BadRequestHttpException( \Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER]));
         }
 
         $mcTask = OuterTask::findOne(['inner_guid' => $task_id]);
         if (!$mcTask || $mcTask->int_status_id != OuterTask::STATUS_REQUESTED) {
-            throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
+            throw new BadRequestHttpException( \Yii::t('api_web', "wrong_param|{param}", ['ru'=>'Неверный параметр|{param}', 'param' => AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER]));
         }
 
         $this->response = $this->container->get('NoAuthWebApi')->loadDictionary($mcTask);
@@ -124,12 +124,12 @@ class CallbackController extends WebApiNoAuthController
     {
         $task_id = Yii::$app->getRequest()->getQueryParam(AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         if (!$task_id) {
-            throw new BadRequestHttpException("empty_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
+            throw new BadRequestHttpException( \Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER]));
         }
 
         $mcTask = OuterTask::findOne(['inner_guid' => $task_id]);
         if (!$mcTask || $mcTask->int_status_id != OuterTask::STATUS_REQUESTED) {
-            throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
+            throw new BadRequestHttpException( \Yii::t('api_web', "wrong_param|{param}", ['ru'=>'Неверный параметр|{param}', 'param' => AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER]));
         }
 
         $this->response = $this->container->get('NoAuthWebApi')->sendWaybill($mcTask);

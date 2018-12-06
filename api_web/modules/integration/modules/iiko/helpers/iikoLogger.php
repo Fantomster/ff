@@ -41,7 +41,11 @@ class iikoLogger
         if (!empty($operation)) {
             self::update(['operation_code' => $operation['code']]);
         } else {
-            throw new \Exception('Not found operation service_id:' . iikoService::getServiceId() . ' denom:' . $denom, 999);
+            throw new \Exception(\Yii::t('api_web', 'Not found operation service_id:{id} {denom}',
+                ['ru'=>'Не найден сервис: {id} {denom}',
+                    'id' => iikoService::getServiceId(),
+                    'denom' => $denom]
+            ), 999);
         }
     }
 
@@ -96,7 +100,7 @@ class iikoLogger
         $user = User::findOne($user_id);
         if (!empty($user)) {
             if (!empty(self::get()['user_id'])) {
-                throw new \Exception('User already recorded.', 999);
+                throw new \Exception(\Yii::t('api_web', 'User already recorded.', ['ru'=>'Пользователь уже записан']), 999);
             }
             self::update([
                 'user_id'         => $user->id,

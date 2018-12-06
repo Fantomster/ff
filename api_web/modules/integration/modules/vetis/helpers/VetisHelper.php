@@ -70,7 +70,7 @@ class VetisHelper
 
         $this->vsdModel = MercVsd::findOne(['uuid' => $uuid]);
         if (!$this->vsdModel) {
-            throw new BadRequestHttpException('Uuid is bad');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'Uuid is bad', ['ru'=>'Некорректный uuid']));
         }
         $this->producer_name = $this->vsdModel->producer_name;
         $confirmedBy = json_decode($this->vsdModel->confirmed_by, true);

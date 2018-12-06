@@ -363,9 +363,7 @@ class AnalyticsWebApi extends WebApi
      */
     public function clientSummary($post)
     {
-        if (!isset($post['search']['currency_id'])) {
-            throw new BadRequestHttpException('parameter_required|currency_id');
-        }
+        $this->validateRequest($post['search'], ['currency_id']);
 
         $currency = Currency::findOne($post['search']['currency_id']);
 
@@ -391,7 +389,7 @@ class AnalyticsWebApi extends WebApi
     {
 
         if (!isset(AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type]) || !AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type]) {
-            throw new BadRequestHttpException('bad_order_type|' . $type);
+            throw new BadRequestHttpException(\Yii::t('api_web', 'bad order type|{type}', ['ru'=>'Не правильный тип заказа|{type}','type' => $type]));
         }
 
         // ограничение на собственные заказы

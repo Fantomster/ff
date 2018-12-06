@@ -100,15 +100,15 @@ class PaymentWebApi extends \api_web\components\WebApi
             if (isset($post[$attribute])) {
                 if ($attribute == 'currency') {
                     if (mb_strlen($post[$attribute]) != 3) {
-                        throw new ValidationException([$attribute => 'It is expected the three-digit code']);
+                        throw new ValidationException([$attribute => \Yii::t('api_web', "It is expected the three-digit code", ['ru'=>'Ожидается трехзначный код'])]);
                     }
                 } else {
                     if (!is_numeric($post[$attribute])) {
-                        throw new ValidationException([$attribute => 'Must be a numeric value']);
+                        throw new ValidationException([$attribute => \Yii::t('api_web', "It is expected the three-digit code", ['ru'=>'Должно быть числовое значение'])]);
                     }
                 }
             } else {
-                throw new ValidationException([$attribute => 'is empty']);
+                throw new ValidationException([$attribute => \Yii::t('api_web', "is empty", ['ru'=>'пустой'])]);
             }
         }
     }

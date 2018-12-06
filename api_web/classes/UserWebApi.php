@@ -48,7 +48,7 @@ class UserWebApi extends \api_web\components\WebApi
         }
 
         if (empty($model)) {
-            throw new BadRequestHttpException('user_not_found');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'user_not_found', ['ru'=>'Пользователь не найден']));
         }
         if (empty($model->integration_service_id)) {
             foreach ([Registry::RK_SERVICE_ID, Registry::IIKO_SERVICE_ID] as $serviceId) {
@@ -143,7 +143,7 @@ class UserWebApi extends \api_web\components\WebApi
     public function createUser(array $post, $role_id, $status = null)
     {
         if (User::findOne(['email' => $post['user']['email']])) {
-            throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
+            throw new BadRequestHttpException(\Yii::t('api_web', "This email is already present in the system.", ['ru'=>'Данный Email уже присутствует в системе.']));
         }
 
         $post['user']['newPassword'] = $post['user']['password'];
@@ -175,7 +175,7 @@ class UserWebApi extends \api_web\components\WebApi
         }
 
         if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
-            throw new ValidationException(['phone' => 'Bad format. (+79112223344)']);
+            throw new ValidationException(['phone' => \Yii::t('api_web', 'Bad format. (+79112223344)', ['ru'=>'Не правильный формат. (+79112223344)'])]);
         }
 
         $profile = new Profile (["scenario" => "register"]);
@@ -203,7 +203,7 @@ class UserWebApi extends \api_web\components\WebApi
 
         $model = User::findOne($post['user_id']);
         if (empty($model)) {
-            throw new BadRequestHttpException('user_not_found');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'user_not_found', ['ru'=>'Пользователь не найден']));
         }
 
         $userToken = UserToken::findByUser($model->id, UserToken::TYPE_EMAIL_ACTIVATE);
@@ -220,7 +220,7 @@ class UserWebApi extends \api_web\components\WebApi
                     //Сколько прошло времени
                     $wait_time = round(strtotime(gmdate('Y-m-d H:i:s')) - strtotime($update_date));
                     if ($wait_time < 300 && $wait_time > 0) {
-                        throw new BadRequestHttpException('wait_sms_send|' . (300 - (int)$wait_time));
+                        throw new BadRequestHttpException(\Yii::t('api_web', "wait_sms_send|{sec}", ['ru'=>'Ожидание отправки sms|{sec}', 'sec' => (300 - (int)$wait_time)]));
                     }
                     $attempt = 0;
                 }
@@ -288,12 +288,12 @@ class UserWebApi extends \api_web\components\WebApi
 
             $organization = Organization::findOne(['id' => $post['organization_id']]);
             if (empty($organization)) {
-                throw new BadRequestHttpException('Нет организации с таким id');
+                throw new BadRequestHttpException(\Yii::t('api_web', "organization not found", ['ru'=>'Организация не найдена']));
             }
 
             //Список доступных бизнесов
             if (!$this->user->isAllowOrganization($organization->id)) {
-                throw new BadRequestHttpException('Нет прав переключиться на эту организацию');
+                throw new BadRequestHttpException(\Yii::t('api_web', "No rights to switch to this organization. ", ['ru'=>'Нет прав переключиться на эту организацию']));
             }
 
             #Расскоментировать после отказа от первой версии
@@ -314,7 +314,7 @@ class UserWebApi extends \api_web\components\WebApi
             } elseif (in_array($this->user->role_id, Role::getFranchiseeEditorRoles())) {
                 $this->user->organization_id = $organization->id;
             } else {
-                throw new \Exception('access denied.');
+                throw new \Exception(\Yii::t('api_web', "access denied.", ['ru'=>'Нет доступа']));
             }
 
             if (!$this->user->save()) {
@@ -341,7 +341,7 @@ class UserWebApi extends \api_web\components\WebApi
     {
         $list_organisation = $this->user->getAllOrganization($searchString);
         if (empty($list_organisation) && !$showEmpty) {
-            throw new BadRequestHttpException('Нет доступных организаций');
+            throw new BadRequestHttpException(\Yii::t('api_web', "No organizations available ", ['ru'=>'Нет доступных организаций']));
         }
 
         $result = [];
@@ -559,7 +559,7 @@ class UserWebApi extends \api_web\components\WebApi
         $id = (int)$post['vendor_id'];
         $vendor = Organization::find()->where(['id' => $id])->andWhere(['type_id' => Organization::TYPE_SUPPLIER])->one();
         if (empty($vendor)) {
-            throw new BadRequestHttpException('vendor_not_found');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vendor_not_found', ['ru'=>'Поставщик не найден']));
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -573,7 +573,7 @@ class UserWebApi extends \api_web\components\WebApi
                 RelationSuppRest::deleteAll($where);
                 RelationSuppRestPotential::deleteAll($where);
             } else {
-                throw new BadRequestHttpException('Вы не работаете с этим поставщиком');
+                throw new BadRequestHttpException(\Yii::t('api_web', "You are not working with this provider.", ['ru'=>'Вы не работаете с этим поставщиком']));
             }
             $transaction->commit();
             return ['result' => true];
@@ -596,11 +596,11 @@ class UserWebApi extends \api_web\components\WebApi
         $this->validateRequest($post, ['password', 'new_password', 'new_password_confirm']);
 
         if (!$this->user->validatePassword($post['password'])) {
-            throw new BadRequestHttpException('bad_old_password');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'bad_old_password', ['ru'=>'Не правильный старый пароль']));
         }
 
         if ($post['password'] == $post['new_password']) {
-            throw new BadRequestHttpException('same_password');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'same_password', ['ru'=>'Тот же пароль']));
         }
 
         $tr = \Yii::$app->db->beginTransaction();
@@ -610,7 +610,7 @@ class UserWebApi extends \api_web\components\WebApi
             $this->user->newPasswordConfirm = $post['new_password_confirm'];
 
             if (!$this->user->validate(['newPassword'])) {
-                throw new BadRequestHttpException('bad_password|' . $this->randomPassword());
+                throw new BadRequestHttpException(\Yii::t('api_web', "bad_password|{pass}", ['ru'=>'Не правильный пароль|{pass}', 'pass' => $this->randomPassword()]));
             }
 
             if (!$this->user->validate() || !$this->user->save()) {
@@ -645,13 +645,13 @@ class UserWebApi extends \api_web\components\WebApi
         }
         //Проверяем телефон
         if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
-            throw new ValidationException(['phone' => 'bad_format_phone']);
+            throw new ValidationException(['phone' => \Yii::t('api_web', "bad_format_phone", ['ru'=>'Неправильный формат телефона'])]);
         }
 
         //Проверяем код, если прилетел
         if (!empty($post['code'])) {
             if (!preg_match('#^\d{4}$#', $post['code'])) {
-                throw new ValidationException(['code' => 'bad_format_code']);
+                throw new ValidationException(['code' => \Yii::t('api_web', 'bad_format_code', ['ru'=>'Не правильный формат кода'])]);
             }
         }
 
@@ -659,7 +659,7 @@ class UserWebApi extends \api_web\components\WebApi
         $model = SmsCodeChangeMobile::findOne(['user_id' => $this->user->id]);
         //Если нет модели, но прилетел какой то код, даем отлуп
         if (empty($model) && !empty($post['code'])) {
-            throw new BadRequestHttpException('not_code_to_change_phone');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'not_code_to_change_phone', ['ru'=>'Невозможно поменять код']));
         }
 
         //Если нет модели
@@ -671,7 +671,8 @@ class UserWebApi extends \api_web\components\WebApi
 
         //Даем отлуп если он уже достал выпращивать коды
         if ($model->isNewRecord === false && $model->accessAllow() === false) {
-            throw new BadRequestHttpException('wait_sms_send|' . (300 - (int)$model->wait_time));
+            throw new BadRequestHttpException(\Yii::t('api_web', "wait_sms_send|{sec}", ['ru'=>'Ожидание отправки sms|{sec}', 'sec' => (300 - (int)$wait_time)]));
+
         }
 
         //Если код в запросе не пришел, шлем смс и создаем запись
@@ -696,7 +697,7 @@ class UserWebApi extends \api_web\components\WebApi
                 //Меняем номер телефона, если все хорошо
                 $model->changePhoneUser();
             } else {
-                throw new BadRequestHttpException('bad_sms_code');
+                throw new BadRequestHttpException(\Yii::t('api_web',  'bad_sms_code', ['ru'=>'Не правильный SMS код']));
             }
         }
         return ['result' => true];
@@ -714,13 +715,9 @@ class UserWebApi extends \api_web\components\WebApi
     {
         WebApiHelper::clearRequest($post);
 
-        if (empty($post['user']['id'])) {
-            throw new BadRequestHttpException('empty_param|id');
-        }
+        $this->validateRequest($post['user'], ['id']);
 
-        if (empty($post['profile']['phone'])) {
-            throw new BadRequestHttpException('empty_param|phone');
-        }
+        $this->validateRequest($post['profile'], ['phone']);
 
         $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
         if (mb_substr($phone, 0, 1) == '8') {
@@ -728,21 +725,21 @@ class UserWebApi extends \api_web\components\WebApi
         }
         //Проверяем телефон
         if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
-            throw new ValidationException(['phone' => 'bad_format_phone']);
+            throw new ValidationException(['phone' => \Yii::t('api_web', "bad_format_phone", ['ru'=>'Неправильный формат телефона'])]);
         }
 
         $user = User::findOne(['id' => $post['user']['id']]);
         if (!$user) {
-            throw new BadRequestHttpException('no such user');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'user_not_found', ['ru'=>'Пользователь не найден']));
         }
 
         if ($user->status == User::STATUS_ACTIVE) {
-            throw new BadRequestHttpException('you have no rights for this action');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'you have no rights for this action', ['ru'=>'У Вас нет прав на это действие ']));
         }
 
         $profile = Profile::findOne(['user_id' => $user->id]);
         if (!$profile) {
-            throw new BadRequestHttpException('no such users profile');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'no such users profile', ['ru'=>'Нет такого профиля пользователя']));
         }
         $profile->phone = $post['profile']['phone'];
         $profile->save();
@@ -897,7 +894,7 @@ class UserWebApi extends \api_web\components\WebApi
             ->scalar();
 
         if (!$relation) {
-            throw new BadRequestHttpException('no such user relation');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'no such user relation', ['ru'=>'Не найдена связь с пользователем']));
         }
 
         $notification = EmailNotification::findOne(['user_id' => $user_id, 'rel_user_org_id' => $relation]);
@@ -934,7 +931,7 @@ class UserWebApi extends \api_web\components\WebApi
             ->scalar();
 
         if (!$relation) {
-            throw new BadRequestHttpException('no such user relation');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'no such user relation', ['ru'=>'Не найдена связь с пользователем']));
         }
 
         $notification = SmsNotification::findOne(['user_id' => $user_id, 'rel_user_org_id' => $relation]);
@@ -965,7 +962,7 @@ class UserWebApi extends \api_web\components\WebApi
     {
         $user = \common\models\User::findOne(['id' => $user_id]);
         if (!$user) {
-            throw new BadRequestHttpException('user_not_found');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'user_not_found', ['ru'=>'Пользователь не найден']));
         }
 
         $transaction = \Yii::$app->db_api->beginTransaction();
@@ -1008,10 +1005,11 @@ class UserWebApi extends \api_web\components\WebApi
         $user_agreement = $org->user_agreement;
         $confidencial_policy = $org->confidencial_policy;
         if (!array_key_exists($request['type'], get_defined_vars())) {
-            throw new BadRequestHttpException('user.wrong_agreement_name');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'user.wrong_agreement_name', ['ru'=>'Неправильное название соглашения'])
+                );
         }
         if ($request['value'] == 0 && ${$request['type']} == 1) {
-            throw new BadRequestHttpException('user.cannot_disable_accepted_agreement');
+            throw new BadRequestHttpException(\Yii::t('api_web', 'user.cannot_disable_accepted_agreement', ['ru'=>'Нельзя отменить принятое соглашение ']));
         }
         $org->{$request['type']} = $request['value'];
         if (!$org->save()) {

@@ -27,7 +27,7 @@ class RabbitWebApi extends WebApi
             /**@var $queue IikoSyncConsumer */
             $queue::getUpdateData($request['org_id']);
         } else {
-            throw new BadRequestHttpException('queue or org_id parameters is empty');
+            throw new BadRequestHttpException(\Yii::t('api_web', "queue or org_id parameters is empty", ['ru'=>'queue или org_id parameters указан']));
         }
 
         return ['result' => true];

@@ -389,7 +389,7 @@ class AnalyticsWebApi extends WebApi
     {
 
         if (!isset(AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type]) || !AnalyticsWebApi::ORDER_MAPPING_TYPE_STATUSES[$type]) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'bad order type|{type}', ['ru'=>'Не правильный тип заказа|{type}','type' => $type]));
+            throw new BadRequestHttpException("bad_order_type|{$type}");
         }
 
         // ограничение на собственные заказы

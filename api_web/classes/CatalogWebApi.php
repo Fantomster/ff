@@ -45,7 +45,7 @@ class CatalogWebApi extends WebApi
                 'result' => true
             ];
         } else {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog.not_empty", ['ru'=>'Каталог не пустой']));
+            throw new BadRequestHttpException('catalog.not_empty');
         }
     }
 
@@ -60,14 +60,14 @@ class CatalogWebApi extends WebApi
     {
         $isEmpty = !CatalogBaseGoods::find()->where(['cat_id' => $catalog->id, 'deleted' => false])->exists();
         if ($isEmpty) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog.is_empty", ['ru'=>'Каталог пустой']));
+            throw new BadRequestHttpException('catalog.is_empty');
         } else {
             if ($catalog->deleteAllProducts()) {
                 return [
                     'result' => true
                 ];
             } else {
-                throw new BadRequestHttpException(\Yii::t('api_web', "catalog.delete_failed", ['ru'=>'Невозможно удалить каталог']));
+                throw new BadRequestHttpException('catalog.delete_failed');
             }
         }
     }
@@ -87,7 +87,7 @@ class CatalogWebApi extends WebApi
 
         $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
         if (empty($catalog)) {
-            throw new BadRequestHttpException( \Yii::t('api_web', "base_catalog_not_found", ['ru'=>'Базовый каталог не найден']));
+            throw new BadRequestHttpException("base_catalog_not_found");
         }
 
         $vendorBaseCatalog = Catalog::findOne(['supp_org_id' => $request['vendor_id'], 'type' => Catalog::BASE_CATALOG]);
@@ -106,7 +106,7 @@ class CatalogWebApi extends WebApi
 
         $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($catalogTemp)) {
-            throw new BadRequestHttpException( \Yii::t('api_web', "catalog_temp_not_found", ['ru'=>'Временный каталог не найден']));
+            throw new BadRequestHttpException("catalog_temp_not_found");
         }
 
         $catalogTempContent = (new Query())->select([
@@ -146,11 +146,11 @@ class CatalogWebApi extends WebApi
             ->where(['temp_id' => $catalogTemp->id])->all();
 
         if (empty($catalogTempContent)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_temp_content_not_found", ['ru'=>'Содержимое временного каталога не найдено']));
+            throw new BadRequestHttpException("catalog_temp_content_not_found");
         }
 
         if (!empty($this->getTempDuplicatePosition(['vendor_id' => $request['vendor_id']]))) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_temp_exists_duplicate", ['ru'=>'Временный каталог уже содержит данную позицию']));
+            throw new BadRequestHttpException("catalog_temp_exists_duplicate");
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -292,11 +292,11 @@ class CatalogWebApi extends WebApi
 
         $model = CatalogTempContent::findOne(['temp_id' => (int)$request['temp_id'], 'id' => (int)$request['id']]);
         if (empty($model)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_temp_not_found", ['ru'=>'Временный каталог не найден']));
+            throw new BadRequestHttpException("catalog_temp_not_found");
         }
 
         if (!$model->delete()) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog.delete_failed", ['ru'=>'Невозможно удалить временный каталог']));
+            throw new BadRequestHttpException('catalog.delete_failed');
         }
 
         return ['result' => true];
@@ -316,14 +316,14 @@ class CatalogWebApi extends WebApi
 
         $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (empty($catalog)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_not_found", ['ru'=>'Каталог не найден']));
+            throw new BadRequestHttpException('catalog_not_found');
         }
 
         $product = CatalogGoods::findOne([
             'base_goods_id' => $request['product_id'],
             'cat_id'        => $catalog->id]);
         if (!$product) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "product_not_found", ['ru'=>'Позиция не найдена']));
+            throw new BadRequestHttpException('product_not_found');
         }
         $success = $product->delete();
 
@@ -346,11 +346,11 @@ class CatalogWebApi extends WebApi
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($catalogTemp)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_temp_not_found", ['ru'=>'Временный каталог не найден']));
+            throw new BadRequestHttpException('catalog_temp_not_found');
         }
 
         if (empty($catalogTemp->index_column)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog.main_index_empty", ['ru'=>'Пустой основной индекс']));
+            throw new BadRequestHttpException('catalog.main_index_empty');
         }
 
         //Ключ, по которому ищем дубли
@@ -458,12 +458,12 @@ class CatalogWebApi extends WebApi
         $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
 
         if (empty($catalog)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_not_found", ['ru'=>'Каталог не найден']));
+            throw new BadRequestHttpException('catalog_not_found');
         }
 
         $catalogs = explode(',', $this->user->organization->getCatalogs());
         if (!in_array($catalog->id, $catalogs)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "this_is_not_your_catalog", ['ru'=>'Это не Ваш каталог']));
+            throw new BadRequestHttpException('this_is_not_your_catalog');
         }
 
         $selectFields = [
@@ -535,11 +535,11 @@ class CatalogWebApi extends WebApi
 
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (!$catalog) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_not_found", ['ru'=>'Каталог не найден']));
+            throw new BadRequestHttpException("catalog.not_found");
         }
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($tempCatalog)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_temp_not_found", ['ru'=>'Временный каталог не найден']));
+            throw new BadRequestHttpException("catalog.temp_not_found");
         }
         $tempContent = CatalogTempContent::find()->where(['temp_id' => $tempCatalog->id]);
         $dataProvider = new ActiveDataProvider([
@@ -578,7 +578,7 @@ class CatalogWebApi extends WebApi
         $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
 
         if (empty($catalog)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "catalog_not_found", ['ru'=>'Каталог не найден']));
+            throw new BadRequestHttpException('catalog_not_found');
         }
         $catalog->currency_id = (int)$request['currency_id'];
         $catalog->save();

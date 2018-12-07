@@ -78,7 +78,7 @@ class CartWebApi extends \api_web\components\WebApi
             $product = (new Product())->findFromCatalogs($post['product_id']);
             //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
             if (!in_array($product['cat_id'], $this->getCatalogs()) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
-                throw new BadRequestHttpException(\Yii::t('api_web', 'catalog.access_denied|{cat}', ['ru'=>'Не доступа к каталогу|{cat}','cat' => $product['cat_id']]));
+                throw new BadRequestHttpException("catalog.access_denied|{$product['cat_id']}");
             }
             $this->setPosition($cart, $product, $post['quantity']);
             $transaction->commit();
@@ -189,9 +189,7 @@ class CartWebApi extends \api_web\components\WebApi
             }
 
             foreach ($post as $row) {
-                if (empty($row['id'])) {
-                    $this->validateRequest($row, ['id']);
-                }
+                $this->validateRequest($row, ['id']);
                 $orders[$row['id']] = [
                     'delivery_date' => $row['delivery_date'] ?? null,
                     'comment'       => $row['comment'] ?? null,
@@ -354,7 +352,7 @@ class CartWebApi extends \api_web\components\WebApi
         $model = $this->getCart()->getCartContents()->andWhere(['product_id' => $post['product_id']])->one();
 
         if (empty($model)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'cart.cart_content_not_found', ['ru'=>'Содержимое корзины не найдено']));
+            throw new BadRequestHttpException("cart.cart_content_not_found");
         }
 
         $model->comment = $post['comment'] ?? '';
@@ -452,7 +450,7 @@ class CartWebApi extends \api_web\components\WebApi
                 throw new ValidationException($position->getFirstErrors());
             }
         } else {
-            throw new BadRequestHttpException(\Yii::t('api_web', "cart.quantity_must_be_greater_zero", ['ru'=>'Количество должно быть больше нуля']));
+            throw new BadRequestHttpException("cart.quantity_must_be_greater_zero");
         }
         return true;
     }

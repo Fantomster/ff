@@ -487,7 +487,7 @@ class VendorController extends WebApiController
      */
     public function actionGetListMainIndex()
     {
-        $this->response = $this->container->get('VendorWebApi')->getListMainIndex($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->getListMainIndex($this->request);
     }
 
     /**

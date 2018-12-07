@@ -6,7 +6,11 @@ use yii\helpers\ArrayHelper;
 
 class XmlParser
 {
-    public function parseInputActWriteOffV3($xml)
+    /**
+     * @param $xml
+     * @return array
+     */
+    public function parseActWriteOffV3($xml)
     {
         $xml_parser = simplexml_load_string($xml);
         $namespaces = $xml_parser->getNamespaces(true);
@@ -22,6 +26,28 @@ class XmlParser
             'ActDate' => (string)$data->Header->ActDate,
             'TypeWriteOff' => (string)$data->Header->TypeWriteOff,
             'Note' => (string)$data->Header->Note,
+        ];
+    }
+
+    /**
+     * @param string $xml
+     * @return array
+     */
+    public function parseActChargeOnV2(string $xml)
+    {
+        $xml_parser = simplexml_load_string($xml);
+        $namespaces = $xml_parser->getNamespaces(true);
+        $data = $xml_parser
+            ->children($namespaces['ns'])
+            ->Document
+            ->ActChargeOn_v2
+            ->children($namespaces['ainp']);
+
+        return [
+            'Number' => (string)$data->Header->Number,
+            'ActDate' => (string)$data->Header->ActDate,
+            'Note' => (string)$data->Header->Note,
+            'TypeChargeOn' => (string)$data->Header->TypeChargeOn
         ];
     }
 
@@ -85,6 +111,29 @@ class XmlParser
         return $result;
     }
 
+    public function parseInventoryRegInfo($xml)
+    {
+        $xml_parser = simplexml_load_string($xml);
+        $namespaces = $xml_parser->getNamespaces(true);
+        $data = $xml_parser
+            ->children($namespaces['ns'])
+            ->Document
+            ->ActInventoryInformF2Reg
+            ->children($namespaces['aint']);
+
+        return [
+            'ActRegId' => (string)$data->Header->ActRegId,
+            'Number' => (string)$data->Header->Number,
+            'positions' => ArrayHelper::getColumn($data->Content->Position, function ($position) {
+                return [
+                    'Identity' => (string)$position->Identity,
+                    'InformF1RegId' => (string)$position->InformF1RegId,
+                    'InformF2' => (array)$position->InformF2->InformF2Item
+                ];
+            }, false),
+        ];
+    }
+
     public function parseReplyRests($xml)
     {
         $xml_parser = simplexml_load_string($xml);
@@ -146,18 +195,20 @@ class XmlParser
     public function parseUrlDoc($xml)
     {
         $xml_parser = simplexml_load_string($xml);
-        if (!empty((string)$xml_parser->url)) {
-            $url = explode('/', (string)$xml_parser->url);
+        $arr = [];
+        foreach ($xml_parser->url as $url) {
+            $url = explode('/', $url);
             $id = $url[count($url) - 1];
             $type = $url[count($url) - 2];
 
-            return [
-                'id' => $id,
-                'type' => $type
-            ];
+            array_push($arr, [
+                    'id' => $id,
+                    'type' => $type
+                ]
+            );
         }
 
-        return false;
+        return $arr;
     }
 
     /**

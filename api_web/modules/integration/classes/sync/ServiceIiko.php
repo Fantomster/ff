@@ -39,6 +39,9 @@ class ServiceIiko extends AbstractSyncFactory
      */
     private $countWaybillSend = 0;
 
+    /**
+     * @var string
+     */
     protected $logCategory = "iiko_log";
     
     /**
@@ -192,6 +195,8 @@ class ServiceIiko extends AbstractSyncFactory
             $message = $this->prepareErrorMessage($e->getMessage(), $api);
             throw new BadRequestHttpException($message);
         }
+
+        return ['result' => false];
     }
 
     /**
@@ -225,27 +230,6 @@ class ServiceIiko extends AbstractSyncFactory
             'outer_dic_id' => $dictionary->id
         ]);
         return $model;
-    }
-
-    /**
-     * Ответ на запрос синхронизации
-     *
-     * @param $model OrganizationDictionary
-     * @return array
-     */
-    private function prepareModel($model)
-    {
-        $defaultStatusText = OrganizationDictionary::getStatusTextList()[OrganizationDictionary::STATUS_DISABLED];
-        return [
-            'id'          => $model->id,
-            'name'        => $model->outerDic->name,
-            'title'       => \Yii::t('api_web', 'dictionary.' . $model->outerDic->name),
-            'count'       => $model->count ?? 0,
-            'status_id'   => $model->status_id ?? 0,
-            'status_text' => $model->statusText ?? $defaultStatusText,
-            'created_at'  => $model->created_at ?? null,
-            'updated_at'  => $model->updated_at ?? null
-        ];
     }
 
     /**

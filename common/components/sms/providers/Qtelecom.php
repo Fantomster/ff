@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: MikeN
@@ -13,6 +14,7 @@ use common\models\SmsStatus;
 
 class Qtelecom extends AbstractProvider
 {
+
     public $sender;    // Имя отправителя
     public $user;      // ваш логин в системе
     public $pass;      // ваш пароль в системе
@@ -35,9 +37,9 @@ class Qtelecom extends AbstractProvider
             $target = implode(',', $target);
         }
         $this->message = trim($message);
-        $this->target = trim($target);
+        $this->target  = trim($target);
         //Отправляем сообщение
-        $result = $this->post_message();
+        $result        = $this->post_message();
         //Смотрим ответ, записываем ошибки или логи об отправке
         $this->parseResponse($result);
     }
@@ -50,19 +52,19 @@ class Qtelecom extends AbstractProvider
     {
         //Данные для запроса к АПИ
         $post = [
-            'action' => 'post_sms',
-            'message' => $this->message,
-            'sender' => $this->sender,
-            'target' => $this->target,
-            'post_id' => $this->post_id,
-            'period' => $this->period,
-            'user' => trim($this->user),
-            'pass' => trim($this->pass),
-            'CLIENTADR' => (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false),
+            'action'               => 'post_sms',
+            'message'              => $this->message,
+            'sender'               => $this->sender,
+            'target'               => $this->target,
+            'post_id'              => $this->post_id,
+            'period'               => $this->period,
+            'user'                 => trim($this->user),
+            'pass'                 => trim($this->pass),
+            'CLIENTADR'            => (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false),
             'HTTP_ACCEPT_LANGUAGE' => (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : false)
         ];
         //УРЛ для запроса
-        $url = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
+        $url  = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
         //Посылаем запрос
         return $this->curlPost($url, $post, true);
     }
@@ -73,15 +75,15 @@ class Qtelecom extends AbstractProvider
      */
     public function getBalance()
     {
-        $post = [
-            'action' => 'balance',
-            'user' => trim($this->user),
-            'pass' => trim($this->pass),
-            'CLIENTADR' => (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false),
+        $post   = [
+            'action'               => 'balance',
+            'user'                 => trim($this->user),
+            'pass'                 => trim($this->pass),
+            'CLIENTADR'            => (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false),
             'HTTP_ACCEPT_LANGUAGE' => (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : false)
         ];
         //УРЛ для запроса
-        $url = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
+        $url    = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
         //Посылаем запрос
         $result = $this->xmlToArray($this->curlPost($url, $post, true));
         return $result['balance']['AGT_BALANCE'];
@@ -95,16 +97,16 @@ class Qtelecom extends AbstractProvider
     public function checkStatus($sms_id)
     {
         //Данные для запроса к АПИ
-        $post = [
-            'action' => 'status',
-            'sms_id' => $sms_id,
-            'user' => trim($this->user),
-            'pass' => trim($this->pass),
-            'CLIENTADR' => (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false),
+        $post   = [
+            'action'               => 'status',
+            'sms_id'               => $sms_id,
+            'user'                 => trim($this->user),
+            'pass'                 => trim($this->pass),
+            'CLIENTADR'            => (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false),
             'HTTP_ACCEPT_LANGUAGE' => (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : false)
         ];
         //УРЛ для запроса
-        $url = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
+        $url    = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
         //Посылаем запрос
         $result = $this->xmlToArray($this->curlPost($url, $post, true));
         //Разбор результата
@@ -149,10 +151,10 @@ class Qtelecom extends AbstractProvider
         if (isset($array['errors'])) {
             if (is_array($array['errors']['error'])) {
                 foreach ($array['errors']['error'] as $error) {
-                    $this->setError($this->message, $this->target, $error);
+                    $this->setError($array['result']['sms']['@attributes']['id'], $array['errors']['error']['@attributes']['code'], $error);
                 }
             } else {
-                $this->setError($this->message, $this->target, $array['errors']['error']);
+                $this->setError($array['result']['sms']['@attributes']['id'], $array['errors']['error']['@attributes']['code'], $array['errors']['error']);
             }
             return;
         }
@@ -167,4 +169,5 @@ class Qtelecom extends AbstractProvider
             }
         }
     }
+
 }

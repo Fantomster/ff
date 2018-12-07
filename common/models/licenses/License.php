@@ -213,7 +213,6 @@ class License extends ActiveRecord
      * @param array $service_ids
      * @return false|string
      * @throws HttpException
-     * @throws \yii\base\InvalidConfigException
      */
     public static function checkLicense($org_id, $service_ids = [])
     {

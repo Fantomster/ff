@@ -14,6 +14,7 @@
 namespace api_web\modules\integration\classes\sync;
 
 use api_web\components\WebApi;
+use api_web\helpers\WebApiHelper;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
 use yii\web\BadRequestHttpException;
@@ -257,4 +258,26 @@ abstract class AbstractSyncFactory extends WebApi
             yield $item;
         }
     }
+
+    /**
+     * Ответ на запрос синхронизации
+     *
+     * @param OrganizationDictionary $model
+     * @return array
+     */
+    protected function prepareModel($model)
+    {
+        $defaultStatusText = OrganizationDictionary::getStatusTextList()[OrganizationDictionary::STATUS_DISABLED];
+        return [
+            'id'          => $model->id,
+            'name'        => $model->outerDic->name,
+            'title'       => \Yii::t('api_web', 'dictionary.' . $model->outerDic->name),
+            'count'       => $model->count ?? 0,
+            'status_id'   => $model->status_id ?? 0,
+            'status_text' => $model->statusText ?? $defaultStatusText,
+            'created_at'  => WebApiHelper::asDatetime($model->created_at),
+            'updated_at'  => WebApiHelper::asDatetime($model->updated_at),
+        ];
+    }
+
 }

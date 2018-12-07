@@ -37,6 +37,7 @@ use common\components\NestedSetsQuery;
  * @property int    $left             Левое включаемое значение выборки типа nested sets
  * @property int    $right            Правое включаемое значение выборки типа nested sets
  * @property int    $level            Уровень подчиненности записи (ID родильской записи) для выборки типа nested sets
+ * @method isLeaf()
  */
 class OuterCategory extends ActiveRecord
 {

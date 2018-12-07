@@ -2,6 +2,7 @@
 
 namespace common\components\edi;
 
+use api_web\components\notice_class\OrderNotice;
 use api_web\components\Registry;
 use common\models\edi\EdiFilesQueue;
 use common\models\OuterUnit;
@@ -71,14 +72,14 @@ class EDIClass extends Component
             if (!$ediOrganization) {
                 throw new Exception('no EDI organization found');
             }
+            $organization = Organization::findOne(['id' => $ediOrganization->organization_id]);
 
             if ($isLeraData) {
                 $order = Order::findOne(['id' => $orderID, 'client_id' => $ediOrganization->organization_id]);
+                $organization = Organization::findOne(['id' => $order->vendor_id]);
             } else {
                 $order = Order::findOne(['id' => $orderID, 'vendor_id' => $ediOrganization->organization_id]);
             }
-
-            $message = "";
             if (!$order) {
                 throw new Exception('No such order');
             }
@@ -107,6 +108,9 @@ class EDIClass extends Component
             $barcodeArray = [];
             $totalQuantity = 0;
             $totalPrice = 0;
+            $changed = [];
+            $deleted = [];
+            $ordNotice = new OrderNotice();
 
             foreach ($positions as $position) {
                 if (!isset($position->PRODUCT)) continue;
@@ -132,9 +136,7 @@ class EDIClass extends Component
                 $totalPrice += $arr[$contID]['PRICE'];
             }
             if ($totalQuantity == 0.00 || $totalPrice == 0.00) {
-                OrderController::sendOrderCanceled($order->client, $order);
-                $message .= Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
-                OrderController::sendSystemMessage($user, $order->id, $message);
+                $ordNotice->cancelOrder($user, $organization, $order);
                 $order->status = OrderStatus::STATUS_REJECTED;
                 if (!$order->save()) {
                     throw new Exception('Error saving order');
@@ -148,8 +150,8 @@ class EDIClass extends Component
                 $index = $orderContent->id;
                 $orderContentArr[] = $orderContent->id;
                 if (!in_array($index, $positionsArray)) {
+                    $deleted[] = $orderContent->product_name;
                     $orderContent->delete();
-                    $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
                     continue;
                 }
                 if (!isset($arr[$index]['BARCODE'])) {
@@ -169,23 +171,18 @@ class EDIClass extends Component
 
                 if ($oldQuantity != $newQuantity) {
                     if (!$newQuantity || $newQuantity == 0.000) {
+                        $deleted[] = $orderContent->product_namet;
                         $orderContent->delete();
-                        $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
                         continue;
-                    } else {
-                        $message .= Yii::t('message', 'frontend.controllers.order.change', ['ru' => "<br/>изменил количество {prod} с {oldQuan} {ed} на ", 'prod' => $orderContent->product_name, 'oldQuan' => $oldQuantity, 'ed' => $good->ed]) . " $newQuantity" . $good->ed;
                     }
                 }
                 $oldPrice = (float)$orderContent->price;
                 $newPrice = (float)$arr[$index]['PRICE'];
                 if ($oldPrice != $newPrice) {
                     if ($newPrice == 0) {
+                        $deleted[] = $orderContent->product_name;
                         $orderContent->delete();
-                        $message .= Yii::t('message', 'frontend.controllers.order.del', ['ru' => "<br/>удалил {prod} из заказа", 'prod' => $orderContent->product_name]);
                         continue;
-                    } else {
-                        $change = " <br/>" . Yii::t('message', 'frontend.controllers.order.change_price', ['ru' => "<br/>изменил цену {prod} с {productPrice} руб на ", 'prod' => $orderContent->product_name, 'productPrice' => $oldPrice, 'currencySymbol' => $order->currency->iso_code]) . " " . $newPrice . " руб";
-                        $message .= $change;
                     }
                 }
                 $summ += $newQuantity * $newPrice;
@@ -204,6 +201,7 @@ class EDIClass extends Component
                 if (!$orderContent->save()) {
                     throw new Exception('Error saving order content');
                 }
+                $changed[] = $orderContent;
             }
             foreach ($positions as $position) {
                 $quantity = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
@@ -237,8 +235,7 @@ class EDIClass extends Component
                     if (!$newOrderContent->save()) {
                         throw new Exception('Error saving order content');
                     }
-                    $message .= " <br/>";
-                    $message .= Yii::t('message', 'frontend.controllers.order.add_position', ['ru' => "Добавил товар {prod}", 'prod' => $good->product]);
+                    $changed[] = $newOrderContent;
                     $total = $quan * $price;
                     $summ += $total;
                 }
@@ -263,16 +260,10 @@ class EDIClass extends Component
             if (!$order->save()) {
                 throw new Exception('Error saving order');
             }
-
-            if ($message != '') {
-                OrderController::sendSystemMessage($user, $order->id, $order->vendor->name . Yii::t('message', 'frontend.controllers.order.change_details_two', ['ru' => ' изменил детали заказа №']) . $order->id . ":$message");
-            }
-
+            $ordNotice->sendOrderChange($organization, $order, $changed, $deleted);
             $action = ($isDesadv) ? " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
             $systemMessage = $order->vendor->name . '' . $action;
             OrderController::sendSystemMessage($user, $order->id, $systemMessage);
-
-            OrderController::sendOrderProcessing($order->client, $order);
             return true;
         } catch (Exception $e) {
             if ($isLeraData) {
@@ -374,14 +365,12 @@ class EDIClass extends Component
             $goodsArray[$barcode]['edi_supplier_article'] = (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String)$good->IDSUPPLIER : $barcode;
             $goodsArray[$barcode]['vat'] = (int)$good->TAXRATE ?? null;
         }
-
         $catalog_base_goods = (new \yii\db\Query())
             ->select(['id', 'barcode'])
             ->from(CatalogBaseGoods::tableName())
             ->where(['cat_id' => $baseCatalog->id])
             ->andWhere('`barcode` IS NOT NULL')
             ->all();
-
         foreach ($catalog_base_goods as $base_good) {
             if (!in_array($base_good['barcode'], $goodsArray)) {
                 \Yii::$app->db->createCommand()->delete(CatalogGoods::tableName(), ['base_goods_id' => $base_good['id'], 'cat_id' => $relationCatalogID])->execute();
@@ -398,12 +387,13 @@ class EDIClass extends Component
                 $catalogBaseGood->supp_org_id = $organization->id;
                 $catalogBaseGood->price = $good['price'];
                 $catalogBaseGood->units = $good['units'];
-                $catalogBaseGood->ed = $good['ed'];
+                $catalogBaseGood->ed = ($good['ed'] == '') ? "кг" : $good['ed'];
                 $catalogBaseGood->category_id = null;
                 $catalogBaseGood->deleted = 0;
                 $catalogBaseGood->barcode = $barcode;
                 $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
                 $res = $catalogBaseGood->save();
+
                 if (!$res) continue;
                 $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
                 $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price'], $good['vat']);
@@ -449,7 +439,7 @@ class EDIClass extends Component
         $catalog = new Catalog();
         $catalog->type = Catalog::CATALOG;
         $catalog->supp_org_id = $organization->id;
-        $catalog->name = $organization->name;
+        $catalog->name = $rest->name;
         $catalog->status = Catalog::STATUS_ON;
         $catalog->currency_id = $currency->id ?? 1;
         $catalog->save();

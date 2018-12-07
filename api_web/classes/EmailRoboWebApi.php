@@ -4,6 +4,7 @@ namespace api_web\classes;
 
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use api_web\helpers\WebApiHelper;
 use common\models\IntegrationSettingFromEmail;
 use yii\web\BadRequestHttpException;
 
@@ -34,7 +35,7 @@ class EmailRoboWebApi extends WebApi
                 'name'       => $model->organization->name,
                 'user'       => $model->user,
                 'is_active'  => $model->is_active,
-                'updated_at' => $model->updated_at,
+                'updated_at' => WebApiHelper::asDatetime($model->updated_at),
             ];
         }
 

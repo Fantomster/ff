@@ -7,6 +7,7 @@ use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\CurrencyHelper;
 use api_web\helpers\OuterProductMapHelper;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\Organization;
 use common\models\OuterAgent;
@@ -63,7 +64,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
             "count"                    => (int)$this->getTotalCount(),
             "total_price"              => CurrencyHelper::asDecimal($this->getTotalPrice()),
             "total_price_with_out_vat" => CurrencyHelper::asDecimal($this->getTotalPriceWithOutVat()),
-            "doc_date"                 => date("Y-m-d H:i:s T", strtotime($this->doc_date)),
+            "doc_date"                 => WebApiHelper::asDatetime($this->doc_date),
             "outer_number_code"        => $this->outer_number_code ?? null,
             "outer_number_additional"  => $this->outer_number_additional ?? null,
         ];
@@ -177,7 +178,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
         if (empty($pd) || $pd == '0000-00-00 00:00:00') {
             $pd = null;
         } else {
-            $pd = date("Y-m-d H:i:s T", strtotime($model->payment_delay_date));
+            $pd = WebApiHelper::asDatetime($model->payment_delay_date);
         }
 
         $return = $model->prepare();

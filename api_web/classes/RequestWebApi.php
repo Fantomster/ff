@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
+use yii\base\InvalidArgumentException;
 use yii\db\ActiveQuery;
 use yii\data\Pagination;
 use common\models\Request;
@@ -16,6 +17,11 @@ use common\models\RequestCallback;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
 
+/**
+ * Class RequestWebApi
+ *
+ * @package api_web\classes
+ */
 class RequestWebApi extends WebApi
 {
     /**
@@ -24,6 +30,7 @@ class RequestWebApi extends WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws InvalidArgumentException
      */
     public function getListClient(array $post)
     {
@@ -84,6 +91,7 @@ class RequestWebApi extends WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws InvalidArgumentException
      */
     public function getListVendor(array $post)
     {
@@ -567,8 +575,8 @@ class RequestWebApi extends WebApi
             'id'                => (int)$model->id,
             "name"              => $model->product,
             "status"            => (int)$model->active_status,
-            "created_at"        => \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:mm:ss'),
-            "end_at"            => !empty($model->end) ? \Yii::$app->formatter->asDate($model->end, 'dd.MM.yyyy HH:mm:ss') : null,
+            "created_at"        => WebApiHelper::asDatetime($model->created_at),
+            "end_at"            => !empty($model->end) ? WebApiHelper::asDatetime($model->end) : null,
             "category"          => $model->categoryName->name,
             "category_id"       => (int)$model->category,
             "amount"            => $model->amount,
@@ -594,8 +602,6 @@ class RequestWebApi extends WebApi
      */
     private function prepareRequestCallback(RequestCallback $model)
     {
-        $createdAt = (empty($model->created_at)) ? (new \DateTime())->format('Y-m-d H:i:s') : \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:mm:ss');
-        $updatedAt = (empty($model->updated_at)) ? (new \DateTime())->format('Y-m-d H:i:s') : \Yii::$app->formatter->asDate($model->updated_at, 'dd.MM.yyyy HH:mm:ss');
         return [
             'id'         => (int)$model->id,
             "request_id" => (int)$model->request_id,
@@ -603,8 +609,8 @@ class RequestWebApi extends WebApi
             "vendor"     => WebApiHelper::prepareOrganization($model->organization),
             "price"      => $model->price,
             "comment"    => $model->comment,
-            "created_at" => $createdAt,
-            "updated_at" => $updatedAt,
+            "created_at" => WebApiHelper::asDatetime($model->created_at),
+            "updated_at" => WebApiHelper::asDatetime($model->updated_at),
         ];
     }
 }

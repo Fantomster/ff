@@ -110,11 +110,11 @@ class IntegrationSettingsWebApi extends WebApi
         $this->validateRequest($request, ['name']);
 
         if (!isset($request['value'])) {
-            $this->validateRequest($request, ['value']);
+            throw new BadRequestHttpException('empty_param|value');
         }
         $modelSetting = IntegrationSetting::findOne(['name' => $request['name'], 'service_id' => $service_id, 'is_active' => true]);
         if (!$modelSetting) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "integration_setting.not_found", ['ru'=>'Настройки интеграции не найдены']));
+            throw new BadRequestHttpException('integration_setting.not_found');
         }
 
         $model = IntegrationSettingValue::find()
@@ -230,7 +230,7 @@ class IntegrationSettingsWebApi extends WebApi
         $arResult = [];
         foreach ($request['checked'] as $orgId) {
             if ($orgId == $request['main_org']) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "setting.main_org_equal_child_org", ['ru'=>'Настройки основной организации совпадают с дочерней']));
+                throw new BadRequestHttpException('setting.main_org_equal_child_org');
             }
             $settingModel = IntegrationSettingValue::findOne(['setting_id' => $settingId, 'org_id' => $orgId]);
             if (!$settingModel) {

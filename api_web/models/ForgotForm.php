@@ -53,7 +53,7 @@ class ForgotForm extends BaseForm
             $mailer->viewPath = $oldViewPath;
             return (int)$result;
         } else {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'user_not_found', ['ru'=>'Пользователь не найден']));
+            throw new BadRequestHttpException('user_not_found');
         }
     }
 

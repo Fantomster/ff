@@ -75,7 +75,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         $this->validateRequest($post, ['type', 'document_id']);
 
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "document.not_support_type", ['ru'=>'Указанный тип документа не поддерживается']));
+            throw new BadRequestHttpException('document.not_support_type');
         }
 
         $className = self::$models[$post['type']];
@@ -94,7 +94,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         $this->validateRequest($post, ['type', 'document_id']);
 
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "document.not_support_type", ['ru'=>'Указанный тип документа не поддерживается']));
+            throw new BadRequestHttpException('document.not_support_type');
         }
 
         $className = self::$modelsContent[$post['type']];
@@ -113,7 +113,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         $this->validateRequest($post, ['type', 'document_id', 'service_id']);
         $hasOrderContent = null;
         if (!in_array(strtolower($post['type']), self::$TYPE_LIST)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "document.not_support_type", ['ru'=>'Указанный тип документа не поддерживается']));
+            throw new BadRequestHttpException('document.not_support_type');
         }
         if (isset($post['has_order_content']) && is_bool($post['has_order_content'])) {
             $hasOrderContent = $post['has_order_content'];
@@ -127,7 +127,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 return $this->getDocumentWaybill($post['document_id'], $post['service_id'], $hasOrderContent);
                 break;
             default:
-                throw new BadRequestHttpException(\Yii::t('api_web', "document.not_support_type", ['ru'=>'Указанный тип документа не поддерживается']));
+                throw new BadRequestHttpException('document.not_support_type');
         }
     }
 
@@ -248,7 +248,7 @@ class DocumentWebApi extends \api_web\components\WebApi
             if (RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $post['search']['business_id']])) {
                 $params_sql[':business_id'] = $post['search']['business_id'];
             } else {
-                throw new BadRequestHttpException(\Yii::t('api_web', "business unavailable to current user", ['ru'=>'Указанный бизнес не связан с активным пользователем']));
+                throw new BadRequestHttpException("business unavailable to current user");
             }
         }
 
@@ -580,18 +580,18 @@ class DocumentWebApi extends \api_web\components\WebApi
         $waybill = Waybill::findOne(['id' => $post['waybill_id'], 'acquirer_id' => $this->user->organization_id]);
 
         if (!isset($waybill)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "waybill_not_found", ['ru'=>'Накладная не найдена']));
+            throw new BadRequestHttpException("waybill_not_found");
         }
 
         if (in_array($waybill->status_id, [Registry::WAYBILL_UNLOADED, Registry::WAYBILL_UNLOADING])) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "document.waybill_in_the_state_of_reset_or_unloaded", ['ru'=>'Документ в состоянии сброшен или выгружен']));
+            throw new BadRequestHttpException("document.waybill_in_the_state_of_reset_or_unloaded");
         }
 
         try {
             if ($waybill->resetPositions()) {
                 return $waybill->prepare();
             } else {
-                throw new BadRequestHttpException(\Yii::t('api_web', "waybill.error_reset_positions", ['ru'=>'Ошибка сброса позиций накладной']));
+                throw new BadRequestHttpException('waybill.error_reset_positions');
             }
 
         } catch (\Throwable $e) {
@@ -627,13 +627,13 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         $waybill = Waybill::findOne(['id' => $post['id'], 'acquirer_id' => $this->user->organization_id]);
         if (!isset($waybill)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "waybill_not_found", ['ru'=>'Накладная не найдена']));
+            throw new BadRequestHttpException("waybill_not_found");
         }
 
         if (!empty($post['agent_uid'])) {
             $agent = OuterAgent::findOne(['id' => $post['agent_uid'], 'org_id' => $this->user->organization_id]);
             if (!$agent) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "agent.not_found", ['ru'=>'Агент не найден']));
+                throw new BadRequestHttpException('agent.not_found');
             }
             $waybill->outer_agent_id = $agent->id;
         }
@@ -641,11 +641,11 @@ class DocumentWebApi extends \api_web\components\WebApi
         if (!empty($post['store_uid'])) {
             $store = OuterStore::findOne(['id' => $post['store_uid'], 'org_id' => $this->user->organization_id]);
             if (!$store) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "store.not_found", ['ru'=>'Склад не найден']));
+                throw new BadRequestHttpException('store.not_found');
             }
             //Если это категория а не склад
             if (!$store->isLeaf()) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "store.is_category", ['ru'=>'Это категория, а не склад']));
+                throw new BadRequestHttpException('store.is_category');
             }
             $waybill->outer_store_id = $store->id;
         }
@@ -710,7 +710,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         ]);
 
         if (empty($replacedOrder)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'document.replaced_order_not_found', ['ru' => 'Заменяемый документ не найден или не является заказом']));
+            throw new BadRequestHttpException('document.replaced_order_not_found');
         }
 
         $document = OrderEmail::findOne([
@@ -719,15 +719,15 @@ class DocumentWebApi extends \api_web\components\WebApi
         ]);
 
         if (empty($document)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_not_found', ['ru' => 'Документ не найден или не является документом от поставщика']));
+            throw new BadRequestHttpException('document.document_not_found');
         }
 
         if ($document->status == Order::STATUS_CANCELLED) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_cancelled', ['ru' => 'Документ в состоянии "Отменен"']));
+            throw new BadRequestHttpException('document.document_cancelled');
         }
 
         if (!is_null($document->replaced_order_id)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_replaced_order_id_is_not_null', ['ru' => 'Документ уже заменен']));
+            throw new BadRequestHttpException('document.document_replaced_order_id_is_not_null');
         }
 
         $replacedOrder->status = Order::STATUS_CANCELLED;
@@ -817,12 +817,12 @@ class DocumentWebApi extends \api_web\components\WebApi
                 $field = 'acquirer_id';
             }
             if (!$query->andWhere([$field => $this->user->organization_id])->exists()) {
-                throw new BadRequestHttpException(\Yii::t('api_web', '{type} not found', ['ru' => '{type} не найден', 'type' => $request['type']]));
+                throw new BadRequestHttpException( "type_not_found|{$request['type']}");
             }
 
             $document = $modelClass::prepareModel($request['document_id'], $request['service_id']);
         } else {
-            throw new BadRequestHttpException(\Yii::t('api_web', '{type} not found', ['ru' => '{type} не найден', 'type' => $request['type']]));
+            throw new BadRequestHttpException("type_not_found|{$request['type']}");
         }
 
         return array_merge(['document' => $document], $this->getDocumentContents($request));

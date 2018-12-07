@@ -26,7 +26,7 @@ class ExcelRenderer
     {
         $order = Order::findOne(['id' => $order_id]);
         if (empty($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
+            throw new BadRequestHttpException('order_not_found');
         }
 
         $styleArray = [

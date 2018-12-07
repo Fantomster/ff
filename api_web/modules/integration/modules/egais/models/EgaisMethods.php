@@ -27,7 +27,7 @@ class EgaisMethods extends WebApi
      public function setEgaisSettings($request, $orgId)
     {
         if (empty($request['egais_url']) || empty($request['fsrar_id']) || empty($orgId)) {
-            throw new BadRequestHttpException (\Yii::t('api_web', 'dictionary.request_error', ['ru'=>'Ошибка запроса']));
+            throw new BadRequestHttpException('dictionary.request_error');
         }
 
         $defaultSettings = IntegrationSetting::findAll([
@@ -35,7 +35,7 @@ class EgaisMethods extends WebApi
         ]);
 
         if (empty($defaultSettings)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'dictionary.egais_get_setting_error', ['ru'=>'Неправильные настройки ЕГАИС']));
+            throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
         /**@var Transaction $transaction */
         $transaction = \Yii::$app->db_api->beginTransaction();
@@ -56,7 +56,7 @@ class EgaisMethods extends WebApi
                 }
                 if (!$settingValue->save()) {
                     $transaction->rollBack();
-                    throw new BadRequestHttpException(\Yii::t('api_web', 'dictionary.egais_get_setting_error', ['ru'=>'Неправильные настройки ЕГАИС']));
+                    throw new BadRequestHttpException('dictionary.egais_set_setting_error');
                 }
             }
         }
@@ -77,13 +77,13 @@ class EgaisMethods extends WebApi
     public function actWriteOff(array $request)
     {
         if (empty($request['xml'])) {
-            throw new BadRequestHttpException (\Yii::t('api_web', 'dictionary.request_error', ['ru'=>'Ошибка запроса']));
+            throw new BadRequestHttpException('dictionary.request_error');
         }
 
         $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $this->user->organization_id);
 
         if (empty($settings)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'dictionary.egais_get_setting_error', ['ru'=>'Неправильные настройки ЕГАИС']));
+            throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
 
         $return = (new EgaisHelper())->sendActWriteOff($settings['egais_url'], $request['xml'], 'ActWriteOff_v3');
@@ -132,7 +132,7 @@ class EgaisMethods extends WebApi
             $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $this->user->organization_id);
 
             if (empty($settings)) {
-                throw new BadRequestHttpException(\Yii::t('api_web', 'dictionary.egais_get_setting_error', ['ru'=>'Неправильные настройки ЕГАИС']));
+                throw new BadRequestHttpException('dictionary.egais_get_setting_error');
             }
 
             $xml = (new EgaisXmlFiles())->queryRests($settings['fsrar_id']);
@@ -158,7 +158,7 @@ class EgaisMethods extends WebApi
         $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $orgId);
 
         if (empty($settings)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'dictionary.egais_get_setting_error', ['ru'=>'Неправильные настройки ЕГАИС']));
+            throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
 
         return EgaisHelper::getAllIncomingDoc($settings['egais_url'], $request);
@@ -174,11 +174,11 @@ class EgaisMethods extends WebApi
     public function getOneIncomingDoc($request)
     {
         if (empty($request) || empty($request['type']) || empty($request['id'])) {
-            throw new BadRequestHttpException (\Yii::t('api_web', 'dictionary.request_error', ['ru'=>'Ошибка запроса']));
+            throw new BadRequestHttpException('dictionary.request_error');
         }
 
         if (!in_array(strtoupper($request['type']), EgaisHelper::$type_document)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'dictionary.egais_type_document_error', ['ru'=>'Неправильный тип документа ЕГАИС']));
+            throw new BadRequestHttpException('dictionary.egais_type_document_error');
         }
 
         $orgId = empty($request['org_id'])
@@ -188,7 +188,7 @@ class EgaisMethods extends WebApi
         $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $orgId);
 
         if (empty($settings)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'dictionary.egais_get_setting_error', ['ru'=>'Неправильные настройки ЕГАИС']));
+            throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
 
         return EgaisHelper::getOneDocument($settings['egais_url'], $request);

@@ -50,7 +50,7 @@ class NoAuthWebApi
     {
         $operation = AllServiceOperation::findOne(['code' => $task->oper_code, 'service_id' => $task->service_id]);
         if (!$operation) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "wrong_param{param}", ['ru'=>'Некорректный параметр|{param}', 'param' =>  AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER]));
+            throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
 
         $allOperations = self::getAllSyncOperations();
@@ -89,7 +89,7 @@ class NoAuthWebApi
     {
         $operation = AllServiceOperation::findOne(['code' => $task->oper_code, 'service_id' => $task->service_id]);
         if (!$operation) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "wrong_param{param}", ['ru'=>'Некорректный параметр|{param}', 'param' =>  AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER]));
+            throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
 
         $allOperations = self::getAllSyncOperations();

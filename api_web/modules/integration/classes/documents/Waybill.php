@@ -142,7 +142,7 @@ class Waybill extends BaseWaybill implements DocumentInterface
     {
         //Если нет связи с заказом
         if (!isset($this->order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "document_has_not_path_to_order", ['ru'=>'Документ не связан с заказом']));
+            throw new BadRequestHttpException("document_has_not_path_to_order");
         }
         /** @var Transaction $transaction */
         $transaction = \Yii::$app->db_api->beginTransaction();

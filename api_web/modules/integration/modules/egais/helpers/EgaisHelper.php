@@ -45,7 +45,7 @@ class EgaisHelper extends WebApi
         $orgId = $this->user->organization_id;
 
         if (EgaisWriteOff::find()->where(['org_id' => $orgId, 'act_number' => $result['ActNumber']])->exists()) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'dictionary.act_write_off_number_error', ['ru'=>'Акт не найден']));
+            throw new BadRequestHttpException('dictionary.act_write_off_number_error');
         }
 
         $newAct = new EgaisWriteOff([
@@ -59,7 +59,7 @@ class EgaisHelper extends WebApi
         ]);
 
         if (!$newAct->save()) {
-            throw new BadRequestHttpException('Не удалось сохранить в базе, проверьте ваш xml документ!');
+            throw new BadRequestHttpException('Could not save to database, check your xml document!');
         }
 
         return self::sendEgaisQuery($url, $data, $queryType);
@@ -131,7 +131,7 @@ class EgaisHelper extends WebApi
             ->send();
 
         if (!$queryRests->isOk) {
-            throw new BadRequestHttpException (\Yii::t('api_web', 'dictionary.request_error', ['ru'=>'Ошибка запроса']));
+            throw new BadRequestHttpException('dictionary.request_error');
         }
 
         $replyId = (new XmlParser())->parseEgaisQuery($queryRests->content);
@@ -144,7 +144,7 @@ class EgaisHelper extends WebApi
             ->send();
 
         if (!$getUrlDoc->isOk) {
-            throw new BadRequestHttpException (\Yii::t('api_web', 'dictionary.request_error', ['ru'=>'Ошибка запроса']));
+            throw new BadRequestHttpException('dictionary.request_error');
         }
 
         $getDataDoc = (new XmlParser())->parseUrlDoc($getUrlDoc->content);
@@ -180,7 +180,7 @@ class EgaisHelper extends WebApi
             ->send();
 
         if (!$response->isOk) {
-            throw new BadRequestHttpException (\Yii::t('api_web', 'dictionary.request_error', ['ru'=>'Ошибка запроса']));
+            throw new BadRequestHttpException('dictionary.request_error');
         }
 
         $docs = (new XmlParser())->parseIncomingDocs($response->content);
@@ -235,7 +235,7 @@ class EgaisHelper extends WebApi
             ->send();
 
         if (!$response->isOk) {
-            throw new BadRequestHttpException (\Yii::t('api_web', 'dictionary.request_error', ['ru'=>'Ошибка запроса']));
+            throw new BadRequestHttpException('dictionary.request_error');
         }
 
         return (new XmlParser())->$parser($response->content);

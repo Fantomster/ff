@@ -50,7 +50,7 @@ class VetisWaybill extends WebApi
     {
         $license = LicenseOrganization::getLicenseForOrganizationService($this->user->organization_id, Registry::MERC_SERVICE_ID);
         if (!isset($license)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.active_license_not_found', ['ru' => 'Нет активной лицензии для доступа к этой функции']));
+            throw new BadRequestHttpException('vetis.active_license_not_found');
         }
 
         $reqPag = $request['pagination'] ?? [];
@@ -239,7 +239,7 @@ class VetisWaybill extends WebApi
     public function getShortInfoAboutVsd($request)
     {
         if (!isset($request['uuid'])) {
-            throw new BadRequestHttpException(\Yii::t('api_web',  'Uuid is required', ['ru'=>'Uuid обязателен']));
+            throw new BadRequestHttpException('Uuid is required');
         }
         $obInfo = (new VetisHelper())->getShortInfoVsd($request['uuid']);
 
@@ -256,7 +256,7 @@ class VetisWaybill extends WebApi
     public function getFullInfoAboutVsd($request)
     {
         if (!isset($request['uuid'])) {
-            throw new BadRequestHttpException(\Yii::t('api_web',  'Uuid is required', ['ru'=>'Uuid обязателен']));
+            throw new BadRequestHttpException('Uuid is required');
         }
         $obInfo = (new VetisHelper())->getFullInfoVsd($request['uuid']);
 
@@ -273,7 +273,7 @@ class VetisWaybill extends WebApi
     public function repayVsd($request)
     {
         if (!isset($request['uuid']) && empty($request['uuid'])) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'Uuid is required and must be array', ['ru'=>'Uuid обязатален и может быть массив']));
+            throw new BadRequestHttpException('Uuid is required and must be array');
         }
         $records = $this->helper->getAvailableVsd($request['uuid']);
         try {
@@ -283,9 +283,7 @@ class VetisWaybill extends WebApi
                     $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_EXTINGUISHED, $request['uuid']);
                 }
             } else {
-                throw new BadRequestHttpException(\Yii::t('api_web', "VSD does not belong to this organization: {uuid}",
-                    ['ru'=>'ВСД не принадлежит данной организации: {uuid}',
-                        'uuid' => $request['uuid']]));
+                throw new BadRequestHttpException('VSD does not belong to this organization|' . $request['uuid']);
             }
         } catch (\Throwable $t) {
             $error = $t->getMessage();
@@ -311,13 +309,11 @@ class VetisWaybill extends WebApi
     {
         $uuid = $request['uuid'];
         if (!isset($uuid) || !isset($request['reason'])) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'Uuid is required and must be array', ['ru'=>'Uuid обязатален и может быть массив']));
+            throw new BadRequestHttpException('Uuid and reason is required and must be array');
         }
         $record = $this->helper->getAvailableVsd($request['uuid']);
         if (!$record) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "VSD does not belong to this organization: {uuid}",
-                ['ru'=>'ВСД не принадлежит данной организации: {uuid}',
-                 'uuid' => $request['uuid']]));
+            throw new BadRequestHttpException('Uuid not for this organization');
         }
         $params = [
             'decision'    => VetDocumentDone::PARTIALLY,
@@ -355,13 +351,11 @@ class VetisWaybill extends WebApi
     {
         $uuid = $request['uuid'];
         if (!isset($uuid) || !isset($request['reason'])) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'Uuid is required and must be array', ['ru'=>'Uuid обязатален и может быть массив']));
+            throw new BadRequestHttpException('Uuid and reason is required and must be array');
         }
         $record = $this->helper->getAvailableVsd($uuid);
         if (!$record) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "VSD does not belong to this organization: {uuid}",
-                ['ru'=>'ВСД не принадлежит данной организации: {uuid}',
-                 'uuid' => $request['uuid']]));
+            throw new BadRequestHttpException('Uuid not for this organization');
         }
         $params = [
             'decision'    => VetDocumentDone::RETURN_ALL,
@@ -415,7 +409,7 @@ class VetisWaybill extends WebApi
     public function getVsdPdf($request)
     {
         if (!isset($request['uuid'])) {
-            throw new BadRequestHttpException(\Yii::t('api_web',  'Uuid is required', ['ru'=>'Uuid обязателен']));
+            throw new BadRequestHttpException('Uuid is required');
         }
 
         $vsdHttp = $this->helper->generateVsdHttp();

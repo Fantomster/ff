@@ -74,7 +74,7 @@ class WebApi
     {
         foreach ($params as $param) {
             if (!isset($request[$param]) || empty($request[$param])) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "empty_param|{param}", ['ru'=>'Неуказан параметр|{param}', 'param' => $param]));
+                throw new BadRequestHttpException('empty_param|' . $param);
             }
         }
     }

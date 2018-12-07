@@ -54,7 +54,7 @@ class EmailRoboWebApi extends WebApi
         $this->validateRequest($post, ['id']);
         $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id, 'version' => 2]);
         if (!$model) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "integration.email.setting_not_found", ['ru'=>'Настройки email не найдены']));
+            throw new BadRequestHttpException('integration.email.setting_not_found');
         }
         $model->password = str_pad('', strlen($model->password), '*');
         return ['result' => $model];
@@ -79,7 +79,7 @@ class EmailRoboWebApi extends WebApi
             'version'         => 2,
         ]);
         if (!$model) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "integration.email.setting_not_found", ['ru'=>'Настройки email не найдены']));
+            throw new BadRequestHttpException('integration.email.setting_not_found');
         }
         try {
             foreach ($post as $key => $field) {
@@ -144,7 +144,7 @@ class EmailRoboWebApi extends WebApi
         $this->validateRequest($post, ['id']);
         $model = IntegrationSettingFromEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization_id, 'version' => 2]);
         if (!$model) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "integration.email.setting_not_found", ['ru'=>'Настройки email не найдены']));
+            throw new BadRequestHttpException('integration.email.setting_not_found');
         }
         try {
             if (!$model->delete()) {
@@ -166,7 +166,7 @@ class EmailRoboWebApi extends WebApi
     {
         $availableBusinesses = (new UserWebApi())->getUserOrganizationBusinessList('id');
         if (!in_array($orgId, array_keys($availableBusinesses['result']))) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "integration.email.bad_organization_id", ['ru'=>'Не корректный идентификатор организации']));
+            throw new BadRequestHttpException('integration.email.bad_organization_id');
         }
 
         return $orgId;

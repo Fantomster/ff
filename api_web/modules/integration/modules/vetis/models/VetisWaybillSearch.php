@@ -54,8 +54,7 @@ class VetisWaybillSearch extends MercVsd
             $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
             if (empty($orgIds['result'])){
                 //todo_refactor localization
-                throw new BadRequestHttpException(\Yii::t('api_web', 'You dont have available businesses, plz add relation to organization for your user',
-                    ['ru'=>'У вас нет доступных предприятий, пожалуйста добавьте привязку предприятия к вашей организации']));
+                throw new BadRequestHttpException('You dont have available businesses, plz add relation to organization for your user');
             }
             $strOrgIds = array_map(function ($el) {
                 return $el['id'];

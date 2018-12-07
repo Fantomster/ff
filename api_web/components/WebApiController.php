@@ -193,13 +193,13 @@ class WebApiController extends \yii\rest\Controller
                 if (isset($this->request['pagination'])) {
                     if (isset($this->request['pagination']['page_size'])) {
                         if ($this->request['pagination']['page_size'] > 200) {
-                            throw new \yii\web\BadRequestHttpException(\Yii::t('api_web', 'param_value_to_large|page_size|200', ['ru'=>'Значение параметра слишком большое|page_size|200']));
+                            throw new \yii\web\BadRequestHttpException('param_value_to_large|page_size|200');
                         }
                     }
                 }
                 return true;
             } else {
-                throw new \yii\web\BadRequestHttpException(\Yii::t('api_web', "Bad request, data request is empty", ['ru'=>'Некорректный запрос отсутствует request']));
+                throw new \yii\web\BadRequestHttpException('Bad request, data request is empty');
             }
         }
         return false;

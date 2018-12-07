@@ -34,7 +34,7 @@ class ClientWebApi extends WebApi
     public function detail()
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         return WebApiHelper::prepareOrganization($this->user->organization);
@@ -51,12 +51,12 @@ class ClientWebApi extends WebApi
     public function detailUpdate(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
         //Поиск ресторана в системе
         $model = Organization::find()->where(['id' => $this->user->organization->id, 'type_id' => Organization::TYPE_RESTAURANT])->one();
         if (empty($model)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "client_not_found", ['ru'=>'Ресторан не найден']));
+            throw new BadRequestHttpException('client_not_found');
         }
         //прошли все проверки, будем обновлять
         $transaction = \Yii::$app->db->beginTransaction();
@@ -158,7 +158,7 @@ class ClientWebApi extends WebApi
     public function detailUpdateLogo(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         $this->validateRequest($post, ['image_source']);
@@ -166,7 +166,7 @@ class ClientWebApi extends WebApi
         //Поиск ресторана в системе
         $model = Organization::find()->where(['id' => $this->user->organization->id, 'type_id' => Organization::TYPE_RESTAURANT])->one();
         if (empty($model)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "client_not_found", ['ru'=>'Ресторан не найден']));
+            throw new BadRequestHttpException('client_not_found');
         }
 
         //прошли все проверки, будем обновлять
@@ -199,7 +199,7 @@ class ClientWebApi extends WebApi
     public function additionalEmailCreate(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         $this->validateRequest($post, ['email']);
@@ -248,7 +248,7 @@ class ClientWebApi extends WebApi
     public function notificationList()
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
         $result = [];
         $isHeadOfOrganisation = (bool)($this->user->role_id == Role::ROLE_RESTAURANT_MANAGER);
@@ -263,7 +263,7 @@ class ClientWebApi extends WebApi
         } else {
             $rel = RelationUserOrganization::findOne(['organization_id' => $this->user->organization->id, 'user_id' => $this->user->id]);
             if (empty($rel)) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "RelationUserOrganization_not_found", ['ru'=>'Связь пользователя с организацией не найдена']));
+                throw new BadRequestHttpException('RelationUserOrganization_not_found');
             }
             $users[] = $this->user->id;
             $relations[] = $rel->id;
@@ -348,7 +348,7 @@ class ClientWebApi extends WebApi
     public function notificationUpdate(array $posts)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         foreach ($posts as $post) {
@@ -367,28 +367,28 @@ class ClientWebApi extends WebApi
             }
 
             if (empty($model)) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "model_not_found", ['ru'=>'Данные не найдены']));
+                throw new BadRequestHttpException('model_not_found');
             }
 
             //Если пользователь не руководитель, он обновлять может только свои уведомления
             if ($this->user->role_id != Role::ROLE_RESTAURANT_MANAGER) {
                 $rel = RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $this->user->organization->id]);
                 if (empty($rel)) {
-                    throw new BadRequestHttpException(\Yii::t('api_web', "RelationUserOrganization_not_found", ['ru'=>'Связь пользователя с организацией не найдена']));
+                    throw new BadRequestHttpException('RelationUserOrganization_not_found');
                 }
 
                 if ($model instanceof AdditionalEmail) {
                     /** @var AdditionalEmail $model */
                     if ($model->organization_id != $this->user->organization->id) {
-                        throw new BadRequestHttpException(\Yii::t('api_web', "model_not_found", ['ru'=>'Данные не найдены']));
+                        throw new BadRequestHttpException('model_not_found');
                     }
                 } else {
                     /** @var SmsNotification $model */
                     if ($model->user_id != $this->user->id) {
-                        throw new BadRequestHttpException(\Yii::t('api_web', "model_not_found", ['ru'=>'Данные не найдены']));
+                        throw new BadRequestHttpException('model_not_found');
                     }
                     if ($model->rel_user_org_id != $rel->id) {
-                        throw new BadRequestHttpException(\Yii::t('api_web', "model_not_found", ['ru'=>'Данные не найдены']));
+                        throw new BadRequestHttpException('model_not_found');
                     }
                 }
             }
@@ -436,14 +436,14 @@ class ClientWebApi extends WebApi
     public function additionalEmailDelete(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         $this->validateRequest($post, ['id']);
 
         $model = AdditionalEmail::findOne(['id' => $post['id'], 'organization_id' => $this->user->organization->id]);
         if (empty($model)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "additional_email.not_found", ['ru'=>'Дополнительный email не найден']));
+            throw new BadRequestHttpException('additional_email.not_found');
         }
 
         $t = \Yii::$app->db->beginTransaction();
@@ -470,7 +470,7 @@ class ClientWebApi extends WebApi
     public function employeeGet(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         $this->validateRequest($post, ['id']);
@@ -488,7 +488,7 @@ class ClientWebApi extends WebApi
     public function employeeSearch(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         $this->validateRequest($post, ['email']);
@@ -511,7 +511,7 @@ class ClientWebApi extends WebApi
     public function employeeRoles()
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
@@ -537,7 +537,7 @@ class ClientWebApi extends WebApi
     public function employeeList(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
@@ -598,7 +598,7 @@ class ClientWebApi extends WebApi
     public function employeeAdd(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -613,7 +613,7 @@ class ClientWebApi extends WebApi
             //Проверка, можно ли проставить эту роль что прислали
             $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
             if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "user.role_set_access", ['ru'=>'Невозможно назначить данную роль']));
+                throw new BadRequestHttpException('user.role_set_access');
             }
 
             //Ищем пользователя
@@ -622,7 +622,7 @@ class ClientWebApi extends WebApi
                 //Смотрим, вдруг он уже работает в этом ресторане
                 $relation = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $this->user->organization->id]);
                 if (!empty($relation)) {
-                    throw new BadRequestHttpException(\Yii::t('api_web', "user.work_in_role|{role}", ['ru'=>'Пользователю уже назначена роль|{role}', 'role' => Role::findOne($relation->role_id)->name]));
+                    throw new BadRequestHttpException('user.work_in_role|' . Role::findOne($relation->role_id)->name);
                 }
             } else {
                 /**
@@ -673,7 +673,7 @@ class ClientWebApi extends WebApi
     public function employeeUpdate(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         $this->validateRequest($post, ['id']);
@@ -684,7 +684,7 @@ class ClientWebApi extends WebApi
 
             if ($user->id != $this->user->id) {
                 if ($this->user->role_id != Role::ROLE_RESTAURANT_MANAGER) {
-                    throw new BadRequestHttpException(\Yii::t('api_web', "'user.employee.update.access_denied'", ['ru'=>'Нет прав на редактирование сотрудиника']));
+                    throw new BadRequestHttpException('user.employee.update.access_denied');
                 }
             }
 
@@ -694,7 +694,7 @@ class ClientWebApi extends WebApi
             ]);
 
             if (empty($relation)) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "user.not_staff", ['ru'=>'Пользователь не в штате']));
+                throw new BadRequestHttpException('user.not_staff');
             }
 
             if (!empty($post['name'])) {
@@ -716,7 +716,7 @@ class ClientWebApi extends WebApi
 
                 $list = Role::find()->where(['organization_type' => Organization::TYPE_RESTAURANT])->all();
                 if (!in_array($post['role_id'], ArrayHelper::map($list, 'id', 'id'))) {
-                    throw new BadRequestHttpException(\Yii::t('api_web', "user.role_set_access", ['ru'=>'Нет прав на изменение роли']));
+                    throw new BadRequestHttpException('user.role_set_access');
                 }
 
                 $user->role_id = $post['role_id'];
@@ -756,17 +756,17 @@ class ClientWebApi extends WebApi
     public function employeeDelete(array $post)
     {
         if ($this->user->organization->type_id != Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "method_access_to_vendor", ['ru'=>'Действие только для постащика']));
+            throw new BadRequestHttpException('method_access_to_vendor');
         }
 
         $this->validateRequest($post, ['id']);
 
         if ($post['id'] === $this->user->id) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "user.delete_myself", ['ru'=>'Невозможно активную учетную запись']));
+            throw new BadRequestHttpException('user.delete_myself');
         }
 
         if ($this->user->role_id != Role::ROLE_RESTAURANT_MANAGER) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "user.employee.delete.access_denied", ['ru'=>'Нет прав на удаление сотрудника']));
+            throw new BadRequestHttpException('user.employee.delete.access_denied');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -827,12 +827,12 @@ class ClientWebApi extends WebApi
         $model = User::findOne($id);
 
         if (empty($model)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "user_not_found", ['ru'=>'Пользователь не найден']));
+            throw new BadRequestHttpException('user_not_found');
         }
 
         $organizations = ArrayHelper::map($model->getAllOrganization(), 'id', 'id');
         if (!in_array($this->user->organization->id, $organizations)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "user.not_staff", ['ru'=>'Пользователь не в штате']));
+            throw new BadRequestHttpException('user.not_staff');
         }
 
         return $model;

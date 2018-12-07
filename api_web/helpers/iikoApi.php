@@ -79,7 +79,7 @@ class iikoApi
         if (isset(self::$_instance->{$name})) {
             self::$_instance->{$name} = $value;
         } else {
-            throw new BadRequestHttpException(\Yii::t('api_web', "iikoApi attribute not found:{attr}", ['ru'=>'iikoApi атрибут не найден:{attr}', 'attr' => $name]));
+            throw new BadRequestHttpException('iikoApi attribute not found|' . $name);
         }
     }
 

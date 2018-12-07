@@ -61,7 +61,7 @@ class IntegrationWebApi extends WebApi
         if ($license) {
             return ['result' => $this->user->setIntegrationServiceId($request['service_id'])];
         } else {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'Dont have active license for this service', ['ru'=>'У вас нет активной лицензии на эту услугу']));
+            throw new BadRequestHttpException('Dont have active license for this service');
         }
     }
 
@@ -105,7 +105,7 @@ class IntegrationWebApi extends WebApi
             $order = Order::findOne(['id' => (int)$post['order_id'], 'client_id' => $this->user->organization_id]);
 
             if (!$order) {
-                throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
+                throw new BadRequestHttpException("order_not_found");
             }
             $outerAgent = OuterAgent::findOne(['vendor_id' => $order->vendor_id]);
             if ($outerAgent) {
@@ -171,7 +171,7 @@ class IntegrationWebApi extends WebApi
             ])->one();
 
         if (!$waybillContent) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "waybill.content_not_found", ['ru'=>'Не найден состав накладной']));
+            throw new BadRequestHttpException("waybill.content_not_found");
         }
 
         $orderContent = $waybillContent->orderContent;
@@ -196,7 +196,7 @@ class IntegrationWebApi extends WebApi
             $waybillContent->sum_without_vat = (int)$result['price'] * $result['quantity'];
             $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $result['quantity'];
         } else {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order_content_not_found", ['ru'=>'Состав заказа не найден']));
+            throw new BadRequestHttpException("order content not found");
         }
 
         if (!$waybillContent->save()) {
@@ -225,7 +225,7 @@ class IntegrationWebApi extends WebApi
             ])->one();
 
         if (!$waybillContent) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "waybill.content_not_found", ['ru'=>'Не найден состав накладной']));
+            throw new BadRequestHttpException("waybill_content_not_found");
         }
 
         $arr = $waybillContent->attributes;
@@ -316,7 +316,7 @@ class IntegrationWebApi extends WebApi
             ])->one();
 
         if (!$waybillContent) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "waybill.content_not_found", ['ru'=>'Не найден состав накладной']));
+            throw new BadRequestHttpException("waybill.content_not_found");
         }
 
         //Обновим внешний продукт и ед. измерения
@@ -329,7 +329,7 @@ class IntegrationWebApi extends WebApi
             ]);
 
             if (empty($outerProduct)) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "waybill.outer_product_not_found", ['ru'=>'Позиция в учетной системе не найдена']));
+                throw new BadRequestHttpException("waybill.outer_product_not_found");
             }
             $waybillContent->outer_product_id = $outerProduct->id;
             $waybillContent->outer_unit_id = $outerProduct->outer_unit_id;
@@ -369,7 +369,7 @@ class IntegrationWebApi extends WebApi
         //Поиск накладной
         $waybill = Waybill::findOne(['id' => (int)$post['waybill_id'], 'acquirer_id' => $this->user->organization_id]);
         if (!$waybill) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "waybill_not_found", ['ru'=>'Накладная не найдена']));
+            throw new BadRequestHttpException("waybill_not_found");
         }
 
         //Найдем продукт у.с.
@@ -378,7 +378,7 @@ class IntegrationWebApi extends WebApi
             'service_id' => $waybill->service_id
         ]);
         if (empty($outerProduct)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "waybill.outer_product_not_found", ['ru'=>'Позиция в учетной системе не найдена']));
+            throw new BadRequestHttpException('waybill.outer_product_not_found');
         }
 
         //Проверяем, нет ли в накладной этого продукта
@@ -387,7 +387,7 @@ class IntegrationWebApi extends WebApi
             'outer_product_id' => $outerProduct->id
         ])->exists();
         if ($exists) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "waybill.content_exists", ['ru'=>'Позиция уже есть в накладной']));
+            throw new BadRequestHttpException("waybill.content_exists");
         }
 
         //Создаем новую запись
@@ -423,22 +423,22 @@ class IntegrationWebApi extends WebApi
 
         $waybillCheck = Waybill::findOne(['id' => $post['waybill_id']]);
         if (!isset($waybillCheck)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_found', ['ru' => 'Накладная не найдена']));
+            throw new BadRequestHttpException('waybill.waibill_not_found');
         }
 
         $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
         $checkOrg = in_array($waybillCheck->acquirer_id, ArrayHelper::map($businessList['result'] ?? [], 'id', 'id')) ?? false;
 
         if (!$checkOrg) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_releated_current_user', ['ru' => 'Накладная не пренадлежит организациям текущего пользователя']));
+            throw new BadRequestHttpException('waybill.waibill_not_releated_current_user');
         }
 
         if ($waybillCheck->service_id != $post['service_id']) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_relation_this_service', ['ru' => 'Накладная не связана с заданным сервисом']));
+            throw new BadRequestHttpException('waybill.waibill_not_relation_this_service');
         }
 
         if ($waybillCheck->status_id == Registry::WAYBILL_UNLOADED) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_unloading', ['ru' => 'Накладная в статусе выгружена']));
+            throw new BadRequestHttpException('waybill.waibill_is_unloading');
         }
 
         $waybillContentCheck = WaybillContent::find()
@@ -446,7 +446,7 @@ class IntegrationWebApi extends WebApi
             ->andWhere('order_content_id is not null')
             ->one();
         if (isset($waybillContentCheck)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_relation_order', ['ru' => 'Накладная связана с заказом']));
+            throw new BadRequestHttpException('waybill.waibill_is_relation_order');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -479,7 +479,7 @@ class IntegrationWebApi extends WebApi
             ])->one();
 
         if (!$waybillContent) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order_content_not_found", ['ru'=>'Состав заказа не найден']));
+            throw new BadRequestHttpException("waybill.content_not_found");
         }
 
         return ['success' => $waybillContent->delete()];

@@ -24,7 +24,7 @@ class NotificationWebApi extends WebApi
         $r = FireBase::getInstance()->get($path);
 
         if (empty($r)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "Notification not found", ['ru'=>'Уведомление не найдено']));
+            throw new BadRequestHttpException('Notification not found');
         }
 
         return \GuzzleHttp\json_decode($r, 1);
@@ -54,7 +54,7 @@ class NotificationWebApi extends WebApi
         $this->validateRequest($post, ['body', 'user_id']);
 
         if (!User::findOne($post['user_id'])) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "user_not_found", ['ru'=>'Пользователь не найден']));
+            throw new BadRequestHttpException('user_not_found');
         }
 
         $path = [

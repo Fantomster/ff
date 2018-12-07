@@ -273,7 +273,7 @@ class GuideWebApi extends \api_web\components\WebApi
                 $transaction->commit();
                 return $this->prepareGuide($guide->id);
             } else {
-                throw new BadRequestHttpException(\Yii::t('api_web', "guide.vendor_create_denied", ['ru'=>'Поставщик не может создавать шаблоны']));
+                throw new BadRequestHttpException("guide.vendor_create_denied");
             }
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -294,11 +294,11 @@ class GuideWebApi extends \api_web\components\WebApi
 
         $order = \common\models\Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
         if (empty($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
+            throw new BadRequestHttpException("order_not_found");
         }
 
         if (empty($order->orderContent)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order_content_not_found", ['ru'=>'Состав заказа не найден']));
+            throw new BadRequestHttpException("order_content_not_found");
         }
 
         $request = [
@@ -402,7 +402,7 @@ class GuideWebApi extends \api_web\components\WebApi
         $dataProvider = (new GuideProductsSearch())->search([], $post['guide_id'], $client->id);
         $result = $dataProvider->models;
         if (empty($result)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "guide.empty_goods", ['ru'=>'Пустой щаблон']));
+            throw new BadRequestHttpException("guide.empty_goods");
         }
 
         $products = [];
@@ -443,7 +443,7 @@ class GuideWebApi extends \api_web\components\WebApi
         try {
             foreach ($params['products'] as &$product) {
                 if (!in_array($product['operation'], ['add', 'del'])) {
-                    throw new BadRequestHttpException(\Yii::t('api_web', "guide.operation_not_found|{operation}", ['ru'=>'Операция не найдена|{operation}', 'operation' => $product['operation']]));
+                    throw new BadRequestHttpException("guide.operation_not_found|{$product['operation']}" );
                 }
                 //Добавляем продукт в шаблон
                 if ($product['operation'] == 'add') {
@@ -489,7 +489,7 @@ class GuideWebApi extends \api_web\components\WebApi
         $guide = Guide::findOne($guide_id);
 
         if ($guide->getProductCount() == 1000) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "guide.max_products|1000", ['ru'=>'Максимальное количество позиций|1000']));
+            throw new BadRequestHttpException('guide.max_products|1000');
         }
 
         /**
@@ -509,7 +509,7 @@ class GuideWebApi extends \api_web\components\WebApi
                     ];
                 }
             } else {
-                throw new BadRequestHttpException(\Yii::t('api_web', "guide.not_add_product_in_guide|{product}", ['ru'=>'Невозможно добавить продукт в шаблон|{product}', 'product' => $id]));
+                throw new BadRequestHttpException("guide.not_add_product_in_guide|{$id}");
             }
         }
     }
@@ -551,7 +551,7 @@ class GuideWebApi extends \api_web\components\WebApi
                         throw new ValidationException($product->getFirstErrors());
                     }
                 } else {
-                    throw new BadRequestHttpException(\Yii::t('api_web', "guide.product_not_found|{product}", ['ru'=>'Позиция не найдена|{product}', 'product' => $pid]));
+                    throw new BadRequestHttpException("guide.product_not_found|{$pid}");
                 }
             }
         } catch (\Exception $e) {
@@ -640,11 +640,11 @@ class GuideWebApi extends \api_web\components\WebApi
         $model = Guide::findOne($guide_id);
 
         if (empty($model)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "guide.not_found", ['ru'=>'Шаблон не найден']));
+            throw new BadRequestHttpException('guide.not_found');
         }
 
         if ($model->client_id != $client->id) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "guide.access_denied", ['ru'=>'Нет доступа к шаблону']));
+            throw new BadRequestHttpException('guide.access_denied');
         }
     }
 }

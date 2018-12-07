@@ -48,7 +48,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $order = Order::findOne($post['order_id']);
 
         if (!$order) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
+            throw new BadRequestHttpException('order_not_found');
         }
 
         //If user is unconfirmed
@@ -66,17 +66,17 @@ class OrderWebApi extends \api_web\components\WebApi
                     $delivery->save();
                 }
             } else {
-                throw new BadRequestHttpException(\Yii::t('api_web', "order.access.change.denied", ['ru'=>'Нет прав на изменение заказа']));
+                throw new BadRequestHttpException("order.access.change.denied");
             }
         }
         if (!$this->accessAllow($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order.access.change.denied", ['ru'=>'Нет прав на изменение заказа']));
+            throw new BadRequestHttpException("order.access.change.denied");
         }
         //OrderStatus::checkEdiOrderPermissions($order, 'edit');
 
         //Проверим статус заказа
         if (in_array($order->status, [OrderStatus::STATUS_CANCELLED, OrderStatus::STATUS_REJECTED])) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order.access.change.canceled_status", ['ru'=>'Нет прав на отмену заказа']));
+            throw new BadRequestHttpException("order.access.change.canceled_status");
         }
         //Если сменили комментарий
         if (isset($post['comment']) && !$isUnconfirmedVendor) {
@@ -89,15 +89,15 @@ class OrderWebApi extends \api_web\components\WebApi
         //Если поменяли скидку
         if (isset($post['discount']) && !empty($post['discount'])) {
             if (empty($post['discount']['type']) || !in_array(strtoupper($post['discount']['type']), ['FIXED', 'PERCENT'])) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "order.discount.types", ['ru'=>'Некорректный тип скидки']));
+                throw new BadRequestHttpException("order.discount.types");
             }
             if (!isset($post['discount']['amount'])) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "order.discount.empty_amount", ['ru'=>'Пустое значение скидки']));
+                throw new BadRequestHttpException("order.discount.empty_amount");
             }
             $order->discount_type = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
 
             if ($order->discount_type == Order::DISCOUNT_PERCENT && 100 < $post['discount']['amount']) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "order.discount.100_percent", ['ru'=>'Скидка должна быть менее 100%']));
+                throw new BadRequestHttpException("order.discount.100_percent");
             }
 
             $order->discount = $post['discount']['amount'];
@@ -115,7 +115,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     foreach ($post['products'] as $product) {
                         $operation = strtolower($product['operation']);
                         if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
-                            throw new BadRequestHttpException(\Yii::t('api_web', "error.request", ['ru'=>'Ошибка в запросе']));
+                            throw new BadRequestHttpException("error.request");
                         }
                         switch ($operation) {
                             case 'delete':
@@ -131,7 +131,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     }
                     if (isset($post['discount']['amount'])) {
                         if ($order->discount_type == Order::DISCOUNT_FIXED && $order->getTotalPriceWithOutDiscount() < $post['discount']['amount']) {
-                            throw new BadRequestHttpException(\Yii::t('api_web', "order.discount.big_amount", ['ru'=>'Слишком большой размер скидки']));
+                            throw new BadRequestHttpException("order.discount.big_amount");
                         }
                     }
 
@@ -146,7 +146,7 @@ class OrderWebApi extends \api_web\components\WebApi
                         }
                     }
                 } else {
-                    throw new BadRequestHttpException(\Yii::t('api_web', "error.request", ['ru'=>'Ошибка в запросе']));
+                    throw new BadRequestHttpException("error.request");
                 }
             }
 
@@ -187,7 +187,7 @@ class OrderWebApi extends \api_web\components\WebApi
          */
         $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
         if (empty($orderContent)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order_content_not_found", ['ru'=>'Состав заказа не найден']));
+            throw new BadRequestHttpException("order_content.not_found");
         }
 
         if (!empty($product['quantity'])) {
@@ -221,13 +221,13 @@ class OrderWebApi extends \api_web\components\WebApi
     private function deleteProduct(Order $order, int $id)
     {
         if (empty($id)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order.delete_product_empty", ['ru'=>'Не указана позиция для удаления']));
+            throw new BadRequestHttpException("order.delete_product_empty");
         }
 
         /** @var OrderContent $orderContentRow */
         $orderContentRow = $order->getOrderContent()->where(['product_id' => $id])->one();
         if (empty($orderContentRow)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order_content_not_found", ['ru'=>'Состав заказа не найден']));
+            throw new BadRequestHttpException("order_content.not_found");
         }
 
         $product_name = $orderContentRow->product_name;
@@ -253,7 +253,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if (empty($orderContentRow)) {
             $productModel = (new Product())->findFromCatalogs($product['id'], $this->user->organization->getCatalogs());
             if (!in_array($productModel['supp_org_id'], [$order->vendor->id])) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "order.bad_vendor|{vendor}", ['ru'=>'Некорректный поставщик|{vendor}', 'vendor' => $order->vendor->name]));
+                throw new BadRequestHttpException("order.bad_vendor|" . $order->vendor->name);
             }
 
             $orderContent = new OrderContent();
@@ -272,7 +272,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new ValidationException($orderContent->getFirstErrors());
             }
         } else {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order.add_product_is_already_in_order|{propduct}", ['ru'=>'Позиция уже есть в заказе|{product}', 'product' => $product['id']]));
+            throw new BadRequestHttpException("order.add_product_is_already_in_order|" . $product['id']);
         }
     }
 
@@ -291,11 +291,11 @@ class OrderWebApi extends \api_web\components\WebApi
         $order = Order::findOne($post['order_id']);
 
         if (empty($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
+            throw new BadRequestHttpException("order_not_found");
         }
 
         if (!$this->accessAllow($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order.edit_comment_access_denied", ['ru'=>'Нет прав на редактирование комментария']));
+            throw new BadRequestHttpException("order.edit_comment_access_denied");
         }
         OrderStatus::checkEdiOrderPermissions($order, 'edit', [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]);
 
@@ -326,7 +326,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $order = Order::findOne($post['order_id']);
 
         if (empty($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
+            throw new BadRequestHttpException("order_not_found");
         }
 
         if (!$this->accessAllow($order)) {
@@ -337,7 +337,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $orderContent = OrderContent::findOne(['order_id' => $order->id, 'product_id' => (int)$post['product_id']]);
 
         if (empty($orderContent)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order.edit_comment_access_denied", ['ru'=>'Нет прав на редактирование комментария']));
+            throw new BadRequestHttpException("order_content.not_found");
         }
 
         $orderContent->comment = $post['comment'];
@@ -372,11 +372,11 @@ class OrderWebApi extends \api_web\components\WebApi
         $order = Order::find()->where(['id' => $post['order_id'], 'service_id' => Registry::MC_BACKEND])->one();
 
         if (empty($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
+            throw new BadRequestHttpException("order_not_found");
         }
 
         if (!$this->accessAllow($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order.view_access_denied", ['ru'=>'order.view_access_denied']));
+            throw new BadRequestHttpException("order.view_access_denied");
         }
 
         return $this->getOrderInfo($order);
@@ -699,7 +699,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 $vendors = [$organizationID];
                 $catalogs = $vendors ? $client->getCatalogs(null) : false;
             } else {
-                throw new BadRequestHttpException(\Yii::t('api_web', "order.edit_access_denied", ['ru'=>'Нет прав на редактирование заказа']));
+                throw new BadRequestHttpException("order.edit_access_denied");
             }
         } else {
             $searchSupplier = $post['search']['supplier_id'] ?? null;
@@ -810,7 +810,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 $suppliers = [$this->user->organization_id];
                 $organizationID = $order->client_id;
             } else {
-                throw new BadRequestHttpException(\Yii::t('api_web', "order.edit_access_denied", ['ru'=>'Нет прав на редактирование заказа']));
+                throw new BadRequestHttpException("order.edit_access_denied");
             }
         } else {
             $suppliers = RelationSuppRest::find()
@@ -897,15 +897,15 @@ class OrderWebApi extends \api_web\components\WebApi
         $order = $query->one();
 
         if (empty($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
+            throw new BadRequestHttpException("order_not_found");
         }
 
         if ($order->status == OrderStatus::STATUS_DONE) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order.already_done", ['ru'=>'Заказ уже принят']));
+            throw new BadRequestHttpException("order.already_done");
         }
 
         if ($order->status == OrderStatus::STATUS_CANCELLED) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order.already_cancel", ['ru'=>'Заказ уже отменен']));
+            throw new BadRequestHttpException("order.already_cancel");
         }
         OrderStatus::checkEdiOrderPermissions($order, 'cancel');
 
@@ -917,7 +917,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
                     $order->status = OrderStatus::STATUS_REJECTED;
                 } else {
-                    throw new BadRequestHttpException(\Yii::t('api_web', "order.edit_access_denied", ['ru'=>'Нет прав на редактирование заказа']));
+                    throw new BadRequestHttpException("order.edit_access_denied");
                 }
             } else {
                 $order->status = OrderStatus::STATUS_CANCELLED;
@@ -958,7 +958,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $order = Order::findOne(['id' => $post['order_id'], 'client_id' => $this->user->organization->id]);
 
         if (empty($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
+            throw new BadRequestHttpException("order_not_found");
         }
 
         $t = \Yii::$app->db->beginTransaction();
@@ -966,7 +966,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
             $content = $order->orderContent;
             if (empty($content)) {
-                throw new BadRequestHttpException(\Yii::t('api_web', "order_content.empty", ['ru'=>'Заказ пуст']));
+                throw new BadRequestHttpException("order_content.empty");
             }
 
             $request = [];
@@ -1008,11 +1008,11 @@ class OrderWebApi extends \api_web\components\WebApi
         $order = $query->one();
 
         if (empty($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
+            throw new BadRequestHttpException("order_not_found");
         }
 
         if ($order->status == OrderStatus::STATUS_DONE) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "order.already_done", ['ru'=>'Заказ уже принят']));
+            throw new BadRequestHttpException("order.already_done");
         }
         OrderStatus::checkEdiOrderPermissions($order, 'complete');
 
@@ -1059,7 +1059,7 @@ class OrderWebApi extends \api_web\components\WebApi
 
         $order = Order::findOne(['id' => $post['order_id']]);
         if (empty($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
+            throw new BadRequestHttpException('order_not_found');
         }
 
         $user = $this->user;
@@ -1113,14 +1113,15 @@ class OrderWebApi extends \api_web\components\WebApi
         $model = Order::find()->where(['id' => $post['order_id'], 'client_id' => $this->user->organization_id])->one();
 
         if (empty($model)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found', ['ru' => 'Заказ не найден']));
+            throw new BadRequestHttpException('order_not_found');
         }
 
         if (!in_array($model->service_id, [Registry::MC_BACKEND, Registry::VENDOR_DOC_MAIL_SERVICE_ID])) {
-            throw new BadRequestHttpException(\Yii::t('api_web', "bad_service_id_in_order|{id}|{var1} or {var2}", ['ru'=>'Не правильный идентификатор сервиса в заказе|{id}|{var1} или  {var2}',
-                'id' => ($model->service_id ?? "NULL"),
-                'var1' => Registry::MC_BACKEND,
-                'var2' => Registry::VENDOR_DOC_MAIL_SERVICE_ID]));
+            throw new BadRequestHttpException(
+                'bad_service_id_in_order|' .
+                ($model->service_id ?? "NULL") . '|' .
+                Registry::MC_BACKEND . ' or ' . Registry::VENDOR_DOC_MAIL_SERVICE_ID
+            );
         }
 
         $t = \Yii::$app->db->beginTransaction();

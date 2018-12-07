@@ -445,13 +445,13 @@ class WaybillHelper
                 ->orderBy([$waybillSearchField => SORT_DESC])->limit(1)->one();
             $ediNumber = $existWaybill->{$waybillSearchField} ?? $existOrderContent->edi_number;
 
-            return $this->getLastEdiNumber($ediNumber);
+            return $this->getLastEdiNumber($ediNumber, $tmp_ed_num);
         } else {
             $existWaybill = Waybill::find()->where(['like', $waybillSearchField, $tmp_ed_num])
                 ->andWhere(['service_id' => $serviceId])
                 ->orderBy([$waybillSearchField => SORT_DESC])->limit(1)->one();
             if ($existWaybill) {
-                return $this->getLastEdiNumber($existWaybill->{$waybillSearchField});
+                return $this->getLastEdiNumber($existWaybill->{$waybillSearchField}, $tmp_ed_num);
             }
         }
 
@@ -462,10 +462,10 @@ class WaybillHelper
      * @param $ediNumber
      * @return int|mixed|string
      */
-    private function getLastEdiNumber($ediNumber)
+    private function getLastEdiNumber($ediNumber, $tmp_ed_num)
     {
         $ed_num = '';
-        if (strpos($ediNumber, '-') != false) {
+        if (strpos($ediNumber, '-') != false && strlen($ediNumber) != strlen($tmp_ed_num)) {
             $ed_nums = explode('-', $ediNumber);
             $count = count($ed_nums);
             if ($count > 2) {

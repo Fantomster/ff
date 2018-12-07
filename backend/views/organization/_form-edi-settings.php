@@ -24,20 +24,22 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'provider_priority')->textInput(['maxlength' => true]) ?>
 
-    <?php
-        if($model->isNewRecord):
-    ?>
-
-    <?= $form->field($model, 'provider_id')->dropDownList($providers)->label('Название провайдера') ?>
+    <?= $form->field($model, 'pricat_action_attribute_rule')->dropDownList(\api_web\components\Registry::$edi_pricat_statuses)->label('Тип обработки документа pricat') ?>
 
     <?php
-        else:
-    ?>
+    if ($model->isNewRecord):
+        ?>
 
-            <h2><?= $model->ediProvider->name ?></h2>
+        <?= $form->field($model, 'provider_id')->dropDownList($providers)->label('Название провайдера') ?>
 
-    <?php
-        endif;
+        <?php
+    else:
+        ?>
+
+        <h2><?= $model->ediProvider->name ?></h2>
+
+        <?php
+    endif;
     ?>
 
     <h3>Выберите организации</h3>

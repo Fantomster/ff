@@ -276,9 +276,7 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function search(array $post)
     {
-        if (empty($post['email'])) {
-            throw new BadRequestHttpException('empty_param|search attribute email');
-        }
+        $this->validateRequest($post, ['email']);
 
         $result = [];
         $email = $post['email'];
@@ -327,9 +325,7 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function update(array $post)
     {
-        if (empty($post['id'])) {
-            throw new BadRequestHttpException('empty_param|id');
-        }
+        $this->validateRequest($post, ['id']);
         //Поиск поставщика в системе
         $model = Organization::find()->where(['id' => $post['id'], 'type_id' => Organization::TYPE_SUPPLIER])->one();
         if (empty($model)) {
@@ -461,18 +457,14 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function uploadLogo(array $post)
     {
-        if (empty($post['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($post, ['vendor_id']);
 
         $vendor = Organization::findOne($post['vendor_id']);
         if (empty($vendor)) {
             throw new BadRequestHttpException('vendor_not_found');
         }
 
-        if (empty($post['image_source'])) {
-            throw new BadRequestHttpException('empty_param|image_source');
-        }
+        $this->validateRequest($post, ['image_source']);
 
         if ($vendor->type_id !== Organization::TYPE_SUPPLIER) {
             throw new BadRequestHttpException('vendor.is_not_vendor');
@@ -514,12 +506,8 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function uploadFile(array $request)
     {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
-        if (empty($request['data'])) {
-            throw new BadRequestHttpException('empty_param|data');
-        }
+        $this->validateRequest($request, ['vendor_id', 'data']);
+
         $vendorId = $request['vendor_id'];
         $vendor = Organization::findOne($vendorId);
         if (empty($vendor) || $vendor->type_id != Organization::TYPE_SUPPLIER) {
@@ -532,7 +520,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendor->id, $this->user->organization, true);
         if (empty($catalog)) {
-            throw new BadRequestHttpException('Catalog not found');
+            throw new BadRequestHttpException('catalog_not_found');
         }
         $catalogID = $catalog->id;
 
@@ -580,25 +568,19 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function prepareTemporary(array $request)
     {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($request, ['vendor_id']);
+
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (!$catalog) {
-            throw new BadRequestHttpException("Catalog not found");
+            throw new BadRequestHttpException("catalog_not_found");
         }
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($tempCatalog)) {
-            throw new BadRequestHttpException("Temp catalog not found");
+            throw new BadRequestHttpException("catalog_temp_not_found");
         }
         $index = $request['index_field'] ?? $tempCatalog->cat->main_index ?? null;
-        if (empty($index)) {
-            throw new BadRequestHttpException('empty_param|index_field');
-        }
-
-        if (empty($request['mapping']) && empty($tempCatalog->cat->mapping)) {
-            throw new BadRequestHttpException('empty_param|mapping');
-        }
+        $mapping = $request['mapping'] ?? $tempCatalog->cat->mapping ?? null;
+        $this->validateRequest(['index' => $index, 'mapping' => $mapping], ['index', 'mapping']);
 
         if (!CatalogTempContent::find()->where(['temp_id' => $tempCatalog->id])->exists()) {
             $request['mapping'] = isset($request['mapping']) ? array_flip($request['mapping']) : null;
@@ -660,13 +642,11 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function deleteMainCatalog(array $request)
     {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
-        }
+        $this->validateRequest($request, ['cat_id']);
 
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
-            throw new BadRequestHttpException('Catalog not found');
+            throw new BadRequestHttpException('catalog_not_found');
         }
         return $this->container->get('CatalogWebApi')->deleteMainCatalog($catalog);
     }
@@ -682,13 +662,11 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function changeMainIndex(array $request)
     {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
-        }
+        $this->validateRequest($request, ['cat_id']);
 
         $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($catalog)) {
-            throw new BadRequestHttpException('Catalog not found');
+            throw new BadRequestHttpException('catalog_not_found');
         }
         return $this->container->get('CatalogWebApi')->changeMainIndex($catalog, $request['index']);
     }
@@ -706,9 +684,8 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function cancelTemporary(array $request)
     {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($request, ['vendor_id']);
+
         $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
 
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
@@ -764,7 +741,8 @@ class VendorWebApi extends \api_web\components\WebApi
         if (!$vendorUser) {
             return false;
         } elseif (empty($vendorUser->organization_id)) {
-            throw new BadRequestHttpException('Пользователь с емайлом:' . $email . ' найден у нас в системе, но он не завершил регистрацию. Как только он пройдет процедуру регистрации поставщика, вы сможете добавить его.');
+            throw new BadRequestHttpException("User with email: found in our system, but he did not complete the registration. 
+            As soon as he goes through the supplier registration procedure, you can add him.|{$vendorUser->email}");
         }
 
         if ($vendorUser->organization->type_id != Organization::TYPE_SUPPLIER) {

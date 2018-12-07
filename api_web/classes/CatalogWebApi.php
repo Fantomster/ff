@@ -83,9 +83,8 @@ class CatalogWebApi extends WebApi
      */
     public function uploadTemporary($request)
     {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException("empty_param|vendor_id");
-        }
+        $this->validateRequest($request, ['vendor_id']);
+
         $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization);
         if (empty($catalog)) {
             throw new BadRequestHttpException("base_catalog_not_found");
@@ -293,7 +292,7 @@ class CatalogWebApi extends WebApi
 
         $model = CatalogTempContent::findOne(['temp_id' => (int)$request['temp_id'], 'id' => (int)$request['id']]);
         if (empty($model)) {
-            throw new BadRequestHttpException("model_not_found");
+            throw new BadRequestHttpException("catalog_temp_not_found");
         }
 
         if (!$model->delete()) {

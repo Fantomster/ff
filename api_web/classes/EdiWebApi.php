@@ -44,22 +44,22 @@ class EdiWebApi extends WebApi
         }
 
         if (!in_array($order->service_id, Registry::$edo_documents)) {
-            throw new BadRequestHttpException("Доступно только для документов ЭДО и Накладных поставщика");
+            throw new BadRequestHttpException("Available only for EDO documents and Supplier Consignment Notes.");
         }
 
         if ($order->status != OrderStatus::STATUS_EDI_SENT_BY_VENDOR) {
-            throw new BadRequestHttpException("Должен быть статус \"Отправлено поставщиком\"");
+            throw new BadRequestHttpException("Must be \"Sent by Supplier \"");
         }
 
         if ($order->service_id == Registry::EDI_SERVICE_ID) {
             $eComAccess = EdiOrganization::findOne(['organization_id' => $order->client_id]);
             if (!$eComAccess) {
-                throw new BadRequestHttpException("Отсутствуют параметры доступа к EDI");
+                throw new BadRequestHttpException("No EDI Access Options");
             }
             $glnArray = $order->client->getGlnCodes($order->client->id, $order->vendor->id);
             $ediIntegration = new EDIIntegration(['orgId' => $order->vendor_id, 'clientId' => $order->client_id, 'providerID' => $glnArray['provider_id']]);
             if (!$ediIntegration) {
-                throw new BadRequestHttpException("В процессе отправки данных возникла ошибка");
+                throw new BadRequestHttpException("An error occurred while sending data");
             }
         }
 
@@ -89,9 +89,9 @@ class EdiWebApi extends WebApi
         ]);
 
         if (empty($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found'));
+            throw new BadRequestHttpException('order_not_found');
         } elseif (!in_array($order->service_id, Registry::$edo_documents)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
+            throw new BadRequestHttpException('order.available_for_edi_order');
         } elseif ($order->status != OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order.status_must_be') . \Yii::t('app', 'common.models.order_status.status_edo_acceptance_finished'));
         }
@@ -118,9 +118,9 @@ class EdiWebApi extends WebApi
         ]);
 
         if (empty($order)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order_not_found'));
+            throw new BadRequestHttpException('order_not_found');
         } elseif (!in_array($order->service_id, Registry::$edo_documents)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'order.available_for_edi_order'));
+            throw new BadRequestHttpException('order.available_for_edi_order');
         } elseif ($order->status != OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'order.status_must_be') . \Yii::t('app', 'common.models.order_status.status_awaiting_accept_from_vendor'));
         }

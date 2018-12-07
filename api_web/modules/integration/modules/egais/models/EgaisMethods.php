@@ -24,7 +24,7 @@ class EgaisMethods extends WebApi
      * @return array
      * @throws BadRequestHttpException|\Exception
      */
-    public function setEgaisSettings($request, $orgId)
+     public function setEgaisSettings($request, $orgId)
     {
         if (empty($request['egais_url']) || empty($request['fsrar_id']) || empty($orgId)) {
             throw new BadRequestHttpException('dictionary.request_error');

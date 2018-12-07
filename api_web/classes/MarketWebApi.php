@@ -239,7 +239,7 @@ class MarketWebApi extends WebApi
                 }
                 if (!empty($relationSuppliers)) {
                     if (in_array($model->supp_org_id, $relationSuppliers)) {
-                        throw new BadRequestHttpException('Нет доступа к продукту');
+                        throw new BadRequestHttpException('product_access_denied');
                     }
                 }
             }

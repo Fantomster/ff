@@ -305,12 +305,12 @@ class WaybillHelper
             ]
         ]);
         if (!$waybill) {
-            throw new BadRequestHttpException('waybill cannot adding waybill_content with id ' . $request['waybill_id']);
+            throw new BadRequestHttpException('waybill cannot adding waybill_content with id |' . $request['waybill_id']);
         }
 
         $orderContent = OrderContent::findOne($request['order_content_id']);
         if (!$orderContent) {
-            throw new BadRequestHttpException('OrderContent dont exists with id ' . $request['order_content_id']);
+            throw new BadRequestHttpException('OrderContent dont exists with id|' . $request['order_content_id']);
         }
 
         $this->checkOrderForWaybillContent($waybill, $orderContent);
@@ -377,7 +377,7 @@ class WaybillHelper
             ->onCondition(['waybill_id' => $waybill->id])
             ->exists()
         ) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_allready_has_waybill_content') . ' - ' . $orderContent->waybillContent->id);
+            throw new BadRequestHttpException('waybill.order_content_allready_has_waybill_content|' . $orderContent->waybillContent->id);
         }
 
         $waybillContent = WaybillContent::find()
@@ -388,7 +388,7 @@ class WaybillHelper
         if ($waybillContent) {
             $orderContentFromWaybill = $waybillContent->orderContent;
             if ($orderContent->order_id != $orderContentFromWaybill->order_id) {
-                throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_not_for_this_waybill'));
+                throw new BadRequestHttpException('waybill.order_content_not_for_this_waybill');
             }
         }
     }

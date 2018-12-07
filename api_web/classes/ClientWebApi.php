@@ -352,9 +352,7 @@ class ClientWebApi extends WebApi
         }
 
         foreach ($posts as $post) {
-            if (!isset($post['id'])) {
-                throw new BadRequestHttpException('empty_param|id');
-            }
+            $this->validateRequest($post, ['id']);
 
             switch ($post['type']) {
                 case 'user_phone':

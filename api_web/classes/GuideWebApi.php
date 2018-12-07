@@ -443,7 +443,7 @@ class GuideWebApi extends \api_web\components\WebApi
         try {
             foreach ($params['products'] as &$product) {
                 if (!in_array($product['operation'], ['add', 'del'])) {
-                    throw new BadRequestHttpException("guide.operation_not_found|" . $product['operation']);
+                    throw new BadRequestHttpException("guide.operation_not_found|{$product['operation']}" );
                 }
                 //Добавляем продукт в шаблон
                 if ($product['operation'] == 'add') {
@@ -509,7 +509,7 @@ class GuideWebApi extends \api_web\components\WebApi
                     ];
                 }
             } else {
-                throw new BadRequestHttpException('guide.not_add_product_in_guide|' . $id);
+                throw new BadRequestHttpException("guide.not_add_product_in_guide|{$id}");
             }
         }
     }
@@ -551,7 +551,7 @@ class GuideWebApi extends \api_web\components\WebApi
                         throw new ValidationException($product->getFirstErrors());
                     }
                 } else {
-                    throw new BadRequestHttpException("guide.product_not_found|" . $pid);
+                    throw new BadRequestHttpException("guide.product_not_found|{$pid}");
                 }
             }
         } catch (\Exception $e) {

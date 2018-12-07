@@ -59,6 +59,11 @@ class Registry
         self::EDI_PRICAT_ACTION_RULE_FOLLOW_VALUE      => 'Следовать значению ACTION в PRICAT (EDI_PRICAT_ACTION_RULE_FOLLOW_VALUE)'
     ];
 
+    /** - Тип поля action документа pricat для edi - */
+    const EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE = 2;
+    const EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE = 4;
+    const EDI_PRICAT_ACTION_TYPE_DELETE = 3;
+
     /**@var array $statuses */
     static $waybill_statuses = [
         self::WAYBILL_COMPARED  => 'compared',

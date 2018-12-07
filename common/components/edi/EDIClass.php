@@ -304,10 +304,10 @@ class EDIClass extends Component
         $isUpdatePosition = true;
 
         if ($ediOrganization->pricat_action_attribute_rule == Registry::EDI_PRICAT_ACTION_RULE_DELETE_NOT_EXISTS) {
-            if (in_array($action, [2, 4])) {
+            if (in_array($action, [Registry::EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE, Registry::EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE])) {
                 $isDeleteEmptyPosition = false;
                 $isUpdatePosition = true;
-            } elseif($action == 3) {
+            } elseif($action == Registry::EDI_PRICAT_ACTION_TYPE_DELETE) {
                 $isDeleteEmptyPosition = true;
                 $isDeletePosition = true;
                 $isUpdatePosition = false;
@@ -318,10 +318,10 @@ class EDIClass extends Component
         }
 
         if ($ediOrganization->pricat_action_attribute_rule == Registry::EDI_PRICAT_ACTION_RULE_FOLLOW_VALUE) {
-            if (in_array($action, [2, 4])) {
+            if (in_array($action, [Registry::EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE, Registry::EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE])) {
                 $isDeleteEmptyPosition = false;
                 $isUpdatePosition = true;
-            } elseif($action == 3) {
+            } elseif($action == Registry::EDI_PRICAT_ACTION_TYPE_DELETE) {
                 $isDeleteEmptyPosition = true;
                 $isDeletePosition = true;
                 $isUpdatePosition = false;

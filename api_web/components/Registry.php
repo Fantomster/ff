@@ -50,6 +50,15 @@ class Registry
     const WAYBILL_UNLOADED = 5;
     const WAYBILL_UNLOADING = 6;
 
+    /** - Тип обработки документа pricat для edi - */
+    const EDI_PRICAT_ACTION_RULE_DELETE_NOT_EXISTS = 1; //Удалять позиции catalog_goods которых нет в PRICAT
+    const EDI_PRICAT_ACTION_RULE_FOLLOW_VALUE = 2; //Следовать значению ACTION в PRICAT
+
+    static $edi_pricat_statuses = [
+        self::EDI_PRICAT_ACTION_RULE_DELETE_NOT_EXISTS => 'Удалять позиции catalog_goods которых нет в PRICAT (EDI_PRICAT_ACTION_RULE_DELETE_NOT_EXISTS)',
+        self::EDI_PRICAT_ACTION_RULE_FOLLOW_VALUE      => 'Следовать значению ACTION в PRICAT (EDI_PRICAT_ACTION_RULE_FOLLOW_VALUE)'
+    ];
+
     /**@var array $statuses */
     static $waybill_statuses = [
         self::WAYBILL_COMPARED  => 'compared',

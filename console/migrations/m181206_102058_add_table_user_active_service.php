@@ -26,7 +26,13 @@ class m181206_102058_add_table_user_active_service extends Migration
         $this->addForeignKey('fk_user_' . $table, $table, 'user_id', \common\models\User::tableName(), 'id');
         $this->addForeignKey('fk_organization_' . $table, $table, 'organization_id', \common\models\Organization::tableName(), 'id');
 
-        $models = \Yii::$app->db->createCommand('SELECT id, organization_id, integration_service_id FROM user WHERE integration_service_id > 0')->queryAll();
+        $models = \Yii::$app->db->createCommand('
+              SELECT 
+                     u.id, u.organization_id, u.integration_service_id 
+              FROM user u
+              INNER JOIN organization o ON o.id = organization_id
+              WHERE integration_service_id > 0
+              ')->queryAll();
         if (!empty($models)) {
             $batch = [];
             foreach ($models as $model) {

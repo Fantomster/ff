@@ -79,48 +79,10 @@ class WebApiController extends \yii\rest\Controller
      */
     public function init()
     {
-        $this->enableCsrfValidation = false;
         $this->addHeaders();
         $this->checkOptionsHeader();
-
         $this->container = (new WebApi())->container;
-        $user = \Yii::$app->request->getBodyParam('user');
-
-        /**
-         * Язык системы
-         */
-        \Yii::$app->language = \Yii::$app->language ?? 'ru';
-        if (isset($user['language'])) {
-            \Yii::$app->language = mb_strtolower($user['language']);
-        }
-
-        /**
-         * Авторизуемся
-         */
-        if (isset($user['token']) && \Yii::$app->user->isGuest) {
-            $identity = (new WebApiAuth())->authenticate(\Yii::$app->getUser(), \Yii::$app->request, \Yii::$app->response);
-            if (!empty($identity)) {
-                \Yii::$app->user->setIdentity($identity);
-            }
-        }
-
-        $this->user = $this->container->get('UserWebApi')->getUser();
-        $this->request = \Yii::$app->request->getBodyParam('request');
-
-        #Проверка лицензии только если это пользователь
-        if (!empty($this->user)) {
-            //Методы к которым пускаем без лицензии
-            $allow_methods_without_license = \Yii::$app->params['allow_methods_without_license'] ?? [];
-            //Если метода нет в разрешенных, проверяем лицензию
-            if (!in_array(\Yii::$app->request->getUrl(), $allow_methods_without_license)) {
-                License::checkEnterLicenseResponse($this->user->organization_id);
-            }
-            if (!is_null($this->license_service_id)) {
-                License::checkLicense($this->user->organization->id, $this->license_service_id);
-            }
-        }
-
-        \Yii::$app->setTimeZone('Etc/GMT' . $this->container->get('UserWebApi')->checkGMTFromDb());
+        $this->authUser();
     }
 
     /**
@@ -170,7 +132,7 @@ class WebApiController extends \yii\rest\Controller
     public function beforeAction($action)
     {
         if (parent::beforeAction($action)) {
-
+            $this->authUser();
             if (strstr(\Yii::$app->request->contentType, 'multipart/form-data') !== false) {
                 $this->request = [
                     'post' => \Yii::$app->request->post()
@@ -216,7 +178,7 @@ class WebApiController extends \yii\rest\Controller
         parent::afterAction($action, $result);
         #Проверка лицензии только если это пользователь
         if (!empty($this->user)) {
-            if (!is_null($this->license_service_id)) {
+            if (isset($this->license_service_id) && !is_null($this->license_service_id)) {
                 License::checkLicense($this->user->organization->id, $this->license_service_id);
             }
         }
@@ -256,5 +218,55 @@ class WebApiController extends \yii\rest\Controller
             \Yii::$app->response->send();
             \Yii::$app->end(200, \Yii::$app->response);
         }
+    }
+
+    /**
+     * @throws HttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     * @throws \yii\web\UnauthorizedHttpException
+     */
+    private function authUser()
+    {
+        if (!empty($this->user)) {
+            return;
+        }
+
+        $user = \Yii::$app->request->getBodyParam('user');
+        /**
+         * Язык системы
+         */
+        \Yii::$app->language = \Yii::$app->language ?? 'ru';
+        if (isset($user['language'])) {
+            \Yii::$app->language = mb_strtolower($user['language']);
+        }
+        /**
+         * Авторизуемся
+         */
+        if (isset($user['token']) && \Yii::$app->user->isGuest) {
+            $identity = (new WebApiAuth())->authenticate(\Yii::$app->getUser(), \Yii::$app->request, \Yii::$app->response);
+            if (!empty($identity)) {
+                \Yii::$app->user->setIdentity($identity);
+            }
+        }
+
+        $this->user = $this->container->get('UserWebApi')->getUser();
+        $this->request = \Yii::$app->request->getBodyParam('request');
+        /**
+         * Проверка лицензии только если это пользователь
+         **/
+        if (!empty($this->user)) {
+            //Методы к которым пускаем без лицензии
+            $allow_methods_without_license = \Yii::$app->params['allow_methods_without_license'] ?? [];
+            //Если метода нет в разрешенных, проверяем лицензию
+            if (!in_array(\Yii::$app->request->getUrl(), $allow_methods_without_license)) {
+                License::checkEnterLicenseResponse($this->user->organization_id);
+            }
+            if (isset($this->license_service_id) && !is_null($this->license_service_id)) {
+                License::checkLicense($this->user->organization->id, $this->license_service_id);
+            }
+        }
+
+        \Yii::$app->setTimeZone('Etc/GMT' . $this->container->get('UserWebApi')->checkGMTFromDb());
     }
 }

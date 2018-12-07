@@ -25,7 +25,7 @@ use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
- * Class DocumentWebApi
+ * Class DocumentWebApi 
  *
  * @package api_web\modules\integration\classes
  */

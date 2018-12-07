@@ -270,9 +270,7 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function search(array $post)
     {
-        if (empty($post['email'])) {
-            throw new BadRequestHttpException('empty_param|search attribute email');
-        }
+        $this->validateRequest($post, ['email']);
 
         $result = [];
         $email = $post['email'];
@@ -321,9 +319,7 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function update(array $post)
     {
-        if (empty($post['id'])) {
-            throw new BadRequestHttpException('empty_param|id');
-        }
+        $this->validateRequest($post, ['id']);
         //Поиск поставщика в системе
         $model = Organization::find()->where(['id' => $post['id'], 'type_id' => Organization::TYPE_SUPPLIER])->one();
         if (empty($model)) {
@@ -455,18 +451,14 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function uploadLogo(array $post)
     {
-        if (empty($post['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($post, ['vendor_id']);
 
         $vendor = Organization::findOne($post['vendor_id']);
         if (empty($vendor)) {
             throw new BadRequestHttpException('vendor_not_found');
         }
 
-        if (empty($post['image_source'])) {
-            throw new BadRequestHttpException('empty_param|image_source');
-        }
+        $this->validateRequest($post, ['image_source']);
 
         if ($vendor->type_id !== Organization::TYPE_SUPPLIER) {
             throw new BadRequestHttpException('vendor.is_not_vendor');
@@ -506,7 +498,8 @@ class VendorWebApi extends \api_web\components\WebApi
         if (!$vendorUser) {
             return false;
         } elseif (empty($vendorUser->organization_id)) {
-            throw new BadRequestHttpException('Пользователь с емайлом:' . $email . ' найден у нас в системе, но он не завершил регистрацию. Как только он пройдет процедуру регистрации поставщика, вы сможете добавить его.');
+            throw new BadRequestHttpException("User with email: found in our system, but he did not complete the registration. 
+            As soon as he goes through the supplier registration procedure, you can add him.|{$vendorUser->email}");
         }
 
         if ($vendorUser->organization->type_id != Organization::TYPE_SUPPLIER) {

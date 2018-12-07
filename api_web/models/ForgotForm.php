@@ -53,7 +53,7 @@ class ForgotForm extends BaseForm
             $mailer->viewPath = $oldViewPath;
             return (int)$result;
         } else {
-            throw new BadRequestHttpException('User not found');
+            throw new BadRequestHttpException('user_not_found');
         }
     }
 

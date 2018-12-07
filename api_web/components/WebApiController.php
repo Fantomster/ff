@@ -161,7 +161,7 @@ class WebApiController extends \yii\rest\Controller
                 }
                 return true;
             } else {
-                throw new \yii\web\BadRequestHttpException('Некорректный запрос отсутствует request');
+                throw new \yii\web\BadRequestHttpException('Bad request, data request is empty');
             }
         }
         return false;

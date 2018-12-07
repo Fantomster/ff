@@ -59,7 +59,7 @@ class EgaisHelper extends WebApi
         ]);
 
         if (!$newAct->save()) {
-            throw new BadRequestHttpException('Не удалось сохранить в базе, проверьте ваш xml документ!');
+            throw new BadRequestHttpException('Could not save to database, check your xml document!');
         }
 
         return self::sendEgaisQuery($url, $data, $queryType);

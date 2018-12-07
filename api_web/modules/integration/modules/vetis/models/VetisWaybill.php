@@ -50,7 +50,7 @@ class VetisWaybill extends WebApi
     {
         $license = LicenseOrganization::getLicenseForOrganizationService($this->user->organization_id, Registry::MERC_SERVICE_ID);
         if (!isset($license)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.active_license_not_found', ['ru' => 'Нет активной лицензии для доступа к этой функции']));
+            throw new BadRequestHttpException('vetis.active_license_not_found');
         }
 
         $reqPag = $request['pagination'] ?? [];
@@ -283,7 +283,7 @@ class VetisWaybill extends WebApi
                     $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_EXTINGUISHED, $request['uuid']);
                 }
             } else {
-                throw new BadRequestHttpException('ВСД не принадлежит данной организации: ' . $request['uuid']);
+                throw new BadRequestHttpException('VSD does not belong to this organization|' . $request['uuid']);
             }
         } catch (\Throwable $t) {
             $error = $t->getMessage();

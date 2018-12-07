@@ -93,9 +93,7 @@ class IntegrationWebApi extends WebApi
      */
     public function handleWaybill(array $post): array
     {
-        if (!isset($post['service_id'])) {
-            throw new BadRequestHttpException("empty_param|service_id");
-        }
+       $this->validateRequest($post, ['service_id']);
 
         $organizationID = $this->user->organization_id;
         $acquirerID = $organizationID;
@@ -163,9 +161,7 @@ class IntegrationWebApi extends WebApi
      */
     public function resetWaybillContent(array $post): array
     {
-        if (!isset($post['waybill_content_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_content_id");
-        }
+       $this->validateRequest($post, ['waybill_content_id']);
 
         $waybillContent = WaybillContent::find()
             ->joinWith('waybill')
@@ -219,9 +215,7 @@ class IntegrationWebApi extends WebApi
      */
     public function showWaybillContent(array $post): array
     {
-        if (!isset($post['waybill_content_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_content_id");
-        }
+       $this->validateRequest($post, ['waybill_content_id']);
 
         $waybillContent = WaybillContent::find()
             ->joinWith('waybill')
@@ -429,22 +423,22 @@ class IntegrationWebApi extends WebApi
 
         $waybillCheck = Waybill::findOne(['id' => $post['waybill_id']]);
         if (!isset($waybillCheck)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_found', ['ru' => 'Накладная не найдена']));
+            throw new BadRequestHttpException('waybill.waibill_not_found');
         }
 
         $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
         $checkOrg = in_array($waybillCheck->acquirer_id, ArrayHelper::map($businessList['result'] ?? [], 'id', 'id')) ?? false;
 
         if (!$checkOrg) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_releated_current_user', ['ru' => 'Накладная не пренадлежит организациям текущего пользователя']));
+            throw new BadRequestHttpException('waybill.waibill_not_releated_current_user');
         }
 
         if ($waybillCheck->service_id != $post['service_id']) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_relation_this_service', ['ru' => 'Накладная не связана с заданным сервисом']));
+            throw new BadRequestHttpException('waybill.waibill_not_relation_this_service');
         }
 
         if ($waybillCheck->status_id == Registry::WAYBILL_UNLOADED) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_unloading', ['ru' => 'Накладная в статусе выгружена']));
+            throw new BadRequestHttpException('waybill.waibill_is_unloading');
         }
 
         $waybillContentCheck = WaybillContent::find()
@@ -452,7 +446,7 @@ class IntegrationWebApi extends WebApi
             ->andWhere('order_content_id is not null')
             ->one();
         if (isset($waybillContentCheck)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_relation_order', ['ru' => 'Накладная связана с заказом']));
+            throw new BadRequestHttpException('waybill.waibill_is_relation_order');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();

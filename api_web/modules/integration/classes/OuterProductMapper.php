@@ -112,7 +112,7 @@ class OuterProductMapper
                 if ($key == 'outer_product_id') {
                     if ($this->isMainOrg) {
                         if (!$this->productExists($value)) {
-                            throw new BadRequestHttpException('outer product not found');
+                            throw new BadRequestHttpException('waybill.outer_product_not_found');
                         }
                     }
                 }

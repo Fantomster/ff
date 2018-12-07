@@ -105,6 +105,13 @@ use api\common\models\RkWaybill;
                                         $ret = ($model->denom == 'taxVat') ? $res : (($res == 1) ? "Включено" : "Выключено");
 
                                         if ($model->denom == 'defGoodGroup') $ret = 'Список';
+                                        if ($model->denom == 'sh_version') {
+                                            if(isset(\api\common\models\RkDicconst::SH_VERSION[$res])) {
+                                                $ret = \api\common\models\RkDicconst::SH_VERSION[$res];
+                                            } else {
+                                                $ret = 'Не установнел';
+                                            }
+                                        }
 
                                         // VAT храним в единицах * 100, нужно облагородить перед выводом. 0/1 конвертим в слова
                                         return $ret;

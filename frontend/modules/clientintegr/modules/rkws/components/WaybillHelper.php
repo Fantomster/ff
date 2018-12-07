@@ -36,46 +36,47 @@ class WaybillHelper extends AuthHelper
 
         $autoNumber = 'textcode="' . $wmodel->text_code . '" numcode="' . $wmodel->num_code . '" ';
 
-
         $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="' . $guid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/waybill' . '">
     <PARAM name="object_id" val="' . $this->restr->code . '" />
     <DOC date="' . Yii::$app->formatter->asDatetime($wmodel->doc_date, "php:Y-m-d") .
-                '" corr="' . $wmodel->corr_rid .
-                '" store="' . $wmodel->store->rid .
-                '" active="' . $exportApproved . '"' .
-                ' duedate="1" note="' . $wmodel->note .
-                '" ' . $autoNumber . '>' . PHP_EOL;
+            '" corr="' . $wmodel->corr_rid .
+            '" store="' . $wmodel->store->rid .
+            '" active="' . $exportApproved . '"' .
+            ' duedate="1" note="' . $wmodel->note .
+            '" ' . $autoNumber . '>' . PHP_EOL;
 
         $recs = \api\common\models\RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.rid as prid, rk_product.unit_rid')->leftJoin('rk_product', 'rk_product.id = product_rid')
-                        ->andWhere('waybill_id = :wid', [':wid' => $id])
-                        ->andWhere(['unload_status' => 1])
-                        ->asArray(true)->all();
+            ->andWhere('waybill_id = :wid', [':wid' => $id])
+            ->andWhere(['unload_status' => 1])
+            ->asArray(true)->all();
 
         // var_dump($recs);
 
+        #Версия StoreHouse
+        $storeHouseVersion = RkDicconst::findOne(['denom' => 'sh_version'])->getPconstValue();
         foreach ($recs as $rec) {
+            $itemSum = ($storeHouseVersion == 4 ? $rec['sum'] * 100 : $rec['sum']);
             // $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.$rec['vat'].'" />'.PHP_EOL;
-            $xml .= '<ITEM rid="' . $rec['prid'] . '" quant="' . ($rec["quant"] * 1000) . '" mu="' . $rec["unit_rid"] . '" sum="' . ($rec['sum'] * 100) . '" vatrate="' . ($rec['vat']) . '" />' . PHP_EOL;
+            $xml .= '<ITEM rid="' . $rec['prid'] . '" quant="' . ($rec["quant"] * 1000) . '" mu="' . $rec["unit_rid"] . '" sum="' . $itemSum . '" vatrate="' . ($rec['vat']) . '" />' . PHP_EOL;
         }
 
         $xml .= '</DOC>' . PHP_EOL .
-                '</RQ>';
+            '</RQ>';
 
         $res = ApiHelper::sendCurl($xml, $this->restr);
 
         $tmodel = new RkTasks();
 
-        $tmodel->tasktype_id  = 33;
-        $tmodel->acc          = $this->org;
-        $tmodel->fid          = 1;
-        $tmodel->guid         = $res['respcode']['taskguid'];
-        $tmodel->fcode        = $res['respcode']['code'];
-        $tmodel->version      = $res['respcode']['version'];
-        $tmodel->isactive     = 1;
-        $tmodel->created_at   = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        $tmodel->tasktype_id = 33;
+        $tmodel->acc = $this->org;
+        $tmodel->fid = 1;
+        $tmodel->guid = $res['respcode']['taskguid'];
+        $tmodel->fcode = $res['respcode']['code'];
+        $tmodel->version = $res['respcode']['version'];
+        $tmodel->isactive = 1;
+        $tmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         $tmodel->intstatus_id = 1;
-
 
         if (!$tmodel->save()) {
             echo "Ошибка валидации<br>";
@@ -96,17 +97,17 @@ class WaybillHelper extends AuthHelper
 
     public function callback()
     {
-        $acc  = 0;
+        $acc = 0;
         $stat = 0;
-        $getr   = Yii::$app->request->getRawBody();
-        $myXML  = simplexml_load_string($getr);
+        $getr = Yii::$app->request->getRawBody();
+        $myXML = simplexml_load_string($getr);
         $gcount = 0;
         $array = [];
 
         if (!isset($myXML->ERROR)) {
             $cmdguid = strval($myXML['cmdguid']);
-            $posid   = strval($myXML['posid']);
-            $stat    = 3;
+            $posid = strval($myXML['posid']);
+            $stat = 3;
 
             foreach ($myXML->DOC as $doc) {
                 foreach ($doc->attributes() as $a => $b) {
@@ -115,7 +116,7 @@ class WaybillHelper extends AuthHelper
             }
         } else {
             $cmdguid = strval($myXML['taskguid']);
-            $stat    = 4;
+            $stat = 4;
             foreach ($myXML->ERROR as $doc) {
                 foreach ($doc->attributes() as $a => $b) {
                     $array[$gcount][$a] = strval($b[0]);
@@ -143,8 +144,8 @@ class WaybillHelper extends AuthHelper
             }
 
             $tmodel->intstatus_id = $stat;
-            $tmodel->isactive     = 0;
-            $tmodel->callback_at  = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+            $tmodel->isactive = 0;
+            $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 
             $acc = $tmodel->acc;
 
@@ -159,13 +160,13 @@ class WaybillHelper extends AuthHelper
             $cmdguid = 'пусто';
         }
         if (empty($posid)) {
-            $posid   = 'пусто';
+            $posid = 'пусто';
         }
         if (empty($array)) {
-            $array   = array(0 => '0');
+            $array = [0 => '0'];
         }
         if (empty($er2)) {
-            $er2     = 'пусто';
+            $er2 = 'пусто';
         }
 
         $this->log('=======WAYBILL==EVENT==START=================');

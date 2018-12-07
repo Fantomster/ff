@@ -63,9 +63,13 @@ class WaybillHelper extends AuthHelper
 
         $xml .= '</DOC>' . PHP_EOL .
             '</RQ>';
-
+        
+        $this->log('START REQUEST:');
+        $this->log($xml);
+        $this->log('END REQUEST');
+        $this->log('START SEND:');
         $res = ApiHelper::sendCurl($xml, $this->restr);
-
+        $this->log('END SEND');
         $tmodel = new RkTasks();
 
         $tmodel->tasktype_id = 33;

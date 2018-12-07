@@ -464,16 +464,24 @@ class WaybillHelper
      */
     private function getLastEdiNumber($ediNumber)
     {
+        $ed_num = '';
         if (strpos($ediNumber, '-') != false) {
             $ed_nums = explode('-', $ediNumber);
-            $ed_num = array_pop($ed_nums);
-            $ed_num = (int)$ed_num + 1;
-            array_push($ed_nums, $ed_num);
-            $ed_num = implode('-', $ed_nums);
+            $count = count($ed_nums);
+            if ($count > 2) {
+                $ed_num2 = (int)$ed_nums[$count-1] + 1;
+                $preCount = $count - 1;
+                for($i = 0; $i < $preCount; $i++){
+                    $ed_num .= $ed_nums[$i];
+                    $ed_num .= '-';
+                }
+                $ed_num .= $ed_num2;
+            } else {
+                $ed_num = $ediNumber . '-1';
+            }
         } else {
             $ed_num = $ediNumber . '-1';
         }
-
         return $ed_num;
     }
 

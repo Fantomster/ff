@@ -5,6 +5,7 @@ namespace frontend\modules\clientintegr\modules\merc\controllers;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
+use common\models\vetis\VetisBusinessEntity;
 use common\models\vetis\VetisProductItem;
 use common\models\vetis\VetisRussianEnterprise;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
@@ -280,7 +281,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             if (!isset($hc)) {
                 return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
             } else {
-                if (!isset($inn)) {
+                if (!isset($inn) || $inn == 'null') {
                     if (isset($hc->owner)) {
                         $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
                     } else {
@@ -289,7 +290,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
                 }
                 else
                 {
-                    $hc = VetisRussianEnterprise::find()->where(['inn' => $inn, 'active' => true, 'last' => 1])->limit(1)->one();
+                    $hc = VetisBusinessEntity::find()->where(['inn' => $inn, 'active' => true, 'last' => 1])->limit(1)->one();
                 }
 
             }
@@ -297,7 +298,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
         }
         if(isset($hc)) {
-            return (['result' => true, 'name' => $hc->name . ', ИНН:' . $hc->inn, 'uuid' => $hc->guid]);
+            return (['result' => true, 'name' => $hc->name, 'inn' => $hc->inn ?? 'Не известно', 'uuid' => $hc->guid]);
         }
         else
         {

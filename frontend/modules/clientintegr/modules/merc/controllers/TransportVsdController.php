@@ -6,6 +6,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 use common\models\vetis\VetisProductItem;
+use common\models\vetis\VetisRussianEnterprise;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\CreatePrepareOutgoingConsignmentRequest;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\CreateRegisterProductionRequest;
@@ -271,7 +272,7 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         }
     }
 
-    public function actionGetHc($recipient_guid)
+    public function actionGetHc($recipient_guid, $inn = null)
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         try {
@@ -279,16 +280,29 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
             if (!isset($hc)) {
                 return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
             } else {
-                if (isset($hc->owner)) {
-                    $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
-                } else {
-                    return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
+                if (!isset($inn)) {
+                    if (isset($hc->owner)) {
+                        $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
+                    } else {
+                        return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
+                    }
                 }
+                else
+                {
+                    $hc = VetisRussianEnterprise::find()->where(['inn' => $inn, 'active' => true, 'last' => 1])->limit(1)->one();
+                }
+
             }
         } catch (\SoapFault $e) {
             return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
         }
-        return (['result' => true, 'name' => $hc->name . ', ИНН:' . $hc->inn, 'uuid' => $hc->guid]);
+        if(isset($hc)) {
+            return (['result' => true, 'name' => $hc->name . ', ИНН:' . $hc->inn, 'uuid' => $hc->guid]);
+        }
+        else
+        {
+            return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
+        }
     }
 
     public function actionConversionStep1()

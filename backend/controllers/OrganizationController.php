@@ -271,7 +271,7 @@ class OrganizationController extends Controller
                     $user->subscribe = $post['User'][$userId]['subscribe'];
                     $user->save();
                 }
-                $emailNotification = $user->emailNotification;
+                $emailNotification = $user->getEmailNotification($id);
                 foreach ($fields as $key => $value) {
                     $emailNotification->$key = $value;
                 }
@@ -281,7 +281,7 @@ class OrganizationController extends Controller
             $sms = $post['Sms'];
             foreach ($sms as $userId => $fields) {
                 $user = User::findOne(['id' => $userId]);
-                $smsNotification = $user->smsNotification;
+                $smsNotification = $user->getSmsNotification($id);
                 foreach ($fields as $key => $value) {
                     $smsNotification->$key = $value;
                 }

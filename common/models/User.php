@@ -359,8 +359,8 @@ class User extends \amnah\yii2\user\models\User
 
     private function getNotifications(String $className, $org_id = null, bool $isFranchisee = false)
     {
-        $org_id = ($org_id == null) ? $this->organization_id : $org_id;
-        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
+        $org_id = $org_id ?? $this->organization_id;
+        $rel    = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
 
         if ($rel === null && !$isFranchisee) {
             return $className::emptyInstance();

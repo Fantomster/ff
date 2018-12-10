@@ -168,43 +168,32 @@ $("document").ready(function(){
     });
  
  function getHC(inn) {
+     var url = "$urlToGetHC?recipient_guid=" + recipient_guid;
+     
+     if(inn != null)
+         {
+             url += "&inn=" + inn; 
+         }
+     
       $.ajax({
                                      type     :"GET",
                                      cache    : false,
-                                     url      : "$urlToGetHC?recipient_guid=" + recipient_guid + "&inn=" + inn,
+                                     url      : url,
                                      success  : function(result) {
                                          $('#step3form-hc_name').val(result.name);
                                          $('#step3form-hc').val(result.uuid);
+                                         justSubmitted = false;
+                                         $('#hc-inn').val(result.inn);
                                     },
                                     error : function ()
                                     {
                                        $('#step3form-hc_name').val(result.name);
                                         $('#step3form-hc').val('Фирма не найдена');
+                                        justSubmitted = false;
+                                        $('#hc-inn').val('');
                                     }
                                 });
- }
+     }
 JS;
 $this->registerJs($customJs, $this::POS_READY);
-
-$customJs = <<< JS
- function getHC(recipient_guid, inn ) {
-      $.ajax({
-                                     type     :"GET",
-                                     cache    : false,
-                                     url      : "$urlToGetHC?recipient_guid=" + recipient_guid + "&inn=" + inn,
-                                     success  : function(result) {
-                                         $('#step3form-hc_name').val(result.name);
-                                         $('#hc-inn').val(result.inn);
-                                         $('#step3form-hc').val(result.uuid);
-                                    },
-                                    error : function ()
-                                    {
-                                       $('#step3form-hc_name').val(result.name);
-                                       $('#hc-inn').val('');
-                                        $('#step3form-hc').val('Фирма не найдена');
-                                    }
-                                });
- }
-JS;
-$this->registerJs($customJs, $this::POS_HEAD);
 ?>

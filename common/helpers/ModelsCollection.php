@@ -25,7 +25,7 @@ class ModelsCollection extends Model
      * @param ActiveRecord[] $models
      * @return array
      */
-    public function saveMultiple(array $models, string $dbName = 'db_api')
+    public function saveMultiple(array $models, bool $validate = true, string $dbName = 'db_api')
     {
         if (count($models) > 0) { // если массив дочерних бизнесов ненулевой,
 
@@ -34,12 +34,14 @@ class ModelsCollection extends Model
             $rowsToInsert = [];
 
             foreach ($models as $model) { //для каждого дочернего бизнеса
-                if ($model->validate()) {
-                    if ($model->beforeSave(true)) { // если данные корректны
-                        $rowsToInsert[] = array_values($model->attributes);// выбираются все значения массива
+                if ($validate) {
+                    if ($model->validate()) {
+                        if ($model->beforeSave(true)) { // если данные корректны
+                            $rowsToInsert[] = array_values($model->attributes);// выбираются все значения массива
+                        }
+                    } else { // если не все данные корректны, возвращаем ошибку
+                        return ['success' => false, 'error' => $model->errors];
                     }
-                } else { // если не все данные корректны, возвращаем ошибку
-                    return ['success' => false, 'error' => $model->errors];
                 }
             }
 

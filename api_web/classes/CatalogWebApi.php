@@ -96,7 +96,7 @@ class CatalogWebApi extends WebApi
             $vendorBaseCatalog = new Catalog([
                 'supp_org_id'  => $request['vendor_id'],
                 'type'         => Catalog::BASE_CATALOG,
-                'name'         => 'Главный каталог',
+                'name'         => Catalog::CATALOG_BASE_NAME,
                 'status'       => Catalog::STATUS_ON,
                 'currency_id'  => $catalog->currency_id,
                 'main_index'   => $catalog->main_index,
@@ -212,10 +212,11 @@ class CatalogWebApi extends WebApi
                 $model->status = CatalogBaseGoods::STATUS_ON;
                 $model->deleted = CatalogBaseGoods::DELETED_OFF;
                 //Если атрибуты изменились или новая запись, сохраняем модель
-                if (!$model->save()) {
+                if (!$model->save(false)) {
                     throw new ValidationException($model->getFirstErrors());
                 }
                 if ($tempRow['cg_id'] != 0) {
+                    /**@var CatalogGoods $catalogGood */
                     $catalogGood = \Yii::createObject([
                         'class'         => '\common\models\CatalogGoods',
                         'cat_id'        => $catalog->id,
@@ -226,7 +227,7 @@ class CatalogWebApi extends WebApi
                         'id' => $tempRow['cg_id'],
                     ]);
                     $catalogGood->price = $model->price;
-                    if (!$catalogGood->save()) {
+                    if (!$catalogGood->save(false)) {
                         throw new ValidationException($catalogGood->getFirstErrors());
                     }
                 } else {
@@ -237,11 +238,11 @@ class CatalogWebApi extends WebApi
                     $arBatchInsert[] = $catalogGood;
                 }
                 if (count($arBatchInsert) > 499) {
-                    (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');
+                    (new ModelsCollection())->saveMultiple($arBatchInsert, false, 'db');
                     $arBatchInsert = [];
                 }
             }
-            (new ModelsCollection())->saveMultiple($arBatchInsert, 'db');
+            (new ModelsCollection())->saveMultiple($arBatchInsert, false, 'db');
             //Убиваем временный каталог
             CatalogTempContent::deleteAll(['temp_id' => $catalogTemp->id]);
             $catalogTemp->delete();

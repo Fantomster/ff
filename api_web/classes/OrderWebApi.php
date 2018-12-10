@@ -429,14 +429,17 @@ class OrderWebApi extends \api_web\components\WebApi
         $dataProvider->pagination = false;
         $products = $dataProvider->models;
 
+        $arEdiNumbers = [];
         if (!empty($products)) {
             foreach ($products as $model) {
                 /**
                  * @var OrderContent $model
                  */
                 $result['items'][] = $this->prepareProduct($model, $currency, $currency_id);
+                $arEdiNumbers[] = $model->edi_number;
             }
         }
+        $result['edi_number'] = array_unique($arEdiNumbers);
 
         $result['client'] = WebApiHelper::prepareOrganization($order->client);
         $result['vendor'] = WebApiHelper::prepareOrganization($order->vendor);

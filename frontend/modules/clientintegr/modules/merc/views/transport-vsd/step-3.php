@@ -76,8 +76,8 @@ $urlToGetHC = \yii\helpers\Url::to(['get-hc']);
                 ],
                 'pluginEvents' => [
                     "select2:select" => "function() { 
-                     var recipient_guid = $(this).select2(\"data\")[0].id;
-                     getHC(recipient_guid, null); 
+                     recipient_guid = $(this).select2(\"data\")[0].id;
+                     getHC(null); 
                       }",
                   ]
             ]);
@@ -162,13 +162,12 @@ $("document").ready(function(){
         }
         justSubmitted = setTimeout(function() {
             justSubmitted = false;
-            var inn = $(this).val();
-            var recipient_guid = $('step3form-recipient').select2("data")[0].id;
-            getHC(recipient_guid, inn); 
+            var inn = $("#hc-inn").val();
+            getHC(inn); 
         }, 700);
     });
  
- function getHC(recipient_guid, inn ) {
+ function getHC(inn) {
       $.ajax({
                                      type     :"GET",
                                      cache    : false,
@@ -195,11 +194,13 @@ $customJs = <<< JS
                                      url      : "$urlToGetHC?recipient_guid=" + recipient_guid + "&inn=" + inn,
                                      success  : function(result) {
                                          $('#step3form-hc_name').val(result.name);
+                                         $('#hc-inn').val(result.inn);
                                          $('#step3form-hc').val(result.uuid);
                                     },
                                     error : function ()
                                     {
                                        $('#step3form-hc_name').val(result.name);
+                                       $('#hc-inn').val('');
                                         $('#step3form-hc').val('Фирма не найдена');
                                     }
                                 });

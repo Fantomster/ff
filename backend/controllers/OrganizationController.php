@@ -290,7 +290,7 @@ class OrganizationController extends Controller
             }
             return $this->redirect(['view', 'id' => $id]);
         }
-        return $this->render('notifications', compact('users'));
+        return $this->render('notifications', compact('users', 'id'));
     }
 
     public function actionAjaxUpdateStatus()

@@ -105,7 +105,6 @@ return [
                 ],
                 'api_web'     => [
                     'class'                 => 'yii\i18n\DbMessageSource',
-                    'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
                 ],
             ],
         ],

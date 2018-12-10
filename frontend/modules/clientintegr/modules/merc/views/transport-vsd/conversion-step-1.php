@@ -117,7 +117,7 @@ $this->registerCss($style);
                             'title' => Yii::t('message', 'frontend.client.integration.max_volume', ['ru' => 'Макс. Объём']),
                             'type' => 'static',
                             'value' => function ($data) {
-                                return $data->amount;
+                                return round($data->amount,3);
                             }
                         ],
                         [

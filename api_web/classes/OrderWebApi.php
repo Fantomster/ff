@@ -439,7 +439,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 $arEdiNumbers[] = $model->edi_number;
             }
         }
-        $result['edi_numbers'] = array_unique($arEdiNumbers);
+        $result['edi_number'] = array_unique($arEdiNumbers);
 
         $result['client'] = WebApiHelper::prepareOrganization($order->client);
         $result['vendor'] = WebApiHelper::prepareOrganization($order->vendor);

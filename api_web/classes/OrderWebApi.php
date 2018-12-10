@@ -436,7 +436,9 @@ class OrderWebApi extends \api_web\components\WebApi
                  * @var OrderContent $model
                  */
                 $result['items'][] = $this->prepareProduct($model, $currency, $currency_id);
-                $arEdiNumbers[] = $model->edi_number;
+                if (!is_null($model->edi_number)) {
+                    $arEdiNumbers[] = $model->edi_number;
+                }
             }
         }
         $result['edi_number'] = array_unique($arEdiNumbers);

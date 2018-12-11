@@ -176,12 +176,7 @@ class WebApiController extends \yii\rest\Controller
     public function afterAction($action, $result)
     {
         parent::afterAction($action, $result);
-        #Проверка лицензии только если это пользователь
-        if (!empty($this->user)) {
-            if (isset($this->license_service_id) && !is_null($this->license_service_id)) {
-                License::checkLicense($this->user->organization->id, $this->license_service_id);
-            }
-        }
+        $this->checkLicense();
 
         if (!empty($this->response)) {
             if (!in_array($action->id, $this->not_log_actions)) {
@@ -251,22 +246,31 @@ class WebApiController extends \yii\rest\Controller
         }
 
         $this->user = $this->container->get('UserWebApi')->getUser();
-        $this->request = \Yii::$app->request->getBodyParam('request');
         /**
          * Проверка лицензии только если это пользователь
          **/
+        $this->checkLicense();
+
+        $this->request = \Yii::$app->request->getBodyParam('request');
+        \Yii::$app->setTimeZone('Etc/GMT' . $this->container->get('UserWebApi')->checkGMTFromDb());
+    }
+
+    /**
+     * @throws HttpException
+     * @throws \yii\base\InvalidConfigException
+     */
+    private function checkLicense()
+    {
         if (!empty($this->user)) {
             //Методы к которым пускаем без лицензии
             $allow_methods_without_license = \Yii::$app->params['allow_methods_without_license'] ?? [];
             //Если метода нет в разрешенных, проверяем лицензию
             if (!in_array(\Yii::$app->request->getUrl(), $allow_methods_without_license)) {
                 License::checkEnterLicenseResponse($this->user->organization_id);
-            }
-            if (isset($this->license_service_id) && !is_null($this->license_service_id)) {
-                License::checkLicense($this->user->organization->id, $this->license_service_id);
+                if (isset($this->license_service_id) && !is_null($this->license_service_id)) {
+                    License::checkLicense($this->user->organization->id, $this->license_service_id);
+                }
             }
         }
-
-        \Yii::$app->setTimeZone('Etc/GMT' . $this->container->get('UserWebApi')->checkGMTFromDb());
     }
 }

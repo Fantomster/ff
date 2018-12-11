@@ -386,7 +386,10 @@ class OrderController extends DefaultController
         $objPHPExcel->getActiveSheet()->getRowDimension(17)->setRowHeight(25);
 
         $row   = 18;
-        $goods = $order->orderContent;
+        $searchModel                              = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider                             = $searchModel->search($params);
+        $goods = $dataProvider->models;
         $i     = 0;
         foreach ($goods as $good) {
             $i++;

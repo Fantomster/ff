@@ -8,8 +8,12 @@ use common\components\edi\EDIIntegration;
 use common\helpers\DBNameHelper;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
-use yii\behaviors\{AttributesBehavior, TimestampBehavior};
-use yii\db\{ActiveRecord, Query};
+use yii\behaviors\{
+    AttributesBehavior, TimestampBehavior
+};
+use yii\db\{
+    ActiveRecord, Query
+};
 use yii\web\BadRequestHttpException;
 
 /**
@@ -134,7 +138,7 @@ class Order extends \yii\db\ActiveRecord
             [['client_id', 'vendor_id', 'status'], 'required'],
             [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id', 'replaced_order_id', 'edi_organization_id'], 'integer'],
             [['total_price', 'discount'], 'number'],
-            [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number', 'edi_ordersp', 'edi_doc_date', 'edi_shipment_quantity', 'is_recadv_sent'], 'safe'],
+            [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number', 'edi_ordersp', 'edi_doc_date', 'edi_shipment_quantity', 'is_recadv_sent', 'is_edi_sent_order'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
@@ -168,6 +172,7 @@ class Order extends \yii\db\ActiveRecord
             'edi_doc_date'          => Yii::t('app', 'Дата накладной заказа по EDI'),
             'edi_shipment_quantity' => Yii::t('app', 'Отгруженное количество товара EDI'),
             'edi_organization_id'   => Yii::t('app', 'Идентификатор связи ресторана в таблице edi_organization'),
+            'is_edi_sent_order'     => Yii::t('app', 'Флаг, показывающий, отпрален ли документ ORDER'),
         ];
     }
 
@@ -704,7 +709,7 @@ class Order extends \yii\db\ActiveRecord
                 }
             }
 
-            if (!$this->ediProcessor && ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || ($this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED && Yii::$app->params['app_version'] == 2) || ($this->status == OrderStatus::STATUS_DONE && Yii::$app->params['app_version'] == 1)))) {
+            if (!$this->ediProcessor && ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || ($this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED && Yii::$app->params['app_version'] == 2) || ($this->status == OrderStatus::STATUS_DONE && Yii::$app->params['app_version'] == 1))) || $this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $this->status == OrderStatus::STATUS_CANCELLED) {
                 $vendor = $this->vendor;
                 $client = $this->client;
                 $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
@@ -715,8 +720,9 @@ class Order extends \yii\db\ActiveRecord
                     if (($this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED && Yii::$app->params['app_version'] == 2) || ($this->status == OrderStatus::STATUS_DONE && Yii::$app->params['app_version'] == 1 && !$this->is_recadv_sent)) {
                         $result = $ediIntegration->sendOrderInfo($this, true);
                         $this->is_recadv_sent = true;
-                    } elseif ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
+                    } elseif ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $this->status == OrderStatus::STATUS_CANCELLED) {
                         $result = $ediIntegration->sendOrderInfo($this, false);
+                        $this->updateAttributes(['is_edi_sent_order' => true]);
                     }
                     if (!$result) {
                         Yii::error(Yii::t('app', 'common.models.order.edi_error'));
@@ -732,6 +738,19 @@ class Order extends \yii\db\ActiveRecord
         } catch (\Throwable $e) {
             \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
+    }
+
+    public function getEdiOrderDocType($order)
+    {
+        if ($order->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR && $order->is_edi_sent_order) {
+            $docType = Registry::EDI_ORDER_DOCTYPE_EDIT;
+        } else {
+            $docType = Registry::EDI_ORDER_DOCTYPE_NEW;
+        }
+        if ($order->status == OrderStatus::STATUS_CANCELLED) {
+            $docType = Registry::EDI_ORDER_DOCTYPE_DELETE;
+        }
+        return $docType;
     }
 
     public function afterDelete()

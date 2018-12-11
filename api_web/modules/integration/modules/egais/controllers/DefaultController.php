@@ -155,8 +155,8 @@ class DefaultController extends WebApiController
     /**
      * @SWG\Post(path="/integration/egais/list-goods-balance",
      *     tags={"Integration/egais"},
-     *     summary="ЕГАИС запрос типов списания",
-     *     description="запрашиваем список типов списания",
+     *     summary="ЕГАИС получение списка товаров на балансе организации",
+     *     description="запрашиваем список товаров на балансе организации",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",

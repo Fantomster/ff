@@ -101,6 +101,7 @@ class AnalyticsController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionClientGoods()
     {
@@ -151,15 +152,18 @@ class AnalyticsController extends WebApiController
      *                  "result": {
      *                      {
      *                          "total_sum": 69521.02,
-     *                          "date": "23.04.2018"
+     *                          "date": "2017-10-06T03:00:00+03:00"
+     *                          "raw_date": "2017-10-06T23:00:00+03:00"
      *                      },
      *                      {
      *                          "total_sum": 6952321,
-     *                          "date": "25.04.2018"
+     *                          "date": "2017-10-06T03:00:00+03:00",
+     *                          "raw_date": "2017-10-06T23:00:00+03:00"
      *                      },
      *                      {
      *                          "total_sum": 6952321.1,
-     *                          "date": "28.05.2018"
+     *                          "date": "2017-10-06T03:00:00+03:00",
+     *                          "raw_date": "2017-10-06T23:00:00+03:00"
      *                      }
      *                  }
      *              }
@@ -174,6 +178,7 @@ class AnalyticsController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionClientPurchases()
     {
@@ -250,6 +255,7 @@ class AnalyticsController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionClientOrders()
     {
@@ -329,6 +335,7 @@ class AnalyticsController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionClientVendors()
     {
@@ -399,6 +406,7 @@ class AnalyticsController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionClientSummary()
     {
@@ -454,6 +462,7 @@ class AnalyticsController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionCurrencies()
     {

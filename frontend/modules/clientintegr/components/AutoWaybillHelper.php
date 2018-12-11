@@ -40,8 +40,9 @@ class AutoWaybillHelper extends \yii\base\Component
         if (isset($licenses['rkws']) && ($licenses['rkws_ucs']) && array_key_exists('rkws', self::licensesMap)) {
             $className = self::supportServices[self::licensesMap['rkws']];
             $waybillModeRkws = RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+            $waybillExists = $className::find()->where(['order_id' => $order_id])->exists();
 
-            if ($waybillModeRkws !== '0') {
+            if (!$waybillExists && ($waybillModeRkws !== '0')) {
                 $res['rkws'] = $className::createWaybill($order_id);
             }
         }
@@ -49,8 +50,9 @@ class AutoWaybillHelper extends \yii\base\Component
         if (isset($licenses['iiko']) && array_key_exists('iiko', self::licensesMap)) {
             $className = self::supportServices[self::licensesMap['iiko']];
             $waybillModeIiko = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+            $waybillExists = $className::find()->where(['order_id' => $order_id])->exists();
 
-            if ($waybillModeIiko !== '0') {
+            if (!$waybillExists && ($waybillModeIiko !== '0')) {
                 $res['iiko'] = $className::createWaybill($order_id);
                 if ($waybillModeIiko === '1') {
                     $res['iiko'] = $className::exportWaybill($order_id);

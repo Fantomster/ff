@@ -8,6 +8,8 @@ use api_web\modules\integration\modules\egais\classes\XmlParser;
 use api_web\modules\integration\modules\egais\helpers\EgaisHelper;
 use common\models\egais\EgaisActWriteOn;
 use common\models\egais\EgaisActWriteOnDetail;
+use common\models\egais\EgaisProductOnBalance;
+use common\models\egais\EgaisQueryRests;
 use common\models\egais\EgaisRequestResponse;
 use common\models\IntegrationSettingValue;
 use common\models\Journal;
@@ -17,12 +19,12 @@ use yii\web\BadRequestHttpException;
 
 class EgaisCronController extends Controller
 {
-    // Проверка на наличие тикетов и успешной постановки на баланс
+    /* Проверка на наличие тикетов и успешной постановки на баланс */
 
     /**
      * @throws ValidationException
      */
-    public function actionCheckTicketActWriteOn()
+    public function actionCheckActWriteOn()
     {
         $acts = EgaisActWriteOn::find()
             ->where(['status' => null])
@@ -34,7 +36,6 @@ class EgaisCronController extends Controller
 
             try {
                 $idAndTypeDocs = $this->getIdAndTypeDocs($settings['egais_url'], $act->reply_id);
-                print_r($idAndTypeDocs);
                 $this->checkingResult($act, $settings['egais_url'], $idAndTypeDocs);
                 $transaction->commit();
             } catch (\Exception $e) {
@@ -51,6 +52,39 @@ class EgaisCronController extends Controller
         }
     }
 
+    /* Запрос товаров на балансе всех организаций которые есть в ЕГАИС */
+
+    /**
+     * @throws ValidationException
+     */
+    public function actionGoodsOnBalance(): void
+    {
+        $queryRests = EgaisQueryRests::find()
+            ->where(['status' => EgaisHelper::QUERY_SENT])
+            ->all();
+
+        $transaction = \Yii::$app->db_api->beginTransaction();
+        foreach ($queryRests as $queryRest) {
+            $setting = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $queryRest->org_id);
+
+            try {
+                $idAndTypeDocs = $this->getIdAndTypeDocs($setting['egais_url'], $queryRest->reply_id);
+                $this->saveProductOnBalance($setting, $queryRest, $idAndTypeDocs);
+                $transaction->commit();
+            } catch (\Exception $e) {
+                $transaction->rollBack();
+                $this->writeInJournal(
+                    'Operation error when saving products',
+                    Registry::EGAIS_SERVICE_ID,
+                    $queryRest->org_id,
+                    'ERROR'
+                );
+                continue;
+            }
+        }
+    }
+
+    /* Получение типа и id документа из ссылки */
     /**
      * @param $url
      * @param $reply_id
@@ -59,7 +93,6 @@ class EgaisCronController extends Controller
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    // Получение типа и id документа из ссылки
     private function getIdAndTypeDocs(string $url, string $reply_id): array
     {
         $client = new Client();
@@ -88,10 +121,10 @@ class EgaisCronController extends Controller
      */
     private function checkingResult(EgaisActWriteOn $act, string $egais_url, array $idAndTypeDocs): void
     {
-        if (count($idAndTypeDocs) == 1) {
-            $doc = EgaisHelper::getOneDocument($egais_url, $idAndTypeDocs);
+        if (!empty($idAndTypeDocs) && count($idAndTypeDocs) == 1) {
+            $doc = EgaisHelper::getOneDocument($egais_url, $idAndTypeDocs[0]);
             /** @var array $doc */
-            $this->saveTicket($act, $doc, $idAndTypeDocs);
+            $this->saveTicket($act, $doc, $idAndTypeDocs[0]);
         } else {
             foreach ($idAndTypeDocs as $idAndTypeDoc) {
                 $doc = EgaisHelper::getOneDocument($egais_url, $idAndTypeDoc);
@@ -107,8 +140,7 @@ class EgaisCronController extends Controller
         }
     }
 
-    // Сохранение результата тикета
-
+    /* Сохранение результата тикета */
     /**
      * @param EgaisActWriteOn $act
      * @param array $doc
@@ -129,6 +161,7 @@ class EgaisCronController extends Controller
                 'org_id' => $act->org_id,
                 'act_id' => $act->id,
                 'doc_id' => $idAndTypeDoc['id'],
+                'doc_type' => 'ActWriteOn',
                 'result' => !empty($doc['Result'])
                     ? (string)$doc['Result']->Conclusion
                     : (string)$doc['OperationResult']->OperationResult,
@@ -150,8 +183,7 @@ class EgaisCronController extends Controller
         }
     }
 
-    // Сохранение результата инвентаризации
-
+    /* Сохранение результата инвентаризации */
     /**
      * @param EgaisActWriteOn $act
      * @param array $doc
@@ -178,8 +210,7 @@ class EgaisCronController extends Controller
         $transaction->commit();
     }
 
-    // запись в журнал в случае ошибки
-
+    /* запись в журнал в случае ошибки */
     /**
      * @param $message
      * @param $service_id
@@ -200,6 +231,71 @@ class EgaisCronController extends Controller
 
         if (!$journal->save()) {
             throw new ValidationException($journal->getFirstErrors());
+        }
+    }
+
+    /* Сохранение продуктов на балансе */
+    /**
+     * @param $settings
+     * @param $queryRest
+     * @param $idAndTypeDocs
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\httpclient\Exception
+     */
+    private function saveProductOnBalance(array $settings, EgaisQueryRests $queryRest, array $idAndTypeDocs): void
+    {
+        /** @var array $doc */
+        $doc = EgaisHelper::getOneDocument($settings['egais_url'], $idAndTypeDocs[0]);
+        $products = $doc["Products"]["StockPosition"];
+
+        foreach ($products as $product) {
+            $egaisProduct = EgaisProductOnBalance::find()
+                ->where([
+                    'org_id' => $queryRest->org_id,
+                    'alc_code' => $product['Product']['AlcCode']
+                ])
+                ->one();
+            if (!empty($egaisProduct)) {
+                $egaisProduct->quantity = $product['Quantity'];
+                $egaisProduct->inform_a_reg_id = $product['InformARegId'];
+                $egaisProduct->inform_b_reg_id = $product['InformBRegId'];
+                $egaisProduct->full_name = $product['Product']['FullName'];
+                $egaisProduct->capacity = $product['Product']['Capacity'];
+                $egaisProduct->alc_volume = $product['Product']['AlcVolume'];
+                $egaisProduct->product_v_code = $product['Product']['ProductVCode'];
+                $egaisProduct->producer_client_reg_id = (string)$product['Product']['Producer']->ClientRegId;
+                $egaisProduct->producer_inn = (string)$product['Product']['Producer']->INN;
+                $egaisProduct->producer_kpp = (string)$product['Product']['Producer']->KPP;
+                $egaisProduct->producer_full_name = (string)$product['Product']['Producer']->FullName;
+                $egaisProduct->producer_short_name = (string)$product['Product']['Producer']->ShortName;
+                $egaisProduct->address_country = (string)$product['Product']['Producer']->address->Country;
+                $egaisProduct->address_region_code = (string)$product['Product']['Producer']->address->RegionCode;
+                $egaisProduct->address_description = (string)$product['Product']['Producer']->address->description;
+            } else {
+                $egaisProduct = new EgaisProductOnBalance([
+                    'org_id' => $queryRest->org_id,
+                    'quantity' => $product['Quantity'],
+                    'inform_a_reg_id' => $product['InformARegId'],
+                    'inform_b_reg_id' => $product['InformBRegId'],
+                    'full_name' => $product['Product']['FullName'],
+                    'alc_code' => $product['Product']['AlcCode'],
+                    'capacity' => $product['Product']['Capacity'],
+                    'alc_volume' => $product['Product']['AlcVolume'],
+                    'product_v_code' => $product['Product']['ProductVCode'],
+                    'producer_client_reg_id' => (string)$product['Product']['Producer']->ClientRegId,
+                    'producer_inn' => (string)$product['Product']['Producer']->INN,
+                    'producer_kpp' => (string)$product['Product']['Producer']->KPP,
+                    'producer_full_name' => (string)$product['Product']['Producer']->FullName,
+                    'producer_short_name' => (string)$product['Product']['Producer']->ShortName,
+                    'address_country' => (string)$product['Product']['Producer']->address->Country,
+                    'address_region_code' => (string)$product['Product']['Producer']->address->RegionCode,
+                    'address_description' => (string)$product['Product']['Producer']->address->description,
+                ]);
+            }
+            $egaisProduct->save();
+            $queryRest->status = EgaisHelper::QUERY_PROCESSED;
+            $queryRest->save();
         }
     }
 }

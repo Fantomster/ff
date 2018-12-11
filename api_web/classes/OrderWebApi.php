@@ -2,11 +2,16 @@
 
 namespace api_web\classes;
 
-use api_web\components\{ExcelRenderer, Registry, WebApiController};
+use api_web\components\{
+    ExcelRenderer, Registry, WebApiController
+};
 use api_web\components\notice_class\OrderNotice;
-use api_web\helpers\{Product, WebApiHelper};
+use api_web\helpers\{
+    Product, WebApiHelper
+};
 use api_web\models\User;
-use common\models\{CatalogBaseGoods,
+use common\models\{
+    CatalogBaseGoods,
     Delivery,
     MpCategory,
     OrderContent,
@@ -14,13 +19,20 @@ use common\models\{CatalogBaseGoods,
     RelationSuppRest,
     Role,
     Order,
-    Organization};
-use common\models\search\{OrderCatalogSearch, OrderContentSearch, OrderSearch};
+    Organization
+};
+use common\models\search\{
+    OrderCatalogSearch, OrderContentSearch, OrderSearch
+};
 use api_web\components\Notice;
 use kartik\mpdf\Pdf;
 use yii\base\InvalidArgumentException;
-use yii\data\{Pagination, SqlDataProvider};
-use yii\db\{Expression, Query};
+use yii\data\{
+    Pagination, SqlDataProvider
+};
+use yii\db\{
+    Expression, Query
+};
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -694,11 +706,15 @@ class OrderWebApi extends \api_web\components\WebApi
         $sort = (isset($post['sort']) ? $post['sort'] : null);
         $searchString = (isset($post['search']['product']) ? $post['search']['product'] : null);
         if ($isUnconfirmedVendor) {
-            $this->validateRequest($post, ['order_id']);
-
-            $order = Order::findOne(['id' => $post['search']['order_id']]);
+            if (empty($post['search']['order_id'])) {
+                throw new BadRequestHttpException('empty_param|search.order_id');
+            }
+            $order = Order::findOne(['id' => (int)$post['search']['order_id']]);
+            if (empty($order)) {
+                throw new BadRequestHttpException('order_not_found');
+            }
             $organizationID = $this->user->organization_id;
-            if ($this->checkUnconfirmedVendorAccess($post['search']['order_id'], $organizationID, $this->user->status)) {
+            if ($this->checkUnconfirmedVendorAccess($order->id, $organizationID, $this->user->status)) {
                 $searchSupplier = $organizationID;
                 $client = Organization::findOne(['id' => $order->client_id]);
                 $vendors = [$organizationID];

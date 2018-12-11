@@ -480,7 +480,7 @@ class EDIClass extends Component
         $catalog = new Catalog();
         $catalog->type = Catalog::CATALOG;
         $catalog->supp_org_id = $organization->id;
-        $catalog->name = $rest->name;
+        $catalog->name = $rest->name . " " . date('d.m.Y');
         $catalog->status = Catalog::STATUS_ON;
         $catalog->currency_id = $currency->id ?? 1;
         $catalog->save();

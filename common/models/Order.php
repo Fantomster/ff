@@ -740,14 +740,17 @@ class Order extends \yii\db\ActiveRecord
         }
     }
 
-    public function getEdiOrderDocType($order)
+    public function getEdiOrderDocType()
     {
-        if ($order->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR && $order->is_edi_sent_order) {
-            $docType = Registry::EDI_ORDER_DOCTYPE_EDIT;
-        } else {
-            $docType = Registry::EDI_ORDER_DOCTYPE_NEW;
+        $docType = null;
+        if ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
+            if ($this->is_edi_sent_order) {
+                $docType = Registry::EDI_ORDER_DOCTYPE_EDIT;
+            } else {
+                $docType = Registry::EDI_ORDER_DOCTYPE_NEW;
+            }
         }
-        if ($order->status == OrderStatus::STATUS_CANCELLED) {
+        if ($this->status == OrderStatus::STATUS_CANCELLED) {
             $docType = Registry::EDI_ORDER_DOCTYPE_DELETE;
         }
         return $docType;

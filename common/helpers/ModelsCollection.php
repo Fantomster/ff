@@ -34,14 +34,16 @@ class ModelsCollection extends Model
             $rowsToInsert = [];
 
             foreach ($models as $model) { //для каждого дочернего бизнеса
+                $isValid = false;
                 if ($validate) {
-                    if ($model->validate()) {
-                        if ($model->beforeSave(true)) { // если данные корректны
-                            $rowsToInsert[] = array_values($model->attributes);// выбираются все значения массива
-                        }
-                    } else { // если не все данные корректны, возвращаем ошибку
-                        return ['success' => false, 'error' => $model->errors];
+                    $isValid = $model->validate();
+                }
+                if ($isValid || !$validate) {
+                    if ($model->beforeSave(true)) { // если данные корректны
+                        $rowsToInsert[] = array_values($model->attributes);// выбираются все значения массива
                     }
+                } else { // если не все данные корректны, возвращаем ошибку
+                    return ['success' => false, 'error' => $model->errors];
                 }
             }
 

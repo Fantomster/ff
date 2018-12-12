@@ -127,8 +127,6 @@ class mercuryApi extends baseApi
 
         $request = $this->getSubmitApplicationRequest(true);
 
-        //$appData = new ApplicationDataWrapper();
-
         //Формируем тело запроса
         $config['login'] = $this->vetisLogin;
         $config['UUID'] = $UUID;
@@ -144,9 +142,6 @@ class mercuryApi extends baseApi
 
         $vetDoc = new VetDocumentDone();
         $vetDoc->init($config);
-        /*$appData->any['ns3:processIncomingConsignmentRequest'] = $vetDoc->getProcessIncomingConsignmentRequest();
-
-        $request->application->data = $appData;*/
 
         $var = new \SoapVar($vetDoc->getProcessIncomingConsignmentRequest(), SOAP_ENC_ARRAY, 'ProcessIncomingConsignmentRequest', 'http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2');
 
@@ -179,7 +174,6 @@ class mercuryApi extends baseApi
                     switch ($error->code) {
                         case "MERC14257" :
                             $err = false;
-                            //$vsd = MercVsd::findOne(['uuid' => $UUID]);
                             $rejectedData = new rejectedForm();
                             $rejectedData->decision = VetDocumentDone::ACCEPT_ALL;
                             $rejectedData->reason = "ТТН верна";
@@ -217,29 +211,6 @@ class mercuryApi extends baseApi
         return $result;
     }
 
-    /* private function addEventLog($response, $method, $localTransactionId, $request_xml, $response_xml)
-      {
-      //Пишем лог
-      $log = new mercLog();
-      $log->applicationId = $response->application->applicationId;
-      $log->status = $response->application->status;
-      $log->action = $method;
-      $log->localTransactionId = $localTransactionId;
-      $log->request = $request_xml;
-      $log->response = $response_xml;
-
-      if ($log->status == mercLog::REJECTED) {
-      $log->description = json_encode($response->application->errors, JSON_UNESCAPED_UNICODE);
-      }
-
-      if (!$log->save())
-      var_dump($log->getErrors());
-
-      if ($log->status == mercLog::REJECTED) {
-      throw new \Exception($log->id, 600);
-      }
-      } */
-
     public function getReceiveApplicationResult($applicationId)
     {
         $client = $this->getSoapClient('mercury');
@@ -254,59 +225,6 @@ class mercuryApi extends baseApi
         }
         return $result;
     }
-
-    /*public function getStockEntryList($listOptions = null)
-    {
-        $result = null;
-        //Генерируем id запроса
-        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
-
-        $client = $this->getSoapClient('mercury');
-
-        $request = $this->getSubmitApplicationRequest();
-
-        $appData = new ApplicationDataWrapper();
-
-        $entryList = new GetStockEntryListRequest();
-        $entryList->localTransactionId = $localTransactionId;
-        $entryList->enterpriseGuid = $this->enterpriseGuid;
-        $entryList->initiator = new User();
-        $entryList->initiator->login = $this->vetisLogin;
-
-        if (isset($listOptions)) {
-            $entryList->listOptions = $listOptions;
-        }
-
-        $entryList->searchPattern = new StockEntrySearchPattern();
-        $entryList->searchPattern->blankFilter = 'NOT_BLANK';
-
-        $appData->any['ns3:getStockEntryListRequest'] = $entryList;
-
-        $request->application->data = $appData;
-
-
-        $result = $client->submitApplicationRequest($request);
-
-        $reuest_xml = $client->__getLastRequest();
-
-        $app_id = $result->application->applicationId;
-        do {
-            //timeout перед запросом результата
-            sleep($this->query_timeout);
-            //Получаем результат запроса
-            $result = $this->getReceiveApplicationResult($app_id);
-
-            //var_dump($result);
-
-            $status = $result->application->status;
-        } while ($status == 'IN_PROCESS');
-
-        //Пишем лог
-        $client = $this->getSoapClient('mercury');
-        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
-
-        return $result;
-    }*/
 
     public function getStockEntryVersionList($listOptions = null)
     {
@@ -412,136 +330,7 @@ class mercuryApi extends baseApi
 
         return $result;
     }
-
-    public function getStockEntryByGuid($GUID)
-    {
-        $cache = Yii::$app->cache;
-        $doc = MercVsd::findOne(['guid' => $GUID]);
-
-        if ($doc != null) {
-            return unserialize($doc->raw_data);
-        }
-
-        return null;
-
-        /*$result = null;
-        $doc = null;
-
-        //Генерируем id запроса
-        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
-
-        //Готовим запрос
-        $client = $this->getSoapClient('mercury');
-
-        $request = $this->getSubmitApplicationRequest();
-
-        $appData = new ApplicationDataWrapper();
-
-        //Формируем тело запроса
-        $stockEntry = new GetStockEntryByGuidRequest();
-        $stockEntry->localTransactionId = $localTransactionId;
-        $stockEntry->enterpriseGuid = $this->enterpriseGuid;
-        $stockEntry->initiator = new User();
-        $stockEntry->initiator->login = $this->vetisLogin;
-        $stockEntry->guid = $GUID;
-
-
-        $appData->any['ns3:getStockEntryByGuidRequest'] = $stockEntry;
-
-        $request->application->data = $appData;
-
-        //Делаем запрос
-        $result = $client->submitApplicationRequest($request);
-
-        $request_xml = $client->__getLastRequest();
-
-        $app_id = $result->application->applicationId;
-        do {
-            //timeout перед запросом результата
-            sleep($this->query_timeout);
-            //Получаем результат запроса
-            $result = $this->getReceiveApplicationResult($app_id);
-
-            $status = $result->application->status;
-        } while ($status == 'IN_PROCESS');
-
-        //Пишем лог
-        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
-
-        if ($status == 'COMPLETED') {
-            $doc = $result->application->result->any['getStockEntryByGuidResponse']->stockEntry;
-            $cache->add('stockEntryRaw_' . $doc->uuid, $doc, 60 * 5);
-        } else {
-            $result = null;
-        }
-
-        return $doc;*/
-    }
-
-    public function getStockEntryByUuid($UUID)
-    {
-        $cache = Yii::$app->cache;
-        $doc = MercVsd::findOne(['uuid' => $UUID]);
-
-        if ($doc != null) {
-            return unserialize($doc->raw_data);
-        }
-
-        return null;
-
-        /*$result = null;
-        $doc = null;
-
-        //Генерируем id запроса
-        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
-
-        //Готовим запрос
-        $client = $this->getSoapClient('mercury');
-
-        $request = $this->getSubmitApplicationRequest();
-
-        $appData = new ApplicationDataWrapper();
-
-        //Формируем тело запроса
-        $stockEntry = new GetStockEntryByUuidRequest();
-        $stockEntry->localTransactionId = $localTransactionId;
-        $stockEntry->enterpriseGuid = $this->enterpriseGuid;
-        $stockEntry->initiator = new User();
-        $stockEntry->initiator->login = $this->vetisLogin;
-        $stockEntry->uuid = $UUID;
-
-        $appData->any['ns3:getStockEntryByUuidRequest'] = $stockEntry;
-
-        $request->application->data = $appData;
-
-        //Делаем запрос
-        $result = $client->submitApplicationRequest($request);
-
-        $request_xml = $client->__getLastRequest();
-
-        $app_id = $result->application->applicationId;
-        do {
-            //timeout перед запросом результата
-            sleep($this->query_timeout);
-            //Получаем результат запроса
-            $result = $this->getReceiveApplicationResult($app_id);
-
-            $status = $result->application->status;
-        } while ($status == 'IN_PROCESS');
-
-        //Пишем лог
-        mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
-
-        if ($status == 'COMPLETED') {
-            $doc = $result->application->result->any['getStockEntryByGuidResponse']->stockEntry;
-            $cache->add('stockEntryRaw_' . $UUID, $doc, 60 * 5);
-        } else {
-            $result = null;
-        }
-
-        return $doc;*/
-    }
-
+    
     public function resolveDiscrepancyOperation($model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
     {
         $result = null;

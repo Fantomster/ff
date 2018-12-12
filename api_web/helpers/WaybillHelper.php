@@ -462,7 +462,7 @@ class WaybillHelper
      * @param $ediNumber
      * @return int|mixed|string
      */
-    private function getLastEdiNumber($ediNumber, $tmp_ed_num)
+    public function getLastEdiNumber($ediNumber, $tmp_ed_num)
     {
         $ed_num = '';
         if (strpos($ediNumber, '-') != false && strlen($ediNumber) != strlen($tmp_ed_num)) {

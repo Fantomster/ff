@@ -6,6 +6,7 @@ use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\OuterProductMapHelper;
+use api_web\helpers\WaybillHelper;
 use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\classes\OuterProductMapper;
 use common\models\AllService;
@@ -118,10 +119,12 @@ class IntegrationWebApi extends WebApi
 
             $orderContent = OrderContent::findOne(['order_id' => $order->id]);
             if ($orderContent->edi_number) {
-                $arr = explode('-', $orderContent->edi_number);
-                if (isset($arr[1])) {
-                    $i = (int)$arr[1];
-                    $ediNumber = $arr[0] . "-" . $i;
+                $tmp_ed_num = $orderContent->edi_number;
+                $existWaybill = Waybill::find()->where(['like', 'outer_number_code', $tmp_ed_num])
+                    ->andWhere(['service_id' => $post['service_id']])
+                    ->orderBy(['outer_number_code' => SORT_DESC])->limit(1)->one();
+                if ($existWaybill->outer_number_code) {
+                    $ediNumber =  WaybillHelper::getLastEdiNumber($existWaybill->outer_number_code, $tmp_ed_num);
                 } else {
                     $ediNumber = $orderContent->edi_number . "-1";
                 }

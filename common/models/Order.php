@@ -728,7 +728,7 @@ class Order extends \yii\db\ActiveRecord
                         $this->is_recadv_sent = true;
                     } elseif ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $this->status == OrderStatus::STATUS_CANCELLED) {
                         $result = $ediIntegration->sendOrderInfo($this, false);
-                        $this->updateAttributes(['is_edi_sent_order' => true]);
+                        $this->updateAttributes(['edi_order' => Registry::EDI_ORDER_DOCTYPE_NEW]);
                     }
                     if (!$result) {
                         Yii::error(Yii::t('app', 'common.models.order.edi_error'));
@@ -750,7 +750,7 @@ class Order extends \yii\db\ActiveRecord
     {
         $docType = null;
         if ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
-            if ($this->is_edi_sent_order) {
+            if ($this->edi_order) {
                 $docType = Registry::EDI_ORDER_DOCTYPE_EDIT;
             } else {
                 $docType = Registry::EDI_ORDER_DOCTYPE_NEW;

@@ -709,7 +709,13 @@ class Order extends \yii\db\ActiveRecord
                 }
             }
 
-            if (!$this->ediProcessor && ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || ($this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED && Yii::$app->params['app_version'] == 2) || ($this->status == OrderStatus::STATUS_DONE && Yii::$app->params['app_version'] == 1))) || $this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $this->status == OrderStatus::STATUS_CANCELLED) {
+            if (!$this->ediProcessor
+                && ($this->status != OrderStatus::STATUS_FORMING && !$insert
+                    && (key_exists('total_price', $changedAttributes)
+                        || ($this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED && Yii::$app->params['app_version'] == 2)
+                        || ($this->status == OrderStatus::STATUS_DONE && Yii::$app->params['app_version'] == 1)))
+                || $this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR
+                || $this->status == OrderStatus::STATUS_CANCELLED) {
                 $vendor = $this->vendor;
                 $client = $this->client;
                 $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
@@ -749,8 +755,7 @@ class Order extends \yii\db\ActiveRecord
             } else {
                 $docType = Registry::EDI_ORDER_DOCTYPE_NEW;
             }
-        }
-        if ($this->status == OrderStatus::STATUS_CANCELLED) {
+        } else {
             $docType = Registry::EDI_ORDER_DOCTYPE_DELETE;
         }
         return $docType;

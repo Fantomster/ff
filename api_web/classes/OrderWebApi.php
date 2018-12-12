@@ -230,9 +230,8 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_content.not_found");
         }
 
-        $product_name = $orderContentRow->product_name;
         $orderContentRow->delete();
-        return $product_name;
+        return $orderContentRow;
     }
 
     /**

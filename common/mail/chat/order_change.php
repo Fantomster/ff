@@ -39,13 +39,28 @@ $i = 0;
 <?php endif; ?>
 
 <?php if (!empty($deleted)): ?>
-    <ul>
-        <li><?= \Yii::t('api_web', 'order.delete.content') ?>
-            <ul>
-                <?php foreach ($deleted as $name): ?>
-                    <li><?= $name ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </li>
-    </ul>
+    <?php
+    $i = 0;
+    ?>
+    <?= \Yii::t('api_web', 'order.delete.content') ?>
+    <table class="table">
+        <thead>
+        <tr>
+            <th class="order">#</th>
+            <th class="name">Товар</th>
+            <th class="article">Артикул</th>
+            <th class="quantity">Кол-во</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($deleted as $model): $model->refresh(); ?>
+            <tr>
+                <td class="order"><?= ++$i ?></td>
+                <td class="name"><?= $model->product_name ?></td>
+                <td class="article"><?= $model->article ?></td>
+                <td class="quantity"><?= $model->quantity ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
 <?php endif; ?>

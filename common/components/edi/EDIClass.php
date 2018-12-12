@@ -150,7 +150,7 @@ class EDIClass extends Component
                 $index = $orderContent->id;
                 $orderContentArr[] = $orderContent->id;
                 if (!in_array($index, $positionsArray)) {
-                    $deleted[] = $orderContent->product_name;
+                    $deleted[] = $orderContent;
                     $orderContent->delete();
                     continue;
                 }
@@ -171,7 +171,7 @@ class EDIClass extends Component
 
                 if ($oldQuantity != $newQuantity) {
                     if (!$newQuantity || $newQuantity == 0.000) {
-                        $deleted[] = $orderContent->product_namet;
+                        $deleted[] = $orderContent;
                         $orderContent->delete();
                         continue;
                     }
@@ -180,7 +180,7 @@ class EDIClass extends Component
                 $newPrice = (float)$arr[$index]['PRICE'];
                 if ($oldPrice != $newPrice) {
                     if ($newPrice == 0) {
-                        $deleted[] = $orderContent->product_name;
+                        $deleted[] = $orderContent;
                         $orderContent->delete();
                         continue;
                     }

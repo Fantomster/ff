@@ -33,72 +33,29 @@ class mercuryApi extends baseApi
         return $this->enterpriseGuid;
     }
 
-    private function getSubmitApplicationRequest()
+    private function getSubmitApplicationRequest($get_array = false)
     {
-        $request = new submitApplicationRequest();
-        $request->apiKey = $this->apiKey;
+        if(!$get_array) {
+            $request = new submitApplicationRequest();
+            $request->apiKey = $this->apiKey;
 
-        $request->application = new Application();
-        $request->application->serviceId = $this->service_id;
-        $request->application->issuerId = $this->issuerID;
-        $request->application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+            $request->application = new Application();
+            $request->application->serviceId = $this->service_id;
+            $request->application->issuerId = $this->issuerID;
+            $request->application->issueDate = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+        }
+        else
+        {
+            $request['apiKey'] = $this->apiKey;
 
+            $request['application']['serviceId'] = $this->service_id;
+            $request['application']['issuerId'] = $this->issuerID;
+            $request['application']['issueDate'] = Yii::$app->formatter->asDate('now', 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime('now', 'HH:mm:ss');
+
+        }
         return $request;
+
     }
-
-    /*public function getVetDocumentList($status = null, $listOptions = null)
-    {
-        $result = null;
-        //Генерируем id запроса
-        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
-
-        $client = $this->getSoapClient('mercury');
-
-        $request = $this->getSubmitApplicationRequest();
-
-        $appData = new ApplicationDataWrapper();
-
-        $vetDocList = new GetVetDocumentListRequest();
-        if (isset($status)) {
-            $vetDocList->vetDocumentStatus = $status;
-        }
-        $vetDocList->localTransactionId = $localTransactionId;
-        $vetDocList->enterpriseGuid = $this->enterpriseGuid;
-        $vetDocList->initiator = new User();
-        $vetDocList->initiator->login = $this->vetisLogin;
-
-        if (isset($listOptions)) {
-            $vetDocList->listOptions = $listOptions;
-        }
-
-        $appData->any['ns3:getVetDocumentListRequest'] = $vetDocList;
-
-        $request->application->data = $appData;
-        try {
-            $result = $client->submitApplicationRequest($request);
-
-            $reuest_xml = $client->__getLastRequest();
-
-            $app_id = $result->application->applicationId;
-            do {
-                //timeout перед запросом результата
-                sleep($this->query_timeout);
-                //Получаем результат запроса
-                $result = $this->getReceiveApplicationResult($app_id);
-
-                //var_dump($result);
-
-                $status = $result->application->status;
-            } while ($status == 'IN_PROCESS');
-
-            //Пишем лог
-            $client = $this->getSoapClient('mercury');
-            mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $reuest_xml, $client->__getLastResponse());
-        } catch (\SoapFault $e) {
-            Yii::error($e->detail);
-        }
-        return $result;
-    }*/
 
     public function getVetDocumentChangeList($date_start, $listOptions = null)
     {
@@ -110,32 +67,27 @@ class mercuryApi extends baseApi
         //Готовим запрос
         $client = $this->getSoapClient('mercury');
 
-        $request = $this->getSubmitApplicationRequest();
-
-        $appData = new ApplicationDataWrapper();
+        $request = $this->getSubmitApplicationRequest(true);
 
         //Формируем тело запроса
-        $vetDocList = new GetVetDocumentChangesListRequest();
-        $vetDocList->localTransactionId = $localTransactionId;
-        $vetDocList->enterpriseGuid = $this->enterpriseGuid;
-        $vetDocList->initiator = new User();
-        $vetDocList->initiator->login = $this->vetisLogin;
+        $vetDocList['localTransactionId'] = $localTransactionId;
+        $vetDocList['enterpriseGuid'] = $this->enterpriseGuid;
+        //$vetDocList[initiator = new User();
+        $vetDocList['initiator']['login'] = $this->vetisLogin;
 
         if (isset($listOptions)) {
-            $vetDocList->listOptions = $listOptions;
+            $vetDocList['listOptions'] = $listOptions;
         }
 
-        $vetDocList->updateDateInterval = new DateInterval();
-        $vetDocList->updateDateInterval->beginDate = Yii::$app->formatter->asDate($date_start, 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime($date_start, 'HH:mm:ss') . '+03:00';
-        $vetDocList->updateDateInterval->endDate = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
+        $vetDocList['updateDateInterval']['beginDate'] = Yii::$app->formatter->asDate($date_start, 'yyyy-MM-dd') . 'T' . Yii::$app->formatter->asTime($date_start, 'HH:mm:ss') . '+03:00';
+        $vetDocList['updateDateInterval']['endDate'] = date('Y-m-d') . 'T' . date('H:i:s') . '+03:00';
 
-        $appData->any['ns3:getVetDocumentChangesListRequest'] = $vetDocList;
+        $var = new \SoapVar($vetDocList, SOAP_ENC_ARRAY, 'GetVetDocumentChangesListRequest', 'http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2');
 
-        $request->application->data = $appData;
+        $request['application']['data']['any'] = ['ns3:getVetDocumentChangesListRequest' => $var];
 
         try {
             $result = $client->submitApplicationRequest($request);
-
             $reuest_xml = $client->__getLastRequest();
 
             $app_id = $result->application->applicationId;
@@ -150,21 +102,18 @@ class mercuryApi extends baseApi
 
             //Пишем лог
             mercLogger::getInstance()->addMercLog($result, 'MercVSDList', $localTransactionId, $reuest_xml, $client->__getLastResponse(), $this->org_id);
-        } catch (\Throwable $e) {
+        } catch (\SoapFault $e) {
+            Yii::error($e->detail);
+            var_dump($e->detail);
+            var_dump($client->__getLastRequest());
+            die();
+        }
+        catch (\Throwable $e) {
+            echo $e->getMessage().PHP_EOL.$e->getTraceAsString().PHP_EOL;
             Yii::error($e->getMessage());
         }
 
         return $result;
-    }
-
-    public function getVetDocumentByUUID($UUID)
-    {
-        $doc = MercVsd::findOne(['uuid' => $UUID]);
-        if ($doc != null) {
-            return $doc->getRawData();
-        }
-
-        return null;
     }
 
     public function getVetDocumentDone($UUID, $rejectedData = null)

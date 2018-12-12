@@ -170,7 +170,7 @@ class MercVSDList extends MercDictConsumer
                 }
                 echo "Cond " . var_dump($condition) . PHP_EOL;
                 echo "============================" . PHP_EOL;
-                sleep(60);
+                //sleep(60);
             } while ($condition);
             if ($count_error > 0) {
                 throw new \Exception('Cancel error operation');

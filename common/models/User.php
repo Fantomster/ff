@@ -360,7 +360,7 @@ class User extends \amnah\yii2\user\models\User
     private function getNotifications(String $className, $org_id = null, bool $isFranchisee = false)
     {
         $org_id = $org_id ?? $this->organization_id;
-        $rel    = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
+        $rel = RelationUserOrganization::findOne(['user_id' => $this->id, 'organization_id' => $org_id]);
 
         if ($rel === null && !$isFranchisee) {
             return $className::emptyInstance();
@@ -1093,8 +1093,8 @@ class User extends \amnah\yii2\user\models\User
      */
     public function getJWTToken($jwt = null)
     {
-        if (is_null($jwt)) {
-            $jwt = \Yii::$app->jwt;
+        if (is_null($jwt) or empty($jwt)) {
+            $jwt = \Yii::$app->get('jwt');
         }
 
         if ($jwt instanceof Jwt) {

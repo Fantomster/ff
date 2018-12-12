@@ -235,6 +235,9 @@ class UserWebApi extends \api_web\components\WebApi
             }
         }
 
+        $userToken->pin = rand(1000, 9999);
+        $userToken->save(false);
+
         Notice::init('User')->sendSmsCodeToActivate($userToken->getAttribute('pin'), $model->profile->phone);
 
         return ['result' => 1];

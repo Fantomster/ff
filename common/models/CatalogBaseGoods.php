@@ -436,4 +436,5 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             throw new BadRequestHttpException($e->getMessage());
         }
     }
+
 }

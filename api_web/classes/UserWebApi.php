@@ -765,6 +765,8 @@ class UserWebApi extends \api_web\components\WebApi
             $vendor->route
         ];
 
+        $user = User::findOne(['organization_id' => $vendor->id, 'role_id' => Role::ROLE_RESTAURANT_MANAGER]);
+
         foreach ($locality as $key => $val) {
             if (empty($val) or $val == 'undefined') {
                 unset($locality[$key]);
@@ -785,8 +787,8 @@ class UserWebApi extends \api_web\components\WebApi
             'contact_name'  => $vendor->contact_name ?? "",
             'inn'           => $vendor->buisinessInfo->inn ?? null,
             'cat_id'        => (int)$model->cat_id,
-            'email'         => $vendor->buisinessInfo->legal_email ?? $vendor->email ?? "",
-            'phone'         => $vendor->phone ?? "",
+            'email'         => $vendor->buisinessInfo->legal_email ?? $vendor->email ?? $user->email ?? '',
+            'phone'         => $vendor->phone ?? $user->profile->phone ?? "",
             'status'        => $status,
             'picture'       => $vendor->getPictureUrl() ?? "",
             'address'       => implode(', ', $locality),

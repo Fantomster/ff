@@ -256,7 +256,7 @@ class VetisHelper
             ->leftJoin(IntegrationSettingValue::tableName() . ' isv', 'isv.setting_id=is.id and isv.value=merc_vsd.recipient_guid')
             ->where(['isv.org' => array_keys($orgIds['result'])])
             ->andWhere(['uuid' => $uuids])
-            ->andWhere(['LENGTH(isv.recipient_guid) > 35'])
+            ->andWhere('LENGTH(isv.recipient_guid) > :len', [':len' => 35])
             ->indexBy('uuid')
             ->all();
     }

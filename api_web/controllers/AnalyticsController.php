@@ -152,7 +152,7 @@ class AnalyticsController extends WebApiController
      *                  "result": {
      *                      {
      *                          "total_sum": 69521.02,
-     *                          "date": "2017-10-06T03:00:00+03:00"
+     *                          "date": "2017-10-06T03:00:00+03:00",
      *                          "raw_date": "2017-10-06T23:00:00+03:00"
      *                      },
      *                      {

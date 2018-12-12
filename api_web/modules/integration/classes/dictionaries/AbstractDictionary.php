@@ -281,7 +281,7 @@ class AbstractDictionary extends WebApi
                 'or',
                 ['is_deleted' => 0],
                 ['is_deleted' => null]
-            ])->exists();
+            ])->andWhere('id <> :agent_id', [':agent_id' => $model->id])->exists();
 
             if ($exists) {
                 throw new BadRequestHttpException('dictionary.agent.update.vendor_exists');

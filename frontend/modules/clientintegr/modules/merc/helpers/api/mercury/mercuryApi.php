@@ -159,70 +159,12 @@ class mercuryApi extends baseApi
 
     public function getVetDocumentByUUID($UUID)
     {
-        $cache = Yii::$app->cache;
         $doc = MercVsd::findOne(['uuid' => $UUID]);
-
         if ($doc != null) {
-            return unserialize($doc->raw_data);
+            return $doc->getRawData();
         }
 
         return null;
-
-        /*$result = null;
-        $doc = null;
-
-        //Генерируем id запроса
-        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
-
-        //Готовим запрос
-        $client = $this->getSoapClient('mercury');
-
-        $request = $this->getSubmitApplicationRequest();
-
-        $appData = new ApplicationDataWrapper();
-
-        //Формируем тело запроса
-        $vetDoc = new getVetDocumentByUUID();
-        $vetDoc->localTransactionId = $localTransactionId;
-        $vetDoc->enterpriseGuid = $this->enterpriseGuid;
-        $vetDoc->initiator = new User();
-        $vetDoc->initiator->login = $this->vetisLogin;
-        $vetDoc->uuid = $UUID;
-
-
-        $appData->any['ns3:getVetDocumentByUuidRequest'] = $vetDoc;
-
-        $request->application->data = $appData;
-
-        try {
-            //Делаем запрос
-            $result = $client->submitApplicationRequest($request);
-
-            $request_xml = $client->__getLastRequest();
-
-            $app_id = $result->application->applicationId;
-            do {
-                //timeout перед запросом результата
-                sleep($this->query_timeout);
-                //Получаем результат запроса
-                $result = $this->getReceiveApplicationResult($app_id);
-
-                $status = $result->application->status;
-            } while ($status == 'IN_PROCESS');
-
-            //Пишем лог
-            mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
-
-            if ($status == 'COMPLETED') {
-                $doc = $result->application->result->any['getVetDocumentByUuidResponse']->vetDocument;
-                $cache->add('vetDocRaw_' . $UUID, $doc, 60 * 5);
-            } else {
-                $result = null;
-            }
-        } catch (\SoapFault $e) {
-            Yii::error($e->detail);
-        }
-        return $doc;*/
     }
 
     public function getVetDocumentDone($UUID, $rejectedData = null)

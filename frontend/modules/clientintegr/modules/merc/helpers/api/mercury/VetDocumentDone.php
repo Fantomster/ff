@@ -59,68 +59,68 @@ class VetDocumentDone extends Component
         $data->delivery = new Delivery();
         $data->delivery->deliveryDate = $date;
 
-        $consignor = $this->doc->certifiedConsignment->consignor;
-        $consignor->businessEntity->uuid = null;
-        $consignor->enterprise->uuid = null;
+        $consignor = $this->doc['certifiedConsignment']['consignor'];
+        $consignor['businessEntity']['uuid'] = null;
+        $consignor['enterprise']['uuid'] = null;
         $data->delivery->consignor = $consignor;
 
-        $consignee = $this->doc->certifiedConsignment->consignee;
-        $consignee->businessEntity->uuid = null;
-        $consignee->enterprise->uuid = null;
+        $consignee = $this->doc['certifiedConsignment']['consignee'];
+        $consignee['businessEntity']['uuid'] = null;
+        $consignee['enterprise']['uuid'] = null;
         $data->delivery->consignee = $consignee;
 
         $consigment = new Consignment();
-        $consigment->productType = $this->doc->certifiedConsignment->batch->productType;
-        $consigment->product = $this->doc->certifiedConsignment->batch->product;
-        $consigment->subProduct = $this->doc->certifiedConsignment->batch->subProduct;
-        $consigment->productItem = $this->doc->certifiedConsignment->batch->productItem;
+        $consigment->productType = $this->doc['certifiedConsignment']['batch']['productType'];
+        $consigment->product = $this->doc['certifiedConsignment']['batch']['product'];
+        $consigment->subProduct = $this->doc['certifiedConsignment']['batch']['subProduct'];
+        $consigment->productItem = $this->doc['certifiedConsignment']['batch']['productItem'];
 
-        $volume = $this->doc->certifiedConsignment->batch->volume;
+        $volume = $this->doc['certifiedConsignment']['batch']['volume'];
         $consigment->volume = (($this->type == self::RETURN_ALL) ? 0 : (isset($this->rejected_data['volume']) ? $this->mb_abs($this->rejected_data['volume']) : $volume));
 
-        $consigment->unit = $this->doc->certifiedConsignment->batch->unit;
+        $consigment->unit = $this->doc['certifiedConsignment']['batch']['unit'];
 
-        if (isset($doc->certifiedConsignment->batch->packingList))
-            $consigment->packageList = $this->doc->certifiedConsignment->batch->packingList;
+        if (isset($this->doc['certifiedConsignment']['batch']['packingList']))
+            $consigment->packageList = $this->doc['certifiedConsignment']['batch']['packingList'];
 
-        $consigment->dateOfProduction = $this->doc->certifiedConsignment->batch->dateOfProduction;
+        $consigment->dateOfProduction = $this->doc['certifiedConsignment']['batch']['dateOfProduction'];
 
-        if (isset($this->doc->certifiedConsignment->batch->expiryDate))
-            $consigment->expiryDate = $this->doc->certifiedConsignment->batch->expiryDate;
+        if (isset($this->doc['certifiedConsignment']['batch']['expiryDate']))
+            $consigment->expiryDate = $this->doc['certifiedConsignment']['batch']['expiryDate'];
 
-        $consigment->batchID = $this->doc->certifiedConsignment->batch->batchID;
-        $consigment->perishable = $this->doc->certifiedConsignment->batch->perishable;
+        $consigment->batchID = $this->doc['certifiedConsignment']['batch']['batchID'];
+        $consigment->perishable = $this->doc['certifiedConsignment']['batch']['perishable'];
 
         $origin = new BatchOrigin();
-        $origin->country = $this->doc->certifiedConsignment->batch->origin->country;
-        $origin->producer = $this->doc->certifiedConsignment->batch->origin->producer;
+        $origin->country = $this->doc['certifiedConsignment']['batch']['origin']['country'];
+        $origin->producer = $this->doc['certifiedConsignment']['batch']['origin']['producer'];
 
         $consigment->origin = $origin;
-        $consigment->lowGradeCargo = $this->doc->certifiedConsignment->batch->lowGradeCargo;
+        $consigment->lowGradeCargo = $this->doc['certifiedConsignment']['batch']['lowGradeCargo'];
 
         $data->delivery->consignment = $consigment;
 
-        if (isset($doc->certifiedConsignment->broker))
-            $data->delivery->broker = $this->doc->certifiedConsignment->broker;
+        if (isset($this->doc['certifiedConsignment']['broker']))
+            $data->delivery->broker = $this->doc['certifiedConsignment']['broker'];
 
-        $data->delivery->transportInfo = $this->doc->certifiedConsignment->transportInfo;
-        $data->delivery->transportStorageType = $this->doc->certifiedConsignment->transportStorageType;
+        $data->delivery->transportInfo = $this->doc['certifiedConsignment']['transportInfo'];
+        $data->delivery->transportStorageType = $this->doc['certifiedConsignment']['transportStorageType'];
 
         $accompanyingForms = new ConsignmentDocumentList();
-        if (isset($this->doc->referencedDocument)) {
+        if (isset($this->doc['referencedDocument'])) {
             $docs = null;
-            if (!is_array($this->doc->referencedDocument))
-                $docs[] = $this->doc->referencedDocument;
+            if (isset($this->doc['referencedDocument']['type']))
+                $docs[] = $this->doc['referencedDocument'];
             else
-                $docs = $this->doc->referencedDocument;
+                $docs = $this->doc['referencedDocument'];
 
             foreach ($docs as $item) {
-                if (($item->type >= 1) && ($item->type <= 5)) {
+                if (($item['type'] >= 1) && ($item['type'] <= 5)) {
                     $accompanyingForms->waybill = new Waybill();
-                    $accompanyingForms->waybill->issueSeries = isset($item->issueSeries) ? $item->issueSeries : null;
-                    $accompanyingForms->waybill->issueNumber = $item->issueNumber;
-                    $accompanyingForms->waybill->issueDate = $item->issueDate;
-                    $accompanyingForms->waybill->type = $item->type;
+                    $accompanyingForms->waybill->issueSeries = isset($item['issueSeries']) ? $item['issueSeries'] : null;
+                    $accompanyingForms->waybill->issueNumber = $item['issueNumber'];
+                    $accompanyingForms->waybill->issueDate = $item['issueDate'];
+                    $accompanyingForms->waybill->type = $item['type'];
                     break;
                 }
             }
@@ -177,68 +177,68 @@ class VetDocumentDone extends Component
         $retuned = new Delivery();
         $retuned->deliveryDate = $date;
 
-        $consignor = $doc->certifiedConsignment->consignee;
-        $consignor->businessEntity->uuid = null;
-        $consignor->enterprise->uuid = null;
+        $consignor = $doc['certifiedConsignment']['consignee'];
+        $consignor['businessEntity']['uuid'] = null;
+        $consignor['enterprise']['uuid'] = null;
 
         $retuned->consignor = $consignor;
 
-        $consignee = $doc->certifiedConsignment->consignor;
-        $consignee->businessEntity->uuid = null;
-        $consignee->enterprise->uuid = null;
+        $consignee = $doc['certifiedConsignment']['consignor'];
+        $consignee['businessEntity']['uuid'] = null;
+        $consignee['enterprise']['uuid'] = null;
 
         $retuned->consignee = $consignee;
 
         $consigment = new Consignment();
-        $consigment->productType = $doc->certifiedConsignment->batch->productType;
+        $consigment->productType = $doc['certifiedConsignment']['batch']['productType'];
 
-        $consigment->product = $doc->certifiedConsignment->batch->product;
+        $consigment->product = $doc['certifiedConsignment']['batch']['product'];
 
-        $consigment->subProduct = $doc->certifiedConsignment->batch->subProduct;
-        $consigment->productItem = $doc->certifiedConsignment->batch->productItem;
+        $consigment->subProduct = $doc['certifiedConsignment']['batch']['subProduct'];
+        $consigment->productItem = $doc['certifiedConsignment']['batch']['productItem'];
 
-        $volume = $doc->certifiedConsignment->batch->volume;
+        $volume = $doc['certifiedConsignment']['batch']['volume'];
 
         $consigment->volume = (($this->type == self::RETURN_ALL) ? $volume : $this->mb_abs($volume - $this->rejected_data['volume']));
 
-        $consigment->unit = $doc->certifiedConsignment->batch->unit;
+        $consigment->unit = $doc['certifiedConsignment']['batch']['unit'];
 
-        if (isset($doc->certifiedConsignment->batch->packingList))
-            $consigment->packageList = $doc->certifiedConsignment->batch->packingList;
+        if (isset($doc['certifiedConsignment']['batch']['packingList']))
+            $consigment->packageList = $doc['certifiedConsignment']['batch']['packingList'];
 
-        $consigment->dateOfProduction = $doc->certifiedConsignment->batch->dateOfProduction;
+        $consigment->dateOfProduction = $doc['certifiedConsignment']['batch']['dateOfProduction'];
 
-        if (isset($doc->certifiedConsignment->batch->expiryDate))
-            $consigment->expiryDate = $doc->certifiedConsignment->batch->expiryDate;
+        if (isset($doc['certifiedConsignment']['batch']['expiryDate']))
+            $consigment->expiryDate = $doc['certifiedConsignment']['batch']['expiryDate'];
 
-        $consigment->batchID = $doc->certifiedConsignment->batch->batchID;
-        $consigment->perishable = $doc->certifiedConsignment->batch->perishable;
-        $consigment->origin = $doc->certifiedConsignment->batch->origin;
-        $consigment->lowGradeCargo = $doc->certifiedConsignment->batch->lowGradeCargo;
+        $consigment->batchID = $doc['certifiedConsignment']['batch']['batchID'];
+        $consigment->perishable = $doc['certifiedConsignment']['batch']['perishable'];
+        $consigment->origin = $doc['certifiedConsignment']['batch']['origin'];
+        $consigment->lowGradeCargo = $doc['certifiedConsignment']['batch']['lowGradeCargo'];
 
         $retuned->consignment = $consigment;
 
-        if (isset($doc->certifiedConsignment->broker))
-            $retuned->broker = $doc->certifiedConsignment->broker;
+        if (isset($doc['certifiedConsignment']['broker']))
+            $retuned->broker = $doc['certifiedConsignment']['broker'];
 
-        $retuned->transportInfo = $doc->certifiedConsignment->transportInfo;
-        $retuned->transportStorageType = $doc->certifiedConsignment->transportStorageType;
+        $retuned->transportInfo = $doc['certifiedConsignment']['transportInfo'];
+        $retuned->transportStorageType = $doc['certifiedConsignment']['transportStorageType'];
 
         $accompanyingForms = new ConsignmentDocumentList();
-        if (isset($doc->referencedDocument)) {
+        if (isset($doc['referencedDocument'])) {
             $docs = null;
-            if (!is_array($doc->referencedDocument))
-                $docs[] = $doc->referencedDocument;
+            if (isset($doc['referencedDocument']['type']))
+                $docs[] = $doc['referencedDocument'];
             else
                 $docs = $doc->referencedDocument;
 
             foreach ($docs as $item) {
-                if (($item->type >= 1) && ($item->type <= 5)) {
+                if (($item['type'] >= 1) && ($item['type'] <= 5)) {
                     $accompanyingForms->waybill = new Waybill();
-                    $accompanyingForms->waybill->issueSeries = isset($item->issueSeries) ? $item->issueSeries : null;
-                    $accompanyingForms->waybill->issueNumber = $item->issueNumber;
-                    $accompanyingForms->waybill->issueDate = $item->issueDate;
-                    $accompanyingForms->waybill->type = $item->type;
+                    $accompanyingForms->waybill->issueSeries = isset($item['issueSeries']) ? $item['issueSeries'] : null;
+                    $accompanyingForms->waybill->issueNumber = $item['issueNumber'];
+                    $accompanyingForms->waybill->issueDate = $item['issueDate'];
+                    $accompanyingForms->waybill->type = $item['type'];
                     break;
                 }
             }
@@ -246,21 +246,21 @@ class VetDocumentDone extends Component
 
         $accompanyingForms->vetCertificate = new VetDocument();
         $accompanyingForms->vetCertificate->uuid = $this->UUID;
-        if(isset($doc->authentication->locationProsperity)) {
-            $authentication['locationProsperity'] = $doc->authentication->locationProsperity;
+        if(isset($doc['authentication']['locationProsperity'])) {
+            $authentication['locationProsperity'] = $doc['authentication']['locationProsperity'];
         }
-        $authentication['purpose']= ['guid' => $doc->authentication->purpose->guid];
-        if(isset($doc->authentication->cargoInspected)) {
-            $authentication['cargoInspected'] = $doc->authentication->cargoInspected;
+        $authentication['purpose']= ['guid' => $doc['authentication']['purpose']['guid']];
+        if(isset($doc['authentication']['cargoInspected'])) {
+            $authentication['cargoInspected'] = $doc['authentication']['cargoInspected'];
         }
-        $authentication['cargoExpertized'] = $doc->authentication->cargoExpertized;
+        $authentication['cargoExpertized'] = $doc['authentication']['cargoExpertized'];
 
-        if(isset($doc->authentication->animalSpentPeriod)) {
-            $authentication['animalSpentPeriod'] =  $doc->authentication->animalSpentPeriod;
+        if(isset($doc['authentication']['animalSpentPeriod'])) {
+            $authentication['animalSpentPeriod'] =  $doc['authentication']['animalSpentPeriod'];
         }
 
         if(isset($doc->authentication->specialMarks)) {
-            $authentication['specialMarks'] =  $doc->authentication->specialMarks;
+            $authentication['specialMarks'] =  $doc['authentication']['specialMarks'];
         }
 
 

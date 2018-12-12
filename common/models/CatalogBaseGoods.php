@@ -9,6 +9,7 @@ use yii\data\ActiveDataProvider;
 use common\behaviors\ImageUploadBehavior;
 use Imagine\Image\ManipulatorInterface;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 
 /**
  * This is the model class for table "catalog_base_goods".
@@ -82,7 +83,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
     {
         return ArrayHelper::merge(parent::behaviors(), [
             [
-                'class'     => ImageUploadBehavior::className(),
+                'class'     => ImageUploadBehavior::class,
                 'attribute' => 'image',
                 'scenarios' => ['default', 'marketPlace'],
                 'path'      => '@app/web/upload/temp/',
@@ -417,7 +418,9 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param $id
      * @return integer
+     * @throws BadRequestHttpException
      */
     public function getSuppById($id)
     {
@@ -426,26 +429,12 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             $vrem = CatalogBaseGoods::find()->where(["id" => $id])->one();
             $result = $vrem['supp_org_id'];
             return $result;
-        } catch (InvalidParamException $e) {
+        } catch (\Exception $e) {
             \yii::error('Cant get value, invalid parameter ' . $id);
         }
         if (is_null($result)) {
             throw new BadRequestHttpException($e->getMessage());
         }
-
     }
 
-    public function afterSave($insert, $changedAttributes)
-    {
-        if ($insert && $this->catalog->type == 1) {
-            $new_item = new CatalogGoods;
-            $new_item->cat_id = $this->cat_id;
-            $new_item->base_goods_id = $this->id;
-            $new_item->price = $this->price;
-            $new_item->vat = null;
-            if (!$new_item->save()) {
-                throw new \Exception('Не удалось сохранить для каталога ' . $this->cat_id . ' в таблице catalog_goods новую запись из catalog_base_goods ' . $this->id);
-            }
-        }
-    }
 }

@@ -25,7 +25,7 @@ use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
- * Class DocumentWebApi
+ * Class DocumentWebApi 
  *
  * @package api_web\modules\integration\classes
  */
@@ -710,7 +710,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         ]);
 
         if (empty($replacedOrder)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'document.replaced_order_not_found', ['ru' => 'Заменяемый документ не найден или не является заказом']));
+            throw new BadRequestHttpException('document.replaced_order_not_found');
         }
 
         $document = OrderEmail::findOne([
@@ -719,15 +719,15 @@ class DocumentWebApi extends \api_web\components\WebApi
         ]);
 
         if (empty($document)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_not_found', ['ru' => 'Документ не найден или не является документом от поставщика']));
+            throw new BadRequestHttpException('document.document_not_found');
         }
 
         if ($document->status == Order::STATUS_CANCELLED) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_cancelled', ['ru' => 'Документ в состоянии "Отменен"']));
+            throw new BadRequestHttpException('document.document_cancelled');
         }
 
         if (!is_null($document->replaced_order_id)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_replaced_order_id_is_not_null', ['ru' => 'Документ уже заменен']));
+            throw new BadRequestHttpException('document.document_replaced_order_id_is_not_null');
         }
 
         $replacedOrder->status = Order::STATUS_CANCELLED;
@@ -817,12 +817,12 @@ class DocumentWebApi extends \api_web\components\WebApi
                 $field = 'acquirer_id';
             }
             if (!$query->andWhere([$field => $this->user->organization_id])->exists()) {
-                throw new BadRequestHttpException($request['type'] . '_not_found');
+                throw new BadRequestHttpException( "type_not_found|{$request['type']}");
             }
 
             $document = $modelClass::prepareModel($request['document_id'], $request['service_id']);
         } else {
-            throw new BadRequestHttpException($request['type'] . '_not_found');
+            throw new BadRequestHttpException("type_not_found|{$request['type']}");
         }
 
         return array_merge(['document' => $document], $this->getDocumentContents($request));

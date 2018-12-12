@@ -2,11 +2,16 @@
 
 namespace api_web\classes;
 
-use api_web\components\{ExcelRenderer, Registry, WebApiController};
+use api_web\components\{
+    ExcelRenderer, Registry, WebApiController
+};
 use api_web\components\notice_class\OrderNotice;
-use api_web\helpers\{Product, WebApiHelper};
+use api_web\helpers\{
+    Product, WebApiHelper
+};
 use api_web\models\User;
-use common\models\{CatalogBaseGoods,
+use common\models\{
+    CatalogBaseGoods,
     Delivery,
     MpCategory,
     OrderContent,
@@ -14,13 +19,20 @@ use common\models\{CatalogBaseGoods,
     RelationSuppRest,
     Role,
     Order,
-    Organization};
-use common\models\search\{OrderCatalogSearch, OrderContentSearch, OrderSearch};
+    Organization
+};
+use common\models\search\{
+    OrderCatalogSearch, OrderContentSearch, OrderSearch
+};
 use api_web\components\Notice;
 use kartik\mpdf\Pdf;
 use yii\base\InvalidArgumentException;
-use yii\data\{Pagination, SqlDataProvider};
-use yii\db\{Expression, Query};
+use yii\data\{
+    Pagination, SqlDataProvider
+};
+use yii\db\{
+    Expression, Query
+};
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -43,9 +55,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function update($post, bool $isUnconfirmedVendor = false)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
         //Поиск заказа
         $order = Order::findOne($post['order_id']);
 
@@ -183,10 +193,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     private function editProduct(Order $order, array $product)
     {
-        if (empty($product['id'])) {
-            throw new BadRequestHttpException("order.edit_product_empty");
-        }
-
+        $this->validateRequest($product, ['id']);
         /**
          * @var OrderContent $orderContent
          */
@@ -251,9 +258,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     private function addProduct(Order $order, array $product)
     {
-        if (empty($product['id'])) {
-            throw new BadRequestHttpException("order.add_product_empty");
-        }
+        $this->validateRequest($product, ['id']);
 
         $orderContentRow = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
 
@@ -293,9 +298,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function addComment(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $order = Order::findOne($post['order_id']);
 
@@ -330,13 +333,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function addProductComment(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
-
-        if (empty($post['product_id'])) {
-            throw new BadRequestHttpException('empty_param|product_id');
-        }
+        $this->validateRequest($post, ['order_id', 'product_id']);
 
         $order = Order::findOne($post['order_id']);
 
@@ -381,9 +378,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function getInfo(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         /**@var Order $order */
         $order = Order::find()->where(['id' => $post['order_id'], 'service_id' => Registry::MC_BACKEND])->one();
@@ -446,14 +441,19 @@ class OrderWebApi extends \api_web\components\WebApi
         $dataProvider->pagination = false;
         $products = $dataProvider->models;
 
+        $arEdiNumbers = [];
         if (!empty($products)) {
             foreach ($products as $model) {
                 /**
                  * @var OrderContent $model
                  */
                 $result['items'][] = $this->prepareProduct($model, $currency, $currency_id);
+                if (!is_null($model->edi_number)) {
+                    $arEdiNumbers[] = $model->edi_number;
+                }
             }
         }
+        $result['edi_number'] = array_unique($arEdiNumbers);
 
         $result['client'] = WebApiHelper::prepareOrganization($order->client);
         $result['vendor'] = WebApiHelper::prepareOrganization($order->vendor);
@@ -707,11 +707,14 @@ class OrderWebApi extends \api_web\components\WebApi
         $searchString = (isset($post['search']['product']) ? $post['search']['product'] : null);
         if ($isUnconfirmedVendor) {
             if (empty($post['search']['order_id'])) {
-                throw new BadRequestHttpException('empty_param|order_id');
+                throw new BadRequestHttpException('empty_param|search.order_id');
             }
-            $order = Order::findOne(['id' => $post['search']['order_id']]);
+            $order = Order::findOne(['id' => (int)$post['search']['order_id']]);
+            if (empty($order)) {
+                throw new BadRequestHttpException('order_not_found');
+            }
             $organizationID = $this->user->organization_id;
-            if ($this->checkUnconfirmedVendorAccess($post['search']['order_id'], $organizationID, $this->user->status)) {
+            if ($this->checkUnconfirmedVendorAccess($order->id, $organizationID, $this->user->status)) {
                 $searchSupplier = $organizationID;
                 $client = Organization::findOne(['id' => $order->client_id]);
                 $vendors = [$organizationID];
@@ -821,9 +824,8 @@ class OrderWebApi extends \api_web\components\WebApi
     {
         $organizationID = $this->user->organization_id;
         if ($isUnconfirmedVendor) {
-            if (empty($post['order_id'])) {
-                throw new BadRequestHttpException('empty_param|order_id');
-            }
+            $this->validateRequest($post, ['order_id']);
+
             $order = Order::findOne(['id' => $post['order_id']]);
             if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
                 $suppliers = [$this->user->organization_id];

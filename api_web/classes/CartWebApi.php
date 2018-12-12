@@ -83,7 +83,7 @@ class CartWebApi extends \api_web\components\WebApi
             $product = (new Product())->findFromCatalogs($post['product_id']);
             //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
             if (!in_array($product['cat_id'], $this->getCatalogs()) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
-                throw new BadRequestHttpException("catalog.access_denied|" . $product['cat_id']);
+                throw new BadRequestHttpException("catalog.access_denied|{$product['cat_id']}");
             }
             $this->setPosition($cart, $product, $post['quantity']);
             $transaction->commit();
@@ -194,9 +194,7 @@ class CartWebApi extends \api_web\components\WebApi
             }
 
             foreach ($post as $row) {
-                if (empty($row['id'])) {
-                    throw new BadRequestHttpException("empty_param|id");
-                }
+                $this->validateRequest($row, ['id']);
                 $orders[$row['id']] = [
                     'delivery_date' => $row['delivery_date'] ?? null,
                     'comment'       => $row['comment'] ?? null,

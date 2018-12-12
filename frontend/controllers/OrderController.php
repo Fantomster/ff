@@ -385,9 +385,10 @@ class OrderController extends DefaultController
 
         $objPHPExcel->getActiveSheet()->getRowDimension(17)->setRowHeight(25);
 
-        $row   = 18;
+        $row = 18;
         $goods = $order->orderContent;
-        $i     = 0;
+        
+        $i = 0;
         foreach ($goods as $good) {
             $i++;
             $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(-1);
@@ -401,7 +402,7 @@ class OrderController extends DefaultController
             $objPHPExcel->getActiveSheet()->getStyle('C' . $row)->getAlignment()->setWrapText(true);
             $objPHPExcel->getActiveSheet()->getStyle("C$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
 
-            $objPHPExcel->getActiveSheet()->setCellValueExplicit('D' . $row, $good->article, \PHPExcel_Cell_DataType::TYPE_STRING);
+            $objPHPExcel->getActiveSheet()->setCellValueExplicit('D' . $row, $good->product->article, \PHPExcel_Cell_DataType::TYPE_STRING);
             $objPHPExcel->getActiveSheet()->getStyle("D$row")->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_BOTTOM)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
             $objPHPExcel->getActiveSheet()->setCellValue('E' . $row, Yii::t('app', $good->product->ed));

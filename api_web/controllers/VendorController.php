@@ -441,7 +441,7 @@ class VendorController extends WebApiController
      */
     public function actionUploadFile()
     {
-        $this->response = $this->container->get('VendorWebApi')->uploadFile($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->uploadFile($this->request);
     }
 
     /**
@@ -487,7 +487,7 @@ class VendorController extends WebApiController
      */
     public function actionGetListMainIndex()
     {
-        $this->response = $this->container->get('VendorWebApi')->getListMainIndex($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->getListMainIndex($this->request);
     }
 
     /**
@@ -574,11 +574,11 @@ class VendorController extends WebApiController
      */
     public function actionPrepareTemporary()
     {
-        $this->response = $this->container->get('VendorWebApi')->prepareTemporary($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->prepareTemporary($this->request);
     }
 
     /**
-     * @SWG\Post(path="/vendor/upload-temporary",
+     * @SWG\Post(path="/vendor/upload-temporary?XDEBUG_PROFILE=1",
      *     tags={"Vendor/Catalog"},
      *     summary="Обновление индивидуального каталога",
      *     description="Обновление индивидуального каталога",
@@ -719,17 +719,17 @@ class VendorController extends WebApiController
 
     public function actionImportCustomCatalog()
     {
-        $this->response = $this->container->get('VendorWebApi')->importCustomCatalog($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->importCustomCatalog($this->request);
     }
 
     public function actionDeleteMainCatalog()
     {
-        $this->response = $this->container->get('VendorWebApi')->deleteMainCatalog($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->deleteMainCatalog($this->request);
     }
 
     public function actionChangeMainIndex()
     {
-        $this->response = $this->container->get('VendorWebApi')->changeMainIndex($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->changeMainIndex($this->request);
     }
 
     /**
@@ -775,12 +775,12 @@ class VendorController extends WebApiController
      */
     public function actionCancelTemporary()
     {
-        $this->response = $this->container->get('VendorWebApi')->cancelTemporary($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->cancelTemporary($this->request);
     }
 
     public function actionGetTempMainCatalog()
     {
-        $this->response = $this->container->get('VendorWebApi')->getTempMainCatalog($this->request);
+        $this->response = $this->container->get('CatalogWebApi')->getTempMainCatalog($this->request);
     }
 
     /**

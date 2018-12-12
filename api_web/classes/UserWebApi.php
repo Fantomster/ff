@@ -145,7 +145,7 @@ class UserWebApi extends \api_web\components\WebApi
     public function createUser(array $post, $role_id, $status = null)
     {
         if (User::findOne(['email' => $post['user']['email']])) {
-            throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
+            throw new BadRequestHttpException('This email is already present in the system.');
         }
 
         $post['user']['newPassword'] = $post['user']['password'];
@@ -290,12 +290,12 @@ class UserWebApi extends \api_web\components\WebApi
 
             $organization = Organization::findOne(['id' => $post['organization_id']]);
             if (empty($organization)) {
-                throw new BadRequestHttpException('Нет организации с таким id');
+                throw new BadRequestHttpException('organization not found');
             }
 
             //Список доступных бизнесов
             if (!$this->user->isAllowOrganization($organization->id)) {
-                throw new BadRequestHttpException('Нет прав переключиться на эту организацию');
+                throw new BadRequestHttpException('No rights to switch to this organization.');
             }
 
             #Расскоментировать после отказа от первой версии
@@ -343,7 +343,7 @@ class UserWebApi extends \api_web\components\WebApi
     {
         $list_organisation = $this->user->getAllOrganization($searchString);
         if (empty($list_organisation) && !$showEmpty) {
-            throw new BadRequestHttpException('Нет доступных организаций');
+            throw new BadRequestHttpException('No organizations available');
         }
 
         $result = [];
@@ -575,7 +575,7 @@ class UserWebApi extends \api_web\components\WebApi
                 RelationSuppRest::deleteAll($where);
                 RelationSuppRestPotential::deleteAll($where);
             } else {
-                throw new BadRequestHttpException('Вы не работаете с этим поставщиком');
+                throw new BadRequestHttpException('You are not working with this supplier.');
             }
             $transaction->commit();
             return ['result' => true];
@@ -716,13 +716,9 @@ class UserWebApi extends \api_web\components\WebApi
     {
         WebApiHelper::clearRequest($post);
 
-        if (empty($post['user']['id'])) {
-            throw new BadRequestHttpException('empty_param|id');
-        }
+        $this->validateRequest($post['user'], ['id']);
 
-        if (empty($post['profile']['phone'])) {
-            throw new BadRequestHttpException('empty_param|phone');
-        }
+        $this->validateRequest($post['profile'], ['phone']);
 
         $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
         if (mb_substr($phone, 0, 1) == '8') {
@@ -735,7 +731,7 @@ class UserWebApi extends \api_web\components\WebApi
 
         $user = User::findOne(['id' => $post['user']['id']]);
         if (!$user) {
-            throw new BadRequestHttpException('no such user');
+            throw new BadRequestHttpException('user_not_found');
         }
 
         if ($user->status == User::STATUS_ACTIVE) {

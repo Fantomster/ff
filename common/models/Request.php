@@ -32,11 +32,13 @@ use yii\db\ActiveRecord;
  * @property MpCategory   $categoryName
  * @property string       $countCallback
  * @property array        $requestCallbacks
+ * 
+ * @property User[]       $recipientsListForClient
  */
 class Request extends \yii\db\ActiveRecord
 {
 
-    const ACTIVE = 1;
+    const ACTIVE   = 1;
     const INACTIVE = 0;
 
     /**
@@ -116,16 +118,16 @@ class Request extends \yii\db\ActiveRecord
     public function getModifyDate()
     {
         $date_stamp = strtotime($this->created_at);
-        $m = Yii::$app->formatter->asDatetime($date_stamp, 'php:n');
-        $ypd = Yii::$app->formatter->asDatetime($date_stamp, 'php:yy');
-        $mpd = Yii::$app->formatter->asDatetime($date_stamp, 'php:m.y');
-        $dpd = Yii::$app->formatter->asDatetime($date_stamp, 'php:j');
-        $tpd = Yii::$app->formatter->asDatetime($date_stamp, 'H:i');
-        $yy = Yii::$app->formatter->asDatetime('now', 'php:yy');
-        $md = Yii::$app->formatter->asDatetime('now', 'php:m.y');
-        $dd = Yii::$app->formatter->asDatetime('now', 'php:j');
+        $m          = Yii::$app->formatter->asDatetime($date_stamp, 'php:n');
+        $ypd        = Yii::$app->formatter->asDatetime($date_stamp, 'php:yy');
+        $mpd        = Yii::$app->formatter->asDatetime($date_stamp, 'php:m.y');
+        $dpd        = Yii::$app->formatter->asDatetime($date_stamp, 'php:j');
+        $tpd        = Yii::$app->formatter->asDatetime($date_stamp, 'H:i');
+        $yy         = Yii::$app->formatter->asDatetime('now', 'php:yy');
+        $md         = Yii::$app->formatter->asDatetime('now', 'php:m.y');
+        $dd         = Yii::$app->formatter->asDatetime('now', 'php:j');
 
-        $today = false;
+        $today     = false;
         $yesterday = false;
 
         if (($mpd == $md) & ($dpd == $dd)) {
@@ -137,15 +139,15 @@ class Request extends \yii\db\ActiveRecord
             $hArray = [Yii::t('app', 'common.models.hour', ['ru' => "час"]), Yii::t('app', 'common.models.hour_two', ['ru' => "часа"]), Yii::t('app', 'common.models.hours', ['ru' => "часов"])];
 
             if ($dif < 60 and $dif >= 0) {
-                $ns = floor($dif);
+                $ns   = floor($dif);
                 $text = self::getTimeFormatWord($ns, $sArray);
                 return "$ns $text " . Yii::t('message', 'market.controllers.site.ago', ['ru' => 'назад']);
             } elseif ($dif / 60 > 0 and $dif / 60 < 60) {
-                $ni = floor($dif / 60);
+                $ni   = floor($dif / 60);
                 $text = self::getTimeFormatWord($ni, $iArray);
                 return "$ni $text " . Yii::t('message', 'market.controllers.site.ago_two', ['ru' => 'назад']);
             } elseif ($dif / 3600 > 0 and $dif / 3600 < 6) {
-                $nh = floor($dif / 3600);
+                $nh   = floor($dif / 3600);
                 $text = self::getTimeFormatWord($nh, $hArray);
                 return "$nh $text " . Yii::t('message', 'market.controllers.site.ago_three', ['ru' => 'назад']);
             } else {
@@ -154,7 +156,7 @@ class Request extends \yii\db\ActiveRecord
         }
 
         if (($mpd == $md) & ($dpd == $dd - 1)) {
-            $today = false;
+            $today     = false;
             $yesterday = true;
             return Yii::t('app', 'common.models.yesterday_in', ['ru' => 'Вчера, в ']) . $tpd;
         }
@@ -181,8 +183,8 @@ class Request extends \yii\db\ActiveRecord
 
     static function getTimeFormatWord($number, $suffix)
     {
-        $keys = [2, 0, 1, 1, 1, 2];
-        $mod = $number % 100;
+        $keys       = [2, 0, 1, 1, 1, 2];
+        $mod        = $number % 100;
         $suffix_key = ($mod > 7 && $mod < 20) ? 2 : $keys[min($mod % 10, 5)];
         return $suffix[$suffix_key];
     }
@@ -324,6 +326,18 @@ class Request extends \yii\db\ActiveRecord
                 'label' => Yii::t('app', 'common.models.status_three', ['ru' => 'Статус']),
             ],
         ];
+    }
+
+    public function getRecipientsListForClient()
+    {
+        return User::find()
+                        ->join('LEFT JOIN', RelationUserOrganization::tableName() . ' as ruo', User::tableName() . '.organization_id = ruo.organization_id')
+                        ->where([
+                            'ruo.organization_id' => $this->rest_org_id,
+                            'ruo.role_id'         => Role::ROLE_RESTAURANT_MANAGER,
+                        ])
+                        ->orWhere([User::tableName() . '.id' => $this->rest_user_id])
+                        ->all();
     }
 
 }

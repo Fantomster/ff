@@ -6,6 +6,9 @@ use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\egais\helpers\EgaisHelper;
 use api_web\modules\integration\modules\egais\classes\EgaisXmlFiles;
+use common\models\egais\EgaisProductOnBalance;
+use common\models\egais\EgaisQueryRests;
+use common\models\egais\EgaisTypeWriteOff;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
 use yii\db\Transaction;
@@ -24,7 +27,7 @@ class EgaisMethods extends WebApi
      * @return array
      * @throws BadRequestHttpException|\Exception
      */
-    public function setEgaisSettings($request, $orgId)
+     public function setEgaisSettings($request, $orgId)
     {
         if (empty($request['egais_url']) || empty($request['fsrar_id']) || empty($orgId)) {
             throw new BadRequestHttpException('dictionary.request_error');
@@ -43,15 +46,15 @@ class EgaisMethods extends WebApi
             if (array_key_exists($defaultSetting->name, $request)) {
                 $settingValue = IntegrationSettingValue::findOne([
                     'setting_id' => $defaultSetting->id,
-                    'org_id'     => $orgId
+                    'org_id' => $orgId
                 ]);
                 if (!empty($settingValue)) {
                     $settingValue->value = $request[$defaultSetting->name];
                 } else {
                     $settingValue = new IntegrationSettingValue([
                         'setting_id' => $defaultSetting->id,
-                        'org_id'     => $orgId,
-                        'value'      => $request[$defaultSetting->name],
+                        'org_id' => $orgId,
+                        'value' => $request[$defaultSetting->name],
                     ]);
                 }
                 if (!$settingValue->save()) {
@@ -65,6 +68,47 @@ class EgaisMethods extends WebApi
         return [
             'result' => true
         ];
+    }
+
+    public function getWriteOffTypes()
+    {
+        return EgaisTypeWriteOff::find()->all();
+    }
+
+    /**
+     * @param array $request
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\httpclient\Exception
+     */
+    public function getGoodsOnBalance(array $request)
+    {
+        $orgId = !empty($request['org_id']) ? $request['org_id'] : $this->user->organization_id;
+
+        $setting = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $orgId);
+        if (empty($setting)) {
+            throw new BadRequestHttpException('dictionary.egais_get_setting_error');
+        }
+
+        $existsQuery = EgaisQueryRests::find()
+            ->where('org_id = :org_id', [':org_id' => $orgId])
+            ->andWhere(['status' => EgaisHelper::QUERY_SENT])
+            ->one();
+
+        if (!empty($existsQuery)) {
+            $existsQuery->updated_at = \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+            $existsQuery->save();
+        } else {
+            $xml = (new EgaisXmlFiles())->queryRests($setting['fsrar_id']);
+            (new EgaisHelper())->sendQueryRests($orgId, $setting['egais_url'], $xml);
+        }
+
+        $goods = EgaisProductOnBalance::find()
+            ->where('org_id = :org_id', ['org_id' => $orgId])
+            ->all();
+
+        return $goods;
     }
 
     /**

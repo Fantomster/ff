@@ -9,6 +9,7 @@ use kartik\widgets\Select2;
 use yii\web\JsExpression;
 
 $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['ru'=>'Новый транспортный ВСД ']);
+$urlToGetHC = \yii\helpers\Url::to(['get-hc']);
 ?>
 <section class="content-header">
         <h1 class="margin-right-350">
@@ -75,27 +76,15 @@ $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['r
                 ],
                 'pluginEvents' => [
                     "select2:select" => "function() { 
-                     var recipient = $(this).select2(\"data\")[0].id;
-                            $.ajax({
-                                     type     :\"GET\",
-                                     cache    : false,
-                                     url      : '". \yii\helpers\Url::to(['get-hc'])."?recipient_guid=' + recipient,
-                                     success  : function(result) {
-                                         $('#step3form-hc_name').val(result.name);
-                                         $('#step3form-hc').val(result.uuid);
-                                    },
-                                    error : function ()
-                                    {
-                                       $('#step3form-hc_name').val(result.name);
-                                        $('#step3form-hc').val('');
-                                    }
-                                });
+                     recipient_guid = $(this).select2(\"data\")[0].id;
+                     getHC(null); 
                       }",
                   ]
             ]);
             ?>
 
             <?= $form->field($model, 'hc',['enableClientValidation' => false])->hiddenInput()->label(false); ?>
+            <?= $form->field($model, 'hc_inn')->textInput(['maxlength' => true, 'id'=>'hc-inn']); ?>
             <?= $form->field($model, 'hc_name')->textInput(['maxlength' => true]); ?>
 
             <?php $model->isTTN = isset($model->isTTN) ? $model->isTTN : true; ?>
@@ -152,6 +141,8 @@ $("#StockEntryForm" ).submit();
 ');
 
 $customJs = <<< JS
+var justSubmitted = false;
+var recipient_guid = '';
 $("document").ready(function(){
         $("#StockEntryForm").on("change", "#isTTN", function() {
             if(($("input[name='step3Form[isTTN]']:checked").val()) == 1)
@@ -164,6 +155,45 @@ $("document").ready(function(){
             }
      }); 
  });
+
+ $(document).on("change keyup paste cut", "#hc-inn", function() {
+     if (justSubmitted) {
+            clearTimeout(justSubmitted);
+        }
+        justSubmitted = setTimeout(function() {
+            justSubmitted = false;
+            var inn = $("#hc-inn").val();
+            getHC(inn); 
+        }, 700);
+    });
+ 
+ function getHC(inn) {
+     var url = "$urlToGetHC?recipient_guid=" + recipient_guid;
+     
+     if(inn != null)
+         {
+             url += "&inn=" + inn; 
+         }
+     
+      $.ajax({
+                                     type     :"GET",
+                                     cache    : false,
+                                     url      : url,
+                                     success  : function(result) {
+                                         $('#step3form-hc_name').val(result.name);
+                                         $('#step3form-hc').val(result.uuid);
+                                         justSubmitted = false;
+                                         $('#hc-inn').val(result.inn);
+                                    },
+                                    error : function ()
+                                    {
+                                       $('#step3form-hc_name').val(result.name);
+                                        $('#step3form-hc').val('Фирма не найдена');
+                                        justSubmitted = false;
+                                        $('#hc-inn').val('');
+                                    }
+                                });
+     }
 JS;
 $this->registerJs($customJs, $this::POS_READY);
 ?>

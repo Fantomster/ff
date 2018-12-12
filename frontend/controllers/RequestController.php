@@ -2,20 +2,20 @@
 
 namespace frontend\controllers;
 
+use Yii;
+use yii\filters\AccessControl;
+use yii\data\ActiveDataProvider;
+use yii\web\Response;
+use yii\widgets\ActiveForm;
 use common\models\AdditionalEmail;
 use common\models\ManagerAssociate;
 use common\models\User;
-use Yii;
 use common\components\AccessRule;
-use yii\filters\AccessControl;
-use yii\data\ActiveDataProvider;
 use common\models\Organization;
 use common\models\Request;
 use common\models\Role;
 use common\models\RequestCallback;
 use common\models\RequestCounters;
-use yii\web\Response;
-use yii\widgets\ActiveForm;
 
 /**
  * Управление заявками
@@ -27,20 +27,20 @@ class RequestController extends DefaultController
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 // We will override the default rule config with the new AccessRule class
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
                         'actions' => [
                             'list',
                             'view',
                         ],
-                        'allow' => true,
+                        'allow'   => true,
                         // Allow restaurant managers
-                        'roles' => [
+                        'roles'   => [
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_ONE_S_INTEGRATION,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
@@ -58,9 +58,9 @@ class RequestController extends DefaultController
                             'set-responsible',
                             'add-supplier',
                         ],
-                        'allow' => true,
+                        'allow'   => true,
                         // Allow restaurant managers
-                        'roles' => [
+                        'roles'   => [
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
@@ -72,9 +72,9 @@ class RequestController extends DefaultController
                         'actions' => [
                             'add-callback',
                         ],
-                        'allow' => true,
+                        'allow'   => true,
                         // Allow restaurant managers
-                        'roles' => [
+                        'roles'   => [
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_SUPPLIER_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
@@ -99,9 +99,9 @@ class RequestController extends DefaultController
             return false;
         }
 
-        $organization = $currentUser->organization;
-        $request = new Request();
-        $request->rest_org_id = $currentUser->organization_id;
+        $organization          = $currentUser->organization;
+        $request               = new Request();
+        $request->rest_org_id  = $currentUser->organization_id;
         $request->rest_user_id = $currentUser->id;
 
         if (Yii::$app->request->isAjax) {
@@ -112,9 +112,9 @@ class RequestController extends DefaultController
             $validForm = ActiveForm::validate($request);
 
             if (empty($organization->lat) ||
-                empty($organization->lng) ||
-                empty($organization->place_id) ||
-                empty($organization->country)) {
+                    empty($organization->lng) ||
+                    empty($organization->place_id) ||
+                    empty($organization->country)) {
                 return ['organization-address' => false];
             }
 
@@ -144,13 +144,13 @@ class RequestController extends DefaultController
     public function actionList()
     {
         $organization = $this->currentUser->organization;
-        $profile = $this->currentUser->profile;
-        $search = ['like', 'product', \Yii::$app->request->get('search') ?: ''];
-        $category = \Yii::$app->request->get('category') ? ['category' => \Yii::$app->request->get('category')] : [];
+        $profile      = $this->currentUser->profile;
+        $search       = ['like', 'product', \Yii::$app->request->get('search') ?: ''];
+        $category     = \Yii::$app->request->get('category') ? ['category' => \Yii::$app->request->get('category')] : [];
 
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
             $dataListRequest = new ActiveDataProvider([
-                'query' => Request::find()->where(['rest_org_id' => $organization->id])->andWhere($search)->orderBy('id DESC'),
+                'query'      => Request::find()->where(['rest_org_id' => $organization->id])->andWhere($search)->orderBy('id DESC'),
                 'pagination' => [
                     'pageSize' => 15,
                 ],
@@ -164,12 +164,12 @@ class RequestController extends DefaultController
         if ($organization->type_id == Organization::TYPE_SUPPLIER) {
             if (\common\models\DeliveryRegions::find()->where(['supplier_id' => $organization->id, 'exception' => 0])->exists()) {
 
-                $my = \Yii::$app->request->get('myOnly') == 2 ? ['responsible_supp_org_id' => $organization->id] : [];
+                $my   = \Yii::$app->request->get('myOnly') == 2 ? ['responsible_supp_org_id' => $organization->id] : [];
                 $rush = \Yii::$app->request->get('rush') == 2 ? ['rush_order' => 1] : [];
 
                 $query = Request::find()
-                    ->joinWith('client')
-                    ->orderBy('id DESC');
+                        ->joinWith('client')
+                        ->orderBy('id DESC');
 
                 //Массив в достывками
                 $deliveryRegions = $organization->deliveryRegionAsArray;
@@ -203,14 +203,14 @@ class RequestController extends DefaultController
                 }
 
                 $query->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])
-                    ->andWhere(['active_status' => Request::ACTIVE])
-                    ->andWhere($search)
-                    ->andWhere($category)
-                    ->andWhere($my)
-                    ->andWhere($rush);
+                        ->andWhere(['active_status' => Request::ACTIVE])
+                        ->andWhere($search)
+                        ->andWhere($category)
+                        ->andWhere($my)
+                        ->andWhere($rush);
 
                 $dataListRequest = new ActiveDataProvider([
-                    'query' => $query,
+                    'query'      => $query,
                     'pagination' => [
                         'pageSize' => 15,
                     ],
@@ -234,9 +234,9 @@ class RequestController extends DefaultController
      */
     public function actionView($id)
     {
-        $user = $this->currentUser;
-        $query = null;
-        $view = 'redirect';
+        $user    = $this->currentUser;
+        $query   = null;
+        $view    = 'redirect';
         //Заявка
         $request = Request::find()->where(['id' => $id])->one();
         //Если нет такой заявки отправляем в список
@@ -248,28 +248,28 @@ class RequestController extends DefaultController
 
         if ($user->organization->type_id == Organization::TYPE_RESTAURANT) {
             //Вьюха
-            $view = 'client';
+            $view          = 'client';
             //Количество комментариев
             $countComments = RequestCallback::find()->where(['request_id' => $id])->count();
             //Строка запроса
-            $query = RequestCallback::find()->where([
-                'request_id' => $id
-            ])->orderBy('id DESC');
+            $query         = RequestCallback::find()->where([
+                        'request_id' => $id
+                    ])->orderBy('id DESC');
         }
 
         if ($user->organization->type_id == Organization::TYPE_SUPPLIER) {
             //Вьюха
-            $view = 'vendor';
+            $view              = 'vendor';
             //Строка запроса
-            $query = RequestCallback::find()->where([
-                'request_id' => $id,
-                'supp_org_id' => $user->organization_id
-            ])->orderBy('id DESC');
+            $query             = RequestCallback::find()->where([
+                        'request_id'  => $id,
+                        'supp_org_id' => $user->organization_id
+                    ])->orderBy('id DESC');
             //Оставил или нет предложение
             $trueFalseCallback = RequestCallback::find()->where([
-                'request_id' => $id,
-                'supp_org_id' => $user->organization_id
-            ])->exists();
+                        'request_id'  => $id,
+                        'supp_org_id' => $user->organization_id
+                    ])->exists();
             //Просмотр этой заявки
             RequestCounters::hit($id, $user->id);
         }
@@ -279,7 +279,7 @@ class RequestController extends DefaultController
         }
 
         $dataCallback = new ActiveDataProvider([
-            'query' => $query,
+            'query'      => $query,
             'pagination' => [
                 'pageSize' => 15,
             ],
@@ -296,12 +296,12 @@ class RequestController extends DefaultController
     {
         //Формат ответа
         Yii::$app->response->format = Response::FORMAT_JSON;
-        $transaction = Yii::$app->db->beginTransaction();
+        $transaction                = Yii::$app->db->beginTransaction();
         try {
             $client = $this->currentUser;
             if (Yii::$app->request->isAjax) {
                 //Получаем параметры
-                $id = Yii::$app->request->post('id');
+                $id             = Yii::$app->request->post('id');
                 $responsible_id = Yii::$app->request->post('responsible_id');
                 //Проверим существование заявки
                 if (!Request::find()->where(['rest_org_id' => $client->organization_id, 'id' => $id])->exists()) {
@@ -309,9 +309,9 @@ class RequestController extends DefaultController
                 }
                 //Проверим реально ли есть ответ на нее, от этой организации
                 $request_callback = RequestCallback::find()->where([
-                    'request_id' => $id,
-                    'supp_org_id' => $responsible_id
-                ])->one();
+                            'request_id'  => $id,
+                            'supp_org_id' => $responsible_id
+                        ])->one();
                 if (empty($request_callback)) {
                     throw new \Exception('Не существует такой RequestCallback::request_id = ' . $id);
                 }
@@ -322,7 +322,7 @@ class RequestController extends DefaultController
                 //мы должны ее снять, и отправить уведомления что сняли
                 $reject = false;
                 if ($request->responsible_supp_org_id == $responsible_id) {
-                    $reject = true;
+                    $reject                           = true;
                     $request->responsible_supp_org_id = null;
                 } else {
                     //Если попали сюда, значит установили исполнителя
@@ -334,30 +334,26 @@ class RequestController extends DefaultController
 
                 //Тут пошли уведомления
                 //Для начала подготовим текст уведомлений и шаблоны email
-                $sms_text = 'sms.request_set_responsible';
-                $subject = Yii::t('app', 'frontend.controllers.request.mix', ['ru' => "mixcart.ru - заявка №%s"]);
-                $email_template = 'requestSetResponsibleMailToSupp';
+                $sms_text              = 'sms.request_set_responsible';
+                $subject               = Yii::t('app', 'frontend.controllers.request.mix', ['ru' => "mixcart.ru - заявка №%s"]);
+                $email_template        = 'requestSetResponsibleMailToSupp';
                 $client_email_template = 'requestSetResponsible';
                 //Если $reject значит сняли с заявки
                 if ($reject) {
-                    $sms_text = 'sms.request_unset_responsible';
-                    $email_template = 'requestSetResponsibleMailToSuppReject';
+                    $sms_text              = 'sms.request_unset_responsible';
+                    $email_template        = 'requestSetResponsibleMailToSuppReject';
                     $client_email_template = 'requestSetResponsibleReject';
                 }
                 //Данные тексты для рассылки
                 $templateMessage = [
-                    'sms_text' => Yii::$app->sms->prepareText($sms_text, ['request_id' => $request->id]),
-                    'email_template' => $email_template,
-                    'email_subject' => sprintf($subject, $request->id),
+                    'sms_text'              => Yii::$app->sms->prepareText($sms_text, ['request_id' => $request->id]),
+                    'email_template'        => $email_template,
+                    'email_subject'         => sprintf($subject, $request->id),
                     'client_email_template' => $client_email_template
                 ];
                 //Для начала соберем сотрудников постовщика, которым необходимо разослать уведомления
                 //Это руководители, и сотрудник который создал отклик
-                $vendor_users = User::find()->where([
-                    'organization_id' => $request_callback->supp_org_id,
-                    'status' => User::STATUS_ACTIVE,
-                    'role_id' => Role::ROLE_SUPPLIER_MANAGER
-                ])->orWhere(['id' => $request_callback->supp_user_id])->all();
+                $vendor_users    = $request_callback->recipientsListForVendor;
 
                 if (!empty($vendor_users)) {
                     //Поехали рассылать
@@ -368,43 +364,43 @@ class RequestController extends DefaultController
                         }
                         //Отправляем емайлы поставщику, о принятии решения по его отклику
                         if ($user->email && $user->emailNotification->request_accept == 1) {
-                            $mailer = Yii::$app->mailer;
+                            $mailer             = Yii::$app->mailer;
                             $mailer->htmlLayout = 'layouts/request';
                             $mailer->compose($templateMessage['email_template'], [
-                                "request" => $request,
-                                "vendor" => $user
-                            ])->setTo($user->email)
-                                ->setSubject($templateMessage['email_subject'])
-                                ->send();
+                                        "request" => $request,
+                                        "vendor"  => $user
+                                    ])->setTo($user->email)
+                                    ->setSubject($templateMessage['email_subject'])
+                                    ->send();
                         }
                     }
                 }
                 //Так же необходимо отправить емейлы, на доп.адреса
                 //только те, которые хотят получать эти уведомления
                 $additional_email = AdditionalEmail::find()->where([
-                    'organization_id' => $request_callback->supp_org_id,
-                    'request_accept' => 1
-                ])->all();
+                            'organization_id' => $request_callback->supp_org_id,
+                            'request_accept'  => 1
+                        ])->all();
                 //Если есть такие емайлы, шлем туда
                 if (!empty($additional_email)) {
                     $vendor = User::findOne($request_callback->supp_user_id);
                     foreach ($additional_email as $add_email) {
-                        $mailer = Yii::$app->mailer;
+                        $mailer             = Yii::$app->mailer;
                         $mailer->htmlLayout = 'layouts/request';
                         $mailer->compose($templateMessage['email_template'], compact("request", "vendor"))
-                            ->setTo($add_email->email)
-                            ->setSubject($templateMessage['email_subject'])
-                            ->send();
+                                ->setTo($add_email->email)
+                                ->setSubject($templateMessage['email_subject'])
+                                ->send();
                     }
                 }
                 //Отправим письмо ресторану, что произошло с откликом
                 if (!empty($client->email)) {
-                    $mailer = Yii::$app->mailer;
+                    $mailer             = Yii::$app->mailer;
                     $mailer->htmlLayout = 'layouts/request';
                     $mailer->compose($templateMessage['client_email_template'], compact("request", "client"))
-                        ->setTo($client->email)
-                        ->setSubject($templateMessage['email_subject'])
-                        ->send();
+                            ->setTo($client->email)
+                            ->setSubject($templateMessage['email_subject'])
+                            ->send();
                 }
 
                 //Вносим изменения в базу
@@ -430,47 +426,48 @@ class RequestController extends DefaultController
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $client = $this->currentUser;
-            $request_id = Yii::$app->request->post('request_id');
-            $vendor = Organization::findOne(['id' => Yii::$app->request->post('supp_org_id')]);
+            $client                     = $this->currentUser;
+            $request_id                 = Yii::$app->request->post('request_id');
+            $vendor                     = Organization::findOne(['id' => Yii::$app->request->post('supp_org_id')]);
+            $callback                   = RequestCallback::find()->where(['supp_org_id' => $vendor->id, 'request_id' => $request_id])->one();
 
-            if (RequestCallback::find()->where(['supp_org_id' => $vendor->id, 'request_id' => $request_id])->exists()) {
+            if (isset($callback)) {
 
                 $relationSuppRest = \common\models\RelationSuppRest::find()->where([
-                    'rest_org_id' => $client->organization_id,
-                    'supp_org_id' => $vendor->id
-                ])->one();
+                            'rest_org_id' => $client->organization_id,
+                            'supp_org_id' => $vendor->id
+                        ])->one();
 
                 if (empty($relationSuppRest)) {
                     $relationSuppRest = new \common\models\RelationSuppRest();
                 }
 
-                $relationSuppRest->deleted = false;
+                $relationSuppRest->deleted     = false;
                 $relationSuppRest->rest_org_id = $client->organization_id;
                 $relationSuppRest->supp_org_id = $vendor->id;
-                $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_OFF;
+                $relationSuppRest->invite      = \common\models\RelationSuppRest::INVITE_OFF;
 
                 if ($relationSuppRest->save()) {
                     $rows = User::find()->where(['organization_id' => $vendor->id, 'role_id' => Role::ROLE_SUPPLIER_MANAGER])->all();
                     foreach ($rows as $row) {
                         $managerAssociate = ManagerAssociate::findOne(['manager_id' => $row->id, 'organization_id' => $client->organization_id]);
                         if (!$managerAssociate) {
-                            $managerAssociate = new ManagerAssociate();
-                            $managerAssociate->manager_id = $row->id;
+                            $managerAssociate                  = new ManagerAssociate();
+                            $managerAssociate->manager_id      = $row->id;
                             $managerAssociate->organization_id = $client->organization_id;
                             $managerAssociate->save();
                         }
                     }
-                    $request = Request::findOne(['id' => $request_id]);
-                    $vendorUsers = \common\models\User::find()->where(['organization_id' => $vendor->id])->all();
+                    $request     = Request::findOne(['id' => $request_id]);
+                    $vendorUsers = $callback->recipientsListForVendor;
                     if ($client->email) {
-                        $mailer = Yii::$app->mailer;
-                        $subject = Yii::t('message', 'frontend.controllers.request.request_two', ['ru' => "mixcart.ru - заявка №"]) . $request->id;
+                        $mailer             = Yii::$app->mailer;
+                        $subject            = Yii::t('message', 'frontend.controllers.request.request_two', ['ru' => "mixcart.ru - заявка №"]) . $request->id;
                         $mailer->htmlLayout = 'layouts/request';
                         $mailer->compose('requestInviteSupplierMailToRest', compact("request", "client"))
-                            ->setTo($client->email)
-                            ->setSubject($subject)
-                            ->send();
+                                ->setTo($client->email)
+                                ->setSubject($subject)
+                                ->send();
                     }
 
                     if (!empty($vendorUsers)) {
@@ -482,13 +479,13 @@ class RequestController extends DefaultController
                                 Yii::$app->sms->send($text, $user->profile->phone);
                             }
                             if (!empty($user->email)) {
-                                $mailer = Yii::$app->mailer;
-                                $subject = "mixcart.ru - заявка №" . $request->id;
+                                $mailer             = Yii::$app->mailer;
+                                $subject            = "mixcart.ru - заявка №" . $request->id;
                                 $mailer->htmlLayout = 'layouts/request';
                                 $mailer->compose('requestInviteSupplier', compact("request", "user"))
-                                    ->setTo($user->email)
-                                    ->setSubject($subject)
-                                    ->send();
+                                        ->setTo($user->email)
+                                        ->setSubject($subject)
+                                        ->send();
                             }
                         }
                     }
@@ -505,13 +502,13 @@ class RequestController extends DefaultController
     public function actionCloseRequest()
     {
         if (Yii::$app->request->isAjax) {
-            $user = $this->currentUser;
+            $user                       = $this->currentUser;
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $id = Yii::$app->request->post('id');
+            $id                         = Yii::$app->request->post('id');
             if (!Request::find()->where(['rest_org_id' => $user->organization_id, 'id' => $id])->exists()) {
                 return ['success' => false];
             }
-            $request = Request::find()->where(['id' => $id])->one();
+            $request                = Request::find()->where(['id' => $id])->one();
             $request->active_status = Request::INACTIVE;
             if ($request->save()) {
                 return ['success' => true];
@@ -530,36 +527,32 @@ class RequestController extends DefaultController
         try {
             if (Yii::$app->request->isAjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
-                $vendor = $this->currentUser;
-                $id = Yii::$app->request->post('id');
-                $price = Yii::$app->request->post('price');
-                $comment = Yii::$app->request->post('comment');
+                $vendor                     = $this->currentUser;
+                $id                         = Yii::$app->request->post('id');
+                $price                      = Yii::$app->request->post('price');
+                $comment                    = Yii::$app->request->post('comment');
 
                 //Создаем отклик
-                $requestCallback = new RequestCallback();
-                $requestCallback->request_id = $id;
-                $requestCallback->supp_org_id = $vendor->organization_id;
+                $requestCallback               = new RequestCallback();
+                $requestCallback->request_id   = $id;
+                $requestCallback->supp_org_id  = $vendor->organization_id;
                 $requestCallback->supp_user_id = $vendor->id;
-                $requestCallback->price = $price;
-                $requestCallback->comment = $comment;
+                $requestCallback->price        = $price;
+                $requestCallback->comment      = $comment;
                 //После успешного сохранения, шлем уведомления в ресторан
                 if ($requestCallback->save()) {
-                    $request = Request::findOne($id);
+                    $request  = Request::findOne($id);
                     #Готовим сообщения
                     //Тема Email
-                    $text = Yii::t('app', 'frontend.controllers.request.mix_two', ['ru' => 'mixcart.ru - заявка №%s']);
-                    $subject = sprintf($text, $request->id);
+                    $text     = Yii::t('app', 'frontend.controllers.request.mix_two', ['ru' => 'mixcart.ru - заявка №%s']);
+                    $subject  = sprintf($text, $request->id);
                     //Сообщение SMS
                     $sms_text = Yii::$app->sms->prepareText('sms.request_new_callback', [
-                        'request_id' => $request->id,
+                        'request_id'  => $request->id,
                         'vendor_name' => $vendor->organization->name
                     ]);
                     //Найдем всех сотрудников ресторана, кому должны отправить уведомления
-                    $clients = User::find()->where([
-                        'organization_id' => $request->rest_org_id,
-                        'status' => User::STATUS_ACTIVE,
-                        'role_id' => Role::ROLE_RESTAURANT_MANAGER
-                    ])->orWhere(['id' => $request->rest_user_id])->all();
+                    $clients  = $request->recipientsListForClient;
                     //Если есть клиенты, а они должн быть :)
                     if (!empty($clients)) {
                         foreach ($clients as $client) {
@@ -569,31 +562,31 @@ class RequestController extends DefaultController
                             }
                             //Отправляем емайлы ресторану о новом отклике
                             if ($client->email && $client->emailNotification->request_accept == 1) {
-                                $mailer = Yii::$app->mailer;
+                                $mailer             = Yii::$app->mailer;
                                 $mailer->htmlLayout = 'layouts/request';
                                 $mailer->compose('requestNewCallback', compact("request", "client", "vendor"))
-                                    ->setTo($client->email)
-                                    ->setSubject($subject)
-                                    ->send();
+                                        ->setTo($client->email)
+                                        ->setSubject($subject)
+                                        ->send();
                             }
                         }
                     }
                     //Теперь найдем дополнительные емайлы в этой организации
                     //только те, которые хотят получать эти уведомления
                     $additional_email = AdditionalEmail::find()->where([
-                        'organization_id' => $request->rest_org_id,
-                        'request_accept' => 1
-                    ])->all();
+                                'organization_id' => $request->rest_org_id,
+                                'request_accept'  => 1
+                            ])->all();
                     //Если есть такие емайлы, шлем туда
                     if (!empty($additional_email)) {
                         $client = User::findOne($request->rest_user_id);
                         foreach ($additional_email as $add_email) {
-                            $mailer = Yii::$app->mailer;
+                            $mailer             = Yii::$app->mailer;
                             $mailer->htmlLayout = 'layouts/request';
                             $mailer->compose('requestNewCallback', compact("request", "client", "vendor"))
-                                ->setTo($add_email->email)
-                                ->setSubject($subject)
-                                ->send();
+                                    ->setTo($add_email->email)
+                                    ->setSubject($subject)
+                                    ->send();
                         }
                     }
                     //Заносим изменения в базу
@@ -611,4 +604,5 @@ class RequestController extends DefaultController
             throw new \Exception($e->getTraceAsString());
         }
     }
+
 }

@@ -286,7 +286,7 @@ class OrderNotice
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider                             = $searchModel->search($params);
         $dataProvider->pagination                 = false;
-        $orgs[]                                   = $order->vendor_id;
+        //$orgs[]                                   = $order->vendor_id;
         $orgs[]                                   = $order->client_id;
 
         foreach ($order->recipientsList as $recipient) {
@@ -302,16 +302,14 @@ class OrderNotice
                     }
                 }
 
-                if ($order->vendor->id != $senderOrg->id) {
-                    $notification = $recipient->getSmsNotification($org);
-                    if ($notification) {
-                        if (!empty($recipient->profile->phone) && $notification->order_processing) {
-                            $text = Yii::$app->sms->prepareText('sms.order_processing', [
-                                'name' => $order->vendor->name,
-                                'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
-                            ]);
-                            Yii::$app->sms->send($text, $recipient->profile->phone, $order->id);
-                        }
+                $notification = $recipient->getSmsNotification($org);
+                if ($notification) {
+                    if (!empty($recipient->profile->phone) && $notification->order_processing) {
+                        $text = Yii::$app->sms->prepareText('sms.order_processing', [
+                            'name' => $order->vendor->name,
+                            'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
+                        ]);
+                        Yii::$app->sms->send($text, $recipient->profile->phone, $order->id);
                     }
                 }
             }
@@ -377,7 +375,7 @@ class OrderNotice
                     'user'          => $clientUser->id,
                     'organization'  => $newMessage->recipient_id,
                     'notifications' => uniqid(),
-                ], [
+                        ], [
                     'body'     => $newMessage->message,
                     'date'     => WebApiHelper::asDatetime(),
                     'order_id' => $order_id
@@ -399,7 +397,7 @@ class OrderNotice
                     'user'          => $vendorUser->id,
                     'organization'  => $newMessage->recipient_id,
                     'notifications' => uniqid(),
-                ], [
+                        ], [
                     'body'     => $newMessage->message,
                     'date'     => WebApiHelper::asDatetime(),
                     'order_id' => $order_id

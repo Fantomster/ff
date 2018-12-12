@@ -44,10 +44,10 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'links' => [
+        'links'   => [
             [
                 'label' => 'Интеграция',
-                'url' => ['/vendorintegr'],
+                'url'   => ['/clientintegr'],
             ],
             'Интеграция с R-keeper WS',
         ],
@@ -74,11 +74,11 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                         <div style="text-align:center;">
                             <?php echo '<label class="cbx-label" for="s_1">Цены в Заказе включают НДС</label>';
                             echo CheckboxX::widget([
-                                'name' => 's_1',
-                                'value' => $wmodel->vat_included ? 1 : 0,
-                                'options' => ['id' => 's_1'],
+                                'name'          => 's_1',
+                                'value'         => $wmodel->vat_included ? 1 : 0,
+                                'options'       => ['id' => 's_1'],
                                 'pluginOptions' => ['threeState' => false],
-                                'pluginEvents' => ['change' => 'function() {
+                                'pluginEvents'  => ['change' => 'function() {
                                     
                                   //  var output = $("#output"); // блок вывода информации
                                     
@@ -122,11 +122,11 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                         $form = ActiveForm::begin([
                             'options' => [
                                 'data-pjax' => true,
-                                'id' => 'search-form',
-                                'role' => 'search',
+                                'id'        => 'search-form',
+                                'role'      => 'search',
                             ],
                             //'enableClientValidation' => false,
-                            'method' => 'get',
+                            'method'  => 'get',
                         ]);
                         ?>
                         <div class="row">
@@ -144,46 +144,46 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 
 
                         <?php
-                        $columns = array(
+                        $columns = [
                             [
-                                'attribute' => 'product_id',
-                                'label' => 'ID в Mixcart',
-                                'vAlign' => 'bottom',
+                                'attribute'      => 'product_id',
+                                'label'          => 'ID в Mixcart',
+                                'vAlign'         => 'bottom',
                                 'contentOptions' => function ($data) {
                                     return ["id" => "way" . $data->id];
                                 },
                             ],
                             [
-                                'attribute' => 'fproductnameProduct',
-                                'label' => 'Наименование продукции',
-                                'vAlign' => 'bottom',
+                                'attribute'      => 'fproductnameProduct',
+                                'label'          => 'Наименование продукции',
+                                'vAlign'         => 'bottom',
                                 'contentOptions' => function ($data) {
                                     return ["id" => "denom" . $data->id];
                                 },
                             ],
                             [
-                                'attribute' => 'waybill_id',
-                                'value' => function ($model) {
+                                'attribute'      => 'waybill_id',
+                                'value'          => function ($model) {
                                     return $model->fproductname->ed ? $model->fproductname->ed : 'Не указано';
                                 },
-                                'format' => 'raw',
-                                'label' => 'Ед. изм. Mixcart',
-                                'vAlign' => 'bottom',
+                                'format'         => 'raw',
+                                'label'          => 'Ед. изм. Mixcart',
+                                'vAlign'         => 'bottom',
                                 'contentOptions' => function ($data) {
                                     return ["id" => "edizm" . $data->id];
                                 },
                             ],
                             [
                                 //'class' => 'kartik\grid\EditableColumn',
-                                'attribute' => 'pdenom',
-                                'label' => 'Наименование в Store House',
-                                'vAlign' => 'bottom',
-                                'width' => '210px',
+                                'attribute'      => 'pdenom',
+                                'label'          => 'Наименование в Store House',
+                                'vAlign'         => 'bottom',
+                                'width'          => '210px',
                                 //'refreshGrid' => true,
                                 'contentOptions' => function ($data) {
                                     return ["id" => "td" . $data->id, 'style' => 'color:#6ea262'/*width: 120px; text-align: center; padding-right: 30px'*/];
                                 },
-                                'value' => function ($model) {
+                                'value'          => function ($model) {
                                     if (!empty($model->product)) {
                                         return $model->product->denom;
                                     }
@@ -220,52 +220,52 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 ]*/
                             ],
                             [
-                                'attribute' => 'munit_rid',
-                                'value' => function ($model) {
+                                'attribute'      => 'munit_rid',
+                                'value'          => function ($model) {
                                     if (!empty($model->product)) {
 
                                         return $model->product->unitname;
                                     }
                                     return 'Не задано';
                                 },
-                                'format' => 'raw',
-                                'label' => 'Ед.изм. StoreHouse',
-                                'vAlign' => 'bottom',
+                                'format'         => 'raw',
+                                'label'          => 'Ед.изм. StoreHouse',
+                                'vAlign'         => 'bottom',
                                 'contentOptions' => function ($data) {
                                     return ["id" => "edizm_us" . $data->id];
                                 },
                             ],
                             [
                                 'attribute' => 'defquant',
-                                'format' => 'raw',
-                                'label' => 'Кол-во в Заказе',
-                                'vAlign' => 'bottom',
+                                'format'    => 'raw',
+                                'label'     => 'Кол-во в Заказе',
+                                'vAlign'    => 'bottom',
                             ],
                             [
-                                'class' => 'kartik\grid\EditableColumn',
-                                'attribute' => 'koef',
-                                'refreshGrid' => true,
+                                'class'           => 'kartik\grid\EditableColumn',
+                                'attribute'       => 'koef',
+                                'refreshGrid'     => true,
                                 'editableOptions' => [
-                                    'asPopover' => $isAndroid ? false : true,
-                                    'header' => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
-                                    'inputType' => \kartik\editable\Editable::INPUT_TEXT,
-                                    'beforeInput' => function ($form, $w) {
+                                    'asPopover'       => $isAndroid ? false : true,
+                                    'header'          => ':<br><strong>1 единица Mixcart равна:&nbsp; &nbsp;</strong>',
+                                    'inputType'       => \kartik\editable\Editable::INPUT_TEXT,
+                                    'beforeInput'     => function ($form, $w) {
                                         /**
                                          * @var $form ActiveForm
-                                         * @var $w \kartik\editable\Editable
+                                         * @var $w    \kartik\editable\Editable
                                          */
                                         echo $form->field($w->model, 'querys')->hiddenInput(['value' => '', 'display' => 'none', 'class' => 'querys']);
                                     },
-                                    'afterInput' => function ($form, $w) {
+                                    'afterInput'      => function ($form, $w) {
                                         /**
                                          * @var $form ActiveForm
-                                         * @var $w \kartik\editable\Editable
+                                         * @var $w    \kartik\editable\Editable
                                          */
                                         //echo $form->field($w->model, 'enable_all_map')->checkbox();
                                         echo $form->field($w->model, 'koef_buttons')->hiddenInput(['value' => 'onlyone', 'class' => 'izm', 'display' => 'none']);
-                                        echo $form->field($w->model, 'koef_forever')->input('button', ['id' => 'koef_forever',
-                                            'class' => 'btn btn-sm btn-primary', 'value' => 'Применить и запомнить', 'title' => 'Применить и использовать в будущем по умолчанию',
-                                            'onClick' => '$(\'.izm\').val(\'forever\'); //устаналиваем значение скрытого поля, указывая, что применить и запомнить
+                                        echo $form->field($w->model, 'koef_forever')->input('button', ['id'      => 'koef_forever',
+                                                                                                       'class'   => 'btn btn-sm btn-primary', 'value' => 'Применить и запомнить', 'title' => 'Применить и использовать в будущем по умолчанию',
+                                                                                                       'onClick' => '$(\'.izm\').val(\'forever\'); //устаналиваем значение скрытого поля, указывая, что применить и запомнить
                                                     var pos = $(\'.summary\').html(); //запоминаем строку с указанием позиций и страницы
                                                     var qasc=$(\'.asc\').attr(\'data-sort\'); //узнаём порядок сортировки с классом asc
                                                     var qdesc=$(\'.desc\').attr(\'data-sort\'); //узнаём порядок сортировки с классом desc                                                    
@@ -288,78 +288,78 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         ]);
                                     },
                                     'buttonsTemplate' => '{submit}{reset}',
-                                    'resetButton' => [
+                                    'resetButton'     => [
                                         'class' => 'btn btn-sm btn-outline-danger',
-                                        'icon' => 'Отменить',
-                                        'name' => 'koef_otkaz',
+                                        'icon'  => 'Отменить',
+                                        'name'  => 'koef_otkaz',
                                         'label' => 'Отменить'
                                     ],
-                                    'submitButton' => [
+                                    'submitButton'    => [
                                         'class' => 'btn btn-sm btn-success sub',
-                                        'icon' => 'Применить',
-                                        'id' => 'koef_submit',
-                                        'name' => 'koef_onlyone',
+                                        'icon'  => 'Применить',
+                                        'id'    => 'koef_submit',
+                                        'name'  => 'koef_onlyone',
                                         'label' => 'Применить только для данной накладной'
                                     ],
-                                    'formOptions' => [
-                                        'action' => Url::toRoute('change-coefficient-new'),
+                                    'formOptions'     => [
+                                        'action'                 => Url::toRoute('change-coefficient-new'),
                                         'enableClientValidation' => false,
                                     ],
                                 ],
-                                'hAlign' => 'right',
-                                'vAlign' => 'bottom',
-                                'format' => ['decimal', 6],
-                                'pageSummary' => true,
-                                'label' => 'Коэфф.'
+                                'hAlign'          => 'right',
+                                'vAlign'          => 'bottom',
+                                'format'          => ['decimal', 6],
+                                'pageSummary'     => true,
+                                'label'           => 'Коэфф.'
                             ],
                             [
-                                'class' => 'kartik\grid\EditableColumn',
-                                'attribute' => 'quant',
-                                'refreshGrid' => true,
+                                'class'           => 'kartik\grid\EditableColumn',
+                                'attribute'       => 'quant',
+                                'refreshGrid'     => true,
                                 'editableOptions' => [
-                                    'asPopover' => $isAndroid ? false : true,
-                                    'header' => ':<br><strong>Новое количество равно:&nbsp; &nbsp;</strong>',
-                                    'inputType' => \kartik\editable\Editable::INPUT_TEXT,
+                                    'asPopover'   => $isAndroid ? false : true,
+                                    'header'      => ':<br><strong>Новое количество равно:&nbsp; &nbsp;</strong>',
+                                    'inputType'   => \kartik\editable\Editable::INPUT_TEXT,
                                     'formOptions' => [
-                                        'action' => Url::toRoute('changekoef'),
+                                        'action'                 => Url::toRoute('changekoef'),
                                         'enableClientValidation' => false,
                                     ],
                                 ],
-                                'hAlign' => 'right',
-                                'vAlign' => 'bottom',
+                                'hAlign'          => 'right',
+                                'vAlign'          => 'bottom',
                                 // 'width'=>'100px',
-                                'format' => ['decimal'],
-                                'footer' => 'Итого сумма без НДС:',
-                                'pageSummary' => true,
-                                'label' => 'Количество'
+                                'format'          => ['decimal'],
+                                'footer'          => 'Итого сумма без НДС:',
+                                'pageSummary'     => true,
+                                'label'           => 'Количество'
                             ],
                             [
-                                'class' => 'kartik\grid\EditableColumn',
-                                'attribute' => 'sum',
-                                'refreshGrid' => true,
+                                'class'           => 'kartik\grid\EditableColumn',
+                                'attribute'       => 'sum',
+                                'refreshGrid'     => true,
                                 'editableOptions' => [
-                                    'asPopover' => $isAndroid ? false : true,
-                                    'header' => '<strong>Новая сумма равна:&nbsp; &nbsp;</strong>',
-                                    'inputType' => \kartik\editable\Editable::INPUT_TEXT,
+                                    'asPopover'   => $isAndroid ? false : true,
+                                    'header'      => '<strong>Новая сумма равна:&nbsp; &nbsp;</strong>',
+                                    'inputType'   => \kartik\editable\Editable::INPUT_TEXT,
                                     'formOptions' => [
-                                        'action' => Url::toRoute('changekoef'),
+                                        'action'                 => Url::toRoute('changekoef'),
                                         'enableClientValidation' => false,
                                     ],
                                 ],
-                                'hAlign' => 'right',
-                                'vAlign' => 'bottom',
-                                'format' => ['decimal', 2],
-                                'footer' => \api\common\models\RkWaybilldata::getSumByWaybillid($wmodel->id),
-                                'pageSummary' => true,
-                                'label' => 'Сумма б/н'
-                            ]);
+                                'hAlign'          => 'right',
+                                'vAlign'          => 'bottom',
+                                'format'          => ['decimal', 2],
+                                'footer'          => \api\common\models\RkWaybilldata::getSumByWaybillid($wmodel->id),
+                                'pageSummary'     => true,
+                                'label'           => 'Сумма б/н'
+                            ]];
                         array_push($columns,
                             [
-                                'class' => 'yii\grid\ActionColumn',
-                                'headerOptions' => ['style' => 'width: 6%; text-align:center'],
+                                'class'          => 'yii\grid\ActionColumn',
+                                'headerOptions'  => ['style' => 'width: 6%; text-align:center'],
                                 'contentOptions' => ['style' => 'width: 6%; text-align:center'],
-                                'template' => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
-                                'header' => '<span align="center">НДС</br>' .
+                                'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
+                                'header'         => '<span align="center">НДС</br>' .
                                     ' <button id="btnZero" type="button" 
                                             onClick="var path = \'' . $sLinkzero . '\';
                                                     var vatf = $(\'#vatFilter\').val();
@@ -427,8 +427,8 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         return true;
                                     },
                                 ],
-                                'buttons' => [
-                                    'zero' => function ($url, $model) {
+                                'buttons'        => [
+                                    'zero'     => function ($url, $model) {
 
                                         if ($model->vat == 0) {
                                             $tClass = "label label-success";
@@ -448,21 +448,21 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         }
                                         $customurl = Yii::$app->getUrlManager()->createUrl([
                                             'clientintegr/rkws/waybill/chvat',
-                                            'id' => $model->id,
+                                            'id'   => $model->id,
                                             'koef' => $model->koef,
                                             'vatf' => $vatf,
                                             'sort' => $sort,
-                                            'vat' => 0, 'page' => $page, 'way' => $way
+                                            'vat'  => 0, 'page' => $page, 'way' => $way
                                         ]);
 
                                         return \yii\helpers\Html::a('&nbsp;0', $customurl, [
-                                            'title' => Yii::t('backend', '0%'),
+                                            'title'     => Yii::t('backend', '0%'),
                                             'data-pjax' => 0,
-                                            'class' => $tClass,
-                                            'style' => $tStyle
+                                            'class'     => $tClass,
+                                            'style'     => $tStyle
                                         ]);
                                     },
-                                    'ten' => function ($url, $model) {
+                                    'ten'      => function ($url, $model) {
 
                                         if ($model->vat == 1000) {
                                             $tClass = "label label-success";
@@ -511,11 +511,11 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                 ]
                             ],
                             [
-                                'label' => 'Сумма с НДС',
+                                'label'  => 'Сумма с НДС',
                                 'format' => ['decimal', 2],
                                 'hAlign' => 'right',
                                 'vAlign' => 'bottom',
-                                'value' => function ($model) {
+                                'value'  => function ($model) {
                                     $sumsnds = (1 + ($model->vat) / 10000) * ($model->sum);
                                     return $sumsnds;
                                 }
@@ -523,11 +523,11 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
 
                         array_push($columns,
                             [
-                                'class' => 'yii\grid\ActionColumn',
+                                'class'          => 'yii\grid\ActionColumn',
                                 'contentOptions' => ['style' => 'width: 6%;'],
-                                'template' => '{clear}&nbsp;{delete}',
+                                'template'       => '{clear}&nbsp;{delete}',
                                 'visibleButtons' => [
-                                    'clear' => function ($model, $key, $index) {
+                                    'clear'  => function ($model, $key, $index) {
                                         // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
                                         return true;
                                     },
@@ -535,8 +535,8 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         return true;
                                     },
                                 ],
-                                'buttons' => [
-                                    'clear' => function ($url, $model) {
+                                'buttons'        => [
+                                    'clear'  => function ($url, $model) {
                                         //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
                                         $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/waybill/cleardata', 'id' => $model->id]);
                                         return \yii\helpers\Html::a('<i class="fa fa-sign-in padding-right-15" aria-hidden="true"></i>', $customurl,
@@ -554,15 +554,15 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                             '<i class="fa fa-trash" aria-hidden="true"></i>',
                                             '#',
                                             [
-                                                'title' => Yii::t('backend', $text),
-                                                'data-pjax' => "0",
-                                                'id' => 'delete-waybill_' . $model->id,
-                                                'class' => 'delete-waybill',
-                                                'data-waybill-id' => $model->id,
-                                                'data-url' => $url,
+                                                'title'             => Yii::t('backend', $text),
+                                                'data-pjax'         => "0",
+                                                'id'                => 'delete-waybill_' . $model->id,
+                                                'class'             => 'delete-waybill',
+                                                'data-waybill-id'   => $model->id,
+                                                'data-url'          => $url,
                                                 'data-product-name' => $model->fproductname->product,
-                                                'data-status' => $model->unload_status,
-                                                'data-action' => $action,
+                                                'data-status'       => $model->unload_status,
+                                                'data-action'       => $action,
                                             ]
                                         );
                                     },
@@ -571,25 +571,25 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                         ?>
                         <?=
                         GridView::widget([
-                            'dataProvider' => $dataProvider,
-                            'pjax' => true, // pjax is set to always true for this demo
-                            'pjaxSettings' => ['options' => ['id' => 'map_grid1', 'enablePushState' => false, 'timeout' => 10000]],
-                            'filterPosition' => false,
-                            'columns' => $columns,
-                            'showFooter' => true,
-                            'options' => ['class' => 'table-responsive'],
-                            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                            'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                            'bordered' => false,
-                            'striped' => true,
-                            'condensed' => false,
-                            'responsive' => false,
-                            'hover' => true,
+                            'dataProvider'     => $dataProvider,
+                            'pjax'             => true, // pjax is set to always true for this demo
+                            'pjaxSettings'     => ['options' => ['id' => 'map_grid1', 'enablePushState' => false, 'timeout' => 10000]],
+                            'filterPosition'   => false,
+                            'columns'          => $columns,
+                            'showFooter'       => true,
+                            'options'          => ['class' => 'table-responsive'],
+                            'tableOptions'     => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                            'formatter'        => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                            'bordered'         => false,
+                            'striped'          => true,
+                            'condensed'        => false,
+                            'responsive'       => false,
+                            'hover'            => true,
                             'resizableColumns' => false,
-                            'export' => [
+                            'export'           => [
                                 'fontAwesome' => true,
                             ],
-                            'rowOptions' => function ($model) {
+                            'rowOptions'       => function ($model) {
                                 if (!$model->unload_status) {
                                     return ['style' => 'opacity: 0.3;'];
                                 }
@@ -607,17 +607,17 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                             echo \yii\helpers\Html::a(
                                 Html::tag('b', 'Выгрузить накладную',
                                     [
-                                        'class' => 'btn btn-success',
+                                        'class'       => 'btn btn-success',
                                         'aria-hidden' => true
                                     ]),
                                 '#',
                                 [
-                                    'onclick' => 'return false;',
-                                    'class' => 'export-waybill-btn',
-                                    'title' => Yii::t('backend', 'Выгрузить'),
+                                    'onclick'   => 'return false;',
+                                    'class'     => 'export-waybill-btn',
+                                    'title'     => Yii::t('backend', 'Выгрузить'),
                                     'data-pjax' => "0",
-                                    'data-id' => $wmodel->id,
-                                    'data-oid' => $wmodel->order_id,
+                                    'data-id'   => $wmodel->id,
+                                    'data-oid'  => $wmodel->order_id,
                                 ])
                             ?>
                         </div>

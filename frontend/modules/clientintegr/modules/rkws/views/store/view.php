@@ -15,26 +15,36 @@ use kartik\tree\TreeViewInput;
 use common\models\User;
 use api\common\models\RkStoretree;
 
-
 ?>
 
 
 <style>
-.bg-default{background:#555} p{margin: 0;} #map{width:100%;height:200px;}
+    .bg-default {
+        background: #555
+    }
+
+    p {
+        margin: 0;
+    }
+
+    #map {
+        width: 100%;
+        height: 200px;
+    }
 </style>
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Интеграция с R-keeper SH (White Server) 
+        <i class="fa fa-upload"></i> Интеграция с R-keeper SH (White Server)
     </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'links' => [
+        'links'   => [
             [
                 'label' => 'Интеграция',
-                'url' => ['/vendorintegr'],
+                'url'   => ['/clientintegr'],
             ],
             'Интеграция с R-keeper WS',
         ],
@@ -44,12 +54,12 @@ use api\common\models\RkStoretree;
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
     СКЛАДЫ
-  
+
 </section>
 <section class="content">
     <div class="catalog-index">
 
-    <!--	<div class="box box-info">            
+        <!--	<div class="box box-info">
             <div class="box-header with-border">
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
@@ -80,7 +90,7 @@ use api\common\models\RkStoretree;
                                             'fontAwesome' => true,
                                         ],
                                     ]); */
-                                    ?> 
+        ?>
 
                                 </div>
                             </div>    
@@ -93,23 +103,23 @@ use api\common\models\RkStoretree;
                     <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
                         <?php echo TreeViewInput::widget(
                             [
-                                'name' => 'category_list',
-                                'value' => 'true', // preselected values
-                                'query' => \api\common\models\RkStoretree::find()
+                                'name'           => 'category_list',
+                                'value'          => 'true', // preselected values
+                                'query'          => \api\common\models\RkStoretree::find()
                                     ->andWhere('acc = :acc', [':acc' => User::findOne([Yii::$app->user->id])->organization_id])
                                     ->andWhere('active = 1')
                                     ->addOrderBy('root, lft'),
                                 'headingOptions' => ['label' => 'Склады'],
-                                'rootOptions' => ['label' => 'Справочник складов'],
-                                'fontAwesome' => true,
-                                'asDropdown' => false,
-                                'multiple' => false,
-                                'options' => ['disabled' => true]
+                                'rootOptions'    => ['label' => 'Справочник складов'],
+                                'fontAwesome'    => true,
+                                'asDropdown'     => false,
+                                'multiple'       => false,
+                                'options'        => ['disabled' => true]
                             ]);
 
                         ?>
 
-                                    <?php /* echo
+                        <?php /* echo
                                          TreeView::widget([
                                         // single query fetch to render the tree
                                         // use the Product model you have in the previous step
@@ -137,17 +147,17 @@ use api\common\models\RkStoretree;
                                         ]
                                         ]);
                                      */
-                                     ?>
-                <?= Html::a('Вернуться',
-            ['/clientintegr/rkws/default'],
-            ['class' => 'btn btn-success btn-export']);
-        ?>
-                                    </div>
-                             </div>    
-                 </div>
-             </div>    
-                                
-    </div>            
+                        ?>
+                        <?= Html::a('Вернуться',
+                            ['/clientintegr/rkws/default'],
+                            ['class' => 'btn btn-success btn-export']);
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </section>
 
 

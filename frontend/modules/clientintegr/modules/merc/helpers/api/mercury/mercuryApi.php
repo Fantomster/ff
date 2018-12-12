@@ -72,7 +72,6 @@ class mercuryApi extends baseApi
         //Формируем тело запроса
         $vetDocList['localTransactionId'] = $localTransactionId;
         $vetDocList['enterpriseGuid'] = $this->enterpriseGuid;
-        //$vetDocList[initiator = new User();
         $vetDocList['initiator']['login'] = $this->vetisLogin;
 
         if (isset($listOptions)) {
@@ -126,9 +125,9 @@ class mercuryApi extends baseApi
         //Готовим запрос
         $client = $this->getSoapClient('mercury');
 
-        $request = $this->getSubmitApplicationRequest();
+        $request = $this->getSubmitApplicationRequest(true);
 
-        $appData = new ApplicationDataWrapper();
+        //$appData = new ApplicationDataWrapper();
 
         //Формируем тело запроса
         $config['login'] = $this->vetisLogin;
@@ -145,9 +144,13 @@ class mercuryApi extends baseApi
 
         $vetDoc = new VetDocumentDone();
         $vetDoc->init($config);
-        $appData->any['ns3:processIncomingConsignmentRequest'] = $vetDoc->getProcessIncomingConsignmentRequest();
+        /*$appData->any['ns3:processIncomingConsignmentRequest'] = $vetDoc->getProcessIncomingConsignmentRequest();
 
-        $request->application->data = $appData;
+        $request->application->data = $appData;*/
+
+        $var = new \SoapVar($vetDoc->getProcessIncomingConsignmentRequest(), SOAP_ENC_ARRAY, 'ProcessIncomingConsignmentRequest', 'http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2');
+
+        $request['application']['data']['any'] = ['ns3:processIncomingConsignmentRequest' => $var];
 
         try {
             $result = $client->submitApplicationRequest($request);

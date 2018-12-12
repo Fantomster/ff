@@ -170,7 +170,7 @@ class License extends ActiveRecord
             $license->having(['=', 'is_active_license', (int)$is_active]);
         }
 
-        return $license->all(\Yii::$app->db_api);
+        return $license->cache(360)->all(\Yii::$app->db_api);
     }
 
     /**

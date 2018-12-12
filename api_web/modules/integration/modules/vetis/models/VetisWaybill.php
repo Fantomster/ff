@@ -5,7 +5,6 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVsd;
-use api_web\classes\UserWebApi;
 use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\helpers\WebApiHelper;
@@ -63,14 +62,9 @@ class VetisWaybill extends WebApi
         $params = $this->helper->set($search, $reqSearch, ['acquirer_id', 'type', 'status', 'sender_guid', 'product_name', 'date']);
         $arResult = $search->search($params, $page, $pageSize);
 
-        foreach ($arResult['groups'] as $group_id => &$v) {
-            $info = $this->helper->getGroupInfo((int)$group_id, array_keys($arResult['uuids']));
-            $v = $info;
-        }
-
         //Строим результат
         $result = [
-            'items'  => $this->getList($arResult['uuids'], $arResult['arIncOut']),
+            'items'  => $arResult['items'],
             'groups' => $arResult['groups']
         ];
         //Ответ для АПИ
@@ -87,11 +81,10 @@ class VetisWaybill extends WebApi
             if (isset($search->acquirer_id)) {
                 $this->sendRequestToUpdate($search->acquirer_id);
             } else {
-                $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
-                foreach ($businessList['result'] as $item) {
+                $result = License::getAllLicense($arResult['org_ids'], Registry::MERC_SERVICE_ID, true);
+                foreach ($result as $license) {
                     try {
-                        License::checkLicense($item['id'], Registry::MERC_SERVICE_ID);
-                        $this->sendRequestToUpdate($item['id']);
+                        $this->sendRequestToUpdate($license['org_id']);
                     } catch (\Exception $e) {
                         continue;
                     }
@@ -206,23 +199,24 @@ class VetisWaybill extends WebApi
     public function getSenderOrProductFilter($request, $filterName)
     {
         if (isset($request['acquirer_id']) && !empty($request['acquirer_id'])) {
-            $enterpriseGuids = mercDicconst::getSetting('enterprise_guid', $request['acquirer_id']);
+            $enterpriseGuides = IntegrationSettingValue::getSettingsByServiceId(Registry::MERC_SERVICE_ID, $request['acquirer_id'], ['enterprise_guid']);
         } else {
-            $enterpriseGuids = $this->helper->getEnterpriseGuids();
+            $enterpriseGuides = $this->helper->getEnterpriseGuids();
         }
-        $query = MercVsd::find();
+        $query = MercVsd::find()->select($filterName)->distinct();
         if (isset($request['search'][$filterName]) && !empty($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);
         }
 
         if ($filterName == 'product_name') {
-            $arResult = $query->andWhere(['or',
-                ['sender_guid' => $enterpriseGuids],
-                ['recipient_guid' => $enterpriseGuids]])
-                ->groupBy('product_name')->all();
-            $result = ArrayHelper::map($arResult, 'product_name', 'product_name');
+            $result = $query->andWhere(['or',
+                ['sender_guid' => $enterpriseGuides],
+                ['recipient_guid' => $enterpriseGuides]])
+                ->indexBy('product_name')
+                ->column();
         } else {
-            $arResult = $query->andWhere(['recipient_guid' => $enterpriseGuids])->groupBy('sender_name')->all();
+            $query->addSelect('sender_guid');
+            $arResult = $query->andWhere(['recipient_guid' => $enterpriseGuides])->groupBy('sender_name')->all();
             $result = ArrayHelper::map($arResult, 'sender_guid', 'sender_name');
         }
 
@@ -250,7 +244,7 @@ class VetisWaybill extends WebApi
      * Полная информация о ВСД
      *
      * @param $request
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|\Exception
      * @return array
      */
     public function getFullInfoAboutVsd($request)

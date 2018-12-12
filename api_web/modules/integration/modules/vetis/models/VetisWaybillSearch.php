@@ -10,9 +10,10 @@ namespace api_web\modules\integration\modules\vetis\models;
 
 use api_web\classes\UserWebApi;
 use api\common\models\merc\MercVsd;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use common\helpers\DBNameHelper;
-use yii\web\BadRequestHttpException;
+use common\models\IntegrationSetting;
 
 /**
  * Class VetisWaybillSearch
@@ -43,30 +44,20 @@ class VetisWaybillSearch extends MercVsd
      */
     public function search($params, $page, $pageSize)
     {
-        $tableName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        $tableName = DBNameHelper::getMainName();
         if (!empty($this->acquirer_id)) {
-            if (is_array($this->acquirer_id)) {
-                $strOrgIds = implode(',', $this->acquirer_id);
-            } else {
-                $strOrgIds = $this->acquirer_id;
-            }
+            $strOrgIds = $this->acquirer_id;
         } else {
-            $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
-            if (empty($orgIds['result'])){
-                //todo_refactor localization
-                throw new BadRequestHttpException('You dont have available businesses, plz add relation to organization for your user');
-            }
-            $strOrgIds = array_map(function ($el) {
-                return $el['id'];
-            }, $orgIds['result']);
-            $strOrgIds = implode(',', $strOrgIds);
+            $orgIds = (new UserWebApi())->getUserOrganizationBusinessList('id');
+            $strOrgIds = implode(',', array_keys($orgIds['result']));
         }
-        $entGuids = implode('\',\'', (new VetisHelper())->getEnterpriseGuids());
+        $enterpriseGuides = implode('\',\'', (new VetisHelper())->getEnterpriseGuids());
 
         $queryParams = [
             ':page'     => $page,
             ':pageSize' => $pageSize,
         ];
+
         $arWhereAndCount = $this->generateWhereStatementAndCount($params, $strOrgIds, $queryParams);
         $mercPconst = $arWhereAndCount['merc_pconst'] ?? 'a.recipient_guid, a.sender_guid';
 
@@ -74,7 +65,7 @@ class VetisWaybillSearch extends MercVsd
                 SELECT 
                      @page := case 
                                when (@row >= (@page_size * @page + @offset)) and
-                                    ((@prev_order_id is null) or (@prev_order_id is not null and @prev_order_id != coalesce(order_id, -1)))
+                                    ((@prev_order_id is null) or (@prev_order_id is not null and @prev_order_id != coalesce(ord_id, -1)))
                                then @page + 1
                                else @page
                               end pg,
@@ -83,18 +74,30 @@ class VetisWaybillSearch extends MercVsd
                                when (@row >= @page_size * @page + @offset) 
                                then (@row - @page_size * @page)
                                else @offset := 0
-                              end, 
-                     @prev_order_id := order_id,
+                              end offsett, 
+                     @prev_order_id := ord_id,
                      tb.*
                 FROM (
-                SELECT DISTINCT a.uuid, 
+                SELECT DISTINCT 
+                a.uuid, 
                 a.date_doc,
-                c.order_id,
+                a.sender_name,
+                a.last_update_date,
+                a.amount,
+                a.unit,
+                a.production_date,
                 a.product_name,
                 a.sender_guid,
                 a.status,
                 a.type,
-                case when a.recipient_guid in (\''.$entGuids.'\') and a.sender_guid not in (\''.$entGuids.'\') then \'incoming\'
+                a.last_error,
+                a.user_status,
+                o.id ord_id,
+                o.created_at,
+                o.total_price,
+                c.id oc_id,
+                vendor.name vendor_name,
+                case when a.recipient_guid in (\'' . $enterpriseGuides . '\') and a.sender_guid not in (\'' . $enterpriseGuides . '\') then \'incoming\'
                      else \'outgoing\'
                 end vsd_direction,
                 case when c.id is not null then 
@@ -106,34 +109,62 @@ class VetisWaybillSearch extends MercVsd
                       and aa.uuid = ab.merc_uuid
                   )
                 else null end ort
+                
                 FROM (SELECT @row := 0, @page_size := :pageSize, @page := 0, @offset := 0, @prev_order_id := NULL) x,
                        merc_vsd a
-                join merc_pconst b on b.const_id = 10 and b.value in (' . $mercPconst . ')
+                left join integration_setting `is` on `is`.name=\'enterprise_guid\'
+                join integration_setting_value b on b.setting_id = `is`.id and b.value in (' . $mercPconst . ')
                 left join `' . $tableName . '`.order_content c on a.uuid = c.merc_uuid
+                left join `' . $tableName . '`.order o on o.id = c.order_id
+                left join `' . $tableName . '`.organization vendor on o.vendor_id = vendor.id
+
                 where 
-                b.org in (' . $strOrgIds . ') ' . $arWhereAndCount['sql'] . '
+                b.org_id in (' . $strOrgIds . ') ' . $arWhereAndCount['sql'] . '
                 order by coalesce(ort, a.date_doc) desc, order_id, a.date_doc desc
                 ) tb 
               ) tb2 where pg=:page
              ';
 
         $result = \Yii::$app->db_api->createCommand($sql, $queryParams)->queryAll();
-        $arIncomingOutgoing = [];
-        $arUuids = $arOrders = [];
+        $arItems = $arGroups = $arContentCount = [];
         foreach ($result as $row) {
-            $arUuids[$row['uuid']] = $row['order_id'];
-            if (!is_null($row['order_id'])) {
-                $arOrders[$row['order_id']] = $row['order_id'];
+            $arItems[] = [
+                'uuid'            => $row['uuid'],
+                'document_id'     => $row['ord_id'],
+                'product_name'    => $row['product_name'],
+                'sender_name'     => $row['sender_name'],
+                'status'          => $row['status'],
+                'status_text'     => MercVsd::$statuses[$row['status']],
+                'status_date'     => WebApiHelper::asDatetime($row['last_update_date']),
+                'amount'          => $row['amount'],
+                'unit'            => $row['unit'],
+                'production_date' => WebApiHelper::asDatetime($row['production_date']),
+                'date_doc'        => WebApiHelper::asDatetime($row['date_doc']),
+                'vsd_direction'   => $row['vsd_direction'],
+                'last_error'      => $row['last_error'],
+                'user_status'     => $row['user_status'],
+            ];
+            if (!is_null($row['ord_id'])) {
+                $status = $arGroups[$row['ord_id']]['statuses'] ?? '';
+                $arContentCount[$row['ord_id']][] = $row['oc_id'];
+                $arGroups[$row['ord_id']] = [
+                    'count'       => count(array_unique($arContentCount[$row['ord_id']])),
+                    'created_at'  => $row['created_at'],
+                    'total_price' => $row['total_price'],
+                    'vendor_name' => $row['vendor_name'],
+                    'statuses'    => $status ? $status . ',' . $row['status'] : $row['status'],
+                ];
             }
-            $arIncomingOutgoing[$row['uuid']] = $row['vsd_direction'];
+        }
+        foreach ($arGroups as $ordId => $group) {
+            $arGroups[$ordId]['statuses'] = (new VetisHelper())->getStatusForGroup($group['statuses']);
         }
 
-
         return [
-            'uuids'    => $arUuids,
-            'groups'   => $arOrders,
-            'count'    => ceil($arWhereAndCount['count'] / $pageSize),
-            'arIncOut' => $arIncomingOutgoing,
+            'items'   => $arItems,
+            'groups'  => $arGroups,
+            'count'   => ceil($arWhereAndCount['count'] / $pageSize),
+            'org_ids' => array_keys($orgIds['result']),
         ];
     }
 
@@ -195,9 +226,10 @@ class VetisWaybillSearch extends MercVsd
         if ($mercPconst) {
             $pConstForCount = 'merc_vsd.' . $mercPconst;
         }
-        $count = MercVsd::find()->distinct()->leftJoin('merc_pconst b', 'b.const_id = 10 and b.value in ('
-            . $pConstForCount . ')')->where(
-            array_merge(['b.org' => explode(',', $strOrgIds)], $arCount)
+        $count = MercVsd::find()->distinct()
+            ->leftJoin(IntegrationSetting::tableName() . ' is', 'is.name=\'enterprise_guid\'')
+            ->leftJoin('integration_setting_value b', 'b.setting_id = is.id and b.value in (' . $pConstForCount . ')')
+            ->where(array_merge(['b.org_id' => explode(',', $strOrgIds)], $arCount)
         );
         if ($between) {
             $count->andWhere($between);

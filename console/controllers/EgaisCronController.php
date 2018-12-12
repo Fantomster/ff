@@ -256,44 +256,32 @@ class EgaisCronController extends Controller
                     'alc_code' => $product['Product']['AlcCode']
                 ])
                 ->one();
-            if (!empty($egaisProduct)) {
-                $egaisProduct->quantity = $product['Quantity'];
-                $egaisProduct->inform_a_reg_id = $product['InformARegId'];
-                $egaisProduct->inform_b_reg_id = $product['InformBRegId'];
-                $egaisProduct->full_name = $product['Product']['FullName'];
-                $egaisProduct->capacity = $product['Product']['Capacity'];
-                $egaisProduct->alc_volume = $product['Product']['AlcVolume'];
-                $egaisProduct->product_v_code = $product['Product']['ProductVCode'];
-                $egaisProduct->producer_client_reg_id = (string)$product['Product']['Producer']->ClientRegId;
-                $egaisProduct->producer_inn = (string)$product['Product']['Producer']->INN;
-                $egaisProduct->producer_kpp = (string)$product['Product']['Producer']->KPP;
-                $egaisProduct->producer_full_name = (string)$product['Product']['Producer']->FullName;
-                $egaisProduct->producer_short_name = (string)$product['Product']['Producer']->ShortName;
-                $egaisProduct->address_country = (string)$product['Product']['Producer']->address->Country;
-                $egaisProduct->address_region_code = (string)$product['Product']['Producer']->address->RegionCode;
-                $egaisProduct->address_description = (string)$product['Product']['Producer']->address->description;
-            } else {
-                $egaisProduct = new EgaisProductOnBalance([
-                    'org_id' => $queryRest->org_id,
-                    'quantity' => $product['Quantity'],
-                    'inform_a_reg_id' => $product['InformARegId'],
-                    'inform_b_reg_id' => $product['InformBRegId'],
-                    'full_name' => $product['Product']['FullName'],
-                    'alc_code' => $product['Product']['AlcCode'],
-                    'capacity' => $product['Product']['Capacity'],
-                    'alc_volume' => $product['Product']['AlcVolume'],
-                    'product_v_code' => $product['Product']['ProductVCode'],
-                    'producer_client_reg_id' => (string)$product['Product']['Producer']->ClientRegId,
-                    'producer_inn' => (string)$product['Product']['Producer']->INN,
-                    'producer_kpp' => (string)$product['Product']['Producer']->KPP,
-                    'producer_full_name' => (string)$product['Product']['Producer']->FullName,
-                    'producer_short_name' => (string)$product['Product']['Producer']->ShortName,
-                    'address_country' => (string)$product['Product']['Producer']->address->Country,
-                    'address_region_code' => (string)$product['Product']['Producer']->address->RegionCode,
-                    'address_description' => (string)$product['Product']['Producer']->address->description,
-                ]);
+
+            if (empty($egaisProduct)) {
+                $egaisProduct = new EgaisProductOnBalance();
             }
+
+            $egaisProduct->setAttributes([
+                'org_id' => $queryRest->org_id,
+                'quantity' => $product['Quantity'],
+                'inform_a_reg_id' => $product['InformARegId'],
+                'inform_b_reg_id' => $product['InformBRegId'],
+                'full_name' => $product['Product']['FullName'],
+                'alc_code' => $product['Product']['AlcCode'],
+                'capacity' => $product['Product']['Capacity'],
+                'alc_volume' => $product['Product']['AlcVolume'],
+                'product_v_code' => $product['Product']['ProductVCode'],
+                'producer_client_reg_id' => (string)$product['Product']['Producer']->ClientRegId,
+                'producer_inn' => (string)$product['Product']['Producer']->INN,
+                'producer_kpp' => (string)$product['Product']['Producer']->KPP,
+                'producer_full_name' => (string)$product['Product']['Producer']->FullName,
+                'producer_short_name' => (string)$product['Product']['Producer']->ShortName,
+                'address_country' => (string)$product['Product']['Producer']->address->Country,
+                'address_region_code' => (string)$product['Product']['Producer']->address->RegionCode,
+                'address_description' => (string)$product['Product']['Producer']->address->description,
+            ]);
             $egaisProduct->save();
+
             $queryRest->status = EgaisHelper::QUERY_PROCESSED;
             $queryRest->save();
         }

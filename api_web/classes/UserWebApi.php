@@ -768,6 +768,8 @@ class UserWebApi extends \api_web\components\WebApi
             $vendor->route
         ];
 
+        $user = User::findOne(['organization_id' => $vendor->id, 'role_id' => Role::ROLE_SUPPLIER_MANAGER]);
+
         foreach ($locality as $key => $val) {
             if (empty($val) or $val == 'undefined') {
                 unset($locality[$key]);
@@ -776,21 +778,31 @@ class UserWebApi extends \api_web\components\WebApi
 
         if ($model->invite == RelationSuppRest::INVITE_ON && $model->cat_id != 0 && $model->status == RelationSuppRest::CATALOG_STATUS_ON) {
             $status = $status_list[1];
+            $enumStatus = 'partner';
         } elseif ($model->cat_id == 0) {
             $status = $status_list[2];
+            $enumStatus = 'catalog_not_set';
         } else {
             $status = $status_list[3];
+            $enumStatus = 'send_invite';
+        }
+
+        if (isset($vendor->buisinessInfo->phone) && !empty($vendor->buisinessInfo->phone)) {
+            $phone = $vendor->buisinessInfo->phone;
+        } elseif (isset($user->profile->phone)) {
+            $phone = $user->profile->phone;
         }
 
         return [
             'id'            => (int)$vendor->id,
             'name'          => $vendor->name ?? "",
             'contact_name'  => $vendor->contact_name ?? "",
-            'inn'           => $vendor->buisinessInfo->inn ?? null,
+            'inn'           => $vendor->buisinessInfo->inn ?? $vendor->inn ?? null,
             'cat_id'        => (int)$model->cat_id,
-            'email'         => $vendor->buisinessInfo->legal_email ?? $vendor->email ?? "",
-            'phone'         => $vendor->phone ?? "",
+            'email'         => $vendor->buisinessInfo->legal_email ?? $vendor->email ?? $user->email ?? '',
+            'phone'         => $phone ?? '',
             'status'        => $status,
+            'enum_status'   => $enumStatus,
             'picture'       => $vendor->getPictureUrl() ?? "",
             'address'       => implode(', ', $locality),
             'rating'        => $vendor->rating ?? 0,

@@ -4,6 +4,7 @@ namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
 use api_web\models\ForgotForm;
+use common\models\BuisinessInfo;
 use common\models\ManagerAssociate;
 use common\models\RelationUserOrganization;
 use Yii;
@@ -110,6 +111,7 @@ class VendorWebApi extends \api_web\components\WebApi
             return $result;
         } else {
             $organization = new Organization();
+            $businessInfo = new BuisinessInfo();
         }
 
         $email = $post['user']['email'];
@@ -143,6 +145,8 @@ class VendorWebApi extends \api_web\components\WebApi
             if (!$vendorUser) {
 //                Создаем нового поставщика и организацию
                 $user->email = $email;
+                $businessInfo->legal_email = $email;
+                $organization->email = $email;
                 $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
                 $user->newPassword = ForgotForm::generatePassword(8);
                 $user->newPasswordConfirm = $user->newPassword;
@@ -160,9 +164,12 @@ class VendorWebApi extends \api_web\components\WebApi
 
                 if (!$vendorID) {
                     $organization->name = $org;
+                    $organization->phone = $phone;
+                    $businessInfo->phone = $phone;
                 }
 
                 if (!empty($post['user']['inn']) && !$vendorID) {
+                    $businessInfo->inn = $post['user']['inn'];
                     $organization->inn = $post['user']['inn'];
                 }
 
@@ -172,6 +179,10 @@ class VendorWebApi extends \api_web\components\WebApi
 
                 if (!$organization->validate() || !$organization->save()) {
                     throw new ValidationException($organization->getFirstErrors());
+                }
+                $businessInfo->organization_id = $organization->id;
+                if (!$businessInfo->validate() || !$businessInfo->save()) {
+                    throw new ValidationException($businessInfo->getFirstErrors());
                 }
 
                 $user->setOrganization($organization)->save();

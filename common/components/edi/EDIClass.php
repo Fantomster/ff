@@ -441,7 +441,7 @@ class EDIClass extends Component
                     $catalogBaseGood->ed = $good['ed'];
                     $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
                 }
-                $catalogBaseGood->deleted = CatalogBaseGoods::STATUS_OFF;
+                $catalogBaseGood->deleted = CatalogBaseGoods::DELETED_OFF;
                 $catalogBaseGood->status = CatalogBaseGoods::STATUS_ON;
                 if (!$catalogBaseGood->save()) continue;
             }

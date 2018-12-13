@@ -629,9 +629,10 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Смена мобильного номера
+     * Смена мобильного номера. Для неподтвержденного юзера свойство $isUnconfirmedUser должно быть true
      *
      * @param $post
+     * @param $isUnconfirmedUser
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
@@ -657,6 +658,7 @@ class UserWebApi extends \api_web\components\WebApi
             }
         }
 
+        //Присваиваем userID
         $userID = $isUnconfirmedUser ? $post['user']['id'] : $this->user->id;
         //Ищем модель на смену номера
         $model = SmsCodeChangeMobile::findOne(['user_id' => $userID]);

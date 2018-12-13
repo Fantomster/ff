@@ -671,8 +671,36 @@ class UserWebApi extends \api_web\components\WebApi
             $model->user_id = $this->user->id;
         }
 
-        $this->sendChangePhoneSms($model);
+        //Даем отлуп если он уже достал выпращивать коды
+        if ($model->isNewRecord === false && $model->accessAllow() === false) {
+            throw new BadRequestHttpException('wait_sms_send|' . (300 - (int)$model->wait_time));
+        }
 
+        //Если код в запросе не пришел, шлем смс и создаем запись
+        if (empty($post['code'])) {
+            //Если модель не новая, значит уже были попытки отправить смс
+            //поэтому мы их просто наращиваем
+            if ($model->isNewRecord === false) {
+                $model->setAttempt();
+            }
+            //Генерируем код
+            $model->code = rand(1111, 9999);
+            //Сохраняем модель
+            if ($model->validate() && $model->save()) {
+                //Отправляем СМС с кодом
+                \Yii::$app->sms->send('Code: ' . $model->code, $model->phone);
+            } else {
+                throw new ValidationException($model->getFirstErrors());
+            }
+        } else {
+            //Проверяем код
+            if ($model->checkCode($post['code'])) {
+                //Меняем номер телефона, если все хорошо
+                $model->changePhoneUser();
+            } else {
+                throw new BadRequestHttpException('bad_sms_code');
+            }
+        }
         return ['result' => true];
     }
 
@@ -716,18 +744,21 @@ class UserWebApi extends \api_web\components\WebApi
         }
         $profile->phone = $post['profile']['phone'];
         $profile->save();
+
+        //Ищем модель на смену номера
+        $model = SmsCodeChangeMobile::findOne(['user_id' => $user->id]);
+        //Если нет модели, но прилетел какой то код, даем отлуп
+        if (empty($model) && !empty($post['code'])) {
+            throw new BadRequestHttpException('not_code_to_change_phone');
+        }
+
+        //Если нет модели
         if (empty($model)) {
             $model = new SmsCodeChangeMobile();
             $model->phone = $phone;
             $model->user_id = $user->id;
         }
 
-        $this->sendChangePhoneSms($model);
-
-        return ['result' => true];
-    }
-
-    private function sendChangePhoneSms($model) {
         //Даем отлуп если он уже достал выпращивать коды
         if ($model->isNewRecord === false && $model->accessAllow() === false) {
             throw new BadRequestHttpException('wait_sms_send|' . (300 - (int)$model->wait_time));
@@ -758,6 +789,8 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('bad_sms_code');
             }
         }
+
+        return ['result' => true];
     }
 
     /**

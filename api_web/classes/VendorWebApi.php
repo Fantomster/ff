@@ -146,6 +146,7 @@ class VendorWebApi extends \api_web\components\WebApi
 //                Создаем нового поставщика и организацию
                 $user->email = $email;
                 $businessInfo->legal_email = $email;
+                $organization->email = $email;
                 $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
                 $user->newPassword = ForgotForm::generatePassword(8);
                 $user->newPasswordConfirm = $user->newPassword;
@@ -163,11 +164,13 @@ class VendorWebApi extends \api_web\components\WebApi
 
                 if (!$vendorID) {
                     $organization->name = $org;
+                    $organization->phone = $phone;
                     $businessInfo->phone = $phone;
                 }
 
                 if (!empty($post['user']['inn']) && !$vendorID) {
                     $businessInfo->inn = $post['user']['inn'];
+                    $organization->inn = $post['user']['inn'];
                 }
 
                 if (!empty($post['user']['contact_name']) && !$vendorID) {

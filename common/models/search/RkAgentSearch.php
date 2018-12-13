@@ -27,7 +27,6 @@ class RkAgentSearch extends RkAgent
 {
     public $searchString;
     public $noComparison;
-    public $vendor_name;
 
     /**
      * @inheritdoc

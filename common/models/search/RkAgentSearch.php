@@ -6,7 +6,6 @@ use api\common\models\RkAgent;
 use Yii;
 use yii\data\ActiveDataProvider;
 use common\models\Organization;
-use common\models\User;
 
 /**
  * Класс для осуществления поиска по контрагентам R-Keeper
@@ -64,21 +63,20 @@ class RkAgentSearch extends RkAgent
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function search($params, $search_string = null, $all_no_comparison = null)
+    public function search($params, $organization)
     {
 
-        $organization = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id)->id;
         $this->load($params);
 
         $query = RkAgent::find()
             ->where(['acc' => $organization]);
 
-        if ((isset($all_no_comparison)) and ($all_no_comparison == 1)) {
-            $query->andWhere($this->tableName() . '.vendor_id IS NULL');
+        if ((isset($this->noComparison)) and ($this->noComparison == 1)) {
+            $query->andWhere(['vendor_id' => null]);
         }
 
-        if (isset($search_string)) {
-            $query->andWhere($this->tableName() . '.denom like "%' . $search_string . '%"');
+        if (isset($this->searchString)) {
+            $query->andFilterWhere(['like', 'denom', $this->searchString]);
         }
         $dataProvider = new ActiveDataProvider([
             'query'      => $query,

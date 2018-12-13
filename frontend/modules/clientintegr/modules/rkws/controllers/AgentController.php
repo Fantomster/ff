@@ -2,6 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
+use common\models\RelationSuppRest;
 use common\models\User;
 use Yii;
 use api\common\models\RkAgent;
@@ -9,6 +10,7 @@ use api\common\models\RkAgentSearch;
 use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
+use common\models\Organization;
 
 /**
  * Description of SiteController
@@ -63,33 +65,30 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
     {
         $searchModel = new \common\models\search\RkAgentSearch;
         $params = Yii::$app->request->getQueryParams();
+        $organization = User::findOne(Yii::$app->user->id)->organization_id;
 
         if (Yii::$app->request->post("RkAgentSearch")) {
             $params['RkAgentSearch'] = Yii::$app->request->post("RkAgentSearch");
             if (isset($params['RkAgentSearch']['searchString'])) {
-                $search_string = $params['RkAgentSearch']['searchString'];
+                $searchModel->searchString = $params['RkAgentSearch']['searchString'];
             }
             if (isset($params['RkAgentSearch']['noComparison'])) {
                 if ($params['RkAgentSearch']['noComparison'] != 0) {
-                    $all_no_comparison = 1;
                     $searchModel->noComparison = 1;
                 } else {
-                    $all_no_comparison = 0;
                     $searchModel->noComparison = 0;
                 }
             }
         } else {
-            $search_string = null;
-            $all_no_comparison = 0;
+            $searchModel->searchString = null;
+            $searchModel->noComparison = 0;
         }
 
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $search_string, $all_no_comparison);
-        $searchModel->searchString = $search_string;
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $organization);
 
         return $this->render('view', [
             'dataProvider' => $dataProvider,
             'searchModel'  => $searchModel,
-            'noComparison' => $all_no_comparison
         ]);
     }
 
@@ -135,12 +134,15 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
         $out['results'] = [];
 
         if (!is_null($term)) {
-            $sql = "SELECT id, `name` as text FROM organization where `name` LIKE '%$term%' and type_id = 2 and id in (SELECT supp_org_id FROM relation_supp_rest where rest_org_id = $organisation_id and deleted = 0)";
+            $vendors = RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $organisation_id, 'deleted' => 0])->column();
+            $data = Organization::find()->select('id,name')->
+                where(['type_id' => 2])->
+                andWhere(['in', 'id', $vendors])->
+                andWhere(['like', 'name', ':term',[':term' => $term]])->all();
         } else {
-            $sql = "SELECT id, `name` as text FROM organization where type_id = 2 and id in (SELECT supp_org_id FROM relation_supp_rest where rest_org_id = $organisation_id and deleted = 0)";
+            $vendors = RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $organisation_id, 'deleted' => 0])->column();
+            $data = Organization::find()->select('id,name')->where(['type_id' => 2])->andWhere(['in', 'id', $vendors])->all();
         }
-        $db = \Yii::$app->db;
-        $data = $db->createCommand($sql)->queryAll();
         $out['results'] = array_values($data);
 
         return $out;
@@ -157,12 +159,8 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
         $id = Yii::$app->request->post('number');
         $agent = RkAgent::findOne($id);
         $agent->vendor_id = $vendor_id;
-        try {
-            if (!$agent->save()) {
-                throw new \Exception('Не удалось сохранить контрагента R-Keeper.');
-            }
-        } catch (\Exception $e) {
-            \yii::error('Не удалось сохранить контрагента R-Keeper.');
+        if (!$agent->save()) {
+            throw new \Exception('Не удалось сохранить контрагента R-Keeper.');
             return false;
         }
         return true;

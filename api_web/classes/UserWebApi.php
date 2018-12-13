@@ -636,7 +636,7 @@ class UserWebApi extends \api_web\components\WebApi
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function mobileChange($post)
+    public function mobileChange($post, $isUnconfirmedUser = false)
     {
         WebApiHelper::clearRequest($post);
         $this->validateRequest($post, ['phone']);
@@ -657,8 +657,9 @@ class UserWebApi extends \api_web\components\WebApi
             }
         }
 
+        $userID = $isUnconfirmedUser ? $post['user']['id'] : $this->user->id;
         //Ищем модель на смену номера
-        $model = SmsCodeChangeMobile::findOne(['user_id' => $this->user->id]);
+        $model = SmsCodeChangeMobile::findOne(['user_id' => $userID]);
         //Если нет модели, но прилетел какой то код, даем отлуп
         if (empty($model) && !empty($post['code'])) {
             throw new BadRequestHttpException('not_code_to_change_phone');
@@ -668,7 +669,7 @@ class UserWebApi extends \api_web\components\WebApi
         if (empty($model)) {
             $model = new SmsCodeChangeMobile();
             $model->phone = $phone;
-            $model->user_id = $this->user->id;
+            $model->user_id = $userID;
         }
 
         //Даем отлуп если он уже достал выпращивать коды
@@ -701,95 +702,6 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('bad_sms_code');
             }
         }
-        return ['result' => true];
-    }
-
-    /**
-     * Смена телефона неподтвержденным пользователем
-     *
-     * @param $post
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws ValidationException
-     */
-    public function changeUnconfirmedUsersPhone($post)
-    {
-        WebApiHelper::clearRequest($post);
-
-        $this->validateRequest($post['user'], ['id']);
-
-        $this->validateRequest($post['profile'], ['phone']);
-
-        $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
-        if (mb_substr($phone, 0, 1) == '8') {
-            $phone = preg_replace('#^8(\d.+?)#', '+7$1', $phone);
-        }
-        //Проверяем телефон
-        if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
-            throw new ValidationException(['phone' => 'bad_format_phone']);
-        }
-
-        $user = User::findOne(['id' => $post['user']['id']]);
-        if (!$user) {
-            throw new BadRequestHttpException('user_not_found');
-        }
-
-        if ($user->status == User::STATUS_ACTIVE) {
-            throw new BadRequestHttpException('you have no rights for this action');
-        }
-
-        $profile = Profile::findOne(['user_id' => $user->id]);
-        if (!$profile) {
-            throw new BadRequestHttpException('no such users profile');
-        }
-        $profile->phone = $post['profile']['phone'];
-        $profile->save();
-
-        //Ищем модель на смену номера
-        $model = SmsCodeChangeMobile::findOne(['user_id' => $user->id]);
-        //Если нет модели, но прилетел какой то код, даем отлуп
-        if (empty($model) && !empty($post['code'])) {
-            throw new BadRequestHttpException('not_code_to_change_phone');
-        }
-
-        //Если нет модели
-        if (empty($model)) {
-            $model = new SmsCodeChangeMobile();
-            $model->phone = $phone;
-            $model->user_id = $user->id;
-        }
-
-        //Даем отлуп если он уже достал выпращивать коды
-        if ($model->isNewRecord === false && $model->accessAllow() === false) {
-            throw new BadRequestHttpException('wait_sms_send|' . (300 - (int)$model->wait_time));
-        }
-
-        //Если код в запросе не пришел, шлем смс и создаем запись
-        if (empty($post['code'])) {
-            //Если модель не новая, значит уже были попытки отправить смс
-            //поэтому мы их просто наращиваем
-            if ($model->isNewRecord === false) {
-                $model->setAttempt();
-            }
-            //Генерируем код
-            $model->code = rand(1111, 9999);
-            //Сохраняем модель
-            if ($model->validate() && $model->save()) {
-                //Отправляем СМС с кодом
-                \Yii::$app->sms->send('Code: ' . $model->code, $model->phone);
-            } else {
-                throw new ValidationException($model->getFirstErrors());
-            }
-        } else {
-            //Проверяем код
-            if ($model->checkCode($post['code'])) {
-                //Меняем номер телефона, если все хорошо
-                $model->changePhoneUser();
-            } else {
-                throw new BadRequestHttpException('bad_sms_code');
-            }
-        }
-
         return ['result' => true];
     }
 

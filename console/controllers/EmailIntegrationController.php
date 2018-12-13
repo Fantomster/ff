@@ -157,11 +157,11 @@ class EmailIntegrationController extends Controller
          */
         ini_set('memory_limit', '384M');
         error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
-        
+
         //Получаем все активные настройки или конкретную настройку
         $where    = (isset($this->setting_id) ? ['id' => $this->setting_id] : ['is_active' => 1]);
         $settings = IntegrationSettingFromEmail::find()->where($where)
-            ->andWhere(['version' => 1])->all();
+                        ->andWhere(['version' => 1])->all();
         \Yii::$app->db->createCommand('SET SESSION wait_timeout = 28800;')->execute();
         //Побежали по серверам
         foreach ($settings as $setting) {
@@ -213,8 +213,10 @@ class EmailIntegrationController extends Controller
             } catch (\Exception $e) {
                 $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
                 \Yii::error($this->log, 'email-integration-log');
+                return;
             }
         }
+        \Yii::error($this->log, 'email-integration-log');
     }
 
     public function beforeAction($action)
@@ -225,10 +227,10 @@ class EmailIntegrationController extends Controller
         }
         \Yii::$app->getLog()->targets = $targets;
         \Yii::$app->getLog()->init();
-        
+
         return parent::beforeAction($action);
-    }    
-    
+    }
+
     /**
      * Подключение к серверу
      * @param IntegrationSettingFromEmail $setting
@@ -300,9 +302,9 @@ class EmailIntegrationController extends Controller
         foreach ($email['attachment'] as $name_file => $file) {
             //print $setting->language.PHP_EOL;
             //Узнаём тип вложения
-            $mime_type = array_keys($file)[0];
+            $mime_type      = array_keys($file)[0];
             //Декодируем имя файла
-            $name_file    = iconv_mime_decode($name_file, 0, "UTF-8");
+            $name_file      = iconv_mime_decode($name_file, 0, "UTF-8");
             $excelExtension = (substr(mb_strtolower($name_file), -4) === ".xls") || (substr(mb_strtolower($name_file), -5) === ".xlsx");
             //Собираем только разрешённые вложения
             if (!(in_array(trim($mime_type), $allow_mime_types) || $excelExtension)) {

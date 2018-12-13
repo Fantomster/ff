@@ -775,10 +775,13 @@ class UserWebApi extends \api_web\components\WebApi
 
         if ($model->invite == RelationSuppRest::INVITE_ON && $model->cat_id != 0 && $model->status == RelationSuppRest::CATALOG_STATUS_ON) {
             $status = $status_list[1];
+            $enumStatus = 'partner';
         } elseif ($model->cat_id == 0) {
             $status = $status_list[2];
+            $enumStatus = 'catalog_not_set';
         } else {
             $status = $status_list[3];
+            $enumStatus = 'send_invite';
         }
 
         if (isset($vendor->buisinessInfo->phone) && !empty($vendor->buisinessInfo->phone)) {
@@ -796,6 +799,7 @@ class UserWebApi extends \api_web\components\WebApi
             'email'         => $vendor->buisinessInfo->legal_email ?? $vendor->email ?? $user->email ?? '',
             'phone'         => $phone ?? '',
             'status'        => $status,
+            'enum_status'   => $enumStatus,
             'picture'       => $vendor->getPictureUrl() ?? "",
             'address'       => implode(', ', $locality),
             'rating'        => $vendor->rating ?? 0,

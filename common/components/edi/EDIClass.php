@@ -149,11 +149,6 @@ class EDIClass extends Component
             foreach ($order->orderContent as $orderContent) {
                 $index = $orderContent->id;
                 $orderContentArr[] = $orderContent->id;
-                if (!in_array($index, $positionsArray)) {
-                    $deleted[] = $orderContent;
-                    $orderContent->delete();
-                    continue;
-                }
                 if (!isset($arr[$index]['BARCODE'])) {
                     if (isset($orderContent->ediOrderContent)) {
                         $index = $orderContent->ediOrderContent->barcode;
@@ -176,15 +171,7 @@ class EDIClass extends Component
                         continue;
                     }
                 }
-                $oldPrice = (float)$orderContent->price;
                 $newPrice = (float)$arr[$index]['PRICE'];
-                if ($oldPrice != $newPrice) {
-                    if ($newPrice == 0) {
-                        $deleted[] = $orderContent;
-                        $orderContent->delete();
-                        continue;
-                    }
-                }
                 $summ += $newQuantity * $newPrice;
                 $orderContent->price = $newPrice;
                 $orderContent->quantity = $newQuantity;

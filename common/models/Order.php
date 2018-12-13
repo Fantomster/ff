@@ -728,7 +728,7 @@ class Order extends \yii\db\ActiveRecord
                         $this->is_recadv_sent = true;
                     } elseif ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $this->status == OrderStatus::STATUS_CANCELLED) {
                         $result = $ediIntegration->sendOrderInfo($this, false);
-                        $this->updateAttributes(['edi_order' => Registry::EDI_ORDER_DOCTYPE_NEW]);
+                        $this->updateAttributes(['edi_order' => $this->id]);
                     }
                     if (!$result) {
                         Yii::error(Yii::t('app', 'common.models.order.edi_error'));

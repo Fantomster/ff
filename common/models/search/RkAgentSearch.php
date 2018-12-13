@@ -75,7 +75,7 @@ class RkAgentSearch extends RkAgent
             $query->andWhere(['vendor_id' => null]);
         }
 
-        $query->andFilterWhere(['like', 'denom', $this->searchString]);
+        $query->andFilterWhere(['like', 'denom', ':string', [':string' => $this->searchString]]);
 
         $dataProvider = new ActiveDataProvider([
             'query'      => $query,

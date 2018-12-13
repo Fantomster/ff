@@ -8,6 +8,7 @@ use console\modules\daemons\components\UpdateDictInterface;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
 use yii\behaviors\TimestampBehavior;
 use Yii;
+use yii\helpers\Json;
 
 /**
  * This is the model class for table "merc_vsd".
@@ -224,6 +225,22 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
             'low_grade_cargo'        => 'Low Grade Cargo',
             'user_status'            => 'User Status',
         ];
+    }
+
+    public function getRawData()
+    {
+        // временно, потом только json
+       //require_once __DIR__ . '/../../../frontend/modules/clientintegr/modules/merc/helpers/api/mercury/Mercury.php';
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
+        try {
+            $result = \yii\helpers\Json::decode($this->raw_data, true);
+            if (isset($result['UUID'])) {
+                return $result;
+            }
+        } catch (\Exception $e) {
+            return Json::decode(Json::encode(\unserialize($this->raw_data)), true);
+        }
+        return null;
     }
 
     public static function getType($uuid)

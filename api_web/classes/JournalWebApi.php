@@ -10,6 +10,7 @@ namespace api_web\classes;
 
 use api_web\components\WebApi;
 use common\models\Journal;
+use common\models\Role;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 
@@ -59,9 +60,12 @@ class JournalWebApi extends WebApi
 
         if (isset($request['search']['user_id']) && !empty($request['search']['user_id'])) {
             $query->andWhere(['user_id' => $request['search']['user_id']]);
+        } elseif ($this->user->role_id == Role::ROLE_RESTAURANT_MANAGER) {
+            $query->andWhere(['organization_id' => $this->user->organization_id]);
         } else {
             $query->andWhere(['user_id' => $this->user->id]);
         }
+
         if ($sort) {
             if ($sort == 'response') {
                 $query->orderBy('response ASC');

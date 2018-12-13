@@ -138,10 +138,14 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
             $data = Organization::find()->select('id,name')->
                 where(['type_id' => 2])->
                 andWhere(['in', 'id', $vendors])->
-                andWhere(['like', 'name', ':term',[':term' => $term]])->all();
+                andWhere(['like', 'name', ':term',[':term' => $term]])->
+                orderBy(['name' => SORT_ASC])->all();
         } else {
             $vendors = RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $organisation_id, 'deleted' => 0])->column();
-            $data = Organization::find()->select('id,name')->where(['type_id' => 2])->andWhere(['in', 'id', $vendors])->all();
+            $data = Organization::find()->select('id,name')->
+                where(['type_id' => 2])->
+                andWhere(['in', 'id', $vendors])->
+                orderBy(['name' => SORT_ASC])->all();
         }
         $out['results'] = array_values($data);
 

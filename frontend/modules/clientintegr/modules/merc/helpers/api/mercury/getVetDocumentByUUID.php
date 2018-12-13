@@ -99,7 +99,7 @@ class getVetDocumentByUUID extends Model
         $doc = MercVsd::findOne(['uuid' => $UUID]);
 
         if ($raw) {
-            return unserialize($doc->raw_data);
+            return $doc->getRawData();
         }
 
         $this->issueNumber = (isset($doc->number)) ? $doc->number : null;
@@ -140,14 +140,6 @@ class getVetDocumentByUUID extends Model
             ]
         ];
 
-        /*if(isset($doc->certifiedConsignment->broker)) {
-            $broker_raw = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getBusinessEntityByUuid($doc->certifiedConsignment->broker->uuid);
-            $broker = $broker_raw;
-            $this->broker = ['label' => 'Сведения о фирме-посреднике (перевозчике продукции)',
-                'value' => $broker->name . ', ИНН:' . $broker->inn,
-            ];
-        }*/
-
         if (isset($doc->owner_guid)) {
             $owner = cerberApi::getInstance(Yii::$app->user->identity->organization_id)->getBusinessEntityByUuid($doc->owner_guid);
         }
@@ -164,15 +156,6 @@ class getVetDocumentByUUID extends Model
         $country_raw = ikarApi::getInstance(Yii::$app->user->identity->organization_id)->getCountryByGuid($doc->origin_country_guid);
 
         $country = isset($country_raw) ? $country_raw->name : null;
-
-        /*$purpose = dictsApi::getInstance(Yii::$app->user->identity->organization_id)->getPurposeByGuid($doc->authentication->purpose->guid);
-        $purpose = isset($purpose) ? $purpose->name : null;*/
-
-        /*$producer = isset($doc->certifiedConsignment->batch->origin->producer) ? MercVsd::getProduccerData($doc->certifiedConsignment->batch->origin->producer, Yii::$app->user->identity->organization_id) : null;
-
-        if(isset($producer)) {
-            $producer = implode(", ",$producer['name']);
-        }*/
 
         $this->batch =
             [
@@ -196,15 +179,6 @@ class getVetDocumentByUUID extends Model
                     'label' => 'Объем',
                     'value' => $doc->amount . " " . (isset($unit) ? $unit->name : ''),
                 ],
-                /*[
-                    'label' => 'Список видов упаковки, которые используются для производственной партии',
-                    'value' => isset($doc->certifiedConsignment->batch->packingList) ? $doc->certifiedConsignment->batch->packingList->packingForm->name : null,
-
-                ],
-                [
-                    'label' => 'Общее количество единиц упаковки для производственной партии',
-                    'value' => isset($doc->certifiedConsignment->batch->packingAmount) ? $doc->certifiedConsignment->batch->packingAmount : null,
-                ],*/
                 [
                     'label' => 'Дата выработки продукции',
                     'value' => $doc->production_date,
@@ -225,10 +199,6 @@ class getVetDocumentByUUID extends Model
                     'label' => 'Список производителей продукции',
                     'value' => $doc->producer_name,
                 ],
-                /*[
-                    'label' => 'Список маркировки, доступный для данного производителя',
-                    'value' => isset($doc->certifiedConsignment->batch->productMarkingList) ? $doc->certifiedConsignment->batch->productMarkingList->productMarking : null,
-                ],*/
                 [
                     'label' => 'Является ли продукция некачественной',
                     'value' => ($doc->low_grade_cargo == 'true') ? 'Да' : 'Нет',
@@ -238,10 +208,6 @@ class getVetDocumentByUUID extends Model
                     'value' => (isset($owner)) ? ($owner->name . ', ИНН:' . $owner->inn) : "-",
                 ],
             ];
-        /*$this->purpose = [
-            'label' => 'Цель. Назначение груза',
-            'value' => $purpose,
-        ];*/
 
         $transportInfo = json_decode($doc->transport_info, true);
         $this->transportInfo = (isset ($transport_info) && isset($transportInfo['transportType'])) ? ([
@@ -274,27 +240,9 @@ class getVetDocumentByUUID extends Model
             ]
         ]) : null;
         $this->transportStorageType = $doc->transport_storage_type;
-        //$this->cargoReloadingPointList = isset($doc->certifiedConsignment->cargoReloadingPointList) ? $doc->certifiedConsignment->cargoReloadingPointList : null;
 
         $this->waybillSeries = $doc->waybill_number;
         $this->waybillDate = $doc->waybill_date;
-
-        /*if(isset($doc->referencedDocument)) {
-            $docs = null;
-            if (!is_array($doc->referencedDocument))
-                $docs[] = $doc->referencedDocument;
-            else
-                $docs = $doc->referencedDocument;
-
-            foreach ($docs as $item) {
-                if (($item->type >= 1) && ($item->type <= 5)) {
-                    $this->waybillSeries = isset($item->issueSeries) ? $item->issueSeries : null;
-                    $this->waybillNumber = $item->issueNumber;
-                    $this->waybillDate = $item->issueDate;
-                    break;
-                }
-            }
-        }*/
 
         $other = json_decode($doc->other_info, true);
 

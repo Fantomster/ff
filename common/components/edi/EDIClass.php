@@ -179,6 +179,9 @@ class EDIClass extends Component
                 $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
                 $orderContent->edi_shipment_quantity = $arr[$index]['DELIVEREDQUANTITY'];
                 $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
+                if ($documentType == 1) {
+                    $orderContent->edi_recadv = $this->fileName;
+                }
                 if ($documentType == 2) {
                     $orderContent->edi_desadv = $this->fileName;
                 }
@@ -239,7 +242,7 @@ class EDIClass extends Component
             $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? $simpleXMLElement->NUMBER ?? '';
             $order->edi_ordersp = $this->ediDocumentType;
             $order->service_id = 6;
-            $order->edi_ordersp = $this->fileName;
+            $order->edi_ordersp = $this->fileName ?? $order->id;
             $order->edi_doc_date = $simpleXMLElement->DELIVERYNOTEDATE ?? null;
             $deliveryDate = isset($simpleXMLElement->DELIVERYDATE) ? \Yii::$app->formatter->asDate($simpleXMLElement->DELIVERYDATE, 'yyyy.MM.dd HH:mm:ss') : null;
             $order->actual_delivery = $deliveryDate;

@@ -138,7 +138,7 @@ class Order extends \yii\db\ActiveRecord
             [['client_id', 'vendor_id', 'status'], 'required'],
             [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id', 'replaced_order_id', 'edi_organization_id'], 'integer'],
             [['total_price', 'discount'], 'number'],
-            [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number', 'edi_ordersp', 'edi_doc_date', 'edi_shipment_quantity', 'is_recadv_sent', 'is_edi_sent_order'], 'safe'],
+            [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number', 'edi_ordersp', 'edi_doc_date', 'edi_shipment_quantity', 'is_recadv_sent'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
@@ -172,7 +172,6 @@ class Order extends \yii\db\ActiveRecord
             'edi_doc_date'          => Yii::t('app', 'Дата накладной заказа по EDI'),
             'edi_shipment_quantity' => Yii::t('app', 'Отгруженное количество товара EDI'),
             'edi_organization_id'   => Yii::t('app', 'Идентификатор связи ресторана в таблице edi_organization'),
-            'is_edi_sent_order'     => Yii::t('app', 'Флаг, показывающий, отпрален ли документ ORDER'),
         ];
     }
 

@@ -330,7 +330,7 @@ class mercuryApi extends baseApi
 
         return $result;
     }
-    
+
     public function resolveDiscrepancyOperation($model, $type = createStoreEntryForm::ADD_PRODUCT, $data_raws = null)
     {
         $result = null;

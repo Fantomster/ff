@@ -148,7 +148,6 @@ class MercVSDList extends MercDictConsumer
                 $offset = $curr_offset;
                 $curr_offset += $curr_count;
                 $curr_offset += $add_curr_offset;
-                //sleep(60);
                 echo "total " . $total . PHP_EOL;
                 echo "curr_count " . $curr_count . PHP_EOL;
                 echo "curr_offset " . $curr_offset . PHP_EOL;
@@ -170,7 +169,7 @@ class MercVSDList extends MercDictConsumer
                 }
                 echo "Cond " . var_dump($condition) . PHP_EOL;
                 echo "============================" . PHP_EOL;
-                //sleep(60);
+                sleep(60);
             } while ($condition);
             if ($count_error > 0) {
                 throw new \Exception('Cancel error operation');

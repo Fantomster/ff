@@ -166,7 +166,6 @@ class OrderController extends DefaultController
                             'edit-guide',
                             'reset-guide',
                             'save-guide',
-                            'checkout',
                             'repeat',
                             'refresh-cart',
                             'ajax-add-to-cart',

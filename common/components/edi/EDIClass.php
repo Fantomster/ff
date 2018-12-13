@@ -418,7 +418,6 @@ class EDIClass extends Component
                     $catalogBaseGood->units = $good['units'];
                     $catalogBaseGood->ed = ($good['ed'] == '') ? "кг" : $good['ed'];
                     $catalogBaseGood->category_id = null;
-                    $catalogBaseGood->deleted = 0;
                     $catalogBaseGood->barcode = $barcode;
                     $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
                     $res = $catalogBaseGood->save();
@@ -442,6 +441,7 @@ class EDIClass extends Component
                     $catalogBaseGood->ed = $good['ed'];
                     $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
                 }
+                $catalogBaseGood->deleted = CatalogBaseGoods::STATUS_OFF;
                 $catalogBaseGood->status = CatalogBaseGoods::STATUS_ON;
                 if (!$catalogBaseGood->save()) continue;
             }

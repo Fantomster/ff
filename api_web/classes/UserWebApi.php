@@ -632,14 +632,15 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Смена мобильного номера
+     * Смена мобильного номера. Для неподтвержденного юзера свойство $isUnconfirmedUser должно быть true
      *
      * @param $post
+     * @param $isUnconfirmedUser
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function mobileChange($post)
+    public function mobileChange($post, $isUnconfirmedUser = false)
     {
         WebApiHelper::clearRequest($post);
         $this->validateRequest($post, ['phone']);
@@ -660,8 +661,10 @@ class UserWebApi extends \api_web\components\WebApi
             }
         }
 
+        //Присваиваем userID
+        $userID = $isUnconfirmedUser ? $post['user']['id'] : $this->user->id;
         //Ищем модель на смену номера
-        $model = SmsCodeChangeMobile::findOne(['user_id' => $this->user->id]);
+        $model = SmsCodeChangeMobile::findOne(['user_id' => $userID]);
         //Если нет модели, но прилетел какой то код, даем отлуп
         if (empty($model) && !empty($post['code'])) {
             throw new BadRequestHttpException('not_code_to_change_phone');
@@ -671,7 +674,7 @@ class UserWebApi extends \api_web\components\WebApi
         if (empty($model)) {
             $model = new SmsCodeChangeMobile();
             $model->phone = $phone;
-            $model->user_id = $this->user->id;
+            $model->user_id = $userID;
         }
 
         //Даем отлуп если он уже достал выпращивать коды
@@ -704,50 +707,6 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('bad_sms_code');
             }
         }
-        return ['result' => true];
-    }
-
-    /**
-     * Смена телефона неподтвержденным пользователем
-     *
-     * @param $post
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws ValidationException
-     */
-    public function changeUnconfirmedUsersPhone($post)
-    {
-        WebApiHelper::clearRequest($post);
-
-        $this->validateRequest($post['user'], ['id']);
-
-        $this->validateRequest($post['profile'], ['phone']);
-
-        $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
-        if (mb_substr($phone, 0, 1) == '8') {
-            $phone = preg_replace('#^8(\d.+?)#', '+7$1', $phone);
-        }
-        //Проверяем телефон
-        if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
-            throw new ValidationException(['phone' => 'bad_format_phone']);
-        }
-
-        $user = User::findOne(['id' => $post['user']['id']]);
-        if (!$user) {
-            throw new BadRequestHttpException('user_not_found');
-        }
-
-        if ($user->status == User::STATUS_ACTIVE) {
-            throw new BadRequestHttpException('you have no rights for this action');
-        }
-
-        $profile = Profile::findOne(['user_id' => $user->id]);
-        if (!$profile) {
-            throw new BadRequestHttpException('no such users profile');
-        }
-        $profile->phone = $post['profile']['phone'];
-        $profile->save();
-
         return ['result' => true];
     }
 

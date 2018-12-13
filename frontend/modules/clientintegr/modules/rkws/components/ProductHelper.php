@@ -65,7 +65,7 @@ class ProductHelper extends AuthHelper
 
             $tmodel = new RkTasks();
 
-            $tmodel->tasktype_id  = 23;
+            $tmodel->tasktype_id  = 22;
             $tmodel->acc          = $this->org;
             $tmodel->fid          = 1;
             $tmodel->guid         = $res['respcode']['taskguid'];
@@ -327,7 +327,7 @@ class ProductHelper extends AuthHelper
         // Обновление словаря RkDic
 
 
-        if ($tmodel->isAllPartsReady($tmodel->req_uid)) { // If all parts are processed
+        ///if ($tmodel->isAllPartsReady($tmodel->req_uid)) { // If all parts are processed
             $this->log('All the parts are received...');
 
             $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $acc])->andWhere('dictype_id = 3')->one();
@@ -349,7 +349,7 @@ class ProductHelper extends AuthHelper
                 exit;
             } else
                 $this->log('SUCCESS:: Dictionary ' . $rmodel->id . ' is successfully saved.');
-        }
+        //}
 
         $tmodel->intstatus_id = RkTasks::INTSTATUS_FULLOK;
 

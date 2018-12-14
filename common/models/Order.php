@@ -8,8 +8,12 @@ use common\components\edi\EDIIntegration;
 use common\helpers\DBNameHelper;
 use frontend\modules\clientintegr\components\AutoWaybillHelper;
 use Yii;
-use yii\behaviors\{AttributesBehavior, TimestampBehavior};
-use yii\db\{ActiveRecord, Query};
+use yii\behaviors\{
+    AttributesBehavior, TimestampBehavior
+};
+use yii\db\{
+    ActiveRecord, Query
+};
 use yii\web\BadRequestHttpException;
 
 /**
@@ -704,7 +708,13 @@ class Order extends \yii\db\ActiveRecord
                 }
             }
 
-            if (!$this->ediProcessor && ($this->status != OrderStatus::STATUS_FORMING && !$insert && (key_exists('total_price', $changedAttributes) || ($this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED && Yii::$app->params['app_version'] == 2) || ($this->status == OrderStatus::STATUS_DONE && Yii::$app->params['app_version'] == 1)))) {
+            if (!$this->ediProcessor
+                && ($this->status != OrderStatus::STATUS_FORMING && !$insert
+                    && (key_exists('total_price', $changedAttributes)
+                        || ($this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED && Yii::$app->params['app_version'] == 2)
+                        || ($this->status == OrderStatus::STATUS_DONE && Yii::$app->params['app_version'] == 1)))
+                || $this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR
+                || $this->status == OrderStatus::STATUS_CANCELLED) {
                 $vendor = $this->vendor;
                 $client = $this->client;
                 $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
@@ -715,8 +725,9 @@ class Order extends \yii\db\ActiveRecord
                     if (($this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED && Yii::$app->params['app_version'] == 2) || ($this->status == OrderStatus::STATUS_DONE && Yii::$app->params['app_version'] == 1 && !$this->is_recadv_sent)) {
                         $result = $ediIntegration->sendOrderInfo($this, true);
                         $this->is_recadv_sent = true;
-                    } elseif ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
+                    } elseif ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $this->status == OrderStatus::STATUS_CANCELLED) {
                         $result = $ediIntegration->sendOrderInfo($this, false);
+                        $this->updateAttributes(['edi_order' => $this->id]);
                     }
                     if (!$result) {
                         Yii::error(Yii::t('app', 'common.models.order.edi_error'));
@@ -732,6 +743,21 @@ class Order extends \yii\db\ActiveRecord
         } catch (\Throwable $e) {
             \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
+    }
+
+    public function getEdiOrderDocType()
+    {
+        $docType = null;
+        if ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
+            if ($this->edi_order) {
+                $docType = Registry::EDI_ORDER_DOCTYPE_EDIT;
+            } else {
+                $docType = Registry::EDI_ORDER_DOCTYPE_NEW;
+            }
+        } else {
+            $docType = Registry::EDI_ORDER_DOCTYPE_DELETE;
+        }
+        return $docType;
     }
 
     public function afterDelete()

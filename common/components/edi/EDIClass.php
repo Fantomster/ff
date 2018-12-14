@@ -149,11 +149,6 @@ class EDIClass extends Component
             foreach ($order->orderContent as $orderContent) {
                 $index = $orderContent->id;
                 $orderContentArr[] = $orderContent->id;
-                if (!in_array($index, $positionsArray)) {
-                    $deleted[] = $orderContent->product_name;
-                    $orderContent->delete();
-                    continue;
-                }
                 if (!isset($arr[$index]['BARCODE'])) {
                     if (isset($orderContent->ediOrderContent)) {
                         $index = $orderContent->ediOrderContent->barcode;
@@ -171,20 +166,12 @@ class EDIClass extends Component
 
                 if ($oldQuantity != $newQuantity) {
                     if (!$newQuantity || $newQuantity == 0.000) {
-                        $deleted[] = $orderContent->product_namet;
+                        $deleted[] = $orderContent;
                         $orderContent->delete();
                         continue;
                     }
                 }
-                $oldPrice = (float)$orderContent->price;
                 $newPrice = (float)$arr[$index]['PRICE'];
-                if ($oldPrice != $newPrice) {
-                    if ($newPrice == 0) {
-                        $deleted[] = $orderContent->product_name;
-                        $orderContent->delete();
-                        continue;
-                    }
-                }
                 $summ += $newQuantity * $newPrice;
                 $orderContent->price = $newPrice;
                 $orderContent->quantity = $newQuantity;
@@ -192,6 +179,9 @@ class EDIClass extends Component
                 $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
                 $orderContent->edi_shipment_quantity = $arr[$index]['DELIVEREDQUANTITY'];
                 $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
+                if ($documentType == 1) {
+                    $orderContent->edi_recadv = $this->fileName;
+                }
                 if ($documentType == 2) {
                     $orderContent->edi_desadv = $this->fileName;
                 }
@@ -252,7 +242,7 @@ class EDIClass extends Component
             $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? $simpleXMLElement->NUMBER ?? '';
             $order->edi_ordersp = $this->ediDocumentType;
             $order->service_id = 6;
-            $order->edi_ordersp = $this->fileName;
+            $order->edi_ordersp = $this->fileName ?? $order->id;
             $order->edi_doc_date = $simpleXMLElement->DELIVERYNOTEDATE ?? null;
             $deliveryDate = isset($simpleXMLElement->DELIVERYDATE) ? \Yii::$app->formatter->asDate($simpleXMLElement->DELIVERYDATE, 'yyyy.MM.dd HH:mm:ss') : null;
             $order->actual_delivery = $deliveryDate;
@@ -428,7 +418,6 @@ class EDIClass extends Component
                     $catalogBaseGood->units = $good['units'];
                     $catalogBaseGood->ed = ($good['ed'] == '') ? "кг" : $good['ed'];
                     $catalogBaseGood->category_id = null;
-                    $catalogBaseGood->deleted = 0;
                     $catalogBaseGood->barcode = $barcode;
                     $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
                     $res = $catalogBaseGood->save();
@@ -452,6 +441,7 @@ class EDIClass extends Component
                     $catalogBaseGood->ed = $good['ed'];
                     $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
                 }
+                $catalogBaseGood->deleted = CatalogBaseGoods::DELETED_OFF;
                 $catalogBaseGood->status = CatalogBaseGoods::STATUS_ON;
                 if (!$catalogBaseGood->save()) continue;
             }

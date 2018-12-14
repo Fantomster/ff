@@ -241,10 +241,9 @@ class OrderWebApi extends \api_web\components\WebApi
         if (empty($orderContentRow)) {
             throw new BadRequestHttpException("order_content.not_found");
         }
-
-        $product_name = $orderContentRow->product_name;
+        $model = $orderContentRow;
         $orderContentRow->delete();
-        return $product_name;
+        return $model;
     }
 
     /**

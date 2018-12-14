@@ -104,6 +104,7 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
             }
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
             $result = $this->sendDoc($string, $done, $order);
+            $order->updateAttributes(['edi_order' => $order->id]);
             $transaction->commit();
         } catch (Exception $e) {
             Yii::error($e);

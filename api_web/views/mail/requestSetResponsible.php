@@ -33,7 +33,7 @@
                 <table align="center" border="0" cellpadding="0" cellspacing="0">
                     <tr>
                         <td valign="top" style="text-align: center;">
-                            <a href=""><img src="<?= \Yii::$app->urlManagerFrontend->baseUrl ?>/img/logo.png" alt=""/></a>
+                            <a href=""><img src="<?= \Yii::$app->urlManagerFrontend->baseUrl ?>/img/logo.png" alt="logo"/></a>
                         </td>
                     </tr>
                 </table>

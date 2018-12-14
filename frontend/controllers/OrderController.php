@@ -1383,7 +1383,7 @@ class OrderController extends DefaultController
         $organization = $this->currentUser->organization;
 
         $searchModel = new OrderSearch2();
-        if (!Yii::$app->user->can('manage')) {
+        if ($this->currentUser->organization->type_id === Organization::TYPE_SUPPLIER && !Yii::$app->user->can('manage')) {
             $searchModel->manager_id = $this->currentUser->id;
         }
         $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));

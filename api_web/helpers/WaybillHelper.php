@@ -468,7 +468,7 @@ class WaybillHelper
         if (strpos($ediNumber, '-') != false && strlen($ediNumber) != strlen($tmp_ed_num)) {
             $ed_nums = explode('-', $ediNumber);
             $count = count($ed_nums);
-            if ($count > 2) {
+            if ($count > 1) {
                 $ed_num2 = (int)$ed_nums[$count-1] + 1;
                 $preCount = $count - 1;
                 for($i = 0; $i < $preCount; $i++){

@@ -384,9 +384,9 @@ class OrderController extends DefaultController
 
         $objPHPExcel->getActiveSheet()->getRowDimension(17)->setRowHeight(25);
 
-        $row = 18;
+        $row   = 18;
         $goods = $order->orderContent;
-        
+
         $i = 0;
         foreach ($goods as $good) {
             $i++;
@@ -1383,8 +1383,11 @@ class OrderController extends DefaultController
         $organization = $this->currentUser->organization;
 
         $searchModel = new OrderSearch2();
+        if (!Yii::$app->user->can('manage')) {
+            $searchModel->manager_id = $this->currentUser->id;
+        }
         $searchModel->prepareDates(Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y"));
-        $statuses    = [
+        $statuses = [
             'new'        => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR],
             'stopped'    => [OrderStatus::STATUS_CANCELLED, OrderStatus::STATUS_REJECTED],
             'processing' => OrderStatus::STATUS_PROCESSING,

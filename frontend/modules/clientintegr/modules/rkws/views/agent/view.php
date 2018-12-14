@@ -60,6 +60,7 @@ use common\models\Organization;
                                 <?php
                                 $form = ActiveForm::begin([
                                     'action'  => Url::to(['view']),
+                                    'method'  => 'get',
                                     'options' => [
                                         'id'    => 'searchForm',
                                         //'data-pjax' => true,

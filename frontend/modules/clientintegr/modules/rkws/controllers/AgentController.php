@@ -66,7 +66,7 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
         $searchModel = new \common\models\search\RkAgentSearch;
         $params = Yii::$app->request->getQueryParams();
         $organization = User::findOne(Yii::$app->user->id)->organization_id;
-        $searchModel->load(Yii::$app->request->post());
+        $searchModel->load(Yii::$app->request->get());
         $dataProvider = $searchModel->search($params, $organization);
         return $this->render('view', [
             'dataProvider' => $dataProvider,

@@ -115,12 +115,15 @@ class VendorEmailWaybillsHelper
 
             $transaction = \Yii::$app->db->beginTransaction();
             $order = new Order();
-            $order->created_at = !empty($invoice['invoice']['date']) ? date('Y-m-d', strtotime($invoice['invoice']['date'])) : null;
+            $docDate = !empty($invoice['invoice']['date']) ? date('Y-m-d', strtotime($invoice['invoice']['date'])) : null;
+            $order->created_at = $docDate;
             $order->vendor_id = $vendorId;
             $order->client_id = $invoice['organization_id'];
             $order->service_id = $this->serviceId;
             $order->status = Order::STATUS_EDI_SENT_BY_VENDOR;
             $order->currency_id = $catalog->currency_id;
+            $order->requested_delivery = $docDate;
+            $order->actual_delivery = $docDate;
             if (!$order->save()) {
                 $this->addLog(implode(' ', $order->getFirstErrors()), 'order_create');
                 return false;

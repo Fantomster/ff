@@ -49,9 +49,9 @@ class RkAgentSearch extends RkAgent
     public function rules()
     {
         return [
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at', 'noComparison'], 'safe'],
             [['acc', 'vendor_id', 'rid'], 'integer'],
-            [['denom', 'comment', 'agent_type'], 'string'],
+            [['denom', 'comment', 'agent_type', 'searchString'], 'string'],
             [['acc'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['acc' => 'id']],
             [['vendor_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['vendor_id' => 'id']],
         ];
@@ -75,7 +75,7 @@ class RkAgentSearch extends RkAgent
             $query->andWhere(['vendor_id' => null]);
         }
 
-        $query->andFilterWhere(['like', 'denom', ':string', [':string' => $this->searchString]]);
+        $query->andFilterWhere(['like', 'denom', $this->searchString]);
 
         $dataProvider = new ActiveDataProvider([
             'query'      => $query,

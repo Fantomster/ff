@@ -66,26 +66,8 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
         $searchModel = new \common\models\search\RkAgentSearch;
         $params = Yii::$app->request->getQueryParams();
         $organization = User::findOne(Yii::$app->user->id)->organization_id;
-
-        if (Yii::$app->request->post("RkAgentSearch")) {
-            $params['RkAgentSearch'] = Yii::$app->request->post("RkAgentSearch");
-            if (isset($params['RkAgentSearch']['searchString'])) {
-                $searchModel->searchString = $params['RkAgentSearch']['searchString'];
-            }
-            if (isset($params['RkAgentSearch']['noComparison'])) {
-                if ($params['RkAgentSearch']['noComparison'] != 0) {
-                    $searchModel->noComparison = 1;
-                } else {
-                    $searchModel->noComparison = 0;
-                }
-            }
-        } else {
-            $searchModel->searchString = null;
-            $searchModel->noComparison = 0;
-        }
-
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $organization);
-
+        $searchModel->load(Yii::$app->request->post());
+        $dataProvider = $searchModel->search($params, $organization);
         return $this->render('view', [
             'dataProvider' => $dataProvider,
             'searchModel'  => $searchModel,
@@ -136,16 +118,16 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
         if (!is_null($term)) {
             $vendors = RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $organisation_id, 'deleted' => 0])->column();
             $data = Organization::find()->select('id,name')->
-                where(['type_id' => 2])->
-                andWhere(['in', 'id', $vendors])->
-                andWhere(['like', 'name', ':term',[':term' => $term]])->
-                orderBy(['name' => SORT_ASC])->all();
+            where(['type_id' => 2])->
+            andWhere(['in', 'id', $vendors])->
+            andWhere(['like', 'name', ':term', [':term' => $term]])->
+            orderBy(['name' => SORT_ASC])->all();
         } else {
             $vendors = RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $organisation_id, 'deleted' => 0])->column();
             $data = Organization::find()->select('id,name')->
-                where(['type_id' => 2])->
-                andWhere(['in', 'id', $vendors])->
-                orderBy(['name' => SORT_ASC])->all();
+            where(['type_id' => 2])->
+            andWhere(['in', 'id', $vendors])->
+            orderBy(['name' => SORT_ASC])->all();
         }
         $out['results'] = array_values($data);
 
@@ -164,7 +146,6 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
         $agent = RkAgent::findOne($id);
         $agent->vendor_id = $vendor_id;
         if (!$agent->save()) {
-            throw new \Exception('Не удалось сохранить контрагента R-Keeper.');
             return false;
         }
         return true;

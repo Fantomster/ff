@@ -138,11 +138,12 @@ $licenses = $user->organization->getLicenseList();
                             ]
                         ],
                         // ['label' => 'Поддержка', 'icon' => 'support', 'url' => ['client/support']],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.send_notification', ['ru' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ']), 'options' => ['class' => 'header']],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.send_notification', ['ru' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ']), 'options' => ['class' => 'header'], 'visible' => ($user->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR)],
                     ],
                 ]
         )
         ?>
+        <?php if ($user->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR) : ?>
         <form action="<?= Url::to(['/user/ajax-invite-friend']) ?>" method="post" style="margin: 15px;" id="inviteForm">
             <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="bottom" title="" style="color: rgb(255, 255, 255);font-size: 20px;" data-original-title="<?= Yii::t('message', 'frontend.views.layouts.client.left.invite', ['ru' => 'Пригласите партнеров и друзей']) ?>">
                 <input type="text" class="form-control" placeholder="Email" name="email" id="email">
@@ -153,6 +154,7 @@ $licenses = $user->organization->getLicenseList();
                 </span>
             </div>
         </form>
+        <?php endif; ?>
 
         <ul class="sidebar-menu personal-manager">
             <li class="header"><span style="text-transform: uppercase;"><?= Yii::t('message', 'frontend.views.layouts.client.left.techno', ['ru' => 'ТЕХНИЧЕСКАЯ ПОДДЕРЖКА']) ?></span></li>

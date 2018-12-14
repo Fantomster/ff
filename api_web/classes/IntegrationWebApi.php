@@ -123,7 +123,7 @@ class IntegrationWebApi extends WebApi
                 $existWaybill = Waybill::find()->where(['like', 'outer_number_code', $tmp_ed_num])
                     ->andWhere(['service_id' => $post['service_id']])
                     ->orderBy(['outer_number_code' => SORT_DESC])->limit(1)->one();
-                if ($existWaybill->outer_number_code) {
+                if ($existWaybill && $existWaybill->outer_number_code) {
                     $ediNumber =  WaybillHelper::getLastEdiNumber($existWaybill->outer_number_code, $tmp_ed_num);
                 } else {
                     $ediNumber = $orderContent->edi_number . "-1";

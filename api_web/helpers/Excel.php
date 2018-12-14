@@ -20,6 +20,10 @@ use common\models\CatalogTempContent;
 class Excel
 {
 
+    /**
+     * Максимальное кол-во столбцов адекватно выводимых фронтом
+     */
+    const FRONT_MAX_CELLS = 26;
     const excelTempFolder = "excelTemp";
 
     /**
@@ -43,7 +47,7 @@ class Excel
             $i = 0;
             $emptyCellsCount = 0;
             foreach ($cellIterator as $cell) {
-                if ($i > 25) {
+                if ($i > self::FRONT_MAX_CELLS - 1) {
                     break;
                 }
                 $cellValue = trim(htmlspecialchars($cell->getValue(), ENT_QUOTES));
@@ -99,16 +103,19 @@ class Excel
     public static function prepareMatrix($matrix)
     {
         $arCountItemsInRows = [];
-        foreach ($matrix as $row) {
-            $countEmptyItemsInRow = 0;
-            foreach ($row as $item) {
-                if (empty($item)) {
-                    $countEmptyItemsInRow++;
+        $emptyColCount = 0;
+        for ($i = self::FRONT_MAX_CELLS - 1; $i >= 0; $i--) {
+            $emptyCount = 0;
+            foreach ($matrix as $row) {
+                if (empty($row[$i])) {
+                    $emptyCount++;
                 }
             }
-            $arCountItemsInRows[] = $countEmptyItemsInRow;
+            if ($emptyCount == count($matrix)) {
+                $emptyColCount++;
+            }
         }
-        $maxCellCount = 26 - min($arCountItemsInRows);
+        $maxCellCount = self::FRONT_MAX_CELLS - $emptyColCount;
         $preparedMatrix = [];
         foreach ($matrix as $row) {
             $preparedMatrix[] = array_slice($row, 0, $maxCellCount);

@@ -578,7 +578,7 @@ class VendorController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/vendor/upload-temporary?XDEBUG_PROFILE=1",
+     * @SWG\Post(path="/vendor/upload-temporary",
      *     tags={"Vendor/Catalog"},
      *     summary="Обновление индивидуального каталога",
      *     description="Обновление индивидуального каталога",

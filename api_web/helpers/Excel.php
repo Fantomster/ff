@@ -20,6 +20,10 @@ use common\models\CatalogTempContent;
 class Excel
 {
 
+    /**
+     * Максимальное кол-во столбцов адекватно выводимых фронтом
+     */
+    const FRONT_MAX_CELLS = 26;
     const excelTempFolder = "excelTemp";
 
     /**
@@ -36,7 +40,6 @@ class Excel
 
         $rows = [];
         $rowsCount = 0;
-        $maxCellsCount = 0;
         foreach ($worksheet->getRowIterator() as $row) {
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
@@ -44,7 +47,7 @@ class Excel
             $i = 0;
             $emptyCellsCount = 0;
             foreach ($cellIterator as $cell) {
-                if ($i > 25) {
+                if ($i > self::FRONT_MAX_CELLS - 1) {
                     break;
                 }
                 $cellValue = trim(htmlspecialchars($cell->getValue(), ENT_QUOTES));
@@ -53,19 +56,17 @@ class Excel
                 if (!$cellValue) {
                     $emptyCellsCount++;
                 }
-
-            }
-            if (count($cells) > $maxCellsCount) {
-                $maxCellsCount = count($cells);
             }
             if (count($cells) != $emptyCellsCount) {
                 $rows[] = $cells;
             }
             $rowsCount++;
             if ($rowsCount == 20) {
+                $arPreparedMatrix = self::prepareMatrix($rows);
                 /**
                  * Заполняем каждый элемент массива до кол-ва, равному наибольшей длинне его элементов
                  */
+                $maxCellsCount = $arPreparedMatrix['max_cell'];
                 return array_map(function ($el) use ($maxCellsCount) {
                     if (count($el) < $maxCellsCount) {
                         end($el);
@@ -73,7 +74,7 @@ class Excel
                         return array_merge($el, $fillForFront);
                     }
                     return $el;
-                }, $rows);
+                }, $arPreparedMatrix['matrix']);
             }
         }
 
@@ -93,6 +94,34 @@ class Excel
         $url = \Yii::$app->get('resourceManager')->getUrl(self::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
         $file = File::getFromUrl($url);
         return self::get20Rows($file->tempName);
+    }
+
+    /**
+     * @param $matrix
+     * @return array
+     */
+    public static function prepareMatrix($matrix)
+    {
+        $arCountItemsInRows = [];
+        $emptyColCount = 0;
+        for ($i = self::FRONT_MAX_CELLS - 1; $i >= 0; $i--) {
+            $emptyCount = 0;
+            foreach ($matrix as $row) {
+                if (empty($row[$i])) {
+                    $emptyCount++;
+                }
+            }
+            if ($emptyCount == count($matrix)) {
+                $emptyColCount++;
+            }
+        }
+        $maxCellCount = self::FRONT_MAX_CELLS - $emptyColCount;
+        $preparedMatrix = [];
+        foreach ($matrix as $row) {
+            $preparedMatrix[] = array_slice($row, 0, $maxCellCount);
+        }
+
+        return ['matrix' => $preparedMatrix, 'max_cell' => $maxCellCount];
     }
 
     /**
@@ -128,7 +157,7 @@ class Excel
                     continue;
                 }
                 $value = trim($cell->getValue());
-                if ($value == 'Наименование'){
+                if ($value == 'Наименование') {
                     $_ = empty(false);
                 }
                 if ($mapping[$cellsCount] == 'article' && $value == 'Артикул') {
@@ -139,7 +168,7 @@ class Excel
                 if ($mapping[$cellsCount] == 'price') {
                     $value = (float)(str_replace(',', '.', $value));
                     $value = filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-                    if (empty($value) || !is_numeric($value)){
+                    if (empty($value) || !is_numeric($value)) {
                         $write = false;
                         break;
                     }

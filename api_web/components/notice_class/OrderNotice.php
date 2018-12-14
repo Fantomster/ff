@@ -307,7 +307,7 @@ class OrderNotice
                 if ($notification) {
                     if (!empty($recipient->profile->phone) && $notification->order_processing) {
                         $text = Yii::$app->sms->prepareText('sms.order_processing', [
-                            'name' => $order->vendor->name,
+                            'vendor_name' => $order->vendor->name,
                             'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone, $order->id);

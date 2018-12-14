@@ -64,6 +64,11 @@ class Registry
     const EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE = 4;
     const EDI_PRICAT_ACTION_TYPE_DELETE = 3;
 
+    /** - Тип поля DOCTYPE документа order для edi - */
+    const EDI_ORDER_DOCTYPE_NEW = 'O';
+    const EDI_ORDER_DOCTYPE_EDIT = 'R';
+    const EDI_ORDER_DOCTYPE_DELETE = 'D';
+
     /**@var array $statuses */
     static $waybill_statuses = [
         self::WAYBILL_COMPARED  => 'compared',

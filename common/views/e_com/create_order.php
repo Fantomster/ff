@@ -6,7 +6,7 @@
     <DELIVERYDATE><?= $dateArray['requested_delivery_date'] ?></DELIVERYDATE>
     <CURRENCY><?= $order->currency->iso_code ?></CURRENCY>
     <SUPORDER><?= $order->id ?></SUPORDER>
-    <DOCTYPE>O</DOCTYPE>
+    <DOCTYPE><?= $order->getEdiOrderDocType() ?></DOCTYPE>
     <CAMPAIGNNUMBER><?= $order->id ?></CAMPAIGNNUMBER>
     <ORDRTYPE>ORIGINAL</ORDRTYPE>
     <INFO><?= $order->comment ?? "" ?></INFO>

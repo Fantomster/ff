@@ -61,10 +61,10 @@ use common\models\Organization;
                                 $form = ActiveForm::begin([
                                     'action'  => Url::to(['view']),
                                     'options' => [
-                                        'id'        => 'searchForm',
-                                        'data-pjax' => true,
-                                        'class'     => "navbar-form no-padding no-margin",
-                                        'role'      => 'search',
+                                        'id'    => 'searchForm',
+                                        //'data-pjax' => true,
+                                        'class' => "navbar-form no-padding no-margin",
+                                        'role'  => 'search',
                                     ],
                                 ]);
                                 ?>
@@ -107,6 +107,7 @@ use common\models\Organization;
                         </div>
                     </div>
                     <div class="box-body table-responsive no-padding">
+                        <?php \yii\widgets\Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'timeout' => 5000]) ?>
                         <?=
                         GridView::widget([
                             'dataProvider'     => $dataProvider,
@@ -149,6 +150,7 @@ use common\models\Organization;
                             ],
                         ]);
                         ?>
+                        <?php \yii\widgets\Pjax::end() ?>
                         <?= Html::a('Вернуться',
                             ['/clientintegr/rkws/default'],
                             ['class' => 'btn btn-success btn-export']);
@@ -269,8 +271,12 @@ $js = <<< JS
                     var selected_name = $("#selpos option:selected").text();
                     var url_edit_new = '$url_edit_new';
                     $.post(url_edit_new, {id:selectvalue, number:number}, function (data) {
-                        $('#but'+number).html(selected_name);
-                        swal.close();
+                        if (data == true) {
+                            $('#but'+number).html(selected_name);
+                            swal.close();
+                        } else {
+                            alert('Не удалось сохранить контрагента R-Keeper.');
+                        }
                     })
                 });
             });

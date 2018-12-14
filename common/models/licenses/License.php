@@ -149,7 +149,7 @@ class License extends ActiveRecord
             ->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
             ->where(['lo.org_id' => $orgId])
-            ->andWhere('lo.is_deleted = 0 OR lo.is_deleted is null')
+            ->andWhere('coalesce(lo.is_deleted, 0) <> 1')
             ->groupBy([
                 'license.id',
                 'license.name',

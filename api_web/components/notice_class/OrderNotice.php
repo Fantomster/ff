@@ -12,6 +12,7 @@ use common\models\OrderContent;
 use common\models\search\OrderContentSearch;
 use common\models\User;
 use Yii;
+use yii\base\Controller;
 use yii\helpers\Json;
 use common\models\Order;
 use yii\data\ArrayDataProvider;
@@ -306,7 +307,7 @@ class OrderNotice
                 if ($notification) {
                     if (!empty($recipient->profile->phone) && $notification->order_processing) {
                         $text = Yii::$app->sms->prepareText('sms.order_processing', [
-                            'name' => $order->vendor->name,
+                            'vendor_name' => $order->vendor->name,
                             'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone, $order->id);
@@ -346,7 +347,13 @@ class OrderNotice
             $newMessage->setAttribute('recipient_id', $recipient_id);
             $newMessage->save();
 
-            $body = Yii::$app->controller->renderPartial('@frontend/views/order/_chat-message', [
+            if (Yii::$app instanceof \yii\console\Application) {
+                $controller = new Controller("", "");
+            } else {
+                $controller = Yii::$app->controller;
+            }
+
+            $body = $controller->renderPartial('@frontend/views/order/_chat-message', [
                 'name'      => '',
                 'message'   => $newMessage->message,
                 'time'      => WebApiHelper::asDatetime($newMessage->created_at),

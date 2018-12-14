@@ -251,12 +251,12 @@ class VetisHelper
         $orgIds = (new UserWebApi())->getUserOrganizationBusinessList('id');
 
         return MercVsd::find()->select(['uuid', 'recipient_guid', 'sender_guid'])
-            ->leftJoin(IntegrationSetting::tableName() . ' is', "on is.name='enterprise_guid' and is.service_id=:service_id",
+            ->leftJoin(IntegrationSetting::tableName() . ' is', "is.name='enterprise_guid' and is.service_id = :service_id",
                 [':service_id' => Registry::MERC_SERVICE_ID])
-            ->leftJoin(IntegrationSettingValue::tableName() . ' isv', 'isv.setting_id=is.id and isv.value=merc_vsd.recipient_guid')
-            ->where(['isv.org' => array_keys($orgIds['result'])])
+            ->leftJoin(IntegrationSettingValue::tableName() . ' isv', 'isv.setting_id=is.id and isv.value = merc_vsd.recipient_guid')
+            ->where(['isv.org_id' => array_keys($orgIds['result'])])
             ->andWhere(['uuid' => $uuids])
-            ->andWhere('LENGTH(isv.recipient_guid) > :len', [':len' => 35])
+            ->andWhere('LENGTH(merc_vsd.recipient_guid) > :len', [':len' => 35])
             ->indexBy('uuid')
             ->all();
     }

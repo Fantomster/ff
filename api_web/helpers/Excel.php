@@ -44,7 +44,7 @@ class Excel
             $i = 0;
             $emptyCellsCount = 0;
             foreach ($cellIterator as $cell) {
-                if ($i > 5 && !$cell->getValue()) {
+                if ($i > 25) {
                     break;
                 }
                 $cellValue = trim(htmlspecialchars($cell->getValue(), ENT_QUOTES));
@@ -137,7 +137,8 @@ class Excel
                 }
 
                 if ($mapping[$cellsCount] == 'price') {
-                    $value = filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT);
+                    $value = (float)(str_replace(',', '.', $value));
+                    $value = filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
                     if (empty($value) || !is_numeric($value)){
                         $write = false;
                         break;

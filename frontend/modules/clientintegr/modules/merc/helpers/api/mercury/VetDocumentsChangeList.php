@@ -65,7 +65,7 @@ class VetDocumentsChangeList extends Model
                 'producer_name' => isset($producer) ? $producer['name'][0] : null,
                 'producer_guid' => isset($producer) ? $producer['guid'][0] : null,
                 'low_grade_cargo' => (int)$item->certifiedConsignment->batch->lowGradeCargo,
-                'raw_data' => Json::encode(Json::decode(Json::encode($item), true)),
+                'raw_data' => Json::encode($item),
 
                 'owner_guid' => isset($item->certifiedConsignment->batch->owner) ? $item->certifiedConsignment->batch->owner->guid : null,
                 'product_guid' => isset($item->certifiedConsignment->batch->product->guid) ? $item->certifiedConsignment->batch->product->guid : null,

@@ -234,7 +234,7 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
         $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
         try {
             $result = \yii\helpers\Json::decode($this->raw_data, true);
-            if (isset($result['UUID'])) {
+            if (isset($result['UUID']) || isset($result['uuid'])) {
                 return $result;
             }
         } catch (\Exception $e) {

@@ -9,7 +9,7 @@
 
 ?>
 
-<p><img src="https://app.mixcart.ru/images/invite-to-client.jpg" style="max-width: 100%; min-width: 100%;" width="952px" height="334px" alt=""/></p>
+<p><img src="https://app.mixcart.ru/images/invite-to-client.jpg" style="max-width: 100%; min-width: 100%;" width="952px" height="334px" alt="invite"/></p>
 
 <h3 style="font-weight: 500;font-size: 27px;"><?= Yii::t('app', 'common.mail.friend_invite.hello', ['ru'=>'Здравствуйте!']) ?></h3>
 <p><?= Yii::t('app', 'common.mail.friend_invite.we', ['ru'=>'Мы, <u>{we}</u>, стали использовать очень удобный инструмент для автоматизации работы с вами', 'we'=>$we]) ?>.
@@ -52,9 +52,9 @@
         </th>
     </tr>
     <tr align="center">
-        <td><img src="https://app.mixcart.ru/img/ico1-1.png" alt="" /></td>
-        <td><img src="https://app.mixcart.ru/img/ico2-1.png" alt="" /></td>
-        <td><img src="https://app.mixcart.ru/img/ico3-1.png" alt="" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico1-1.png" alt="cart" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico2-1.png" alt="folder" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico3-1.png" alt="cellphone" /></td>
     </tr>
 
 
@@ -74,9 +74,9 @@
         </td>
     </tr>
     <tr align="center">
-        <td><img src="https://app.mixcart.ru/img/ico4-1.png" alt="" /></td>
-        <td><img src="https://app.mixcart.ru/img/ico5-1.png" alt="" /></td>
-        <td><img src="https://app.mixcart.ru/img/ico2.png" alt="" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico4-1.png" alt="badge" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico5-1.png" alt="sign" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico2.png" alt="thumb-up" /></td>
     </tr>
 
 
@@ -96,9 +96,9 @@
         </td>
     </tr>
     <tr align="center">
-        <td><img src="https://app.mixcart.ru/img/ico4.png" alt="" /></td>
-        <td><img src="https://app.mixcart.ru/img/ico8.png" alt="" /></td>
-        <td><img src="https://app.mixcart.ru/img/ico9.png" alt="" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico4.png" alt="pie" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico8.png" alt="hammer" /></td>
+        <td><img src="https://app.mixcart.ru/img/ico9.png" alt="cellphone" /></td>
     </tr>
 
 </table>

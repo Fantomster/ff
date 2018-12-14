@@ -3,21 +3,18 @@
 namespace frontend\modules\clientintegr\modules\odinsobsh\controllers;
 
 use api\common\models\one_s\OneSWaybill;
-use api\common\models\iiko\iikoWaybillData;
-use api\common\models\iiko\search\iikoDicSearch;
-use api\common\models\iiko\iikoService;
 use api\common\models\one_s\OneSGood;
 use api\common\models\one_s\OneSService;
 use api\common\models\one_s\OneSStore;
 use api\common\models\one_s\search\OneSDicSearch;
-use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use Yii;
-use yii\httpclient\Response;
 use yii\data\ActiveDataProvider;
 use api\common\models\one_s\OneSContragent;
 use common\models\User;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
+use common\models\Organization;
+use common\models\RelationSuppRest;
 
 class DefaultController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
@@ -110,12 +107,14 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
      */
     public function actionAgentView()
     {
-        $dataProvider = new ActiveDataProvider([
-            'query' => OneSContragent::find()->where(['org_id' => $this->organisation_id])
-        ]);
-
+        $searchModel = new \common\models\search\OneSAgentSearch;
+        $params = Yii::$app->request->getQueryParams();
+        $organization = User::findOne(Yii::$app->user->id)->organization_id;
+        $searchModel->load(Yii::$app->request->get());
+        $dataProvider = $searchModel->search($params, $organization);
         return $this->render('agent-view', [
             'dataProvider' => $dataProvider,
+            'searchModel'  => $searchModel,
         ]);
     }
 
@@ -140,22 +139,51 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
     }
 
     /**
-     * Формирование списка поставщиков по введенным символам
-     * @param null $term
-     * @return mixed
-     * @throws \yii\db\Exception
+     * Формирование списка поставщиков по введённым символам
+     *
+     * @return array
      */
-    public function actionAgentAutocomplete($term = null)
+    public function actionAgentAutocomplete()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $term = Yii::$app->request->post('stroka');
+        $user = User::findOne(\Yii::$app->user->id);
+        $organisation_id = $user->organization_id;
+        $out['results'] = [];
 
         if (!is_null($term)) {
-            $sql = "SELECT id, `name` as text FROM organization where `name` LIKE '%$term%' and type_id = 2 and id in (SELECT supp_org_id FROM relation_supp_rest where rest_org_id = $this->organisation_id and deleted = 0)";
-            $db = \Yii::$app->db;
-            $data = $db->createCommand($sql)->queryAll();
-            $out['results'] = array_values($data);
+            $vendors = RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $organisation_id, 'deleted' => 0])->column();
+            $data = Organization::find()->select('id,name')->
+            where(['type_id' => 2])->
+            andWhere(['in', 'id', $vendors])->
+            andWhere(['like', 'name', ':term', [':term' => $term]])->
+            orderBy(['name' => SORT_ASC])->all();
+        } else {
+            $vendors = RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $organisation_id, 'deleted' => 0])->column();
+            $data = Organization::find()->select('id,name')->
+            where(['type_id' => 2])->
+            andWhere(['in', 'id', $vendors])->
+            orderBy(['name' => SORT_ASC])->all();
         }
+        $out['results'] = array_values($data);
 
         return $out;
+    }
+
+    /**
+     * Редактирование идентификатора поставщика у агента
+     *
+     * @return boolean
+     */
+    public function actionEditVendor()
+    {
+        $vendor_id = Yii::$app->request->post('id');
+        $id = Yii::$app->request->post('number');
+        $agent = OneSContragent::findOne($id);
+        $agent->vendor_id = $vendor_id;
+        if (!$agent->save()) {
+            return false;
+        }
+        return true;
     }
 }

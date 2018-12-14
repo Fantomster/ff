@@ -740,13 +740,19 @@ class ServiceRkws extends AbstractSyncFactory
      */
     public function checkConnect($request = [])
     {
-        $code = isset($request['code']) ? trim($request['code']) : $this->licenseCode;
+
+        if (isset($request['params'])) {
+            if (isset($request['params']['code'])) {
+                $this->licenseCode = $request['params']['code'];
+            }
+        }
+
         try {
-            $cook = $this->prepareServiceWithAuthCheck($code);
+            $cook = $this->prepareServiceWithAuthCheck($this->licenseCode);
             $url = $this->getUrlCmd();
             $xml = '<?xml version="1.0" encoding="utf-8"?>
             <RQ cmd="get_objectinfo">
-                <PARAM name="object_id" val="' . $code . '"/>
+                <PARAM name="object_id" val="' . $this->licenseCode . '"/>
             </RQ>';
             $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
             if (!empty($xmlData)) {

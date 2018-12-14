@@ -719,10 +719,20 @@ class Order extends \yii\db\ActiveRecord
                 $client = $this->client;
                 $errorText = Yii::t('app', 'common.models.order.gln', ['ru' => 'Внимание! Выбранный Поставщик работает с Заказами в системе электронного документооборота. Вам необходимо зарегистрироваться в системе EDI и получить GLN-код']);
                 $glnArray = $client->getGlnCodes($client->id, $vendor->id);
-                if (isset($glnArray['client_gln']) && isset($glnArray['vendor_gln']) && $glnArray['client_gln'] > 0 && $glnArray['vendor_gln'] > 0) {
+
+                $updatedAtPlusTenSeconds = date("Y-m-d H:i:s", (strtotime(date($this->updated_at)) + 10));
+                da($updatedAtPlusTenSeconds);
+                if (isset($glnArray['client_gln'])
+                    && isset($glnArray['vendor_gln'])
+                    && $glnArray['client_gln'] > 0
+                    && $glnArray['vendor_gln'] > 0) {
                     $ediIntegration = new EDIIntegration(['orgId' => $vendor->id, 'clientId' => $client->id, 'providerID' => $glnArray['provider_id']]);
                     $result = true;
-                    if (($this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED && Yii::$app->params['app_version'] == 2) || ($this->status == OrderStatus::STATUS_DONE && Yii::$app->params['app_version'] == 1 && !$this->is_recadv_sent)) {
+                    if (($this->status == OrderStatus::STATUS_EDI_ACCEPTANCE_FINISHED
+                            && Yii::$app->params['app_version'] == 2)
+                        || ($this->status == OrderStatus::STATUS_DONE
+                            && Yii::$app->params['app_version'] == 1
+                            && !$this->is_recadv_sent)) {
                         $result = $ediIntegration->sendOrderInfo($this, true);
                         $this->is_recadv_sent = true;
                     } elseif ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $this->status == OrderStatus::STATUS_CANCELLED) {

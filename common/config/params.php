@@ -22,6 +22,7 @@ return [
     'default_franchisee_id'   => 1,
     //static urls
     'shortHome'               => 'mixcart.ru',
+    'appUrl'                  => 'https://app.mixcart.ru',
     'staticUrl'               => [
         'ru' => [
             'market'    => 'https://market.mixcart.ru/',

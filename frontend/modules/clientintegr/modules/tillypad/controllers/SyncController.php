@@ -86,10 +86,7 @@ class SyncController extends \frontend\modules\clientintegr\modules\iiko\control
         $id = Yii::$app->request->post('number');
         $agent = iikoAgent::findOne($id);
         $agent->vendor_id = $vendor_id;
-        if (!$agent->save()) {
-            return false;
-        }
-        return true;
+        return $agent->save();
     }
 
     /**
@@ -103,10 +100,7 @@ class SyncController extends \frontend\modules\clientintegr\modules\iiko\control
         $id = Yii::$app->request->post('number');
         $agent = iikoAgent::findOne($id);
         $agent->comment = $comment;
-        if (!$agent->save()) {
-            return false;
-        }
-        return true;
+        return $agent->save();
     }
 
     /**
@@ -120,9 +114,6 @@ class SyncController extends \frontend\modules\clientintegr\modules\iiko\control
         $id = Yii::$app->request->post('number');
         $agent = iikoAgent::findOne($id);
         $agent->is_active = $activ;
-        if (!$agent->save()) {
-            return false;
-        }
-        return true;
+        return $agent->save();
     }
 }

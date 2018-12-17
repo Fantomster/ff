@@ -145,10 +145,7 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
         $id = Yii::$app->request->post('number');
         $agent = RkAgent::findOne($id);
         $agent->vendor_id = $vendor_id;
-        if (!$agent->save()) {
-            return false;
-        }
-        return true;
+        return $agent->save();
     }
 
 }

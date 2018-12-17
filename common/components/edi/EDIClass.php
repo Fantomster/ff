@@ -283,7 +283,6 @@ class EDIClass extends Component
     {
         $supplierGLN = $xml->SUPPLIER;
         $buyerGLN = $xml->BUYER;
-        $action = (isset($xml->ACTION)) ? $xml->ACTION : null;
         $ediOrganization = EdiOrganization::findOne(['gln_code' => $supplierGLN, 'provider_id' => $providerID]);
         if (!$ediOrganization) {
             \Yii::error('No EDI organization');
@@ -362,6 +361,11 @@ class EDIClass extends Component
             $goodsArray[$barcode]['units'] = (float)$good->QUANTITYOFCUINTU ?? (float)$good->PACKINGMULTIPLENESS ?? $good->MINORDERQUANTITY;
             $goodsArray[$barcode]['edi_supplier_article'] = (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String)$good->IDSUPPLIER : $barcode;
             $goodsArray[$barcode]['vat'] = (int)$good->TAXRATE ?? null;
+            if ($isFollowActionRule) {
+                $goodsArray[$barcode]['action'] = (isset($good->ACTION) && $good->ACTION > 0) ? (int)$good->ACTION : null;
+            } else {
+                $goodsArray[$barcode]['action'] = null;
+            }
         }
         $catalog_base_goods = (new \yii\db\Query())
             ->select(['id', 'barcode'])
@@ -377,7 +381,7 @@ class EDIClass extends Component
 
         foreach ($goodsArray as $barcode => $good) {
             $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
-            if (!$catalogBaseGood) {
+            if (!$catalogBaseGood && $good['action'] != Registry::EDI_PRICAT_ACTION_TYPE_DELETE) {
                 $catalogBaseGood = new CatalogBaseGoods();
                 $catalogBaseGood->cat_id = $baseCatalog->id;
                 $catalogBaseGood->article = $good['article'];
@@ -398,22 +402,31 @@ class EDIClass extends Component
                 if (!$res2) continue;
             } else {
                 $catalogGood = CatalogGoods::findOne(['cat_id' => $relationCatalogID, 'base_goods_id' => $catalogBaseGood->id]);
-                if (!$catalogGood) {
-                    $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price'], $good['vat']);
-                    if (!$res2) continue;
-                } else {
-                    $catalogGood->price = $good['price'];
-                    $catalogGood->save();
+                if ($good['action'] == Registry::EDI_PRICAT_ACTION_TYPE_DELETE && $isFollowActionRule && $catalogGood) {
+                    $catalogGood->delete();
+                    continue;
                 }
-                $catalogBaseGood->units = $good['units'];
-                $catalogBaseGood->product = $good['name'];
-                $catalogBaseGood->article = $good['article'];
-                $catalogBaseGood->ed = $good['ed'];
-                $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
+                if (!$isFollowActionRule
+                    || $good['action'] == Registry::EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE
+                    || $good['action'] == Registry::EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE) {
+                    if (!$catalogGood) {
+                        $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price'], $good['vat']);
+                        if (!$res2) continue;
+                    } else {
+                        $catalogGood->price = $good['price'];
+                        $catalogGood->save();
+                    }
+                    $catalogBaseGood->units = $good['units'];
+                    $catalogBaseGood->product = $good['name'];
+                    $catalogBaseGood->article = $good['article'];
+                    $catalogBaseGood->ed = $good['ed'];
+                    $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
+                }
+
+                $catalogBaseGood->deleted = CatalogBaseGoods::DELETED_OFF;
+                $catalogBaseGood->status = CatalogBaseGoods::STATUS_ON;
+                if (!$catalogBaseGood->save()) continue;
             }
-            $catalogBaseGood->deleted = CatalogBaseGoods::DELETED_OFF;
-            $catalogBaseGood->status = CatalogBaseGoods::STATUS_ON;
-            if (!$catalogBaseGood->save()) continue;
         }
 
         return true;

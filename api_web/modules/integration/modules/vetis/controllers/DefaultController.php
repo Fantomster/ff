@@ -13,12 +13,11 @@ use api_web\modules\integration\modules\vetis\models\VetisWaybill;
  */
 class DefaultController extends WebApiController
 {
-    /**
-     * Для контроллера нужна лицензия меркурия
-     *
-     * @var int
-     */
-    public $license_service_id = Registry::MERC_SERVICE_ID;
+    public function beforeAction($action)
+    {
+        $this->setLicenseServiceId(Registry::MERC_SERVICE_ID);
+        return parent::beforeAction($action);
+    }
 
     /**
      * @SWG\Post(path="/integration/vetis/groups-list",

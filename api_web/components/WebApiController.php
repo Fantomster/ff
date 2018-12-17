@@ -268,7 +268,7 @@ class WebApiController extends \yii\rest\Controller
             if (!in_array(\Yii::$app->request->getUrl(), $allow_methods_without_license)) {
                 License::checkEnterLicenseResponse($this->user->organization_id);
                 if (isset($this->license_service_id) && !is_null($this->license_service_id)) {
-                    License::checkLicense($this->user->organization->id, $this->license_service_id);
+                    License::checkLicense($this->user->organization_id, $this->license_service_id);
                 }
             }
         }

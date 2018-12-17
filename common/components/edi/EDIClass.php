@@ -289,41 +289,12 @@ class EDIClass extends Component
             \Yii::error('No EDI organization');
             return false;
         }
-        $isDeleteEmptyPosition = true;
-        $isDeletePosition = false;
-        $isUpdatePosition = true;
 
         if ($ediOrganization->pricat_action_attribute_rule == Registry::EDI_PRICAT_ACTION_RULE_DELETE_NOT_EXISTS) {
-            if (in_array($action, [Registry::EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE, Registry::EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE])) {
-                $isDeleteEmptyPosition = false;
-                $isUpdatePosition = true;
-            } elseif($action == Registry::EDI_PRICAT_ACTION_TYPE_DELETE) {
-                $isDeleteEmptyPosition = true;
-                $isDeletePosition = true;
-                $isUpdatePosition = false;
-            } else {
-                $isDeleteEmptyPosition = true;
-                $isUpdatePosition = true;
-            }
+            $isFollowActionRule = false;
+        } else {
+            $isFollowActionRule = true;
         }
-
-        if ($ediOrganization->pricat_action_attribute_rule == Registry::EDI_PRICAT_ACTION_RULE_FOLLOW_VALUE) {
-            if (in_array($action, [Registry::EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE, Registry::EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE])) {
-                $isDeleteEmptyPosition = false;
-                $isUpdatePosition = true;
-            } elseif($action == Registry::EDI_PRICAT_ACTION_TYPE_DELETE) {
-                $isDeleteEmptyPosition = true;
-                $isDeletePosition = true;
-                $isUpdatePosition = false;
-            } else {
-                $isDeleteEmptyPosition = false;
-                $isUpdatePosition = false;
-            }
-        }
-        if (!$isDeleteEmptyPosition && !$isUpdatePosition && !$isDeletePosition) {
-            return true;
-        }
-        $isDeleteEmptyPosition = ($ediOrganization->pricat_action_attribute_rule == Registry::EDI_PRICAT_ACTION_RULE_DELETE_NOT_EXISTS) ? true : false;
 
         $organization = Organization::findOne(['id' => $ediOrganization->organization_id]);
 
@@ -399,52 +370,50 @@ class EDIClass extends Component
             ->andWhere('`barcode` IS NOT NULL')
             ->all();
         foreach ($catalog_base_goods as $base_good) {
-            if ((!in_array($base_good['barcode'], $goodsArray) && $isDeleteEmptyPosition) || $isDeletePosition) {
+            if (!in_array($base_good['barcode'], $goodsArray) && !$isFollowActionRule) {
                 \Yii::$app->db->createCommand()->delete(CatalogGoods::tableName(), ['base_goods_id' => $base_good['id'], 'cat_id' => $relationCatalogID])->execute();
             }
         }
-        if ($isDeletePosition) return true;
-        if ($isUpdatePosition) {
-            foreach ($goodsArray as $barcode => $good) {
-                $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
-                if (!$catalogBaseGood) {
-                    $catalogBaseGood = new CatalogBaseGoods();
-                    $catalogBaseGood->cat_id = $baseCatalog->id;
-                    $catalogBaseGood->article = $good['article'];
-                    $catalogBaseGood->product = $good['name'];
-                    $catalogBaseGood->status = CatalogBaseGoods::STATUS_ON;
-                    $catalogBaseGood->supp_org_id = $organization->id;
-                    $catalogBaseGood->price = $good['price'];
-                    $catalogBaseGood->units = $good['units'];
-                    $catalogBaseGood->ed = ($good['ed'] == '') ? "кг" : $good['ed'];
-                    $catalogBaseGood->category_id = null;
-                    $catalogBaseGood->barcode = $barcode;
-                    $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
-                    $res = $catalogBaseGood->save();
 
-                    if (!$res) continue;
-                    $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
+        foreach ($goodsArray as $barcode => $good) {
+            $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
+            if (!$catalogBaseGood) {
+                $catalogBaseGood = new CatalogBaseGoods();
+                $catalogBaseGood->cat_id = $baseCatalog->id;
+                $catalogBaseGood->article = $good['article'];
+                $catalogBaseGood->product = $good['name'];
+                $catalogBaseGood->status = CatalogBaseGoods::STATUS_ON;
+                $catalogBaseGood->supp_org_id = $organization->id;
+                $catalogBaseGood->price = $good['price'];
+                $catalogBaseGood->units = $good['units'];
+                $catalogBaseGood->ed = ($good['ed'] == '') ? "кг" : $good['ed'];
+                $catalogBaseGood->category_id = null;
+                $catalogBaseGood->barcode = $barcode;
+                $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
+                $res = $catalogBaseGood->save();
+
+                if (!$res) continue;
+                $catalogBaseGood = CatalogBaseGoods::findOne(['cat_id' => $baseCatalog->id, 'barcode' => $barcode]);
+                $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price'], $good['vat']);
+                if (!$res2) continue;
+            } else {
+                $catalogGood = CatalogGoods::findOne(['cat_id' => $relationCatalogID, 'base_goods_id' => $catalogBaseGood->id]);
+                if (!$catalogGood) {
                     $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price'], $good['vat']);
                     if (!$res2) continue;
                 } else {
-                    $catalogGood = CatalogGoods::findOne(['cat_id' => $relationCatalogID, 'base_goods_id' => $catalogBaseGood->id]);
-                    if (!$catalogGood) {
-                        $res2 = $this->insertGood($relationCatalogID, $catalogBaseGood->id, $good['price'], $good['vat']);
-                        if (!$res2) continue;
-                    } else {
-                        $catalogGood->price = $good['price'];
-                        $catalogGood->save();
-                    }
-                    $catalogBaseGood->units = $good['units'];
-                    $catalogBaseGood->product = $good['name'];
-                    $catalogBaseGood->article = $good['article'];
-                    $catalogBaseGood->ed = $good['ed'];
-                    $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
+                    $catalogGood->price = $good['price'];
+                    $catalogGood->save();
                 }
-                $catalogBaseGood->deleted = CatalogBaseGoods::DELETED_OFF;
-                $catalogBaseGood->status = CatalogBaseGoods::STATUS_ON;
-                if (!$catalogBaseGood->save()) continue;
+                $catalogBaseGood->units = $good['units'];
+                $catalogBaseGood->product = $good['name'];
+                $catalogBaseGood->article = $good['article'];
+                $catalogBaseGood->ed = $good['ed'];
+                $catalogBaseGood->edi_supplier_article = $good['edi_supplier_article'];
             }
+            $catalogBaseGood->deleted = CatalogBaseGoods::DELETED_OFF;
+            $catalogBaseGood->status = CatalogBaseGoods::STATUS_ON;
+            if (!$catalogBaseGood->save()) continue;
         }
 
         return true;

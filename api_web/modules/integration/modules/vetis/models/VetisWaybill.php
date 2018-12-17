@@ -78,16 +78,12 @@ class VetisWaybill extends WebApi
         ];
 
         if ($page == 1) {
-            if (isset($search->acquirer_id)) {
-                $this->sendRequestToUpdate($search->acquirer_id);
-            } else {
-                $result = License::getAllLicense($arResult['org_ids'], Registry::MERC_SERVICE_ID, true);
-                foreach ($result as $license) {
-                    try {
-                        $this->sendRequestToUpdate($license['org_id']);
-                    } catch (\Exception $e) {
-                        continue;
-                    }
+            $result = License::getAllLicense($arResult['org_ids'], Registry::MERC_SERVICE_ID, true);
+            foreach ($result as $license) {
+                try {
+                    $this->sendRequestToUpdate($license['org_id']);
+                } catch (\Exception $e) {
+                    continue;
                 }
             }
         }

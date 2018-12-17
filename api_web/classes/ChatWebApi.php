@@ -441,7 +441,7 @@ class ChatWebApi extends WebApi
             'unread_message'    => (int)$model->unread_message ?? 0,
             'last_message'      => $last_message,
             'last_message_date' => WebApiHelper::asDatetime($model->last_message_date),
-            'is_edi'            => empty($model->ediNumber) ? false : true,
+            'is_edi'            => $model->vendor->isEdi()
         ];
     }
 

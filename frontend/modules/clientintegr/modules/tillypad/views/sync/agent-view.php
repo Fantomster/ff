@@ -319,13 +319,13 @@ $js = <<< JS
                 var idbutton = 'butcom' + idnumber;
                 var cont_old = $(this).html();
                 if (cont_old=='---') {cont_old='<em>'+cont_old+'</em>';}
-                var cont_new = '<button class="button-name" id="'+idbutton+'" style="color:#6ea262;background:none;border:none;border-bottom:1px dashed">'+cont_old+'</button>';
+                var cont_new = '<button class="button-comment" id="'+idbutton+'" style="color:#6ea262;background:none;border:none;border-bottom:1px dashed">'+cont_old+'</button>';
                 if (idbutton!='butcomined') {
                     $(this).html(cont_new);
                 }
             });
-            $('.button-name').on('click', function () {
-                $('a .button-name').click(function(){ return false;});
+            $('.button-comment').on('click', function () {
+                $('a .button-comment').click(function(){ return false;});
                 var idbutton = $(this).attr('id');
                 var idbuttons = String(idbutton);
                 var number = idbuttons.substring(6);   // идентификатор строки
@@ -379,13 +379,13 @@ $js = <<< JS
                 var idnumber = idtds.substring(5);
                 var idbutton = 'butact' + idnumber;
                 var cont_old = $(this).html();
-                var cont_new = '<button class="button-name" id="'+idbutton+'" style="color:#6ea262;background:none;border:none;border-bottom:1px dashed">'+cont_old+'</button>';
+                var cont_new = '<button class="button-active" id="'+idbutton+'" style="color:#6ea262;background:none;border:none;border-bottom:1px dashed">'+cont_old+'</button>';
                 if (idbutton!='butactined') {
                     $(this).html(cont_new);
                 }
             });
-            $('.button-name').on('click', function () {
-                $('a .button-name').click(function(){ return false;});
+            $('.button-active').on('click', function () {
+                $('a .button-active').click(function(){ return false;});
                 var idbutton = $(this).attr('id');
                 var idbuttons = String(idbutton);
                 var number = idbuttons.substring(6);   // идентификатор строки

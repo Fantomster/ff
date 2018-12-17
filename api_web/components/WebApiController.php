@@ -273,4 +273,21 @@ class WebApiController extends \yii\rest\Controller
             }
         }
     }
+
+    /**
+     * Устанавливаем сервисы лицензии которых необходимо проверить
+     *
+     * @param null $service_id
+     */
+    public function setLicenseServiceId($service_id = null)
+    {
+        if ($this->user) {
+            if (is_null($service_id)) {
+                $service_id = $this->user->integration_service_id;
+            }
+            $this->license_service_id = $service_id;
+        } else {
+            $this->license_service_id = null;
+        }
+    }
 }

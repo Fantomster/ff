@@ -160,7 +160,7 @@ class SettingController extends \api_web\components\WebApiController
 
     public function actionUpdate()
     {
-        $this->license_service_id = $this->user->integration_service_id;
+        $this->setLicenseServiceId($this->request['service_id'] ?? null);
         $this->response = $this->container->get('IntegrationSettingsWebApi')->update($this->request);
     }
 
@@ -229,7 +229,7 @@ class SettingController extends \api_web\components\WebApiController
      */
     public function actionGetMainOrganizations()
     {
-        $this->license_service_id = $this->user->integration_service_id;
+        $this->setLicenseServiceId($this->request['service_id'] ?? null);
         $this->response = $this->container->get('IntegrationSettingsWebApi')->getMainOrganizations($this->request);
     }
 
@@ -287,7 +287,7 @@ class SettingController extends \api_web\components\WebApiController
 
     public function actionSetMainOrganizations()
     {
-        $this->license_service_id = $this->user->integration_service_id;
+        $this->setLicenseServiceId($this->request['service_id'] ?? null);
         $this->response = $this->container->get('IntegrationSettingsWebApi')->setMainOrganizations($this->request);
     }
 
@@ -335,7 +335,7 @@ class SettingController extends \api_web\components\WebApiController
 
     public function actionResetMainOrgSetting()
     {
-        $this->license_service_id = $this->user->integration_service_id;
+        $this->setLicenseServiceId($this->request['service_id'] ?? null);
         $this->response = $this->container->get('IntegrationSettingsWebApi')->resetMainOrgSetting($this->request);
     }
 }

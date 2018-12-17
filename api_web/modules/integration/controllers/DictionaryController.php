@@ -23,7 +23,7 @@ class DictionaryController extends \api_web\components\WebApiController
      */
     public function beforeAction($action)
     {
-        $this->license_service_id = $this->user->integration_service_id;
+        $this->setLicenseServiceId($this->request['service_id'] ?? null);
         return parent::beforeAction($action);
     }
 

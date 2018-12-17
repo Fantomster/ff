@@ -36,7 +36,7 @@ class SyncController extends WebApiController
      */
     public function beforeAction($action)
     {
-        $this->license_service_id = $this->user->integration_service_id;
+        $this->setLicenseServiceId($this->request['service_id'] ?? null);
         return parent::beforeAction($action);
     }
 

@@ -13,6 +13,8 @@ use yii\filters\AccessControl;
 use yii\web\Response;
 use yii\helpers\ArrayHelper;
 use kartik\grid\EditableColumnAction;
+use common\models\search\iikoAgentSearch;
+use Yii;
 
 class SyncController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
@@ -124,12 +126,14 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
      */
     public function actionAgentView()
     {
-        $dataProvider = new ActiveDataProvider([
-            'query' => iikoAgent::find()->where(['org_id' => $this->organisation_id])
-        ]);
-
+        $searchModel = new iikoAgentSearch;
+        $params = Yii::$app->request->getQueryParams();
+        $organization = User::findOne(Yii::$app->user->id)->organization_id;
+        $searchModel->load(Yii::$app->request->get());
+        $dataProvider = $searchModel->search($params, $organization);
         return $this->render('agent-view', [
             'dataProvider' => $dataProvider,
+            'searchModel'  => $searchModel,
         ]);
     }
 
@@ -148,14 +152,15 @@ class SyncController extends \frontend\modules\clientintegr\controllers\DefaultC
     }
 
     /**
-     * Формирование списка поставщиков по введенным символам
+     * Формирование списка поставщиков по введённым символам
      * @param null $term
      * @return mixed
      * @throws \yii\db\Exception
      */
-    public function actionAgentAutocomplete($term = null)
+    public function actionAgentAutocomplete()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $term = '';
 
         if (!is_null($term)) {
 

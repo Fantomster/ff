@@ -724,7 +724,6 @@ class Order extends \yii\db\ActiveRecord
                     && isset($glnArray['vendor_gln'])
                     && $glnArray['client_gln'] > 0
                     && $glnArray['vendor_gln'] > 0
-
                 ) {
                     $ediIntegration = new EDIIntegration(['orgId' => $vendor->id, 'clientId' => $client->id, 'providerID' => $glnArray['provider_id']]);
                     $result = true;
@@ -736,13 +735,12 @@ class Order extends \yii\db\ActiveRecord
                         $result = $ediIntegration->sendOrderInfo($this, true);
                         $this->updateAttributes(['is_recadv_sent' => true]);
                     } elseif ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $this->status == OrderStatus::STATUS_CANCELLED) {
-                        $updatedAtPlusTenSeconds = date("Y-m-d H:i:s", (strtotime(date($this->updated_at)) + 10));
-                        $nowDate = date("Y-m-d H:i:s");
-                        if (!$this->edi_order) {
+                        if ($this->edi_order == null) {
                             $result = $ediIntegration->sendOrderInfo($this, false);
-                            $this->updateAttributes(['edi_order' => $this->id]);
-                        } elseif ($this->edi_order && $nowDate > $updatedAtPlusTenSeconds) {
-                            $result = $ediIntegration->sendOrderInfo($this, false);
+                        } else {
+                            if ((isset($changedAttributes['total_price']) && $changedAttributes['total_price'] > 0) || $this->status == OrderStatus::STATUS_CANCELLED) {
+                                $result = $ediIntegration->sendOrderInfo($this, false);
+                            }
                         }
                     }
                     if (!$result) {

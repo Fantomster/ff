@@ -133,8 +133,8 @@ EOXML;
                 return $result;
             }
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
-
             $result = $this->sendDoc($string, $done);
+            $order->updateAttributes(['edi_order' => $order->id]);
             $transaction->commit();
         } catch (Exception $e) {
             Yii::error($e);

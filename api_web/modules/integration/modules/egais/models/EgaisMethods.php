@@ -2,6 +2,7 @@
 
 namespace api_web\modules\integration\modules\egais\models;
 
+use api_web\components\definitions\egais\actWriteOff\ActWriteOffV3;
 use api_web\components\definitions\egais\actWriteOn\ActChargeOnV2;
 use api_web\components\Registry;
 use api_web\components\ValidateRequest;
@@ -117,14 +118,13 @@ class EgaisMethods extends WebApi
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
+     * @throws \api_web\exceptions\ValidationException
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
     public function actWriteOff(array $request)
     {
-        if (empty($request['xml'])) {
-            throw new BadRequestHttpException('dictionary.request_error');
-        }
+        ValidateRequest::loadData(ActWriteOffV3::class, $request);
 
         $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $this->user->organization_id);
 
@@ -132,7 +132,7 @@ class EgaisMethods extends WebApi
             throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
 
-        $return = (new EgaisHelper())->sendActWriteOff($settings['egais_url'], $request['xml'], 'ActWriteOff_v3');
+        $return = (new EgaisHelper())->sendActWriteOff($settings, $request, 'ActWriteOff_v3');
 
         return [
             'result' => $return

@@ -70,31 +70,36 @@ class EgaisHelper extends WebApi
     }
 
     /**
-     * @param string $url
-     * @param string $data
+     * @param array $settings
+     * @param array $request
      * @param string $queryType
-     * @return bool|string
+     * @return string
      * @throws BadRequestHttpException
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    public function sendActWriteOff(string $url, string $data, string $queryType)
+    public function sendActWriteOff(array $settings, array $request, string $queryType)
     {
-        $result = (new XmlParser())->parseActWriteOffV3($data);
-        $typeWriteOff = EgaisTypeWriteOff::findOne(['type' => $result['TypeWriteOff']]);
         $orgId = $this->user->organization_id;
+        $numberAct = EgaisWriteOff::find()
+            ->select(['act_number'])
+            ->where((['org_id' => $orgId]))
+            ->orderBy(['act_number' => SORT_DESC])
+            ->one();
+        $date = date('Y-m-d');
 
-        if (EgaisWriteOff::find()->where(['org_id' => $orgId, 'act_number' => $result['ActNumber']])->exists()) {
-            throw new BadRequestHttpException('dictionary.act_write_off_number_error');
-        }
+        $request['date'] = $date;
+        $request['number'] = !empty($numberAct) ? ++$numberAct->act_number : 101;
+
+        $typeWriteOff = EgaisTypeWriteOff::findOne(['type' => $request['type_write_off']]);
 
         $newAct = new EgaisWriteOff([
             'org_id' => $orgId,
-            'identity' => $result['identity'],
-            'act_number' => $result['ActNumber'],
-            'act_date' => $result['ActDate'],
+            'identity' => $request['identity'],
+            'act_number' => $request['number'],
+            'act_date' => $request['date'],
             'type_write_off' => $typeWriteOff->id,
-            'note' => $result['Note'],
+            'note' => $request['note'],
             'status' => null,
         ]);
 
@@ -102,7 +107,9 @@ class EgaisHelper extends WebApi
             throw new BadRequestHttpException('Could not save to database, check your xml document!');
         }
 
-        return self::sendEgaisQuery($url, $data, $queryType);
+        $xmlFile = EgaisXmlFiles::actWriteOffV3($settings['fsrar_id'], $request);
+
+        return self::sendEgaisQuery($settings['egais_url'], $xmlFile, $queryType);
     }
 
 

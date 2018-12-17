@@ -10,7 +10,7 @@ use api_web\components\ValidateRequest;
 class ItemInformF1 extends ValidateRequest
 {
     /**
-     * @SWG\Property(@SWG\Xml(name="quantity"), example="20")
+     * @SWG\Property(@SWG\Xml(name="quantity"), example=20)
      * @var integer
      */
     public $quantity;

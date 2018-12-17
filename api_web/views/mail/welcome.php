@@ -7,7 +7,7 @@
                        style="max-width: 680px; min-width: 320px; background: #ffffff;">
                     <tr>
                         <td align="center" valign="middle" height="320"
-                            style="width: 100%;background-image: url('https://preview.ibb.co/bRS9nH/banner_fruits.png');background-repeat: no-repeat;background-position: 0 -15px;background-size: cover;">
+                            style="width: 100%;background-image: url('https://static.mixcart.ru/banner_fruits.png');background-repeat: no-repeat;background-position: 0 -15px;background-size: cover;background-color:#84bf76;">
                             <font style="font-family: 'Open Sans', Arial, sans-serif;font-size: 40px;color: #ffffff;font-weight: bold;text-transform: uppercase;">
                             <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 40px;color: #ffffff;line-height: normal;">
                                 <?= Yii::t('app', 'common.mail.welcome.head_good', ['ru' => 'Здорово,']) ?>
@@ -67,7 +67,7 @@
                     <td align="center" valign="top" height="90" class="btn-wrapper"
                         style="color: #ffffff;font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;">
                         <a href="<?= \Yii::$app->urlManagerFrontend->baseUrl ?>" target="_blank"
-                           style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;text-decoration: none;color: #ffffff;display: block;width: 280px;background-image: url('https://image.ibb.co/eydtxH/btn_hover.png');background-position: -3px -12px;background-repeat: no-repeat;height: 83px;">
+                           style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;text-decoration: none;color: #ffffff;display: block;width: 280px;background-image: url('https://static.mixcart.ru/btn_hover.png');background-position: -3px -12px;background-repeat: no-repeat;height: 83px;background-color:#84bf76;">
                             <font face="'Open Sans', Arial, sans-serif"
                                   style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;color: #ffffff;">
                             <span style="font-family: 'Open Sans', Arial, sans-serif;font-size: 24px;line-height: 60px;color: #ffffff;">

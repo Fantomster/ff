@@ -2,7 +2,9 @@
 
 namespace api_web\modules\integration\modules\egais\models;
 
+use api_web\components\definitions\egais\actWriteOn\ActChargeOnV2;
 use api_web\components\Registry;
+use api_web\components\ValidateRequest;
 use api_web\components\WebApi;
 use api_web\modules\integration\modules\egais\helpers\EgaisHelper;
 use api_web\modules\integration\modules\egais\classes\EgaisXmlFiles;
@@ -94,14 +96,13 @@ class EgaisMethods extends WebApi
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
+     * @throws \api_web\exceptions\ValidationException
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
     public function actWriteOn(array $request)
     {
-        if (empty($request['xml'])) {
-            throw new BadRequestHttpException('dictionary.request_error');
-        }
+        ValidateRequest::loadData(ActChargeOnV2::class, $request);
 
         $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $this->user->organization_id);
 
@@ -109,7 +110,7 @@ class EgaisMethods extends WebApi
             throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
 
-        $return = (new EgaisHelper())->sendActWriteOn($settings['egais_url'], $request['xml'], 'ActChargeOn_v2');
+        $return = (new EgaisHelper())->sendActWriteOn($settings, $request, 'ActChargeOn_v2');
 
         return [
             'result' => $return

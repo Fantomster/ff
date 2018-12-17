@@ -119,40 +119,6 @@ $this->title = 'Интеграция с 1С Общепит';
                                         return Organization::get_value($model->vendor_id)->name ?? '(не задано)';
                                     },
                                 ],
-                                /*[
-                                    'class' => 'kartik\grid\EditableColumn',
-                                    'attribute' => 'vendor_id',
-                                    'label' => 'Поставщик MixCart',
-                                    'vAlign' => 'middle',
-                                    'width' => '210px',
-                                    'contentOptions' => function ($model) {
-                                        return ["id" => "mixct0" . $model['id']];
-                                    },
-                                    'refreshGrid' => true,
-                                    'editableOptions' => function($model) {return [
-                                        'asPopover' => true,
-                                        'name' => 'vendor_id',
-                                        'formOptions' => ['action' => ['agent-mapping']],
-                                        'header' => 'Поставщик MixCart',
-                                        'size' => 'md',
-                                        'inputType' => \kartik\editable\Editable::INPUT_SELECT2,
-                                        'displayValue' => isset($model->vendor) ? $model->vendor->name : null,
-                                        'options' => [
-                                            'data' => [$model->vendor_id => isset($model->vendor) ? $model->vendor->name : ''],
-                                            'options' => ['placeholder' => 'Выберите поставщика из списка',
-                                            ],
-                                            'pluginOptions' => [
-                                                'minimumInputLength' => 2,
-                                                'ajax' => [
-                                                    'url' => Url::toRoute(['agent-autocomplete']),
-                                                    'dataType' => 'json',
-                                                    'data' => new JsExpression('function(params) { return {term:params.term}; }')
-                                                ],
-                                                'allowClear' => true
-                                            ],
-                                        ]
-                                    ];}
-                                    ],*/
                                 'inn_kpp',
                                 'updated_at',
                             ],
@@ -238,7 +204,12 @@ $js = <<< JS
                                             sel = sel+'<select id="selpos" name="list_tovar" class="swal2-input">';
                                             var index;
                                             for (index = 0; index < data.length; ++index) {
-                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['name']+'</option>';
+                                                if (data[index]['name'] == cont_old) {
+                                                    var app = ' selected';
+                                                } else {
+                                                    var app = '';
+                                                }
+                                                sel = sel+'<option value="'+data[index]['id']+'"'+app+'>'+data[index]['name']+'</option>';
                                             }
                                             sel = sel+'</select></div>';
                                     } else {
@@ -266,7 +237,12 @@ $js = <<< JS
                                             sel = sel+'<select id="selpos" name="list_postav" class="swal2-input">';
                                             var index;
                                             for (index = 0; index < data.length; ++index) {
-                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['name']+'</option>';
+                                                if (data[index]['name'] == cont_old) {
+                                                    var app = ' selected';
+                                                } else {
+                                                    var app = '';
+                                                }
+                                                sel = sel+'<option value="'+data[index]['id']+'"'+app+'>'+data[index]['name']+'</option>';
                                             }
                                             sel = sel+'</select></div>';
                                         } else {

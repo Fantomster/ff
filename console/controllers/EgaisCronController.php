@@ -253,7 +253,8 @@ class EgaisCronController extends Controller
             $egaisProduct = EgaisProductOnBalance::find()
                 ->where([
                     'org_id' => $queryRest->org_id,
-                    'alc_code' => $product['Product']['AlcCode']
+                    'inform_a_reg_id' => $product['InformARegId'],
+                    'inform_b_reg_id' => $product['InformBRegId']
                 ])
                 ->one();
 

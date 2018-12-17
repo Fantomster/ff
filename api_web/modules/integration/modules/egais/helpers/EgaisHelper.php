@@ -3,6 +3,7 @@
 namespace api_web\modules\integration\modules\egais\helpers;
 
 use api_web\components\WebApi;
+use api_web\modules\integration\modules\egais\classes\EgaisXmlFiles;
 use api_web\modules\integration\modules\egais\classes\XmlParser;
 use common\models\egais\EgaisActWriteOn;
 use common\models\egais\EgaisQueryRests;
@@ -106,41 +107,45 @@ class EgaisHelper extends WebApi
 
 
     /**
-     * @param string $url
-     * @param string $data
+     * @param array $settings
+     * @param array $request
      * @param string $queryType
      * @return bool
      * @throws BadRequestHttpException
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    public function sendActWriteOn(string $url, string $data, string $queryType)
+    public function sendActWriteOn(array $settings, array $request, string $queryType)
     {
-        $result = (new XmlParser())->parseActChargeOnV2($data);
-
-        $typeWriteOn = EgaisTypeChargeOn::findOne(['type' => $result['TypeChargeOn']]);
         $orgId = $this->user->organization_id;
+        $numberAct = EgaisActWriteOn::find()
+            ->select(['number'])
+            ->where((['org_id' => $orgId]))
+            ->orderBy(['number' => SORT_DESC])
+            ->one();
+        $date = date('Y-m-d');
 
-        if (EgaisActWriteOn::find()->where(['org_id' => $orgId, 'number' => $result['Number']])->exists()) {
-            throw new BadRequestHttpException('dictionary.act_write_off_number_error');
-        }
+        $request['date'] = $date;
+        $request['number'] = !empty($numberAct) ? ++$numberAct->number : 101;
+
+        $xmlFile = EgaisXmlFiles::actChargeOnV2($settings['fsrar_id'], $request);
+        $typeWriteOn = EgaisTypeChargeOn::findOne(['type' => $request['type']]);
 
         $newAct = new EgaisActWriteOn([
             'org_id' => $orgId,
-            'number' => $result['Number'],
-            'act_date' => $result['ActDate'],
+            'number' => $request['number'],
+            'act_date' => $request['date'],
             'type_charge_on' => $typeWriteOn->id,
-            'note' => $result['Note'],
+            'note' => $request['note'],
             'status' => null,
         ]);
 
         $client = new Client();
         $queryRests = $client->createRequest()
             ->setMethod('POST')
-            ->setUrl("{$url}/opt/in/{$queryType}")
-            ->addFileContent('xml_file', $data)
+            ->setUrl("{$settings['egais_url']}/opt/in/{$queryType}")
+            ->addFileContent('xml_file', $xmlFile)
             ->send();
-
         if (!$queryRests->isOk && !$newAct->save()) {
             throw new BadRequestHttpException('dictionary.request_error');
         }

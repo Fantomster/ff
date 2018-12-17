@@ -759,8 +759,7 @@ class Order extends \yii\db\ActiveRecord
         }
     }
 
-    public
-    function getEdiOrderDocType()
+    public function getEdiOrderDocType()
     {
         $docType = null;
         if ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
@@ -775,8 +774,7 @@ class Order extends \yii\db\ActiveRecord
         return $docType;
     }
 
-    public
-    function afterDelete()
+    public function afterDelete()
     {
         parent::afterDelete();
         if (!is_a(Yii::$app, 'yii\console\Application')) {
@@ -790,8 +788,7 @@ class Order extends \yii\db\ActiveRecord
      * @param $user
      * @return string
      */
-    public
-    function getUrlForUser($user, $appVersion = 1)
+    public function getUrlForUser($user, $appVersion = 1)
     {
         if ($user instanceof User) {
 
@@ -854,8 +851,7 @@ class Order extends \yii\db\ActiveRecord
      * @param $user
      * @return Organization|null
      */
-    public
-    function getOrganizationByUser($user)
+    public function getOrganizationByUser($user)
     {
         $clientRelation = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $this->client_id]);
         if (isset($clientRelation)) {
@@ -871,8 +867,7 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public
-    function getCurrency()
+    public function getCurrency()
     {
         return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
     }
@@ -880,8 +875,7 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public
-    function getInvoice()
+    public function getInvoice()
     {
         return $this->hasOne(IntegrationInvoice::className(), ['order_id' => 'id']);
     }
@@ -889,8 +883,7 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public
-    function getInvoiceRelation()
+    public function getInvoiceRelation()
     {
         return $this->hasOne(IntegrationInvoice::className(), ['id' => 'invoice_relation']);
     }
@@ -898,8 +891,7 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return string
      */
-    public
-    function formatPrice()
+    public function formatPrice()
     {
         return $this->total_price . " " . $this->currency->symbol;
     }
@@ -907,8 +899,7 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public
-    function getAttachments()
+    public function getAttachments()
     {
         return $this->hasMany(OrderAttachment::className(), ['order_id' => 'id']);
     }
@@ -916,8 +907,7 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public
-    function getAssignment()
+    public function getAssignment()
     {
         return $this->hasOne(OrderAssignment::className(), ['order_id' => 'id']);
     }
@@ -925,8 +915,7 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public
-    function getRelatedEmails()
+    public function getRelatedEmails()
     {
         return $this->hasMany(EmailQueue::className(), ['order_id' => 'id']);
     }
@@ -935,8 +924,7 @@ class Order extends \yii\db\ActiveRecord
      * @return string
      * @throws \yii\base\InvalidConfigException
      */
-    public
-    function getFormattedCreationDate()
+    public function getFormattedCreationDate()
     {
         return Yii::$app->formatter->asDatetime($this->created_at, "php:d.m.Y, H:i");
     }
@@ -945,8 +933,7 @@ class Order extends \yii\db\ActiveRecord
      * @param null $service_id
      * @return array|Waybill[]|ActiveRecord[]
      */
-    public
-    function getWaybills($service_id = null)
+    public function getWaybills($service_id = null)
     {
         $query = (new Query())
             ->distinct()
@@ -970,8 +957,7 @@ class Order extends \yii\db\ActiveRecord
      *
      * @return string
      */
-    public
-    function getTotalPrice()
+    public function getTotalPrice()
     {
         $total_price = $this->getAttribute('total_price');
         return number_format(round($total_price, 2), 2, '.', '');
@@ -983,8 +969,7 @@ class Order extends \yii\db\ActiveRecord
      * @return array|null
      * @throws \yii\db\Exception
      */
-    public
-    function getOrderContentWithOutWaybill()
+    public function getOrderContentWithOutWaybill()
     {
         $query = new Query();
         $query->select('oc.id');

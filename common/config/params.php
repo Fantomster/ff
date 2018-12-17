@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'app_version' => 1,
     'google-api'              => [
         'key-id'   => 'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
         'language' => 'ru-RU'
@@ -21,6 +22,7 @@ return [
     'default_franchisee_id'   => 1,
     //static urls
     'shortHome'               => 'mixcart.ru',
+    'appUrl'                  => 'https://app.mixcart.ru',
     'staticUrl'               => [
         'ru' => [
             'market'    => 'https://market.mixcart.ru/',
@@ -74,7 +76,7 @@ return [
     /**
      * Логирование запросов к ВебАпи
      */
-    'web_api_log'             => true,
+    'web_api_log'             => false,
     'e_com'                   => [
         'login'       => 'markettest',
         'pass'        => 'e1fa52810ea9d18a5af901c147c804e6',
@@ -102,5 +104,6 @@ return [
         'edi_api_leradata_url'       => 'https://leradata.pro/api/vetis/api.php',
         'edi_api_order_document_id'  => 220,
         'edi_api_recadv_document_id' => 351
-    ]
+    ],
+    'disable_daemon_logs' => true,
 ];

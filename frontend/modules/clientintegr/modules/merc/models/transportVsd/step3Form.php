@@ -15,6 +15,7 @@ class step3Form extends Model
 {
     public $recipient;
     public $hc;
+    public $hc_inn;
     public $isTTN;
     public $seriesTTN;
     public $numberTTN;
@@ -35,7 +36,7 @@ class step3Form extends Model
         return [
             [['recipient', 'hc', 'isTTN'], 'required'],
             [['recipient', 'hc', 'numberTTN', 'dateTTN', 'typeTTN'], 'required', 'on' => 'isTTN'],
-            [['isTTN'],'integer'],
+            [['isTTN', 'hc_inn'],'integer'],
             [['recipient', 'hc', 'seriesTTN', 'numberTTN', 'typeTTN', 'hc_name', 'dateTTN'], 'string'],
         ];
     }
@@ -45,6 +46,7 @@ class step3Form extends Model
         return [
             'recipient' => 'Предприятие-получатель',
             'hc_name' => 'Фирма-получатель',
+            'hc_inn' => 'ИНН Фирмы-получателя',
             'isTTN' => 'Наличие TTN',
             'seriesTTN' => 'Серия ТТН',
             'numberTTN' => 'Номер ТТН',

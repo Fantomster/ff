@@ -17,6 +17,8 @@ use Yii;
  * @property string       $updated_at
  * @property Organization $organization
  * @property Request      $request
+ * 
+ * @property User[]       $recipientsListForVendor
  */
 class RequestCallback extends \yii\db\ActiveRecord
 {
@@ -106,6 +108,17 @@ class RequestCallback extends \yii\db\ActiveRecord
                 \api\modules\v1\modules\mobile\components\notifications\NotificationRequest::actionRequestCallback($this, true);
             }
         }
+    }
+    
+    public function getRecipientsListForVendor()
+    {
+        return User::find()
+                        ->join('LEFT JOIN', RelationUserOrganization::tableName() . ' as ruo', User::tableName() . '.organization_id = ruo.organization_id')
+                        ->where([
+                            'ruo.organization_id' => $this->supp_org_id,
+                            'ruo.role_id'         => Role::ROLE_SUPPLIER_MANAGER,
+                        ])
+                        ->all();
     }
 
 }

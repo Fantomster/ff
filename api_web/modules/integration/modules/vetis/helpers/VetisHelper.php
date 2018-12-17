@@ -11,7 +11,8 @@ namespace api_web\modules\integration\modules\vetis\helpers;
 use api\common\models\merc\MercVsd;
 use api_web\classes\UserWebApi;
 use api_web\components\Registry;
-use common\helpers\DBNameHelper;
+use api_web\helpers\WebApiHelper;
+use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
 use api_web\modules\integration\modules\vetis\api\cerber\cerberApi;
 use common\models\vetis\VetisCountry;
@@ -20,7 +21,6 @@ use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
 use yii\db\Expression;
 use yii\db\Query;
-use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -81,9 +81,6 @@ class VetisHelper
         $country = VetisCountry::findOne(['guid' => $this->vsdModel->origin_country_guid]);
         $this->country_name = isset($country) ? $country->name : null;
 
-        if (isset($this->vsdModel->referencedDocument)) {
-            $this->setTransportWaybill($this->vsdModel->referencedDocument);
-        }
         $transportInfo = json_decode($this->vsdModel->transport_info, true);
         $this->vehicle_number = isset($transportInfo['transportNumber']['vehicleNumber']) ? $transportInfo['transportNumber']['vehicleNumber'] : null;
         $other = json_decode($this->vsdModel->other_info, true);
@@ -93,7 +90,7 @@ class VetisHelper
         $this->location_prosperity = $other['locationProsperity'];
         $this->special_marks = $other['specialMarks'];
         $this->issueNumber = (isset($this->vsdModel->number)) ? $this->vsdModel->number : null;
-        $this->issueDate = $this->vsdModel->date_doc;
+        $this->issueDate = WebApiHelper::asDatetime($this->vsdModel->date_doc);
         $this->form = $this->vsdModel->form;
         $this->type = MercVsd::$types[$this->vsdModel->type];
         $this->status = $this->vsdModel->status;
@@ -132,22 +129,22 @@ class VetisHelper
         $unit = VetisUnit::findOne(['guid' => $this->vsdModel->unit_guid]);;
         $this->volume = $this->vsdModel->amount . (isset($unit) ? " " . $unit->name : '');
 
-        $this->date_of_production = $this->vsdModel->production_date;
-        $this->expiry_date_of_production = $this->vsdModel->expiry_date;
+        $this->date_of_production = WebApiHelper::asDatetime($this->vsdModel->production_date);
+        $this->expiry_date_of_production = WebApiHelper::asDatetime($this->vsdModel->expiry_date);
         $this->perishable_products = isset($this->vsdModel->perishable) ? (($this->vsdModel->perishable == 'true') ? 'Да' :
             'Нет') : null;
 
         $laboratory_research = json_decode($this->vsdModel->laboratory_research, true);
         $this->expertiseInfo = 'Экспертиза не проводилась';
         try {
-            if (array_key_exists('batchID', $laboratory_research)){
+            if (array_key_exists('batchID', $laboratory_research)) {
                 $this->expertiseInfo = mb_convert_encoding(
-                    $laboratory_research['indicator']['name'] . ' : ' . $laboratory_research['operator']['name'] . " эксп №" . $laboratory_research['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($laboratory_research['actualDateTime'])) . " ( " . $laboratory_research['conclusion'] . " )",  "UTF-8", "UTF-8");
+                    $laboratory_research['indicator']['name'] . ' : ' . $laboratory_research['operator']['name'] . " эксп №" . $laboratory_research['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($laboratory_research['actualDateTime'])) . " ( " . $laboratory_research['conclusion'] . " )", "UTF-8", "UTF-8");
             } else {
                 $arTmp = [];
                 foreach ($laboratory_research as $item) {
                     $arTmp[] = mb_convert_encoding(
-                        $item['indicator']['name'] . ' : ' . $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . date("Y-m-d h:i:s", strtotime($item['actualDateTime'])) . " ( " . $item['conclusion'] . " )", "UTF-8", "UTF-8");
+                        $item['indicator']['name'] . ' : ' . $item['operator']['name'] . " эксп №" . $item['expertiseID'] . " от " . WebApiHelper::asDatetime($item['actualDateTime']) . " ( " . $item['conclusion'] . " )", "UTF-8", "UTF-8");
                 }
                 $this->expertiseInfo = $arTmp;
             }
@@ -177,7 +174,7 @@ class VetisHelper
         $this->specified_person_post = $specPerson['post'] ?? "-";
 
         $this->waybillSeries = $this->vsdModel->waybill_number;
-        $this->waybillDate = $this->vsdModel->waybill_date;
+        $this->waybillDate = WebApiHelper::asDatetime($this->vsdModel->waybill_date);
         return $this;
     }
 
@@ -218,56 +215,6 @@ class VetisHelper
     }
 
     /**
-     * @param int   $id
-     * @param array $uuids
-     * @return array|bool
-     */
-    public function getGroupInfo(int $id, $uuids)
-    {
-        $tableName = $this->getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
-        $query = (new Query())
-            ->select(
-                [
-                    'COUNT(oc.id) as count',
-                    'o.created_at',
-                    'o.total_price',
-                    'vendor.name as vendor_name',
-                    'GROUP_CONCAT(DISTINCT `m`.`status` SEPARATOR \',\') AS `statuses`',
-                ]
-            )
-            ->from('order o')
-            ->innerJoin('order_content oc', 'oc.order_id = o.id')
-            ->innerJoin('organization vendor', 'o.vendor_id = vendor.id')
-            ->leftJoin('`' . $tableName . '`.merc_vsd m', 'm.uuid = oc.merc_uuid COLLATE utf8_unicode_ci')
-            ->where(['o.id' => $id])
-            ->andWhere('oc.merc_uuid is not null')
-            ->andWhere(['m.uuid' => $uuids])
-            ->one(\Yii::$app->db);
-
-        if (!is_null($query['statuses'])) {
-            $query['statuses'] = $this->getStatusForGroup($query['statuses']);
-        }
-
-        if ($query['count'] == 0) {
-            return null;
-        }
-
-        return $query;
-    }
-
-    /**
-     * Get database name from config
-     *
-     * @param string $name
-     * @param string $dsn dsn string from config
-     * @return string database name
-     * */
-    public function getDsnAttribute($name, $dsn)
-    {
-        return DBNameHelper::getDsnAttribute($name, $dsn);
-    }
-
-    /**
      * Get group status from array statuses
      *
      * @param string $strStatuses
@@ -275,7 +222,7 @@ class VetisHelper
      * */
     public function getStatusForGroup($strStatuses)
     {
-        $statuses = explode(',', $strStatuses);
+        $statuses = array_unique(explode(',', $strStatuses));
         if (count($statuses) > 1) {
             return [
                 'id'   => 'CONFIRMED',
@@ -293,59 +240,30 @@ class VetisHelper
     }
 
     /**
-     * @param       $models
-     * @param array $order_ids
-     * @return array
-     */
-    public function attachModelsInDocument($models, array $order_ids)
-    {
-        $tableName = $this->getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
-        $query = (new Query())
-            ->select("
-                `m`.uuid,
-                `m`.`sender_name`,
-                `m`.`product_name`,
-                `m`.`status`,
-                `m`.`last_update_date` as status_date,
-                `m`.`amount`,
-                `m`.`unit`,
-                `m`.`production_date`,
-                `m`.`date_doc`,
-                `o`.id as document_id
-            ")
-            ->from('order o')
-            ->leftJoin('order_content oc', 'oc.order_id = o.id')
-            ->leftJoin('`' . $tableName . '`.merc_vsd m', 'm.uuid = oc.merc_uuid')
-            ->where(['in', 'o.id', $order_ids])
-            ->andWhere('oc.merc_uuid is not null')
-            ->all();
-
-        $query = ArrayHelper::index($query, 'uuid');
-
-        $models = ArrayHelper::merge($models, $query);
-
-        return $models;
-    }
-
-    /**
+     * Список доступных ВСД
+     *
      * @param $uuids
      * @return array|\yii\db\ActiveRecord[]
      * @throws \Exception
      */
     public function getAvailableVsd($uuids)
     {
-        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
-        $arOrgIds = array_map(function ($el) {
-            return $el['id'];
-        }, $orgIds['result']);
+        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList('id');
 
         return MercVsd::find()->select(['uuid', 'recipient_guid', 'sender_guid'])
-            ->leftJoin('merc_pconst mc', 'mc.const_id=10 and mc.value=merc_vsd.recipient_guid')
-            ->where(['mc.org' => $arOrgIds])
-            ->andWhere(['uuid' => $uuids])->indexBy('uuid')->all();
+            ->leftJoin(IntegrationSetting::tableName() . ' is', "is.name='enterprise_guid' and is.service_id = :service_id",
+                [':service_id' => Registry::MERC_SERVICE_ID])
+            ->leftJoin(IntegrationSettingValue::tableName() . ' isv', 'isv.setting_id=is.id and isv.value = merc_vsd.recipient_guid')
+            ->where(['isv.org_id' => array_keys($orgIds['result'])])
+            ->andWhere(['uuid' => $uuids])
+            ->andWhere('LENGTH(merc_vsd.recipient_guid) > :len', [':len' => 35])
+            ->indexBy('uuid')
+            ->all();
     }
 
     /**
+     * Получить массив не погашенных ВСД и их общее число
+     *
      * @param null $enterpriseGuids
      * @return array
      * @throws \Exception
@@ -355,28 +273,34 @@ class VetisHelper
         if (!$enterpriseGuids) {
             $enterpriseGuids = $this->getEnterpriseGuids();
         }
-        $query = (new Query())->select(['GROUP_CONCAT(uuid) as uuids', 'COUNT(*) as count'])->from('merc_vsd')
-            ->where(['status' => 'CONFIRMED', 'recipient_guid' => $enterpriseGuids])->one(\Yii::$app->db_api);
+        $queryResult = (new Query())->select(['uuid'])
+            ->from(MercVsd::tableName())
+            ->where(['status' => 'CONFIRMED', 'recipient_guid' => $enterpriseGuids])
+            ->column(\Yii::$app->db_api);
 
         return [
-            'uuids' => explode(',', $query['uuids']),
-            'count' => $query['count'],
+            'uuids' => $queryResult,
+            'count' => count($queryResult),
         ];
     }
 
     /**
-     * @return mixed
+     * Возвращает массив enterprise_guid для всех доступных бизнесов, при неудаче возвращает пустой массив
+     *
+     * @return array
      * @throws \Exception
      */
     public function getEnterpriseGuids()
     {
-        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList();
-        foreach ($orgIds['result'] as $orgId) {
-            $entGuid = $this->getSettings($orgId['id'], ['enterprise_guid']);
-            $enterpriseGuids[$entGuid] = $entGuid;
-        }
+        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList('id');
 
-        return $enterpriseGuids;
+        return (new Query())->select('value')->distinct()
+            ->from(IntegrationSettingValue::tableName() . ' isv')
+            ->leftJoin(IntegrationSetting::tableName() . ' is', "isv.setting_id=is.id and is.service_id=:service_id",
+                [':service_id' => Registry::MERC_SERVICE_ID])
+            ->where(['isv.org_id' => array_keys($orgIds['result']), 'is.name' => 'enterprise_guid'])
+            ->andWhere('LENGTH(value) > 35')
+            ->column(\Yii::$app->db_api);
     }
 
     /**

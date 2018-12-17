@@ -168,7 +168,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             $model->decision = VetDocumentDone::PARTIALLY;
         }
         
-        try {
+        //try {
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $api = mercuryApi::getInstance();
 
@@ -203,13 +203,13 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
                 }
                 return $this->redirect(['view', 'uuid' => $uuid]);
             }
-        } catch (\Error $e) {
+       /* } catch (\Error $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
         } catch (\Exception $e) {
             Yii::$app->session->setFlash('error', $this->getErrorText($e));
             return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-        }
+        }*/
         
         try {
             $document = new getVetDocumentByUUID();
@@ -362,15 +362,4 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         MercVsd::getUpdateData(Yii::$app->user->identity->organization_id);
         return true; // in case of error return true anyway, like hand_only is set
     }
-    
-    private function getErrorText($e)
-    {
-        Yii::error($e->getMessage() . " " . $e->getTraceAsString());
-        if ($e->getCode() == 600) {
-            return "При обращении к api Меркурий возникла ошибка. Ошибка зарегистрирована в журнале за номером №" . $e->getMessage() . ". Если ошибка повторяется обратитесь в техническую службу.";
-        } else {
-            return "При обращении к api Меркурий возникла ошибка. Если ошибка повторяется обратитесь в техническую службу.";
-        }
-    }
-    
 }

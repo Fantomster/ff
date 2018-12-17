@@ -5,14 +5,15 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVsd;
-use api_web\classes\UserWebApi;
 use api_web\components\Registry;
 use api_web\components\WebApi;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use api_web\modules\integration\modules\vetis\api\mercury\mercuryApi;
 use api_web\modules\integration\modules\vetis\api\mercury\VetDocumentDone;
+use common\models\IntegrationSettingValue;
+use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
-use common\models\licenses\LicenseService;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -46,9 +47,9 @@ class VetisWaybill extends WebApi
      */
     public function getGroupsList($request)
     {
-        $license = LicenseOrganization::getLicenseForOrganizationService($this->user->organization_id,Registry::MERC_SERVICE_ID);
-        if(!isset($license)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.active_license_not_found', ['ru' => 'Нет активной лицензии для доступа к этой функции']));
+        $license = LicenseOrganization::getLicenseForOrganizationService($this->user->organization_id, Registry::MERC_SERVICE_ID);
+        if (!isset($license)) {
+            throw new BadRequestHttpException('vetis.active_license_not_found');
         }
 
         $reqPag = $request['pagination'] ?? [];
@@ -61,14 +62,9 @@ class VetisWaybill extends WebApi
         $params = $this->helper->set($search, $reqSearch, ['acquirer_id', 'type', 'status', 'sender_guid', 'product_name', 'date']);
         $arResult = $search->search($params, $page, $pageSize);
 
-        foreach ($arResult['groups'] as $group_id => &$v) {
-            $info = $this->helper->getGroupInfo((int)$group_id, array_keys($arResult['uuids']));
-            $v = $info;
-        }
-
         //Строим результат
         $result = [
-            'items'  => $this->getList($arResult['uuids'], $arResult['arIncOut']),
+            'items'  => $arResult['items'],
             'groups' => $arResult['groups']
         ];
         //Ответ для АПИ
@@ -81,21 +77,34 @@ class VetisWaybill extends WebApi
             ]
         ];
 
-        if($page == 1) {
-            if(isset($search->acquirer_id)) {
-                MercVsd::getUpdateData($search->acquirer_id);
-            }
-            else {
-                $businessList = (new UserWebApi())->getUserOrganizationBusinessList($this->user->organization_id);
-                foreach ($businessList['result'] as $item) {
-                    $license = LicenseOrganization::getLicenseForOrganizationService($item['id'], Registry::MERC_SERVICE_ID);
-                    if (isset($license)) {
-                        MercVsd::getUpdateData($item['id']);
+        if ($page == 1) {
+            if (isset($search->acquirer_id)) {
+                $this->sendRequestToUpdate($search->acquirer_id);
+            } else {
+                $result = License::getAllLicense($arResult['org_ids'], Registry::MERC_SERVICE_ID, true);
+                foreach ($result as $license) {
+                    try {
+                        $this->sendRequestToUpdate($license['org_id']);
+                    } catch (\Exception $e) {
+                        continue;
                     }
                 }
             }
         }
         return $return;
+    }
+
+    /**
+     * Отправка запроса на обновление
+     *
+     * @param $org_id
+     */
+    private function sendRequestToUpdate($org_id)
+    {
+        $enterpriseGuid = IntegrationSettingValue::getSettingsByServiceId(Registry::MERC_SERVICE_ID, $org_id, ['enterprise_guid']);
+        if (!empty($enterpriseGuid) && strlen($enterpriseGuid) >= 36) {
+            MercVsd::getUpdateData($org_id, $enterpriseGuid);
+        }
     }
 
     /**
@@ -118,11 +127,11 @@ class VetisWaybill extends WebApi
                 'sender_name'     => $model->sender_name,
                 'status'          => $model->status,
                 'status_text'     => MercVsd::$statuses[$model->status],
-                'status_date'     => $model->last_update_date,
+                'status_date'     => WebApiHelper::asDatetime($model->last_update_date),
                 'amount'          => $model->amount,
                 'unit'            => $model->unit,
-                'production_date' => $model->production_date,
-                'date_doc'        => $model->date_doc,
+                'production_date' => WebApiHelper::asDatetime($model->production_date),
+                'date_doc'        => WebApiHelper::asDatetime($model->date_doc),
                 'vsd_direction'   => $arIncOut[$model->uuid] ?? null,
                 'last_error'      => $model->last_error,
                 'user_status'     => $model->user_status,
@@ -136,7 +145,8 @@ class VetisWaybill extends WebApi
      * Формирование всех фильтров
      *
      * @return array
-     * */
+     * @throws \Exception
+     */
     public function getFilters()
     {
         return [
@@ -189,23 +199,24 @@ class VetisWaybill extends WebApi
     public function getSenderOrProductFilter($request, $filterName)
     {
         if (isset($request['acquirer_id']) && !empty($request['acquirer_id'])) {
-            $enterpriseGuids = mercDicconst::getSetting('enterprise_guid', $request['acquirer_id']);
+            $enterpriseGuides = IntegrationSettingValue::getSettingsByServiceId(Registry::MERC_SERVICE_ID, $request['acquirer_id'], ['enterprise_guid']);
         } else {
-            $enterpriseGuids = $this->helper->getEnterpriseGuids();
+            $enterpriseGuides = $this->helper->getEnterpriseGuids();
         }
-        $query = MercVsd::find();
+        $query = MercVsd::find()->select($filterName)->distinct();
         if (isset($request['search'][$filterName]) && !empty($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);
         }
 
         if ($filterName == 'product_name') {
-            $arResult = $query->andWhere(['or',
-                ['sender_guid' => $enterpriseGuids],
-                ['recipient_guid' => $enterpriseGuids]])
-                ->groupBy('product_name')->all();
-            $result = ArrayHelper::map($arResult, 'product_name', 'product_name');
+            $result = $query->andWhere(['or',
+                ['sender_guid' => $enterpriseGuides],
+                ['recipient_guid' => $enterpriseGuides]])
+                ->indexBy('product_name')
+                ->column();
         } else {
-            $arResult = $query->andWhere(['recipient_guid' => $enterpriseGuids])->groupBy('sender_name')->all();
+            $query->addSelect('sender_guid');
+            $arResult = $query->andWhere(['recipient_guid' => $enterpriseGuides])->groupBy('sender_name')->all();
             $result = ArrayHelper::map($arResult, 'sender_guid', 'sender_name');
         }
 
@@ -233,7 +244,7 @@ class VetisWaybill extends WebApi
      * Полная информация о ВСД
      *
      * @param $request
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|\Exception
      * @return array
      */
     public function getFullInfoAboutVsd($request)
@@ -266,7 +277,7 @@ class VetisWaybill extends WebApi
                     $this->helper->setMercVsdUserStatus(MercVsd::USER_STATUS_EXTINGUISHED, $request['uuid']);
                 }
             } else {
-                throw new BadRequestHttpException('ВСД не принадлежит данной организации: ' . $request['uuid']);
+                throw new BadRequestHttpException('VSD does not belong to this organization|' . $request['uuid']);
             }
         } catch (\Throwable $t) {
             $error = $t->getMessage();

@@ -8,9 +8,10 @@
 
 namespace common\components\edi;
 
-
 use common\models\Catalog;
+use common\models\CatalogGoods;
 use common\models\Currency;
+use common\models\edi\EdiFilesQueue;
 use common\models\Order;
 use common\models\Organization;
 use common\models\RelationSuppRest;
@@ -46,7 +47,6 @@ abstract class AbstractRealization
      */
     public $fileId;
 
-
     /**
      * @var
      */
@@ -57,18 +57,28 @@ abstract class AbstractRealization
      */
     public $fileType;
 
+    public $xml;
+    public $edi;
+
+    public function __construct()
+    {
+        $this->edi = new EDIClass();
+        $this->edi->fileName = $this->fileName;
+    }
+
     /**
-     * @param int $status
+     * @param int    $status
      * @param String $errorText
      * @throws \yii\db\Exception
      */
     protected function updateQueue(int $status, String $errorText): void
     {
-        \Yii::$app->db->createCommand()->update('edi_files_queue', ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText], 'id=' . $this->fileId)->execute();
+        \Yii::$app->db->createCommand()->update(EdiFilesQueue::tableName(), ['updated_at' => new Expression('NOW()'), 'status' => $status, 'error_text' => $errorText], 'id=' . $this->fileId)->execute();
     }
 
     /**
      * check gln code for organization and check orderId if file dont have pricat prefix
+     *
      * @param $content
      * @param $fileName
      * @return bool
@@ -99,11 +109,11 @@ abstract class AbstractRealization
         return true;
     }
 
-
     /**
      * add org id to file in queue table
+     *
      * @var integer $id
-     * @var string $glnCode
+     * @var string  $glnCode
      * @return boolean
      * */
     private function addOrgIdToFile($id, $glnCode)
@@ -126,9 +136,9 @@ abstract class AbstractRealization
         return true;
     }
 
-
     /**
      * Return string between $startTag and $endTag
+     *
      * @param $string
      * @param $startTag
      * @param $endTag
@@ -146,7 +156,7 @@ abstract class AbstractRealization
 
     /**
      * @param Organization $organization
-     * @param Currency $currency
+     * @param Currency     $currency
      * @param Organization $rest
      * @return int
      * @throws \Exception
@@ -180,27 +190,59 @@ abstract class AbstractRealization
         return $catalogID;
     }
 
-
     /**
-     * @param int $catID
-     * @param int $catalogBaseGoodID
+     * @param int   $catID
+     * @param int   $catalogBaseGoodID
      * @param float $price
      * @return bool
      * @throws \yii\db\Exception
      */
-    protected function insertGood(int $catID, int $catalogBaseGoodID, float $price): bool
+    public function insertGood(int $catID, int $catalogBaseGoodID, float $price, int $vat = null): bool
     {
-        $res = \Yii::$app->db->createCommand()->insert('catalog_goods', [
+        $res = Yii::$app->db->createCommand()->insert(CatalogGoods::tableName(), [
             'cat_id'        => $catID,
             'base_goods_id' => $catalogBaseGoodID,
             'created_at'    => new Expression('NOW()'),
             'updated_at'    => new Expression('NOW()'),
             'price'         => $price,
+            'vat'           => $vat
         ])->execute();
         if ($res) {
             return true;
         } else {
             return false;
         }
+    }
+
+    public function parseFile($content, $providerID)
+    {
+        return $this->edi->parseFile($content, $providerID);
+    }
+
+    /**
+     * @return bool
+     * @throws \yii\db\Exception
+     */
+    public function handlePriceListUpdating($xml, $providerID): bool
+    {
+        return $this->edi->handlePriceListUpdating($xml, $providerID);
+    }
+
+    public function handleOrderResponse($simpleXMLElement, $documentType, $providerID, $isAlcohol = false, $isLeraData = false, $exceptionArray = [])
+    {
+        return $this->edi->handleOrderResponse($simpleXMLElement, $documentType, $providerID, $isAlcohol, $isLeraData, $exceptionArray);
+    }
+
+    public function getSendingOrderContent($order, $done, $dateArray, $orderContent)
+    {
+        return $this->edi->getSendingOrderContent($order, $done, $dateArray, $orderContent);
+    }
+
+    /**
+     * @return array
+     */
+    public function getFileList(): array
+    {
+        return $this->edi->getFileList();
     }
 }

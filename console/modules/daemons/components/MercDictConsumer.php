@@ -10,6 +10,7 @@ namespace console\modules\daemons\components;
 
 use api\common\models\merc\mercPconst;
 use api\common\models\RabbitQueues;
+use api_web\helpers\WebApiHelper;
 use frontend\modules\clientintegr\modules\merc\helpers\api\baseApi;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercLogger;
 use yii\db\Expression;
@@ -26,6 +27,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
 
     /**
      * Description
+     *
      * @var baseApi
      */
     protected $instance;
@@ -50,7 +52,9 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
 
     /**
      * Обработка и сохранение результата
+     *
      * @param $list
+     * @return array
      */
     protected function saveList($list)
     {
@@ -107,7 +111,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                 try {
                     //Записываем в базу данные о текущем шаге
                     $this->data['request'] = json_encode($this->request);
-                    if(isset($this->queue)) {
+                    if (isset($this->queue)) {
                         $this->queue->data_request = json_encode($this->data);
                         $this->queue->save();
                     }
@@ -116,8 +120,8 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                     $response = $this->instance->sendRequest($this->method, $this->request);
                     $list = $response->{$this->listName};
                     $offset += $list->count;
-                    $this->log('Load ' . $offset. ' / ' . $list->total . PHP_EOL);
-                    echo 'Load ' . $offset. ' / ' . $list->total . PHP_EOL;
+                    $this->log('Load ' . $offset . ' / ' . $list->total . PHP_EOL);
+                    echo 'Load ' . $offset . ' / ' . $list->total . PHP_EOL;
 
                     if ($list->count > 0) {
                         $result = $this->saveList($list->{$this->listItemName});
@@ -142,20 +146,18 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
                             $step = round($step / 2);
                             $this->request['listOptions']['count'] = $step;
                             //$this->request['listOptions']['offset'] += $this->request['listOptions']['count'];
-                        }
-                        else
-                        {
+                        } else {
                             $this->log('ERROR RECORD' . json_encode($this->request, true) . PHP_EOL);
                             $step = self::DEFAULT_STEP;
                             $this->request['listOptions']['count'] = $step;
                             $this->request['listOptions']['offset'] += 1;
                             $error = 0;
                         }
-                    }elseif ($error > 3) {
+                    } elseif ($error > 3) {
                         throw new \Exception('Error operation');
                     }
                 }
-              $total = $list->total ?? ($this->request['listOptions']['count'] + $this->request['listOptions']['offset'] +1);
+                $total = $list->total ?? ($this->request['listOptions']['count'] + $this->request['listOptions']['offset'] + 1);
             } while ($total > ($this->request['listOptions']['count'] + $this->request['listOptions']['offset']));
         } catch (\Throwable $e) {
             $this->log($e->getMessage() . " " . $e->getTraceAsString() . PHP_EOL);
@@ -165,7 +167,7 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
 
         $this->log("Complete operation success");
 
-        if(isset($this->queue)) {
+        if (isset($this->queue)) {
             $this->queue->data_request = new Expression('NULL');
             $this->queue->save();
         }
@@ -185,9 +187,10 @@ class MercDictConsumer extends AbstractConsumer implements ConsumerInterface
     {
         FireBase::getInstance()->update([
             'mercury',
-            'operation' => $operation."_".$org_id,
+            'operation' => $operation . "_" . $org_id,
         ], [
-            'update_date' => strtotime(gmdate("M d Y H:i:s")),
+            'last_executed'  => \Yii::$app->formatter->asDatetime(gmdate("M d Y H:i:s"), WebApiHelper::$formatDate),
+            'plain_executed' => \Yii::$app->formatter->asDatetime(gmdate("M d Y H:i:s", time() + static::$timeout), WebApiHelper::$formatDate)
         ]);
     }
 }

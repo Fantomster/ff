@@ -46,6 +46,16 @@ class FireBase
     }
 
     /**
+     *
+     */
+    public static function unsetInstance()
+    {
+        if (self::$instance != null) {
+            self::$instance = null;
+        }
+    }
+
+    /**
      * @return FireBase
      */
     private static function createInstance()

@@ -30,14 +30,10 @@ class OuterProductMapSearch extends OuterProductMap
         $outerProductTableName = $dbName . OuterProduct::tableName();
         $outerUnitTableName = $dbName . OuterUnit::tableName();
         $outerStoreTableName = $dbName . OuterStore::tableName();
-        $catalogBaseGoodsTableName = CatalogBaseGoods::tableName();
 
         $this->service_id = $post['service_id'] ?? 0;
         $mainOrgSetting = IntegrationSettingValue::getSettingsByServiceId($this->service_id, $client->id, ['main_org']);
         $mainOrgId = !empty($mainOrgSetting) ? $mainOrgSetting : $client->id;
-
-//where a . rest_org_id = 6430
-//    and a . supp_org_id = 6559;
 
         $query = (new Query())->select([
             "coalesce(e_c.id, e_m.id) id",
@@ -45,7 +41,7 @@ class OuterProductMapSearch extends OuterProductMap
             "e_m.service_id",
             "e_c.organization_id",
             "d_v.id vendor_id",
-            "coalesce(d_v.legal_entity, d_v.name) vendor_name",
+            "d_v.name vendor_name",
             "d.id product_id",
             "d.product product_name",
             "d.ed unit",
@@ -85,7 +81,7 @@ class OuterProductMapSearch extends OuterProductMap
                  * фильтр по продукту
                  */
                 if (!empty($post['search']['product'])) {
-                    $query->andFilterWhere(['like', "$outerProductTableName.`name`", $post['search']['product']]);
+                    $query->andFilterWhere(['like', "f.`name`", $post['search']['product']]);
                     $query->orFilterWhere(['like', "d.`product`", $post['search']['product']]);
                 }
                 /**

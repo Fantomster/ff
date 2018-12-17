@@ -21,6 +21,7 @@ namespace common\models\egais;
  * @property string $conclusion [varchar(250)]
  * @property string $date [varchar(255)]
  * @property string $comment
+ * @property string $doc_type [varchar(255)]
  */
 class EgaisRequestResponse extends \yii\db\ActiveRecord
 {
@@ -52,7 +53,8 @@ class EgaisRequestResponse extends \yii\db\ActiveRecord
                     'result',
                     'conclusion',
                     'date',
-                    'comment'
+                    'comment',
+                    'doc_type'
                 ], 'string'
             ],
             [['created_at'], 'safe']
@@ -68,6 +70,7 @@ class EgaisRequestResponse extends \yii\db\ActiveRecord
             'org_id' => 'Organization id',
             'act_id' => 'Act id',
             'doc_id' => 'Document id',
+            'doc_type' => 'Document type',
             'date' => 'Date',
             'operation_name' => 'Operation name',
             'result' => 'Result',

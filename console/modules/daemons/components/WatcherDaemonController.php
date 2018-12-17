@@ -54,21 +54,26 @@ abstract class WatcherDaemonController extends DaemonController
         \Yii::trace('Check daemon ' . $job['consumerClass']);
         if (file_exists($pidfile)) {
             $pid = file_get_contents($pidfile);
-            if ($this->isProcessRunning($pid)) {
-                if ($job['enabled']) {
-                    \Yii::trace('Daemon ' . $job['className'] . ' running and working fine');
+            if (!empty($pid)) {
+                if ($this->isProcessRunning($pid)) {
+                    if ($job['enabled']) {
+                        \Yii::trace('Daemon ' . $job['className'] . ' running and working fine');
 
-                    return true;
-                } else {
-                    \Yii::warning('Daemon ' . $job['className'] . ' running, but disabled in config. Send SIGTERM signal.');
-                    if (isset($job['hardKill']) && $job['hardKill']) {
-                        posix_kill($pid, SIGKILL);
+                        return true;
                     } else {
-                        posix_kill($pid, SIGTERM);
-                    }
+                        \Yii::warning('Daemon ' . $job['className'] . ' running, but disabled in config. Send SIGTERM signal.');
+                        if (isset($job['hardKill']) && $job['hardKill']) {
+                            posix_kill($pid, SIGKILL);
+                        } else {
+                            posix_kill($pid, SIGTERM);
+                        }
 
-                    return true;
+                        return true;
+                    }
                 }
+            }
+            else{
+                $job['enabled'] = true;
             }
         }
         \Yii::trace('Daemon pid not found.');
@@ -142,6 +147,10 @@ abstract class WatcherDaemonController extends DaemonController
      */
     public function isProcessRunning($pid)
     {
-        return !!posix_getpgid($pid);
+        try {
+            return !!posix_getpgid($pid);
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 }

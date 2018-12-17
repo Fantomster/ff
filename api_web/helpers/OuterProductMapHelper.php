@@ -8,7 +8,6 @@
 
 namespace api_web\helpers;
 
-use common\helpers\DBNameHelper;
 use common\models\IntegrationSettingValue;
 use common\models\Order;
 use common\models\OrderContent;

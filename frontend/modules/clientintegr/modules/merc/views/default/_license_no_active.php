@@ -51,13 +51,13 @@ try {
             }
             else
              {
-                var now = new Date();
-                var timestamp = snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
-                if(isNaN(timestamp)) {
+                var now = new Date(snapshot.val().last_executed);//snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
+                var hourOffset = now.getTimezoneOffset() / 60;
+                now.setHours(now.getHours() - hourOffset);
+                if(isNaN(now)) {
                     $('#mercNotificationVsd').html('$messageVSD' + 'неизвестно');
                     return;
                 }
-                now = new Date(timestamp);
                 var formatted =  ('0' + now.getDate()).substr(-2,2) + '.' + ('0' + (now.getMonth() + 1)).substr(-2,2) + '.' + now.getFullYear() + ' ' + ('0' + now.getHours()).substr(-2,2) + ":" + ('0' + now.getMinutes()).substr(-2,2) + ":" + ('0' + now.getSeconds()).substr(-2,2);
                 $('#mercNotificationVsd').html('$messageVSD' + formatted);    
                 //console.log(snapshot.val().update_date); //Вывод значения в консоль
@@ -71,13 +71,13 @@ try {
         }
         else
          { 
-            var now = new Date();
-            var timestamp = snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
+            var now = new Date(snapshot.val().last_executed);//snapshot.val().update_date * 1000 - (now.getTimezoneOffset() * 60000);
+            var hourOffset = now.getTimezoneOffset() / 60;
+            now.setHours(now.getHours() - hourOffset);
              if(isNaN(timestamp)) {
                     $('#mercNotificationVsd').html('$messageStock' + 'неизвестно');
                     return;
                 }
-            now = new Date(timestamp);
             var formatted =  ('0' + now.getDate()).substr(-2,2) + '.' + ('0' + (now.getMonth() + 1)).substr(-2,2) + '.' + now.getFullYear() + ' ' + ('0' + now.getHours()).substr(-2,2) + ":" + ('0' + now.getMinutes()).substr(-2,2) + ":" + ('0' + now.getSeconds()).substr(-2,2);
             $('#mercNotificationStockEntr').html('$messageStock' + formatted);    
             //console.log(snapshot.val().update_date); //Вывод значения в консоль

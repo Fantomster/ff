@@ -127,7 +127,7 @@ $this->registerJs('
                     <?= Yii::t('app', 'frontend.views.order.favorites.freq', ['ru'=>'Часто заказываемые товары']) ?> <small class="label bg-yellow">new</small>
                 </a>
             </li>
-            <?php if ($client->parent_id == null) : ?>
+            <?php if ($client->parent_id == null && Yii::$app->user->identity->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR) : ?>
                 <li>
                     <a href="<?= Url::to(['order/product-filter']) ?>">
                         <?= Yii::t('message', 'frontend.views.order.filter_product', ['ru' => 'Фильтрация товаров']) ?>

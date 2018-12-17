@@ -14,7 +14,6 @@ namespace api_web\components;
 
 use Yii;
 use yii\di\Container;
-use api_web\classes\NoAuthWebApi;
 
 /**
  * Class WebApiNoAuth
@@ -25,7 +24,7 @@ class WebApiNoAuth
     /** @var $container Container */
     public $container;
 
-    /** @var $resourceManager ResourceManagerInterface */
+    /** @var $resourceManager \common\components\resourcemanager\AmazonS3ResourceManager */
     public $resourceManager;
 
     /** @const Индекс лога */

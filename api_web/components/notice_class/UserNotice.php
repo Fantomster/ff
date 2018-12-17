@@ -49,7 +49,7 @@ class UserNotice
 
         $user = User::findOne(['email' => $email]);
         if (!$user) {
-            throw new BadRequestHttpException('Пользователь с таким Email не найден в системе.');
+            throw new BadRequestHttpException('User with this Email was not found in the system.');
         }
         $model = new ForgotForm();
         $model->email = $email;

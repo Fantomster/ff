@@ -3,18 +3,17 @@ namespace common\models;
 
 use Yii;
 use amnah\yii2\user\models\UserToken as BaseModel;
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
+/**
+ * This is the model class for table "{{%user_token}}".
+ * @property integer $pin
+ */
 
 class UserToken extends BaseModel
 {
     public function rules() {
         $rules = parent::rules();
-        $rules[] = [['pin'], 'required', 'on' => ['unique']];
+        $rules[] = [['pin'], 'required'];
         return $rules;
     }
     

@@ -58,10 +58,10 @@ class cerberApi extends baseApi
             return null;
         }
 
-        $enterprise = VetisRussianEnterprise::findOne(['uuid' => $UUID, 'active' => true, 'last' => true]);
+        $enterprise = VetisRussianEnterprise::find()->where(['uuid' => $UUID, 'active' => true, 'last' => true])->limit(1)->one();
 
         if (empty($enterprise)) {
-            $enterprise = VetisForeignEnterprise::findOne(['uuid' => $UUID, 'active' => true, 'last' => true]);
+            $enterprise = VetisForeignEnterprise::find()->where(['uuid' => $UUID, 'active' => true, 'last' => true])->limit(1)->one();
         }
 
         if (!empty($enterprise)) {
@@ -80,7 +80,7 @@ class cerberApi extends baseApi
      */
     public function getBusinessEntityByUuid($UUID)
     {
-        $business = VetisBusinessEntity::findOne(['uuid' => $UUID, 'active' => true, 'last' => true]);
+        $business = VetisBusinessEntity::find()->where(['uuid' => $UUID, 'active' => true, 'last' => true])->limit(1)->one();
 
         if (!empty($business)) {
             return $business->businessEntity;
@@ -101,10 +101,10 @@ class cerberApi extends baseApi
             return null;
         }
 
-        $enterprise = VetisRussianEnterprise::findOne(['guid' => $GUID, 'active' => true, 'last' => true]);
+        $enterprise = VetisRussianEnterprise::find()->where(['guid' => $GUID, 'active' => true, 'last' => true])->limit(1)->one();
 
         if (empty($enterprise)) {
-            $enterprise = VetisForeignEnterprise::findOne(['guid' => $GUID, 'active' => true, 'last' => true]);
+            $enterprise = VetisForeignEnterprise::find()->where(['guid' => $GUID, 'active' => true, 'last' => true])->limit(1)->one();
         }
 
         if (!empty($enterprise)) {
@@ -123,7 +123,7 @@ class cerberApi extends baseApi
      */
     public function getBusinessEntityByGuid($GUID)
     {
-        $business = VetisBusinessEntity::findOne(['guid' => $GUID, 'active' => true, 'last' => true]);
+        $business = VetisBusinessEntity::find()->where(['guid' => $GUID, 'active' => true, 'last' => true])->limit(1)->one();
 
         if (!empty($business)) {
             return $business->businessEntity;

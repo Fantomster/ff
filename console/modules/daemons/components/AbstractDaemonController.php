@@ -23,11 +23,13 @@ abstract class AbstractDaemonController extends DaemonController
      * @var RabbitService
      */
     private $rabbit;
+
     /**
      * Description
      * @var AMQPStreamConnection
      */
     private $connect;
+
     /**
      * Description
      * @var AMQPChannel
@@ -83,7 +85,7 @@ abstract class AbstractDaemonController extends DaemonController
         $dateTime = new \DateTime();
         (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
             'start_executing' => $dateTime->format('Y-m-d H:i:s')
-        ], $arWhere)->execute();
+                ], $arWhere)->execute();
     }
 
     public function loggingExecutedTime()
@@ -96,12 +98,12 @@ abstract class AbstractDaemonController extends DaemonController
             $arWhere['organization_id'] = $this->orgId;
         }
 
-        $dateTime = new \DateTime();
+        $dateTime       = new \DateTime();
         $this->lastExec = $dateTime->format('Y-m-d H:i:s');
         (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
             'start_executing' => new Expression('NULL'),
             'last_executed'   => $this->lastExec
-        ], $arWhere)->execute();
+                ], $arWhere)->execute();
     }
 
     /**
@@ -110,7 +112,7 @@ abstract class AbstractDaemonController extends DaemonController
     protected function defineJobs()
     {
         $this->rabbit = \Yii::$app->get('rabbit');
-        $consumerTag = get_class($this);
+        $consumerTag  = get_class($this);
 
         //Получаем канал, если нет, создаем
         $channel = $this->getChannel($this->getQueueName(), $this->getExchangeName());
@@ -125,6 +127,7 @@ abstract class AbstractDaemonController extends DaemonController
             try {
                 $channel->wait(null, true, 5);
             } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $timeout) {
+                
             } catch (\PhpAmqpLib\Exception\AMQPRuntimeException $runtime) {
                 \Yii::error($runtime->getMessage());
             }
@@ -142,8 +145,10 @@ abstract class AbstractDaemonController extends DaemonController
         }
         $message = $message . PHP_EOL;
         $message .= str_pad('', 80, '=') . PHP_EOL;
-        \Yii::info(self::shortClassName().": ".$message);
-        file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . self::shortClassName() . '.log', $message, FILE_APPEND);
+        \Yii::info(self::shortClassName() . ": " . $message);
+        if (!\Yii::$app->params['disable_daemon_logs']) {
+            file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . self::shortClassName() . '.log', $message, FILE_APPEND);
+        }
     }
 
     /**
@@ -155,7 +160,6 @@ abstract class AbstractDaemonController extends DaemonController
         \Yii::$app->db->close();
         \Yii::$app->db->open();
         //}
-
         //if (\Yii::$app->db_api->isActive) {
         \Yii::$app->db_api->close();
         \Yii::$app->db_api->open();
@@ -189,7 +193,7 @@ abstract class AbstractDaemonController extends DaemonController
     {
         if (!is_null($this->lastExec)) {
             $lastExec = new \DateTime($this->lastExec);
-            $timeOut = $lastExec->getTimestamp() + $this->consumerClassName::$timeout;
+            $timeOut  = $lastExec->getTimestamp() + $this->consumerClassName::$timeout;
             return date('Y-m-d H:i:s', $timeOut);
         }
         return null;
@@ -251,5 +255,4 @@ abstract class AbstractDaemonController extends DaemonController
      * @return string
      */
     abstract protected function getQueueName();
-
 }

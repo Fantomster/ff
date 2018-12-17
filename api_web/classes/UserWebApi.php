@@ -52,10 +52,12 @@ class UserWebApi extends \api_web\components\WebApi
         }
         if (empty($model->integration_service_id)) {
             foreach ([Registry::RK_SERVICE_ID, Registry::IIKO_SERVICE_ID] as $serviceId) {
-                if (!empty(License::checkByServiceId($this->user->organization_id, $serviceId))) {
-                    $model->integration_service_id = $serviceId;
-                    $model->save();
+                try {
+                    License::checkLicense($this->user->organization_id, $serviceId);
+                    $model->setIntegrationServiceId($serviceId);
                     break;
+                } catch (\Exception $e) {
+                    continue;
                 }
             }
         }
@@ -135,6 +137,7 @@ class UserWebApi extends \api_web\components\WebApi
      *
      * @param array   $post
      * @param integer $role_id
+     * @param null    $status
      * @return User
      * @throws BadRequestHttpException
      * @throws ValidationException
@@ -142,7 +145,7 @@ class UserWebApi extends \api_web\components\WebApi
     public function createUser(array $post, $role_id, $status = null)
     {
         if (User::findOne(['email' => $post['user']['email']])) {
-            throw new BadRequestHttpException('Данный Email уже присутствует в системе.');
+            throw new BadRequestHttpException('This email is already present in the system.');
         }
 
         $post['user']['newPassword'] = $post['user']['password'];
@@ -232,6 +235,9 @@ class UserWebApi extends \api_web\components\WebApi
             }
         }
 
+        $userToken->pin = rand(1000, 9999);
+        $userToken->save(false);
+
         Notice::init('User')->sendSmsCodeToActivate($userToken->getAttribute('pin'), $model->profile->phone);
 
         return ['result' => 1];
@@ -287,12 +293,12 @@ class UserWebApi extends \api_web\components\WebApi
 
             $organization = Organization::findOne(['id' => $post['organization_id']]);
             if (empty($organization)) {
-                throw new BadRequestHttpException('Нет организации с таким id');
+                throw new BadRequestHttpException('organization not found');
             }
 
             //Список доступных бизнесов
             if (!$this->user->isAllowOrganization($organization->id)) {
-                throw new BadRequestHttpException('Нет прав переключиться на эту организацию');
+                throw new BadRequestHttpException('No rights to switch to this organization.');
             }
 
             #Расскоментировать после отказа от первой версии
@@ -331,6 +337,8 @@ class UserWebApi extends \api_web\components\WebApi
     /**
      * Список бизнесов пользователя
      *
+     * @param null $searchString
+     * @param bool $showEmpty
      * @return array
      * @throws BadRequestHttpException
      */
@@ -338,7 +346,7 @@ class UserWebApi extends \api_web\components\WebApi
     {
         $list_organisation = $this->user->getAllOrganization($searchString);
         if (empty($list_organisation) && !$showEmpty) {
-            throw new BadRequestHttpException('Нет доступных организаций');
+            throw new BadRequestHttpException('No organizations available');
         }
 
         $result = [];
@@ -570,7 +578,7 @@ class UserWebApi extends \api_web\components\WebApi
                 RelationSuppRest::deleteAll($where);
                 RelationSuppRestPotential::deleteAll($where);
             } else {
-                throw new BadRequestHttpException('Вы не работаете с этим поставщиком');
+                throw new BadRequestHttpException('You are not working with this supplier.');
             }
             $transaction->commit();
             return ['result' => true];
@@ -624,14 +632,15 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Смена мобильного номера
+     * Смена мобильного номера. Для неподтвержденного юзера свойство $isUnconfirmedUser должно быть true
      *
      * @param $post
+     * @param $isUnconfirmedUser
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
      */
-    public function mobileChange($post)
+    public function mobileChange($post, $isUnconfirmedUser = false)
     {
         WebApiHelper::clearRequest($post);
         $this->validateRequest($post, ['phone']);
@@ -652,8 +661,10 @@ class UserWebApi extends \api_web\components\WebApi
             }
         }
 
+        //Присваиваем userID
+        $userID = $isUnconfirmedUser ? $post['user']['id'] : $this->user->id;
         //Ищем модель на смену номера
-        $model = SmsCodeChangeMobile::findOne(['user_id' => $this->user->id]);
+        $model = SmsCodeChangeMobile::findOne(['user_id' => $userID]);
         //Если нет модели, но прилетел какой то код, даем отлуп
         if (empty($model) && !empty($post['code'])) {
             throw new BadRequestHttpException('not_code_to_change_phone');
@@ -663,7 +674,7 @@ class UserWebApi extends \api_web\components\WebApi
         if (empty($model)) {
             $model = new SmsCodeChangeMobile();
             $model->phone = $phone;
-            $model->user_id = $this->user->id;
+            $model->user_id = $userID;
         }
 
         //Даем отлуп если он уже достал выпращивать коды
@@ -700,54 +711,6 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Смена телефона неподтвержденным пользователем
-     *
-     * @param $post
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws ValidationException
-     */
-    public function changeUnconfirmedUsersPhone($post)
-    {
-        WebApiHelper::clearRequest($post);
-
-        if (empty($post['user']['id'])) {
-            throw new BadRequestHttpException('empty_param|id');
-        }
-
-        if (empty($post['profile']['phone'])) {
-            throw new BadRequestHttpException('empty_param|phone');
-        }
-
-        $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['profile']['phone']);
-        if (mb_substr($phone, 0, 1) == '8') {
-            $phone = preg_replace('#^8(\d.+?)#', '+7$1', $phone);
-        }
-        //Проверяем телефон
-        if (!preg_match('#^(\+\d{1,2}|8)\d{3}\d{7,10}$#', $phone)) {
-            throw new ValidationException(['phone' => 'bad_format_phone']);
-        }
-
-        $user = User::findOne(['id' => $post['user']['id']]);
-        if (!$user) {
-            throw new BadRequestHttpException('no such user');
-        }
-
-        if ($user->status == User::STATUS_ACTIVE) {
-            throw new BadRequestHttpException('you have no rights for this action');
-        }
-
-        $profile = Profile::findOne(['user_id' => $user->id]);
-        if (!$profile) {
-            throw new BadRequestHttpException('no such users profile');
-        }
-        $profile->phone = $post['profile']['phone'];
-        $profile->save();
-
-        return ['result' => true];
-    }
-
-    /**
      * Информация о поставщике
      *
      * @param RelationSuppRest $model
@@ -764,6 +727,8 @@ class UserWebApi extends \api_web\components\WebApi
             $vendor->route
         ];
 
+        $user = User::findOne(['organization_id' => $vendor->id, 'role_id' => Role::ROLE_SUPPLIER_MANAGER]);
+
         foreach ($locality as $key => $val) {
             if (empty($val) or $val == 'undefined') {
                 unset($locality[$key]);
@@ -772,21 +737,31 @@ class UserWebApi extends \api_web\components\WebApi
 
         if ($model->invite == RelationSuppRest::INVITE_ON && $model->cat_id != 0 && $model->status == RelationSuppRest::CATALOG_STATUS_ON) {
             $status = $status_list[1];
+            $enumStatus = 'partner';
         } elseif ($model->cat_id == 0) {
             $status = $status_list[2];
+            $enumStatus = 'catalog_not_set';
         } else {
             $status = $status_list[3];
+            $enumStatus = 'send_invite';
+        }
+
+        if (isset($vendor->buisinessInfo->phone) && !empty($vendor->buisinessInfo->phone)) {
+            $phone = $vendor->buisinessInfo->phone;
+        } elseif (isset($user->profile->phone)) {
+            $phone = $user->profile->phone;
         }
 
         return [
             'id'            => (int)$vendor->id,
             'name'          => $vendor->name ?? "",
             'contact_name'  => $vendor->contact_name ?? "",
-            'inn'           => $vendor->buisinessInfo->inn ?? null,
+            'inn'           => $vendor->buisinessInfo->inn ?? $vendor->inn ?? null,
             'cat_id'        => (int)$model->cat_id,
-            'email'         => $vendor->buisinessInfo->legal_email ?? $vendor->email ?? "",
-            'phone'         => $vendor->phone ?? "",
+            'email'         => $vendor->buisinessInfo->legal_email ?? $vendor->email ?? $user->email ?? '',
+            'phone'         => $phone ?? '',
             'status'        => $status,
+            'enum_status'   => $enumStatus,
             'picture'       => $vendor->getPictureUrl() ?? "",
             'address'       => implode(', ', $locality),
             'rating'        => $vendor->rating ?? 0,

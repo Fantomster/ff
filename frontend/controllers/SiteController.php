@@ -266,9 +266,13 @@ class SiteController extends Controller {
         if ($type == 'product') {
             header('Content-Type: image/png');
             $model = CatalogBaseGoods::findOne($id);
-            $array = explode('base64,', $model->imageUrl);
-            if (isset($array[1])) {
-                echo base64_decode($array[1]);
+            if(strstr($model->imageUrl, 'base64') !== false) {
+                $array = explode('base64,', $model->imageUrl);
+                if (isset($array[1])) {
+                    echo base64_decode($array[1]);
+                }
+            } else {
+              echo file_get_contents($model->imageUrl);
             }
             exit;
         }

@@ -15,11 +15,13 @@ use Yii;
  * @property string $created_at
  * @property string $updated_at
  * @property string $provider
+ * @property integer $order_id
  *
  * @property SmsStatus $status
  */
 class SmsSend extends \yii\db\ActiveRecord
 {
+
     /**
      * @inheritdoc
      */
@@ -31,7 +33,8 @@ class SmsSend extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
@@ -48,7 +51,7 @@ class SmsSend extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['status_id'], 'integer'],
+            [['status_id', 'order_id'], 'integer'],
             [['text'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['sms_id', 'target', 'provider'], 'string', 'max' => 255],
@@ -62,14 +65,15 @@ class SmsSend extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'sms_id' => 'Sms ID',
-            'status_id' => 'Status ID',
-            'text' => Yii::t('app', 'common.models.message', ['ru'=>'Сообщение']),
-            'target' => Yii::t('app', 'common.models.reciever', ['ru'=>'Получатель']),
-            'created_at' => Yii::t('app', 'common.models.send_date', ['ru'=>'Дата отправки']),
-            'updated_at' => Yii::t('app', 'common.models.cancel_date', ['ru'=>'Дата смены статуса']),
-            'provider' => 'Provider',
+            'id'         => 'ID',
+            'sms_id'     => 'Sms ID',
+            'status_id'  => 'Status ID',
+            'order_id'   => 'Order ID',
+            'text'       => Yii::t('app', 'common.models.message', ['ru' => 'Сообщение']),
+            'target'     => Yii::t('app', 'common.models.reciever', ['ru' => 'Получатель']),
+            'created_at' => Yii::t('app', 'common.models.send_date', ['ru' => 'Дата отправки']),
+            'updated_at' => Yii::t('app', 'common.models.cancel_date', ['ru' => 'Дата смены статуса']),
+            'provider'   => 'Provider',
         ];
     }
 
@@ -80,4 +84,13 @@ class SmsSend extends \yii\db\ActiveRecord
     {
         return $this->hasOne(SmsStatus::className(), ['status' => 'status_id']);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrder()
+    {
+        return $this->hasOne(Order::className(), ['id' => 'order_id']);
+    }
+
 }

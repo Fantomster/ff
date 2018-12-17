@@ -4,8 +4,14 @@ namespace api_web\components\notice_class;
 
 use api_web\classes\ChatWebApi;
 use api_web\components\FireBase;
+use api_web\helpers\WebApiHelper;
 use common\models\Order;
 
+/**
+ * Class ChatNotice
+ *
+ * @package api_web\components\notice_class
+ */
 class ChatNotice
 {
     /**
@@ -38,6 +44,7 @@ class ChatNotice
         if (!empty($last_message)) {
             $last_message = stripcslashes(trim($last_message, "'"));
         }
+        $created_at = $order->orderChatLastMessage->created_at ?? null;
 
         FireBase::getInstance()->update([
             'chat',
@@ -45,9 +52,11 @@ class ChatNotice
             'dialog' => $order->id
         ], [
             'unread_message_count' => (int)$order->getOrderChatUnreadCount($recipient_id),
-            'last_message' => $last_message,
-            'last_message_date' => $order->orderChatLastMessage->created_at ?? null,
+            'last_message'         => $last_message,
+            'last_message_date'    => WebApiHelper::asDatetime($created_at),
         ]);
+
+        FireBase::unsetInstance();
 
         FireBase::getInstance()->update([
             'chat',

@@ -11,26 +11,36 @@ use kartik\grid\GridView;
 use kartik\editable\Editable;
 use api\common\models\RkAccess;
 
-
 ?>
 
 
 <style>
-.bg-default{background:#555} p{margin: 0;} #map{width:100%;height:200px;}
+    .bg-default {
+        background: #555
+    }
+
+    p {
+        margin: 0;
+    }
+
+    #map {
+        width: 100%;
+        height: 200px;
+    }
 </style>
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Интеграция с 1C 
+        <i class="fa fa-upload"></i> Интеграция с 1C
     </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'links' => [
+        'links'   => [
             [
                 'label' => 'Интеграция',
-                'url' => ['/vendorintegr'],
+                'url'   => ['/clientintegr'],
             ],
             'Интеграция с 1С',
         ],

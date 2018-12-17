@@ -6,6 +6,7 @@ use api_web\components\WebApi;
 use api_web\modules\integration\modules\egais\classes\EgaisXmlFiles;
 use api_web\modules\integration\modules\egais\classes\XmlParser;
 use common\models\egais\EgaisActWriteOn;
+use common\models\egais\EgaisQueryRests;
 use common\models\egais\EgaisTypeChargeOn;
 use common\models\egais\EgaisTypeWriteOff;
 use common\models\egais\EgaisWriteOff;
@@ -28,6 +29,45 @@ class EgaisHelper extends WebApi
         //'FORMF2REGINFO',
         //'TTNHISTORYF2REG'
     ];
+
+    /** - Статусы запросов в ЕГАИС - */
+    const QUERY_SENT = 1;
+    const QUERY_PROCESSED = 2;
+    const QUERY_NOT_PROCESSED = 3;
+    const QUERY_ERROR = 4;
+
+    static $status_query = [
+        self::QUERY_SENT => 'sent',
+        self::QUERY_PROCESSED => 'processed',
+        self::QUERY_NOT_PROCESSED => 'not processed',
+        self::QUERY_ERROR => 'error'
+    ];
+    /* - - */
+
+    /**
+     * @param $orgId
+     * @param $url
+     * @param $data
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\httpclient\Exception
+     */
+    public function sendQueryRests($orgId, $url, $data): void
+    {
+        $client = new Client();
+        $queryRests = $client->createRequest()
+            ->setMethod('POST')
+            ->setUrl("{$url}/opt/in/QueryRests")
+            ->addFileContent('xml_file', $data)
+            ->send();
+
+        $replyId = (new XmlParser())->parseEgaisQuery($queryRests->content);
+
+        (new EgaisQueryRests([
+            'org_id' => $orgId,
+            'reply_id' => $replyId,
+            'status' => EgaisHelper::QUERY_SENT
+        ]))->save();
+    }
 
     /**
      * @param string $url
@@ -59,7 +99,7 @@ class EgaisHelper extends WebApi
         ]);
 
         if (!$newAct->save()) {
-            throw new BadRequestHttpException('Не удалось сохранить в базе, проверьте ваш xml документ!');
+            throw new BadRequestHttpException('Could not save to database, check your xml document!');
         }
 
         return self::sendEgaisQuery($url, $data, $queryType);

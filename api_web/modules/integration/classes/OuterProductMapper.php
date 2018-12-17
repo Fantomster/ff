@@ -106,13 +106,13 @@ class OuterProductMapper
     public function loadRequest($request): void
     {
         foreach ($request as $key => $value) {
-            if (!empty($value)) {
+            if ((!empty($value) || $value == 0) && !is_null($value)) {
                 $this->request[$key] = $value;
 
                 if ($key == 'outer_product_id') {
                     if ($this->isMainOrg) {
                         if (!$this->productExists($value)) {
-                            throw new BadRequestHttpException('outer product not found');
+                            throw new BadRequestHttpException('waybill.outer_product_not_found');
                         }
                     }
                 }
@@ -177,7 +177,9 @@ class OuterProductMapper
             $mainOrgModel = $this->getModel($this->mainOrgId);
         }
         if ($mainOrgModel) {
-            unset($this->request['outer_product_id']);
+            if (isset($this->request['outer_product_id'])) {
+                unset($this->request['outer_product_id']);
+            }
             $model = new OuterProductMap();
             $model->service_id = $mainOrgModel->service_id;
             $model->organization_id = $this->orgId;

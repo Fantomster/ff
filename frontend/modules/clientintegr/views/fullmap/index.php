@@ -14,6 +14,7 @@ use \yii\web\JsExpression;
 use common\models\Organization;
 use api\common\models\AllMaps;
 use common\models\CatalogBaseGoods;
+use api_web\components\Registry;
 
 $this->registerJs(
 
@@ -82,8 +83,8 @@ $this->registerJs(
         <div class="box box-info">
             <div class="box-header with-border">
                 <div class="panel-body">
-                    <?php // Pjax::begin(['enablePushState' => true, 'id' => 'fullmapGrid-pjax', 'timeout' => 5000]);
-                    // ?>
+                    <?php //Pjax::begin(['enablePushState' => true, 'id' => 'fullmapGrid-pjax', 'timeout' => 5000]);
+                    ?>
                     <div class="row">
                         <div class="col-md-4" align="left">
                             <div class="guid-header">
@@ -163,7 +164,7 @@ $this->registerJs(
                                     'filterModel'    => $searchModel,
                                     'filterPosition' => false,
                                     'formatter'      => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
-                                    'striped'        => true,
+                                    //'striped'        => true,
                                     'pjax'           => true,
                                     'pjaxSettings'   => [
                                         'options' => ['timeout' => 30000, 'scrollTo' => true, 'enablePushState' => false]
@@ -186,77 +187,6 @@ $this->registerJs(
                                             'value'          => function ($model) {
                                                 return "<input type='checkbox' class='checkbox-export kv-row-checkbox' name='selection[]' value='" . $model['id'] . "'>";
                                             }
-                                            /*'onChangeEvents'  => [
-                                                'changeAll'  => 'function(e) {
-                                                            url      = window.location.href;
-                                                            var value = [];
-                                                            state = $(this).prop("checked") ? 1 : 0;*/
-
-                                            //  selectedCount = parseInt($("#selected_info").text());
-                                            //   mode = 1;
-
-                                            /*    if ((selectedCount+1) > 12 && state == 1) {
-                                                alert("Превышен лимит для выбора продуктов в 300 позиций");
-                                                // mode = 0;
-                                                return false;
-                                                }
-                                            */
-                                            /*$(".checkbox-export").each(function() {
-                                                 value.push($(this).val());
-                                             });
-
-                                            value = value.toString();
-
-                                            $.ajax({
-                                              url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
-                                              type: "POST",
-                                              data: {selected: value, state: state},
-                                              success: function(data){
-                                              if (data == -1) {
-                                              // alert ("Превышен лимит для выбора продуктов в 300 позиций");
-                                               swal({title: "Ошибка", html:"Превышен лимит для выбора продуктов в 300 позиций", type: "error"});
-                                              }
-                                              $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
-                                              }
-                                            }); }',
-                                 'changeCell' => 'function(e) {
-
-                                              // alert(mode);
-
-                                           //   if ((typeof(mode) != "undefined") && mode == 1) {
-                                           //   return false;
-                                           //   }
-
-                                             //console.log(selectedCount);
-                                              state = $(this).prop("checked") ? 1 : 0;
-                                             selectedCount = parseInt($("#selected_info").text());*/
-                                            // alert(selectedCount);
-
-                                            /*  if ((selectedCount+1) > 12 && state == 1) {
-                                              alert("Превышен лимит для выбора продуктов в 300 позиций");
-                                              return false;
-                                              } */
-
-                                            /*url = window.location.href;
-                                            var value = $(this).val();
-
-                                           $.ajax({
-                                             url: "' . $urlSaveSelected . '?selected=" +  value+"&state=" + state,
-                                             type: "POST",
-                                             data: {selected: value, state: state},
-                                             success: function(data){
-                                             if (data == -1) {
-                                             // alert ("Превышен лимит для выбора продуктов в 300 позиций");
-                                              swal({title: "Ошибка", html:"Превышен лимит для выбора продуктов в 300 позиций", type: "error"});
-                                             }
-                                             $.pjax.reload({container: "#fullmapGrid-pjax", url: url, timeout:30000});
-
-                                             }
-                                           });}'
-                            ],*/
-                                            /*'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
-                                                return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => (in_array($model['id'], $selected)) ? 'checked' : ""];
-                                            },*/
                                         ],
                                         ['attribute'      => 'service_denom',
                                          'contentOptions' => function ($model) {
@@ -298,20 +228,11 @@ $this->registerJs(
                                         [
                                             'attribute'      => 'pdenom',
                                             'value'          => function ($model) {
-                                                if (!empty($model['pdenom'])) {
-                                                    return $model['pdenom'];
-                                                } else {
-                                                    return '(не задано)';
-                                                }
-                                            },
-                                            'value'          => function ($model) {
                                                 return $model['pdenom'] ?? 'Не задано';
                                             },
                                             'label'          => Yii::t('message', 'frontend.fullmap.index.product_name_service', ['ru' => 'Название продукта']),
                                             'vAlign'         => 'middle',
                                             'width'          => '210px',
-                                            //'refreshGrid' => true,
-                                            //'readonly' => ($searchModel->service_id == 2 && $mainOrg != $client->id),
                                             'contentOptions' => function ($model) {
                                                 return ["id" => "prdct" . $model['id']];
                                             },
@@ -333,10 +254,25 @@ $this->registerJs(
                                         [
                                             'class'           => 'kartik\grid\EditableColumn',
                                             'attribute'       => 'koef',
-                                            'refreshGrid'     => true,
-                                            'readonly'        => ($searchModel->service_id == 2 && $editCan == 0),
+                                            'refreshGrid'     => false,
+                                            'readonly'        => ($searchModel->service_id == Registry::IIKO_SERVICE_ID && $editCan == 0),
                                             'contentOptions'  => function ($model) {
                                                 return ["id" => "koeff" . $model['id']];
+                                            },
+                                            'value'           => function ($model) {
+                                                if (!empty($model['koef'])) {
+                                                    $koef_old = $model['koef'];
+                                                    $koef = str_replace(',', '.', $koef_old);
+                                                    $koef_temp = floor($koef * 1000000);
+                                                    $koef_len = strlen($koef_temp);
+                                                    $koef_left = substr($koef_temp, 0, $koef_len - 6);
+                                                    if ($koef_left == '') {
+                                                        $koef_left = '0';
+                                                    }
+                                                    $koef_right = substr($koef_temp, $koef_len - 6);
+                                                    return $koef_left . ',' . $koef_right;
+                                                }
+                                                return '(не задано)';
                                             },
                                             'editableOptions' => [
                                                 'name'        => 'koef',
@@ -345,12 +281,11 @@ $this->registerJs(
                                                 'inputType'   => \kartik\editable\Editable::INPUT_TEXT,
                                                 'formOptions' => [
                                                     'action'                 => Url::toRoute(['editkoef', 'service_id' => $searchModel->service_id]),
-                                                    'enableClientValidation' => false,
+                                                    'enableClientValidation' => true,
                                                 ],
                                             ],
                                             'hAlign'          => 'right',
                                             'vAlign'          => 'middle',
-                                            'format'          => ['decimal', 6],
                                             'label'           => Yii::t('message', 'frontend.fullmap.index.koef', ['ru' => 'Коэффициент']),
                                             'pageSummary'     => true
                                         ],
@@ -360,7 +295,7 @@ $this->registerJs(
                                             'label'           => Yii::t('message', 'frontend.fullmap.index.store', ['ru' => 'Склад']),
                                             'vAlign'          => 'middle',
                                             'width'           => '210px',
-                                            'refreshGrid'     => true,
+                                            'refreshGrid'     => false,
                                             'contentOptions'  => function ($model) {
                                                 return ["id" => "store" . $model['id']];
                                             },
@@ -497,6 +432,21 @@ $js = <<< JS
         if (!organization) {
             var organization = '$client->id';
         }
+        function links_column6 () { // обрисовка курсивом незаданных значений в столбце "Коэффициент"
+            $('[data-col-seq='+6+']').each(function() {
+                var id_daddy = $(this).attr('id');
+                var cont_child = $('#'+id_daddy+' div button').html();
+                if (cont_child=='(не задано)') {
+                    $('#'+id_daddy+' div button').each(function() {
+                        var editable_link = $(this).hasClass('kv-editable-link');
+                        if (editable_link) {
+                            $(this).html('<em>' + '(не задано)' + '</em>');
+                        }
+                    })
+                }
+            })
+        }
+        
         function links_column4 () { // реакция на нажатие строки в столбце "Наименование продукта"
             $('[data-col-seq='+4+']').each(function() {
                 var idtd = $(this).attr('id');
@@ -504,7 +454,7 @@ $js = <<< JS
                 var idnumber = idtds.substring(5);
                 var idbutton = 'but' + idnumber;
                 var cont_old = $(this).html();
-                if (cont_old=='(не задано)') {cont_old='<i>'+cont_old+'</i>';}
+                if (cont_old=='(не задано)') {cont_old='<em>'+cont_old+'</em>';}
                 var cont_new = '<button class="button-name" id="'+idbutton+'" style="color:#6ea262;background:none;border:none;border-bottom:1px dashed">'+cont_old+'</button>';
                 if (idbutton!='butined') {
                     $(this).html(cont_new);
@@ -512,16 +462,14 @@ $js = <<< JS
             });
             $('.button-name').on('click', function () {
                 $('a .button-name').click(function(){ return false;});
-                //var vat_filter = $("#vatFilter").val(); //фильтр НДС
                 var idbutton = $(this).attr('id');
                 var idbuttons = String(idbutton);
                 var number = idbuttons.substring(3);   // идентификатор строки
                 var denom = $("#catal"+number).html(); // наименование товара
                 var edizm = $("#ed"+number).html(); // единица измерения товара
-                //var id = $("#way"+number).html();      // якорь строки
                 var tovar = denom+'   /'+edizm+'/';    // наименование товара вместе с единицей измерения
                 var cont_old = $(this).html();         // содержание ячейки до форматирования
-                var nesopost = '<i>(не задано)</i>';   // содержание несопоставленной ячейки
+                var nesopost = '<em>(не задано)</em>';   // содержание несопоставленной ячейки
                 swal({
                     html: '<span style="font-size:14px">Сопоставить продукт</span></br></br><span id="tovar">товар</span></br></br>' +
                     '<input type="text" id="bukv-tovar" class="swal2-input" placeholder="Введите или выберите товар" autofocus>'+
@@ -553,7 +501,7 @@ $js = <<< JS
                             }
                             var url_auto_complete_new = '$url_auto_complete_new';
                             $.post(url_auto_complete_new, {stroka: a, us:us}).done(
-                                function(data){
+                                function(data){console.log(data);
                                     if (data.length>0) {
                                             var sel100 = 'Показаны первые 100 позиций';
                                             if (data.length>=100) {
@@ -646,6 +594,7 @@ $js = <<< JS
         }
 
         $(document).on('pjax:end', function() { // реакция на перерисовку грид-таблицы
+            links_column6();
             var edit_can = '$editCan';
             if (edit_can==1) {
                 links_column4();
@@ -655,6 +604,7 @@ $js = <<< JS
         });
 
         $(document).ready(function() { // действия после полной загрузки страницы
+            links_column6();
             var edit_can = '$editCan';
             if (edit_can==1) {
                 links_column4();
@@ -817,13 +767,17 @@ $js = <<< JS
                                 $('#store' + id_row + ' button').text(data);
                             }
                             if (koef_set != -1) {
-                                koef_set = koef_set.replace(',','.');
+                                var koef_end = sixzero(koef_set);
+                                /*koef_set = koef_set.replace(',','.');
                                 var koef_set_temp = Math.floor(koef_set * 1000000);
                                 koef_set_temp = '' + koef_set_temp;
                                 var koef_len = koef_set_temp.length;
                                 var koef_left = koef_set_temp.substring(0,koef_len-6);
+                                if (koef_left == '') {
+                                    koef_left = '0';
+                                }
                                 var koef_right = koef_set_temp.substring(koef_len-6);
-                                var koef_end = koef_left + ',' +koef_right;
+                                var koef_end = koef_left + ',' +koef_right;*/
                                 $('#koeff' + id_row + ' button').text(koef_end);
                             }
                             if (vat_set != -1) {
@@ -890,7 +844,21 @@ $js = <<< JS
                     })
                 }
             })
-        }        
+        }
+        
+        function sixzero(str) {
+            str = str.replace(',','.');
+            var str_temp = Math.floor(str * 1000000);
+            str_temp = '' + str_temp;
+            var str_len = str_temp.length;
+            var str_left = str_temp.substring(0,str_len-6);
+            if (str_left == '') {
+                str_left = '0';
+            }
+            var str_right = str_temp.substring(str_len-6);
+            var str_end = str_left + ',' +str_right;
+            return str_end;
+        }
     });
 JS;
 

@@ -12,7 +12,7 @@ return [
     'defaultRoute'        => 'site',
     'components'          => [
         'request'            => [
-            'class'               => \yii\web\Request::className(),
+            'class'               => \yii\web\Request::class,
             'cookieValidationKey' => '__absoluteExpire112233',
             'parsers'             => [
                 'application/json' => 'yii\web\JsonParser',
@@ -20,7 +20,7 @@ return [
             ]
         ],
         'urlManager'         => [
-            'class'                   => \codemix\localeurls\UrlManager::className(),
+            'class'                   => \codemix\localeurls\UrlManager::class,
             'enableLocaleUrls'        => false,
             'showScriptName'          => false,
             'enablePrettyUrl'         => true,
@@ -31,8 +31,8 @@ return [
             ],
         ],
         'user'               => [
-            'class'         => \amnah\yii2\user\components\User::className(),
-            'identityClass' => \common\models\User::className(),
+            'class'         => \amnah\yii2\user\components\User::class,
+            'identityClass' => \common\models\User::class,
             'loginUrl'      => null,
             'enableSession' => false,
         ],
@@ -47,7 +47,7 @@ return [
             'name' => 'advanced-web-api',
         ],
         'errorHandler'       => [
-            'class' => \api_web\handler\WebApiErrorHandler::className(),
+            'class' => \api_web\handler\WebApiErrorHandler::class,
         ],
         'urlManagerFrontend' => [
             'class'           => 'yii\web\urlManager',

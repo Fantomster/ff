@@ -8,6 +8,7 @@ use api_web\modules\integration\modules\vetis\api\baseApi;
 use api_web\modules\integration\modules\vetis\api\mercLogger;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
+use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentDone;
 
 /**
  * Class mercuryApi
@@ -179,13 +180,14 @@ class mercuryApi extends baseApi
 
         $vetDoc = new VetDocumentDone();
         $vetDoc->init($config);
-        $appData->any['ns3:processIncomingConsignmentRequest'] = $vetDoc->getProcessIncomingConsignmentRequest();
+
+        $var = new \SoapVar($vetDoc->getProcessIncomingConsignmentRequest(), SOAP_ENC_ARRAY, 'ProcessIncomingConsignmentRequest', 'http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2');
+        $appData->any['ns3:processIncomingConsignmentRequest'] = $var;
 
         $request->application->data = $appData;
 
         try {
             $result = $client->submitApplicationRequest($request);
-
             $reuest_xml = $client->__getLastRequest();
 
             $app_id = $result->application->applicationId;
@@ -204,7 +206,6 @@ class mercuryApi extends baseApi
             if ($status == 'COMPLETED') {
                 $doc[] = $result->application->result->any['processIncomingConsignmentResponse']->vetDocument;
                 (new VetDocumentsChangeList())->updateDocumentsList($doc[0]);
-
             } else {
                 $result = null;
             }

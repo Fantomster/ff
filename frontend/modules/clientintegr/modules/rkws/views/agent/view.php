@@ -221,7 +221,12 @@ $js = <<< JS
                                             sel = sel+'<select id="selpos" name="list_tovar" class="swal2-input">';
                                             var index;
                                             for (index = 0; index < data.length; ++index) {
-                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['name']+'</option>';
+                                                if (data[index]['name'] == cont_old) {
+                                                    var app = ' selected';
+                                                } else {
+                                                    var app = '';
+                                                }
+                                                sel = sel+'<option value="'+data[index]['id']+'"'+app+'>'+data[index]['name']+'</option>';
                                             }
                                             sel = sel+'</select></div>';
                                     } else {
@@ -249,7 +254,12 @@ $js = <<< JS
                                             sel = sel+'<select id="selpos" name="list_postav" class="swal2-input">';
                                             var index;
                                             for (index = 0; index < data.length; ++index) {
-                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['name']+'</option>';
+                                                if (data[index]['name'] == cont_old) {
+                                                    var app = ' selected';
+                                                } else {
+                                                    var app = '';
+                                                }
+                                                sel = sel+'<option value="'+data[index]['id']+'"'+app+'>'+data[index]['name']+'</option>';
                                             }
                                             sel = sel+'</select></div>';
                                         } else {

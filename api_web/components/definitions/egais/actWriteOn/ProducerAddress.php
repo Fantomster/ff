@@ -10,13 +10,13 @@ use api_web\components\ValidateRequest;
 class ProducerAddress extends ValidateRequest
 {
     /**
-     * @SWG\Property(@SWG\Xml(name="country"), example="643")
+     * @SWG\Property(@SWG\Xml(name="country"), example=643)
      * @var integer
      */
     public $country;
 
     /**
-     * @SWG\Property(@SWG\Xml(name="region_code"), example="50")
+     * @SWG\Property(@SWG\Xml(name="region_code"), example=50)
      * @var integer
      */
     public $region_code;

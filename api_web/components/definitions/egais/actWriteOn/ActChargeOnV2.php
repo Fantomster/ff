@@ -22,7 +22,7 @@ class ActChargeOnV2 extends ValidateRequest
     public $type;
 
     /**
-     * @SWG\Property(@SWG\Xml(name="items"), type="array", @SWG\Items(ref="Items"))
+     * @SWG\Property(@SWG\Xml(name="items"), type="array", @SWG\Items(ref="ActItems"))
      */
     public $items = [];
 

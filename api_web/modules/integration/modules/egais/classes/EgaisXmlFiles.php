@@ -100,10 +100,64 @@ XMLBODY;
         }
 
         $xmlFile .= <<<XMLFOOTER
-            </ainp:Content>
+                        </ainp:Content>
                     </ns:ActChargeOn_v2>
                 </ns:Document>
             </ns:Documents>
+XMLFOOTER;
+
+        return $xmlFile;
+    }
+
+    public static function actWriteOffV3($fsrar_id, $parameters)
+    {
+        $xmlFile = <<<XMLHEADER
+<?xml version='1.0' encoding='UTF-8'?>
+            <ns:Documents Version='1.0'
+            xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+            xmlns:ns='http://fsrar.ru/WEGAIS/WB_DOC_SINGLE_01'
+            xmlns:pref='http://fsrar.ru/WEGAIS/ProductRef_v2'
+            xmlns:awr='http://fsrar.ru/WEGAIS/ActWriteOff_v3'
+            xmlns:ce='http://fsrar.ru/WEGAIS/CommonV3'>
+            <ns:Owner>
+                <ns:FSRAR_ID>{$fsrar_id}</ns:FSRAR_ID>
+            </ns:Owner>
+            <ns:Document>
+                <ns:ActWriteOff_v3>
+                    <awr:Identity>{$parameters['identity']}</awr:Identity>
+                    <awr:Header>
+                        <awr:ActNumber>{$parameters['number']}</awr:ActNumber>
+                        <awr:ActDate>{$parameters['date']}</awr:ActDate>
+                        <awr:TypeWriteOff>{$parameters['type_write_off']}</awr:TypeWriteOff>
+                        <awr:Note>{$parameters['note']}</awr:Note>
+                    </awr:Header>
+                    <awr:Content>
+XMLHEADER;
+
+        foreach ($parameters['positions'] as $position) {
+            $xmlFile .= <<<XMLBODY
+                <awr:Position>
+                    <awr:Identity>{$position['identity']}</awr:Identity>
+                    <awr:Quantity>{$position['quantity']}</awr:Quantity>
+                    <awr:SumSale>{$position['sum_sale']}</awr:SumSale>
+                    <awr:InformF1F2>
+                        <awr:InformF2>
+                            <pref:F2RegId>{$position['inform_f2']['f2_reg_id']}</pref:F2RegId>
+                        </awr:InformF2>
+                    </awr:InformF1F2>
+                    <awr:MarkCodeInfo>
+                        <ce:amc>{$position['mark_code_info']['mark_code_first']}</ce:amc>
+                        <ce:amc>{$position['mark_code_info']['mark_code_second']}</ce:amc>
+                    </awr:MarkCodeInfo>
+                </awr:Position>
+XMLBODY;
+        }
+        
+        $xmlFile .= <<<XMLFOOTER
+                    </awr:Content>
+                </ns:ActWriteOff_v3>
+            </ns:Document>
+        </ns:Documents>
 XMLFOOTER;
 
         return $xmlFile;

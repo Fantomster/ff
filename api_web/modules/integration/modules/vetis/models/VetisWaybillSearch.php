@@ -45,10 +45,14 @@ class VetisWaybillSearch extends MercVsd
     public function search($params, $page, $pageSize)
     {
         $tableName = DBNameHelper::getMainName();
+        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList('id');
         if (!empty($this->acquirer_id)) {
-            $strOrgIds = $this->acquirer_id;
+            if (is_array($this->acquirer_id)) {
+                $strOrgIds = implode(',', $this->acquirer_id);
+            } else {
+                $strOrgIds = $this->acquirer_id;
+            }
         } else {
-            $orgIds = (new UserWebApi())->getUserOrganizationBusinessList('id');
             $strOrgIds = implode(',', array_keys($orgIds['result']));
         }
         $enterpriseGuides = implode('\',\'', (new VetisHelper())->getEnterpriseGuids());
@@ -230,7 +234,7 @@ class VetisWaybillSearch extends MercVsd
             ->leftJoin(IntegrationSetting::tableName() . ' is', 'is.name=\'enterprise_guid\'')
             ->leftJoin('integration_setting_value b', 'b.setting_id = is.id and b.value in (' . $pConstForCount . ')')
             ->where(array_merge(['b.org_id' => explode(',', $strOrgIds)], $arCount)
-        );
+            );
         if ($between) {
             $count->andWhere($between);
         }

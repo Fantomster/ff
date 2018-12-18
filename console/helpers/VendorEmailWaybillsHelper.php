@@ -171,6 +171,7 @@ class VendorEmailWaybillsHelper
                         $catGood->cat_id = $catalog->id;
                         $catGood->price = round($row['price_without_tax'], 2);
                         $catGood->vat = ceil($row['tax_rate']);
+                        $catGood->service_id = Registry::VENDOR_DOC_MAIL_SERVICE_ID;
                         if (!$catGood->save()) {
                             $this->addLog(implode(' ', $catGood->getFirstErrors()), 'CatalogGoods_create');
                         }
@@ -182,6 +183,7 @@ class VendorEmailWaybillsHelper
                         $catGood->cat_id = $catalog->id;
                         $catGood->price = round($row['price_without_tax'], 2);
                         $catGood->vat = ceil($row['tax_rate']);
+                        $catGood->service_id = Registry::VENDOR_DOC_MAIL_SERVICE_ID;
                         if (!$catGood->save()) {
                             $this->addLog(implode(' ', $catGood->getFirstErrors()), 'CatalogGoods_create');
                         }

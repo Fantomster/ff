@@ -190,7 +190,7 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
 
     public function parseFile($content)
     {
-        $success = $this->realization->parseFile($content, $this->providerID);
+        $success = $this->realization->parseFile($content, $this->providerID, $this->realization->fileName);
         if ($success) {
             $this->updateQueue($this->ediFilesQueueID, parent::STATUS_HANDLED, '');
         } else {

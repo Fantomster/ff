@@ -48,9 +48,9 @@ class OrderNotice
         /**
          * @var $client Organization
          */
-        $client      = $user->organization;
+        $client = $user->organization;
         $clientUsers = $client->users;
-        $count       = (int) $client->getCartCount();
+        $count = (int)$client->getCartCount();
         foreach ($clientUsers as $user) {
             $channel = 'user' . $user->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
@@ -61,7 +61,7 @@ class OrderNotice
             FireBase::getInstance()->update([
                 'user'         => $user->id,
                 'organization' => $client->id
-                    ], [
+            ], [
                 'cart_count'              => $count,
                 'last_add_cart_user_name' => $user->profile->full_name
             ]);
@@ -75,13 +75,13 @@ class OrderNotice
      */
     public function sendLastUserCartAdd(User $userSend)
     {
-        $client      = $userSend->organization;
+        $client = $userSend->organization;
         $clientUsers = $client->users;
         foreach ($clientUsers as $user) {
             FireBase::getInstance()->update([
                 'user'         => $user->id,
                 'organization' => $client->id
-                    ], [
+            ], [
                 'last_add_cart_user_name' => $userSend->profile->full_name
             ]);
         }
@@ -98,13 +98,13 @@ class OrderNotice
     {
         /** @var \yii\swiftmailer\Mailer $mailer */
         /** @var \yii\swiftmailer\Message $message */
-        $mailer             = Yii::$app->mailer;
+        $mailer = Yii::$app->mailer;
         $mailer->htmlLayout = '@mail_views/layouts/order';
-        $senderOrg          = $sender;
-        $subject            = Yii::t('message', 'frontend.controllers.order.new_order') . $order->id . "!";
-        $dataProvider       = new ArrayDataProvider(['allModels' => $order->orderContent, 'pagination' => false]);
-        $orgs[]             = $order->vendor_id;
-        $orgs[]             = $order->client_id;
+        $senderOrg = $sender;
+        $subject = Yii::t('message', 'frontend.controllers.order.new_order') . $order->id . "!";
+        $dataProvider = new ArrayDataProvider(['allModels' => $order->orderContent, 'pagination' => false]);
+        $orgs[] = $order->vendor_id;
+        $orgs[] = $order->client_id;
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
@@ -117,9 +117,9 @@ class OrderNotice
 //                    }
                     try {
                         $mailer->compose('@mail_views/orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     } catch (\Exception $e) {
                         \Yii::error($e->getMessage());
                     }
@@ -154,14 +154,14 @@ class OrderNotice
 
         /** @var Mailer $mailer */
         /** @var Message $message */
-        $mailer             = Yii::$app->mailer;
+        $mailer = Yii::$app->mailer;
         $mailer->htmlLayout = '@mail_views/layouts/order';
-        $subject            = Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
+        $subject = Yii::t('message', 'frontend.controllers.order.cancelled_order_six', ['ru' => "Заказ № {order_id} отменен!", 'order_id' => $order->id]);
 
-        $searchModel                              = new OrderContentSearch();
+        $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
-        $dataProvider                             = $searchModel->search($params);
-        $dataProvider->pagination                 = false;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
 
         $orgs[] = $order->vendor_id;
         $orgs[] = $order->client_id;
@@ -177,9 +177,9 @@ class OrderNotice
                 if ($notification) {
                     if ($notification->order_canceled) {
                         $mailer->compose('@mail_views/orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     }
                 }
                 //Отправляем СМС
@@ -213,22 +213,22 @@ class OrderNotice
         /** @var Mailer $mailer */
         /** @var Message $message */
         if (!$sender) {
-            $sender    = $order->createdBy;
+            $sender = $order->createdBy;
             $senderOrg = $sender->organization;
         } else {
             $senderOrg = $sender;
         }
 
-        $mailer             = Yii::$app->mailer;
+        $mailer = Yii::$app->mailer;
         $mailer->htmlLayout = '@mail_views/order';
-        $subject            = Yii::t('message', 'frontend.controllers.order.complete', ['ru' => "Заказ № {order_id} выполнен!", 'order_id' => $order->id]);
+        $subject = Yii::t('message', 'frontend.controllers.order.complete', ['ru' => "Заказ № {order_id} выполнен!", 'order_id' => $order->id]);
 
-        $searchModel                              = new OrderContentSearch();
+        $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
-        $dataProvider                             = $searchModel->search($params);
-        $dataProvider->pagination                 = false;
-        $orgs[]                                   = $order->vendor_id;
-        $orgs[]                                   = $order->client_id;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
+        $orgs[] = $order->vendor_id;
+        $orgs[] = $order->client_id;
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
@@ -237,9 +237,9 @@ class OrderNotice
                 if ($notification) {
                     if ($notification->order_done) {
                         $mailer->compose('@mail_views/orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     }
                 }
 
@@ -268,27 +268,27 @@ class OrderNotice
      * @param null  $sender
      * @throws \Exception
      */
-    public function processingOrder(Order $order, User $user, $sender = null)
+    public function processingOrder(Order $order, User $user, $sender = null, $isDesadv = false)
     {
         /** @var Mailer $mailer */
         /** @var Message $message */
         if (!$sender) {
-            $sender    = $order->createdBy;
+            $sender = $order->createdBy;
             $senderOrg = $sender->organization;
         } else {
             $senderOrg = $sender;
         }
 
-        $mailer             = Yii::$app->mailer;
+        $mailer = Yii::$app->mailer;
         $mailer->htmlLayout = '@mail_views/order';
-        $subject            = Yii::t('message', 'frontend.controllers.order.accepted_order', ['ru' => "Заказ № {order_id} подтвержден!", 'order_id' => $order->id]);
+        $subject = $isDesadv ? $senderOrg->name . " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.accepted_order', ['ru' => "Заказ № {order_id} подтвержден!", 'order_id' => $order->id]);
 
-        $searchModel                              = new OrderContentSearch();
+        $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
-        $dataProvider                             = $searchModel->search($params);
-        $dataProvider->pagination                 = false;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
         //$orgs[]                                   = $order->vendor_id;
-        $orgs[]                                   = $order->client_id;
+        $orgs[] = $order->client_id;
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
@@ -296,10 +296,10 @@ class OrderNotice
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification) {
                     if ($notification->order_processing) {
-                        $mailer->compose('@mail_views/orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                        $mailer->compose('@mail_views/orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient", "isDesadv"))
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     }
                 }
 
@@ -308,7 +308,7 @@ class OrderNotice
                     if (!empty($recipient->profile->phone) && $notification->order_processing) {
                         $text = Yii::$app->sms->prepareText('sms.order_processing', [
                             'vendor_name' => $order->vendor->name,
-                            'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
+                            'url'         => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone, $order->id);
                     }
@@ -333,14 +333,14 @@ class OrderNotice
     private function sendSystemMessage($user, $order_id, $message, $danger = false)
     {
         try {
-            $order                  = Order::findOne(['id' => $order_id]);
-            $newMessage             = new OrderChat();
-            $newMessage->order_id   = $order->id;
-            $newMessage->message    = $message;
-            $newMessage->is_system  = 1;
+            $order = Order::findOne(['id' => $order_id]);
+            $newMessage = new OrderChat();
+            $newMessage->order_id = $order->id;
+            $newMessage->message = $message;
+            $newMessage->is_system = 1;
             $newMessage->sent_by_id = $user->id;
-            $newMessage->danger     = $danger;
-            $recipient_id           = $order->client_id;
+            $newMessage->danger = $danger;
+            $recipient_id = $order->client_id;
             if ($order->client_id == $user->organization->id) {
                 $recipient_id = $order->vendor_id;
             }
@@ -382,7 +382,7 @@ class OrderNotice
                     'user'          => $clientUser->id,
                     'organization'  => $newMessage->recipient_id,
                     'notifications' => uniqid(),
-                        ], [
+                ], [
                     'body'     => $newMessage->message,
                     'date'     => WebApiHelper::asDatetime(),
                     'order_id' => $order_id
@@ -404,7 +404,7 @@ class OrderNotice
                     'user'          => $vendorUser->id,
                     'organization'  => $newMessage->recipient_id,
                     'notifications' => uniqid(),
-                        ], [
+                ], [
                     'body'     => $newMessage->message,
                     'date'     => WebApiHelper::asDatetime(),
                     'order_id' => $order_id
@@ -422,7 +422,7 @@ class OrderNotice
      */
     private function getNotificationCount(Organization $organizaion)
     {
-        return (int) OrderChat::find()->where(['viewed' => 0, 'is_system' => 1, 'recipient_id' => $organizaion->id])->count();
+        return (int)OrderChat::find()->where(['viewed' => 0, 'is_system' => 1, 'recipient_id' => $organizaion->id])->count();
     }
 
     /**
@@ -438,17 +438,17 @@ class OrderNotice
     {
         /** @var Mailer $mailer */
         /** @var Message $message */
-        $mailer             = Yii::$app->mailer;
+        $mailer = Yii::$app->mailer;
         $mailer->htmlLayout = '@mail_views/order';
         // send email
-        $subject            = Yii::t('message', 'frontend.controllers.order.change_in_order', ['ru' => "Измененения в заказе №"]) . $order->id;
+        $subject = Yii::t('message', 'frontend.controllers.order.change_in_order', ['ru' => "Измененения в заказе №"]) . $order->id;
 
-        $searchModel                              = new OrderContentSearch();
+        $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
-        $dataProvider                             = $searchModel->search($params);
-        $dataProvider->pagination                 = false;
-        $orgs[]                                   = $order->vendor_id;
-        $orgs[]                                   = $order->client_id;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
+        $orgs[] = $order->vendor_id;
+        $orgs[] = $order->client_id;
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             foreach ($orgs as $org) {
@@ -456,9 +456,9 @@ class OrderNotice
                 if ($notification)
                     if ($notification->order_changed) {
                         $mailer->compose('@mail_views/orderChange', compact("subject", "senderOrg", "order", "dataProvider", "recipient", "changed", "deleted"))
-                                ->setTo($email)
-                                ->setSubject($subject)
-                                ->send();
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
                     }
                 $notification = $recipient->getSmsNotification($org);
                 if ($notification)

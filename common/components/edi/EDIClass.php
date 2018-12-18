@@ -124,7 +124,7 @@ class EDIClass extends Component
                 $arr[$contID]['DELIVEREDQUANTITY'] = (isset($position->DELIVEREDQUANTITY)) ? (float)$position->DELIVEREDQUANTITY : 0.00;
                 $arr[$contID]['PRICE'] = (float)$position->PRICE[0] ?? (float)$position->PRICE ?? 0;
                 $arr[$contID]['PRICEWITHVAT'] = (isset($position->PRICEWITHVAT)) ? (float)$position->PRICEWITHVAT : 0.00;;
-                $arr[$contID]['TAXRATE'] = (isset($position->VAT)) ? (float)$position->VAT : 0.00;
+                $arr[$contID]['TAXRATE'] = (isset($position->TAXRATE)) ? (int)$position->TAXRATE : 0;
                 $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
                 $arr[$contID]['WAYBILLNUMBER'] = isset($position->WAYBILLNUMBER) ? $position->WAYBILLNUMBER : null;
                 $arr[$contID]['WAYBILLDATE'] = isset($position->WAYBILLDATE) ? $position->WAYBILLDATE : null;
@@ -146,6 +146,7 @@ class EDIClass extends Component
 
             $summ = 0;
             $orderContentArr = [];
+            $isPositionChanged = false;
             foreach ($order->orderContent as $orderContent) {
                 $index = $orderContent->id;
                 $orderContentArr[] = $orderContent->id;
@@ -172,12 +173,14 @@ class EDIClass extends Component
                     }
                 }
                 $newPrice = (float)$arr[$index]['PRICE'];
+                if ($orderContent->price != $newPrice || $orderContent->quantity != $newQuantity) {
+                    $isPositionChanged = true;
+                }
                 $summ += $newQuantity * $newPrice;
                 $orderContent->price = $newPrice;
                 $orderContent->quantity = $newQuantity;
-                $orderContent->vat_product = $arr[$index]['TAXRATE'] ?? 0.00;
+                $orderContent->vat_product = isset($arr[$index]['TAXRATE']) ? (int)$arr[$index]['TAXRATE'] : 0;
                 $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
-                $orderContent->edi_shipment_quantity = $arr[$index]['DELIVEREDQUANTITY'];
                 $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
                 if ($documentType == 1) {
                     $orderContent->edi_recadv = $this->fileName;
@@ -222,9 +225,11 @@ class EDIClass extends Component
                     $newOrderContent->plan_quantity = $quan;
                     $newOrderContent->plan_price = $price;
                     $newOrderContent->units = $good->units;
+                    $newOrderContent->vat_product = $position->VAT ?? 0.00;
                     if (!$newOrderContent->save()) {
                         throw new Exception('Error saving order content');
                     }
+                    $isPositionChanged = true;
                     $changed[] = $newOrderContent;
                     $total = $quan * $price;
                     $summ += $total;
@@ -250,7 +255,13 @@ class EDIClass extends Component
             if (!$order->save()) {
                 throw new Exception('Error saving order');
             }
-            $ordNotice->sendOrderChange($organization, $order, $changed, $deleted);
+
+            if ($isPositionChanged) {
+                $ordNotice->sendOrderChange($organization, $order, $changed, $deleted);
+            } else {
+                $ordNotice->processingOrder($order, $user, $organization, $isDesadv);
+            }
+
             $action = ($isDesadv) ? " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
             $systemMessage = $order->vendor->name . '' . $action;
             OrderController::sendSystemMessage($user, $order->id, $systemMessage);

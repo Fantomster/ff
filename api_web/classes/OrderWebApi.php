@@ -134,7 +134,9 @@ class OrderWebApi extends \api_web\components\WebApi
                                 $deleted[] = $this->deleteProduct($order, $product['id']);
                                 break;
                             case 'add':
-                                $changed[] = $this->addProduct($order, $product);
+                                $change = $this->addProduct($order, $product);
+                                $change->setIsNewRecord(true);
+                                $changed[] = $change;
                                 break;
                             case 'edit':
                                 $changed[] = $this->editProduct($order, $product);
@@ -198,6 +200,7 @@ class OrderWebApi extends \api_web\components\WebApi
          * @var OrderContent $orderContent
          */
         $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
+        $oldOrderContentAttributes = $orderContent->attributes;
         if (empty($orderContent)) {
             throw new BadRequestHttpException("order_content.not_found");
         }
@@ -213,6 +216,7 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         if ($orderContent->save()) {
+            $orderContent->setOldAttributes($oldOrderContentAttributes);
             return $orderContent;
         } else {
             throw new ValidationException($orderContent->getFirstErrors());

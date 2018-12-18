@@ -56,7 +56,7 @@ class WaybillHelper extends AuthHelper
         #Версия StoreHouse
         $storeHouseVersion = RkDicconst::findOne(['denom' => 'sh_version'])->getPconstValue();
         foreach ($recs as $rec) {
-            $itemSum = ($storeHouseVersion == 4 ? $rec['sum'] * 100 : $rec['sum']);
+            $itemSum = ($storeHouseVersion == 4 ? $rec['sum'] * 100 : str_replace('.', ',', $rec['sum']));
             // $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.$rec['vat'].'" />'.PHP_EOL;
             $xml .= '<ITEM rid="' . $rec['prid'] . '" quant="' . ($rec["quant"] * 1000) . '" mu="' . $rec["unit_rid"] . '" sum="' . $itemSum . '" vatrate="' . ($rec['vat']) . '" />' . PHP_EOL;
         }

@@ -60,12 +60,12 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     /**
      * Get files list from provider and insert to table
      */
-    public function handleFilesList(): void
+    public function handleFilesList()
     {
         try {
             $this->getFilesListForInsertingInQueue();
         } catch (\Throwable $e) {
-            Yii::error($e->getMessage());
+            return false;
         }
     }
 

@@ -56,8 +56,6 @@ class ChatWebApi extends WebApi
                        order_chat 
                     WHERE 
                     order_id = order.id 
-                    AND
-                    recipient_id = :org_id
                 )',
                 'unread_message'    => '(
                     SELECT 
@@ -67,7 +65,7 @@ class ChatWebApi extends WebApi
                     WHERE 
                     order_id = order.id 
                     AND
-                    recipient_id = :org_id
+                    recipient_id = :org_id  
                     AND 
                     viewed = 0
                 )',
@@ -87,9 +85,7 @@ class ChatWebApi extends WebApi
                     FROM 
                        order_chat 
                     WHERE 
-                    order_id = order.id 
-                    AND
-                    recipient_id = :org_id
+                    order_id = order.id
                     ORDER BY order_chat.created_at DESC
                     LIMIT 1
                 )'
@@ -439,7 +435,7 @@ class ChatWebApi extends WebApi
             'image'             => $model->vendor->pictureUrl ?? '',
             'count_message'     => (int)$model->count_message ?? 0,
             'unread_message'    => (int)$model->unread_message ?? 0,
-            'last_message'      => $last_message,
+            'last_message'      => strip_tags($last_message),
             'last_message_date' => WebApiHelper::asDatetime($model->last_message_date),
             'is_edi'            => $model->vendor->isEdi()
         ];

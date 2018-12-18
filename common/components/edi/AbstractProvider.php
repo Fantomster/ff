@@ -29,7 +29,7 @@ abstract class AbstractProvider
      * @var
      */
     private $client;
-    private $isDebug = true;
+    private $isDebug = false;
 
     /**
      * Получение файла от провадера

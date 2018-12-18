@@ -214,8 +214,9 @@ abstract class AbstractRealization
         }
     }
 
-    public function parseFile($content, $providerID)
+    public function parseFile($content, $providerID, $fileName = null)
     {
+        $this->edi->fileName = $fileName;
         return $this->edi->parseFile($content, $providerID);
     }
 

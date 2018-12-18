@@ -45,7 +45,7 @@
                     <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
                     <DELIVEREDQUANTITY><?= $position['quantity'] ?></DELIVEREDQUANTITY>
                     <ORDEREDQUANTITY><?= ($position['plan_quantity'] > 0) ? (float)$position['plan_quantity'] : $position['quantity'] ?></ORDEREDQUANTITY>
-                    <ACCEPTEDQUANTITY><?= ($position['quantity'] > 0) ? (float)$position['quantity'] : $position['edi_shipment_quantity'] ?></ACCEPTEDQUANTITY>
+                    <ACCEPTEDQUANTITY><?= ($position['quantity'] > 0) ? (float)$position['quantity'] : $position['plan_quantity'] ?></ACCEPTEDQUANTITY>
                     <ORDERUNIT><?= $measure ?></ORDERUNIT>
                     <EGAISCODE><?= $position['id'] ?></EGAISCODE>
                     <EGAISQUANTITY><?= $position['quantity'] ?></EGAISQUANTITY>

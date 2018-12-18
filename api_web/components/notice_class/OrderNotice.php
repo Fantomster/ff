@@ -268,7 +268,7 @@ class OrderNotice
      * @param null  $sender
      * @throws \Exception
      */
-    public function processingOrder(Order $order, User $user, $sender = null)
+    public function processingOrder(Order $order, User $user, $sender = null, $isDesadv = false)
     {
         /** @var Mailer $mailer */
         /** @var Message $message */
@@ -281,7 +281,7 @@ class OrderNotice
 
         $mailer = Yii::$app->mailer;
         $mailer->htmlLayout = '@mail_views/order';
-        $subject = Yii::t('message', 'frontend.controllers.order.accepted_order', ['ru' => "Заказ № {order_id} подтвержден!", 'order_id' => $order->id]);
+        $subject = $isDesadv ? $senderOrg->name . " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.accepted_order', ['ru' => "Заказ № {order_id} подтвержден!", 'order_id' => $order->id]);
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -299,7 +299,7 @@ class OrderNotice
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification) {
                     if ($notification->order_processing) {
-                        $mailer->compose('@mail_views/orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        $mailer->compose('@mail_views/orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient", "isDesadv"))
                             ->setTo($email)
                             ->setSubject($subject)
                             ->send();

@@ -45,15 +45,17 @@ class VetisWaybillSearch extends MercVsd
     public function search($params, $page, $pageSize)
     {
         $tableName = DBNameHelper::getMainName();
-        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList('id');
         if (!empty($this->acquirer_id)) {
             if (is_array($this->acquirer_id)) {
                 $strOrgIds = implode(',', $this->acquirer_id);
             } else {
                 $strOrgIds = $this->acquirer_id;
             }
+            $arOrgIds = $this->acquirer_id;
         } else {
+            $orgIds = (new UserWebApi())->getUserOrganizationBusinessList('id');
             $strOrgIds = implode(',', array_keys($orgIds['result']));
+            $arOrgIds = array_keys($orgIds['result']);
         }
         $enterpriseGuides = implode('\',\'', (new VetisHelper())->getEnterpriseGuids());
 
@@ -124,7 +126,7 @@ class VetisWaybillSearch extends MercVsd
 
                 where 
                 b.org_id in (' . $strOrgIds . ') ' . $arWhereAndCount['sql'] . '
-                order by coalesce(ort, a.date_doc) desc, order_id, a.date_doc desc
+                order by coalesce(ort, a.date_doc) desc, ord_id, a.date_doc desc
                 ) tb 
               ) tb2 where pg=:page
              ';
@@ -168,7 +170,7 @@ class VetisWaybillSearch extends MercVsd
             'items'   => $arItems,
             'groups'  => $arGroups,
             'count'   => ceil($arWhereAndCount['count'] / $pageSize),
-            'org_ids' => array_keys($orgIds['result']),
+            'org_ids' => $arOrgIds,
         ];
     }
 

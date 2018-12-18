@@ -34,19 +34,19 @@ class ItemProduct extends ValidateRequest
     public $unit_type;
 
     /**
-     * @SWG\Property(@SWG\Xml(name="alc_volume"), example="40")
+     * @SWG\Property(@SWG\Xml(name="alc_volume"), example=40)
      * @var integer
      */
     public $alc_volume;
 
     /**
-     * @SWG\Property(@SWG\Xml(name="product_v_code"), example="200")
+     * @SWG\Property(@SWG\Xml(name="product_v_code"), example=200)
      * @var integer
      */
     public $product_v_code;
 
     /**
-     * @SWG\Property(property="producer", ref="Producer")
+     * @SWG\Property(property="producer", ref="ProductProducer")
      * @var object
      */
     public $producer;

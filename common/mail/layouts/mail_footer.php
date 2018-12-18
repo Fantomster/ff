@@ -12,7 +12,7 @@
                 <tr>
                     <td align="center" valign="middle" width="28">
                         <a href="tel:84994041018" target="_blank" style="text-decoration: none;">
-                            <img src="https://image.ibb.co/niX3xH/icon_phone.png" alt="phone" width="16" height="16"
+                            <img src="https://static.mixcart.ru/icon_phone.png" alt="phone" width="16" height="16"
                                  border="0" style="border:0; outline:none; text-decoration:none; display:block;">
                         </a>
                     </td>
@@ -26,7 +26,7 @@
                     </td>
                     <td align="center" valign="middle" width="33">
                         <a href="mailto:info@mixcart.ru" target="_blank" style="text-decoration: none;">
-                            <img src="https://image.ibb.co/fWh8Wc/icon_mail.png" alt="phone" width="22" height="16"
+                            <img src="https://static.mixcart.ru/icon_mail.png" alt="email" width="22" height="16"
                                  border="0" style="border:0; outline:none; text-decoration:none; display:block;">
                         </a>
                     </td>
@@ -40,7 +40,7 @@
                     </td>
                     <td align="center" valign="middle" width="30">
                         <a href="<?= \Yii::$app->urlManagerFrontend->baseUrl ?>" target="_blank" style="text-decoration: none;">
-                            <img src="https://image.ibb.co/iib2rc/icon_web.png" alt="phone" width="19" height="19"
+                            <img src="https://static.mixcart.ru/icon_web.png" alt="web" width="19" height="19"
                                  border="0" style="border:0; outline:none; text-decoration:none; display:block;">
                         </a>
                     </td>
@@ -66,12 +66,12 @@
                 <tr>
                     <td align="center" valign="middle" height="70">
                         <a href="https://www.facebook.com/mixcartru/"><img
-                                src="https://preview.ibb.co/b0fgKx/fb_logo.png" alt="Facebook Logo" width="30"
+                                src="https://static.mixcart.ru/fb_logo.png" alt="Facebook Logo" width="30"
                                 height="30" style="border:0; outline:none; text-decoration:none;"></a>
                     </td>
                     <td align="center" valign="middle" height="70">
                         <a href="https://www.instagram.com/mixcart_ru/?hl=ru"><img
-                                src="https://preview.ibb.co/h2tXsH/instagram_logo.png" alt="Facebook Logo"
+                                src="https://static.mixcart.ru/instagram_logo.png" alt="Facebook Logo"
                                 width="25" height="25"
                                 style="border:0; outline:none; text-decoration:none;"></a>
                     </td>

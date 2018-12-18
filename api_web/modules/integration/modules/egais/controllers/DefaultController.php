@@ -249,7 +249,6 @@ class DefaultController extends WebApiController
      *         @SWG\Schema (
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(property="request", ref="#/definitions/ActWriteOffV3"),
-     *
      *         )
      *     ),
      *    @SWG\Response(

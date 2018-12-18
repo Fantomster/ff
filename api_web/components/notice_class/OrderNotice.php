@@ -287,12 +287,15 @@ class OrderNotice
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
-        //$orgs[]                                   = $order->vendor_id;
-        $orgs[] = $order->client_id;
+
+        $organizations = [
+            $order->vendor_id,
+            $order->client_id
+        ];
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            foreach ($orgs as $org) {
+            foreach ($organizations as $org) {
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification) {
                     if ($notification->order_processing) {

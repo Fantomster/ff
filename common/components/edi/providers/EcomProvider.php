@@ -53,13 +53,9 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
     /**
      * Get files list from provider and insert to table
      */
-    public function handleFilesList(): void
+    public function handleFilesList()
     {
-        try {
-            $objectList = $this->getFilesListForInsertingInQueue();
-        } catch (\Throwable $e) {
-            Yii::error($e->getMessage());
-        }
+        $objectList = parent::handleFilesList();
         if (!empty($objectList)) {
             $this->insertFilesInQueue($objectList, $this->orgID);
         }
@@ -77,16 +73,12 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
         try {
             $object = $client->getList(['user' => ['login' => $this->login, 'pass' => $this->pass]]);
         } catch (\Throwable $e) {
-            Yii::error($e->getMessage());
+            return false;
         }
         if ($object->result->errorCode != 0) {
-            Yii::error('EComIntegration getList Error №' . $object->result->errorCode);
+            return false;
         }
         $list = $object->result->list ?? null;
-
-        if (!$list) {
-            Yii::error('No files for ' . $this->login);
-        }
         return $list;
     }
 
@@ -107,8 +99,8 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
             $order->updateAttributes(['edi_order' => $order->id]);
             $transaction->commit();
         } catch (Exception $e) {
-            Yii::error($e);
             $transaction->rollback();
+            return false;
         }
         return $result;
     }

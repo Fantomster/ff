@@ -29,7 +29,7 @@ abstract class AbstractProvider
      * @var
      */
     private $client;
-    private $isDebug = false;
+    private $isDebug = true;
 
     /**
      * Получение файла от провадера
@@ -47,6 +47,19 @@ abstract class AbstractProvider
         $class = substr($className, $pos + 1);
         $provider = EdiProvider::findOne(['provider_class' => $class]);
         return $provider->id;
+    }
+
+    /**
+     * Get files list from provider and insert to table
+     */
+    public function handleFilesList()
+    {
+        try {
+            $objectList = $this->getFilesListForInsertingInQueue();
+        } catch (\Throwable $e) {
+            return false;
+        }
+        return $objectList;
     }
 
     /**

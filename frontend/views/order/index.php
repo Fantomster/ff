@@ -624,9 +624,9 @@ $this->registerCss($css);
                 </div>
             </div>
             <?php if ($businessType == SearchOrdersComponent::BUSINESS_TYPE_VENDOR) { ?>
-                <?= Html::submitButton('<i class="fa fa-file-excel-o"></i> ' . $btn['excel'], ['class' => 'btn btn-success export-to-xls'])
+                <?= Html::button('<i class="fa fa-file-excel-o"></i> ' . $btn['excel'], ['class' => 'btn btn-success export-to-xls'])
                 ?>
-                <?= Html::submitButton('<i class="fa fa-th"></i> ' . $btn['grid'], ['class' => 'btn btn-success grid-report'])
+                <?= Html::button('<i class="fa fa-th"></i> ' . $btn['grid'], ['class' => 'btn btn-success grid-report'])
                 ?>
             <?php } ?>
             <div class="row">

@@ -59,7 +59,6 @@ class EDIClass extends Component
     public function handleOrderResponse($simpleXMLElement, $documentType, $providerID, $isAlcohol = false, $isLeraData = false, $exceptionArray = [])
     {
         try {
-            dd($simpleXMLElement);
             $orderID = $simpleXMLElement->ORDERNUMBER;
             if ($isLeraData) {
                 $head = $simpleXMLElement->HEAD[0];
@@ -187,7 +186,7 @@ class EDIClass extends Component
                 $orderContent->into_price = $newPrice;
                 $orderContent->into_price_vat = isset($arr[$index]['PRICEWITHVAT']) ? $arr[$index]['PRICEWITHVAT'] : null;
                 $orderContent->into_price_sum = isset($arr[$index]['AMOUNT']) ? $arr[$index]['AMOUNT'] : null;
-                $orderContent->into_price_sum = isset($arr[$index]['AMOUNTWITHVAT']) ? $arr[$index]['AMOUNTWITHVAT'] : null;
+                $orderContent->into_price_sum_vat = isset($arr[$index]['AMOUNTWITHVAT']) ? $arr[$index]['AMOUNTWITHVAT'] : null;
                 $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
                 $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
                 if ($documentType == 1) {

@@ -181,9 +181,6 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         $id = Yii::$app->request->post('number');
         $agent = OneSContragent::findOne($id);
         $agent->vendor_id = $vendor_id;
-        if (!$agent->save()) {
-            return false;
-        }
-        return true;
+        return $agent->save();
     }
 }

@@ -6,6 +6,8 @@ use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\OuterProductMapHelper;
+use api_web\helpers\WaybillHelper;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\classes\OuterProductMapper;
 use common\models\AllService;
 use common\models\CatalogBaseGoods;
@@ -20,7 +22,7 @@ use common\models\OuterUnit;
 use common\models\search\OuterProductMapSearch;
 use common\models\Waybill;
 use common\models\WaybillContent;
-use yii\base\Exception;
+use yii\base\InvalidArgumentException;
 use yii\data\SqlDataProvider;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
@@ -58,9 +60,7 @@ class IntegrationWebApi extends WebApi
         $this->validateRequest($request, ['service_id']);
         $license = License::checkByServiceId($this->user->organization_id, $request['service_id']);
         if ($license) {
-            $this->user->integration_service_id = $request['service_id'];
-            $this->user->save();
-            return ['result' => true];
+            return ['result' => $this->user->setIntegrationServiceId($request['service_id'])];
         } else {
             throw new BadRequestHttpException('Dont have active license for this service');
         }
@@ -94,9 +94,7 @@ class IntegrationWebApi extends WebApi
      */
     public function handleWaybill(array $post): array
     {
-        if (!isset($post['service_id'])) {
-            throw new BadRequestHttpException("empty_param|service_id");
-        }
+       $this->validateRequest($post, ['service_id']);
 
         $organizationID = $this->user->organization_id;
         $acquirerID = $organizationID;
@@ -121,10 +119,12 @@ class IntegrationWebApi extends WebApi
 
             $orderContent = OrderContent::findOne(['order_id' => $order->id]);
             if ($orderContent->edi_number) {
-                $arr = explode('-', $orderContent->edi_number);
-                if (isset($arr[1])) {
-                    $i = (int)$arr[1];
-                    $ediNumber = $arr[0] . "-" . $i;
+                $tmp_ed_num = $orderContent->edi_number;
+                $existWaybill = Waybill::find()->where(['like', 'outer_number_code', $tmp_ed_num])
+                    ->andWhere(['service_id' => $post['service_id']])
+                    ->orderBy(['outer_number_code' => SORT_DESC])->limit(1)->one();
+                if ($existWaybill && $existWaybill->outer_number_code) {
+                    $ediNumber =  WaybillHelper::getLastEdiNumber($existWaybill->outer_number_code, $tmp_ed_num);
                 } else {
                     $ediNumber = $orderContent->edi_number . "-1";
                 }
@@ -164,9 +164,7 @@ class IntegrationWebApi extends WebApi
      */
     public function resetWaybillContent(array $post): array
     {
-        if (!isset($post['waybill_content_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_content_id");
-        }
+       $this->validateRequest($post, ['waybill_content_id']);
 
         $waybillContent = WaybillContent::find()
             ->joinWith('waybill')
@@ -220,9 +218,7 @@ class IntegrationWebApi extends WebApi
      */
     public function showWaybillContent(array $post): array
     {
-        if (!isset($post['waybill_content_id'])) {
-            throw new BadRequestHttpException("empty_param|waybill_content_id");
-        }
+       $this->validateRequest($post, ['waybill_content_id']);
 
         $waybillContent = WaybillContent::find()
             ->joinWith('waybill')
@@ -363,51 +359,6 @@ class IntegrationWebApi extends WebApi
     }
 
     /**
-     * @param WaybillContent $waybillContent
-     * @param                $post
-     * @param                $quan
-     * @param                $koef
-     * @throws \Exception
-     * @return array
-     */
-    private function handleWaybillContent($waybillContent, $post, $quan, $koef)
-    {
-        return ['deprecated' => true];
-        //DEPRECATED this suck stub
-        if (!OuterProduct::find()->where(['id' => $post['outer_product_id']])->exists()) {
-            throw new BadRequestHttpException('outer_product_not_found');
-        }
-        if (isset($post['outer_product_id'])) {
-            $waybillContent->outer_product_id = $post['outer_product_id'];
-        }
-
-        $orderContent = OrderContent::findOne(['id' => $waybillContent->order_content_id]);
-        if (!$orderContent) {
-            if (isset($post['price_without_vat'])) {
-                $waybillContent->price_without_vat = (int)$post['price_without_vat'];
-                if (isset($post['vat_waybill'])) {
-                    $waybillContent->price_with_vat = (int)($post['price_without_vat'] + ($post['price_without_vat'] * $post['vat_waybill']));
-                    if (isset($post['quantity_waybill'])) {
-                        $waybillContent->sum_without_vat = (int)$post['price_without_vat'] * $post['quantity_waybill'];
-                        $waybillContent->sum_with_vat = $waybillContent->price_with_vat * $post['quantity_waybill'];
-                    }
-                }
-            }
-        } else {
-            if (isset($post['quantity_waybill']) && !isset($post['koef'])) {
-                $koef = $post['quantity_waybill'] / $orderContent->quantity;
-            }
-            if (isset($post['koef']) && !isset($post['quantity_waybill'])) {
-                $quan = $orderContent->quantity * $post['koef'];
-            }
-        }
-        $waybillContent->quantity_waybill = $quan;
-        $waybillContent->koef = $koef;
-        $waybillContent->save();
-        return ['success' => true, 'koef' => $koef, 'quantity' => $quan];
-    }
-
-    /**
      * integration: Накладная (привязана к заказу) - Добавление позиции
      *
      * @param array $post
@@ -475,22 +426,22 @@ class IntegrationWebApi extends WebApi
 
         $waybillCheck = Waybill::findOne(['id' => $post['waybill_id']]);
         if (!isset($waybillCheck)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_found', ['ru' => 'Накладная не найдена']));
+            throw new BadRequestHttpException('waybill.waibill_not_found');
         }
 
         $businessList = (new UserWebApi())->getUserOrganizationBusinessList();
         $checkOrg = in_array($waybillCheck->acquirer_id, ArrayHelper::map($businessList['result'] ?? [], 'id', 'id')) ?? false;
 
         if (!$checkOrg) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_releated_current_user', ['ru' => 'Накладная не пренадлежит организациям текущего пользователя']));
+            throw new BadRequestHttpException('waybill.waibill_not_releated_current_user');
         }
 
         if ($waybillCheck->service_id != $post['service_id']) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_not_relation_this_service', ['ru' => 'Накладная не связана с заданным сервисом']));
+            throw new BadRequestHttpException('waybill.waibill_not_relation_this_service');
         }
 
         if ($waybillCheck->status_id == Registry::WAYBILL_UNLOADED) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_unloading', ['ru' => 'Накладная в статусе выгружена']));
+            throw new BadRequestHttpException('waybill.waibill_is_unloading');
         }
 
         $waybillContentCheck = WaybillContent::find()
@@ -498,7 +449,7 @@ class IntegrationWebApi extends WebApi
             ->andWhere('order_content_id is not null')
             ->one();
         if (isset($waybillContentCheck)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.waibill_is_relation_order', ['ru' => 'Накладная связана с заказом']));
+            throw new BadRequestHttpException('waybill.waibill_is_relation_order');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -542,7 +493,7 @@ class IntegrationWebApi extends WebApi
      *
      * @param array $post
      * @return array
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|InvalidArgumentException
      */
     public function getProductMapList(array $post): array
     {
@@ -607,7 +558,7 @@ class IntegrationWebApi extends WebApi
                 $this->editProductMap($post['service_id'], $item, $post['business_id']);
                 $result[$item['product_id']] = ['success' => true];
             } catch (\Exception $e) {
-                $result[$item['product_id']] = ['success' => false, 'error' => \Yii::t('api_web', $e->getMessage())  . $e->getTraceAsString()];
+                $result[$item['product_id']] = ['success' => false, 'error' => \Yii::t('api_web', $e->getMessage()) . $e->getTraceAsString()];
             }
         }
         return $result;
@@ -628,7 +579,9 @@ class IntegrationWebApi extends WebApi
         //Загружаем данные по базовому и дочерним бизнесам (если бизнес главный)
         $mapper = new OuterProductMapper($business_id, $service_id);
         $mapper->loadRequest($request);
-        $mapper->updateChildesMap();
+        if (isset($request['outer_product_id']) && !is_null($request['outer_product_id'])) {
+            $mapper->updateChildesMap();
+        }
         $mapper->updateModel();
     }
 
@@ -636,6 +589,7 @@ class IntegrationWebApi extends WebApi
      * Информация по сопоставлению продукта
      *
      * @param array $model
+     * @param bool  $isChild
      * @return array
      */
     private function prepareOutProductMap(array $model, $isChild = false)
@@ -652,8 +606,8 @@ class IntegrationWebApi extends WebApi
             "outer_store"                   => null,
             "coefficient"                   => !empty($model['coefficient']) ? round($model['coefficient'], 10) : 1,
             "vat"                           => (int)$model['vat'],
-            "created_at"                    => $model['created_at'] ?? null,
-            "updated_at"                    => $model['updated_at'] ?? null,
+            "created_at"                    => WebApiHelper::asDatetime($model['created_at'] ?? null),
+            "updated_at"                    => WebApiHelper::asDatetime($model['updated_at'] ?? null),
             "is_child_organization_for_map" => $isChild,
         ];
 

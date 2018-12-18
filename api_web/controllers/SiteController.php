@@ -2,7 +2,6 @@
 
 namespace api_web\controllers;
 
-use api_web\components\WebApi;
 use api_web\components\WebApiSwaggerAction;
 use Yii;
 use yii\web\Controller;
@@ -108,12 +107,12 @@ class SiteController extends Controller
              */
             $provider = (new \frontend\modules\billing\Module('billing'))->getProvider();
             if (!$provider->isProviderRequest()) {
-                throw new \Exception('Request Provider no allow This IP:' . \Yii::$app->request->getUserIP());
+                throw new \Exception(\Yii::t('api_web', "Request Provider no allow This IP:{ip}", ['ru'=>'Запрос поставщика не разрешает этот IP: {ip}', 'ip' => \Yii::$app->request->getUserIP()]));
             }
 
             $notification = \Yii::$app->request->getRawBody();
             if (empty($notification)) {
-                throw new \Exception('empty Body in Request');
+                throw new \Exception(\Yii::t('api_web', 'empty Body in Request', ['ru'=>'Пустое тело запроса']));
             }
 
             $notification = \GuzzleHttp\json_decode($notification, true);
@@ -122,7 +121,7 @@ class SiteController extends Controller
                 $external_id = $notification['object']['id'];
                 $payment = BillingPayment::findOne(['external_payment_id' => $external_id]);
                 if (empty($payment)) {
-                    throw new \Exception("Payment not found " . \Yii::$app->request->getRawBody());
+                    throw new \Exception(\Yii::t('api_web', "Payment not found {body}", ['ru'=>'Платеж не найден {body}', 'body' => \Yii::$app->request->getRawBody()]));
                 }
                 $payment->checkProvider($provider);
                 $provider->confirmPayment($payment);

@@ -3,8 +3,8 @@
 namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
+use yii\base\InvalidArgumentException;
 use yii\db\ActiveQuery;
-use yii\db\Expression;
 use yii\data\Pagination;
 use common\models\Request;
 use yii\helpers\ArrayHelper;
@@ -17,6 +17,11 @@ use common\models\RequestCallback;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
 
+/**
+ * Class RequestWebApi
+ *
+ * @package api_web\classes
+ */
 class RequestWebApi extends WebApi
 {
     /**
@@ -25,11 +30,12 @@ class RequestWebApi extends WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws InvalidArgumentException
      */
     public function getListClient(array $post)
     {
         if ($this->user->organization->type_id !== Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('Раздел доступен только для ресторанов...');
+            throw new BadRequestHttpException('This section is available only for restaurants ...');
         }
 
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
@@ -85,11 +91,12 @@ class RequestWebApi extends WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws InvalidArgumentException
      */
     public function getListVendor(array $post)
     {
         if ($this->user->organization->type_id !== Organization::TYPE_SUPPLIER) {
-            throw new BadRequestHttpException('Раздел доступен только для поставщиков...');
+            throw new BadRequestHttpException('This section is available only to suppliers ...');
         }
 
         $organization = $this->user->organization;
@@ -187,7 +194,7 @@ class RequestWebApi extends WebApi
     {
         if ($this->user->organization->type_id !== Organization::TYPE_RESTAURANT) {
             //todo_refactor localization
-            throw new BadRequestHttpException('Вы не можете смотреть предложения, могут только рестораны...');
+            throw new BadRequestHttpException('You can’t watch offers, only restaurants can ...');
         }
         $this->validateRequest($post, ['request_id']);
 
@@ -259,7 +266,7 @@ class RequestWebApi extends WebApi
     public function create(array $post)
     {
         if ($this->user->organization->type_id !== Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('Вы не можете создавать заявки, могут только рестораны...');
+            throw new BadRequestHttpException('You can not create an application, can only restaurants ...');
         }
 
         $this->validateRequest($post, ['category_id', 'product', 'amount']);
@@ -340,14 +347,14 @@ class RequestWebApi extends WebApi
     public function addCallback(array $post)
     {
         if ($this->user->organization->type_id !== Organization::TYPE_SUPPLIER) {
-            throw new BadRequestHttpException('Вы не можете отправить предложение, доступно только поставщикам...');
+            throw new BadRequestHttpException('You can not send an offer, available only to suppliers ...');
         }
 
         $this->validateRequest($post, ['request_id', 'price']);
 
         $request = Request::findOne((int)$post['request_id']);
         if (empty($request)) {
-            throw new BadRequestHttpException('Not found request');
+            throw new BadRequestHttpException('request_not_found');
         }
 
         if ($request->active_status == 0) {
@@ -360,7 +367,7 @@ class RequestWebApi extends WebApi
             ->andWhere(['supp_org_id' => $this->user->organization->id]);
 
         if ($model->exists()) {
-            throw new BadRequestHttpException('Вы уже оставили отклик');
+            throw new BadRequestHttpException('You have already left a response');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -396,14 +403,14 @@ class RequestWebApi extends WebApi
     public function setContractor(array $post)
     {
         if ($this->user->organization->type_id !== Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('Вы не ресторан, проходите дальше...');
+            throw new BadRequestHttpException('You are not a restaurant, go further ...');
         }
 
         $this->validateRequest($post, ['request_id', 'callback_id']);
 
         $request = Request::findOne((int)$post['request_id']);
         if (empty($request)) {
-            throw new BadRequestHttpException('Not found request');
+            throw new BadRequestHttpException('request_not_found');
         }
 
         $this->checkAccess($request);
@@ -414,11 +421,11 @@ class RequestWebApi extends WebApi
         }
 
         if ($request->responsible_supp_org_id == $callback->supp_org_id) {
-            throw new BadRequestHttpException('Вы уже установлены исполнителем.');
+            throw new BadRequestHttpException('You are already installed by the performer.');
         }
 
         if (!empty($request->responsible_supp_org_id)) {
-            throw new BadRequestHttpException('На эту заявку уже назначен исполнитель.');
+            throw new BadRequestHttpException('An executive has already been assigned to this application.');
         }
 
         $transaction = \Yii::$app->db->beginTransaction();
@@ -443,14 +450,14 @@ class RequestWebApi extends WebApi
     public function unsetContractor(array $post)
     {
         if ($this->user->organization->type_id !== Organization::TYPE_RESTAURANT) {
-            throw new BadRequestHttpException('Вы не ресторан, проходите дальше...');
+            throw new BadRequestHttpException('You are not a restaurant, go further ...');
         }
 
         $this->validateRequest($post, ['request_id']);
 
         $request = Request::findOne((int)$post['request_id']);
         if (empty($request)) {
-            throw new BadRequestHttpException('Not found request');
+            throw new BadRequestHttpException('request_not_found');
         }
 
         $this->checkAccess($request);
@@ -477,17 +484,17 @@ class RequestWebApi extends WebApi
     {
         if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
             if ($model->rest_org_id !== $this->user->organization->id) {
-                throw new BadRequestHttpException('Вы не можете смотреть чужие заявки.');
+                throw new BadRequestHttpException('You can not watch other applications.');
             }
         }
         if ($this->user->organization->type_id == Organization::TYPE_SUPPLIER) {
             $requests = ArrayHelper::map($this->getVendorRequestsQuery()->all(), 'id', 'product');
             if (empty($requests[$model->id])) {
-                throw new BadRequestHttpException('Вы не можете видеть эту заявку, она вне зоны вашей доставки.');
+                throw new BadRequestHttpException('You can not see this application, it is outside your delivery area.');
             }
 
             if ($model->active_status == Request::INACTIVE) {
-                throw new BadRequestHttpException('Заявка закрыта.');
+                throw new BadRequestHttpException('request_closed.');
             }
         }
         return true;
@@ -516,7 +523,7 @@ class RequestWebApi extends WebApi
                 }
             }
         } else {
-            throw new BadRequestHttpException('Необходимо установить регионы доставки.');
+            throw new BadRequestHttpException('It is necessary to establish delivery regions.');
         }
 
         //Условия для исключения доставки с регионов
@@ -549,7 +556,7 @@ class RequestWebApi extends WebApi
     {
         $model = RequestCallback::findOne($id);
         if (empty($model)) {
-            throw new BadRequestHttpException('Not found RequestCallback::id = ' . $id);
+            throw new BadRequestHttpException('Not found RequestCallback|' . $id);
         }
 
         return $this->prepareRequestCallback($model);
@@ -560,6 +567,7 @@ class RequestWebApi extends WebApi
      *
      * @param Request $model
      * @return array
+     * @throws \yii\base\InvalidConfigException
      */
     private function prepareRequest(Request $model)
     {
@@ -567,8 +575,8 @@ class RequestWebApi extends WebApi
             'id'                => (int)$model->id,
             "name"              => $model->product,
             "status"            => (int)$model->active_status,
-            "created_at"        => \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:mm:ss'),
-            "end_at"            => !empty($model->end) ? \Yii::$app->formatter->asDate($model->end, 'dd.MM.yyyy HH:mm:ss') : null,
+            "created_at"        => WebApiHelper::asDatetime($model->created_at),
+            "end_at"            => !empty($model->end) ? WebApiHelper::asDatetime($model->end) : null,
             "category"          => $model->categoryName->name,
             "category_id"       => (int)$model->category,
             "amount"            => $model->amount,
@@ -590,11 +598,10 @@ class RequestWebApi extends WebApi
      *
      * @param RequestCallback $model
      * @return array
+     * @throws \yii\base\InvalidConfigException
      */
     private function prepareRequestCallback(RequestCallback $model)
     {
-        $createdAt = (empty($model->created_at)) ? (new \DateTime())->format('Y-m-d H:i:s') : \Yii::$app->formatter->asDate($model->created_at, 'dd.MM.yyyy HH:mm:ss');
-        $updatedAt = (empty($model->updated_at)) ? (new \DateTime())->format('Y-m-d H:i:s') : \Yii::$app->formatter->asDate($model->updated_at, 'dd.MM.yyyy HH:mm:ss');
         return [
             'id'         => (int)$model->id,
             "request_id" => (int)$model->request_id,
@@ -602,8 +609,8 @@ class RequestWebApi extends WebApi
             "vendor"     => WebApiHelper::prepareOrganization($model->organization),
             "price"      => $model->price,
             "comment"    => $model->comment,
-            "created_at" => $createdAt,
-            "updated_at" => $updatedAt,
+            "created_at" => WebApiHelper::asDatetime($model->created_at),
+            "updated_at" => WebApiHelper::asDatetime($model->updated_at),
         ];
     }
 }

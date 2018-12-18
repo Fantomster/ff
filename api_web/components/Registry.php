@@ -50,6 +50,25 @@ class Registry
     const WAYBILL_UNLOADED = 5;
     const WAYBILL_UNLOADING = 6;
 
+    /** - Тип обработки документа pricat для edi - */
+    const EDI_PRICAT_ACTION_RULE_DELETE_NOT_EXISTS = 1; //Удалять позиции catalog_goods которых нет в PRICAT
+    const EDI_PRICAT_ACTION_RULE_FOLLOW_VALUE = 2; //Следовать значению ACTION в PRICAT
+
+    static $edi_pricat_statuses = [
+        self::EDI_PRICAT_ACTION_RULE_DELETE_NOT_EXISTS => 'Удалять позиции catalog_goods которых нет в PRICAT (EDI_PRICAT_ACTION_RULE_DELETE_NOT_EXISTS)',
+        self::EDI_PRICAT_ACTION_RULE_FOLLOW_VALUE      => 'Следовать значению ACTION в PRICAT (EDI_PRICAT_ACTION_RULE_FOLLOW_VALUE)'
+    ];
+
+    /** - Тип поля action документа pricat для edi - */
+    const EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE = 2;
+    const EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE = 4;
+    const EDI_PRICAT_ACTION_TYPE_DELETE = 3;
+
+    /** - Тип поля DOCTYPE документа order для edi - */
+    const EDI_ORDER_DOCTYPE_NEW = 'O';
+    const EDI_ORDER_DOCTYPE_EDIT = 'R';
+    const EDI_ORDER_DOCTYPE_DELETE = 'D';
+
     /**@var array $statuses */
     static $waybill_statuses = [
         self::WAYBILL_COMPARED  => 'compared',
@@ -121,7 +140,8 @@ class Registry
         self::RK_SERVICE_ID           => 33,
         self::IIKO_SERVICE_ID         => 5,
         self::TILLYPAD_SERVICE_ID     => 5,
-        self::ONE_S_CLIENT_SERVICE_ID => 0
+        self::ONE_S_CLIENT_SERVICE_ID => 0,
+        self::EGAIS_SERVICE_ID        => 1
     ];
 
     /** @var array Список ставок НДС */

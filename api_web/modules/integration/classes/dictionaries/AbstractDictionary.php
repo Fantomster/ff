@@ -11,7 +11,7 @@ namespace api_web\modules\integration\classes\dictionaries;
 use api_web\classes\UserWebApi;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
-use api_web\modules\integration\classes\Dictionary;
+use api_web\helpers\WebApiHelper;
 use common\models\Organization;
 use common\models\OrganizationDictionary;
 use common\models\OuterAgent;
@@ -55,7 +55,6 @@ class AbstractDictionary extends WebApi
      * Список справочников
      *
      * @return array
-     * @throws BadRequestHttpException
      */
     public function getList()
     {
@@ -85,8 +84,8 @@ class AbstractDictionary extends WebApi
                 'count'       => $model->count ?? 0,
                 'status_id'   => $model->status_id ?? 0,
                 'status_text' => $model->statusText ?? $defaultStatusText,
-                'created_at'  => $model->created_at ?? null,
-                'updated_at'  => $model->updated_at ?? null
+                'created_at'  => WebApiHelper::asDatetime($model->created_at),
+                'updated_at'  => WebApiHelper::asDatetime($model->updated_at),
             ];
         }
 
@@ -282,7 +281,7 @@ class AbstractDictionary extends WebApi
                 'or',
                 ['is_deleted' => 0],
                 ['is_deleted' => null]
-            ])->exists();
+            ])->andWhere('id <> :agent_id', [':agent_id' => $model->id])->exists();
 
             if ($exists) {
                 throw new BadRequestHttpException('dictionary.agent.update.vendor_exists');
@@ -470,8 +469,8 @@ class AbstractDictionary extends WebApi
             'outer_uid'   => $model->outer_uid,
             'name'        => $model->name,
             'store_type'  => $model->store_type,
-            'created_at'  => $model->created_at,
-            'updated_at'  => $model->updated_at,
+            'created_at'  => WebApiHelper::asDatetime($model->created_at),
+            'updated_at'  => WebApiHelper::asDatetime($model->updated_at),
             'is_active'   => (int)!$model->is_deleted,
             'is_category' => (bool)(!$model->isLeaf()),
             'childs'      => $model->isLeaf() ? [] : $child($model),
@@ -663,7 +662,7 @@ class AbstractDictionary extends WebApi
     private function prepareCategory($model)
     {
         /**
-         * @param $model OuterCategory
+         * @param OuterCategory $model
          * @return array
          */
         $child = function ($model) {
@@ -682,8 +681,8 @@ class AbstractDictionary extends WebApi
             'outer_uid'  => $model->outer_uid,
             'name'       => $model->name,
             'selected'   => (bool)$model->selected,
-            'created_at' => $model->created_at,
-            'updated_at' => $model->updated_at,
+            'created_at' => WebApiHelper::asDatetime($model->created_at),
+            'updated_at' => WebApiHelper::asDatetime($model->updated_at),
             'childs'     => $model->isLeaf() ? [] : $child($model),
         ];
     }

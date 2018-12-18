@@ -8,10 +8,8 @@ use api\common\models\one_s\OneSWaybill;
 use api\common\models\one_s\OneSWaybillData;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
-use api_web\modules\integration\interfaces\ServiceInterface;
 use common\models\Order;
 use common\models\search\OrderSearch;
-use Yii;
 use yii\web\BadRequestHttpException;
 
 class one_sOrder extends WebApi

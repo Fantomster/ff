@@ -98,14 +98,15 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
                     $this->ediFilesQueueID = $key;
                     if ($type == 'pricat') {
                         $xml = json_decode(json_encode($xml, JSON_UNESCAPED_UNICODE));
-                        $this->realization->handlePriceListUpdating($key, $xml, $this->providerID);
+                        $this->realization->handlePriceListUpdating($xml, $this->providerID);
                     } else {
                         $exceptionArray = [
                             'file_id'   => $key,
                             'status'    => parent::STATUS_ERROR,
                             'json_data' => json_encode($xml)
                         ];
-                        $this->realization->handleOrderResponse($xml, $type, false, $exceptionArray, $this->providerID);
+                        $simpleXMLElement = json_decode(json_encode($xml, JSON_UNESCAPED_UNICODE));
+                        $this->realization->handleOrderResponse($simpleXMLElement, $type, $this->providerID, false, true, $exceptionArray);
                     }
                 }
             }
@@ -118,14 +119,6 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
         $transaction = Yii::$app->db_api->beginTransaction();
         $result = false;
         try {
-            $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
-            if (!$ediOrder) {
-                Yii::$app->db->createCommand()->insert('edi_order', [
-                    'order_id' => $order->id,
-                    'lang'     => Yii::$app->language ?? 'ru'
-                ])->execute();
-            }
-
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);
             $dateArray = $this->ediProvider->getDateData($order);
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);

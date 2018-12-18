@@ -9,9 +9,7 @@ use common\models\licenses\License;
 use common\models\OuterAgent;
 use common\models\OuterCategory;
 use common\models\OuterStore;
-use common\models\Waybill;
 use Yii;
-use yii\db\ActiveRecord;
 use yii\db\Transaction;
 use yii\db\mssql\PDO;
 use yii\web\BadRequestHttpException;
@@ -63,12 +61,14 @@ class ServiceRkws extends AbstractSyncFactory
     public $additionalXmlFields = [];
 
     protected $logCategory = "rkws_log";
-    
+
     /**
      * Basic service method "Send request"
      *
      * @return array?
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      */
     public function sendRequestForObjects(): ?array
     {
@@ -112,6 +112,9 @@ class ServiceRkws extends AbstractSyncFactory
      * @param array $params
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      */
     public function sendRequest(array $params = []): array
     {
@@ -196,49 +199,46 @@ class ServiceRkws extends AbstractSyncFactory
     }
 
     /**
+     * @param null $code
      * @return null|string
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidArgumentException
+     * @throws \Exception
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\db\Exception
      */
-    public function prepareServiceWithAuthCheck(): ?string
+    public function prepareServiceWithAuthCheck($code = null): ?string
     {
-
+        $this->licenseCode = $code;
         # 1. Check if authorization is required && active license exists
         $this->log('Begin "auth check" in ' . __METHOD__);
         $this->now = date('Y-m-d H:i:s', time());
-
         # 2. Find license
         /**@var License $license */
         $license = License::checkByServiceId($this->user->organization_id, Registry::RK_SERVICE_ID);
         if (!$license) {
             throw new BadRequestHttpException('no_active_mixcart_license');
         }
-
         # 3. Remember license codes
-        $this->licenseCode = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['code']);
-        if (!$this->licenseCode) {
-            throw new BadRequestHttpException('Не задана настройка [code] для R-keeper.');
+        if (is_null($this->licenseCode)) {
+            $this->licenseCode = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['code']);
+            if (!$this->licenseCode) {
+                throw new BadRequestHttpException('Не задана настройка [code] для R-keeper.');
+            }
         }
-
         # 5. Фиксируем активную лицензия найдена и инициализируем транзакции в БД
         $transaction = $this->createTransaction();
-
         # 6. Пытаемся найти активную сессию и если все хорошо - то используем ее
         $sess = RkSession::findOne(['acc' => $this->user->organization_id, 'status' => 1]);
         if ($sess && $sess->cook) {
             # 6.1. Активная лицензия найдена - проверяем сессию в куки
             $cookie = self::COOK_AUTH_PREFIX_SESSION . "=" . $sess->cook . ";";
             $xmlData = $this->sendByCurl($this->getUrlCmd(), $this->prepareXmlForTestConnection($this->licenseCode), $cookie);
-
             if ($xmlData) {
                 $xml = (array)simplexml_load_string($xmlData);
                 if (isset($xml['OBJECTINFO'])) {
                     $xml = (array)$xml['OBJECTINFO'];
                     $err = (isset($xml['ERROR']) && $xml['ERROR']) ? $xml['ERROR'] : null;
                     if (isset($xml['@attributes']['id']) && $xml['@attributes']['id'] == $this->licenseCode && !$err) {
-
                         # 6.1.1. Активная сессия в куки подтверждена - используем ее и прекращаем процедуры
                         $this->log('Service licence session with active state id good - use it');
                         /** @var PDO $transaction */
@@ -249,7 +249,6 @@ class ServiceRkws extends AbstractSyncFactory
             }
             $this->deactivateSessionWithoutCommit($sess, $transaction);
         }
-
         # 7. Если сюда попали - то активной сессии нет!!!
         # Пытаемся создать новую
         # Checkout existing valig connection params
@@ -259,7 +258,6 @@ class ServiceRkws extends AbstractSyncFactory
             # 7.1. Try to prepare new session
             $xmlData = $this->sendByCurl($this->getUrlLogin(), $this->prepareXmlWithAuthParams($access));
             if ($xmlData) {
-
                 preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $xmlData, $matches);
                 $cookList = [];
                 foreach ($matches[1] as $item) {
@@ -267,7 +265,6 @@ class ServiceRkws extends AbstractSyncFactory
                     $cookList = array_merge($cookList, $cook);
                 }
                 if (isset($cookList[self::COOK_AUTH_PREFIX_LOGIN]) && $cookList[self::COOK_AUTH_PREFIX_LOGIN]) {
-
                     # 7.1.1. Try to save new session
                     $sess = new RkSession();
                     $sess->cook = $cookList[self::COOK_AUTH_PREFIX_LOGIN];
@@ -282,21 +279,17 @@ class ServiceRkws extends AbstractSyncFactory
                         $transaction->rollback();
                         throw new BadRequestHttpException('rkws_session_create_error');
                     }
-
                     # 7.2. Use valid session
                     $transaction->commit();
                     return $sess->cook;
                 }
-
                 $transaction->rollback();
                 throw new BadRequestHttpException('rkws_session_no_cookie');
             } else {
                 throw new BadRequestHttpException('empty_service_response');
             }
-
         }
         throw new BadRequestHttpException('empty_service_access_params');
-
     }
 
     /**
@@ -553,6 +546,8 @@ class ServiceRkws extends AbstractSyncFactory
      * @param OuterTask   $task
      * @param string|null $data
      * @return string
+     * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
     public function callbackData(OuterTask $task, string $data = null)
     {
@@ -740,39 +735,24 @@ class ServiceRkws extends AbstractSyncFactory
     }
 
     /**
-     * Ответ на запрос синхронизации
-     *
-     * @param $model OrganizationDictionary
-     * @return array
-     */
-    private function prepareModel($model)
-    {
-        $defaultStatusText = OrganizationDictionary::getStatusTextList()[OrganizationDictionary::STATUS_DISABLED];
-        return [
-            'id'          => $model->id,
-            'name'        => $model->outerDic->name,
-            'title'       => \Yii::t('api_web', 'dictionary.' . $model->outerDic->name),
-            'count'       => $model->count ?? 0,
-            'status_id'   => $model->status_id ?? 0,
-            'status_text' => $model->statusText ?? $defaultStatusText,
-            'created_at'  => $model->created_at ?? null,
-            'updated_at'  => $model->updated_at ?? null
-        ];
-    }
-
-    /**
      * @param array $request
      * @return array
      */
     public function checkConnect($request = [])
     {
-        $code = isset($request['code']) ? trim($request['code']) : $this->licenseCode;
+
+        if (isset($request['params'])) {
+            if (isset($request['params']['code'])) {
+                $this->licenseCode = $request['params']['code'];
+            }
+        }
+
         try {
-            $cook = $this->prepareServiceWithAuthCheck();
+            $cook = $this->prepareServiceWithAuthCheck($this->licenseCode);
             $url = $this->getUrlCmd();
             $xml = '<?xml version="1.0" encoding="utf-8"?>
             <RQ cmd="get_objectinfo">
-                <PARAM name="object_id" val="' . $code . '"/>
+                <PARAM name="object_id" val="' . $this->licenseCode . '"/>
             </RQ>';
             $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
             if (!empty($xmlData)) {

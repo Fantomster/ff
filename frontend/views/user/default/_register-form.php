@@ -16,7 +16,7 @@ $form     = ActiveForm::begin([
         ]);
 $language = (Yii::$app->language == 'en') ? 'gb' : Yii::$app->language;
 ?>
-<input type="email" name="new-email" style="position: absolute; top: -100%;">
+<input type="email" name="Userito[email]" style="position: absolute; top: -100%;">
 <input type="password" name="new-password" style="position: absolute; top: -100%;">
 <input type="hidden" name="_csrf-fk" value="<?= Yii::$app->request->getCsrfToken() ?>" />
 <div class="auth-sidebar__form-radios">

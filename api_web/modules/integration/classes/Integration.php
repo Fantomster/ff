@@ -63,6 +63,7 @@ class Integration
      * @param $request
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
     public static function checkAgentNameExists($request)
     {

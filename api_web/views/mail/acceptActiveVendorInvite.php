@@ -1,6 +1,5 @@
 <?php
 
-use yii\helpers\Url;
 use yii\helpers\Html;
 
 /**
@@ -12,7 +11,7 @@ use yii\helpers\Html;
 
 ?>
 
-<p><img src="https://app.mixcart.ru/images/invite-to-client.jpg" style="max-width: 100%; min-width: 100%;" width="952px" height="334px" alt=""/></p>
+<p><img src="https://app.mixcart.ru/images/invite-to-client.jpg" style="max-width: 100%; min-width: 100%;" width="952px" height="334px" alt="invite"/></p>
 
 <h3 style="font-weight: 500;font-size: 27px;"><?= Yii::t('app', 'common.mail.accept_vendor_invite.hello', ['ru'=>'Здравствуйте']) ?>!</h3>
 <p><?= Yii::t('app', 'common.mail.accept_active_vendor_invite.we', ['ru'=>'{vendor}, уже сделал свою работу легче с помощью {link} и приглашает вас работать вместе с ним.', 'vendor'=>$vendor, 'link' =>Html::a('MixCart', Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/client/suppliers"]))]); ?>

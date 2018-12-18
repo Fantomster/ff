@@ -83,7 +83,7 @@ $this->registerJs(
         <div class="box box-info">
             <div class="box-header with-border">
                 <div class="panel-body">
-                    <?php  //Pjax::begin(['enablePushState' => true, 'id' => 'fullmapGrid-pjax', 'timeout' => 5000]);
+                    <?php //Pjax::begin(['enablePushState' => true, 'id' => 'fullmapGrid-pjax', 'timeout' => 5000]);
                     ?>
                     <div class="row">
                         <div class="col-md-4" align="left">
@@ -228,13 +228,6 @@ $this->registerJs(
                                         [
                                             'attribute'      => 'pdenom',
                                             'value'          => function ($model) {
-                                                if (!empty($model['pdenom'])) {
-                                                    return $model['pdenom'];
-                                                } else {
-                                                    return '(не задано)';
-                                                }
-                                            },
-                                            'value'          => function ($model) {
                                                 return $model['pdenom'] ?? 'Не задано';
                                             },
                                             'label'          => Yii::t('message', 'frontend.fullmap.index.product_name_service', ['ru' => 'Название продукта']),
@@ -266,18 +259,18 @@ $this->registerJs(
                                             'contentOptions'  => function ($model) {
                                                 return ["id" => "koeff" . $model['id']];
                                             },
-                                            'value'          => function ($model) {
+                                            'value'           => function ($model) {
                                                 if (!empty($model['koef'])) {
                                                     $koef_old = $model['koef'];
                                                     $koef = str_replace(',', '.', $koef_old);
                                                     $koef_temp = floor($koef * 1000000);
                                                     $koef_len = strlen($koef_temp);
-                                                    $koef_left = substr($koef_temp,0, $koef_len - 6);
+                                                    $koef_left = substr($koef_temp, 0, $koef_len - 6);
                                                     if ($koef_left == '') {
                                                         $koef_left = '0';
                                                     }
-                                                    $koef_right = substr($koef_temp, $koef_len-6);
-                                                    return $koef_left.','.$koef_right;
+                                                    $koef_right = substr($koef_temp, $koef_len - 6);
+                                                    return $koef_left . ',' . $koef_right;
                                                 }
                                                 return '(не задано)';
                                             },
@@ -469,16 +462,14 @@ $js = <<< JS
             });
             $('.button-name').on('click', function () {
                 $('a .button-name').click(function(){ return false;});
-                //var vat_filter = $("#vatFilter").val(); //фильтр НДС
                 var idbutton = $(this).attr('id');
                 var idbuttons = String(idbutton);
                 var number = idbuttons.substring(3);   // идентификатор строки
                 var denom = $("#catal"+number).html(); // наименование товара
                 var edizm = $("#ed"+number).html(); // единица измерения товара
-                //var id = $("#way"+number).html();      // якорь строки
                 var tovar = denom+'   /'+edizm+'/';    // наименование товара вместе с единицей измерения
                 var cont_old = $(this).html();         // содержание ячейки до форматирования
-                var nesopost = '<i>(не задано)</i>';   // содержание несопоставленной ячейки
+                var nesopost = '<em>(не задано)</em>';   // содержание несопоставленной ячейки
                 swal({
                     html: '<span style="font-size:14px">Сопоставить продукт</span></br></br><span id="tovar">товар</span></br></br>' +
                     '<input type="text" id="bukv-tovar" class="swal2-input" placeholder="Введите или выберите товар" autofocus>'+
@@ -510,7 +501,7 @@ $js = <<< JS
                             }
                             var url_auto_complete_new = '$url_auto_complete_new';
                             $.post(url_auto_complete_new, {stroka: a, us:us}).done(
-                                function(data){
+                                function(data){console.log(data);
                                     if (data.length>0) {
                                             var sel100 = 'Показаны первые 100 позиций';
                                             if (data.length>=100) {

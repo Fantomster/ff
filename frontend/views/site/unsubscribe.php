@@ -28,7 +28,7 @@
                     <td align="center" valign="top">
                 <tr>
                     <td align="center" valign="middle" height="105" bgcolor="#2a2c2e" style="">
-                        <img src="https://image.ibb.co/jAC3xH/logo.png" alt="logo" width="101" height="48"
+                        <img src="https://static.mixcart.ru/logo.png" alt="logo" width="101" height="48"
                              border="0"
                              style="border:0; outline:none; text-decoration:none; display:block;">
                     </td>

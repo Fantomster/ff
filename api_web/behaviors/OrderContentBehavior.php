@@ -8,7 +8,7 @@
 namespace api_web\behaviors;
 
 use common\models\WaybillContent;
-use yii\base\Behavior;
+use yii\base\{Behavior, InvalidArgumentException};
 use yii\db\ActiveRecord;
 
 /**
@@ -20,8 +20,14 @@ class OrderContentBehavior extends Behavior
 {
     /** @var \common\models\OrderContent $model */
     public $model;
+    /**
+     * @var array
+     */
     private $updateAttributes = [];
 
+    /**
+     * @return array
+     */
     public function events()
     {
         return [
@@ -37,7 +43,7 @@ class OrderContentBehavior extends Behavior
      * @param $event
      * @return bool
      */
-    public function substitutionValuePriceQuantity($event)
+    public function substitutionValuePriceQuantity($event): bool
     {
         if (!empty($this->model->waybillContent)) {
             $this->model->price = $this->model->waybillContent->price_without_vat;
@@ -52,9 +58,10 @@ class OrderContentBehavior extends Behavior
      * а в заказе оставлям прежнее
      *
      * @param $event
+     * @throws InvalidArgumentException
      * @return bool
      */
-    public function changeValuePriceQuantityFromWaybill($event)
+    public function changeValuePriceQuantityFromWaybill($event): bool
     {
         if (!empty($this->model->waybillContent)) {
             #Проверяем, менялась ли цена
@@ -83,8 +90,9 @@ class OrderContentBehavior extends Behavior
      *
      * @param $attribute
      * @param $waybill_attribute
+     * @throws InvalidArgumentException
      */
-    private function checkAttribute($attribute, $waybill_attribute)
+    private function checkAttribute($attribute, $waybill_attribute): void
     {
         //Если атрибут был изменен
         if ($this->model->isAttributeChanged($attribute)) {

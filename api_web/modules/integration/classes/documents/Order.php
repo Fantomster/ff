@@ -5,16 +5,24 @@ namespace api_web\modules\integration\classes\documents;
 use api_web\classes\DocumentWebApi;
 use api_web\components\Registry;
 use api_web\helpers\CurrencyHelper;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\interfaces\DocumentInterface;
 use common\models\Order as BaseOrder;
 use common\models\OrderContent;
 use common\models\OuterAgent;
 use yii\helpers\ArrayHelper;
-use yii\web\BadRequestHttpException;
 
+/**
+ * Class Order
+ *
+ * @package api_web\modules\integration\classes\documents
+ */
 class Order extends BaseOrder implements DocumentInterface
 {
 
+    /**
+     * @var null
+     */
     public static $waybill_service_id = null;
 
     /**
@@ -40,7 +48,7 @@ class Order extends BaseOrder implements DocumentInterface
             "is_mercury_cert"   => $this->getIsMercuryCert(),
             "count"             => (int)$this->positionCount,
             "total_price"       => CurrencyHelper::asDecimal($this->getTotalPriceFromDb(self::$waybill_service_id)),
-            "doc_date"          => date("Y-m-d H:i:s T", strtotime($this->created_at)),
+            "doc_date"          => WebApiHelper::asDatetime($this->created_at),
             "vendor"            => null,
             "agent"             => null,
             "store"             => null

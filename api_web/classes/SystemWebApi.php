@@ -21,8 +21,7 @@ class SystemWebApi extends WebApi
     /**
      * Параметры работы сервера со временем
      *
-     * @return array
-     * @throws BadRequestHttpException
+     * @return void
      */
     public function datetime()
     {

@@ -2,32 +2,37 @@
 
 namespace api_web\classes;
 
-use api_web\components\ExcelRenderer;
+use api_web\components\{
+    ExcelRenderer, Registry, WebApiController
+};
 use api_web\components\notice_class\OrderNotice;
-use api_web\components\Registry;
-use api_web\components\WebApiController;
-use api_web\helpers\Product;
-use api_web\helpers\WebApiHelper;
+use api_web\helpers\{
+    Product, WebApiHelper
+};
 use api_web\models\User;
-use common\models\CatalogBaseGoods;
-use common\models\Delivery;
-use common\models\MpCategory;
-use common\models\OrderContent;
-use common\models\OrderStatus;
-use common\models\RelationSuppRest;
-use common\models\Role;
-use common\models\search\OrderCatalogSearch;
-use common\models\search\OrderContentSearch;
-use common\models\search\OrderSearch;
-use common\models\Order;
-use common\models\Organization;
+use common\models\{
+    CatalogBaseGoods,
+    Delivery,
+    MpCategory,
+    OrderContent,
+    OrderStatus,
+    RelationSuppRest,
+    Role,
+    Order,
+    Organization
+};
+use common\models\search\{
+    OrderCatalogSearch, OrderContentSearch, OrderSearch
+};
 use api_web\components\Notice;
-use common\models\WaybillContent;
 use kartik\mpdf\Pdf;
-use yii\data\Pagination;
-use yii\data\SqlDataProvider;
-use yii\db\Expression;
-use yii\db\Query;
+use yii\base\InvalidArgumentException;
+use yii\data\{
+    Pagination, SqlDataProvider
+};
+use yii\db\{
+    Expression, Query
+};
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -46,13 +51,11 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param bool $isUnconfirmedVendor
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws \Exception|\Throwable
      */
     public function update($post, bool $isUnconfirmedVendor = false)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
         //Поиск заказа
         $order = Order::findOne($post['order_id']);
 
@@ -88,7 +91,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order.access.change.canceled_status");
         }
         //Если сменили комментарий
-        if (!empty($post['comment']) && !$isUnconfirmedVendor) {
+        if (isset($post['comment']) && !$isUnconfirmedVendor) {
             $order->comment = trim($post['comment']);
         }
         //Если сменили дату доставки
@@ -112,6 +115,9 @@ class OrderWebApi extends \api_web\components\WebApi
             $order->discount = $post['discount']['amount'];
         }
         $tr = \Yii::$app->db->beginTransaction();
+        if (is_null($order->created_by_id)) {
+            $order->created_by_id = $this->user->id;
+        }
         try {
             $changed = [];
             $deleted = [];
@@ -162,19 +168,15 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new ValidationException($order->getFirstErrors());
             }
             $tr->commit();
-            if ($order->vendor_id == $this->user->organization_id) {
-                $sender = $order->vendor;
-            } elseif ($order->client_id == $this->user->organization_id) {
-                $sender = $order->client;
-            }
-            if ($isUnconfirmedVendor) {
+            $sender = $order->client;
+            if ($order->vendor_id == $this->user->organization_id || $isUnconfirmedVendor) {
                 $sender = $order->vendor;
             }
             if (!empty($changed) || !empty($deleted)) {
                 Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted);
             }
-            return $this->getInfo(['order_id' => $order->id]);
-        } catch (\Exception $e) {
+            return $this->getOrderInfo($order);
+        } catch (\Throwable $e) {
             $tr->rollBack();
             throw $e;
         }
@@ -191,12 +193,9 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     private function editProduct(Order $order, array $product)
     {
-        if (empty($product['id'])) {
-            throw new BadRequestHttpException("order.edit_product_empty");
-        }
-
+        $this->validateRequest($product, ['id']);
         /**
-         * @var $orderContent OrderContent
+         * @var OrderContent $orderContent
          */
         $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
         if (empty($orderContent)) {
@@ -242,10 +241,9 @@ class OrderWebApi extends \api_web\components\WebApi
         if (empty($orderContentRow)) {
             throw new BadRequestHttpException("order_content.not_found");
         }
-
-        $product_name = $orderContentRow->product_name;
+        $model = $orderContentRow;
         $orderContentRow->delete();
-        return $product_name;
+        return $model;
     }
 
     /**
@@ -255,13 +253,11 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array $product
      * @return OrderContent
      * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @throws ValidationException|InvalidArgumentException
      */
     private function addProduct(Order $order, array $product)
     {
-        if (empty($product['id'])) {
-            throw new BadRequestHttpException("order.add_product_empty");
-        }
+        $this->validateRequest($product, ['id']);
 
         $orderContentRow = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
 
@@ -297,13 +293,11 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws ValidationException
+     * @throws ValidationException|InvalidArgumentException
      */
     public function addComment(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         $order = Order::findOne($post['order_id']);
 
@@ -338,13 +332,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function addProductComment(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
-
-        if (empty($post['product_id'])) {
-            throw new BadRequestHttpException('empty_param|product_id');
-        }
+        $this->validateRequest($post, ['order_id', 'product_id']);
 
         $order = Order::findOne($post['order_id']);
 
@@ -389,9 +377,7 @@ class OrderWebApi extends \api_web\components\WebApi
      */
     public function getInfo(array $post)
     {
-        if (empty($post['order_id'])) {
-            throw new BadRequestHttpException('empty_param|order_id');
-        }
+        $this->validateRequest($post, ['order_id']);
 
         /**@var Order $order */
         $order = Order::find()->where(['id' => $post['order_id'], 'service_id' => Registry::MC_BACKEND])->one();
@@ -412,20 +398,15 @@ class OrderWebApi extends \api_web\components\WebApi
      * @return array
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
+     * @throws \Exception
      */
     public function getOrderInfo(Order $order)
     {
         $result = $order->attributes;
         $currency = $order->currency->symbol ?? "RUB";
         $currency_id = $order->currency->id;
-        unset($result['updated_at']);
-        unset($result['status']);
-        unset($result['accepted_by_id']);
-        unset($result['created_by_id']);
-        unset($result['vendor_id']);
-        unset($result['client_id']);
-        unset($result['currency_id']);
-        unset($result['discount_type']);
+        unset($result['updated_at'], $result['status'], $result['accepted_by_id'], $result['created_by_id'],
+            $result['vendor_id'], $result['client_id'], $result['currency_id'], $result['discount_type']);
         $result['currency'] = $currency;
         $result['currency_id'] = $currency_id;
         $result['total_price'] = round($order->total_price, 2);
@@ -459,28 +440,33 @@ class OrderWebApi extends \api_web\components\WebApi
         $dataProvider->pagination = false;
         $products = $dataProvider->models;
 
+        $arEdiNumbers = [];
         if (!empty($products)) {
             foreach ($products as $model) {
                 /**
                  * @var OrderContent $model
                  */
                 $result['items'][] = $this->prepareProduct($model, $currency, $currency_id);
+                if (!is_null($model->edi_number)) {
+                    $arEdiNumbers[] = $model->edi_number;
+                }
             }
         }
+        $result['edi_number'] = array_unique($arEdiNumbers);
 
         $result['client'] = WebApiHelper::prepareOrganization($order->client);
         $result['vendor'] = WebApiHelper::prepareOrganization($order->vendor);
 
         if (!is_null($order->status_updated_at) && $order->status_updated_at != '0000-00-00 00:00:00') {
-            $obUpdatedAt = (new \DateTime(trim($order->status_updated_at)))->format("d.m.Y H:i:s");
+            $obUpdatedAt = WebApiHelper::asDatetime(trim($order->status_updated_at));
         } else {
-            $obUpdatedAt = (new \DateTime())->format("d.m.Y H:i:s");
+            $obUpdatedAt = WebApiHelper::asDatetime();
         }
 
         if (!is_null($order->edi_doc_date) && $order->edi_doc_date != '0000-00-00 00:00:00') {
-            $ediDocDate = (new \DateTime(trim($order->edi_doc_date)))->format("d.m.Y H:i:s");
+            $ediDocDate = WebApiHelper::asDatetime(trim($order->edi_doc_date));
         } else {
-            $ediDocDate = (new \DateTime())->format("d.m.Y H:i:s");
+            $ediDocDate = WebApiHelper::asDatetime();
         }
         $result['status_updated_at'] = $obUpdatedAt;
         $result['edi_doc_date'] = $ediDocDate;
@@ -607,29 +593,24 @@ class OrderWebApi extends \api_web\components\WebApi
                     $date = $model->updated_at;
                 }
 
-                if (!empty($date)) {
-                    $obDateTime = new \DateTime($date);
-                    $date = $obDateTime->format("d.m.Y H:i:s");
-                }
-                $obCreateAt = new \DateTime($model->created_at);
                 if (!is_null($model->status_updated_at) && $model->status_updated_at != '0000-00-00 00:00:00') {
-                    $obUpdatedAt = (new \DateTime(trim($model->status_updated_at)))->format("d.m.Y H:i:s");
+                    $obUpdatedAt = WebApiHelper::asDatetime(trim($model->status_updated_at));
                 } else {
-                    $obUpdatedAt = (new \DateTime())->format("d.m.Y H:i:s");
+                    $obUpdatedAt = WebApiHelper::asDatetime();
                 }
 
                 if (!is_null($model->edi_doc_date) && $model->edi_doc_date != '0000-00-00 00:00:00') {
-                    $ediDocDate = (new \DateTime(trim($model->edi_doc_date)))->format("d.m.Y H:i:s");
+                    $ediDocDate = WebApiHelper::asDatetime(trim($model->edi_doc_date));
                 } else {
-                    $ediDocDate = (new \DateTime())->format("d.m.Y H:i:s");
+                    $ediDocDate = WebApiHelper::asDatetime();
                 }
 
                 $orderInfo = [
                     'id'                => (int)$model->id,
-                    'created_at'        => $obCreateAt->format("d.m.Y H:i:s"),
+                    'created_at'        => WebApiHelper::asDatetime($model->created_at),
                     'status_updated_at' => $obUpdatedAt,
                     'edi_doc_date'      => $ediDocDate,
-                    'completion_date'   => $date ?? null,
+                    'completion_date'   => isset($date) ? WebApiHelper::asDatetime($date) : null,
                     'status'            => (int)$model->status,
                     'status_text'       => $model->statusText,
                     'vendor'            => $model->vendor->name,
@@ -725,11 +706,14 @@ class OrderWebApi extends \api_web\components\WebApi
         $searchString = (isset($post['search']['product']) ? $post['search']['product'] : null);
         if ($isUnconfirmedVendor) {
             if (empty($post['search']['order_id'])) {
-                throw new BadRequestHttpException('empty_param|order_id');
+                throw new BadRequestHttpException('empty_param|search.order_id');
             }
-            $order = Order::findOne(['id' => $post['search']['order_id']]);
+            $order = Order::findOne(['id' => (int)$post['search']['order_id']]);
+            if (empty($order)) {
+                throw new BadRequestHttpException('order_not_found');
+            }
             $organizationID = $this->user->organization_id;
-            if ($this->checkUnconfirmedVendorAccess($post['search']['order_id'], $organizationID, $this->user->status)) {
+            if ($this->checkUnconfirmedVendorAccess($order->id, $organizationID, $this->user->status)) {
                 $searchSupplier = $organizationID;
                 $client = Organization::findOne(['id' => $order->client_id]);
                 $vendors = [$organizationID];
@@ -767,7 +751,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $searchModel->catalogs = $catalogs;
 
             /**
-             * @var $dataProvider SqlDataProvider
+             * @var SqlDataProvider $dataProvider
              */
             $searchModel->searchString = $searchString;
             $searchModel->selectedVendor = $searchSupplier;
@@ -839,9 +823,8 @@ class OrderWebApi extends \api_web\components\WebApi
     {
         $organizationID = $this->user->organization_id;
         if ($isUnconfirmedVendor) {
-            if (empty($post['order_id'])) {
-                throw new BadRequestHttpException('empty_param|order_id');
-            }
+            $this->validateRequest($post, ['order_id']);
+
             $order = Order::findOne(['id' => $post['order_id']]);
             if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
                 $suppliers = [$this->user->organization_id];
@@ -923,13 +906,14 @@ class OrderWebApi extends \api_web\components\WebApi
     public function cancel(array $post, bool $isUnconfirmedVendor = false)
     {
         $this->validateRequest($post, ['order_id']);
-
+        //todo_refactoring with $this->complete() method duplicate rows
         $query = Order::find()->where(['id' => $post['order_id']]);
         if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
             $query->andWhere(['client_id' => $this->user->organization->id]);
         } else {
             $query->andWhere(['vendor_id' => $this->user->organization->id]);
         }
+        /**@var Order $order */
         $order = $query->one();
 
         if (empty($order)) {
@@ -1040,6 +1024,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $vendor = true;
             $query->andWhere(['vendor_id' => $this->user->organization->id]);
         }
+        /**@var Order $order */
         $order = $query->one();
 
         if (empty($order)) {
@@ -1086,7 +1071,7 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array            $post
      * @param WebApiController $c
      * @return false|string
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|InvalidArgumentException
      */
     public function saveToPdf(array $post, WebApiController $c)
     {
@@ -1109,20 +1094,21 @@ class OrderWebApi extends \api_web\components\WebApi
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
+        $pathView = \Yii::getAlias('@frontend') . '/views/order/';
         $pdf = new Pdf([
             'mode'        => Pdf::MODE_UTF8,
             'format'      => Pdf::FORMAT_A4,
             'orientation' => Pdf::ORIENT_PORTRAIT,
             'destination' => Pdf::DEST_BROWSER,
-            'content'     => $c->renderPartial('@app/../frontend/views/order/_pdf_order', compact('dataProvider', 'order')),
+            'content'     => $c->renderFile($pathView . '_pdf_order.php', compact('dataProvider', 'order')),
             'options'     => [
                 'defaultfooterline'      => false,
                 'defaultfooterfontstyle' => false,
             ],
             'methods'     => [
-                'SetFooter' => $c->renderPartial('@app/../frontend/views/order/_pdf_signature'),
+                'SetFooter' => $c->renderFile($pathView . '_pdf_signature.php'),
             ],
-            'cssFile'     => '@app/../frontend/web/css/pdf_styles.css'
+            'cssFile'     => \Yii::getAlias('@frontend') . '/web/css/pdf_styles.css'
         ]);
         $pdf->filename = 'mixcart_order_' . $post['order_id'] . '.pdf';
         ob_start();
@@ -1176,6 +1162,8 @@ class OrderWebApi extends \api_web\components\WebApi
 
     /**
      * @param OrderContent $model
+     * @param null         $currency
+     * @param null         $currency_id
      * @return array
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
@@ -1265,13 +1253,13 @@ class OrderWebApi extends \api_web\components\WebApi
      *
      * @param array $post
      * @return false|string
-     * @throws BadRequestHttpException
+     * @throws BadRequestHttpException|\Exception
      */
     public function saveToExcel(array $post)
     {
         $this->validateRequest($post, ['order_id']);
 
-        $objPHPExcel = (new ExcelRenderer())->OrderRender($post, ['order_id']);
+        $objPHPExcel = (new ExcelRenderer())->OrderRender($post['order_id']);
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
         $objWriter->save(tempnam("/tmp", "excel"));
         ob_start();

@@ -5,6 +5,7 @@ namespace api_web\modules\integration\modules\tillypad\models;
 use api\common\models\iiko\iikoDicconst;
 use api\common\models\iiko\iikoPconst;
 use api\common\models\iiko\iikoWaybill;
+use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\modules\integration\interfaces\ServiceInterface;
@@ -32,7 +33,7 @@ class TillypadService extends WebApi implements ServiceInterface
      */
     public static function getServiceId()
     {
-        return 10;
+        return Registry::TILLYPAD_SERVICE_ID;
     }
 
     /**
@@ -42,7 +43,7 @@ class TillypadService extends WebApi implements ServiceInterface
      */
     public function getLicenseMixCart()
     {
-        return \api\common\models\tillypad\TillypadService::find(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
+        return \api\common\models\tillypad\TillypadService::find()->where(['org' => $this->user->organization->id])->orderBy('fd DESC')->one();
     }
 
     /**

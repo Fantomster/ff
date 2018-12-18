@@ -34,7 +34,7 @@ class EdiOrganization extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['organization_id', 'gln_code', 'provider_id', 'provider_priority'], 'integer'],
+            [['organization_id', 'gln_code', 'provider_id', 'provider_priority', 'pricat_action_attribute_rule'], 'integer'],
             [['provider_id', 'gln_code'], 'required'],
             [['login', 'pass'], 'string', 'max' => 255],
             [['int_user_id'], 'string', 'max' => 50],
@@ -54,15 +54,16 @@ class EdiOrganization extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'                => 'ID',
-            'organization_id'   => 'Organization ID',
-            'gln_code'          => 'Gln Code',
-            'login'             => 'Login',
-            'pass'              => 'Pass',
-            'int_user_id'       => 'intUserID - ID юзера в системе Leradata',
-            'token'             => 'Токен юзера в системе Leradata',
-            'provider_id'       => 'ID EDI провайдера',
-            'provider_priority' => 'Приоритет провайдера',
+            'id'                           => 'ID',
+            'organization_id'              => 'Organization ID',
+            'gln_code'                     => 'Gln Code',
+            'login'                        => 'Login',
+            'pass'                         => 'Pass',
+            'int_user_id'                  => 'intUserID - ID юзера в системе Leradata',
+            'token'                        => 'Токен юзера в системе Leradata',
+            'provider_id'                  => 'ID EDI провайдера',
+            'provider_priority'            => 'Приоритет провайдера',
+            'pricat_action_attribute_rule' => 'Тип обработки документа pricat',
         ];
     }
 

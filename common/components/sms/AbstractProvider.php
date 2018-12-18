@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: MikeN
@@ -8,16 +9,17 @@
 
 namespace common\components\sms;
 
-
 use yii\db\Exception;
 
 abstract class AbstractProvider
 {
+
     /**
      * Сообщение в кодировке UTF-8
      * @var string
      */
     public $message;
+
     /**
      * Получатели
      * @var string
@@ -59,8 +61,8 @@ abstract class AbstractProvider
      */
     public function xmlToArray($data)
     {
-        $r = $xml = simplexml_load_string($data);
-        return json_decode(json_encode((array)$r), TRUE);
+        $r   = $xml = simplexml_load_string($data);
+        return json_decode(json_encode((array) $r), TRUE);
     }
 
     /**
@@ -98,29 +100,30 @@ abstract class AbstractProvider
     {
         //Сохраняем что отправили смс
         $model = new \common\models\SmsSend([
-            'provider' => get_class($this),
-            'target' => $target,
-            'text' => $message,
+            'provider'  => get_class($this),
+            'target'    => $target,
+            'text'      => $message,
             'status_id' => 1,
-            'sms_id' => $sms_id
+            'sms_id'    => $sms_id
         ]);
         $model->save();
     }
 
     /**
      * Запись ошибки в базу
-     * @param $message
-     * @param $target
-     * @param $error_message
+     * @param integer $sms_send_id
+     * @param integer $error_code
+     * @param string $error_message
      */
-    public function setError($message, $target, $error_message)
+    public function setError($sms_send_id, $error_code, $error_message)
     {
         //Сохраняем ошибку в лог, чтобы ошибка при отправке, не рушила систему
         $model = new \common\models\SmsError([
-            'message' => $message,
-            'target' => $target,
-            'error' => $error_message,
+            'error'       => $error_message,
+            'sms_send_id' => $sms_send_id,
+            'error_code'  => $error_code,
         ]);
         $model->save();
     }
+
 }

@@ -22,8 +22,24 @@ class WebApiHelper
     ];
 
     /**
+     * Форматирование всех дат в ATOM
+     *
+     * @var array
+     */
+    public static $formatDate = 'php:' . \DateTime::ATOM;
+
+    /**
+     * Значения которых не должно быть в реквесте
+     *
+     * @var array
+     */
+    public static $clearValue = ['d.m.Y', ''];
+
+    /**
      * @param array $response
      * @return array
+     * @throws \yii\base\InvalidArgumentException
+     * @throws \yii\base\InvalidConfigException
      */
     public static function response(Array $response)
     {
@@ -33,12 +49,10 @@ class WebApiHelper
     }
 
     /**
-     * Форматирование всех дат в ATOM
-     *
-     * @var array
+     * @param $response
+     * @throws \yii\base\InvalidArgumentException
+     * @throws \yii\base\InvalidConfigException
      */
-    public static $formatDate = 'php:' . \DateTime::ATOM;
-
     private static function formatDate(&$response)
     {
         if (is_array($response)) {
@@ -51,6 +65,22 @@ class WebApiHelper
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * @param $date
+     * @return string
+     */
+    public static function asDatetime($date = null)
+    {
+        try {
+            if (!is_null($date) && !empty($date)) {
+                return \Yii::$app->formatter->asDatetime($date, self::$formatDate);
+            }
+            return \Yii::$app->formatter->asDatetime('now', self::$formatDate);
+        } catch (\Throwable $t) {
+            return null;
         }
     }
 
@@ -167,12 +197,8 @@ class WebApiHelper
     }
 
     /**
-     * Значения которых не должно быть в реквесте
-     *
-     * @var array
+     * @param $post
      */
-    public static $clearValue = ['d.m.Y', ''];
-
     public static function clearRequest(&$post)
     {
         if (is_array($post)) {
@@ -209,5 +235,15 @@ class WebApiHelper
         ob_end_flush();
         ob_flush();
         flush();
+    }
+
+    /**
+     * @param $var
+     * @param $key
+     * @return bool
+     */
+    public static function valVar($var, $key): bool
+    {
+        return isset($var[$key]) && !empty($var[$key]) ? true : false;
     }
 }

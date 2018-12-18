@@ -3,27 +3,21 @@
 namespace api_web\classes;
 
 use api_web\helpers\WebApiHelper;
-use common\models\CatalogBaseGoods;
-use common\models\CatalogGoods;
 use api_web\models\ForgotForm;
-use common\models\CatalogTempContent;
-use common\models\Currency;
+use common\models\BuisinessInfo;
 use common\models\ManagerAssociate;
 use common\models\RelationUserOrganization;
 use Yii;
 use api_web\exceptions\ValidationException;
 use common\models\Profile;
-use common\models\restaurant\RestaurantChecker;
 use common\models\User;
 use common\models\Role;
 use common\models\Catalog;
-use common\models\CatalogTemp;
 use common\models\Organization;
 use common\models\RelationSuppRest;
 use yii\helpers\ArrayHelper;
 use yii\validators\NumberValidator;
 use yii\web\BadRequestHttpException;
-use api_web\helpers\Excel;
 
 /**
  * Class VendorWebApi
@@ -108,15 +102,12 @@ class VendorWebApi extends \api_web\components\WebApi
                     'message'         => "Приглашение отправлено."
                 ];
             } else {
-                $result = [
-                    'success'         => true,
-                    'organization_id' => $organization->id,
-                    'message'         => "Приглашение уже было отправлено."
-                ];
+                throw new BadRequestHttpException(\Yii::t('app', 'common.models.already_exists_two', ['ru' => 'Данный поставщик уже имеется в вашем списке контактов!']));
             }
             return $result;
         } else {
             $organization = new Organization();
+            $businessInfo = new BuisinessInfo();
         }
 
         $email = $post['user']['email'];
@@ -150,6 +141,8 @@ class VendorWebApi extends \api_web\components\WebApi
             if (!$vendorUser) {
 //                Создаем нового поставщика и организацию
                 $user->email = $email;
+                $businessInfo->legal_email = $email;
+                $organization->email = $email;
                 $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
                 $user->newPassword = ForgotForm::generatePassword(8);
                 $user->newPasswordConfirm = $user->newPassword;
@@ -167,9 +160,12 @@ class VendorWebApi extends \api_web\components\WebApi
 
                 if (!$vendorID) {
                     $organization->name = $org;
+                    $organization->phone = $phone;
+                    $businessInfo->phone = $phone;
                 }
 
                 if (!empty($post['user']['inn']) && !$vendorID) {
+                    $businessInfo->inn = $post['user']['inn'];
                     $organization->inn = $post['user']['inn'];
                 }
 
@@ -180,9 +176,13 @@ class VendorWebApi extends \api_web\components\WebApi
                 if (!$organization->validate() || !$organization->save()) {
                     throw new ValidationException($organization->getFirstErrors());
                 }
+                $businessInfo->organization_id = $organization->id;
+                if (!$businessInfo->validate() || !$businessInfo->save()) {
+                    throw new ValidationException($businessInfo->getFirstErrors());
+                }
 
                 $user->setOrganization($organization)->save();
-                $relId = $user->createRelationUserOrganization($user->organization->id, $user->role_id);
+                $user->createRelationUserOrganization($user->organization->id, $user->role_id);
                 $get_supp_org_id = $organization->id;
                 $currentOrganization = $currentUser->organization;
                 if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
@@ -197,7 +197,7 @@ class VendorWebApi extends \api_web\components\WebApi
             }
 
             if (count($arrCatalog)) {
-                $lastInsert_cat_id = $this->addBaseCatalog($get_supp_org_id, $currentUser, $arrCatalog, $currency);
+                $lastInsert_cat_id = $this->container->get('CatalogWebApi')->addBaseCatalog($get_supp_org_id, $currentUser, $arrCatalog, $currency);
             } else {
                 $lastInsert_cat_id = 0;
             }
@@ -277,9 +277,7 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function search(array $post)
     {
-        if (empty($post['email'])) {
-            throw new BadRequestHttpException('empty_param|search attribute email');
-        }
+        $this->validateRequest($post, ['email']);
 
         $result = [];
         $email = $post['email'];
@@ -328,9 +326,7 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function update(array $post)
     {
-        if (empty($post['id'])) {
-            throw new BadRequestHttpException('empty_param|id');
-        }
+        $this->validateRequest($post, ['id']);
         //Поиск поставщика в системе
         $model = Organization::find()->where(['id' => $post['id'], 'type_id' => Organization::TYPE_SUPPLIER])->one();
         if (empty($model)) {
@@ -462,18 +458,14 @@ class VendorWebApi extends \api_web\components\WebApi
      */
     public function uploadLogo(array $post)
     {
-        if (empty($post['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
+        $this->validateRequest($post, ['vendor_id']);
 
         $vendor = Organization::findOne($post['vendor_id']);
         if (empty($vendor)) {
             throw new BadRequestHttpException('vendor_not_found');
         }
 
-        if (empty($post['image_source'])) {
-            throw new BadRequestHttpException('empty_param|image_source');
-        }
+        $this->validateRequest($post, ['image_source']);
 
         if ($vendor->type_id !== Organization::TYPE_SUPPLIER) {
             throw new BadRequestHttpException('vendor.is_not_vendor');
@@ -502,252 +494,6 @@ class VendorWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Загрузка индивид. каталога
-     *
-     * @param array $request
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws \Throwable
-     * @throws \yii\base\Exception
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\db\StaleObjectException
-     * @throws \yii\di\NotInstantiableException
-     */
-    public function uploadFile(array $request)
-    {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
-        if (empty($request['data'])) {
-            throw new BadRequestHttpException('empty_param|data');
-        }
-        $vendorId = $request['vendor_id'];
-        $vendor = Organization::findOne($vendorId);
-        if (empty($vendor) || $vendor->type_id != Organization::TYPE_SUPPLIER) {
-            //todo_refactor no migration localization
-            throw new BadRequestHttpException('vendor.not_found');
-        }
-        if ($vendor->vendor_is_work) {
-            throw new BadRequestHttpException('vendor.is_work');
-        }
-
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendor->id, $this->user->organization, true);
-        if (empty($catalog)) {
-            throw new BadRequestHttpException('Catalog not found');
-        }
-        $catalogID = $catalog->id;
-
-        //проверка нет ли уже загруженного временного каталога
-        //если есть - удаляем
-        $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalogID, 'user_id' => $this->user->id]);
-        if (!empty($tempCatalog)) {
-            Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
-            CatalogTempContent::deleteAll(['temp_id' => $tempCatalog->id]);
-            $tempCatalog->delete();
-        }
-        //сохранение и загрузка на s3
-        $base64 = $request['data'];
-        $type = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,';
-        if (strpos($base64, $type) !== false) {
-            try {
-                $file = \api_web\helpers\File::getFromBase64($base64, $type, "xlsx");
-                Yii::$app->get('resourceManager')->save($file, Excel::excelTempFolder . DIRECTORY_SEPARATOR . $file->name);
-                $newTempCatalog = new CatalogTemp();
-                $newTempCatalog->cat_id = $catalogID;
-                $newTempCatalog->user_id = $this->user->id;
-                $newTempCatalog->excel_file = $file->name;
-                $newTempCatalog->save();
-                return [
-                    'result'  => true,
-                    'temp_id' => $newTempCatalog->id,
-                    'rows'    => Excel::get20Rows($file->tempName)
-                ];
-            } catch (\yii\base\Exception $e) {
-                throw $e;
-            }
-        } else {
-            throw new BadRequestHttpException("The download format is different from XLSX");
-        }
-    }
-
-    /**
-     * Валидация и импорт уже загруженного файла инд. каталога
-     *
-     * @param array $request
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws ValidationException
-     */
-    public function prepareTemporary(array $request)
-    {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
-        if (!$catalog) {
-            throw new BadRequestHttpException("Catalog not found");
-        }
-        $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
-        if (empty($tempCatalog)) {
-            throw new BadRequestHttpException("Temp catalog not found");
-        }
-        $index = $request['index_field'] ?? $tempCatalog->cat->main_index ?? null;
-        if (empty($index)) {
-            throw new BadRequestHttpException('empty_param|index_field');
-        }
-
-        if (empty($request['mapping']) && empty($tempCatalog->cat->mapping)) {
-            throw new BadRequestHttpException('empty_param|mapping');
-        }
-
-        if (!CatalogTempContent::find()->where(['temp_id' => $tempCatalog->id])->exists()) {
-            $request['mapping'] = isset($request['mapping']) ? array_flip($request['mapping']) : null;
-            $mapping = $request['mapping'] ?? $tempCatalog->cat->mapping;
-            if (is_string($mapping)) {
-                $mapping = \json_decode($mapping);
-            }
-
-            $excelUrl = Yii::$app->get('resourceManager')->getUrl(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
-            $file = \api_web\helpers\File::getFromUrl($excelUrl);
-
-            if (Excel::writeToTempTable($file->tempName, $tempCatalog->id, $mapping, $index)) {
-                $tempCatalog->index_column = $index;
-                $tempCatalog->cat->main_index = $tempCatalog->index_column;
-                $tempCatalog->mapping = \json_encode($mapping);
-                $tempCatalog->cat->mapping = $tempCatalog->mapping;
-                $tempCatalog->cat->save();
-                $tempCatalog->save();
-            }
-        }
-        $dubles = $this->container->get('CatalogWebApi')->getTempDuplicatePosition($request);
-        if ($dubles) {
-            return ['duplicates' => $dubles];
-        }
-
-        return ['products' => $this->container->get('CatalogWebApi')->getGoodsInTempCatalog($request)];
-    }
-
-    /**
-     * Загрузка индивидуального каталога
-     *
-     * @param array $request
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws ValidationException
-     */
-    public function uploadCustomCatalog(array $request)
-    {
-        //
-    }
-
-    /**
-     * Валидация и импорт уже загруженного основного каталога
-     *
-     * @param array $request
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws ValidationException
-     */
-    public function importCustomCatalog(array $request)
-    {
-        //
-    }
-
-    /**
-     * Удаление основного каталога
-     *
-     * @param array $request
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws ValidationException
-     */
-    public function deleteMainCatalog(array $request)
-    {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
-        }
-
-        $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
-        if (empty($catalog)) {
-            throw new BadRequestHttpException('Catalog not found');
-        }
-        return $this->container->get('CatalogWebApi')->deleteMainCatalog($catalog);
-    }
-
-    /**
-     * Смена уникального индекса главного каталога
-     *
-     * @param array $request
-     * @return array
-     * @throws BadRequestHttpException
-     */
-    public function changeMainIndex(array $request)
-    {
-        if (empty($request['cat_id'])) {
-            throw new BadRequestHttpException('empty_param|cat_id');
-        }
-
-        $catalog = Catalog::findOne(['id' => $request['cat_id'], 'supp_org_id' => $this->user->organization_id, 'type' => Catalog::BASE_CATALOG]);
-        if (empty($catalog)) {
-            throw new BadRequestHttpException('Catalog not found');
-        }
-        return $this->container->get('CatalogWebApi')->changeMainIndex($catalog, $request['index']);
-    }
-
-    /**
-     * Удаление загруженного необработанного каталога
-     *
-     * @param array $request
-     * @return array
-     * @throws \Exception
-     */
-    public function cancelTemporary(array $request)
-    {
-        if (empty($request['vendor_id'])) {
-            throw new BadRequestHttpException('empty_param|vendor_id');
-        }
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
-
-        $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
-        if (!empty($tempCatalog)) {
-            Yii::$app->get('resourceManager')->delete(Excel::excelTempFolder . DIRECTORY_SEPARATOR . $tempCatalog->excel_file);
-            CatalogTempContent::deleteAll(['temp_id' => $tempCatalog->id]);
-            $tempCatalog->delete();
-        }
-        return ['result' => true];
-    }
-
-    /**
-     * Список ключей для выбора
-     *
-     * @return array
-     */
-    public function getListMainIndex()
-    {
-        return $this->container->get('CatalogWebApi')->getKeys();
-    }
-
-    /**
-     * Статус загруженного, но не импортированного каталога
-     *
-     * @param array $request
-     * @return array
-     */
-    public function getTempMainCatalog(array $request)
-    {
-        $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
-        if (!empty($tempCatalog)) {
-            return [
-                'exists'  => true,
-                'rows'    => Excel::get20RowsFromTempUploaded($tempCatalog),
-                'mapping' => $tempCatalog->mapping,
-            ];
-        } else {
-            return ['exists' => false];
-        }
-    }
-
-    /**
      * @param $email
      * @return bool|User|null
      * @throws BadRequestHttpException
@@ -759,7 +505,8 @@ class VendorWebApi extends \api_web\components\WebApi
         if (!$vendorUser) {
             return false;
         } elseif (empty($vendorUser->organization_id)) {
-            throw new BadRequestHttpException('Пользователь с емайлом:' . $email . ' найден у нас в системе, но он не завершил регистрацию. Как только он пройдет процедуру регистрации поставщика, вы сможете добавить его.');
+            throw new BadRequestHttpException("User with email: found in our system, but he did not complete the registration. 
+            As soon as he goes through the supplier registration procedure, you can add him.|{$vendorUser->email}");
         }
 
         if ($vendorUser->organization->type_id != Organization::TYPE_SUPPLIER) {
@@ -793,96 +540,6 @@ class VendorWebApi extends \api_web\components\WebApi
             //поставщику было отправлено приглашение, но поставщик еще не добавил этот ресторан
             throw new BadRequestHttpException(\Yii::t('app', 'common.models.already_sent', ['ru' => 'Вы уже отправили приглашение этому поставщику, ожидается подтверждение от поставщика']));
         }
-    }
-
-    /**
-     * @param               $get_supp_org_id
-     * @param User          $currentUser
-     * @param               $arrCatalog
-     * @param Currency|null $currency
-     * @return int
-     * @throws ValidationException
-     */
-    private function addBaseCatalog($get_supp_org_id, $currentUser, $arrCatalog, Currency $currency = null)
-    {
-        /**
-         * 2) Создаем базовый и каталог для ресторана
-         * */
-        //Поставщик зарегистрирован, но не авторизован
-        //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
-        $vendorBaseCatalog = Catalog::findOne(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG]);
-        if (!$vendorBaseCatalog) {
-            $vendorBaseCatalog = new Catalog();
-            $vendorBaseCatalog->supp_org_id = $get_supp_org_id;
-            $vendorBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);
-            $vendorBaseCatalog->type = Catalog::BASE_CATALOG;
-            $vendorBaseCatalog->status = Catalog::STATUS_ON;
-            $vendorBaseCatalog->currency_id = !is_null($currency) ? $currency->id : 1;
-            if (!$vendorBaseCatalog->save()) {
-                throw new ValidationException($vendorBaseCatalog->getFirstErrors());
-            }
-            $vendorBaseCatalog->refresh();
-        }
-        $lastInsert_base_cat_id = $vendorBaseCatalog->id;
-
-        $newCatalog = new Catalog();
-        $newCatalog->supp_org_id = $get_supp_org_id;
-        $newCatalog->name = ($currentUser->organization->name == "") ? $currentUser->email : $currentUser->organization->name;
-        $newCatalog->type = Catalog::CATALOG;
-        $newCatalog->status = Catalog::STATUS_ON;
-        $newCatalog->currency_id = !is_null($currency) ? $currency->id : 1;
-        if (!$newCatalog->save()) {
-            throw new ValidationException($newCatalog->getFirstErrors());
-        }
-        $lastInsert_cat_id = $newCatalog->id;
-        $newCatalog->refresh();
-
-        /**
-         * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
-         * */
-        $article = 1;
-        foreach ($arrCatalog as $arrCatalogs) {
-            $product = strip_tags(trim($arrCatalogs['product']));
-            $price = strip_tags(trim($arrCatalogs['price']));
-            $ed = strip_tags(trim($arrCatalogs['ed']));
-            $price = str_replace(',', '.', $price);
-            if (substr($price, -3, 1) == '.') {
-                $price = explode('.', $price);
-                $last = array_pop($price);
-                $price = join($price, '') . '.' . $last;
-            } else {
-                $price = str_replace('.', '', $price);
-            }
-            $newProduct = new CatalogBaseGoods();
-            $newProduct->scenario = "import";
-            $newProduct->cat_id = $lastInsert_base_cat_id;
-            $newProduct->supp_org_id = $get_supp_org_id;
-            $newProduct->article = (string)$article;
-            $newProduct->product = $product;
-//            $newProduct->units = null;
-            $newProduct->price = $price;
-            $newProduct->ed = $ed;
-            $newProduct->status = CatalogBaseGoods::STATUS_ON;
-            $newProduct->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
-            $newProduct->deleted = CatalogBaseGoods::DELETED_OFF;
-            if (!$newProduct->save()) {
-                throw new ValidationException($newProduct->getFirstErrors());
-            }
-            $newProduct->refresh();
-
-            $lastInsert_base_goods_id = $newProduct->id;
-
-            $newGoods = new CatalogGoods();
-            $newGoods->cat_id = $lastInsert_cat_id;
-            $newGoods->base_goods_id = $lastInsert_base_goods_id;
-            $newGoods->price = $price;
-            if (!$newGoods->save()) {
-                throw new ValidationException($newGoods->getFirstErrors());
-            }
-            $newGoods->refresh();
-            $article++;
-        }
-        return $lastInsert_cat_id;
     }
 
     /**

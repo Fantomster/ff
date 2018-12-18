@@ -24,8 +24,13 @@ use api_web\exceptions\ValidationException;
  */
 class CartWebApi extends \api_web\components\WebApi
 {
-
+    /**
+     * @var
+     */
     public static $cart;
+    /**
+     * @var
+     */
     public $catalogs;
 
     /**
@@ -34,8 +39,10 @@ class CartWebApi extends \api_web\components\WebApi
      * @param array $post
      * @param bool  $ajax_published
      * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
      */
-    public function add(array $post, $ajax_published = false)
+    public function add(array $post, bool $ajax_published = false)
     {
         //Если прилетел массив товаров
         if (!isset($post['product_id'])) {
@@ -52,7 +59,7 @@ class CartWebApi extends \api_web\components\WebApi
         }
 
         //Обновляем дату изменения корзины
-        $cart             = $this->getCart();
+        $cart = $this->getCart();
         $cart->updated_at = new Expression('NOW()');
         $cart->save(false);
 
@@ -72,11 +79,11 @@ class CartWebApi extends \api_web\components\WebApi
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $cart    = $this->getCart();
+            $cart = $this->getCart();
             $product = (new Product())->findFromCatalogs($post['product_id']);
             //В корзину можно добавлять товары с маркета, или с каталогов Поставщиков ресторана
             if (!in_array($product['cat_id'], $this->getCatalogs()) && $product['market_place'] !== CatalogBaseGoods::MARKETPLACE_ON) {
-                throw new BadRequestHttpException("catalog.access_denied|" . $product['cat_id']);
+                throw new BadRequestHttpException("catalog.access_denied|{$product['cat_id']}");
             }
             $this->setPosition($cart, $product, $post['quantity']);
             $transaction->commit();
@@ -91,10 +98,11 @@ class CartWebApi extends \api_web\components\WebApi
      * Содержимое корзины
      *
      * @return array
+     * @throws ValidationException
      */
     public function items()
     {
-        $client  = $this->user->organization;
+        $client = $this->user->organization;
         //Корзина теущего клиента
         $content = $client->_getCart();
 
@@ -102,7 +110,7 @@ class CartWebApi extends \api_web\components\WebApi
             return [];
         }
         $return = [];
-        $items  = [];
+        $items = [];
         /**
          * @var CartContent $row
          */
@@ -132,11 +140,14 @@ class CartWebApi extends \api_web\components\WebApi
      *
      * @param array $post
      * @return array
+     * @throws \Throwable
+     * @throws \yii\base\ErrorException
+     * @throws \yii\db\StaleObjectException
      */
     public function clear(array $post)
     {
-        $client    = $this->user->organization;
-        $carts     = Cart::find()->where(['organization_id' => $client->id])->all();
+        $client = $this->user->organization;
+        $carts = Cart::find()->where(['organization_id' => $client->id])->all();
         $vendor_id = $post['vendor_id'] ?? null;
         /**
          * @var $cart     Cart
@@ -166,7 +177,7 @@ class CartWebApi extends \api_web\components\WebApi
     public function registration(array $post)
     {
         WebApiHelper::clearRequest($post);
-        $cart   = $this->getCart();
+        $cart = $this->getCart();
         //Результат для ответа
         $result = [
             'success' => 0,
@@ -183,9 +194,7 @@ class CartWebApi extends \api_web\components\WebApi
             }
 
             foreach ($post as $row) {
-                if (empty($row['id'])) {
-                    throw new BadRequestHttpException("empty_param|id");
-                }
+                $this->validateRequest($row, ['id']);
                 $orders[$row['id']] = [
                     'delivery_date' => $row['delivery_date'] ?? null,
                     'comment'       => $row['comment'] ?? null,
@@ -204,7 +213,7 @@ class CartWebApi extends \api_web\components\WebApi
                     }
                 }
             } catch (\Exception $e) {
-                $result['error']   += 1;
+                $result['error'] += 1;
                 $result['message'] = $e->getMessage();
                 \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             }
@@ -213,7 +222,7 @@ class CartWebApi extends \api_web\components\WebApi
         return $result;
     }
 
-    /**
+    /**0
      * Создание заказа
      *
      * @param Cart  $cart
@@ -225,20 +234,20 @@ class CartWebApi extends \api_web\components\WebApi
      */
     private function createOrder(Cart $cart, Organization $vendor, array $post)
     {
-        $client      = $this->user->organization;
+        $client = $this->user->organization;
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             //Создаем заказ
-            $order                = new Order();
-            $order->client_id     = $client->id;
+            $order = new Order();
+            $order->client_id = $client->id;
             $order->created_by_id = $this->user->id;
-            $order->vendor_id     = $vendor->id;
-            $order->status        = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+            $order->vendor_id = $vendor->id;
+            $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
             $order->currency_id = ($cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->one())->currency_id;
-            $order->service_id    = 9;
+            $order->service_id = 9;
 
             if (!empty($post['delivery_date'])) {
-                $d                         = str_replace('.', '-', $post['delivery_date']);
+                $d = str_replace('.', '-', $post['delivery_date']);
                 $order->requested_delivery = date('Y-m-d H:i:s', strtotime($d . ' 19:00:00'));
             }
 
@@ -256,18 +265,18 @@ class CartWebApi extends \api_web\components\WebApi
             //Получаем записи только нужного нам поставщика
             $contents = $cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->all();
             foreach ($this->iterator($contents) as $cartContent) {
-                $orderContent                   = new OrderContent();
-                $orderContent->order_id         = $order->id;
-                $orderContent->product_id       = $cartContent->product_id;
-                $orderContent->quantity         = $cartContent->quantity;
-                $orderContent->plan_quantity    = $cartContent->quantity;
+                $orderContent = new OrderContent();
+                $orderContent->order_id = $order->id;
+                $orderContent->product_id = $cartContent->product_id;
+                $orderContent->quantity = $cartContent->quantity;
+                $orderContent->plan_quantity = $cartContent->quantity;
                 $orderContent->initial_quantity = $cartContent->quantity;
-                $orderContent->price            = $cartContent->price;
-                $orderContent->plan_price       = $cartContent->price;
-                $orderContent->product_name     = $cartContent->product_name;
-                $orderContent->units            = $cartContent->units;
-                $orderContent->comment          = $cartContent->comment;
-                $orderContent->article          = $cartContent->product['article'];
+                $orderContent->price = $cartContent->price;
+                $orderContent->plan_price = $cartContent->price;
+                $orderContent->product_name = $cartContent->product_name;
+                $orderContent->units = $cartContent->units;
+                $orderContent->comment = $cartContent->comment;
+                $orderContent->article = $cartContent->product['article'];
                 if ($orderContent->validate() && $orderContent->save()) {
                     $cartContent->delete();
                 } else {
@@ -279,7 +288,7 @@ class CartWebApi extends \api_web\components\WebApi
             $cart->updated_at = new Expression('NOW()');
             $cart->save();
             $transaction->commit();
-            $orderCreated     = true;
+            $orderCreated = true;
         } catch (\Exception $e) {
             $transaction->rollBack();
             throw $e;
@@ -315,13 +324,13 @@ class CartWebApi extends \api_web\components\WebApi
         }
 
         $result = (new Query())
-                ->from('cart as c')
-                ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
-                ->andWhere([
-                    'c.organization_id' => $this->user->organization->id,
-                    'cc.product_id'     => $id
-                ])
-                ->one();
+            ->from('cart as c')
+            ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
+            ->andWhere([
+                'c.organization_id' => $this->user->organization->id,
+                'cc.product_id'     => $id
+            ])
+            ->one();
 
         if (!empty($result['quantity'])) {
             $return = round($result['quantity'], 3);
@@ -411,11 +420,13 @@ class CartWebApi extends \api_web\components\WebApi
      * @return bool
      * @throws BadRequestHttpException
      * @throws ValidationException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     private function setPosition(Cart $cart, array &$product, $quantity)
     {
         /**
-         * @var $productInCart CartContent
+         * @var CartContent $productInCart
          */
         $productInCart = $cart->getCartContents()->andWhere(['product_id' => $product['id']])->one();
         if ($productInCart) {
@@ -423,7 +434,7 @@ class CartWebApi extends \api_web\components\WebApi
                 $productInCart->delete();
                 return true;
             } else {
-                $productInCart->quantity   = $this->recalculationQuantity($productInCart, $quantity);
+                $productInCart->quantity = $this->recalculationQuantity($productInCart, $quantity);
                 $productInCart->updated_at = new Expression('NOW()');
                 $productInCart->save(false);
                 return true;
@@ -431,15 +442,15 @@ class CartWebApi extends \api_web\components\WebApi
         }
 
         if ($quantity > 0) {
-            $position               = new CartContent();
-            $position->cart_id      = $cart->id;
-            $position->product_id   = $product['id'];
-            $position->quantity     = $this->recalculationQuantity($product, $quantity);
-            $position->price        = $product['price'];
+            $position = new CartContent();
+            $position->cart_id = $cart->id;
+            $position->product_id = $product['id'];
+            $position->quantity = $this->recalculationQuantity($product, $quantity);
+            $position->price = $product['price'];
             $position->product_name = $product['product'];
-            $position->units        = $product['units'];
-            $position->vendor_id    = $product['vendor_id'];
-            $position->currency_id  = $product['currency_id'];
+            $position->units = $product['units'];
+            $position->vendor_id = $product['vendor_id'];
+            $position->currency_id = $product['currency_id'];
             if (!$position->save()) {
                 throw new ValidationException($position->getFirstErrors());
             }
@@ -486,22 +497,22 @@ class CartWebApi extends \api_web\components\WebApi
     {
         $model = $row->product;
 
-        $item['id']          = (int) $model['id'];
-        $item['product']     = $model['product'];
-        $item['catalog_id']  = (int) $model['cat_id'];
-        $item['category_id'] = isset($model['model']->category) ? (int) $model['model']->category->id : 0;
-        $item['price']       = round($model['price'], 2);
-        $item['rating']      = round($model['model']->ratingStars, 1);
-        $item['supplier']    = $row->vendor->name;
-        $item['brand']       = ($model['model']->brand ? $model['model']->brand : '');
-        $item['article']     = $model['model']->article;
-        $item['ed']          = $model['model']->ed;
-        $item['units']       = round(($model['units'] ?? 0), 3);
-        $item['currency']    = $row->currency->symbol;
+        $item['id'] = (int)$model['id'];
+        $item['product'] = $model['product'];
+        $item['catalog_id'] = (int)$model['cat_id'];
+        $item['category_id'] = isset($model['model']->category) ? (int)$model['model']->category->id : 0;
+        $item['price'] = round($model['price'], 2);
+        $item['rating'] = round($model['model']->ratingStars, 1);
+        $item['supplier'] = $row->vendor->name;
+        $item['brand'] = ($model['model']->brand ? $model['model']->brand : '');
+        $item['article'] = $model['model']->article;
+        $item['ed'] = $model['model']->ed;
+        $item['units'] = round(($model['units'] ?? 0), 3);
+        $item['currency'] = $row->currency->symbol;
         $item['currency_id'] = $row->currency->id;
-        $item['image']       = (new MarketWebApi())->getProductImage($model['model']);
-        $item['in_basket']   = $this->countProductInCart($model['id']);
-        $item['comment']     = $row->comment;
+        $item['image'] = (new MarketWebApi())->getProductImage($model['model']);
+        $item['in_basket'] = $this->countProductInCart($model['id']);
+        $item['comment'] = $row->comment;
         return $item;
     }
 

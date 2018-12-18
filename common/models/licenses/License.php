@@ -149,7 +149,7 @@ class License extends ActiveRecord
             ->from(self::tableName())
             ->leftJoin('license_organization lo', 'lo.license_id=license.id')
             ->where(['lo.org_id' => $orgId])
-            ->andWhere('lo.is_deleted = 0 OR lo.is_deleted is null')
+            ->andWhere('coalesce(lo.is_deleted, 0) <> 1')
             ->groupBy([
                 'license.id',
                 'license.name',
@@ -213,7 +213,6 @@ class License extends ActiveRecord
      * @param array $service_ids
      * @return false|string
      * @throws HttpException
-     * @throws \yii\base\InvalidConfigException
      */
     public static function checkLicense($org_id, $service_ids = [])
     {
@@ -234,8 +233,6 @@ class License extends ActiveRecord
             }
         }
 
-        \Yii::$app->response->headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
-        \Yii::$app->response->headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
         #Проверяем, не стухла ли лицензия
         if (strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
             $message = \Yii::t('api_web', 'license.payment_required');

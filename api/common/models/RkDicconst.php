@@ -5,15 +5,13 @@ namespace api\common\models;
 use Yii;
 use common\models\Organization;
 
-
 /**
  * This is the model class for table "rk_dicconst".
  *
  * @property integer $id
- * @property string $denom
- * @property string $def_value
- * @property string $comment
- *
+ * @property string  $denom
+ * @property string  $def_value
+ * @property string  $comment
  */
 class RkDicconst extends \yii\db\ActiveRecord
 {
@@ -21,6 +19,10 @@ class RkDicconst extends \yii\db\ActiveRecord
     const PC_TYPE_DROP = 1;
     const PC_TYPE_STRING = 2;
     const PC_TYPE_TREE = 7;
+    const SH_VERSION = [
+        4 => 'Store House v.4',
+        5 => 'Store House v.5'
+    ];
 
     /**
      * @inheritdoc
@@ -37,9 +39,9 @@ class RkDicconst extends \yii\db\ActiveRecord
     {
         return [
             [['id'], 'integer'],
-            [['denom','def_value','comment'], 'string', 'max' => 255],
-            [['denom','def_value','comment'], 'safe'],
-            
+            [['denom', 'def_value', 'comment'], 'string', 'max' => 255],
+            [['denom', 'def_value', 'comment'], 'safe'],
+
         ];
     }
 
@@ -49,36 +51,29 @@ class RkDicconst extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'denom' => 'Название константы',
+            'id'        => 'ID',
+            'denom'     => 'Название константы',
             'def_value' => 'Значение по умолчанию',
-            'comment' => 'Комментарий',
+            'comment'   => 'Комментарий',
         ];
     }
 
-    public function getPconstValue() {
+    public function getPconstValue()
+    {
 
-    $pConst = \api\common\models\RkPconst::findOne(['const_id' => $this->id, 'org' => Yii::$app->user->identity->organization_id]);
+        $pConst = \api\common\models\RkPconst::findOne(['const_id' => $this->id, 'org' => Yii::$app->user->identity->organization_id]);
+        $res = (!isset($pConst->value)) ? $this->def_value : $pConst->value;
 
-    $res =  (!isset($pConst->value)) ? $this->def_value : $pConst->value;
+        if ($this->denom == 'taxVat') {
+            $res = $res / 100;
+        }
 
-    //  echo $this->denom.PHP_EOL;
-    //  echo "PCONST:"; var_dump($pConst->value);
-    //  echo "DEF:"; var_dump($this->def_value);
-
-
-    if ($this->denom == 'taxVat')
-        $res = $res/100;
-
-    //  echo "RES:"; var_dump($res);
-
-    return $res;
-}
+        return $res;
+    }
 
     public static function getDb()
     {
-       return \Yii::$app->db_api;
+        return \Yii::$app->db_api;
     }
-
 
 }

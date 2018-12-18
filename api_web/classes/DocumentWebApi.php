@@ -5,6 +5,7 @@ namespace api_web\classes;
 use api_web\components\Registry;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\CurrencyHelper;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\classes\documents\EdiOrder;
 use api_web\modules\integration\classes\documents\EdiOrderContent;
 use api_web\modules\integration\classes\documents\Order;
@@ -24,7 +25,7 @@ use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
- * Class DocumentWebApi
+ * Class DocumentWebApi 
  *
  * @package api_web\modules\integration\classes
  */
@@ -187,6 +188,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      *
      * @param      $document_id
      * @param null $service_id
+     * @param null $hasOrderContent
      * @return array
      */
     private function getDocumentWaybill($document_id, $service_id, $hasOrderContent = null)
@@ -522,7 +524,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                     "count"                   => (int)$model['object_position_count'],
                     "total_price"             => CurrencyHelper::asDecimal($model['object_total_price']),
                     //"total_price_with_out_vat" => CurrencyHelper::asDecimal($model['total_price_with_out_vat'], 2, null),
-                    "doc_date"                => date("Y-m-d H:i:s T", strtotime($model['doc_date'])),
+                    "doc_date"                => WebApiHelper::asDatetime($model['doc_date']),
                     "outer_number_code"       => $model['outer_number_code'] ?? null,
                     "outer_number_additional" => $model['outer_number_additional'] ?? null,
                     "order_acquirer_id"       => $model['order_acquirer_id'],
@@ -708,7 +710,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         ]);
 
         if (empty($replacedOrder)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'document.replaced_order_not_found', ['ru' => 'Заменяемый документ не найден или не является заказом']));
+            throw new BadRequestHttpException('document.replaced_order_not_found');
         }
 
         $document = OrderEmail::findOne([
@@ -717,15 +719,15 @@ class DocumentWebApi extends \api_web\components\WebApi
         ]);
 
         if (empty($document)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_not_found', ['ru' => 'Документ не найден или не является документом от поставщика']));
+            throw new BadRequestHttpException('document.document_not_found');
         }
 
         if ($document->status == Order::STATUS_CANCELLED) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_cancelled', ['ru' => 'Документ в состоянии "Отменен"']));
+            throw new BadRequestHttpException('document.document_cancelled');
         }
 
         if (!is_null($document->replaced_order_id)) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'document.document_replaced_order_id_is_not_null', ['ru' => 'Документ уже заменен']));
+            throw new BadRequestHttpException('document.document_replaced_order_id_is_not_null');
         }
 
         $replacedOrder->status = Order::STATUS_CANCELLED;
@@ -815,12 +817,12 @@ class DocumentWebApi extends \api_web\components\WebApi
                 $field = 'acquirer_id';
             }
             if (!$query->andWhere([$field => $this->user->organization_id])->exists()) {
-                throw new BadRequestHttpException($request['type'] . '_not_found');
+                throw new BadRequestHttpException( "type_not_found|{$request['type']}");
             }
 
             $document = $modelClass::prepareModel($request['document_id'], $request['service_id']);
         } else {
-            throw new BadRequestHttpException($request['type'] . '_not_found');
+            throw new BadRequestHttpException("type_not_found|{$request['type']}");
         }
 
         return array_merge(['document' => $document], $this->getDocumentContents($request));

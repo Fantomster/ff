@@ -9,7 +9,6 @@
 namespace api_web\helpers;
 
 use api_web\components\Registry;
-use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\models\User;
 use api_web\modules\integration\classes\SyncServiceFactory;
@@ -62,11 +61,13 @@ class WaybillHelper
     }
 
     /**
-     * @param      $order_id
-     * @param null $arOrderContentForCreate С EDI может приходить несколькими файлами orderContent для одного заказа
-     * @param null $supplierOrgId
-     * @throws \Exception
+     * @param       $order_id
+     * @param null  $arOrderContentForCreate С EDI может приходить несколькими файлами orderContent для одного заказа
+     * @param null  $supplierOrgId
+     * @param array $arExcludedService
      * @return mixed
+     * @throws BadRequestHttpException
+     * @throws ValidationException
      */
     public function createWaybill($order_id, $arOrderContentForCreate = null, $supplierOrgId = null, $arExcludedService = [])
     {
@@ -217,7 +218,7 @@ class WaybillHelper
                 $ordCont = $mappedProduct['orderContent'];
                 $price = $ordCont->price;
                 $quantity = $ordCont->quantity;
-                $taxRate = in_array($serviceId, Registry::$edo_documents) &&
+                $taxRate = in_array($ordCont->order->service_id, Registry::$edo_documents) &&
                 !is_null($ordCont->vat_product) ? $ordCont->vat_product : $mappedProduct['vat'];
                 $priceWithVat = (float)($price + ($price * ($taxRate / 100)));
                 $modelWaybillContent = new WaybillContent();
@@ -304,12 +305,12 @@ class WaybillHelper
             ]
         ]);
         if (!$waybill) {
-            throw new BadRequestHttpException('waybill cannot adding waybill_content with id ' . $request['waybill_id']);
+            throw new BadRequestHttpException('waybill cannot adding waybill_content with id |' . $request['waybill_id']);
         }
 
         $orderContent = OrderContent::findOne($request['order_content_id']);
         if (!$orderContent) {
-            throw new BadRequestHttpException('OrderContent dont exists with id ' . $request['order_content_id']);
+            throw new BadRequestHttpException('OrderContent dont exists with id|' . $request['order_content_id']);
         }
 
         $this->checkOrderForWaybillContent($waybill, $orderContent);
@@ -376,7 +377,7 @@ class WaybillHelper
             ->onCondition(['waybill_id' => $waybill->id])
             ->exists()
         ) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_allready_has_waybill_content') . ' - ' . $orderContent->waybillContent->id);
+            throw new BadRequestHttpException('waybill.order_content_allready_has_waybill_content|' . $orderContent->waybillContent->id);
         }
 
         $waybillContent = WaybillContent::find()
@@ -387,7 +388,7 @@ class WaybillHelper
         if ($waybillContent) {
             $orderContentFromWaybill = $waybillContent->orderContent;
             if ($orderContent->order_id != $orderContentFromWaybill->order_id) {
-                throw new BadRequestHttpException(\Yii::t('api_web', 'waybill.order_content_not_for_this_waybill'));
+                throw new BadRequestHttpException('waybill.order_content_not_for_this_waybill');
             }
         }
     }
@@ -444,13 +445,13 @@ class WaybillHelper
                 ->orderBy([$waybillSearchField => SORT_DESC])->limit(1)->one();
             $ediNumber = $existWaybill->{$waybillSearchField} ?? $existOrderContent->edi_number;
 
-            return $this->getLastEdiNumber($ediNumber);
+            return $this->getLastEdiNumber($ediNumber, $tmp_ed_num);
         } else {
             $existWaybill = Waybill::find()->where(['like', $waybillSearchField, $tmp_ed_num])
                 ->andWhere(['service_id' => $serviceId])
                 ->orderBy([$waybillSearchField => SORT_DESC])->limit(1)->one();
             if ($existWaybill) {
-                return $this->getLastEdiNumber($existWaybill->{$waybillSearchField});
+                return $this->getLastEdiNumber($existWaybill->{$waybillSearchField}, $tmp_ed_num);
             }
         }
 
@@ -461,18 +462,26 @@ class WaybillHelper
      * @param $ediNumber
      * @return int|mixed|string
      */
-    private function getLastEdiNumber($ediNumber)
+    public function getLastEdiNumber($ediNumber, $tmp_ed_num)
     {
-        if (strpos($ediNumber, '-') != false) {
+        $ed_num = '';
+        if (strpos($ediNumber, '-') != false && strlen($ediNumber) != strlen($tmp_ed_num)) {
             $ed_nums = explode('-', $ediNumber);
-            $ed_num = array_pop($ed_nums);
-            $ed_num = (int)$ed_num + 1;
-            array_push($ed_nums, $ed_num);
-            $ed_num = implode('-', $ed_nums);
+            $count = count($ed_nums);
+            if ($count > 1) {
+                $ed_num2 = (int)$ed_nums[$count-1] + 1;
+                $preCount = $count - 1;
+                for($i = 0; $i < $preCount; $i++){
+                    $ed_num .= $ed_nums[$i];
+                    $ed_num .= '-';
+                }
+                $ed_num .= $ed_num2;
+            } else {
+                $ed_num = $ediNumber . '-1';
+            }
         } else {
             $ed_num = $ediNumber . '-1';
         }
-
         return $ed_num;
     }
 
@@ -555,6 +564,7 @@ class WaybillHelper
      *
      * @param        $message
      * @param        $service_id
+     * @param int    $orgId
      * @param string $type
      * @throws ValidationException
      */
@@ -581,7 +591,6 @@ class WaybillHelper
      */
     public function createQueryWyabillToOrder($orderId)
     {
-        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
         return (new Query())->distinct()->select(['w.id', 'w.service_id'])
             ->from('waybill w')
             ->leftJoin('waybill_content wc', 'w.id=wc.waybill_id')

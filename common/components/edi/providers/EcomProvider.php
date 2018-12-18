@@ -95,14 +95,6 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
         $transaction = Yii::$app->db_api->beginTransaction();
         $result = false;
         try {
-            $ediOrder = EdiOrder::findOne(['order_id' => $order->id]);
-            if (!$ediOrder) {
-                Yii::$app->db->createCommand()->insert('edi_order', [
-                    'order_id' => $order->id,
-                    'lang'     => Yii::$app->language ?? 'ru'
-                ])->execute();
-            }
-
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);
             $dateArray = $this->getDateData($order);
             if (!count($orderContent)) {

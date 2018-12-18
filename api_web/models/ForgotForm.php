@@ -6,7 +6,6 @@ use Yii;
 use yii\swiftmailer\Mailer;
 use yii\swiftmailer\Message;
 use amnah\yii2\user\models\forms\ForgotForm as BaseForm;
-use common\models\UserToken;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -54,7 +53,7 @@ class ForgotForm extends BaseForm
             $mailer->viewPath = $oldViewPath;
             return (int)$result;
         } else {
-            throw new BadRequestHttpException('User not found');
+            throw new BadRequestHttpException('user_not_found');
         }
     }
 
@@ -72,7 +71,7 @@ class ForgotForm extends BaseForm
     }
 
     /**
-     * @param $number length
+     * @param $number int
      * @return string
      */
     public static function generatePassword($number)

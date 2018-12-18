@@ -3,14 +3,8 @@
 use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\widgets\Pjax;
 use kartik\form\ActiveForm;
-use yii\web\View;
-use yii\widgets\ListView;
 use kartik\grid\GridView;
-use kartik\editable\Editable;
-use frontend\controllers\ClientController;
-use \yii\web\JsExpression;
 use common\models\Organization;
 
 $this->title = 'Интеграция с Tillypad';
@@ -304,7 +298,7 @@ $js = <<< JS
                             $('#but'+number).html(selected_name);
                             swal.close();
                         } else {
-                            alert('Не удалось сохранить контрагента 1С.');
+                            alert('Не удалось сохранить контрагента Tillypad.');
                         }
                     })
                 });
@@ -357,17 +351,17 @@ $js = <<< JS
                 })
                 $('#denom_forever').on('click', function () {
                     var selectvalue = $('#bukv-tovar').val();
-                    console.log(selectvalue);
                     var url_edit_comment = '$url_edit_comment';
-                    console.log(number);
-                    $.post(url_edit_comment, {comm:selectvalue, number:number}, function (data) {
-                        if (data == true) {
-                            $('#butcom'+number).html(selectvalue);
-                            swal.close();
-                        } else {
-                            alert('Не удалось сохранить комментарий к контрагенту Tillypad.');
-                        }
-                    })
+                    if (selectvalue != '') {
+                        $.post(url_edit_comment, {comm:selectvalue, number:number}, function (data) {
+                            if (data == true) {
+                                $('#butcom'+number).html(selectvalue);
+                            } else {
+                                alert('Не удалось сохранить комментарий к контрагенту Tillypad.');
+                            }
+                        })
+                    }
+                    swal.close();
                 });
             });
         }
@@ -411,7 +405,7 @@ $js = <<< JS
                             }
                             var sel = '<div id="spisok">';
                             sel = sel+'<select id="selpos" name="list_tovar" class="swal2-input">';
-                            if (cont_old == 'Не акктивен') {
+                            if (cont_old == 'Не активен') {
                                 var app = ' selected';
                             } else {
                                 var app = '';

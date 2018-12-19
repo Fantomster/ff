@@ -83,6 +83,9 @@ class OuterProductMapSearch extends OuterProductMap
                 if (!empty($post['search']['product'])) {
                     $query->andFilterWhere(['like', "f.`name`", $post['search']['product']]);
                     $query->orFilterWhere(['like', "d.`product`", $post['search']['product']]);
+                    $query->orderBy([
+                        'IF(f.id is null, 0, 1)' => SORT_DESC
+                    ]);
                 }
                 /**
                  * фильтр по поставщику
@@ -94,12 +97,6 @@ class OuterProductMapSearch extends OuterProductMap
         }
 
         $query->andWhere(['in', "a.supp_org_id", $vendors]);
-
-        $query->orderBy([
-            'IF(f.id is null, 0, 1)' => SORT_DESC,
-            'f.id'                   => SORT_ASC,
-            'product_id'             => SORT_ASC,
-        ]);
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query->createCommand()->getRawSql(),

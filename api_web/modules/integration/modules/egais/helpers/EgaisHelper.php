@@ -2,7 +2,9 @@
 
 namespace api_web\modules\integration\modules\egais\helpers;
 
+use api_web\components\Registry;
 use api_web\components\WebApi;
+use api_web\exceptions\ValidationException;
 use api_web\modules\integration\modules\egais\classes\EgaisXmlFiles;
 use api_web\modules\integration\modules\egais\classes\XmlParser;
 use common\models\egais\EgaisActWriteOn;
@@ -10,6 +12,7 @@ use common\models\egais\EgaisQueryRests;
 use common\models\egais\EgaisTypeChargeOn;
 use common\models\egais\EgaisTypeWriteOff;
 use common\models\egais\EgaisWriteOff;
+use common\models\Journal;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
 use yii\httpclient\Client;
@@ -48,19 +51,21 @@ class EgaisHelper extends WebApi
      * @param $orgId
      * @param $url
      * @param $data
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws BadRequestHttpException
+     * @throws ValidationException
      */
     public function sendQueryRests($orgId, $url, $data): void
     {
-        $client = new Client();
-        $queryRests = $client->createRequest()
-            ->setMethod('POST')
-            ->setUrl("{$url}/opt/in/QueryRests")
-            ->addFileContent('xml_file', $data)
-            ->send();
-
-        $replyId = (new XmlParser())->parseEgaisQuery($queryRests->content);
+        $querySettings = [
+            "method" => "POST",
+            "url" => "{$url}/opt/in/QueryRests",
+            "file" => [
+                'field_name' => 'xml_file',
+                'data' => $data
+            ]
+        ];
+        $requestResponse = $this->sendRequest($querySettings);
+        $replyId = (new XmlParser())->parseEgaisQuery($requestResponse);
 
         (new EgaisQueryRests([
             'org_id' => $orgId,
@@ -75,8 +80,7 @@ class EgaisHelper extends WebApi
      * @param string $queryType
      * @return string
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws ValidationException
      */
     public function sendActWriteOff(array $settings, array $request, string $queryType)
     {
@@ -109,7 +113,7 @@ class EgaisHelper extends WebApi
 
         $xmlFile = EgaisXmlFiles::actWriteOffV3($settings['fsrar_id'], $request);
 
-        return self::sendEgaisQuery($settings['egais_url'], $xmlFile, $queryType);
+        return $this->sendEgaisQuery($settings['egais_url'], $xmlFile, $queryType);
     }
 
 
@@ -119,8 +123,7 @@ class EgaisHelper extends WebApi
      * @param string $queryType
      * @return bool
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws ValidationException
      */
     public function sendActWriteOn(array $settings, array $request, string $queryType)
     {
@@ -136,7 +139,23 @@ class EgaisHelper extends WebApi
         $request['number'] = !empty($numberAct) ? ++$numberAct->number : 101;
 
         $xmlFile = EgaisXmlFiles::actChargeOnV2($settings['fsrar_id'], $request);
+
+        $querySettings = [
+            "method" => "POST",
+            "url" => "{$settings['egais_url']}/opt/in/{$queryType}",
+            "file" => [
+                'field_name' => 'xml_file',
+                'data' => $xmlFile
+            ]
+        ];
+        $requestResponse = $this->sendRequest($querySettings);
+        $reply_id = (new XmlParser())->parseEgaisQuery($requestResponse);
+
         $typeWriteOn = EgaisTypeChargeOn::findOne(['type' => $request['type']]);
+
+        if (empty($typeWriteOn)) {
+            throw new BadRequestHttpException('dictionary.egais_type_document_error');
+        }
 
         $newAct = new EgaisActWriteOn([
             'org_id' => $orgId,
@@ -145,22 +164,14 @@ class EgaisHelper extends WebApi
             'type_charge_on' => $typeWriteOn->id,
             'note' => $request['note'],
             'status' => null,
+            'reply_id' => $reply_id
         ]);
 
-        $client = new Client();
-        $queryRests = $client->createRequest()
-            ->setMethod('POST')
-            ->setUrl("{$settings['egais_url']}/opt/in/{$queryType}")
-            ->addFileContent('xml_file', $xmlFile)
-            ->send();
-        if (!$queryRests->isOk && !$newAct->save()) {
+        if (!$newAct->save()) {
             throw new BadRequestHttpException('dictionary.request_error');
         }
 
-        $reply_id = (new XmlParser())->parseEgaisQuery($queryRests->content);
-        $newAct->reply_id = $reply_id;
-
-        return $newAct->save();
+        return true;
     }
 
     /**
@@ -169,39 +180,32 @@ class EgaisHelper extends WebApi
      * @param $queryType
      * @return bool|string
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws ValidationException
      */
-    public static function sendEgaisQuery($url, $data, $queryType)
+    public function sendEgaisQuery($url, $data, $queryType)
     {
-        $client = new Client();
-        $queryRests = $client->createRequest()
-            ->setMethod('POST')
-            ->setUrl("{$url}/opt/in/{$queryType}")
-            ->addFileContent('xml_file', $data)
-            ->send();
-
-        if (!$queryRests->isOk) {
-            throw new BadRequestHttpException('dictionary.request_error');
-        }
-
-        $replyId = (new XmlParser())->parseEgaisQuery($queryRests->content);
+        $querySettings = [
+            "method" => "POST",
+            "url" => "{$url}/opt/in/{$queryType}",
+            "file" => [
+                'field_name' => 'xml_file',
+                'data' => $data
+            ]
+        ];
+        $requestResponse = $this->sendRequest($querySettings);
+        $replyId = (new XmlParser())->parseEgaisQuery($requestResponse);
 
         sleep(3);
 
-        $getUrlDoc = $client->createRequest()
-            ->setMethod('get')
-            ->setUrl("{$url}/opt/out?replyId={$replyId}")
-            ->send();
-
-        if (!$getUrlDoc->isOk) {
-            throw new BadRequestHttpException('dictionary.request_error');
-        }
-
-        $getDataDoc = (new XmlParser())->parseUrlDoc($getUrlDoc->content);
+        $querySettings = [
+            "method" => "GET",
+            "url" => "{$url}/opt/out?replyId={$replyId}",
+        ];
+        $requestResponse = $this->sendRequest($querySettings);
+        $getDataDoc = (new XmlParser())->parseUrlDoc($requestResponse);
 
         if (!empty($getDataDoc)) {
-            return self::getOneDocument($url, $getDataDoc[0]);
+            return $this->getOneDocument($url, $getDataDoc[0]);
         }
 
         return true;
@@ -214,27 +218,20 @@ class EgaisHelper extends WebApi
      * @param $request
      * @return array
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws ValidationException
      */
-    public static function getAllIncomingDoc($url, $request)
+    public function getAllIncomingDoc($url, $request)
     {
         $page = (isset($request['pagination']['page']) ? $request['pagination']['page'] : 1);
         $pageSize = (isset($request['pagination']['page_size']) ? $request['pagination']['page_size'] : 12);
 
-        (!empty($request["type"])) ? $type = '/' . $request["type"] : $type = null;
-
-        $client = new Client();
-        $response = $client->createRequest()
-            ->setMethod('get')
-            ->setUrl($url . '/opt/out' . $type)
-            ->send();
-
-        if (!$response->isOk) {
-            throw new BadRequestHttpException('dictionary.request_error');
-        }
-
-        $docs = (new XmlParser())->parseIncomingDocs($response->content);
+        $type = !empty($request["type"]) ? '/' . $request["type"] : null;
+        $querySettings = [
+            "method" => "GET",
+            "url" => "{$url}/opt/out{$type}",
+        ];
+        $requestResponse = $this->sendRequest($querySettings);
+        $docs = (new XmlParser())->parseIncomingDocs($requestResponse);
 
         $pagination = new Pagination();
         $pagination->setPage($page - 1);
@@ -253,7 +250,7 @@ class EgaisHelper extends WebApi
 
         $result = [];
         foreach ($dataProvider->getModels() as $model) {
-            array_push($result, $model);
+            $result[] = $model;
         }
 
         return [
@@ -271,24 +268,79 @@ class EgaisHelper extends WebApi
      * @param $request
      * @return string
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws ValidationException
      */
-    public static function getOneDocument($url, $request)
+    public function getOneDocument($url, $request)
     {
-        $query = "{$url}/opt/out/{$request['type']}/{$request['id']}";
+        $querySettings = [
+            "method" => "GET",
+            "url" => "{$url}/opt/out/{$request['type']}/{$request['id']}",
+        ];
+        $requestResponse = $this->sendRequest($querySettings);
+
         $parser = "parse{$request['type']}";
 
-        $client = new Client();
-        $response = $client->createRequest()
-            ->setMethod('get')
-            ->setUrl($query)
-            ->send();
+        return (new XmlParser())->$parser($requestResponse);
+    }
 
-        if (!$response->isOk) {
-            throw new BadRequestHttpException('dictionary.request_error');
+    /**
+     * @param array $request
+     * @return mixed
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function sendRequest(array $request)
+    {
+        try {
+            $client = new Client();
+            $response = $client->createRequest()
+                ->setMethod($request['method'])
+                ->setUrl($request['url']);
+
+            if (!empty($request['file'])) {
+                $file = $request['file'];
+                $response->addFileContent($file['field_name'], $file['data']);
+            }
+
+            $response->send();
+
+            if (!empty($response->isOk) && !$response->isOk) {
+                throw new BadRequestHttpException('dictionary.request_error');
+            }
+        } catch (\Exception $e) {
+            $this->writeInJournal(
+                $e->getMessage(),
+                Registry::EGAIS_SERVICE_ID,
+                $this->user->organization_id,
+                'ERROR'
+            );
+            throw new BadRequestHttpException('dictionary.connection_error_egais');
         }
 
-        return (new XmlParser())->$parser($response->content);
+        return $response->content;
+    }
+
+    /* запись в журнал в случае ошибки */
+    /**
+     * @param $message
+     * @param $service_id
+     * @param int $orgId
+     * @param string $type
+     * @throws ValidationException
+     */
+    private function writeInJournal($message, $service_id, int $orgId = 0, $type = 'success'): void
+    {
+        $journal = new Journal();
+        $journal->response = is_array($message) ? json_encode($message) : $message;
+        $journal->service_id = (int)$service_id;
+        $journal->type = $type;
+        $journal->log_guide = 'CreateWaybill';
+        $journal->organization_id = $orgId;
+        $journal->user_id = \Yii::$app instanceof \Yii\web\Application ? $this->user->id : null;
+        $journal->operation_code = (string)(Registry::$operation_code_send_waybill[$service_id] ?? 0);
+
+        if (!$journal->save()) {
+            throw new ValidationException($journal->getFirstErrors());
+        }
     }
 }

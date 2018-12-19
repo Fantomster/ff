@@ -35,7 +35,7 @@ class EgaisCronController extends Controller
             $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $act->org_id);
 
             try {
-                $idAndTypeDocs = $this->getIdAndTypeDocs($settings['egais_url'], $act->reply_id);
+                $idAndTypeDocs = $this->getIdAndTypeDocs($settings['egais_url'], $act->reply_id, $act->org_id);
                 $this->checkingResult($act, $settings['egais_url'], $idAndTypeDocs);
                 $transaction->commit();
             } catch (\Exception $e) {
@@ -68,7 +68,7 @@ class EgaisCronController extends Controller
             $setting = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $queryRest->org_id);
 
             try {
-                $idAndTypeDocs = $this->getIdAndTypeDocs($setting['egais_url'], $queryRest->reply_id);
+                $idAndTypeDocs = $this->getIdAndTypeDocs($setting['egais_url'], $queryRest->reply_id, $queryRest->org_id);
                 $this->saveProductOnBalance($setting, $queryRest, $idAndTypeDocs);
                 $transaction->commit();
             } catch (\Exception $e) {
@@ -86,25 +86,39 @@ class EgaisCronController extends Controller
 
     /* Получение типа и id документа из ссылки */
     /**
-     * @param $url
-     * @param $reply_id
+     * @param string $url
+     * @param string $reply_id
+     * @param int $orgId
      * @return array|bool
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws ValidationException
      */
-    private function getIdAndTypeDocs(string $url, string $reply_id): array
+    private function getIdAndTypeDocs(string $url, string $reply_id, int $orgId): array
     {
-        $client = new Client();
-        $tickets = $client->createRequest()
-            ->setMethod('get')
-            ->setUrl("{$url}/opt/out?replyId={$reply_id}")
-            ->send();
+        try {
+            $client = new Client();
+            $tickets = $client->createRequest()
+                ->setMethod('get')
+                ->setUrl("{$url}/opt/out?replyId={$reply_id}")
+                ->send();
 
-        $urlDoc = (new XmlParser())->parseUrlDoc($tickets->content);
+            if (!$tickets->isOk) {
+                throw new BadRequestHttpException('dictionary.request_error');
+            }
+
+            $urlDoc = (new XmlParser())->parseUrlDoc($tickets->content);
+
+        } catch (\Exception $e) {
+            $this->writeInJournal(
+                $e->getMessage(),
+                Registry::EGAIS_SERVICE_ID,
+                $orgId,
+                'ERROR'
+            );
+        }
 
         if (empty($urlDoc)) {
-            throw new BadRequestHttpException();
+            throw new BadRequestHttpException('dictionary.parse_error_egais');
         }
 
         return $urlDoc;
@@ -116,18 +130,17 @@ class EgaisCronController extends Controller
      * @param string $egais_url
      * @param array $idAndTypeDocs
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws ValidationException
      */
     private function checkingResult(EgaisActWriteOn $act, string $egais_url, array $idAndTypeDocs): void
     {
         if (!empty($idAndTypeDocs) && count($idAndTypeDocs) == 1) {
-            $doc = EgaisHelper::getOneDocument($egais_url, $idAndTypeDocs[0]);
+            $doc = (new EgaisHelper())->getOneDocument($egais_url, $idAndTypeDocs[0]);
             /** @var array $doc */
             $this->saveTicket($act, $doc, $idAndTypeDocs[0]);
         } else {
             foreach ($idAndTypeDocs as $idAndTypeDoc) {
-                $doc = EgaisHelper::getOneDocument($egais_url, $idAndTypeDoc);
+                $doc = (new EgaisHelper())->getOneDocument($egais_url, $idAndTypeDoc);
                 if ($idAndTypeDoc['type'] == 'Ticket') {
                     /** @var array $doc */
                     $this->saveTicket($act, $doc, $idAndTypeDoc);
@@ -236,17 +249,16 @@ class EgaisCronController extends Controller
 
     /* Сохранение продуктов на балансе */
     /**
-     * @param $settings
-     * @param $queryRest
-     * @param $idAndTypeDocs
+     * @param array $settings
+     * @param EgaisQueryRests $queryRest
+     * @param array $idAndTypeDocs
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws ValidationException
      */
     private function saveProductOnBalance(array $settings, EgaisQueryRests $queryRest, array $idAndTypeDocs): void
     {
         /** @var array $doc */
-        $doc = EgaisHelper::getOneDocument($settings['egais_url'], $idAndTypeDocs[0]);
+        $doc = (new EgaisHelper())->getOneDocument($settings['egais_url'], $idAndTypeDocs[0]);
         $products = $doc["Products"]["StockPosition"];
 
         foreach ($products as $product) {

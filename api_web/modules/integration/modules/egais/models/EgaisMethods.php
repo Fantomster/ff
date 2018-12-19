@@ -82,8 +82,8 @@ class EgaisMethods extends WebApi
      * @param array $request
      * @return mixed
      * @throws BadRequestHttpException
+     * @throws \api_web\exceptions\ValidationException
      * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
      */
     public function getGoodsOnBalance(array $request)
     {
@@ -119,8 +119,6 @@ class EgaisMethods extends WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws \api_web\exceptions\ValidationException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
      */
     public function actWriteOff(array $request)
     {
@@ -144,8 +142,6 @@ class EgaisMethods extends WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws \api_web\exceptions\ValidationException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
      */
     public function actWriteOn(array $request)
     {
@@ -168,8 +164,7 @@ class EgaisMethods extends WebApi
      * @param $request
      * @return mixed
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws \api_web\exceptions\ValidationException
      */
     public function getQueryRests($request)
     {
@@ -181,7 +176,7 @@ class EgaisMethods extends WebApi
             }
 
             $xml = (new EgaisXmlFiles())->queryRests($settings['fsrar_id']);
-            $return = EgaisHelper::sendEgaisQuery($settings['egais_url'], $xml, 'QueryRests');
+            $return = (new EgaisHelper())->sendEgaisQuery($settings['egais_url'], $xml, 'QueryRests');
 
             return ['result' => $return];
         }
@@ -206,15 +201,14 @@ class EgaisMethods extends WebApi
             throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
 
-        return EgaisHelper::getAllIncomingDoc($settings['egais_url'], $request);
+        return (new EgaisHelper())->getAllIncomingDoc($settings['egais_url'], $request);
     }
 
     /**
      * @param $request
      * @return mixed
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws \api_web\exceptions\ValidationException
      */
     public function getOneIncomingDoc($request)
     {
@@ -236,6 +230,6 @@ class EgaisMethods extends WebApi
             throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
 
-        return EgaisHelper::getOneDocument($settings['egais_url'], $request);
+        return (new EgaisHelper())->getOneDocument($settings['egais_url'], $request);
     }
 }

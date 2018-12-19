@@ -67,6 +67,22 @@ class VetisWaybillSearch extends MercVsd
         $arWhereAndCount = $this->generateWhereStatementAndCount($params, $strOrgIds, $queryParams);
         $mercPconst = $arWhereAndCount['merc_pconst'] ?? 'a.recipient_guid, a.sender_guid';
 
+        $vsdDirection = 'case when a.recipient_guid in (\'' . $enterpriseGuides . '\') and a.sender_guid not in (\'' . $enterpriseGuides . '\') then \'incoming\'
+                     else \'outgoing\'
+                end vsd_direction';
+
+        if (isset($params['type'])) {
+            if ($params['type'] == 'INCOMING') {
+                $vsdDirection = 'case when a.recipient_guid in (\'' . $enterpriseGuides . '\') then \'incoming\'
+                     else \'outgoing\'
+                end vsd_direction';
+            } elseif ($params['type'] == 'OUTGOING') {
+                $vsdDirection = 'case when a.sender_guid in (\'' . $enterpriseGuides . '\') then \'outgoing\'
+                     else \'incoming\'
+                end vsd_direction';
+            }
+        }
+
         $sql = 'SELECT * FROM (
                 SELECT 
                      @page := case 
@@ -103,9 +119,7 @@ class VetisWaybillSearch extends MercVsd
                 o.total_price,
                 c.id oc_id,
                 vendor.name vendor_name,
-                case when a.recipient_guid in (\'' . $enterpriseGuides . '\') and a.sender_guid not in (\'' . $enterpriseGuides . '\') then \'incoming\'
-                     else \'outgoing\'
-                end vsd_direction,
+                ' . $vsdDirection . ',
                 case when c.id is not null then 
                   (
                   select max(date_doc) 

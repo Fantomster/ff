@@ -194,11 +194,13 @@ class VetisWaybill extends WebApi
      */
     public function getSenderOrProductFilter($request, $filterName)
     {
-        if (isset($request['acquirer_id']) && !empty($request['acquirer_id'])) {
-            $enterpriseGuides = IntegrationSettingValue::getSettingsByServiceId(Registry::MERC_SERVICE_ID, $request['acquirer_id'], ['enterprise_guid']);
+        if (isset($request['search']['acquirer_id']) && !empty($request['search']['acquirer_id'])) {
+            $businesses['result'] = array_fill_keys((!is_array($request['search']['acquirer_id'])) ? [$request['search']['acquirer_id']] : $request['search']['acquirer_id'], "");
+            $enterpriseGuides = $this->helper->getEnterpriseGuids($businesses);
         } else {
             $enterpriseGuides = $this->helper->getEnterpriseGuids();
         }
+
         $query = MercVsd::find()->select($filterName)->distinct();
         if (isset($request['search'][$filterName]) && !empty($request['search'][$filterName])) {
             $query->andWhere(['like', $filterName, $request['search'][$filterName]]);

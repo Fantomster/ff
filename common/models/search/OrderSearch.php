@@ -85,7 +85,7 @@ class OrderSearch extends Order
 
         if (isset($params['OrderSearch']['id']) && (int)$params['OrderSearch']['id'] > 0) {
             $query = Order::find()->where(['id' => (int)$params['OrderSearch']['id']])
-                ->orWhere('id in (SELECT order_id FROM fkeeper.order_content where edi_number = :edi_number)', [':edi_number' => $params['OrderSearch']['id']])
+                ->orWhere('id in (SELECT order_id FROM order_content where edi_number = :edi_number)', [':edi_number' => $params['OrderSearch']['id']])
                 ->andWhere(['client_id' => User::findOne(Yii::$app->user->id)->organization_id])->limit(1);
             return new ActiveDataProvider([
                 'query' => $query

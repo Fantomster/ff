@@ -122,6 +122,7 @@ class UserWebApi extends \api_web\components\WebApi
             $userToken = UserToken::generate($user->id, UserToken::TYPE_EMAIL_ACTIVATE);
             Notice::init('User')->sendSmsCodeToActivate($userToken->getAttribute('pin'), $profile->phone);
             $transaction->commit();
+
             return $user->id;
         } catch (ValidationException $e) {
             $transaction->rollBack();
@@ -135,9 +136,9 @@ class UserWebApi extends \api_web\components\WebApi
     /**
      * Создание пользователя
      *
-     * @param array   $post
+     * @param array $post
      * @param integer $role_id
-     * @param null    $status
+     * @param null $status
      * @return User
      * @throws BadRequestHttpException
      * @throws ValidationException
@@ -158,6 +159,7 @@ class UserWebApi extends \api_web\components\WebApi
         }
         $user->setRegisterAttributes($role_id, $status);
         $user->save();
+
         return $user;
     }
 
@@ -186,6 +188,7 @@ class UserWebApi extends \api_web\components\WebApi
             throw new ValidationException($profile->getFirstErrors());
         }
         $profile->setUser($user->id)->save();
+
         return $profile;
     }
 
@@ -271,6 +274,7 @@ class UserWebApi extends \api_web\components\WebApi
             Notice::init('User')->sendEmailWelcome($user);
             $userToken->delete();
             $transaction->commit();
+
             return $user->getJWTToken();
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -327,6 +331,7 @@ class UserWebApi extends \api_web\components\WebApi
             }
 
             $transaction->commit();
+
             return true;
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -359,6 +364,7 @@ class UserWebApi extends \api_web\components\WebApi
         $result = array_map(function ($item) use ($licenses) {
             $item['license_is_active'] = !empty($licenses[$item['id']]);
             $item['license'] = isset($licenses[$item['id']]) ? $licenses[$item['id']] : null;
+
             return $item;
         }, $result);
 
@@ -390,15 +396,25 @@ class UserWebApi extends \api_web\components\WebApi
         if (isset($post['search']['status'])) {
             switch ($post['search']['status']) {
                 case 1:
-                    $addWhere = ['invite' => 1, 'u.status' => 1];
+                    $addWhere = [
+                        'u.invite' => 1,
+                        'u.status' => 1
+                    ];
+                    $dataProvider->query->andFilterWhere(['<>', 'u.cat_id', 0]);
                     break;
                 case 2:
-                    $addWhere = ['invite' => 1, 'u.status' => 0];
+                    $addWhere = [
+                        'u.invite' => 1,
+                        'u.status' => 1,
+                        'u.cat_id' => 0
+                    ];
                     break;
                 case 3:
-                    $addWhere = ['or',
-                        ['invite' => 0, 'u.status' => 1],
-                        ['invite' => 0, 'u.status' => 0]
+                    $addWhere = [
+                        'or',
+                        ['u.invite' => 0, 'u.status' => 1],
+                        ['u.invite' => 1, 'u.status' => 0],
+                        ['u.invite' => 0, 'u.status' => 0],
                     ];
                     break;
             }
@@ -427,12 +443,11 @@ class UserWebApi extends \api_web\components\WebApi
                     }
                 }
             } else {
-                $dataProvider->query->andFilterWhere(
-                    ['or',
-                        ['u.country' => $post['search']['location']],
-                        ['u.locality' => $post['search']['location']]
-                    ]
-                );
+                $dataProvider->query->andFilterWhere([
+                    'or',
+                    ['u.country' => $post['search']['location']],
+                    ['u.locality' => $post['search']['location']]
+                ]);
             }
         }
 
@@ -469,7 +484,7 @@ class UserWebApi extends \api_web\components\WebApi
                         $sort = 'DESC';
                         break;
                 }
-                $field = "invite {$sort}, u.status {$sort}";
+                $field = "u.invite {$sort}, u.status {$sort}, u.cat_id {$sort}";
             }
             $dataProvider->query->orderBy($field);
         }
@@ -582,6 +597,7 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('You are not working with this supplier.');
             }
             $transaction->commit();
+
             return ['result' => true];
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -624,6 +640,7 @@ class UserWebApi extends \api_web\components\WebApi
             }
 
             $tr->commit();
+
             return ['result' => true];
         } catch (\Exception $e) {
             $tr->rollBack();
@@ -708,6 +725,7 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('bad_sms_code');
             }
         }
+
         return ['result' => true];
     }
 
@@ -786,6 +804,7 @@ class UserWebApi extends \api_web\components\WebApi
             $n = rand(0, count($alphabet) - 1);
             $pass .= $alphabet[$n];
         }
+
         return $pass . rand(111, 999);
     }
 
@@ -848,6 +867,7 @@ class UserWebApi extends \api_web\components\WebApi
         $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($res, 'id'));
         $res = array_map(function ($item) use ($licenses) {
             $item['license_is_active'] = isset($licenses[$item['id']]);
+
             return $item;
         }, $res);
 

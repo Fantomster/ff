@@ -42,6 +42,7 @@ class EdiController extends WebApiController
      *                  property="request",
      *                  default={
      *                      "search": {
+     *                         "id" : "1",
      *                         "vendor": {
      *                             124,
      *                             143

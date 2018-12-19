@@ -290,9 +290,9 @@ class VetisHelper
      * @return array
      * @throws \Exception
      */
-    public function getEnterpriseGuids()
+    public function getEnterpriseGuids($orgIds = null)
     {
-        $orgIds = (new UserWebApi())->getUserOrganizationBusinessList('id');
+        $orgIds = $orgIds ?? (new UserWebApi())->getUserOrganizationBusinessList('id');
 
         return (new Query())->select('value')->distinct()
             ->from(IntegrationSettingValue::tableName() . ' isv')

@@ -3,7 +3,9 @@
 namespace api_web\components;
 
 use api_web\exceptions\ValidationException;
+use common\models\RelationUserOrganization;
 use yii\base\Model;
+use yii\web\BadRequestHttpException;
 
 class ValidateRequest extends Model
 {
@@ -43,7 +45,7 @@ class ValidateRequest extends Model
     }
 
     /**
-     * @param $attribute
+     * @param       $attribute
      * @param Model $model
      * @param array $item
      */
@@ -52,6 +54,21 @@ class ValidateRequest extends Model
         $model->setAttributes($item);
         if (!$model->validate()) {
             $this->addError($attribute, $model->getErrors());
+        }
+    }
+
+    /**
+     * @param $businesses
+     * @param $user_id
+     */
+    public static function avaliableBusinessList($businesses, $user_id)
+    {
+        $count = RelationUserOrganization::find()
+            ->where(['user_id' => $user_id])
+            ->andWhere(['in', 'organization_id', $businesses])
+            ->count();
+        if ($count != count($businesses)) {
+            throw new BadRequestHttpException("business unavailable to current user");
         }
     }
 }

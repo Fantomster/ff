@@ -253,7 +253,7 @@ class EDIClass extends Component
             $order->total_price = $summ;
             $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? $simpleXMLElement->NUMBER ?? '';
             $order->edi_ordersp = $this->ediDocumentType;
-            $order->service_id = 6;
+            $order->service_id = Registry::EDI_SERVICE_ID;
             $order->edi_ordersp = $this->fileName ?? $order->id;
             $order->edi_doc_date = $simpleXMLElement->DELIVERYNOTEDATE ?? null;
             $deliveryDate = isset($simpleXMLElement->DELIVERYDATE) ? \Yii::$app->formatter->asDate($simpleXMLElement->DELIVERYDATE, 'yyyy.MM.dd HH:mm:ss') : null;
@@ -393,7 +393,7 @@ class EDIClass extends Component
             ->all();
         foreach ($catalog_base_goods as $base_good) {
             if (!in_array($base_good['barcode'], $goodsArray) && !$isFollowActionRule) {
-                \Yii::$app->db->createCommand()->delete(CatalogGoods::tableName(), ['base_goods_id' => $base_good['id'], 'cat_id' => $relationCatalogID])->execute();
+                \Yii::$app->db->createCommand()->delete(CatalogGoods::tableName(), ['base_goods_id' => $base_good['id'], 'cat_id' => $relationCatalogID, 'service_id' => Registry::EDI_SERVICE_ID])->execute();
             }
         }
 
@@ -420,7 +420,7 @@ class EDIClass extends Component
                 if (!$res2) continue;
             } else {
                 $catalogGood = CatalogGoods::findOne(['cat_id' => $relationCatalogID, 'base_goods_id' => $catalogBaseGood->id]);
-                if ($good['action'] == Registry::EDI_PRICAT_ACTION_TYPE_DELETE && $isFollowActionRule && $catalogGood) {
+                if ($good['action'] == Registry::EDI_PRICAT_ACTION_TYPE_DELETE && $isFollowActionRule && $catalogGood && $catalogGood->service_id == Registry::EDI_SERVICE_ID) {
                     $catalogGood->delete();
                     continue;
                 }
@@ -432,6 +432,7 @@ class EDIClass extends Component
                         if (!$res2) continue;
                     } else {
                         $catalogGood->price = $good['price'];
+                        $catalogGood->service_id = Registry::EDI_SERVICE_ID;
                         $catalogGood->save();
                     }
                     $catalogBaseGood->units = $good['units'];
@@ -457,6 +458,7 @@ class EDIClass extends Component
         $catalogGood->base_goods_id = $catalogBaseGoodID;
         $catalogGood->price = $price;
         $catalogGood->vat = $vat;
+        $catalogGood->service_id = Registry::EDI_SERVICE_ID;
         $res = $catalogGood->save();
         if ($res) {
             return true;

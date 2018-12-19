@@ -208,6 +208,7 @@ class WebApiController extends \yii\rest\Controller
     private function checkOptionsHeader()
     {
         if (\Yii::$app->request->isOptions) {
+            \Yii::$app->response->headers->add('Access-Control-Max-Age', 86400);
             \Yii::$app->response->statusCode = 200;
             \Yii::$app->response->content = ' ';
             \Yii::$app->response->send();

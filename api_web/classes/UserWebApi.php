@@ -458,7 +458,7 @@ class UserWebApi extends \api_web\components\WebApi
                 $sort = 'DESC';
             }
             if ($field == 'name') {
-                $field = 'vendor_name ' . $sort;
+                $field = 'u.vendor_name ' . $sort;
             }
             if ($field == 'status') {
                 switch ($sort) {
@@ -469,10 +469,11 @@ class UserWebApi extends \api_web\components\WebApi
                         $sort = 'DESC';
                         break;
                 }
-                $field = "invite {$sort}, `status` {$sort}";
+                $field = "invite {$sort}, u.status {$sort}";
             }
             $dataProvider->query->orderBy($field);
         }
+
         //Данные для ответа
         foreach ($dataProvider->models as $model) {
             $return['vendors'][] = $this->prepareVendor($model);

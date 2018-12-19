@@ -112,8 +112,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
 
     public static function GetRelationCatalogs()
     {
-        $catalog = RelationSuppRest::
-        find()
+        $catalog = RelationSuppRest::find()
             ->select(['id', 'cat_id', 'rest_org_id', 'invite'])
             ->where(['supp_org_id' => User::getOrganizationUser(Yii::$app->user->id)])
             ->andWhere(['not', ['cat_id' => null]])

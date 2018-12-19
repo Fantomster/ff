@@ -6,6 +6,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVsd;
 use api_web\components\Registry;
+use api_web\components\ValidateRequest;
 use api_web\components\WebApi;
 use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
@@ -196,6 +197,7 @@ class VetisWaybill extends WebApi
     {
         if (isset($request['search']['acquirer_id']) && !empty($request['search']['acquirer_id'])) {
             $businesses['result'] = array_fill_keys((!is_array($request['search']['acquirer_id'])) ? [$request['search']['acquirer_id']] : $request['search']['acquirer_id'], "");
+            ValidateRequest::avaliableBusinessList(array_keys($businesses['result']), $this->user->id);
             $enterpriseGuides = $this->helper->getEnterpriseGuids($businesses);
         } else {
             $enterpriseGuides = $this->helper->getEnterpriseGuids();

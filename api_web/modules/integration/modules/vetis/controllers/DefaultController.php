@@ -200,7 +200,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                  "search": {"sender_name":"часть имени", "acquirer_id": 7}
+     *                  "search": {"sender_name":"часть имени", "acquirer_id": [7, 8]}
      *                  }
      *              )
      *         )

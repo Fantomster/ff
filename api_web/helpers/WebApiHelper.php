@@ -246,4 +246,19 @@ class WebApiHelper
     {
         return isset($var[$key]) && !empty($var[$key]) ? true : false;
     }
+
+    /**
+     * Генератор, для ускорения работы перебора массивов/объектов
+     *
+     * @param $items
+     * @return \Generator
+     */
+    public static function generator($items)
+    {
+        if (is_iterable($items)) {
+            foreach ($items as $item) {
+                yield $item;
+            }
+        }
+    }
 }

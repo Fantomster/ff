@@ -3,6 +3,7 @@
 namespace api\common\models\iiko;
 
 use api\common\models\AllMaps;
+use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\classes\DocumentWebApi;
 use common\helpers\DBNameHelper;
 use common\models\Order;
@@ -222,9 +223,17 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         }
 
         $xml->addChild('comment', $model->note);
-        $datetime = new \DateTime($model->doc_date);
-        $xml->addChild('dateIncoming', $datetime->format('d.m.Y'));
-        $xml->addChild('incomingDate', $datetime->format('d.m.Y'));
+
+        $arr = explode(' ', $this->doc_date);
+        if (isset($arr[1])) {
+            $date = $arr[0] . " " . date('H:i:s');
+        } else {
+            $date = $this->doc_date;
+        }
+        $doc_date = \Yii::$app->formatter->asDatetime($date, WebApiHelper::$formatDate);
+        $xml->addChild('dateIncoming', $doc_date);
+        $xml->addChild('incomingDate', $doc_date);
+
         $xml->addChild('defaultStore', $model->store->uuid);
         $xml->addChild('supplier', $model->agent->uuid);
         $xml->addChild('status', 'NEW');

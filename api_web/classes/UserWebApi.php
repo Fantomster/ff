@@ -136,9 +136,9 @@ class UserWebApi extends \api_web\components\WebApi
     /**
      * Создание пользователя
      *
-     * @param array $post
+     * @param array   $post
      * @param integer $role_id
-     * @param null $status
+     * @param null    $status
      * @return User
      * @throws BadRequestHttpException
      * @throws ValidationException
@@ -451,10 +451,8 @@ class UserWebApi extends \api_web\components\WebApi
             }
         }
 
-        //$dataProvider->query->andWhere('1=0');
         //Ответ
         $return = [
-            'headers'    => [],
             'vendors'    => [],
             'pagination' => [
                 'page'       => $page,
@@ -490,8 +488,12 @@ class UserWebApi extends \api_web\components\WebApi
         }
 
         //Данные для ответа
-        foreach ($dataProvider->models as $model) {
-            $return['vendors'][] = $this->prepareVendor($model);
+        if (!empty($dataProvider->models)) {
+            $r = new \SplObjectStorage();
+            foreach ($dataProvider->models as $model) {
+                $r->attach((object)$this->prepareVendor($model));
+            }
+            $return['vendors'] = $r;
         }
 
         return $return;

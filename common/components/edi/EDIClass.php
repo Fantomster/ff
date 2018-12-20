@@ -124,7 +124,7 @@ class EDIClass extends Component
                 $arr[$contID]['DELIVEREDQUANTITY'] = (isset($position->DELIVEREDQUANTITY)) ? (float)$position->DELIVEREDQUANTITY : 0.00;
                 $arr[$contID]['PRICE'] = (float)$position->PRICE[0] ?? (float)$position->PRICE ?? 0;
                 $arr[$contID]['PRICEWITHVAT'] = (isset($position->PRICEWITHVAT)) ? (float)$position->PRICEWITHVAT : 0.00;;
-                $arr[$contID]['TAXRATE'] = (isset($position->VAT)) ? (float)$position->VAT : 0.00;
+                $arr[$contID]['TAXRATE'] = (isset($position->TAXRATE)) ? (int)$position->TAXRATE : 0;
                 $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
                 $arr[$contID]['WAYBILLNUMBER'] = isset($position->WAYBILLNUMBER) ? $position->WAYBILLNUMBER : null;
                 $arr[$contID]['WAYBILLDATE'] = isset($position->WAYBILLDATE) ? $position->WAYBILLDATE : null;
@@ -132,6 +132,8 @@ class EDIClass extends Component
                 $arr[$contID]['DELIVERYNOTEDATE'] = isset($position->DELIVERYNOTEDATE) ? $position->DELIVERYNOTEDATE : null;
                 $arr[$contID]['GTIN'] = isset($position->GTIN) ? $position->GTIN : null;
                 $arr[$contID]['UUID'] = isset($position->UUID) ? $position->UUID : null;
+                $arr[$contID]['AMOUNT'] = isset($position->AMOUNT) ? $position->AMOUNT: null;
+                $arr[$contID]['AMOUNTWITHVAT'] = isset($position->AMOUNTWITHVAT) ? $position->AMOUNTWITHVAT : null;
                 $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
                 $totalPrice += $arr[$contID]['PRICE'];
             }
@@ -176,8 +178,13 @@ class EDIClass extends Component
                 $orderContent->price = $newPrice;
                 $orderContent->quantity = $newQuantity;
                 $orderContent->vat_product = $arr[$index]['TAXRATE'] ?? 0.00;
+                $orderContent->vat_product = isset($arr[$index]['TAXRATE']) ? (int)$arr[$index]['TAXRATE'] : 0;
+                $orderContent->into_quantity = isset($arr[$index]['DELIVEREDQUANTITY']) ? $arr[$index]['DELIVEREDQUANTITY'] : null;
+                $orderContent->into_price = $newPrice;
+                $orderContent->into_price_vat = isset($arr[$index]['PRICEWITHVAT']) ? $arr[$index]['PRICEWITHVAT'] : null;
+                $orderContent->into_price_sum = isset($arr[$index]['AMOUNT']) ? $arr[$index]['AMOUNT'] : null;
+                $orderContent->into_price_sum_vat = isset($arr[$index]['AMOUNTWITHVAT']) ? $arr[$index]['AMOUNTWITHVAT'] : null;
                 $orderContent->edi_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? null;
-                $orderContent->edi_shipment_quantity = $arr[$index]['DELIVEREDQUANTITY'];
                 $orderContent->merc_uuid = $arr[$index]['UUID'] ?? null;
                 if ($documentType == 1) {
                     $orderContent->edi_recadv = $this->fileName;

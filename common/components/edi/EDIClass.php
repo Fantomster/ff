@@ -116,7 +116,7 @@ class EDIClass extends Component
                 if (!isset($position->PRODUCT)) continue;
                 $contID = (int)$position->PRODUCTIDBUYER;
                 $positionsArray[] = (int)$contID;
-                $arr[$contID] = $this->fillArrayData($position, $isDesadv);
+                $arr[$contID] = $this->fillArrayData($position);
                 if ($isDesadv) {
                     $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
                 } else {

@@ -1083,4 +1083,3 @@ class Dicts
         return $getResearchMethodChangesListResponse;
 
     }}
-?>

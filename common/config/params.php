@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'app_version' => 1,
     'google-api'              => [
         'key-id'   => 'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
         'language' => 'ru-RU'
@@ -21,6 +22,7 @@ return [
     'default_franchisee_id'   => 1,
     //static urls
     'shortHome'               => 'mixcart.ru',
+    'appUrl'                  => 'https://app.mixcart.ru',
     'staticUrl'               => [
         'ru' => [
             'market'    => 'https://market.mixcart.ru/',

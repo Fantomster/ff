@@ -153,7 +153,8 @@ class RelationSuppRest extends \yii\db\ActiveRecord
                 'rest_org_id',
                 'supp_org_id',
                 'cat_id',
-                'invite'
+                'invite',
+                'status',
             ]
         ]);
 

@@ -13,26 +13,36 @@ use kartik\editable\Editable;
 use api\common\models\RkAccess;
 use api\common\models\RkWaybill;
 
-
 ?>
 
 
 <style>
-.bg-default{background:#555} p{margin: 0;} #map{width:100%;height:200px;}
+    .bg-default {
+        background: #555
+    }
+
+    p {
+        margin: 0;
+    }
+
+    #map {
+        width: 100%;
+        height: 200px;
+    }
 </style>
 <section class="content-header">
     <h1>
-        <i class="fa fa-upload"></i> Интеграция с R-keeper SH (White Server) 
+        <i class="fa fa-upload"></i> Интеграция с R-keeper SH (White Server)
     </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'links' => [
+        'links'   => [
             [
                 'label' => 'Интеграция',
-                'url' => ['/vendorintegr'],
+                'url'   => ['/clientintegr'],
             ],
             'Интеграция с R-keeper WS',
         ],
@@ -41,25 +51,26 @@ use api\common\models\RkWaybill;
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
-    Редактирование настройки: <?php echo "<strong>" . \api\common\models\RkDicconst::findOne(['id' => $model->const_id])->comment ." </strong>"; ?>
+    Редактирование
+    настройки: <?php echo "<strong>" . \api\common\models\RkDicconst::findOne(['id' => $model->const_id])->comment . " </strong>"; ?>
 </section>
 <section class="content">
     <div class="catalog-index">
 
-    	<div class="box box-info">            
+        <div class="box box-info">
             <div class="box-header with-border">
-                            <div class="panel-body">
-                                <div class="box-body table-responsive no-padding" style="overflow-x:visible;">
-                                    
-    
-    <?php echo $this->render('_form', [
-        'model' => $model,
-    ]) ?>
-                                </div>
-                            </div>    
+                <div class="panel-body">
+                    <div class="box-body table-responsive no-padding" style="overflow-x:visible;">
+
+
+                        <?php echo $this->render('_form', [
+                            'model' => $model,
+                        ]) ?>
+                    </div>
                 </div>
-            </div>        
-    </div>            
+            </div>
+        </div>
+    </div>
 </section>
 
 

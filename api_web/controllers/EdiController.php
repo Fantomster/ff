@@ -2,24 +2,29 @@
 
 /**
  * Class EdiController
- * @package api\modules\v1\modules\web\controllers
+ *
+ * @package   api\modules\v1\modules\web\controllers
  * @createdBy Basil A Konakov
  * @createdAt 2018-09-11
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
+ * @author    Mixcart
+ * @module    WEB-API
+ * @version   2.0
  */
 
 namespace api_web\controllers;
 
+use api_web\components\Registry;
 use api_web\components\WebApiController;
 
 /**
  * Class EdiController
+ *
  * @package api_web\controllers
  */
 class EdiController extends WebApiController
 {
+
+    public $license_service_id = [Registry::VENDOR_DOC_MAIL_SERVICE_ID, Registry::EDI_SERVICE_ID];
 
     /**
      * @SWG\Post(path="/edi/order-history",
@@ -217,7 +222,8 @@ class EdiController extends WebApiController
      *                          "email": "neo@neo.com",
      *                          "site": "mixcart.ru",
      *                          "address": "ул. Побратимов, 7, Люберцы, Московская обл., Россия, 140013",
-     *                          "image": "https://fkeeper.s3.amazonaws.com/org-picture/53beaf2b075e33f1fcffeb3505ef1765.jpg",
+     *                          "image":
+     *                          "https://fkeeper.s3.amazonaws.com/org-picture/53beaf2b075e33f1fcffeb3505ef1765.jpg",
      *                          "type_id": 1,
      *                          "type": "Ресторан",
      *                          "rating": 0,
@@ -239,7 +245,8 @@ class EdiController extends WebApiController
      *                          "email": "kosm@test.ru",
      *                          "site": "www.mixcart.ru",
      *                          "address": "ул. Побратимов, 7, Люберцы, Московская обл., Россия, 140013",
-     *                          "image": "https://fkeeper.s3.amazonaws.com/org-picture/3ae0a1b32b4a81eb7a1ac12e4b220205.jpg",
+     *                          "image":
+     *                          "https://fkeeper.s3.amazonaws.com/org-picture/3ae0a1b32b4a81eb7a1ac12e4b220205.jpg",
      *                          "type_id": 2,
      *                          "type": "Поставщик",
      *                          "rating": 0,
@@ -474,7 +481,6 @@ class EdiController extends WebApiController
         $this->response = $this->container->get('EdiWebApi')->getHistoryCount($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/edi/order-update",
      *     tags={"edi"},
@@ -540,7 +546,8 @@ class EdiController extends WebApiController
      *                      "ed": "",
      *                      "currency": "RUB",
      *                      "currency_id": 1,
-     *                      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
+     *                      "image":
+     *                      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
      *                  }
      *              },
      *              "client": {
@@ -605,7 +612,6 @@ class EdiController extends WebApiController
         $this->response = $this->container->get('OrderWebApi')->update($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/edi/order-repeat",
      *     tags={"edi"},
@@ -644,7 +650,6 @@ class EdiController extends WebApiController
     {
         $this->response = $this->container->get('OrderWebApi')->repeat($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/edi/order-print-pdf",
@@ -694,7 +699,6 @@ class EdiController extends WebApiController
             exit($result);
         }
     }
-
 
     /**
      * @SWG\Post(path="/edi/order-create-guide",
@@ -832,7 +836,6 @@ class EdiController extends WebApiController
         }
         $this->response = $result;
     }
-
 
     /**
      * @SWG\Post(path="/edi/save-to-pdf",

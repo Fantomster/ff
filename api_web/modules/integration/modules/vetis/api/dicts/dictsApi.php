@@ -5,8 +5,6 @@ namespace api_web\modules\integration\modules\vetis\api\dicts;
 use common\models\vetis\VetisPurpose;
 use common\models\vetis\VetisUnit;
 use api_web\modules\integration\modules\vetis\api\baseApi;
-use Yii;
-use yii\db\Exception;
 
 /**
  * Class dictsApi
@@ -120,7 +118,7 @@ class dictsApi extends baseApi
         }
 
         if (!array_key_exists('listOptions', $options)) {
-            throw new \Exception('startDate field is not specified');
+            throw new \Exception(\Yii::t('api_web', 'startDate field is not specified', ['ru'=>'Начальная дата неуказана']));
         }
 
         $request->updateDateInterval = new DateInterval();
@@ -143,7 +141,7 @@ class dictsApi extends baseApi
         $request->listOptions = $options['listOptions'];
 
         if (!array_key_exists('listOptions', $options)) {
-            throw new \Exception('startDate field is not specified');
+            throw new \Exception(\Yii::t('api_web', 'startDate field is not specified', ['ru'=>'Начальная дата неуказана']));
         }
 
         $request->updateDateInterval = new DateInterval();

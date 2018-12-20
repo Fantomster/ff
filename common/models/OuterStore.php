@@ -27,6 +27,7 @@ use common\components\NestedSetsQuery;
  * @property int $selected
  * @property int $collapsed
  * @method makeRoot()
+ * @method isLeaf()
  * @method prependTo($rootNode)
  */
 class OuterStore extends ActiveRecord

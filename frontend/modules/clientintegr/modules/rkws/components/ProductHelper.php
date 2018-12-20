@@ -35,10 +35,10 @@ class ProductHelper extends AuthHelper
         $rguid = UUID::uuid4();
 
         $defGoodGroup = RkDicconst::findOne(['denom' => 'defGoodGroup'])->getPconstValue();
-        $dGroups      = '';
-        $currGroup    = 0;
-        $groupArray   = $defGoodGroup ? explode(',', $defGoodGroup) : [0];
-        $groupCount   = sizeof($groupArray);
+        $dGroups = '';
+        $currGroup = 0;
+        $groupArray = $defGoodGroup ? explode(',', $defGoodGroup) : [0];
+        $groupCount = sizeof($groupArray);
 
         foreach ($groupArray as $group) { // Start cycle for groups
             $currGroup++;
@@ -53,31 +53,28 @@ class ProductHelper extends AuthHelper
             $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_get_goods" tasktype="any_call" guid="' . $rguid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/product' . '" timeout="3600">
     <PARAM name="object_id" val="' . $this->restr->code . '" />' .
-                    $dGroups .
-                    '</RQ>';
-
+                $dGroups .
+                '</RQ>';
 
             $res = ApiHelper::sendCurl($xml, $this->restr);
 
             $this->log(print_r($xml, true));
             $this->log(print_r($res, true));
 
-
             $tmodel = new RkTasks();
 
-            $tmodel->tasktype_id  = 23;
-            $tmodel->acc          = $this->org;
-            $tmodel->fid          = 1;
-            $tmodel->guid         = $res['respcode']['taskguid'];
-            $tmodel->fcode        = $res['respcode']['code'];
-            $tmodel->version      = $res['respcode']['version'];
-            $tmodel->isactive     = 1;
-            $tmodel->created_at   = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+            $tmodel->tasktype_id = 22;
+            $tmodel->acc = $this->org;
+            $tmodel->fid = 1;
+            $tmodel->guid = $res['respcode']['taskguid'];
+            $tmodel->fcode = $res['respcode']['code'];
+            $tmodel->version = $res['respcode']['version'];
+            $tmodel->isactive = 1;
+            $tmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $tmodel->intstatus_id = 1;
-            $tmodel->total_parts  = $groupCount;
+            $tmodel->total_parts = $groupCount;
             $tmodel->current_part = $currGroup;
-            $tmodel->req_uid      = $rguid;
-
+            $tmodel->req_uid = $rguid;
 
             if (!$tmodel->save()) {
                 echo "Ошибка валидации<br>";
@@ -94,9 +91,9 @@ class ProductHelper extends AuthHelper
         } else {
 
             if ($tmodel->total_parts === $tmodel->current_part) {
-                $rmodel->updated_at   = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+                $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                 $rmodel->dicstatus_id = 2;
-                $rmodel->obj_count    = 0;
+                $rmodel->obj_count = 0;
 
                 if (!$rmodel->save()) {
                     $er3 = $rmodel->getErrors();
@@ -127,7 +124,7 @@ class ProductHelper extends AuthHelper
         $myXML = simplexml_load_string($getr);
 
         $cmdguid = $myXML['cmdguid'] ? $myXML['cmdguid'] : $myXML['taskguid']; // Try to find guid in cmdguid or taskguid
-        $posid   = $myXML['posid'] ? $myXML['posid'] : '-нет POSID-';
+        $posid = $myXML['posid'] ? $myXML['posid'] : '-нет POSID-';
 
         $this->log('=========================================');
         $this->log(date("Y-m-d H:i:s") . ' : Product callback received ');
@@ -146,7 +143,7 @@ class ProductHelper extends AuthHelper
             exit;
         }
 
-        $acc              = $tmodel->acc;
+        $acc = $tmodel->acc;
         $tmodel->isactive = 0;
         $tmodel->setCallbackStart();
 
@@ -164,9 +161,9 @@ class ProductHelper extends AuthHelper
 
         if (isset($array['code'])) {  // We got external error
             $tmodel->intstatus_id = RkTasks::INTSTATUS_EXTERROR;
-            $tmodel->wsstatus_id  = $array['code'];
-            $tmodel->retry        = $tmodel->retry + 1;
-            $tmodel->rcount       = 0;
+            $tmodel->wsstatus_id = $array['code'];
+            $tmodel->retry = $tmodel->retry + 1;
+            $tmodel->rcount = 0;
 
             if (!$tmodel->setCallbackEnd()) {
                 $this->log('ERROR:: Task with external ERROR with guid ' . $cmdguid . 'cannot be saved!!');
@@ -187,7 +184,7 @@ class ProductHelper extends AuthHelper
 
             foreach ($item->attributes() as $c => $d) {
                 if ($c == 'rid')
-                    $prid  = strval($d[0]);
+                    $prid = strval($d[0]);
                 if ($c == 'name')
                     $pname = strval($d[0]);
             }
@@ -198,21 +195,21 @@ class ProductHelper extends AuthHelper
 
                     foreach ($unit->attributes() as $c => $d) {
                         if ($c == 'rid')
-                            $urid  = strval($d[0]);
+                            $urid = strval($d[0]);
                         if ($c == 'name')
                             $uname = strval($d[0]);
                     }
 
                     $gcount++;
 
-                    $array[$gcount]['group_rid']  = 1;
+                    $array[$gcount]['group_rid'] = 1;
                     $array[$gcount]['group_name'] = 'пока нет';
                     // $array[$gcount]['group_parent'] = $grparent;
 
-                    $array[$gcount]['product_rid']  = $prid;
+                    $array[$gcount]['product_rid'] = $prid;
                     $array[$gcount]['product_name'] = $pname;
-                    $array[$gcount]['unit_rid']     = $urid;
-                    $array[$gcount]['unit_name']    = $uname;
+                    $array[$gcount]['unit_rid'] = $urid;
+                    $array[$gcount]['unit_name'] = $uname;
                 }
             }
         }
@@ -282,20 +279,20 @@ class ProductHelper extends AuthHelper
         foreach ($array as $a) {
 
             $checks = RkProduct::find()->andWhere('acc = :acc', [':acc' => $acc])
-                    ->andWhere('rid = :rid', [':rid' => $a['product_rid']])
-                    ->andWhere('unit_rid = :unit_rid', [':unit_rid' => $a['unit_rid']])
-                    ->one();
+                ->andWhere('rid = :rid', [':rid' => $a['product_rid']])
+                ->andWhere('unit_rid = :unit_rid', [':unit_rid' => $a['unit_rid']])
+                ->one();
 
             if ($checks == null) {
 
                 $amodel = new RkProduct();
 
-                $amodel->acc        = $acc;
-                $amodel->rid        = $a['product_rid'];
-                $amodel->denom      = $a['product_name'];
-                $amodel->unit_rid   = $a['unit_rid'];
-                $amodel->unitname   = $a['unit_name'];
-                $amodel->group_rid  = $a['group_rid'];
+                $amodel->acc = $acc;
+                $amodel->rid = $a['product_rid'];
+                $amodel->denom = $a['product_name'];
+                $amodel->unit_rid = $a['unit_rid'];
+                $amodel->unitname = $a['unit_name'];
+                $amodel->group_rid = $a['group_rid'];
                 $amodel->group_name = $a['group_name'];
 
                 //    $amodel->agent_type = $a['type'];
@@ -313,9 +310,9 @@ class ProductHelper extends AuthHelper
 
         $this->log('SUCCESS:: Products saved: ' . $scount);
 
-        $tmodel->rcount       = $icount;
+        $tmodel->rcount = $icount;
         $tmodel->intstatus_id = RkTasks::INTSTATUS_DICOK;
-        $tmodel->fcode        = 1;
+        $tmodel->fcode = 1;
 
         if (!$tmodel->save()) {
             $this->log('ERROR:: Task status THE END cannot be saved!!');
@@ -326,30 +323,30 @@ class ProductHelper extends AuthHelper
 
         // Обновление словаря RkDic
 
-
         if ($tmodel->isAllPartsReady($tmodel->req_uid)) { // If all parts are processed
             $this->log('All the parts are received...');
-
-            $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $acc])->andWhere('dictype_id = 3')->one();
-
-            if (!$rmodel) {
-                $this->log('ERROR:: Dictionary to update products is not found.');
-                exit;
-            }
-
-            $fcount = RkProduct::find()->andWhere('acc= :org_id', [':org_id' => $acc])->count('*');
-
-            $rmodel->updated_at   = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-            $rmodel->dicstatus_id = 6;
-            $rmodel->obj_count    = isset($fcount) ? $fcount : 0;
-
-            if (!$rmodel->save()) {
-                $er3 = $rmodel->getErrors();
-                $this->log('ERROR:: Dictionary ' . $rmodel->id . 'cannot be saved - ' . $er3);
-                exit;
-            } else
-                $this->log('SUCCESS:: Dictionary ' . $rmodel->id . ' is successfully saved.');
         }
+
+        $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $acc])->andWhere('dictype_id = 3')->one();
+
+        if (!$rmodel) {
+            $this->log('ERROR:: Dictionary to update products is not found.');
+            exit;
+        }
+
+        $fcount = RkProduct::find()->andWhere('acc= :org_id', [':org_id' => $acc])->count('*');
+
+        $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        $rmodel->dicstatus_id = 6;
+        $rmodel->obj_count = isset($fcount) ? $fcount : 0;
+
+        if (!$rmodel->save()) {
+            $er3 = $rmodel->getErrors();
+            $this->log('ERROR:: Dictionary ' . $rmodel->id . 'cannot be saved - ' . $er3);
+            exit;
+        } else
+            $this->log('SUCCESS:: Dictionary ' . $rmodel->id . ' is successfully saved.');
+        //}
 
         $tmodel->intstatus_id = RkTasks::INTSTATUS_FULLOK;
 

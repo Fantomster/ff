@@ -148,7 +148,6 @@ class MercVSDList extends MercDictConsumer
                 $offset = $curr_offset;
                 $curr_offset += $curr_count;
                 $curr_offset += $add_curr_offset;
-                //sleep(60);
                 echo "total " . $total . PHP_EOL;
                 echo "curr_count " . $curr_count . PHP_EOL;
                 echo "curr_offset " . $curr_offset . PHP_EOL;

@@ -8,7 +8,7 @@ use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
 use yii\bootstrap\Modal;
 
-$this->title = Yii::t('message', 'frontend.views.order.guide_list', ['ru'=>"Список шаблонов"]);
+$this->title = Yii::t('message', 'frontend.views.order.guide_list', ['ru' => "Список шаблонов"]);
 
 yii\jui\JuiAsset::register($this);
 
@@ -25,16 +25,16 @@ $this->registerJs('
     $(document).on("click", ".delete-guide", function(e) {
         e.preventDefault();
         clicked = $(this);
-        title = "' . Yii::t('message', 'frontend.views.order.deleting_guide', ['ru'=>'Удаление шаблона']) . ' ";
-        text = "' . Yii::t('message', 'frontend.views.order.del_guide', ['ru'=>'Вы уверены, что хотите удалить шаблон?']) . ' ";
-        success = "' . Yii::t('message', 'frontend.views.order.guide_deleted', ['ru'=>'Шаблон удалён!']) . ' ";
+        title = "' . Yii::t('message', 'frontend.views.order.deleting_guide', ['ru' => 'Удаление шаблона']) . ' ";
+        text = "' . Yii::t('message', 'frontend.views.order.del_guide', ['ru' => 'Вы уверены, что хотите удалить шаблон?']) . ' ";
+        success = "' . Yii::t('message', 'frontend.views.order.guide_deleted', ['ru' => 'Шаблон удалён!']) . ' ";
         swal({
             title: title,
             text: text,
             type: "warning",
             showCancelButton: true,
-            confirmButtonText: "' . Yii::t('message', 'frontend.views.order.yep_delete', ['ru'=>'Да, удалить']) . ' ",
-            cancelButtonText: "' . Yii::t('message', 'frontend.views.order.cancel_two', ['ru'=>'Отмена']) . ' ",
+            confirmButtonText: "' . Yii::t('message', 'frontend.views.order.yep_delete', ['ru' => 'Да, удалить']) . ' ",
+            cancelButtonText: "' . Yii::t('message', 'frontend.views.order.cancel_two', ['ru' => 'Отмена']) . ' ",
             showLoaderOnConfirm: true,
             preConfirm: function () {
                 return new Promise(function (resolve, reject) {
@@ -62,13 +62,13 @@ $this->registerJs('
     $(document).on("click", ".new-guid", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        var title = "' . Yii::t('message', 'frontend.views.order.set_name_for_guide', ['ru'=>'Назовите ваш новый шаблон']) . ' ";
+        var title = "' . Yii::t('message', 'frontend.views.order.set_name_for_guide', ['ru' => 'Назовите ваш новый шаблон']) . ' ";
         swal({
             title: title,
             input: "text",
             showCancelButton: true,
-            cancelButtonText: "' . Yii::t('message', 'frontend.views.order.cancel_three', ['ru'=>'Отмена']) . ' ",
-            confirmButtonText: "' . Yii::t('message', 'frontend.views.order.accept', ['ru'=>'Принять']) . ' ",
+            cancelButtonText: "' . Yii::t('message', 'frontend.views.order.cancel_three', ['ru' => 'Отмена']) . ' ",
+            confirmButtonText: "' . Yii::t('message', 'frontend.views.order.accept', ['ru' => 'Принять']) . ' ",
             showLoaderOnConfirm: true,
             allowOutsideClick: false,
             showLoaderOnConfirm: true,
@@ -95,7 +95,7 @@ $this->registerJs('
             } else if (result.dismiss === "cancel") {
                 swal.close();
             } else {
-                swal({title: "' . Yii::t('error', 'frontend.views.order.error', ['ru'=>'Ошибка!']) . ' ", text: "' . Yii::t('message', 'frontend.views.order.try_again', ['ru'=>'Попробуйте еще раз']) . ' ", type: "error"});
+                swal({title: "' . Yii::t('error', 'frontend.views.order.error', ['ru' => 'Ошибка!']) . ' ", text: "' . Yii::t('message', 'frontend.views.order.try_again', ['ru' => 'Попробуйте еще раз']) . ' ", type: "error"});
             }
         });
     });
@@ -103,15 +103,15 @@ $this->registerJs('
     $(document).on("click", ".add-note", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        var title = "' . Yii::t('message', 'frontend.views.order.good_comment', ['ru'=>'Комментарий к товару']) . ' ";
+        var title = "' . Yii::t('message', 'frontend.views.order.good_comment', ['ru' => 'Комментарий к товару']) . ' ";
         fixBootstrapModal();
         fixBootstrapModal();
         swal({
             title: title,
             input: "textarea",
             showCancelButton: true,
-            cancelButtonText: "' . Yii::t('message', 'frontend.views.order.close', ['ru'=>'Закрыть']) . ' ",
-            confirmButtonText: "' . Yii::t('message', 'frontend.views.order.save', ['ru'=>'Сохранить']) . ' ",
+            cancelButtonText: "' . Yii::t('message', 'frontend.views.order.close', ['ru' => 'Закрыть']) . ' ",
+            confirmButtonText: "' . Yii::t('message', 'frontend.views.order.save', ['ru' => 'Сохранить']) . ' ",
             showLoaderOnConfirm: true,
             allowOutsideClick: false,
             showLoaderOnConfirm: true,
@@ -146,7 +146,7 @@ $this->registerJs('
             } else if (result.dismiss === "cancel") {
                 swal.close();
             } else {
-                swal({title: "' . Yii::t('error', 'frontend.views.order.error_two', ['ru'=>'Ошибка!']) . ' ", text: "' . Yii::t('message', 'frontend.views.order.try_again_two', ['ru'=>'Попробуйте еще раз']) . ' ", type: "error"});
+                swal({title: "' . Yii::t('error', 'frontend.views.order.error_two', ['ru' => 'Ошибка!']) . ' ", text: "' . Yii::t('message', 'frontend.views.order.try_again_two', ['ru' => 'Попробуйте еще раз']) . ' ", type: "error"});
             }
         });
     });
@@ -251,7 +251,7 @@ $this->registerJs('
         ).done(function(result) {
             console.log(result);
             if(result == false){
-                $("#guideModal .modal-header").append("<p class=bg-danger>' . Yii::t('message', 'frontend.views.order.guides.quantity', ['ru'=>'Кол-во товаров:']) . ' 0</p>");
+                $("#guideModal .modal-header").append("<p class=bg-danger>' . Yii::t('message', 'frontend.views.order.guides.quantity', ['ru' => 'Кол-во товаров:']) . ' 0</p>");
             }else{
                 $("#guideModal").modal("toggle");
             }
@@ -284,14 +284,14 @@ $this->registerJs('
     $(document).on("click", ".rename-template", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        var title = "'.Yii::t('app', 'frontend.views.order.guides.rename', ['ru'=>'Переименовать шаблон']).'";
+        var title = "' . Yii::t('app', 'frontend.views.order.guides.rename', ['ru' => 'Переименовать шаблон']) . '";
         swal({
             title: title,
             input: "text",
             inputValue: clicked.parent().find(".title a").text(),
             showCancelButton: true,
-            cancelButtonText: "'.Yii::t('app', 'frontend.views.order.guides.cancel', ['ru'=>'Отмена']).'",
-            confirmButtonText: "'.Yii::t('app', 'frontend.views.order.guides.rename_two', ['ru'=>'Переименовать']).'",
+            cancelButtonText: "' . Yii::t('app', 'frontend.views.order.guides.cancel', ['ru' => 'Отмена']) . '",
+            confirmButtonText: "' . Yii::t('app', 'frontend.views.order.guides.rename_two', ['ru' => 'Переименовать']) . '",
             showLoaderOnConfirm: true,
             allowOutsideClick: false,
             showLoaderOnConfirm: true,
@@ -317,7 +317,7 @@ $this->registerJs('
             if (result.dismiss === "cancel") {
                 swal.close();
             } else if (result.value.type !== "success") {
-               swal({title: "' . Yii::t('error', 'frontend.views.order.error_two', ['ru'=>'Ошибка!']) . '", text: "' . Yii::t('message', 'frontend.views.order.try_again_two', ['ru'=>'Попробуйте ещё раз']) . '", type: "error"});
+               swal({title: "' . Yii::t('error', 'frontend.views.order.error_two', ['ru' => 'Ошибка!']) . '", text: "' . Yii::t('message', 'frontend.views.order.try_again_two', ['ru' => 'Попробуйте ещё раз']) . '", type: "error"});
             }
         });
     });
@@ -328,18 +328,22 @@ $this->registerJs('
 <section class="content">
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs">
-            <li><a href="<?= Url::to(['order/create']) ?>"><?= Yii::t('message', 'frontend.views.order.all_goods', ['ru'=>'Все продукты']) ?></a></li>
+            <li>
+                <a href="<?= Url::to(['order/create']) ?>"><?= Yii::t('message', 'frontend.views.order.all_goods', ['ru' => 'Все продукты']) ?></a>
+            </li>
             <li class="active">
                 <a href="#">
-                    <?= Yii::t('message', 'frontend.views.order.orders_guides', ['ru'=>'Шаблоны заказов']) ?> <small class="label bg-yellow">new</small>
+                    <?= Yii::t('message', 'frontend.views.order.orders_guides', ['ru' => 'Шаблоны заказов']) ?>
+                    <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li>
                 <a href="<?= Url::to(['order/favorites']) ?>">
-                    <?= Yii::t('message', 'frontend.views.order.faq', ['ru'=>'Часто заказываемые товары']) ?> <small class="label bg-yellow">new</small>
+                    <?= Yii::t('message', 'frontend.views.order.faq', ['ru' => 'Часто заказываемые товары']) ?>
+                    <small class="label bg-yellow">new</small>
                 </a>
             </li>
-            <?php if ($client->parent_id == null) : ?>
+            <?php if ($client->parent_id == null && Yii::$app->user->identity->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR) : ?>
                 <li>
                     <a href="<?= Url::to(['order/product-filter']) ?>">
                         <?= Yii::t('message', 'frontend.views.order.filter_product', ['ru' => 'Фильтрация товаров']) ?>
@@ -355,39 +359,41 @@ $this->registerJs('
                         <div class="pull-left">
                             <?php
                             $form = ActiveForm::begin([
-                                        'method' => 'get',
-                                        'options' => [
-                                            'id' => 'searchForm',
-                                            'class' => "navbar-form no-padding no-margin",
-                                            'role' => 'search',
-                                        ],
+                                'method'  => 'get',
+                                'options' => [
+                                    'id'    => 'searchForm',
+                                    'class' => "navbar-form no-padding no-margin",
+                                    'role'  => 'search',
+                                ],
                             ]);
                             ?>
                             <?=
-                                    $form->field($searchModel, 'searchString', [
-                                        'addon' => [
-                                            'append' => [
-                                                'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchForm"><i class="fa fa-search"></i></a>',
-                                                'options' => [
-                                                    'class' => 'append',
-                                                ],
-                                            ],
-                                        ],
+                            $form->field($searchModel, 'searchString', [
+                                'addon'   => [
+                                    'append' => [
+                                        'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchForm"><i class="fa fa-search"></i></a>',
                                         'options' => [
-                                            'class' => "margin-right-15 form-group",
+                                            'class' => 'append',
                                         ],
-                                    ])
-                                    ->textInput([
-                                        'id' => 'searchString',
-                                        'class' => 'form-control',
-                                        'placeholder' => Yii::t('message', 'frontend.views.order.search', ['ru'=>'Поиск'])])
-                                    ->label(false)
+                                    ],
+                                ],
+                                'options' => [
+                                    'class' => "margin-right-15 form-group",
+                                ],
+                            ])
+                                ->textInput([
+                                    'id'          => 'searchString',
+                                    'class'       => 'form-control',
+                                    'placeholder' => Yii::t('message', 'frontend.views.order.search', ['ru' => 'Поиск'])])
+                                ->label(false)
                             ?>
                             <?php ActiveForm::end(); ?>
                         </div>
-                        <div class="pull-right">
-                            <?= Html::a('<i class="fa fa-plus"></i> ' . Yii::t('message', 'frontend.views.order.create_template', ['ru'=>'Создать шаблон']), '#', ['class' => 'btn btn-md btn-outline-success new-guid']) ?>
-                        </div>
+                        <?php if (Yii::$app->user->identity->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR): ?>
+                            <div class="pull-right">
+                                <?= Html::a('<i class="fa fa-plus"></i> ' . Yii::t('message', 'frontend.views.order.create_template', ['ru' => 'Создать шаблон']), '#', ['class' => 'btn btn-md btn-outline-success new-guid']) ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -404,23 +410,23 @@ $this->registerJs('
                     <?=
                     ListView::widget([
                         'dataProvider' => $dataProvider,
-                        'itemView' => 'guides/_guide-view',
-                        'itemOptions' => [
-                            'tag' => 'div',
+                        'itemView'     => 'guides/_guide-view',
+                        'itemOptions'  => [
+                            'tag'   => 'div',
                             'class' => 'guid_block',
                         ],
-                        'pager' => [
+                        'pager'        => [
                             'maxButtonCount' => 5,
-                            'options' => [
+                            'options'        => [
                                 'class' => 'pagination col-md-12  no-padding'
                             ],
                         ],
-                        'options' => [
+                        'options'      => [
                             'class' => 'col-lg-12 list-wrapper inline no-padding'
                         ],
-                        'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
-                        'summary' => '',
-                        'emptyText' => Yii::t('message', 'frontend.views.order.empty_list', ['ru'=>'Список пуст']),
+                        'layout'       => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
+                        'summary'      => '',
+                        'emptyText'    => Yii::t('message', 'frontend.views.order.empty_list', ['ru' => 'Список пуст']),
                     ])
                     ?>
                     <?php Pjax::end(); ?>
@@ -431,9 +437,9 @@ $this->registerJs('
 </section>
 <?=
 Modal::widget([
-    'id' => 'guideModal',
+    'id'            => 'guideModal',
     'clientOptions' => false,
-    'size' => Modal::SIZE_LARGE,
-    'header' => '<span class=\'glyphicon-left glyphicon glyphicon-refresh spinning\'></span>',
+    'size'          => Modal::SIZE_LARGE,
+    'header'        => '<span class=\'glyphicon-left glyphicon glyphicon-refresh spinning\'></span>',
 ])
 ?>

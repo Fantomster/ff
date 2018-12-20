@@ -4,7 +4,6 @@ namespace api_web\components;
 
 use Yii;
 use light\swagger\SwaggerApiAction;
-use yii\db\Exception;
 
 class WebApiSwaggerAction extends SwaggerApiAction
 {

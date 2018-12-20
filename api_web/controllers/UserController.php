@@ -280,7 +280,7 @@ class UserController extends WebApiController
      */
     public function actionLogin()
     {
-        $this->response = ['token' => $this->user->getJWTToken(\Yii::$app->jwt)];
+        $this->response = ['token' => $this->user->getJWTToken()];
     }
 
     /**
@@ -794,7 +794,10 @@ class UserController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/UserNoAuth"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={"user": {"id": 1},"profile": {"phone": "+79182225587"}}
+     *                  default={"user": {"id": 1},
+     *                      "phone": "+79182225587",
+     *                      "code": 4433
+     *                  }
      *              )
      *         )
      *     ),
@@ -817,7 +820,7 @@ class UserController extends WebApiController
      */
     public function actionChangeUnconfirmedUsersPhone()
     {
-        $this->response = $this->container->get('UserWebApi')->changeUnconfirmedUsersPhone($this->request);
+        $this->response = $this->container->get('UserWebApi')->mobileChange($this->request, true);
     }
 
     /**

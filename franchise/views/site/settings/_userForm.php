@@ -27,7 +27,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
             <h4 class="modal-title"><?= $user->isNewRecord ? Yii::t('app', 'franchise.views.site.settings.new_user', ['ru' => 'Новый пользователь']) : Yii::t('app', 'franchise.views.site.settings.edit_user', ['ru' => 'Редактировать пользователя']) ?></h4>
         </div>
         <div class="modal-body">
-            <input type="email" name="new-email" style="position: absolute; top: -100%;">
+            <input type="email"  name="Userito[email]" style="position: absolute; top: -100%;">
             <input type="password" name="new-password" style="position: absolute; top: -100%;">
 
             <?= $form->field($user, 'email') ?>

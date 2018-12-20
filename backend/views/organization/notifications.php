@@ -24,8 +24,8 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
         <div class="box-body">
             <?php foreach ($users as $user){
-            $emailNotification = $user->emailNotification;
-            $smsNotification = $user->smsNotification;
+            $emailNotification = $user->getEmailNotification($id);
+            $smsNotification = $user->getSmsNotification($id);
             if(!$emailNotification->id || !$smsNotification->id)continue;
             ?>
             <div class="row">

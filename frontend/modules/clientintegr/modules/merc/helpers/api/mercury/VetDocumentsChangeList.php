@@ -5,9 +5,8 @@ namespace frontend\modules\clientintegr\modules\merc\helpers\api\mercury;
 use api\common\models\merc\MercVsd;
 use common\models\vetis\VetisUnit;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
-use frontend\modules\clientintegr\modules\merc\helpers\api\dicts\dictsApi;
 use yii\base\Model;
-use yii\helpers\BaseStringHelper;
+use yii\helpers\Json;
 
 class VetDocumentsChangeList extends Model
 {
@@ -16,7 +15,6 @@ class VetDocumentsChangeList extends Model
     public function updateDocumentsList($list)
     {
         $list = is_array($list) ? $list : [$list];
-        $count = count($list);
         $i = 0;
         foreach ($list as $item) {
             $i++;
@@ -67,7 +65,7 @@ class VetDocumentsChangeList extends Model
                 'producer_name' => isset($producer) ? $producer['name'][0] : null,
                 'producer_guid' => isset($producer) ? $producer['guid'][0] : null,
                 'low_grade_cargo' => (int)$item->certifiedConsignment->batch->lowGradeCargo,
-                'raw_data' => serialize($item),
+                'raw_data' => Json::encode($item),
 
                 'owner_guid' => isset($item->certifiedConsignment->batch->owner) ? $item->certifiedConsignment->batch->owner->guid : null,
                 'product_guid' => isset($item->certifiedConsignment->batch->product->guid) ? $item->certifiedConsignment->batch->product->guid : null,
@@ -106,32 +104,6 @@ class VetDocumentsChangeList extends Model
         }
     }
 
-    public function updateData($last_visit)
-    {
-        $api = mercuryApi::getInstance($this->org_id);
-        $listOptions = new ListOptions();
-        $listOptions->count = 100;
-        $listOptions->offset = 0;
-        $count = 0;
-        $this->log('Load' . PHP_EOL);
-
-        do {
-            $result = $api->getVetDocumentChangeList($last_visit, $listOptions);
-            $vetDocumentList = $result->application->result->any['getVetDocumentChangesListResponse']->vetDocumentList;
-            $count += $vetDocumentList->count;
-            $this->log('Load ' . $count . ' / ' . $vetDocumentList->total . PHP_EOL);
-
-            if ($vetDocumentList->count > 0) {
-                $this->updateDocumentsList($vetDocumentList->vetDocument);
-            }
-
-            if ($vetDocumentList->count < $vetDocumentList->total) {
-                $listOptions->offset += $vetDocumentList->count;
-            }
-
-        } while ($vetDocumentList->total > ($vetDocumentList->count + $vetDocumentList->offset));
-    }
-
     public function handUpdateData($vsd_uuid_list)
     {
         $mask = '/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/';
@@ -150,19 +122,5 @@ class VetDocumentsChangeList extends Model
         }
 
         return true;
-    }
-
-    /**
-     * @param $message array|string
-     */
-    public function log($message)
-    {
-        if (is_array($message)) {
-            $message = print_r($message, true);
-        }
-        $message = $message . PHP_EOL;
-        $message .= str_pad('', 80, '=') . PHP_EOL;
-        $className = BaseStringHelper::basename(get_class($this));
-        file_put_contents(\Yii::$app->basePath . "/runtime/daemons/logs/jobs_" . $className . '.log', $message, FILE_APPEND);
     }
 }

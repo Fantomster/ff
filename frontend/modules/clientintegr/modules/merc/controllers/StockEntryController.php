@@ -303,12 +303,4 @@ class StockEntryController extends \frontend\modules\clientintegr\controllers\De
         }
         return $out;
     }
-
-    private function getErrorText($e)
-    {
-        if ($e->getCode() == 600)
-            return "При обращении к api Меркурий возникла ошибка. Ошибка зарегистрирована в журнале за номером №" . $e->getMessage() . ". Если ошибка повторяется обратитесь в техническую службу.";
-        else
-            return "При обращении к api Меркурий возникла ошибка. Если ошибка повторяется обратитесь в техническую службу.";
-    }
 }

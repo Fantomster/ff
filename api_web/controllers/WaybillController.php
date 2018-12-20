@@ -8,13 +8,9 @@
 
 namespace api_web\controllers;
 
-use api_web\components\Registry;
 use api_web\components\WebApiController;
 use api_web\helpers\WaybillHelper;
 use api_web\helpers\WebApiHelper;
-use api_web\modules\integration\classes\SyncServiceFactory;
-use common\models\Journal;
-use yii\db\Transaction;
 
 class WaybillController extends WebApiController
 {
@@ -105,7 +101,8 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\web\BadRequestHttpException
      */
     public function actionMoveOrderContentToWaybill()
     {

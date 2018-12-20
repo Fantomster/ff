@@ -54,7 +54,7 @@ $licenses = $user->organization->getLicenseList();
                     'encodeLabels' => false,
                     'items' => [
                         ['label' => Yii::t('message', 'frontend.views.layouts.client.left.navigation', ['ru' => 'НАВИГАЦИЯ']), 'options' => ['class' => 'header']],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.desktop', ['ru' => 'Рабочий стол']), 'icon' => 'home', 'url' => ['/client/index']],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.desktop', ['ru' => 'Рабочий стол']), 'icon' => 'home', 'url' => ['/client/index'], 'visible' => ($user->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR)],
                         [
                             'label' => Yii::t('message', 'frontend.views.layouts.client.left.set_order', ['ru' => 'Разместить заказ']),
                             'icon' => 'opencart',
@@ -66,8 +66,9 @@ $licenses = $user->organization->getLicenseList();
                             'icon' => 'history',
                             'url' => ['/order/index'],
                             'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">' . ($newOrdersCount ? $newOrdersCount : '') . '</span></span></a>',
+                            'visible' => ($user->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR)
                         ],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.vendors', ['ru' => 'Поставщики']), 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs step-vendor'], 'visible' => (!in_array($user->role_id, $disabled_roles) || $user->role_id != \common\models\Role::ROLE_RESTAURANT_JUNIOR_BUYER)],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.vendors', ['ru' => 'Поставщики']), 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs step-vendor'], 'visible' => (!in_array($user->role_id, $disabled_roles) && $user->role_id != \common\models\Role::ROLE_RESTAURANT_JUNIOR_BUYER) && $user->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR],
 //                        [
 //                            'label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']),
 //                            'icon' => 'envelope',
@@ -137,11 +138,12 @@ $licenses = $user->organization->getLicenseList();
                             ]
                         ],
                         // ['label' => 'Поддержка', 'icon' => 'support', 'url' => ['client/support']],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.send_notification', ['ru' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ']), 'options' => ['class' => 'header']],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.send_notification', ['ru' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ']), 'options' => ['class' => 'header'], 'visible' => ($user->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR)],
                     ],
                 ]
         )
         ?>
+        <?php if ($user->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR) : ?>
         <form action="<?= Url::to(['/user/ajax-invite-friend']) ?>" method="post" style="margin: 15px;" id="inviteForm">
             <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="bottom" title="" style="color: rgb(255, 255, 255);font-size: 20px;" data-original-title="<?= Yii::t('message', 'frontend.views.layouts.client.left.invite', ['ru' => 'Пригласите партнеров и друзей']) ?>">
                 <input type="text" class="form-control" placeholder="Email" name="email" id="email">
@@ -152,6 +154,7 @@ $licenses = $user->organization->getLicenseList();
                 </span>
             </div>
         </form>
+        <?php endif; ?>
 
         <ul class="sidebar-menu personal-manager">
             <li class="header"><span style="text-transform: uppercase;"><?= Yii::t('message', 'frontend.views.layouts.client.left.techno', ['ru' => 'ТЕХНИЧЕСКАЯ ПОДДЕРЖКА']) ?></span></li>

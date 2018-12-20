@@ -1,5 +1,4 @@
 <?php
-use yii\helpers\Url;
 if (empty($toFrontEnd)) {
     $toFrontEnd = false;
 }

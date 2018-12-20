@@ -10,6 +10,7 @@ use common\models\Organization;
  * This is the model class for table "rk_access".
  *
  * @property integer $id
+ * @property integer $const_id
  * @property integer $fid
  * @property integer $org
  * @property string $login

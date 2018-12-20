@@ -2,7 +2,6 @@
 
 namespace api_web\modules\integration\modules\one_s\models;
 
-use api\common\models\one_s\one_sStore as one_sStore_AR;
 use api\common\models\one_s\OneSStore;
 use api_web\components\WebApi;
 
@@ -32,7 +31,7 @@ class one_sStore extends WebApi
     }
 
     /**
-     * @param \api\common\models\one_s\one_sStore $model
+     * @param OneSStore $model
      * @return array
      */
     private function prepareStore(\api\common\models\one_s\OneSStore $model)

@@ -171,7 +171,7 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionMapList()
     {
-        $this->license_service_id = $this->user->integration_service_id ?? 0;
+        $this->setLicenseServiceId($this->request['service_id'] ?? null);
         $this->response = $this->container->get('IntegrationWebApi')->getProductMapList($this->request);
     }
 
@@ -241,7 +241,7 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionMapUpdate()
     {
-        $this->license_service_id = $this->user->integration_service_id ?? 0;
+        $this->setLicenseServiceId($this->request['service_id'] ?? null);
         $this->response = $this->container->get('IntegrationWebApi')->mapUpdate($this->request);
     }
 
@@ -249,8 +249,8 @@ class DefaultController extends \api_web\components\WebApiController
      * @SWG\Post(path="/integration/default/check-connect",
      *     tags={"Integration"},
      *     summary="Проверка, доступно ли подключение к серверу интеграции",
-     *     description="Проверка, доступно ли подключение к серверу интеграции, если params пустой, будут браться настройки из базы",
-     *     produces={"application/json"},
+     *     description="Проверка, доступно ли подключение к серверу интеграции, если params пустой, будут браться
+     *     настройки из базы", produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
      *         in="body",
@@ -291,7 +291,7 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionCheckConnect()
     {
-        $this->license_service_id = $this->user->integration_service_id ?? 0;
+        $this->setLicenseServiceId($this->request['service_id'] ?? null);
         $this->response = SyncServiceFactory::init($this->request['service_id'])->checkConnect($this->request);
     }
 }

@@ -24,6 +24,7 @@ use kartik\grid\CheckboxColumn;
 use api\common\models\iiko\iikoWaybill;
 use kartik\grid\ExpandRowColumn;
 use common\components\SearchOrdersComponent;
+use api_web\components\Registry;
 
 /** @var $affiliated array */
 /** @var $searchParams array Search Params */
@@ -214,7 +215,8 @@ $columns = [
     // 9. Статус накладной
     [
         'value'          => function ($data) {
-            $nacl = iikoWaybill::findOne(['order_id' => $data->id]);
+            //$nacl = iikoWaybill::findOne(['order_id' => $data->id]);
+            $nacl = iikoWaybill::find()->where(['order_id' => $data->id, 'service_id' => Registry::IIKO_SERVICE_ID])->one();
             if (isset($nacl->status)) {
                 return $nacl->status->denom;
             } else {
@@ -239,9 +241,10 @@ $columns = [
             return $val;
         },
         'detail'        => function ($model) use ($lic) {
-            $wmodel = iikoWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id])->one();
+            $wmodel = iikoWaybill::find()->where(['order_id' => $model->id, 'service_id' => Registry::IIKO_SERVICE_ID])->one();
             if ($wmodel) {
-                $wmodel = iikoWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id]);
+                //$wmodel = iikoWaybill::find()->andWhere('order_id = :order_id', [':order_id' => $model->id]);
+                $wmodel = iikoWaybill::find()->where(['order_id' => $model->id, 'service_id' => Registry::IIKO_SERVICE_ID]);
             } else {
                 $wmodel = null;
             }
@@ -640,7 +643,7 @@ $('.ajax-popover').click(function() {
             popover.applyPlacement(calculated_offset, popover.options.placement);
         },
       error: function(jqXHR, textStatus, errorThrown) {
-            return instance.content('Failed to load data');
+            //return instance.content('Failed to load data');
         }
     });
   }

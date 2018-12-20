@@ -13,7 +13,6 @@ use kartik\editable\Editable;
 use api\common\models\RkAccess;
 use api\common\models\RkWaybill;
 
-
 ?>
 
 
@@ -40,10 +39,10 @@ use api\common\models\RkWaybill;
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'links' => [
+        'links'   => [
             [
                 'label' => 'Интеграция',
-                'url' => ['/vendorintegr'],
+                'url'   => ['/clientintegr'],
             ],
             'Интеграция с R-keeper WS',
         ],
@@ -66,11 +65,11 @@ use api\common\models\RkWaybill;
                     <div class="box-body table-responsive no-padding">
                         <?=
                         GridView::widget([
-                            'dataProvider' => $dataProvider,
-                            'pjax' => true, // pjax is set to always true for this demo
+                            'dataProvider'     => $dataProvider,
+                            'pjax'             => true, // pjax is set to always true for this demo
                             //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
-                            'filterPosition' => false,
-                            'columns' => [
+                            'filterPosition'   => false,
+                            'columns'          => [
                                 'denom',
                                 'comment',
                                 // 'def_value',
@@ -85,9 +84,9 @@ use api\common\models\RkWaybill;
                                 ],
                                 */
                                 [
-                                    'value' => function ($data) {
+                                    'value'          => function ($data) {
 
-                                        $model = \api\common\models\RkDicconst::findOne(['id' =>$data->id]);
+                                        $model = \api\common\models\RkDicconst::findOne(['id' => $data->id]);
 
                                         $res = $model->getPconstValue();
 
@@ -106,31 +105,37 @@ use api\common\models\RkWaybill;
                                         $ret = ($model->denom == 'taxVat') ? $res : (($res == 1) ? "Включено" : "Выключено");
 
                                         if ($model->denom == 'defGoodGroup') $ret = 'Список';
-
+                                        if ($model->denom == 'sh_version') {
+                                            if(isset(\api\common\models\RkDicconst::SH_VERSION[$res])) {
+                                                $ret = \api\common\models\RkDicconst::SH_VERSION[$res];
+                                            } else {
+                                                $ret = 'Не установнел';
+                                            }
+                                        }
 
                                         // VAT храним в единицах * 100, нужно облагородить перед выводом. 0/1 конвертим в слова
                                         return $ret;
 
                                     },
-                                    'label' => 'Текущее значение',
-                                    'contentOptions' =>['style'=>'font-weight:bold;'],
+                                    'label'          => 'Текущее значение',
+                                    'contentOptions' => ['style' => 'font-weight:bold;'],
                                 ],
                                 [
-                                    'class' => 'yii\grid\ActionColumn',
-                                    'contentOptions'=>['style'=>'width: 6%;'],
-                                    'template'=>'{clear}&nbsp;',
+                                    'class'          => 'yii\grid\ActionColumn',
+                                    'contentOptions' => ['style' => 'width: 6%;'],
+                                    'template'       => '{clear}&nbsp;',
                                     'visibleButtons' => [
                                         'clear' => function ($model, $key, $index) {
                                             // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
                                             return true;
                                         },
                                     ],
-                                    'buttons'=>[
-                                        'clear' =>  function ($url, $model) {
+                                    'buttons'        => [
+                                        'clear' => function ($url, $model) {
                                             //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                            $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/settings/changeconst', 'id'=>$model->id]);
-                                            return \yii\helpers\Html::a( '<i class="fa fa-wrench" aria-hidden="true"></i>', $customurl,
-                                                ['title' => 'Изменить значение', 'data-pjax'=>"0"]);
+                                            $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/settings/changeconst', 'id' => $model->id]);
+                                            return \yii\helpers\Html::a('<i class="fa fa-wrench" aria-hidden="true"></i>', $customurl,
+                                                ['title' => 'Изменить значение', 'data-pjax' => "0"]);
                                         },
                                     ]
                                 ],
@@ -139,16 +144,16 @@ use api\common\models\RkWaybill;
                             /* 'rowOptions' => function ($data, $key, $index, $grid) {
                               return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
                               }, */
-                            'options' => ['class' => 'table-responsive'],
-                            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                            'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                            'bordered' => false,
-                            'striped' => true,
-                            'condensed' => false,
-                            'responsive' => false,
-                            'hover' => true,
+                            'options'          => ['class' => 'table-responsive'],
+                            'tableOptions'     => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                            'formatter'        => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                            'bordered'         => false,
+                            'striped'          => true,
+                            'condensed'        => false,
+                            'responsive'       => false,
+                            'hover'            => true,
                             'resizableColumns' => false,
-                            'export' => [
+                            'export'           => [
                                 'fontAwesome' => true,
                             ],
                         ]);

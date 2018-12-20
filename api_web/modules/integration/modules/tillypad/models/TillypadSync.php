@@ -3,8 +3,6 @@
 namespace api_web\modules\integration\modules\tillypad\models;
 
 use api\common\models\iiko\iikoWaybillData;
-use api_web\modules\integration\modules\tillypad\helpers\TillypadLogger;
-use common\models\Journal;
 use yii\db\Expression;
 use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
@@ -17,7 +15,6 @@ use api\common\models\iiko\iikoStore;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use frontend\modules\clientintegr\modules\tillypad\helpers\TillypadApi;
-use yii\web\Response;
 
 class TillypadSync extends WebApi
 {
@@ -102,7 +99,6 @@ class TillypadSync extends WebApi
      * Синхронизация складов
      *
      * @return integer
-     * @throws BadRequestHttpException
      * @throws ValidationException
      */
     protected function store()
@@ -220,7 +216,7 @@ class TillypadSync extends WebApi
      * Синхронизация продуктов
      *
      * @return int
-     * @throws ValidationException
+     * @throws \Exception
      */
     protected function goods()
     {
@@ -317,6 +313,7 @@ class TillypadSync extends WebApi
      *
      * @param array $post
      * @return array
+     * @throws ValidationException
      */
     public function handleWaybillData(array $post): array
     {

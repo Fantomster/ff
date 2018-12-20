@@ -30,7 +30,6 @@ class OuterProductMapSearch extends OuterProductMap
         $outerProductTableName = $dbName . OuterProduct::tableName();
         $outerUnitTableName = $dbName . OuterUnit::tableName();
         $outerStoreTableName = $dbName . OuterStore::tableName();
-        $catalogBaseGoodsTableName = CatalogBaseGoods::tableName();
 
         $this->service_id = $post['service_id'] ?? 0;
         $mainOrgSetting = IntegrationSettingValue::getSettingsByServiceId($this->service_id, $client->id, ['main_org']);

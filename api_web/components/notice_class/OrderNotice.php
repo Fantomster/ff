@@ -3,6 +3,7 @@
 namespace api_web\components\notice_class;
 
 use api_web\components\FireBase;
+use api_web\helpers\WebApiHelper;
 use common\models\Message;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
@@ -11,6 +12,7 @@ use common\models\OrderContent;
 use common\models\search\OrderContentSearch;
 use common\models\User;
 use Yii;
+use yii\base\Controller;
 use yii\helpers\Json;
 use common\models\Order;
 use yii\data\ArrayDataProvider;
@@ -127,9 +129,9 @@ class OrderNotice
                     try {
                         $text = Yii::$app->sms->prepareText('sms.order_new', [
                             'name' => $senderOrg->name,
-                            'url'  => $order->getUrlForUser($recipient)
+                            'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
-                        Yii::$app->sms->send($text, $recipient->profile->phone);
+                        Yii::$app->sms->send($text, $recipient->profile->phone, $order->id);
                     } catch (\Exception $e) {
                         \Yii::error($e->getMessage());
                     }
@@ -144,6 +146,7 @@ class OrderNotice
      * @param User         $user
      * @param Organization $organization
      * @param Order        $order
+     * @throws \Exception
      */
     public function cancelOrder(User $user, Organization $organization, Order $order)
     {
@@ -185,9 +188,9 @@ class OrderNotice
                     if (!empty($recipient->profile->phone) && $notification->order_canceled) {
                         $text = Yii::$app->sms->prepareText('sms.order_canceled', [
                             'name' => $senderOrg->name,
-                            'url'  => $order->getUrlForUser($recipient)
+                            'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
-                        Yii::$app->sms->send($text, $recipient->profile->phone);
+                        Yii::$app->sms->send($text, $recipient->profile->phone, $order->id);
                     }
                 }
             }
@@ -245,9 +248,9 @@ class OrderNotice
                     if (!empty($recipient->profile->phone) && $notification->order_done) {
                         $text = Yii::$app->sms->prepareText('sms.order_done', [
                             'name' => $senderOrg->name,
-                            'url'  => $order->getUrlForUser($recipient)
+                            'url'  => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
-                        Yii::$app->sms->send($text, $recipient->profile->phone);
+                        Yii::$app->sms->send($text, $recipient->profile->phone, $order->id);
                     }
                 }
             }
@@ -284,12 +287,15 @@ class OrderNotice
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
-        $orgs[] = $order->vendor_id;
-        $orgs[] = $order->client_id;
+
+        $organizations = [
+            $order->vendor_id,
+            $order->client_id
+        ];
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            foreach ($orgs as $org) {
+            foreach ($organizations as $org) {
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification) {
                     if ($notification->order_processing) {
@@ -300,16 +306,14 @@ class OrderNotice
                     }
                 }
 
-                if ($order->vendor->id != $senderOrg->id) {
-                    $notification = $recipient->getSmsNotification($org);
-                    if ($notification) {
-                        if (!empty($recipient->profile->phone) && $notification->order_processing) {
-                            $text = Yii::$app->sms->prepareText('sms.order_processing', [
-                                'name' => $order->vendor->name,
-                                'url'  => $order->getUrlForUser($recipient)
-                            ]);
-                            Yii::$app->sms->send($text, $recipient->profile->phone);
-                        }
+                $notification = $recipient->getSmsNotification($org);
+                if ($notification) {
+                    if (!empty($recipient->profile->phone) && $notification->order_processing) {
+                        $text = Yii::$app->sms->prepareText('sms.order_processing', [
+                            'vendor_name' => $order->vendor->name,
+                            'url'         => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
+                        ]);
+                        Yii::$app->sms->send($text, $recipient->profile->phone, $order->id);
                     }
                 }
             }
@@ -346,10 +350,16 @@ class OrderNotice
             $newMessage->setAttribute('recipient_id', $recipient_id);
             $newMessage->save();
 
-            $body = Yii::$app->controller->renderPartial('@frontend/views/order/_chat-message', [
+            if (Yii::$app instanceof \yii\console\Application) {
+                $controller = new Controller("", "");
+            } else {
+                $controller = Yii::$app->controller;
+            }
+
+            $body = $controller->renderPartial('@frontend/views/order/_chat-message', [
                 'name'      => '',
                 'message'   => $newMessage->message,
-                'time'      => $newMessage->created_at,
+                'time'      => WebApiHelper::asDatetime($newMessage->created_at),
                 'isSystem'  => 1,
                 'sender_id' => $user->id,
                 'ajax'      => 1,
@@ -377,7 +387,7 @@ class OrderNotice
                     'notifications' => uniqid(),
                 ], [
                     'body'     => $newMessage->message,
-                    'date'     => \Yii::$app->formatter->asDatetime('now', 'php:' . \DateTime::ATOM),
+                    'date'     => WebApiHelper::asDatetime(),
                     'order_id' => $order_id
                 ]);
             }
@@ -399,7 +409,7 @@ class OrderNotice
                     'notifications' => uniqid(),
                 ], [
                     'body'     => $newMessage->message,
-                    'date'     => \Yii::$app->formatter->asDatetime('now', 'php:' . \DateTime::ATOM),
+                    'date'     => WebApiHelper::asDatetime(),
                     'order_id' => $order_id
                 ]);
             }
@@ -425,6 +435,7 @@ class OrderNotice
      * @param Order          $order
      * @param OrderContent[] $changed
      * @param OrderContent[] $deleted
+     * @throws \Exception
      */
     public function sendOrderChange($senderOrg, $order, $changed = [], $deleted = [])
     {
@@ -457,9 +468,9 @@ class OrderNotice
                     if ($recipient->profile->phone && $notification->order_changed) {
                         $text = Yii::$app->sms->prepareText('sms.order_changed', [
                             'client_name' => $senderOrg->name,
-                            'url'         => $order->getUrlForUser($recipient)
+                            'url'         => $order->getUrlForUser($recipient, Yii::$app->params['app_version'])
                         ]);
-                        Yii::$app->sms->send($text, $recipient->profile->phone);
+                        Yii::$app->sms->send($text, $recipient->profile->phone, $order->id);
                     }
             }
         }
@@ -473,46 +484,13 @@ class OrderNotice
             $senderUser = $order->acceptedBy ?? User::findOne(1);
         }
 
-        $systemMessage = [];
-        if (!empty($changed)) {
-            $getterAttribute = function (OrderContent $model, string $attr) {
-                $result = $model->$attr;
-                /*if ($model->isAttributeChanged($attr)) {
-                    $result = $model->getOldAttribute($attr) . ' => ' . $result;
-                }*/
-                return $result;
-            };
-
-            $systemMessage[] = \Yii::t('api_web', 'order.change.content');
-            $oc = new  OrderContent();
-            $systemMessage[] = implode(' | ', [
-                $oc->getAttributeLabel('product_name'),
-                $oc->getAttributeLabel('quantity'),
-                $oc->getAttributeLabel('price'),
+        if (!empty($changed) || !empty($deleted)) {
+            $systemMessage = \Yii::$app->view->renderFile('@mail_views/chat/order_change.php', [
+                'changed' => $changed,
+                'deleted' => $deleted
             ]);
-
-            foreach ($changed as $orderContent) {
-                $row = [];
-                $row[] = $orderContent->product_name;
-                $row[] = $getterAttribute($orderContent, 'quantity');
-                $row[] = $getterAttribute($orderContent, 'price');
-                $systemMessage[] = implode(' | ', $row);
-            }
-        }
-
-        if (!empty($deleted)) {
-            $systemMessage[] = \Yii::t('api_web', 'order.delete.content');
-            foreach ($deleted as $name) {
-                $systemMessage[] = $name;
-            }
-        }
-
-        $systemMessage = implode(PHP_EOL, $systemMessage);
-        if (!empty($systemMessage)) {
-            $systemMessage .= PHP_EOL . str_pad('', 20, '-');
-            $systemMessage .= PHP_EOL . \Yii::t('api_web', 'order.notice.total_price') . ' ' . $order->total_price;
-            $systemMessage .= ' ' . $order->currency->symbol;
             $this->sendSystemMessage($senderUser, $order->id, $systemMessage, false);
         }
     }
+
 }

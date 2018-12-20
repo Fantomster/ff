@@ -9,12 +9,13 @@ use Yii;
  *
  * @property integer $id
  * @property string $date
- * @property string $message
- * @property string $target
  * @property string $error
+ * @property integer $error_code
+ * @property integer $sms_send_id
  */
 class SmsError extends \yii\db\ActiveRecord
 {
+
     /**
      * @inheritdoc
      */
@@ -26,10 +27,29 @@ class SmsError extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class'      => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    \yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date']
+                ],
+                'value'      => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [
             [['date'], 'safe'],
+            [['error_code', 'sms_send_id'], 'integer'],
             [['message', 'target', 'error'], 'string', 'max' => 255],
         ];
     }
@@ -40,11 +60,12 @@ class SmsError extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'date' => 'Date',
-            'message' => 'Message',
-            'target' => 'Target',
-            'error' => 'Error',
+            'id'          => 'ID',
+            'date'        => 'Date',
+            'error'       => 'Error',
+            'error_code'  => 'Error code',
+            'sms_send_id' => 'Sms ID',
         ];
     }
+
 }

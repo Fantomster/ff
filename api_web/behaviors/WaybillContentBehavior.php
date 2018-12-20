@@ -7,7 +7,6 @@
 
 namespace api_web\behaviors;
 
-use api_web\components\Registry;
 use yii\base\Behavior;
 use yii\base\Event;
 use yii\elasticsearch\ActiveRecord;

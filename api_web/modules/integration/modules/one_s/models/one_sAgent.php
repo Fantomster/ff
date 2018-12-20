@@ -5,11 +5,6 @@ namespace api_web\modules\integration\modules\one_s\models;
 use api\common\models\one_s\one_sWaybill;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
-use api_web\modules\integration\interfaces\ServiceInterface;
-use common\models\Order;
-use common\models\search\OrderSearch;
-use Yii;
-use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
 
 class one_sAgent extends WebApi
@@ -74,11 +69,12 @@ class one_sAgent extends WebApi
         ];
     }
 
-
     /**
      * one_s: Создание сопоставлений номенклатуры накладной с продуктами MixCart
+     *
      * @param array $post
      * @return array
+     * @throws ValidationException
      */
     public function handleWaybillData(array $post): array
     {

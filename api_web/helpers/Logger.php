@@ -78,7 +78,7 @@ class Logger
                 'response_at' => new Expression('NOW()')
             ]);
         } else {
-            throw new \Exception('Response already recorded.', 999);
+            throw new \Exception(\Yii::t('api_web', "Response already recorded.", ['ru'=>'Ответ уже записан']), 999);
         }
     }
 
@@ -103,7 +103,7 @@ class Logger
          */
         if (!empty($user)) {
             if (!empty(self::get()['user_id'])) {
-                throw new \Exception('User already recorded.', 999);
+                throw new \Exception(\Yii::t('api_web', 'User already recorded.', ['ru'=>'Пользователь уже записан']), 999);
             }
             self::update([
                 'user_id' => $user->id,
@@ -114,6 +114,7 @@ class Logger
 
     /**
      * @param $columns
+     * @throws \yii\db\Exception
      */
     private static function insert($columns)
     {
@@ -124,6 +125,7 @@ class Logger
 
     /**
      * @param $columns
+     * @throws \yii\db\Exception
      */
     private static function update($columns)
     {

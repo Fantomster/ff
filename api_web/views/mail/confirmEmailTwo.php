@@ -1,7 +1,5 @@
 <?php
 
-use yii\helpers\Url;
-
 /**
  * @var $userToken \common\models\UserToken
  */

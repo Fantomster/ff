@@ -239,7 +239,7 @@ class MarketWebApi extends WebApi
                 }
                 if (!empty($relationSuppliers)) {
                     if (in_array($model->supp_org_id, $relationSuppliers)) {
-                        throw new BadRequestHttpException('Нет доступа к продукту');
+                        throw new BadRequestHttpException('product_access_denied');
                     }
                 }
             }
@@ -253,7 +253,6 @@ class MarketWebApi extends WebApi
      *
      * @param $post
      * @return array
-     * @throws BadRequestHttpException
      */
     public function organizations($post)
     {
@@ -393,14 +392,13 @@ class MarketWebApi extends WebApi
      * @param CatalogBaseGoods $model
      * @return string
      */
-    public
-    function getProductImage($model)
+    public function getProductImage($model)
     {
         $url = $model->getImageUrl();
         if (strstr($url, 'amazon') === false && strstr($url, 'data:image') === false) {
-            return \Yii::$app->params['web'] . preg_replace('#http(.+?)\/\/(.+?)\/(.+?)#', '$3', $url);
+            return \Yii::$app->params['appUrl'] . preg_replace('#http(.+?)\/\/(.+?)\/(.+?)#', '$3', $url);
         } else {
-            return \Yii::$app->params['web'] . 'site/image-base?id=' . $model->id . '&type=product';
+            return \Yii::$app->params['appUrl'] . '/site/image-base?id=' . $model->id . '&type=product';
         }
     }
 

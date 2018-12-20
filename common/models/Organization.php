@@ -936,13 +936,26 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getPictureUrl()
     {
-        if ($this->type_id == self::TYPE_SUPPLIER) {
-            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['vendor-noavatar'];
+        $key = 'type_' . $this->type_id . '_org_' . $this->id . '_avatar';
+
+        if (\Yii::$app->cache->exists($key)) {
+            return \Yii::$app->cache->get($key);
         }
-        if ($this->type_id == self::TYPE_RESTAURANT) {
-            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['client-noavatar'];
+
+        $picture = Yii::$app->params['pictures']['org-noavatar'];
+        if (empty($this->picture)) {
+            if ($this->type_id == self::TYPE_SUPPLIER) {
+                $picture = Yii::$app->params['pictures']['vendor-noavatar'];
+            }
+            if ($this->type_id == self::TYPE_RESTAURANT) {
+                $picture = Yii::$app->params['pictures']['client-noavatar'];
+            }
+        } else {
+            $picture = $this->getThumbUploadUrl('picture', 'picture');
+            \Yii::$app->cache->set($key, $picture, 360);
         }
-        return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['org-noavatar'];
+
+        return $picture;
     }
 
     public function inviteVendor($vendor, $invite, $includeBaseCatalog = false, $fromMarket = false)

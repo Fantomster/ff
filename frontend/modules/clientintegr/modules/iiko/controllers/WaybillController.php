@@ -28,9 +28,9 @@ use api\common\models\iikoWaybillDataSearch;
 use common\models\search\OrderSearch2;
 use yii\web\BadRequestHttpException;
 use common\components\SearchOrdersComponent;
-use yii\helpers\Json;
 use api_web\components\Registry;
 use common\helpers\DBNameHelper;
+use common\models\OrderContent;
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
@@ -377,6 +377,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionMap()
     {
         $model = iikoWaybill::findOne(Yii::$app->request->get('waybill_id'));
+        //$model = iikoWaybill::find()->where(['order_id' => $data->id, 'service_id' => Registry::IIKO_SERVICE_ID])->one();
         $vatData = VatData::getVatList();
         if (!$model) {
             die("Cant find wmodel in map controller");
@@ -560,7 +561,7 @@ SQL;
             $orgId = User::findOne(Yii::$app->user->id)->organization_id;
             $constId = iikoDicconst::findOne(['denom' => 'main_org']);
             $parentId = iikoPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
-             $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
+            $organizationID = !is_null($parentId) ? $parentId->value : $orgId;
 
             $organizationID = (isset($parentId, $parentId->value) && strlen((int)$parentId->value) ==
                 strlen($parentId->value) && $parentId->value > 0) ? $parentId->value : $orgId;
@@ -1177,7 +1178,7 @@ SQL;
         $obConstModel = iikoDicconst::findOne(['denom' => 'main_org']);
         $arChildsModels = iikoPconst::find()->select('org')->where(['const_id' => $obConstModel->id, 'value' => $org_id])->all();
 
-        $idorgs = '' . $org_id.',';
+        $idorgs = '' . $org_id . ',';
         if ($arChildsModels) {
             foreach ($arChildsModels as $child) {
                 $idorgs .= $child->org . ',';
@@ -1204,5 +1205,36 @@ SQL;
         }
 
         return $munit;
+    }
+
+    /**
+     * @return string
+     */
+    public function actionGetpopover()
+    {
+        $id = Yii::$app->request->post('key');
+        $goodCount = OrderContent::find()->andWhere('order_id = :id', ['id' => $id])->count('*');
+        $listIds = OrderContent::find()->select('product_id')->andWhere('order_id = :id', ['id' => $id])->limit(10)->asArray()->all();
+
+        foreach ($listIds as $ids) {
+            foreach ($ids as $key => $value) {
+                $fList[] = $value;
+            }
+        }
+
+        $listGoods = CatalogBaseGoods::find()->select('product')->andWhere(['IN', 'id', $fList])->asArray()->all();
+        $result = "";
+        $ind = 1;
+
+        foreach ($listGoods as $ids) {
+            foreach ($ids as $key => $value) {
+                $result .= $ind++ . ')&nbsp;' . $value . "<br>";
+            }
+        }
+
+        if ($goodCount > 10) {
+            $result .= "и другие...";
+        }
+        return $result;
     }
 }

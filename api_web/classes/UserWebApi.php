@@ -841,8 +841,13 @@ class UserWebApi extends \api_web\components\WebApi
      * @param string $indexByField
      * @return array
      */
-    public function getUserOrganizationBusinessList(string $indexByField = null)
+    public function getUserOrganizationBusinessList(string $indexByField = null, string $nameTerm = null)
     {
+        if(isset($nameTerm) && strlen($nameTerm) < 3)
+        {
+            throw new BadRequestHttpException('The_search_string_must_be_at_least_3_characters.');
+        }
+
         $resQuery = (new Query())
             ->select(['a.id', 'a.name'])
             ->distinct()
@@ -859,6 +864,11 @@ class UserWebApi extends \api_web\components\WebApi
                     Role::ROLE_ADMIN,
                 ]
             ]);
+
+        if(isset($nameTerm)) {
+            $resQuery->andWhere("a.name LIKE :name", [':name' => '%'.$nameTerm.'%']);
+        }
+
         if (!is_null($indexByField)) {
             $resQuery->indexBy($indexByField);
         }

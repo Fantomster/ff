@@ -56,14 +56,24 @@ class WaybillHelper extends AuthHelper
         #Версия StoreHouse
         $storeHouseVersion = RkDicconst::findOne(['denom' => 'sh_version'])->getPconstValue();
         foreach ($recs as $rec) {
-            $itemSum = ($storeHouseVersion == 4 ? $rec['sum'] * 100 : str_replace('.', ',', $rec['sum']));
-            // $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.$rec['vat'].'" />'.PHP_EOL;
-            $xml .= '<ITEM rid="' . $rec['prid'] . '" quant="' . ($rec["quant"] * 1000) . '" mu="' . $rec["unit_rid"] . '" sum="' . $itemSum . '" vatrate="' . ($rec['vat']) . '" />' . PHP_EOL;
+            $vatSum = '';
+            if ($storeHouseVersion == 4) {
+                $itemSum = $rec['sum'] * 100;
+            }
+
+            if ($storeHouseVersion == 5) {
+                $itemSum = str_replace('.', ',', $rec['sum']);
+                $nds = ceil($rec['vat'] / 10000);
+                $vatSumValue = $itemSum * $nds;
+                $vatSum = " vatsum='{$vatSumValue}' ";
+            }
+
+            $xml .= '<ITEM rid="' . $rec['prid'] . '" quant="' . ($rec["quant"] * 1000) . '" mu="' . $rec["unit_rid"] . '" sum="' . $itemSum . '" vatrate="' . ($rec['vat']) . '" ' . $vatSum . '/>' . PHP_EOL;
         }
 
         $xml .= '</DOC>' . PHP_EOL .
             '</RQ>';
-        
+
         $this->log('START REQUEST:');
         $this->log($xml);
         $this->log('END REQUEST');

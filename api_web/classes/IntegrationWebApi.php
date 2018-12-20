@@ -525,11 +525,13 @@ class IntegrationWebApi extends WebApi
             $isChildOrganization = false;
         }
 
-        $result = new \SplObjectStorage();
         if (!empty($models)) {
+            $result = new \SplObjectStorage();
             foreach (WebApiHelper::generator($models) as $model) {
                 $result->attach((object)$this->prepareOutProductMap($model, $isChildOrganization));
             }
+        } else {
+            $result = [];
         }
 
         return [

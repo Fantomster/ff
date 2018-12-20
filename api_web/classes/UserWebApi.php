@@ -843,11 +843,6 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function getUserOrganizationBusinessList(string $indexByField = null, string $name = null)
     {
-        if(isset($name) && strlen($name) < 3)
-        {
-            return ['result' => null];
-        }
-
         $resQuery = (new Query())
             ->select(['a.id', 'a.name'])
             ->distinct()
@@ -865,7 +860,7 @@ class UserWebApi extends \api_web\components\WebApi
                 ]
             ]);
 
-        if(isset($name)) {
+        if(isset($name) && strlen(trim($name)) > 3) {
             $resQuery->andWhere("a.name LIKE :name", [':name' => '%'.$name.'%']);
         }
 

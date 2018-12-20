@@ -860,7 +860,7 @@ class UserWebApi extends \api_web\components\WebApi
                 ]
             ]);
 
-        if(isset($name) && strlen(trim($name)) > 3) {
+        if(isset($name) && mb_strlen(trim($name)) > 3) {
             $resQuery->andWhere("a.name LIKE :name", [':name' => '%'.$name.'%']);
         }
 

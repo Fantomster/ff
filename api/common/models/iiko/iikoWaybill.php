@@ -146,7 +146,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
     {
         parent::afterSave($insert, $changedAttributes);
         if ($insert) {
-            $this->createWaybillData();
+            $this->createWaybillData($this->service_id);
         }
     }
 
@@ -287,7 +287,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         ];
     }
 
-    public static function createWaybill($order_id, $service_id = 2)
+    public static function createWaybill($order_id, $service_id = Registry::IIKO_SERVICE_ID)
     {
 
         $res = true;
@@ -405,7 +405,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         return $res;
     }
 
-    protected function createWaybillData($service_id = 2)
+    protected function createWaybillData($service_id = Registry::IIKO_SERVICE_ID)
     {
         $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
 

@@ -28,7 +28,6 @@ use api\common\models\iikoWaybillDataSearch;
 use common\models\search\OrderSearch2;
 use yii\web\BadRequestHttpException;
 use common\components\SearchOrdersComponent;
-use yii\helpers\Json;
 use api_web\components\Registry;
 use common\helpers\DBNameHelper;
 use common\models\OrderContent;
@@ -378,6 +377,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionMap()
     {
         $model = iikoWaybill::findOne(Yii::$app->request->get('waybill_id'));
+        //$model = iikoWaybill::find()->where(['order_id' => $data->id, 'service_id' => Registry::IIKO_SERVICE_ID])->one();
         $vatData = VatData::getVatList();
         if (!$model) {
             die("Cant find wmodel in map controller");

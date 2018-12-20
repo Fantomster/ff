@@ -30,7 +30,7 @@ class EgaisMethods extends WebApi
      * @return array
      * @throws BadRequestHttpException|\Exception
      */
-     public function setEgaisSettings($request, $orgId)
+    public function setEgaisSettings($request, $orgId)
     {
         if (empty($request['egais_url']) || empty($request['fsrar_id']) || empty($orgId)) {
             throw new BadRequestHttpException('dictionary.request_error');
@@ -153,35 +153,11 @@ class EgaisMethods extends WebApi
             throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
 
-        $return = (new EgaisHelper())->sendActWriteOn($settings, $request, 'ActChargeOn_v2');
+        $return = (new EgaisHelper())->sendActWriteOn($settings, $request);
 
         return [
             'result' => $return
         ];
-    }
-
-    /**
-     * @param $request
-     * @return mixed
-     * @throws BadRequestHttpException
-     * @throws \api_web\exceptions\ValidationException
-     */
-    public function getQueryRests($request)
-    {
-        if (empty($request)) {
-            $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::EGAIS_SERVICE_ID, $this->user->organization_id);
-
-            if (empty($settings)) {
-                throw new BadRequestHttpException('dictionary.egais_get_setting_error');
-            }
-
-            $xml = (new EgaisXmlFiles())->queryRests($settings['fsrar_id']);
-            $return = (new EgaisHelper())->sendEgaisQuery($settings['egais_url'], $xml, 'QueryRests');
-
-            return ['result' => $return];
-        }
-
-        return ['result' => false];
     }
 
     /**
@@ -230,6 +206,6 @@ class EgaisMethods extends WebApi
             throw new BadRequestHttpException('dictionary.egais_get_setting_error');
         }
 
-        return (new EgaisHelper())->getOneDocument($settings['egais_url'], $request);
+        return (new EgaisHelper())->getOneIncomingDoc($settings['egais_url'], $request);
     }
 }

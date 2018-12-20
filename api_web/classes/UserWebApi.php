@@ -841,11 +841,11 @@ class UserWebApi extends \api_web\components\WebApi
      * @param string $indexByField
      * @return array
      */
-    public function getUserOrganizationBusinessList(string $indexByField = null, string $nameTerm = null)
+    public function getUserOrganizationBusinessList(string $indexByField = null, string $name = null)
     {
-        if(isset($nameTerm) && strlen($nameTerm) < 3)
+        if(isset($name) && strlen($name) < 3)
         {
-            throw new BadRequestHttpException('The_search_string_must_be_at_least_3_characters.');
+            return ['result' => null];
         }
 
         $resQuery = (new Query())
@@ -865,8 +865,8 @@ class UserWebApi extends \api_web\components\WebApi
                 ]
             ]);
 
-        if(isset($nameTerm)) {
-            $resQuery->andWhere("a.name LIKE :name", [':name' => '%'.$nameTerm.'%']);
+        if(isset($name)) {
+            $resQuery->andWhere("a.name LIKE :name", [':name' => '%'.$name.'%']);
         }
 
         if (!is_null($indexByField)) {

@@ -727,7 +727,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *
+     *                     "search": {"name":"часть имени"}
      *                  }
      *              )
      *         )
@@ -769,7 +769,7 @@ class DefaultController extends WebApiController
      */
     public function actionAcquirerFilter()
     {
-        $this->response = $this->container->get('UserWebApi')->getUserOrganizationBusinessList();
+        $this->response = $this->container->get('UserWebApi')->getUserOrganizationBusinessList(null, $this->request['search']['name'] ?? null);
     }
 
     /**

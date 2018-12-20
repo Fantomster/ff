@@ -843,7 +843,7 @@ class UserWebApi extends \api_web\components\WebApi
      * @param string $indexByField
      * @return array
      */
-    public function getUserOrganizationBusinessList(string $indexByField = null)
+    public function getUserOrganizationBusinessList(string $indexByField = null, string $name = null)
     {
         $resQuery = (new Query())
             ->select(['a.id', 'a.name'])
@@ -861,6 +861,11 @@ class UserWebApi extends \api_web\components\WebApi
                     Role::ROLE_ADMIN,
                 ]
             ]);
+
+        if(isset($name) && mb_strlen(trim($name)) > 3) {
+            $resQuery->andWhere("a.name LIKE :name", [':name' => '%'.$name.'%']);
+        }
+
         if (!is_null($indexByField)) {
             $resQuery->indexBy($indexByField);
         }

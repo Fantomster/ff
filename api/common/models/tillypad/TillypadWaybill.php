@@ -1,6 +1,6 @@
 <?php
 
-namespace api\common\models\iiko;
+namespace api\common\models\tillypad;
 
 use api\common\models\AllMaps;
 use api_web\helpers\WebApiHelper;
@@ -12,7 +12,7 @@ use frontend\modules\clientintegr\components\CreateWaybillByOrderInterface;
 use Yii;
 use frontend\controllers\ClientController;
 use yii\helpers\ArrayHelper;
-use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
+use frontend\modules\clientintegr\modules\iiko\helpers\TillypadApi;
 use api_web\components\Registry;
 
 /**
@@ -39,7 +39,7 @@ use api_web\components\Registry;
  * @property integer $service_id
  * @property Order   $order;
  */
-class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface
+class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface
 {
 
     const AUTOSTATUS_NEW = 1;
@@ -234,15 +234,6 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         $xml->addChild('dateIncoming', $doc_date);
         $xml->addChild('incomingDate', $doc_date);
 
-        $arr = explode(' ', $this->payment_delay_date);
-        if (isset($arr[1])) {
-            $date_delay = $arr[0] . " " . date('H:i:s');
-        } else {
-            $date_delay = $this->payment_delay_date;
-        }
-        $doc_date_delay = \Yii::$app->formatter->asDatetime($date_delay, WebApiHelper::$formatDate);
-        $xml->addChild('dueDate', $doc_date_delay);
-
         $xml->addChild('defaultStore', $model->store->uuid);
         $xml->addChild('supplier', $model->agent->uuid);
         $xml->addChild('status', 'NEW');
@@ -384,7 +375,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             throw new \Exception('Ошибка при экспорте накладных в авторежиме');
         }
 
-        $api = iikoApi::getInstance();
+        $api = TillypadApi::getInstance();
 
         if ($api->auth()) {
 

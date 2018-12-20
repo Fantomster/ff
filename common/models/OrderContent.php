@@ -348,7 +348,7 @@ class OrderContent extends \yii\db\ActiveRecord
     {
         $orgId = $this->order->client_id;
         $settingMainOrg = IntegrationSettingValue::getSettingsByServiceId($serviceId, $orgId, ['main_org']);
-        if ($settingMainOrg){
+        if ($settingMainOrg) {
             $orgId = $settingMainOrg;
         }
 
@@ -359,5 +359,50 @@ class OrderContent extends \yii\db\ActiveRecord
                 'organization_id' => $orgId,
                 'vendor_id'       => $this->order->vendor_id,
             ])->exists();
+    }
+
+    /**
+     *  Проверяем изменился ли атрибут
+     *
+     * @param        $attribute
+     * @param string $comparedAttribute
+     * @return bool|null
+     */
+    public function changedAttribute($attribute, $comparedAttribute = '>')
+    {
+        $result = null;
+        if ($this->isAttributeChanged($attribute) && !$this->isNewRecord) {
+            if ($this->getAttribute($attribute) != $this->getOldAttribute($attribute)) {
+                switch ($comparedAttribute) {
+                    case '>':
+                        $result = $this->getAttribute($attribute) > $this->getOldAttribute($attribute);
+                        break;
+                    case '<':
+                        $result = $this->getAttribute($attribute) < $this->getOldAttribute($attribute);
+                        break;
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param        $attribute
+     * @param string $comparedAttribute
+     * @return string
+     */
+    public function getCssClassChatMessage($attribute, $comparedAttribute = '>')
+    {
+        if (is_null($this->changedAttribute($attribute, $comparedAttribute))) {
+            return 'action-not-changed';
+        }
+
+        if ($this->changedAttribute($attribute, $comparedAttribute) === true) {
+            return 'action-raised';
+        }
+
+        if ($this->changedAttribute($attribute, $comparedAttribute) === false) {
+            return 'action-lowered';
+        }
     }
 }

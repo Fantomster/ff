@@ -7,24 +7,6 @@ use \api_web\helpers\CurrencyHelper;
  * @var \api_web\modules\integration\classes\documents\OrderContent[] $deleted
  */
 
-/**
- * @param \yii\db\ActiveRecord $model
- * @param                      $attribute
- * @return string
- */
-function getActionClass($model, $attribute)
-{
-    $class = '';
-    if ($model->getAttribute($attribute) != $model->getOldAttribute($attribute)) {
-        if ($model->getAttribute($attribute) > $model->getOldAttribute($attribute)) {
-            $class = 'action-raised';
-        } else {
-            $class = 'action-lowered';
-        }
-    }
-    return $class;
-}
-
 ?>
 <?php if (!empty($changed) || !empty($deleted)): ?>
     <table class="table">
@@ -41,19 +23,16 @@ function getActionClass($model, $attribute)
         <tbody>
 
         <?php if (!empty($changed)): $i = 0; ?>
-            <?php foreach ($changed as $model) : ?>
-                <?php if ($model->isNewRecord) {
+            <?php foreach ($changed as $model) : $new = $model->isNewRecord; ?>
+                <?php if ($new) {
                     $model->refresh();
-                    $add = true;
-                } else {
-                    $add = false;
                 } ?>
-                <tr class="<?= $add ? 'action-added' : 'action-changed' ?>">
+                <tr class="<?= $new ? 'action-added' : 'action-changed' ?>">
                     <td class="order"><?= ++$i ?></td>
                     <td class="name"><?= $model->product_name ?></td>
                     <td class="article"><?= $model->article ?></td>
-                    <td class="quantity <?= getActionClass($model, 'quantity') ?>"><?= $model->quantity ?></td>
-                    <td class="price <?= getActionClass($model, 'price') ?>">
+                    <td class="quantity <?= $model->getCssClassChatMessage('quantity') ?>"><?= $model->quantity ?></td>
+                    <td class="price <?= $model->getCssClassChatMessage('price') ?>">
                         <?= CurrencyHelper::asDecimal($model->price) ?>
                         <?= $model->getCurrency()->symbol ?>
                         <?= $model->product->ed ? '/' . $model->product->ed : '' ?>
@@ -65,7 +44,7 @@ function getActionClass($model, $attribute)
             <?php endforeach; ?>
         <?php endif; ?>
 
-        <?php if (!empty($deleted)): $i = 0; ?>
+        <?php if (!empty($deleted)): ?>
             <?php foreach ($deleted as $model): ?>
                 <tr class="action-removed">
                     <td class="order"><?= ++$i ?></td>

@@ -330,10 +330,11 @@ class OrderNotice
      * @param      $order_id
      * @param      $message
      * @param bool $danger
+     * @param null $messageFcm
      * @return bool
      * @throws \Exception
      */
-    private function sendSystemMessage($user, $order_id, $message, $danger = false)
+    private function sendSystemMessage($user, $order_id, $message, $danger = false, $messageFcm = null)
     {
         try {
             $order = Order::findOne(['id' => $order_id]);
@@ -358,7 +359,7 @@ class OrderNotice
 
             $body = $controller->renderPartial('@frontend/views/order/_chat-message', [
                 'name'      => '',
-                'message'   => $newMessage->message,
+                'message'   => $messageFcm ?? strip_tags($newMessage->message),
                 'time'      => WebApiHelper::asDatetime($newMessage->created_at),
                 'isSystem'  => 1,
                 'sender_id' => $user->id,
@@ -386,7 +387,7 @@ class OrderNotice
                     'organization'  => $newMessage->recipient_id,
                     'notifications' => uniqid(),
                 ], [
-                    'body'     => $newMessage->message,
+                    'body'     => $messageFcm ?? strip_tags($newMessage->message),
                     'date'     => WebApiHelper::asDatetime(),
                     'order_id' => $order_id
                 ]);
@@ -408,7 +409,7 @@ class OrderNotice
                     'organization'  => $newMessage->recipient_id,
                     'notifications' => uniqid(),
                 ], [
-                    'body'     => $newMessage->message,
+                    'body'     => $messageFcm ?? strip_tags($newMessage->message),
                     'date'     => WebApiHelper::asDatetime(),
                     'order_id' => $order_id
                 ]);
@@ -489,7 +490,7 @@ class OrderNotice
                 'changed' => $changed,
                 'deleted' => $deleted
             ]);
-            $this->sendSystemMessage($senderUser, $order->id, $systemMessage, false);
+            $this->sendSystemMessage($senderUser, $order->id, $systemMessage, false, $subject);
         }
     }
 

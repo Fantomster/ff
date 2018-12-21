@@ -50,14 +50,33 @@ if (!$selectedStore || count($selectedStore) == 0) {
 
     ?>
 
+    <?php
+
+    if (!$model->doc_date) {
+        $model->doc_date = date('d.m.Y', time());
+    } else {
+        $model->doc_date = date('d.m.Y', strtotime($model->doc_date));
+    }
+    if (!$model->payment_delay_date) {
+        $model->payment_delay_date = date('d.m.Y', time());
+    } else {
+        $model->payment_delay_date = date('d.m.Y', strtotime($model->payment_delay_date));
+    }
+    ?>
+
     <?php echo $form->field($model, 'agent_uuid')->widget(Select2::class, [
-        'data' => iikoAgent::getAgents($orgId),
-        'options' => [
+        'data'          => iikoAgent::getAgents($orgId),
+        'options'       => [
             'options' => $agentPaymentDelays,
         ],
-        'pluginEvents' => [
+        'pluginEvents'  => [
             "change" => "function() {
-                var dateObj = Math.round(new Date().getTime() / 1000);
+                var dateStr = '$model->doc_date';
+                var dateStr_day = dateStr.substring(0,2);
+                var dateStr_month = dateStr.substring(3,5);
+                var dateStr_year = dateStr.substring(6,10);
+                var dateString = dateStr_year + '-' + dateStr_month + '-' + dateStr_day + 'T00:00:00.000Z';
+                var dateObj = Math.round(new Date(dateString).getTime() / 1000);
                 var newDate = new Date((dateObj + $('option[value='+ $(this).val() +']').attr('data-payment-delay') * 24 * 60 * 60) * 1000);
                 var y = newDate.getFullYear();
                 var m = newDate.getMonth() + 1;
@@ -70,50 +89,60 @@ if (!$selectedStore || count($selectedStore) == 0) {
         ],
         'pluginOptions' => [
             'allowClear' => true],
-        'id' => 'orgFilter'
+        'id'            => 'orgFilter'
     ]);
     ?>
 
     <?php echo $form->field($model, 'store_id')->dropDownList($selectedStore) ?>
-    <?php
-
-    if (!$model->doc_date) {
-        $model->doc_date = date('d.m.Y', time());
-    } else {
-        $model->doc_date = date('d.m.Y', strtotime($model->doc_date));
-    }
-    if(!$model->payment_delay_date) {
-        $model->payment_delay_date = date('d.m.Y', time());
-    } else {
-        $model->payment_delay_date = date('d.m.Y', strtotime($model->payment_delay_date));
-    }
-    ?>
 
     <?= $form->field($model, 'doc_date')->label('Дата документа')->
     widget(DatePicker::class, [
-        'type' => DatePicker::TYPE_COMPONENT_APPEND,
+        'type'          => DatePicker::TYPE_COMPONENT_APPEND,
         'convertFormat' => true,
-        'layout' => '{picker}{input}',
+        'layout'        => '{picker}{input}',
         'pluginOptions' => [
-            'autoclose' => true,
-            'format' => 'dd.MM.yyyy',
+            'autoclose'      => true,
+            'format'         => 'dd.MM.yyyy',
             'todayHighlight' => false,
+        ],
+        'pluginEvents'  => [
+            "change" => "function() {
+                var dateStr = $('#iikowaybill-doc_date').val();
+                console.log(dateStr);
+                var dateStr_day = dateStr.substring(0,2);
+                var dateStr_month = dateStr.substring(3,5);
+                var dateStr_year = dateStr.substring(6,10);
+                var dateString = dateStr_year + '-' + dateStr_month + '-' + dateStr_day + 'T00:00:00.000Z';
+                var dateObj = Math.round(new Date(dateString).getTime() / 1000);
+                var paymentDelay = $('#iikowaybill-agent_uuid option:selected').attr('data-payment-delay');
+                var newDate = new Date((dateObj + paymentDelay * 24 * 60 * 60) * 1000);
+                var y = newDate.getFullYear();
+                var m = newDate.getMonth() + 1;
+                if (m < 10) {m = '0' + m;}
+                var d = newDate.getDate();
+                if (d < 10) {d = '0' + d;}
+                var res = d + '.' + m + '.' + y;
+                $('#iikowaybill-payment_delay_date').val(res);
+            }",
         ],
     ]);
     ?>
 
+    <?php echo $form->field($model, 'payment_delay_date')->textInput(['maxlength' => true, 'readonly' => true]) ?>
+
     <?php
-    echo $form->field($model, 'payment_delay_date')->label('Дата отсрочки платежа')->
-    widget(DatePicker::class, [
-        'type' => DatePicker::TYPE_COMPONENT_APPEND,
-        'convertFormat' => true,
-        'layout' => '{picker}{input}',
-        'pluginOptions' => [
-            'autoclose' => true,
-            'format' => 'dd.MM.yyyy',
-            'todayHighlight' => false,
-        ],
-    ]);
+    /*    echo $form->field($model, 'payment_delay_date')->label('Дата отсрочки платежа')->
+        widget(DatePicker::class, [
+            'type' => DatePicker::TYPE_COMPONENT_APPEND,
+            'convertFormat' => true,
+            'layout' => '{input}',
+            'readonly' => true,
+            'pluginOptions' => [
+                'autoclose' => true,
+                'format' => 'dd.MM.yyyy',
+                'todayHighlight' => false,
+            ],
+        ]);*/
     ?>
 
     <?php echo $form->field($model, 'note')->textInput(['maxlength' => true]) ?>

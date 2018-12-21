@@ -2,50 +2,46 @@
 
 namespace frontend\controllers;
 
-use api\common\models\merc\mercDicconst;
-use api\common\models\merc\MercVsd;
-use api\common\models\merc\search\mercVSDSearch;
-use api_web\classes\CartWebApi;
-use api_web\classes\RkeeperWebApi;
-use api_web\modules\integration\modules\rkeeper\models\rkeeperOrder;
-use api_web\modules\integration\modules\rkeeper\models\rkeeperStore;
-use common\components\COOK;
-use common\models\Cart;
-use common\models\CatalogGoodsBlocked;
-use common\models\OrderStatus;
-use common\models\search\OrderProductsSearch;
-use frontend\helpers\GenerationTime;
 use Yii;
-use common\components\SearchOrdersComponent;
-use yii\base\Controller;
-use yii\db\Expression;
+use Exception;
+use kartik\mpdf\Pdf;
+use yii\helpers\Url;
 use yii\helpers\Json;
 use yii\helpers\Html;
-use common\models\search\OrderCatalogSearch;
-use common\models\CatalogGoods;
-use common\models\CatalogBaseGoods;
-use common\models\Order;
+use common\models\Cart;
 use common\models\Role;
+use common\models\Order;
+use yii\base\Controller;
+use common\components\COOK;
+use common\models\OrderChat;
+use common\models\OrderStatus;
+use yii\filters\AccessControl;
+use api_web\classes\CartWebApi;
+use common\models\CatalogGoods;
 use common\models\OrderContent;
 use common\models\Organization;
-use common\models\search\OrderSearch;
-use common\models\search\OrderSearch2;
-use common\models\search\OrderContentSearch;
-use common\models\ManagerAssociate;
-use common\models\OrderChat;
-use common\models\OrderAttachment;
 use common\models\guides\Guide;
-use common\models\search\GuideSearch;
-use common\models\guides\GuideProduct;
-use common\models\search\GuideProductsSearch;
-use common\models\search\BaseProductSearch;
-use common\models\search\VendorSearch;
+use api_web\components\FireBase;
+use api_web\helpers\WebApiHelper;
 use common\components\AccessRule;
-use kartik\mpdf\Pdf;
-use yii\filters\AccessControl;
+use common\models\OrderAttachment;
+use api\common\models\merc\MercVsd;
+use common\models\CatalogBaseGoods;
+use common\models\ManagerAssociate;
+use frontend\helpers\GenerationTime;
 use yii\web\BadRequestHttpException;
-use yii\helpers\Url;
-use Exception;
+use common\models\search\GuideSearch;
+use common\models\CatalogGoodsBlocked;
+use common\models\search\OrderSearch2;
+use common\models\guides\GuideProduct;
+use common\models\search\VendorSearch;
+use api\common\models\merc\mercDicconst;
+use common\models\search\BaseProductSearch;
+use common\components\SearchOrdersComponent;
+use common\models\search\OrderCatalogSearch;
+use common\models\search\OrderContentSearch;
+use common\models\search\OrderProductsSearch;
+use common\models\search\GuideProductsSearch;
 
 class OrderController extends DefaultController
 {
@@ -2388,6 +2384,18 @@ class OrderController extends DefaultController
                         Yii::$app->sms->send($text, $recipient->profile->phone, $order->id);
                     }
             }
+        }
+        $systemMessage = $order->vendor->name . Yii::t('message', 'frontend.controllers.order.cancelled_order', ['ru' => ' отменил заказ!']);
+        foreach ($order->client->getAssociatedManagers($order->vendor_id) as $manager) {
+            FireBase::getInstance()->update([
+                'user'          => $manager->id,
+                'organization'  => $order->client_id,
+                'notifications' => uniqid(),
+            ], [
+                'body'     => $systemMessage,
+                'date'     => WebApiHelper::asDatetime(),
+                'order_id' => $order->id
+            ]);
         }
     }
 

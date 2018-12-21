@@ -338,4 +338,53 @@ class SettingController extends \api_web\components\WebApiController
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
         $this->response = $this->container->get('IntegrationSettingsWebApi')->resetMainOrgSetting($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/integration/setting/get-items-setting",
+     *     tags={"Integration/settings"},
+     *     summary="Список возможных значений для настройки",
+     *     description="Список возможных значений для настройки",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 1,
+     *                      "setting_name": "sh_version"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                   "result": { "value":"comment", 4:"Store House 4", 5:"Store House 5"}
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * )
+     * @throws \Exception
+     */
+
+    public function actionGetItemsSetting()
+    {
+        $this->setLicenseServiceId($this->request['service_id'] ?? null);
+        $this->response = $this->container->get('IntegrationSettingsWebApi')->getItemsSetting($this->request);
+    }
 }

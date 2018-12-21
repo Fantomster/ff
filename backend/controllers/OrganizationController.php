@@ -2,11 +2,15 @@
 
 namespace backend\controllers;
 
+use api_web\components\WebApi;
 use backend\models\TestVendorsSearch;
+use common\models\AllService;
 use common\models\edi\EdiOrganization;
 use common\models\edi\EdiProvider;
 use common\models\Franchisee;
 use common\models\FranchiseeAssociate;
+use common\models\IntegrationSetting;
+use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
 use common\models\RelationSuppRest;
@@ -18,6 +22,7 @@ use common\models\Organization;
 use common\models\Role;
 use backend\models\OrganizationSearch;
 use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
@@ -69,7 +74,9 @@ class OrganizationController extends Controller
                             'add-license',
                             'edi-settings',
                             'update-edi-settings',
-                            'create-edi-settings'
+                            'create-edi-settings',
+                            'integration-settings',
+                            'update-integration-settings'
                         ],
                         'allow'   => true,
                         'roles'   => [
@@ -540,6 +547,45 @@ class OrganizationController extends Controller
             'ediOrganizations'     => $ediOrganizations,
             'orgID'                => $id,
             'checkedOrganizations' => $checkedOrganizations
+        ]);
+    }
+
+    /**
+     * @param $id
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function actionIntegrationSettings($id)
+    {
+        $organization = Organization::findOne(['id' => $id]);
+        $api = new WebApi();
+        $list = $api->container->get('IntegrationWebApi')->list([])['services'];
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $list
+        ]);
+
+        return $this->render('integration-settings', [
+            'dataProvider' => $dataProvider,
+            'organization' => $organization
+        ]);
+    }
+
+    public function actionUpdateIntegrationSettings()
+    {
+        $org_id = Yii::$app->request->get('org_id');
+        $service_id = Yii::$app->request->get('service_id');
+        $organization = Organization::findOne(['id' => $org_id]);
+        $service = AllService::findOne($service_id);
+        License::checkLicense($organization->id, $service->id);
+
+        $s = IntegrationSetting::find()->where(['service_id' => $service->id])->all();
+
+        return $this->render('update-integration-settings', [
+            'service'      => $service,
+            'organization' => $organization,
+            'settings'     => $s
         ]);
     }
 

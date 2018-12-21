@@ -39,6 +39,8 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
 
     <?= Html::a('Настройки EDI', ['edi-settings', 'id' => $model->id], ['class' => 'btn btn-default', 'style' => 'margin-bottom: 10px;']) ?>
 
+    <?= Html::a('Настройки интеграции', ['integration-settings', 'id' => $model->id], ['class' => 'btn btn-default', 'style' => 'margin-bottom: 10px;']) ?>
+
     <?=
     DetailView::widget([
         'model' => $model,

@@ -479,21 +479,25 @@ class ServiceRkws extends AbstractSyncFactory
             $cb = str_replace('load-dictionary', '', Yii::$app->params['rkeepCallBackURL']) . "send-waybill?" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER . '=' . $guid;
             $this->log('Callback URL and salespoint code for the template are:' . $cb . ' (' . $this->licenseCode . ')');
 
-            $exportApproved = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['useAcceptedDocs']);
+            $settings = IntegrationSettingValue::getSettingsByServiceId(Registry::RK_SERVICE_ID, $this->user->organization_id, ['useAcceptedDocs', 'sh_version']);
+            $exportApproved = $settings['useAcceptedDocs'] ?? 0;
+            $shVersion = $settings['sh_version'] ?? 4;
+
+            $records = RkwsWaybill::prepareItemsWaybill($records, $shVersion);
 
             $outerAgent = OuterAgent::findOne($waybill->outer_agent_id);
             $outerStore = OuterStore::findOne($waybill->outer_store_id);
-            $xml = Yii::$app->view->render($this->dirResponseXml . '/' . ucfirst('Waybill'),
-                [
-                    'waybill'        => $waybill,
-                    'agentUid'       => $outerAgent->outer_uid,
-                    'storeUid'       => $outerStore->outer_uid,
-                    'records'        => $records,
-                    'exportApproved' => $exportApproved ?? 0,
-                    'code'           => $this->licenseCode,
-                    'guid'           => $guid,
-                    'cb'             => $cb,
-                ]);
+            $xml = Yii::$app->view->render($this->dirResponseXml . '/Waybill', [
+                'waybill'        => $waybill,
+                'agentUid'       => $outerAgent->outer_uid,
+                'storeUid'       => $outerStore->outer_uid,
+                'records'        => $records,
+                'exportApproved' => $exportApproved ?? 0,
+                'code'           => $this->licenseCode,
+                'guid'           => $guid,
+                'cb'             => $cb
+            ]);
+
             $this->log($xml);
             $xmlData = $this->sendByCurl($url, $xml, self::COOK_AUTH_PREFIX_SESSION . "=" . $cook . ";");
 

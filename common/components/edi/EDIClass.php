@@ -116,24 +116,12 @@ class EDIClass extends Component
                 if (!isset($position->PRODUCT)) continue;
                 $contID = (int)$position->PRODUCTIDBUYER;
                 $positionsArray[] = (int)$contID;
+                $arr[$contID] = $this->fillArrayData($position);
                 if ($isDesadv) {
                     $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
                 } else {
                     $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
                 }
-                $arr[$contID]['DELIVEREDQUANTITY'] = (isset($position->DELIVEREDQUANTITY)) ? (float)$position->DELIVEREDQUANTITY : 0.00;
-                $arr[$contID]['PRICE'] = (float)$position->PRICE[0] ?? (float)$position->PRICE ?? 0;
-                $arr[$contID]['PRICEWITHVAT'] = (isset($position->PRICEWITHVAT)) ? (float)$position->PRICEWITHVAT : 0.00;;
-                $arr[$contID]['TAXRATE'] = (isset($position->TAXRATE)) ? (int)$position->TAXRATE : 0;
-                $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
-                $arr[$contID]['WAYBILLNUMBER'] = isset($position->WAYBILLNUMBER) ? $position->WAYBILLNUMBER : null;
-                $arr[$contID]['WAYBILLDATE'] = isset($position->WAYBILLDATE) ? $position->WAYBILLDATE : null;
-                $arr[$contID]['DELIVERYNOTENUMBER'] = isset($position->DELIVERYNOTENUMBER) ? $position->DELIVERYNOTENUMBER : null;
-                $arr[$contID]['DELIVERYNOTEDATE'] = isset($position->DELIVERYNOTEDATE) ? $position->DELIVERYNOTEDATE : null;
-                $arr[$contID]['GTIN'] = isset($position->GTIN) ? $position->GTIN : null;
-                $arr[$contID]['UUID'] = isset($position->UUID) ? $position->UUID : null;
-                $arr[$contID]['AMOUNT'] = isset($position->AMOUNT) ? $position->AMOUNT: null;
-                $arr[$contID]['AMOUNTWITHVAT'] = isset($position->AMOUNTWITHVAT) ? $position->AMOUNTWITHVAT : null;
                 $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
                 $totalPrice += $arr[$contID]['PRICE'];
             }
@@ -372,18 +360,16 @@ class EDIClass extends Component
             $barcodeArray[] = $barcode;
             $ed = (String)$good->UNIT ?? (String)$good->QUANTITYOFCUINTUUNIT;
             $ed = OuterUnit::getInnerName($ed, Registry::EDI_SERVICE_ID);
-            $goodsArray[$barcode]['name'] = (String)$good->PRODUCTNAME ?? '';
-            $goodsArray[$barcode]['price'] = (float)$good->UNITPRICE ?? 0.0;
-            $goodsArray[$barcode]['article'] = (isset($good->IDBUYER) && $good->IDBUYER != '') ? (String)$good->IDBUYER : $barcode;
-            $goodsArray[$barcode]['ed'] = $ed;
-            $goodsArray[$barcode]['units'] = (float)$good->MINORDERQUANTITY ?? (float)$good->QUANTITYOFCUINTU ?? (float)$good->PACKINGMULTIPLENESS;
-            $goodsArray[$barcode]['edi_supplier_article'] = (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String)$good->IDSUPPLIER : $barcode;
-            $goodsArray[$barcode]['vat'] = (int)$good->TAXRATE ?? null;
-            if ($isFollowActionRule) {
-                $goodsArray[$barcode]['action'] = (isset($good->ACTION) && $good->ACTION > 0) ? (int)$good->ACTION : null;
-            } else {
-                $goodsArray[$barcode]['action'] = null;
-            }
+            $goodsArray[$barcode] = [
+                'ed'                   => $ed,
+                'name'                 => (String)$good->PRODUCTNAME ?? '',
+                'price'                => (float)$good->UNITPRICE ?? 0.0,
+                'article'              => (isset($good->IDBUYER) && $good->IDBUYER != '') ? (String)$good->IDBUYER : $barcode,
+                'units'                => (float)$good->MINORDERQUANTITY ?? (float)$good->QUANTITYOFCUINTU ?? (float)$good->PACKINGMULTIPLENESS,
+                'edi_supplier_article' => (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String)$good->IDSUPPLIER : $barcode,
+                'vat'                  => (int)$good->TAXRATE ?? null,
+                'action'               => (isset($good->ACTION) && $good->ACTION > 0) ? (int)$good->ACTION : null,
+            ];
         }
         $catalog_base_goods = (new \yii\db\Query())
             ->select(['id', 'barcode'])
@@ -420,7 +406,7 @@ class EDIClass extends Component
                 if (!$res2) continue;
             } else {
                 $catalogGood = CatalogGoods::findOne(['cat_id' => $relationCatalogID, 'base_goods_id' => $catalogBaseGood->id]);
-                if ($good['action'] == Registry::EDI_PRICAT_ACTION_TYPE_DELETE && $isFollowActionRule && $catalogGood && $catalogGood->service_id == Registry::EDI_SERVICE_ID) {
+                if ($good['action'] == Registry::EDI_PRICAT_ACTION_TYPE_DELETE && $catalogGood && $catalogGood->service_id == Registry::EDI_SERVICE_ID) {
                     $catalogGood->delete();
                     continue;
                 }
@@ -510,5 +496,25 @@ class EDIClass extends Component
     public function insertEdiErrorData($arr): void
     {
         Yii::$app->db->createCommand()->insert(EdiFilesQueue::tableName(), $arr)->execute();
+    }
+
+    private function fillArrayData($position)
+    {
+        $arr = [
+            'DELIVEREDQUANTITY'  => (isset($position->DELIVEREDQUANTITY)) ? (float)$position->DELIVEREDQUANTITY : 0.00,
+            'PRICE'              => (float)$position->PRICE[0] ?? (float)$position->PRICE ?? 0,
+            'PRICEWITHVAT'       => (isset($position->PRICEWITHVAT)) ? (float)$position->PRICEWITHVAT : 0.00,
+            'TAXRATE'            => (isset($position->TAXRATE)) ? (int)$position->TAXRATE : 0,
+            'BARCODE'            => (int)$position->PRODUCT,
+            'WAYBILLNUMBER'      => isset($position->WAYBILLNUMBER) ? $position->WAYBILLNUMBER : null,
+            'WAYBILLDATE'        => isset($position->WAYBILLDATE) ? $position->WAYBILLDATE : null,
+            'DELIVERYNOTENUMBER' => isset($position->DELIVERYNOTENUMBER) ? $position->DELIVERYNOTENUMBER : null,
+            'DELIVERYNOTEDATE'   => isset($position->DELIVERYNOTEDATE) ? $position->DELIVERYNOTEDATE : null,
+            'GTIN'               => isset($position->GTIN) ? $position->GTIN : null,
+            'UUID'               => isset($position->UUID) ? $position->UUID : null,
+            'AMOUNT'             => isset($position->AMOUNT) ? $position->AMOUNT : null,
+            'AMOUNTWITHVAT'      => isset($position->AMOUNTWITHVAT) ? $position->AMOUNTWITHVAT : null,
+        ];
+        return $arr;
     }
 }

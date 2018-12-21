@@ -139,7 +139,7 @@ class cerberApi extends baseApi
      * @param $country_guid
      * @return array
      */
-    public function getForeignEnterpriseList($name, $country_guid)
+    public function getForeignEnterpriseList($name, $country_guid, $hc = null)
     {
         $mask = '/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/';
         preg_match_all($mask, $name, $list);
@@ -149,8 +149,18 @@ class cerberApi extends baseApi
                 ->limit(20)->all();
         }
         else {
-            $result = VetisForeignEnterprise::find()->where(['active' => true, 'last' => true, 'country_guid' => $country_guid])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")
-                ->limit(20)->all();
+            $query = VetisForeignEnterprise::find()->where(['active' => true, 'last' => true, 'country_guid' => $country_guid]);
+
+            if(!empty($name)) {
+                $query->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)");
+            }
+
+
+            if(isset($hc)) {
+                $query->andWhere(['owner_guid' => $hc]);
+            }
+
+            $result = $query->limit(20)->all();
         }
 
         if (!empty($result)) {
@@ -171,7 +181,7 @@ class cerberApi extends baseApi
      * @param $country_guid
      * @return array
      */
-    public function getRussianEnterpriseList($name)
+    public function getRussianEnterpriseList($name, $hc = null)
     {
         $mask = '/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/';
         preg_match_all($mask, $name, $list);
@@ -181,9 +191,18 @@ class cerberApi extends baseApi
                 ->limit(20)
                 ->all();
         } else {
-            $result = VetisRussianEnterprise::find()->where(['active' => true, 'last' => true])->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)")
-                ->limit(20)
-                ->all();
+            $query = VetisRussianEnterprise::find()->where(['active' => true, 'last' => true]);
+
+            if(!empty($name)) {
+                $query->andWhere("MATCH (`name`) AGAINST ('$name*' IN BOOLEAN MODE)");
+            }
+
+
+            if(!empty($hc)) {
+                $query->andWhere(['owner_guid' => $hc]);
+            }
+
+           $result = $query->limit(20)->all();
         }
 
         if (!empty($result)) {

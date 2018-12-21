@@ -6,6 +6,7 @@ use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercService;
 use api\common\models\merc\MercVsd;
 use common\models\vetis\VetisBusinessEntity;
+use common\models\vetis\VetisForeignEnterprise;
 use common\models\vetis\VetisProductItem;
 use common\models\vetis\VetisRussianEnterprise;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
@@ -23,6 +24,7 @@ use frontend\modules\clientintegr\modules\merc\models\transportVsd\step3Form;
 use frontend\modules\clientintegr\modules\merc\models\transportVsd\step4Form;
 use Yii;
 use yii\bootstrap\ActiveForm;
+use yii\helpers\ArrayHelper;
 use yii\web\Response;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
@@ -273,35 +275,32 @@ class TransportVsdController extends \frontend\modules\clientintegr\controllers\
         }
     }
 
-    public function actionGetHc($recipient_guid, $inn = null)
+    public function actionGetHc($recipient_guid = null, $inn = null)
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         try {
-            $hc = cerberApi::getInstance()->getEnterpriseByGuid($recipient_guid);
-            if (!isset($hc)) {
-                return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
-            } else {
-                if (!isset($inn) || $inn == 'null') {
-                    if (isset($hc->owner)) {
-                        $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
-                    } else {
-                        return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
-                    }
+            if(isset($recipient_guid)) {
+                $recipient = cerberApi::getInstance()->getEnterpriseByGuid($recipient_guid);
+                if(isset ($recipient->owner->guid)) {
+                    $hc = cerberApi::getInstance()->getBusinessEntityByGuid($recipient->owner->guid);
                 }
-                else
-                {
+            }
+
+            if(!isset($hc)) {
+                if (isset($inn) && $inn != 'null') {
                     $hc = VetisBusinessEntity::find()->where(['inn' => $inn, 'active' => true, 'last' => 1])->limit(1)->one();
                 }
-
             }
-        } catch (\SoapFault $e) {
-            return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
-        }
-        if(isset($hc)) {
-            return (['result' => true, 'name' => $hc->name, 'inn' => $hc->inn ?? 'Не известно', 'uuid' => $hc->guid]);
-        }
-        else
-        {
+
+            if(isset($hc)) {
+                return (['result' => true, 'name' => $hc->name, 'inn' => $hc->inn ?? 'Не известно', 'guid' => $hc->guid]);
+            }
+            else
+            {
+                throw new \Exception('Error');
+            }
+
+        } catch (\Throwable $e) {
             return (['result' => false, 'name' => 'Не удалось загрузить Фирму-получателя']);
         }
     }

@@ -53,4 +53,56 @@ class RkwsWaybill extends ServiceRkws
         return $array;
     }
 
+    /**
+     * @param $items
+     * @param $shVersion
+     * @return array
+     */
+    public static function prepareItemsWaybill($items, $shVersion)
+    {
+        $result = [];
+        /** @method getItemSh4 $method */
+        /** @method getItemSh5 $method */
+        $method = 'getItemSh' . $shVersion;
+        if (is_iterable($items)) {
+            foreach ($items as $record) {
+                $result[] = self::{$method}($record);
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param $rec
+     * @return array
+     */
+    private static function getItemSh4($rec)
+    {
+        return [
+            'mu'      => $rec["unit_rid"],
+            'quant'   => ($rec["quantity_waybill"] * 1000),
+            'rid'     => $rec['product_rid'],
+            'sum'     => ($rec['sum_without_vat'] * 100),
+            'vatrate' => ($rec['vat_waybill'] * 100),
+            'vatsum'  => round((($rec['sum_without_vat'] * 100) * ($rec['vat_waybill'] / 100)), 2)
+        ];
+    }
+
+    /**
+     * @param $rec
+     * @return array
+     */
+    private static function getItemSh5($rec)
+    {
+        $vatSumm = ($rec['sum_without_vat'] * ($rec['vat_waybill'] / 100));
+        return [
+            'mu'      => $rec["unit_rid"],
+            'quant'   => ($rec["quantity_waybill"] * 1000),
+            'rid'     => $rec['product_rid'],
+            'vatrate' => ($rec['vat_waybill'] * 100),
+            'sum'     => str_replace('.', ',', round($rec['sum_without_vat'], 2)),
+            'vatsum'  => str_replace('.', ',', round($vatSumm, 2)),
+        ];
+    }
+
 }

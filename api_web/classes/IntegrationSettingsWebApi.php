@@ -9,7 +9,9 @@ use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
 use common\models\OuterProductMap;
 use yii\db\Query;
+use yii\helpers\Json;
 use yii\web\BadRequestHttpException;
+use yii\web\JsonParser;
 
 /**
  * Class IntegrationSettingsWebApi
@@ -296,4 +298,50 @@ class IntegrationSettingsWebApi extends WebApi
         \Yii::$app->db_api->createCommand($data_update)->execute();
     }
 
+    /**
+     * Спиосок возможных значения для настроек
+     *
+     * @param $request
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+    public function getItemsSetting($request)
+    {
+        $this->validateRequest($request, ['service_id', 'setting_name']);
+
+        $setting = IntegrationSetting::findOne(['service_id' => $request['service_id'], 'name' => $request['setting_name']]);
+
+        if (empty($setting)) {
+            throw new BadRequestHttpException('setting.not_found');
+        }
+
+        switch ($setting->type) {
+            case 'input_text':
+            case 'password':
+                $type = "string";
+                break;
+            default:
+                $type = "json";
+        }
+
+        return $this->getItems($setting->item_list, $type);
+    }
+
+    /**
+     * @param $item_list
+     * @param $type
+     * @return mixed
+     */
+    private function getItems($item_list, $type)
+    {
+        $r = '';
+        if ($type == 'json') {
+            if (!empty($item_list)) {
+                $r = Json::decode($item_list, true);
+            } else {
+                $r = [];
+            }
+        }
+        return $r;
+    }
 }

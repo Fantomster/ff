@@ -444,8 +444,13 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             $taxVat = (iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
             foreach ($records as $record) {
                 $wdmodel = new iikoWaybillData();
-                ///$wdmodel->setScenario('autoWaybill');
-                if (isset($record->invoiceContent)) {
+                if (($record->into_quantity != null) and ($record->into_price != null) and ($record->into_price_vat != null) and ($record->into_price_sum != null) and ($record->into_price_sum_vat != null) and ($record->vat_product != null) and ($record->quantity == $record->into_quantity)) {
+                    $wdmodel->quant = $record->into_quantity;
+                    $wdmodel->sum = $record->into_price_sum;
+                    $wdmodel->defquant = $record->into_quantity;
+                    $wdmodel->defsum = $record->into_price_sum;
+                    $wdmodel->vat = $record->vat_product * 100;
+                } elseif (isset($record->invoiceContent)) {
                     $wdmodel->quant = $record->invoiceContent->quantity;
                     $wdmodel->sum = $record->invoiceContent->sum_without_nds;
                     $wdmodel->defquant = $record->invoiceContent->quantity;

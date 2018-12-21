@@ -114,7 +114,10 @@ class EDIClass extends Component
 
             foreach ($positions as $position) {
                 if (!isset($position->PRODUCT)) continue;
-                $contID = (int)$position->PRODUCTIDBUYER;
+                $productIDBuyer = (int)$position->PRODUCTIDBUYER;
+                $productOrderContent = OrderContent::findOne(['order_id' => $order->id, 'product_id' => $productIDBuyer]);
+                if (!$productOrderContent) continue;
+                $contID = $productOrderContent->id;
                 $positionsArray[] = (int)$contID;
                 if ($isDesadv) {
                     $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
@@ -132,7 +135,7 @@ class EDIClass extends Component
                 $arr[$contID]['DELIVERYNOTEDATE'] = isset($position->DELIVERYNOTEDATE) ? $position->DELIVERYNOTEDATE : null;
                 $arr[$contID]['GTIN'] = isset($position->GTIN) ? $position->GTIN : null;
                 $arr[$contID]['UUID'] = isset($position->UUID) ? $position->UUID : null;
-                $arr[$contID]['AMOUNT'] = isset($position->AMOUNT) ? $position->AMOUNT: null;
+                $arr[$contID]['AMOUNT'] = isset($position->AMOUNT) ? $position->AMOUNT : null;
                 $arr[$contID]['AMOUNTWITHVAT'] = isset($position->AMOUNTWITHVAT) ? $position->AMOUNTWITHVAT : null;
                 $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
                 $totalPrice += $arr[$contID]['PRICE'];
@@ -304,7 +307,7 @@ class EDIClass extends Component
             if (in_array($action, [Registry::EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE, Registry::EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE])) {
                 $isDeleteEmptyPosition = false;
                 $isUpdatePosition = true;
-            } elseif($action == Registry::EDI_PRICAT_ACTION_TYPE_DELETE) {
+            } elseif ($action == Registry::EDI_PRICAT_ACTION_TYPE_DELETE) {
                 $isDeleteEmptyPosition = true;
                 $isDeletePosition = true;
                 $isUpdatePosition = false;
@@ -318,7 +321,7 @@ class EDIClass extends Component
             if (in_array($action, [Registry::EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE, Registry::EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE])) {
                 $isDeleteEmptyPosition = false;
                 $isUpdatePosition = true;
-            } elseif($action == Registry::EDI_PRICAT_ACTION_TYPE_DELETE) {
+            } elseif ($action == Registry::EDI_PRICAT_ACTION_TYPE_DELETE) {
                 $isDeleteEmptyPosition = true;
                 $isDeletePosition = true;
                 $isUpdatePosition = false;

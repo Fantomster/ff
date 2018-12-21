@@ -139,9 +139,7 @@ class Registry
     static $operation_code_send_waybill = [
         self::RK_SERVICE_ID           => 33,
         self::IIKO_SERVICE_ID         => 5,
-        self::TILLYPAD_SERVICE_ID     => 5,
-        self::ONE_S_CLIENT_SERVICE_ID => 0,
-        self::EGAIS_SERVICE_ID        => 1
+        self::TILLYPAD_SERVICE_ID     => 5
     ];
 
     /** @var array Список ставок НДС */

@@ -10,6 +10,13 @@ use yii\web\JsExpression;
 
 $this->title = Yii::t('message', 'frontend.views.mercury.new_transport_vsd', ['ru'=>'Новый транспортный ВСД ']);
 $urlToGetHC = \yii\helpers\Url::to(['get-hc']);
+
+$this->registerCSS("
+    .select2-container {
+    width: 100% !important;
+    }
+");
+
 ?>
 <section class="content-header">
         <h1 class="margin-right-350">
@@ -58,19 +65,25 @@ $urlToGetHC = \yii\helpers\Url::to(['get-hc']);
             $url = \yii\helpers\Url::to(['stock-entry/producers-list']);
             $desc = '';//empty($model->city) ? '' : City::findOne($model->city)->description;
 
+            $customJs = <<< JS
+var hc_guid = null;
+JS;
+            $this->registerJs($customJs, $this::POS_HEAD);
+
             echo $form->field($model, 'recipient')->widget(Select2::classname(), [
                 'initValueText' => $desc, // set the initial display text
                 'options' => ['placeholder' => 'Укажите название предприятия для поиска  ...'],
                 'pluginOptions' => [
-                    'allowClear' => true,
-                    'minimumInputLength' => 3,
+                    'allowClear' => false,
+                    'minimumInputLength' => 3,//new JsExpression('(hc_guid === null) ? 0 : 3'),
                     'language' => [
                         'errorLoading' => new JsExpression("function () { return 'Загрузка результатов...'; }"),
                     ],
                     'ajax' => [
                         'url' => $url,
                         'dataType' => 'json',
-                        'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                        'data' => new JsExpression('function(params) { 
+                        return {q:params.term, hc:hc_guid}; }'),
                     ],
                     'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
                 ],
@@ -181,9 +194,17 @@ $("document").ready(function(){
                                      url      : url,
                                      success  : function(result) {
                                          $('#step3form-hc_name').val(result.name);
-                                         $('#step3form-hc').val(result.uuid);
+                                         $('#step3form-hc').val(result.guid);
                                          justSubmitted = false;
-                                         $('#hc-inn').val(result.inn);
+                                         hc_guid = result.guid;
+                                         index = ($('#step3form-recipient').attr('data-krajee-select2'));
+                                         options = window[index];
+                                         options.minimumInputLength = 0;
+                                         console.log(hc_guid);
+                                         if(hc_guid == 'undefined' || hc_guid == null || hc_guid == "") {
+                                             options.minimumInputLength = 3;
+                                         }
+                                         $('#step3form-recipient').select2(options);
                                     },
                                     error : function ()
                                     {
@@ -191,6 +212,11 @@ $("document").ready(function(){
                                         $('#step3form-hc').val('Фирма не найдена');
                                         justSubmitted = false;
                                         $('#hc-inn').val('');
+                                        hc_guid = null;
+                                        index = ($('#step3form-recipient').attr('data-krajee-select2'));
+                                        options = window[index];
+                                        options.minimumInputLength = 3;
+                                         $('#step3form-recipient').select2(options);
                                     }
                                 });
      }

@@ -490,6 +490,17 @@ class OrderNotice
                 'changed' => $changed,
                 'deleted' => $deleted
             ]);
+
+            FireBase::getInstance()->update([
+                'chat',
+                'organization' => $senderOrg->id,
+                'dialog'       => $order->id
+            ], [
+                'unread_message_count' => (int)$order->getOrderChatUnreadCount($senderOrg->id),
+                'last_message'         => $subject,
+                'last_message_date'    => WebApiHelper::asDatetime(),
+            ]);
+
             $this->sendSystemMessage($senderUser, $order->id, $systemMessage, false, $subject);
         }
     }

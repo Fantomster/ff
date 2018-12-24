@@ -169,7 +169,7 @@ class Order extends \yii\db\ActiveRecord
             'create_user'           => Yii::t('app', 'Заказ создал'),
             'plan_price'            => Yii::t('app', 'План'),
             'waybill_number'        => Yii::t('app', 'Номер накладной'),
-            'edi_doc_date'          => Yii::t('app', 'Дата накладной заказа по EDI'),
+            'edi_doc_date'          => Yii::t('app', 'Дата накладной заказа по EDI')
         ];
     }
 

@@ -114,10 +114,7 @@ class EDIClass extends Component
 
             foreach ($positions as $position) {
                 if (!isset($position->PRODUCT)) continue;
-                $productIDBuyer = (int)$position->PRODUCTIDBUYER;
-                $productOrderContent = OrderContent::findOne(['order_id' => $order->id, 'product_id' => $productIDBuyer]);
-                if (!$productOrderContent) continue;
-                $contID = $productOrderContent->id;
+                $contID = (int)$position->PRODUCTIDBUYER;
                 $positionsArray[] = (int)$contID;
                 $arr[$contID] = $this->fillArrayData($position);
                 if ($isDesadv) {
@@ -125,19 +122,6 @@ class EDIClass extends Component
                 } else {
                     $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->ACCEPTEDQUANTITY ?? (float)$position->ORDEREDQUANTITY;
                 }
-                $arr[$contID]['DELIVEREDQUANTITY'] = (isset($position->DELIVEREDQUANTITY)) ? (float)$position->DELIVEREDQUANTITY : 0.00;
-                $arr[$contID]['PRICE'] = (float)$position->PRICE[0] ?? (float)$position->PRICE ?? 0;
-                $arr[$contID]['PRICEWITHVAT'] = (isset($position->PRICEWITHVAT)) ? (float)$position->PRICEWITHVAT : 0.00;;
-                $arr[$contID]['TAXRATE'] = (isset($position->TAXRATE)) ? (int)$position->TAXRATE : 0;
-                $arr[$contID]['BARCODE'] = (int)$position->PRODUCT;
-                $arr[$contID]['WAYBILLNUMBER'] = isset($position->WAYBILLNUMBER) ? $position->WAYBILLNUMBER : null;
-                $arr[$contID]['WAYBILLDATE'] = isset($position->WAYBILLDATE) ? $position->WAYBILLDATE : null;
-                $arr[$contID]['DELIVERYNOTENUMBER'] = isset($position->DELIVERYNOTENUMBER) ? $position->DELIVERYNOTENUMBER : null;
-                $arr[$contID]['DELIVERYNOTEDATE'] = isset($position->DELIVERYNOTEDATE) ? $position->DELIVERYNOTEDATE : null;
-                $arr[$contID]['GTIN'] = isset($position->GTIN) ? $position->GTIN : null;
-                $arr[$contID]['UUID'] = isset($position->UUID) ? $position->UUID : null;
-                $arr[$contID]['AMOUNT'] = isset($position->AMOUNT) ? $position->AMOUNT : null;
-                $arr[$contID]['AMOUNTWITHVAT'] = isset($position->AMOUNTWITHVAT) ? $position->AMOUNTWITHVAT : null;
                 $totalQuantity += $arr[$contID]['ACCEPTEDQUANTITY'];
                 $totalPrice += $arr[$contID]['PRICE'];
             }
@@ -312,36 +296,10 @@ class EDIClass extends Component
         }
 
         if ($ediOrganization->pricat_action_attribute_rule == Registry::EDI_PRICAT_ACTION_RULE_DELETE_NOT_EXISTS) {
-            if (in_array($action, [Registry::EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE, Registry::EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE])) {
-                $isDeleteEmptyPosition = false;
-                $isUpdatePosition = true;
-            } elseif ($action == Registry::EDI_PRICAT_ACTION_TYPE_DELETE) {
-                $isDeleteEmptyPosition = true;
-                $isDeletePosition = true;
-                $isUpdatePosition = false;
-            } else {
-                $isDeleteEmptyPosition = true;
-                $isUpdatePosition = true;
-            }
+            $isFollowActionRule = false;
+        } else {
+            $isFollowActionRule = true;
         }
-
-        if ($ediOrganization->pricat_action_attribute_rule == Registry::EDI_PRICAT_ACTION_RULE_FOLLOW_VALUE) {
-            if (in_array($action, [Registry::EDI_PRICAT_ACTION_TYPE_FIRST_UPDATE, Registry::EDI_PRICAT_ACTION_TYPE_SECOND_UPDATE])) {
-                $isDeleteEmptyPosition = false;
-                $isUpdatePosition = true;
-            } elseif ($action == Registry::EDI_PRICAT_ACTION_TYPE_DELETE) {
-                $isDeleteEmptyPosition = true;
-                $isDeletePosition = true;
-                $isUpdatePosition = false;
-            } else {
-                $isDeleteEmptyPosition = false;
-                $isUpdatePosition = false;
-            }
-        }
-        if (!$isDeleteEmptyPosition && !$isUpdatePosition && !$isDeletePosition) {
-            return true;
-        }
-        $isDeleteEmptyPosition = ($ediOrganization->pricat_action_attribute_rule == Registry::EDI_PRICAT_ACTION_RULE_DELETE_NOT_EXISTS) ? true : false;
 
         $organization = Organization::findOne(['id' => $ediOrganization->organization_id]);
 

@@ -512,7 +512,8 @@ class UserController extends WebApiController
      * @SWG\Post(path="/user/vendors",
      *     tags={"User"},
      *     summary="Список поставщиков",
-     *     description="Получить список поставщиков пользователя",
+     *     description="Получить список поставщиков пользователя
+     *     enum_status: {partner, catalog_not_set, send_invite}",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",

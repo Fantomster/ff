@@ -15,6 +15,7 @@ use Yii;
  * @property int $is_active Флаг активности объекта
  * @property string $item_list Список значение по умолчанию в формате JSON, для отображения при начальном выборе, например { 1: "Включено", 2: "Выключено"}
  * @property int $service_id Идентификатор сервиса в таблице all_service
+ * @property int $required_moderation Настройка сервиса обязательна к модерации
  *
  * @property IntegrationSettingValue[] $integrationSettingValues
  */
@@ -55,7 +56,7 @@ class IntegrationSetting extends \yii\db\ActiveRecord
         return [
             [['name', 'comment'], 'required'],
             [['type'], 'string'],
-            [['is_active'], 'integer'],
+            [['is_active', 'required_moderation'], 'integer'],
             [['name', 'default_value', 'comment', 'item_list'], 'string', 'max' => 255],
         ];
     }
@@ -74,6 +75,7 @@ class IntegrationSetting extends \yii\db\ActiveRecord
             'is_active' => 'Флаг активности объекта',
             'item_list' => 'Список значение по умолчанию в формате JSON, для отображения при начальном выборе, ' .
                 'например { 1: \"Включено\", 2: \"Выключено\"}',
+            'required_moderation' => 'Обязателен к модерации',
         ];
     }
 

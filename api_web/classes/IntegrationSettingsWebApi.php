@@ -12,7 +12,6 @@ use common\models\OuterProductMap;
 use yii\db\Query;
 use yii\helpers\Json;
 use yii\web\BadRequestHttpException;
-use yii\web\JsonParser;
 
 /**
  * Class IntegrationSettingsWebApi
@@ -46,7 +45,7 @@ class IntegrationSettingsWebApi extends WebApi
             )
             ->where(
                 IntegrationSettingValue::tableName() . ".org_id = :org and int_set.service_id = :service and int_set.is_active = true", [
-                ':org'     => $this->user->organization_id,
+                ':org' => $this->user->organization_id,
                 ':service' => $post['service_id']
             ])
             ->orderBy('setting_id')
@@ -75,9 +74,9 @@ class IntegrationSettingsWebApi extends WebApi
             ->where(
                 "org_id = :org and service_id = :service and is_active = true and name = :name",
                 [
-                    ':org'     => $this->user->organization_id,
+                    ':org' => $this->user->organization_id,
                     ':service' => $post['service_id'],
-                    ':name'    => $post['name']
+                    ':name' => $post['name']
                 ]
             )
             ->asArray()
@@ -104,6 +103,7 @@ class IntegrationSettingsWebApi extends WebApi
                 $result[$item['name']] = ['error' => $e->getMessage()];
             }
         }
+
         return $result;
     }
 
@@ -118,43 +118,110 @@ class IntegrationSettingsWebApi extends WebApi
      */
     private function updateSetting($service_id, $request)
     {
-        $this->validateRequest($request, ['name']);
+        $this->validateRequest($request, ['name', 'value']);
 
-        if (!isset($request['value'])) {
-            throw new BadRequestHttpException('empty_param|value');
-        }
-        $modelSetting = IntegrationSetting::findOne(['name' => $request['name'], 'service_id' => $service_id, 'is_active' => true]);
-        if (!$modelSetting) {
+        $setting = IntegrationSetting::find()
+            ->where('name = :name AND service_id = :service_id AND is_active = :is_active', [
+                ':name' => $request['name'],
+                ':service_id' => $service_id,
+                ':is_active' => true
+            ])
+            ->one();
+
+        if (empty($setting)) {
             throw new BadRequestHttpException('integration_setting.not_found');
         }
 
-        $model = IntegrationSettingValue::find()
-            ->where(
-                "setting_id = :setting_id and org_id = :org",
-                [
-                    ':setting_id' => $modelSetting->id,
-                    ':org'        => $this->user->organization_id
-                ]
-            )
+        $settingValue = IntegrationSettingValue::find()
+            ->where([
+                'setting_id' => $setting->id,
+                'org_id' => $this->user->organization_id
+            ])
             ->one();
 
-        if (!$model) {
-            $model = new IntegrationSettingValue();
-            $model->setting_id = $modelSetting->id;
-            $model->org_id = $this->user->organization_id;
+        if (empty($setting->required_moderation)) {
+            if (empty($settingValue)) {
+                $settingValue = new IntegrationSettingValue();
+            }
+            $settingValue->setAttributes([
+                'setting_id' => $setting->id,
+                'org_id' => $this->user->organization_id,
+                'value' => $request['value']
+            ]);
+
+            if (!$settingValue->save()) {
+                throw new ValidationException($settingValue->getFirstErrors());
+            }
+
+            if ($setting->name == 'main_org' && !empty($request['value'])) {
+                $this->updateOuterProductMap($this->user->organization_id, $request['value']);
+            }
+
+            return $settingValue->value;
         }
 
-        $model->value = $request['value'];
+        $settingChange = IntegrationSettingChange::find()
+            ->where([
+                'integration_setting_id' => $setting->id,
+                'org_id' => $this->user->organization_id,
+                'old_value' => !empty($settingValue) ? $settingValue->value : null,
+                'new_value' => $request['value'],
+                'is_active' => true
+            ])
+            ->one();
 
-        if (!$model->save()) {
-            throw new ValidationException($model->getFirstErrors());
+        if (empty($settingChange)) {
+            (new IntegrationSettingChange([
+                'org_id' => $this->user->organization_id,
+                'integration_setting_id' => $setting->id,
+                'old_value' => !empty($settingValue) ? $settingValue->value : null,
+                'new_value' => $request['value'],
+                'changed_user_id' => $this->user->id
+            ]))->save();
         }
 
-        if ($modelSetting->name == 'main_org' && !empty($request['value'])) {
-            $this->updateOuterProductMap($this->user->organization_id, $request['value']);
+        return \Yii::t('api_web', 'api_web.moderation_setting_save_msg', [
+            'ru' => 'Ваши настройки отправлены на модерацию'
+        ]);
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function rejectChange($request): array
+    {
+        $this->validateRequest($request, ['service_id', 'setting_id']);
+
+        $setting = IntegrationSetting::find()
+            ->where('service_id = :service_id AND id = :id AND is_active = :is_active', [
+                ':service_id' => $request['service_id'],
+                ':id' => $request['setting_id'],
+                ':is_active' => true
+            ])
+            ->one();
+
+        if (empty($setting)) {
+            throw new BadRequestHttpException('integration_setting.not_found');
         }
 
-        return $model->value;
+        $settingChange = IntegrationSettingChange::find()
+            ->where([
+                'integration_setting_id' => $setting->id,
+                'org_id' => $this->user->organization_id,
+                'is_active' => true
+            ])
+            ->one();
+
+        if (empty($settingChange)) {
+            throw new BadRequestHttpException('integration_setting.not_found');
+        }
+        $settingChange->is_active = 0;
+
+        return [
+            'result' => $settingChange->save()
+        ];
     }
 
     /**
@@ -207,8 +274,8 @@ class IntegrationSettingsWebApi extends WebApi
      * Получение настройки для всех организаций
      *
      * @param string $settingName
-     * @param array  $arOrgIds
-     * @param int    $serviceId
+     * @param array $arOrgIds
+     * @param int $serviceId
      * @return array
      */
     public function getSettingsByOrgIds(string $settingName, array $arOrgIds, int $serviceId)
@@ -351,6 +418,7 @@ class IntegrationSettingsWebApi extends WebApi
                 $r = [];
             }
         }
+
         return $r;
     }
 }

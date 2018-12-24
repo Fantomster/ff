@@ -19,13 +19,11 @@ use yii\behaviors\TimestampBehavior;
  * @property string           $outer_number_code
  * @property string           $outer_number_additional
  * @property string           $outer_store_id
- * @property string           $outer_duedate
  * @property string           $outer_note
  * @property string           $outer_order_date
  * @property string           $outer_agent_id
  * @property int              $vat_included
  * @property string           $doc_date
- * @property int              $is_duedate
  * @property string           $created_at
  * @property string           $updated_at
  * @property string           $exported_at
@@ -85,8 +83,8 @@ class Waybill extends \yii\db\ActiveRecord
     {
         return [
             [['acquirer_id', 'service_id'], 'required'],
-            [['acquirer_id', 'status_id', 'service_id', 'vat_included', 'is_duedate', 'payment_delay'], 'integer'],
-            [['outer_duedate', 'doc_date', 'created_at', 'updated_at', 'exported_at', 'payment_delay_date', 'outer_document_id'], 'safe'],
+            [['acquirer_id', 'status_id', 'service_id', 'vat_included', 'payment_delay'], 'integer'],
+            [['doc_date', 'created_at', 'updated_at', 'exported_at', 'payment_delay_date', 'outer_document_id'], 'safe'],
             [['outer_number_code', 'outer_number_additional', 'outer_note', 'outer_order_date'], 'string', 'max' => 45],
             [['outer_store_id', 'outer_agent_id'], 'integer'],
         ];
@@ -105,7 +103,6 @@ class Waybill extends \yii\db\ActiveRecord
             'outer_number_code'       => 'Outer Number Code',
             'outer_number_additional' => 'Outer Number Additional',
             'outer_store_id'          => 'Outer Store Id',
-            'outer_duedate'           => 'Outer Duedate',
             'outer_note'              => 'Outer Note',
             'outer_order_date'        => 'Outer Order Date',
             'outer_agent_id'          => 'Outer Agent Id',

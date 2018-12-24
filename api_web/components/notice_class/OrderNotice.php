@@ -3,6 +3,7 @@
 namespace api_web\components\notice_class;
 
 use api_web\components\FireBase;
+use api_web\components\Notice;
 use api_web\helpers\WebApiHelper;
 use common\models\Message;
 use common\models\notifications\EmailNotification;
@@ -21,7 +22,6 @@ use yii\swiftmailer\Mailer;
 
 class OrderNotice
 {
-
     /**
      * @param $vendor Organization
      * @return bool
@@ -198,6 +198,8 @@ class OrderNotice
 
         $systemMessage = $organization->name . \Yii::t('message', 'frontend.controllers.order.cancelled_order', ['ru' => ' отменил заказ!']);
         $this->sendSystemMessage($user, $order->id, $systemMessage, true);
+        $recipient_org_id = $senderOrg->id == $order->client_id ? $order->vendor_id : $order->client_id;
+        Notice::init('Chat')->updateCountMessageAndDialog($recipient_org_id, $order, $subject);
     }
 
     /**
@@ -258,6 +260,8 @@ class OrderNotice
 
         $systemMessage = $order->client->name . \Yii::t('message', 'frontend.controllers.order.receive_order_five', ['ru' => ' получил заказ!']);
         $this->sendSystemMessage($user, $order->id, $systemMessage, false);
+        $recipient_org_id = $senderOrg->id == $order->client_id ? $order->vendor_id : $order->client_id;
+        Notice::init('Chat')->updateCountMessageAndDialog($recipient_org_id, $order, $subject);
     }
 
     /**
@@ -321,6 +325,8 @@ class OrderNotice
 
         $systemMessage = $order->vendor->name . \Yii::t('message', 'frontend.controllers.order.confirm_order', ['ru' => ' подтвердил заказ!']);
         $this->sendSystemMessage($user, $order->id, $systemMessage, false);
+        $recipient_org_id = $senderOrg->id == $order->client_id ? $order->vendor_id : $order->client_id;
+        Notice::init('Chat')->updateCountMessageAndDialog($recipient_org_id, $order, $subject);
     }
 
     /**
@@ -491,17 +497,9 @@ class OrderNotice
                 'deleted' => $deleted
             ]);
 
-            FireBase::getInstance()->update([
-                'chat',
-                'organization' => $senderOrg->id,
-                'dialog'       => $order->id
-            ], [
-                'unread_message_count' => (int)$order->getOrderChatUnreadCount($senderOrg->id),
-                'last_message'         => $subject,
-                'last_message_date'    => WebApiHelper::asDatetime(),
-            ]);
-
             $this->sendSystemMessage($senderUser, $order->id, $systemMessage, false, $subject);
+            $recipient_org_id = $senderOrg->id == $order->client_id ? $order->vendor_id : $order->client_id;
+            Notice::init('Chat')->updateCountMessageAndDialog($recipient_org_id, $order, $subject);
         }
     }
 

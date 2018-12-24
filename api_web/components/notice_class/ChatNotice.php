@@ -49,6 +49,7 @@ class ChatNotice
         }
         $created_at = $order->orderChatLastMessage->created_at ?? null;
 
+        FireBase::unsetInstance();
         FireBase::getInstance()->update([
             'chat',
             'organization' => $recipient_id,
@@ -60,7 +61,6 @@ class ChatNotice
         ]);
 
         FireBase::unsetInstance();
-
         FireBase::getInstance()->update([
             'chat',
             'organization' => $recipient_id

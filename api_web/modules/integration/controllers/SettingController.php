@@ -29,10 +29,19 @@ class SettingController extends \api_web\components\WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  "name":"value",
-     *                  "name1":"value1",
-     *                  "name2":"value2"
+     *              {
+     *                  "id":27,
+     *                  "name":"code",
+     *                  "value":"test-123",
+     *                  "changed":"test-1234567"
+     *              },
+     *              {
+     *                  "id":23,
+     *                  "name":"code",
+     *                  "value":"test-123",
+     *                  "changed":null
      *              }
+     *            }
      *          )
      *     ),
      *     @SWG\Response(

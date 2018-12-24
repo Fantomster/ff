@@ -6,6 +6,7 @@ use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use common\helpers\DBNameHelper;
 use common\models\IntegrationSetting;
+use common\models\IntegrationSettingChange;
 use common\models\IntegrationSettingValue;
 use common\models\OuterProductMap;
 use yii\db\Query;
@@ -32,15 +33,23 @@ class IntegrationSettingsWebApi extends WebApi
         $this->validateRequest($post, ['service_id']);
 
         $result = IntegrationSettingValue::find()
-            ->select(['name', 'value'])
+            ->select(['int_set.id', 'int_set.name', 'value', 'COALESCE(ch.new_value, NULL) as changed'])
             ->leftJoin(
-                IntegrationSetting::tableName(),
-                IntegrationSetting::tableName() . ".id = " . IntegrationSettingValue::tableName() . ".setting_id"
-            )->where(
-                "org_id = :org and service_id = :service and is_active = true", [
+                IntegrationSetting::tableName() . ' as int_set',
+                "int_set.id = " . IntegrationSettingValue::tableName() . ".setting_id"
+            )
+            ->leftJoin(
+                IntegrationSettingChange::tableName() . ' as ch',
+                "ch.integration_setting_id = " . IntegrationSettingValue::tableName() . ".setting_id AND " .
+                "ch.org_id = " . IntegrationSettingValue::tableName() . ".org_id AND " .
+                "ch.is_active = 1"
+            )
+            ->where(
+                IntegrationSettingValue::tableName() . ".org_id = :org and int_set.service_id = :service and int_set.is_active = true", [
                 ':org'     => $this->user->organization_id,
                 ':service' => $post['service_id']
             ])
+            ->orderBy('setting_id')
             ->asArray()->all();
 
         return $result;

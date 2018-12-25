@@ -31,7 +31,11 @@ $.post('$url',function(data){
 
 JS;
 $this->registerJs($customJs, yii\web\View::POS_READY);
-$countSettingChange = IntegrationSettingChange::count()
+$countSettingChange = IntegrationSettingChange::count();
+$countSettingChangeHtml = '';
+if ($countSettingChange > 0) {
+    $countSettingChangeHtml = "<span class='badge' style='background-color: red;'>{$countSettingChange}</span>";
+}
 ?>
 <?php $this->beginPage() ?>
 
@@ -167,7 +171,7 @@ $countSettingChange = IntegrationSettingChange::count()
                             'url'   => ['/organization/index'],
                         ],
                         [
-                            'label'       => "Изменение настроек <span class='badge' style='background-color: red;'>{$countSettingChange}</span>",
+                            'label'       => "Изменение настроек {$countSettingChangeHtml}",
                             'url'         => ['/setting-change/index'],
                             'linkOptions' => [
                                 'style' => 'display: flex; justify-content: space-between; align-items: center;'

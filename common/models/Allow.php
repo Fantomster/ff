@@ -8,22 +8,24 @@ use yii\helpers\ArrayHelper;
 /**
  * This is the model class for table "allow".
  *
- * @property integer $id
- * @property string $name_allow
+ * @property int    $id         Идентификатор записи в таблице
+ * @property string $name_allow Наименование состояния согласия на определённые действия
  *
+ * @property User[]        $usersAtEmailAllow
+ * @property User[]        $usersAtSmsAllow
  */
 class Allow extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'allow';
+        return '{{%allow}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -34,12 +36,12 @@ class Allow extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'         => 'ID',
             'name_allow' => Yii::t('app', 'Name'),
         ];
     }
@@ -59,23 +61,20 @@ class Allow extends \yii\db\ActiveRecord
     {
         return $this->hasMany(User::className(), ['sms_subscribe' => 'id']);
     }
-    
+
     /**
      * array of all allows
-     * 
+     *
      * @return array
      */
-    public static function getList() {
+    public static function getList()
+    {
         $models = Allow::find()
-                ->select(['id', 'name_allow'])
-                ->asArray()
-                ->all();
+            ->select(['id', 'name_allow'])
+            ->asArray()
+            ->all();
 
-        $models[]=['id'=>0,'name_allow'=>'Не указано'];
-        return
-//        ArrayHelper::merge(
-//                        [null => null], 
-                ArrayHelper::map($models, 'id', 'name_allow');
-       // );
+        $models[] = ['id' => 0, 'name_allow' => 'Не указано'];
+        return ArrayHelper::map($models, 'id', 'name_allow');
     }
 }

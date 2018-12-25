@@ -20,6 +20,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string             $updated_at
  * @property string             $confirmed_at
  * @property IntegrationSetting $integrationSetting
+ * @property Organization       $organization
  */
 class IntegrationSettingChange extends \yii\db\ActiveRecord
 {
@@ -62,7 +63,7 @@ class IntegrationSettingChange extends \yii\db\ActiveRecord
             [['org_id', 'integration_setting_id', 'changed_user_id', 'confirmed_user_id', 'is_active'], 'integer'],
             [['created_at', 'updated_at', 'confirmed_at'], 'safe'],
             [['old_value', 'new_value'], 'string', 'max' => 255],
-            [['integration_setting_id'], 'exist', 'skipOnError' => true, 'targetClass' => IntegrationSetting::className(), 'targetAttribute' => ['integration_setting_id' => 'id']],
+            [['integration_setting_id'], 'exist', 'skipOnError' => true, 'targetClass' => IntegrationSetting::class, 'targetAttribute' => ['integration_setting_id' => 'id']],
         ];
     }
 
@@ -75,14 +76,17 @@ class IntegrationSettingChange extends \yii\db\ActiveRecord
             'id'                     => 'ID',
             'org_id'                 => 'Org ID',
             'integration_setting_id' => 'Integration Setting ID',
-            'old_value'              => 'Old Value',
-            'new_value'              => 'New Value',
-            'changed_user_id'        => 'Changed User ID',
-            'confirmed_user_id'      => 'Confirmed User ID',
-            'is_active'              => 'Is Active',
-            'created_at'             => 'Created At',
-            'updated_at'             => 'Updated At',
-            'confirmed_at'           => 'Confirmed At',
+            'old_value'              => 'Старое значение',
+            'new_value'              => 'Новое значение',
+            'changed_user_id'        => 'Создан',
+            'confirmed_user_id'      => 'Подтвердил',
+            'is_active'              => 'Активность',
+            'created_at'             => 'Дата создания',
+            'updated_at'             => 'Дата обновления',
+            'confirmed_at'           => 'Дата принятия',
+            'org_name'               => 'Организация',
+            'setting_name'           => 'Настройка',
+            'setting_comment'        => 'Описание настройки',
         ];
     }
 
@@ -91,6 +95,19 @@ class IntegrationSettingChange extends \yii\db\ActiveRecord
      */
     public function getIntegrationSetting()
     {
-        return $this->hasOne(IntegrationSetting::className(), ['id' => 'integration_setting_id']);
+        return $this->hasOne(IntegrationSetting::class, ['id' => 'integration_setting_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganization()
+    {
+        return $this->hasOne(Organization::class, ['id' => 'org_id']);
+    }
+
+    public static function count()
+    {
+        return self::find()->where(['is_active' => true])->count();
     }
 }

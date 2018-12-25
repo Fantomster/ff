@@ -129,7 +129,7 @@ class SettingController extends \api_web\components\WebApiController
      *                      "settings": {
      *                           {
      *                              "name":"taxVat",
-     *                              "value":10
+     *                              "value": "10"
      *                          },
      *                           {
      *                              "name":"auth_password",

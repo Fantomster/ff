@@ -11,8 +11,8 @@ use yii\helpers\ArrayHelper;
  * @property int    $id         Идентификатор записи в таблице
  * @property string $name_allow Наименование состояния согласия на определённые действия
  *
- * @property User        $usersAtEmailAllow
- * @property User        $usersAtSmsAllow
+ * @property User[]        $usersAtEmailAllow
+ * @property User[]        $usersAtSmsAllow
  */
 class Allow extends \yii\db\ActiveRecord
 {

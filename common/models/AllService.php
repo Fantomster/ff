@@ -81,6 +81,22 @@ class AllService extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOuterDictionaries()
+    {
+        return $this->hasMany(OuterDictionary::className(), ['service_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOuterProductMaps()
+    {
+        return $this->hasMany(OuterProductMap::className(), ['service_id' => 'id']);
+    }
+
+    /**
      * @param       $org_id
      * @param array $service_ids
      * @param null  $is_active

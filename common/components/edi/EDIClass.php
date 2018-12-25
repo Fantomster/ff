@@ -378,7 +378,7 @@ class EDIClass extends Component
             ->andWhere('`barcode` IS NOT NULL')
             ->all();
         foreach ($catalog_base_goods as $base_good) {
-            if (!in_array($base_good['barcode'], $goodsArray) && !$isFollowActionRule) {
+            if (!in_array($base_good['barcode'], $barcodeArray) && !$isFollowActionRule) {
                 \Yii::$app->db->createCommand()->delete(CatalogGoods::tableName(), ['base_goods_id' => $base_good['id'], 'cat_id' => $relationCatalogID, 'service_id' => Registry::EDI_SERVICE_ID])->execute();
             }
         }

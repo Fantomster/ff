@@ -118,7 +118,11 @@ class IntegrationSettingsWebApi extends WebApi
      */
     private function updateSetting($service_id, $request)
     {
-        $this->validateRequest($request, ['name', 'value']);
+        $this->validateRequest($request, ['name']);
+
+        if (!isset($request['value'])) {
+            throw new BadRequestHttpException('empty_param|value');
+        }
 
         $setting = IntegrationSetting::find()
             ->where('name = :name AND service_id = :service_id AND is_active = :is_active', [
@@ -180,9 +184,7 @@ class IntegrationSettingsWebApi extends WebApi
             ]))->save();
         }
 
-        return \Yii::t('api_web', 'api_web.moderation_setting_save_msg', [
-            'ru' => 'Ваши настройки отправлены на модерацию'
-        ]);
+        throw new BadRequestHttpException(\Yii::t('api_web', 'api_web.moderation_setting_save_msg'));
     }
 
     /**

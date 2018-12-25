@@ -14,41 +14,46 @@ use yii\web\BadRequestHttpException;
 /**
  * This is the model class for table "catalog_base_goods".
  *
- * @property integer       $id
- * @property integer       $cat_id
- * @property integer       $category_id
- * @property integer       $supp_org_id
- * @property string        $article
- * @property string        $product
- * @property number        $units
- * @property string        $price
- * @property integer       $status
- * @property integer       $market_place
- * @property integer       $deleted
- * @property string        $created_at
- * @property string        $updated_at
- * @property string        $image
- * @property string        $imageUrl
- * @property string        $miniImageUrl
- * @property string        $brand
- * @property string        $region
- * @property string        $weight
- * @property file          $importCatalog
- * @property string        $note
- * @property string        $ed
- * @property integer       $mp_show_price
- * @property string        $edi_supplier_article
- * @property string        $ssid
- * @property string        $es_status
- * @property string        $rating
- * @property string        $barcode
- * @property MpCountry     $mpRegion
- * @property Organization  $vendor
- * @property MpCategory    $category
- * @property MpCategory    $mainCategory
- * @property RatingStars   $ratingStars
- * @property RatingPercent $ratingPercent
- * @property Catalog       $catalog
+ * @property int              $id                   Идентификатор записи в таблице
+ * @property int              $cat_id               Идентификатор каталога товаров
+ * @property string           $article              Артикул товара
+ * @property string           $product              Наименование товара
+ * @property int              $status               Показатель состояния активности товара (0 - не активен, 1 - активен)
+ * @property int              $market_place         Показатель задействования товара в Маркет Плейсе (0 - не
+ *           задействован, 1 - задействован)
+ * @property int              $deleted              Показатель состояния удаления товара (0 - не удалён, 1 - удалён)
+ * @property string           $created_at           Дата и время создания записи в таблице
+ * @property string           $updated_at           Дата и время последнего изменения записи в таблице
+ * @property int              $supp_org_id          Идентификатор организации-поставщика
+ * @property string           $price                Цена товара
+ * @property double           $units                Количество единиц товара в товарной упаковке
+ * @property int              $category_id          Идентификатор категории товаров из Market Place
+ * @property string           $note                 Примечание
+ * @property string           $ed                   Единица измерения товара
+ * @property string           $image                Название файла-изображения товара
+ * @property string           $brand                Название производителя товара (бренд)
+ * @property string           $region               Страна или регион производителя
+ * @property string           $weight               Вес товарной упаковки товара
+ * @property int              $es_status            Показатель состояния индесации товара в поисковом движке Elastic
+ *           Search (0 - не участвует в поиске, 1  - участвует в поиске)
+ * @property int              $mp_show_price        Показатель состояния необходимости показа цены на товар в Market
+ *           Place
+ * @property int              $rating               Рейтинг товара на Market Place
+ * @property int              $barcode              Штрих-код товара на Market Place
+ * @property string           $edi_supplier_article Артикул товара для EDI
+ * @property string           $ssid                 Идентификатор SSID (не используется)
+ *
+ * @property Organization     $vendor
+ * @property MpCategory       $category
+ * @property CartContent[]    $cartContents
+ * @property CatalogGoods[]   $catalogGoods
+ * @property GuideProduct     $guideProduct
+ * @property GuideProduct[]   $guideProducts
+ * @property OrderContent[]   $orderContents
+ * @property CatalogBaseGoods $baseProduct
+ * @property Catalog          $catalog
+ * @property MpCategory       $subCategory
+ * @property MpCountry        $mpRegion
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord
 {
@@ -77,7 +82,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
     public $sub2;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function behaviors()
     {
@@ -103,15 +108,15 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'catalog_base_goods';
+        return '{{%catalog_base_goods}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -119,11 +124,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             [['cat_id', 'price', 'product', 'ed'], 'required'],
             [['cat_id', 'category_id', 'supp_org_id', 'status', 'deleted', 'rating'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
-            //[['article'], 'required', 'on' => 'uniqueArticle'],
             [['article', 'edi_supplier_article'], 'string', 'max' => 50],
-//            [['article'], 'uniqueArticle','when' => function($model) {
-//            return !empty($model->cat_id);
-//            }],
             [['article', 'product', 'brand', 'region', 'weight'], 'string', 'max' => 255],
             [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process', 'except' => 'import'],
             [['note'], 'string', 'max' => 255],
@@ -152,18 +153,8 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
         ];
     }
 
-//    public function uniqueArticle($attribute, $params, $validator)
-//    {
-//        empty($this->id)?$where= "true":$where = "id <> $this->id";
-//        if (self::find()->where(['cat_id'=>$this->cat_id,'article'=>$this->article,'deleted'=>self::DELETED_OFF])
-//                    ->andWhere($where)
-//                    ->exists() && User::findIdentity(Yii::$app->user->id)->organization->type_id == Organization::TYPE_SUPPLIER) {
-//                $this->addError($attribute, 'Такой артикул уже существует в каталоге');
-//        }
-//        
-//    }
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
@@ -189,19 +180,14 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             'weight'         => Yii::t('app', 'common.models.weight', ['ru' => 'Вес']),
             'mp_show_price'  => Yii::t('app', 'common.models.show_price_in_f_market', ['ru' => 'Показывать цену в F-MARKET']),
             'rating'         => Yii::t('app', 'common.models.rating', ['ru' => 'Рейтинг'])
-            //'importCatalog'=>'Files'
         ];
     }
 
-//    public function beforeSave($insert) {
-//        if (parent::beforeSave($insert)) {
-//
-//            $this->es_status = CatalogBaseGoods::ES_UPDATE;
-//            return true;
-//        }
-//        return false;
-//    }
-
+    /**
+     * @param $params
+     * @param $id
+     * @return ActiveDataProvider
+     */
     public function search($params, $id)
     {
         $query = CatalogBaseGoods::find()->select(['id', 'cat_id', 'category_id', 'article', 'product', 'units', 'price', 'note', 'ed', 'status', 'market_place'])->where(['cat_id' => $id, 'deleted' => '0']);
@@ -234,6 +220,10 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
         return $dataProvider;
     }
 
+    /**
+     * @param $id
+     * @return array|CatalogBaseGoods|\yii\db\ActiveRecord|null
+     */
     public static function get_value($id)
     {
         $model = CatalogBaseGoods::find()->where(["id" => $id])->one();
@@ -243,6 +233,10 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
         return null;
     }
 
+    /**
+     * @param $id
+     * @return array|Allow[]|AllService[]|Catalog[]|CatalogBaseGoods[]|\yii\db\ActiveRecord[]
+     */
     public static function get_no_active_product($id)
     {
         $model = CatalogBaseGoods::find()->select('id')->where(["id" => $id, 'status' => CatalogBaseGoods::STATUS_OFF])->all();
@@ -257,23 +251,25 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCategory()
     {
         return $this->hasOne(MpCategory::className(), ['id' => 'category_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getGuideProduct()
     {
         return $this->hasOne(GuideProduct::className(), ['cbg_id' => 'id']);
     }
 
     /**
-     * @return string url to product image
+     * @return string
      */
-    /* public function getImageUrl()
-      {
-      return $this->image ? $this->getThumbUploadUrl('image', 'image') : self::DEFAULT_IMAGE;
-      } */
     public function getImageUrl()
     {
         if ($this->image) {
@@ -287,53 +283,85 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getMpRegion()
     {
         return $this->hasOne(MpCountry::className(), ['id' => 'region']);
     }
 
+    /**
+     * @return string
+     */
     public function getMiniImageUrl()
     {
         return $this->image ? $this->getThumbUploadUrl('image', 'mini') : self::DEFAULT_IMAGE;
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getSubCategory()
     {
         return $this->hasOne(MpCategory::className(), ['id' => 'category_id']);
     }
 
+    /**
+     * @return array|MpCategory|\yii\db\ActiveRecord|null
+     */
     public function getMainCategory()
     {
         return MpCategory::find()->where(['id' => $this->category->parent])->one();
     }
 
+    /**
+     * @param $id
+     * @return array|MpCategory|\yii\db\ActiveRecord|null
+     */
     public static function getCurCategory($id)
     {
         $parent = MpCategory::find()->where(['id' => $id])->one()->parent;
         return MpCategory::find()->where(['id' => $parent])->one();
     }
 
+    /**
+     * @return string
+     */
     public function getRatingStars()
     {
         return number_format(($this->rating) / (self::MAX_RATING / 5), 1);
     }
 
+    /**
+     * @return string
+     */
     public function getRatingPercent()
     {
         return number_format(((($this->rating) / (self::MAX_RATING / 5)) / 5 * 100), 1);
     }
 
+    /**
+     * @param $clientId
+     * @return string
+     */
     public function getClientNote($clientId)
     {
         $note = \common\models\GoodsNotes::findOne(['catalog_base_goods_id' => $this->id, 'rest_org_id' => $clientId]);
         return isset($note) ? $note->note : '';
     }
 
+    /**
+     * @return string
+     */
     public function formatPrice()
     {
         return $this->price . " " . $this->catalog->currency->symbol;
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCatalog()
     {
         return $this->hasOne(Catalog::className(), ['id' => 'cat_id']);
@@ -347,6 +375,12 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
         return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'id']);
     }
 
+    /**
+     * @param Catalog $catalog
+     * @param string  $sort
+     * @param bool    $isBase
+     * @return ActiveDataProvider
+     */
     public function getDataForExcelExport(Catalog $catalog, string $sort, bool $isBase = false): ActiveDataProvider
     {
         $q = self::find()

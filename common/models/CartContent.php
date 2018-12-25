@@ -3,41 +3,40 @@
 namespace common\models;
 
 use Yii;
-use yii\db\Expression;
 
 /**
  * This is the model class for table "cart_content".
  *
- * @property int $id
- * @property int $cart_id
- * @property int $vendor_id
- * @property int $product_id
- * @property int $currency_id
- * @property string $product_name
- * @property double $quantity
- * @property double $price
- * @property double $units
- * @property string $comment
- * @property string $created_at
- * @property string $updated_at
+ * @property int              $id           Идентификатор записи в таблице
+ * @property int              $cart_id      Идентификатор корзины
+ * @property int              $vendor_id    Идентификатор организации-поставщика данного товара
+ * @property int              $product_id   Идентификатор товара, отложенного в корзину
+ * @property string           $product_name Наименование товара, отложенного в корзину
+ * @property double           $quantity     Количество данного товара, отложенного в корзину
+ * @property double           $price        Цена данного товара
+ * @property double           $units        Единица измерения данного товара
+ * @property string           $comment      Комментарий сотрудника ресторана к данному товару
+ * @property string           $created_at   Дата и время создания записи в таблице
+ * @property string           $updated_at   Дата и время последнего изменения записи в таблице
+ * @property int              $currency_id  Идентификатор валюты
  *
- * @property Cart $cart
- * @property Currency $currency
- * @property array $product
- * @property Organization $vendor
+ * @property Cart             $cart
+ * @property Currency         $currency
+ * @property CatalogBaseGoods $product
+ * @property Organization     $vendor
  */
 class CartContent extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'cart_content';
+        return '{{%cart_content}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -56,23 +55,23 @@ class CartContent extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'cart_id' => Yii::t('app', 'Cart ID'),
-            'vendor_id' => Yii::t('app', 'Vendor ID'),
-            'product_id' => Yii::t('app', 'Product ID'),
+            'id'           => Yii::t('app', 'ID'),
+            'cart_id'      => Yii::t('app', 'Cart ID'),
+            'vendor_id'    => Yii::t('app', 'Vendor ID'),
+            'product_id'   => Yii::t('app', 'Product ID'),
             'product_name' => Yii::t('app', 'Product Name'),
-            'quantity' => Yii::t('app', 'Quantity'),
-            'price' => Yii::t('app', 'Price'),
-            'units' => Yii::t('app', 'Units'),
-            'comment' => Yii::t('app', 'Comment'),
-            'created_at' => Yii::t('app', 'Created At'),
-            'updated_at' => Yii::t('app', 'Updated At'),
-            'currency_id' => Yii::t('app', 'Currency ID'),
+            'quantity'     => Yii::t('app', 'Quantity'),
+            'price'        => Yii::t('app', 'Price'),
+            'units'        => Yii::t('app', 'Units'),
+            'comment'      => Yii::t('app', 'Comment'),
+            'created_at'   => Yii::t('app', 'Created At'),
+            'updated_at'   => Yii::t('app', 'Updated At'),
+            'currency_id'  => Yii::t('app', 'Currency ID'),
         ];
     }
 

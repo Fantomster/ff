@@ -9,21 +9,25 @@ use yii\web\BadRequestHttpException;
 /**
  * This is the model class for table "catalog".
  *
- * @property integer $id
- * @property integer $supp_org_id
- * @property string $name
- * @property integer $status
- * @property integer $type
- * @property string $created_at
- * @property string $updated_at
- * @property integer $currency_id
- * @property string $index_column
- * @property string $main_index
- * @property string $mapping
+ * @property int               $id           Идентификатор записи в таблице
+ * @property int               $type         Тип каталога товаров (0 - не каталог, 1 - базовый каталог, 2 -
+ *           индивидуальный каталог)
+ * @property int               $supp_org_id  Идентификатор организации-поставщика
+ * @property string            $name         Наименование каталога товаров поставщика
+ * @property int               $status       Статус каталога товаров (0 - не действующий, 1 - действующий)
+ * @property string            $created_at   Дата и время создания записи в таблице
+ * @property string            $updated_at   Дата и время последнего изменения записи в таблице
+ * @property int               $currency_id  Идентификатор валюты
+ * @property string            $main_index   Имя индекса для полнотекстового поиска
+ * @property string            $mapping      Альтернативные варианты названия при полнотекстовом поиске
+ * @property int               $index_column Идентификатор поля для индексации при полнотекстовом поиске
  *
- * @property Vendor $vendor
- * @property Currency $currency
- * @property integer $positionsCount
+ * @property Organization      $vendor
+ * @property Currency          $currency
+ * @property CatalogSnapshot[] $catalogSnapshots
+ * @property CatalogTemp[]     $catalogTemps
+ * @property Catalog           $nameCatalog
+ * @property Catalog[]         $catalogs
  */
 class Catalog extends \yii\db\ActiveRecord
 {
@@ -36,14 +40,13 @@ class Catalog extends \yii\db\ActiveRecord
     const STATUS_OFF = 0;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'catalog';
+        return '{{%catalog}}';
     }
 
-    //auto created_at && updated_at 
     public function behaviors()
     {
         return [
@@ -57,7 +60,7 @@ class Catalog extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -66,25 +69,27 @@ class Catalog extends \yii\db\ActiveRecord
             [['supp_org_id', 'type', 'status'], 'integer'],
             [['created_at', 'mapping', 'index_column'], 'safe'],
             [['name'], 'string', 'max' => 255],
-                //['type', 'uniqueBaseCatalog'],
         ];
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'name' => 'Name',
+            'id'          => 'ID',
+            'name'        => 'Name',
             'supp_org_id' => 'Org Supp ID',
-            'type' => 'Type',
-            'status' => 'Status',
-            'created_at' => 'Create Datetime',
+            'type'        => 'Type',
+            'status'      => 'Status',
+            'created_at'  => 'Create Datetime',
         ];
     }
 
+    /**
+     * check unique base catalog
+     */
     public function uniqueBaseCatalog()
     {
         if ($this->type == 1) {
@@ -95,13 +100,19 @@ class Catalog extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @param $id
+     * @return array|Catalog|\yii\db\ActiveRecord|null
+     */
     public static function getNameCatalog($id)
     {
-        $catalogName = Catalog::find()
-                        ->where(['id' => $id])->one();
-        return $catalogName;
+        return Catalog::find()->where(['id' => $id])->one();
     }
 
+    /**
+     * @param $id
+     * @return array|Catalog|\yii\db\ActiveRecord|null
+     */
     public static function get_value($id)
     {
         $model = Catalog::find()->where(["id" => $id])->one();
@@ -111,24 +122,41 @@ class Catalog extends \yii\db\ActiveRecord
         return null;
     }
 
+    /**
+     * @param      $type
+     * @param null $vendorId
+     * @return array|Allow[]|AllService[]|Catalog[]|\yii\db\ActiveRecord[]
+     */
     public static function GetCatalogs($type, $vendorId = null)
     {
         $catalog = Catalog::find()
-                        ->select(['id', 'status', 'name', 'created_at', 'currency_id'])
-                        ->where(['supp_org_id' => $vendorId ? $vendorId : \common\models\User::getOrganizationUser(Yii::$app->user->id), 'type' => $type])->all();
+            ->select(['id', 'status', 'name', 'created_at', 'currency_id'])
+            ->where(['supp_org_id' => $vendorId ? $vendorId : \common\models\User::getOrganizationUser(Yii::$app->user->id), 'type' => $type])->all();
         return $catalog;
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getVendor()
     {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCurrency()
     {
         return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
     }
 
+    /**
+     * @param      $arrCatalog
+     * @param bool $isWebApi
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
     public function addCatalog($arrCatalog, bool $isWebApi = false)
     {
         if (empty($arrCatalog) && !$isWebApi) {
@@ -138,7 +166,7 @@ class Catalog extends \yii\db\ActiveRecord
         $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
         if (count($arrCatalog) > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
             throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.more_position', ['ru' => 'Чтобы добавить больше <strong> {max} </strong> позиций, пожалуйста свяжитесь с нами', 'max' => CatalogBaseGoods::MAX_INSERT_FROM_XLS])
-            . '<a href="mailto://info@mixcart.ru" target="_blank" class="text-success">info@mixcart.ru</a>');
+                . '<a href="mailto://info@mixcart.ru" target="_blank" class="text-success">info@mixcart.ru</a>');
         }
         $productNames = [];
         foreach ($arrCatalog as $arrCatalogs) {
@@ -190,9 +218,7 @@ class Catalog extends \yii\db\ActiveRecord
     public function addBaseCatalog($check, $get_supp_org_id, $currentUser, $arrCatalog, Currency $currency = null)
     {
         /**
-         *
-         * 2) Создаем базовый и каталог для ресторана
-         *
+         * Создаем базовый и каталог для ресторана
          * */
         if ($check['eventType'] == 5) {
             $newBaseCatalog = new Catalog();
@@ -203,7 +229,7 @@ class Catalog extends \yii\db\ActiveRecord
             if (!is_null($currency)) {
                 $newBaseCatalog->currency_id = $currency->id;
             }
-            if (!$newBaseCatalog->save()){
+            if (!$newBaseCatalog->save()) {
                 throw new ValidationException($newBaseCatalog->getFirstErrors());
             }
             $newBaseCatalog->refresh();
@@ -223,7 +249,7 @@ class Catalog extends \yii\db\ActiveRecord
                 if (isset($currency)) {
                     $newBaseCatalog->currency_id = $currency->id;
                 }
-                if (!$newBaseCatalog->save()){
+                if (!$newBaseCatalog->save()) {
                     throw new ValidationException($newBaseCatalog->getFirstErrors());
                 }
                 $newBaseCatalog->refresh();
@@ -239,16 +265,14 @@ class Catalog extends \yii\db\ActiveRecord
         if (isset($currency)) {
             $newCatalog->currency_id = $currency->id;
         }
-        if (!$newCatalog->save()){
+        if (!$newCatalog->save()) {
             throw new ValidationException($newBaseCatalog->getFirstErrors());
         }
         $lastInsert_cat_id = $newCatalog->id;
         $newCatalog->refresh();
 
         /**
-         *
-         * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
-         *
+         * Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
          * */
         $article_create = 0;
         foreach ($arrCatalog as $arrCatalogs) {
@@ -274,7 +298,7 @@ class Catalog extends \yii\db\ActiveRecord
             $newProduct->scenario = "import";
             $newProduct->cat_id = $lastInsert_base_cat_id;
             $newProduct->supp_org_id = $get_supp_org_id;
-            $newProduct->article = (string) $article;
+            $newProduct->article = (string)$article;
             $newProduct->product = $product;
             $newProduct->units = $units;
             $newProduct->price = $price;
@@ -282,7 +306,7 @@ class Catalog extends \yii\db\ActiveRecord
             $newProduct->status = CatalogBaseGoods::STATUS_ON;
             $newProduct->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
             $newProduct->deleted = CatalogBaseGoods::DELETED_OFF;
-            if (!$newProduct->save()){
+            if (!$newProduct->save()) {
                 throw new ValidationException($newBaseCatalog->getFirstErrors());
             }
             $newProduct->refresh();
@@ -293,7 +317,7 @@ class Catalog extends \yii\db\ActiveRecord
             $newGoods->cat_id = $lastInsert_cat_id;
             $newGoods->base_goods_id = $lastInsert_base_goods_id;
             $newGoods->price = $price;
-            if (!$newGoods->save()){
+            if (!$newGoods->save()) {
                 throw new ValidationException($newBaseCatalog->getFirstErrors());
             }
             $newGoods->refresh();
@@ -301,6 +325,10 @@ class Catalog extends \yii\db\ActiveRecord
         return $lastInsert_cat_id;
     }
 
+    /**
+     * @return bool
+     * @throws \yii\db\Exception
+     */
     public function makeSnapshot()
     {
         if ($this->type !== self::BASE_CATALOG) {
@@ -314,13 +342,13 @@ class Catalog extends \yii\db\ActiveRecord
             $newSnapshot->currency_id = $this->currency_id;
             $newSnapshot->save();
             $sql = "INSERT INTO catalog_snapshot_content "
-                    . "(snapshot_id,article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid) "
-                    . "(SELECT :snapshot_id"
-                    . ",article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid "
-                    . "FROM catalog_base_goods WHERE cat_id = :cat_id AND deleted = 0)";
+                . "(snapshot_id,article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid) "
+                . "(SELECT :snapshot_id"
+                . ",article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid "
+                . "FROM catalog_base_goods WHERE cat_id = :cat_id AND deleted = 0)";
             \Yii::$app->db->createCommand($sql)
-                    ->bindValues([":snapshot_id" => $newSnapshot->id, ":cat_id" => $this->id])
-                    ->execute();
+                ->bindValues([":snapshot_id" => $newSnapshot->id, ":cat_id" => $this->id])
+                ->execute();
             $transaction->commit();
             return true;
         } catch (\Exception $e) {
@@ -329,6 +357,11 @@ class Catalog extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @param bool $saveCurrent
+     * @return bool
+     * @throws \yii\db\Exception
+     */
     public function restoreLastSnapshot($saveCurrent = false)
     {
         $lastSnapshot = CatalogSnapshot::find()->orderBy(['id' => SORT_DESC])->limit(1)->one();
@@ -342,13 +375,13 @@ class Catalog extends \yii\db\ActiveRecord
             $this->currency_id = $this->currency_id;
             if ($this->save()) {
                 $sql = "INSERT INTO catalog_base_goods "
-                        . "(supp_org_id, cat_id,article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid) "
-                        . "(SELECT :supp_org_id, :cat_id"
-                        . ",article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid "
-                        . "FROM catalog_snapshot_content WHERE snapshot_id = :snapshot_id)";
+                    . "(supp_org_id, cat_id,article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid) "
+                    . "(SELECT :supp_org_id, :cat_id"
+                    . ",article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid "
+                    . "FROM catalog_snapshot_content WHERE snapshot_id = :snapshot_id)";
                 \Yii::$app->db->createCommand($sql)
-                        ->bindValues([":snapshot_id" => $lastSnapshot->id, ":cat_id" => $this->id, ":supp_org_id" => $this->supp_org_id])
-                        ->execute();
+                    ->bindValues([":snapshot_id" => $lastSnapshot->id, ":cat_id" => $this->id, ":supp_org_id" => $this->supp_org_id])
+                    ->execute();
                 $transaction->commit();
                 return true;
             }
@@ -358,6 +391,11 @@ class Catalog extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @param bool $save
+     * @return bool
+     * @throws \yii\db\Exception
+     */
     public function deleteAllProducts($save = true)
     {
         if ($this->positionsCount == 0) {
@@ -370,21 +408,31 @@ class Catalog extends \yii\db\ActiveRecord
         return false;
     }
 
+    /**
+     * @return array
+     */
     public static function getMainIndexesList()
     {
         return [
             'product' => Yii::t('message', 'frontend.views.vendor.name_of_good', ['ru' => 'Наименование']),
             'article' => Yii::t('message', 'frontend.views.vendor.art_five', ['ru' => 'Артикул']),
-            'ssid' => Yii::t('message', 'frontend.views.vendor.ssid', ['ru' => 'SSID']),
+            'ssid'    => Yii::t('message', 'frontend.views.vendor.ssid', ['ru' => 'SSID']),
         ];
     }
 
+    /**
+     * @param $index
+     * @return bool
+     */
     public static function isMainIndexValid($index)
     {
         $indexes = self::getMainIndexesList();
         return (in_array($index, array_keys($indexes)));
     }
 
+    /**
+     * @return int|string
+     */
     public function getPositionsCount()
     {
         if ($this->type == self::BASE_CATALOG) {

@@ -5,13 +5,13 @@ namespace common\models;
 use Yii;
 
 /**
- * This is the model class for table "{{%all_service_operation}}".
+ * This is the model class for table "all_service_operation".
  *
- * @property int $id
- * @property int $service_id
- * @property int $code
- * @property string $denom
- * @property string $comment
+ * @property int        $id         Идентификатор записи в таблице
+ * @property int        $service_id Идентификатор учётного сервиса (таблица all_service)
+ * @property int        $code       Код операции
+ * @property string     $denom      slug-псевдоним операции
+ * @property string     $comment    Комментарий, описание сути операции
  *
  * @property AllService $service
  */
@@ -52,11 +52,11 @@ class AllServiceOperation extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
+            'id'         => Yii::t('app', 'ID'),
             'service_id' => Yii::t('app', 'Service ID'),
-            'code' => Yii::t('app', 'Code'),
-            'denom' => Yii::t('app', 'Denom'),
-            'comment' => Yii::t('app', 'Comment'),
+            'code'       => Yii::t('app', 'Code'),
+            'denom'      => Yii::t('app', 'Denom'),
+            'comment'    => Yii::t('app', 'Comment'),
         ];
     }
 

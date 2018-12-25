@@ -5,6 +5,7 @@ namespace common\models;
 use common\helpers\DBNameHelper;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use yii\db\Query;
 
 /**
  * IntegrationSettingChangeSearch represents the model behind the search form of
@@ -59,10 +60,12 @@ class IntegrationSettingChangeSearch extends IntegrationSettingChange
         $this->load($params);
 
         $query->joinWith(['organization' => function ($query) {
-            return $query->from(['org' => DBNameHelper::getMainName() . '.' . Organization::tableName()]);
+            /** @var Query $query */
+            return $query->from(['org' => '`' . DBNameHelper::getMainName() . '`.' . Organization::tableName()]);
         }], true);
+
         $query->joinWith(['integrationSetting' => function ($query) {
-            /** @var Model $query */
+            /** @var Query $query */
             return $query->from(['setting' => IntegrationSetting::tableName()]);
         }], true);
 

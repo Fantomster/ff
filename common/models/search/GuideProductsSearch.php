@@ -94,6 +94,7 @@ class GuideProductsSearch extends \yii\base\Model
                     AND (cbg.product LIKE :searchString) 
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0)
+                AND (cat.status = 1)
             UNION ALL
             (SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note, gp.updated_at as updated_at, cbg.updated_at as price_updated_at
                 FROM guide_product AS gp

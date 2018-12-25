@@ -2,22 +2,25 @@
 
 namespace common\models;
 
-
 /**
  * This is the model class for table "edi_order_content".
  *
- * @property integer $order_content_id
- * @property integer $doc_type
- * @property integer $barcode
- * @property string  $edi_supplier_article
- * @property string  $pricewithvat
- * @property string  $taxrate
- * @property string  $uuid
- * @property string  $gtin
- * @property string  $waybill_date
- * @property string  $waybill_number
- * @property string  $delivery_note_date
- * @property string  $delivery_note_number
+ * @property int          $id                   Идентификатор записи в таблице
+ * @property int          $order_content_id     Идентификатор товарной позиции заказа
+ * @property string       $edi_supplier_article Артикул товара от поставщика
+ * @property int          $doc_type             Тип документа (0 - заказ, 1 - уведомление об отгрузке DESADV, 2 -
+ *           уведомление об отгрузке ALCDES)
+ * @property int          $barcode              Штрих-код товара
+ * @property string       $pricewithvat         Цена с НДС
+ * @property string       $taxrate              Ставка НДС
+ * @property string       $uuid                 Универсальный идентификатор товара в системе ВЕТИС
+ * @property string       $gtin                 Глобальный идентификатор товарной продукции системы ВЕТИС
+ * @property string       $waybill_date         Дата получения товарной накладной по EDI
+ * @property string       $waybill_number       Номер товарной накладной по EDI
+ * @property string       $delivery_note_number Номер товарно-транспортной накладной по EDI
+ * @property string       $delivery_note_date   Дата получения товарно-транспортной накладной по EDI
+ *
+ * @property OrderContent $orderContent
  */
 class EdiOrderContent extends \yii\db\ActiveRecord
 {
@@ -25,15 +28,15 @@ class EdiOrderContent extends \yii\db\ActiveRecord
     const ALCDES = 2;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'edi_order_content';
+        return '{{%edi_order_content}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -43,14 +46,6 @@ class EdiOrderContent extends \yii\db\ActiveRecord
             [['order_content_id'], 'unique'],
             [['edi_supplier_article'], 'safe'],
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function attributeLabels()
-    {
-        return [];
     }
 
     /**

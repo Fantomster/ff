@@ -2,29 +2,28 @@
 
 namespace common\models;
 
-use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "franchise_type".
  *
- * @property integer $id
- * @property string $name
- * @property string $share
- * @property string $price
+ * @property int    $id    Идентификатор записи в таблице
+ * @property string $name  Наименование типа франчайзи
+ * @property string $share Процент дохода от франшизы
+ * @property string $price Цена за покупку франшизы
  */
 class FranchiseType extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'franchise_type';
+        return '{{%franchise_type}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -36,13 +35,13 @@ class FranchiseType extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'name' => 'Name',
+            'id'    => 'ID',
+            'name'  => 'Name',
             'share' => 'Share',
             'price' => 'Price',
         ];
@@ -50,14 +49,15 @@ class FranchiseType extends \yii\db\ActiveRecord
 
     /**
      * array of all organization types
-     * 
+     *
      * @return array
      */
-    public static function getList() {
+    public static function getList()
+    {
         $models = FranchiseType::find()
-                ->select(['id', 'name'])
-                ->asArray()
-                ->all();
+            ->select(['id', 'name'])
+            ->asArray()
+            ->all();
 
         return ArrayHelper::map($models, 'id', 'name');
     }

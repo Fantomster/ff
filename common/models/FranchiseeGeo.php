@@ -5,32 +5,34 @@ namespace common\models;
 use Yii;
 
 /**
- * This is the model class for table "franchisee".
+ * This is the model class for table "franchisee_geo".
  *
- * @property integer    $id
- * @property integer    $franchisee_id
- * @property string     $exception
- * @property string     $country
- * @property string     $locality
- * @property string     $administrative_area_level_1
- * @property string     $created_at
- * @property string     $updated_at
- * @property integer    $status
+ * @property int        $id                          Идентификатор записи в таблице
+ * @property int        $franchisee_id               Идентификатор франчайзи
+ * @property string     $country                     Наименование государства, в котором находится франчайзи
+ * @property string     $locality                    Наименование населённого пункта, в котором находится франчайзи
+ * @property int        $exception                   Показатель исключения населённого пункта из показа и поиска (0 -
+ *           не исключать, 1 - исключать)
+ * @property string     $created_at                  Дата и время создания записи в таблице
+ * @property string     $updated_at                  Дата и время последнего изменения записи в таблице
+ * @property string     $administrative_area_level_1 Наименование региона 1 уровня государства, в котором находится
+ *           франчайзи
+ * @property int        $status                      Показатель статуса активности (не используется)
+ *
  * @property Franchisee $franchisee
  */
 class FranchiseeGeo extends \yii\db\ActiveRecord
 {
-
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'franchisee_geo';
+        return '{{%franchisee_geo}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function behaviors()
     {
@@ -45,7 +47,7 @@ class FranchiseeGeo extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -58,7 +60,7 @@ class FranchiseeGeo extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {

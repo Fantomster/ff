@@ -2,46 +2,48 @@
 
 namespace common\models;
 
-use Yii;
-
 /**
  * This is the model class for table "integration_setting_from_email".
  *
- * @property int $id
- * @property int $organization_id
- * @property string $server_type
- * @property string $server_host
- * @property int $server_port
- * @property int $server_ssl
- * @property string $user
- * @property string $password
- * @property int $is_active
- * @property string $created_at
- * @property string $updated_at
- * @property string $language
+ * @property int                $id              Идентификатор записи в таблице
+ * @property int                $organization_id Идентификатор организации - получателя накладных
+ * @property string             $server_type     Тип почтового сервера для получения накладных
+ * @property string             $server_host     Почтовый сервер для получения накладных
+ * @property int                $server_port     Порт почтового сервера для получения накладных
+ * @property int                $server_ssl      Флажок использования SSL для получения накладных
+ * @property string             $user            Логин для входа на почтовый сервер для получения накладных
+ * @property string             $password        Пароль для входа на почтовый сервер для получения накладных
+ * @property int                $is_active       Флажок показателя активности данного почтового ящика для получения
+ *           накладных
+ * @property string             $created_at      Дата и время создания записи в таблице
+ * @property string             $updated_at      Дата и время последнего изменения записи в таблице
+ * @property string             $language        Двухбуквенное обозначение языка, на котором ведётся переписка
+ * @property int                $version         Версия приложения MixCart
  *
- * @property Organization $organization
+ * @property Organization       $organization
+ * @property IntegrationInvoice $invoice
  */
 class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'integration_setting_from_email';
+        return '{{%integration_setting_from_email}}';
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function behaviors()
     {
         return [
             'timestamp' => [
-                'class' => \yii\behaviors\TimestampBehavior::className(),
-                'attributes' => [
-                    \yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
-                    \yii\db\ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
-                ],
-                'value' => \gmdate('Y-m-d H:i:s'),
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
             ],
         ];
     }
@@ -67,18 +69,18 @@ class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'              => 'ID',
             'organization_id' => 'Организация',
-            'server_type' => 'Тип сервера',
-            'server_host' => 'Сервер',
-            'server_port' => 'Порт',
-            'server_ssl' => 'SSL',
-            'user' => 'Логин',
-            'password' => 'Пароль',
-            'is_active' => 'Активен',
-            'created_at' => 'Дата создания',
-            'updated_at' => 'Дата изменения',
-            'language' => 'Язык',
+            'server_type'     => 'Тип сервера',
+            'server_host'     => 'Сервер',
+            'server_port'     => 'Порт',
+            'server_ssl'      => 'SSL',
+            'user'            => 'Логин',
+            'password'        => 'Пароль',
+            'is_active'       => 'Активен',
+            'created_at'      => 'Дата создания',
+            'updated_at'      => 'Дата изменения',
+            'language'        => 'Язык',
         ];
     }
 

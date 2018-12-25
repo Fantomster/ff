@@ -45,7 +45,7 @@ class IntegrationSettingsWebApi extends WebApi
             )
             ->where(
                 IntegrationSettingValue::tableName() . ".org_id = :org and int_set.service_id = :service and int_set.is_active = true", [
-                ':org' => $this->user->organization_id,
+                ':org'     => $this->user->organization_id,
                 ':service' => $post['service_id']
             ])
             ->orderBy('setting_id')
@@ -74,9 +74,9 @@ class IntegrationSettingsWebApi extends WebApi
             ->where(
                 "org_id = :org and service_id = :service and is_active = true and name = :name",
                 [
-                    ':org' => $this->user->organization_id,
+                    ':org'     => $this->user->organization_id,
                     ':service' => $post['service_id'],
-                    ':name' => $post['name']
+                    ':name'    => $post['name']
                 ]
             )
             ->asArray()
@@ -122,9 +122,9 @@ class IntegrationSettingsWebApi extends WebApi
 
         $setting = IntegrationSetting::find()
             ->where('name = :name AND service_id = :service_id AND is_active = :is_active', [
-                ':name' => $request['name'],
+                ':name'       => $request['name'],
                 ':service_id' => $service_id,
-                ':is_active' => true
+                ':is_active'  => true
             ])
             ->one();
 
@@ -135,7 +135,7 @@ class IntegrationSettingsWebApi extends WebApi
         $settingValue = IntegrationSettingValue::find()
             ->where([
                 'setting_id' => $setting->id,
-                'org_id' => $this->user->organization_id
+                'org_id'     => $this->user->organization_id
             ])
             ->one();
 
@@ -145,8 +145,8 @@ class IntegrationSettingsWebApi extends WebApi
             }
             $settingValue->setAttributes([
                 'setting_id' => $setting->id,
-                'org_id' => $this->user->organization_id,
-                'value' => $request['value']
+                'org_id'     => $this->user->organization_id,
+                'value'      => $request['value']
             ]);
 
             if (!$settingValue->save()) {
@@ -163,20 +163,20 @@ class IntegrationSettingsWebApi extends WebApi
         $settingChange = IntegrationSettingChange::find()
             ->where([
                 'integration_setting_id' => $setting->id,
-                'org_id' => $this->user->organization_id,
-                'old_value' => !empty($settingValue) ? $settingValue->value : null,
-                'new_value' => $request['value'],
-                'is_active' => true
+                'org_id'                 => $this->user->organization_id,
+                'old_value'              => !empty($settingValue) ? $settingValue->value : null,
+                'new_value'              => $request['value'],
+                'is_active'              => true
             ])
             ->one();
 
         if (empty($settingChange)) {
             (new IntegrationSettingChange([
-                'org_id' => $this->user->organization_id,
+                'org_id'                 => $this->user->organization_id,
                 'integration_setting_id' => $setting->id,
-                'old_value' => !empty($settingValue) ? $settingValue->value : null,
-                'new_value' => $request['value'],
-                'changed_user_id' => $this->user->id
+                'old_value'              => !empty($settingValue) ? $settingValue->value : null,
+                'new_value'              => $request['value'],
+                'changed_user_id'        => $this->user->id
             ]))->save();
         }
 
@@ -197,8 +197,8 @@ class IntegrationSettingsWebApi extends WebApi
         $setting = IntegrationSetting::find()
             ->where('service_id = :service_id AND id = :id AND is_active = :is_active', [
                 ':service_id' => $request['service_id'],
-                ':id' => $request['setting_id'],
-                ':is_active' => true
+                ':id'         => $request['setting_id'],
+                ':is_active'  => true
             ])
             ->one();
 
@@ -209,8 +209,8 @@ class IntegrationSettingsWebApi extends WebApi
         $settingChange = IntegrationSettingChange::find()
             ->where([
                 'integration_setting_id' => $setting->id,
-                'org_id' => $this->user->organization_id,
-                'is_active' => true
+                'org_id'                 => $this->user->organization_id,
+                'is_active'              => true
             ])
             ->one();
 
@@ -274,8 +274,8 @@ class IntegrationSettingsWebApi extends WebApi
      * Получение настройки для всех организаций
      *
      * @param string $settingName
-     * @param array $arOrgIds
-     * @param int $serviceId
+     * @param array  $arOrgIds
+     * @param int    $serviceId
      * @return array
      */
     public function getSettingsByOrgIds(string $settingName, array $arOrgIds, int $serviceId)

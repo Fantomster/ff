@@ -4,7 +4,7 @@ use common\models\Organization;
 
 $recipientIsClient = ($recipient->organization->type_id == Organization::TYPE_RESTAURANT);
 if ($recipientIsClient) {
-    if ($isDesadv) {
+    if (isset($isDesadv) && $isDesadv == true) {
         $text = $senderOrg->name . " " . Yii::t('app', 'отправил заказ!');
     } else {
         $text = Yii::t('app', 'common.mail.order_confirmed.text_for_client', ['ru' => 'Поставщик {org_name} потдвердил заказ №{order_id}', 'order_id' => $order->id, 'org_name' => $senderOrg->name]);

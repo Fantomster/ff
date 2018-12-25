@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "integration_setting_change".
@@ -37,6 +38,18 @@ class IntegrationSettingChange extends \yii\db\ActiveRecord
     public static function getDb()
     {
         return Yii::$app->get('db_api');
+    }
+
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
     }
 
     /**

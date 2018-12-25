@@ -354,20 +354,22 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('No organizations available');
         }
 
+        $orgIds = ArrayHelper::getColumn((array)$list_organisation, 'id');
+        $licenses = License::getMixCartLicenses($orgIds);
+
         $result = [];
-        foreach ($list_organisation as $item) {
-            $model = Organization::findOne($item['id']);
-            $result[] = WebApiHelper::prepareOrganization($model);
+        foreach (WebApiHelper::generator($list_organisation) as $model) {
+            $item = WebApiHelper::prepareOrganization($model);
+
+            $item['license_is_active'] = false;
+            $item['license'] = null;
+            if (!empty($licenses[$item['id']])) {
+                $item['license_is_active'] = true;
+                $item['license'] = $licenses[$item['id']];
+            }
+
+            $result[] = $item;
         }
-
-        $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($result, 'id'));
-        $result = array_map(function ($item) use ($licenses) {
-            $item['license_is_active'] = !empty($licenses[$item['id']]);
-            $item['license'] = isset($licenses[$item['id']]) ? $licenses[$item['id']] : null;
-
-            return $item;
-        }, $result);
-
         return $result;
     }
 
@@ -862,8 +864,8 @@ class UserWebApi extends \api_web\components\WebApi
                 ]
             ]);
 
-        if(isset($name)) {
-            $resQuery->andWhere("a.name LIKE :name", [':name' => '%'.$name.'%']);
+        if (isset($name)) {
+            $resQuery->andWhere("a.name LIKE :name", [':name' => '%' . $name . '%']);
         }
 
         if (!is_null($indexByField)) {

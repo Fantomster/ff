@@ -6,6 +6,8 @@ use api_web\components\notice_class\OrderNotice;
 use api_web\components\Registry;
 use common\models\edi\EdiFilesQueue;
 use common\models\OuterUnit;
+use common\models\RelationUserOrganization;
+use common\models\Role;
 use yii\base\Component;
 use common\models\Catalog;
 use common\models\CatalogBaseGoods;
@@ -249,7 +251,7 @@ class EDIClass extends Component
 
             $order->status = $orderStatus;
             $order->total_price = $summ;
-            $order->waybill_number = $simpleXMLElement->DELIVERYNOTENUMBER ?? $simpleXMLElement->NUMBER ?? '';
+            $order->waybill_number = (int)$simpleXMLElement->DELIVERYNOTENUMBER ?? (int)$simpleXMLElement->NUMBER ?? '';
             $order->edi_ordersp = $this->ediDocumentType;
             $order->service_id = 6;
             $order->edi_ordersp = $this->fileName ?? $order->id;
@@ -257,7 +259,17 @@ class EDIClass extends Component
             $deliveryDate = isset($simpleXMLElement->DELIVERYDATE) ? \Yii::$app->formatter->asDate($simpleXMLElement->DELIVERYDATE, 'yyyy.MM.dd HH:mm:ss') : null;
             $order->actual_delivery = $deliveryDate;
             $order->ediProcessor = 1;
-            $order->acceptedBy = $organization->associatedManagers($organization->id, true) ?? 1;
+            $managerAssociate = $organization->getAssociatedManagers($organization->id, true);
+            $acceptedByID = 1;
+            if ($managerAssociate) {
+                $acceptedByID = $managerAssociate->id;
+            } else {
+                $relUserOrg = RelationUserOrganization::findOne(['organization_id' => $organization->id, 'is_active' => true, 'role_id' => [Role::ROLE_ADMIN, Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_RESTAURANT_EMPLOYEE]]);
+                if ($relUserOrg) {
+                    $acceptedByID = $relUserOrg->user_id;
+                }
+            }
+            $order->accepted_by_id = $acceptedByID;
             if (!$order->save()) {
                 throw new Exception('Error saving order');
             }

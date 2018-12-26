@@ -8,22 +8,23 @@ use yii\helpers\ArrayHelper;
 /**
  * This is the model class for table "gender".
  *
- * @property integer $id
- * @property string $name_gender
+ * @property int       $id          Идентификатор записи в таблице
+ * @property string    $name_gender Наименование гендерного пола
  *
+ * @property Profile[] $profilesAtGender
  */
 class Gender extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'gender';
+        return '{{%gender}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -34,12 +35,12 @@ class Gender extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'          => 'ID',
             'name_gender' => Yii::t('app', 'Name'),
         ];
     }
@@ -51,23 +52,20 @@ class Gender extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Profile::className(), ['gender' => 'id']);
     }
-    
+
     /**
      * array of all genders
-     * 
+     *
      * @return array
      */
-    public static function getList() {
+    public static function getList()
+    {
         $models = Gender::find()
-                ->select(['id', 'name_gender'])
-                ->asArray()
-                ->all();
+            ->select(['id', 'name_gender'])
+            ->asArray()
+            ->all();
 
-        $models[]=['id'=>'0','name_allow'=>'Не указано'];
-        return
-//        ArrayHelper::merge(
-//                        [null => null], 
-                ArrayHelper::map($models, 'id', 'name_gender');
-       // );
+        $models[] = ['id' => '0', 'name_allow' => 'Не указано'];
+        return ArrayHelper::map($models, 'id', 'name_gender');
     }
 }

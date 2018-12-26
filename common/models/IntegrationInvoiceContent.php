@@ -2,60 +2,59 @@
 
 namespace common\models;
 
-use Yii;
-
 /**
  * This is the model class for table "integration_invoice_content".
  *
- * @property int $id
- * @property int $invoice_id
- * @property int $row_number
- * @property string $article
- * @property string $title
- * @property string $ed
- * @property int $percent_nds
- * @property float $price_nds
- * @property float $price_without_nds
- * @property float $quantity
- * @property string $created_at
- * @property string $updated_at
- * @property double $sum_without_nds
+ * @property int                $id                Идентификатор записи в таблице
+ * @property int                $invoice_id        Идентификатор накладной поставщика
+ * @property int                $row_number        Номер строки в таблице накладной поставщика
+ * @property string             $article           Артикул/код товара в таблице накладной поставщика
+ * @property string             $title             Наименование товара в накладной поставщика
+ * @property int                $percent_nds       Налоговая ставка НДС в накладной поставщика
+ * @property double             $price_nds         Цена за единицу товара с НДС в накладной поставщика
+ * @property double             $price_without_nds Цена за единицу товара без НДС в накладной поставщика
+ * @property string             $quantity          Количество товара в накладной поставщика
+ * @property string             $ed                Единица измерения товара в накладной поставщика
+ * @property string             $created_at        Дата и время создания записи в таблице
+ * @property string             $updated_at        Дата и время последнего изменения записи в таблице
+ * @property double             $sum_without_nds   Сумма товаров без НДС в строке накладной поставщика
  *
  * @property IntegrationInvoice $invoice
  */
 class IntegrationInvoiceContent extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'integration_invoice_content';
+        return '{{%integration_invoice_content}}';
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function behaviors()
     {
         return [
             'timestamp' => [
-                'class' => \yii\behaviors\TimestampBehavior::className(),
-                'attributes' => [
-                    \yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
-                    \yii\db\ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
-                ],
-                'value' => new \yii\db\Expression('NOW()'),
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
             ],
         ];
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
         return [
             [['invoice_id'], 'required'],
             [['invoice_id', 'row_number', 'percent_nds'], 'integer'],
-            [['price_nds', 'price_without_nds','quantity','sum_without_nds'], 'double'],
+            [['price_nds', 'price_without_nds', 'quantity', 'sum_without_nds'], 'double'],
             [['created_at', 'updated_at'], 'safe'],
             [['article', 'title', 'ed'], 'string', 'max' => 255],
             [['invoice_id'], 'exist', 'skipOnError' => true, 'targetClass' => IntegrationInvoice::className(), 'targetAttribute' => ['invoice_id' => 'id']],
@@ -63,29 +62,33 @@ class IntegrationInvoiceContent extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'invoice_id' => 'Invoice ID',
-            'row_number' => 'Row Number',
-            'article' => 'Артикул',
-            'title' => 'Наименование',
-            'ed' => 'Ед. измерения',
-            'percent_nds' => 'НДС',
-            'price_nds' => 'Сумма с НДС',
+            'id'                => 'ID',
+            'invoice_id'        => 'Invoice ID',
+            'row_number'        => 'Row Number',
+            'article'           => 'Артикул',
+            'title'             => 'Наименование',
+            'ed'                => 'Ед. измерения',
+            'percent_nds'       => 'НДС',
+            'price_nds'         => 'Сумма с НДС',
             'price_without_nds' => 'Цена без НДС',
-            'totalPrice' => 'Общая сумма без НДС',
-            'quantity' => 'Кол-во',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
-            'sum_without_nds' => 'Сумма без НДС',
+            'totalPrice'        => 'Общая сумма без НДС',
+            'quantity'          => 'Кол-во',
+            'created_at'        => 'Created At',
+            'updated_at'        => 'Updated At',
+            'sum_without_nds'   => 'Сумма без НДС',
         ];
     }
 
-    public function getTotalPrice() {
+    /**
+     * @return float
+     */
+    public function getTotalPrice()
+    {
         return round($this->price_without_nds * $this->quantity, 2);
     }
 

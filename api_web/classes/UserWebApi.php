@@ -2,8 +2,10 @@
 
 namespace api_web\classes;
 
+use api_web\components\FireBase;
 use api_web\components\Registry;
 use api_web\helpers\WebApiHelper;
+use api_web\models\ForgotForm;
 use common\models\licenses\License;
 use common\models\ManagerAssociate;
 use common\models\notifications\EmailNotification;
@@ -19,6 +21,7 @@ use api_web\components\Notice;
 use common\models\RelationSuppRestPotential;
 use common\models\Organization;
 use yii\db\Query;
+use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -636,7 +639,7 @@ class UserWebApi extends \api_web\components\WebApi
             $this->user->newPasswordConfirm = $post['new_password_confirm'];
 
             if (!$this->user->validate(['newPassword'])) {
-                throw new BadRequestHttpException('bad_password|' . $this->randomPassword());
+                throw new BadRequestHttpException('bad_password|' . ForgotForm::generatePassword(8));
             }
 
             if (!$this->user->validate() || !$this->user->save()) {
@@ -794,25 +797,6 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Генератор случайного пароля
-     *
-     * @return string
-     */
-    private function randomPassword()
-    {
-        $pass = '';
-        $alphabet = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,w,x,y,z,";
-        $alphabet .= "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,W,X,Y,Z,";
-        $alphabet = explode(',', $alphabet);
-        for ($i = 0; $i < 6; $i++) {
-            $n = rand(0, count($alphabet) - 1);
-            $pass .= $alphabet[$n];
-        }
-
-        return $pass . rand(111, 999);
-    }
-
-    /**
      * Возвращает GMT из базы, если его нет сохраняет из headers, добавляет плюс к не отрицательному таймзону
      *
      * @return string $gmt
@@ -842,7 +826,8 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * @param string $indexByField
+     * @param string|null $indexByField
+     * @param string|null $name
      * @return array
      */
     public function getUserOrganizationBusinessList(string $indexByField = null, string $name = null)
@@ -874,11 +859,9 @@ class UserWebApi extends \api_web\components\WebApi
         $res = $resQuery->all();
 
         $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($res, 'id'));
-        $res = array_map(function ($item) use ($licenses) {
+        foreach ($res as &$item) {
             $item['license_is_active'] = isset($licenses[$item['id']]);
-
-            return $item;
-        }, $res);
+        }
 
         return ['result' => $res];
     }
@@ -970,6 +953,7 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('user_not_found');
         }
 
+        /** @var Transaction $transaction */
         $transaction = \Yii::$app->db_api->beginTransaction();
         try {
             $user->setOrganization($organization_id, true);

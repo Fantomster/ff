@@ -2389,7 +2389,6 @@ class OrderController extends DefaultController
         }
         $systemMessage = $order->vendor->name . Yii::t('message', 'frontend.controllers.order.cancelled_order', ['ru' => ' отменил заказ!']);
         foreach ($order->client->users as $user) {
-            FireBase::unsetInstance();
             FireBase::getInstance()->update([
                 'user'          => $user->id,
                 'organization'  => $order->client->id,

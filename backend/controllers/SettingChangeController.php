@@ -94,7 +94,6 @@ class SettingChangeController extends Controller
         }
         $organization = Organization::findOne($settingChange->org_id);
         foreach ($organization->users as $user) {
-            FireBase::unsetInstance();
             FireBase::getInstance()->update([
                 'user'          => $user->id,
                 'organization'  => $organization->id,

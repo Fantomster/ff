@@ -25,7 +25,7 @@ use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
- * Class DocumentWebApi 
+ * Class DocumentWebApi
  *
  * @package api_web\modules\integration\classes
  */
@@ -160,8 +160,8 @@ class DocumentWebApi extends \api_web\components\WebApi
         //Позиции заказа вне накладной
         $existsQuery = (new Query())
             ->select(['w.id'])
-            ->from($apiDb . '.' . \common\models\Waybill::tableName() . ' as w')
-            ->innerJoin($apiDb . '.' . \common\models\WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
+            ->from('`' . $apiDb . '`.' . \common\models\Waybill::tableName() . ' as w')
+            ->innerJoin('`' . $apiDb . '`.' . \common\models\WaybillContent::tableName() . ' as wc', 'wc.waybill_id = w.id')
             ->where('wc.order_content_id = oc.id')
             ->andWhere('w.service_id = :service_id', [':service_id' => (int)$service_id]);
 
@@ -817,7 +817,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 $field = 'acquirer_id';
             }
             if (!$query->andWhere([$field => $this->user->organization_id])->exists()) {
-                throw new BadRequestHttpException( "type_not_found|{$request['type']}");
+                throw new BadRequestHttpException("type_not_found|{$request['type']}");
             }
 
             $document = $modelClass::prepareModel($request['document_id'], $request['service_id']);

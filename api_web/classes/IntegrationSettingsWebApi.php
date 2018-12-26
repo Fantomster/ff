@@ -174,14 +174,20 @@ class IntegrationSettingsWebApi extends WebApi
             ])
             ->one();
 
-        if (empty($settingChange)) {
-            (new IntegrationSettingChange([
-                'org_id'                 => $this->user->organization_id,
-                'integration_setting_id' => $setting->id,
-                'old_value'              => !empty($settingValue) ? $settingValue->value : null,
-                'new_value'              => $request['value'],
-                'changed_user_id'        => $this->user->id
-            ]))->save();
+        if (empty($settingValue) || !empty($settingValue) && $settingValue->value != $request['value']) {
+            if (empty($settingChange)) {
+                $newSettingChange = new IntegrationSettingChange([
+                    'org_id'                 => $this->user->organization_id,
+                    'integration_setting_id' => $setting->id,
+                    'old_value'              => !empty($settingValue) ? $settingValue->value : null,
+                    'new_value'              => $request['value'],
+                    'changed_user_id'        => $this->user->id
+                ]);
+
+                if (!$newSettingChange->save()) {
+                    throw new ValidationException($newSettingChange->getFirstErrors());
+                }
+            }
         }
 
         throw new BadRequestHttpException(\Yii::t('api_web', 'api_web.moderation_setting_save_msg'));

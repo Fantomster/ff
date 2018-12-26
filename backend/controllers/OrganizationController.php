@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use api_web\components\WebApi;
+use api_web\exceptions\ValidationException;
 use backend\models\TestVendorsSearch;
 use common\models\AllService;
 use common\models\edi\EdiOrganization;
@@ -76,7 +77,8 @@ class OrganizationController extends Controller
                             'update-edi-settings',
                             'create-edi-settings',
                             'integration-settings',
-                            'update-integration-settings'
+                            'update-integration-settings',
+                            'ajax-update-integration-settings'
                         ],
                         'allow'   => true,
                         'roles'   => [
@@ -572,21 +574,70 @@ class OrganizationController extends Controller
         ]);
     }
 
+    /**
+     * @return string
+     * @throws \yii\base\InvalidArgumentException
+     * @throws \yii\web\HttpException
+     */
     public function actionUpdateIntegrationSettings()
     {
-        $org_id = Yii::$app->request->get('org_id');
+        $orgId = Yii::$app->request->get('org_id');
         $service_id = Yii::$app->request->get('service_id');
-        $organization = Organization::findOne(['id' => $org_id]);
+        $organization = Organization::findOne(['id' => $orgId]);
         $service = AllService::findOne($service_id);
         License::checkLicense($organization->id, $service->id);
 
-        $s = IntegrationSetting::find()->where(['service_id' => $service->id])->all();
+        $settingIds = IntegrationSetting::find()
+            ->select(['id', 'default_value'])
+            ->where(['service_id' => $service->id, 'is_active' => 1])
+            ->indexBy('id')
+            ->all();
+        $result = IntegrationSettingValue::find()
+            ->joinWith('setting')
+            ->where(['setting_id' => array_keys($settingIds), 'org_id' => $orgId, 'is_active' => 1])
+            ->indexBy('setting_id')->all();
+
+        $diff = array_diff_key($settingIds, $result);
+        if (!empty($diff)) {
+            /**@var IntegrationSetting $setting */
+            foreach ($diff as $setting) {
+                $settingValue = new IntegrationSettingValue();
+                $settingValue->setting_id = $setting->id;
+                $settingValue->org_id = $orgId;
+                $settingValue->value = $setting->default_value ?? '';
+                if ($settingValue->save(false)) {
+                    $result[$setting->id] = $settingValue;
+                }
+            }
+        }
 
         return $this->render('update-integration-settings', [
             'service'      => $service,
             'organization' => $organization,
-            'settings'     => $s
+            'dataProvider' => new ArrayDataProvider(['allModels' => $result]),
         ]);
+    }
+
+    /**
+     * @return bool
+     * @throws ValidationException
+     */
+    public function actionAjaxUpdateIntegrationSettings()
+    {
+        if (Yii::$app->request->isAjax) {
+            $settings = \Yii::$app->request->post('settings');
+            foreach ($settings as $setting) {
+                $model = IntegrationSettingValue::findOne($setting['id']);
+                $model->value = $setting['value'];
+                if (!$model->save(false)) {
+                    throw new ValidationException($model->getFirstErrors());
+                }
+            }
+            \Yii::$app->session->setFlash('success', "Статья сохранена");
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

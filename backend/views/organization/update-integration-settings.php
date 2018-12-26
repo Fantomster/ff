@@ -1,5 +1,6 @@
 <?php
 
+use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 
@@ -25,39 +26,57 @@ $this->params['breadcrumbs'][] = $this->title;
 $gridColumns = [
     [
         'format'    => 'raw',
-        'attribute' => 'denom',
-        'label'     => 'Сервис',
+        'attribute' => 'setting.name',
+        'label'     => 'Название настройки',
     ],
     [
-        'attribute' => 'vendor',
-        'label'     => 'Провайдер',
+        'attribute' => 'setting.comment',
+        'label'     => 'Комментарий',
     ],
     [
-        'format' => 'raw',
-        'value'  => function ($data) use ($organization) {
-            if ($data['license']['is_active_license'] == 1) {
-                return Html::a('Редактировать', [
-                    'organization/update-integration-settings',
-                    'service_id' => $data['id'],
-                    'org_id'     => $organization->id
-                ]);
-            } else {
-                return '';
-            }
-        }
+        'format'    => 'raw',
+        'attribute' => 'value',
+        'label'     => 'Название настройки',
+        'value'     => function ($data) {
+            return Html::input('text', 'setting_' . $data->setting_id, $data->value, ['data' => ['id' => $data->id, 'org_id' => $data->org_id, 'setting_id' => $data->setting_id], 'class' => 'setting_input']);
+        },
     ],
+
 ];
 ?>
-
 <div class="organization-index">
     <h3><?= $this->title ?></h3>
     <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>
-    <?php
-    /** @var \common\models\IntegrationSetting $setting */
-    foreach ($settings as $setting): ?>
-        <div>
-            <?= $setting->name ?>
-        </div>
-    <?php endforeach; ?>
+    <?=
+    GridView::widget([
+        'dataProvider' => $dataProvider,
+        'columns'      => $gridColumns,
+    ]);
+    ?>
+    <button type="button" onclick="submit()" class="btn btn-success pull-right">Submit</button>
     <?php Pjax::end(); ?>
 </div>
+
+<script type="text/javascript">
+	function submit() {
+		let data = [];
+		$('.setting_input').each(function () {
+			let element = {};
+			element.id = $(this).data('id');
+			element.org_id = $(this).data('org_id');
+			element.setting_id = $(this).data('setting_id');
+			element.value = $(this).val();
+			data.push(element);
+		});
+		$.ajax({
+			type: "POST",
+			url: '/organization/ajax-update-integration-settings',
+			data: {settings: data},
+			success: function (result) {
+				if (result == 1) {
+					location.reload();
+				}
+			}
+		});
+	}
+</script>

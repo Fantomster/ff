@@ -9,31 +9,31 @@ use yii\helpers\ArrayHelper;
 /**
  * This is the model class for table "order_attachment".
  *
- * @property int $id
- * @property int $order_id
- * @property string $file
- * @property string $created_at
+ * @property int    $id         Идентификатор записи в таблице
+ * @property int    $order_id   Идентификатор заказа, к которому относится прикреплённый файл
+ * @property string $file       Наименование прикреплённого файла
+ * @property string $created_at Дата и время создания записи в таблице
  *
- * @property Order $order
- * @property integer $size
- * @property string $url
- * @property OrderAssignment $assignment
+ * @property Order  $order
  */
-class OrderAttachment extends \yii\db\ActiveRecord {
+class OrderAttachment extends \yii\db\ActiveRecord
+{
 
     public $resourceCategory = 'bill';
 
     /**
      * {@inheritdoc}
      */
-    public static function tableName() {
-        return 'order_attachment';
+    public static function tableName()
+    {
+        return '{{%order_attachment}}';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['order_id', 'file'], 'required'],
             [['order_id'], 'integer'],
@@ -44,35 +44,37 @@ class OrderAttachment extends \yii\db\ActiveRecord {
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return ArrayHelper::merge(parent::behaviors(), [
-                    [
-                        'class' => UploadBehavior::className(),
-                        'attribute' => 'file',
-                        'scenarios' => ['default'],
-                        'path' => '@app/web/upload/temp/',
-                        'url' => '/upload/temp/',
-                    ],
-                    'timestamp' => [
-                        'class' => 'yii\behaviors\TimestampBehavior',
-                        'value' => function ($event) {
-                            return gmdate("Y-m-d H:i:s");
-                        },
-                        'updatedAtAttribute' => false,
-                    ],
+            [
+                'class'     => UploadBehavior::className(),
+                'attribute' => 'file',
+                'scenarios' => ['default'],
+                'path'      => '@app/web/upload/temp/',
+                'url'       => '/upload/temp/',
+            ],
+            'timestamp' => [
+                'class'              => 'yii\behaviors\TimestampBehavior',
+                'value'              => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+                'updatedAtAttribute' => false,
+            ],
         ]);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
-            'id' => 'ID',
-            'order_id' => 'Order ID',
-            'file' => 'Файл',
+            'id'         => 'ID',
+            'order_id'   => 'Order ID',
+            'file'       => 'Файл',
             'created_at' => 'Created At',
         ];
     }
@@ -80,24 +82,30 @@ class OrderAttachment extends \yii\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getOrder() {
+    public function getOrder()
+    {
         return $this->hasOne(Order::className(), ['id' => 'order_id']);
     }
 
-    public function getFile() {
+    /**
+     * load file
+     */
+    public function getFile()
+    {
         Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
-//        $size = $this->getSize();
         header('Content-Disposition: inline; filename=' . $this->file);
-        //header("Content-type:application/pdf");
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
-        //header('Content-Length: ' . $size);
         flush();
         readfile($this->getRawUploadUrl('file'));
     }
 
-    function getSize() {
+    /**
+     * @return mixed
+     */
+    function getSize()
+    {
         $url = $this->getRawUploadUrl('file');
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_NOBODY, 1);
@@ -116,7 +124,8 @@ class OrderAttachment extends \yii\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAssignment() {
+    public function getAssignment()
+    {
         return $this->hasOne(OrderAssignment::className(), ['order_id' => 'order_id']);
     }
 

@@ -3,7 +3,6 @@
 namespace common\models;
 
 use common\models\search\OrderCatalogSearch;
-use market\components\ImagesHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
 use common\behaviors\SluggableBehavior;
@@ -11,13 +10,14 @@ use common\behaviors\SluggableBehavior;
 /**
  * This is the model class for table "mp_category".
  *
- * @property integer $id
- * @property string $name
- * @property string $title
- * @property string $text
- * @property string $description
- * @property string $keywords
- * @property integer $parent
+ * @property int        $id          Идентификатор записи в таблице
+ * @property string     $name        Наименование категории товаров в Маркет Плейс
+ * @property int        $parent      Идентификатор родительской категории товаров в Маркет Плейс
+ * @property string     $slug        slug-псевдоним категории товаров в Маркет Плейс
+ * @property string     $title       Заголовок к категории товаров Маркет Плейс
+ * @property string     $text        Текст к категории товаров в Маркет Плейс
+ * @property string     $description Описание категории товаров в Маркет Плейс
+ * @property string     $keywords    Ключевые слова категории товаров в Маркет Плейс
  *
  * @property MpCategory $parentCategory
  */
@@ -25,15 +25,15 @@ class MpCategory extends \yii\db\ActiveRecord
 {
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'mp_category';
+        return '{{%mp_category}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -45,33 +45,40 @@ class MpCategory extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function behaviors()
     {
         return [
             'slug' => [
-                'class' => SluggableBehavior::className(),
-                'attribute' => 'name',
-                'slugAttribute' => 'slug',
+                'class'          => SluggableBehavior::className(),
+                'attribute'      => 'name',
+                'slugAttribute'  => 'slug',
                 'transliterator' => 'Russian-Latin/BGN; NFKD',
                 //Set this to true, if you want to update a slug when source attribute has been changed
-                'forceUpdate' => true,
-                'ensureUnique' => true,
+                'forceUpdate'    => true,
+                'ensureUnique'   => true,
             ],
         ];
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'name' => Yii::t('app', 'common.models.category_mp', ['ru' => 'Категория']) . ' (MP)',
+            'id'     => 'ID',
+            'name'   => Yii::t('app', 'common.models.category_mp', ['ru' => 'Категория']) . ' (MP)',
             'parent' => 'Parent',
         ];
     }
 
+    /**
+     * @param string $name
+     * @return mixed|string
+     */
     public function __get($name)
     {
         if ($name == 'name') {
@@ -151,12 +158,19 @@ class MpCategory extends \yii\db\ActiveRecord
         return (int)CatalogBaseGoods::find()->where(["category_id" => $id])->count();
     }
 
+    /**
+     * @param $id
+     * @return string
+     */
     public static function getCategory($id)
     {
         $cat = Yii::t('app', MpCategory::find()->where(["id" => $id])->one()->name);
         return $cat;
     }
 
+    /**
+     * @return array
+     */
     public static function allCategory()
     {
         $mp_ed = ArrayHelper::map(MpCategory::find()->all(), 'id', 'name');
@@ -166,6 +180,9 @@ class MpCategory extends \yii\db\ActiveRecord
         return $mp_ed;
     }
 
+    /**
+     * @return array|MpCategory|\yii\db\ActiveRecord|null
+     */
     public function getParentCategory()
     {
         return MpCategory::find()->where(["id" => $this->parent])->one();

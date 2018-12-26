@@ -24,7 +24,7 @@ use common\components\NestedSetsQuery;
  *
  * @property int    $id               ID записи данных о категории
  * @property string $outer_uid        ID записи категории в источнике загрузки данных
- * @property string $parent_outer_uid ID записи родительской категории в источнике загрузки данных
+ * @property string $parent_outer_uid Родительский outer_id
  * @property int    $service_id       ID сервиса, с помощью которого была произведена загрузка данной категории
  * @property int    $org_id           ID организации, к которой относится данная категория
  * @property string $name             Наименование категории
@@ -66,17 +66,12 @@ class OuterCategory extends ActiveRecord
         ];
     }
 
-    public static function find()
-    {
-        return new NestedSetsQuery(get_called_class());
-    }
-
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'outer_category';
+        return '{{%outer_category}}';
     }
 
     /**
@@ -124,6 +119,17 @@ class OuterCategory extends ActiveRecord
         ];
     }
 
+    /**
+     * @return NestedSetsQuery|\yii\db\ActiveQuery
+     */
+    public static function find()
+    {
+        return new NestedSetsQuery(get_called_class());
+    }
+
+    /**
+     *
+     */
     public function selectedParent()
     {
         /** @var OuterCategory $parent */

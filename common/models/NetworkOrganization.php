@@ -2,32 +2,29 @@
 
 namespace common\models;
 
-use Yii;
-
 /**
  * This is the model class for table "network_organization".
  *
- * @property integer $id
- * @property integer $organization_id
- * @property integer $parent_id
- * @property string $created_at
- * @property string $updated_at
- *
- * @property Organization[] $parent
+ * @property int          $id              Идентификатор записи в таблице
+ * @property int          $organization_id Идентификатор организации, являющейся подчинённой
+ * @property int          $parent_id       Идентификатор "родительской" организации
+ * @property string       $created_at      Дата и время создания записи в таблице
+ * @property string       $updated_at      Дата и время последнего изменения записи в таблице
  * @property Organization $organization
+ * @property Organization $parent
  */
 class NetworkOrganization extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'network_organization';
+        return '{{%network_organization}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -41,16 +38,16 @@ class NetworkOrganization extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'              => 'ID',
             'organization_id' => 'Organization ID',
-            'parent_id' => 'Parent ID',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
+            'parent_id'       => 'Parent ID',
+            'created_at'      => 'Created At',
+            'updated_at'      => 'Updated At',
         ];
     }
 

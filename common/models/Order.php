@@ -19,49 +19,51 @@ use yii\web\BadRequestHttpException;
 /**
  * This is the model class for table "order".
  *
- * @property integer            $id
- * @property integer            $client_id
- * @property integer            $vendor_id
- * @property integer            $created_by_id
- * @property integer            $accepted_by_id
- * @property integer            $status
- * @property string             $total_price
- * @property string             $created_at
- * @property string             $updated_at
- * @property string             $completion_date
- * @property string             $requested_delivery
- * @property string             $actual_delivery
- * @property string             $comment
- * @property string             $discount
- * @property integer            $discount_type
- * @property integer            $currency_id
- * @property string             $waybill_number
- * @property integer            $service_id
- * @property string             $status_updated_at
- * @property string             $edi_order
- * @property string             $edi_ordersp
- * @property bool               $is_recadv_sent
+ * @property int                $id                 Идентификатор записи в таблице
+ * @property int                $client_id          Идентификатор клиента, оформившего заказ
+ * @property int                $vendor_id          Идентификатор организации-поставщика
+ * @property int                $created_by_id      Идентификатор пользователя, создавшего заказ
+ * @property int                $accepted_by_id     Идентификатор пользователя, завершившего заказ
+ * @property int                $status             Идентификатор статуса заказа
+ * @property string             $total_price        Сумма заказа без НДС
+ * @property int                $invoice_relation   Идентификатор накладной ТОРГ-12
+ * @property string             $created_at         Дата и время создания записи в таблице
+ * @property string             $updated_at         Дата и время последнего изменения записи в таблице
+ * @property string             $requested_delivery Ожидаемые дата и время доставки товаров
+ * @property string             $actual_delivery    Реальные дата и время доставки товаров
+ * @property string             $comment            Комментарий (не используется)
+ * @property string             $discount           Размер скидки в процентах
+ * @property int                $discount_type      Идентификатор типа скидки
+ * @property int                $currency_id        Идентификатор вида валюты, в которой оформлен заказ
+ * @property string             $completion_date    Дата и время завершения заказа
+ * @property string             $waybill_number     Номер приходной накладной
+ * @property int                $service_id         Идентификатор учётного сервиса (all_service)
+ * @property string             $status_updated_at  Дата и время последнего изменения статуса заказа
+ * @property string             $edi_order          Идентификатор EDI заказа
+ * @property string             $edi_ordersp        Название файла ordersp, который поступает от поставщика
+ * @property string             $accepted_at        Дата и время завершения заказа
+ * @property string             $edi_error_message  Сообщение об ошибке от EDI
+ * @property int                $replaced_order_id  Идентификатор заказа, который был заменён текущим
+ * @property string             $edi_doc_date       Дата накладной заказа по EDI
+ * @property int                $is_recadv_sent     Показатель состояния отправки файла recadv (0 - не отправлен, 1 -
+ *           отправлен)
+ *
+ * @property EmailQueue[]       $emailQueues
  * @property User               $acceptedBy
+ * @property Organization       $client
  * @property User               $createdBy
+ * @property Currency           $currency
+ * @property Organization       $vendor
+ * @property OrderAssignment    $orderAssignment
+ * @property OrderAttachment[]  $orderAttachments
+ * @property OrderChat[]        $orderChats
+ * @property OrderContent[]     $orderContents
+ * @property EdiOrder           $ediOrder
  * @property Profile            $createdByProfile
  * @property Profile            $acceptedByProfile
- * @property Organization       $client
- * @property Organization       $vendor
- * @property OrderContent[]     $orderContent
- * @property OrderChat[]        $orderChat
- * @property integer            positionCount
- * @property integer            invoice_relation
- * @property string             $statusText
- * @property bool               $isObsolete
- * @property string             $rawPrice
- * @property User[]             $recipientsList
- * @property Currency           $currency
- * @property OrderAttachment[]  $attachments
- * @property OrderAssignment    $assignment
- * @property EmailQueue[]       $relatedEmails
- * @property integer            $replaced_order_id
  * @property IntegrationInvoice $invoice
- * @property array              $ediNumber
+ * @property IntegrationInvoice $invoiceRelation
+ * @property EmailQueue[]       $relatedEmails
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -90,16 +92,15 @@ class Order extends \yii\db\ActiveRecord
     public $last_message_date = null;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-
     public static function tableName()
     {
-        return 'order';
+        return '{{%order}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function behaviors(): array
     {
@@ -130,7 +131,7 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules(): array
     {
@@ -149,27 +150,27 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels(): array
     {
         return [
-            'id'                    => Yii::t('app', 'Номер заказа'),
-            'replaced_order_id'     => Yii::t('app', 'ID заказа который был заменен текущим'),
-            'client_id'             => 'Client ID',
-            'vendor_id'             => 'Vendor ID',
-            'created_by_id'         => 'Created By ID',
-            'accepted_by_id'        => 'Accepted By ID',
-            'status'                => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
-            'status_text'           => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
-            'total_price'           => Yii::t('app', 'common.models.total_price', ['ru' => 'Итоговая цена']),
-            'created_at'            => Yii::t('app', 'Дата создания'),
-            'updated_at'            => 'Updated At',
-            'vendor'                => Yii::t('app', 'Поставщик'),
-            'create_user'           => Yii::t('app', 'Заказ создал'),
-            'plan_price'            => Yii::t('app', 'План'),
-            'waybill_number'        => Yii::t('app', 'Номер накладной'),
-            'edi_doc_date'          => Yii::t('app', 'Дата накладной заказа по EDI')
+            'id'                => Yii::t('app', 'Номер заказа'),
+            'replaced_order_id' => Yii::t('app', 'ID заказа который был заменен текущим'),
+            'client_id'         => 'Client ID',
+            'vendor_id'         => 'Vendor ID',
+            'created_by_id'     => 'Created By ID',
+            'accepted_by_id'    => 'Accepted By ID',
+            'status'            => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'status_text'       => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'total_price'       => Yii::t('app', 'common.models.total_price', ['ru' => 'Итоговая цена']),
+            'created_at'        => Yii::t('app', 'Дата создания'),
+            'updated_at'        => 'Updated At',
+            'vendor'            => Yii::t('app', 'Поставщик'),
+            'create_user'       => Yii::t('app', 'Заказ создал'),
+            'plan_price'        => Yii::t('app', 'План'),
+            'waybill_number'    => Yii::t('app', 'Номер накладной'),
+            'edi_doc_date'      => Yii::t('app', 'Дата накладной заказа по EDI')
         ];
     }
 
@@ -196,6 +197,14 @@ class Order extends \yii\db\ActiveRecord
 
             return true;
         }
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEmailQueues()
+    {
+        return $this->hasMany(EmailQueue::className(), ['order_id' => 'id']);
     }
 
     /**
@@ -757,6 +766,9 @@ class Order extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @return string|null
+     */
     public function getEdiOrderDocType()
     {
         $docType = null;
@@ -772,6 +784,9 @@ class Order extends \yii\db\ActiveRecord
         return $docType;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function afterDelete()
     {
         parent::afterDelete();

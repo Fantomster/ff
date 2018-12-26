@@ -35,7 +35,7 @@ class OuterAgent extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'outer_agent';
+        return '{{%outer_agent}}';
     }
 
     /**

@@ -19,12 +19,13 @@ use yii\behaviors\TimestampBehavior;
  * @property string             $created_at             Дата создания запроса на изменения настройки
  * @property string             $updated_at             Дата последнего изменения
  * @property string             $confirmed_at           Дата подтвержения настройки
- *
- * @property IntegrationSetting $integrationSetting
- * @property Organization       $organization
  * @property int                $rejected_user_id [int(11)]  Указатель на ID пользователя который отменил запрос о
  *           изменении
  * @property int                $rejected_at      [timestamp]  Дата отмены изменения
+ *
+ * @property User               $rejectedUser
+ * @property IntegrationSetting $integrationSetting
+ * @property Organization       $organization
  */
 class IntegrationSettingChange extends \yii\db\ActiveRecord
 {
@@ -121,5 +122,13 @@ class IntegrationSettingChange extends \yii\db\ActiveRecord
     public static function count()
     {
         return self::find()->where(['is_active' => true])->count();
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRejectedUser()
+    {
+        return $this->hasOne(User::class, ['id' => 'org_id']);
     }
 }

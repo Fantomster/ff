@@ -27,7 +27,6 @@ use yii\behaviors\TimestampBehavior;
  * @property int             $outer_dic_id Код словаря
  * @property int             $org_id       Код организации
  * @property int             $status_id    ID статуса - выгружен, ошибка, не выгружался
- * @property int             $statusText   Статус текстом
  * @property int             $count        Количество записей в словаре
  * @property string          $created_at   Дата создания
  * @property string          $updated_at   Дата обновления
@@ -42,6 +41,25 @@ class OrganizationDictionary extends ActiveRecord
     const STATUS_SEND_REQUEST = 3;
     const IIKO_UNIT_DICT_ID = 9;
 
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return '{{%organization_dictionary}}';
+    }
+
+    /**
+     * @return \yii\db\Connection the database connection used by this AR class.
+     */
+    public static function getDb()
+    {
+        return Yii::$app->get('db_api');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function behaviors()
     {
         return [
@@ -54,16 +72,9 @@ class OrganizationDictionary extends ActiveRecord
         ];
     }
 
-    public static function tableName()
-    {
-        return 'organization_dictionary';
-    }
-
-    public static function getDb()
-    {
-        return Yii::$app->get('db_api');
-    }
-
+    /**
+     * {@inheritdoc}
+     */
     public function rules()
     {
         return [
@@ -75,6 +86,9 @@ class OrganizationDictionary extends ActiveRecord
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function attributeLabels()
     {
         return [
@@ -88,11 +102,17 @@ class OrganizationDictionary extends ActiveRecord
         ];
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getOrg()
     {
         return $this->hasOne(Organization::class, ['id' => 'org_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getOuterDic()
     {
         return $this->hasOne(OuterDictionary::class, ['id' => 'outer_dic_id']);

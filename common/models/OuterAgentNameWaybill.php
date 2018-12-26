@@ -7,9 +7,9 @@ use Yii;
 /**
  * This is the model class for table "outer_agent_name_waybill".
  *
- * @property int    $id
- * @property int    $agent_id
- * @property string $name
+ * @property int        $id
+ * @property int        $agent_id ID контрагента из outer_agent
+ * @property string     $name
  * @property OuterAgent $agent
  */
 class OuterAgentNameWaybill extends \yii\db\ActiveRecord
@@ -19,7 +19,7 @@ class OuterAgentNameWaybill extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'outer_agent_name_waybill';
+        return '{{%outer_agent_name_waybill}}';
     }
 
     /**

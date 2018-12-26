@@ -173,7 +173,7 @@ class OrderSearch extends Order
         if ($this->manager_id) {
             $maTable = \common\models\ManagerAssociate::tableName();
             $orderTable = Order::tableName();
-            $query->rightJoin($maTable, "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->manager_id);
+            $query->rightJoin($maTable, "$maTable.organization_id = $orderTable.client_id AND $maTable.manager_id = " . $this->manager_id);
         }
         $query->where(Order::tableName() . '.`status` != :status', ['status' => OrderStatus::STATUS_FORMING]);
 
@@ -209,10 +209,10 @@ class OrderSearch extends Order
 
         $orderTable = Order::tableName();
         if (isset($completion_date_from)) {
-            $query->andWhere("IF( $orderTable.status = " . OrderStatus::STATUS_DONE . ", IFNULL($orderTable.completion_date, $orderTable.actual_delivery) >= '$completion_date_from', $orderTable.updated_at >= '$completion_date_from')");
+            $query->andWhere("IF($orderTable.status = " . OrderStatus::STATUS_DONE . ", IFNULL($orderTable.completion_date, $orderTable.actual_delivery) >= '$completion_date_from', $orderTable.updated_at >= '$completion_date_from')");
         }
         if (isset($completion_date_to)) {
-            $query->andWhere("IF( $orderTable.status = " . OrderStatus::STATUS_DONE . ", IFNULL($orderTable.completion_date, $orderTable.actual_delivery) <= '$completion_date_to', $orderTable.updated_at <= '$completion_date_to')");
+            $query->andWhere("IF($orderTable.status = " . OrderStatus::STATUS_DONE . ", IFNULL($orderTable.completion_date, $orderTable.actual_delivery) <= '$completion_date_to', $orderTable.updated_at <= '$completion_date_to')");
         }
 
         if (!empty($this->vendor_array)) {
@@ -252,8 +252,9 @@ class OrderSearch extends Order
     /**
      * Creates data provider instance with search query applied for waybill controller (Integration)
      *
-     * @param array $params
+     * @param $params
      * @return ActiveDataProvider
+     * @throws \Exception
      */
     public function searchWaybill($params)
     {

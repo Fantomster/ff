@@ -73,6 +73,9 @@ class EDIClass extends Component
                 throw new Exception('no EDI organization found');
             }
             $organization = Organization::findOne(['id' => $ediOrganization->organization_id]);
+            if (!$organization) {
+                throw new Exception('no organization found');
+            }
 
             if ($isLeraData) {
                 $order = Order::findOne(['id' => $orderID, 'client_id' => $ediOrganization->organization_id]);
@@ -254,6 +257,7 @@ class EDIClass extends Component
             $deliveryDate = isset($simpleXMLElement->DELIVERYDATE) ? \Yii::$app->formatter->asDate($simpleXMLElement->DELIVERYDATE, 'yyyy.MM.dd HH:mm:ss') : null;
             $order->actual_delivery = $deliveryDate;
             $order->ediProcessor = 1;
+            $order->acceptedBy = $organization->associatedManagers($organization->id, true) ?? 1;
             if (!$order->save()) {
                 throw new Exception('Error saving order');
             }

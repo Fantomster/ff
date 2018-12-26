@@ -3,8 +3,6 @@
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\User;
-use yii\widgets\Pjax;
-
 
 /* @var $this yii\web\View */
 /* @var $model \api\common\models\iiko\iikoPconst */
@@ -21,11 +19,12 @@ use yii\widgets\Pjax;
             case \api\common\models\iiko\iikoDicconst::TYPE_DROP :
                 if ($dicConst->denom === 'taxVat') {
                     echo $form->field($model, 'value')->dropDownList([
-                        '0' => '0',
+                        '0'    => '0',
                         '1000' => '10',
-                        '1800' => '18'
+                        '1800' => '18',
+                        '2000' => '20'
                     ]);
-                } else if ($dicConst->denom === 'auto_unload_invoice') {
+                } elseif ($dicConst->denom === 'auto_unload_invoice') {
                     echo $form->field($model, 'value')->dropDownList([
                         '0' => 'Выключено',
                         '1' => 'Включено',

@@ -2,10 +2,7 @@
 
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-use kartik\date\DatePicker;
-use yii\helpers\ArrayHelper;
 use kartik\tree\TreeViewInput;
-use yii\bootstrap\Dropdown;
 use common\models\User;
 
 /* @var $this yii\web\View */
@@ -36,7 +33,8 @@ use common\models\User;
                 echo $form->field($model, 'value')->dropDownList([
                     '0'    => '0',
                     '1000' => '10',
-                    '1800' => '18'
+                    '1800' => '18',
+                    '2000' => '20'
                 ]);
             } elseif ($pConst->denom === 'auto_unload_invoice') {
                 echo $form->field($model, 'value')->dropDownList([

@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use api_web\components\FireBase;
+use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
 use common\models\IntegrationSettingValue;
 use common\models\Organization;
@@ -12,6 +13,7 @@ use common\models\IntegrationSettingChangeSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * SettingChangeController implements the CRUD actions for IntegrationSettingChange model.
@@ -51,10 +53,11 @@ class SettingChangeController extends Controller
 
     /**
      * @param $id
-     * @return \yii\web\Response
+     * @return Response
      * @throws NotFoundHttpException
+     * @throws ValidationException
      */
-    public function actionConfirm($id)
+    public function actionConfirm(int $id): Response
     {
         $settingChange = $this->findModelSettingChange($id);
 
@@ -86,7 +89,7 @@ class SettingChangeController extends Controller
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollback();
-            throw new NotFoundHttpException($e->getMessage());
+            throw new ValidationException($e->getMessage());
         }
         $organization = Organization::findOne($settingChange->org_id);
         foreach ($organization->getAssociatedManagers($organization->id) as $user) {
@@ -104,6 +107,28 @@ class SettingChangeController extends Controller
     }
 
     /**
+     * @param int $id
+     * @return Response
+     * @throws NotFoundHttpException
+     * @throws ValidationException
+     */
+    public function actionCancel(int $id): Response
+    {
+        $settingChange = $this->findModelSettingChange($id);
+        $settingChange->setAttributes([
+            'rejected_user_id' => \Yii::$app->user->identity->getId(),
+            'rejected_at'      => gmdate("Y-m-d H:i:s"),
+            'is_active'        => 0
+        ]);
+
+        if (!$settingChange->save()) {
+            throw new ValidationException($settingChange->getFirstErrors());
+        }
+
+        return $this->redirect(['setting-change/index']);
+    }
+
+    /**
      * Finds the IntegrationSettingChange model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      *
@@ -111,7 +136,7 @@ class SettingChangeController extends Controller
      * @return IntegrationSettingChange the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModelSettingChange($id)
+    protected function findModelSettingChange(int $id): IntegrationSettingChange
     {
         if (($model = IntegrationSettingChange::findOne($id)) !== null) {
             return $model;

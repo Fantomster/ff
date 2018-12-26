@@ -53,12 +53,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class'         => 'yii\grid\ActionColumn',
                 'header'        => 'Действия',
                 'headerOptions' => ['width' => '80'],
-                'template'      => '{confirm}',
+                'template'      => '{confirm} {cancel}',
                 'buttons'       => [
                     'confirm' => function ($url) {
                         return Html::a('<span class="btn btn-sm btn-success">Применить</span>', $url, [
                             'data' => [
                                 'confirm' => 'Вы действительно хотите применить данную настройку? Отменить действие будет невозможно!',
+                                'method'  => 'post',
+                            ]
+                        ]);
+                    },
+                    'cancel'  => function ($url) {
+                        return Html::a('<span class="btn btn-sm btn-danger">Отменить</span>', $url, [
+                            'data' => [
+                                'confirm' => 'Вы действительно хотите отменить данную настройку? Отменить действие будет невозможно!',
                                 'method'  => 'post',
                             ]
                         ]);

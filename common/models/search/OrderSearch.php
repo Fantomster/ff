@@ -175,7 +175,7 @@ class OrderSearch extends Order
             $orderTable = Order::tableName();
             $query->rightJoin($maTable, "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->manager_id);
         }
-        $query->where('`' . Order::tableName() . '`.`status` != :status', ['status' => OrderStatus::STATUS_FORMING]);
+        $query->where(Order::tableName() . '.`status` != :status', ['status' => OrderStatus::STATUS_FORMING]);
 
         $addSortAttributes = $this->vendor_search_id ? ['client.name'] : ['vendor.name'];
         $addSortAttributes[] = 'createdByProfile.full_name';

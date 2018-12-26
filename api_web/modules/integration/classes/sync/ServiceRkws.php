@@ -19,7 +19,6 @@ use common\models\OuterTask;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use api\common\models\RkAccess;
 use api\common\models\RkSession;
-use common\models\OrganizationDictionary;
 
 class ServiceRkws extends AbstractSyncFactory
 {
@@ -150,7 +149,7 @@ class ServiceRkws extends AbstractSyncFactory
      * @throws BadRequestHttpException
      * @throws \Throwable
      */
-    private function sendRequestPrivate(array $params = [], $cook): array
+    private function sendRequestPrivate(array $params, $cook): array
     {
         $url = $this->getUrlCmd();
         $guid = UUID::uuid4();

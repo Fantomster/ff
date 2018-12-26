@@ -3,7 +3,6 @@
 namespace api_web\classes;
 
 use api_web\components\WebApi;
-use yii\web\BadRequestHttpException;
 
 /**
  * Class SystemWebApi

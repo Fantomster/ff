@@ -7,33 +7,41 @@ use Yii;
 /**
  * This is the model class for table "delivery".
  *
- * @property integer $id
- * @property integer $vendor_id
- * @property string $delivery_charge
- * @property string $min_free_delivery_charge
- * @property bool $mon
- * @property bool $tue
- * @property bool $wed
- * @property bool $thu
- * @property bool $fri
- * @property bool $sat
- * @property bool $sun
- * @property string $min_order_price
- * @property string $created_at
- * @property string $updated_at
+ * @property int    $id                       Идентификатор записи в таблице
+ * @property int    $vendor_id                Идентификатор организации-поставщика
+ * @property string $delivery_charge          Стоимость доставки
+ * @property string $min_free_delivery_charge Минимальная стоимость заказа, при которой доставка осуществляется
+ *           бесплатно
+ * @property int    $mon                      Показатель возможности доставки заказа в понедельник (0 - нет доставки, 1
+ *           - доставка возможна)
+ * @property int    $tue                      Показатель возможности доставки заказа во вторник (0 - нет доставки, 1 -
+ *           доставка возможна)
+ * @property int    $wed                      Показатель возможности доставки заказа в среду (0 - нет доставки, 1 -
+ *           доставка возможна)
+ * @property int    $thu                      Показатель возможности доставки заказа в четверг (0 - нет доставки, 1 -
+ *           доставка возможна)
+ * @property int    $fri                      Показатель возможности доставки заказа в пятницу (0 - нет доставки, 1 -
+ *           доставка возможна)
+ * @property int    $sat                      Показатель возможности доставки заказа в субботу (0 - нет доставки, 1 -
+ *           доставка возможна)
+ * @property int    $sun                      Показатель возможности доставки заказа в воскресенье (0 - нет доставки, 1
+ *           - доставка возможна)
+ * @property string $min_order_price          Минимальная стоимость заказа
+ * @property string $created_at               Дата и время создания записи в таблице
+ * @property string $updated_at               Дата и время последнего изменения записи в таблице
  */
 class Delivery extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'delivery';
+        return '{{%delivery}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function behaviors()
     {
@@ -46,9 +54,9 @@ class Delivery extends \yii\db\ActiveRecord
             ],
         ];
     }
-    
+
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -62,50 +70,54 @@ class Delivery extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'vendor_id' => Yii::t('app', 'Vendor ID'),
-            'delivery_charge' => Yii::t('app', 'common.models.delivery_price', ['ru'=>'Стоимость доставки']),
-            'min_free_delivery_charge' => Yii::t('app', 'common.models.free_delivery', ['ru'=>'Cтоимость заказа для бесплатной доставки']),
-            'mon' => Yii::t('app', 'common.models.mon', ['ru'=>'Пн']),
-            'tue' => Yii::t('app', 'common.models.tue', ['ru'=>'Вт']),
-            'wed' => Yii::t('app', 'common.models.wed', ['ru'=>'Ср']),
-            'thu' => Yii::t('app', 'common.models.thu', ['ru'=>'Чт']),
-            'fri' => Yii::t('app', 'common.models.fri', ['ru'=>'Пт']),
-            'sat' => Yii::t('app', 'common.models.sat', ['ru'=>'Сб']),
-            'sun' => Yii::t('app', 'common.models.sun', ['ru'=>'Вс']),
-            'min_order_price' => Yii::t('app', 'common.models.min_price', ['ru'=>'Минимальная стоимость заказа']),
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
+            'id'                       => 'ID',
+            'vendor_id'                => Yii::t('app', 'Vendor ID'),
+            'delivery_charge'          => Yii::t('app', 'common.models.delivery_price', ['ru' => 'Стоимость доставки']),
+            'min_free_delivery_charge' => Yii::t('app', 'common.models.free_delivery', ['ru' => 'Cтоимость заказа для бесплатной доставки']),
+            'mon'                      => Yii::t('app', 'common.models.mon', ['ru' => 'Пн']),
+            'tue'                      => Yii::t('app', 'common.models.tue', ['ru' => 'Вт']),
+            'wed'                      => Yii::t('app', 'common.models.wed', ['ru' => 'Ср']),
+            'thu'                      => Yii::t('app', 'common.models.thu', ['ru' => 'Чт']),
+            'fri'                      => Yii::t('app', 'common.models.fri', ['ru' => 'Пт']),
+            'sat'                      => Yii::t('app', 'common.models.sat', ['ru' => 'Сб']),
+            'sun'                      => Yii::t('app', 'common.models.sun', ['ru' => 'Вс']),
+            'min_order_price'          => Yii::t('app', 'common.models.min_price', ['ru' => 'Минимальная стоимость заказа']),
+            'created_at'               => 'Created At',
+            'updated_at'               => 'Updated At',
         ];
     }
-    
-    public function getDaysString() {
+
+    /**
+     * @return string
+     */
+    public function getDaysString()
+    {
         $days = [];
         if ($this->mon) {
-            $days[] = Yii::t('app', 'common.models.mon_two', ['ru'=>'Пн']);
+            $days[] = Yii::t('app', 'common.models.mon_two', ['ru' => 'Пн']);
         }
         if ($this->tue) {
-            $days[] = Yii::t('app', 'common.models.tue_two', ['ru'=>'Вт']);
+            $days[] = Yii::t('app', 'common.models.tue_two', ['ru' => 'Вт']);
         }
         if ($this->wed) {
-            $days[] = Yii::t('app', 'common.models.wed_two', ['ru'=>'Ср']);
+            $days[] = Yii::t('app', 'common.models.wed_two', ['ru' => 'Ср']);
         }
         if ($this->thu) {
-            $days[] = Yii::t('app', 'common.models.thu_two', ['ru'=>'Чт']);
+            $days[] = Yii::t('app', 'common.models.thu_two', ['ru' => 'Чт']);
         }
         if ($this->fri) {
-            $days[] = Yii::t('app', 'common.models.fri_two', ['ru'=>'Пт']);
+            $days[] = Yii::t('app', 'common.models.fri_two', ['ru' => 'Пт']);
         }
         if ($this->sat) {
-            $days[] = Yii::t('app', 'common.models.sat_two', ['ru'=>'Сб']);
+            $days[] = Yii::t('app', 'common.models.sat_two', ['ru' => 'Сб']);
         }
         if ($this->sun) {
-            $days[] = Yii::t('app', 'common.models.sun_two', ['ru'=>'Вс']);
+            $days[] = Yii::t('app', 'common.models.sun_two', ['ru' => 'Вс']);
         }
         return implode(", ", $days);
     }

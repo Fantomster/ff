@@ -2,30 +2,28 @@
 
 namespace common\models;
 
-use Yii;
-
 /**
  * This is the model class for table "franchisee_user".
  *
- * @property integer $id
- * @property integer $user_id
- * @property integer $franchisee_id
+ * @property int        $id            Идентификатор записи в таблице
+ * @property int        $user_id       Идентификатор пользователя
+ * @property int        $franchisee_id Идентификатор франчайзи
  *
  * @property Franchisee $franchisee
- * @property User $user
+ * @property User       $user
  */
 class FranchiseeUser extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'franchisee_user';
+        return '{{%franchisee_user}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -38,13 +36,13 @@ class FranchiseeUser extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'user_id' => 'User ID',
+            'id'            => 'ID',
+            'user_id'       => 'User ID',
             'franchisee_id' => 'Franchisee ID',
         ];
     }

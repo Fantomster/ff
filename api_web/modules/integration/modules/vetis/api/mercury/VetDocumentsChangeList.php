@@ -6,7 +6,6 @@ use api\common\models\merc\MercVsd;
 use common\models\vetis\VetisUnit;
 use api_web\modules\integration\modules\vetis\api\cerber\cerberApi;
 use yii\base\Model;
-use yii\helpers\BaseStringHelper;
 
 /**
  * Class VetDocumentsChangeList

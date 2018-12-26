@@ -128,7 +128,7 @@ class ExcelRenderer
         $row = $this->fillCellBottomData($objPHPExcel, $row, \Yii::t('app', 'Скидка:'), " " . $order->getFormattedDiscount());
         $row = $this->fillCellBottomData($objPHPExcel, $row, \Yii::t('app', 'Стоимость доставки:'), " " . $order->calculateDelivery() . " " . $order->currency->iso_code);
         $row = $this->fillCellBottomData($objPHPExcel, $row, \Yii::t('app', 'Итого:'), " " . $order->getTotalPriceWithOutDiscount() . " " . $order->currency->iso_code);
-        $row = $this->fillCellBottomData($objPHPExcel, $row, \Yii::t('message', 'frontend.views.order.total_price_all'), " " . $order->total_price . " " . $order->currency->iso_code, true);
+        $this->fillCellBottomData($objPHPExcel, $row, \Yii::t('message', 'frontend.views.order.total_price_all'), " " . $order->total_price . " " . $order->currency->iso_code, true);
 
         $activeSheet->getSheetView()->setZoomScale(70);
         // Set Orientation, size and scaling

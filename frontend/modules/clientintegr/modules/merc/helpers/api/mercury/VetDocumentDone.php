@@ -105,6 +105,10 @@ class VetDocumentDone extends Component
             $data['delivery']['shipmentRoute'] = $this->doc['certifiedConsignment']['shipmentRoute'];
         }
 
+        if(isset($this->doc['certifiedConsignment']['shipmentRoute'])) {
+            $data['delivery']['shipmentRoute'] = $this->doc['certifiedConsignment']['shipmentRoute'];
+        }
+
         $accompanyingForms = [];
         if (isset($this->doc['referencedDocument'])) {
             $docs = null;
@@ -205,7 +209,7 @@ class VetDocumentDone extends Component
 
         $retuned['transportInfo'] = $doc['certifiedConsignment']['transportInfo'];
         $retuned['transportStorageType'] = $doc['certifiedConsignment']['transportStorageType'];
-
+        
         $accompanyingForms = [];
         if (isset($doc['referencedDocument'])) {
             $docs = null;
@@ -242,7 +246,6 @@ class VetDocumentDone extends Component
         if(isset($doc['authentication']['specialMarks'])) {
             $authentication['specialMarks'] =  $doc['authentication']['specialMarks'];
         }
-
 
         //Заполняем условия регионализации при необходимости
         if(isset($this->conditions)) {

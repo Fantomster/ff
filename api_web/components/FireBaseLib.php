@@ -51,6 +51,7 @@ class FireBaseLib implements FirebaseInterface
     public function closeCurlHandler()
     {
         curl_close($this->_curlHandler);
+        $this->_curlHandler = null;
     }
 
     /**
@@ -159,9 +160,9 @@ class FireBaseLib implements FirebaseInterface
             curl_setopt($ch, CURLOPT_FRESH_CONNECT, 0);
             curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
             $return = curl_exec($ch);
-            $this->closeCurlHandler();
         } catch (\Exception $e) {
             $return = null;
+            $this->closeCurlHandler();
         }
         return $return;
     }
@@ -183,9 +184,9 @@ class FireBaseLib implements FirebaseInterface
         try {
             $ch = $this->_getCurlHandler($path, 'GET', $options);
             $return = curl_exec($ch);
-            $this->closeCurlHandler();
         } catch (\Exception $e) {
             $return = null;
+            $this->closeCurlHandler();
         }
         return $return;
     }
@@ -205,6 +206,7 @@ class FireBaseLib implements FirebaseInterface
             $return = curl_exec($ch);
         } catch (\Exception $e) {
             $return = null;
+            $this->closeCurlHandler();
         }
         return $return;
     }
@@ -222,7 +224,7 @@ class FireBaseLib implements FirebaseInterface
         $url = $this->_getJsonPath($path, $options);
         $ch = $this->_curlHandler;
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->_timeout ?? 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -250,9 +252,9 @@ class FireBaseLib implements FirebaseInterface
             curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
             $return = curl_exec($ch);
-            $this->closeCurlHandler();
         } catch (\Exception $e) {
             $return = null;
+            $this->closeCurlHandler();
         }
         return $return;
     }

@@ -11,6 +11,7 @@ use Yii;
 use common\models\IntegrationSettingChange;
 use common\models\IntegrationSettingChangeSearch;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -52,10 +53,10 @@ class SettingChangeController extends Controller
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return Response
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
-     * @throws ValidationException
      */
     public function actionConfirm(int $id): Response
     {
@@ -89,10 +90,10 @@ class SettingChangeController extends Controller
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollback();
-            throw new ValidationException($e->getMessage());
+            throw new ForbiddenHttpException($e->getMessage());
         }
         $organization = Organization::findOne($settingChange->org_id);
-        foreach ($organization->getAssociatedManagers($organization->id) as $user) {
+        foreach ($organization->users as $user) {
             FireBase::getInstance()->update([
                 'user'          => $user->id,
                 'organization'  => $organization->id,

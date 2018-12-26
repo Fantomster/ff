@@ -114,14 +114,20 @@ class OneSWaybill extends \yii\db\ActiveRecord
             $records = OrderContent::findAll(['order_id' => $this->order_id]);
             $transaction = \Yii::$app->db_api->beginTransaction();
             try {
-                //$taxVat = (OneSDicstatus::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? OneSDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
-                $taxVat = 1800;
+                $taxVat = (OneSDicstatus::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? OneSDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
+                //$taxVat = 1800;
 
                 foreach ($records as $record) {
                     $wdmodel = new OneSWaybillData();
                     $wdmodel->waybill_id = $this->id;
                     $wdmodel->product_id = $record->product_id;
-                    if (isset($record->invoiceContent)) {
+                    if (($record->into_quantity != null) and ($record->into_price != null) and ($record->into_price_vat != null) and ($record->into_price_sum != null) and ($record->into_price_sum_vat != null) and ($record->vat_product != null) and ($record->quantity == $record->into_quantity)) {
+                        $wdmodel->quant = $record->into_quantity;
+                        $wdmodel->sum = $record->into_price_sum;
+                        $wdmodel->defquant = $record->into_quantity;
+                        $wdmodel->defsum = $record->into_price_sum;
+                        $wdmodel->vat = $record->vat_product * 100;
+                    } elseif (isset($record->invoiceContent)) {
                         $wdmodel->quant = $record->invoiceContent->quantity;
                         $wdmodel->sum = $record->invoiceContent->sum_without_nds;
                         $wdmodel->defquant = $record->invoiceContent->quantity;

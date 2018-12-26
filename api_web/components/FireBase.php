@@ -46,16 +46,6 @@ class FireBase
     }
 
     /**
-     *
-     */
-    public static function unsetInstance()
-    {
-        if (self::$instance != null) {
-            self::$instance = null;
-        }
-    }
-
-    /**
      * @return FireBase
      */
     private static function createInstance()
@@ -63,7 +53,8 @@ class FireBase
         self::$path = Yii::$app->params['fireBase']['DEFAULT_PATH'] ?? '/';
         $url = Yii::$app->params['fireBase']['DEFAULT_URL'];
         $token = Yii::$app->params['fireBase']['DEFAULT_TOKEN'];
-        self::$fireBase = new \api_web\components\FireBaseLib($url, $token);
+        self::$fireBase = new FireBaseLib($url, $token);
+        self::$fireBase->setTimeOut(1);
         return new self();
     }
 
@@ -104,8 +95,11 @@ class FireBase
     {
         $path = $this->getPath($path);
         $result = self::$fireBase->set($path, $data);
-        if (strstr($result, 'error') !== false) {
-            throw new HttpException(401, $result, 401);
+        if (!is_iterable($result)) {
+            /** @var $result string */
+            if (strstr($result, 'error') !== false) {
+                throw new HttpException(401, $result, 401);
+            }
         }
     }
 
@@ -127,8 +121,20 @@ class FireBase
     {
         $path = $this->getPath($path);
         $result = self::$fireBase->delete($path);
-        if (strstr($result, 'error') !== false) {
-            throw new HttpException(401, $result, 401);
+        if (!is_iterable($result)) {
+            /** @var $result string */
+            if (strstr($result, 'error') !== false) {
+                throw new HttpException(401, $result, 401);
+            }
         }
+    }
+
+    /**
+     *
+     */
+    public function __destruct()
+    {
+        self::$instance = null;
+        self::$fireBase->closeCurlHandler();
     }
 }

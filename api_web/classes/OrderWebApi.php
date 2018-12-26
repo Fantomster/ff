@@ -200,10 +200,10 @@ class OrderWebApi extends \api_web\components\WebApi
          * @var OrderContent $orderContent
          */
         $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
-        $oldOrderContentAttributes = $orderContent->attributes;
         if (empty($orderContent)) {
             throw new BadRequestHttpException("order_content.not_found");
         }
+        $oldOrderContentAttributes = $orderContent->attributes;
 
         if (!empty($product['quantity'])) {
             $orderContent->quantity = $product['quantity'];

@@ -47,7 +47,7 @@ class SettingsController extends DefaultController
                             'ajax-add-email',
                             'ajax-delete-email',
                             'ajax-change-email-notification',
-                            'test'
+//                            'test'
                         ],
                         'allow'   => true,
                         'roles'   => [
@@ -67,13 +67,13 @@ class SettingsController extends DefaultController
     }
 
     //метод для теста - симуляция запуска крон
-    public function actionTest()
-    {
-        $cron = new CronController(1, 1);
-        $cron->actionHandleFiles();
-        $cron->actionHandleFilesQueue();
-        echo 'success';
-    }
+//    public function actionTest()
+//    {
+//        $cron = new CronController(1, 1);
+//        $cron->actionHandleFiles();
+//        $cron->actionHandleFilesQueue();
+//        echo 'success';
+//    }
 
     public function actionUser()
     {

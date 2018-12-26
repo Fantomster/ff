@@ -41,7 +41,7 @@
                 <POSITION>
                     <POSITIONNUMBER><?= $i++ ?></POSITIONNUMBER>
                     <PRODUCT><?= $barcode ?></PRODUCT>
-                    <PRODUCTIDBUYER><?= $position['id'] ?></PRODUCTIDBUYER>
+                    <PRODUCTIDBUYER><?= $product['id'] ?></PRODUCTIDBUYER>
                     <PRODUCTIDSUPPLIER><?= $edi_supplier_article ?></PRODUCTIDSUPPLIER>
                     <DELIVEREDQUANTITY><?= $position['quantity'] ?></DELIVEREDQUANTITY>
                     <ORDEREDQUANTITY><?= ($position['plan_quantity'] > 0) ? (float)$position['plan_quantity'] : $position['quantity'] ?></ORDEREDQUANTITY>

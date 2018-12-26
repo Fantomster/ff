@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api_web\components\Registry;
+use api_web\models\User;
 use common\models\RelationSuppRest;
 use api_web\exceptions\ValidationException;
 use common\helpers\ModelsCollection;

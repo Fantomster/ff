@@ -2,12 +2,15 @@
 
 namespace api_web\models;
 
+use common\components\mailer\Mailer;
+use common\components\mailer\Message;
 use Yii;
 use common\models\User as BaseUser;
 use yii\filters\RateLimitInterface;
 
 /**
  * Class User
+ *
  * @package api_web\models
  */
 class User extends BaseUser implements RateLimitInterface
@@ -19,10 +22,11 @@ class User extends BaseUser implements RateLimitInterface
 
     /**
      * Returns the maximum number of allowed requests and the window size.
+     *
      * @param \yii\web\Request $request the current request
-     * @param \yii\base\Action $action the action to be executed
+     * @param \yii\base\Action $action  the action to be executed
      * @return array an array of two elements. The first element is the maximum number of allowed requests,
-     * and the second element is the size of the window in seconds.
+     *                                  and the second element is the size of the window in seconds.
      */
     public function getRateLimit($request, $action)
     {
@@ -31,10 +35,11 @@ class User extends BaseUser implements RateLimitInterface
 
     /**
      * Loads the number of allowed requests and the corresponding timestamp from a persistent storage.
+     *
      * @param \yii\web\Request $request the current request
-     * @param \yii\base\Action $action the action to be executed
+     * @param \yii\base\Action $action  the action to be executed
      * @return array an array of two elements. The first element is the number of allowed requests,
-     * and the second element is the corresponding UNIX timestamp.
+     *                                  and the second element is the corresponding UNIX timestamp.
      */
     public function loadAllowance($request, $action)
     {
@@ -45,10 +50,11 @@ class User extends BaseUser implements RateLimitInterface
 
     /**
      * Saves the number of allowed requests and the corresponding timestamp to a persistent storage.
-     * @param \yii\web\Request $request the current request
-     * @param \yii\base\Action $action the action to be executed
-     * @param integer $allowance the number of allowed requests remaining.
-     * @param integer $timestamp the current timestamp.
+     *
+     * @param \yii\web\Request $request   the current request
+     * @param \yii\base\Action $action    the action to be executed
+     * @param integer          $allowance the number of allowed requests remaining.
+     * @param integer          $timestamp the current timestamp.
      */
     public function saveAllowance($request, $action, $allowance, $timestamp)
     {

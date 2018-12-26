@@ -7,15 +7,18 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "outer_unit".
  *
- * @property int    $id
- * @property string $outer_uid  Внешний ID
- * @property int    $service_id ID Сервиса
- * @property string $name       Название продукта
- * @property int    $org_id     ID организации
- * @property string $iso_code   ISO код
- * @property int    $is_deleted Статус удаления
- * @property string $created_at Дата создания
- * @property string $updated_at Дата обновления
+ * @property int               $id
+ * @property string            $outer_uid        Внешний уникальный ID
+ * @property string            $parent_outer_uid Родительский outer_id
+ * @property double            $ratio            Коэффициент
+ * @property int               $org_id           ID Организации
+ * @property int               $service_id       ID Сервиса
+ * @property string            $name             Название продукта
+ * @property string            $iso_code         ISO код
+ * @property int               $is_deleted       Статус удаления
+ * @property string            $created_at       Дата создания
+ * @property string            $updated_at       Дата обновления
+ * @property OuterProductMap[] $outerProductMaps
  */
 class OuterUnit extends \yii\db\ActiveRecord
 {
@@ -24,7 +27,7 @@ class OuterUnit extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'outer_unit';
+        return '{{%outer_unit}}';
     }
 
     /**
@@ -98,5 +101,13 @@ class OuterUnit extends \yii\db\ActiveRecord
             return $unit->outer_uid;
         }
         return $innerName;
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOuterProductMaps()
+    {
+        return $this->hasMany(OuterProductMap::className(), ['outer_unit_id' => 'id']);
     }
 }

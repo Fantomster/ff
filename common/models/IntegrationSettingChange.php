@@ -21,6 +21,9 @@ use yii\behaviors\TimestampBehavior;
  * @property string             $confirmed_at
  * @property IntegrationSetting $integrationSetting
  * @property Organization       $organization
+ * @property int                $rejected_user_id [int(11)]  Указатель на ID пользователя который отменил запрос о
+ *           изменении
+ * @property int                $rejected_at      [timestamp]  Дата отмены изменения
  */
 class IntegrationSettingChange extends \yii\db\ActiveRecord
 {
@@ -60,8 +63,8 @@ class IntegrationSettingChange extends \yii\db\ActiveRecord
     {
         return [
             [['org_id', 'integration_setting_id', 'new_value', 'changed_user_id'], 'required'],
-            [['org_id', 'integration_setting_id', 'changed_user_id', 'confirmed_user_id', 'is_active'], 'integer'],
-            [['created_at', 'updated_at', 'confirmed_at'], 'safe'],
+            [['org_id', 'integration_setting_id', 'changed_user_id', 'confirmed_user_id', 'rejected_user_id', 'is_active'], 'integer'],
+            [['created_at', 'updated_at', 'confirmed_at', 'rejected_at'], 'safe'],
             [['old_value', 'new_value'], 'string', 'max' => 255],
             [['integration_setting_id'], 'exist', 'skipOnError' => true, 'targetClass' => IntegrationSetting::class, 'targetAttribute' => ['integration_setting_id' => 'id']],
         ];
@@ -80,10 +83,12 @@ class IntegrationSettingChange extends \yii\db\ActiveRecord
             'new_value'              => 'Новое значение',
             'changed_user_id'        => 'Создан',
             'confirmed_user_id'      => 'Подтвердил',
+            'rejected_user_id'       => 'Отменил',
             'is_active'              => 'Активность',
             'created_at'             => 'Дата создания',
             'updated_at'             => 'Дата обновления',
             'confirmed_at'           => 'Дата принятия',
+            'rejected_at'            => 'Дата отмены',
             'org_name'               => 'Организация',
             'setting_name'           => 'Настройка',
             'setting_comment'        => 'Описание настройки',

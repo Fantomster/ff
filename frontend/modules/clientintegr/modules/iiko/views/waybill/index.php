@@ -25,6 +25,7 @@ use api\common\models\iiko\iikoWaybill;
 use kartik\grid\ExpandRowColumn;
 use common\components\SearchOrdersComponent;
 use api_web\components\Registry;
+use common\models\search\OrderSearch2;
 
 /** @var $affiliated array */
 /** @var $searchParams array Search Params */
@@ -192,7 +193,7 @@ $columns = [
         'headerOptions'  => ['style' => 'text-align: center; white-space: nowrap'],
         'contentOptions' => ['style' => 'text-align: right; width: 100px'],
         'value'          => function ($data) use ($msg) {
-            return $data->positionCount .
+            return OrderSearch2::getPositionCountById($data->id) .
                 ' <a class="ajax-popover" data-container="body" data-content="Loading..."
                     data-html="data-html" data-placement="bottom" data-title="' . $msg['entries'] . '"
                     data-toggle="popover"  data-trigger="focus" data-url="' .

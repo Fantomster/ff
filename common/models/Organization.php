@@ -1835,6 +1835,7 @@ class Organization extends \yii\db\ActiveRecord
 
     public function getSuppliersByString($numrest, string $stroka)
     {
+        $numrest = (int)$numrest; //wtf, переписать без всякой жалости.
         $sql = "SELECT organization.id,organization.name FROM organization INNER JOIN relation_supp_rest ON
                 (organization.id=relation_supp_rest.supp_org_id AND relation_supp_rest.rest_org_id=$numrest)";
         $connection = \Yii::$app->getDb();

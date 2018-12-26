@@ -156,8 +156,11 @@ class OrderController extends DefaultController
                     ],
                     [
                         'actions' => [
-                            'create',
+                            'edit',
+                            'complete-obsolete',
+                            'ajax-cancel-order',
                             'guides',
+                            'create',
                             'favorites',
                             'product-filter',
                             'edit-guide',

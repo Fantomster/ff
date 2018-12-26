@@ -280,9 +280,6 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             $item->addChild('store', $model->store->uuid);
         }
 
-//        var_dump($xml);
-//        die();
-
         return $xml->asXML();
     }
 
@@ -292,7 +289,8 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             '1'    => Yii::t('message', 'frontend.views.order.all', ['ru' => 'Все']),
             '0'    => 0,
             '1000' => 10,
-            '1800' => 18
+            '1800' => 18,
+            '2000' => 20
         ];
     }
 
@@ -441,7 +439,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         $transaction = \Yii::$app->db_api->beginTransaction();
         try {
-            $taxVat = (iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
+            $taxVat = (iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 2000;
             foreach ($records as $record) {
                 $wdmodel = new iikoWaybillData();
                 if (($record->into_quantity != null) and ($record->into_price != null) and ($record->into_price_vat != null) and ($record->into_price_sum != null) and ($record->into_price_sum_vat != null) and ($record->vat_product != null) and ($record->quantity == $record->into_quantity)) {

@@ -3,12 +3,9 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\Modal;
-use yii\widgets\Pjax;
 use kartik\grid\GridView;
-// use yii\grid\GridView;
 use kartik\form\ActiveForm;
 use yii\widgets\Breadcrumbs;
-use kartik\widgets\TouchSpin;
 use yii\web\View;
 use \yii\web\JsExpression;
 
@@ -281,6 +278,7 @@ $this->registerJs(
 $sLinkzero = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' => 0]);
 $sLinkten = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' => 1000]);
 $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' => 1800]);
+$sLinktwenty = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' => 2000]);
 ?>
 <img id="cart-image" src="/images/cart.png" style="position:absolute;left:-100%;">
 <style>
@@ -383,7 +381,7 @@ $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientin
                                 <?php echo Html::label('Коэф:', 'koef_set'); ?>
                                 <?php echo Html::textInput("koef_set", '', ['class' => 'form-control', 'style' => 'width:15%;', 'id' => 'koef_set']) ?>
                                 <?php echo Html::label('НДС:', 'vat_set'); ?>
-                                <?php echo Html::dropDownList('vat_set', null, [-1 => 'Нет', 0 => '0%', 1000 => '10%', 1800 => '18%'],
+                                <?php echo Html::dropDownList('vat_set', null, [-1 => 'Нет', 0 => '0%', 1000 => '10%', 1800 => '18%', 2000 => '20%'],
                                     ['class' => 'form-control', 'style' => 'width:15%', 'id' => 'vat_set']); ?>
                             </div>
                         </div>
@@ -613,11 +611,12 @@ $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientin
                                         [
                                             'class'          => 'yii\grid\ActionColumn',
                                             'contentOptions' => ['style' => 'width: 6%;'],
-                                            'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
-                                            // 'header' => '<a class="label label-default" href="setvatz">0</a><a class="label label-default" href="setvatt">10</a><a class="label label-default" href="setvate">18</a>',
+                                            'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}&nbsp;{twenty}',
+                                            // 'header' => '<a class="label label-default" href="setvatz">0</a><a class="label label-default" href="setvatt">10</a><a class="label label-default" href="setvate">18</a><a class="label label-default" href="setvate">20</a>',
                                             //  'header' => '<span align="center"> <button id="btnZero" type="button" onClick="location.href=\''.$sLinkzero.'\';" class="btn btn-xs btn-link" style="color:green;">0</button>'.
                                             //      '<button id="btnTen" type="button" onClick="location.href=\''.$sLinkten.'\';" class="btn btn-xs btn-link" style="color:green;">10</button>'.
                                             //      '<button id="btnEight" type="button" onClick="location.href=\''.$sLinkeight.'\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
+                                            //      '<button id="btnEight" type="button" onClick="location.href=\''.$sLinktwenty.'\';" class="btn btn-xs btn-link" style="color:green;">20</button></span>',
 
                                             //  'sort' => false,
                                             //  '' => false,
@@ -678,6 +677,21 @@ $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientin
                                                     $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/chvat', 'id' => $data['id'], 'vat' => '1800']);
                                                     return \yii\helpers\Html::a('18', $customurl,
                                                         ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
+                                                },
+                                                'twenty'   => function ($model, $data, $index) {
+
+                                                    if ($data['vat'] == 2000) {
+                                                        $tClass = "label label-success";
+                                                        $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                                                    } else {
+                                                        $tClass = "label label-default";
+                                                        $tStyle = "";
+                                                    }
+
+                                                    //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                                                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/chvat', 'id' => $data['id'], 'vat' => '2000']);
+                                                    return \yii\helpers\Html::a('20', $customurl,
+                                                        ['title' => Yii::t('backend', '20%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                                 },
 
                                             ]

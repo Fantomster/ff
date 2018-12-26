@@ -19,11 +19,12 @@ use common\models\User;
         case \api\common\models\one_s\OneSDicconst::TYPE_DROP :
             if ($dicConst->denom === 'taxVat') {
                 echo $form->field($model, 'value')->dropDownList([
-                    '0' => '0',
+                    '0'    => '0',
                     '1000' => '10',
-                    '1800' => '18'
+                    '1800' => '18',
+                    '2000' => '20'
                 ]);
-            } else if ($dicConst->denom === 'auto_unload_invoice') {
+            } elseif ($dicConst->denom === 'auto_unload_invoice') {
                 echo $form->field($model, 'value')->dropDownList([
                     '0' => 'Выключено',
                     '1' => 'Включено',
@@ -35,17 +36,17 @@ use common\models\User;
                     '1' => 'Включено',
                 ]);
             }
-        break;
+            break;
         case \api\common\models\one_s\OneSDicconst::TYPE_PASSWORD:
             echo $form->field($model, 'value')->passwordInput(['maxlength' => true]);
-        break;
+            break;
         default:
             echo $form->field($model, 'value')->textInput(['maxlength' => true]);
     }
     ?>
     <div class="form-group">
         <?php echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
-        <?= Html::a('Вернуться', ['index'], ['class' => 'btn btn-success btn-export']);?>
+        <?= Html::a('Вернуться', ['index'], ['class' => 'btn btn-success btn-export']); ?>
     </div>
     <?php ActiveForm::end(); ?>
 </div>

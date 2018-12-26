@@ -283,7 +283,8 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
             '1'    => Yii::t('message', 'frontend.views.order.all', ['ru' => 'Все']),
             '0'    => 0,
             '1000' => 10,
-            '1800' => 18
+            '1800' => 18,
+            '2000' => 20
         ];
     }
 
@@ -432,7 +433,7 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
 
         $transaction = \Yii::$app->db_api->beginTransaction();
         try {
-            $taxVat = (iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
+            $taxVat = (iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 2000;
             foreach ($records as $record) {
                 $wdmodel = new iikoWaybillData();
                 ///$wdmodel->setScenario('autoWaybill');

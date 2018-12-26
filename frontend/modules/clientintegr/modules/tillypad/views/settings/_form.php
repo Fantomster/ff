@@ -3,7 +3,6 @@
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\User;
-use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model \api\common\models\iiko\iikoPconst */
@@ -22,7 +21,8 @@ use yii\widgets\Pjax;
                     echo $form->field($model, 'value')->dropDownList([
                         '0'    => '0',
                         '1000' => '10',
-                        '1800' => '18'
+                        '1800' => '18',
+                        '2000' => '20'
                     ]);
                 } elseif ($dicConst->denom === 'auto_unload_invoice') {
                     echo $form->field($model, 'value')->dropDownList([

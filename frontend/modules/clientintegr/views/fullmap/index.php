@@ -3,16 +3,10 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\Modal;
-use yii\widgets\Pjax;
 use kartik\grid\GridView;
-// use yii\grid\GridView;
 use kartik\form\ActiveForm;
 use yii\widgets\Breadcrumbs;
-use kartik\widgets\TouchSpin;
-use yii\web\View;
-use \yii\web\JsExpression;
 use common\models\Organization;
-use api\common\models\AllMaps;
 use common\models\CatalogBaseGoods;
 use api_web\components\Registry;
 
@@ -141,7 +135,7 @@ $this->registerJs(
                                 <?php echo Html::label('Коэф:', 'koef_set'); ?>
                                 <?php echo Html::textInput("koef_set", '', ['class' => 'form-control', 'style' => 'width:15%;', 'id' => 'koef_set', 'readonly' => ($searchModel->service_id == \api_web\components\Registry::IIKO_SERVICE_ID && $mainOrg != $client->id)]) ?>
                                 <?php echo Html::label('НДС:', 'vat_set'); ?>
-                                <?php echo Html::dropDownList('vat_set', null, [-1 => 'Нет', 0 => '0%', 1000 => '10%', 1800 => '18%'],
+                                <?php echo Html::dropDownList('vat_set', null, [-1 => 'Нет', 0 => '0%', 1000 => '10%', 1800 => '18%', 2000 => '20%'],
                                     ['class' => 'form-control', 'style' => 'width:15%', 'id' => 'vat_set']); ?>
                             </div>
                         </div>
@@ -335,7 +329,7 @@ $this->registerJs(
                                                         'style' => 'width: 6%;',
                                                         'class' => 'vatcl'];
                                             },
-                                            'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
+                                            'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}&nbsp;{twenty}',
                                             'visibleButtons' => [
                                                 'zero' => function ($model) {
                                                     return true;
@@ -380,6 +374,19 @@ $this->registerJs(
                                                     //$customurl = Url::toRoute(['chvat', 'prod_id' => $data['id'], 'vat' => '1800', 'service_id' => $searchModel->service_id]);
                                                     return \yii\helpers\Html::button('18',
                                                         ['title' => Yii::t('backend', '18%'), 'id' => $tId, 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle/*, 'url' => $customurl*/]);
+                                                },
+                                                'twenty'   => function ($model, $data, $index) use ($searchModel) {
+                                                    if ($data['vat'] == 2000) {
+                                                        $tClass = "vatchange btn label label-success";
+                                                        $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                                                    } else {
+                                                        $tClass = "vatchange btn label label-default";
+                                                        $tStyle = "";
+                                                    }
+                                                    $tId = 'buttn20' . $data['id'];
+                                                    //$customurl = Url::toRoute(['chvat', 'prod_id' => $data['id'], 'vat' => '2000', 'service_id' => $searchModel->service_id]);
+                                                    return \yii\helpers\Html::button('20',
+                                                        ['title' => Yii::t('backend', '20%'), 'id' => $tId, 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle/*, 'url' => $customurl*/]);
                                                 },
                                             ]
                                         ],
@@ -835,6 +842,12 @@ $js = <<< JS
                                     if($('#buttn18'+id_vat).hasClass('label-success')) {
                                         $('#buttn18'+id_vat).removeClass('label-success').addClass('vatchange label-default');
                                         $('#buttn18'+id_vat).attr('style','');
+                                    }    
+                                }
+                                if (vat_vat!='20') {
+                                    if($('#buttn20'+id_vat).hasClass('label-success')) {
+                                        $('#buttn20'+id_vat).removeClass('label-success').addClass('vatchange label-default');
+                                        $('#buttn20'+id_vat).attr('style','');
                                     }    
                                 }
                             } else {

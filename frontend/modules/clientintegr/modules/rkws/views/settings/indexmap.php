@@ -3,16 +3,8 @@
 use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\widgets\Pjax;
-use yii\widgets\ActiveForm;
-use common\models\Order;
-use yii\web\View;
-use yii\widgets\ListView;
 use kartik\grid\GridView;
-use kartik\editable\Editable;
 use kartik\checkbox\CheckboxX;
-use api\common\models\RkAccess;
-use api\common\models\RkWaybill;
 use yii\web\JsExpression;
 
 ?>
@@ -284,7 +276,7 @@ use yii\web\JsExpression;
                                             'asPopover'   => $isAndroid ? false : true,
                                             'header'      => '<strong>Новая ставка НДС равна:&nbsp; &nbsp;</srong>',
                                             'inputType'   => \kartik\editable\Editable::INPUT_DROPDOWN_LIST,
-                                            'data'        => ['0' => '0', '1000' => '10', '1800' => '18'],
+                                            'data'        => ['0' => '0', '1000' => '10', '1800' => '18', '2000' => '20'],
                                             'formOptions' => [
                                                 'action' => Url::toRoute('changekoef')
                                             ],

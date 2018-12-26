@@ -2,7 +2,6 @@
 
 namespace common\components;
 
-use backend\models\UserSearch;
 use golovchanskiy\parseTorg12\models as models;
 use golovchanskiy\parseTorg12\exceptions\ParseTorg12Exception;
 use yii\db\Query;
@@ -28,7 +27,7 @@ class ParserTorg12
 
     /**
      * Допустимые значения ставки НДС
-     * По умолчанию доступны: 0, 10, 18
+     * По умолчанию доступны: 0, 10, 18, 20
      *
      * @var string
      */
@@ -36,7 +35,7 @@ class ParserTorg12
 
     /**
      * Ставка НДС по-умолчанию (устанавливается, если не удалось определить ставку)
-     * По умолчанию: 18
+     * По умолчанию: 20
      *
      * @var string
      */
@@ -124,7 +123,7 @@ class ParserTorg12
      * @param int    $defaultTaxRate Ставка НДС по умолчанию
      */
 
-    public function __construct($filePath, array $taxRateList = [0, 10, 18], $defaultTaxRate = 18)
+    public function __construct($filePath, array $taxRateList = [0, 10, 18, 20], $defaultTaxRate = 20)
     {
         $this->filePath = $filePath;
         $this->taxRateList = $taxRateList;

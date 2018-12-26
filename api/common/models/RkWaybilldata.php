@@ -4,9 +4,6 @@ namespace api\common\models;
 
 use api_web\modules\integration\modules\rkeeper\models\rkeeperService;
 use Yii;
-use common\models\Organization;
-use yii\base\Exception;
-use yii\db\Expression;
 
 /**
  * This is the model class for table "rk_waybill_data".
@@ -15,20 +12,19 @@ use yii\db\Expression;
  * @property integer $waybill_id
  * @property integer $product_id
  * @property integer $product_rid
- * @property string $munit_rid
+ * @property string  $munit_rid
  * @property integer $org
  * @property integer $vat
  * @property integer $vat_included
- * @property double $sum
- * @property double $quant
- * @property double $defsum
- * @property double $defquant
- * @property double $koef
- * @property string $created_at
- * @property string $updated_at
- * @property string $linked_at
+ * @property double  $sum
+ * @property double  $quant
+ * @property double  $defsum
+ * @property double  $defquant
+ * @property double  $koef
+ * @property string  $created_at
+ * @property string  $updated_at
+ * @property string  $linked_at
  * @property integer $unload_status
- *
  */
 class RkWaybilldata extends \yii\db\ActiveRecord
 {
@@ -59,9 +55,9 @@ class RkWaybilldata extends \yii\db\ActiveRecord
             //  [['koef'], 'number'],
             //
             [['koef', 'sum', 'quant'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
-            // ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800]],
+            // ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800,2000]],
             //   [['koef','sum','quant'], 'number', 'min' => 0.000001],
-            // ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800]],
+            // ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800,2000]],
             ['koef', 'filter', 'filter' => function ($value) {
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
@@ -86,28 +82,28 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'fid' => 'FID',
-            'id' => Yii::t('app', 'ID'),
-            'waybill_id' => Yii::t('app', 'Waybill ID'),
-            'product_id' => Yii::t('app', 'ID в Mixcart'),
-            'product_rid' => Yii::t('app', 'Product Rid'),
-            'munit' => Yii::t('app', 'Munit'),
-            'org' => Yii::t('app', 'Org'),
-            'vat' => Yii::t('app', 'Vat'),
-            'vat_included' => Yii::t('app', 'Vat Included'),
-            'sum' => Yii::t('app', 'Сумма б/н'),
-            'quant' => Yii::t('app', 'Количество'),
-            'defsum' => Yii::t('app', 'Defsum'),
-            'defquant' => Yii::t('app', 'Defquant'),
-            'koef' => Yii::t('app', 'Коэфф.'),
-            'created_at' => Yii::t('app', 'Created At'),
-            'updated_at' => Yii::t('app', 'Updated At'),
+            'fid'                 => 'FID',
+            'id'                  => Yii::t('app', 'ID'),
+            'waybill_id'          => Yii::t('app', 'Waybill ID'),
+            'product_id'          => Yii::t('app', 'ID в Mixcart'),
+            'product_rid'         => Yii::t('app', 'Product Rid'),
+            'munit'               => Yii::t('app', 'Munit'),
+            'org'                 => Yii::t('app', 'Org'),
+            'vat'                 => Yii::t('app', 'Vat'),
+            'vat_included'        => Yii::t('app', 'Vat Included'),
+            'sum'                 => Yii::t('app', 'Сумма б/н'),
+            'quant'               => Yii::t('app', 'Количество'),
+            'defsum'              => Yii::t('app', 'Defsum'),
+            'defquant'            => Yii::t('app', 'Defquant'),
+            'koef'                => Yii::t('app', 'Коэфф.'),
+            'created_at'          => Yii::t('app', 'Created At'),
+            'updated_at'          => Yii::t('app', 'Updated At'),
             'fproductnameProduct' => Yii::t('app', 'Наименование продукции'),
-            'enable_all_map' => Yii::t('app', 'Сохранить в сопоставлении'),
-            'koef_buttons' => Yii::t('app', ''),
-            'koef_forever' => Yii::t('app', ''),
-            'querys' => Yii::t('app', ''),
-            'unload_status' => Yii::t('app', 'Статус для отправления'),
+            'enable_all_map'      => Yii::t('app', 'Сохранить в сопоставлении'),
+            'koef_buttons'        => Yii::t('app', ''),
+            'koef_forever'        => Yii::t('app', ''),
+            'querys'              => Yii::t('app', ''),
+            'unload_status'       => Yii::t('app', 'Статус для отправления'),
         ];
     }
 
@@ -115,7 +111,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     {
         return [
             RkAccess::STATUS_UNLOCKED => 'Активен',
-            RkAccess::STATUS_LOCKED => 'Отключен',
+            RkAccess::STATUS_LOCKED   => 'Отключен',
         ];
     }
 
@@ -124,11 +120,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
      */
     public function getWaybill()
     {
-
-        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         return RkWaybill::findOne(['id' => $this->waybill_id]);
-
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
     }
 
     public function getVat()
@@ -139,13 +131,9 @@ class RkWaybilldata extends \yii\db\ActiveRecord
 
     public function getProduct()
     {
-
-        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         $rprod = RkProduct::find()->andWhere('id = :id', [':id' => $this->product_rid])->one();
 
         return $rprod;
-
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
     }
 
     /**
@@ -198,7 +186,6 @@ class RkWaybilldata extends \yii\db\ActiveRecord
             } else { // Создание
                 // $this->koef = 1;
             }
-
 
             return true;
         } else {
@@ -273,7 +260,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
 
         $allMapModel = AllMaps::findOne([
             'service_id' => rkeeperService::getServiceId(),
-            'org_id' => $client_id,
+            'org_id'     => $client_id,
             //    'supp_id' => $vendor_id,
             'product_id' => $this->product_id
         ]);
@@ -281,8 +268,8 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         if (empty($allMapModel)) {
             $allMapModel = new AllMaps([
                 'service_id' => rkeeperService::getServiceId(),
-                'org_id' => $client_id,
-                'supp_id' => $vendor_id,
+                'org_id'     => $client_id,
+                'supp_id'    => $vendor_id,
                 'product_id' => $this->product_id,
                 'created_at' => Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss')
             ]);

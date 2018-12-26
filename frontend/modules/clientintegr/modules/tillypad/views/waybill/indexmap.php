@@ -7,7 +7,6 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\grid\GridView;
 use kartik\checkbox\CheckboxX;
-use yii\web\JsExpression;
 
 /** @var $way mixed */
 
@@ -17,6 +16,7 @@ $way = Yii::$app->request->get('way');
 $sLinkzero = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/tillypad/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 0]);
 $sLinkten = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/tillypad/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1000]);
 $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/tillypad/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 1800]);
+$sLinktwenty = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/tillypad/waybill/makevat', 'waybill_id' => $wmodel->id, 'vat' => 2000]);
 $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-top:-30px;}');
 ?>
 
@@ -326,7 +326,7 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                         'class'          => 'yii\grid\ActionColumn',
                                         'headerOptions'  => ['style' => 'width: 6%; text-align:center'],
                                         'contentOptions' => ['style' => 'width: 6%; text-align:center'],
-                                        'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
+                                        'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}&nbsp;{twenty}',
                                         'header'         => '<span align="center">НДС</br>' .
                                             ' <button id="btnZero" type="button" 
                                             onClick="var path = \'' . $sLinkzero . '\';
@@ -387,7 +387,27 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                     var pos = $(\'.summary\').html();
                                                     path = path+\'&vatf=\'+vatf+\'&sort=\'+sortirov+\'&page=\'+pos;
                                                     location.href=path;" 
-                                            class="btn btn-xs btn-link" style="color:green;">18</button></span>',
+                                            class="btn btn-xs btn-link" style="color:green;">18</button>' .
+                                            '<button id="btnTwenty" type="button" 
+                                            onClick="var path = \'' . $sLinktwenty . '\';
+                                                    var vatf = $(\'#vatFilter\').val();
+                                                    var qasc=$(\'.asc\').attr(\'data-sort\');
+                                                    var qdesc=$(\'.desc\').attr(\'data-sort\');
+                                                    if (typeof qdesc === \'undefined\') {
+                                                        var sortirov=qasc;
+                                                    } else {
+                                                        var sortirov=qdesc;
+                                                    }
+                                                    var sortirov0=sortirov.substring(0,1);
+                                                    if (sortirov0==\'-\') {
+                                                        sortirov=sortirov.substring(1);
+                                                    } else {
+                                                        sortirov=\'-\'+sortirov;
+                                                    }
+                                                    var pos = $(\'.summary\').html();
+                                                    path = path+\'&vatf=\'+vatf+\'&sort=\'+sortirov+\'&page=\'+pos;
+                                                    location.href=path;" 
+                                            class="btn btn-xs btn-link" style="color:green;">20</button></span>',
 
                                         'visibleButtons' => [
                                             'zero' => function ($model, $key, $index) {
@@ -475,6 +495,29 @@ $this->registerCss('.table-responsive {overflow-x: hidden;}.alVatFilter{margin-t
                                                 $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/tillypad/waybill/chvat', 'id' => $model->id, 'koef' => $model->koef, 'vatf' => $vatf, 'vat' => '1800', 'page' => $page, 'sort' => $sort, 'way' => $way]);
                                                 return \yii\helpers\Html::a('18', $customurl,
                                                     ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
+                                            },
+                                            'twenty'   => function ($url, $model) {
+
+                                                if ($model->vat == 2000) {
+                                                    $tClass = "label label-success";
+                                                    $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                                                } else {
+                                                    $tClass = "label label-default";
+                                                    $tStyle = "";
+                                                }
+
+                                                //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                                                $way = $model->id;
+                                                $sort = Yii::$app->request->get('sort');
+                                                $page = Yii::$app->request->get('page') ? Yii::$app->request->get('page') : 1;
+                                                $vatf = 1;
+                                                if (null !== (Yii::$app->request->get('iikoWaybillDataSearch'))) {
+                                                    $massiv = Yii::$app->request->get('iikoWaybillDataSearch');
+                                                    $vatf = $massiv["vat"];
+                                                }
+                                                $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/tillypad/waybill/chvat', 'id' => $model->id, 'koef' => $model->koef, 'vatf' => $vatf, 'vat' => '2000', 'page' => $page, 'sort' => $sort, 'way' => $way]);
+                                                return \yii\helpers\Html::a('20', $customurl,
+                                                    ['title' => Yii::t('backend', '20%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                             },
                                         ]
                                     ],

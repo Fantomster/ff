@@ -119,7 +119,10 @@ class EDIClass extends Component
 
             foreach ($positions as $position) {
                 if (!isset($position->PRODUCT)) continue;
-                $contID = (int)$position->PRODUCTIDBUYER;
+                $productIDBuyer = (int)$position->PRODUCTIDBUYER;
+                $productOrderContent = OrderContent::findOne(['order_id' => $order->id, 'product_id' => $productIDBuyer]);
+                if (!$productOrderContent) continue;
+                $contID = $productOrderContent->id;
                 $positionsArray[] = (int)$contID;
                 if ($isDesadv) {
                     $arr[$contID]['ACCEPTEDQUANTITY'] = (float)$position->DELIVEREDQUANTITY ?? (float)$position->ORDEREDQUANTITY;

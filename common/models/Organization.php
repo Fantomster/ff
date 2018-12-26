@@ -1083,17 +1083,21 @@ class Organization extends \yii\db\ActiveRecord
         return $managers;
     }
 
-    public function getAssociatedManagers($vendor_id)
+    public function getAssociatedManagers($vendor_id, $isOnlyOne = false)
     {
         $usrTable = User::tableName();
         $assocTable = ManagerAssociate::tableName();
         $relationTable = RelationUserOrganization::tableName();
 
-        return User::find()
+        $query =  User::find()
             ->leftJoin($assocTable, "$assocTable.manager_id = $usrTable.id")
             ->leftJoin($relationTable, "$relationTable.user_id = $assocTable.manager_id")
-            ->where(["$assocTable.organization_id" => $this->id, "$relationTable.organization_id" => $vendor_id])
-            ->all();
+            ->where(["$assocTable.organization_id" => $this->id, "$relationTable.organization_id" => $vendor_id]);
+        if ($isOnlyOne) {
+            return $query->one();
+        } else {
+            return $query->all();
+        }
     }
 
     public function getRelatedFranchisee()

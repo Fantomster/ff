@@ -3,18 +3,8 @@
 use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\widgets\Pjax;
-use yii\widgets\ActiveForm;
-use common\models\Order;
-use yii\web\View;
-use yii\widgets\ListView;
 use kartik\grid\GridView;
-use kartik\editable\Editable;
-use kartik\checkbox\CheckboxX;
-use api\common\models\RkAccess;
-use api\common\models\RkWaybill;
 use yii\web\JsExpression;
-use api\common\models\RkDicconst;
 use frontend\assets\ProgressBarAsset;
 
 ?>
@@ -274,16 +264,18 @@ ProgressBarAsset::register($this);
                     $sLinkzero = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' => 0]);
                     $sLinkten = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' => 1000]);
                     $sLinkeight = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' => 1800]);
+                    $sLinktwenty = Url::base(true) . Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/makevat', 'vat' => 2000]);
 
                     array_push($columns,
                         [
                             'class'          => 'yii\grid\ActionColumn',
                             'contentOptions' => ['style' => 'width: 6%;'],
-                            'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}',
-                            // 'header' => '<a class="label label-default" href="setvatz">0</a><a class="label label-default" href="setvatt">10</a><a class="label label-default" href="setvate">18</a>',
+                            'template'       => '{zero}&nbsp;{ten}&nbsp;{eighteen}&nbsp;{twenty}',
+                            // 'header' => '<a class="label label-default" href="setvatz">0</a><a class="label label-default" href="setvatt">10</a><a class="label label-default" href="setvate">18</a><a class="label label-default" href="setvate">20</a>',
                             'header'         => '<span align="center"> <button id="btnZero" type="button" onClick="location.href=\'' . $sLinkzero . '\';" class="btn btn-xs btn-link" style="color:green;">0</button>' .
                                 '<button id="btnTen" type="button" onClick="location.href=\'' . $sLinkten . '\';" class="btn btn-xs btn-link" style="color:green;">10</button>' .
-                                '<button id="btnEight" type="button" onClick="location.href=\'' . $sLinkeight . '\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>',
+                                '<button id="btnEight" type="button" onClick="location.href=\'' . $sLinkeight . '\';" class="btn btn-xs btn-link" style="color:green;">18</button></span>' .
+                                '<button id="btnEight" type="button" onClick="location.href=\'' . $sLinktwenty . '\';" class="btn btn-xs btn-link" style="color:green;">20</button></span>',
 
                             //  'sort' => false,
                             //  '' => false,
@@ -340,6 +332,21 @@ ProgressBarAsset::register($this);
                                     $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/chvat', 'id' => $model->id, 'vat' => '1800']);
                                     return \yii\helpers\Html::a('18', $customurl,
                                         ['title' => Yii::t('backend', '18%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
+                                },
+                                'twenty'   => function ($url, $model) {
+
+                                    if ($model->vat == 2000) {
+                                        $tClass = "label label-success";
+                                        $tStyle = "pointer-events: none; cursor: default; text-decoration: none;";
+                                    } else {
+                                        $tClass = "label label-default";
+                                        $tStyle = "";
+                                    }
+
+                                    //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/rkws/fullmap/chvat', 'id' => $model->id, 'vat' => '2000']);
+                                    return \yii\helpers\Html::a('20', $customurl,
+                                        ['title' => Yii::t('backend', '20%'), 'data-pjax' => "0", 'class' => $tClass, 'style' => $tStyle]);
                                 },
                             ]
                         ]);

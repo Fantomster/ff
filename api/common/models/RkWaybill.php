@@ -13,7 +13,7 @@ use common\models\OrderContent;
 use api_web\components\Registry;
 
 /**
- * This is the model class for table "rk_access".
+ * This is the model class for table "rk_waybill".
  *
  * @property integer  $id
  * @property integer  $fid
@@ -85,34 +85,22 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
 
     public function getCorr()
     {
-
-        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         $acc = ($this->org === null) ? Yii::$app->user->identity->organization_id : $this->org;
         return RkAgent::find()->andWhere('rid = :corr_rid and acc = :acc', [':corr_rid' => $this->corr_rid, ':acc' => $acc])->one();
-
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
     }
 
     public function getStore()
     {
-
-        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         $acc = ($this->org === null) ? Yii::$app->user->identity->organization_id : $this->org;
         return RkStoretree::find()
             ->andWhere('id = :store_rid and acc = :acc', [':store_rid' => $this->store_rid, ':acc' => $acc])
             // ->andWhere('type = 2')
             ->one();
-
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
     }
 
     public function getStatus()
     {
-
-        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         return RkWaybillstatus::find()->andWhere('id = :id', [':id' => $this->status_id])->one();
-
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
     }
 
     /**
@@ -120,11 +108,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
      */
     public function getOrder()
     {
-
-        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         return Order::find()->andWhere('id = :id', [':id' => $this->order_id])->one();
-
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
     }
 
     public function getFinalDate()
@@ -205,7 +189,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
 
         $transaction = \Yii::$app->db_api->beginTransaction();
         try {
-            $taxVat = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() ?? 1800;
+            $taxVat = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() ?? 2000;
 
             foreach ($records as $record) {
                 $wdmodel = new RkWaybilldata();

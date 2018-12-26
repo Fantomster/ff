@@ -103,7 +103,6 @@ class OneSWaybill extends \yii\db\ActiveRecord
             }
 
             return true;
-//            return parent::beforeSave($insert); // ну жесть же, зачем оно тут?
         }
     }
 
@@ -114,8 +113,7 @@ class OneSWaybill extends \yii\db\ActiveRecord
             $records = OrderContent::findAll(['order_id' => $this->order_id]);
             $transaction = \Yii::$app->db_api->beginTransaction();
             try {
-                $taxVat = (OneSDicstatus::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? OneSDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 1800;
-                //$taxVat = 1800;
+                $taxVat = (OneSDicstatus::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? OneSDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 2000;
 
                 foreach ($records as $record) {
                     $wdmodel = new OneSWaybillData();
@@ -262,9 +260,6 @@ class OneSWaybill extends \yii\db\ActiveRecord
             $item->addChild('isAdditionalExpense', false);
             $item->addChild('store', $model->store->uuid);
         }
-
-//        var_dump($xml);
-//        die();
 
         return $xml->asXML();
     }

@@ -234,16 +234,13 @@ class InvoiceController extends Controller
 
     public function actionListPostav()
     {
-        $org_id = $_POST["org_id"];
-        $stroka = $_POST["stroka"];
-        $res = Organization::getSuppliersByString($org_id, $stroka);
-        $res = json_encode($res);
-        return $res;
+        $org_id = Yii::$app->request->post("org_id");
+        $stroka = Yii::$app->request->post("stroka");
+        return json_encode(Organization::getSuppliersByString($org_id, $stroka));
     }
 
     protected function getEarliestInvoice($org_id)
     {
-
         $eDate = IntegrationInvoice::find()->andWhere(['organization_id' => $org_id])->orderBy('date ASC')->one();
 
         return isset($eDate) ? $eDate->date : null;

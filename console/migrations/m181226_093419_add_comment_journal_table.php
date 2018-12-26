@@ -18,16 +18,14 @@ class m181226_093419_add_comment_journal_table extends Migration
      */
     public function safeUp()
     {
-        $this->addCommentOnColumn('{{%journal}}', 'org_id', 'Указатель на ID организации');
-        $this->addCommentOnColumn('{{%journal}}', 'integration_setting_id', 'Указатель на ID сервиса интеграции');
-        $this->addCommentOnColumn('{{%journal}}', 'old_value', 'Старое значение настройки');
-        $this->addCommentOnColumn('{{%journal}}', 'new_value', 'Новое значение настройки');
-        $this->addCommentOnColumn('{{%journal}}', 'changed_user_id', 'Указатель на ID пользователя который запросил изменения');
-        $this->addCommentOnColumn('{{%journal}}', 'confirmed_user_id', 'Указатель на ID пользователя который подтвердил изменения');
-        $this->addCommentOnColumn('{{%journal}}', 'is_active', 'Активность настройки 1-активна, 0-не активна');
-        $this->addCommentOnColumn('{{%journal}}', 'created_at', 'Дата создания запроса на изменения настройки');
-        $this->addCommentOnColumn('{{%journal}}', 'updated_at', 'Дата последнего изменения');
-        $this->addCommentOnColumn('{{%journal}}', 'confirmed_at', 'Дата подтвержения настройки');
+        $this->addCommentOnColumn('{{%journal}}', 'service_id', 'Указатель на ID сервиса интеграции');
+        $this->addCommentOnColumn('{{%journal}}', 'operation_code', 'Код операции');
+        $this->addCommentOnColumn('{{%journal}}', 'user_id', 'Указатель на ID пользователя выполнившего операцию');
+        $this->addCommentOnColumn('{{%journal}}', 'organization_id', 'Указатель на ID организации пользователя ');
+        $this->addCommentOnColumn('{{%journal}}', 'response', 'Результат операции');
+        $this->addCommentOnColumn('{{%journal}}', 'log_guide', 'Уникальный индентификатор записи в логе');
+        $this->addCommentOnColumn('{{%journal}}', 'type', 'Тип операции');
+        $this->addCommentOnColumn('{{%journal}}', 'created_at', 'Дата выполнения операции');
     }
 
     /**
@@ -35,15 +33,13 @@ class m181226_093419_add_comment_journal_table extends Migration
      */
     public function safeDown()
     {
-        $this->dropCommentFromColumn('{{%journal}}', 'org_id');
-        $this->dropCommentFromColumn('{{%journal}}', 'integration_setting_id');
-        $this->dropCommentFromColumn('{{%journal}}', 'old_value');
-        $this->dropCommentFromColumn('{{%journal}}', 'new_value');
-        $this->dropCommentFromColumn('{{%journal}}', 'changed_user_id');
-        $this->dropCommentFromColumn('{{%journal}}', 'confirmed_user_id');
-        $this->dropCommentFromColumn('{{%journal}}', 'is_active');
+        $this->dropCommentFromColumn('{{%journal}}', 'service_id');
+        $this->dropCommentFromColumn('{{%journal}}', 'operation_code');
+        $this->dropCommentFromColumn('{{%journal}}', 'user_id');
+        $this->dropCommentFromColumn('{{%journal}}', 'organization_id');
+        $this->dropCommentFromColumn('{{%journal}}', 'response');
+        $this->dropCommentFromColumn('{{%journal}}', 'log_guide');
+        $this->dropCommentFromColumn('{{%journal}}', 'type');
         $this->dropCommentFromColumn('{{%journal}}', 'created_at');
-        $this->dropCommentFromColumn('{{%journal}}', 'updated_at');
-        $this->dropCommentFromColumn('{{%journal}}', 'confirmed_at');
     }
 }

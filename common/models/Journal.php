@@ -10,14 +10,14 @@ use yii\db\Query;
  * This is the model class for table "journal".
  *
  * @property int                 $id
- * @property int                 $service_id      идентификатор сервиса
+ * @property int                 $service_id      Указатель на ID сервиса интеграции
  * @property string              $operation_code  Код операции
- * @property int                 $user_id         идентификатор пользователя
- * @property int                 $organization_id идентификатор организации
- * @property string              $response        ответ
- * @property string              $log_guide       уникальный индентификатор записи в логе
- * @property string              $type            тип операции
- * @property string              $created_at      дата записи
+ * @property int                 $user_id         Указатель на ID пользователя выполнившего операцию
+ * @property int                 $organization_id Указатель на ID организации пользователя
+ * @property string              $response        Результат операции
+ * @property string              $log_guide       Уникальный индентификатор записи в логе
+ * @property string              $type            Тип операции
+ * @property string              $created_at      Дата создания выполнения операции
  *
  * @property AllService          $service
  * @property AllServiceOperation $operation

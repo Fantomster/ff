@@ -7,26 +7,26 @@ use Yii;
 /**
  * This is the model class for table "mp_country".
  *
- * @property integer $id
- * @property string $name
- * @property string $full_name
- * @property string $en_name
- * @property string $alpha2
- * @property string $alpha3
- * @property string $location
+ * @property int    $id        Идентификатор записи в таблице
+ * @property string $name      Краткое наименование государства на русском языке
+ * @property string $full_name Полное наименование государства на русском языке
+ * @property string $en_name   Краткое наименование государства на английском языке
+ * @property string $alpha2    Двухбуквенное обозначение государства
+ * @property string $alpha3    Трёхбуквенное обозначение государства
+ * @property string $location  Регион, где расположено данное государство
  */
 class MpCountry extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'mp_country';
+        return '{{%mp_country}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -40,38 +40,43 @@ class MpCountry extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'name' => Yii::t('app', 'common.models.country_three', ['ru'=>'Страна']),
+            'id'        => 'ID',
+            'name'      => Yii::t('app', 'common.models.country_three', ['ru' => 'Страна']),
             'full_name' => 'Full Name',
-            'en_name' => 'En Name',
-            'alpha2' => 'Alpha2',
-            'alpha3' => 'Alpha3',
-            'location' => 'Location',
+            'en_name'   => 'En Name',
+            'alpha2'    => 'Alpha2',
+            'alpha3'    => 'Alpha3',
+            'location'  => 'Location',
         ];
     }
-    
-    public function ajaxsearch($q){
+
+    /**
+     * @param $q
+     * @return array
+     */
+    public function ajaxsearch($q)
+    {
         $query = self::find();
-        $query->select(['name','id']);
-        if($q!='*'){
+        $query->select(['name', 'id']);
+        if ($q != '*') {
             $query->andFilterWhere(['like', 'name', $q]);
         }
 
         $query->orderBy('name');
-        $res=$query->all();
-        $result=[];
-        if(!empty($res)){
-            foreach($res as $row){
-                /**@var countrys $row **/
-                $result[]=['id'=>$row->id,'name'=>$row->name];
+        $res = $query->all();
+        $result = [];
+        if (!empty($res)) {
+            foreach ($res as $row) {
+                /**@var countrys $row * */
+                $result[] = ['id' => $row->id, 'name' => $row->name];
             }
         }
-        $out=['more'=>false,'results'=>$result];
+        $out = ['more' => false, 'results' => $result];
         return $out;
     }
 }

@@ -2,29 +2,26 @@
 
 namespace common\models;
 
-use Yii;
-
 /**
  * This is the model class for table "message".
  *
- * @property integer $id
- * @property string $language
- * @property string $translation
- *
+ * @property int           $id          Идентификатор записи в таблице source_message (внешний ключ)
+ * @property string        $language    Двухбуквенное обозначение языка
+ * @property string        $translation Перевод слова или фразы в проекте на иностранный язык
  * @property SourceMessage $id0
  */
 class Message extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'message';
+        return '{{%message}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -38,13 +35,13 @@ class Message extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'language' => 'Language',
+            'id'          => 'ID',
+            'language'    => 'Language',
             'translation' => 'Translation',
         ];
     }

@@ -14,6 +14,7 @@ use Yii;
 use common\components\SearchOrdersComponent;
 use api\common\models\RkWaybill;
 use yii\helpers\ArrayHelper;
+use common\models\OrderContent;
 
 /**
  * OrderSearch represents the model behind the search form about `common\models\Order`.
@@ -43,23 +44,24 @@ class OrderSearch2 extends Order
 
     /**
      * Creates dateFrom and dateTo parameters for filtering needs
+     *
      * @createdBy Basil A Konakov
      * @createdAt 2018-08-15
      * @var $dateFrom string
-     * @var $dateTo string
+     * @var $dateTo   string
      * */
     public function prepareDates(string $dateFrom = null, string $dateTo = null)
     {
 
         if (!$dateFrom) {
-            $today           = new \DateTime();
+            $today = new \DateTime();
             $this->date_from = $today->format('d.m.Y');
         } else {
             $this->date_from = $dateFrom;
         }
 
         if (!$dateTo) {
-            $today         = new \DateTime();
+            $today = new \DateTime();
             $this->date_to = $today->format('d.m.Y');
         } else {
             $this->date_to = $dateTo;
@@ -68,12 +70,13 @@ class OrderSearch2 extends Order
 
     /**
      * searchForIntegration R-Keeper
-     * @var $type string
-     * @var $params array
+     *
+     * @var $type         string
+     * @var $params       array
      * @var $businessType string
-     * @var $wbStatuses array
-     * @var $pagination array
-     * @var $sort array
+     * @var $wbStatuses   array
+     * @var $pagination   array
+     * @var $sort         array
      * @return ActiveDataProvider
      */
     public function searchForIntegration(string $type, array $params, string $businessType, array $wbStatuses = [], array $pagination = [], array $sort = []): ActiveDataProvider
@@ -86,17 +89,16 @@ class OrderSearch2 extends Order
 
         $orgId = User::findOne(Yii::$app->user->id)->organization_id;
 
-        if (isset($params['OrderSearch2']['id']) && (int) $params['OrderSearch2']['id'] > 0) {
-            $query = Order::find()->where(['id' => (int) $params['OrderSearch2']['id']])
-                    ->andWhere([$selfTypeColumnId => $orgId])
-                    ->andFilterWhere(['status' => OrderStatus::STATUS_DONE]);
+        if (isset($params['OrderSearch2']['id']) && (int)$params['OrderSearch2']['id'] > 0) {
+            $query = Order::find()->where(['id' => (int)$params['OrderSearch2']['id']])
+                ->andWhere([$selfTypeColumnId => $orgId])
+                ->andFilterWhere(['status' => OrderStatus::STATUS_DONE]);
         } elseif (isset($params['OrderSearch2']['id']) && $params['OrderSearch2']['id']) {
             $query = Order::find()->where(['id' => 0]);
         } else {
 
             $query = Order::find()->andWhere([$selfTypeColumnId => $orgId]);
             $this->load($params);
-
 
             $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
             if ($from) {
@@ -137,13 +139,13 @@ class OrderSearch2 extends Order
                     # ищем все готовые к выгрузке
                     $ordersWithReadyWbDoc = [];
                     if ($type == SearchOrdersComponent::INTEGRATION_TYPE_RKWS) {
-                        $qparams              = ['org' => (int) $params['OrderSearch2']['client_id'], 'status_id' => 5, 'readytoexport' => 1];
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 5, 'readytoexport' => 1];
                         $ordersWithReadyWbDoc = RkWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_IIKO) {
-                        $qparams              = ['org' => (int) $params['OrderSearch2']['client_id'], 'status_id' => 4, 'readytoexport' => 1];
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 4, 'readytoexport' => 1];
                         $ordersWithReadyWbDoc = iikoWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_ONES) {
-                        $qparams              = ['org' => (int) $params['OrderSearch2']['client_id'], 'status_id' => 3, 'readytoexport' => 1];
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 3, 'readytoexport' => 1];
                         $ordersWithReadyWbDoc = OneSWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     }
                     $ordersWithReadyWbDoc = ArrayHelper::map($ordersWithReadyWbDoc, 'order_id', 'order_id');
@@ -152,7 +154,7 @@ class OrderSearch2 extends Order
 
                     # ищем все выгруженные
                     $ordersWithFinalWbDoc = [];
-                    $qparams              = ['org' => (int) $params['OrderSearch2']['client_id'], 'status_id' => 2];
+                    $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 2];
                     if ($type == SearchOrdersComponent::INTEGRATION_TYPE_RKWS) {
                         $ordersWithFinalWbDoc = RkWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_IIKO) {
@@ -165,8 +167,8 @@ class OrderSearch2 extends Order
                 } elseif ($wbStatuses[$this->wb_status] == WaybillController::ORDER_STATUS_FILLED_DEFINEDBY_WB_STATUS) {
 
                     # ищем все
-                    $all     = [];
-                    $qparams = ['org' => (int) $params['OrderSearch2']['client_id']];
+                    $all = [];
+                    $qparams = ['org' => (int)$params['OrderSearch2']['client_id']];
                     if ($type == SearchOrdersComponent::INTEGRATION_TYPE_RKWS) {
                         $all = RkWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_IIKO) {
@@ -174,22 +176,22 @@ class OrderSearch2 extends Order
                     } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_ONES) {
                         $all = OneSWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     }
-                    $all                  = ArrayHelper::map($all, 'order_id', 'order_id');
+                    $all = ArrayHelper::map($all, 'order_id', 'order_id');
                     # ищем все готовые к выгрузке и выгруженные
                     $ordersWithReadyWbDoc = [];
                     if ($type == SearchOrdersComponent::INTEGRATION_TYPE_RKWS) {
-                        $qparams              = ['org' => (int) $params['OrderSearch2']['client_id'], 'status_id' => 5, 'readytoexport' => 1];
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 5, 'readytoexport' => 1];
                         $ordersWithReadyWbDoc = RkWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_IIKO) {
-                        $qparams              = ['org' => (int) $params['OrderSearch2']['client_id'], 'status_id' => 4, 'readytoexport' => 1];
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 4, 'readytoexport' => 1];
                         $ordersWithReadyWbDoc = iikoWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_ONES) {
-                        $qparams              = ['org' => (int) $params['OrderSearch2']['client_id'], 'status_id' => 3, 'readytoexport' => 1];
+                        $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 3, 'readytoexport' => 1];
                         $ordersWithReadyWbDoc = OneSWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     }
                     $ordersWithReadyWbDoc = ArrayHelper::map($ordersWithReadyWbDoc, 'order_id', 'order_id');
                     $ordersWithFinalWbDoc = [];
-                    $qparams              = ['org' => (int) $params['OrderSearch2']['client_id'], 'status_id' => 2];
+                    $qparams = ['org' => (int)$params['OrderSearch2']['client_id'], 'status_id' => 2];
                     if ($type == SearchOrdersComponent::INTEGRATION_TYPE_RKWS) {
                         $ordersWithFinalWbDoc = RkWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_IIKO) {
@@ -203,8 +205,8 @@ class OrderSearch2 extends Order
                 } elseif ($wbStatuses[$this->wb_status] == WaybillController::ORDER_STATUS_NODOC_DEFINEDBY_WB_STATUS) {
 
                     # ищем все сформированные
-                    $all     = [];
-                    $qparams = ['org' => (int) $params['OrderSearch2']['client_id']];
+                    $all = [];
+                    $qparams = ['org' => (int)$params['OrderSearch2']['client_id']];
                     if ($type == SearchOrdersComponent::INTEGRATION_TYPE_RKWS) {
                         $all = RkWaybill::find()->select('order_id')->where($qparams)->asArray()->all();
                     } elseif ($type == SearchOrdersComponent::INTEGRATION_TYPE_IIKO) {
@@ -232,11 +234,12 @@ class OrderSearch2 extends Order
 
     /**
      * swdfsdfsfd
-     * @var $params array
-     * @var $businessType string
+     *
+     * @var $params        array
+     * @var $businessType  string
      * @var $orderStatuses array
-     * @var $pagination array
-     * @var $sort array
+     * @var $pagination    array
+     * @var $sort          array
      * @return ActiveDataProvider
      */
     public function search(array $params, string $businessType, array $orderStatuses = [], array $pagination = [], array $sort = []): ActiveDataProvider
@@ -249,14 +252,14 @@ class OrderSearch2 extends Order
 
         $query = Order::find();
 
-        if (isset($params['OrderSearch2']['id']) && (int) $params['OrderSearch2']['id'] > 0) {
-            $query->where(['id' => (int) $params['OrderSearch2']['id']])
-                    ->andWhere([$selfTypeColumnId => User::findOne(Yii::$app->user->id)->organization_id]);
+        if (isset($params['OrderSearch2']['id']) && (int)$params['OrderSearch2']['id'] > 0) {
+            $query->where(['id' => (int)$params['OrderSearch2']['id']])
+                ->andWhere([$selfTypeColumnId => User::findOne(Yii::$app->user->id)->organization_id]);
         } elseif (isset($params['OrderSearch2']['id']) && $params['OrderSearch2']['id']) {
             $query->where(['id' => 0]);
         } else {
             if ($this->manager_id) {
-                $maTable    = \common\models\ManagerAssociate::tableName();
+                $maTable = \common\models\ManagerAssociate::tableName();
                 $orderTable = Order::tableName();
                 $query->rightJoin($maTable, "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->manager_id);
             }
@@ -301,6 +304,14 @@ class OrderSearch2 extends Order
             }
         }
         return new ActiveDataProvider($queryData);
+    }
+
+    /**
+     * @return int|string
+     */
+    public function getPositionCountById($id)
+    {
+        return count(OrderContent::find()->where(['order_id' => $id])->all());
     }
 
 }

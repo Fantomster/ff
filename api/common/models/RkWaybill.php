@@ -79,7 +79,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
     {
         return [
             RkAccess::STATUS_UNLOCKED => 'Активен',
-            RkAccess::STATUS_LOCKED   => 'Отключен',
+            RkAccess::STATUS_LOCKED   => 'Отключён',
         ];
     }
 
@@ -90,7 +90,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
         $acc = ($this->org === null) ? Yii::$app->user->identity->organization_id : $this->org;
         return RkAgent::find()->andWhere('rid = :corr_rid and acc = :acc', [':corr_rid' => $this->corr_rid, ':acc' => $acc])->one();
 
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
     }
 
     public function getStore()
@@ -103,7 +103,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
             // ->andWhere('type = 2')
             ->one();
 
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
     }
 
     public function getStatus()
@@ -112,7 +112,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
         return RkWaybillstatus::find()->andWhere('id = :id', [':id' => $this->status_id])->one();
 
-        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);
     }
 
     /**
@@ -209,10 +209,15 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
 
             foreach ($records as $record) {
                 $wdmodel = new RkWaybilldata();
-                ///$wdmodel->setScenario('autoWaybill');
                 $wdmodel->waybill_id = $this->id;
                 $wdmodel->product_id = $record->product_id;
-                if (isset($record->invoiceContent)) {
+                if (($record->into_quantity != null) and ($record->into_price != null) and ($record->into_price_vat != null) and ($record->into_price_sum != null) and ($record->into_price_sum_vat != null) and ($record->vat_product != null) and ($record->quantity == $record->into_quantity)) {
+                    $wdmodel->quant = $record->into_quantity;
+                    $wdmodel->sum = $record->into_price_sum;
+                    $wdmodel->defquant = $record->into_quantity;
+                    $wdmodel->defsum = $record->into_price_sum;
+                    $wdmodel->vat = $record->vat_product * 100;
+                } elseif (isset($record->invoiceContent)) {
                     $wdmodel->quant = $record->invoiceContent->quantity;
                     $wdmodel->sum = $record->invoiceContent->sum_without_nds;
                     $wdmodel->defquant = $record->invoiceContent->quantity;

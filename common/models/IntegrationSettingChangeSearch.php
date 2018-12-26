@@ -61,7 +61,7 @@ class IntegrationSettingChangeSearch extends IntegrationSettingChange
 
         $query->joinWith(['organization' => function ($query) {
             /** @var Query $query */
-            return $query->from(['org' => '`' . DBNameHelper::getMainName() . '`.' . Organization::tableName()]);
+            return $query->from(['org' => DBNameHelper::getMainName() . '.' . Organization::tableName()]);
         }], true);
 
         $query->joinWith(['integrationSetting' => function ($query) {

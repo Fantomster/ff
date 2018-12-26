@@ -25,7 +25,7 @@ class m181005_125413_add_sync_settings_countur extends Migration
     public function safeUp()
     {
 
-        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        $dbName = DBNameHelper::getMainName();
 
         $this->createTable('{{%integration_setting}}', [
             'id' => $this->primaryKey()->comment('Уникальный идентификатор настройки'),

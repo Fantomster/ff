@@ -124,7 +124,7 @@ class VetisWaybillSearch extends MercVsd
                   (
                   select max(date_doc) 
                     from  merc_vsd aa,
-                          `' . $tableName . '`.order_content ab 
+                          ' . $tableName . '.order_content ab 
                     where ab.order_id = c.order_id
                       and aa.uuid = ab.merc_uuid
                   )
@@ -134,9 +134,9 @@ class VetisWaybillSearch extends MercVsd
                        merc_vsd a
                 left join integration_setting `is` on `is`.name=\'enterprise_guid\'
                 join integration_setting_value b on b.setting_id = `is`.id and b.value in (' . $mercPconst . ')
-                left join `' . $tableName . '`.order_content c on a.uuid = c.merc_uuid
-                left join `' . $tableName . '`.order o on o.id = c.order_id
-                left join `' . $tableName . '`.organization vendor on o.vendor_id = vendor.id
+                left join ' . $tableName . '.order_content c on a.uuid = c.merc_uuid
+                left join ' . $tableName . '.order o on o.id = c.order_id
+                left join ' . $tableName . '.organization vendor on o.vendor_id = vendor.id
 
                 where 
                 b.org_id in (' . $strOrgIds . ') ' . $arWhereAndCount['sql'] . '

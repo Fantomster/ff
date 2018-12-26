@@ -23,7 +23,7 @@ class m181009_134354_delete_parent_outer_uid extends Migration
         $this->addColumn('{{%outer_unit}}', 'parent_outer_uid',
             $this->string(45)->null()->after('outer_uid')->comment('Родительский outer_id'));
 
-        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        $dbName = DBNameHelper::getMainName();
         $this->addForeignKey('{{%outer_unit_org}}', '{{%outer_unit}}', 'org_id', $dbName.'.organization', 'id');
     }
 

@@ -25,7 +25,7 @@ class OuterProductMapSearch extends OuterProductMap
      */
     public function search(Organization $client, $post)
     {
-        $dbName = "`" . DBNameHelper::getApiName() . "`.";
+        $dbName = DBNameHelper::getApiName() . ".";
         $outerProductMapTableName = $dbName . OuterProductMap::tableName();
         $outerProductTableName = $dbName . OuterProduct::tableName();
         $outerUnitTableName = $dbName . OuterUnit::tableName();
@@ -72,10 +72,8 @@ class OuterProductMapSearch extends OuterProductMap
 
         /**
          * ВНИМАНИЕ !!!!!!!
-         *
          *  Сортировка по умолчанию тут выключена специально, поскольку занимает очень много времени > 20 сек
          *  сортировка производится только  если задан поиск по какому то продукту.
-         *
          *  ЕСЛИ ТЫ ЗАБРАЛСЯ СЮДА ЧТОБЫ ДОБАВИТЬ СОРТИРОВКУ ПО ЧЬЕЙ ТО ЗАДАЧЕ
          *  ОБСУДИ ЭТО С ТИМЛИДОМ ИЛИ ДИРЕКТОРОМ
          */

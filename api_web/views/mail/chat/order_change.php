@@ -37,7 +37,7 @@ use \api_web\helpers\CurrencyHelper;
                     <td class="order"><?= ++$i ?></td>
                     <td class="name"><?= $model->product_name ?></td>
                     <td class="article"><?= $model->article ?></td>
-                    <td class="quantity <?= $model->getCssClassChatMessage('quantity') ?>"><?= $model->quantity ?></td>
+                    <td class="quantity <?= $model->getCssClassChatMessage('quantity') ?>"><?= number_format($model->quantity, 3, '.', '') ?></td>
                     <td class="quantity-action <?= $model->getCssClassChatMessage('quantity') ?>"><i
                                 class="material-icons"></i></td>
                     <td class="price <?= $model->getCssClassChatMessage('price') ?>">
@@ -61,7 +61,7 @@ use \api_web\helpers\CurrencyHelper;
                     <td class="order"><?= ++$i ?></td>
                     <td class="name"><?= $model->product_name ?></td>
                     <td class="article"><?= $model->article ?></td>
-                    <td class="quantity"><?= $model->quantity ?></td>
+                    <td class="quantity"><?= number_format($model->quantity, 3, '.', '') ?></td>
                     <td class="quantity-action"><i class="material-icons"></i></td>
                     <td class="price <?= $model->getCssClassChatMessage('price') ?>">
                         <?= CurrencyHelper::asDecimal($model->price) ?>

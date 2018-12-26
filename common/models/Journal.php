@@ -7,19 +7,22 @@ use yii\db\ActiveRecord;
 use yii\db\Query;
 
 /**
- * This is the model class for table "{{%journal}}".
+ * This is the model class for table "journal".
  *
- * @property int $id
- * @property int $service_id
- * @property string $operation_code
- * @property int $user_id
- * @property int $organization_id
- * @property string $response
- * @property string $log_guide
- * @property string $type
- * @property string $created_at
+ * @property int                 $id
+ * @property int                 $service_id      идентификатор сервиса
+ * @property string              $operation_code  Код операции
+ * @property int                 $user_id         идентификатор пользователя
+ * @property int                 $organization_id идентификатор организации
+ * @property string              $response        ответ
+ * @property string              $log_guide       уникальный индентификатор записи в логе
+ * @property string              $type            тип операции
+ * @property string              $created_at      дата записи
+ *
+ * @property AllService          $service
  * @property AllServiceOperation $operation
- * @property array $record
+ * @property User                $user
+ * @property Organization        $organization
  */
 class Journal extends \yii\db\ActiveRecord
 {
@@ -53,81 +56,95 @@ class Journal extends \yii\db\ActiveRecord
         ];
     }
 
-    public function behaviors() {
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors()
+    {
         return [
             'timestamp' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
+                'class'      => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['created_at']
                 ],
-                'value' => function ($event) {
+                'value'      => function ($event) {
                     return gmdate("Y-m-d H:i:s");
                 },
             ],
         ];
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'service_id' => Yii::t('app', 'Сервис'),
-            'operation_code' => Yii::t('app', 'Операция'),
-            'user_id' => Yii::t('app', 'User ID'),
-            'organization_id' => Yii::t('app', 'Организация'),
-            'response' => Yii::t('app', 'Response'),
-            'log_guide' => Yii::t('app', 'Log Guide'),
-            'type' => Yii::t('app', 'Результат'),
-            'operation.denom' => Yii::t('app', 'Операция'),
-            'operation.comment' => Yii::t('app', 'Комментарий к операции'),
-            'record.response' => Yii::t('app', 'Ответ сервера'),
-            'record.request' => Yii::t('app', 'Запрос'),
-            'record.request_at' => Yii::t('app', 'Дата запроса'),
+            'id'                 => Yii::t('app', 'ID'),
+            'service_id'         => Yii::t('app', 'Сервис'),
+            'operation_code'     => Yii::t('app', 'Операция'),
+            'user_id'            => Yii::t('app', 'User ID'),
+            'organization_id'    => Yii::t('app', 'Организация'),
+            'response'           => Yii::t('app', 'Response'),
+            'log_guide'          => Yii::t('app', 'Log Guide'),
+            'type'               => Yii::t('app', 'Результат'),
+            'operation.denom'    => Yii::t('app', 'Операция'),
+            'operation.comment'  => Yii::t('app', 'Комментарий к операции'),
+            'record.response'    => Yii::t('app', 'Ответ сервера'),
+            'record.request'     => Yii::t('app', 'Запрос'),
+            'record.request_at'  => Yii::t('app', 'Дата запроса'),
             'record.response_at' => Yii::t('app', 'Дата ответа'),
-            'created_at' => Yii::t('app', 'Created At')
+            'created_at'         => Yii::t('app', 'Created At')
         ];
     }
 
     /**
      * Информация о сервисе
+     *
      * @return \yii\db\ActiveQuery
      */
-    public function getService() {
+    public function getService()
+    {
         return $this->hasOne(AllService::className(), ['id' => 'service_id']);
     }
 
     /**
      * Информация об операции
+     *
      * @return \yii\db\ActiveQuery
      */
-    public function getOperation() {
+    public function getOperation()
+    {
         return $this->hasOne(AllServiceOperation::className(), ['service_id' => 'service_id', 'code' => 'operation_code']);
     }
 
     /**
      * Информация о пользователе
+     *
      * @return \yii\db\ActiveQuery
      */
-    public function getUser() {
+    public function getUser()
+    {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
     /**
      * Организация
+     *
      * @return \yii\db\ActiveQuery
      */
-    public function getOrganization() {
+    public function getOrganization()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
     }
 
     /**
      * Запись из внутреннего журнала, с подробными данными
+     *
      * @return array
      */
-    public function getRecord() {
+    public function getRecord()
+    {
         $log = (new Query())->select('log_table, log_field')
             ->from('all_service')
             ->where(['id' => $this->service_id])

@@ -55,7 +55,7 @@ class AutoWaybillHelper extends \yii\base\Component
             if (!$waybillExists && ($waybillModeIiko !== '0')) {
                 $res['iiko'] = $className::createWaybill($order_id);
                 if ($waybillModeIiko === '1') {
-                    $res['iiko'] = $className::exportWaybill($order_id);
+                    $res['iiko'] = $className::exportWaybill($order_id, true);
                 }
             }
         }

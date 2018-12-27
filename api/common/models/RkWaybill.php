@@ -325,4 +325,19 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
         // TODO: Implement exportWaybill() method.
     }
 
+    /**
+     * 
+     * @param iikoWaybill $contributorWaybill
+     * @param iikoWaybill $recipientWaybill
+     * @return iikoWaybill
+     */
+    public static function moveContentToExistingWaybill($contributorWaybill, $recipientWaybill) {
+        foreach ($contributorWaybill->waybillData as $position) {
+            $position->waybill_id = $recipientWaybill->waybill_id;
+            $position->save();
+        }
+        $contributorWaybill->delete();
+        return $recipientWaybill;
+    }
+    
 }

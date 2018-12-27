@@ -662,7 +662,7 @@ SQL;
             
             $existingWaybill = iikoWaybill::find()->where(['order_id' => $model->order_id, 'store_id' => $model->store_id])->one();
             if (!empty($existingWaybill)) {
-                $model = $this->moveContentToExistingWaybill($model, $existingWaybill);
+                $model = iikoWaybill::moveContentToExistingWaybill($model, $existingWaybill);
             }
             
             $sql = "SELECT COUNT(*) FROM iiko_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
@@ -1027,21 +1027,6 @@ SQL;
         return $this->redirect(['map', 'waybill_id' => $model->waybill->id, 'page' => $page, 'way' => $way, 'iikoWaybillDataSearch[vat]' => $vatf, 'sort' => $sort]);
     }
 
-    /**
-     * 
-     * @param iikoWaybill $contributorWaybill
-     * @param iikoWaybill $recipientWaybill
-     * @return iikoWaybill
-     */
-    public function moveContentToExistingWaybill($contributorWaybill, $recipientWaybill) {
-        foreach ($contributorWaybill->data as $position) {
-            $position->waybill_id = $recipientWaybill->waybill_id;
-            $position->save();
-        }
-        $contributorWaybill->delete();
-        return $recipientWaybill;
-    }
-    
     public function getLastUrl()
     {
 

@@ -39,7 +39,7 @@ use api_web\components\Registry;
  * @property integer $service_id
  * @property Order   $order;
  * 
- * @property iikoWaybillData[] $data
+ * @property iikoWaybillData[] $waybillData
  */
 class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface
 {
@@ -522,4 +522,19 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         }
     }
 
+    /**
+     * 
+     * @param iikoWaybill $contributorWaybill
+     * @param iikoWaybill $recipientWaybill
+     * @return iikoWaybill
+     */
+    public static function moveContentToExistingWaybill($contributorWaybill, $recipientWaybill) {
+        foreach ($contributorWaybill->waybillData as $position) {
+            $position->waybill_id = $recipientWaybill->waybill_id;
+            $position->save();
+        }
+        $contributorWaybill->delete();
+        return $recipientWaybill;
+    }
+    
 }

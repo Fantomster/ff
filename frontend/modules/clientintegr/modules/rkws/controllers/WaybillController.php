@@ -849,6 +849,12 @@ SQL;
                 var_dump($model->getErrors());
                 exit;
             }*/
+            
+            $existingWaybill = RkWaybill::find()->where(['order_id' => $model->order_id, 'store_rid' => $model->store_id])->one();
+            if (!empty($existingWaybill)) {
+                $model = RkWaybill::moveContentToExistingWaybill($model, $existingWaybill);
+            }
+            
             $sql = "SELECT COUNT(*) FROM rk_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
             $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
             if (($model->corr_rid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_rid === null)) {

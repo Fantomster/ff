@@ -688,8 +688,6 @@ SQL;
                     $model->readytoexport = 0;
                 }
             }
-            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');
-            $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
             $model->save();
             return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
         } else {

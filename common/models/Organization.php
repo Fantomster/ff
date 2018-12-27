@@ -1979,43 +1979,24 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param        $numrest
-     * @param string $string_of_search
+     * @param        $clientId
+     * @param string $searchString
      * @return array
      * @throws \yii\db\Exception
      */
-    public function getSuppliersByString($numrest, string $string_of_search)
+    public function getSuppliersByString($clientId, string $searchString)
     {
-        $numrest = (int)$numrest;
         $query = Organization::find()->select('organization.id,organization.name')
             ->innerJoin('relation_supp_rest', 'organization.id=relation_supp_rest.supp_org_id')
-            ->where('relation_supp_rest.rest_org_id = :numrest', [':numrest' => $numrest])->orderBy('name')->all();
-        //$sql = "SELECT organization.id,organization.name FROM organization INNER JOIN relation_supp_rest ON
-        //      (organization.id=relation_supp_rest.supp_org_id AND relation_supp_rest.rest_org_id=$numrest)";
-
-        //$connection = \Yii::$app->getDb();
-        //$command    = $connection->createCommand($sql);
-        //$res        = $command->queryAll();
-        //ksort($res);
+            ->where('relation_supp_rest.rest_org_id = :numrest', [':numrest' => $clientId])
+            ->andFilterWhere(['like', 'name', $searchString])
+            ->orderBy('name')->all();
         $res2 = [];
-        $i=0;
-        if ($string_of_search != '') {
-            foreach ($query as $vendor) {
-                $substitute = mb_strtolower($vendor->name);
-                if (strpos($substitute, $string_of_search) !== false) {
-                    $res2[$i]['id'] = $vendor->id;
-                    $res2[$i]['name'] = $vendor->name;
-                    $i++;
-                }
-            }
-        } else {
-            foreach ($query as $vendor) {
-                if (count($res2) < 100) {
-                    $res2[$i]['id'] = $vendor->id;
-                    $res2[$i]['name'] = $vendor->name;
-                    $i++;
-                } //ограничение на количество поставщиков для выпадающего списка
-            }
+        $i = 0;
+        foreach ($query as $vendor) {
+            $res2[$i]['id'] = $vendor->id;
+            $res2[$i]['name'] = $vendor->name;
+            $i++;
         }
         return $res2;
     }

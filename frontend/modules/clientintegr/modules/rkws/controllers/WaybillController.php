@@ -915,7 +915,7 @@ SQL;
                     var_dump($model->getErrors());
                     exit;
                 }*/
-                return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+                return $this->redirect(['/clientintegr/rkws/waybill/index', 'way' => $model->order_id]);
             } else {
                 return $this->render('create', [
                     'model' => $model,

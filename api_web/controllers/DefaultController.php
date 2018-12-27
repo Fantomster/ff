@@ -5,6 +5,11 @@ namespace api_web\controllers;
 use api_web\components\Registry;
 use api_web\components\WebApiController;
 
+/**
+ * Class DefaultController
+ *
+ * @package api_web\controllers
+ */
 class DefaultController extends WebApiController
 {
     /**
@@ -46,6 +51,6 @@ class DefaultController extends WebApiController
      */
     public function actionGetNdsList()
     {
-        $this->response = Registry::$nds_list;
+        $this->response = array_values(Registry::$nds_list);
     }
 }

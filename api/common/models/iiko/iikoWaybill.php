@@ -294,7 +294,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         ];
     }
 
-    public static function createWaybill($order_id, $service_id = Registry::IIKO_SERVICE_ID)
+    public static function createWaybill($order_id, $service_id = Registry::IIKO_SERVICE_ID, $auto = false)
     {
 
         $res = true;
@@ -325,6 +325,12 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         $num = (count($stories) > 1) ? 1 : '';
 
+        foreach ($stories as $store_id) {
+            if (empty($store_id) && $auto) {
+                return false;
+            }
+        }
+        
         foreach ($stories as $store) {
             $model = new iikoWaybill();
             $model->order_id = $order_id;

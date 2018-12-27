@@ -43,7 +43,7 @@ class AutoWaybillHelper extends \yii\base\Component
             $waybillExists = $className::find()->where(['order_id' => $order_id])->exists();
 
             if (!$waybillExists && ($waybillModeRkws !== '0')) {
-                $res['rkws'] = $className::createWaybill($order_id);
+                $res['rkws'] = $className::createWaybill($order_id, true);
             }
         }
 
@@ -53,7 +53,7 @@ class AutoWaybillHelper extends \yii\base\Component
             $waybillExists = $className::find()->where(['order_id' => $order_id])->exists();
 
             if (!$waybillExists && ($waybillModeIiko !== '0')) {
-                $res['iiko'] = $className::createWaybill($order_id);
+                $res['iiko'] = $className::createWaybill($order_id, \api_web\components\Registry::IIKO_SERVICE_ID, true);
                 if ($waybillModeIiko === '1') {
                     $res['iiko'] = $className::exportWaybill($order_id);
                 }

@@ -2,15 +2,14 @@
 
 namespace frontend\modules\clientintegr\modules\email\controllers;
 
-
-use Aws\S3\Exception\AccessDeniedException;
 use common\models\IntegrationSettingFromEmail;
 use common\models\Organization;
 use common\models\User;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 
 /**
- * @var $user User
+ * @var $user         User
  * @var $organization Organization
  */
 class SettingController extends Controller
@@ -28,30 +27,29 @@ class SettingController extends Controller
         return $this->render('index', ['models' => $models]);
     }
 
+    /**
+     * @return string|\yii\web\Response
+     */
     public function actionCreate()
     {
-        $user = \Yii::$app->user->identity;
         $model = new IntegrationSettingFromEmail();
 
-        if (\Yii::$app->request->isPost) {
-            $post = \Yii::$app->request->post();
-            if (isset($post)) {
-                $model->load($post);
-                if ($model->validate()) {
-                    $model->save();
-                    $this->redirect(\yii\helpers\Url::to(['setting/edit', 'setting_id' => $model->id]));
-                } else {
-                    print_r($model);
-                }
-            }
+        if ($model->load(\Yii::$app->request->post()) && $model->validate()) {
+            $model->save();
+
+            return $this->redirect(['setting/index']);
         }
 
         return $this->render('edit', [
             'model' => $model,
-            'user' => $user
+            'user'  => \Yii::$app->user->identity
         ]);
     }
 
+    /**
+     * @return string
+     * @throws ForbiddenHttpException
+     */
     public function actionEdit()
     {
         $user = \Yii::$app->user->identity;
@@ -78,13 +76,18 @@ class SettingController extends Controller
 
             return $this->render('edit', [
                 'model' => $model,
-                'user' => $user
+                'user'  => $user
             ]);
         } else {
-            throw new AccessDeniedException('Not access this setting.');
+            throw new ForbiddenHttpException('Not access this setting.');
         }
     }
 
+    /**
+     * @throws ForbiddenHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function actionDelete()
     {
         $user = \Yii::$app->user->identity;
@@ -96,7 +99,7 @@ class SettingController extends Controller
             $model->delete();
             $this->redirect('/clientintegr/email/setting');
         } else {
-            throw new AccessDeniedException('Not access this setting.');
+            throw new ForbiddenHttpException('Not access this setting.');
         }
     }
 }

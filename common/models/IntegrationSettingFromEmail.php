@@ -19,18 +19,42 @@ namespace common\models;
  * @property string             $updated_at      Дата и время последнего изменения записи в таблице
  * @property string             $language        Двухбуквенное обозначение языка, на котором ведётся переписка
  * @property int                $version         Версия приложения MixCart
- *
  * @property Organization       $organization
  * @property IntegrationInvoice $invoice
  */
 class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
 {
+    private $_old_password;
+
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
         return '{{%integration_setting_from_email}}';
+    }
+
+    public function afterFind()
+    {
+        $this->_old_password = $this->password;
+        parent::afterFind();
+    }
+
+    /**
+     * @param bool $insert
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function beforeSave($insert)
+    {
+        $password = \Yii::$app->get('encode')->encrypt($this->password, $this->user);
+        $checkPassword = trim($this->password, '*');
+        if (!$this->isNewRecord && empty($checkPassword)) {
+            $password = $this->_old_password;
+        }
+        $this->password = $password;
+
+        return parent::beforeSave($insert);
     }
 
     /**
@@ -98,5 +122,22 @@ class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
     public function getInvoice()
     {
         return $this->hasMany(IntegrationInvoice::className(), ['integration_setting_from_email_id' => 'id']);
+    }
+
+    /**
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getCountCharsPassword(): string
+    {
+        $stars = '';
+        if (!empty($this->password)) {
+            $countChars = iconv_strlen(\Yii::$app->get('encode')->decrypt($this->password, $this->user));
+            for ($i = 0; $i < $countChars; $i++) {
+                $stars .= "*";
+            }
+        }
+
+        return $stars;
     }
 }

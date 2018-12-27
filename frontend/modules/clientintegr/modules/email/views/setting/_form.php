@@ -8,7 +8,6 @@ use yii\widgets\ActiveForm;
 /* @var $form ActiveForm */
 /* @var $user \common\models\User */
 
-
 ?>
 <style>
     .hint-block {
@@ -24,7 +23,9 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'server_host')->hint('Пример: imap.yandex.ru') ?>
     <?= $form->field($model, 'server_port')->hint('IMAP: 993, POP3: 995')->textInput(['type' => 'number']) ?>
     <?= $form->field($model, 'user')->hint('Логин от почты') ?>
-    <?= $form->field($model, 'password')->passwordInput()->hint('Пароль от почты') ?>
+    <?= $form->field($model, 'password')->passwordInput([
+        'value' => $model->getCountCharsPassword()
+    ])->hint('Пароль от почты') ?>
     <?= $form->field($model, 'language')->dropDownList(['ru' => 'ru (Русский)', 'en' => 'en (Английский)', 'es' => 'es (Испанский)', 'md' => 'md (Молдавский)', 'ua' => 'ua (Украинский)']) ?>
     <?= $form->field($model, 'server_ssl')->dropDownList(['1' => 'Да', '0' => 'Нет']) ?>
     <?= $form->field($model, 'is_active')->dropDownList(['1' => 'Да', '0' => 'Нет']) ?>

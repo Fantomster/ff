@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'app_version' => 1,
+    'app_version'             => 1,
     'google-api'              => [
         'key-id'   => 'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
         'language' => 'ru-RU'
@@ -105,5 +105,8 @@ return [
         'edi_api_order_document_id'  => 220,
         'edi_api_recadv_document_id' => 351
     ],
-    'disable_daemon_logs' => true,
+    'disable_daemon_logs'     => true,
+    'encrypt'                 => [
+        'salt' => '3652612C4A5B5D1B1719' // MixCart2.0 в шестнадцатеричной системе
+    ]
 ];

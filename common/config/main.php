@@ -104,7 +104,7 @@ return [
                     'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
                 ],
                 'api_web'     => [
-                    'class'                 => 'yii\i18n\DbMessageSource',
+                    'class' => 'yii\i18n\DbMessageSource',
                 ],
             ],
         ],
@@ -249,6 +249,9 @@ return [
             'class' => 'sizeg\jwt\Jwt',
             'key'   => 'DDA19FBF32BC8D66A5D3A22EA15F7',
         ],
+        'encode'                => [
+            'class' => 'common\components\Encode',
+        ],
     ],
     'modules'        => [
         'user'         => [
@@ -282,9 +285,9 @@ return [
         ],
         'treemanager'  => [
             'class' => '\kartik\tree\Module',
-        // enter other module properties if needed
-        // for advanced/personalized configuration
-        // (refer module properties available below)
+            // enter other module properties if needed
+            // for advanced/personalized configuration
+            // (refer module properties available below)
         ],
         'pdfjs'        => [
             'class' => '\yii2assets\pdfjs\Module',

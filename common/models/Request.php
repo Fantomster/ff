@@ -8,45 +8,46 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "request".
  *
- * @property integer      $id
- * @property integer      $category
- * @property string       $product
- * @property string       $comment
- * @property string       $regular
- * @property string       $amount
- * @property integer      $rush_order
- * @property integer      $payment_method
- * @property string       $deferment_payment
- * @property integer      $responsible_supp_org_id
- * @property integer      $count_views
- * @property integer      $hits
- * @property string       $created_at
- * @property string       $end
- * @property integer      $rest_org_id
- * @property integer      $active_status
- * @property integer      $rest_user_id
- * @property string       $regularName
- * @property Organization $vendor
- * @property Organization $client
- * @property string       $paymentMethodName
- * @property MpCategory   $categoryName
- * @property string       $countCallback
- * @property array        $requestCallbacks
- * 
- * @property User[]       $recipientsListForClient
+ * @property int                 $id                      Идентификатор записи в таблице
+ * @property int                 $category                Идентификатор категории товара
+ * @property string              $product                 Наименование продукта-товара
+ * @property string              $comment                 Комментарий к заявке
+ * @property string              $regular                 Периодичность данной заявки (1 - разово, 2 - ежедневно, 3 -
+ *           еженедельно, 4 - ежемесячно)
+ * @property string              $amount                  Количество товара
+ * @property int                 $rush_order              Показатель срочности заявки (0 - не срочная, 1 - срочная)
+ * @property int                 $payment_method          Способ платежа (1 - наличный расчёт, 2 - безналичный расчёт)
+ * @property string              $deferment_payment       Отсрочка платежа
+ * @property int                 $responsible_supp_org_id Идентификатор организации-поставщика, взявшего на себя
+ *           ответственность за выполнение заявки ресторана
+ * @property int                 $count_views             Количество просмотров заказа
+ * @property string              $created_at              Дата и время создания записи в таблице
+ * @property string              $end                     Дата и время окончания действия заявки ресторана
+ * @property int                 $rest_org_id             Идентификатор организации-ресторана, откуда поступила заявка
+ * @property int                 $active_status           Показатель статуса активности заявки (0 - не активна, 1 -
+ *           активна)
+ * @property int                 $rest_user_id            Идентификатор пользователя, сотрудника ресторана, создавшего
+ *           заявку
+ *
+ * @property MpCategory          $categoryName
+ * @property Organization        $client
+ * @property Organization        $vendor
+ * @property RequestCallback[]   $requestCallbacks
+ * @property FranchiseeAssociate $franchiseeAssociate
+ * @property RequestCounters[]   $requestCounters
  */
 class Request extends \yii\db\ActiveRecord
 {
 
-    const ACTIVE   = 1;
+    const ACTIVE = 1;
     const INACTIVE = 0;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'request';
+        return '{{%request}}';
     }
 
     public function beforeSave($insert)
@@ -62,6 +63,9 @@ class Request extends \yii\db\ActiveRecord
         return false;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function behaviors()
     {
         return [
@@ -78,7 +82,7 @@ class Request extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -91,7 +95,7 @@ class Request extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
@@ -115,19 +119,23 @@ class Request extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
     public function getModifyDate()
     {
         $date_stamp = strtotime($this->created_at);
-        $m          = Yii::$app->formatter->asDatetime($date_stamp, 'php:n');
-        $ypd        = Yii::$app->formatter->asDatetime($date_stamp, 'php:yy');
-        $mpd        = Yii::$app->formatter->asDatetime($date_stamp, 'php:m.y');
-        $dpd        = Yii::$app->formatter->asDatetime($date_stamp, 'php:j');
-        $tpd        = Yii::$app->formatter->asDatetime($date_stamp, 'H:i');
-        $yy         = Yii::$app->formatter->asDatetime('now', 'php:yy');
-        $md         = Yii::$app->formatter->asDatetime('now', 'php:m.y');
-        $dd         = Yii::$app->formatter->asDatetime('now', 'php:j');
+        $m = Yii::$app->formatter->asDatetime($date_stamp, 'php:n');
+        $ypd = Yii::$app->formatter->asDatetime($date_stamp, 'php:yy');
+        $mpd = Yii::$app->formatter->asDatetime($date_stamp, 'php:m.y');
+        $dpd = Yii::$app->formatter->asDatetime($date_stamp, 'php:j');
+        $tpd = Yii::$app->formatter->asDatetime($date_stamp, 'H:i');
+        $yy = Yii::$app->formatter->asDatetime('now', 'php:yy');
+        $md = Yii::$app->formatter->asDatetime('now', 'php:m.y');
+        $dd = Yii::$app->formatter->asDatetime('now', 'php:j');
 
-        $today     = false;
+        $today = false;
         $yesterday = false;
 
         if (($mpd == $md) & ($dpd == $dd)) {
@@ -139,15 +147,15 @@ class Request extends \yii\db\ActiveRecord
             $hArray = [Yii::t('app', 'common.models.hour', ['ru' => "час"]), Yii::t('app', 'common.models.hour_two', ['ru' => "часа"]), Yii::t('app', 'common.models.hours', ['ru' => "часов"])];
 
             if ($dif < 60 and $dif >= 0) {
-                $ns   = floor($dif);
+                $ns = floor($dif);
                 $text = self::getTimeFormatWord($ns, $sArray);
                 return "$ns $text " . Yii::t('message', 'market.controllers.site.ago', ['ru' => 'назад']);
             } elseif ($dif / 60 > 0 and $dif / 60 < 60) {
-                $ni   = floor($dif / 60);
+                $ni = floor($dif / 60);
                 $text = self::getTimeFormatWord($ni, $iArray);
                 return "$ni $text " . Yii::t('message', 'market.controllers.site.ago_two', ['ru' => 'назад']);
             } elseif ($dif / 3600 > 0 and $dif / 3600 < 6) {
-                $nh   = floor($dif / 3600);
+                $nh = floor($dif / 3600);
                 $text = self::getTimeFormatWord($nh, $hArray);
                 return "$nh $text " . Yii::t('message', 'market.controllers.site.ago_three', ['ru' => 'назад']);
             } else {
@@ -156,7 +164,7 @@ class Request extends \yii\db\ActiveRecord
         }
 
         if (($mpd == $md) & ($dpd == $dd - 1)) {
-            $today     = false;
+            $today = false;
             $yesterday = true;
             return Yii::t('app', 'common.models.yesterday_in', ['ru' => 'Вчера, в ']) . $tpd;
         }
@@ -181,10 +189,15 @@ class Request extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @param $number
+     * @param $suffix
+     * @return mixed
+     */
     static function getTimeFormatWord($number, $suffix)
     {
-        $keys       = [2, 0, 1, 1, 1, 2];
-        $mod        = $number % 100;
+        $keys = [2, 0, 1, 1, 1, 2];
+        $mod = $number % 100;
         $suffix_key = ($mod > 7 && $mod < 20) ? 2 : $keys[min($mod % 10, 5)];
         return $suffix[$suffix_key];
     }
@@ -207,6 +220,9 @@ class Request extends \yii\db\ActiveRecord
         return RequestCounters::hits($this->id);
     }
 
+    /**
+     * @return string
+     */
     public function getRegularName()
     {
         switch ($this->regular) {
@@ -225,6 +241,9 @@ class Request extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @return string
+     */
     public function getPaymentMethodName()
     {
         switch ($this->payment_method) {
@@ -237,6 +256,10 @@ class Request extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @param $id
+     * @return array|Allow[]|AllService[]|Cart[]|Catalog[]|CatalogBaseGoods[]|Category[]|Franchisee[]|FranchiseeGeo[]|FranchiseType[]|Gender[]|IntegrationSettingFromEmail[]|Job[]|MpCategory[]|MpCountry[]|MpEd[]|notifications\EmailNotification[]|Order[]|OrderChat[]|OrganizationType[]|RelationSuppRest[]|User[]|Waybill[]|void|ActiveRecord[]
+     */
     public function getManagers($id)
     {
         if (User::find()->where(['organization_id' => $id])->exists()) {
@@ -246,48 +269,65 @@ class Request extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getClient()
     {
         return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getVendor()
     {
         return $this->hasOne(Organization::className(), ['id' => 'responsible_supp_org_id']);
     }
 
+    /**
+     * @return int|string
+     */
     public function getCounter()
     {
         return RequestCounters::find()->where(['request_id' => $this->id])->count();
     }
 
+    /**
+     * @return int|string
+     */
     public function getCountCallback()
     {
         return RequestCallback::find()->where(['request_id' => $this->id])->count();
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getRequestCallbacks()
     {
         return $this->hasMany(RequestCallback::className(), ['request_id' => 'id']);
     }
 
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
-        if ($insert) {
-//            if (!is_a(Yii::$app, 'yii\console\Application')) {
-//                if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
-//                    \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequest($this->id, $insert);
-//                }
-//            }
-        }
-    }
-
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getFranchiseeAssociate()
     {
         return $this->hasOne(FranchiseeAssociate::className(), ['rest_org_id' => 'organization_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRequestCounters()
+    {
+        return $this->hasMany(RequestCounters::className(), ['request_id' => 'id']);
+    }
+
+    /**
+     * @return array
+     */
     public function getRequestExportColumns()
     {
         return [
@@ -328,16 +368,19 @@ class Request extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return array|Allow[]|AllService[]|Cart[]|Catalog[]|CatalogBaseGoods[]|Category[]|Franchisee[]|FranchiseeGeo[]|FranchiseType[]|Gender[]|IntegrationSettingFromEmail[]|Job[]|MpCategory[]|MpCountry[]|MpEd[]|notifications\EmailNotification[]|Order[]|OrderChat[]|OrganizationType[]|RelationSuppRest[]|User[]|Waybill[]|ActiveRecord[]
+     */
     public function getRecipientsListForClient()
     {
         return User::find()
-                        ->join('LEFT JOIN', RelationUserOrganization::tableName() . ' as ruo', User::tableName() . '.organization_id = ruo.organization_id')
-                        ->where([
-                            'ruo.organization_id' => $this->rest_org_id,
-                            'ruo.role_id'         => Role::ROLE_RESTAURANT_MANAGER,
-                        ])
-                        ->orWhere([User::tableName() . '.id' => $this->rest_user_id])
-                        ->all();
+            ->join('LEFT JOIN', RelationUserOrganization::tableName() . ' as ruo', User::tableName() . '.organization_id = ruo.organization_id')
+            ->where([
+                'ruo.organization_id' => $this->rest_org_id,
+                'ruo.role_id'         => Role::ROLE_RESTAURANT_MANAGER,
+            ])
+            ->orWhere([User::tableName() . '.id' => $this->rest_user_id])
+            ->all();
     }
 
 }

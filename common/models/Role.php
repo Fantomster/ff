@@ -1,22 +1,21 @@
 <?php
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 namespace common\models;
 
 /**
- * Role model
+ * This is the model class for table "role".
  *
- * @inheritdoc
+ * @property int $id Идентификатор записи в таблице
+ * @property string $name Наименование роли пользователя в системе
+ * @property string $created_at Дата и время создания записи в таблице
+ * @property string $updated_at Дата и время последнего изменения записи в таблице
+ * @property int $can_admin Показатель возможности роли исполнять функции администратора в системе (0 - не может, 1  - может)
+ * @property int $can_manage Показатель возможности роли исполнять функции менеджера в системе (0 - не может, 1  - может)
+ * @property int $organization_type Идентификатор типа организации (1 - ресторан, 2 - поставщик, 3 - франчайзинг)
+ * @property int $can_observe Показатель возможности роли исполнять функции наблюдателя в системе (0 - не может, 1  - может)
  *
- * @property integer $can_manage
- * @property integer $organization_type
- * 
  * @property OrganizationType $organizationType
+ * @property RelationUserOrganization[] $relationUserOrganizations
+ * @property User[] $users
  */
 class Role extends \amnah\yii2\user\models\Role
 {
@@ -111,6 +110,10 @@ class Role extends \amnah\yii2\user\models\Role
      */
     const ROLE_RESTAURANT_ORDER_INITIATOR = 19;
 
+    /**
+     * @param $organization_type
+     * @return mixed
+     */
     public static function getManagerRole($organization_type)
     {
         $role = static::find()->where('can_manage=1 AND organization_type = :orgType', [
@@ -119,11 +122,18 @@ class Role extends \amnah\yii2\user\models\Role
         return isset($role) ? $role->id : static::ROLE_USER;
     }
 
+    /**
+     * @return array
+     */
     public static function getAdminRoles()
     {
         return [self::ROLE_ADMIN, self::ROLE_FKEEPER_MANAGER, self::ROLE_FKEEPER_OBSERVER];
     }
 
+    /**
+     * @param $organization_type
+     * @return mixed
+     */
     public static function getEmployeeRole($organization_type)
     {
         $role = static::find()->where('can_manage=0 AND organization_type = :orgType', [
@@ -154,22 +164,53 @@ class Role extends \amnah\yii2\user\models\Role
         return $dropdown;
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRelationUserOrganizations()
+    {
+        return $this->hasMany(RelationUserOrganization::className(), ['role_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUsers()
+    {
+        return $this->hasMany(User::className(), ['role_id' => 'id']);
+    }
+
+    /**
+     * @param int $roleId
+     * @return String
+     */
     public static function getRoleName(int $roleId): String
     {
         $role = static::findOne(['id' => $roleId]);
         return $role->name ?? '';
     }
 
+    /**
+     * @return array
+     */
     public static function getExceptionArray(): array
     {
         return [self::ROLE_ADMIN, self::ROLE_FKEEPER_OBSERVER];
     }
 
+    /**
+     * @return array
+     */
     public static function getFranchiseeEditorRoles(): array
     {
         return [self::ROLE_FRANCHISEE_OWNER, self::ROLE_FRANCHISEE_OPERATOR, self::ROLE_FRANCHISEE_LEADER, self::ROLE_FRANCHISEE_MANAGER];
     }
 
+    /**
+     * @param int $userID
+     * @param int $organizationID
+     * @return int
+     */
     public function getRelationOrganizationType(int $userID, int $organizationID): int
     {
         $rel = RelationUserOrganization::findOne(['user_id' => $userID, 'organization_id' => $organizationID]);

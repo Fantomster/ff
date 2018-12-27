@@ -850,7 +850,7 @@ SQL;
                 exit;
             }*/
             
-            $existingWaybill = RkWaybill::find()->where(['order_id' => $model->order_id, 'store_rid' => $model->store_id])->one();
+            $existingWaybill = RkWaybill::find()->where(['order_id' => $model->order_id, 'store_rid' => $model->store_rid])->one();
             if (!empty($existingWaybill)) {
                 $model = RkWaybill::moveContentToExistingWaybill($model, $existingWaybill);
             }

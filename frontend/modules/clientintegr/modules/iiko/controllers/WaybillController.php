@@ -689,7 +689,8 @@ SQL;
                 }
             }
             $model->save();
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            return $this->redirect(['/clientintegr/iiko/waybill/index', 'way' => $model->order_id]);
+            
         } else {
             return $this->render($vi, [
                 'model' => $model,

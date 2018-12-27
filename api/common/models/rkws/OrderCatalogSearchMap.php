@@ -74,17 +74,17 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
 
         $joins = [
             0                       => '',
-            Registry::RK_SERVICE_ID => " LEFT JOIN `$dbName`.`rk_product` fprod ON amap.serviceproduct_id = fprod.id
-                   LEFT JOIN `$dbName`.`rk_storetree` fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.acc  AND fstore.type = 2 ",
+            Registry::RK_SERVICE_ID => " LEFT JOIN $dbName.`rk_product` fprod ON amap.serviceproduct_id = fprod.id
+                   LEFT JOIN $dbName.`rk_storetree` fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.acc  AND fstore.type = 2 ",
 
-            Registry::IIKO_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON amap.serviceproduct_id = fprod.id
-                   LEFT JOIN `$dbName`.`iiko_store` fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
+            Registry::IIKO_SERVICE_ID => " LEFT JOIN $dbName.`iiko_product` fprod ON amap.serviceproduct_id = fprod.id
+                   LEFT JOIN $dbName.`iiko_store` fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
 
-            Registry::ONE_S_CLIENT_SERVICE_ID => " LEFT JOIN `$dbName`.`one_s_good` fprod ON amap.serviceproduct_id = fprod.id
-                   LEFT JOIN `$dbName`.`one_s_store` fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.org_id ",
+            Registry::ONE_S_CLIENT_SERVICE_ID => " LEFT JOIN $dbName.`one_s_good` fprod ON amap.serviceproduct_id = fprod.id
+                   LEFT JOIN $dbName.`one_s_store` fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.org_id ",
 
-            Registry::TILLYPAD_SERVICE_ID => " LEFT JOIN `$dbName`.`iiko_product` fprod ON amap.serviceproduct_id = fprod.id
-                   LEFT JOIN `$dbName`.`iiko_store` fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
+            Registry::TILLYPAD_SERVICE_ID => " LEFT JOIN $dbName.`iiko_product` fprod ON amap.serviceproduct_id = fprod.id
+                   LEFT JOIN $dbName.`iiko_store` fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
 
         ];
 
@@ -216,14 +216,14 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         if ($this->service_id == 0) {
             $sql = "SELECT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id] .
                 " FROM ($assigned_catalog_products) `acp`
-            LEFT JOIN `$dbName`.`all_map` `amap` ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
-            LEFT JOIN `$dbName`.`all_service` `aser` ON amap.service_id = aser.id " . $joins[$this->service_id] . "
+            LEFT JOIN $dbName.`all_map` `amap` ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
+            LEFT JOIN $dbName.`all_service` `aser` ON amap.service_id = aser.id " . $joins[$this->service_id] . "
             WHERE amap.service_id = 0" . (empty($where) ? "" : " AND " . $where);
         } else {
             $sql = "SELECT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id] .
                 " FROM ($assigned_catalog_products) `acp`
-            LEFT JOIN `$dbName`.`all_map` `amap` ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
-            LEFT JOIN `$dbName`.`all_service` `aser` ON amap.service_id = aser.id " . $joins[$this->service_id] .
+            LEFT JOIN $dbName.`all_map` `amap` ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
+            LEFT JOIN $dbName.`all_service` `aser` ON amap.service_id = aser.id " . $joins[$this->service_id] .
                 (empty($where) ? "" : " WHERE " . $where);
         }
 

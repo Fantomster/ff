@@ -10,6 +10,7 @@ namespace api_web\components;
 
 use api_web\helpers\Logger;
 use common\models\licenses\License;
+use common\models\Organization;
 use yii\web\HttpException;
 
 /**
@@ -263,13 +264,16 @@ class WebApiController extends \yii\rest\Controller
     private function checkLicense()
     {
         if (!empty($this->user)) {
-            //Методы к которым пускаем без лицензии
-            $allow_methods_without_license = \Yii::$app->params['allow_methods_without_license'] ?? [];
-            //Если метода нет в разрешенных, проверяем лицензию
-            if (!in_array(\Yii::$app->request->getUrl(), $allow_methods_without_license)) {
-                License::checkEnterLicenseResponse($this->user->organization_id);
-                if (isset($this->license_service_id) && !is_null($this->license_service_id)) {
-                    License::checkLicense($this->user->organization_id, $this->license_service_id);
+            //Проверяем лицензию только для ресторанов
+            if ($this->user->organization->type_id == Organization::TYPE_RESTAURANT) {
+                //Методы к которым пускаем без лицензии
+                $allow_methods_without_license = \Yii::$app->params['allow_methods_without_license'] ?? [];
+                //Если метода нет в разрешенных, проверяем лицензию
+                if (!in_array(\Yii::$app->request->getUrl(), $allow_methods_without_license)) {
+                    License::checkEnterLicenseResponse($this->user->organization_id);
+                    if (isset($this->license_service_id) && !is_null($this->license_service_id)) {
+                        License::checkLicense($this->user->organization_id, $this->license_service_id);
+                    }
                 }
             }
         }

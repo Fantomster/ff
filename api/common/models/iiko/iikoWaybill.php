@@ -38,6 +38,8 @@ use api_web\components\Registry;
  * @property integer $payment_delay_date
  * @property integer $service_id
  * @property Order   $order;
+ * 
+ * @property iikoWaybillData[] $data
  */
 class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface
 {
@@ -325,12 +327,6 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         $num = (count($stories) > 1) ? 1 : '';
 
-        foreach ($stories as $store_id) {
-            if (empty($store_id) && $auto) {
-                return false;
-            }
-        }
-        
         foreach ($stories as $store) {
             $model = new iikoWaybill();
             $model->order_id = $order_id;
@@ -375,7 +371,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         return $client_id;
     }
 
-    public static function exportWaybill($order_id)
+    public static function exportWaybill($order_id, $auto = false)
     {
         $res = true;
         $records = iikoWaybill::find()
@@ -388,6 +384,12 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             throw new \Exception('Ошибка при экспорте накладных в авторежиме');
         }
 
+        foreach ($records as $waybill) {
+            if ($auto && empty($waybill->store_id)) {
+                return false;
+            }
+        }
+        
         $api = iikoApi::getInstance();
 
         if ($api->auth()) {
@@ -403,7 +405,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                     } else {
                         \Yii::error('Waybill' . $model->id . 'has been exported');
                     }
-
+                    
                     $model->status_id = 2;
                     $model->save();
                     $transaction->commit();

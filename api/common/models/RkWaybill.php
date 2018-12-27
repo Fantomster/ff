@@ -296,12 +296,6 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
 
         $num = (count($stories) > 1) ? 1 : '';
 
-        foreach ($stories as $store_id) {
-            if (empty($store_id) && $auto) {
-                return false;
-            }
-        }
-
         foreach ($stories as $store) {
             $model            = new RkWaybill();
             $model->order_id  = $order_id;
@@ -326,7 +320,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
         return $res;
     }
 
-    public static function exportWaybill($waybill_id): bool
+    public static function exportWaybill($waybill_id, $auto = false): bool
     {
         // TODO: Implement exportWaybill() method.
     }

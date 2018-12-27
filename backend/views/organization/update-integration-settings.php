@@ -38,7 +38,21 @@ $gridColumns = [
         'attribute' => 'value',
         'label'     => 'Название настройки',
         'value'     => function ($data) {
-            return Html::input('text', 'setting_' . $data->setting_id, $data->value, ['data' => ['id' => $data->id, 'org_id' => $data->org_id, 'setting_id' => $data->setting_id], 'class' => 'setting_input']);
+
+            switch ($data->setting->type) {
+                case 'dropdown_list':
+                    return Html::dropDownList('setting_' . $data->setting_id, $data->value, json_decode($data->setting->item_list), ['data' => ['id' => $data->id, 'org_id' => $data->org_id, 'setting_id' => $data->setting_id], 'class' => 'setting_input']);
+                    break;
+                case 'input_text':
+                    return Html::input('text', 'setting_' . $data->setting_id, $data->value, ['data' => ['id' => $data->id, 'org_id' => $data->org_id, 'setting_id' => $data->setting_id], 'class' => 'setting_input']);
+                    break;
+                case 'password':
+                    return Html::input('password', 'setting_' . $data->setting_id, $data->value, ['data' => ['id' => $data->id, 'org_id' => $data->org_id, 'setting_id' => $data->setting_id], 'class' => 'setting_input']);
+                    break;
+            }
+
+
+
         },
     ],
 

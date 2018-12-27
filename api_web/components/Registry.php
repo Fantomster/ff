@@ -144,8 +144,8 @@ class Registry
 
     /** @var array Список ставок НДС */
     static $nds_list = [
-        0,
-        10,
-        18
+        0  => 0,
+        10 => 10,
+        18 => 18,
     ];
 }

@@ -14,6 +14,7 @@ use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
+use common\models\OuterCategory;
 use common\models\RelationSuppRest;
 use common\models\edi\EdiRoamingMap;
 use common\models\TestVendors;
@@ -302,6 +303,9 @@ class OrganizationController extends Controller
         return $this->render('notifications', compact('users', 'id'));
     }
 
+    /**
+     * @return bool
+     */
     public function actionAjaxUpdateStatus()
     {
         if (Yii::$app->request->isAjax) {
@@ -316,6 +320,9 @@ class OrganizationController extends Controller
         }
     }
 
+    /**
+     * @return bool
+     */
     public function actionAjaxUpdateVendorIsWork()
     {
         if (Yii::$app->request->isAjax) {
@@ -405,6 +412,9 @@ class OrganizationController extends Controller
         return $this->render('add-license', ['licenses' => $licenses, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'nowDate' => $nowDate, 'organizationID' => $id]);
     }
 
+    /**
+     * @return bool|string
+     */
     public function actionAjaxUpdateLicenseOrganization()
     {
         if (Yii::$app->request->isAjax) {
@@ -476,6 +486,10 @@ class OrganizationController extends Controller
         return $this->handleEdiSettings($model, $id, $post, true);
     }
 
+    /**
+     * @return bool|string
+     * @throws \yii\base\InvalidArgumentException
+     */
     public function actionAjaxUpdateEdiList()
     {
         if (Yii::$app->request->isAjax) {
@@ -499,6 +513,14 @@ class OrganizationController extends Controller
         }
     }
 
+    /**
+     * @param      $model
+     * @param      $id
+     * @param      $post
+     * @param bool $isCreate
+     * @return string
+     * @throws \yii\base\InvalidArgumentException
+     */
     private function handleEdiSettings($model, $id, $post, $isCreate = true)
     {
         if ($isCreate) {
@@ -608,6 +630,15 @@ class OrganizationController extends Controller
                 if ($settingValue->save(false)) {
                     $result[$setting->id] = $settingValue;
                 }
+            }
+        }
+
+        foreach ($result as $item) {
+            if ($item->setting->name == 'defGoodGroup') {
+                $models = OuterCategory::find()->select('name')
+                    ->where(['org_id' => $orgId, 'service_id' => $service_id])
+                    ->indexBy('id')->column();
+                $item->setting->item_list = json_encode($models);
             }
         }
 

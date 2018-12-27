@@ -530,7 +530,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
      */
     public static function moveContentToExistingWaybill($contributorWaybill, $recipientWaybill) {
         foreach ($contributorWaybill->waybillData as $position) {
-            $position->waybill_id = $recipientWaybill->waybill_id;
+            $position->waybill_id = $recipientWaybill->id;
             $position->save();
         }
         $contributorWaybill->delete();

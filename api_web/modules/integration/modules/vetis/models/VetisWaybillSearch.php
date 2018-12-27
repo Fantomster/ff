@@ -57,7 +57,7 @@ class VetisWaybillSearch extends MercVsd
             $strOrgIds = implode(',', array_keys($orgIds['result']));
             $arOrgIds = array_keys($orgIds['result']);
         }
-        $enterpriseGuides = implode('\',\'', (new VetisHelper())->getEnterpriseGuids());
+        $enterpriseGuides = implode('\',\'', (new VetisHelper())->getEnterpriseGuids($arOrgIds));
 
         $queryParams = [
             ':page'     => $page,

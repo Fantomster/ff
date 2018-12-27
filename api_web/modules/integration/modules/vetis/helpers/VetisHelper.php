@@ -287,18 +287,18 @@ class VetisHelper
     /**
      * Возвращает массив enterprise_guid для всех доступных бизнесов, при неудаче возвращает пустой массив
      *
+     * @param null $orgIds
      * @return array
-     * @throws \Exception
      */
     public function getEnterpriseGuids($orgIds = null)
     {
-        $orgIds = $orgIds ?? (new UserWebApi())->getUserOrganizationBusinessList('id');
+        $orgIds = $orgIds ?? array_keys((new UserWebApi())->getUserOrganizationBusinessList('id')['result']);
 
         return (new Query())->select('value')->distinct()
             ->from(IntegrationSettingValue::tableName() . ' isv')
             ->leftJoin(IntegrationSetting::tableName() . ' is', "isv.setting_id=is.id and is.service_id=:service_id",
                 [':service_id' => Registry::MERC_SERVICE_ID])
-            ->where(['isv.org_id' => array_keys($orgIds['result']), 'is.name' => 'enterprise_guid'])
+            ->where(['isv.org_id' => $orgIds, 'is.name' => 'enterprise_guid'])
             ->andWhere('LENGTH(value) > 35')
             ->column(\Yii::$app->db_api);
     }

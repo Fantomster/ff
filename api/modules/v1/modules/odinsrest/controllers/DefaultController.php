@@ -412,14 +412,4 @@ class DefaultController extends Controller
             return true;
         }
     }
-
-
-    private function getDsnAttribute($name, $dsn)
-    {
-        if (preg_match('/' . $name . '=([^;]*)/', $dsn, $match)) {
-            return $match[1];
-        } else {
-            return null;
-        }
-    }
 }

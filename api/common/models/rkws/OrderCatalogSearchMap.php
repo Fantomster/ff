@@ -3,6 +3,7 @@
 namespace api\common\models\rkws;
 
 use api\common\models\iiko\iikoService;
+use common\helpers\DBNameHelper;
 use common\models\CatalogBaseGoods;
 use common\models\CatalogGoods;
 use common\models\RelationSuppRest;
@@ -52,17 +53,14 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
     }
 
     /**
-     * Search
-     *
      * @param array $params
-     * @return ActiveDataProvider
+     * @return \yii\data\ActiveDataProvider|SqlDataProvider
      */
     public function search($params)
     {
         $this->load($params);
 
-        $db_api = \Yii::$app->db_api;
-        $dbName = $this->getDsnAttribute('dbname', $db_api->dsn);
+        $dbName = DBNameHelper::getApiName();
         if (empty($this->service_id)) {
             $this->service_id = 0;
         }
@@ -255,7 +253,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             ]);
         } else {
             $sql = "SELECT id from `catalog_base_goods` WHERE id = 100000000"; // Запрос, заведомо возвращающий пустой результат во избежание ошибки у ресторана,
-                                                                               // у которого нет ни одной записи в relation_supp_rest
+            // у которого нет ни одной записи в relation_supp_rest
             $dataProvider = new SqlDataProvider([
                 'sql'        => $sql,
                 'pagination' => [
@@ -266,14 +264,4 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
         return $dataProvider;
     }
-
-    private function getDsnAttribute($name, $dsn)
-    {
-        if (preg_match('/' . $name . '=([^;]*)/', $dsn, $match)) {
-            return $match[1];
-        } else {
-            return null;
-        }
-    }
-
 }

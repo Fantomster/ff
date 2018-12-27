@@ -2,6 +2,7 @@
 
 namespace backend\models;
 
+use common\helpers\DBNameHelper;
 use common\models\Journal;
 use yii\data\ActiveDataProvider;
 use common\models\Organization;
@@ -31,16 +32,16 @@ class MercuryReportSearch extends Journal
     /**
      * Creates data provider instance with search query applied
      *
-     * @param array $params
+     * @param $params
      * @return ActiveDataProvider
+     * @throws \Exception
      */
     public function search($params)
     {
         $query = self::find();
 
         $organizationTable = Organization::tableName();
-        $db = \Yii::$app->db;
-        $dbName = "`" . $this->getDsnAttribute('dbname', $db->dsn) . "`";
+        $dbName = DBNameHelper::getMainName();
 
         $query->select('org.`name` as orgName, log.organization_id, SUM(case when log.`type` = \'success\' then 1 else 0 end) as succCount, SUM(case when log.`type` <> \'success\' then 1 else 0 end) as errorCount');
         $query->from('journal as log');
@@ -94,14 +95,4 @@ class MercuryReportSearch extends Journal
 
         return $dataProvider;
     }
-
-    private function getDsnAttribute($name, $dsn)
-    {
-        if (preg_match('/' . $name . '=([^;]*)/', $dsn, $match)) {
-            return $match[1];
-        } else {
-            return null;
-        }
-    }
-
 }

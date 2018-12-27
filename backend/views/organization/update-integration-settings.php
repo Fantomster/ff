@@ -67,7 +67,7 @@ $gridColumns = [
         'columns'      => $gridColumns,
     ]);
     ?>
-    <button type="button" onclick="submit()" class="btn btn-success pull-right">Submit</button>
+    <button type="button" onclick="submit()" class="btn btn-success pull-right">Сохранить</button>
     <?php Pjax::end(); ?>
 </div>
 

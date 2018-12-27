@@ -664,7 +664,7 @@ class OrganizationController extends Controller
                     throw new ValidationException($model->getFirstErrors());
                 }
             }
-            \Yii::$app->session->setFlash('success', "Статья сохранена");
+            \Yii::$app->session->setFlash('success', "Настройки сохранены");
             return true;
         } else {
             return false;

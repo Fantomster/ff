@@ -1988,7 +1988,7 @@ class Organization extends \yii\db\ActiveRecord
     {
         $query = Organization::find()->select('organization.id,organization.name')
             ->innerJoin('relation_supp_rest', 'organization.id=relation_supp_rest.supp_org_id')
-            ->where('relation_supp_rest.rest_org_id = :numrest', [':numrest' => $clientId])
+            ->where(['relation_supp_rest.rest_org_id' => $clientId])
             ->andFilterWhere(['like', 'name', $searchString])
             ->orderBy('name')->all();
         $result = ArrayHelper::toArray($query, [

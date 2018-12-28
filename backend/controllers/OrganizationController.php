@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use backend\models\TestVendorsSearch;
@@ -11,6 +12,7 @@ use common\models\edi\EdiProvider;
 use common\models\Franchisee;
 use common\models\FranchiseeAssociate;
 use common\models\IntegrationSetting;
+use common\models\IntegrationSettingFromEmail;
 use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
@@ -79,7 +81,8 @@ class OrganizationController extends Controller
                             'create-edi-settings',
                             'integration-settings',
                             'update-integration-settings',
-                            'ajax-update-integration-settings'
+                            'ajax-update-integration-settings',
+                            'ajax-update-integration-settings-email',
                         ],
                         'allow'   => true,
                         'roles'   => [
@@ -609,44 +612,54 @@ class OrganizationController extends Controller
         $service = AllService::findOne($service_id);
         License::checkLicense($organization->id, $service->id);
 
-        $settingIds = IntegrationSetting::find()
-            ->select(['id', 'default_value'])
-            ->where(['service_id' => $service->id, 'is_active' => 1])
-            ->indexBy('id')
-            ->all();
-        $result = IntegrationSettingValue::find()
-            ->joinWith('setting')
-            ->where(['setting_id' => array_keys($settingIds), 'org_id' => $orgId, 'is_active' => 1])
-            ->indexBy('setting_id')->all();
+        if ($service_id != Registry::VENDOR_DOC_MAIL_SERVICE_ID) {
+            $settingIds = IntegrationSetting::find()
+                ->select(['id', 'default_value'])
+                ->where(['service_id' => $service->id, 'is_active' => 1])
+                ->indexBy('id')
+                ->all();
+            $result = IntegrationSettingValue::find()
+                ->joinWith('setting')
+                ->where(['setting_id' => array_keys($settingIds), 'org_id' => $orgId, 'is_active' => 1])
+                ->indexBy('setting_id')->all();
 
-        $diff = array_diff_key($settingIds, $result);
-        if (!empty($diff)) {
-            /**@var IntegrationSetting $setting */
-            foreach ($diff as $setting) {
-                $settingValue = new IntegrationSettingValue();
-                $settingValue->setting_id = $setting->id;
-                $settingValue->org_id = $orgId;
-                $settingValue->value = $setting->default_value ?? '';
-                if ($settingValue->save(false)) {
-                    $result[$setting->id] = $settingValue;
+            $diff = array_diff_key($settingIds, $result);
+            if (!empty($diff)) {
+                /**@var IntegrationSetting $setting */
+                foreach ($diff as $setting) {
+                    $settingValue = new IntegrationSettingValue();
+                    $settingValue->setting_id = $setting->id;
+                    $settingValue->org_id = $orgId;
+                    $settingValue->value = $setting->default_value ?? '';
+                    if ($settingValue->save(false)) {
+                        $result[$setting->id] = $settingValue;
+                    }
                 }
             }
-        }
 
-        foreach ($result as $item) {
-            if ($item->setting->name == 'defGoodGroup') {
-                $models = OuterCategory::find()->select('name')
-                    ->where(['org_id' => $orgId, 'service_id' => $service_id])
-                    ->indexBy('id')->column();
-                $item->setting->item_list = json_encode($models);
+            foreach ($result as $item) {
+                if ($item->setting->name == 'defGoodGroup') {
+                    $models = OuterCategory::find()->select('name')
+                        ->where(['org_id' => $orgId, 'service_id' => $service_id])
+                        ->indexBy('id')->column();
+                    $item->setting->item_list = json_encode($models);
+                }
             }
-        }
 
-        return $this->render('update-integration-settings', [
-            'service'      => $service,
-            'organization' => $organization,
-            'dataProvider' => new ArrayDataProvider(['allModels' => $result]),
-        ]);
+            return $this->render('update-integration-settings', [
+                'service'      => $service,
+                'organization' => $organization,
+                'dataProvider' => new ArrayDataProvider(['allModels' => $result]),
+            ]);
+        } else {
+            $models = IntegrationSettingFromEmail::findAll(['organization_id' => $orgId]);
+
+            return $this->render('update-integration-settings-email', [
+                'service'      => $service,
+                'organization' => $organization,
+                'dataProvider' => new ArrayDataProvider(['allModels' => $models]),
+            ]);
+        }
     }
 
     /**
@@ -664,6 +677,35 @@ class OrganizationController extends Controller
                     throw new ValidationException($model->getFirstErrors());
                 }
             }
+            \Yii::$app->session->setFlash('success', "Настройки сохранены");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @return bool
+     * @throws ValidationException
+     */
+    public function actionAjaxUpdateIntegrationSettingsEmail()
+    {
+        if (Yii::$app->request->isAjax) {
+            $settings = \Yii::$app->request->post('settings');
+            foreach ($settings as $setting) {
+                $model = IntegrationSettingFromEmail::findOne($setting['id']);
+                $model->server_type = $setting['server_type'];
+                $model->server_host = $setting['server_host'];
+                $model->server_port = $setting['server_port'];
+                $model->server_ssl = $setting['server_ssl'];
+                $model->user = $setting['user'];
+                $model->password = $setting['password'];
+                $model->is_active = $setting['is_active'];
+                if (!$model->save()) {
+                    throw new ValidationException($model->getFirstErrors());
+                }
+            }
+            var_dump($model->getFirstErrors());
             \Yii::$app->session->setFlash('success', "Настройки сохранены");
             return true;
         } else {

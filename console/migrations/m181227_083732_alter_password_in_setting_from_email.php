@@ -11,11 +11,11 @@ class m181227_083732_alter_password_in_setting_from_email extends Migration
      */
     public function safeUp()
     {
-        $settingRobots = IntegrationSettingFromEmail::find()->all();
-        foreach ($settingRobots as $settingRobot) {
-            $settingRobot->password = \Yii::$app->get('encode')->encrypt($settingRobot->password, $settingRobot->user);
-            $settingRobot->save();
-        }
+//        $settingRobots = IntegrationSettingFromEmail::find()->all();
+//        foreach ($settingRobots as $settingRobot) {
+//            $settingRobot->password = \Yii::$app->get('encode')->encrypt($settingRobot->password, $settingRobot->user);
+//            $settingRobot->save();
+//        }
     }
 
     /**
@@ -24,10 +24,10 @@ class m181227_083732_alter_password_in_setting_from_email extends Migration
      */
     public function safeDown()
     {
-        $settingRobots = IntegrationSettingFromEmail::find()->all();
-        foreach ($settingRobots as $settingRobot) {
-            $settingRobot->password = \Yii::$app->get('encode')->decrypt($settingRobot->password, $settingRobot->user);
-            $settingRobot->save();
-        }
+//        $settingRobots = IntegrationSettingFromEmail::find()->all();
+//        foreach ($settingRobots as $settingRobot) {
+//            $settingRobot->password = \Yii::$app->get('encode')->decrypt($settingRobot->password, $settingRobot->user);
+//            $settingRobot->save();
+//        }
     }
 }

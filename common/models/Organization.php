@@ -1991,13 +1991,12 @@ class Organization extends \yii\db\ActiveRecord
             ->where('relation_supp_rest.rest_org_id = :numrest', [':numrest' => $clientId])
             ->andFilterWhere(['like', 'name', $searchString])
             ->orderBy('name')->all();
-        $res2 = [];
-        $i = 0;
-        foreach ($query as $vendor) {
-            $res2[$i]['id'] = $vendor->id;
-            $res2[$i]['name'] = $vendor->name;
-            $i++;
-        }
+        $res2 = ArrayHelper::toArray($query, [
+            'app\models\Post' => [
+                'id',
+                'name',
+            ],
+        ]);
         return $res2;
     }
 

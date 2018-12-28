@@ -71,25 +71,27 @@ $gridColumns = [
         'attribute' => 'password',
         'label'     => 'Пароль',
         'value'     => function ($data) {
-            return Html::input('password', 'setting_' . $data->id, $data->password, ['data' => ['id' => $data->id, 'org_id' => $data->organization_id], 'class' => 'setting_input password']);
+            /** @var $data \common\models\IntegrationSettingFromEmail */
+            return Html::input('password', 'setting_' . $data->id, $data->getCountCharsPassword(), ['data' => ['id' => $data->id, 'org_id' => $data->organization_id], 'class' => 'setting_input password']);
         },
     ],
 
 ];
 ?>
-<div class="organization-index">
-    <h3><?= $this->title ?></h3>
-    <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>
-    <?=
-    GridView::widget([
-        'dataProvider' => $dataProvider,
-        'columns'      => $gridColumns,
-    ]);
-    ?>
-    <button type="button" class="btn btn-success pull-right">Сохранить</button>
-    <?php Pjax::end(); ?>
-</div>
+    <div class="organization-index">
+        <h3><?= $this->title ?></h3>
+        <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>
+        <?=
+        GridView::widget([
+            'dataProvider' => $dataProvider,
+            'columns'      => $gridColumns,
+        ]);
+        ?>
+        <button type="button" class="btn btn-success pull-right">Сохранить</button>
+        <?php Pjax::end(); ?>
+    </div>
 <?php
+$url = Yii::$app->urlManager->createUrl('/organization/ajax-update-integration-settings-email');
 $customJs = <<< JS
 		$(document).on('click', '.btn-success', function () {
 			let data = [];
@@ -108,7 +110,7 @@ $customJs = <<< JS
 			});
 			$.ajax({
 				type: "POST",
-				url: '/organization/ajax-update-integration-settings-email',
+				url: '$url',
 				data: {settings: data},
 				success: function (result) {
 					if (result == 1) {

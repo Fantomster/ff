@@ -1979,11 +1979,11 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param string $clientId
-     * @param string $searchString
+     * @param $clientId
+     * @param $searchString
      * @return array
      */
-    public function getSuppliersByString(string $clientId, string $searchString)
+    public function getSuppliersByString($clientId, $searchString)
     {
         $query = Organization::find()->select('organization.id,organization.name')
             ->innerJoin('relation_supp_rest', 'organization.id=relation_supp_rest.supp_org_id')

@@ -202,8 +202,9 @@ class EmailIntegration2Controller extends Controller
                 $connect->setActiveMailbox('INBOX');
                 break;
             case 'pop3':
-                $connect = new Pop3($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
-                break;
+                throw new Exception("pop3 set for organization: {$setting->organization_id} (mail:{$setting->user})");
+                //$connect = new Pop3($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
+                //break;
             default:
                 throw new Exception('Не определён тип сервера.');
         }
@@ -222,12 +223,12 @@ class EmailIntegration2Controller extends Controller
         $messages = [];
 
         if ($this->connect instanceof Imap) {
-            $messages = $this->connect->getEmails($start, $limit, true);
+            $messages = $this->connect->search(["UNSEEN"], $start, $limit, true, true);
         }
 
-        if ($this->connect instanceof Pop3) {
-            $messages = $this->connect->getEmails($start, $limit);
-        }
+//        if ($this->connect instanceof Pop3) {
+//            $messages = $this->connect->getEmails($start, $limit);
+//        }
 
         return $messages;
     }

@@ -7,27 +7,29 @@ use common\behaviors\LogDeletedBehavior;
 /**
  * This is the model class for table "relation_user_organization".
  *
- * @property integer $id
- * @property integer $user_id
- * @property integer $leader_id
- * @property integer $organization_id
- * @property integer $role_id
- * @property User $user
+ * @property int          $id              Идентификатор записи в таблице
+ * @property int          $user_id         Идентификатор пользователя
+ * @property int          $organization_id Идентификатор типа этой организации
+ * @property int          $role_id         Идентификатор роли
+ * @property int          $is_active       Флажок состояния активности зависимости пользователя, организации и роли
+ *
+ * @property User         $user
  * @property Organization $organization
+ * @property Role         $role
  */
 class RelationUserOrganization extends \yii\db\ActiveRecord
 {
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'relation_user_organization';
+        return '{{%relation_user_organization}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function behaviors()
     {
@@ -39,7 +41,7 @@ class RelationUserOrganization extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -50,15 +52,15 @@ class RelationUserOrganization extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'user_id' => 'User ID',
+            'id'              => 'ID',
+            'user_id'         => 'User ID',
             'organization_id' => 'Organization ID',
-            'role_id' => 'Role ID',
+            'role_id'         => 'Role ID',
         ];
     }
 
@@ -78,6 +80,18 @@ class RelationUserOrganization extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRole()
+    {
+        return $this->hasOne(Role::className(), ['id' => 'role_id']);
+    }
+
+    /**
+     * @param User $user
+     * @return bool
+     */
     public function checkRelationExisting(User $user): bool
     {
         $rel = self::findAll(['user_id' => $user->id]);
@@ -87,11 +101,16 @@ class RelationUserOrganization extends \yii\db\ActiveRecord
         return false;
     }
 
-    public static function relationExists($user_id, $organization_id) 
+    /**
+     * @param $user_id
+     * @param $organization_id
+     * @return bool
+     */
+    public static function relationExists($user_id, $organization_id)
     {
         return self::find()->where(['user_id' => $user_id, 'organization_id' => $organization_id])->exists();
     }
-    
+
     /**
      * @param int $organizationID
      * @param int $userID
@@ -108,6 +127,10 @@ class RelationUserOrganization extends \yii\db\ActiveRecord
         return $rel->role_id ?? null;
     }
 
+    /**
+     * @param bool  $insert
+     * @param array $changedAttributes
+     */
     public function afterSave($insert, $changedAttributes)
     {
         if ($insert) {

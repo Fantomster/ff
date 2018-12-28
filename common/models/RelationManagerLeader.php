@@ -2,52 +2,70 @@
 
 namespace common\models;
 
-use Yii;
-use yii\data\ActiveDataProvider;
-use common\behaviors\UploadBehavior;
-use yii\helpers\ArrayHelper;
-
 /**
- * This is the model class for table "relation_supp_rest".
+ * This is the model class for table "relation_manager_leader".
  *
- * @property integer $id
- * @property integer $manager_id
- * @property integer $leader_id
+ * @property int  $id         Идентификатор записи в таблице
+ * @property int  $manager_id Идентификатор пользователя-руководителя
+ * @property int  $leader_id  Идентификатор-пользователя-сотрудника, подчинённого руководителя
+ *
+ * @property User $leader
+ * @property User $manager
  */
-class RelationManagerLeader extends \yii\db\ActiveRecord {
-
+class RelationManagerLeader extends \yii\db\ActiveRecord
+{
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public static function tableName() {
-        return 'relation_manager_leader';
+    public static function tableName()
+    {
+        return '{{%relation_manager_leader}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [];
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['manager_id', 'leader_id'], 'integer'],
         ];
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
-            'id' => 'ID',
+            'id'         => 'ID',
             'manager_id' => 'Manager ID',
-            'leader_id' => 'Leader ID',
+            'leader_id'  => 'Leader ID',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLeader()
+    {
+        return $this->hasOne(User::className(), ['id' => 'leader_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getManager()
+    {
+        return $this->hasOne(User::className(), ['id' => 'manager_id']);
     }
 }

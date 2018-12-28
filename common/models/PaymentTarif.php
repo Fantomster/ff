@@ -5,26 +5,27 @@ namespace common\models;
 use Yii;
 
 /**
- * This is the model class for table "{{%payment_tarif}}".
+ * This is the model class for table "payment_tarif".
  *
- * @property integer $tarif_id
- * @property integer $payment_type_id
- * @property integer $organization_type_id
- * @property double $price
- * @property integer $status
- * @property integer $organization_id
- * @property integer $individual
- * @property string $created_at
- * @property string $updated_at
+ * @property int              $tarif_id             Идентификатор записи в таблице
+ * @property int              $payment_type_id      Идентификатор типа платных услуг
+ * @property int              $organization_type_id Идентификатор категории организации
+ * @property double           $price                Стоимость услуги
+ * @property int              $status               Статус платной услуги (0 - не активна, 1- активна)
+ * @property int              $organization_id      Идентификатор организации, которой услуга предоставляется
+ * @property int              $individual           Показатель статуса индивидуальности платной услуги (0 - не
+ *           индивидуальная, 1 - индивидуальная)
+ * @property string           $created_at           Дата и время создания записи в таблице
+ * @property string           $updated_at           Дата и время последнего изменения записи в таблице
  *
- * @property Organization $organization
+ * @property Organization     $organization
  * @property OrganizationType $organizationType
- * @property PaymentType $paymentType
+ * @property PaymentType      $paymentType
  */
 class PaymentTarif extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
@@ -48,20 +49,20 @@ class PaymentTarif extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'tarif_id' => Yii::t('app', 'Tarif ID'),
-            'payment_type_id' => Yii::t('app', 'Payment Type ID'),
+            'tarif_id'             => Yii::t('app', 'Tarif ID'),
+            'payment_type_id'      => Yii::t('app', 'Payment Type ID'),
             'organization_type_id' => Yii::t('app', 'Organization Type ID'),
-            'price' => Yii::t('app', 'Price'),
-            'status' => Yii::t('app', 'Status'),
-            'organization_id' => Yii::t('app', 'Организация'),
-            'individual' => Yii::t('app', 'Индивидуальный прайс'),
-            'created_at' => Yii::t('app', 'Created At'),
-            'updated_at' => Yii::t('app', 'Updated At'),
+            'price'                => Yii::t('app', 'Price'),
+            'status'               => Yii::t('app', 'Status'),
+            'organization_id'      => Yii::t('app', 'Организация'),
+            'individual'           => Yii::t('app', 'Индивидуальный прайс'),
+            'created_at'           => Yii::t('app', 'Created At'),
+            'updated_at'           => Yii::t('app', 'Updated At'),
         ];
     }
 

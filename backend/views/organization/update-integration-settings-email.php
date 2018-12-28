@@ -86,35 +86,36 @@ $gridColumns = [
         'columns'      => $gridColumns,
     ]);
     ?>
-    <button type="button" onclick="submit()" class="btn btn-success pull-right">Сохранить</button>
+    <button type="button" class="btn btn-success pull-right">Сохранить</button>
     <?php Pjax::end(); ?>
 </div>
-
-<script type="text/javascript">
-	function submit() {
-		let data = [];
-		$('.kv-table-wrap tbody tr').each(function () {
-			let element = {};
-			element.id = $(this).find('.server_type').data('id');
-			element.org_id = $(this).find('.server_type').data('org_id');
-			element.server_type = $(this).find('.server_type').val();
-			element.server_host = $(this).find('.server_host').val();
-			element.server_port = $(this).find('.server_port').val();
-			element.server_ssl = +$(this).find('.server_ssl').is(':checked');
-			element.user = $(this).find('.user').val();
-			element.password = $(this).find('.password').val();
-			element.is_active = +$(this).find('.is_active').is(':checked');
-			data.push(element);
-		});
-		$.ajax({
-			type: "POST",
-			url: '/organization/ajax-update-integration-settings-email',
-			data: {settings: data},
-			success: function (result) {
-				if (result == 1) {
-					location.reload();
+<?php
+$customJs = <<< JS
+		$(document).on('click', '.btn-success', function () {
+			let data = [];
+			$('.kv-table-wrap tbody tr').each(function () {
+				let element = {};
+				element.id = $(this).find('.server_type').data('id');
+				element.org_id = $(this).find('.server_type').data('org_id');
+				element.server_type = $(this).find('.server_type').val();
+				element.server_host = $(this).find('.server_host').val();
+				element.server_port = $(this).find('.server_port').val();
+				element.server_ssl = +$(this).find('.server_ssl').is(':checked');
+				element.user = $(this).find('.user').val();
+				element.password = $(this).find('.password').val();
+				element.is_active = +$(this).find('.is_active').is(':checked');
+				data.push(element);
+			});
+			$.ajax({
+				type: "POST",
+				url: '/organization/ajax-update-integration-settings-email',
+				data: {settings: data},
+				success: function (result) {
+					if (result == 1) {
+						location.reload();
+					}
 				}
-			}
+			});
 		});
-	}
-</script>
+JS;
+$this->registerJs($customJs, \yii\web\View::POS_READY);

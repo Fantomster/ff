@@ -51,8 +51,6 @@ $gridColumns = [
                     break;
             }
 
-
-
         },
     ],
 
@@ -67,30 +65,34 @@ $gridColumns = [
         'columns'      => $gridColumns,
     ]);
     ?>
-    <button type="button" onclick="submit()" class="btn btn-success pull-right">Сохранить</button>
+    <button type="button" class="btn btn-success pull-right">Сохранить</button>
     <?php Pjax::end(); ?>
 </div>
-
-<script type="text/javascript">
-	function submit() {
-		let data = [];
-		$('.setting_input').each(function () {
-			let element = {};
-			element.id = $(this).data('id');
-			element.org_id = $(this).data('org_id');
-			element.setting_id = $(this).data('setting_id');
-			element.value = $(this).val();
-			data.push(element);
-		});
-		$.ajax({
-			type: "POST",
-			url: '/organization/ajax-update-integration-settings',
-			data: {settings: data},
-			success: function (result) {
-				if (result == 1) {
-					location.reload();
+<?php
+$customJs = <<< JS
+	$(document).ready(function () {
+		$(document).on('click', '.btn-success', function () {
+			let data = [];
+			$('.setting_input').each(function () {
+				let element = {};
+				element.id = $(this).data('id');
+				element.org_id = $(this).data('org_id');
+				element.setting_id = $(this).data('setting_id');
+				element.value = $(this).val();
+				data.push(element);
+			});
+			$.ajax({
+				type: "POST",
+				url: '/organization/ajax-update-integration-settings',
+				data: {settings: data},
+				success: function (result) {
+					if (result == 1) {
+						location.reload();
+					}
 				}
-			}
+			});
 		});
-	}
-</script>
+	});
+JS;
+
+$this->registerJs($customJs, \yii\web\View::POS_READY);

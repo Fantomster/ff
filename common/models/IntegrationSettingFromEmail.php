@@ -21,6 +21,7 @@ namespace common\models;
  * @property int                $version         Версия приложения MixCart
  * @property Organization       $organization
  * @property IntegrationInvoice $invoice
+ * @property string             $countCharsPassword
  */
 class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
 {
@@ -65,7 +66,7 @@ class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
-                'value' => function ($event) {
+                'value' => function () {
                     return gmdate("Y-m-d H:i:s");
                 },
             ],
@@ -83,7 +84,7 @@ class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
             [['created_at', 'updated_at'], 'safe'],
             [['server_type', 'server_host', 'user', 'password'], 'string', 'max' => 255],
             [['language'], 'string', 'max' => 3],
-            [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
+            [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::class, 'targetAttribute' => ['organization_id' => 'id']],
         ];
     }
 
@@ -113,7 +114,7 @@ class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
      */
     public function getOrganization()
     {
-        return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
+        return $this->hasOne(Organization::class, ['id' => 'organization_id']);
     }
 
     /**
@@ -121,7 +122,7 @@ class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
      */
     public function getInvoice()
     {
-        return $this->hasMany(IntegrationInvoice::className(), ['integration_setting_from_email_id' => 'id']);
+        return $this->hasMany(IntegrationInvoice::class, ['integration_setting_from_email_id' => 'id']);
     }
 
     /**
@@ -133,9 +134,7 @@ class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
         $stars = '';
         if (!empty($this->password)) {
             $countChars = iconv_strlen(\Yii::$app->get('encode')->decrypt($this->password, $this->user));
-            for ($i = 0; $i < $countChars; $i++) {
-                $stars .= "*";
-            }
+            $stars = str_pad("", $countChars, "*");
         }
 
         return $stars;

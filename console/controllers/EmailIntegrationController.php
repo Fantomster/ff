@@ -236,13 +236,14 @@ class EmailIntegrationController extends Controller
      */
     private function connect(IntegrationSettingFromEmail $setting)
     {
+        $password = \Yii::$app->get('encode')->decrypt($setting->password, $setting->user);
         switch ($setting->server_type) {
             case 'imap':
-                $connect = new Imap($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
+                $connect = new Imap($setting->server_host, $setting->user, $password, $setting->server_port, $setting->server_ssl);
                 $connect->setActiveMailbox('INBOX');
                 break;
             case 'pop3':
-                $connect = new Pop3($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
+                $connect = new Pop3($setting->server_host, $setting->user, $password, $setting->server_port, $setting->server_ssl);
                 break;
             default:
                 throw new Exception('Не определён тип сервера.');

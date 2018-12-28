@@ -105,39 +105,39 @@ use common\models\guides\Guide;
 class Organization extends \yii\db\ActiveRecord
 {
 
-    const FRANCHISEE_SORTED                = 1;
-    const FRANCHISEE_UNSORTED              = 2;
-    const TYPE_RESTAURANT                  = 1;
-    const TYPE_SUPPLIER                    = 2;
-    const TYPE_FRANCHISEE                  = 3;
-    const WHITE_LIST_OFF                   = 0;
-    const WHITE_LIST_ON                    = 1;
-    const STEP_OK                          = 0;
-    const STEP_SET_INFO                    = 1;
-    const STEP_ADD_VENDOR                  = 2; //restaurants only
-    const STEP_ADD_CATALOG                 = 3; //vendors only
-    const STEP_TUTORIAL                    = 4;
-    const DEFAULT_AVATAR                   = '/images/rest-noavatar.gif';
-    const DEFAULT_VENDOR_AVATAR            = '/images/vendor-noavatar.gif';
-    const DEFAULT_RESTAURANT_AVATAR        = '/images/restaurant-noavatar.gif';
-    const ES_INACTIVE                      = 0;
-    const ES_UPDATED                       = 1;
-    const ES_DELETED                       = 2;
-    const MAX_RATING                       = 31;
-    const STATUS_WHITELISTED               = 0;
-    const STATUS_BLACKISTED                = 1;
-    const STATUS_UNSORTED                  = 2;
-    const RELATION_INVITED                 = 1; //есть связь с поставщиком invite_on
-    const RELATION_INVITE_IN_PROGRESS      = 2; //поставщику было отправлено приглашение, но поставщик ещё не добавил этот ресторан
+    const FRANCHISEE_SORTED = 1;
+    const FRANCHISEE_UNSORTED = 2;
+    const TYPE_RESTAURANT = 1;
+    const TYPE_SUPPLIER = 2;
+    const TYPE_FRANCHISEE = 3;
+    const WHITE_LIST_OFF = 0;
+    const WHITE_LIST_ON = 1;
+    const STEP_OK = 0;
+    const STEP_SET_INFO = 1;
+    const STEP_ADD_VENDOR = 2; //restaurants only
+    const STEP_ADD_CATALOG = 3; //vendors only
+    const STEP_TUTORIAL = 4;
+    const DEFAULT_AVATAR = '/images/rest-noavatar.gif';
+    const DEFAULT_VENDOR_AVATAR = '/images/vendor-noavatar.gif';
+    const DEFAULT_RESTAURANT_AVATAR = '/images/restaurant-noavatar.gif';
+    const ES_INACTIVE = 0;
+    const ES_UPDATED = 1;
+    const ES_DELETED = 2;
+    const MAX_RATING = 31;
+    const STATUS_WHITELISTED = 0;
+    const STATUS_BLACKISTED = 1;
+    const STATUS_UNSORTED = 2;
+    const RELATION_INVITED = 1; //есть связь с поставщиком invite_on
+    const RELATION_INVITE_IN_PROGRESS = 2; //поставщику было отправлено приглашение, но поставщик ещё не добавил этот ресторан
     const NO_AUTH_ADD_RELATION_AND_CATALOG = 3; //поставщик не авторизован // добавляем к базовому каталогу поставщика каталог ресторана и создаём связь
-    const THIS_IS_RESTAURANT               = 4; //email ресторана
-    const NEW_VENDOR                       = 5; //нет в базе такого email
-    const AUTH_SEND_INVITE                 = 6; //поставщик авторизован invite
+    const THIS_IS_RESTAURANT = 4; //email ресторана
+    const NEW_VENDOR = 5; //нет в базе такого email
+    const AUTH_SEND_INVITE = 6; //поставщик авторизован invite
 
     public $resourceCategory = 'org-picture';
     public $manager_ids;
     public $gln_code;
-    public $action           = 'edit';
+    public $action = 'edit';
 
     /**
      * {@inheritdoc}
@@ -358,9 +358,9 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->email == '')
             $this->email = null;
         if ($this->inn == '')
-            $this->inn   = null;
+            $this->inn = null;
         if ($this->kpp == '')
-            $this->kpp   = null;
+            $this->kpp = null;
         if (parent::beforeSave($insert)) {
             $this->es_status = Organization::ES_UPDATED;
 
@@ -411,11 +411,11 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return [];
         }
-        $categories     = ArrayHelper::map(Category::find()
-                                ->select(['id', 'name'])
-                                ->orderBy(['name' => SORT_ASC])
-                                ->asArray()
-                                ->all(), 'id', 'name');
+        $categories = ArrayHelper::map(Category::find()
+            ->select(['id', 'name'])
+            ->orderBy(['name' => SORT_ASC])
+            ->asArray()
+            ->all(), 'id', 'name');
         $categories[''] = 'Все категории';
         ksort($categories);
         return $categories;
@@ -432,9 +432,9 @@ class Organization extends \yii\db\ActiveRecord
             return [];
         }
         $query = RelationSuppRest::find()
-                ->select(['organization.id', 'organization.name'])
-                ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
-                ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id');
+            ->select(['organization.id', 'organization.name'])
+            ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
+            ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id');
 //        if (!$all) {
         $query->where(['relation_supp_rest.rest_org_id' => $this->id]);
 //        }
@@ -444,12 +444,12 @@ class Organization extends \yii\db\ActiveRecord
         }
         if ($notMap) {
             $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
-                                    ->asArray()
-                                    ->all(), 'id', 'name');
+                ->asArray()
+                ->all(), 'id', 'name');
         } else {
             $vendors = $query->orderBy(['organization.name' => SORT_ASC])
-                    ->asArray()
-                    ->all();
+                ->asArray()
+                ->all();
         }
 
         if ($all) {
@@ -473,14 +473,14 @@ class Organization extends \yii\db\ActiveRecord
             return [];
         }
         $query = RelationSuppRest::find()
-                ->select(['organization.id', 'organization.name'])
-                ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
-                ->where(['relation_supp_rest.rest_org_id' => $this->id]);
-        $res   = $query
-                ->orderBy(['organization.name' => SORT_ASC])
-                ->asArray()
-                ->all();
-        $res   = ArrayHelper::map($res, 'id', 'name');
+            ->select(['organization.id', 'organization.name'])
+            ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
+            ->where(['relation_supp_rest.rest_org_id' => $this->id]);
+        $res = $query
+            ->orderBy(['organization.name' => SORT_ASC])
+            ->asArray()
+            ->all();
+        $res = ArrayHelper::map($res, 'id', 'name');
         if ($addAllOption) {
             $res['0'] = Yii::t('app', 'common.models.all_vendors', ['ru' => 'Все поставщики']);
         }
@@ -494,9 +494,9 @@ class Organization extends \yii\db\ActiveRecord
             return [];
         }
         $query = RelationSuppRest::find()
-                ->select(['organization.id', 'organization.name as text'])
-                ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
-                ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id');
+            ->select(['organization.id', 'organization.name as text'])
+            ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
+            ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id');
 //        if (!$all) {
         $query->where(['relation_supp_rest.rest_org_id' => $this->id]);
 //        }
@@ -506,12 +506,12 @@ class Organization extends \yii\db\ActiveRecord
         }
         if ($notMap) {
             $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
-                                    ->asArray()
-                                    ->all(), 'id', 'name');
+                ->asArray()
+                ->all(), 'id', 'name');
         } else {
             $vendors = $query->orderBy(['organization.name' => SORT_ASC])
-                    ->asArray()
-                    ->all();
+                ->asArray()
+                ->all();
         }
 
         if ($all) {
@@ -533,14 +533,14 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         $query = RelationSuppRest::find()
-                ->select(['organization.id as id', 'organization.name as name'])
-                ->joinWith('client', false)
-                ->where(['relation_supp_rest.supp_org_id' => $this->id])
-                ->orderBy(['organization.name' => SORT_ASC]);
+            ->select(['organization.id as id', 'organization.name as name'])
+            ->joinWith('client', false)
+            ->where(['relation_supp_rest.supp_org_id' => $this->id])
+            ->orderBy(['organization.name' => SORT_ASC]);
 
         $clients = ArrayHelper::map($query
-                                ->asArray()
-                                ->all(), 'id', 'name');
+            ->asArray()
+            ->all(), 'id', 'name');
 
         if ($all) {
             $clients[''] = Yii::t('message', 'market.views.site.rest.all', ['ru' => 'Все рестораны']);
@@ -568,10 +568,10 @@ class Organization extends \yii\db\ActiveRecord
         }
         //$vendor_id = (int)$vendor_id;
         $query = RelationSuppRest::find()
-                ->select(['relation_supp_rest.cat_id as cat_id'])
-                ->leftJoin('catalog', 'relation_supp_rest.cat_id = catalog.id')
-                ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false, 'relation_supp_rest.status' => 1])
-                ->andWhere(['catalog.status' => Catalog::STATUS_ON]);
+            ->select(['relation_supp_rest.cat_id as cat_id'])
+            ->leftJoin('catalog', 'relation_supp_rest.cat_id = catalog.id')
+            ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false, 'relation_supp_rest.status' => 1])
+            ->andWhere(['catalog.status' => Catalog::STATUS_ON]);
         if ($vendor_id) {
             $query->andFilterWhere(['relation_supp_rest.supp_org_id' => $vendor_id]);
         }
@@ -691,9 +691,9 @@ class Organization extends \yii\db\ActiveRecord
             return 0;
         }
         return (new Query())->from('cart as c')
-                        ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
-                        ->andWhere(['c.organization_id' => $this->id])
-                        ->count();
+            ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
+            ->andWhere(['c.organization_id' => $this->id])
+            ->count();
     }
 
     /*
@@ -706,26 +706,26 @@ class Organization extends \yii\db\ActiveRecord
         switch ($this->type_id) {
             case self::TYPE_RESTAURANT:
                 $result = Order::find()->where([
-                            'client_id' => $this->id,
-                            'status'    => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
-                        )->count();
+                        'client_id' => $this->id,
+                        'status'    => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                )->count();
                 break;
             case self::TYPE_SUPPLIER:
                 if (isset($manager_id)) {
-                    $maTable    = ManagerAssociate::tableName();
+                    $maTable = ManagerAssociate::tableName();
                     $orderTable = Order::tableName();
-                    $result     = Order::find()
-                            ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
-                            ->where([
-                                'vendor_id'           => $this->id,
-                                "$maTable.manager_id" => $manager_id,
-                                'status'              => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
-                            ->count();
+                    $result = Order::find()
+                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                        ->where([
+                            'vendor_id'           => $this->id,
+                            "$maTable.manager_id" => $manager_id,
+                            'status'              => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
+                        ->count();
                 } else {
                     $result = Order::find()->where([
-                                'vendor_id' => $this->id,
-                                'status'    => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
-                            )->count();
+                            'vendor_id' => $this->id,
+                            'status'    => [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR, OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                    )->count();
                 }
                 break;
         }
@@ -741,9 +741,9 @@ class Organization extends \yii\db\ActiveRecord
                 break;
             case self::TYPE_SUPPLIER:
                 $result = RelationSuppRest::find()->where([
-                            'supp_org_id' => $this->id,
-                            'invite'      => [RelationSuppRest::INVITE_OFF]]
-                        )->count();
+                        'supp_org_id' => $this->id,
+                        'invite'      => [RelationSuppRest::INVITE_OFF]]
+                )->count();
                 break;
         }
         return $result;
@@ -751,22 +751,22 @@ class Organization extends \yii\db\ActiveRecord
 
     public function getEarliestOrderDate()
     {
-        $today  = new \DateTime();
+        $today = new \DateTime();
         $result = $today->format('d.m.Y');
         switch ($this->type_id) {
             case self::TYPE_RESTAURANT:
                 $firstOrder = Order::find()
-                        ->where(['client_id' => $this->id])
-                        ->orderBy(['created_at' => SORT_ASC])
-                        ->limit(1)
-                        ->one();
+                    ->where(['client_id' => $this->id])
+                    ->orderBy(['created_at' => SORT_ASC])
+                    ->limit(1)
+                    ->one();
                 break;
             case self::TYPE_SUPPLIER:
                 $firstOrder = Order::find()
-                        ->where(['vendor_id' => $this->id])
-                        ->orderBy(['created_at' => SORT_ASC])
-                        ->limit(1)
-                        ->one();
+                    ->where(['vendor_id' => $this->id])
+                    ->orderBy(['created_at' => SORT_ASC])
+                    ->limit(1)
+                    ->one();
                 break;
         }
         if ($firstOrder) {
@@ -780,12 +780,12 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getUsers()
     {
-        $userTable     = User::tableName();
+        $userTable = User::tableName();
         $relationTable = RelationUserOrganization::tableName();
 
-        $query           = User::find();
+        $query = User::find();
         $query->leftJoin($relationTable, "$relationTable.user_id = $userTable.id")
-                ->where("$relationTable.organization_id = $this->id");
+            ->where("$relationTable.organization_id = $this->id");
         $query->multiple = true;
 
         return $query;
@@ -806,23 +806,23 @@ class Organization extends \yii\db\ActiveRecord
 
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
             $sql = 'SELECT `order_chat`.*, ord.`client_id` AS vid, ma.`manager_id` FROM `order_chat` INNER JOIN '
-                    . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
-                    . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
-                    . 'AND ((`order_chat`.`is_system`=0) '
-                    . 'AND (`order_chat`.`viewed`=0)) '
-                    . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id` '
-                    . 'LEFT JOIN `order` AS ord ON ord.`id` = `order_chat`.`order_id` '
-                    . 'LEFT JOIN `manager_associate` AS ma ON ord.`client_id` = ma.`organization_id` '
-                    . 'WHERE ma.`manager_id` = ' . $userId . ' '
-                    . 'ORDER BY `order_chat`.`created_at` DESC';
+                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
+                . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
+                . 'AND ((`order_chat`.`is_system`=0) '
+                . 'AND (`order_chat`.`viewed`=0)) '
+                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id` '
+                . 'LEFT JOIN `order` AS ord ON ord.`id` = `order_chat`.`order_id` '
+                . 'LEFT JOIN `manager_associate` AS ma ON ord.`client_id` = ma.`organization_id` '
+                . 'WHERE ma.`manager_id` = ' . $userId . ' '
+                . 'ORDER BY `order_chat`.`created_at` DESC';
         } else {
             $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
-                    . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
-                    . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
-                    . 'AND ((`order_chat`.`is_system`=0) '
-                    . 'AND (`order_chat`.`viewed`=0)) '
-                    . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id`'
-                    . 'ORDER BY `order_chat`.`created_at` DESC';
+                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
+                . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
+                . 'AND ((`order_chat`.`is_system`=0) '
+                . 'AND (`order_chat`.`viewed`=0)) '
+                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id`'
+                . 'ORDER BY `order_chat`.`created_at` DESC';
         }
 
         return OrderChat::findBySql($sql)->all();
@@ -837,23 +837,23 @@ class Organization extends \yii\db\ActiveRecord
         $userId = Yii::$app->user->id;
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
             $sql = 'SELECT `order_chat`.*, ord.`client_id` AS vid, ma.`manager_id` FROM `order_chat` INNER JOIN '
-                    . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
-                    . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
-                    . 'AND ((`order_chat`.`is_system`=1) '
-                    . 'AND (`order_chat`.`viewed`=0)) '
-                    . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id` '
-                    . 'LEFT JOIN `order` AS ord ON ord.`id` = `order_chat`.`order_id` '
-                    . 'LEFT JOIN `manager_associate` AS ma ON ord.`client_id` = ma.`organization_id` '
-                    . 'WHERE ma.`manager_id` = ' . $userId . ' '
-                    . 'ORDER BY `order_chat`.`created_at` DESC';
+                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
+                . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
+                . 'AND ((`order_chat`.`is_system`=1) '
+                . 'AND (`order_chat`.`viewed`=0)) '
+                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id` '
+                . 'LEFT JOIN `order` AS ord ON ord.`id` = `order_chat`.`order_id` '
+                . 'LEFT JOIN `manager_associate` AS ma ON ord.`client_id` = ma.`organization_id` '
+                . 'WHERE ma.`manager_id` = ' . $userId . ' '
+                . 'ORDER BY `order_chat`.`created_at` DESC';
         } else {
             $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
-                    . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
-                    . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
-                    . 'AND ((`order_chat`.`is_system`=1) '
-                    . 'AND (`order_chat`.`viewed`=0)) '
-                    . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id`'
-                    . 'ORDER BY `order_chat`.`created_at` DESC';
+                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
+                . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
+                . 'AND ((`order_chat`.`is_system`=1) '
+                . 'AND (`order_chat`.`viewed`=0)) '
+                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id`'
+                . 'ORDER BY `order_chat`.`created_at` DESC';
         }
         return OrderChat::findBySql($sql)->all();
     }
@@ -918,7 +918,7 @@ class Organization extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes)
     {
         if ($insert && ($this->type_id == self::TYPE_SUPPLIER)) {
-            $delivery            = new Delivery();
+            $delivery = new Delivery();
             $delivery->vendor_id = $this->id;
             $delivery->save();
         }
@@ -973,7 +973,7 @@ class Organization extends \yii\db\ActiveRecord
     public function getFranchisee()
     {
         return $this->hasOne(Franchisee::className(), ['id' => 'franchisee_id'])
-                        ->viaTable('franchisee_associate', ['organization_id' => 'id']);
+            ->viaTable('franchisee_associate', ['organization_id' => 'id']);
     }
 
     /**
@@ -1028,12 +1028,12 @@ class Organization extends \yii\db\ActiveRecord
             return false;
         }
 
-        $relation                 = new RelationSuppRest();
-        $relation->supp_org_id    = $vendor->id;
-        $relation->rest_org_id    = $this->id;
-        $relation->invite         = $invite;
+        $relation = new RelationSuppRest();
+        $relation->supp_org_id = $vendor->id;
+        $relation->rest_org_id = $this->id;
+        $relation->invite = $invite;
         $relation->is_from_market = $fromMarket;
-        $baseCatalog              = Catalog::findOne(['supp_org_id' => $vendor->id, 'type' => Catalog::BASE_CATALOG]);
+        $baseCatalog = Catalog::findOne(['supp_org_id' => $vendor->id, 'type' => Catalog::BASE_CATALOG]);
         if ($includeBaseCatalog && $baseCatalog) {
             $relation->cat_id = $baseCatalog;
         }
@@ -1042,8 +1042,8 @@ class Organization extends \yii\db\ActiveRecord
         foreach ($rows as $row) {
             $managerAssociate = ManagerAssociate::findOne(['manager_id' => $row->id, 'organization_id' => $this->id]);
             if (!$managerAssociate) {
-                $managerAssociate                  = new ManagerAssociate();
-                $managerAssociate->manager_id      = $row->id;
+                $managerAssociate = new ManagerAssociate();
+                $managerAssociate->manager_id = $row->id;
                 $managerAssociate->organization_id = $this->id;
                 $managerAssociate->save();
             }
@@ -1082,12 +1082,12 @@ class Organization extends \yii\db\ActiveRecord
             return 0;
         }
         return CatalogBaseGoods::find()
-                        ->where([
-                            'supp_org_id'  => $this->id,
-                            'deleted'      => CatalogBaseGoods::DELETED_OFF,
-                            'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
-                        ->groupBy(['category_id'])
-                        ->count();
+            ->where([
+                'supp_org_id'  => $this->id,
+                'deleted'      => CatalogBaseGoods::DELETED_OFF,
+                'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+            ->groupBy(['category_id'])
+            ->count();
     }
 
     /**
@@ -1115,11 +1115,11 @@ class Organization extends \yii\db\ActiveRecord
             return [];
         }
         $catalogs = ArrayHelper::map(Catalog::find()
-                                ->select(['id', 'name'])
-                                ->where(['supp_org_id' => $this->id, 'status' => 1])
-                                ->orderBy(['name' => SORT_ASC])
-                                ->asArray()
-                                ->all(), 'id', 'name');
+            ->select(['id', 'name'])
+            ->where(['supp_org_id' => $this->id, 'status' => 1])
+            ->orderBy(['name' => SORT_ASC])
+            ->asArray()
+            ->all(), 'id', 'name');
         foreach ($catalogs as $id => &$catalog) {
             $catalogs[$id] = Yii::t('app', $catalog);
         }
@@ -1131,18 +1131,18 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getManagersList()
     {
-        $usrTable  = User::tableName();
+        $usrTable = User::tableName();
         $profTable = Profile::tableName();
-        $ruoTable  = RelationUserOrganization::tableName();
+        $ruoTable = RelationUserOrganization::tableName();
 
         $managers = ArrayHelper::map(User::find()
-                                ->joinWith('profile')
-                                ->leftJoin($ruoTable, "$ruoTable.user_id=$usrTable.id")
-                                ->select(["$usrTable.id as id", "$profTable.full_name as name"])
-                                ->where(["$ruoTable.organization_id" => $this->id])
-                                ->orderBy(['name' => SORT_ASC])
-                                ->asArray()
-                                ->all(), 'id', 'name');
+            ->joinWith('profile')
+            ->leftJoin($ruoTable, "$ruoTable.user_id=$usrTable.id")
+            ->select(["$usrTable.id as id", "$profTable.full_name as name"])
+            ->where(["$ruoTable.organization_id" => $this->id])
+            ->orderBy(['name' => SORT_ASC])
+            ->asArray()
+            ->all(), 'id', 'name');
         return $managers;
     }
 
@@ -1152,23 +1152,23 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getAssociatedManagersList($vendor_id)
     {
-        $usrTable      = User::tableName();
-        $profTable     = Profile::tableName();
-        $assocTable    = ManagerAssociate::tableName();
+        $usrTable = User::tableName();
+        $profTable = Profile::tableName();
+        $assocTable = ManagerAssociate::tableName();
         $relationTable = RelationUserOrganization::tableName();
 
         $managers = ArrayHelper::map(User::find()
-                                ->joinWith('profile')
-                                ->joinWith('associated')
-                                ->joinWith('relationsUserOrganization')
-                                ->select(["$usrTable.id as id", "$profTable.full_name as name"])
-                                ->where([
-                                    "$relationTable.organization_id" => $vendor_id,
-                                    "$assocTable.organization_id"    => $this->id,
-                                ])
-                                ->orderBy(['name' => SORT_ASC])
-                                ->asArray()
-                                ->all(), 'id', 'name');
+            ->joinWith('profile')
+            ->joinWith('associated')
+            ->joinWith('relationsUserOrganization')
+            ->select(["$usrTable.id as id", "$profTable.full_name as name"])
+            ->where([
+                "$relationTable.organization_id" => $vendor_id,
+                "$assocTable.organization_id"    => $this->id,
+            ])
+            ->orderBy(['name' => SORT_ASC])
+            ->asArray()
+            ->all(), 'id', 'name');
         return $managers;
     }
 
@@ -1179,14 +1179,14 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getAssociatedManagers($vendor_id, $isOnlyOne = false)
     {
-        $usrTable      = User::tableName();
-        $assocTable    = ManagerAssociate::tableName();
+        $usrTable = User::tableName();
+        $assocTable = ManagerAssociate::tableName();
         $relationTable = RelationUserOrganization::tableName();
 
         $query = User::find()
-                ->leftJoin($assocTable, "$assocTable.manager_id = $usrTable.id")
-                ->leftJoin($relationTable, "$relationTable.user_id = $assocTable.manager_id")
-                ->where(["$assocTable.organization_id" => $this->id, "$relationTable.organization_id" => $vendor_id]);
+            ->leftJoin($assocTable, "$assocTable.manager_id = $usrTable.id")
+            ->leftJoin($relationTable, "$relationTable.user_id = $assocTable.manager_id")
+            ->where(["$assocTable.organization_id" => $this->id, "$relationTable.organization_id" => $vendor_id]);
         if ($isOnlyOne) {
             return $query->one();
         } else {
@@ -1199,13 +1199,13 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getRelatedFranchisee()
     {
-        $usrTable      = User::tableName();
+        $usrTable = User::tableName();
         $relationTable = RelationUserOrganization::tableName();
 
         return User::find()
-                        ->leftJoin($relationTable, "$relationTable.user_id = $usrTable.id")
-                        ->where(["$relationTable.organization_id" => $this->id, "$relationTable.role_id" => Role::ROLE_FRANCHISEE_OWNER])
-                        ->all();
+            ->leftJoin($relationTable, "$relationTable.user_id = $usrTable.id")
+            ->where(["$relationTable.organization_id" => $this->id, "$relationTable.role_id" => Role::ROLE_FRANCHISEE_OWNER])
+            ->all();
     }
 
     /**
@@ -1257,13 +1257,13 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getOrganizationManagersDataProvider()
     {
-        $usrTable             = User::tableName();
-        $profTable            = Profile::tableName();
-        $query                = User::find()
-                ->leftJoin("$profTable", "$profTable.user_id = $usrTable.id")
-                ->select(["$usrTable.id as id", "$usrTable.email as email", "$profTable.full_name as name", "$profTable.phone"])
-                ->where(["$usrTable.organization_id" => $this->id])
-                ->orderBy(['name' => SORT_ASC]);
+        $usrTable = User::tableName();
+        $profTable = Profile::tableName();
+        $query = User::find()
+            ->leftJoin("$profTable", "$profTable.user_id = $usrTable.id")
+            ->select(["$usrTable.id as id", "$usrTable.email as email", "$profTable.full_name as name", "$profTable.phone"])
+            ->where(["$usrTable.organization_id" => $this->id])
+            ->orderBy(['name' => SORT_ASC]);
         $managersDataProvider = new ActiveDataProvider([
             'query'      => $query,
             'pagination' => [
@@ -1285,8 +1285,8 @@ class Organization extends \yii\db\ActiveRecord
     protected function getOrganizationQuery($organization_id, $type = 'supp', $currency_id = 1)
     {
         $type_id = ($type == 'supp') ? Organization::TYPE_SUPPLIER : Organization::TYPE_RESTAURANT;
-        $prefix  = ($type == 'rest') ? 'supp' : 'rest';
-        $name    = ($type == 'rest') ? 'client' : 'vendor';
+        $prefix = ($type == 'rest') ? 'supp' : 'rest';
+        $name = ($type == 'rest') ? 'client' : 'vendor';
         return "SELECT self_registered, org.id as id, org.name as name,
                 org.created_at as created_at, org.contact_name as contact_name, org.phone as phone, (select count(id) from relation_supp_rest where " . $type . "_org_id=org.id) as clientCount, 
                 (select count(id) from relation_supp_rest where " . $type . "_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
@@ -1306,18 +1306,18 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function sendGenerationPasswordEmail($user, $isFranchise = false)
     {
-        $userToken     = new UserToken();
+        $userToken = new UserToken();
         $userTokenType = $userToken::TYPE_PASSWORD_RESET;
         if ($userTokenType) {
             $userToken = $userToken::generate($user->id, $userTokenType);
         }
-        $mailer  = Yii::$app->mailer;
-        $email   = $user->email;
+        $mailer = Yii::$app->mailer;
+        $email = $user->email;
         $subject = Yii::$app->id . " - " . Yii::t('app', 'common.config.params.pass', ['ru' => 'Создание пароля для входа в систему MixCart']);
         $mailer->compose('changePassword', compact(['userToken', 'isFranchise']))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();
     }
 
     /**
@@ -1326,7 +1326,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getAssociatedRequestsList($franchisee_id)
     {
-        $search          = ['like', 'product', \Yii::$app->request->get('search') ?: ''];
+        $search = ['like', 'product', \Yii::$app->request->get('search') ?: ''];
         $dataListRequest = new ActiveDataProvider([
             'query'      => Request::find()->leftJoin('franchisee_associate', "franchisee_associate.organization_id = request.rest_org_id")->where(['franchisee_associate.franchisee_id' => $franchisee_id])->andWhere($search)->orderBy('request.id DESC'),
             'pagination' => [
@@ -1441,31 +1441,31 @@ class Organization extends \yii\db\ActiveRecord
             return 0;
         }
 
-        $count    = 0;
+        $count = 0;
         $catalogs = Catalog::find()
-                ->leftJoin('relation_supp_rest', 'relation_supp_rest.cat_id=catalog.id')
-                ->where([
-                    'relation_supp_rest.deleted'     => false,
-                    'relation_supp_rest.supp_org_id' => $this->id,
-                    'relation_supp_rest.rest_org_id' => $clientId,
-                ])
-                ->all();
+            ->leftJoin('relation_supp_rest', 'relation_supp_rest.cat_id=catalog.id')
+            ->where([
+                'relation_supp_rest.deleted'     => false,
+                'relation_supp_rest.supp_org_id' => $this->id,
+                'relation_supp_rest.rest_org_id' => $clientId,
+            ])
+            ->all();
         foreach ($catalogs as $catalog) {
             if ($catalog->type === Catalog::BASE_CATALOG) {
                 $count = CatalogBaseGoods::find()->where([
-                            'cat_id'  => $catalog->id,
-                            'status'  => CatalogBaseGoods::STATUS_ON,
-                            'deleted' => CatalogBaseGoods::DELETED_OFF
-                        ])->count();
+                    'cat_id'  => $catalog->id,
+                    'status'  => CatalogBaseGoods::STATUS_ON,
+                    'deleted' => CatalogBaseGoods::DELETED_OFF
+                ])->count();
             } else {
                 $count += CatalogGoods::find()
-                        ->leftJoin('catalog_base_goods', 'catalog_base_goods.id=catalog_goods.base_goods_id')
-                        ->where([
-                            'catalog_goods.cat_id'       => $catalog->id,
-                            'catalog_base_goods.status'  => CatalogBaseGoods::STATUS_ON,
-                            'catalog_base_goods.deleted' => CatalogBaseGoods::DELETED_OFF,
-                        ])
-                        ->count();
+                    ->leftJoin('catalog_base_goods', 'catalog_base_goods.id=catalog_goods.base_goods_id')
+                    ->where([
+                        'catalog_goods.cat_id'       => $catalog->id,
+                        'catalog_base_goods.status'  => CatalogBaseGoods::STATUS_ON,
+                        'catalog_base_goods.deleted' => CatalogBaseGoods::DELETED_OFF,
+                    ])
+                    ->count();
             }
         }
         return $count;
@@ -1482,42 +1482,42 @@ class Organization extends \yii\db\ActiveRecord
             return null;
         }
 
-        $cgTable  = CatalogGoods::tableName();
+        $cgTable = CatalogGoods::tableName();
         $cbgTable = CatalogBaseGoods::tableName();
         $orgTable = Organization::tableName();
         $rsrTable = RelationSuppRest::tableName();
         $catTable = Catalog::tableName();
 
         $product = CatalogGoods::find()
-                ->leftJoin($cbgTable, "$cbgTable.id = $cgTable.base_goods_id")
-                ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
-                ->leftJoin($rsrTable, "$rsrTable.cat_id = $cgTable.cat_id")
-                ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
-                ->where([
-                    "$rsrTable.deleted"     => false,
-                    "$cbgTable.deleted"     => CatalogBaseGoods::DELETED_OFF,
-                    "$cbgTable.status"      => CatalogBaseGoods::STATUS_ON,
-                    "$rsrTable.rest_org_id" => $this->id,
-                    "$catTable.status"      => Catalog::STATUS_ON,
-                    "$cbgTable.id"          => $product_id,
-                ])
-                ->one();
+            ->leftJoin($cbgTable, "$cbgTable.id = $cgTable.base_goods_id")
+            ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
+            ->leftJoin($rsrTable, "$rsrTable.cat_id = $cgTable.cat_id")
+            ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
+            ->where([
+                "$rsrTable.deleted"     => false,
+                "$cbgTable.deleted"     => CatalogBaseGoods::DELETED_OFF,
+                "$cbgTable.status"      => CatalogBaseGoods::STATUS_ON,
+                "$rsrTable.rest_org_id" => $this->id,
+                "$catTable.status"      => Catalog::STATUS_ON,
+                "$cbgTable.id"          => $product_id,
+            ])
+            ->one();
         if ($product) {
             return CatalogBaseGoods::findOne(['id' => $product_id]);
         }
         $product = CatalogBaseGoods::find()
-                ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
-                ->leftJoin($rsrTable, "$rsrTable.cat_id = $cbgTable.cat_id")
-                ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
-                ->where([
-                    "$rsrTable.deleted"     => false,
-                    "$cbgTable.deleted"     => CatalogBaseGoods::DELETED_OFF,
-                    "$cbgTable.status"      => CatalogBaseGoods::STATUS_ON,
-                    "$rsrTable.rest_org_id" => $this->id,
-                    "$catTable.status"      => Catalog::STATUS_ON,
-                    "$cbgTable.id"          => $product_id,
-                ])
-                ->one();
+            ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
+            ->leftJoin($rsrTable, "$rsrTable.cat_id = $cbgTable.cat_id")
+            ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
+            ->where([
+                "$rsrTable.deleted"     => false,
+                "$cbgTable.deleted"     => CatalogBaseGoods::DELETED_OFF,
+                "$cbgTable.status"      => CatalogBaseGoods::STATUS_ON,
+                "$rsrTable.rest_org_id" => $this->id,
+                "$catTable.status"      => Catalog::STATUS_ON,
+                "$cbgTable.id"          => $product_id,
+            ])
+            ->one();
         if ($product) {
             return $product;
         }
@@ -1543,16 +1543,16 @@ class Organization extends \yii\db\ActiveRecord
             if (FranchiseeAssociate::find()->where(['organization_id' => $this->id])->exists()) {
                 //Удаляем все связи
                 Yii::$app->db->createCommand()
-                        ->delete(FranchiseeAssociate::tableName(), ['organization_id' => $this->id])
-                        ->execute();
+                    ->delete(FranchiseeAssociate::tableName(), ['organization_id' => $this->id])
+                    ->execute();
             }
         }
         //Этот флаг снимает признак того что организация отсортирована
         if ($cancel_sorted === true) {
             //Ставим признак то что не отсортирован
             Yii::$app->db->createCommand()
-                    ->update(self::tableName(), ['franchisee_sorted' => 0], ['id' => $this->id])
-                    ->execute();
+                ->update(self::tableName(), ['franchisee_sorted' => 0], ['id' => $this->id])
+                ->execute();
             $this->refresh();
         }
         //Проводим прикрепление только для неотсортированых организаций c адресом
@@ -1564,21 +1564,21 @@ class Organization extends \yii\db\ActiveRecord
         //Если организация уже привязана
         if (FranchiseeAssociate::find()->where(['organization_id' => $this->id])->exists()) {
             Yii::$app->db->createCommand()
-                    ->update(self::tableName(), ['franchisee_sorted' => 1], ['id' => $this->id])
-                    ->execute();
+                ->update(self::tableName(), ['franchisee_sorted' => 1], ['id' => $this->id])
+                ->execute();
         } else {
             //Есть, уже есть шанс что к кому то ее прилепим
             //Франчази по умолчанию
-            $franchise  = null;
+            $franchise = null;
             $default_id = 1;
             if (isset(Yii::$app->params['default_franchisee_id'])) {
                 //Берем id из параметров
-                $default_id = (integer) Yii::$app->params['default_franchisee_id'];
+                $default_id = (integer)Yii::$app->params['default_franchisee_id'];
             }
             //Есть ли франшиза в стране организации
             if (FranchiseeGeo::find()->where(['country' => $this->country])->exists()) {
                 //Поля для получения
-                $fields    = [
+                $fields = [
                     'franchisee_id',
                     'franchisee.type_id',
                     'exception',
@@ -1589,29 +1589,29 @@ class Organization extends \yii\db\ActiveRecord
                 ];
                 //Поиск франчей в городе организации
                 $franchise = FranchiseeGeo::find()->asArray()
-                                ->select($fields)
-                                ->leftJoin('franchisee', 'franchisee.id = franchisee_id')
-                                ->where(['country' => $this->country, 'locality' => $this->locality])
-                                ->andWhere('LENGTH(locality) > 2')->all();
+                    ->select($fields)
+                    ->leftJoin('franchisee', 'franchisee.id = franchisee_id')
+                    ->where(['country' => $this->country, 'locality' => $this->locality])
+                    ->andWhere('LENGTH(locality) > 2')->all();
 
                 if (!$franchise) {
                     //Если не нашли франчей в этом городе, ищем в области
                     $franchise = FranchiseeGeo::find()->asArray()
-                                    ->select($fields)
-                                    ->leftJoin('franchisee', 'franchisee.id = franchisee_id')
-                                    ->where([
-                                        'country'                     => $this->country,
-                                        'administrative_area_level_1' => $this->administrative_area_level_1
-                                    ])->andWhere('LENGTH(administrative_area_level_1) > 2')->all();
+                        ->select($fields)
+                        ->leftJoin('franchisee', 'franchisee.id = franchisee_id')
+                        ->where([
+                            'country'                     => $this->country,
+                            'administrative_area_level_1' => $this->administrative_area_level_1
+                        ])->andWhere('LENGTH(administrative_area_level_1) > 2')->all();
 
                     if (!$franchise) {
                         //Если же не нашли даже в области, ищем в стране
                         $franchise = FranchiseeGeo::find()->asArray()
-                                        ->select($fields)
-                                        ->leftJoin('franchisee', 'franchisee.id = franchisee_id')
-                                        ->where(['country' => $this->country])
-                                        ->andWhere("locality ='' or locality is null")
-                                        ->andWhere("administrative_area_level_1 ='' or administrative_area_level_1 is null")->all();
+                            ->select($fields)
+                            ->leftJoin('franchisee', 'franchisee.id = franchisee_id')
+                            ->where(['country' => $this->country])
+                            ->andWhere("locality ='' or locality is null")
+                            ->andWhere("administrative_area_level_1 ='' or administrative_area_level_1 is null")->all();
                     }
                 }
             }
@@ -1626,8 +1626,8 @@ class Organization extends \yii\db\ActiveRecord
                 //Схраняем к дефолтному, и ставим знак что франч не отсортирован
                 if ($associate->save()) {
                     Yii::$app->db->createCommand()
-                            ->update(self::tableName(), ['franchisee_sorted' => 0], ['id' => $this->id])
-                            ->execute();
+                        ->update(self::tableName(), ['franchisee_sorted' => 0], ['id' => $this->id])
+                        ->execute();
                     //Обновляем атрибуты модели
                     $this->refresh();
                 }
@@ -1656,13 +1656,13 @@ class Organization extends \yii\db\ActiveRecord
         }
         //Умолчание
         $franchise = null;
-        $result    = [];
+        $result = [];
         //Формируем массив франчей по рангу
         foreach ($franchise_pull as $f) {
             if ($f['exception'] == 1) {
                 if (
-                        $f['administrative_area_level_1'] == $this->administrative_area_level_1 ||
-                        $f['locality'] == $this->locality
+                    $f['administrative_area_level_1'] == $this->administrative_area_level_1 ||
+                    $f['locality'] == $this->locality
                 ) {
                     continue;
                 }
@@ -1678,13 +1678,13 @@ class Organization extends \yii\db\ActiveRecord
         krsort($result);
         //Сначала проставим колличество получаемых организаций - всем выбранным франчам
         //У кого еще небыло попыток, только null
-        $result    = $this->setReceivingOrganization($result);
+        $result = $this->setReceivingOrganization($result);
         //Получаем подходящего франча
         $franchise = $this->getFranchiseeReceivingOrganization($result);
         //Если никого не нашлось, значит у всех кончились попытки получения
         if ($franchise === null) {
             //Обновляем всем попытки принудительно
-            $result    = $this->setReceivingOrganization($result, true);
+            $result = $this->setReceivingOrganization($result, true);
             //Получаем подходящего франча, еще раз, так как обновили поля
             $franchise = $this->getFranchiseeReceivingOrganization($result);
             //Если и сейчас никого нет, отправляем к дефолту
@@ -1702,21 +1702,21 @@ class Organization extends \yii\db\ActiveRecord
         if ($associate->save()) {
             //После сохранения, у франча - уменьшаем количество попыток
             Yii::$app->db->createCommand()->update(
-                    Franchisee::tableName(), ['receiving_organization' => ($franchise['receiving_organization'] - 1)], ['id' => $franchise['franchisee_id']]
+                Franchisee::tableName(), ['receiving_organization' => ($franchise['receiving_organization'] - 1)], ['id' => $franchise['franchisee_id']]
             )->execute();
             //Ставим флаг что припарковали организацию
             Yii::$app->db->createCommand()->update(
-                    self::tableName(), ['franchisee_sorted' => 1], ['id' => $this->id]
+                self::tableName(), ['franchisee_sorted' => 1], ['id' => $this->id]
             )->execute();
             //Отправлем емайл франчу, если есть адрес почты
             if (!empty($franchise['legal_email'])) {
-                $url     = Yii::$app->params['protocol'] . ":" . Yii::$app->params['franchiseeHost'] . "/organization/show-";
-                $url     .= ($this->type_id == Organization::TYPE_RESTAURANT ? 'client' : 'vendor');
+                $url = Yii::$app->params['protocol'] . ":" . Yii::$app->params['franchiseeHost'] . "/organization/show-";
+                $url .= ($this->type_id == Organization::TYPE_RESTAURANT ? 'client' : 'vendor');
                 $message = Yii::$app->mailer;
                 $message->compose('franchiseeAssociateAdded', ["organization" => $this, "route" => $url . '/' . $this->id])
-                        ->setTo($franchise['legal_email'])
-                        ->setSubject(Yii::t('app', 'common.models.self_registered', ['ru' => 'Самостоятельно зарегистрировавшаяся организация добавлена во франчайзи']))
-                        ->send();
+                    ->setTo($franchise['legal_email'])
+                    ->setSubject(Yii::t('app', 'common.models.self_registered', ['ru' => 'Самостоятельно зарегистрировавшаяся организация добавлена во франчайзи']))
+                    ->send();
             }
         }
         //Обновляем атрибуты модели организации
@@ -1766,7 +1766,7 @@ class Organization extends \yii\db\ActiveRecord
                 //Обновляем число попыток, если оно NULL или стоит принудидетьльное обновление
                 if ($franchisee['receiving_organization'] === null or $p === true) {
                     Yii::$app->db->createCommand()->update(
-                            Franchisee::tableName(), ['receiving_organization' => $receiving_organization], ['id' => $franchisee['franchisee_id']]
+                        Franchisee::tableName(), ['receiving_organization' => $receiving_organization], ['id' => $franchisee['franchisee_id']]
                     )->execute();
                     //Обновляем значение, так как работаем с сылкой, и возвращаем тот же массив, зачем жрать память
                     $franchisee['receiving_organization'] = $receiving_organization;
@@ -1801,7 +1801,7 @@ class Organization extends \yii\db\ActiveRecord
         $return = [];
 
         $lic = \api\common\models\RkServicedata::find()->andWhere('org = :org', ['org' => $this->id])->one();
-        $t   = strtotime(date('Y-m-d H:i:s', time()));
+        $t = strtotime(date('Y-m-d H:i:s', time()));
         if ($lic) {
             if ($t >= strtotime($lic->fd) && $t <= strtotime($lic->td) && $lic->status_id === 1) {
                 $return['rk'] = true;
@@ -1825,11 +1825,11 @@ class Organization extends \yii\db\ActiveRecord
     public function getLicenseList()
     {
         $result = [];
-        $lic    = RkServicedata::getLicense();
+        $lic = RkServicedata::getLicense();
         if ($lic != null) {
-            $result['rkws']     = $lic;
-            $org                = $lic['service_id'];
-            $lic_ucs            = RkServicedata::getLicenseUcs($org);
+            $result['rkws'] = $lic;
+            $org = $lic['service_id'];
+            $lic_ucs = RkServicedata::getLicenseUcs($org);
             $result['rkws_ucs'] = $lic_ucs;
         }
 
@@ -1950,9 +1950,9 @@ class Organization extends \yii\db\ActiveRecord
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             self::updateAll(['parent_id' => $this->id], ['parent_id' => $this->parent_id]);
-            $formerParent            = self::findOne(['id' => $this->parent_id]);
+            $formerParent = self::findOne(['id' => $this->parent_id]);
             $formerParent->parent_id = $this->id;
-            $this->parent_id         = null;
+            $this->parent_id = null;
             if ($formerParent->save() && $this->save()) {
                 $transaction->commit();
                 return true;
@@ -1974,42 +1974,30 @@ class Organization extends \yii\db\ActiveRecord
             $relation->delete();
         }
         $this->blacklisted = true;
-        $this->parent_id   = null;
+        $this->parent_id = null;
         return $this->save();
     }
 
     /**
-     * @param        $numrest
-     * @param string $stroka
+     * @param integer $clientId
+     * @param string $searchString
      * @return array
      * @throws \yii\db\Exception
      */
-    public function getSuppliersByString($numrest, string $stroka)
+    public function getSuppliersByString(integer $clientId, string $searchString)
     {
-        $numrest = (int)$numrest; //wtf, переписать без всякой жалости.
-        $sql = "SELECT organization.id,organization.name FROM organization INNER JOIN relation_supp_rest ON
-                (organization.id=relation_supp_rest.supp_org_id AND relation_supp_rest.rest_org_id=$numrest)";
-        $connection = \Yii::$app->getDb();
-        $command    = $connection->createCommand($sql);
-        $res        = $command->queryAll();
-        ksort($res);
-        $res2       = [];
-        if ($stroka != '') {
-            foreach ($res as $postav) {
-                $podstav = mb_strtolower($postav['name']);
-                if (strpos($podstav, $stroka) !== false) {
-                    $res2[] = $postav;
-                }
-            }
-        } else {
-            foreach ($res as $postav) {
-                $podstav = mb_strtolower($postav['name']);
-                if (count($res2) < 100) {
-                    $res2[] = $postav;
-                } //ограничение на количество поставщиков для выпадающего списка
-            }
-        }
-        return $res2;
+        $query = Organization::find()->select('organization.id,organization.name')
+            ->innerJoin('relation_supp_rest', 'organization.id=relation_supp_rest.supp_org_id')
+            ->where(['relation_supp_rest.rest_org_id' => $clientId])
+            ->andFilterWhere(['like', 'name', $searchString])
+            ->orderBy('name')->all();
+        $result = ArrayHelper::toArray($query, [
+            'common\models\Organization' => [
+                'id',
+                'name',
+            ],
+        ]);
+        return $result;
     }
 
 }

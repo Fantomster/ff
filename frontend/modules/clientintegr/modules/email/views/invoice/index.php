@@ -22,16 +22,16 @@ use yii\helpers\Url;
 
 Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
 $form = ActiveForm::begin([
-            'options'                => [
-                'data-pjax' => false,
-                'id'        => 'search-form',
-                'role'      => 'search',
-            ],
-            'enableClientValidation' => false,
-            'method'                 => 'get',
-        ]);
+    'options'                => [
+        'data-pjax' => false,
+        'id'        => 'search-form',
+        'role'      => 'search',
+    ],
+    'enableClientValidation' => false,
+    'method'                 => 'get',
+]);
 
-$this->title                         = 'Список накладных';
+$this->title = 'Список накладных';
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;
@@ -115,8 +115,8 @@ $this->registerJs('
                     <div class="col-lg-2 col-md-3 col-sm-6">
                         <?php
                         echo $form->field($searchModel, 'number')
-                                ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'number'])
-                                ->label(Yii::t('message', 'frontend.views.torg12.number', ['ru' => 'Номер накладной']), ['class' => 'label', 'style' => 'color:#555']);
+                            ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'number'])
+                            ->label(Yii::t('message', 'frontend.views.torg12.number', ['ru' => 'Номер накладной']), ['class' => 'label', 'style' => 'color:#555']);
                         ?>
                     </div>
                     <div class="col-lg-3 col-md-5 col-sm-9">
@@ -143,8 +143,8 @@ $this->registerJs('
                     <div class="col-lg-2 col-md-3 col-sm-6">
                         <?php
                         echo $form->field($searchModel, 'name_postav')
-                                ->textInput(['prompt' => 'Поиск', 'class' => 'form-control fa fa-search', 'id' => 'name_postav_filter'])
-                                ->label(Yii::t('message', 'frontend.views.supplier.denome', ['ru' => 'Наименование поставщика']), ['class' => 'label', 'style' => 'color:#555']);
+                            ->textInput(['prompt' => 'Поиск', 'class' => 'form-control fa fa-search', 'id' => 'name_postav_filter'])
+                            ->label(Yii::t('message', 'frontend.views.supplier.denome', ['ru' => 'Наименование поставщика']), ['class' => 'label', 'style' => 'color:#555']);
                         ?>
                     </div>
                 </div>
@@ -165,7 +165,7 @@ $this->registerJs('
                         'columns'      => [
                             [
                                 'header'             =>
-                                'выбрать / ' . \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-close clear_invoice_radio', 'style' => 'cursor:pointer;color:red']),
+                                    'выбрать / ' . \yii\helpers\Html::tag('i', '', ['class' => 'fa fa-close clear_invoice_radio', 'style' => 'cursor:pointer;color:red']),
                                 'format'             => 'raw',
                                 'attribute'          => 'number',
                                 'filterInputOptions' => [
@@ -184,10 +184,10 @@ $this->registerJs('
                                     return '<a href="#" class="btn btn-secondary btn-lg invoice_radio" role="button" aria-disabled="true" id="' . $model->id . '">☐</a>';
                                 },
                                 //'contentOptions' => ['class' => 'text-center'],
-                                'contentOptions'                     => function ($model) {
+                                'contentOptions'     => function ($model) {
                                     return ["id" => "rbutton" . $model->id];
                                 },
-                                'headerOptions' => ['style' => 'width: 100px;'],
+                                'headerOptions'      => ['style' => 'width: 100px;'],
                             ],
                             [
                                 'format'             => 'raw',
@@ -200,41 +200,41 @@ $this->registerJs('
                                 'contentOptions'     => function ($model) {
                                     return ["id" => "nn" . $model->id];
                                 },
-                                'value' => function ($data) {
+                                'value'              => function ($data) {
 
-                                    $user          = Yii::$app->user->identity;
-                                    $licenses      = $user->organization->getLicenseList();
+                                    $user = Yii::$app->user->identity;
+                                    $licenses = $user->organization->getLicenseList();
                                     $timestamp_now = time();
                                     if (isset($licenses['rkws'])) {
-                                        $sub0                 = explode(' ', $licenses['rkws']->td);
-                                        $sub1                 = explode('-', $sub0[0]);
+                                        $sub0 = explode(' ', $licenses['rkws']->td);
+                                        $sub1 = explode('-', $sub0[0]);
                                         $licenses['rkws']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
                                         if ($licenses['rkws']->status_id == 0) {
                                             $rk_us = 0;
                                         }
-                                        if (($licenses['rkws']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['rkws']->td)))) {
+                                        if (($licenses['rkws']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws']->td)))) {
                                             $link = 'rkws';
                                         }
                                     }
                                     if (isset($licenses['iiko'])) {
-                                        $sub0                 = explode(' ', $licenses['iiko']->td);
-                                        $sub1                 = explode('-', $sub0[0]);
+                                        $sub0 = explode(' ', $licenses['iiko']->td);
+                                        $sub1 = explode('-', $sub0[0]);
                                         $licenses['iiko']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
                                         if ($licenses['iiko']->status_id == 0) {
                                             $lic_iiko = 0;
                                         }
-                                        if (($licenses['iiko']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['iiko']->td)))) {
+                                        if (($licenses['iiko']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['iiko']->td)))) {
                                             $link = 'iiko';
                                         }
                                     }
                                     if (isset($licenses['tillypad'])) {
-                                        $sub0                     = explode(' ', $licenses['tillypad']->td);
-                                        $sub1                     = explode('-', $sub0[0]);
+                                        $sub0 = explode(' ', $licenses['tillypad']->td);
+                                        $sub1 = explode('-', $sub0[0]);
                                         $licenses['tillypad']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
                                         if ($licenses['tillypad']->status_id == 0) {
                                             $lic_tilly = 0;
                                         }
-                                        if (($licenses['tillypad']->status_id == 1) and ( $timestamp_now <= (strtotime($licenses['tillypad']->td)))) {
+                                        if (($licenses['tillypad']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['tillypad']->td)))) {
                                             $link = 'tillypad';
                                         }
                                     }
@@ -293,7 +293,7 @@ $this->registerJs('
                                 'contentOptions' => function ($data) {
                                     return ["id" => "oid" . $data->id];
                                 },
-                                'value' => function ($data) {
+                                'value'          => function ($data) {
                                     return Html::a($data->order_id, Url::to(['/order/view', 'id' => $data->order_id]), ['class' => 'target-blank', 'data-pjax' => "0"]);
                                 },
                             ],
@@ -311,7 +311,7 @@ $this->registerJs('
                                 'hAlign'         => 'center',
                                 'contentOptions' => function ($data) {
                                     return ["id"          => "way" . $data->id,
-                                        "data-vendor" => $data->vendor_id];
+                                            "data-vendor" => $data->vendor_id];
                                 },
                                 /* 'buttons' => [
                                   'view_relations' => function ($url, $model) {
@@ -322,7 +322,7 @@ $this->registerJs('
                                   }
                                   }
                                   ], */
-                                'value' => function ($model) {
+                                'value'          => function ($model) {
                                     if (isset($model->vendor_id)) {
                                         return $model->vendor->name;
                                     } else {
@@ -331,12 +331,12 @@ $this->registerJs('
                                 }
                             ],
                             [
-                                'class' => 'kartik\grid\ExpandRowColumn',
-                                'width' => '50px',
-                                'value' => function ($model, $key, $index, $column) {
+                                'class'            => 'kartik\grid\ExpandRowColumn',
+                                'width'            => '50px',
+                                'value'            => function ($model, $key, $index, $column) {
                                     return GridView::ROW_COLLAPSED;
                                 },
-                                'detail' => function ($model, $key, $index, $column) {
+                                'detail'           => function ($model, $key, $index, $column) {
                                     return \Yii::$app->controller->renderPartial('_content', ['model' => $model]);
                                 },
                                 'expandOneOnly'    => false,
@@ -366,12 +366,12 @@ $this->registerJs('
 <?php
 $url = \Yii::$app->urlManager->createUrl('/clientintegr/email/invoice');
 
-$user         = \Yii::$app->user->identity;
+$user = \Yii::$app->user->identity;
 /**
  * @var $organization \common\models\Organization
  */
 $organization = $user->organization;
-$integration  = $organization->integrationOnly();
+$integration = $organization->integrationOnly();
 
 $list_integration = '';
 
@@ -392,8 +392,8 @@ if (!empty($integration)) {
     ];
     foreach ($integration as $key => $row) {
         $list_integration .= '<br>' . \yii\helpers\Html::a($links[$key]['title'], \Yii::$app->urlManager->createUrl($links[$key]['url']), [
-                    'class' => 'btn btn-primary'
-        ]);
+                'class' => 'btn btn-primary'
+            ]);
     }
 }
 
@@ -437,6 +437,7 @@ $js = <<<JS
                         $.post('$url/list-postav', {org_id: organization_id, stroka: a}).done(
                                     function(data){
                                         var arr = JSON.parse(data);
+                                        console.log(arr);
                                         if (arr.length>0) {
                                             var sel100 = 'Показаны первые 100 позиций';
                                             if (arr.length>=100) {
@@ -461,6 +462,7 @@ $js = <<<JS
                                     $.post('$url/list-postav', {org_id: organization_id, stroka: a}).done(
                                     function(data){
                                         var arr = JSON.parse(data);
+                                        console.log(arr);
                                         if (arr.length>0) {
                                             var sel = '<div id="spisok">';
                                             sel = sel+'<select id="selpos" name="list_postav" class="swal2-input">';
@@ -900,7 +902,7 @@ $js = <<<JS
 JS;
 $this->registerJs($js);
 $this->registerJsFile(
-        'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js', ['depends' => [\yii\web\JqueryAsset::className()]]
+    'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js', ['depends' => [\yii\web\JqueryAsset::className()]]
 );
 ?>
 </div>

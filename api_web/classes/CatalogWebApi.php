@@ -60,8 +60,9 @@ class CatalogWebApi extends WebApi
      * @param Catalog $catalog
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
-    public function deleteMainCatalog($catalog)
+    public function deleteMainCatalog(Catalog $catalog)
     {
         $isEmpty = !CatalogBaseGoods::find()->where(['cat_id' => $catalog->id, 'deleted' => false])->exists();
         if ($isEmpty) {
@@ -162,7 +163,7 @@ class CatalogWebApi extends WebApi
         try {
             /* Удаление всех продуктов при обновлении */
             CatalogGoods::deleteAll([
-                'cat_id' => $catalog->id,
+                'cat_id'     => $catalog->id,
                 'service_id' => Registry::MC_BACKEND
             ]);
             $arBatchInsert = [];
@@ -219,10 +220,10 @@ class CatalogWebApi extends WebApi
                 }
 
                 $catalogGood = new CatalogGoods([
-                    'cat_id' => $catalog->id,
+                    'cat_id'        => $catalog->id,
                     'base_goods_id' => $model->id,
-                    'price' => $model->price,
-                    'service_id' => Registry::MC_BACKEND
+                    'price'         => $model->price,
+                    'service_id'    => Registry::MC_BACKEND
                 ]);
                 $arBatchInsert[] = $catalogGood;
 
@@ -613,8 +614,8 @@ class CatalogWebApi extends WebApi
             ->where([
                 'supp_org_id' => $vendorID,
                 'rest_org_id' => $restOrganization->id,
-                'status' => RelationSuppRest::CATALOG_STATUS_ON,
-                'deleted' => 0,
+                'status'      => RelationSuppRest::CATALOG_STATUS_ON,
+                'deleted'     => 0,
             ]);
         if (!$kostilForInvitedVendor) {
             $relQuery->andWhere([">", "cat_id", 0]);
@@ -686,8 +687,10 @@ class CatalogWebApi extends WebApi
         $vendorId = $request['vendor_id'];
         $vendor = Organization::findOne($vendorId);
         if (empty($vendor) || $vendor->type_id != Organization::TYPE_SUPPLIER) {
-            //todo_refactor no migration localization
             throw new BadRequestHttpException('vendor.not_found');
+        }
+        if ($vendor->isEdi()) {
+            throw new BadRequestHttpException('vendor.is_edi');
         }
         if ($vendor->vendor_is_work) {
             throw new BadRequestHttpException('vendor.is_work');
@@ -864,8 +867,8 @@ class CatalogWebApi extends WebApi
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $request['cat_id'], 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
             return [
-                'exists' => true,
-                'rows' => Excel::get20RowsFromTempUploaded($tempCatalog),
+                'exists'  => true,
+                'rows'    => Excel::get20RowsFromTempUploaded($tempCatalog),
                 'mapping' => $tempCatalog->mapping,
             ];
         } else {

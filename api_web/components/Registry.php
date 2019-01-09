@@ -18,9 +18,9 @@ class Registry
 {
 
     /** id лицензий MixCart из таблицы license*/
-    const MC_LITE_LICENSE_ID = 11;
-    const MC_BUSINESS_LICENSE_ID = 12;
-    const MC_ENTERPRICE_LICENSE_ID = 13;
+    const MC_LITE_LICENSE_ID = 101;
+    const MC_BUSINESS_LICENSE_ID = 102;
+    const MC_ENTERPRICE_LICENSE_ID = 103;
 
     /** - Services section - */
     const RK_SERVICE_ID = 1;
@@ -41,6 +41,8 @@ class Registry
     const TILLYPAD_SERVICE_ID = 10;
     /**@var int const for MixCart service_id in all_service table */
     const MC_BACKEND = 9;
+    /**@var int const for Poster service_id in all_service table */
+    const POSTER_SERVICE_ID = 11;
 
     /** - Waybill section - */
     const WAYBILL_COMPARED = 1;

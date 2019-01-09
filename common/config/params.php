@@ -108,5 +108,6 @@ return [
     'disable_daemon_logs'     => true,
     'encrypt'                 => [
         'salt' => '3652612C4A5B5D1B1719' // MixCart2.0 в шестнадцатеричной системе
-    ]
+    ],
+    'posterApiUrl'            => 'https://joinposter.com/api/',
 ];

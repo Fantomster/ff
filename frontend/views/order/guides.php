@@ -343,7 +343,13 @@ $this->registerJs('
                     <small class="label bg-yellow">new</small>
                 </a>
             </li>
-            <?php if ($client->parent_id == null && Yii::$app->user->identity->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR) : ?>
+            <?php
+            $disabled_roles = [
+                \common\models\Role::ROLE_RESTAURANT_BUYER,
+                \common\models\Role::ROLE_RESTAURANT_JUNIOR_BUYER,
+                \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR,
+            ];
+            if ($client->parent_id == null && !in_array(Yii::$app->user->identity->role_id, $disabled_roles)) : ?>
                 <li>
                     <a href="<?= Url::to(['order/product-filter']) ?>">
                         <?= Yii::t('message', 'frontend.views.order.filter_product', ['ru' => 'Фильтрация товаров']) ?>

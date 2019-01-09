@@ -67,7 +67,8 @@ $licenses = $user->organization->getLicenseList();
                             'url' => ['/order/index'],
                             'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">' . ($newOrdersCount ? $newOrdersCount : '') . '</span></span></a>'
                         ],
-                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.vendors', ['ru' => 'Поставщики']), 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs step-vendor'], 'visible' => (!in_array($user->role_id, $disabled_roles) && $user->role_id != \common\models\Role::ROLE_RESTAURANT_JUNIOR_BUYER) && $user->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR],
+                        ['label' => Yii::t('message', 'frontend.views.layouts.client.left.vendors', ['ru' => 'Поставщики']), 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs step-vendor'],
+                         'visible' => (!in_array($user->role_id, $disabled_roles) && $user->role_id != \common\models\Role::ROLE_RESTAURANT_JUNIOR_BUYER) && $user->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR || $user->role_id == \common\models\Role::ROLE_RESTAURANT_BUYER],
 //                        [
 //                            'label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']),
 //                            'icon' => 'envelope',

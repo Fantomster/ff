@@ -485,18 +485,6 @@ class EDIClass extends Component
         return $catalogID;
     }
 
-    /**
-     * @return array
-     */
-    public function getFileList(): array
-    {
-        return (new \yii\db\Query())
-            ->select(['id', 'name'])
-            ->from(EdiFilesQueue::tableName())
-            ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
-            ->all();
-    }
-
     public function getSendingOrderContent($order, $done, $dateArray, $orderContent)
     {
         $vendor = $order->vendor;

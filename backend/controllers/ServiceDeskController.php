@@ -5,6 +5,7 @@ namespace backend\controllers;
 use common\models\OperatorCall;
 use common\models\search\OperatorReportFastSearch;
 use common\models\search\OperatorReportSearch;
+use console\controllers\CronController;
 use Yii;
 use common\models\Organization;
 use common\models\forms\ServiceDesk;
@@ -57,7 +58,7 @@ class ServiceDeskController extends Controller
                         ],
                     ],
                     [
-                        'actions'       => ['operators-report', 'fast-operators-report'],
+                        'actions'       => ['operators-report', 'fast-operators-report', 'test'],
                         'allow'         => true,
                         'matchCallback' => function ($rule, $action) {
                             return in_array(Yii::$app->user->id, Yii::$app->params['operatorsReportAdminIDs']);
@@ -167,6 +168,15 @@ class ServiceDeskController extends Controller
         $dataProvider = $searchModel->search($params);
 
         return $this->render('operator-fast', ['dataProvider' => $dataProvider, 'searchModel' => $searchModel, 'filterValues' => $filterValues]);
+    }
+
+    //метод для теста - симуляция запуска крон
+    public function actionTest()
+    {
+        $cron = new CronController(1, 1);
+        $cron->actionHandleFiles();
+        $cron->actionHandleFilesQueue();
+        echo 'success';
     }
 
 }

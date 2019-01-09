@@ -66,15 +66,6 @@ class SettingsController extends DefaultController
         ];
     }
 
-    //метод для теста - симуляция запуска крон
-//    public function actionTest()
-//    {
-//        $cron = new CronController(1, 1);
-//        $cron->actionHandleFiles();
-//        $cron->actionHandleFilesQueue();
-//        echo 'success';
-//    }
-
     public function actionUser()
     {
         $profile = $this->currentUser->profile;

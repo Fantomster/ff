@@ -267,7 +267,8 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
 
     public static function createWaybill($order_id, $auto = false)
     {
-
+        $order_id = (int)$order_id; //переписать без raw запросов
+        
         $res = true;
 
         $order = \common\models\Order::findOne(['id' => $order_id]);

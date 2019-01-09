@@ -91,6 +91,7 @@ class ClientController extends DefaultController
                         // Allow restaurant managers
                         'roles'   => [
                             Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_ONE_S_INTEGRATION,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,

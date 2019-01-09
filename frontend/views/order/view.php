@@ -231,6 +231,14 @@ $js = <<<JS
             });        
         });
 
+        $(document).on('pjax:complete', function() {
+            dataEdited = 0;
+        })
+JS;
+
+if (Yii::$app->user->identity->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR) {
+    $js .= <<<JS
+
         $(document).on("click", ".cancel-order", function(e) {
             e.preventDefault();
             var clicked = $(this);
@@ -270,10 +278,9 @@ $js = <<<JS
                 }
             });
         });
-        $(document).on('pjax:complete', function() {
-            dataEdited = 0;
-        })
 JS;
+}
+
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 \common\assets\PrintThisAsset::register($this);
 

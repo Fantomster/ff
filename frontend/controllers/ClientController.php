@@ -149,7 +149,9 @@ class ClientController extends DefaultController
                             'view-catalog',
                             'view-supplier',
                             'payments',
-                            'price-stat'
+                            'price-stat',
+                            'remove-supplier',
+                            'apply-supplier',
                         ],
                         'allow'   => true,
                         // Allow restaurant managers

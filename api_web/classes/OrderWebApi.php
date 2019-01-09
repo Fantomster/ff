@@ -1049,10 +1049,9 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new ValidationException($order->getFirstErrors());
             }
             $t->commit();
-            if ($isUnconfirmedVendor) {
+            $sender = $order->client;
+            if ($order->vendor_id == $this->user->organization_id || $isUnconfirmedVendor) {
                 $sender = $order->vendor;
-            } else {
-                $sender = $order->client;
             }
             /** @var OrderNotice $notice */
             $notice = Notice::init('Order');

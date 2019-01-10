@@ -65,7 +65,7 @@ class ClientSearch extends RelationSuppRest {
         $maTable = ManagerAssociate::tableName();
 
         $query = RelationSuppRest::find()
-                ->select("$rspTable.*, $orgTable.name as client_name, $catTable.name as catalog_name, `$orderTable`.updated_at as last_order_date")
+                ->select("$rspTable.*, $orgTable.name as client_name, $catTable.name as catalog_name, $orderTable.updated_at as last_order_date")
                 ->joinWith('client')
                 ->joinWith('catalog')
                 ->joinWith('lastOrder');

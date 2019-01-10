@@ -225,6 +225,7 @@ $dataColumns = [
         'format' => 'raw',
         'value' => function ($data) {
             $class = $message = $message_orig = $url = null;
+            $disabledString = (Yii::$app->user->identity->role_id == \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR) ? " disabled" : "";
             if (in_array($data->status, [OrderStatus::STATUS_DONE, OrderStatus::STATUS_REJECTED, OrderStatus::STATUS_CANCELLED])) {
                 $message_orig = Yii::t('message', 'frontend.views.order.repeat_order', ['ru' => 'Повторить заказ']);
                 $message = Yii::t('message', 'frontend.views.order.repeat', ['ru' => 'Повторить']);
@@ -233,7 +234,7 @@ $dataColumns = [
             } elseif ($data->isObsolete) {
                 $message_orig = Yii::t('message', 'frontend.views.order.complete_order', ['ru' => 'Завершить заказ']);
                 $message = Yii::t('message', 'frontend.views.order.complete', ['ru' => 'Завершить']);
-                $class = 'complete btn btn-outline-success';
+                $class = "complete btn btn-outline-success$disabledString";
                 if (isset($data->vendor->ediOrganization->gln_code) && $data->vendor->ediOrganization->gln_code > 0) {
                     $class = 'complete btn btn-outline-success completeEdi';
                 }

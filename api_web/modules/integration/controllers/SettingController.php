@@ -521,7 +521,28 @@ class SettingController extends \api_web\components\WebApiController
      *         response = 200,
      *         description = "success",
      *         @SWG\Schema(
-     *             default={{}}
+     *             default={
+     *                  "result": true,
+     *                  "data_from_server": {
+     *                    "access_token": "145072:7130848db640adf93839a485a4371b3f",
+     *                    "account_number": "145072",
+     *                    "user": {
+     *                        "id": 3,
+     *                        "name": "",
+     *                        "email": "makagonova@mixcart.ru",
+     *                        "role_id": 3
+     *                    },
+     *                    "ownerInfo": {
+     *                        "email": "makagonova@mixcart.ru",
+     *                        "phone": "+7 9035445138",
+     *                        "city": "",
+     *                        "country": "RU",
+     *                        "name": "",
+     *                        "company_name": "MixCart"
+     *                    },
+     *                    "tariff": {}
+     *                  }
+     *              }
      *         )
      *     ),
      *     @SWG\Response(

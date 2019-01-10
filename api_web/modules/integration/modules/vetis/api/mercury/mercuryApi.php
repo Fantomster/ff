@@ -771,19 +771,17 @@ class mercuryApi extends baseApi
         try {
             foreach ($result as $item) {
                 $item = json_decode(json_encode($item), true);
-                switch ($item['appliedR13nRule']['decision']) {
-                    case 1 :
-                        break;                         //Можно делать перемещение без ограничений
-                    case 2 ://Можно делать перемещение при соблюдении условий
-                        $requirements = !array_key_exists('relatedDisease', $item['appliedR13nRule']['requirement']) ? $item['appliedR13nRule']['requirement'] : [$item['appliedR13nRule']['requirement']];
-                        foreach ($requirements as $requirement) {
-                            $сonditions[] = ['name'   => $requirement['relatedDisease']['name'],
-                                             'groups' => $this->getConditions($requirement)];
-                        }
-                        break;
-                    case 3 :
-                        throw new BadRequestHttpException("Relocation prohibited by regionalization rules|{$item['appliedR13nRule']['requirement']['relatedDisease']['name']}", 1330);
-                    //throw new Exception('Пересещение запрещено правилами регионализации (' . $item['appliedR13nRule']['requirement']['relatedDisease']['name'] . ')!');
+                if ($item['appliedR13nRule']['decision'] == 2) {
+                    //Можно делать перемещение при соблюдении условий
+                    $requirements = !array_key_exists('relatedDisease', $item['appliedR13nRule']['requirement']) ? $item['appliedR13nRule']['requirement'] : [$item['appliedR13nRule']['requirement']];
+                    foreach ($requirements as $requirement) {
+                        $сonditions[] = ['name'   => $requirement['relatedDisease']['name'],
+                                         'groups' => $this->getConditions($requirement)];
+                    }
+                }
+
+                if ($item['appliedR13nRule']['decision'] == 3) {
+                    throw new BadRequestHttpException("Relocation prohibited by regionalization rules|{$item['appliedR13nRule']['requirement']['relatedDisease']['name']}", 1330);
                 }
             }
         } catch (\Exception $e) {
@@ -803,29 +801,27 @@ class mercuryApi extends baseApi
     private function getConditions($requirement)
     {
         $conditions = null;
-        switch ($requirement['type']) {
-            case 1 :
-                break;                         //Можно делать перемещение без ограничений
-            case 2 ://Можно делать перемещение при соблюдении условий
-                $conditionGroups = is_array($requirement["conditionGroup"]) ? $requirement["conditionGroup"] : [$requirement["conditionGroup"]];
-                $i = 0;
-                foreach ($conditionGroups as $group) {
-                    $conditions_group = null;
-                    $group = !array_key_exists('condition', $group) ? $group : $group['condition'];
-                    $condition = !array_key_exists('guid', $group) ? $group : [$group];
-                    foreach ($condition as $cond) {
-                        if ($cond['active'] && $cond['last']) {
-                            $conditions_group[] = ['guid'    => $cond['guid'],
-                                                   'title'   => $cond['text'],
-                                                   'checked' => false];
-                        }
+        if ($requirement['type'] == 2) {
+            //Можно делать перемещение при соблюдении условий
+            $conditionGroups = is_array($requirement["conditionGroup"]) ? $requirement["conditionGroup"] : [$requirement["conditionGroup"]];
+            $i = 0;
+            foreach ($conditionGroups as $group) {
+                $conditions_group = null;
+                $group = !array_key_exists('condition', $group) ? $group : $group['condition'];
+                $condition = !array_key_exists('guid', $group) ? $group : [$group];
+                foreach ($condition as $cond) {
+                    if ($cond['active'] && $cond['last']) {
+                        $conditions_group[] = ['guid'    => $cond['guid'],
+                                               'title'   => $cond['text'],
+                                               'checked' => false];
                     }
-                    $conditions[] = $conditions_group;
                 }
-                break;
-            case 3 :
-                throw new BadRequestHttpException("Relocation prohibited by regionalization rules|{$requirement['relatedDisease']['name']}", 1330);
-            //throw new Exception('Пересещение запрещено правилами регионализации (' . $requirement['relatedDisease']['name'] . ')!');
+                $conditions[] = $conditions_group;
+            }
+        }
+
+        if ($requirement['type'] == 3) {
+            throw new BadRequestHttpException("Relocation prohibited by regionalization rules|{$requirement['relatedDisease']['name']}", 1330);
         }
         return $conditions;
     }

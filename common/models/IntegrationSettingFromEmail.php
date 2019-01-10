@@ -81,6 +81,7 @@ class IntegrationSettingFromEmail extends \yii\db\ActiveRecord
         return [
             [['organization_id', 'server_type', 'server_host', 'server_port', 'user', 'password'], 'required'],
             [['organization_id', 'server_port', 'server_ssl', 'is_active'], 'integer'],
+            [['server_type'], 'compare', 'compareValue' => 'imap', 'operator' => '===', 'message' => 'IMAP only'],
             [['created_at', 'updated_at'], 'safe'],
             [['server_type', 'server_host', 'user', 'password'], 'string', 'max' => 255],
             [['language'], 'string', 'max' => 3],

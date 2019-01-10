@@ -19,9 +19,9 @@ use yii\widgets\ActiveForm;
     <?php $form = ActiveForm::begin(); ?>
     <?= Html::hiddenInput('IntegrationSettingFromEmail[id]', ($model->id ?? null)) ?>
     <?= Html::hiddenInput('IntegrationSettingFromEmail[organization_id]', $user->organization_id) ?>
-    <?= $form->field($model, 'server_type')->dropDownList(['imap' => 'IMAP', 'pop3' => 'POP3']) ?>
+    <?= $form->field($model, 'server_type')->dropDownList(['imap' => 'IMAP']) ?>
     <?= $form->field($model, 'server_host')->hint('Пример: imap.yandex.ru') ?>
-    <?= $form->field($model, 'server_port')->hint('IMAP: 993, POP3: 995')->textInput(['type' => 'number']) ?>
+    <?= $form->field($model, 'server_port')->hint('IMAP: 993')->textInput(['type' => 'number']) ?>
     <?= $form->field($model, 'user')->hint('Логин от почты') ?>
     <?= $form->field($model, 'password')->passwordInput([
         'value' => $model->countCharsPassword

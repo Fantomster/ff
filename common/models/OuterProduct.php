@@ -8,20 +8,21 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "outer_product".
  *
- * @property int $id
- * @property int $service_id ID Сервиса
- * @property int $org_id ID организации
- * @property string $outer_uid Внешний ID
- * @property string $name Название продукта
- * @property string $parent_uid Id родителя
- * @property int $level Уровень
- * @property int $is_deleted Статус удаления
- * @property int $is_category Статус категории
- * @property int $outer_unit_id Внешний ID привязки к таблице outer_unit
- * @property string $comment Комментарий
- * @property string $created_at Дата создания
- * @property string $updated_at Дата обновления
- * @property OuterUnit $outerUnit
+ * @property int               $id
+ * @property int               $service_id    ID Сервиса
+ * @property int               $org_id        ID организации
+ * @property string            $outer_uid     Внешний уникальный ID
+ * @property string            $name
+ * @property string            $parent_uid    Внешний уникальный ID родителя
+ * @property int               $level         Уровень
+ * @property int               $is_deleted    Статус удаления
+ * @property int               $is_category   Статус категории
+ * @property int               $outer_unit_id Связь с таблицей outer_unit
+ * @property string            $comment       Комментарий
+ * @property string            $created_at    Дата создания
+ * @property string            $updated_at    Дата обновления
+ * @property OuterProductMap[] $outerProductMaps
+ * @property OuterUnit         $outerUnit
  */
 class OuterProduct extends \yii\db\ActiveRecord
 {
@@ -30,7 +31,7 @@ class OuterProduct extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'outer_product';
+        return '{{%outer_product}}';
     }
 
     /**
@@ -60,19 +61,19 @@ class OuterProduct extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'service_id' => 'Service ID',
-            'org_id' => 'Org ID',
-            'outer_uid' => 'Outer Uid',
-            'name' => 'Name',
-            'parent_uid' => 'Parent Uid',
-            'level' => 'Level',
-            'is_deleted' => 'Is Deleted',
-            'is_category' => 'Is Category',
+            'id'            => 'ID',
+            'service_id'    => 'Service ID',
+            'org_id'        => 'Org ID',
+            'outer_uid'     => 'Outer Uid',
+            'name'          => 'Name',
+            'parent_uid'    => 'Parent Uid',
+            'level'         => 'Level',
+            'is_deleted'    => 'Is Deleted',
+            'is_category'   => 'Is Category',
             'outer_unit_id' => 'Outer Unit ID',
-            'comment' => 'Comment',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
+            'comment'       => 'Comment',
+            'created_at'    => 'Created At',
+            'updated_at'    => 'Updated At',
         ];
     }
 
@@ -83,19 +84,27 @@ class OuterProduct extends \yii\db\ActiveRecord
     {
         return [
             [
-                'class' => TimestampBehavior::class,
+                'class'              => TimestampBehavior::class,
                 'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',
-                'value' => \gmdate('Y-m-d H:i:s'),
+                'value'              => \gmdate('Y-m-d H:i:s'),
             ],
         ];
     }
 
     /**
      * @return \yii\db\ActiveQuery
-     */     
+     */
     public function getOuterUnit()
     {
         return $this->hasOne(OuterUnit::className(), ['id' => 'outer_unit_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOuterProductMaps()
+    {
+        return $this->hasMany(OuterProductMap::className(), ['outer_product_id' => 'id']);
     }
 }

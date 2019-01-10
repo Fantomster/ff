@@ -7,21 +7,21 @@ use Yii;
 /**
  * This is the model class for table "mp_ed".
  *
- * @property integer $id
- * @property string $name
+ * @property int    $id   Идентификатор записи в таблице
+ * @property string $name Наименование единицы измерения товаров
  */
 class MpEd extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'mp_ed';
+        return '{{%mp_ed}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -32,19 +32,25 @@ class MpEd extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'   => 'ID',
             'name' => 'Name',
         ];
     }
 
-    public static function dropdown() {
+    /**
+     * @return array
+     */
+    public static function dropdown()
+    {
         $list = \yii\helpers\ArrayHelper::getColumn(self::find()->all(), 'name');
-        $list = array_map(function($item) { return Yii::t('app', $item); }, $list);
+        $list = array_map(function ($item) {
+            return Yii::t('app', $item);
+        }, $list);
         return $list;
     }
 }

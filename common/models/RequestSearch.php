@@ -7,7 +7,8 @@ use yii\data\ActiveDataProvider;
 /**
  * OrderSearch represents the model behind the search form about `common\models\Order`.
  */
-class RequestSearch extends Request {
+class RequestSearch extends Request
+{
 
     public $searchString;
     public $date_from;
@@ -18,9 +19,10 @@ class RequestSearch extends Request {
     public $categoryName;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['amount'], 'integer'],
             [['created_at', 'date_from', 'date_to', 'searchString', 'product', 'comment', 'clientName', 'categoryName'], 'safe'],
@@ -28,9 +30,10 @@ class RequestSearch extends Request {
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return "{{%request}}";
     }
 
@@ -38,14 +41,14 @@ class RequestSearch extends Request {
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
-    public function search($params, $franchisee_id, $prev30 = false) {
+    public function search($params, $franchisee_id, $prev30 = false)
+    {
         $requestTable = Request::tableName();
         $query = Request::find()->leftJoin('franchisee_associate', "franchisee_associate.organization_id = request.rest_org_id")->leftJoin('organization', "organization.id = request.rest_org_id")->leftJoin('mp_category', "mp_category.id = request.category");
-        if($franchisee_id){
-            $query->where(['franchisee_associate.franchisee_id'=>$franchisee_id]);
+        if ($franchisee_id) {
+            $query->where(['franchisee_associate.franchisee_id' => $franchisee_id]);
         }
         $this->load($params);
 
@@ -80,7 +83,7 @@ class RequestSearch extends Request {
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
+            'sort'  => ['defaultOrder' => ['id' => SORT_DESC]]
         ]);
 
         if (!$this->validate()) {

@@ -94,7 +94,7 @@ class IntegrationWebApi extends WebApi
      */
     public function handleWaybill(array $post): array
     {
-       $this->validateRequest($post, ['service_id']);
+        $this->validateRequest($post, ['service_id']);
 
         $organizationID = $this->user->organization_id;
         $acquirerID = $organizationID;
@@ -124,7 +124,7 @@ class IntegrationWebApi extends WebApi
                     ->andWhere(['service_id' => $post['service_id']])
                     ->orderBy(['outer_number_code' => SORT_DESC])->limit(1)->one();
                 if ($existWaybill && $existWaybill->outer_number_code) {
-                    $ediNumber =  WaybillHelper::getLastEdiNumber($existWaybill->outer_number_code, $tmp_ed_num);
+                    $ediNumber = WaybillHelper::getLastEdiNumber($existWaybill->outer_number_code, $tmp_ed_num);
                 } else {
                     $ediNumber = $orderContent->edi_number . "-1";
                 }
@@ -164,7 +164,7 @@ class IntegrationWebApi extends WebApi
      */
     public function resetWaybillContent(array $post): array
     {
-       $this->validateRequest($post, ['waybill_content_id']);
+        $this->validateRequest($post, ['waybill_content_id']);
 
         $waybillContent = WaybillContent::find()
             ->joinWith('waybill')
@@ -218,7 +218,7 @@ class IntegrationWebApi extends WebApi
      */
     public function showWaybillContent(array $post): array
     {
-       $this->validateRequest($post, ['waybill_content_id']);
+        $this->validateRequest($post, ['waybill_content_id']);
 
         $waybillContent = WaybillContent::find()
             ->joinWith('waybill')
@@ -525,11 +525,13 @@ class IntegrationWebApi extends WebApi
             $isChildOrganization = false;
         }
 
-        $result = [];
         if (!empty($models)) {
-            foreach ($models as $model) {
-                $result[] = $this->prepareOutProductMap($model, $isChildOrganization);
+            $result = new \SplObjectStorage();
+            foreach (WebApiHelper::generator($models) as $model) {
+                $result->attach((object)$this->prepareOutProductMap($model, $isChildOrganization));
             }
+        } else {
+            $result = [];
         }
 
         return [
@@ -605,46 +607,21 @@ class IntegrationWebApi extends WebApi
             "outer_unit"                    => null,
             "outer_store"                   => null,
             "coefficient"                   => !empty($model['coefficient']) ? round($model['coefficient'], 10) : 1,
-            "vat"                           => (int)$model['vat'],
+            "vat"                           => (int)$model['vat'] ?? 0,
             "created_at"                    => WebApiHelper::asDatetime($model['created_at'] ?? null),
             "updated_at"                    => WebApiHelper::asDatetime($model['updated_at'] ?? null),
             "is_child_organization_for_map" => $isChild,
         ];
 
-        if (isset($model['vendor_id'])) {
-            $result ["vendor"] = [
-                "id"   => (int)$model['vendor_id'],
-                "name" => $model['vendor_name']
-            ];
-        }
+        $fields = ['vendor', 'product', 'outer_product', 'outer_unit', 'outer_store'];
 
-        if (isset($model['product_id'])) {
-            $result ["product"] = [
-                "id"   => (int)$model['product_id'],
-                "name" => $model['product_name']
-            ];
-            $result["unit"] = $model['unit'];
-        }
-
-        if (isset($model['outer_product_id'])) {
-            $result ["outer_product"] = [
-                "id"   => (int)$model['outer_product_id'],
-                "name" => $model['outer_product_name']
-            ];
-        }
-
-        if (isset($model["outer_unit_id"])) {
-            $result["outer_unit"] = [
-                "id"   => (int)$model['outer_unit_id'],
-                "name" => $model['outer_unit_name']
-            ];
-        }
-
-        if (isset($model['outer_store_id'])) {
-            $result["outer_store"] = [
-                "id"   => (int)$model['outer_store_id'],
-                "name" => $model['outer_store_name']
-            ];
+        foreach ($fields as $name) {
+            if (isset($model[$name . '_id'])) {
+                $result[$name] = [
+                    "id"   => (int)$model[$name . '_id'],
+                    "name" => $model[$name . '_name']
+                ];
+            }
         }
 
         return $result;

@@ -8,39 +8,39 @@ use common\models\notifications\EmailFails;
 /**
  * This is the model class for table "email_queue".
  *
- * @property int $id
- * @property string $to
- * @property string $from
- * @property string $subject
- * @property string $body
- * @property int $order_id
- * @property string $message_id
- * @property int $status
- * @property int $email_fail_id
- * @property string $created_at
- * @property string $updated_at
+ * @property int        $id            Идентификатор записи в таблице
+ * @property string     $to            Е-мэйл получателя электронного письма (кому)
+ * @property string     $from          Е-мэйл отправителя электронного письма (от кого)
+ * @property string     $subject       Заголовок электронного письма
+ * @property string     $body          Содержание электронного письма
+ * @property int        $order_id      Идентификатор заказа, по которому отправлено письмо
+ * @property string     $message_id    Идентификатор очереди на Amazon
+ * @property int        $status        Статус электронного письма (0 - новое, 1 - отправлено, 2 - получено, 3 -
+ *           отправить не удалось, неудача)
+ * @property int        $email_fail_id Идентификатор неудачи при отправке электронного письма
+ * @property string     $created_at    Дата и время создания записи в таблице
+ * @property string     $updated_at    Дата и время последнего изменения записи в таблице
  *
  * @property EmailFails $emailFail
- * @property Order $order
- * @property string $statusText
+ * @property Order      $order
  */
 class EmailQueue extends \yii\db\ActiveRecord
 {
     const STATUS_NEW = 0;
     const STATUS_SENDING = 1;
     const STATUS_CONFIRMED = 2;
-    const STATUS_FAILED = 3; 
-    
+    const STATUS_FAILED = 3;
+
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'email_queue';
+        return '{{%email_queue}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function behaviors(): array
     {
@@ -53,7 +53,7 @@ class EmailQueue extends \yii\db\ActiveRecord
             ],
         ];
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -77,17 +77,17 @@ class EmailQueue extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'to' => Yii::t('app', 'To'),
-            'from' => Yii::t('app', 'From'),
-            'subject' => Yii::t('app', 'Subject'),
-            'body' => Yii::t('app', 'Body'),
-            'order_id' => Yii::t('app', 'Order ID'),
-            'message_id' => Yii::t('app', 'Message ID'),
-            'status' => Yii::t('app', 'Status'),
+            'id'            => Yii::t('app', 'ID'),
+            'to'            => Yii::t('app', 'To'),
+            'from'          => Yii::t('app', 'From'),
+            'subject'       => Yii::t('app', 'Subject'),
+            'body'          => Yii::t('app', 'Body'),
+            'order_id'      => Yii::t('app', 'Order ID'),
+            'message_id'    => Yii::t('app', 'Message ID'),
+            'status'        => Yii::t('app', 'Status'),
             'email_fail_id' => Yii::t('app', 'Email Fail ID'),
-            'created_at' => Yii::t('app', 'Created At'),
-            'updated_at' => Yii::t('app', 'Updated At'),
+            'created_at'    => Yii::t('app', 'Created At'),
+            'updated_at'    => Yii::t('app', 'Updated At'),
         ];
     }
 
@@ -106,11 +106,11 @@ class EmailQueue extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Order::className(), ['id' => 'order_id']);
     }
-    
+
     /**
      * @return string
      */
-    public function getStatusText() 
+    public function getStatusText()
     {
         switch ($this->status) {
             case self::STATUS_NEW:

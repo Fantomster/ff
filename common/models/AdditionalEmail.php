@@ -9,26 +9,34 @@ use Yii;
 /**
  * This is the model class for table "additional_email".
  *
- * @property integer $id
- * @property string $email
- * @property integer $organization_id
- * @property integer $order_created
- * @property integer $order_canceled
- * @property integer $order_changed
- * @property integer $order_processing
- * @property integer $order_done
- * @property integer $request_accept
- * @property integer $merc_vsd
-* @property integer $merc_stock_expiry
- * @property integer $confirmed
- * @property string $token
+ * @property int          $id                Идентификатор записи в таблице
+ * @property string       $email             Е-мэйл
+ * @property int          $organization_id   Идентификатор организации
+ * @property int          $order_created     Показатель состояния необходимости отправлять оповещения о создании
+ *           заказов (0 - не отправлять, 1 - отправлять)
+ * @property int          $order_canceled    Показатель состояния необходимости отправлять оповещения об отмене заказов
+ *           (0 - не отправлять, 1 - отправлять)
+ * @property int          $order_changed     Показатель состояния необходимости отправлять оповещения об изменении
+ *           заказов (0 - не отправлять, 1 - отправлять)
+ * @property int          $order_processing  Показатель состояния необходимости отправлять оповещения о взятии заказов
+ *           в работу (0 - не отправлять, 1 - отправлять)
+ * @property int          $order_done        Показатель состояния необходимости отправлять оповещения о завершении
+ *           заказов (0 - не отправлять, 1 - отправлять)
+ * @property int          $request_accept    Показатель состояния согласия получения оповещений на дополнительный
+ *           е-мэйл
+ * @property int          $merc_vsd          Показатель состояния необходимости отправлять оповещения о непогашенных
+ *           ВСД (0 - не отправлять, 1 - отправлять)
+ * @property int          $confirmed         Показатель статуса подтверждения дополнительного е-мэйла (0 - не
+ *           подтверждён, 1 - подтверждён)
+ * @property string       $token             Хэш данного е-мэйла
+ * @property int          $merc_stock_expiry Уведомление о проблемной продукции в меркурии
  *
  * @property Organization $organization
  */
 class AdditionalEmail extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
@@ -36,7 +44,7 @@ class AdditionalEmail extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -52,22 +60,22 @@ class AdditionalEmail extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'email' => 'Email',
-            'organization_id' => Yii::t('app', 'common.models.additional_email.org', ['ru' => 'Организация']),
-            'order_created' => Yii::t('app', 'common.models.additional_email.creation', ['ru' => 'Создание']),
-            'order_canceled' => Yii::t('app', 'common.models.additional_email.cancel', ['ru' => 'Отмена']),
-            'order_changed' => Yii::t('app', 'common.models.additional_email.changing', ['ru' => 'Изменение']),
-            'order_processing' => Yii::t('app', 'common.models.additional_email.working', ['ru' => 'В работе']),
-            'order_done' => Yii::t('app', 'common.models.additional_email.ready', ['ru' => 'Выполнен']),
-            'request_accept' => Yii::t('app', 'common.models.additional_email.ready.accepted_two', ['ru' => 'Принятие заявки']),
-            'merc_vsd' => Yii::t('app', 'common.models.additional_email.vsd_short', ['ru' => 'ВСД']),
-            'merc_stock_expiry' =>  Yii::t('app', 'frontend.views.settings.stock_expiry_notification', ['ru'=>'Рассылки о проблемной продукции']),
+            'id'                => 'ID',
+            'email'             => 'Email',
+            'organization_id'   => Yii::t('app', 'common.models.additional_email.org', ['ru' => 'Организация']),
+            'order_created'     => Yii::t('app', 'common.models.additional_email.creation', ['ru' => 'Создание']),
+            'order_canceled'    => Yii::t('app', 'common.models.additional_email.cancel', ['ru' => 'Отмена']),
+            'order_changed'     => Yii::t('app', 'common.models.additional_email.changing', ['ru' => 'Изменение']),
+            'order_processing'  => Yii::t('app', 'common.models.additional_email.working', ['ru' => 'В работе']),
+            'order_done'        => Yii::t('app', 'common.models.additional_email.ready', ['ru' => 'Выполнен']),
+            'request_accept'    => Yii::t('app', 'common.models.additional_email.ready.accepted_two', ['ru' => 'Принятие заявки']),
+            'merc_vsd'          => Yii::t('app', 'common.models.additional_email.vsd_short', ['ru' => 'ВСД']),
+            'merc_stock_expiry' => Yii::t('app', 'frontend.views.settings.stock_expiry_notification', ['ru' => 'Рассылки о проблемной продукции']),
         ];
     }
 
@@ -87,11 +95,7 @@ class AdditionalEmail extends \yii\db\ActiveRecord
     {
         if ($org_id === null || $org_id == $this->organization_id) {
             $model = new EmailNotification();
-            $model->order_created = $this->order_created;
-            $model->order_canceled = $this->order_canceled;
-            $model->order_changed = $this->order_changed;
-            $model->order_processing = $this->order_processing;
-            $model->order_done = $this->order_done;
+            $model->setAttributes($this->attributes);
             return $model;
         }
 
@@ -115,23 +119,25 @@ class AdditionalEmail extends \yii\db\ActiveRecord
     {
         return new \amnah\yii2\user\models\Profile();
     }
-    
+
     /**
      * Send confirmation mail
+     *
      * @param Organization $organization
      * @return int
      */
-    public function sendConfirmationEmail() {
+    public function sendConfirmationEmail()
+    {
         /** @var Mailer $mailer */
         $mailer = Yii::$app->mailer;
         $this->token = md5($this->email);
         $this->save();
         $token = $this->token;
-        $subject = Yii::t('app', 'common.models.additional_mail_subject', ['ru'=>"Дополнительная почта для MixCart"]);
+        $subject = Yii::t('app', 'common.models.additional_mail_subject', ['ru' => "Дополнительная почта для MixCart"]);
         $result = $mailer->compose('confirmAdditionalEmail', compact("token"))
-                ->setTo($this->email)
-                ->setSubject($subject)
-                ->send();
+            ->setTo($this->email)
+            ->setSubject($subject)
+            ->send();
 
         return $result;
     }

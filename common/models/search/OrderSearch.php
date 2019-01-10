@@ -85,6 +85,7 @@ class OrderSearch extends Order
 
         if (isset($params['OrderSearch']['id']) && (int)$params['OrderSearch']['id'] > 0) {
             $query = Order::find()->where(['id' => (int)$params['OrderSearch']['id']])
+                ->orWhere('id in (SELECT order_id FROM order_content where edi_number = :edi_number)', [':edi_number' => $params['OrderSearch']['id']])
                 ->andWhere(['client_id' => User::findOne(Yii::$app->user->id)->organization_id])->limit(1);
             return new ActiveDataProvider([
                 'query' => $query
@@ -172,9 +173,9 @@ class OrderSearch extends Order
         if ($this->manager_id) {
             $maTable = \common\models\ManagerAssociate::tableName();
             $orderTable = Order::tableName();
-            $query->rightJoin($maTable, "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->manager_id);
+            $query->rightJoin($maTable, "$maTable.organization_id = $orderTable.client_id AND $maTable.manager_id = " . $this->manager_id);
         }
-        $query->where('`' . Order::tableName() . '`.`status` != :status', ['status' => OrderStatus::STATUS_FORMING]);
+        $query->where(Order::tableName() . '.`status` != :status', ['status' => OrderStatus::STATUS_FORMING]);
 
         $addSortAttributes = $this->vendor_search_id ? ['client.name'] : ['vendor.name'];
         $addSortAttributes[] = 'createdByProfile.full_name';
@@ -208,10 +209,10 @@ class OrderSearch extends Order
 
         $orderTable = Order::tableName();
         if (isset($completion_date_from)) {
-            $query->andWhere("IF( $orderTable.status = " . OrderStatus::STATUS_DONE . ", IFNULL($orderTable.completion_date, $orderTable.actual_delivery) >= '$completion_date_from', $orderTable.updated_at >= '$completion_date_from')");
+            $query->andWhere("IF($orderTable.status = " . OrderStatus::STATUS_DONE . ", IFNULL($orderTable.completion_date, $orderTable.actual_delivery) >= '$completion_date_from', $orderTable.updated_at >= '$completion_date_from')");
         }
         if (isset($completion_date_to)) {
-            $query->andWhere("IF( $orderTable.status = " . OrderStatus::STATUS_DONE . ", IFNULL($orderTable.completion_date, $orderTable.actual_delivery) <= '$completion_date_to', $orderTable.updated_at <= '$completion_date_to')");
+            $query->andWhere("IF($orderTable.status = " . OrderStatus::STATUS_DONE . ", IFNULL($orderTable.completion_date, $orderTable.actual_delivery) <= '$completion_date_to', $orderTable.updated_at <= '$completion_date_to')");
         }
 
         if (!empty($this->vendor_array)) {
@@ -251,8 +252,9 @@ class OrderSearch extends Order
     /**
      * Creates data provider instance with search query applied for waybill controller (Integration)
      *
-     * @param array $params
+     * @param $params
      * @return ActiveDataProvider
+     * @throws \Exception
      */
     public function searchWaybill($params)
     {

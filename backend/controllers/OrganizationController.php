@@ -2,13 +2,21 @@
 
 namespace backend\controllers;
 
+use api_web\components\Registry;
+use api_web\components\WebApi;
+use api_web\exceptions\ValidationException;
 use backend\models\TestVendorsSearch;
+use common\models\AllService;
 use common\models\edi\EdiOrganization;
 use common\models\edi\EdiProvider;
 use common\models\Franchisee;
 use common\models\FranchiseeAssociate;
+use common\models\IntegrationSetting;
+use common\models\IntegrationSettingFromEmail;
+use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
+use common\models\OuterCategory;
 use common\models\RelationSuppRest;
 use common\models\edi\EdiRoamingMap;
 use common\models\TestVendors;
@@ -18,6 +26,7 @@ use common\models\Organization;
 use common\models\Role;
 use backend\models\OrganizationSearch;
 use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
@@ -69,7 +78,11 @@ class OrganizationController extends Controller
                             'add-license',
                             'edi-settings',
                             'update-edi-settings',
-                            'create-edi-settings'
+                            'create-edi-settings',
+                            'integration-settings',
+                            'update-integration-settings',
+                            'ajax-update-integration-settings',
+                            'ajax-update-integration-settings-email',
                         ],
                         'allow'   => true,
                         'roles'   => [
@@ -293,6 +306,9 @@ class OrganizationController extends Controller
         return $this->render('notifications', compact('users', 'id'));
     }
 
+    /**
+     * @return bool
+     */
     public function actionAjaxUpdateStatus()
     {
         if (Yii::$app->request->isAjax) {
@@ -307,6 +323,9 @@ class OrganizationController extends Controller
         }
     }
 
+    /**
+     * @return bool
+     */
     public function actionAjaxUpdateVendorIsWork()
     {
         if (Yii::$app->request->isAjax) {
@@ -396,6 +415,9 @@ class OrganizationController extends Controller
         return $this->render('add-license', ['licenses' => $licenses, 'organizations' => $organizations, 'tenDaysAfter' => $tenDaysAfter, 'nowDate' => $nowDate, 'organizationID' => $id]);
     }
 
+    /**
+     * @return bool|string
+     */
     public function actionAjaxUpdateLicenseOrganization()
     {
         if (Yii::$app->request->isAjax) {
@@ -467,6 +489,10 @@ class OrganizationController extends Controller
         return $this->handleEdiSettings($model, $id, $post, true);
     }
 
+    /**
+     * @return bool|string
+     * @throws \yii\base\InvalidArgumentException
+     */
     public function actionAjaxUpdateEdiList()
     {
         if (Yii::$app->request->isAjax) {
@@ -490,6 +516,14 @@ class OrganizationController extends Controller
         }
     }
 
+    /**
+     * @param      $model
+     * @param      $id
+     * @param      $post
+     * @param bool $isCreate
+     * @return string
+     * @throws \yii\base\InvalidArgumentException
+     */
     private function handleEdiSettings($model, $id, $post, $isCreate = true)
     {
         if ($isCreate) {
@@ -541,6 +575,141 @@ class OrganizationController extends Controller
             'orgID'                => $id,
             'checkedOrganizations' => $checkedOrganizations
         ]);
+    }
+
+    /**
+     * @param $id
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function actionIntegrationSettings($id)
+    {
+        $organization = Organization::findOne(['id' => $id]);
+        $api = new WebApi();
+        $list = $api->container->get('IntegrationWebApi')->list([])['services'];
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $list
+        ]);
+
+        return $this->render('integration-settings', [
+            'dataProvider' => $dataProvider,
+            'organization' => $organization
+        ]);
+    }
+
+    /**
+     * @return string
+     * @throws \yii\base\InvalidArgumentException
+     * @throws \yii\web\HttpException
+     */
+    public function actionUpdateIntegrationSettings()
+    {
+        $orgId = Yii::$app->request->get('org_id');
+        $service_id = Yii::$app->request->get('service_id');
+        $organization = Organization::findOne(['id' => $orgId]);
+        $service = AllService::findOne($service_id);
+        License::checkLicense($organization->id, $service->id);
+
+        if ($service_id != Registry::VENDOR_DOC_MAIL_SERVICE_ID) {
+            $settingIds = IntegrationSetting::find()
+                ->select(['id', 'default_value'])
+                ->where(['service_id' => $service->id, 'is_active' => 1])
+                ->indexBy('id')
+                ->all();
+            $result = IntegrationSettingValue::find()
+                ->joinWith('setting')
+                ->where(['setting_id' => array_keys($settingIds), 'org_id' => $orgId, 'is_active' => 1])
+                ->indexBy('setting_id')->all();
+
+            $diff = array_diff_key($settingIds, $result);
+            if (!empty($diff)) {
+                /**@var IntegrationSetting $setting */
+                foreach ($diff as $setting) {
+                    $settingValue = new IntegrationSettingValue();
+                    $settingValue->setting_id = $setting->id;
+                    $settingValue->org_id = $orgId;
+                    $settingValue->value = $setting->default_value ?? '';
+                    if ($settingValue->save(false)) {
+                        $result[$setting->id] = $settingValue;
+                    }
+                }
+            }
+
+            foreach ($result as $item) {
+                if ($item->setting->name == 'defGoodGroup') {
+                    $models = OuterCategory::find()->select('name')
+                        ->where(['org_id' => $orgId, 'service_id' => $service_id])
+                        ->indexBy('id')->column();
+                    $item->setting->item_list = json_encode($models);
+                }
+            }
+
+            return $this->render('update-integration-settings', [
+                'service'      => $service,
+                'organization' => $organization,
+                'dataProvider' => new ArrayDataProvider(['allModels' => $result]),
+            ]);
+        } else {
+            $models = IntegrationSettingFromEmail::findAll(['organization_id' => $orgId]);
+
+            return $this->render('update-integration-settings-email', [
+                'service'      => $service,
+                'organization' => $organization,
+                'dataProvider' => new ArrayDataProvider(['allModels' => $models]),
+            ]);
+        }
+    }
+
+    /**
+     * @return bool
+     * @throws ValidationException
+     */
+    public function actionAjaxUpdateIntegrationSettings()
+    {
+        if (Yii::$app->request->isAjax) {
+            $settings = \Yii::$app->request->post('settings');
+            foreach ($settings as $setting) {
+                $model = IntegrationSettingValue::findOne($setting['id']);
+                $model->value = $setting['value'];
+                if (!$model->save(false)) {
+                    throw new ValidationException($model->getFirstErrors());
+                }
+            }
+            \Yii::$app->session->setFlash('success', "Настройки сохранены");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @return bool
+     * @throws ValidationException
+     */
+    public function actionAjaxUpdateIntegrationSettingsEmail()
+    {
+        if (Yii::$app->request->isAjax) {
+            $settings = \Yii::$app->request->post('settings');
+            foreach ($settings as $setting) {
+                $model = IntegrationSettingFromEmail::findOne($setting['id']);
+                $model->server_type = $setting['server_type'];
+                $model->server_host = $setting['server_host'];
+                $model->server_port = $setting['server_port'];
+                $model->server_ssl = $setting['server_ssl'];
+                $model->user = $setting['user'];
+                $model->password = $setting['password'];
+                $model->is_active = $setting['is_active'];
+                if (!$model->save()) {
+                    throw new ValidationException($model->getFirstErrors());
+                }
+            }
+            \Yii::$app->session->setFlash('success', "Настройки сохранены");
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

@@ -101,6 +101,9 @@ class VetDocumentDone extends Component
 
         $data['delivery']['transportInfo'] = $this->doc['certifiedConsignment']['transportInfo'];
         $data['delivery']['transportStorageType'] = $this->doc['certifiedConsignment']['transportStorageType'];
+        if(isset($this->doc['certifiedConsignment']['shipmentRoute'])) {
+            $data['delivery']['shipmentRoute'] = $this->doc['certifiedConsignment']['shipmentRoute'];
+        }
 
         if(isset($this->doc['certifiedConsignment']['shipmentRoute'])) {
             $data['delivery']['shipmentRoute'] = $this->doc['certifiedConsignment']['shipmentRoute'];

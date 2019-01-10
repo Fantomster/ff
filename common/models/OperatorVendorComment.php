@@ -7,11 +7,10 @@ use Yii;
 /**
  * This is the model class for table "operator_vendor_comment".
  *
- * @property int $vendor_id id поставщика
- * @property string $comment комментарий
- * @property string $created_at Дата создания записи
- * @property string $updated_at Дата последнего изменения записи
- *
+ * @property int          $vendor_id  Идентификатор организации-поставщика
+ * @property string       $comment    Комментарий сотрудников Mixcarta о поставщике
+ * @property string       $created_at Дата и время создания записи в таблице
+ * @property string       $updated_at Дата и время последнего изменения записи в таблице
  * @property Organization $vendor
  */
 class OperatorVendorComment extends \yii\db\ActiveRecord
@@ -42,8 +41,8 @@ class OperatorVendorComment extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'vendor_id' => Yii::t('app', 'id поставщика'),
-            'comment' => Yii::t('app', 'комментарий'),
+            'vendor_id'  => Yii::t('app', 'id поставщика'),
+            'comment'    => Yii::t('app', 'комментарий'),
             'created_at' => Yii::t('app', 'Дата создания записи'),
             'updated_at' => Yii::t('app', 'Дата последнего изменения записи'),
         ];

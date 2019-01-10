@@ -1,66 +1,81 @@
 <?php
+
+use \api_web\helpers\CurrencyHelper;
+
 /**
  * @var \api_web\modules\integration\classes\documents\OrderContent[] $changed
- * @var string[]                                                      $deleted
+ * @var \api_web\modules\integration\classes\documents\OrderContent[] $deleted
  */
 
-$i = 0;
 ?>
-<?php if (!empty($changed)): ?>
+<?php if (!empty($changed) || !empty($deleted)): ?>
+    <p><?= Yii::t('app', 'Изменились детали заказа') ?>:</p>
     <table class="table">
         <thead>
         <tr>
+            <th class="main-action"></th>
             <th class="order">#</th>
-            <th class="name">Товар</th>
-            <th class="article">Артикул</th>
-            <th class="quantity">Кол-во</th>
-            <th class="price">Цена</th>
-            <th class="sum">Сумма</th>
+            <th class="name"><?= \Yii::t('api_web', 'mail.chat.order_changed.name') ?></th>
+            <th class="article"><?= \Yii::t('api_web', 'mail.chat.order_changed.article') ?></th>
+            <th class="quantity"><?= \Yii::t('api_web', 'mail.chat.order_changed.quantity') ?></th>
+            <th class="quantity-action"></th>
+            <th class="price"><?= \Yii::t('api_web', 'mail.chat.order_changed.price') ?></th>
+            <th class="price-action"></th>
+            <th class="sum"><?= \Yii::t('api_web', 'mail.chat.order_changed.sum') ?></th>
         </tr>
         </thead>
         <tbody>
-        <?php foreach ($changed as $model): $model->refresh(); ?>
-            <tr>
-                <td class="order"><?= ++$i ?></td>
-                <td class="name"><?= $model->product_name ?></td>
-                <td class="article"><?= $model->article ?></td>
-                <td class="quantity"><?= $model->quantity ?></td>
-                <td class="price">
-                    <?= \api_web\helpers\CurrencyHelper::asDecimal($model->price) ?>
-                    <?= $model->getCurrency()->symbol ?><?= $model->product->ed ? '/' . $model->product->ed : '' ?>
-                </td>
-                <td class="sum">
-                    <?= \api_web\helpers\CurrencyHelper::asDecimal($model->quantity * $model->price) ?>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
-<?php endif; ?>
 
-<?php if (!empty($deleted)): ?>
-    <?php
-    $i = 0;
-    ?>
-    <?= \Yii::t('api_web', 'order.delete.content') ?>
-    <table class="table">
-        <thead>
-        <tr>
-            <th class="order">#</th>
-            <th class="name">Товар</th>
-            <th class="article">Артикул</th>
-            <th class="quantity">Кол-во</th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($deleted as $model): $model->refresh(); ?>
-            <tr>
-                <td class="order"><?= ++$i ?></td>
-                <td class="name"><?= $model->product_name ?></td>
-                <td class="article"><?= $model->article ?></td>
-                <td class="quantity"><?= $model->quantity ?></td>
-            </tr>
-        <?php endforeach; ?>
+        <?php if (!empty($changed)): $i = 0; ?>
+            <?php foreach ($changed as $model) : $new = $model->isNewRecord; ?>
+                <?php if ($new) {
+                    $model->refresh();
+                } ?>
+                <tr class="<?= $new ? 'action-added' : 'action-changed' ?>">
+                    <td class="main-action <?= $new ? 'action-added' : 'action-changed' ?>"><i
+                                class="material-icons"></i></td>
+                    <td class="order"><?= ++$i ?></td>
+                    <td class="name"><?= $model->product_name ?></td>
+                    <td class="article"><?= $model->article ?></td>
+                    <td class="quantity <?= $model->getCssClassChatMessage('quantity') ?>"><?= number_format($model->quantity, 3, '.', '') ?></td>
+                    <td class="quantity-action <?= $model->getCssClassChatMessage('quantity') ?>"><i
+                                class="material-icons"></i></td>
+                    <td class="price <?= $model->getCssClassChatMessage('price') ?>">
+                        <?= CurrencyHelper::asDecimal($model->price) ?>
+                        <?= $model->getCurrency()->symbol ?>
+                        <?= $model->product->ed ? '/' . $model->product->ed : '' ?>
+                    </td>
+                    <td class="price-action <?= $model->getCssClassChatMessage('price') ?>"><i
+                                class="material-icons"></i></td>
+                    <td class="sum">
+                        <?= CurrencyHelper::asDecimal($model->quantity * $model->price) ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+        <?php if (!empty($deleted)): $i = 0; ?>
+            <?php foreach ($deleted as $model): ?>
+                <tr class="action-removed">
+                    <td class="main-action"><i class="material-icons"></i></td>
+                    <td class="order"><?= ++$i ?></td>
+                    <td class="name"><?= $model->product_name ?></td>
+                    <td class="article"><?= $model->article ?></td>
+                    <td class="quantity"><?= number_format($model->quantity, 3, '.', '') ?></td>
+                    <td class="quantity-action"><i class="material-icons"></i></td>
+                    <td class="price <?= $model->getCssClassChatMessage('price') ?>">
+                        <?= CurrencyHelper::asDecimal($model->price) ?>
+                        <?= $model->getCurrency()->symbol ?>
+                        <?= $model->product->ed ? '/' . $model->product->ed : '' ?>
+                    </td>
+                    <td class="price-action"><i class="material-icons"></i></td>
+                    <td class="sum">
+                        <?= CurrencyHelper::asDecimal($model->quantity * $model->price) ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
         </tbody>
     </table>
 <?php endif; ?>

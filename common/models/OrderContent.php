@@ -7,57 +7,78 @@ use common\helpers\DBNameHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Query;
-use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "order_content".
  *
- * @property integer                   $id
- * @property integer                   $order_id
- * @property integer                   $product_id
- * @property string                    $quantity
- * @property string                    $initial_quantity
- * @property string                    $price
- * @property string                    $plan_price
- * @property string                    $plan_quantity
- * @property string                    $product_name
- * @property string                    $article
- * @property integer                   $units
- * @property string                    $comment
- * @property string                    $merc_uuid
- * @property integer                   $vat_product
- * @property string                    $edi_desadv
- * @property string                    $edi_alcdes
- * @property string                    $edi_number
- * @property string                    $edi_recadv
- * @property string                    $edi_invoice
- * @property string                    $updated_at
- * @property float                     $into_quantity
- * @property float                     $into_price
- * @property float                     $into_price_vat
- * @property float                     $into_price_sum
- * @property float                     $into_price_sum_vat
- * @property integer                   $invoice_content_id
+ * @property int                       $id                 Идентификатор записи в таблице
+ * @property int                       $order_id           Идентификатор заказа, к которому относится товарная позиция
+ * @property int                       $product_id         Идентификатор товара в таблице catalog_base_goods
+ * @property string                    $quantity           Количество товара
+ * @property string                    $price              Цена товара
+ * @property string                    $initial_quantity   Первоначальное количество товара
+ * @property string                    $product_name       Наименование товарной позиции
+ * @property double                    $units              Единица измерения товара
+ * @property string                    $article            Артикул товара из накладной ТОРГ-12
+ * @property string                    $comment            Комментарий (не используется)
+ * @property string                    $plan_price         Изменённая цена товара
+ * @property string                    $plan_quantity      Изменённое количество товара
+ * @property string                    $updated_at         Дата и время последнего изменения записи в таблице
+ * @property int                       $updated_user_id    Идентификатор пользователя, совершившего последние изменения
+ *           записи в таблице
+ * @property string                    $merc_uuid          Уникальный идентификатор товара в системе Ветис
+ * @property int                       $vat_product        Ставка НДС
+ * @property string                    $edi_desadv         Название файла desadv IDE
+ * @property string                    $edi_alcdes         Название файла alcdes IDE
+ * @property string                    $edi_recadv         Название файла recadv IDE
+ * @property string                    $edi_number         Номер накладной EDI
+ * @property string                    $edi_invoice        Номер счёта EDI
+ * @property int                       $invoice_content_id Идентификатор накладной ТОРГ-12
+ * @property string                    $into_quantity      Кол-во из накладной поставщика
+ * @property string                    $into_price         Цена из накладной поставщика
+ * @property int                       $into_price_vat     Цена за единицу товара с НДС из накладной поставщика
+ * @property string                    $into_price_sum     Сумма за количество товара из накладной поставщика
+ * @property string                    $into_price_sum_vat Сумма за количество товара с НДС из накладной поставщика
+ *
  * @property Order                     $order
  * @property CatalogBaseGoods          $product
- * @property string                    $total
- * @property string                    $note
- * @property CatalogGoods              $productFromCatalog
+ * @property EdiOrderContent           $ediOrderContent
  * @property IntegrationInvoiceContent $invoiceContent
+ * @property GoodsNotes                $note
+ * @property Currency                  $currency
  * @property WaybillContent            $waybillContent
  */
 class OrderContent extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'order_content';
+        return '{{%order_content}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => OrderContentBehavior::class,
+                'model' => $this
+            ],
+            [
+                'class'              => TimestampBehavior::class,
+                'updatedAtAttribute' => 'updated_at',
+                'createdAtAttribute' => false,
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -74,7 +95,7 @@ class OrderContent extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
@@ -248,16 +269,6 @@ class OrderContent extends \yii\db\ActiveRecord
     public function beforeSave($insert)
     {
         $result = parent::beforeSave($insert);
-        /*if(!$insert){
-            if($this->plan_quantity == 0.000){
-                $this->plan_quantity = $this->quantity;
-            }
-            if($this->plan_price == 0.00){
-                $this->plan_price = $this->price;
-            }
-        }else{
-            $this->plan_price = $this->price;
-        }*/
         return $result;
     }
 
@@ -313,25 +324,6 @@ class OrderContent extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return array
-     */
-    public function behaviors()
-    {
-        return [
-            [
-                'class' => OrderContentBehavior::class,
-                'model' => $this
-            ],
-            [
-                'class'              => TimestampBehavior::class,
-                'updatedAtAttribute' => 'updated_at',
-                'createdAtAttribute' => false,
-                'value'              => \gmdate('Y-m-d H:i:s'),
-            ],
-        ];
-    }
-
-    /**
      * @return \yii\db\ActiveQuery
      */
     public function getWaybillContent()
@@ -348,7 +340,7 @@ class OrderContent extends \yii\db\ActiveRecord
     {
         $orgId = $this->order->client_id;
         $settingMainOrg = IntegrationSettingValue::getSettingsByServiceId($serviceId, $orgId, ['main_org']);
-        if ($settingMainOrg){
+        if ($settingMainOrg) {
             $orgId = $settingMainOrg;
         }
 
@@ -359,5 +351,50 @@ class OrderContent extends \yii\db\ActiveRecord
                 'organization_id' => $orgId,
                 'vendor_id'       => $this->order->vendor_id,
             ])->exists();
+    }
+
+    /**
+     *  Проверяем изменился ли атрибут
+     *
+     * @param        $attribute
+     * @param string $comparedAttribute
+     * @return bool|null
+     */
+    public function changedAttribute($attribute, $comparedAttribute = '>')
+    {
+        $result = null;
+        if ($this->isAttributeChanged($attribute) && !$this->isNewRecord) {
+            if ($this->getAttribute($attribute) != $this->getOldAttribute($attribute)) {
+                switch ($comparedAttribute) {
+                    case '>':
+                        $result = $this->getAttribute($attribute) > $this->getOldAttribute($attribute);
+                        break;
+                    case '<':
+                        $result = $this->getAttribute($attribute) < $this->getOldAttribute($attribute);
+                        break;
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param        $attribute
+     * @param string $comparedAttribute
+     * @return string
+     */
+    public function getCssClassChatMessage($attribute, $comparedAttribute = '>')
+    {
+        if (is_null($this->changedAttribute($attribute, $comparedAttribute))) {
+            return 'action-not-changed';
+        }
+
+        if ($this->changedAttribute($attribute, $comparedAttribute) === true) {
+            return 'action-raised';
+        }
+
+        if ($this->changedAttribute($attribute, $comparedAttribute) === false) {
+            return 'action-lowered';
+        }
     }
 }

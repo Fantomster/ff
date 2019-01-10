@@ -849,6 +849,12 @@ SQL;
                 var_dump($model->getErrors());
                 exit;
             }*/
+            
+            $existingWaybill = RkWaybill::find()->where(['order_id' => $model->order_id, 'store_rid' => $model->store_rid])->one();
+            if (!empty($existingWaybill)) {
+                $model = RkWaybill::moveContentToExistingWaybill($model, $existingWaybill);
+            }
+            
             $sql = "SELECT COUNT(*) FROM rk_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
             $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
             if (($model->corr_rid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_rid === null)) {
@@ -873,7 +879,7 @@ SQL;
                 }
             }
             $model->save();
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            return $this->redirect(['/clientintegr/rkws/waybill/index', 'way' => $model->order_id]);
         } else {
             return $this->render($vi, [
                 'model' => $model,
@@ -909,7 +915,7 @@ SQL;
                     var_dump($model->getErrors());
                     exit;
                 }*/
-                return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+                return $this->redirect(['/clientintegr/rkws/waybill/index', 'way' => $model->order_id]);
             } else {
                 return $this->render('create', [
                     'model' => $model,
@@ -1168,7 +1174,7 @@ SQL;
         }
         $dbName = DBNameHelper::getMainName();
         $sql = "SELECT wd.id FROM `rk_waybill_data` `wd` LEFT JOIN `rk_waybill` `w` ON wd.waybill_id = w.id 
-                LEFT JOIN `" . $dbName . "`.`order` `o` ON w.order_id = o.id 
+                LEFT JOIN " . $dbName . ".`order` `o` ON w.order_id = o.id 
                 WHERE w.status_id = 1 AND o.vendor_id = :w_supp AND o.client_id = :w_org AND wd.product_id = :w_pid AND wd.product_rid IS NULL";
         $massivs = Yii::$app->db_api->createCommand($sql, [':w_pid' => $number, ':w_supp' => $supp_id, ':w_org' => $org_id])->queryAll();
         $ids = '';

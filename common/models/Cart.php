@@ -8,27 +8,29 @@ use yii\behaviors\TimestampBehavior;
 /**
  * This is the model class for table "cart".
  *
- * @property int           $id
- * @property int           $organization_id
- * @property int           $user_id
- * @property string        $created_at
- * @property string        $updated_at
- * @property Organization  $organization
- * @property User          $user
- * @property CartContent[] $cartContents
+ * @property int           $id              Идентификатор записи в таблице
+ * @property int           $organization_id Идентификатор организации, чей сотрудник создал корзину
+ * @property int           $user_id         Идентификатор пользователя, создавшего корзину
+ * @property string        $created_at      Дата и время создания записи в таблице
+ * @property string        $updated_at      Дата и время последнего изменения записи в таблице
+ *
+ * @property Organization    $organization
+ * @property User            $user
+ * @property CartContent[]   $cartContents
+ * @property Organization[]  $vendors
  */
 class Cart extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'cart';
+        return '{{%cart}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function behaviors(): array
     {
@@ -43,7 +45,7 @@ class Cart extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -58,7 +60,7 @@ class Cart extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
@@ -134,6 +136,11 @@ class Cart extends \yii\db\ActiveRecord
         return 0;
     }
 
+    /**
+     * @param      $vendor_id
+     * @param null $rawPrice
+     * @return float|int
+     */
     public function forFreeDelivery($vendor_id, $rawPrice = null)
     {
         $vendor = Organization::findOne($vendor_id);
@@ -148,6 +155,11 @@ class Cart extends \yii\db\ActiveRecord
         return ceil((($diff > 0) ? $diff : 0) * 100) / 100;
     }
 
+    /**
+     * @param      $vendor_id
+     * @param null $rawPrice
+     * @return float|int
+     */
     public function forMinCartPrice($vendor_id, $rawPrice = null)
     {
         $vendor = Organization::find()->cache(3600)->where(['id' => $vendor_id])->one();
@@ -159,14 +171,24 @@ class Cart extends \yii\db\ActiveRecord
         return ceil((($diff > 0) ? $diff : 0) * 100) / 100;
     }
 
+    /**
+     * @param $vendor_id
+     * @return false|string|null
+     */
     public function getRawPrice($vendor_id)
     {
-        if ($this->id != null)
+        if ($this->id != null) {
             return CartContent::find()->select('SUM(quantity*price)')->where(['cart_id' => $this->id, 'vendor_id' => $vendor_id])->scalar();
+        }
 
         return CartContent::find()->select('SUM(quantity*price)')->where(['vendor_id' => $vendor_id])->scalar();
     }
 
+    /**
+     * @param      $vendor_id
+     * @param null $rawPrice
+     * @return string
+     */
     public function calculateTotalPrice($vendor_id, $rawPrice = null)
     {
         $total_price = !isset($rawPrice) ? $this->getRawPrice($vendor_id) : $rawPrice;

@@ -8,23 +8,23 @@ use yii\helpers\ArrayHelper;
 /**
  * This is the model class for table "jobs".
  *
- * @property integer $id
- * @property string $name_job
- * @property integer $organization_type_id
- *
+ * @property int       $id                   Идентификатор записи в таблице
+ * @property string    $name_job             Наименование должности сотрудников поставщиков и ресторанов
+ * @property int       $organization_type_id Идентификатор типа организации, к которой относится должность сотрудников
+ * @property Profile[] $profilesAtJob
  */
 class Job extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'jobs';
+        return '{{%jobs}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -36,12 +36,12 @@ class Job extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'       => 'ID',
             'name_job' => Yii::t('app', 'Name'),
         ];
     }
@@ -53,24 +53,21 @@ class Job extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Profile::className(), ['job_id' => 'id']);
     }
-    
+
     /**
      * array of all jobs of the postavs
-     * 
+     *
      * @return array
      */
-    public static function getListPostav() {
+    public static function getListPostav()
+    {
         $models = Job::find()
-                ->select(['id', 'name_job', 'organization_type_id'])
-                ->where(['organization_type_id' => 2])
-                ->asArray()
-                ->all();
-        $models[]=['id'=>'0','name_allow'=>'Не указано'];
-        return 
-//        ArrayHelper::merge(
-//                        [null => null], 
-                ArrayHelper::map($models, 'id', 'name_job');
-       // );
+            ->select(['id', 'name_job', 'organization_type_id'])
+            ->where(['organization_type_id' => 2])
+            ->asArray()
+            ->all();
+        $models[] = ['id' => '0', 'name_allow' => 'Не указано'];
+        return ArrayHelper::map($models, 'id', 'name_job');
     }
 
     /**
@@ -78,18 +75,15 @@ class Job extends \yii\db\ActiveRecord
      *
      * @return array
      */
-    public static function getListRestor() {
+    public static function getListRestor()
+    {
         $models = Job::find()
             ->select(['id', 'name_job', 'organization_type_id'])
             ->where(['organization_type_id' => 1])
             ->asArray()
             ->all();
-        $models[]=['id'=>'0','name_allow'=>'Не указано'];
-        return
-//        ArrayHelper::merge(
-//                        [null => null],
-            ArrayHelper::map($models, 'id', 'name_job');
-        // );
+        $models[] = ['id' => '0', 'name_allow' => 'Не указано'];
+        return ArrayHelper::map($models, 'id', 'name_job');
     }
 
     /**

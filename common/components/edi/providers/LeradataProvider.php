@@ -60,12 +60,12 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
     /**
      * Get files list from provider and insert to table
      */
-    public function handleFilesList(): void
+    public function handleFilesList()
     {
         try {
             $this->getFilesListForInsertingInQueue();
         } catch (\Throwable $e) {
-            Yii::error($e->getMessage());
+            return false;
         }
     }
 
@@ -123,6 +123,7 @@ class LeradataProvider extends AbstractProvider implements ProviderInterface
             $dateArray = $this->ediProvider->getDateData($order);
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
             $result = $this->sendDoc($string, $done);
+            $order->updateAttributes(['edi_order' => $order->id]);
             $transaction->commit();
         } catch (Exception $e) {
             Yii::error($e);

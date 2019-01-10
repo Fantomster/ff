@@ -185,6 +185,7 @@ class EmailIntegrationController extends Controller
                 //Получаем последние 100 емайлов
                 $emails = $this->getEmails(0, 20);
                 foreach ($emails as $email) {
+                    echo $email['subject'] . PHP_EOL;
                     //Пропускаем емайлы без вложений
                     if (empty($email['attachment'])) {
                         continue;
@@ -236,14 +237,16 @@ class EmailIntegrationController extends Controller
      */
     private function connect(IntegrationSettingFromEmail $setting)
     {
+        $password = \Yii::$app->get('encode')->decrypt($setting->password, $setting->user);
         switch ($setting->server_type) {
             case 'imap':
-                $connect = new Imap($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
+                $connect = new Imap($setting->server_host, $setting->user, $password, $setting->server_port, $setting->server_ssl);
                 $connect->setActiveMailbox('INBOX');
                 break;
             case 'pop3':
-                $connect = new Pop3($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
-                break;
+                throw new Exception("pop3 set for organization: {$setting->organization_id} (mail:{$setting->user})");
+                //$connect = new Pop3($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
+                //break;
             default:
                 throw new Exception('Не определён тип сервера.');
         }
@@ -261,12 +264,12 @@ class EmailIntegrationController extends Controller
         $messages = [];
 
         if ($this->connect instanceof Imap) {
-            $messages = $this->connect->getEmails($start, $limit, true);
+            $messages = $this->connect->search(["UNSEEN"], $start, $limit, true, true);
         }
 
-        if ($this->connect instanceof Pop3) {
-            $messages = $this->connect->getEmails($start, $limit);
-        }
+//        if ($this->connect instanceof Pop3) {
+//            $messages = $this->connect->getEmails($start, $limit);
+//        }
 
         return $messages;
     }

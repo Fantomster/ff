@@ -3,24 +3,26 @@
 namespace common\models;
 
 use common\models\licenses\License;
-use common\models\licenses\LicenseOrganization;
 use Yii;
-use yii\db\Query;
 use yii\helpers\ArrayHelper;
 
 /**
- * This is the model class for table "{{%all_service}}".
+ * This is the model class for table "all_service".
  *
- * @property int                   $id
- * @property int                   $type_id
- * @property int                   $is_active
- * @property string                $denom
- * @property string                $vendor
- * @property string                $created_at
- * @property string                $updated_at
- * @property string                $log_table
- * @property string                $log_field
+ * @property int                   $id         Идентификатор записи в таблице
+ * @property int                   $type_id    Тип учётного сервиса
+ * @property int                   $is_active  Показатель состояния активности учётного сервиса (0 - не активен, 1 -
+ *           активен)
+ * @property string                $denom      Наименование учётного сервиса
+ * @property string                $vendor     Название организации, которой принадлежит учётная система
+ * @property string                $created_at Дата и время создания записи в таблице
+ * @property string                $updated_at Дата и время последнего изменения записи в таблице
+ * @property string                $log_table  Наименование таблицы лога учётного сервиса
+ * @property string                $log_field  Наименование поля, где хранится идентификатор запроса в учётной системе
+ *
  * @property AllServiceOperation[] $allServiceOperations
+ * @property OuterDictionary[]     $outerDictionaries
+ * @property OuterProductMap[]     $outerProductMaps
  */
 class AllService extends \yii\db\ActiveRecord
 {
@@ -76,6 +78,22 @@ class AllService extends \yii\db\ActiveRecord
     public function getAllServiceOperations()
     {
         return $this->hasMany(AllServiceOperation::className(), ['service_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOuterDictionaries()
+    {
+        return $this->hasMany(OuterDictionary::className(), ['service_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOuterProductMaps()
+    {
+        return $this->hasMany(OuterProductMap::className(), ['service_id' => 'id']);
     }
 
     /**

@@ -9,10 +9,11 @@ use yii\web\BadRequestHttpException;
 
 /**
  * This is the model class for table "order_status".
- * @property integer $id ID статуса заказа
- * @property string $denom ИДЕНТИФИКАТОР СООТВЕТСТВУЮЩЕЙ КОНСТАНТЫ В МОДЕЛИ ORDER
- * @property string $comment Общее описание статуса
- * @property string $comment_edi Описание статуса заказа, обрабатываемого в системе EDI
+ *
+ * @property int    $id          Идентификатор записи в таблице
+ * @property string $denom       Наименование константы статуса заказа
+ * @property string $comment     Псевдоним наименования статуса заказа (source_message)
+ * @property string $comment_edi Комментарий к статусу заказа, связанного с EDI
  */
 class OrderStatus extends ActiveRecord
 {
@@ -28,13 +29,46 @@ class OrderStatus extends ActiveRecord
     const STATUS_EDI_ACCEPTANCE_FINISHED = 9;
 
     static $clientPermissionsDef = [
-        'edit' => true,
-        'cancel' => true,
+        'edit'     => true,
+        'cancel'   => true,
         'complete' => true,
     ];
 
     /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return '{{%order_status}}';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules(): array
+    {
+        return [
+            [['id'], 'required'],
+            [['denom', 'comment', 'comment_edi'], 'string', 'max' => 255],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels(): array
+    {
+        return [
+            'id'          => Yii::t('app', 'common.models.order_status.id', ['ru' => 'ID статуса заказа']),
+            'denom'       => Yii::t('app', 'common.models.order_status.denom', ['ru' => 'ИДЕНТИФИКАТОР СООТВЕТСТВУЮЩЕЙ КОНСТАНТЫ В МОДЕЛИ ORDER']),
+            'comment'     => Yii::t('app', 'common.models.order_status.comment', ['ru' => 'Общее описание статуса']),
+            'comment_edi' => Yii::t('app', 'common.models.order_status.comment_edi', ['ru' => 'Описание статуса заказа, обрабатываемого в системе EDI']),
+        ];
+    }
+
+    /**
      * Get permissions for a client that is "the owner of the order" by the status of an order
+     *
      * @param int $status Status of an order (Order->status_id)
      * @return array?
      */
@@ -63,8 +97,8 @@ class OrderStatus extends ActiveRecord
             self::STATUS_CANCELLED,
         ])) {
             $res = [
-                'edit' => false,
-                'cancel' => false,
+                'edit'     => false,
+                'cancel'   => false,
                 'complete' => false,
             ];
             if ($status == self::STATUS_EDI_SENT_BY_VENDOR) {
@@ -76,11 +110,12 @@ class OrderStatus extends ActiveRecord
 
     /**
      * Get a custom permission for a client that is "the owner of the order" by the status of an order
-     * @param int $status Status of an order (Order->status_id)
-     * @param string $type Type of client permission
+     *
+     * @param int    $status Status of an order (Order->status_id)
+     * @param string $type   Type of client permission
      * @return bool?
      */
-    public static function getClientPermissionByType(int $status = null, string $type = NULL): ?bool
+    public static function getClientPermissionByType(int $status = null, string $type = null): ?bool
     {
         if (!$status || ($type && !array_key_exists($type, self::$clientPermissionsDef))) {
             return null;
@@ -97,9 +132,10 @@ class OrderStatus extends ActiveRecord
 
     /**
      * CheckOrderPermission
-     * @param Order $order Order
-     * @param string $type Type of client permission
-     * @param array $ediExcludesStatuses Excluded statuses for this check
+     *
+     * @param Order  $order               Order
+     * @param string $type                Type of client permission
+     * @param array  $ediExcludesStatuses Excluded statuses for this check
      * @throws BadRequestHttpException
      */
     public static function checkEdiOrderPermissions(Order $order = null, string $type = null, array $ediExcludesStatuses = [])
@@ -114,29 +150,4 @@ class OrderStatus extends ActiveRecord
             }
         }
     }
-
-
-    public static function tableName()
-    {
-        return 'order_status';
-    }
-
-    public function rules(): array
-    {
-        return [
-            [['id'], 'required'],
-            [['denom', 'comment', 'comment_edi'], 'string', 'max' => 255],
-        ];
-    }
-
-    public function attributeLabels(): array
-    {
-        return [
-            'id' => Yii::t('app', 'common.models.order_status.id', ['ru' => 'ID статуса заказа']),
-            'denom' => Yii::t('app', 'common.models.order_status.denom', ['ru' => 'ИДЕНТИФИКАТОР СООТВЕТСТВУЮЩЕЙ КОНСТАНТЫ В МОДЕЛИ ORDER']),
-            'comment' => Yii::t('app', 'common.models.order_status.comment', ['ru' => 'Общее описание статуса']),
-            'comment_edi' => Yii::t('app', 'common.models.order_status.comment_edi', ['ru' => 'Описание статуса заказа, обрабатываемого в системе EDI']),
-        ];
-    }
-
 }

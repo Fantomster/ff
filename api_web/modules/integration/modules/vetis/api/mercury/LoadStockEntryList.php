@@ -9,7 +9,6 @@ use api_web\modules\integration\modules\vetis\api\dicts\dictsApi;
 use api_web\modules\integration\modules\vetis\api\ikar\ikarApi;
 use common\models\IntegrationSettingValue;
 use yii\base\Model;
-use yii\helpers\BaseStringHelper;
 
 /**
  * Class LoadStockEntryList

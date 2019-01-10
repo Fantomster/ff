@@ -3,20 +3,19 @@
 namespace common\models;
 
 use Yii;
-use yii\behaviors\AttributesBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
 /**
- * This is the model class for table "{{%operator_call}}".
+ * This is the model class for table "operator_call".
  *
- * @property int $order_id
- * @property int $operator_id
- * @property int $status_call_id
- * @property string $comment
- * @property string $created_at
- * @property string $updated_at
- * @property string $closed_at
+ * @property int    $order_id       Идентификатор заказа
+ * @property int    $operator_id    Идентификатор оператора заказа
+ * @property int    $status_call_id Идентификатор статуса звонка (1 - открыто, 2 - перезвонить, 3 - завершено)
+ * @property string $comment        Комментарий к звонку
+ * @property string $created_at     Дата и время создания записи в таблице
+ * @property string $updated_at     Дата и время последнего изменения записи в таблице
+ * @property string $closed_at      Дата и время завершения звонка
  */
 class OperatorCall extends ActiveRecord
 {
@@ -25,6 +24,17 @@ class OperatorCall extends ActiveRecord
     const STATUS_COMPLETE = 3; //Завершено
     const STATUS_CONTROLL = 4; //Контроль
 
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return '{{%operator_call}}';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function behaviors(): array
     {
         return [
@@ -37,6 +47,9 @@ class OperatorCall extends ActiveRecord
         ];
     }
 
+    /**
+     * @return array|string[]
+     */
     public static function primaryKey()
     {
         return ['order_id'];
@@ -59,14 +72,6 @@ class OperatorCall extends ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
-    {
-        return '{{%operator_call}}';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function rules()
     {
         return [
@@ -78,12 +83,15 @@ class OperatorCall extends ActiveRecord
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function checkControlCount($attribute, $params)
     {
-        if($attribute == 'status_call_id') {
+        if ($attribute == 'status_call_id') {
             if ($this->$attribute == 4) {
                 if (self::find()->where(['operator_id' => $this->operator_id, $attribute => self::STATUS_CONTROLL])->count() == Yii::$app->params['countControlsOperator']) {
-                    $this->addError($attribute, "Одновременно на контроле может быть не более ".Yii::$app->params['countControlsOperator']." заказаов!");
+                    $this->addError($attribute, "Одновременно на контроле может быть не более " . Yii::$app->params['countControlsOperator'] . " заказаов!");
                 }
             }
         }
@@ -111,8 +119,8 @@ class OperatorCall extends ActiveRecord
     public static function getStatus()
     {
         return [
-            self::STATUS_OPEN => 'Открыто',
-            self::STATUS_RECALL => 'Перезвонить',
+            self::STATUS_OPEN     => 'Открыто',
+            self::STATUS_RECALL   => 'Перезвонить',
             self::STATUS_COMPLETE => 'Завершено',
             self::STATUS_CONTROLL => 'Контроль'
         ];

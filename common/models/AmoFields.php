@@ -2,39 +2,37 @@
 
 namespace common\models;
 
-use Yii;
-use yii\data\ActiveDataProvider;
-use common\behaviors\UploadBehavior;
-use yii\helpers\ArrayHelper;
-
 /**
- * This is the model class for table "relation_supp_rest".
+ * This is the model class for table "amo_fields".
  *
- * @property integer $id
- * @property integer $responsible_user_id
- * @property integer $pipeline_id
+ * @property int    $id                  Идентификатор записи в таблице
+ * @property string $amo_field           Значение поля FIELDS из формы на лендинге
+ * @property int    $responsible_user_id Идентификатор ответственного менеджера
+ * @property int    $pipeline_id         Идентификатор "воронки"
  */
-class AmoFields extends \yii\db\ActiveRecord {
-
-
+class AmoFields extends \yii\db\ActiveRecord
+{
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public static function tableName() {
-        return 'amo_fields';
+    public static function tableName()
+    {
+        return '{{%amo_fields}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [];
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['amo_field'], 'required'],
             [['amo_field'], 'string', 'max' => 255],
@@ -43,13 +41,14 @@ class AmoFields extends \yii\db\ActiveRecord {
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
-            'amo_field' => 'Значение поля FIELDS[sitepage] из формы на лендинге(напр. franch)',
+            'amo_field'           => 'Значение поля FIELDS[sitepage] из формы на лендинге(напр. franch)',
             'responsible_user_id' => 'ID ответственного менеджера(responsible_user_id)',
-            'pipeline_id' => 'ID воронки(pipeline_id)',
+            'pipeline_id'         => 'ID воронки(pipeline_id)',
         ];
     }
 }

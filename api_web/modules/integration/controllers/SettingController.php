@@ -29,10 +29,19 @@ class SettingController extends \api_web\components\WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  "name":"value",
-     *                  "name1":"value1",
-     *                  "name2":"value2"
+     *              {
+     *                  "id":27,
+     *                  "name":"code",
+     *                  "value":"test-123",
+     *                  "changed":"test-1234567"
+     *              },
+     *              {
+     *                  "id":23,
+     *                  "name":"code",
+     *                  "value":"test-123",
+     *                  "changed":null
      *              }
+     *            }
      *          )
      *     ),
      *     @SWG\Response(
@@ -120,7 +129,7 @@ class SettingController extends \api_web\components\WebApiController
      *                      "settings": {
      *                           {
      *                              "name":"taxVat",
-     *                              "value":10
+     *                              "value": "10"
      *                          },
      *                           {
      *                              "name":"auth_password",
@@ -162,6 +171,55 @@ class SettingController extends \api_web\components\WebApiController
     {
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
         $this->response = $this->container->get('IntegrationSettingsWebApi')->update($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/setting/reject-change",
+     *     tags={"Integration/settings"},
+     *     summary="Отмена изменение настройки",
+     *     description="Отмена изменение настройки",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "service_id": 1,
+     *                      "setting_id": 2
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * )
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function actionRejectChange()
+    {
+        $this->setLicenseServiceId($this->request['service_id'] ?? null);
+        $this->response = $this->container->get('IntegrationSettingsWebApi')->rejectChange($this->request);
     }
 
     /**

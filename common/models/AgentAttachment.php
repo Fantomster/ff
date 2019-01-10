@@ -2,16 +2,15 @@
 
 namespace common\models;
 
-use Yii;
 use common\behaviors\UploadBehavior;
 use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "agent_attachment".
  *
- * @property integer $id
- * @property integer $agent_request_id
- * @property string $attachment
+ * @property int          $id               Идентификатор записи в таблице
+ * @property int          $agent_request_id Идентификатор заявки организации на присоединение к франшизе
+ * @property string       $attachment       Название приложенного файла
  *
  * @property AgentRequest $agentRequest
  */
@@ -21,31 +20,31 @@ class AgentAttachment extends \yii\db\ActiveRecord
     public $resourceCategory = 'agent_requests';
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'agent_attachment';
+        return '{{%agent_attachment}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function behaviors()
     {
         return ArrayHelper::merge(parent::behaviors(), [
-                    [
-                        'class' => UploadBehavior::className(),
-                        'attribute' => 'attachment',
-                        'scenarios' => ['default'],
-                        'path' => '@app/web/upload/temp/',
-                        'url' => '/upload/temp/',
-                    ],
+            [
+                'class'     => UploadBehavior::className(),
+                'attribute' => 'attachment',
+                'scenarios' => ['default'],
+                'path'      => '@app/web/upload/temp/',
+                'url'       => '/upload/temp/',
+            ],
         ]);
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -56,14 +55,14 @@ class AgentAttachment extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'               => 'ID',
             'agent_request_id' => 'Agent Request ID',
-            'attachment' => 'Attachment',
+            'attachment'       => 'Attachment',
         ];
     }
 

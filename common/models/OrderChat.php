@@ -7,32 +7,32 @@ use Yii;
 /**
  * This is the model class for table "order_chat".
  *
- * @property integer $id
- * @property integer $recipient_id
- * @property integer $order_id
- * @property integer $sent_by_id
- * @property integer $is_system
- * @property string $message
- * @property string $created_at
- * @property integer $viewed
- * @property integer $danger
+ * @property int $id Идентификатор записи в таблице
+ * @property int $order_id Идентификатор заказа
+ * @property int $sent_by_id Идентификатор пользователя, создавшего сообщение в чате
+ * @property int $is_system Является ли сообщение созданным системой (0 - не является, 1- является)
+ * @property string $message Текст сообщения в чате
+ * @property string $created_at Дата и время создания записи в таблице
+ * @property int $viewed Показатель статуса просмотренности сообщения в чате (0 - не просмотрено, 1 - просмотрено)
+ * @property int $recipient_id Идентификатор пользователя, которому адресовано сообщение в чате
+ * @property int $danger Показатель статуса важности сообщения в чате (0 - не является важным, 1 - является важным)
  *
+ * @property Organization $recipient
  * @property Order $order
  * @property User $sentBy
- * @property Organization $recipient
  */
 class OrderChat extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'order_chat';
+        return '{{%order_chat}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -47,7 +47,7 @@ class OrderChat extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function behaviors()
     {
@@ -63,7 +63,7 @@ class OrderChat extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
@@ -93,17 +93,17 @@ class OrderChat extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'sent_by_id']);
     }
 
-    public function getUser(){
-        return $this->hasOne(User::className(), ['id' => 'sent_by_id']);
-    }
-
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getRecipient() {
         return $this->hasOne(Organization::className(), ['id' => 'recipient_id']);
     }
-    
+
+    /**
+     * @param bool  $insert
+     * @param array $changedAttributes
+     */
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
 

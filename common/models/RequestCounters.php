@@ -2,27 +2,25 @@
 
 namespace common\models;
 
-use Yii;
-
 /**
  * This is the model class for table "request_counters".
  *
- * @property integer $id
- * @property integer $request_id
- * @property integer $user_id
- * @property string $created_at
- * @property string $updated_at
+ * @property int     $id         Идентификатор записи в таблице
+ * @property int     $request_id Идентификатор заявки ресторана
+ * @property int     $user_id    Идентификатор пользователя, просмотревшего заявку
+ * @property string  $created_at Дата и время создания записи в таблице
+ * @property string  $updated_at Дата и время последнего изменения записи в таблице
  * @property Request $request
- * @property User $user
+ * @property User    $user
  */
 class RequestCounters extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'request_counters';
+        return '{{%request_counters}}';
     }
 
     /**
@@ -40,14 +38,14 @@ class RequestCounters extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'         => 'ID',
             'request_id' => 'Request ID',
-            'user_id' => 'User ID',
+            'user_id'    => 'User ID',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
@@ -74,7 +72,8 @@ class RequestCounters extends \yii\db\ActiveRecord
      *
      * @param $request_id
      */
-    public static function hits($request_id) {
+    public static function hits($request_id)
+    {
         return self::find()->where(['request_id' => $request_id])->count();
     }
 
@@ -82,7 +81,8 @@ class RequestCounters extends \yii\db\ActiveRecord
      * @param $request_id
      * @param $user_id
      */
-    public static function hit($request_id, $user_id) {
+    public static function hit($request_id, $user_id)
+    {
         if (!self::find()->where(['request_id' => $request_id, 'user_id' => $user_id])->exists()) {
             $requestCounters = new self();
             $requestCounters->request_id = $request_id;

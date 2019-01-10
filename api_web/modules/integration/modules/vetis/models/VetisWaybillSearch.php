@@ -46,12 +46,18 @@ class VetisWaybillSearch extends MercVsd
     {
         $tableName = DBNameHelper::getMainName();
         if (!empty($this->acquirer_id)) {
-            $strOrgIds = $this->acquirer_id;
+            if (is_array($this->acquirer_id)) {
+                $strOrgIds = implode(',', $this->acquirer_id);
+            } else {
+                $strOrgIds = $this->acquirer_id;
+            }
+            $arOrgIds = $this->acquirer_id;
         } else {
             $orgIds = (new UserWebApi())->getUserOrganizationBusinessList('id');
             $strOrgIds = implode(',', array_keys($orgIds['result']));
+            $arOrgIds = array_keys($orgIds['result']);
         }
-        $enterpriseGuides = implode('\',\'', (new VetisHelper())->getEnterpriseGuids());
+        $enterpriseGuides = implode('\',\'', (new VetisHelper())->getEnterpriseGuids($arOrgIds));
 
         $queryParams = [
             ':page'     => $page,
@@ -60,6 +66,22 @@ class VetisWaybillSearch extends MercVsd
 
         $arWhereAndCount = $this->generateWhereStatementAndCount($params, $strOrgIds, $queryParams);
         $mercPconst = $arWhereAndCount['merc_pconst'] ?? 'a.recipient_guid, a.sender_guid';
+
+        $vsdDirection = 'case when a.recipient_guid in (\'' . $enterpriseGuides . '\') and a.sender_guid not in (\'' . $enterpriseGuides . '\') then \'incoming\'
+                     else \'outgoing\'
+                end vsd_direction';
+
+        if (isset($params['type'])) {
+            if ($params['type'] == 'INCOMING') {
+                $vsdDirection = 'case when a.recipient_guid in (\'' . $enterpriseGuides . '\') then \'incoming\'
+                     else \'outgoing\'
+                end vsd_direction';
+            } elseif ($params['type'] == 'OUTGOING') {
+                $vsdDirection = 'case when a.sender_guid in (\'' . $enterpriseGuides . '\') then \'outgoing\'
+                     else \'incoming\'
+                end vsd_direction';
+            }
+        }
 
         $sql = 'SELECT * FROM (
                 SELECT 
@@ -97,14 +119,12 @@ class VetisWaybillSearch extends MercVsd
                 o.total_price,
                 c.id oc_id,
                 vendor.name vendor_name,
-                case when a.recipient_guid in (\'' . $enterpriseGuides . '\') and a.sender_guid not in (\'' . $enterpriseGuides . '\') then \'incoming\'
-                     else \'outgoing\'
-                end vsd_direction,
+                ' . $vsdDirection . ',
                 case when c.id is not null then 
                   (
                   select max(date_doc) 
                     from  merc_vsd aa,
-                          `' . $tableName . '`.order_content ab 
+                          ' . $tableName . '.order_content ab 
                     where ab.order_id = c.order_id
                       and aa.uuid = ab.merc_uuid
                   )
@@ -114,13 +134,13 @@ class VetisWaybillSearch extends MercVsd
                        merc_vsd a
                 left join integration_setting `is` on `is`.name=\'enterprise_guid\'
                 join integration_setting_value b on b.setting_id = `is`.id and b.value in (' . $mercPconst . ')
-                left join `' . $tableName . '`.order_content c on a.uuid = c.merc_uuid
-                left join `' . $tableName . '`.order o on o.id = c.order_id
-                left join `' . $tableName . '`.organization vendor on o.vendor_id = vendor.id
+                left join ' . $tableName . '.order_content c on a.uuid = c.merc_uuid
+                left join ' . $tableName . '.order o on o.id = c.order_id
+                left join ' . $tableName . '.organization vendor on o.vendor_id = vendor.id
 
                 where 
                 b.org_id in (' . $strOrgIds . ') ' . $arWhereAndCount['sql'] . '
-                order by coalesce(ort, a.date_doc) desc, order_id, a.date_doc desc
+                order by coalesce(ort, a.date_doc) desc, ord_id, a.date_doc desc
                 ) tb 
               ) tb2 where pg=:page
              ';
@@ -164,7 +184,7 @@ class VetisWaybillSearch extends MercVsd
             'items'   => $arItems,
             'groups'  => $arGroups,
             'count'   => ceil($arWhereAndCount['count'] / $pageSize),
-            'org_ids' => array_keys($orgIds['result']),
+            'org_ids' => $arOrgIds,
         ];
     }
 
@@ -230,7 +250,7 @@ class VetisWaybillSearch extends MercVsd
             ->leftJoin(IntegrationSetting::tableName() . ' is', 'is.name=\'enterprise_guid\'')
             ->leftJoin('integration_setting_value b', 'b.setting_id = is.id and b.value in (' . $pConstForCount . ')')
             ->where(array_merge(['b.org_id' => explode(',', $strOrgIds)], $arCount)
-        );
+            );
         if ($between) {
             $count->andWhere($between);
         }

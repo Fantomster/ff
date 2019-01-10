@@ -133,7 +133,7 @@ class EmailIntegration2Controller extends Controller
          */
         error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
         //Получаем все активные настройки или конкретную настройку
-        $where    = (isset($this->setting_id) ? ['id' => $this->setting_id] : ['is_active' => 1]);
+        $where = (isset($this->setting_id) ? ['id' => $this->setting_id] : ['is_active' => 1]);
         $settings = IntegrationSettingFromEmail::find()->where($where)
             ->andWhere(['version' => 2])->all();
         \Yii::$app->db->createCommand('SET SESSION wait_timeout = 28800;')->execute();
@@ -191,19 +191,22 @@ class EmailIntegration2Controller extends Controller
 
     /**
      * Подключение к серверу
+     *
      * @param IntegrationSettingFromEmail $setting
      * @throws Exception
      */
     private function connect(IntegrationSettingFromEmail $setting)
     {
+        $password = \Yii::$app->get('encode')->decrypt($setting->password, $setting->user);
         switch ($setting->server_type) {
             case 'imap':
-                $connect = new Imap($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
+                $connect = new Imap($setting->server_host, $setting->user, $password, $setting->server_port, $setting->server_ssl);
                 $connect->setActiveMailbox('INBOX');
                 break;
             case 'pop3':
-                $connect = new Pop3($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
-                break;
+                throw new Exception("pop3 set for organization: {$setting->organization_id} (mail:{$setting->user})");
+                //$connect = new Pop3($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
+                //break;
             default:
                 throw new Exception('Не определён тип сервера.');
         }
@@ -213,6 +216,7 @@ class EmailIntegration2Controller extends Controller
 
     /**
      * Получим 20 последних сообщений
+     *
      * @param int $start
      * @param int $limit
      * @return array
@@ -222,19 +226,20 @@ class EmailIntegration2Controller extends Controller
         $messages = [];
 
         if ($this->connect instanceof Imap) {
-            $messages = $this->connect->getEmails($start, $limit, true);
+            $messages = $this->connect->search(["UNSEEN"], $start, $limit, true, true);
         }
 
-        if ($this->connect instanceof Pop3) {
-            $messages = $this->connect->getEmails($start, $limit);
-        }
+//        if ($this->connect instanceof Pop3) {
+//            $messages = $this->connect->getEmails($start, $limit);
+//        }
 
         return $messages;
     }
 
     /**
      * Получим список вложений, которые не обрабатывали
-     * @param array $email
+     *
+     * @param array                       $email
      * @param IntegrationSettingFromEmail $setting
      * @throws \Exception
      * @return array|null
@@ -276,11 +281,11 @@ class EmailIntegration2Controller extends Controller
               ]); */
 
             //Получаем тело файла
-            $content      = array_values($file)[0];
+            $content = array_values($file)[0];
             //Декодируем имя файла
-            $name_file    = iconv_mime_decode($name_file, 0, "UTF-8");
+            $name_file = iconv_mime_decode($name_file, 0, "UTF-8");
             //Темповый файл, для прочтения и парсинга
-            $temp_file    = \Yii::getAlias('@app') . '/runtime/' . md5($email['id']) . '_' . $name_file;
+            $temp_file = \Yii::getAlias('@app') . '/runtime/' . md5($email['id']) . '_' . $name_file;
             //Тело файла в BASE64 для возможности записи в базу
             $file_content = base64_encode($content);
             //Проверяем на всякий темповый файл, если есть, удаляем
@@ -289,9 +294,9 @@ class EmailIntegration2Controller extends Controller
             }
             //Проверяем, нет ли уже этой накладной у этой организации
             $model = IntegrationInvoice::findOne([
-                        'integration_setting_from_email_id' => $setting->id,
-                        'organization_id'                   => $setting->organization_id,
-                        'file_hash_summ'                    => md5($file_content),
+                'integration_setting_from_email_id' => $setting->id,
+                'organization_id'                   => $setting->organization_id,
+                'file_hash_summ'                    => md5($file_content),
             ]);
             if (!empty($model)) {
                 //$this->log('- File (' . $name_file . ') has previously been processed by the parser `integration_invoice`.`id` = ' . $model->id);
@@ -365,7 +370,7 @@ class EmailIntegration2Controller extends Controller
             } else {
                 $this->log[] = trim($message);
             }
-        } catch (\Throwable $t){
+        } catch (\Throwable $t) {
             $this->log($t->getTraceAsString());
         }
     }

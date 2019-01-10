@@ -8,19 +8,19 @@ use yii\db\Expression;
 /**
  * This is the model class for table "{{%sms_code_change_mobile}}".
  *
- * @property int $id
- * @property int $user_id
+ * @property int    $id
+ * @property int    $user_id
  * @property string $phone
- * @property int $code
- * @property int $attempt
+ * @property int    $code
+ * @property int    $attempt
  * @property string $created_at
  * @property string $updated_at
- *
- * @property User $user
+ * @property User   $user
  */
 class SmsCodeChangeMobile extends \yii\db\ActiveRecord
 {
     public $wait_time = 0;
+
     /**
      * @inheritdoc
      */
@@ -40,21 +40,21 @@ class SmsCodeChangeMobile extends \yii\db\ActiveRecord
             [['created_at', 'updated_at'], 'safe'],
             [['phone'], 'string', 'max' => 255],
             [['user_id'], 'unique'],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
 
     /**
-     * @inheritdoc
+     * @return array
      */
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'user_id' => Yii::t('app', 'User ID'),
-            'phone' => Yii::t('app', 'Phone'),
-            'code' => Yii::t('app', 'Code'),
-            'attempt' => Yii::t('app', 'Attempt'),
+            'id'         => Yii::t('app', 'ID'),
+            'user_id'    => Yii::t('app', 'User ID'),
+            'phone'      => Yii::t('app', 'Phone'),
+            'code'       => Yii::t('app', 'Code'),
+            'attempt'    => Yii::t('app', 'Attempt'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
         ];
@@ -65,11 +65,12 @@ class SmsCodeChangeMobile extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
+        return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 
     /**
      * Проверка кода и смена номера
+     *
      * @param $code
      * @return bool|false|int
      */
@@ -83,7 +84,10 @@ class SmsCodeChangeMobile extends \yii\db\ActiveRecord
 
     /**
      * Смена номера телефона
+     *
      * @return false|int
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function changePhoneUser()
     {
@@ -91,6 +95,7 @@ class SmsCodeChangeMobile extends \yii\db\ActiveRecord
         if ($this->user->profile->save()) {
             return $this->delete();
         }
+        return false;
     }
 
     /**

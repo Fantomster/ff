@@ -659,6 +659,12 @@ SQL;
         $lic = iikoService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            
+            $existingWaybill = iikoWaybill::find()->where(['order_id' => $model->order_id, 'store_id' => $model->store_id])->one();
+            if (!empty($existingWaybill)) {
+                $model = iikoWaybill::moveContentToExistingWaybill($model, $existingWaybill);
+            }
+            
             $sql = "SELECT COUNT(*) FROM iiko_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
             $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
             if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_id === null)) {
@@ -682,10 +688,12 @@ SQL;
                     $model->readytoexport = 0;
                 }
             }
-            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');
-            $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+
+            $model->doc_date = Yii::$app->formatter->asDate(Yii::$app->formatter->asDate($model->doc_date, 'php:Y-m-d') . ' 16:00:00', 'php:Y-m-d H:i:s');
+            $model->payment_delay_date = Yii::$app->formatter->asDate(Yii::$app->formatter->asDate($model->payment_delay_date, 'php:Y-m-d') . ' 16:00:00', 'php:Y-m-d H:i:s');
             $model->save();
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            return $this->redirect(['/clientintegr/iiko/waybill/index', 'way' => $model->order_id]);
+            
         } else {
             return $this->render($vi, [
                 'model' => $model,
@@ -723,7 +731,7 @@ SQL;
                 $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
                 $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
                 $model->save();
-                return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+                return $this->redirect(['/clientintegr/iiko/waybill/index', 'way' => $model->order_id]);
             } else {
                 return $this->render('create', [
                     'model' => $model,
@@ -1189,7 +1197,7 @@ SQL;
         //$number = 1*$number;
 
         $sql = "SELECT wd.id FROM `iiko_waybill_data` `wd` LEFT JOIN `iiko_waybill` `w` ON wd.waybill_id = w.id 
-                LEFT JOIN `" . $dbName . "`.`order` `o` ON w.order_id = o.id  
+                LEFT JOIN " . $dbName . ".`order` `o` ON w.order_id = o.id  
                 WHERE w.status_id = 1 AND o.vendor_id = :w_supp AND o.client_id in (" . $idorgs . ") AND wd.product_id = :w_pid AND wd.product_rid IS NULL";
         $massivs = Yii::$app->db_api->createCommand($sql, [':w_pid' => $number, ':w_supp' => $supp_id])->queryAll();
         $ids = '';

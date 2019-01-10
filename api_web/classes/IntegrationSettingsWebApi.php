@@ -6,12 +6,12 @@ use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use common\helpers\DBNameHelper;
 use common\models\IntegrationSetting;
+use common\models\IntegrationSettingChange;
 use common\models\IntegrationSettingValue;
 use common\models\OuterProductMap;
 use yii\db\Query;
 use yii\helpers\Json;
 use yii\web\BadRequestHttpException;
-use yii\web\JsonParser;
 
 /**
  * Class IntegrationSettingsWebApi
@@ -32,15 +32,23 @@ class IntegrationSettingsWebApi extends WebApi
         $this->validateRequest($post, ['service_id']);
 
         $result = IntegrationSettingValue::find()
-            ->select(['name', 'value'])
+            ->select(['int_set.id', 'int_set.name', 'value', 'COALESCE(ch.new_value, NULL) as changed'])
             ->leftJoin(
-                IntegrationSetting::tableName(),
-                IntegrationSetting::tableName() . ".id = " . IntegrationSettingValue::tableName() . ".setting_id"
-            )->where(
-                "org_id = :org and service_id = :service and is_active = true", [
+                IntegrationSetting::tableName() . ' as int_set',
+                "int_set.id = " . IntegrationSettingValue::tableName() . ".setting_id"
+            )
+            ->leftJoin(
+                IntegrationSettingChange::tableName() . ' as ch',
+                "ch.integration_setting_id = " . IntegrationSettingValue::tableName() . ".setting_id AND " .
+                "ch.org_id = " . IntegrationSettingValue::tableName() . ".org_id AND " .
+                "ch.is_active = 1"
+            )
+            ->where(
+                IntegrationSettingValue::tableName() . ".org_id = :org and int_set.service_id = :service and int_set.is_active = true", [
                 ':org'     => $this->user->organization_id,
                 ':service' => $post['service_id']
             ])
+            ->orderBy('setting_id')
             ->asArray()->all();
 
         return $result;
@@ -95,6 +103,7 @@ class IntegrationSettingsWebApi extends WebApi
                 $result[$item['name']] = ['error' => $e->getMessage()];
             }
         }
+
         return $result;
     }
 
@@ -114,38 +123,113 @@ class IntegrationSettingsWebApi extends WebApi
         if (!isset($request['value'])) {
             throw new BadRequestHttpException('empty_param|value');
         }
-        $modelSetting = IntegrationSetting::findOne(['name' => $request['name'], 'service_id' => $service_id, 'is_active' => true]);
-        if (!$modelSetting) {
+
+        $setting = IntegrationSetting::find()
+            ->where('name = :name AND service_id = :service_id AND is_active = :is_active', [
+                ':name'       => $request['name'],
+                ':service_id' => $service_id,
+                ':is_active'  => true
+            ])
+            ->one();
+
+        if (empty($setting)) {
             throw new BadRequestHttpException('integration_setting.not_found');
         }
 
-        $model = IntegrationSettingValue::find()
-            ->where(
-                "setting_id = :setting_id and org_id = :org",
-                [
-                    ':setting_id' => $modelSetting->id,
-                    ':org'        => $this->user->organization_id
-                ]
-            )
+        $settingValue = IntegrationSettingValue::find()
+            ->where([
+                'setting_id' => $setting->id,
+                'org_id'     => $this->user->organization_id
+            ])
             ->one();
 
-        if (!$model) {
-            $model = new IntegrationSettingValue();
-            $model->setting_id = $modelSetting->id;
-            $model->org_id = $this->user->organization_id;
+        if (empty($setting->required_moderation)) {
+            if (empty($settingValue)) {
+                $settingValue = new IntegrationSettingValue();
+            }
+            $settingValue->setAttributes([
+                'setting_id' => $setting->id,
+                'org_id'     => $this->user->organization_id,
+                'value'      => $request['value']
+            ]);
+
+            if (!$settingValue->save()) {
+                throw new ValidationException($settingValue->getFirstErrors());
+            }
+
+            if ($setting->name == 'main_org' && !empty($request['value'])) {
+                $this->updateOuterProductMap($this->user->organization_id, $request['value']);
+            }
+
+            return $settingValue->value;
         }
 
-        $model->value = $request['value'];
+        $settingChange = IntegrationSettingChange::find()
+            ->where([
+                'integration_setting_id' => $setting->id,
+                'org_id'                 => $this->user->organization_id,
+                'old_value'              => !empty($settingValue) ? $settingValue->value : null,
+                'new_value'              => $request['value'],
+                'is_active'              => true
+            ])
+            ->one();
 
-        if (!$model->save()) {
-            throw new ValidationException($model->getFirstErrors());
+        if (empty($settingValue) || !empty($settingValue) && $settingValue->value != $request['value']) {
+            if (empty($settingChange)) {
+                $newSettingChange = new IntegrationSettingChange([
+                    'org_id'                 => $this->user->organization_id,
+                    'integration_setting_id' => $setting->id,
+                    'old_value'              => !empty($settingValue) ? $settingValue->value : null,
+                    'new_value'              => $request['value'],
+                    'changed_user_id'        => $this->user->id
+                ]);
+
+                if (!$newSettingChange->save()) {
+                    throw new ValidationException($newSettingChange->getFirstErrors());
+                }
+            }
         }
 
-        if ($modelSetting->name == 'main_org' && !empty($request['value'])) {
-            $this->updateOuterProductMap($this->user->organization_id, $request['value']);
+        throw new BadRequestHttpException(\Yii::t('api_web', 'api_web.moderation_setting_save_msg'));
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function rejectChange($request): array
+    {
+        $this->validateRequest($request, ['service_id', 'setting_id']);
+
+        $setting = IntegrationSetting::find()
+            ->where('service_id = :service_id AND id = :id AND is_active = :is_active', [
+                ':service_id' => $request['service_id'],
+                ':id'         => $request['setting_id'],
+                ':is_active'  => true
+            ])
+            ->one();
+
+        if (empty($setting)) {
+            throw new BadRequestHttpException('integration_setting.not_found');
         }
 
-        return $model->value;
+        $settingChange = IntegrationSettingChange::find()
+            ->where([
+                'integration_setting_id' => $setting->id,
+                'org_id'                 => $this->user->organization_id,
+                'is_active'              => true
+            ])
+            ->one();
+
+        if (empty($settingChange)) {
+            throw new BadRequestHttpException('integration_setting.not_found');
+        }
+        $settingChange->is_active = 0;
+
+        return [
+            'result' => $settingChange->save()
+        ];
     }
 
     /**
@@ -342,6 +426,7 @@ class IntegrationSettingsWebApi extends WebApi
                 $r = [];
             }
         }
+
         return $r;
     }
 }

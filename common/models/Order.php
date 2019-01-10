@@ -19,49 +19,51 @@ use yii\web\BadRequestHttpException;
 /**
  * This is the model class for table "order".
  *
- * @property integer            $id
- * @property integer            $client_id
- * @property integer            $vendor_id
- * @property integer            $created_by_id
- * @property integer            $accepted_by_id
- * @property integer            $status
- * @property string             $total_price
- * @property string             $created_at
- * @property string             $updated_at
- * @property string             $completion_date
- * @property string             $requested_delivery
- * @property string             $actual_delivery
- * @property string             $comment
- * @property string             $discount
- * @property integer            $discount_type
- * @property integer            $currency_id
- * @property string             $waybill_number
- * @property integer            $service_id
- * @property string             $status_updated_at
- * @property string             $edi_order
- * @property string             $edi_ordersp
- * @property bool               $is_recadv_sent
+ * @property int                $id                 Идентификатор записи в таблице
+ * @property int                $client_id          Идентификатор клиента, оформившего заказ
+ * @property int                $vendor_id          Идентификатор организации-поставщика
+ * @property int                $created_by_id      Идентификатор пользователя, создавшего заказ
+ * @property int                $accepted_by_id     Идентификатор пользователя, завершившего заказ
+ * @property int                $status             Идентификатор статуса заказа
+ * @property string             $total_price        Сумма заказа без НДС
+ * @property int                $invoice_relation   Идентификатор накладной ТОРГ-12
+ * @property string             $created_at         Дата и время создания записи в таблице
+ * @property string             $updated_at         Дата и время последнего изменения записи в таблице
+ * @property string             $requested_delivery Ожидаемые дата и время доставки товаров
+ * @property string             $actual_delivery    Реальные дата и время доставки товаров
+ * @property string             $comment            Комментарий (не используется)
+ * @property string             $discount           Размер скидки в процентах
+ * @property int                $discount_type      Идентификатор типа скидки
+ * @property int                $currency_id        Идентификатор вида валюты, в которой оформлен заказ
+ * @property string             $completion_date    Дата и время завершения заказа
+ * @property string             $waybill_number     Номер приходной накладной
+ * @property int                $service_id         Идентификатор учётного сервиса (all_service)
+ * @property string             $status_updated_at  Дата и время последнего изменения статуса заказа
+ * @property string             $edi_order          Идентификатор EDI заказа
+ * @property string             $edi_ordersp        Название файла ordersp, который поступает от поставщика
+ * @property string             $accepted_at        Дата и время завершения заказа
+ * @property string             $edi_error_message  Сообщение об ошибке от EDI
+ * @property int                $replaced_order_id  Идентификатор заказа, который был заменён текущим
+ * @property string             $edi_doc_date       Дата накладной заказа по EDI
+ * @property int                $is_recadv_sent     Показатель состояния отправки файла recadv (0 - не отправлен, 1 -
+ *           отправлен)
+ *
+ * @property EmailQueue[]       $emailQueues
  * @property User               $acceptedBy
+ * @property Organization       $client
  * @property User               $createdBy
+ * @property Currency           $currency
+ * @property Organization       $vendor
+ * @property OrderAssignment    $orderAssignment
+ * @property OrderAttachment[]  $orderAttachments
+ * @property OrderChat[]        $orderChats
+ * @property OrderContent[]     $orderContents
+ * @property EdiOrder           $ediOrder
  * @property Profile            $createdByProfile
  * @property Profile            $acceptedByProfile
- * @property Organization       $client
- * @property Organization       $vendor
- * @property OrderContent[]     $orderContent
- * @property OrderChat[]        $orderChat
- * @property integer            positionCount
- * @property integer            invoice_relation
- * @property string             $statusText
- * @property bool               $isObsolete
- * @property string             $rawPrice
- * @property User[]             $recipientsList
- * @property Currency           $currency
- * @property OrderAttachment[]  $attachments
- * @property OrderAssignment    $assignment
- * @property EmailQueue[]       $relatedEmails
- * @property integer            $replaced_order_id
  * @property IntegrationInvoice $invoice
- * @property array              $ediNumber
+ * @property IntegrationInvoice $invoiceRelation
+ * @property EmailQueue[]       $relatedEmails
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -90,16 +92,15 @@ class Order extends \yii\db\ActiveRecord
     public $last_message_date = null;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-
     public static function tableName()
     {
-        return 'order';
+        return '{{%order}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function behaviors(): array
     {
@@ -130,15 +131,15 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules(): array
     {
         return [
             [['client_id', 'vendor_id', 'status'], 'required'],
-            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id', 'replaced_order_id', 'edi_organization_id'], 'integer'],
+            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type', 'invoice_relation', 'service_id', 'replaced_order_id'], 'integer'],
             [['total_price', 'discount'], 'number'],
-            [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number', 'edi_ordersp', 'edi_doc_date', 'edi_shipment_quantity', 'is_recadv_sent'], 'safe'],
+            [['created_at', 'status_updated_at', 'updated_at', 'edi_order', 'requested_delivery', 'actual_delivery', 'comment', 'completion_date', 'waybill_number', 'edi_ordersp', 'edi_doc_date', 'is_recadv_sent'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
@@ -149,29 +150,27 @@ class Order extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels(): array
     {
         return [
-            'id'                    => Yii::t('app', 'Номер заказа'),
-            'replaced_order_id'     => Yii::t('app', 'ID заказа который был заменен текущим'),
-            'client_id'             => 'Client ID',
-            'vendor_id'             => 'Vendor ID',
-            'created_by_id'         => 'Created By ID',
-            'accepted_by_id'        => 'Accepted By ID',
-            'status'                => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
-            'status_text'           => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
-            'total_price'           => Yii::t('app', 'common.models.total_price', ['ru' => 'Итоговая цена']),
-            'created_at'            => Yii::t('app', 'Дата создания'),
-            'updated_at'            => 'Updated At',
-            'vendor'                => Yii::t('app', 'Поставщик'),
-            'create_user'           => Yii::t('app', 'Заказ создал'),
-            'plan_price'            => Yii::t('app', 'План'),
-            'waybill_number'        => Yii::t('app', 'Номер накладной'),
-            'edi_doc_date'          => Yii::t('app', 'Дата накладной заказа по EDI'),
-            'edi_shipment_quantity' => Yii::t('app', 'Отгруженное количество товара EDI'),
-            'edi_organization_id'   => Yii::t('app', 'Идентификатор связи ресторана в таблице edi_organization'),
+            'id'                => Yii::t('app', 'Номер заказа'),
+            'replaced_order_id' => Yii::t('app', 'ID заказа который был заменен текущим'),
+            'client_id'         => 'Client ID',
+            'vendor_id'         => 'Vendor ID',
+            'created_by_id'     => 'Created By ID',
+            'accepted_by_id'    => 'Accepted By ID',
+            'status'            => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'status_text'       => Yii::t('app', 'common.models.status', ['ru' => 'Статус']),
+            'total_price'       => Yii::t('app', 'common.models.total_price', ['ru' => 'Итоговая цена']),
+            'created_at'        => Yii::t('app', 'Дата создания'),
+            'updated_at'        => 'Updated At',
+            'vendor'            => Yii::t('app', 'Поставщик'),
+            'create_user'       => Yii::t('app', 'Заказ создал'),
+            'plan_price'        => Yii::t('app', 'План'),
+            'waybill_number'    => Yii::t('app', 'Номер накладной'),
+            'edi_doc_date'      => Yii::t('app', 'Дата накладной заказа по EDI')
         ];
     }
 
@@ -198,6 +197,14 @@ class Order extends \yii\db\ActiveRecord
 
             return true;
         }
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEmailQueues()
+    {
+        return $this->hasMany(EmailQueue::className(), ['order_id' => 'id']);
     }
 
     /**
@@ -724,7 +731,6 @@ class Order extends \yii\db\ActiveRecord
                     && isset($glnArray['vendor_gln'])
                     && $glnArray['client_gln'] > 0
                     && $glnArray['vendor_gln'] > 0
-
                 ) {
                     $ediIntegration = new EDIIntegration(['orgId' => $vendor->id, 'clientId' => $client->id, 'providerID' => $glnArray['provider_id']]);
                     $result = true;
@@ -736,13 +742,12 @@ class Order extends \yii\db\ActiveRecord
                         $result = $ediIntegration->sendOrderInfo($this, true);
                         $this->updateAttributes(['is_recadv_sent' => true]);
                     } elseif ($this->status == OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR || $this->status == OrderStatus::STATUS_CANCELLED) {
-                        $updatedAtPlusTenSeconds = date("Y-m-d H:i:s", (strtotime(date($this->updated_at)) + 10));
-                        $nowDate = date("Y-m-d H:i:s");
-                        if (!$this->edi_order) {
+                        if ($this->edi_order == null) {
                             $result = $ediIntegration->sendOrderInfo($this, false);
-                            $this->updateAttributes(['edi_order' => $this->id]);
-                        } elseif ($this->edi_order && $nowDate > $updatedAtPlusTenSeconds) {
-                            $result = $ediIntegration->sendOrderInfo($this, false);
+                        } else {
+                            if ((isset($changedAttributes['total_price']) && $changedAttributes['total_price'] > 0) || $this->status == OrderStatus::STATUS_CANCELLED) {
+                                $result = $ediIntegration->sendOrderInfo($this, false);
+                            }
                         }
                     }
                     if (!$result) {
@@ -761,6 +766,9 @@ class Order extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @return string|null
+     */
     public function getEdiOrderDocType()
     {
         $docType = null;
@@ -776,6 +784,9 @@ class Order extends \yii\db\ActiveRecord
         return $docType;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function afterDelete()
     {
         parent::afterDelete();

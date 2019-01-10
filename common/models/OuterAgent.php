@@ -35,7 +35,7 @@ class OuterAgent extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'outer_agent';
+        return '{{%outer_agent}}';
     }
 
     /**
@@ -103,7 +103,7 @@ class OuterAgent extends \yii\db\ActiveRecord
      */
     public function getVendor()
     {
-        $db_instance = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        $db_instance = DBNameHelper::getMainName();
         return (new ActiveQuery(Organization::class))
             ->from($db_instance . '.' . Organization::tableName() . ' `o`')
             ->onCondition([

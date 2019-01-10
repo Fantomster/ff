@@ -25,7 +25,7 @@ class OuterProductMapSearch extends OuterProductMap
      */
     public function search(Organization $client, $post)
     {
-        $dbName = "`" . DBNameHelper::getApiName() . "`.";
+        $dbName = DBNameHelper::getApiName() . ".";
         $outerProductMapTableName = $dbName . OuterProductMap::tableName();
         $outerProductTableName = $dbName . OuterProduct::tableName();
         $outerUnitTableName = $dbName . OuterUnit::tableName();
@@ -70,6 +70,14 @@ class OuterProductMapSearch extends OuterProductMap
 
         $vendors = array_keys($client->getSuppliers(null));
 
+        /**
+         * ВНИМАНИЕ !!!!!!!
+         *  Сортировка по умолчанию тут выключена специально, поскольку занимает очень много времени > 20 сек
+         *  сортировка производится только  если задан поиск по какому то продукту.
+         *  ЕСЛИ ТЫ ЗАБРАЛСЯ СЮДА ЧТОБЫ ДОБАВИТЬ СОРТИРОВКУ ПО ЧЬЕЙ ТО ЗАДАЧЕ
+         *  ОБСУДИ ЭТО С ТИМЛИДОМ ИЛИ ДИРЕКТОРОМ
+         */
+
         if (isset($post['search'])) {
             /**
              * фильтр по id продукта
@@ -83,6 +91,9 @@ class OuterProductMapSearch extends OuterProductMap
                 if (!empty($post['search']['product'])) {
                     $query->andFilterWhere(['like', "f.`name`", $post['search']['product']]);
                     $query->orFilterWhere(['like', "d.`product`", $post['search']['product']]);
+                    $query->orderBy([
+                        'IF(f.id is null, 0, 1)' => SORT_DESC
+                    ]);
                 }
                 /**
                  * фильтр по поставщику
@@ -94,12 +105,6 @@ class OuterProductMapSearch extends OuterProductMap
         }
 
         $query->andWhere(['in', "a.supp_org_id", $vendors]);
-
-        $query->orderBy([
-            'IF(f.id is null, 0, 1)' => SORT_DESC,
-            'f.id'                   => SORT_ASC,
-            'product_id'             => SORT_ASC,
-        ]);
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query->createCommand()->getRawSql(),

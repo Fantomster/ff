@@ -74,6 +74,12 @@ class mercDicconst extends \yii\db\ActiveRecord
         return $res;
     }
 
+    /**
+     * @param      $denom
+     * @param null $org
+     * @return mixed|string
+     * @throws \Exception
+     */
     public static function getSetting($denom, $org = null)
     {
         $iskl = ['hand_load_only'=> 0,'vetis_password' => ''];

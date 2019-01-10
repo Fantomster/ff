@@ -13,12 +13,11 @@ use api_web\modules\integration\modules\vetis\models\VetisWaybill;
  */
 class DefaultController extends WebApiController
 {
-    /**
-     * Для контроллера нужна лицензия меркурия
-     *
-     * @var int
-     */
-    public $license_service_id = Registry::MERC_SERVICE_ID;
+    public function beforeAction($action)
+    {
+        $this->setLicenseServiceId(Registry::MERC_SERVICE_ID);
+        return parent::beforeAction($action);
+    }
 
     /**
      * @SWG\Post(path="/integration/vetis/groups-list",
@@ -201,7 +200,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                  "search": {"sender_name":"часть имени", "acquirer_id": 7}
+     *                  "search": {"sender_name":"часть имени", "acquirer_id": {7, 8}}
      *                  }
      *              )
      *         )
@@ -247,7 +246,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                  "search": {"product_name":"часть имени", "acquirer_id": 7}
+     *                  "search": {"product_name":"часть имени", "acquirer_id": {7, 8}}
      *                  }
      *              )
      *         )
@@ -728,7 +727,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *
+     *                     "search": {"name":"часть имени"}
      *                  }
      *              )
      *         )
@@ -770,7 +769,7 @@ class DefaultController extends WebApiController
      */
     public function actionAcquirerFilter()
     {
-        $this->response = $this->container->get('UserWebApi')->getUserOrganizationBusinessList();
+        $this->response = $this->container->get('UserWebApi')->getUserOrganizationBusinessList(null, $this->request['search']['name'] ?? null);
     }
 
     /**
@@ -788,7 +787,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "org_id": "1234"
+     *                      "org_id": ["1", "2", "3"]
      *                  }
      *              )
      *         )

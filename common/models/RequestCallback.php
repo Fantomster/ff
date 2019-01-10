@@ -7,32 +7,48 @@ use Yii;
 /**
  * This is the model class for table "request_callback".
  *
- * @property integer      $id
- * @property integer      $request_id
- * @property integer      $supp_org_id
- * @property integer      $supp_user_id
- * @property string       $price
- * @property string       $comment
- * @property string       $created_at
- * @property string       $updated_at
- * @property Organization $organization
- * @property Request      $request
- * 
+ * @property int          $id           Идентификатор записи в таблице
+ * @property int          $request_id   Идентификатор заявки ресторана
+ * @property int          $supp_org_id  Идентификатор организации-поставщика
+ * @property string       $price        Цена, предлагаемая поставщиком
+ * @property string       $comment      Комментарий поставщика
+ * @property string       $created_at   Дата и время создания записи в таблице
+ * @property string       $updated_at   Дата и время последнего изменения записи в таблице
+ * @property int          $supp_user_id Идентификатор пользователя организации-поставщика
+ *
  * @property User[]       $recipientsListForVendor
+ * @property Request      $request
+ * @property Organization $organization
+ * @property User         $user
  */
 class RequestCallback extends \yii\db\ActiveRecord
 {
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'request_callback';
+        return '{{%request_callback}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     */
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -47,7 +63,7 @@ class RequestCallback extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
@@ -60,18 +76,6 @@ class RequestCallback extends \yii\db\ActiveRecord
             'comment'      => 'Comment',
             'created_at'   => 'Created At',
             'updated_at'   => 'Updated At',
-        ];
-    }
-
-    public function behaviors()
-    {
-        return [
-            'timestamp' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'value' => function ($event) {
-                    return gmdate("Y-m-d H:i:s");
-                },
-            ],
         ];
     }
 
@@ -99,6 +103,10 @@ class RequestCallback extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'supp_user_id']);
     }
 
+    /**
+     * @param bool  $insert
+     * @param array $changedAttributes
+     */
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
@@ -109,16 +117,19 @@ class RequestCallback extends \yii\db\ActiveRecord
             }
         }
     }
-    
+
+    /**
+     * @return array|Allow[]|AllService[]|Cart[]|Catalog[]|CatalogBaseGoods[]|Category[]|Franchisee[]|FranchiseeGeo[]|FranchiseType[]|Gender[]|IntegrationSettingFromEmail[]|Job[]|MpCategory[]|MpCountry[]|MpEd[]|notifications\EmailNotification[]|Order[]|OrderChat[]|OrganizationType[]|RelationSuppRest[]|User[]|Waybill[]|\yii\db\ActiveRecord[]
+     */
     public function getRecipientsListForVendor()
     {
         return User::find()
-                        ->join('LEFT JOIN', RelationUserOrganization::tableName() . ' as ruo', User::tableName() . '.organization_id = ruo.organization_id')
-                        ->where([
-                            'ruo.organization_id' => $this->supp_org_id,
-                            'ruo.role_id'         => Role::ROLE_SUPPLIER_MANAGER,
-                        ])
-                        ->all();
+            ->join('LEFT JOIN', RelationUserOrganization::tableName() . ' as ruo', User::tableName() . '.organization_id = ruo.organization_id')
+            ->where([
+                'ruo.organization_id' => $this->supp_org_id,
+                'ruo.role_id'         => Role::ROLE_SUPPLIER_MANAGER,
+            ])
+            ->all();
     }
 
 }

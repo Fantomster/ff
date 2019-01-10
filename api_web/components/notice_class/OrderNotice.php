@@ -3,6 +3,7 @@
 namespace api_web\components\notice_class;
 
 use api_web\components\FireBase;
+use api_web\components\Notice;
 use api_web\helpers\WebApiHelper;
 use common\models\Message;
 use common\models\notifications\EmailNotification;
@@ -21,7 +22,6 @@ use yii\swiftmailer\Mailer;
 
 class OrderNotice
 {
-
     /**
      * @param $vendor Organization
      * @return bool
@@ -198,6 +198,8 @@ class OrderNotice
 
         $systemMessage = $organization->name . \Yii::t('message', 'frontend.controllers.order.cancelled_order', ['ru' => ' отменил заказ!']);
         $this->sendSystemMessage($user, $order->id, $systemMessage, true);
+        $recipient_org_id = $senderOrg->id == $order->client_id ? $order->vendor_id : $order->client_id;
+        Notice::init('Chat')->updateCountMessageAndDialog($recipient_org_id, $order, $subject);
     }
 
     /**
@@ -258,6 +260,8 @@ class OrderNotice
 
         $systemMessage = $order->client->name . \Yii::t('message', 'frontend.controllers.order.receive_order_five', ['ru' => ' получил заказ!']);
         $this->sendSystemMessage($user, $order->id, $systemMessage, false);
+        $recipient_org_id = $senderOrg->id == $order->client_id ? $order->vendor_id : $order->client_id;
+        Notice::init('Chat')->updateCountMessageAndDialog($recipient_org_id, $order, $subject);
     }
 
     /**
@@ -268,7 +272,7 @@ class OrderNotice
      * @param null  $sender
      * @throws \Exception
      */
-    public function processingOrder(Order $order, User $user, $sender = null)
+    public function processingOrder(Order $order, User $user, $sender = null, $isDesadv = false)
     {
         /** @var Mailer $mailer */
         /** @var Message $message */
@@ -281,7 +285,7 @@ class OrderNotice
 
         $mailer = Yii::$app->mailer;
         $mailer->htmlLayout = '@mail_views/order';
-        $subject = Yii::t('message', 'frontend.controllers.order.accepted_order', ['ru' => "Заказ № {order_id} подтвержден!", 'order_id' => $order->id]);
+        $subject = $isDesadv ? $senderOrg->name . " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.accepted_order', ['ru' => "Заказ № {order_id} подтвержден!", 'order_id' => $order->id]);
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -299,7 +303,7 @@ class OrderNotice
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification) {
                     if ($notification->order_processing) {
-                        $mailer->compose('@mail_views/orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        $mailer->compose('@mail_views/orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient", "isDesadv"))
                             ->setTo($email)
                             ->setSubject($subject)
                             ->send();
@@ -321,6 +325,8 @@ class OrderNotice
 
         $systemMessage = $order->vendor->name . \Yii::t('message', 'frontend.controllers.order.confirm_order', ['ru' => ' подтвердил заказ!']);
         $this->sendSystemMessage($user, $order->id, $systemMessage, false);
+        $recipient_org_id = $senderOrg->id == $order->client_id ? $order->vendor_id : $order->client_id;
+        Notice::init('Chat')->updateCountMessageAndDialog($recipient_org_id, $order, $subject);
     }
 
     /**
@@ -330,10 +336,11 @@ class OrderNotice
      * @param      $order_id
      * @param      $message
      * @param bool $danger
+     * @param null $messageFcm
      * @return bool
      * @throws \Exception
      */
-    private function sendSystemMessage($user, $order_id, $message, $danger = false)
+    private function sendSystemMessage($user, $order_id, $message, $danger = false, $messageFcm = null)
     {
         try {
             $order = Order::findOne(['id' => $order_id]);
@@ -358,7 +365,7 @@ class OrderNotice
 
             $body = $controller->renderPartial('@frontend/views/order/_chat-message', [
                 'name'      => '',
-                'message'   => $newMessage->message,
+                'message'   => $messageFcm ?? strip_tags($newMessage->message),
                 'time'      => WebApiHelper::asDatetime($newMessage->created_at),
                 'isSystem'  => 1,
                 'sender_id' => $user->id,
@@ -386,7 +393,7 @@ class OrderNotice
                     'organization'  => $newMessage->recipient_id,
                     'notifications' => uniqid(),
                 ], [
-                    'body'     => $newMessage->message,
+                    'body'     => $messageFcm ?? strip_tags($newMessage->message),
                     'date'     => WebApiHelper::asDatetime(),
                     'order_id' => $order_id
                 ]);
@@ -408,7 +415,7 @@ class OrderNotice
                     'organization'  => $newMessage->recipient_id,
                     'notifications' => uniqid(),
                 ], [
-                    'body'     => $newMessage->message,
+                    'body'     => $messageFcm ?? strip_tags($newMessage->message),
                     'date'     => WebApiHelper::asDatetime(),
                     'order_id' => $order_id
                 ]);
@@ -489,7 +496,10 @@ class OrderNotice
                 'changed' => $changed,
                 'deleted' => $deleted
             ]);
-            $this->sendSystemMessage($senderUser, $order->id, $systemMessage, false);
+
+            $this->sendSystemMessage($senderUser, $order->id, $systemMessage, false, $subject);
+            $recipient_org_id = $senderOrg->id == $order->client_id ? $order->vendor_id : $order->client_id;
+            Notice::init('Chat')->updateCountMessageAndDialog($recipient_org_id, $order, $subject);
         }
     }
 

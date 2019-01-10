@@ -2,6 +2,8 @@
 
 namespace api_web\classes;
 
+use api_web\components\Registry;
+use api_web\models\User;
 use common\models\RelationSuppRest;
 use api_web\exceptions\ValidationException;
 use common\helpers\ModelsCollection;
@@ -43,6 +45,7 @@ class CatalogWebApi extends WebApi
         if ($isEmpty) {
             $catalog->main_index = $index;
             $catalog->save();
+
             return [
                 'result' => true
             ];
@@ -57,8 +60,9 @@ class CatalogWebApi extends WebApi
      * @param Catalog $catalog
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
-    public function deleteMainCatalog($catalog)
+    public function deleteMainCatalog(Catalog $catalog)
     {
         $isEmpty = !CatalogBaseGoods::find()->where(['cat_id' => $catalog->id, 'deleted' => false])->exists();
         if ($isEmpty) {
@@ -157,6 +161,11 @@ class CatalogWebApi extends WebApi
 
         $transaction = \Yii::$app->db->beginTransaction();
         try {
+            /* Удаление всех продуктов при обновлении */
+            CatalogGoods::deleteAll([
+                'cat_id'     => $catalog->id,
+                'service_id' => Registry::MC_BACKEND
+            ]);
             $arBatchInsert = [];
             /**
              * @var CatalogTempContent $tempRow
@@ -209,28 +218,15 @@ class CatalogWebApi extends WebApi
                 if (!$model->save(false)) {
                     throw new ValidationException($model->getFirstErrors());
                 }
-                if ($tempRow['cg_id'] != 0) {
-                    /**@var CatalogGoods $catalogGood */
-                    $catalogGood = \Yii::createObject([
-                        'class'         => '\common\models\CatalogGoods',
-                        'cat_id'        => $catalog->id,
-                        'base_goods_id' => $tempRow['cbg_id'],
-                        'vat'           => $tempRow['cg_vat'],
-                    ]);
-                    $catalogGood->setOldAttributes([
-                        'id' => $tempRow['cg_id'],
-                    ]);
-                    $catalogGood->price = $model->price;
-                    if (!$catalogGood->save(false)) {
-                        throw new ValidationException($catalogGood->getFirstErrors());
-                    }
-                } else {
-                    $catalogGood = new CatalogGoods();
-                    $catalogGood->cat_id = $catalog->id;
-                    $catalogGood->base_goods_id = $model->id;
-                    $catalogGood->price = $model->price;
-                    $arBatchInsert[] = $catalogGood;
-                }
+
+                $catalogGood = new CatalogGoods([
+                    'cat_id'        => $catalog->id,
+                    'base_goods_id' => $model->id,
+                    'price'         => $model->price,
+                    'service_id'    => Registry::MC_BACKEND
+                ]);
+                $arBatchInsert[] = $catalogGood;
+
                 if (count($arBatchInsert) > 499) {
                     (new ModelsCollection())->saveMultiple($arBatchInsert, false, 'db');
                     $arBatchInsert = [];
@@ -241,6 +237,7 @@ class CatalogWebApi extends WebApi
             CatalogTempContent::deleteAll(['temp_id' => $catalogTemp->id]);
             $catalogTemp->delete();
             $transaction->commit();
+
             return ['result' => true];
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -427,6 +424,7 @@ class CatalogWebApi extends WebApi
             }
             //Все ок!
             $transaction->commit();
+
             return ['products' => $this->getGoodsInTempCatalog($request)];
         } catch (\Exception $e) {
             if ($transaction->getIsActive()) {
@@ -616,8 +614,8 @@ class CatalogWebApi extends WebApi
             ->where([
                 'supp_org_id' => $vendorID,
                 'rest_org_id' => $restOrganization->id,
-                'status' => RelationSuppRest::CATALOG_STATUS_ON,
-                'deleted' => 0,
+                'status'      => RelationSuppRest::CATALOG_STATUS_ON,
+                'deleted'     => 0,
             ]);
         if (!$kostilForInvitedVendor) {
             $relQuery->andWhere([">", "cat_id", 0]);
@@ -662,6 +660,7 @@ class CatalogWebApi extends WebApi
                 throw new ValidationException($rel->getFirstErrors());
             }
         }
+
         return $catalog;
     }
 
@@ -688,8 +687,10 @@ class CatalogWebApi extends WebApi
         $vendorId = $request['vendor_id'];
         $vendor = Organization::findOne($vendorId);
         if (empty($vendor) || $vendor->type_id != Organization::TYPE_SUPPLIER) {
-            //todo_refactor no migration localization
             throw new BadRequestHttpException('vendor.not_found');
+        }
+        if ($vendor->isEdi()) {
+            throw new BadRequestHttpException('vendor.is_edi');
         }
         if ($vendor->vendor_is_work) {
             throw new BadRequestHttpException('vendor.is_work');
@@ -721,6 +722,7 @@ class CatalogWebApi extends WebApi
                 $newTempCatalog->user_id = $this->user->id;
                 $newTempCatalog->excel_file = $file->name;
                 $newTempCatalog->save();
+
                 return [
                     'result'  => true,
                     'temp_id' => $newTempCatalog->id,
@@ -838,6 +840,7 @@ class CatalogWebApi extends WebApi
             CatalogTempContent::deleteAll(['temp_id' => $tempCatalog->id]);
             $tempCatalog->delete();
         }
+
         return ['result' => true];
     }
 
@@ -960,6 +963,7 @@ class CatalogWebApi extends WebApi
             $newGoods->refresh();
             $article++;
         }
+
         return $lastInsert_cat_id;
     }
 }

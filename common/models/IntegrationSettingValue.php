@@ -14,6 +14,7 @@ use yii\db\Query;
  * @property string             $value      Значение настройки для данной организации
  * @property string             $created_at
  * @property string             $updated_at
+ * @property Organization       $organization
  * @property IntegrationSetting $setting
  */
 class IntegrationSettingValue extends \yii\db\ActiveRecord
@@ -23,7 +24,7 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'integration_setting_value';
+        return '{{%integration_setting_value}}';
     }
 
     /**
@@ -32,6 +33,21 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
     public static function getDb()
     {
         return Yii::$app->get('db_api');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
     }
 
     /**
@@ -67,6 +83,14 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getOrganization()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'org_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getSetting()
     {
         return $this->hasOne(IntegrationSetting::class, ['id' => 'setting_id']);
@@ -97,7 +121,7 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
             ->where(['isv.org_id' => $orgId])
             ->andFilterWhere(['is.name' => $settingNames, 'is.service_id' => $serviceId])
             ->all(\Yii::$app->db_api);
-        
+
         if (count($dbResult) > 1 && (count($settingNames) > 1 || empty($settingNames))) {
             foreach ($dbResult as $item) {
                 $result[$item['name']] = $item['value'];
@@ -108,22 +132,4 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
 
         return $result;
     }
-
-    /**
-     * @return array
-     */
-    public function behaviors()
-    {
-        return [
-            'timestamp' => [
-                'class'      => \yii\behaviors\TimestampBehavior::class,
-                'attributes' => [
-                    \yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
-                    \yii\db\ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
-                ],
-                'value'      => \gmdate('Y-m-d H:i:s'),
-            ],
-        ];
-    }
-
 }

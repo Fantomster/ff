@@ -59,50 +59,6 @@ class DefaultController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/egais/query-rests",
-     *     tags={"Integration/egais"},
-     *     summary="ЕГАИС запрос остатков",
-     *     description="запрашиваем остатки алкогольной продукции в ЕГАИС",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                  }
-     *              )
-     *         )
-     *     ),
-     *    @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *            @SWG\Schema(
-     *              default={
-     *                      "result": true
-     *              }
-     *          )
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "error"
-     *     )
-     * )
-     * @throws \Exception
-     */
-    public function actionQueryRests()
-    {
-        $this->response = (new EgaisMethods())->getQueryRests($this->request);
-    }
-
-    /**
      * @SWG\Post(path="/integration/egais/write-off-types",
      *     tags={"Integration/egais"},
      *     summary="ЕГАИС запрос типов списания",
@@ -249,7 +205,6 @@ class DefaultController extends WebApiController
      *         @SWG\Schema (
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(property="request", ref="#/definitions/ActWriteOffV3"),
-     *
      *         )
      *     ),
      *    @SWG\Response(
@@ -290,7 +245,6 @@ class DefaultController extends WebApiController
      *         @SWG\Schema (
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(property="request", ref="#/definitions/ActChargeOnV2"),
-     *
      *         )
      *     ),
      *    @SWG\Response(

@@ -9,52 +9,68 @@ use yii\helpers\HtmlPurifier;
 /**
  * This is the model class for table "integration_invoice".
  *
- * @property int $id
- * @property int $organization_id
- * @property int $integration_setting_from_email_id
- * @property string $number
- * @property string $date
- * @property string $email_id
- * @property int $order_id
- * @property string $file_mime_type
- * @property string $file_content
- * @property string $file_hash_summ
- * @property string $created_at
- * @property string $updated_at
- * @property string $consignee
- * @property int $vendor_id
+ * @property int                         $id                                Идентификатор записи в таблице
+ * @property int                         $organization_id                   Идентификатор организации - получателя
+ *           накладной
+ * @property int                         $integration_setting_from_email_id Идентификатор электронного ящика,
+ *           настроенного в интеграциях
+ * @property string                      $number                            Номер накладной, взятый из накладной
+ * @property string                      $date                              Дата поставки, взятая из накладной
+ * @property string                      $email_id                          Идентификатор почтового ящика, откуда был
+ *           загружен файл с накладной
+ * @property int                         $order_id                          Идентификатор заказа, созданного по этой
+ *           накладной
+ * @property string                      $file_mime_type                    МИМЕ-тип вложенного файла накладной
+ * @property string                      $file_content                      Хэш-контент файла накладной
+ * @property string                      $file_hash_summ                    Хэш-сумма файла накладной
+ * @property string                      $created_at                        Дата и время создания записи в таблице
+ * @property string                      $updated_at                        Дата и время последнего изменения записи в
+ *           таблице
+ * @property string                      $total_sum_withtax                 Стоимость всех товаров по накладной с НДС
+ * @property string                      $total_sum_withouttax              Стоимость всех товаров по накладной без НДС
+ * @property string                      $name_postav                       Наименование поставщика, взятое из
+ *           накладной
+ * @property string                      $inn_postav                        ИНН поставщика, взятый из накладной
+ * @property string                      $kpp_postav                        КПП поставщика, взятый из накладной
+ * @property string                      $consignee                         Наименование грузополучателя, взятое из
+ *           накладной ТОРГ-12
+ * @property int                         $vendor_id                         Идентификатор организации-поставщика
  *
- * @property IntegrationInvoiceContent[] $Content
- * @property Organization $organization
+ * @property Organization                $organization
+ * @property IntegrationInvoiceContent[] $content
+ * @property Order                       $order
+ * @property Organization                $vendor
+ * @property Order                       $orderRelation
  * @property IntegrationSettingFromEmail $integrationSettingFromEmail
  */
 class IntegrationInvoice extends \yii\db\ActiveRecord
 {
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'integration_invoice';
+        return '{{%integration_invoice}}';
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function behaviors()
     {
         return [
             'timestamp' => [
-                'class' => \yii\behaviors\TimestampBehavior::className(),
-                'attributes' => [
-                    \yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
-                    \yii\db\ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
-                ],
-                'value' => new \yii\db\Expression('NOW()'),
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
             ],
         ];
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -71,32 +87,32 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'organization_id' => 'Получатель накладной',
+            'id'                                => 'ID',
+            'organization_id'                   => 'Получатель накладной',
             'integration_setting_from_email_id' => 'Настройка',
-            'number' => 'Номер накладной',
-            'date' => 'Дата',
-            'email_id' => 'Email ID',
-            'order_id' => 'Связь с заказом',
-            'file_mime_type' => 'MimeType',
-            'file_content' => 'File Content',
-            'file_hash_summ' => 'File Hash Summ',
-            'created_at' => 'Дата получения',
-            'count' => 'Кол-во позиций',
-            'total' => 'Итоговая сумма',
-            'updated_at' => 'Updated At',
-            'total_sum_withtax' => 'Итого с НДС',
-            'price_without_tax_sum' => 'Итого без НДС',
-            'name_postav' => 'Наименование поставщика',
-            'inn_postav' => 'ИНН поставщика',
-            'kpp_postav' => 'КПП поставщика',
-            'consignee' => 'Грузополучатель',
-            'vendor_id' => 'Идентификатор поставщика'
+            'number'                            => 'Номер накладной',
+            'date'                              => 'Дата',
+            'email_id'                          => 'Email ID',
+            'order_id'                          => 'Связь с заказом',
+            'file_mime_type'                    => 'MimeType',
+            'file_content'                      => 'File Content',
+            'file_hash_summ'                    => 'File Hash Summ',
+            'created_at'                        => 'Дата получения',
+            'count'                             => 'Кол-во позиций',
+            'total'                             => 'Итоговая сумма',
+            'updated_at'                        => 'Updated At',
+            'total_sum_withtax'                 => 'Итого с НДС',
+            'price_without_tax_sum'             => 'Итого без НДС',
+            'name_postav'                       => 'Наименование поставщика',
+            'inn_postav'                        => 'ИНН поставщика',
+            'kpp_postav'                        => 'КПП поставщика',
+            'consignee'                         => 'Грузополучатель',
+            'vendor_id'                         => 'Идентификатор поставщика'
         ];
     }
 
@@ -108,6 +124,9 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         return $this->hasMany(IntegrationInvoiceContent::className(), ['invoice_id' => 'id']);
     }
 
+    /**
+     * @return float
+     */
     public function getTotalSumm()
     {
         $total = 0;
@@ -192,16 +211,16 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         if (!empty($invoice['invoice']['rows'])) {
             foreach ($invoice['invoice']['rows'] as $row) {
                 $content = new IntegrationInvoiceContent([
-                    'invoice_id' => $this->id,
-                    'row_number' => $row['num'],
-                    'article' => $row['code'],
-                    'title' => $row['name'],
-                    'ed' => $row['ed'],
-                    'percent_nds' => ceil($row['tax_rate']),
-                    'price_nds' => round($row['sum_with_tax'], 2),
+                    'invoice_id'        => $this->id,
+                    'row_number'        => $row['num'],
+                    'article'           => $row['code'],
+                    'title'             => $row['name'],
+                    'ed'                => $row['ed'],
+                    'percent_nds'       => ceil($row['tax_rate']),
+                    'price_nds'         => round($row['sum_with_tax'], 2),
                     'price_without_nds' => round($row['price_without_tax'], 2),
-                    'quantity' => $row['cnt'],
-                    'sum_without_nds' => $row['sum_without_tax'],
+                    'quantity'          => $row['cnt'],
+                    'sum_without_nds'   => $row['sum_without_tax'],
                 ]);
                 if (!$content->save()) {
                     throw new Exception(implode(' ', $content->getFirstErrors()));
@@ -229,8 +248,8 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         //Если не нашли, создаём
         foreach ($this->content as $row) {
             $model = CatalogBaseGoods::find()->where(['supp_org_id' => $vendor->id])
-                    ->andWhere(['product' => HtmlPurifier::process($row->title)])
-                    ->one();
+                ->andWhere(['product' => HtmlPurifier::process($row->title)])
+                ->one();
 
             if (empty($model)) {
                 $model = new CatalogBaseGoods();
@@ -247,12 +266,12 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
                 }
             }
             $models[] = [
-                'id' => $model->id,
-                'quantity' => $row->quantity,
-                'price' => $row->price_without_nds, //round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds / 100), 2),
-                'units' => 1,
-                'product_name' => $model->product,
-                'article' => $model->article,
+                'id'                 => $model->id,
+                'quantity'           => $row->quantity,
+                'price'              => $row->price_without_nds, //round($row->price_without_nds + ($row->price_without_nds * $row->percent_nds / 100), 2),
+                'units'              => 1,
+                'product_name'       => $model->product,
+                'article'            => $model->article,
                 'invoice_content_id' => $row->id,
             ];
         }
@@ -262,6 +281,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
 
     /**
      * Записывает товарные позиции из накладной ТОРГ-12 в таблицу catalog_goods
+     *
      * @param Organization $vendor
      * @return boolean
      * @throws Exception
@@ -286,12 +306,12 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         }
         foreach ($this->content as $row) {
             $model = CatalogBaseGoods::find()->where(['supp_org_id' => $vendor->id])
-                    ->andWhere(['like', 'product', HtmlPurifier::process($row->title), 'status' => CatalogBaseGoods::STATUS_ON])
-                    ->one();
+                ->andWhere(['like', 'product', HtmlPurifier::process($row->title), 'status' => CatalogBaseGoods::STATUS_ON])
+                ->one();
             foreach ($catalogs as $catalog) {
                 $model2 = CatalogGoods::find()->where(['cat_id' => $catalog['cat_id']])
-                        ->andWhere(['base_goods_id' => $model->id])
-                        ->one();
+                    ->andWhere(['base_goods_id' => $model->id])
+                    ->one();
 
                 if (empty($model2)) {
                     $model2 = new CatalogGoods();
@@ -308,6 +328,10 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         return true;
     }
 
+    /**
+     * @param $id
+     * @return float|int
+     */
     public function pageOrder($id)
     {
         $user = \Yii::$app->user->identity;

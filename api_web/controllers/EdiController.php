@@ -24,7 +24,7 @@ use api_web\components\WebApiController;
 class EdiController extends WebApiController
 {
 
-    public $license_service_id = [Registry::VENDOR_DOC_MAIL_SERVICE_ID, Registry::EDI_SERVICE_ID];
+    public $license_service_id = [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID];
 
     /**
      * @SWG\Post(path="/edi/order-history",
@@ -42,6 +42,7 @@ class EdiController extends WebApiController
      *                  property="request",
      *                  default={
      *                      "search": {
+     *                         "id" : "1",
      *                         "vendor": {
      *                             124,
      *                             143

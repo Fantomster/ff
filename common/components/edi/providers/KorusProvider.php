@@ -59,13 +59,9 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
     /**
      * Get files list from provider and insert to table
      */
-    public function handleFilesList(): void
+    public function handleFilesList()
     {
-        try {
-            $objectList = $this->getFilesListForInsertingInQueue();
-        } catch (\Throwable $e) {
-            Yii::error($e->getMessage());
-        }
+        $objectList = parent::handleFilesList();
         if (!empty($objectList)) {
             $this->insertFilesInQueue($objectList, $this->orgID);
         }
@@ -84,9 +80,6 @@ class KorusProvider extends AbstractProvider implements ProviderInterface
         $desadvList = $this->getOneTypeFilesList('DESADV', $action);
         $ordrspList = $this->getOneTypeFilesList('ORDRSP', $action);
         $list = array_merge($pricatList, $desadvList, $ordrspList);
-        if (!count($list)) {
-            throw new Exception('No files for ' . $this->login);
-        }
         return $list;
     }
 
@@ -133,8 +126,8 @@ EOXML;
                 return $result;
             }
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
-
             $result = $this->sendDoc($string, $done);
+            $order->updateAttributes(['edi_order' => $order->id]);
             $transaction->commit();
         } catch (Exception $e) {
             Yii::error($e);
@@ -175,7 +168,7 @@ EOXML;
         if ($array['ns2SendResponse']['ns2Res'] == 1) {
             return true;
         } else {
-            Yii::error("Ecom returns error code");
+            Yii::error("Korus returns error code");
             return false;
         }
     }
@@ -257,10 +250,10 @@ EOXML;
 EOXML;
         $array = $this->executeCurl($soap_request, $action);
         if ($array['ns2ReceiveResponse']['ns2Res'] != 1) {
-            throw new Exception('EComIntegration getList Error №' . $array['ns2ReceiveResponse']['ns2Res']);
+            throw new Exception('KorusIntegration getList Error №' . $array['ns2ReceiveResponse']['ns2Res']);
         }
         if (!isset($array['ns2ReceiveResponse']['ns2Cnt'])) {
-            throw new Exception('EComIntegration getList Error № 1');
+            throw new Exception('KorusIntegration getList Error № 1');
         }
         return base64_decode($array['ns2ReceiveResponse']['ns2Cnt']);
     }
@@ -293,7 +286,7 @@ EOXML;
 
     public function parseFile($content)
     {
-        $success = $this->realization->parseFile($content, $this->providerID);
+        $success = $this->realization->parseFile($content, $this->providerID, $this->realization->fileName);
         if ($success === true) {
             $this->updateQueue($this->ediFilesQueueID, parent::STATUS_HANDLED, '');
         } else {

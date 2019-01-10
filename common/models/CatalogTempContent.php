@@ -2,20 +2,18 @@
 
 namespace common\models;
 
-use Yii;
-
 /**
  * This is the model class for table "catalog_temp_content".
  *
- * @property int $id
- * @property int $temp_id
- * @property string $article
- * @property string $product
- * @property string $price
- * @property double $units
- * @property string $note
- * @property string $ed
- *
+ * @property int         $id      Идентификатор записи в таблице
+ * @property int         $temp_id Идентификатор временного каталога
+ * @property string      $article Артикул товара
+ * @property string      $product Наименование товара
+ * @property string      $price   Цена товара
+ * @property double      $units   Идентификатор единицы измерения товара
+ * @property string      $note    Примечание
+ * @property string      $ed      Наименование единицы измерения товара
+ * @property string      $other   Другое
  * @property CatalogTemp $temp
  */
 class CatalogTempContent extends \yii\db\ActiveRecord
@@ -25,7 +23,7 @@ class CatalogTempContent extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'catalog_temp_content';
+        return '{{%catalog_temp_content}}';
     }
 
     /**
@@ -48,14 +46,14 @@ class CatalogTempContent extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'      => 'ID',
             'temp_id' => 'Temp ID',
             'article' => 'Article',
             'product' => 'Product',
-            'price' => 'Price',
-            'units' => 'Units',
-            'note' => 'Note',
-            'ed' => 'Ed',
+            'price'   => 'Price',
+            'units'   => 'Units',
+            'note'    => 'Note',
+            'ed'      => 'Ed',
         ];
     }
 

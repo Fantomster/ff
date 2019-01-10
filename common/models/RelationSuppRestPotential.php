@@ -8,27 +8,31 @@ use common\behaviors\UploadBehavior;
 use yii\helpers\ArrayHelper;
 
 /**
- * This is the model class for table "relation_supp_rest".
+ * This is the model class for table "relation_supp_rest_potential".
  *
- * @property integer $id
- * @property integer $rest_org_id
- * @property integer $supp_org_id
- * @property integer $cat_id
- * @property integer $invite
- * @property string $created_at
- * @property string $updated_at
- * @property string $uploaded_catalog
- * @property booolean $uploaded_processed
- * @property booolean $is_from_market
- * @property booolean $deleted
- * @property integer $supp_user_id
- * 
- * @property Catalog $catalog
+ * @property int          $id                 Идентификатор записи в таблице
+ * @property int          $rest_org_id        Идентификатор организации-ресторана, отправившему приглашение
+ * @property int          $supp_org_id        Идентификатор организации-поставщика, которой отправлено приглашение
+ * @property int          $cat_id             Идентификатор каталога товаров
+ * @property int          $invite             Показатель наличия связи с поставщиком (0 - нет связи, 1 - есть связь)
+ * @property string       $created_at         Дата и время создания записи в таблице
+ * @property string       $updated_at         Дата и время последнего изменения записи в таблице
+ * @property string       $uploaded_catalog   Название файла, содержащего каталог
+ * @property int          $uploaded_processed Показатель состояния внедрения каталога в систему (0 - каталог не
+ *           внедрён, 1 - каталог внедрён)
+ * @property int          $status             Показатель состояния активности каталога (0 - не активен, 1 - активен)
+ * @property int          $is_from_market     Показатель состояния получения каталога из Маркета (0 - получен не из
+ *           Маркета, 1 - получен из Маркета)
+ * @property int          $deleted            Показатель состояния удаления каталога (0 - не удалён, 1 - удалён)
+ * @property int          $supp_user_id       Идентификатор пользователя организации-поставщика
+ *
+ * @property Catalog      $catalog
  * @property Organization $client
  * @property Organization $vendor
- * @property Order $lastOrder
+ * @property Order        $lastOrder
  */
-class RelationSuppRestPotential extends \yii\db\ActiveRecord {
+class RelationSuppRestPotential extends \yii\db\ActiveRecord
+{
 
     const PAGE_CLIENTS = 3;
     const PAGE_CATALOG = 2;
@@ -44,37 +48,33 @@ class RelationSuppRestPotential extends \yii\db\ActiveRecord {
     public $resourceCategory = 'uploaded_catalogs';
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public static function tableName() {
-        return 'relation_supp_rest_potential';
+    public static function tableName()
+    {
+        return '{{%relation_supp_rest_potential}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return ArrayHelper::merge(parent::behaviors(), [
-                    'timestamp' => [
-                        'class' => 'yii\behaviors\TimestampBehavior',
-                        'value' => function ($event) {
-                            return gmdate("Y-m-d H:i:s");
-                        },
-                    ],
-                    /*[
-                        'class' => UploadBehavior::className(),
-                        'attribute' => 'uploaded_catalog',
-                        'scenarios' => ['default'],
-                        'path' => '@app/web/upload/temp/',
-                        'url' => '/upload/temp/',
-                    ],*/
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
         ]);
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['rest_org_id', 'supp_org_id'], 'required'],
             [['rest_org_id', 'supp_org_id', 'cat_id', 'supp_user_id'], 'integer'],
@@ -84,42 +84,54 @@ class RelationSuppRestPotential extends \yii\db\ActiveRecord {
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
-            'id' => 'ID',
+            'id'          => 'ID',
             'rest_org_id' => 'Rest Org ID',
             'supp_org_id' => 'Supp Org ID',
-            'cat_id' => Yii::t('app', 'common.models.catalogue', ['ru'=>'Каталог']),
+            'cat_id'      => Yii::t('app', 'common.models.catalogue', ['ru' => 'Каталог']),
         ];
     }
 
-    public static function GetRelationCatalogs() {
+    /**
+     * @return array|Allow[]|AllService[]|Cart[]|Catalog[]|CatalogBaseGoods[]|Category[]|Franchisee[]|FranchiseeGeo[]|FranchiseType[]|Gender[]|IntegrationSettingFromEmail[]|Job[]|MpCategory[]|MpCountry[]|MpEd[]|notifications\EmailNotification[]|Order[]|OrderChat[]|OrganizationType[]|RelationSuppRest[]|User[]|Waybill[]|\yii\db\ActiveRecord[]
+     */
+    public static function GetRelationCatalogs()
+    {
         $catalog = RelationSuppRest::
-                find()
-                ->select(['id', 'cat_id', 'rest_org_id', 'invite'])
-                ->where(['supp_org_id' => User::getOrganizationUser(Yii::$app->user->id)])
-                ->andWhere(['not', ['cat_id' => null]])
-                ->all();
+        find()
+            ->select(['id', 'cat_id', 'rest_org_id', 'invite'])
+            ->where(['supp_org_id' => User::getOrganizationUser(Yii::$app->user->id)])
+            ->andWhere(['not', ['cat_id' => null]])
+            ->all();
         return $catalog;
     }
 
-    public function search($params, $currentUser, $const) {
+    /**
+     * @param $params
+     * @param $currentUser
+     * @param $const
+     * @return ActiveDataProvider
+     */
+    public function search($params, $currentUser, $const)
+    {
         $vendor_id = Yii::$app->request->get('vendor_id');
         $org_id = !empty($vendor_id) ? $vendor_id : $currentUser->organization_id;
         if ($const == RelationSuppRest::PAGE_CLIENTS) {
             $query = RelationSuppRest::find()
-                    ->where(['supp_org_id' => $org_id]);
+                ->where(['supp_org_id' => $org_id]);
         }
         if ($const == RelationSuppRest::PAGE_SUPPLIERS) {
             $query = RelationSuppRest::find()
-                    ->where(['rest_org_id' => $org_id]);
+                ->where(['rest_org_id' => $org_id]);
         }
         if ($const == RelationSuppRest::PAGE_CATALOG) {
             $query = RelationSuppRest::find()
-                    ->where(['supp_org_id' => $org_id])
-                    ->andWhere(['invite' => RelationSuppRest::INVITE_ON]);
+                ->where(['supp_org_id' => $org_id])
+                ->andWhere(['invite' => RelationSuppRest::INVITE_ON]);
         }
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -140,43 +152,47 @@ class RelationSuppRestPotential extends \yii\db\ActiveRecord {
         return $dataProvider;
     }
 
-
-    public static function row_count($id) {
+    /**
+     * @param $id
+     * @return int|string
+     */
+    public static function row_count($id)
+    {
         $count = RelationSuppRest::find()
-                ->where(['cat_id' => $id])
-                ->count();
+            ->where(['cat_id' => $id])
+            ->count();
         return $count;
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCatalog() {
+    public function getCatalog()
+    {
         return $this->hasOne(Catalog::className(), ['id' => 'cat_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getVendor() {
+    public function getVendor()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getClient() {
+    public function getClient()
+    {
         return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getLastOrder() {
+    public function getLastOrder()
+    {
         return $this->hasOne(Order::className(), ['vendor_id' => 'supp_org_id', 'client_id' => 'rest_org_id'])->orderBy(["`order`.updated_at" => SORT_DESC]);
-    }
-    
-    public function afterSave($insert, $changedAttributes) {
-        parent::afterSave($insert, $changedAttributes);
     }
 }

@@ -4,6 +4,7 @@
 /* @var $content string */
 
 use backend\assets\AppAsset;
+use common\models\IntegrationSettingChange;
 use yii\helpers\Html;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
@@ -30,6 +31,11 @@ $.post('$url',function(data){
 
 JS;
 $this->registerJs($customJs, yii\web\View::POS_READY);
+$countSettingChange = IntegrationSettingChange::count();
+$countSettingChangeHtml = '';
+if ($countSettingChange > 0) {
+    $countSettingChangeHtml = "<span class='badge' style='background-color: red;'>{$countSettingChange}</span>";
+}
 ?>
 <?php $this->beginPage() ?>
 
@@ -165,6 +171,13 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                             'url'   => ['/organization/index'],
                         ],
                         [
+                            'label'       => "Изменение настроек {$countSettingChangeHtml}",
+                            'url'         => ['/setting-change/index'],
+                            'linkOptions' => [
+                                'style' => 'display: flex; justify-content: space-between; align-items: center;'
+                            ],
+                        ],
+                        [
                             'label' => 'Регионы доставки - поставщик',
                             'url'   => ['/delivery-regions/index'],
                         ],
@@ -264,8 +277,9 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
             . '</li>';
     }
     echo Nav::widget([
-        'options' => ['class' => 'navbar-nav navbar-right'],
-        'items'   => $menuItems,
+        'options'      => ['class' => 'navbar-nav navbar-right'],
+        'items'        => $menuItems,
+        'encodeLabels' => false,
     ]);
     NavBar::end();
     ?>

@@ -2,8 +2,10 @@
 
 namespace api_web\classes;
 
+use api_web\components\FireBase;
 use api_web\components\Registry;
 use api_web\helpers\WebApiHelper;
+use api_web\models\ForgotForm;
 use common\models\licenses\License;
 use common\models\ManagerAssociate;
 use common\models\notifications\EmailNotification;
@@ -19,6 +21,7 @@ use api_web\components\Notice;
 use common\models\RelationSuppRestPotential;
 use common\models\Organization;
 use yii\db\Query;
+use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
@@ -122,6 +125,7 @@ class UserWebApi extends \api_web\components\WebApi
             $userToken = UserToken::generate($user->id, UserToken::TYPE_EMAIL_ACTIVATE);
             Notice::init('User')->sendSmsCodeToActivate($userToken->getAttribute('pin'), $profile->phone);
             $transaction->commit();
+
             return $user->id;
         } catch (ValidationException $e) {
             $transaction->rollBack();
@@ -158,6 +162,7 @@ class UserWebApi extends \api_web\components\WebApi
         }
         $user->setRegisterAttributes($role_id, $status);
         $user->save();
+
         return $user;
     }
 
@@ -186,6 +191,7 @@ class UserWebApi extends \api_web\components\WebApi
             throw new ValidationException($profile->getFirstErrors());
         }
         $profile->setUser($user->id)->save();
+
         return $profile;
     }
 
@@ -271,6 +277,7 @@ class UserWebApi extends \api_web\components\WebApi
             Notice::init('User')->sendEmailWelcome($user);
             $userToken->delete();
             $transaction->commit();
+
             return $user->getJWTToken();
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -327,6 +334,7 @@ class UserWebApi extends \api_web\components\WebApi
             }
 
             $transaction->commit();
+
             return true;
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -349,19 +357,22 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('No organizations available');
         }
 
+        $orgIds = ArrayHelper::getColumn((array)$list_organisation, 'id');
+        $licenses = License::getMixCartLicenses($orgIds);
+
         $result = [];
-        foreach ($list_organisation as $item) {
-            $model = Organization::findOne($item['id']);
-            $result[] = WebApiHelper::prepareOrganization($model);
+        foreach (WebApiHelper::generator($list_organisation) as $model) {
+            $item = WebApiHelper::prepareOrganization($model);
+
+            $item['license_is_active'] = false;
+            $item['license'] = null;
+            if (!empty($licenses[$item['id']])) {
+                $item['license_is_active'] = true;
+                $item['license'] = $licenses[$item['id']];
+            }
+
+            $result[] = $item;
         }
-
-        $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($result, 'id'));
-        $result = array_map(function ($item) use ($licenses) {
-            $item['license_is_active'] = !empty($licenses[$item['id']]);
-            $item['license'] = isset($licenses[$item['id']]) ? $licenses[$item['id']] : null;
-            return $item;
-        }, $result);
-
         return $result;
     }
 
@@ -390,15 +401,25 @@ class UserWebApi extends \api_web\components\WebApi
         if (isset($post['search']['status'])) {
             switch ($post['search']['status']) {
                 case 1:
-                    $addWhere = ['invite' => 1, 'u.status' => 1];
+                    $addWhere = [
+                        'u.invite' => 1,
+                        'u.status' => 1
+                    ];
+                    $dataProvider->query->andFilterWhere(['<>', 'u.cat_id', 0]);
                     break;
                 case 2:
-                    $addWhere = ['invite' => 1, 'u.status' => 0];
+                    $addWhere = [
+                        'u.invite' => 1,
+                        'u.status' => 1,
+                        'u.cat_id' => 0
+                    ];
                     break;
                 case 3:
-                    $addWhere = ['or',
-                        ['invite' => 0, 'u.status' => 1],
-                        ['invite' => 0, 'u.status' => 0]
+                    $addWhere = [
+                        'or',
+                        ['u.invite' => 0, 'u.status' => 1],
+                        ['u.invite' => 1, 'u.status' => 0],
+                        ['u.invite' => 0, 'u.status' => 0],
                     ];
                     break;
             }
@@ -427,19 +448,16 @@ class UserWebApi extends \api_web\components\WebApi
                     }
                 }
             } else {
-                $dataProvider->query->andFilterWhere(
-                    ['or',
-                        ['u.country' => $post['search']['location']],
-                        ['u.locality' => $post['search']['location']]
-                    ]
-                );
+                $dataProvider->query->andFilterWhere([
+                    'or',
+                    ['u.country' => $post['search']['location']],
+                    ['u.locality' => $post['search']['location']]
+                ]);
             }
         }
 
-        //$dataProvider->query->andWhere('1=0');
         //Ответ
         $return = [
-            'headers'    => [],
             'vendors'    => [],
             'pagination' => [
                 'page'       => $page,
@@ -458,7 +476,7 @@ class UserWebApi extends \api_web\components\WebApi
                 $sort = 'DESC';
             }
             if ($field == 'name') {
-                $field = 'vendor_name ' . $sort;
+                $field = 'u.vendor_name ' . $sort;
             }
             if ($field == 'status') {
                 switch ($sort) {
@@ -469,13 +487,18 @@ class UserWebApi extends \api_web\components\WebApi
                         $sort = 'DESC';
                         break;
                 }
-                $field = "invite {$sort}, `status` {$sort}";
+                $field = "u.invite {$sort}, u.status {$sort}, u.cat_id {$sort}";
             }
             $dataProvider->query->orderBy($field);
         }
+
         //Данные для ответа
-        foreach ($dataProvider->models as $model) {
-            $return['vendors'][] = $this->prepareVendor($model);
+        if (!empty($dataProvider->models)) {
+            $r = new \SplObjectStorage();
+            foreach ($dataProvider->models as $model) {
+                $r->attach((object)$this->prepareVendor($model));
+            }
+            $return['vendors'] = $r;
         }
 
         return $return;
@@ -581,6 +604,7 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('You are not working with this supplier.');
             }
             $transaction->commit();
+
             return ['result' => true];
         } catch (\Exception $e) {
             $transaction->rollBack();
@@ -615,7 +639,7 @@ class UserWebApi extends \api_web\components\WebApi
             $this->user->newPasswordConfirm = $post['new_password_confirm'];
 
             if (!$this->user->validate(['newPassword'])) {
-                throw new BadRequestHttpException('bad_password|' . $this->randomPassword());
+                throw new BadRequestHttpException('bad_password|' . ForgotForm::generatePassword(8));
             }
 
             if (!$this->user->validate() || !$this->user->save()) {
@@ -623,6 +647,7 @@ class UserWebApi extends \api_web\components\WebApi
             }
 
             $tr->commit();
+
             return ['result' => true];
         } catch (\Exception $e) {
             $tr->rollBack();
@@ -707,6 +732,7 @@ class UserWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('bad_sms_code');
             }
         }
+
         return ['result' => true];
     }
 
@@ -771,24 +797,6 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * Генератор случайного пароля
-     *
-     * @return string
-     */
-    private function randomPassword()
-    {
-        $pass = '';
-        $alphabet = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,w,x,y,z,";
-        $alphabet .= "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,W,X,Y,Z,";
-        $alphabet = explode(',', $alphabet);
-        for ($i = 0; $i < 6; $i++) {
-            $n = rand(0, count($alphabet) - 1);
-            $pass .= $alphabet[$n];
-        }
-        return $pass . rand(111, 999);
-    }
-
-    /**
      * Возвращает GMT из базы, если его нет сохраняет из headers, добавляет плюс к не отрицательному таймзону
      *
      * @return string $gmt
@@ -818,10 +826,11 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * @param string $indexByField
+     * @param string|null $indexByField
+     * @param string|null $name
      * @return array
      */
-    public function getUserOrganizationBusinessList(string $indexByField = null)
+    public function getUserOrganizationBusinessList(string $indexByField = null, string $name = null)
     {
         $resQuery = (new Query())
             ->select(['a.id', 'a.name'])
@@ -839,16 +848,20 @@ class UserWebApi extends \api_web\components\WebApi
                     Role::ROLE_ADMIN,
                 ]
             ]);
+
+        if (isset($name)) {
+            $resQuery->andWhere("a.name LIKE :name", [':name' => '%' . $name . '%']);
+        }
+
         if (!is_null($indexByField)) {
             $resQuery->indexBy($indexByField);
         }
         $res = $resQuery->all();
 
         $licenses = License::getMixCartLicenses(ArrayHelper::getColumn($res, 'id'));
-        $res = array_map(function ($item) use ($licenses) {
+        foreach ($res as &$item) {
             $item['license_is_active'] = isset($licenses[$item['id']]);
-            return $item;
-        }, $res);
+        }
 
         return ['result' => $res];
     }
@@ -940,6 +953,7 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('user_not_found');
         }
 
+        /** @var Transaction $transaction */
         $transaction = \Yii::$app->db_api->beginTransaction();
         try {
             $user->setOrganization($organization_id, true);

@@ -18,7 +18,7 @@ use yii\behaviors\TimestampBehavior;
  * @property int              $outer_product_id id продукта из у.с. таблицы outer_product
  * @property int              $outer_unit_id    id единицы измерения у.с. таблицы outer_unit
  * @property int              $outer_store_id   id склада у.с. таблицы outer_store
- * @property double           $coefficient      коэффициент
+ * @property string           $coefficient
  * @property double           $vat              НДС
  * @property AllService       $service
  * @property OuterProduct     $outerProduct
@@ -28,6 +28,22 @@ use yii\behaviors\TimestampBehavior;
  */
 class OuterProductMap extends \yii\db\ActiveRecord
 {
+    /**
+     * {@inheritdoc}
+     */
+    public static function tableName()
+    {
+        return '{{%outer_product_map}}';
+    }
+
+    /**
+     * @return \yii\db\Connection the database connection used by this AR class.
+     */
+    public static function getDb()
+    {
+        return Yii::$app->get('db_api');
+    }
+
     /**
      * @return array
      */
@@ -41,22 +57,6 @@ class OuterProductMap extends \yii\db\ActiveRecord
                 'value'              => \gmdate('Y-m-d H:i:s'),
             ],
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
-    {
-        return 'outer_product_map';
-    }
-
-    /**
-     * @return \yii\db\Connection the database connection used by this AR class.
-     */
-    public static function getDb()
-    {
-        return Yii::$app->get('db_api');
     }
 
     /**

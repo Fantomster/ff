@@ -25,7 +25,7 @@ class m181002_131001_add_fk_dic_org extends Migration
     public function safeUp()
     {
 
-        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        $dbName = DBNameHelper::getMainName();
         $this->addForeignKey('{{%organization_dictionary_org}}', '{{%organization_dictionary}}', 'org_id', $dbName.'.organization', 'id');
 
     }

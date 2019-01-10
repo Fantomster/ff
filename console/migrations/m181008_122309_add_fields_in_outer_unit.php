@@ -30,7 +30,7 @@ class m181008_122309_add_fields_in_outer_unit extends Migration
             $this->float()->null()->after('parent_outer_uid')->comment('Коэффициент'));
         $this->addColumn('{{%outer_unit}}', 'org_id',
             $this->integer()->notNull()->after('ratio')->comment('ID Организации'));
-        $dbName = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db->dsn);
+        $dbName = DBNameHelper::getMainName();
         $this->addForeignKey('{{%outer_unit_org}}', '{{%outer_unit}}', 'org_id', $dbName.'.organization', 'id');
     }
 

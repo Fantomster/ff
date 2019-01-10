@@ -2,51 +2,53 @@
 
 namespace common\models;
 
-use Yii;
 use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "franchisee_associate".
  *
- * @property integer $id
- * @property integer $franchisee_id
- * @property integer $organization_id
- * @property integer $self_registered
- * @property integer $agent_id
- * @property string $created_at
- * @property string $updated_at 
- *
- * @property Franchisee $franchisee
+ * @property int          $id              Идентификатор записи в таблице
+ * @property int          $franchisee_id   Идентификатор франчайзи
+ * @property int          $organization_id Идентификатор организации
+ * @property int          $self_registered Показатель статуса создания связи организации и франчайзи (0 - связь не
+ *           создана, 1 - организация зарегистрировалась сама, 2 - организация зарегистрирована через админку)
+ * @property int          $agent_id        Идентификатор пользователя-агента (users)
+ * @property string       $created_at      Дата и время создания записи в таблице
+ * @property string       $updated_at      Дата и время последнего изменения записи в таблице
+ * @property Franchisee   $franchisee
  * @property Organization $organization
+ * @property User         $agent
  */
 class FranchiseeAssociate extends \yii\db\ActiveRecord
 {
     const SELF_REGISTERED = 1;
     const REGISTERED = 2;
+
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'franchisee_associate';
+        return '{{%franchisee_associate}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return ArrayHelper::merge(parent::behaviors(), [
-                    'timestamp' => [
-                        'class' => 'yii\behaviors\TimestampBehavior',
-                        'value' => function ($event) {
-                            return gmdate("Y-m-d H:i:s");
-                        },
-                    ],
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
         ]);
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -60,13 +62,13 @@ class FranchiseeAssociate extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'franchisee_id' => 'Franchisee ID',
+            'id'              => 'ID',
+            'franchisee_id'   => 'Franchisee ID',
             'organization_id' => 'Organization ID',
         ];
     }

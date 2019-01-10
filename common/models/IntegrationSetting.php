@@ -7,16 +7,19 @@ use Yii;
 /**
  * This is the model class for table "integration_setting".
  *
- * @property int $id Уникальный идентификатор настройки
- * @property string $name Наименование настройки
- * @property string $default_value Значение по умолчанию
- * @property string $comment Комментарий - подробное описание настройки, отображается на фронт
- * @property string $type Тип настройки - вып. список, полее ввода и т.п.
- * @property int $is_active Флаг активности объекта
- * @property string $item_list Список значение по умолчанию в формате JSON, для отображения при начальном выборе, например { 1: "Включено", 2: "Выключено"}
- * @property int $service_id Идентификатор сервиса в таблице all_service
- *
- * @property IntegrationSettingValue[] $integrationSettingValues
+ * @property int                        $id                  Уникальный идентификатор настройки
+ * @property string                     $name                Наименование настройки
+ * @property string                     $default_value       Значение по умолчанию
+ * @property string                     $comment             Комментарий - подробное описание настройки, отображается
+ *           на фронт
+ * @property string                     $type                Тип настройки - вып. список, полее ввода и т.п.
+ * @property int                        $is_active           Флаг активности объекта
+ * @property string                     $item_list           Список значение по умолчанию в формате JSON, для
+ *           отображения при начальном выборе, например { 1: "Включено", 2: "Выключено"}
+ * @property int                        $service_id
+ * @property int                        $required_moderation Настройка сервиса обязательна к модерации
+ * @property IntegrationSettingChange[] $integrationSettingChanges
+ * @property IntegrationSettingValue[]  $integrationSettingValues
  */
 class IntegrationSetting extends \yii\db\ActiveRecord
 {
@@ -36,7 +39,7 @@ class IntegrationSetting extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'integration_setting';
+        return '{{%integration_setting}}';
     }
 
     /**
@@ -55,7 +58,7 @@ class IntegrationSetting extends \yii\db\ActiveRecord
         return [
             [['name', 'comment'], 'required'],
             [['type'], 'string'],
-            [['is_active'], 'integer'],
+            [['is_active', 'required_moderation'], 'integer'],
             [['name', 'default_value', 'comment', 'item_list'], 'string', 'max' => 255],
         ];
     }
@@ -66,15 +69,24 @@ class IntegrationSetting extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'Уникальный идентификатор настройки',
-            'name' => 'Наименование настройки',
-            'default_value' => 'Значение по умолчанию',
-            'comment' => 'Комментарий - подробное описание настройки, отображается на фронт',
-            'type' => 'Тип настройки - вып. список, полее ввода и т.п.',
-            'is_active' => 'Флаг активности объекта',
-            'item_list' => 'Список значение по умолчанию в формате JSON, для отображения при начальном выборе, ' .
+            'id'                  => 'Уникальный идентификатор настройки',
+            'name'                => 'Наименование настройки',
+            'default_value'       => 'Значение по умолчанию',
+            'comment'             => 'Комментарий - подробное описание настройки, отображается на фронт',
+            'type'                => 'Тип настройки - вып. список, полее ввода и т.п.',
+            'is_active'           => 'Флаг активности объекта',
+            'item_list'           => 'Список значение по умолчанию в формате JSON, для отображения при начальном выборе, ' .
                 'например { 1: \"Включено\", 2: \"Выключено\"}',
+            'required_moderation' => 'Обязателен к модерации',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getIntegrationSettingChanges()
+    {
+        return $this->hasMany(IntegrationSettingChange::className(), ['integration_setting_id' => 'id']);
     }
 
     /**

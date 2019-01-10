@@ -50,6 +50,19 @@ abstract class AbstractProvider
     }
 
     /**
+     * Get files list from provider and insert to table
+     */
+    public function handleFilesList()
+    {
+        try {
+            $objectList = $this->getFilesListForInsertingInQueue();
+        } catch (\Throwable $e) {
+            return false;
+        }
+        return $objectList;
+    }
+
+    /**
      * Разбор файла
      */
     public function parseFile($content)

@@ -134,7 +134,9 @@ class OrderWebApi extends \api_web\components\WebApi
                                 $deleted[] = $this->deleteProduct($order, $product['id']);
                                 break;
                             case 'add':
-                                $changed[] = $this->addProduct($order, $product);
+                                $change = $this->addProduct($order, $product);
+                                $change->setIsNewRecord(true);
+                                $changed[] = $change;
                                 break;
                             case 'edit':
                                 $changed[] = $this->editProduct($order, $product);
@@ -201,6 +203,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if (empty($orderContent)) {
             throw new BadRequestHttpException("order_content.not_found");
         }
+        $oldOrderContentAttributes = $orderContent->attributes;
 
         if (!empty($product['quantity'])) {
             $orderContent->quantity = $product['quantity'];
@@ -213,6 +216,7 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         if ($orderContent->save()) {
+            $orderContent->setOldAttributes($oldOrderContentAttributes);
             return $orderContent;
         } else {
             throw new ValidationException($orderContent->getFirstErrors());
@@ -1045,10 +1049,9 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new ValidationException($order->getFirstErrors());
             }
             $t->commit();
-            if ($isUnconfirmedVendor) {
+            $sender = $order->client;
+            if ($order->vendor_id == $this->user->organization_id || $isUnconfirmedVendor) {
                 $sender = $order->vendor;
-            } else {
-                $sender = $order->client;
             }
             /** @var OrderNotice $notice */
             $notice = Notice::init('Order');

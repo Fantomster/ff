@@ -2,30 +2,27 @@
 
 namespace common\models;
 
-use Yii;
-
 /**
  * This is the model class for table "manager_associate".
  *
- * @property integer $id
- * @property integer $manager_id
- * @property integer $organization_id
- *
- * @property User $manager
+ * @property int          $id              Идентификатор записи в таблице
+ * @property int          $manager_id      Идентификатор пользователя с ролью Руководитель
+ * @property int          $organization_id Идентификатор организации
+ * @property User         $manager
  * @property Organization $organization
  */
 class ManagerAssociate extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'manager_associate';
+        return '{{%manager_associate}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -38,13 +35,13 @@ class ManagerAssociate extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'manager_id' => 'Manager ID',
+            'id'              => 'ID',
+            'manager_id'      => 'Manager ID',
             'organization_id' => 'Organization ID',
         ];
     }
@@ -64,17 +61,17 @@ class ManagerAssociate extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
     }
-    
+
     /**
      * checks if manager is associated with client
-     * 
+     *
      * @param integer $client_id
      * @param integer $vendor_id
      * @param integer $manager_id
-     * 
      * @return boolean
      */
-    public static function isAssociated($client_id, $manager_id) {
+    public static function isAssociated($client_id, $manager_id)
+    {
         return self::find()->where(['manager_id' => $manager_id, 'organization_id' => $client_id])->exists();
     }
 }

@@ -3,39 +3,38 @@
 namespace common\models;
 
 use Yii;
-use yii\helpers\FormatConverter;
 
 /**
  * This is the model class for table "payment".
  *
- * @property integer $payment_id
- * @property double $total
- * @property string $receipt_number
- * @property integer $organization_id
- * @property integer $type_payment
- * @property integer $status
- * @property string $email
- * @property string $phone
- * @property string $date
- * @property string $created_at
- * @property string $updated_at
+ * @property int          $payment_id      Идентификатор записи в таблице
+ * @property double       $total           Сумма оплаты
+ * @property string       $receipt_number  Номер выставленного счёта
+ * @property int          $organization_id Идентификатор организации, которой выставлен счёт за оплату услуги
+ * @property int          $type_payment    Идентификатор типа платной услуги
+ * @property string       $email           Е-мэйл организации, оплачивающей услугу
+ * @property string       $phone           Номер телефона организации, оплачивающей платную услугу
+ * @property string       $date            Дата оплаты
+ * @property string       $created_at      Дата и время создания записи в таблице
+ * @property string       $updated_at      Дата и время последнего изменения записи в таблице
+ * @property int          $status          Показатель статуса счёта за услугу (0 - ошибочный, 1 - выставленный, 2 -
+ *           оплаченный)
  *
  * @property Organization $organization
- * @property PaymentType $payment
+ * @property PaymentType  $payment
  */
-
 class Payment extends \yii\db\ActiveRecord
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'payment';
+        return '{{%payment}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -52,22 +51,22 @@ class Payment extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
-            'payment_id' => 'ID',
-            'date' => Yii::t('app', 'Дата оплаты'),
-            'total' => Yii::t('app', 'Сумма'),
-            'receipt_number' => Yii::t('app', 'Номер выставленного счета'),
+            'payment_id'      => 'ID',
+            'date'            => Yii::t('app', 'Дата оплаты'),
+            'total'           => Yii::t('app', 'Сумма'),
+            'receipt_number'  => Yii::t('app', 'Номер выставленного счета'),
             'organization_id' => Yii::t('app', 'Организация'),
-            'type_payment' => Yii::t('app', 'Тип оплаты'),
-            'email' => 'Email',
-            'phone' => 'Phone',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
-            'status' => 'status',
+            'type_payment'    => Yii::t('app', 'Тип оплаты'),
+            'email'           => 'Email',
+            'phone'           => 'Phone',
+            'created_at'      => 'Created At',
+            'updated_at'      => 'Updated At',
+            'status'          => 'status',
         ];
     }
 

@@ -10,21 +10,24 @@ use yii\helpers\ArrayHelper;
 /**
  * This is the model class for table "relation_supp_rest".
  *
- * @property integer      $id
- * @property integer      $rest_org_id
- * @property integer      $supp_org_id
- * @property integer      $cat_id
- * @property integer      $invite
- * @property integer      $status
- * @property string       $created_at
- * @property string       $updated_at
- * @property string       $uploaded_catalog
- * @property booolean     $uploaded_processed
- * @property booolean     $is_from_market
- * @property booolean     $deleted
+ * @property int          $id                 Идентификатор записи в таблице
+ * @property int          $rest_org_id        Идентификатор организации-ресторана
+ * @property int          $supp_org_id        Идентификатор организации-поставщика
+ * @property int          $cat_id             Идентификатор каталога товаров
+ * @property int          $invite             Показатель наличия связи с поставщиком (0 - нет связи, 1 - есть связь)
+ * @property string       $created_at         Дата и время создания записи в таблице
+ * @property string       $updated_at         Дата и время последнего изменения записи в таблице
+ * @property int          $status             Показатель состояния активности каталога (0 - не активен, 1 - активен)
+ * @property string       $uploaded_catalog   Название файла, содержащего каталог
+ * @property int          $uploaded_processed Показатель состояния внедрения каталога в систему (0 - каталог не
+ *           внедрён, 1 - каталог внедрён)
+ * @property int          $is_from_market     Показатель состояния получения каталога из Маркета (0 - получен не из
+ *           Маркета, 1 - получен из Маркета)
+ * @property int          $deleted            Показатель состояния удаления каталога (0 - не удалён, 1 - удалён)
+ *
  * @property Catalog      $catalog
  * @property Organization $client
- * @property Organization $vendor
+ * @property Organization $restOrg
  * @property Order        $lastOrder
  */
 class RelationSuppRest extends \yii\db\ActiveRecord
@@ -43,15 +46,15 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public $resourceCategory = 'uploaded_catalogs';
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'relation_supp_rest';
+        return '{{%relation_supp_rest}}';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function behaviors()
     {
@@ -73,7 +76,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
@@ -86,7 +89,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
@@ -98,22 +101,12 @@ class RelationSuppRest extends \yii\db\ActiveRecord
         ];
     }
 
-//    public function delete() {
-//        $this->deleted = true;
-//        return $this->save();
-//    }
-//    
-//    public static function deleteAll($condition = '', $params = array()) {
-//        $command = static::getDb()->createCommand();
-//        $command->update(static::tableName(), ['deleted' => true], $condition, $params);
-//
-//        return $command->execute();
-//    }
-
+    /**
+     * @return array|Allow[]|AllService[]|Cart[]|Catalog[]|CatalogBaseGoods[]|Category[]|Franchisee[]|FranchiseeGeo[]|FranchiseType[]|Gender[]|IntegrationSettingFromEmail[]|Job[]|MpCategory[]|MpCountry[]|MpEd[]|notifications\EmailNotification[]|Order[]|OrderChat[]|OrganizationType[]|RelationSuppRest[]|User[]|Waybill[]|\yii\db\ActiveRecord[]
+     */
     public static function GetRelationCatalogs()
     {
-        $catalog = RelationSuppRest::
-        find()
+        $catalog = RelationSuppRest::find()
             ->select(['id', 'cat_id', 'rest_org_id', 'invite'])
             ->where(['supp_org_id' => User::getOrganizationUser(Yii::$app->user->id)])
             ->andWhere(['not', ['cat_id' => null]])
@@ -121,12 +114,12 @@ class RelationSuppRest extends \yii\db\ActiveRecord
         return $catalog;
     }
 
-    /* public static function getStatusRelation($sup_org_id,$rest_org_id){
-      $catalogName = RelationSuppRest::find()
-      ->where(['sup_org_id' => $sup_org_id,'rest_org_id'=>$rest_org_id])->one();
-      return $catalogName->status;
-      } */
-
+    /**
+     * @param $params
+     * @param $currentUser
+     * @param $const
+     * @return ActiveDataProvider
+     */
     public function search($params, $currentUser, $const)
     {
         $vendor_id = Yii::$app->request->get('vendor_id');
@@ -164,6 +157,10 @@ class RelationSuppRest extends \yii\db\ActiveRecord
         return $dataProvider;
     }
 
+    /**
+     * @param $id
+     * @return int|string
+     */
     public static function row_count($id)
     {
         $count = RelationSuppRest::find()
@@ -202,12 +199,6 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public function getLastOrder()
     {
         return $this->hasOne(Order::className(), ['vendor_id' => 'supp_org_id', 'client_id' => 'rest_org_id'])->orderBy(["`order`.updated_at" => SORT_DESC]);
-    }
-
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
-
     }
 
 }

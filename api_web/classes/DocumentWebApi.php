@@ -25,7 +25,7 @@ use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 /**
- * Class DocumentWebApi 
+ * Class DocumentWebApi
  *
  * @package api_web\modules\integration\classes
  */
@@ -140,7 +140,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      */
     private function getDocumentOrder($document_id, $service_id)
     {
-        $apiDb = DBNameHelper::getDsnAttribute('dbname', \Yii::$app->db_api->dsn);
+        $apiDb = DBNameHelper::getApiName();
 
         $result = [
             'documents' => [],
@@ -332,7 +332,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                   if(merc_uuid IS NULL, 0, 1)                    is_mercury_cert,
                   dat.replaced_order_id                          replaced_order_id,
                   (
-                    SELECT id FROM  `$apiShema`.outer_agent oav WHERE
+                    SELECT id FROM  $apiShema.outer_agent oav WHERE
                         org_id = :business_id AND service_id = :service_id
                                                                   AND
                         if(dat.order_id IS NULL, dat.waybill_outer_agent_id, dat.order_vendor_id)
@@ -341,7 +341,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                     LIMIT 1
                   ) as object_agent_id,
                   (
-                    SELECT name FROM  `$apiShema`.outer_agent oav WHERE
+                    SELECT name FROM  $apiShema.outer_agent oav WHERE
                         org_id = :business_id AND service_id = :service_id
                                                                   AND
                         if(dat.order_id IS NULL, dat.waybill_outer_agent_id, dat.order_vendor_id)
@@ -412,14 +412,14 @@ class DocumentWebApi extends \api_web\components\WebApi
                          coalesce(a.doc_date, a.created_at)               sort_waybill,
                          coalesce(a.doc_date, a.created_at)               waybill_date,
                          null                                             order_date
-                       FROM `$apiShema`.waybill a
-                         LEFT JOIN `$apiShema`.waybill_content b ON b.waybill_id = a.id
+                       FROM $apiShema.waybill a
+                         LEFT JOIN $apiShema.waybill_content b ON b.waybill_id = a.id
                          LEFT JOIN order_content c ON c.id = b.order_content_id
                          LEFT JOIN `order` d ON d.id = c.order_id
                        WHERE a.acquirer_id = :business_id AND a.service_id = :service_id
                        AND a.id not IN (
                                SELECT sqwc.waybill_id
-                               FROM `$apiShema`.waybill_content sqwc
+                               FROM $apiShema.waybill_content sqwc
                                  JOIN order_content sqoc ON sqoc.id = sqwc.order_content_id
                                WHERE sqwc.waybill_id = a.id
                            )
@@ -456,18 +456,18 @@ class DocumentWebApi extends \api_web\components\WebApi
                          a.created_at                                           order_date
                        FROM `order` a
                          JOIN order_content b ON b.order_id = a.id
-                         LEFT JOIN `$apiShema`.waybill_content c ON c.order_content_id = b.id and c.waybill_id in (select id from `$apiShema`.waybill where service_id = :service_id and acquirer_id = :business_id)
-                         LEFT JOIN `$apiShema`.waybill d ON d.id = c.waybill_id AND d.service_id = :service_id
+                         LEFT JOIN $apiShema.waybill_content c ON c.order_content_id = b.id and c.waybill_id in (select id from $apiShema.waybill where service_id = :service_id and acquirer_id = :business_id)
+                         LEFT JOIN $apiShema.waybill d ON d.id = c.waybill_id AND d.service_id = :service_id
                        WHERE a.client_id = :business_id
                      ) dat
                   
-                  LEFT JOIN (SELECT * FROM `$apiShema`.outer_agent WHERE org_id = :business_id AND service_id = :service_id LIMIT 1) as oav
+                  LEFT JOIN (SELECT * FROM $apiShema.outer_agent WHERE org_id = :business_id AND service_id = :service_id LIMIT 1) as oav
                    ON
                    if(dat.order_id IS NULL, dat.waybill_outer_agent_id, dat.order_vendor_id) =
                    if(dat.order_id IS NULL, oav.id, oav.vendor_id)
                   
                   LEFT JOIN organization ov ON ov.id = dat.order_vendor_id
-                  LEFT JOIN `$apiShema`.outer_store osw ON osw.org_id = :business_id AND osw.service_id = :service_id AND dat.waybill_outer_store_id = osw.id
+                  LEFT JOIN $apiShema.outer_store osw ON osw.org_id = :business_id AND osw.service_id = :service_id AND dat.waybill_outer_store_id = osw.id
                 WHERE 1  $where_all  
                 GROUP BY id, dat.order_acquirer_id, dat.order_service_id, wb_status_id, wb_service_id, sort_doc";
 
@@ -817,7 +817,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                 $field = 'acquirer_id';
             }
             if (!$query->andWhere([$field => $this->user->organization_id])->exists()) {
-                throw new BadRequestHttpException( "type_not_found|{$request['type']}");
+                throw new BadRequestHttpException("type_not_found|{$request['type']}");
             }
 
             $document = $modelClass::prepareModel($request['document_id'], $request['service_id']);

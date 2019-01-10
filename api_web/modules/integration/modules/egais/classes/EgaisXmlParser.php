@@ -4,7 +4,7 @@ namespace api_web\modules\integration\modules\egais\classes;
 
 use yii\helpers\ArrayHelper;
 
-class XmlParser
+class EgaisXmlParser
 {
     /**
      * @param $xml
@@ -180,11 +180,11 @@ class XmlParser
      * @param $xml
      * @return string
      */
-    public function parseEgaisQuery($xml)
+    public function getReplyId($xml)
     {
         $xml_parser = simplexml_load_string($xml);
 
-        return (string)$xml_parser->url;
+        return (string)$xml_parser->url ?: null;
     }
 
     /* Возвращает массив с id и type входящего документа */
@@ -192,7 +192,7 @@ class XmlParser
      * @param $xml
      * @return array|bool
      */
-    public function parseUrlDoc($xml)
+    public function getUrlDoc($xml)
     {
         $xml_parser = simplexml_load_string($xml);
         $arr = [];

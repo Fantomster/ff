@@ -7,7 +7,8 @@ use yii\data\ActiveDataProvider;
 /**
  * OrderSearch represents the model behind the search form about `common\models\Order`.
  */
-class RequestCallbackSearch extends Request {
+class RequestCallbackSearch extends Request
+{
 
     public $searchString;
     public $price;
@@ -17,18 +18,20 @@ class RequestCallbackSearch extends Request {
     public $date_to;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['searchString', 'price', 'comment', 'vendorName'], 'safe'],
         ];
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return "{{%request_callback}}";
     }
 
@@ -36,12 +39,12 @@ class RequestCallbackSearch extends Request {
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
-    public function search($params) {
+    public function search($params)
+    {
         $query = RequestCallback::find()->leftJoin('organization', "organization.id = request_callback.supp_org_id")
-                ->where(['request_callback.request_id'=>$params['id']]);
+            ->where(['request_callback.request_id' => $params['id']]);
         $this->load($params);
 
         // grid filtering conditions
@@ -57,7 +60,7 @@ class RequestCallbackSearch extends Request {
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
+            'sort'  => ['defaultOrder' => ['id' => SORT_DESC]]
         ]);
 
         if (!$this->validate()) {

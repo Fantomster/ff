@@ -261,7 +261,7 @@ class OrderSearch2 extends Order
             if ($this->manager_id) {
                 $maTable = \common\models\ManagerAssociate::tableName();
                 $orderTable = Order::tableName();
-                $query->rightJoin($maTable, "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->manager_id);
+                $query->rightJoin($maTable, "$maTable.organization_id = $orderTable.client_id AND $maTable.manager_id = " . $this->manager_id);
             }
             $query->andWhere([$selfTypeColumnId => User::findOne(Yii::$app->user->id)->organization_id]);
 

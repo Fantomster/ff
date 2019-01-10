@@ -114,7 +114,7 @@ if (isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrgan
     ];
 }
 $btnCloseOrder = Html::button('<span><i class="icon fa fa-check"></i> ' . Yii::t('message', 'frontend.views.order.end_all', ['ru' => 'Завершить']) . ' </span>', [
-    'class' => (isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code > 0) ? 'btn btn-outline-success completeEdi' : 'btn btn-outline-success btnOrderAction',
+    'class' => (isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code > 0) ? "btn btn-outline-success completeEdi$disabledString" : "btn btn-outline-success btnOrderAction$disabledString",
     'data'  => $data,
 ]);
 $canEdit = false;

@@ -157,7 +157,6 @@ class OrderController extends DefaultController
                     [
                         'actions' => [
                             'edit',
-                            'complete-obsolete',
                             'ajax-cancel-order',
                             'guides',
                             'create',

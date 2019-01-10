@@ -163,6 +163,7 @@ class EDIClass extends Component
                 $oldQuantity = (float)$orderContent->quantity;
                 $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
 
+                $orderContent->setOldAttributes($orderContent->attributes);
                 if ($oldQuantity != $newQuantity) {
                     if (!$newQuantity || $newQuantity == 0.000) {
                         $deleted[] = $orderContent;
@@ -194,10 +195,11 @@ class EDIClass extends Component
                 if ($documentType == 3) {
                     $orderContent->edi_alcdes = $this->fileName;
                 }
+                $clone = clone $orderContent;
+                $changed[] = $clone;
                 if (!$orderContent->save()) {
                     throw new Exception('Error saving order content');
                 }
-                $changed[] = $orderContent;
             }
             foreach ($positions as $position) {
                 $quantity = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
@@ -229,11 +231,11 @@ class EDIClass extends Component
                     $newOrderContent->plan_price = $price;
                     $newOrderContent->units = $good->units;
                     $newOrderContent->vat_product = $position->VAT ?? 0.00;
+                    $changed[] = $newOrderContent;
                     if (!$newOrderContent->save()) {
                         throw new Exception('Error saving order content');
                     }
                     $isPositionChanged = true;
-                    $changed[] = $newOrderContent;
                     $total = $quan * $price;
                     $summ += $total;
                 }

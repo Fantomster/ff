@@ -71,18 +71,19 @@ if (isset($licenses['rkws'])) {
     $sub0 = explode(' ', $licenses['rkws_ucs']->td);
     $sub1 = explode('-', $sub0[0]);
     $licenses['rkws_ucs']->td = $sub1[2] . '.' . $sub1[1] . '.' . $sub1[0];
+    $rk_lic = 3;
     if ($licenses['rkws_ucs']->status_id == 0) { // если лицензия отключена в админке Mixcart
         $rk_lic = 0;
     }
-    if (($licenses['rkws_ucs']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws_ucs']->td)))) { // если лицензия учётной системы в админке включена, но истёк её срок
-        $rk_lic = 3;
-    }
-    if (($licenses['rkws_ucs']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['rkws_ucs']->td)))) { // если лицензия учётной системы в админке включена, до окончания её срока осталось менее двух недель
-        $rk_lic = 2;
-    }
-    if (($licenses['rkws_ucs']->status_id == 1) and ($timestamp_now > (strtotime($licenses['rkws_ucs']->td)))) { // если лицензия учётной системы в админке включена и до окончания её срока осталось более двух недель
-        $rk_lic = 1;
-    }
+    /* if (($licenses['rkws_ucs']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws_ucs']->status_id == 1)))) { // если лицензия учётной системы в админке включена, но истёк её срок
+         $rk_lic = 3;
+     }
+     if (($licenses['rkws_ucs']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['rkws_ucs']->td)))) { // если лицензия учётной системы в админке включена, до окончания её срока осталось менее двух недель
+         $rk_lic = 2;
+     }
+     if (($licenses['rkws_ucs']->status_id == 1) and ($timestamp_now > (strtotime($licenses['rkws_ucs']->td)))) { // если лицензия учётной системы в админке включена и до окончания её срока осталось более двух недель
+         $rk_lic = 1;
+     }*/
 }
 
 // Блок проверки состояния лицензии IIKO
@@ -209,16 +210,16 @@ if (isset($licenses['odinsobsh'])) {
                                         print "<p class=\"small\"> Лицензия UCS: ID " . $licenses['rkws_ucs']->code . " <strong><span style=\"color:#dd4b39\">Не активна</span></strong>.</br>";
                                         print "Пожалуйста, обратитесь к вашему <a href=\"https://www.ucs.ru/dealers/\" target=\"_blanc\">дилеру UCS</a>.</p>";
                                         break;
-                                    case 1:
+                                    /*case 1:
                                         print "<p class=\"small\"> Лицензия UCS: ID " . $licenses['rkws_ucs']->code . " <strong><span style=\"color:#dd4b39\">Не активна </span></strong>с " . $licenses['rkws_ucs']->td . ".</br>";
                                         print "Пожалуйста, обратитесь к вашему <a href=\"https://www.ucs.ru/dealers/\" target=\"_blanc\">дилеру UCS</a>.</p>";
                                         break;
                                     case 2:
                                         print "<p class=\"small\"> Лицензия UCS: ID " . $licenses['rkws_ucs']->code . " <strong><span style=\"color:#dd4b39\">Истекает срок </span></strong>(по " . $licenses['rkws_ucs']->td . "). </br>";
                                         print "Пожалуйста, обратитесь к вашему <a href=\"https://www.ucs.ru/dealers/\" target=\"_blanc\">дилеру UCS</a>.</p>";
-                                        break;
+                                        break;*/
                                     case 3:
-                                        print "<p class=\"small\"> Лицензия UCS: ID " . $licenses['rkws_ucs']->code . " <strong><span style=\"color:#6ea262\">Активна </span></strong>(по " . $licenses['rkws_ucs']->td . "). </br>";
+                                        print "<p class=\"small\"> Лицензия UCS: ID " . $licenses['rkws_ucs']->code . " <strong><span style=\"color:#6ea262\">Активна </span></strong></br>";
                                         print "</p></br>";
                                         break;
                                 }

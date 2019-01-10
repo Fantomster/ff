@@ -18,34 +18,36 @@ use yii\web\Response;
 /**
  * Site controller
  */
-class SiteController extends Controller {
+class SiteController extends Controller
+{
 
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['logout', 'signup', 'index', 'about', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'faq', 'restaurant', 'supplier', 'unsubscribe'],
-                'rules' => [
+                'only'       => ['logout', 'signup', 'index', 'about', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'faq', 'restaurant', 'supplier', 'unsubscribe'],
+                'rules'      => [
                     [
                         'actions' => ['signup', 'index', 'about', 'faq', 'restaurant', 'supplier', 'unsubscribe'],
-                        'allow' => true,
-                        'roles' => ['?'],
+                        'allow'   => true,
+                        'roles'   => ['?'],
                     ],
                     [
                         'actions' => ['logout', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'ajax-complete-registration', 'ajax-wizard-off', 'unsubscribe'],
-                        'allow' => true,
-                        'roles' => ['@'],
+                        'allow'   => true,
+                        'roles'   => ['@'],
                     ],
                     [
-                        'actions' => ['index', 'about', 'faq', 'restaurant', 'supplier'],
-                        'allow' => false,
-                        'roles' => [
+                        'actions'      => ['index', 'about', 'faq', 'restaurant', 'supplier'],
+                        'allow'        => false,
+                        'roles'        => [
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_ONE_S_INTEGRATION,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
@@ -74,8 +76,8 @@ class SiteController extends Controller {
                     ],
                 ],
             ],
-            'verbs' => [
-                'class' => VerbFilter::className(),
+            'verbs'  => [
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'logout' => ['post'],
                 ],
@@ -86,7 +88,8 @@ class SiteController extends Controller {
     /**
      * @inheritdoc
      */
-    public function actions() {
+    public function actions()
+    {
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
@@ -94,7 +97,8 @@ class SiteController extends Controller {
         ];
     }
 
-    public function actionUnsubscribe($token) {
+    public function actionUnsubscribe($token)
+    {
         $user = User::findOne(['access_token' => $token]);
         if ($user) {
 //            $user->subscribe = 0;
@@ -111,7 +115,8 @@ class SiteController extends Controller {
      *
      * @return mixed
      */
-    public function actionIndex() {
+    public function actionIndex()
+    {
         $user = new User();
         $user->scenario = 'register';
         $profile = new Profile();
@@ -128,24 +133,29 @@ class SiteController extends Controller {
      *
      * @return mixed
      */
-    public function actionAbout() {
+    public function actionAbout()
+    {
         return $this->render('about');
     }
 
-    public function actionPayment() {
+    public function actionPayment()
+    {
         throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         //return $this->render('payment');
     }
 
-    public function actionContacts() {
+    public function actionContacts()
+    {
         return $this->render('contacts');
     }
 
-    public function actionFaq() {
+    public function actionFaq()
+    {
         return $this->render('faq');
     }
 
-    public function actionRestaurant() {
+    public function actionRestaurant()
+    {
         $user = new User();
         $user->scenario = 'register';
         $profile = new Profile();
@@ -155,7 +165,8 @@ class SiteController extends Controller {
         return $this->render('restaurant', compact("user", "profile", "organization"));
     }
 
-    public function actionSupplier() {
+    public function actionSupplier()
+    {
         $user = new User();
         $user->scenario = 'register';
         $profile = new Profile();
@@ -165,7 +176,8 @@ class SiteController extends Controller {
         return $this->render('supplier', compact("user", "profile", "organization"));
     }
 
-    public function actionCompleteRegistration() {
+    public function actionCompleteRegistration()
+    {
         $this->layout = "main-user";
         $user = Yii::$app->user->identity;
 //        $profile = $user->profile;
@@ -190,7 +202,8 @@ class SiteController extends Controller {
         return $this->render("complete-registration", compact("organization"));
     }
 
-    public function actionAjaxCompleteRegistration() {
+    public function actionAjaxCompleteRegistration()
+    {
         $user = Yii::$app->user->identity;
         $profile = new Profile();
         $profile = $user->profile;
@@ -205,11 +218,11 @@ class SiteController extends Controller {
                 $organization->save();
                 $organization->refresh();
                 $contact = [
-                    'name' => $profile->full_name,
+                    'name'         => $profile->full_name,
                     'company_name' => $organization->name,
-                    'email' => $user->email,
-                    'phone' => $profile->phone,
-                    'city' => $organization->locality,
+                    'email'        => $user->email,
+                    'phone'        => $profile->phone,
+                    'city'         => $organization->locality,
                 ];
                 $amoFields = \common\models\AmoFields::findOne(['amo_field' => 'register']);
                 if ($amoFields) {
@@ -223,7 +236,8 @@ class SiteController extends Controller {
         return \yii\widgets\ActiveForm::validate($profile, $organization);
     }
 
-    public function actionAjaxWizardOff() {
+    public function actionAjaxWizardOff()
+    {
         $user = Yii::$app->user->identity;
         $organization = $user->organization;
         if (Yii::$app->request->isAjax) {
@@ -240,7 +254,8 @@ class SiteController extends Controller {
         return false;
     }
 
-    public function actionAjaxTutorialOff() {
+    public function actionAjaxTutorialOff()
+    {
         $user = Yii::$app->user->identity;
         if (isset($user->organization)) {
             $organization = $user->organization;
@@ -250,7 +265,8 @@ class SiteController extends Controller {
         return false;
     }
 
-    public function actionAjaxTutorialOn() {
+    public function actionAjaxTutorialOn()
+    {
         $user = Yii::$app->user->identity;
         if (isset($user->organization)) {
             $organization = $user->organization;
@@ -260,29 +276,40 @@ class SiteController extends Controller {
         return false;
     }
 
-    public function actionImageBase() {
+    public function actionImageBase()
+    {
+        function printBase64($image)
+        {
+            $array = explode('base64,', $image);
+            return base64_decode($array[1]);
+        }
+
         $id = Yii::$app->request->get('id');
         $type = Yii::$app->request->get('type');
         if ($type == 'product') {
             header('Content-Type: image/png');
             $model = CatalogBaseGoods::findOne($id);
-            if(strstr($model->imageUrl, 'base64') !== false) {
-                $array = explode('base64,', $model->imageUrl);
-                if (isset($array[1])) {
-                    echo base64_decode($array[1]);
+            if (!empty($model)) {
+                $image = $model->getImageUrl();
+                if (strstr($image, 'base64') !== false) {
+                    echo printBase64($image);
+                } else {
+                    echo file_get_contents($image);
                 }
             } else {
-              echo file_get_contents($model->imageUrl);
+                echo printBase64(CatalogBaseGoods::DEFAULT_IMAGE);
             }
             exit;
         }
     }
 
-    private function isRegistrationComplete($organization) {
+    private function isRegistrationComplete($organization)
+    {
         return ($organization->step != Organization::STEP_SET_INFO);
     }
 
-    private function redirectOrganizationIndex($organization) {
+    private function redirectOrganizationIndex($organization)
+    {
         if ($organization->type_id === Organization::TYPE_RESTAURANT) {
             $this->redirect(['/client/index']);
         }
@@ -291,60 +318,22 @@ class SiteController extends Controller {
         }
     }
 
-    private function getPage($url, $follow, $cookiesIn = '') {
-        $options = array(
-            CURLOPT_RETURNTRANSFER => true, // return web page
-            CURLOPT_HEADER => true, //return headers in addition to content
-            CURLOPT_FOLLOWLOCATION => $follow, // follow redirects
-            CURLOPT_ENCODING => "", // handle all encodings
-            CURLOPT_AUTOREFERER => true, // set referer on redirect
-            CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
-            CURLOPT_TIMEOUT => 120, // timeout on response
-            CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
-            CURLINFO_HEADER_OUT => true,
-            CURLOPT_SSL_VERIFYPEER => true, // Validate SSL Certificates
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_COOKIE => $cookiesIn,
-            CURLOPT_HTTPHEADER => ['User-Agent: Mozilla/5.0 (X11; Ubuntu; Linu…) Gecko/20100101 Firefox/61.0'],
-        );
-
-        $ch = curl_init($url);
-        curl_setopt_array($ch, $options);
-        $rough_content = curl_exec($ch);
-        $err = curl_errno($ch);
-        $errmsg = curl_error($ch);
-        $header = curl_getinfo($ch);
-        curl_close($ch);
-
-        $header_content = substr($rough_content, 0, $header['header_size']);
-        $body_content = trim(str_replace($header_content, '', $rough_content));
-        $pattern = "#Set-Cookie:\\s+(?<cookie>[^=]+=[^;]+)#m";
-        preg_match_all($pattern, $header_content, $matches);
-        $cookiesOut = implode("; ", $matches['cookie']);
-
-        $header['errno'] = $err;
-        $header['errmsg'] = $errmsg;
-        $header['headers'] = $header_content;
-        $header['content'] = $body_content;
-        $header['cookies'] = $cookiesOut;
-        return $header;
-    }
-
-    private function postForm($url, $vars = [], $cookiesIn = '') {
-
+    private function getPage($url, $follow, $cookiesIn = '')
+    {
         $options = [
             CURLOPT_RETURNTRANSFER => true, // return web page
-            CURLOPT_HEADER => true, //return headers in addition to content
-            CURLOPT_FOLLOWLOCATION => false, // follow redirects
-            CURLOPT_POST => true, // handle all encodings
+            CURLOPT_HEADER         => true, //return headers in addition to content
+            CURLOPT_FOLLOWLOCATION => $follow, // follow redirects
+            CURLOPT_ENCODING       => "", // handle all encodings
+            CURLOPT_AUTOREFERER    => true, // set referer on redirect
             CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
-            CURLOPT_TIMEOUT => 120, // timeout on response
-            CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
-            CURLINFO_HEADER_OUT => true,
+            CURLOPT_TIMEOUT        => 120, // timeout on response
+            CURLOPT_MAXREDIRS      => 10, // stop after 10 redirects
+            CURLINFO_HEADER_OUT    => true,
             CURLOPT_SSL_VERIFYPEER => true, // Validate SSL Certificates
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_COOKIE => $cookiesIn,
-            CURLOPT_POSTFIELDS => http_build_query($vars),
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_COOKIE         => $cookiesIn,
+            CURLOPT_HTTPHEADER     => ['User-Agent: Mozilla/5.0 (X11; Ubuntu; Linu…) Gecko/20100101 Firefox/61.0'],
         ];
 
         $ch = curl_init($url);
@@ -369,13 +358,53 @@ class SiteController extends Controller {
         return $header;
     }
 
-    public function actionTestAuth() {
+    private function postForm($url, $vars = [], $cookiesIn = '')
+    {
+
+        $options = [
+            CURLOPT_RETURNTRANSFER => true, // return web page
+            CURLOPT_HEADER         => true, //return headers in addition to content
+            CURLOPT_FOLLOWLOCATION => false, // follow redirects
+            CURLOPT_POST           => true, // handle all encodings
+            CURLOPT_CONNECTTIMEOUT => 120, // timeout on connect
+            CURLOPT_TIMEOUT        => 120, // timeout on response
+            CURLOPT_MAXREDIRS      => 10, // stop after 10 redirects
+            CURLINFO_HEADER_OUT    => true,
+            CURLOPT_SSL_VERIFYPEER => true, // Validate SSL Certificates
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_COOKIE         => $cookiesIn,
+            CURLOPT_POSTFIELDS     => http_build_query($vars),
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, $options);
+        $rough_content = curl_exec($ch);
+        $err = curl_errno($ch);
+        $errmsg = curl_error($ch);
+        $header = curl_getinfo($ch);
+        curl_close($ch);
+
+        $header_content = substr($rough_content, 0, $header['header_size']);
+        $body_content = trim(str_replace($header_content, '', $rough_content));
+        $pattern = "#Set-Cookie:\\s+(?<cookie>[^=]+=[^;]+)#m";
+        preg_match_all($pattern, $header_content, $matches);
+        $cookiesOut = implode("; ", $matches['cookie']);
+
+        $header['errno'] = $err;
+        $header['errmsg'] = $errmsg;
+        $header['headers'] = $header_content;
+        $header['content'] = $body_content;
+        $header['cookies'] = $cookiesOut;
+        return $header;
+    }
+
+    public function actionTestAuth()
+    {
         $link = 'https://t2-mercury.vetrf.ru/hs/';
 
         $step0 = $this->getPage($link, false);
 
         $step1 = $this->getPage($step0['redirect_url'], true, $step0['cookies']);
-
 
         $data = \darkdrim\simplehtmldom\SimpleHTMLDom::str_get_html($step1['content']);
 
@@ -420,12 +449,10 @@ class SiteController extends Controller {
                 $vsdNum = $row->find('.profile-info-value')[0]->find('span')[0]->innertext;
             }
         }
-        
-        $urlGetPdf = 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=1&preview=false&_action=printVetDocumentList&_language=ru&printPk='.$vsdNum.'&displayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=';
+
+        $urlGetPdf = 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=1&preview=false&_action=printVetDocumentList&_language=ru&printPk=' . $vsdNum . '&displayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=';
         $step7 = $this->getPage($urlGetPdf, true, $step4['cookies']);
         $data7 = $step7['content'];
-
-        
 
         Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
         header("Content-type:application/pdf");

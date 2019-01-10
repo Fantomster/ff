@@ -188,6 +188,15 @@ class mercuryApi extends baseApi
                             $vsd->save();
                             $result = $vsd;
                             break;
+                        case "MERC14256" :
+                            $err = false;
+                            $rejectedData = new rejectedForm();
+                            $rejectedData->decision = VetDocumentDone::ACCEPT_ALL;
+                            $rejectedData->reason = "Номер транспортного средства верен";
+                            $rejectedData->description = "Номер транспортного средства верен";
+                            $rejectedData->uuid = $UUID;
+                            $result = $this->getVetDocumentDone($UUID, $rejectedData);
+                            break;
                     }
                     if (!$err) {
                         break;

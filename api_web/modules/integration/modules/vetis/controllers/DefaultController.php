@@ -886,4 +886,59 @@ class DefaultController extends WebApiController
             exit($result);
         }
     }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/regionalization-get",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение информации по болезням",
+     *     description="Получение информации по болезням",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                        "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
+     *                        "country_name": "Россия",
+     *                        "producer_name":"ООО Мираторг, 600021, Владимирская обл., г. Муром, ул. Октябрьской революции 16",
+     *                        "referenced_document":"3345 231234",
+     *                        "referenced_date":"23.04.1025",
+     *                        "cargo_expertized":"Положительный результат.",
+     *                        "location_prosperity":"Благополучна",
+     *                        "special_marks":"Особые отметки, любой текст",
+     *                        "vehicle_number":"a666sf777tiv"
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function actionRegionalizationGet()
+    {
+        $this->response = (new VetisWaybill())->getRegionalizationInfo($this->request);
+    }
 }

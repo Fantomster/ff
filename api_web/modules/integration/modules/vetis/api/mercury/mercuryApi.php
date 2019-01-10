@@ -9,6 +9,7 @@ use api_web\modules\integration\modules\vetis\api\mercLogger;
 use frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
 use frontend\modules\clientintegr\modules\merc\helpers\api\mercury\VetDocumentDone;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class mercuryApi
@@ -684,4 +685,145 @@ class mercuryApi extends baseApi
         return $result;
     }
 
+    /**
+     * @param $recipient_guid
+     * @param $sender_guid
+     * @param $cargoTypeGuid
+     * @return mixed|null
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function checkShipmentRegionalizationOperation($recipient_guid, $sender_guid, $cargoTypeGuid)
+    {
+        $result = null;
+
+        //Генерируем id запроса
+        $localTransactionId = $this->getLocalTransactionId(__FUNCTION__);
+
+        //Готовим запрос
+        $client = $this->getSoapClient();
+
+        $request = $this->getSubmitApplicationRequest();
+
+        $appData = new ApplicationDataWrapper();
+
+        $data = new checkShipmentRegionalizationRequest();
+
+        $data->localTransactionId = $localTransactionId;
+        $data->initiator = new User();
+        $data->initiator->login = $this->vetisLogin;
+        $data->cargoType = new SubProduct();
+        $data->cargoType->guid = $cargoTypeGuid;
+        $data->shipmentRoute = new ShipmentRoute();
+
+        $routePoint = new ShipmentRoutePoint();
+        $routePoint->enterprise = new Enterprise();
+        $routePoint->enterprise->guid = $recipient_guid;
+
+        $routePoints[] = $routePoint;
+
+        $routePoint = new ShipmentRoutePoint();
+        $routePoint->enterprise = new Enterprise();
+        $routePoint->enterprise->guid = $sender_guid;
+
+        $routePoints[] = $routePoint;
+
+        $data->shipmentRoute = $routePoints;
+
+        $appData->any['ns3:checkShipmentRegionalizationRequest'] = $data;
+
+        $request->application->data = $appData;
+
+        //Делаем запрос
+        try {
+            $result = $client->submitApplicationRequest($request);
+
+            $request_xml = $client->__getLastRequest();
+
+            $app_id = $result->application->applicationId;
+            do {
+                //timeout перед запросом результата
+                sleep($this->query_timeout);
+                //Получаем результат запроса
+                $result = $this->getReceiveApplicationResult($app_id);
+
+                $status = $result->application->status;
+            } while ($status == 'IN_PROCESS');
+
+            //Пишем лог
+            mercLogger::getInstance()->addMercLog($result, __FUNCTION__, $localTransactionId, $request_xml, $client->__getLastResponse());
+
+            if ($status == 'COMPLETED') {
+                $result = $result->application->result->any['checkShipmentRegionalizationResponse']->r13nRouteSection;
+            } else {
+                $result = null;
+            }
+
+        } catch (\SoapFault $e) {
+            \Yii::error($e->detail);
+        } catch (\Throwable $e) {
+            \Yii::error($e->getMessage());
+        }
+        return $result;
+    }
+    public function getRegionalizationConditions ($recipient_guid, $sender_guid, $cargoTypeGuid)
+    {
+        $result = $this->checkShipmentRegionalizationOperation($recipient_guid, $sender_guid, $cargoTypeGuid);
+        if ($result == null) {
+            throw new \Exception('CheckShipmentRegionalizationOperation error');
+        }
+        $result = is_array($result) ? $result : [$result];
+        $сonditions = null;
+        try {
+            foreach ($result as $item) {
+                $item = json_decode(json_encode($item), true);
+                switch ($item['appliedR13nRule']['decision']) {
+                    case 1 :
+                        break;                         //Можно делать перемещение без ограничений
+                    case 2 ://Можно делать перемещение при соблюдении условий
+                        $requirements = !array_key_exists('relatedDisease', $item['appliedR13nRule']['requirement']) ? $item['appliedR13nRule']['requirement'] : [$item['appliedR13nRule']['requirement']];
+                        foreach ($requirements as $requirement) {
+                            $сonditions[$requirement['relatedDisease']['name']] = $this->getConditions($requirement);
+                        }
+                        break;
+                    case 3 :
+                        throw new BadRequestHttpException("Relocation prohibited by regionalization rules|{$item['appliedR13nRule']['requirement']['relatedDisease']['name']}", 1330);
+                    //throw new Exception('Пересещение запрещено правилами регионализации (' . $item['appliedR13nRule']['requirement']['relatedDisease']['name'] . ')!');
+                }
+            }
+        }catch (\Exception $e) {
+            if ($e->getCode() != 1330)  {
+                throw $e;
+            }
+            return $сonditions = ['reason_for_prohibition' => $e->getMessage()];
+        }
+        return $сonditions;
+    }
+
+    private function getConditions($requirement) {
+        $conditions = null;
+        switch ($requirement['type']) {
+            case 1 :
+                break;                         //Можно делать перемещение без ограничений
+            case 2 ://Можно делать перемещение при соблюдении условий
+                $conditionGroups = is_array($requirement["conditionGroup"]) ? $requirement["conditionGroup"] : [$requirement["conditionGroup"]];
+                $i = 0;
+                foreach ($conditionGroups as $group) {
+                    $i++;
+                    $group = !array_key_exists('condition', $group) ? $group : $group['condition'];
+                    $condition = !array_key_exists('guid', $group) ? $group : [$group];
+                    foreach ($condition as $cond) {
+                        if ($cond['active'] && $cond['last']) {
+                            $conditions[] = ['guid' => $cond['guid'],
+                                             'text' => $cond['text'],
+                                             'group' => $i];
+                        }
+                    }
+                }
+                break;
+            case 3 :
+                throw new BadRequestHttpException("Relocation prohibited by regionalization rules|{$requirement['relatedDisease']['name']}", 1330);
+                //throw new Exception('Пересещение запрещено правилами регионализации (' . $requirement['relatedDisease']['name'] . ')!');
+        }
+        return $conditions;
+    }
 }

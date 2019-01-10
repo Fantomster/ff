@@ -432,15 +432,14 @@ class VetisWaybill extends WebApi
             if (array_key_exists($request['uuid'], $records)) {
                 $vsd = $records[$request['uuid']];
                 $conditions = $api->getRegionalizationConditions($vsd['recipient_guid'], $vsd['sender_guid'], $vsd['sub_product_guid']);
-                $result = ['relocation' => true,
-               'reason_for_prohibition' => null];
+                $result = ['relocation'             => true,
+                           'reason_for_prohibition' => null];
 
                 if (isset($conditions)) {
                     $result['relocation'] = false;
-                    if(array_key_exists('reason_for_prohibition', $conditions)) {
+                    if (array_key_exists('reason_for_prohibition', $conditions)) {
                         $result['reason_for_prohibition'] = $conditions['$conditions'];
-                    }
-                    else {
+                    } else {
                         $result['conditions'] = $conditions;
                     }
                 }

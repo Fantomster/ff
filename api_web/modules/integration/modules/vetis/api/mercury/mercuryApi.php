@@ -586,8 +586,8 @@ class mercuryApi extends baseApi
     }
 
     /**
-     * @param $action
-     * @param $uuid
+     * @param                  $action
+     * @param                  $uuid
      * @param null|productForm $form
      * @return null
      * @throws \Exception
@@ -760,7 +760,7 @@ class mercuryApi extends baseApi
      * @return array|null
      * @throws \yii\base\InvalidConfigException
      */
-    public function getRegionalizationConditions ($recipient_guid, $sender_guid, $cargoTypeGuid)
+    public function getRegionalizationConditions($recipient_guid, $sender_guid, $cargoTypeGuid)
     {
         $result = $this->checkShipmentRegionalizationOperation($recipient_guid, $sender_guid, $cargoTypeGuid);
         if ($result == null) {
@@ -777,8 +777,8 @@ class mercuryApi extends baseApi
                     case 2 ://Можно делать перемещение при соблюдении условий
                         $requirements = !array_key_exists('relatedDisease', $item['appliedR13nRule']['requirement']) ? $item['appliedR13nRule']['requirement'] : [$item['appliedR13nRule']['requirement']];
                         foreach ($requirements as $requirement) {
-                            $сonditions[] = ['name' => $requirement['relatedDisease']['name'],
-                                'groups' => $this->getConditions($requirement)];
+                            $сonditions[] = ['name'   => $requirement['relatedDisease']['name'],
+                                             'groups' => $this->getConditions($requirement)];
                         }
                         break;
                     case 3 :
@@ -786,8 +786,8 @@ class mercuryApi extends baseApi
                     //throw new Exception('Пересещение запрещено правилами регионализации (' . $item['appliedR13nRule']['requirement']['relatedDisease']['name'] . ')!');
                 }
             }
-        }catch (\Exception $e) {
-            if ($e->getCode() != 1330)  {
+        } catch (\Exception $e) {
+            if ($e->getCode() != 1330) {
                 throw $e;
             }
             return $сonditions = ['reason_for_prohibition' => $e->getMessage()];
@@ -800,7 +800,8 @@ class mercuryApi extends baseApi
      * @return array|null
      * @throws BadRequestHttpException
      */
-    private function getConditions($requirement) {
+    private function getConditions($requirement)
+    {
         $conditions = null;
         switch ($requirement['type']) {
             case 1 :
@@ -814,9 +815,9 @@ class mercuryApi extends baseApi
                     $condition = !array_key_exists('guid', $group) ? $group : [$group];
                     foreach ($condition as $cond) {
                         if ($cond['active'] && $cond['last']) {
-                            $conditions_group[] = ['guid' => $cond['guid'],
-                                             'title' => $cond['text'],
-                                             'checked' => false];
+                            $conditions_group[] = ['guid'    => $cond['guid'],
+                                                   'title'   => $cond['text'],
+                                                   'checked' => false];
                         }
                     }
                     $conditions[] = $conditions_group;
@@ -824,7 +825,7 @@ class mercuryApi extends baseApi
                 break;
             case 3 :
                 throw new BadRequestHttpException("Relocation prohibited by regionalization rules|{$requirement['relatedDisease']['name']}", 1330);
-                //throw new Exception('Пересещение запрещено правилами регионализации (' . $requirement['relatedDisease']['name'] . ')!');
+            //throw new Exception('Пересещение запрещено правилами регионализации (' . $requirement['relatedDisease']['name'] . ')!');
         }
         return $conditions;
     }

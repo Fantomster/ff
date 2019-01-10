@@ -430,12 +430,13 @@ class VetisWaybill extends WebApi
         try {
             $api = mercuryApi::getInstance();
             if (array_key_exists($request['uuid'], $records)) {
-                $vsd = $request['uuid'];
+                $vsd = $records[$request['uuid']];
                 $conditions = $api->getRegionalizationConditions($vsd['recipient_guid'], $vsd['sender_guid'], $vsd['sub_product_guid']);
-                $result = ['relocation' => true];
+                $result = ['relocation' => true,
+               'reason_for_prohibition' => null];
 
                 if (isset($conditions)) {
-                    $result = ['relocation' => false];
+                    $result['relocation'] = false;
                     if(array_key_exists('reason_for_prohibition', $conditions)) {
                         $result['reason_for_prohibition'] = $conditions['$conditions'];
                     }
@@ -455,6 +456,6 @@ class VetisWaybill extends WebApi
             $this->helper->setLastError($error, $request['uuid']);
         }
 
-        return ['result' => $result];
+        return $result;
     }
 }

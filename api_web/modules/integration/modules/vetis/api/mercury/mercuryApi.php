@@ -706,30 +706,17 @@ class mercuryApi extends baseApi
 
         $appData = new ApplicationDataWrapper();
 
-        $data = new checkShipmentRegionalizationRequest();
+        $data['localTransactionId'] = $localTransactionId;
+        $data['initiator']['login'] = $this->vetisLogin;
+        $data['cargoType']['guid'] = $cargoTypeGuid;
 
-        $data->localTransactionId = $localTransactionId;
-        $data->initiator = new User();
-        $data->initiator->login = $this->vetisLogin;
-        $data->cargoType = new SubProduct();
-        $data->cargoType->guid = $cargoTypeGuid;
-        $data->shipmentRoute = new ShipmentRoute();
+        $routePoints[]['enterprise']['guid'] = $recipient_guid;
+        $routePoints[]['enterprise']['guid'] = $sender_guid;
+        $data['shipmentRoute'] = $routePoints;
 
-        $routePoint = new ShipmentRoutePoint();
-        $routePoint->enterprise = new Enterprise();
-        $routePoint->enterprise->guid = $recipient_guid;
+        $var = new \SoapVar($data, SOAP_ENC_ARRAY, 'CheckShipmentRegionalizationRequest', 'http://api.vetrf.ru/schema/cdm/mercury/g2b/applications/v2');
 
-        $routePoints[] = $routePoint;
-
-        $routePoint = new ShipmentRoutePoint();
-        $routePoint->enterprise = new Enterprise();
-        $routePoint->enterprise->guid = $sender_guid;
-
-        $routePoints[] = $routePoint;
-
-        $data->shipmentRoute = $routePoints;
-
-        $appData->any['ns3:checkShipmentRegionalizationRequest'] = $data;
+        $appData->any['ns3:checkShipmentRegionalizationRequest'] = $var;
 
         $request->application->data = $appData;
 
@@ -765,6 +752,14 @@ class mercuryApi extends baseApi
         }
         return $result;
     }
+
+    /**
+     * @param $recipient_guid
+     * @param $sender_guid
+     * @param $cargoTypeGuid
+     * @return array|null
+     * @throws \yii\base\InvalidConfigException
+     */
     public function getRegionalizationConditions ($recipient_guid, $sender_guid, $cargoTypeGuid)
     {
         $result = $this->checkShipmentRegionalizationOperation($recipient_guid, $sender_guid, $cargoTypeGuid);
@@ -782,7 +777,8 @@ class mercuryApi extends baseApi
                     case 2 ://Можно делать перемещение при соблюдении условий
                         $requirements = !array_key_exists('relatedDisease', $item['appliedR13nRule']['requirement']) ? $item['appliedR13nRule']['requirement'] : [$item['appliedR13nRule']['requirement']];
                         foreach ($requirements as $requirement) {
-                            $сonditions[$requirement['relatedDisease']['name']] = $this->getConditions($requirement);
+                            $сonditions[] = ['name' => $requirement['relatedDisease']['name'],
+                                'groups' => $this->getConditions($requirement)];
                         }
                         break;
                     case 3 :
@@ -799,6 +795,11 @@ class mercuryApi extends baseApi
         return $сonditions;
     }
 
+    /**
+     * @param $requirement
+     * @return array|null
+     * @throws BadRequestHttpException
+     */
     private function getConditions($requirement) {
         $conditions = null;
         switch ($requirement['type']) {
@@ -808,16 +809,17 @@ class mercuryApi extends baseApi
                 $conditionGroups = is_array($requirement["conditionGroup"]) ? $requirement["conditionGroup"] : [$requirement["conditionGroup"]];
                 $i = 0;
                 foreach ($conditionGroups as $group) {
-                    $i++;
+                    $conditions_group = null;
                     $group = !array_key_exists('condition', $group) ? $group : $group['condition'];
                     $condition = !array_key_exists('guid', $group) ? $group : [$group];
                     foreach ($condition as $cond) {
                         if ($cond['active'] && $cond['last']) {
-                            $conditions[] = ['guid' => $cond['guid'],
-                                             'text' => $cond['text'],
-                                             'group' => $i];
+                            $conditions_group[] = ['guid' => $cond['guid'],
+                                             'title' => $cond['text'],
+                                             'checked' => false];
                         }
                     }
+                    $conditions[] = $conditions_group;
                 }
                 break;
             case 3 :

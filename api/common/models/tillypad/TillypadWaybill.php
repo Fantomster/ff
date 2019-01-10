@@ -290,6 +290,7 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
 
     public static function createWaybill($order_id, $service_id = Registry::IIKO_SERVICE_ID)
     {
+        $order_id = (int)$order_id; //переписать без raw запросов
 
         $res = true;
 

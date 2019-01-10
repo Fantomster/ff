@@ -298,7 +298,8 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
     public static function createWaybill($order_id, $service_id = Registry::IIKO_SERVICE_ID, $auto = false)
     {
-
+        $order_id = (int)$order_id; //переписать без raw запросов
+        
         $res = true;
 
         $order = \common\models\Order::findOne(['id' => $order_id]);

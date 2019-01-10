@@ -715,7 +715,7 @@ class Organization extends \yii\db\ActiveRecord
                     $maTable = ManagerAssociate::tableName();
                     $orderTable = Order::tableName();
                     $result = Order::find()
-                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                        ->leftJoin("$maTable", "$maTable.organization_id = $orderTable.client_id")
                         ->where([
                             'vendor_id'           => $this->id,
                             "$maTable.manager_id" => $manager_id,

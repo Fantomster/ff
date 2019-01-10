@@ -727,13 +727,25 @@ class UserWebApi extends \api_web\components\WebApi
             //Проверяем код
             if ($model->checkCode($post['code'])) {
                 //Меняем номер телефона, если все хорошо
-                $model->changePhoneUser();
+                try {
+                    $model->changePhoneUser();
+                } catch (\Throwable $e) {
+                    \Yii::info($e->getMessage());
+                }
             } else {
                 throw new BadRequestHttpException('bad_sms_code');
             }
         }
 
-        return ['result' => true];
+        if ($isUnconfirmedUser) {
+            try {
+                return ['token' => $model->user->getJWTToken()];
+            } catch (\Exception $e) {
+                \Yii::info($e->getMessage());
+            }
+        } else {
+            return ['result' => true];
+        }
     }
 
     /**

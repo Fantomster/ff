@@ -787,7 +787,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "org_id": ["1", "2", "3"]
+     *                      "org_id": {"1", "2", "3"}
      *                  }
      *              )
      *         )

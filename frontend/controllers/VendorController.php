@@ -2121,7 +2121,7 @@ class VendorController extends DefaultController
         // Объем продаж чарт
         if (Yii::$app->user->can('manage')) {
             $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
-                (select sum(total_price) FROM `$orderTable` 
+                (select sum(total_price) FROM $orderTable 
                 where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
                 vendor_id = $currentUser->organization_id and status<>" . OrderStatus::STATUS_FORMING . " and ("
                             . "DATE(created_at) between '" .
@@ -2130,15 +2130,15 @@ class VendorController extends DefaultController
                             $where .
                             ") AS `total_price`
                 FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
-                FROM `$orderTable` where 
+                FROM $orderTable where 
                 vendor_id = $currentUser->organization_id and status<>" . OrderStatus::STATUS_FORMING . " and("
                             . "DATE(created_at) between '" .
                             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                             date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")`tb`")->queryAll();
         } else {
             $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
-                (select sum(total_price) FROM `$orderTable` LEFT JOIN `$maTable` ON `$orderTable`.client_id = `$maTable`.organization_id 
-                where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at AND `$maTable`.manager_id = $currentUser->id AND
+                (select sum(total_price) FROM $orderTable LEFT JOIN $maTable ON $orderTable.client_id = $maTable.organization_id 
+                where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at AND $maTable.manager_id = $currentUser->id AND
                 vendor_id = $currentUser->organization_id and status<>" . OrderStatus::STATUS_FORMING . " and ("
                             . "DATE(created_at) between '" .
                             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
@@ -2146,8 +2146,8 @@ class VendorController extends DefaultController
                             $where .
                             ") AS `total_price`
                 FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
-                FROM `$orderTable` LEFT JOIN `$maTable` ON `$orderTable`.client_id = `$maTable`.organization_id WHERE 
-                vendor_id = $currentUser->organization_id AND `$maTable`.manager_id = $currentUser->id and status<>" . OrderStatus::STATUS_FORMING . " and("
+                FROM $orderTable LEFT JOIN $maTable ON $orderTable.client_id = $maTable.organization_id WHERE 
+                vendor_id = $currentUser->organization_id AND $maTable.manager_id = $currentUser->id and status<>" . OrderStatus::STATUS_FORMING . " and("
                             . "DATE(created_at) between '" .
                             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                             date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")`tb`")->queryAll();

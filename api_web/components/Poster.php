@@ -21,18 +21,18 @@ class Poster extends WebApi
     /**
      * @var string
      */
-    static $registerUrl = 'https://{%s}.joinposter.com/api/v2/auth/access_token';
+    static $registerUrl = 'https://%s.joinposter.com/api/v2/auth/access_token';
 
     /**
      * @param $request
-     * @return string
+     * @return array
      */
     public function generateAuthUrl($request)
     {
         $appId = ISV::getSettingsByServiceId(Registry::POSTER_SERVICE_ID, $this->user->organization_id, ['application_id']);
-        $redirectUrl = $_SERVER['HTTP_ORIGIN'] . '/poster-auth';
+        $redirectUrl = $request['redirect_url'] ?? $_SERVER['HTTP_ORIGIN'] . '/poster-auth';
 
-        return \Yii::$app->params['posterApiUrl'] . "auth?application_id=$appId&redirect_uri=$redirectUrl&response_type=code";
+        return ['resutl' => \Yii::$app->params['posterApiUrl'] . "auth?application_id=$appId&redirect_uri=$redirectUrl&response_type=code"];
     }
 
     /**
@@ -52,7 +52,10 @@ class Poster extends WebApi
             'redirect_uri'       => $request['url'],
             'code'               => $request['code'],
         ];
-        $data = $this->sendRequest($url, 'post', $auth);
+        $data = json_decode($this->sendRequest($url, 'post', $auth));
+        if (isset($data->code) && $data->code >= 400) {
+            return ['result' => false, 'error' => $data->error_message];
+        }
         $accessTokenSetting = IntegrationSetting::findOne(['name' => 'access_token', 'service_id' => Registry::POSTER_SERVICE_ID]);
         $setting = ISV::findOne(['org_id' => $this->user->organization_id, 'setting_id' => $accessTokenSetting->id]);
         if (!$setting) {
@@ -60,7 +63,7 @@ class Poster extends WebApi
             $setting->org_id = $this->user->organization_id;
             $setting->setting_id = $accessTokenSetting->id;
         }
-        $setting->value = $data['access_token'];
+        $setting->value = $data->access_token;
         $success = $setting->save();
 
         return ['result' => $success, 'data_from_server' => $data];

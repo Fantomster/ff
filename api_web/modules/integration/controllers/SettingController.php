@@ -448,7 +448,6 @@ class SettingController extends \api_web\components\WebApiController
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
         $this->response = $this->container->get('IntegrationSettingsWebApi')->getItemsSetting($this->request);
     }
-
     /**
      * @SWG\Post(path="/integration/setting/generate-poster-auth-url",
      *     tags={"Poster"},
@@ -464,7 +463,7 @@ class SettingController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *
+     *                      "redirect_url": "fronturl.ru"
      *                  }
      *              )
      *         )
@@ -474,7 +473,7 @@ class SettingController extends \api_web\components\WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                   "result": { "value":"comment", 4:"Store House 4", 5:"Store House 5"}
+     *                   "result": "https://joinposter.com/api/auth?application_id=418&redirect_uri=http://api.mixcart.loc/poster-auth&response_type=code"
      *              }
      *          )
      *     ),
@@ -512,8 +511,8 @@ class SettingController extends \api_web\components\WebApiController
      *                  property="request",
      *                  default={
      *                      "code": 123,
-     *                      "account": qwe,
-     *                      "url": https://backfronturl.ru
+     *                      "account": "qwe",
+     *                      "url": "https://backfronturl.ru"
      *                  }
      *              )
      *         )
@@ -536,7 +535,7 @@ class SettingController extends \api_web\components\WebApiController
      * )
      * @throws \Exception
      */
-    public function actionIndex()
+    public function actionPosterAuth()
     {
         $this->response = (new Poster())->saveAccessKey($this->request);
     }

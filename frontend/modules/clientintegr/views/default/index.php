@@ -75,15 +75,15 @@ if (isset($licenses['rkws'])) {
     if ($licenses['rkws_ucs']->status_id == 0) { // если лицензия отключена в админке Mixcart
         $rk_lic = 0;
     }
-   /* if (($licenses['rkws_ucs']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws_ucs']->status_id == 1)))) { // если лицензия учётной системы в админке включена, но истёк её срок
-        $rk_lic = 3;
-    }
-    if (($licenses['rkws_ucs']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['rkws_ucs']->td)))) { // если лицензия учётной системы в админке включена, до окончания её срока осталось менее двух недель
-        $rk_lic = 2;
-    }
-    if (($licenses['rkws_ucs']->status_id == 1) and ($timestamp_now > (strtotime($licenses['rkws_ucs']->td)))) { // если лицензия учётной системы в админке включена и до окончания её срока осталось более двух недель
-        $rk_lic = 1;
-    }*/
+    /* if (($licenses['rkws_ucs']->status_id == 1) and ($timestamp_now <= (strtotime($licenses['rkws_ucs']->status_id == 1)))) { // если лицензия учётной системы в админке включена, но истёк её срок
+         $rk_lic = 3;
+     }
+     if (($licenses['rkws_ucs']->status_id == 1) and (($timestamp_now + 14 * 86400) > (strtotime($licenses['rkws_ucs']->td)))) { // если лицензия учётной системы в админке включена, до окончания её срока осталось менее двух недель
+         $rk_lic = 2;
+     }
+     if (($licenses['rkws_ucs']->status_id == 1) and ($timestamp_now > (strtotime($licenses['rkws_ucs']->td)))) { // если лицензия учётной системы в админке включена и до окончания её срока осталось более двух недель
+         $rk_lic = 1;
+     }*/
 }
 
 // Блок проверки состояния лицензии IIKO

@@ -7,10 +7,11 @@ $timestamp_now=time();
 $sub0 = explode(' ',$licucs->td);
 $sub1 = explode('-',$sub0[0]);
 $licucs->td = $sub1[2].'.'.$sub1[1].'.'.$sub1[0];
+$lic_rkws_ucs = 3;
 if ($licucs->status_id==0) $lic_rkws_ucs=0;
-if (($licucs->status_id==1) and ($timestamp_now<=(strtotime($licucs->td)))) $lic_rkws_ucs=3;
+/*if (($licucs->status_id==1) and ($timestamp_now<=(strtotime($licucs->td)))) $lic_rkws_ucs=3;
 if (($licucs->status_id==1) and (($timestamp_now+14*86400)>(strtotime($licucs->td)))) $lic_rkws_ucs=2;
-if (($licucs->status_id==1) and ($timestamp_now>(strtotime($licucs->td)))) $lic_rkws_ucs=1;
+if (($licucs->status_id==1) and ($timestamp_now>(strtotime($licucs->td)))) $lic_rkws_ucs=1;*/
 if ($lic_rkws_ucs!=3) {
     ?>
     <div class="box box-info">

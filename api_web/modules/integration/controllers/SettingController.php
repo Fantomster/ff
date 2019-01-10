@@ -2,6 +2,9 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\components\Poster;
+use api_web\components\Registry;
+
 class SettingController extends \api_web\components\WebApiController
 {
     /**
@@ -444,5 +447,97 @@ class SettingController extends \api_web\components\WebApiController
     {
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
         $this->response = $this->container->get('IntegrationSettingsWebApi')->getItemsSetting($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/setting/generate-poster-auth-url",
+     *     tags={"Poster"},
+     *     summary="Генерация урла для авторизации в Poster",
+     *     description="Генерация урла для авторизации в Poster",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                   "result": { "value":"comment", 4:"Store House 4", 5:"Store House 5"}
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * )
+     * @throws \Exception
+     */
+    public function actionGeneratePosterAuthUrl()
+    {
+        $this->setLicenseServiceId(Registry::POSTER_SERVICE_ID);
+        $this->response = (new Poster())->generateAuthUrl($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/setting/poster-auth",
+     *     tags={"Poster"},
+     *     summary="Авторизация по code полученного из oAuth2",
+     *     description="Авторизация по code полученного из oAuth2",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *             @SWG\Property(property="user", ref="#/definitions/User"),
+     *             @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "code": 123,
+     *                      "account": qwe,
+     *                      "url": https://backfronturl.ru
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *             default={{}}
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionIndex()
+    {
+        $this->response = (new Poster())->saveAccessKey($this->request);
     }
 }

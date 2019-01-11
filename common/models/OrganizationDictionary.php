@@ -39,7 +39,6 @@ class OrganizationDictionary extends ActiveRecord
     const STATUS_ACTIVE = 1;
     const STATUS_ERROR = 2;
     const STATUS_SEND_REQUEST = 3;
-    const IIKO_UNIT_DICT_ID = 9;
 
     /**
      * {@inheritdoc}
@@ -51,6 +50,7 @@ class OrganizationDictionary extends ActiveRecord
 
     /**
      * @return \yii\db\Connection the database connection used by this AR class.
+     * @throws \yii\base\InvalidConfigException
      */
     public static function getDb()
     {
@@ -155,7 +155,7 @@ class OrganizationDictionary extends ActiveRecord
 
         $lastExec = new \DateTime();
         $plainExec = null;
-        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID) {
+        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID || $this->outerDic->service_id == Registry::TILLYPAD_SERVICE_ID) {
             $plainExec = date('Y-m-d H:i:s', $lastExec->getTimestamp() + $consumerFullName::$timeout);
         }
         \Yii::$app->language = $this->org->lang ?? 'ru';
@@ -175,15 +175,17 @@ class OrganizationDictionary extends ActiveRecord
      */
     public static function updateIikoUnitDictionary($status, $org_id): void
     {
+        $unitId = self::getUnitIdByServiceId('unit', Registry::IIKO_SERVICE_ID);
+
         $dictionaryUnit = self::findOne([
             'org_id'       => $org_id,
-            'outer_dic_id' => self::IIKO_UNIT_DICT_ID
+            'outer_dic_id' => $unitId
         ]);
 
         if (empty($dictionaryUnit)) {
             $dictionaryUnit = new self([
                 'org_id'       => $org_id,
-                'outer_dic_id' => self::IIKO_UNIT_DICT_ID,
+                'outer_dic_id' => $unitId,
                 'status_id'    => $status,
                 'count'        => 0
             ]);
@@ -193,6 +195,43 @@ class OrganizationDictionary extends ActiveRecord
             $count = OuterUnit::find()->where([
                 'org_id'     => $org_id,
                 'service_id' => Registry::IIKO_SERVICE_ID,
+                'is_deleted' => 0
+            ])->count();
+            $dictionaryUnit->count = (int)$count;
+        } else {
+            $dictionaryUnit->updated_at = \gmdate('Y-m-d H:i:s');
+        }
+
+        $dictionaryUnit->status_id = $status;
+        $dictionaryUnit->save();
+    }
+
+    /**
+     * @param $status
+     * @param $org_id
+     */
+    public static function updateTillypadUnitDictionary($status, $org_id): void
+    {
+        $unitId = self::getUnitIdByServiceId('unit', Registry::TILLYPAD_SERVICE_ID);
+
+        $dictionaryUnit = self::findOne([
+            'org_id'       => $org_id,
+            'outer_dic_id' => $unitId
+        ]);
+
+        if (empty($dictionaryUnit)) {
+            $dictionaryUnit = new self([
+                'org_id'       => $org_id,
+                'outer_dic_id' => $unitId,
+                'status_id'    => $status,
+                'count'        => 0
+            ]);
+        }
+
+        if ($status == self::STATUS_ACTIVE) {
+            $count = OuterUnit::find()->where([
+                'org_id'     => $org_id,
+                'service_id' => Registry::TILLYPAD_SERVICE_ID,
                 'is_deleted' => 0
             ])->count();
             $dictionaryUnit->count = (int)$count;
@@ -227,5 +266,15 @@ class OrganizationDictionary extends ActiveRecord
             self::STATUS_ERROR        => \Yii::t('app', 'organization_dictionary.status.error'),
             self::STATUS_SEND_REQUEST => \Yii::t('app', 'organization_dictionary.status.send_request')
         ];
+    }
+
+    private static function getUnitIdByServiceId($name, $serviceId)
+    {
+        $unit = OuterDictionary::findOne([
+            'name'       => $name,
+            'service_id' => $serviceId
+        ]);
+
+        return $unit->id;
     }
 }

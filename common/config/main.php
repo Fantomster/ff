@@ -89,19 +89,19 @@ return [
                 ],
                 'app'         => [
                     'class'                 => 'yii\i18n\DbMessageSource',
-                    'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
+                    //'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
                 ],
                 'message'     => [
                     'class'                 => 'yii\i18n\DbMessageSource',
-                    'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
+                    //'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
                 ],
                 'sms_message' => [
                     'class'                 => 'yii\i18n\DbMessageSource',
-                    'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
+                    //'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
                 ],
                 'error'       => [
                     'class'                 => 'yii\i18n\DbMessageSource',
-                    'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
+                    //'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
                 ],
                 'api_web'     => [
                     'class' => 'yii\i18n\DbMessageSource',

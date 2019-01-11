@@ -89,13 +89,16 @@ class Registry
         self::VENDOR_DOC_MAIL_SERVICE_ID,
         self::ONE_S_CLIENT_SERVICE_ID,
         self::TILLYPAD_SERVICE_ID,
+        self::POSTER_SERVICE_ID,
     ];
 
     /** @var array сервисы в которых генерируются накладные */
     static $waybill_services = [
         self::RK_SERVICE_ID,
         self::IIKO_SERVICE_ID,
-        self::ONE_S_CLIENT_SERVICE_ID
+        self::ONE_S_CLIENT_SERVICE_ID,
+        self::TILLYPAD_SERVICE_ID,
+        self::POSTER_SERVICE_ID
     ];
 
     /**@var array сервисы MixCart */

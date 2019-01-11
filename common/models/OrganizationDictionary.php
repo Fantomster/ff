@@ -155,7 +155,7 @@ class OrganizationDictionary extends ActiveRecord
 
         $lastExec = new \DateTime();
         $plainExec = null;
-        if ($this->outerDic->service_id == Registry::IIKO_SERVICE_ID || $this->outerDic->service_id == Registry::TILLYPAD_SERVICE_ID) {
+        if (in_array($this->outerDic->service_id, [Registry::IIKO_SERVICE_ID, Registry::TILLYPAD_SERVICE_ID])) {
             $plainExec = date('Y-m-d H:i:s', $lastExec->getTimestamp() + $consumerFullName::$timeout);
         }
         \Yii::$app->language = $this->org->lang ?? 'ru';

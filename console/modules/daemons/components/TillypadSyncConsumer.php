@@ -85,7 +85,7 @@ class TillypadSyncConsumer extends AbstractConsumer
                 $this->tillypadApi->logout();
                 //Информацию шлем в FCM
                 $dictionary->noticeToFCM();
-                if (in_array($dictionary->outerDic->service_id, Registry::$integration_services)) {
+                if ($dictionary->outerDic->service_id == Registry::TILLYPAD_SERVICE_ID && $dictionary->outerDic->name == 'product') {
                     OrganizationDictionary::updateTillypadUnitDictionary($dictionary->status_id, $dictionary->org_id);
                 }
             }

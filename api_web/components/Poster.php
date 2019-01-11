@@ -10,6 +10,7 @@ namespace api_web\components;
 
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue as ISV;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class Poster
@@ -26,10 +27,16 @@ class Poster extends WebApi
     /**
      * @param $request
      * @return array
+     * @throws BadRequestHttpException
      */
     public function generateAuthUrl($request)
     {
         $appId = ISV::getSettingsByServiceId(Registry::POSTER_SERVICE_ID, $this->user->organization_id, ['application_id']);
+
+        if(empty($appId)) {
+            throw new BadRequestHttpException('poster.not_set_app_id');
+        }
+
         $redirectUrl = $request['redirect_url'] ?? $_SERVER['HTTP_ORIGIN'] . '/poster-auth';
 
         return ['result' => \Yii::$app->params['posterApiUrl'] . "auth?application_id=$appId&redirect_uri=$redirectUrl&response_type=code"];

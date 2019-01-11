@@ -12,6 +12,7 @@ use yii\i18n\MissingTranslationEvent;
  */
 class TranslationEventHandler {
 
+    /**
     public static function handleMissingTranslation(MissingTranslationEvent $event)
     {
         if (!SourceMessage::findOne(['message' => $event->message])) {
@@ -28,4 +29,5 @@ class TranslationEventHandler {
             }
         }
     }
+     */
 }

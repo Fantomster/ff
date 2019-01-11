@@ -32,7 +32,7 @@ class Poster extends WebApi
         $appId = ISV::getSettingsByServiceId(Registry::POSTER_SERVICE_ID, $this->user->organization_id, ['application_id']);
         $redirectUrl = $request['redirect_url'] ?? $_SERVER['HTTP_ORIGIN'] . '/poster-auth';
 
-        return ['resutl' => \Yii::$app->params['posterApiUrl'] . "auth?application_id=$appId&redirect_uri=$redirectUrl&response_type=code"];
+        return ['result' => \Yii::$app->params['posterApiUrl'] . "auth?application_id=$appId&redirect_uri=$redirectUrl&response_type=code"];
     }
 
     /**

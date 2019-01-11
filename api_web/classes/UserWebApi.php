@@ -669,6 +669,7 @@ class UserWebApi extends \api_web\components\WebApi
     {
         WebApiHelper::clearRequest($post);
         $this->validateRequest($post, ['phone']);
+        $return = ['result' => true];
 
         $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['phone']);
         if (mb_substr($phone, 0, 1) == '8') {
@@ -729,6 +730,9 @@ class UserWebApi extends \api_web\components\WebApi
                 //Меняем номер телефона, если все хорошо
                 try {
                     $model->changePhoneUser();
+                    if ($isUnconfirmedUser) {
+                        $return = ['token' => $model->user->getJWTToken()];
+                    }
                 } catch (\Throwable $e) {
                     \Yii::info($e->getMessage());
                 }
@@ -737,15 +741,7 @@ class UserWebApi extends \api_web\components\WebApi
             }
         }
 
-        if ($isUnconfirmedUser) {
-            try {
-                return ['token' => $model->user->getJWTToken()];
-            } catch (\Exception $e) {
-                \Yii::info($e->getMessage());
-            }
-        } else {
-            return ['result' => true];
-        }
+        return $return;
     }
 
     /**

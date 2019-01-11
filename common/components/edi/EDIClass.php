@@ -385,7 +385,7 @@ class EDIClass extends Component
                 'ed'                   => $ed,
                 'name'                 => (String)$good->PRODUCTNAME ?? '',
                 'price'                => (float)$good->UNITPRICE ?? 0.0,
-                'article'              => (isset($good->IDBUYER) && $good->IDBUYER != '') ? (String)$good->IDBUYER : $barcode,
+                'article'              => $barcode,
                 'units'                => (float)$good->MINORDERQUANTITY ?? (float)$good->QUANTITYOFCUINTU ?? (float)$good->PACKINGMULTIPLENESS,
                 'edi_supplier_article' => (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String)$good->IDSUPPLIER : $barcode,
                 'vat'                  => (int)$good->TAXRATE ?? null,

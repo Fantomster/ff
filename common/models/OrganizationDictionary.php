@@ -172,10 +172,11 @@ class OrganizationDictionary extends ActiveRecord
     /**
      * @param $status
      * @param $org_id
+     * @param $service_id
      */
-    public static function updateIikoUnitDictionary($status, $org_id): void
+    public static function updateUnitDictionary($status, $org_id, $service_id)
     {
-        $unitId = self::getUnitIdByServiceId('unit', Registry::IIKO_SERVICE_ID);
+        $unitId = self::getUnitIdByServiceId('unit', $service_id);
 
         $dictionaryUnit = self::findOne([
             'org_id'       => $org_id,
@@ -194,44 +195,7 @@ class OrganizationDictionary extends ActiveRecord
         if ($status == self::STATUS_ACTIVE) {
             $count = OuterUnit::find()->where([
                 'org_id'     => $org_id,
-                'service_id' => Registry::IIKO_SERVICE_ID,
-                'is_deleted' => 0
-            ])->count();
-            $dictionaryUnit->count = (int)$count;
-        } else {
-            $dictionaryUnit->updated_at = \gmdate('Y-m-d H:i:s');
-        }
-
-        $dictionaryUnit->status_id = $status;
-        $dictionaryUnit->save();
-    }
-
-    /**
-     * @param $status
-     * @param $org_id
-     */
-    public static function updateTillypadUnitDictionary($status, $org_id): void
-    {
-        $unitId = self::getUnitIdByServiceId('unit', Registry::TILLYPAD_SERVICE_ID);
-
-        $dictionaryUnit = self::findOne([
-            'org_id'       => $org_id,
-            'outer_dic_id' => $unitId
-        ]);
-
-        if (empty($dictionaryUnit)) {
-            $dictionaryUnit = new self([
-                'org_id'       => $org_id,
-                'outer_dic_id' => $unitId,
-                'status_id'    => $status,
-                'count'        => 0
-            ]);
-        }
-
-        if ($status == self::STATUS_ACTIVE) {
-            $count = OuterUnit::find()->where([
-                'org_id'     => $org_id,
-                'service_id' => Registry::TILLYPAD_SERVICE_ID,
+                'service_id' => $service_id,
                 'is_deleted' => 0
             ])->count();
             $dictionaryUnit->count = (int)$count;
@@ -268,11 +232,11 @@ class OrganizationDictionary extends ActiveRecord
         ];
     }
 
-    private static function getUnitIdByServiceId($name, $serviceId)
+    private static function getUnitIdByServiceId($name, $service_id)
     {
         $unit = OuterDictionary::findOne([
             'name'       => $name,
-            'service_id' => $serviceId
+            'service_id' => $service_id
         ]);
 
         return $unit->id;

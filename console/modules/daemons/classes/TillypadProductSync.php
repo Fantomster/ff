@@ -1,9 +1,11 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: Silukov Konstantin
- * Date: 9/12/2018
- * Time: 3:24 PM
+ * Developer: Arsen
+ * Vk: https://vk.com/a.arsik
+ * Inst: https://www.instagram.com/arsen.web/
+ * Date: 2019-01-11
+ * Time: 14:53
  */
 
 namespace console\modules\daemons\classes;
@@ -11,14 +13,9 @@ namespace console\modules\daemons\classes;
 use common\models\OuterProduct;
 use common\models\OuterUnit;
 use console\modules\daemons\components\ConsumerInterface;
-use console\modules\daemons\components\IikoSyncConsumer;
+use console\modules\daemons\components\TillypadSyncConsumer;
 
-/**
- * Class IikoProductSync
- *
- * @package console\modules\daemons\classes
- */
-class IikoProductSync extends IikoSyncConsumer implements ConsumerInterface
+class TillypadProductSync extends TillypadSyncConsumer implements ConsumerInterface
 {
     /**@var array $items */
     private $items;
@@ -72,8 +69,8 @@ class IikoProductSync extends IikoSyncConsumer implements ConsumerInterface
      */
     protected function product()
     {
-        $this->items = $this->iikoApi->getProducts();
-        $this->iikoApi->logout();
+        $this->items = $this->tillypadApi->getProducts();
+        $this->tillypadApi->logout();
         //Если пришли продукты, обновляем их
         if (!empty($this->items['products'])) {
             //поскольку мы не можем отследить изменения на стороне провайдера

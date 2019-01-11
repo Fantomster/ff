@@ -56,7 +56,7 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['setting_id', 'org_id', 'value'], 'required'],
+            [['setting_id', 'org_id'], 'required'],
             [['setting_id', 'org_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['value'], 'string', 'max' => 255],

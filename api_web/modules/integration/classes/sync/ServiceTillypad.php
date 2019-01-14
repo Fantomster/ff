@@ -240,13 +240,13 @@ class ServiceTillypad extends AbstractSyncFactory
     private function prepareErrorMessage($message, $api)
     {
         if (strpos($message, 'Код ответа сервера: 0') !== false) {
-            $message = "Не удалось соединиться с сервером, проверьте настройки подключения к iiko";
+            $message = "Не удалось соединиться с сервером, проверьте настройки подключения к Tillypad";
         }
         if (strpos($message, '401') !== false) {
-            $message = "Ошибка авторизации, проверьте настройки подключения к iiko";
+            $message = "Ошибка авторизации, проверьте настройки подключения к Tillypad";
         }
         if (strpos($message, '403') !== false) {
-            $message = "Видимо на сервере iiko закончились свободные лицензии." . PHP_EOL;
+            $message = "Видимо на сервере Tillypad закончились свободные лицензии." . PHP_EOL;
             $message .= "Лицензий свободно: " . $api->getLicenseCount();
         }
         return $message;

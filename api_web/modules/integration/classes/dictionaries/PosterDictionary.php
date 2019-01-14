@@ -2,21 +2,20 @@
 /**
  * Created by PhpStorm.
  * User: Konstantin Silukov
- * Date: 25.09.2018
- * Time: 20:25
+ * Date: 2019-01-14
+ * Time: 11:41
  */
 
 namespace api_web\modules\integration\classes\dictionaries;
 
-
 use api_web\modules\integration\interfaces\DictionaryInterface;
 
 /**
- * Class IikoStore
+ * Class PosterDictionary
  *
  * @package api_web\modules\integration\classes\dictionaries
  */
-class IikoStore extends AbstractDictionary implements DictionaryInterface
+class PosterDictionary extends AbstractDictionary implements DictionaryInterface
 {
 
 }

@@ -18,11 +18,15 @@ class SyncServiceFactory extends WebApi
     /** SERVICE TILLYPAD name */
     const SERVICE_TILLYPAD = 'Tillypad';
 
+    /** SERVICE TILLYPAD name */
+    const SERVICE_POSTER = 'Poster';
+
     /** SERVICE "id - name" mapping */
     const ALL_SERVICE_MAP = [
         Registry::RK_SERVICE_ID       => self::SERVICE_RKEEPER,
         Registry::IIKO_SERVICE_ID     => self::SERVICE_IIKO,
-        Registry::TILLYPAD_SERVICE_ID => self::SERVICE_TILLYPAD
+        Registry::TILLYPAD_SERVICE_ID => self::SERVICE_TILLYPAD,
+        Registry::POSTER_SERVICE_ID   => self::SERVICE_POSTER,
     ];
 
     /** @var array */

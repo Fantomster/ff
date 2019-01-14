@@ -86,15 +86,13 @@ $gridColumns = [
 
         <?php
         echo ExportMenu::widget([
+                'stream' => true,
+            'showConfirmAlert' => false,
             'dataProvider'    => $DataProvider,
             'columns'         => $gridColumns,
-            'target'          => ExportMenu::TARGET_SELF,
+            'target'          => ExportMenu::TARGET_BLANK,
             'batchSize'       => 200,
             'timeout'         => 0,
-            'noExportColumns' => [
-                6,
-                7
-            ],
             'exportConfig'    => [
                 ExportMenu::FORMAT_HTML    => false,
                 ExportMenu::FORMAT_TEXT    => false,
@@ -117,7 +115,7 @@ $gridColumns = [
         ?>
 
         <?php
-        Pjax::begin(['enablePushState' => false, 'id' => 'ReportList', 'timeout' => 30000]);
+        Pjax::begin(['enablePushState' => true, 'id' => 'ReportList', 'timeout' => 30000]);
         $form = ActiveForm::begin([
             'options' => [
                 'data-pjax' => true,

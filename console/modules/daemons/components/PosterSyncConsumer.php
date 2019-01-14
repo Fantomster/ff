@@ -2,42 +2,33 @@
 /**
  * Created by PhpStorm.
  * User: Konstantin Silukov
- * Date: 9/12/2018
- * Time: 4:04 PM
+ * Date: 2019-01-14
+ * Time: 10:39
  */
 
 namespace console\modules\daemons\components;
 
-use api\common\models\RabbitQueues;
 use api_web\components\Registry;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
-use api_web\helpers\iikoApi;
 use yii\web\BadRequestHttpException;
 
 /**
- * Class IikoSyncConsumer
+ * Class PosterSyncConsumer
  *
  * @package console\modules\daemons\components
  */
-class IikoSyncConsumer extends AbstractConsumer
+class PosterSyncConsumer extends AbstractConsumer
 {
     /**@property int|null $orgId Id организации */
     public $orgId;
     /**@var integer */
-    const SERVICE_ID = Registry::IIKO_SERVICE_ID;
+    const SERVICE_ID = Registry::POSTER_SERVICE_ID;
 
     /**
      * @var
      */
     public $type;
-
-    /**
-     * Description
-     *
-     * @var iikoApi
-     */
-    public $iikoApi;
 
     /**
      * IikoSyncConsumer constructor.
@@ -47,7 +38,6 @@ class IikoSyncConsumer extends AbstractConsumer
     public function __construct($orgId = null)
     {
         $this->orgId = $orgId;
-        $this->iikoApi = iikoApi::getInstance($this->orgId);
     }
 
     /**
@@ -80,10 +70,6 @@ class IikoSyncConsumer extends AbstractConsumer
 
         if (method_exists($this, $model->name) === true) {
             try {
-                //Пробуем пролезть в iko
-                if (!$this->iikoApi->auth()) {
-                    throw new BadRequestHttpException('Не удалось авторизоваться в iiko - Office');
-                }
                 //Синхронизируем нужное нам и
                 //ответ получим, сколько записей у нас в боевом состоянии
                 $count = $this->{$model->name}();
@@ -92,25 +78,15 @@ class IikoSyncConsumer extends AbstractConsumer
                 $dictionary->errorSync();
                 throw $e;
             } finally {
-                //Убиваем сессию, а то закончатся на сервере iiko
-                $this->iikoApi->logout();
                 //Информацию шлем в FCM
                 $dictionary->noticeToFCM();
-                if ($dictionary->outerDic->service_id == Registry::IIKO_SERVICE_ID && $dictionary->outerDic->name == 'product') {
-                    OrganizationDictionary::updateUnitDictionary($dictionary->status_id, $dictionary->org_id, Registry::IIKO_SERVICE_ID);
+                if ($dictionary->outerDic->service_id == self::SERVICE_ID && $dictionary->outerDic->name == 'product') {
+                    OrganizationDictionary::updateUnitDictionary($dictionary->status_id, $dictionary->org_id, self::SERVICE_ID);
                 }
             }
             return ['success' => true];
         } else {
-            throw new BadRequestHttpException('Not found method [iikoSync->' . $model->name . '()]');
+            throw new BadRequestHttpException('Not found method [posterSync->' . $model->name . '()]');
         }
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function __destruct()
-    {
-        $this->iikoApi->logout();
     }
 }

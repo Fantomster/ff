@@ -10,9 +10,14 @@ namespace api_web\classes;
 
 
 use api_web\components\WebApi;
-use console\modules\daemons\components\IikoSyncConsumer;
+use console\modules\daemons\components\AbstractConsumer;
 use yii\web\BadRequestHttpException;
 
+/**
+ * Class RabbitWebApi
+ *
+ * @package api_web\classes
+ */
 class RabbitWebApi extends WebApi
 {
     /**
@@ -24,7 +29,7 @@ class RabbitWebApi extends WebApi
     {
         if (!empty($request['queue']) && !empty($request['org_id'])) {
             $queue = $this->getQueueClass($request['queue']);
-            /**@var $queue IikoSyncConsumer */
+            /**@var AbstractConsumer $queue */
             $queue::getUpdateData($request['org_id']);
         } else {
             throw new BadRequestHttpException('queue or org_id parameters is empty');
@@ -33,6 +38,10 @@ class RabbitWebApi extends WebApi
         return ['result' => true];
     }
 
+    /**
+     * @param $queue
+     * @return string
+     */
     public function getQueueClass($queue){
         return "console\modules\daemons\classes\\" . $queue;
     }

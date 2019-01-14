@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: Fanto
+ * User: Konstantin Silukov
  * Date: 9/14/2018
  * Time: 1:26 PM
  */
@@ -12,7 +12,6 @@ use api_web\exceptions\ValidationException;
 use common\models\OuterStore;
 use console\modules\daemons\components\IikoSyncConsumer;
 use console\modules\daemons\components\ConsumerInterface;
-use api_web\helpers\iikoApi;
 use yii\web\BadRequestHttpException;
 
 /**

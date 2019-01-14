@@ -18,7 +18,7 @@ class SyncServiceFactory extends WebApi
     /** SERVICE TILLYPAD name */
     const SERVICE_TILLYPAD = 'Tillypad';
 
-    /** SERVICE TILLYPAD name */
+    /** SERVICE POSTER name */
     const SERVICE_POSTER = 'Poster';
 
     /** SERVICE "id - name" mapping */

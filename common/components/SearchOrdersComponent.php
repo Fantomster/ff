@@ -212,18 +212,18 @@ class SearchOrdersComponent extends Component
             // 3.2. Update counts - otherwise
             foreach ($this->counts as $key => $val) {
                 $where = ['vendor_id' => $orgId, "$tblMA.manager_id" => $userId, 'status' => $statuses[$key]];
-                $this->counts[$key] = Order::find()->leftJoin("$tblMA", "$tblMA.organization_id = `$tblOrder`.client_id")
+                $this->counts[$key] = Order::find()->leftJoin("$tblMA", "$tblMA.organization_id = $tblOrder.client_id")
                     ->where($where)->count();
             }
             // 3.3. Update Totalprice - otherwise
             $this->totalPrice = Order::find()
-                ->leftJoin("$tblMA", "$tblMA.organization_id = `$tblOrder`.vendor_id")
+                ->leftJoin("$tblMA", "$tblMA.organization_id = $tblOrder.vendor_id")
                 ->where(['status' => $statuses['fulfilled'], "$tblMA.manager_id" => $userId, 'vendor_id' => $orgId])
                 ->sum("total_price");
             // 3.4. Detect Restaurants
             $query = Order::find()->select(["$tblMA.organization_id", 'organization.name'])
                 ->where(['vendor_id' => $orgId, "$tblMA.manager_id" => $userId])
-                ->leftJoin("$tblMA", "$tblMA.organization_id = `$tblOrder`.client_id")
+                ->leftJoin("$tblMA", "$tblMA.organization_id = $tblOrder.client_id")
                 ->leftJoin('organization', 'organization.id = order.client_id')
                 ->groupBy("$tblMA.organization_id");
             $data = $query->asArray()->all();

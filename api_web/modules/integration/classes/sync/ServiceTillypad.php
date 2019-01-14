@@ -168,7 +168,7 @@ class ServiceTillypad extends AbstractSyncFactory
      */
     public function checkConnect($request = [])
     {
-        $api = TillypadApi::getInstance();
+        $api = TillypadApi::getInstance($this->user->organization_id);
 
         if (!empty($request['params'])) {
             if (!empty($request['params']['URL'])) {

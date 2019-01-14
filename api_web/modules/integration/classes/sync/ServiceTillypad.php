@@ -178,7 +178,7 @@ class ServiceTillypad extends AbstractSyncFactory
                 $api->setAttribute('login', $request['params']['auth_login']);
             }
             if (!empty($request['params']['auth_password'])) {
-                $api->setAttribute('pass', $request['params']['auth_password']);
+                $api->setAttribute('password', $request['params']['auth_password']);
             }
         }
 

@@ -731,6 +731,8 @@ class UserWebApi extends \api_web\components\WebApi
                 try {
                     $model->changePhoneUser();
                     if ($isUnconfirmedUser) {
+                        //Отправляем приветственное письмо
+                        $model->user->sendWelcome();
                         $return = ['token' => $model->user->getJWTToken()];
                     }
                 } catch (\Throwable $e) {

@@ -1,31 +1,20 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Konstantin Silukov
- * Date: 9/12/2018
- * Time: 4:04 PM
- */
 
 namespace console\modules\daemons\components;
 
 use api\common\models\RabbitQueues;
 use api_web\components\Registry;
+use api_web\helpers\TillypadApi;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
-use api_web\helpers\iikoApi;
 use yii\web\BadRequestHttpException;
 
-/**
- * Class IikoSyncConsumer
- *
- * @package console\modules\daemons\components
- */
-class IikoSyncConsumer extends AbstractConsumer
+class TillypadSyncConsumer extends AbstractConsumer
 {
     /**@property int|null $orgId Id организации */
     public $orgId;
     /**@var integer */
-    const SERVICE_ID = Registry::IIKO_SERVICE_ID;
+    const SERVICE_ID = Registry::TILLYPAD_SERVICE_ID;
 
     /**
      * @var
@@ -35,19 +24,19 @@ class IikoSyncConsumer extends AbstractConsumer
     /**
      * Description
      *
-     * @var iikoApi
+     * @var TillypadApi
      */
-    public $iikoApi;
+    public $tillypadApi;
 
     /**
-     * IikoSyncConsumer constructor.
+     * TillypadSyncConsumer constructor.
      *
      * @param null $orgId
      */
     public function __construct($orgId = null)
     {
         $this->orgId = $orgId;
-        $this->iikoApi = iikoApi::getInstance($this->orgId);
+        $this->tillypadApi = TillypadApi::getInstance($this->orgId);
     }
 
     /**
@@ -81,7 +70,7 @@ class IikoSyncConsumer extends AbstractConsumer
         if (method_exists($this, $model->name) === true) {
             try {
                 //Пробуем пролезть в iko
-                if (!$this->iikoApi->auth()) {
+                if (!$this->tillypadApi->auth()) {
                     throw new BadRequestHttpException('Не удалось авторизоваться в iiko - Office');
                 }
                 //Синхронизируем нужное нам и
@@ -92,17 +81,54 @@ class IikoSyncConsumer extends AbstractConsumer
                 $dictionary->errorSync();
                 throw $e;
             } finally {
-                //Убиваем сессию, а то закончатся на сервере iiko
-                $this->iikoApi->logout();
+                //Убиваем сессию, а то закончатся на сервере tillypad
+                $this->tillypadApi->logout();
                 //Информацию шлем в FCM
                 $dictionary->noticeToFCM();
-                if ($dictionary->outerDic->service_id == Registry::IIKO_SERVICE_ID && $dictionary->outerDic->name == 'product') {
-                    OrganizationDictionary::updateUnitDictionary($dictionary->status_id, $dictionary->org_id, Registry::IIKO_SERVICE_ID);
+                if ($dictionary->outerDic->service_id == Registry::TILLYPAD_SERVICE_ID && $dictionary->outerDic->name == 'product') {
+                    OrganizationDictionary::updateUnitDictionary($dictionary->status_id, $dictionary->org_id, Registry::TILLYPAD_SERVICE_ID);
                 }
             }
             return ['success' => true];
         } else {
-            throw new BadRequestHttpException('Not found method [iikoSync->' . $model->name . '()]');
+            throw new BadRequestHttpException('Not found method [tillypadSync->' . $model->name . '()]');
+        }
+    }
+
+    /**
+     * Запрос на постановку в очередь обновлений справочника
+     *
+     * @param integer $org_id
+     */
+    public static function getUpdateData($org_id): void
+    {
+        $arClassName = explode("\\", static::class);
+        $className = array_pop($arClassName);
+        try {
+            //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
+            $queue = RabbitQueues::find()->where(['consumer_class_name' => $className, 'organization_id' => $org_id])->one();
+            if ($queue == null) {
+                $queue = new RabbitQueues();
+                $queue->consumer_class_name = $className;
+                $queue->organization_id = $org_id;
+                if ($queue->validate()) {
+                    $queue->save();
+                }
+            }
+
+            $queueName = $queue->consumer_class_name;
+
+            if (!empty($queue->organization_id)) {
+                $queueName .= '_' . $queue->organization_id;
+            }
+
+            //ставим задачу в очередь
+            \Yii::$app->get('rabbit')
+                ->setQueue($queueName)
+                ->addRabbitQueue('');
+
+        } catch (\Exception $e) {
+            \Yii::error($e->getMessage());
         }
     }
 
@@ -111,6 +137,6 @@ class IikoSyncConsumer extends AbstractConsumer
      */
     public function __destruct()
     {
-        $this->iikoApi->logout();
+        $this->tillypadApi->logout();
     }
 }

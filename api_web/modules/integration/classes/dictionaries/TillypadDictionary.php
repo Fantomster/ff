@@ -7,7 +7,9 @@
 
 namespace api_web\modules\integration\classes\dictionaries;
 
-class TillypadDictionary
+use api_web\modules\integration\interfaces\DictionaryInterface;
+
+class TillypadDictionary extends AbstractDictionary implements DictionaryInterface
 {
 
 }

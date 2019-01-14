@@ -64,7 +64,7 @@ class TillypadApi
         if (property_exists(self::$_instance, $name)) {
             self::$_instance->{$name} = $value;
         } else {
-            throw new BadRequestHttpException("Tillypad attribute not found|{$name}");
+            throw new BadRequestHttpException("Tillypad attribute not found {$name}");
         }
     }
 

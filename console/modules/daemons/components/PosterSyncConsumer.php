@@ -81,7 +81,7 @@ class PosterSyncConsumer extends AbstractConsumer
                 //Информацию шлем в FCM
                 $dictionary->noticeToFCM();
                 if ($dictionary->outerDic->service_id == self::SERVICE_ID && $dictionary->outerDic->name == 'product') {
-                    OrganizationDictionary::updateIikoUnitDictionary($dictionary->status_id, $dictionary->org_id);
+                    OrganizationDictionary::updateUnitDictionary($dictionary->status_id, $dictionary->org_id, self::SERVICE_ID);
                 }
             }
             return ['success' => true];

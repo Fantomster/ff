@@ -80,7 +80,7 @@ class PosterSyncConsumer extends AbstractConsumer
             } finally {
                 //Информацию шлем в FCM
                 $dictionary->noticeToFCM();
-                if ($dictionary->outerDic->service_id == Registry::IIKO_SERVICE_ID && $dictionary->outerDic->name == 'product') {
+                if ($dictionary->outerDic->service_id == self::SERVICE_ID && $dictionary->outerDic->name == 'product') {
                     OrganizationDictionary::updateIikoUnitDictionary($dictionary->status_id, $dictionary->org_id);
                 }
             }

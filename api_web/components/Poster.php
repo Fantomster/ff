@@ -101,7 +101,7 @@ class Poster
      */
     public function generateAuthUrl($request)
     {
-        $appId = ISV::getSettingsByServiceId(Registry::POSTER_SERVICE_ID, $this->orgId, ['application_id']);
+        $appId = \Yii::$app->params['posterAppId'];
         if (empty($appId)) {
             throw new BadRequestHttpException('poster.not_set_app_id');
         }
@@ -118,10 +118,9 @@ class Poster
     public function saveAccessKey($request)
     {
         $url = sprintf(Poster::$registerUrl, $request['account']);
-        $posterSettings = ISV::getSettingsByServiceId(Registry::POSTER_SERVICE_ID, $this->orgId);
         $auth = [
-            'application_id'     => $posterSettings['application_id'],
-            'application_secret' => $posterSettings['application_secret'],
+            'application_id'     => \Yii::$app->params['posterAppId'],
+            'application_secret' => \Yii::$app->params['posterAppSecretKey'],
             'grant_type'         => 'authorization_code',
             'redirect_uri'       => $request['url'],
             'code'               => $request['code'],

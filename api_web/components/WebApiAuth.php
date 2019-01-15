@@ -14,6 +14,8 @@ use yii\web\UnauthorizedHttpException;
  */
 class WebApiAuth extends AuthMethod
 {
+    private $keyCache;
+
     /**
      * Авторизация по токену в BODY
      *
@@ -28,6 +30,15 @@ class WebApiAuth extends AuthMethod
     {
         $identity = null;
         $params = $request->getBodyParams();
+
+        if (isset($params['request']['email']) && isset($params['request']['password'])) {
+            $this->keyCache = 'auth_' . md5($params['request']['email']);
+            $attempt = \Yii::$app->cache->get($this->keyCache);
+            if ($attempt >= 10) {
+                throw new UnauthorizedHttpException('You enter the password too often, rest for 10 minutes.');
+            }
+        }
+
         if (!empty($params)) {
             if (isset($params['user']['token']) || isset($params['request']['email'])) {
                 //Авторизация по токену
@@ -36,7 +47,7 @@ class WebApiAuth extends AuthMethod
                     try {
                         $jwtToken = \Yii::$app->jwt->getParser()->parse((string)$params['user']['token']);
                         $identity = User::getByJWTToken(\Yii::$app->jwt, $jwtToken);
-                    } catch(\Exception $e) {
+                    } catch (\Exception $e) {
                         $this->handleFailure($e->getMessage());
                     }
                 }
@@ -63,22 +74,24 @@ class WebApiAuth extends AuthMethod
                             \Yii::$app->session->set('country', trim($params['user']['location']['country']));
                         }
                     }
-
+                    \Yii::$app->cache->delete($this->keyCache);
                     return $identity;
                 } else {
                     $this->handleFailure($response);
                 }
             }
         }
-
         return null;
     }
 
     /**
-     * @inheritdoc
+     * @param $response
+     * @throws UnauthorizedHttpException
      */
     public function handleFailure($response)
     {
+        $attempt = \Yii::$app->cache->get($this->keyCache) ?? 0;
+        \Yii::$app->cache->set($this->keyCache, ($attempt + 1), 600);
         throw new UnauthorizedHttpException('auth_failed', 401);
     }
 }

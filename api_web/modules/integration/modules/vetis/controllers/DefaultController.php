@@ -591,7 +591,11 @@ class DefaultController extends WebApiController
      *                  default={
      *                      "uuid": "93cdc45a-edc3-472f-bd70-99ffca18edc9",
      *                      "reason":"Nulla in gravida ex. In hac habitasse platea dictumst.",
-     *                      "description":"long string description"
+     *                      "description":"long string description",
+     *                      "conditions": {
+     *                          "ed9839ef-5563-41a8-8f0a-c062ce0bca60",
+     *                          "ed9839ef-5577-41a8-8f0a-c062ce0bca69"
+     *                      }
      *                  }
      *              )
      *         )
@@ -641,7 +645,11 @@ class DefaultController extends WebApiController
      *                      "uuid": "93cdc45a-edc3-472f-bd70-99ffca18edc9",
      *                      "reason":"Nulla in gravida ex. In hac habitasse platea dictumst.",
      *                      "amount":"40",
-     *                      "description":"long string description"
+     *                      "description":"long string description",
+     *                      "conditions": {
+     *                          "ed9839ef-5563-41a8-8f0a-c062ce0bca60",
+     *                          "ed9839ef-5577-41a8-8f0a-c062ce0bca69"
+     *                      }
      *                  }
      *              )
      *         )

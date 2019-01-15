@@ -122,8 +122,10 @@ class mercuryApi extends baseApi
             //Пишем лог
             mercLogger::getInstance()->addMercLog($result, 'MercVSDList', $localTransactionId, $reuest_xml, $client->__getLastResponse(), $this->org_id);
         } catch (\SoapFault $e) {
+            $result = null;
             \Yii::error($e->detail);
         } catch (\Throwable $e) {
+            $result = null;
             \Yii::error($e);
         }
 
@@ -211,10 +213,13 @@ class mercuryApi extends baseApi
                 $result = null;
             }
         } catch (\SoapFault $e) {
+            $result = null;
             \Yii::error($e->detail);
         } catch (\Throwable $e) {
+            $result = null;
             \Yii::error($e->getMessage());
         }
+
         return $result;
     }
 
@@ -232,8 +237,10 @@ class mercuryApi extends baseApi
         try {
             $result = $client->receiveApplicationResult($request);
         } catch (\SoapFault $e) {
+            $result = null;
             \Yii::error($e->detail);
         } catch (\Throwable $e) {
+            $result = null;
             \Yii::error($e);
         }
         return $result;
@@ -467,6 +474,7 @@ class mercuryApi extends baseApi
         } else {
             $result = null;
         }
+
         return $result;
     }
 
@@ -678,10 +686,13 @@ class mercuryApi extends baseApi
                 $result = null;
             }
         } catch (\SoapFault $e) {
+            $result = null;
             \Yii::error($e->detail);
         } catch (\Throwable $e) {
+            $result = null;
             \Yii::error($e->getMessage());
         }
+
         return $result;
     }
 
@@ -746,10 +757,13 @@ class mercuryApi extends baseApi
             }
 
         } catch (\SoapFault $e) {
+            $result = null;
             \Yii::error($e->detail);
         } catch (\Throwable $e) {
+            $result = null;
             \Yii::error($e->getMessage());
         }
+
         return $result;
     }
 

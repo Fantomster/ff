@@ -43,7 +43,13 @@ abstract class AbstractSyncFactory extends WebApi
     const HTTP_CODE_OK = 200;
 
     /** List of dictionaries awailable for a service - By default it is an empty array */
-    public $dictionaryAvailable = [];
+    public $dictionaryAvailable = [
+        self::DICTIONARY_AGENT,
+        self::DICTIONARY_PRODUCT,
+        self::DICTIONARY_STORE,
+        self::DICTIONARY_UNIT,
+        self::DICTIONARY_CATEGORY
+    ];
 
     /** @var string $index Символьный идентификатор справочника */
     public $index;

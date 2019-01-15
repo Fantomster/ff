@@ -22,6 +22,7 @@ use yii\web\ServerErrorHttpException;
 class ServicePoster extends AbstractSyncFactory
 {
     public $queueName = null;
+
     public $dictionaryAvailable = [
         self::DICTIONARY_AGENT,
         self::DICTIONARY_PRODUCT,

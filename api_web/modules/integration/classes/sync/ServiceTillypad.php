@@ -25,12 +25,15 @@ use yii\web\ServerErrorHttpException;
 class ServiceTillypad extends AbstractSyncFactory
 {
     public $queueName = null;
+
     public $dictionaryAvailable = [
         self::DICTIONARY_AGENT,
         self::DICTIONARY_PRODUCT,
         self::DICTIONARY_STORE,
     ];
+
     private $countWaybillSend = 0;
+
     protected $logCategory = "tillypad_log";
 
     /**

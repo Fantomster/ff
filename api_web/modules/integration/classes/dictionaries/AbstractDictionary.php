@@ -12,6 +12,7 @@ use api_web\classes\UserWebApi;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
+use api_web\modules\integration\classes\Integration;
 use api_web\modules\integration\interfaces\DictionaryInterface;
 use common\models\Organization;
 use common\models\OrganizationDictionary;
@@ -71,6 +72,16 @@ class AbstractDictionary extends WebApi implements DictionaryInterface
                 'org_id'       => $this->user->organization_id
             ])->all();
 
+        $service = Integration::$service_map[$this->service_id] ?? '';
+
+        $dictionaryUpload = [];
+        if (!empty($service)) {
+            $class = "api_web\modules\integration\classes\sync\\Service" . $service;
+            if (class_exists($class)) {
+                $dictionaryUpload = (new $class($service, $this->service_id))->dictionaryAvailable;
+            }
+        }
+
         $return = [];
         /**
          * Статус по умолчанию = "Синхронизация не проводилась"
@@ -85,6 +96,8 @@ class AbstractDictionary extends WebApi implements DictionaryInterface
                 'count'       => $model->count ?? 0,
                 'status_id'   => $model->status_id ?? 0,
                 'status_text' => $model->statusText ?? $defaultStatusText,
+                'upload'      => in_array($model->outerDic->name, $dictionaryUpload),
+                'prefix'      => Integration::$service_map[$this->service_id] ?? '',
                 'created_at'  => WebApiHelper::asDatetime($model->created_at),
                 'updated_at'  => WebApiHelper::asDatetime($model->updated_at),
             ];

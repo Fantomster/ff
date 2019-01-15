@@ -38,7 +38,7 @@ class Integration
             throw new BadRequestHttpException('choose_integration_service');
         }
         $this->service_id = $serviceId;
-        $this->serviceName = self::$service_map[$serviceId];
+        $this->serviceName = self::$service_map[$serviceId] ?? null;
     }
 
     /**

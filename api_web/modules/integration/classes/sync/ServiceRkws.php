@@ -552,6 +552,7 @@ class ServiceRkws extends AbstractSyncFactory
      * @return string
      * @throws BadRequestHttpException
      * @throws \yii\db\Exception
+     * @throws \Exception
      */
     public function callbackData(OuterTask $task, string $data = null)
     {

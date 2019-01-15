@@ -30,8 +30,9 @@ class ServiceTillypad extends AbstractSyncFactory
         self::DICTIONARY_STORE,
     ];
 
-    private $countWaybillSend = 0;
-
+    /**
+     * @var string
+     */
     protected $logCategory = "tillypad_log";
 
     /**
@@ -194,44 +195,6 @@ class ServiceTillypad extends AbstractSyncFactory
         }
 
         return ['result' => false];
-    }
-
-    /**
-     * @param                 $res
-     * @param TillypadWaybill $model
-     * @param                 $message
-     * @param bool            $success
-     * @return array
-     * @throws BadRequestHttpException
-     * @throws \Exception
-     */
-    private function response(&$res, $model, $message, $success = true)
-    {
-        if ($this->countWaybillSend == 1 and $success === false) {
-            throw new BadRequestHttpException($message);
-        } else {
-            $res[] = $model->prepare();
-        }
-        return $res;
-    }
-
-    /**
-     * Получить модель справочника организации
-     *
-     * @return OrganizationDictionary
-     */
-    private function getModel(): OrganizationDictionary
-    {
-        $outerDictionary = OuterDictionary::findOne([
-            'service_id' => $this->serviceId,
-            'name'       => $this->index
-        ]);
-        $orgDictionary = OrganizationDictionary::findOne([
-            'org_id'       => $this->user->organization_id,
-            'outer_dic_id' => $outerDictionary->id
-        ]);
-
-        return $orgDictionary;
     }
 
     /**

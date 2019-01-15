@@ -15,13 +15,13 @@ namespace api_web\modules\integration\classes\sync;
 
 use api_web\components\WebApi;
 use api_web\helpers\WebApiHelper;
+use api_web\modules\integration\classes\documents\Waybill;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
 use yii\web\BadRequestHttpException;
 
 abstract class AbstractSyncFactory extends WebApi
 {
-
     const XML_LOAD_RESULT_FAULT = 'Error!';
     const XML_LOAD_RESULT_SUCCESS = 'Success!';
 
@@ -53,7 +53,13 @@ abstract class AbstractSyncFactory extends WebApi
 
     /** @var string $index Символьный идентификатор справочника */
     public $index;
+    /** @var string $index Имя очереди */
     public $queueName = null;
+
+    /**
+     * @var int
+     */
+    protected $countWaybillSend = 0;
 
     /** service_id $_POST params */
     public $serviceId;
@@ -93,7 +99,6 @@ abstract class AbstractSyncFactory extends WebApi
      */
     public function getOrganizationDictionary(int $service_id, int $org_id): OrganizationDictionary
     {
-
         $outerDic = OuterDictionary::findOne(['service_id' => $service_id, 'name' => $this->index]);
         if (!$outerDic) {
             throw new BadRequestHttpException("outer_dic_not_found");
@@ -112,7 +117,6 @@ abstract class AbstractSyncFactory extends WebApi
                 throw new BadRequestHttpException("org_dic_not_accessible");
             }
         }
-
         return $orgDic;
     }
 
@@ -308,4 +312,37 @@ abstract class AbstractSyncFactory extends WebApi
         ];
     }
 
+    /**
+     * @param         $res
+     * @param Waybill $model
+     * @param         $message
+     * @param bool    $success
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    protected function response(&$res, $model, $message, $success = true)
+    {
+        if ($this->countWaybillSend == 1 and $success === false) {
+            throw new BadRequestHttpException($message);
+        } else {
+            $res[] = $model->prepare();
+        }
+        return $res;
+    }
+
+    /**
+     * Получить модель справочника организыйии
+     *
+     * @return OrganizationDictionary
+     */
+    protected function getModel()
+    {
+        $dictionary = OuterDictionary::findOne(['service_id' => $this->serviceId, 'name' => $this->index]);
+        $model = OrganizationDictionary::findOne([
+            'org_id'       => $this->user->organization_id,
+            'outer_dic_id' => $dictionary->id
+        ]);
+        return $model;
+    }
 }

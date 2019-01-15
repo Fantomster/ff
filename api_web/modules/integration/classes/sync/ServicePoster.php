@@ -14,7 +14,6 @@ use api_web\components\Registry;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
 use api_web\modules\integration\classes\documents\Waybill;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use yii\db\Transaction;
 use yii\web\BadRequestHttpException;
 use yii\web\ServerErrorHttpException;
@@ -27,10 +26,6 @@ use yii\web\ServerErrorHttpException;
 class ServicePoster extends AbstractSyncFactory
 {
     /**
-     * @var null
-     */
-    public $queueName = null;
-    /**
      * @var array
      */
     public $dictionaryAvailable = [
@@ -40,9 +35,9 @@ class ServicePoster extends AbstractSyncFactory
     ];
 
     /**
-     * @var int
+     * @var string
      */
-    private $countWaybillSend = 0;
+    protected $logCategory = "poster_log";
 
     /**
      * @param array $params
@@ -150,38 +145,5 @@ class ServicePoster extends AbstractSyncFactory
         }
 
         return ['result' => $res];
-    }
-
-    /**
-     * Получить модель справочника организыйии
-     *
-     * @return OrganizationDictionary
-     */
-    private function getModel()
-    {
-        $dictionary = OuterDictionary::findOne(['service_id' => $this->serviceId, 'name' => $this->index]);
-        $model = OrganizationDictionary::findOne([
-            'org_id'       => $this->user->organization_id,
-            'outer_dic_id' => $dictionary->id
-        ]);
-        return $model;
-    }
-
-    /**
-     * @param      $res
-     * @param      $model
-     * @param      $message
-     * @param bool $success
-     * @return array
-     * @throws BadRequestHttpException
-     */
-    private function response(&$res, $model, $message, $success = true)
-    {
-        if ($this->countWaybillSend == 1 and $success === false) {
-            throw new BadRequestHttpException($message);
-        } else {
-            $res[] = $model->prepare();
-        }
-        return $res;
     }
 }

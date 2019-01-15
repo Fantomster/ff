@@ -12,6 +12,7 @@ use api_web\classes\UserWebApi;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
+use api_web\modules\integration\interfaces\DictionaryInterface;
 use common\models\Organization;
 use common\models\OrganizationDictionary;
 use common\models\OuterAgent;
@@ -33,7 +34,7 @@ use yii\web\BadRequestHttpException;
  *
  * @package api_web\modules\integration\classes\dictionaries
  */
-class AbstractDictionary extends WebApi
+class AbstractDictionary extends WebApi implements DictionaryInterface
 {
     /**
      * @var

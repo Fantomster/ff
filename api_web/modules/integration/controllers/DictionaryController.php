@@ -733,7 +733,7 @@ class DictionaryController extends \api_web\components\WebApiController
         if (!isset($this->request['service_id'])) {
             throw new BadRequestHttpException('empty_param|service_id');
         }
-        /** @var  $factory \api_web\modules\integration\classes\dictionaries\RkwsCategory */
+        /** @var  $factory \api_web\modules\integration\classes\dictionaries\RkwsCategory1 */
         $factory = (new Dictionary($this->request['service_id'], 'Category'));
         $this->response = $factory->categorySetSelected($this->request);
     }

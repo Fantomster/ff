@@ -10,8 +10,9 @@ use yii\data\SqlDataProvider;
  *
  * @author elbabuino
  */
-class DynamicUsageSearch extends \yii\base\Model {
-    
+class DynamicUsageSearch extends \yii\base\Model
+{
+
     public $org_name;
     public $org_id;
     public $org_contact_name;
@@ -44,7 +45,8 @@ class DynamicUsageSearch extends \yii\base\Model {
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['org_name', 'franchisee_name', 'start_date'], 'string'],
         ];
@@ -53,67 +55,68 @@ class DynamicUsageSearch extends \yii\base\Model {
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
-           'org_name' => 'Организация',
-           'org_id' => 'ID',
-            'org_contact_name' => 'Контактное лицо',
-            'org_city' => 'Город',
-            'org_email' => 'Email',
-            'org_type' => 'Тип',
-           'org_registred' => 'Дата регистрации',
-            'franchisee_name' => 'Франчайзи',
+            'org_name'          => 'Организация',
+            'org_id'            => 'ID',
+            'org_contact_name'  => 'Контактное лицо',
+            'org_city'          => 'Город',
+            'org_email'         => 'Email',
+            'org_type'          => 'Тип',
+            'org_registred'     => 'Дата регистрации',
+            'franchisee_name'   => 'Франчайзи',
             'franchisee_region' => 'Регион',
-            'order_max_date' => 'Дата последнего заказа',
-            'order_cnt' => 'Общее количество заказов',
-            'w5_sum' => '',
-            'w5_count' => '5 недель назад<br>Оборот / Заказов / Поставщиков',
-            'w5_vendor' => '',
-            'w4_sum'  => '',
-            'w4_count' => '4 недели назад<br>Оборот / Заказов / Поставщиков',
-            'w4_vendor' => '',
-            'w3_sum' => '',
-            'w3_count' => '3 недели назад<br>Оборот / Заказов / Поставщиков',
-            'w3_vendor' => '',
-            'w2_sum' => '',
-            'w2_count' => '2 недели назад<br>Оборот / Заказов / Поставщиков',
-            'w2_vendor' => '',
-            'w1_sum' => '',
-            'w1_count' => '1 неделю назад<br>Оборот / Заказов / Поставщиков',
-            'w1_vendor' => '',
+            'order_max_date'    => 'Дата последнего заказа',
+            'order_cnt'         => 'Общее количество заказов',
+            'w5_sum'            => '',
+            'w5_count'          => '5 недель назад<br>Оборот / Заказов / Поставщиков',
+            'w5_vendor'         => '',
+            'w4_sum'            => '',
+            'w4_count'          => '4 недели назад<br>Оборот / Заказов / Поставщиков',
+            'w4_vendor'         => '',
+            'w3_sum'            => '',
+            'w3_count'          => '3 недели назад<br>Оборот / Заказов / Поставщиков',
+            'w3_vendor'         => '',
+            'w2_sum'            => '',
+            'w2_count'          => '2 недели назад<br>Оборот / Заказов / Поставщиков',
+            'w2_vendor'         => '',
+            'w1_sum'            => '',
+            'w1_count'          => '1 неделю назад<br>Оборот / Заказов / Поставщиков',
+            'w1_vendor'         => '',
         ];
     }
-    
+
     /**
      * Creates data provider instance with search query applied
      *
-     * @param array $params
+     * @param array   $params
      * @param integer $guideId
      * @param integer $clientId
-     *
      * @return SqlDataProvider
      */
-    public function search(array $params) {
+    public function search(array $params)
+    {
         $this->load($params);
         $this->start_date = Yii::$app->request->get("start_date");
         $where = [];
 
-        if($this->start_date!= null)
-        {
+        if ($this->start_date != null) {
             $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $this->start_date . " 00:00:00");
-            $start_date = " '".$dt->format('Y-m-d H:i:s')."' ";
-        }
-        else
+            $start_date = " '" . $dt->format('Y-m-d H:i:s') . "' ";
+            $where[] = "(order_max_date > $start_date)";
+        } else {
             $start_date = " NOW() ";
+        }
 
-        if($this->org_name)
+        if ($this->org_name)
             $where[] = "(org_name LIKE '%$this->org_name%')";
 
-        if($this->franchisee_name)
+        if ($this->franchisee_name)
             $where[] = "(franchisee_name LIKE '%$this->franchisee_name%')";
 
-        if(count($where) > 0)
-            $where = "WHERE ".implode(' AND ', $where)." ";
+        if (count($where) > 0)
+            $where = "WHERE " . implode(' AND ', $where) . " ";
         else
             $where = '';
 
@@ -177,12 +180,12 @@ class DynamicUsageSearch extends \yii\base\Model {
                 ";
 
         $dataProvider = new SqlDataProvider([
-            'sql' => $query,
+            'sql'        => $query,
             'pagination' => [
-                'page' => isset($params['page']) ? ($params['page']-1) : 0,
+                'page'     => isset($params['page']) ? ($params['page'] - 1) : 0,
                 'pageSize' => 20,],
         ]);
-        
+
         return $dataProvider;
     }
 }

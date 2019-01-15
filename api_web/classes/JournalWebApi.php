@@ -41,9 +41,6 @@ class JournalWebApi extends WebApi
                 if (isset($date['start']) && !empty($date['start'])) {
                     $query->andWhere('created_at >= :date_from',
                         [':date_from' => date('Y-m-d H:i:s', strtotime($date['start'] . ' 00:00:00'))]);
-                } else {
-                    $query->andWhere('created_at >= :date_from',
-                        [':date_from' => date('Y-m-d H:i:s', strtotime(date('Y-m-01') . ' 00:00:00'))]);
                 }
                 if (isset($date['end']) && !empty($date['end'])) {
                     $query->andWhere('created_at <= :date_to',

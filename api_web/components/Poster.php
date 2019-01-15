@@ -9,6 +9,7 @@
 namespace api_web\components;
 
 use api_web\exceptions\ValidationException;
+use api_web\modules\integration\classes\documents\Waybill;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue as ISV;
 use common\models\OuterAgent;
@@ -48,6 +49,11 @@ class Poster
      * @var string
      */
     static $agentsPostfix = 'storage.getSuppliers';
+
+    /**
+     * @var string
+     */
+    static $waybillPostfix = 'storage.createSupply';
 
     /**
      * @var
@@ -227,11 +233,12 @@ class Poster
             $model = OuterProduct::findOne(['outer_uid' => $ingredient['ingredient_id'], 'org_id' => $this->orgId, 'service_id' => Registry::POSTER_SERVICE_ID]);
             if (!$model) {
                 $model = new OuterProduct([
-                    'outer_uid'  => $ingredient['ingredient_id'],
-                    'service_id' => Registry::POSTER_SERVICE_ID,
-                    'org_id'     => $this->orgId,
-                    'name'       => $ingredient['ingredient_name'],
-                    'is_deleted' => 0,
+                    'outer_uid'             => $ingredient['ingredient_id'],
+                    'service_id'            => Registry::POSTER_SERVICE_ID,
+                    'org_id'                => $this->orgId,
+                    'name'                  => $ingredient['ingredient_name'],
+                    'is_deleted'            => 0,
+                    'outer_product_type_id' => 4,
                 ]);
             }
 
@@ -270,11 +277,12 @@ class Poster
             $model = OuterProduct::findOne(['outer_uid' => $ingredient['product_id'], 'org_id' => $this->orgId, 'service_id' => Registry::POSTER_SERVICE_ID]);
             if (!$model) {
                 $model = new OuterProduct([
-                    'outer_uid'  => $ingredient['product_id'],
-                    'service_id' => Registry::POSTER_SERVICE_ID,
-                    'org_id'     => $this->orgId,
-                    'name'       => $ingredient['product_name'],
-                    'is_deleted' => 0,
+                    'outer_uid'             => $ingredient['product_id'],
+                    'service_id'            => Registry::POSTER_SERVICE_ID,
+                    'org_id'                => $this->orgId,
+                    'name'                  => $ingredient['product_name'],
+                    'is_deleted'            => 0,
+                    'outer_product_type_id' => 1,
                 ]);
             }
 
@@ -346,5 +354,35 @@ class Poster
     private function generateRequestUrl($postfix)
     {
         return \Yii::$app->params['posterApiUrl'] . $postfix . '?token=' . $this->accessToken;
+    }
+
+    /**
+     * @param Waybill $waybill
+     * @return bool
+     */
+    public function sendWaybill(Waybill $waybill)
+    {
+        $url = $this->generateRequestUrl(self::$waybillPostfix);
+        $supply = [
+            "supply" => [
+                "date"        => date("Y-m-d H:i:s"),
+                "supplier_id" => $waybill->outerAgent->outer_uid,
+                "storage_id"  => $waybill->outerStore->outer_uid,
+            ]
+        ];
+        $arIngredients = [];
+        foreach ($waybill->waybillContents as $item) {
+            $arIngredients[] = [
+                'id'   => $item->productOuter->outer_uid,
+                'type' => $item->productOuter->outerProductType->value,
+                'num'  => $item->quantity_waybill * $item->koef,
+                'sum'  => $item->price_with_vat,
+            ];
+        }
+
+        $supply['ingredient'] = $arIngredients;
+        $response = $this->sendRequest($url, 'post', $supply);
+
+        return (bool)$response['success'];
     }
 }

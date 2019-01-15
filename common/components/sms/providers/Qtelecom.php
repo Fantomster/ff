@@ -26,6 +26,7 @@ class Qtelecom extends AbstractProvider
 
     /**
      * Отправка сообщения
+     *
      * @param $message
      * @param $target
      * @return mixed
@@ -37,15 +38,16 @@ class Qtelecom extends AbstractProvider
             $target = implode(',', $target);
         }
         $this->message = trim($message);
-        $this->target  = trim($target);
+        $this->target = trim($target);
         //Отправляем сообщение
-        $result        = $this->post_message();
+        $result = $this->post_message();
         //Смотрим ответ, записываем ошибки или логи об отправке
         $this->parseResponse($result);
     }
 
     /**
      * Отправка СМС
+     *
      * @return mixed|string
      */
     private function post_message()
@@ -64,18 +66,19 @@ class Qtelecom extends AbstractProvider
             'HTTP_ACCEPT_LANGUAGE' => (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : false)
         ];
         //УРЛ для запроса
-        $url  = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
+        $url = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
         //Посылаем запрос
         return $this->curlPost($url, $post, true);
     }
 
     /**
      * Проверка баланса
+     *
      * @return mixed
      */
     public function getBalance()
     {
-        $post   = [
+        $post = [
             'action'               => 'balance',
             'user'                 => trim($this->user),
             'pass'                 => trim($this->pass),
@@ -83,7 +86,7 @@ class Qtelecom extends AbstractProvider
             'HTTP_ACCEPT_LANGUAGE' => (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : false)
         ];
         //УРЛ для запроса
-        $url    = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
+        $url = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
         //Посылаем запрос
         $result = $this->xmlToArray($this->curlPost($url, $post, true));
         return $result['balance']['AGT_BALANCE'];
@@ -91,13 +94,14 @@ class Qtelecom extends AbstractProvider
 
     /**
      * Проверка статуса СМС от провайдера
+     *
      * @param $sms_id
      * @return mixed
      */
     public function checkStatus($sms_id)
     {
         //Данные для запроса к АПИ
-        $post   = [
+        $post = [
             'action'               => 'status',
             'sms_id'               => $sms_id,
             'user'                 => trim($this->user),
@@ -106,7 +110,7 @@ class Qtelecom extends AbstractProvider
             'HTTP_ACCEPT_LANGUAGE' => (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : false)
         ];
         //УРЛ для запроса
-        $url    = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
+        $url = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
         //Посылаем запрос
         $result = $this->xmlToArray($this->curlPost($url, $post, true));
         //Разбор результата
@@ -137,6 +141,7 @@ class Qtelecom extends AbstractProvider
 
     /**
      * Разбор ответа
+     *
      * @param $result
      * @throws \yii\db\Exception
      */

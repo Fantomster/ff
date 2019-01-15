@@ -68,8 +68,9 @@ class Sms extends Component
     /**
      * Отправка смс
      *
-     * @param $message
-     * @param $target
+     * @param      $message
+     * @param      $target
+     * @param null $order_id
      */
     public function send($message, $target, $order_id = null)
     {
@@ -83,8 +84,9 @@ class Sms extends Component
                 throw new Exception(Yii::t('app', 'common.components.sms.cant_be', ['ru' => 'Сообщение не может быть пустым. ']));
             }
             //Отправка смс
-            $this->sender->send($message, $target, $order_id);
-        } catch (Exception $e) {
+            $this->sender->setProperty('order_id', $order_id);
+            $this->sender->send($message, $target);
+        } catch (\Exception $e) {
             \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
     }
@@ -99,7 +101,7 @@ class Sms extends Component
     {
         try {
             return $this->sender->checkStatus($sms_id);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
     }
@@ -111,7 +113,7 @@ class Sms extends Component
     {
         try {
             return $this->sender->getBalance();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return null;
         }
     }

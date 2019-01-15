@@ -78,7 +78,7 @@ class IntegrationWebApi extends WebApi
         $user_service_id = $this->user->integration_service_id;
         foreach ($result as &$item) {
             $item['is_default'] = $user_service_id == $item['id'] ? true : false;
-            $item['is_integration_setting'] = in_array($item['id'], Registry::$waybill_services);
+            $item['is_integration_service'] = in_array($item['id'], Registry::$waybill_services);
         }
         return [
             'services' => $result

@@ -2,7 +2,10 @@
 
 namespace backend\models;
 
+use common\models\Organization;
 use Yii;
+use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\data\SqlDataProvider;
 
 /**
@@ -10,7 +13,7 @@ use yii\data\SqlDataProvider;
  *
  * @author elbabuino
  */
-class DynamicUsageSearch extends \yii\base\Model {
+class DynamicUsageSearch extends Organization {
     
     public $org_name;
     public $org_id;
@@ -178,13 +181,25 @@ class DynamicUsageSearch extends \yii\base\Model {
                              order_max_date desc,
                              order_cnt desc
                 ";
+        dd($this::findBySql($query));
 
-        $dataProvider = new SqlDataProvider([
-            'sql' => $query,
+        $dataProvider = new ActiveDataProvider([
+            'query' => $this::findBySql($query),
+            //'allModels' => $this::findBySql($query)->all(),
             'pagination' => [
                 'page' => isset($params['page']) ? ($params['page']-1) : 0,
-                'pageSize' => 20,],
+                'pageSize' => 20,
+                'defaultPageSize' => 20,
+                'totalCount' => 28
+                ],
         ]);
+
+//        $dataProvider = new SqlDataProvider([
+//            'sql' => $query,
+//            'pagination' => [
+//                'page' => isset($params['page']) ? ($params['page']-1) : 0,
+//                'pageSize' => 20,],
+//        ]);
         
         return $dataProvider;
     }

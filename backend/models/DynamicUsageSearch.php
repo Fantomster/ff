@@ -120,9 +120,6 @@ class DynamicUsageSearch extends Organization {
         else
             $where = '';
 
-        /*var_dump($start_date);
-        var_dump($this->start_date);*/
-
         $query = "select q.*
                       from (
                     select org.*,
@@ -181,25 +178,13 @@ class DynamicUsageSearch extends Organization {
                              order_max_date desc,
                              order_cnt desc
                 ";
-        dd($this::findBySql($query));
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $this::findBySql($query),
-            //'allModels' => $this::findBySql($query)->all(),
+        $dataProvider = new SqlDataProvider([
+            'sql' => $query,
             'pagination' => [
                 'page' => isset($params['page']) ? ($params['page']-1) : 0,
-                'pageSize' => 20,
-                'defaultPageSize' => 20,
-                'totalCount' => 28
-                ],
+                'pageSize' => 20,],
         ]);
-
-//        $dataProvider = new SqlDataProvider([
-//            'sql' => $query,
-//            'pagination' => [
-//                'page' => isset($params['page']) ? ($params['page']-1) : 0,
-//                'pageSize' => 20,],
-//        ]);
         
         return $dataProvider;
     }

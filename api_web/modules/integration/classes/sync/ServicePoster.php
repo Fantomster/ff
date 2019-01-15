@@ -11,7 +11,6 @@ namespace api_web\modules\integration\classes\sync;
 use api_web\classes\RabbitWebApi;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use yii\web\ServerErrorHttpException;
 
 /**
@@ -21,8 +20,6 @@ use yii\web\ServerErrorHttpException;
  */
 class ServicePoster extends AbstractSyncFactory
 {
-    public $queueName = null;
-
     public $dictionaryAvailable = [
         self::DICTIONARY_AGENT,
         self::DICTIONARY_PRODUCT,
@@ -62,7 +59,7 @@ class ServicePoster extends AbstractSyncFactory
                 }
                 return $this->prepareModel($model);
             } else {
-                throw new HttpException(402, 'Error send request to RabbitMQ');
+                throw new \yii\web\HttpException(402, 'Error send request to RabbitMQ');
             }
         } catch (\Throwable $e) {
             \Yii::error($e->getMessage());

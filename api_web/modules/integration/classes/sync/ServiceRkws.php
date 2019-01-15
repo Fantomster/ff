@@ -4,6 +4,7 @@ namespace api_web\modules\integration\classes\sync;
 
 use api_web\components\Registry;
 use api_web\modules\integration\classes\documents\WaybillContent;
+use api_web\modules\integration\classes\sync\rkws\RkwsWaybill;
 use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\OuterAgent;

@@ -110,7 +110,8 @@ class EmailIntegrationController extends Controller
         //$temp_file[66] = '/app/console/runtime/testnac63.xlsx';
         //$temp_file[67] = '/app/console/runtime/testnac64.xlsx';
         //$temp_file[68] = '/app/console/runtime/testnac65.xls';
-        $temp_file[69] = '/app/console/runtime/testnac66.xlsx';
+        //$temp_file[69] = '/app/console/runtime/testnac66.xlsx';
+        $temp_file[70] = '/app/console/runtime/testnac70.XLS';
 
 
         $i = 1;
@@ -161,7 +162,7 @@ class EmailIntegrationController extends Controller
         //Получаем все активные настройки или конкретную настройку
         $where    = (isset($this->setting_id) ? ['id' => $this->setting_id] : ['is_active' => 1]);
         $settings = IntegrationSettingFromEmail::find()->where($where)
-                        ->andWhere(['version' => 1])->all();
+            ->andWhere(['version' => 1])->all();
         \Yii::$app->db->createCommand('SET SESSION wait_timeout = 28800;')->execute();
         //Побежали по серверам
         foreach ($settings as $setting) {
@@ -245,8 +246,8 @@ class EmailIntegrationController extends Controller
                 break;
             case 'pop3':
                 throw new Exception("pop3 set for organization: {$setting->organization_id} (mail:{$setting->user})");
-                //$connect = new Pop3($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
-                //break;
+            //$connect = new Pop3($setting->server_host, $setting->user, $setting->password, $setting->server_port, $setting->server_ssl);
+            //break;
             default:
                 throw new Exception('Не определён тип сервера.');
         }
@@ -331,9 +332,9 @@ class EmailIntegrationController extends Controller
             }
             //Проверяем, нет ли уже этой накладной у этой организации
             $model = IntegrationInvoice::findOne([
-                        'integration_setting_from_email_id' => $setting->id,
-                        'organization_id'                   => $setting->organization_id,
-                        'file_hash_summ'                    => md5($file_content),
+                'integration_setting_from_email_id' => $setting->id,
+                'organization_id'                   => $setting->organization_id,
+                'file_hash_summ'                    => md5($file_content),
             ]);
             if (!empty($model)) {
                 //$this->log('- File (' . $name_file . ') has previously been processed by the parser `integration_invoice`.`id` = ' . $model->id);

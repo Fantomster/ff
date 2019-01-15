@@ -19,7 +19,7 @@ use yii\web\BadRequestHttpException;
 class Integration
 {
     /** @var array */
-    static $service_map = [
+    public static $service_map = [
         Registry::RK_SERVICE_ID       => 'Rkws',
         Registry::IIKO_SERVICE_ID     => 'Iiko',
         Registry::POSTER_SERVICE_ID   => 'Poster',

@@ -9,36 +9,10 @@ use yii\web\BadRequestHttpException;
 
 class SyncServiceFactory extends WebApi
 {
-    /** SERVICE RKEEPER name */
-    const SERVICE_RKEEPER = 'Rkws';
-
-    /** SERVICE IIKO name */
-    const SERVICE_IIKO = 'Iiko';
-
-    /** SERVICE TILLYPAD name */
-    const SERVICE_TILLYPAD = 'Tillypad';
-
-    /** SERVICE POSTER name */
-    const SERVICE_POSTER = 'Poster';
-
-    /** SERVICE "id - name" mapping */
-    const ALL_SERVICE_MAP = [
-        Registry::RK_SERVICE_ID       => self::SERVICE_RKEEPER,
-        Registry::IIKO_SERVICE_ID     => self::SERVICE_IIKO,
-        Registry::TILLYPAD_SERVICE_ID => self::SERVICE_TILLYPAD,
-        Registry::POSTER_SERVICE_ID   => self::SERVICE_POSTER,
-    ];
-
     /** @var array */
     public $syncResult = [];
 
     const TASK_SYNC_GET_LOG = 'get-log';
-    const TASK_SYNC_GET_OBJECTS = 'get-rkws-objects';
-
-    const SYNC_TASK_SERVICE_MAPPING = [
-        self::TASK_SYNC_GET_OBJECTS => self::SERVICE_RKEEPER,
-    ];
-
     /**
      * Construct method for Class SyncServiceFactory
      *
@@ -50,14 +24,14 @@ class SyncServiceFactory extends WebApi
     public function __construct($serviceId = 0, array $params = [], string $callbackTaskId = null)
     {
         parent::__construct();
-        # 2. Identify Service ID or CALLLBACK
+        # 2. Identify Service ID or CALLBACK
         if (!$callbackTaskId) {
             # 2.1.1. Identify Service ID
-            if (!array_key_exists($serviceId, self::ALL_SERVICE_MAP)) {
+            if (!array_key_exists($serviceId, Integration::$service_map)) {
                 throw new BadRequestHttpException("empty_param|params");
             }
             # 2.1.2. Use entity class (by factory)
-            $entity = $this->factory((int)$serviceId, (string)self::ALL_SERVICE_MAP[$serviceId]);
+            $entity = $this->factory((int)$serviceId, (string)Integration::$service_map[$serviceId]);
             # 2.1.3. Load dictionary data
             /** AbstractSyncFactory $entity */
             $this->syncResult = $entity->loadDictionary($params);
@@ -65,14 +39,11 @@ class SyncServiceFactory extends WebApi
             return; //ололо я водитель нло
         } else {
             # 2.2.1. Find service ID and other params by task_id
-            $serviceName = null;
-            if (isset(self::SYNC_TASK_SERVICE_MAPPING[$callbackTaskId])) {
-                $serviceName = self::SYNC_TASK_SERVICE_MAPPING[$callbackTaskId];
-            }
+            $serviceName = self::getServiceMappingNameCallback($callbackTaskId);
             if (!$serviceName) {
                 throw new BadRequestHttpException("Service was not recognized by task_id!");
             }
-            $serviceId = array_search($serviceName, self::ALL_SERVICE_MAP);
+            $serviceId = array_search($serviceName, Integration::$service_map);
             if (!$serviceId) {
                 throw new BadRequestHttpException("empty_param|service_id");
             }
@@ -108,7 +79,7 @@ class SyncServiceFactory extends WebApi
     public static function init(int $serviceId, string $serviceName = null): AbstractSyncFactory
     {
         if (!$serviceName) {
-            $serviceName = (string)self::ALL_SERVICE_MAP[$serviceId];
+            $serviceName = (string)Integration::$service_map[$serviceId];
         }
 
         $className = __NAMESPACE__ . '\\sync\\Service' . $serviceName;
@@ -117,5 +88,18 @@ class SyncServiceFactory extends WebApi
         } else {
             throw new BadRequestHttpException("class_not_exist");
         }
+    }
+
+    /**
+     * @param $callbackId
+     * @return mixed|null
+     */
+    private static function getServiceMappingNameCallback($callbackId)
+    {
+        $r = [
+            'get-rkws-objects' => Integration::$service_map[Registry::RK_SERVICE_ID],
+        ];
+
+        return $r[$callbackId] ?? null;
     }
 }

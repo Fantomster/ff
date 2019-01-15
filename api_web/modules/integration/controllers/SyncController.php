@@ -13,6 +13,7 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\modules\integration\classes\Integration;
 use Yii;
 use yii\web\BadRequestHttpException;
 use api_web\modules\integration\classes\SyncServiceFactory;
@@ -188,5 +189,48 @@ class SyncController extends WebApiController
         $factory = (new SyncServiceFactory($this->request['service_id'], [], SyncServiceFactory::TASK_SYNC_GET_LOG))->factory($this->request['service_id']);
 
         $this->response = $factory->sendWaybill($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/sync/get-service-prefix",
+     *     tags={"Integration/sync"},
+     *     summary="Список префиксов систем интеграции",
+     *     description="Список префиксов систем интеграции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={}
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                      1: "Rkws",
+     *                      2: "Iiko"
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionGetServicePrefix()
+    {
+        $this->response = Integration::$service_map;
     }
 }

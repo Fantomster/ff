@@ -43,16 +43,23 @@ abstract class AbstractSyncFactory extends WebApi
     const HTTP_CODE_OK = 200;
 
     /** List of dictionaries awailable for a service - By default it is an empty array */
-    public $dictionaryAvailable = [];
+    public $dictionaryAvailable = [
+        self::DICTIONARY_AGENT,
+        self::DICTIONARY_PRODUCT,
+        self::DICTIONARY_STORE,
+        self::DICTIONARY_UNIT,
+        self::DICTIONARY_CATEGORY
+    ];
 
     /** @var string $index Символьный идентификатор справочника */
     public $index;
+    public $queueName = null;
 
     /** service_id $_POST params */
     public $serviceId;
     /** Service Name identified by service_id in $_POST params and SyncServiceFactory->$allServicesMap */
     public $serviceName;
-    
+
     protected $logCategory = "sync_log";
 
     /**
@@ -69,7 +76,7 @@ abstract class AbstractSyncFactory extends WebApi
             $this->serviceId = $serviceId;
         }
     }
-    
+
     /**
      * @param string $message
      */
@@ -212,11 +219,32 @@ abstract class AbstractSyncFactory extends WebApi
      */
     public function factory(string $dictionary, int $serviceId): ?AbstractSyncFactory
     {
-        $className = __NAMESPACE__ . '\\' . $this->serviceName . ucfirst($dictionary);
+        $ns = __NAMESPACE__;
+        $directoryServiceClass = __DIR__ . DIRECTORY_SEPARATOR . strtolower($this->serviceName);
+        if (file_exists($directoryServiceClass)) {
+            $ns .= '\\' . strtolower($this->serviceName);
+        }
+
+        $className = $ns . '\\' . $this->serviceName . ucfirst($dictionary);
         if (class_exists($className)) {
-            return new $className($this->serviceName, $serviceId);
+            $s = new $className($this->serviceName, $serviceId);
+            $s->index = $dictionary;
+            return $s;
         } else {
-            throw new BadRequestHttpException("class_not_exist");
+            $serviceClass = $ns . '\\Service' . $this->serviceName;
+            if (class_exists($serviceClass)) {
+                /** @var AbstractSyncFactory $service */
+                $service = new $serviceClass($this->serviceName, $serviceId);
+                if (in_array($dictionary, $service->dictionaryAvailable)) {
+                    $service->index = $dictionary;
+                    $service->queueName = $this->serviceName . ucfirst($dictionary) . 'Sync';
+                    return $service;
+                } else {
+                    throw new BadRequestHttpException("Dictionary '{$dictionary}' not upload in service " . $this->serviceName);
+                }
+            } else {
+                throw new BadRequestHttpException("class_not_exist");
+            }
         }
     }
 

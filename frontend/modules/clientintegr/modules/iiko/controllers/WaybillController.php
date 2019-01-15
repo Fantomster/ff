@@ -660,7 +660,7 @@ SQL;
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             
-            $existingWaybill = iikoWaybill::find()->where(['order_id' => $model->order_id, 'store_id' => $model->store_id])->one();
+            $existingWaybill = iikoWaybill::find()->where(['order_id' => $model->order_id, 'store_id' => $model->store_id])->andWhere(['!=', 'id', $id])->one();
             if (!empty($existingWaybill)) {
                 $model = iikoWaybill::moveContentToExistingWaybill($model, $existingWaybill);
             }

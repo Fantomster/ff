@@ -24,13 +24,14 @@ use yii\web\ServerErrorHttpException;
  */
 class ServiceTillypad extends AbstractSyncFactory
 {
-    public $queueName = null;
     public $dictionaryAvailable = [
         self::DICTIONARY_AGENT,
         self::DICTIONARY_PRODUCT,
         self::DICTIONARY_STORE,
     ];
+
     private $countWaybillSend = 0;
+
     protected $logCategory = "tillypad_log";
 
     /**
@@ -196,12 +197,13 @@ class ServiceTillypad extends AbstractSyncFactory
     }
 
     /**
-     * @param      $res
-     * @param      $model
-     * @param      $message
-     * @param bool $success
+     * @param                 $res
+     * @param TillypadWaybill $model
+     * @param                 $message
+     * @param bool            $success
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Exception
      */
     private function response(&$res, $model, $message, $success = true)
     {

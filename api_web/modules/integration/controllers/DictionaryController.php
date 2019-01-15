@@ -60,6 +60,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                              "count": 7,
      *                              "status_id": 1,
      *                              "status_text": "Загружены",
+     *                              "upload": true,
+     *                              "prefix": "Rkws",
      *                              "created_at": "2018-10-18T16:50:54+03:00",
      *                              "updated_at": "2018-10-19T09:12:42+03:00"
      *                          },
@@ -69,6 +71,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                              "title": "Склады",
      *                              "count": 10,
      *                              "status_id": 1,
+     *                              "upload": true,
+     *                              "prefix": "Rkws",
      *                              "status_text": "Загружены",
      *                              "created_at": "2018-10-18T16:50:54+03:00",
      *                              "updated_at": "2018-10-19T09:12:42+03:00"

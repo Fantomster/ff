@@ -117,9 +117,6 @@ class DynamicUsageSearch extends \yii\base\Model {
         else
             $where = '';
 
-        /*var_dump($start_date);
-        var_dump($this->start_date);*/
-
         $query = "select q.*
                       from (
                     select org.*,

@@ -77,7 +77,7 @@ class ServicePoster extends AbstractSyncFactory
                 }
                 return $this->prepareModel($model);
             } else {
-                throw new HttpException(402, 'Error send request to RabbitMQ');
+                throw new \yii\web\HttpException(402, 'Error send request to RabbitMQ');
             }
         } catch (\Throwable $e) {
             \Yii::error($e->getMessage());

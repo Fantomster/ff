@@ -15,7 +15,8 @@ return [
             'maxChildProcesses' => 5,
             'isMultiInstance'   => false,
             'daemons'           => [
-                ['className' => 'iikoLogDaemonController', 'enabled' => true]
+                ['className' => 'iikoLogDaemonController', 'enabled' => true],
+                ['className' => 'TillypadLogDaemonController', 'enabled' => true],
             ]
         ],
         'abaddon-daemon' => [

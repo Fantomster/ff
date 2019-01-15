@@ -21,11 +21,6 @@ use yii\web\ServerErrorHttpException;
 class ServiceIiko extends AbstractSyncFactory
 {
     /**
-     * @var null
-     */
-    public $queueName = null;
-
-    /**
      * @var array
      */
     public $dictionaryAvailable = [

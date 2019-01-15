@@ -1,7 +1,8 @@
 <?php
 
-namespace api_web\modules\integration\classes\sync;
+namespace api_web\modules\integration\classes\sync\rkws;
 
+use api_web\modules\integration\classes\sync\ServiceRkws;
 use common\models\Waybill;
 use yii\web\BadRequestHttpException;
 
@@ -32,7 +33,7 @@ class RkwsWaybill extends ServiceRkws
         if (!$myXML) {
             throw new BadRequestHttpException("empty_result_xml_data");
         }
-        $array  = [];
+        $array = [];
         $gcount = 0;
 
         if (!isset($myXML->ERROR)) {

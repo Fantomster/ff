@@ -2,14 +2,15 @@
 
 namespace api_web\classes;
 
+use api_web\modules\integration\classes\Integration;
 use Yii;
 use api_web\components\Registry;
-use api_web\modules\integration\classes\sync\RkwsAgent;
-use api_web\modules\integration\classes\sync\RkwsCategory;
-use api_web\modules\integration\classes\sync\RkwsUnit;
-use api_web\modules\integration\classes\sync\RkwsProduct;
-use api_web\modules\integration\classes\sync\RkwsStore;
-use api_web\modules\integration\classes\sync\RkwsWaybill;
+use api_web\modules\integration\classes\sync\rkws\RkwsAgent;
+use api_web\modules\integration\classes\sync\rkws\RkwsCategory;
+use api_web\modules\integration\classes\sync\rkws\RkwsUnit;
+use api_web\modules\integration\classes\sync\rkws\RkwsProduct;
+use api_web\modules\integration\classes\sync\rkws\RkwsStore;
+use api_web\modules\integration\classes\sync\rkws\RkwsWaybill;
 use api_web\modules\integration\classes\sync\ServiceRkws;
 use common\models\Journal;
 use common\models\Waybill;
@@ -40,11 +41,10 @@ class NoAuthWebApi
     }
 
     /**
-     * Загрузка справочников R-keeper
-     *
      * @param OuterTask $task
      * @return string
      * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
     public function loadDictionary(OuterTask $task)
     {
@@ -55,8 +55,8 @@ class NoAuthWebApi
 
         $allOperations = self::getAllSyncOperations();
         if (isset($allOperations[$operation->code])) {
-            $class  = $allOperations[$operation->code];
-            $entity = new $class(SyncServiceFactory::ALL_SERVICE_MAP[$operation->service_id], $operation->service_id);
+            $class = $allOperations[$operation->code];
+            $entity = new $class(Integration::$service_map[$operation->service_id], $operation->service_id);
             $entity->log('`task_id` : ' . $task->id);
             if ($entity instanceof ServiceRkws) {
                 $entity->orgId = $task->org_id;
@@ -95,32 +95,32 @@ class NoAuthWebApi
         $allOperations = self::getAllSyncOperations();
         if (isset($allOperations[$operation->code])) {
             $entityName = $allOperations[$operation->code];
-            $entity     = new $entityName(SyncServiceFactory::ALL_SERVICE_MAP[$operation->service_id], $operation->service_id);
+            $entity = new $entityName(Integration::$service_map[$operation->service_id], $operation->service_id);
             $entity->log('Callback operation `task_id` params is ' . $task->id);
             /** @var RkwsWaybill $entity */
             if (method_exists($entity, 'receiveXMLDataWaybill')) {
-                $body                     = Yii::$app->request->getRawBody();
-                $res                      = $entity->receiveXMLDataWaybill($task, $body);
-                $xml                      = (array) simplexml_load_string($body);
-                $waybill                  = Waybill::findOne($task->waybill_id);
-                $journal                  = new Journal();
-                $journal->service_id      = $waybill->service_id;
-                $journal->operation_code  = $operation->code;
-                $journal->log_guide       = 'any_call';
+                $body = Yii::$app->request->getRawBody();
+                $res = $entity->receiveXMLDataWaybill($task, $body);
+                $xml = (array)simplexml_load_string($body);
+                $waybill = Waybill::findOne($task->waybill_id);
+                $journal = new Journal();
+                $journal->service_id = $waybill->service_id;
+                $journal->operation_code = $operation->code;
+                $journal->log_guide = 'any_call';
                 $journal->organization_id = $waybill->acquirer_id;
                 // Когда все хорошо и накладная создалась в R-keeper
                 if (array_key_exists('DOC', $xml)) {
-                    $doc                        = (array) $xml['DOC'];
-                    $waybill->status_id         = Registry::WAYBILL_UNLOADED;
+                    $doc = (array)$xml['DOC'];
+                    $waybill->status_id = Registry::WAYBILL_UNLOADED;
                     $waybill->outer_document_id = $doc['@attributes']['rid'];
-                    $journal->type              = 'success';
-                    $journal->response          = "waybill.id = " . $waybill->id;
+                    $journal->type = 'success';
+                    $journal->response = "waybill.id = " . $waybill->id;
                 } elseif (array_key_exists('ERROR', $xml)) {
                     //Когда случилась ошибка
-                    $error              = (array) $xml['ERROR'];
+                    $error = (array)$xml['ERROR'];
                     $waybill->status_id = Registry::WAYBILL_ERROR;
-                    $journal->type      = 'error';
-                    $journal->response  = $error['@attributes']['Text'];
+                    $journal->type = 'error';
+                    $journal->response = $error['@attributes']['Text'];
                 }
                 $waybill->save();
                 $journal->save();

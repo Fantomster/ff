@@ -314,6 +314,7 @@ class VetisWaybill extends WebApi
             'volume'      => $request['amount'],
             'reason'      => $request['reason'],
             'description' => $request['description'],
+            'conditions'  => $request['conditions']
         ];
 
         try {
@@ -355,6 +356,7 @@ class VetisWaybill extends WebApi
             'decision'    => VetDocumentDone::RETURN_ALL,
             'reason'      => $request['reason'],
             'description' => $request['description'],
+            'conditions'  => $request['conditions']
         ];
 
         try {

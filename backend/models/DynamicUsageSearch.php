@@ -2,10 +2,7 @@
 
 namespace backend\models;
 
-use common\models\Organization;
 use Yii;
-use yii\data\ActiveDataProvider;
-use yii\data\ArrayDataProvider;
 use yii\data\SqlDataProvider;
 
 /**
@@ -13,7 +10,7 @@ use yii\data\SqlDataProvider;
  *
  * @author elbabuino
  */
-class DynamicUsageSearch extends Organization {
+class DynamicUsageSearch extends \yii\base\Model {
     
     public $org_name;
     public $org_id;

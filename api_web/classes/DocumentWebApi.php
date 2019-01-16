@@ -605,6 +605,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Exception
      */
     public function getWaybillDetail(array $post)
     {
@@ -620,6 +621,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @throws BadRequestHttpException
      * @throws \yii\base\InvalidArgumentException
      * @throws ValidationException
+     * @throws \Exception
      */
     public function editWaybillDetail(array $post)
     {
@@ -704,7 +706,7 @@ class DocumentWebApi extends \api_web\components\WebApi
     {
         $this->validateRequest($post, ['replaced_order_id', 'document_id']);
 
-        $replacedOrder = \common\models\Order::findOne([
+        $replacedOrder = OrderMC::findOne([
             'id'         => (int)$post['replaced_order_id'],
             'service_id' => Registry::MC_BACKEND
         ]);

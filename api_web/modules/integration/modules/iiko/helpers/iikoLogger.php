@@ -15,6 +15,11 @@ class iikoLogger
     private static $guide;
     private static $row;
 
+    /**
+     * iikoLogger constructor.
+     *
+     * @throws \Exception
+     */
     function __construct()
     {
         self::$guide = md5(uniqid(microtime(), 1));

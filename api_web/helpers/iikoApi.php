@@ -97,6 +97,9 @@ class iikoApi
     {
     }
 
+    /**
+     * @throws \Exception
+     */
     public function __destruct()
     {
         $this->logout();

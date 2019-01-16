@@ -744,6 +744,7 @@ class CatalogWebApi extends WebApi
      * @throws BadRequestHttpException
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\di\NotInstantiableException
+     * @throws \Exception
      */
     public function prepareTemporary(array $request)
     {
@@ -861,6 +862,7 @@ class CatalogWebApi extends WebApi
      *
      * @param array $request
      * @return array
+     * @throws \yii\base\InvalidConfigException
      */
     public function getTempMainCatalog(array $request)
     {

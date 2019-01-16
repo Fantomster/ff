@@ -91,7 +91,6 @@ class RequestWebApi extends WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws InvalidArgumentException
      */
     public function getListVendor(array $post)
     {
@@ -563,11 +562,10 @@ class RequestWebApi extends WebApi
     }
 
     /**
-     * Информация по заявке
+     *  Информация по заявке
      *
      * @param Request $model
      * @return array
-     * @throws \yii\base\InvalidConfigException
      */
     private function prepareRequest(Request $model)
     {
@@ -598,7 +596,6 @@ class RequestWebApi extends WebApi
      *
      * @param RequestCallback $model
      * @return array
-     * @throws \yii\base\InvalidConfigException
      */
     private function prepareRequestCallback(RequestCallback $model)
     {

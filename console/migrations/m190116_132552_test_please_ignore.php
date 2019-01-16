@@ -13,6 +13,7 @@ class m190116_132552_test_please_ignore extends Migration
     public function safeUp()
     {
         throw new Exception("ololo i'm ufo driver");
+        //oy veyzmir!
     }
 
     /**

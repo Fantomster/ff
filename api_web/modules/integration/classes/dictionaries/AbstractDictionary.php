@@ -172,7 +172,7 @@ class AbstractDictionary extends WebApi implements DictionaryInterface
         return [
             'id'        => (int)$model->id,
             'name'      => $model->name,
-            'unit'      => (OuterUnit::findOne($model->outer_unit_id))->name,
+            'unit'      => !empty($model->outerUnit) ? $model->outerUnit->name : '',
             'is_active' => (int)!$model->is_deleted
         ];
     }

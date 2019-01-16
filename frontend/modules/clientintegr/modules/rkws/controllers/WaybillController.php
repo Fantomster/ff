@@ -849,12 +849,12 @@ SQL;
                 var_dump($model->getErrors());
                 exit;
             }*/
-            
+
             $existingWaybill = RkWaybill::find()->where(['order_id' => $model->order_id, 'store_rid' => $model->store_rid])->one();
             if (!empty($existingWaybill)) {
                 $model = RkWaybill::moveContentToExistingWaybill($model, $existingWaybill);
             }
-            
+
             $sql = "SELECT COUNT(*) FROM rk_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
             $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
             if (($model->corr_rid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_rid === null)) {
@@ -1011,6 +1011,7 @@ SQL;
          */
 
         $id = Yii::$app->request->post('id');
+        /** @var RkWaybill $model */
         $model = $this->findModel($id);
         $error = '';
 
@@ -1024,9 +1025,14 @@ SQL;
 
         if ($error == '') {
             $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
-            $res->sendWaybill($id);
-            $model = $this->findModel($id);
-            if ($model->status_id != 2) $error .= 'Ошибка при отправке. ';
+            if ($res->sendWaybill($id)) {
+                $model->refresh();
+                if ($model->status_id != 2) {
+                    $error .= 'Ошибка при отправке. ';
+                }
+            } else {
+                $error .= 'Выгрузка не удалась. ';
+            }
         }
 
         if ($error == '') {

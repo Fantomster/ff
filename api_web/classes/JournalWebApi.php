@@ -74,6 +74,21 @@ class JournalWebApi extends WebApi
             } elseif ($sort == '-created_at') {
                 $query->orderBy('created_at DESC');
             }
+            if ($sort == 'service_id') {
+                $query->orderBy('service_id ASC');
+            } elseif ($sort == '-service_id') {
+                $query->orderBy('service_id DESC');
+            }
+            if ($sort == 'type') {
+                $query->orderBy('type ASC');
+            } elseif ($sort == '-type') {
+                $query->orderBy('type DESC');
+            }
+            if ($sort == 'user_id') {
+                $query->orderBy('user_id ASC');
+            } elseif ($sort == '-user_id') {
+                $query->orderBy('user_id DESC');
+            }
         } else {
             $query->orderBy('id DESC');
         }

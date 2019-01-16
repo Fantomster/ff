@@ -95,7 +95,8 @@ class WaybillHelper extends AuthHelper
 
         if (!$tmodel->save()) {
             echo "Ошибка валидации<br>";
-            var_dump($tmodel->getErrors());
+            var_dump(['v' => $tmodel->getErrors(), 'response' => $res]);
+            return false;
         }
 
         // Обновление статуса выгрузки накладной

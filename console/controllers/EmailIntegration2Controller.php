@@ -233,7 +233,7 @@ class EmailIntegration2Controller extends Controller
 //            $messages = $this->connect->getEmails($start, $limit);
 //        }
 
-        return $messages;
+        return isset($messages['id']) ? [$messages] : $messages;
     }
 
     /**

@@ -47,6 +47,11 @@ if ($countSettingChange > 0) {
     <?= Html::csrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
+    <style>
+        .nav > li > a {
+            padding: 10px 8px;
+        }
+    </style>
 </head>
 <body>
 <?php $this->beginBody() ?>

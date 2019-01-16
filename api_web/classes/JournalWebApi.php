@@ -21,6 +21,13 @@ use yii\data\Pagination;
  */
 class JournalWebApi extends WebApi
 {
+    private $arAvailableFields = [
+        'response',
+        'created_at',
+        'service_id',
+        'type',
+        'user_id',
+    ];
 
     /**
      * @param $request
@@ -63,32 +70,12 @@ class JournalWebApi extends WebApi
             $query->andWhere(['user_id' => $this->user->id]);
         }
 
-        if ($sort) {
-            if ($sort == 'response') {
-                $query->orderBy('response ASC');
-            } elseif ($sort == '-response') {
-                $query->orderBy('response DESC');
+        if ($sort && in_array(ltrim($sort, '-'), $this->arAvailableFields)) {
+            $sortDirection = 'ASC';
+            if (strpos('-', $sort) !== false) {
+                $sortDirection = 'DESC';
             }
-            if ($sort == 'created_at') {
-                $query->orderBy('created_at ASC');
-            } elseif ($sort == '-created_at') {
-                $query->orderBy('created_at DESC');
-            }
-            if ($sort == 'service_id') {
-                $query->orderBy('service_id ASC');
-            } elseif ($sort == '-service_id') {
-                $query->orderBy('service_id DESC');
-            }
-            if ($sort == 'type') {
-                $query->orderBy('type ASC');
-            } elseif ($sort == '-type') {
-                $query->orderBy('type DESC');
-            }
-            if ($sort == 'user_id') {
-                $query->orderBy('user_id ASC');
-            } elseif ($sort == '-user_id') {
-                $query->orderBy('user_id DESC');
-            }
+            $query->orderBy($sort . ' ' . $sortDirection);
         } else {
             $query->orderBy('id DESC');
         }

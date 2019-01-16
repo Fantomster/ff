@@ -186,7 +186,6 @@ class EmailIntegrationController extends Controller
                 //Получаем последние 100 емайлов
                 $emails = $this->getEmails(0, 20);
                 foreach ($emails as $email) {
-                    echo $email['subject'] . PHP_EOL;
                     //Пропускаем емайлы без вложений
                     if (empty($email['attachment'])) {
                         continue;
@@ -272,7 +271,7 @@ class EmailIntegrationController extends Controller
 //            $messages = $this->connect->getEmails($start, $limit);
 //        }
 
-        return $messages;
+        return isset($messages['id']) ? [$messages] : $messages;
     }
 
     /**

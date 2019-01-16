@@ -31,7 +31,7 @@ class JournalWebApi extends WebApi
     {
         $page = $request['pagination']['page'] ?? 1;
         $pageSize = $request['pagination']['page_size'] ?? 12;
-        $sort = $post['sort'] ?? null;
+        $sort = $request['sort'] ?? null;
 
         $query = Journal::find();
         if (isset($request['search'])) {

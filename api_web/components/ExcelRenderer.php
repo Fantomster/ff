@@ -121,7 +121,7 @@ class ExcelRenderer
         $activeSheet->setCellValue("G17", \Yii::t('message', 'frontend.views.order.grid_price') . " " . $order->currency->iso_code);
 
         $row = 18;
-        $goods = $order->orderContents;
+        $goods = $order->orderContent;
         $this->fillOrderContentRows($objPHPExcel, $goods, $row, $styleArray, $width);
 
         $row += 2;

@@ -56,8 +56,8 @@ use yii\web\BadRequestHttpException;
  * @property Organization       $vendor
  * @property OrderAssignment    $orderAssignment
  * @property OrderAttachment[]  $orderAttachments
- * @property OrderChat[]        $orderChats
- * @property OrderContent[]     $orderContents
+ * @property OrderChat[]        $orderChat
+ * @property OrderContent[]     $orderContent
  * @property EdiOrder           $ediOrder
  * @property Profile            $createdByProfile
  * @property Profile            $acceptedByProfile

@@ -141,7 +141,7 @@ class ServicePoster extends AbstractSyncFactory
             }
 
         } catch (\Throwable $t) {
-            throw new BadRequestHttpException($t->getMessage());
+            throw new BadRequestHttpException($t->getMessage() . PHP_EOL . $t->getTraceAsString());
         }
 
         return ['result' => $res];

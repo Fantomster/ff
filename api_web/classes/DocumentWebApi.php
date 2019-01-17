@@ -258,7 +258,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (isset($post['search']['number']) && !empty($post['search']['number'])) {
-            $where_all .= " AND dat.supply = :doc_number";
+            $where_all .= " AND (dat.supply = :doc_number OR dat.order_id = :doc_number)";
             $params_sql[':doc_number'] = $post['search']['number'];
         }
 

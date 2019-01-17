@@ -265,9 +265,6 @@ class IntegrationWebApi extends WebApi
             $arr['outer_unit']['id'] = $outerUnit->id;
             $arr['outer_unit']['name'] = $outerUnit->name;
             $arr['outer_unit']['equality'] = true;
-        } else {
-            $arr['outer_unit']['id'] = null;
-            $arr['outer_unit']['name'] = '';
         }
 
         //Если есть связь, с заказом
@@ -288,7 +285,7 @@ class IntegrationWebApi extends WebApi
                     $arr['outer_product']['equality'] = false;
                 }
                 //Если отличаются склады, надо подсвечивать на фронте
-                if ($outerProductMap->outer_store_id != $waybillContent->waybill->outer_store_id) {
+                if ($outerProductMap->outer_store_id != $waybillContent->waybill->outer_store_id && $outerStore) {
                     $arr['outer_store']['equality'] = false;
                 }
                 //Если ставка НДС отличается, то надо подсвечивать на фронте

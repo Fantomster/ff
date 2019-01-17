@@ -228,7 +228,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         $arr = explode(' ', $this->doc_date);
         if (isset($arr[1])) {
-            $date = $arr[0] . " " . date('H:i:s');
+            $date = $arr[0] . " " . gmdate('H:i:s');
         } else {
             $date = $this->doc_date;
         }
@@ -238,7 +238,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         $arr = explode(' ', $this->payment_delay_date);
         if (isset($arr[1])) {
-            $date_delay = $arr[0] . " " . date('H:i:s');
+            $date_delay = $arr[0] . " " . gmdate('H:i:s');
         } else {
             $date_delay = $this->payment_delay_date;
         }

@@ -1174,6 +1174,7 @@ class OrderWebApi extends \api_web\components\WebApi
     private function prepareProduct(OrderContent $model, $currency = null, $currency_id = null)
     {
         $quantity = !empty($model->quantity) ? round($model->quantity, 3) : round($model->product->units, 3);
+        $units = is_float($model->product->units) ? $model->product->units : 1;
 
         $item = [];
         $item['id'] = (int)$model->id;
@@ -1188,7 +1189,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['brand'] = $model->product->brand ? $model->product->brand : '';
         $item['article'] = $model->product->article;
         $item['ed'] = $model->product->ed;
-        $item['units'] = 1; // $model->product->units
+        $item['units'] = $units;
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);

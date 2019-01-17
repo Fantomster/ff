@@ -836,9 +836,10 @@ SQL;
 
     /**
      * @param $id
+     * @param $page
      * @return string|\yii\web\Response
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $page)
     {
         $model = $this->findModel($id);
         $lic = $this->checkLic();
@@ -879,7 +880,7 @@ SQL;
                 }
             }
             $model->save();
-            return $this->redirect(['/clientintegr/rkws/waybill/index', 'way' => $model->order_id]);
+            return $this->redirect(['/clientintegr/rkws/waybill/index', 'way' => $model->order_id, 'page' => $page]);
         } else {
             return $this->render($vi, [
                 'model' => $model,
@@ -889,9 +890,10 @@ SQL;
 
     /**
      * @param $order_id
+     * @param $page
      * @return string|\yii\web\Response
      */
-    public function actionCreate($order_id)
+    public function actionCreate($order_id, $page)
     {
         $ord = \common\models\Order::findOne(['id' => $order_id]);
         if (!$ord) {
@@ -903,7 +905,7 @@ SQL;
 
         if ($const !== '0') {
             RkWaybill::createWaybill($order_id);
-            return $this->redirect([$this->getLastUrl() . 'way=' . $order_id]);
+            return $this->redirect(['/clientintegr/rkws/waybill/index', 'page' => $page, 'way' => $order_id]);
         } else {
             $model = new RkWaybill();
             $model->order_id = $order_id;
@@ -911,11 +913,7 @@ SQL;
             $model->org = $ord->client_id;
 
             if ($model->load(Yii::$app->request->post()) && $model->save()) {
-                /*if ($model->getErrors()) {
-                    var_dump($model->getErrors());
-                    exit;
-                }*/
-                return $this->redirect(['/clientintegr/rkws/waybill/index', 'way' => $model->order_id]);
+                return $this->redirect(['/clientintegr/rkws/waybill/index', 'page' => $page, 'way' => $model->order_id]);
             } else {
                 return $this->render('create', [
                     'model' => $model,
@@ -1020,7 +1018,7 @@ SQL;
         }
 
         if ($model->readytoexport == 0) {
-            $error .= 'Не все товары сопоставлены! ';
+            $error .= 'Накладная к выгрузке не готова! ';
         }
 
         if ($error == '') {

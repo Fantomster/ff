@@ -252,7 +252,7 @@ class IntegrationWebApi extends WebApi
             $arr['outer_product']['equality'] = true;
         }
 
-        $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id]);
+        $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id, 'service_id' => $waybillContent->waybill->service_id]);
         if ($outerStore) {
             $arr['outer_store']['id'] = $outerStore->id;
             $arr['outer_store']['name'] = $outerStore->name;

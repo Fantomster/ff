@@ -220,6 +220,7 @@ class IntegrationWebApi extends WebApi
     {
         $this->validateRequest($post, ['waybill_content_id']);
 
+        /**@var WaybillContent $waybillContent */
         $waybillContent = WaybillContent::find()
             ->joinWith('waybill')
             ->where([
@@ -551,7 +552,7 @@ class IntegrationWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      */
-    public function mapUpdate(array $post)
+    public function mapUpdate(array $post): array
     {
         $this->validateRequest($post, ['business_id', 'service_id', 'map']);
         $result = [];

@@ -147,7 +147,16 @@ class Waybill extends BaseWaybill implements DocumentInterface
         /** @var Transaction $transaction */
         $transaction = \Yii::$app->db_api->beginTransaction();
         try {
-            WaybillContent::updateAll(['order_content_id' => null], 'waybill_id = :wid', [':wid' => $this->id]);
+            foreach ($this->waybillContents as $waybillContent) {
+                if (is_null($waybillContent->outer_product_id)) {
+                    $waybillContent->delete();
+                } else {
+                    $waybillContent->order_content_id = null;
+                    if (!$waybillContent->save()) {
+                        throw new ValidationException($waybillContent->getFirstErrors());
+                    }
+                }
+            }
             $this->status_id = Registry::WAYBILL_RESET;
             if (!$this->save()) {
                 throw new ValidationException($this->getFirstErrors());

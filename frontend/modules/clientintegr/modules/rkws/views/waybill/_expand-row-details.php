@@ -127,10 +127,9 @@ if (empty($model)) {
     );
 
     $timestamp_now = time();
-    ($licucs->status_id == 1) && ($timestamp_now <= (strtotime($licucs->td))) ? $lic_rkws_ucs = 1 : $lic_rkws_ucs = 0;
+    ($licucs->status_id == 1)/* && ($timestamp_now <= (strtotime($licucs->td)))*/ ? $lic_rkws_ucs = 1 : $lic_rkws_ucs = 0; // Оставляю строку на случай, что R-Keeper починит правильность указания окончания срока действия своей лицензии
     (($lic->status_id == 1) && ($timestamp_now <= (strtotime($lic->td)))) ? $lic_rkws = 1 : $lic_rkws = 0;
-    //if (($lic_rkws_ucs == 0) or ($lic_rkws == 0)) { // Оставляю строку на случай, что R-Keeper починит правильность указания окончания срока действия своей лицензии
-    if ($lic_rkws == 0) {
+    if (($lic_rkws_ucs == 0) or ($lic_rkws == 0)) {
         unset($columns[10]['buttons']['export']);
     }
 

@@ -246,7 +246,7 @@ class IntegrationWebApi extends WebApi
             'equality' => true
         ];
 
-        $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id]);
+        $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id, 'service_id' => $waybillContent->waybill->service_id]);
         if ($outerProduct) {
             $arr['outer_product']['id'] = $outerProduct->id;
             $arr['outer_product']['name'] = $outerProduct->name;
@@ -281,11 +281,11 @@ class IntegrationWebApi extends WebApi
             if (!empty($outerProductMap)) {
                 $outerProductMap = (object)current($outerProductMap);
                 //Если отличаются продукты, надо подсвечивать на фронте
-                if ($outerProductMap->outer_product_id != $waybillContent->outer_product_id) {
+                if ($outerProductMap->outer_product_id != $waybillContent->outer_product_id && $outerProduct) {
                     $arr['outer_product']['equality'] = false;
                 }
                 //Если отличаются склады, надо подсвечивать на фронте
-                if ($outerProductMap->outer_store_id != $waybillContent->waybill->outer_store_id) {
+                if ($outerProductMap->outer_store_id != $waybillContent->waybill->outer_store_id && $outerStore) {
                     $arr['outer_store']['equality'] = false;
                 }
                 //Если ставка НДС отличается, то надо подсвечивать на фронте

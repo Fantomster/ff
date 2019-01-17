@@ -19,7 +19,9 @@ use yii\web\View;
     </div>
     <strong>© 2016 - <?= date('Y') ?> MixCart</strong>
 </footer>
-<?php $js = "
+<?php
+
+$js = "
             $(document).snowfall({
                 flakeCount: 30, // Количество снежинок
                 flakeColor: '#ffffff', // Цвет снежинок если нет картинки
@@ -35,5 +37,6 @@ use yii\web\View;
             });
 ";
 
-$this->registerJs($js, \yii\web\View::POS_READY)
+//Раскоментировать зимой, пойдет снег
+//$this->registerJs($js, \yii\web\View::POS_READY)
 ?>

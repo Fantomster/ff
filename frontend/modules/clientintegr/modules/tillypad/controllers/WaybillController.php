@@ -555,9 +555,10 @@ return $out;
 
     /**
      * @param $id
+     * @param $page
      * @return string|\yii\web\Response
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $page)
     {
         $model = $this->findModel($id);
         $lic = TillypadService::getLicense();
@@ -586,10 +587,10 @@ return $out;
                     $model->readytoexport = 0;
                 }
             }
-            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');
-            $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+            $model->doc_date = Yii::$app->formatter->asDate(Yii::$app->formatter->asDate($model->doc_date, 'php:Y-m-d') . ' 16:00:00', 'php:Y-m-d H:i:s');
+            $model->payment_delay_date = Yii::$app->formatter->asDate(Yii::$app->formatter->asDate($model->payment_delay_date, 'php:Y-m-d') . ' 16:00:00', 'php:Y-m-d H:i:s');
             $model->save();
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            return $this->redirect(['/clientintegr/tillypad/waybill/index', 'page' => $page, 'way' => $model->order_id]);
         } else {
             return $this->render($vi, [
                 'model' => $model,
@@ -599,9 +600,10 @@ return $out;
 
     /**
      * @param $order_id
+     * @param $page
      * @return string|\yii\web\Response
      */
-    public function actionCreate($order_id)
+    public function actionCreate($order_id, $page)
     {
         $ord = \common\models\Order::findOne(['id' => $order_id]);
 
@@ -614,7 +616,7 @@ return $out;
 
         if ($waybillModeIiko !== '0') {
             iikoWaybill::createWaybill($order_id, Registry::TILLYPAD_SERVICE_ID);
-            return $this->redirect([$this->getLastUrl() . 'way=' . $order_id]);
+            return $this->redirect(['/clientintegr/tillypad/waybill/index', 'page' => $page, 'way' => $order_id]);
         } else {
             $model = new iikoWaybill();
             $model->setScenario('handMade');
@@ -628,7 +630,7 @@ return $out;
                 //$model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
                 $model->payment_delay_date = $model->doc_date;
                 $model->save();
-                return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+                return $this->redirect(['/clientintegr/tillypad/waybill/index', 'page' => $page, 'way' => $model->order_id]);
             } else {
                 return $this->render('create', [
                     'model' => $model,
@@ -756,7 +758,7 @@ return $out;
             }
 
             if ($model->readytoexport == 0) {
-                throw new \Exception('Не все товары сопоставлены!');
+                throw new \Exception('Накладная к выгрузке не готова! ');
             }
 
             if ($api->auth()) {

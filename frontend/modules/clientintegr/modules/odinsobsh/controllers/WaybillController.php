@@ -581,9 +581,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     /**
      * @param $id
+     * @param $page
      * @return string|\yii\web\Response
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $page)
     {
         $model = $this->findModel($id);
         $lic = OneSService::getLicense();
@@ -617,7 +618,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 }
             }
             $model->save();
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            return $this->redirect(['/clientintegr/odinsobsh/waybill/index', 'page' => $page, 'way' => $model->order_id]);
         } else {
             return $this->render($vi, [
                 'model' => $model,
@@ -627,9 +628,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     /**
      * @param $order_id
+     * @param $page
      * @return string|\yii\web\Response
      */
-    public function actionCreate($order_id)
+    public function actionCreate($order_id, $page)
     {
         $user = $this->currentUser;
         $ord = \common\models\Order::findOne(['id' => $order_id]);
@@ -653,7 +655,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 var_dump($model->getErrors());
                 exit;
             }*/
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            return $this->redirect(['/clientintegr/odinsobsh/waybill/index', 'page' => $page, 'way' => $model->order_id]);
         } else {
             $model->num_code = $order_id;
             return $this->render('create', [
@@ -1009,7 +1011,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $sql = "UPDATE `one_s_waybill_data` SET `product_rid` = :w_spid, `munit` = :w_munit, updated_at = NOW() WHERE id in (" . $ids . ")";
             $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_munit' => $munit])->execute();
         }
-
 
         return $munit;
     }

@@ -651,20 +651,21 @@ SQL;
 
     /**
      * @param $id
+     * @param $page
      * @return string|\yii\web\Response
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $page)
     {
         $model = $this->findModel($id);
         $lic = iikoService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            
+
             $existingWaybill = iikoWaybill::find()->where(['order_id' => $model->order_id, 'store_id' => $model->store_id])->andWhere(['!=', 'id', $id])->one();
             if (!empty($existingWaybill)) {
                 $model = iikoWaybill::moveContentToExistingWaybill($model, $existingWaybill);
             }
-            
+
             $sql = "SELECT COUNT(*) FROM iiko_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
             $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
             if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_id === null)) {
@@ -692,8 +693,8 @@ SQL;
             $model->doc_date = Yii::$app->formatter->asDate(Yii::$app->formatter->asDate($model->doc_date, 'php:Y-m-d') . ' 16:00:00', 'php:Y-m-d H:i:s');
             $model->payment_delay_date = Yii::$app->formatter->asDate(Yii::$app->formatter->asDate($model->payment_delay_date, 'php:Y-m-d') . ' 16:00:00', 'php:Y-m-d H:i:s');
             $model->save();
-            return $this->redirect(['/clientintegr/iiko/waybill/index', 'way' => $model->order_id]);
-            
+            return $this->redirect(['/clientintegr/iiko/waybill/index', 'way' => $model->order_id, 'page' => $page]);
+
         } else {
             return $this->render($vi, [
                 'model' => $model,
@@ -703,9 +704,10 @@ SQL;
 
     /**
      * @param $order_id
+     * @param $page
      * @return string|\yii\web\Response
      */
-    public function actionCreate($order_id)
+    public function actionCreate($order_id, $page)
     {
         $ord = \common\models\Order::findOne(['id' => $order_id]);
 
@@ -718,7 +720,7 @@ SQL;
 
         if ($waybillModeIiko !== '0') {
             iikoWaybill::createWaybill($order_id, Registry::IIKO_SERVICE_ID);
-            return $this->redirect([$this->getLastUrl() . 'way=' . $order_id]);
+            return $this->redirect(['/clientintegr/iiko/waybill/index', 'page' => $page, 'way' => $order_id]);
         } else {
             $model = new iikoWaybill();
             $model->setScenario('handMade');
@@ -731,7 +733,7 @@ SQL;
                 $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
                 $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
                 $model->save();
-                return $this->redirect(['/clientintegr/iiko/waybill/index', 'way' => $model->order_id]);
+                return $this->redirect(['/clientintegr/iiko/waybill/index', 'page' => $page, 'way' => $model->order_id]);
             } else {
                 return $this->render('create', [
                     'model' => $model,
@@ -859,7 +861,7 @@ SQL;
             }
 
             if ($model->readytoexport == 0) {
-                throw new \Exception('Не все товары сопоставлены!');
+                throw new \Exception('Накладная к выгрузке не готова! ');
             }
 
             if ($api->auth()) {

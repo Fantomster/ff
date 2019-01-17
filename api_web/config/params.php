@@ -36,7 +36,9 @@ return [
         '/order/complete-order-by-unconfirmed-vendor',
         '/order/messages-by-unconfirmed-vendor',
         '/order/send-message-by-unconfirmed-vendor',
-        '/client/get-license-mix-cart'
+        '/client/get-license-mix-cart',
+        '/order/save-to-excel-by-unconfirmed-vendor',
+        '/order/save-to-pdf-by-unconfirmed-vendor',
     ],
     'api_web_url' => 'https://api-dev.mixcart.ru',
     'staticUrl' => [

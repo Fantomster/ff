@@ -16,7 +16,7 @@ $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPco
 if (empty($model)) {
     echo "<div  style=\"text-align:right;\">";
     //if ($waybillMode === "0") {
-    echo Html::a('Создать накладную', ['create', 'order_id' => $order_id], ['class' => 'btn btn-md fk-button']);
+    echo Html::a('Создать накладную', ['create', 'order_id' => $order_id, 'page' => $page], ['class' => 'btn btn-md fk-button']);
     /*} else {
         echo "Включён автоматический режим создания накладных.";
     }*/
@@ -80,12 +80,20 @@ if (empty($model)) {
             'buttons'        => [
 
                 'update' => function ($url, $model) {
-                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/tillypad/waybill/update', 'id' => $model->id]);
+                    $page = Yii::$app->request->get('page');
+                    if ($page == '') {
+                        $page = 1;
+                    }
+                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/tillypad/waybill/update', 'id' => $model->id, 'page' => $page]);
                     return \yii\helpers\Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', $customurl,
                         ['title' => Yii::t('backend', 'Изменить шапку'), 'data-pjax' => "0"]);
                 },
                 'map'    => function ($url, $model) {
-                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/tillypad/waybill/map', 'waybill_id' => $model->id, 'way' => 0, 'iikoWaybillDataSearch[vat]' => 1]);
+                    $page = Yii::$app->request->get('page');
+                    if ($page == '') {
+                        $page = 1;
+                    }
+                    $customurl = Yii::$app->getUrlManager()->createUrl(['clientintegr/tillypad/waybill/map', 'waybill_id' => $model->id, 'way' => 0, 'iikoWaybillDataSearch[vat]' => 1, 'page' => $page]);
                     return \yii\helpers\Html::a('<i class="fa fa-chain" aria-hidden="true"></i>', $customurl,
                         ['title' => Yii::t('backend', 'Сопоставить'), 'data-pjax' => "0"]);
                 },

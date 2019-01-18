@@ -11,5 +11,7 @@ module.exports = {
         chromedriver.stop();
 
         done();
-    }
+    },
+    
+    'site_url' : "https://front-qas.mixcart.ru"
 };

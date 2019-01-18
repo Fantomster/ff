@@ -103,11 +103,10 @@ class OuterAgent extends \yii\db\ActiveRecord
      */
     public function getVendor()
     {
-        $db_instance = DBNameHelper::getMainName();
         return (new ActiveQuery(Organization::class))
-            ->from($db_instance . '.' . Organization::tableName() . ' `o`')
+            ->from(DBNameHelper::getMainName() . '.' . Organization::tableName() . ' o')
             ->onCondition([
-                '`o`.`id`' => '`outer_agent`.`vendor_id`'
+                'o.id' => 'outer_agent.vendor_id'
             ]);
     }
 

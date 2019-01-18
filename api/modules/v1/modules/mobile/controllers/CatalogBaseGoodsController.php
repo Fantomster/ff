@@ -94,7 +94,7 @@ class CatalogBaseGoodsController extends ActiveController {
         }
 
         if(!empty($params->vendor_id)) {
-            $where .= ' AND `org`.id IN (' .$params->vendor_id. ') ';
+            $where .= ' AND org.id IN (' . $params->vendor_id . ') ';
             $selectedVendor = $params->vendor_id;
         }
 
@@ -116,10 +116,10 @@ class CatalogBaseGoodsController extends ActiveController {
         SELECT * FROM (
            SELECT 
               $fieldsCBG
-           FROM `catalog_base_goods` `cbg`
-             LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
-             LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
-             LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+           FROM catalog_base_goods cbg
+             LEFT JOIN organization org ON cbg.supp_org_id = org.id
+             LEFT JOIN catalog cat ON cbg.cat_id = cat.id
+             LEFT JOIN currency curr ON cat.currency_id = curr.id
            WHERE
            cat_id IN (" . $catalogs . ")
            ".$where."
@@ -127,11 +127,11 @@ class CatalogBaseGoodsController extends ActiveController {
         UNION ALL
           SELECT 
           $fieldsCG
-          FROM `catalog_goods` `cg`
-           LEFT JOIN `catalog_base_goods` `cbg` ON cg.base_goods_id = cbg.id
-           LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
-           LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
-           LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+          FROM catalog_goods cg
+           LEFT JOIN catalog_base_goods cbg ON cg.base_goods_id = cbg.id
+           LEFT JOIN organization org ON cbg.supp_org_id = org.id
+           LEFT JOIN catalog cat ON cg.cat_id = cat.id
+           LEFT JOIN currency curr ON cat.currency_id = curr.id
           WHERE 
           cg.cat_id IN (" . $catalogs . ")
           ".$where."

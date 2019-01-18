@@ -43,10 +43,10 @@ class MercuryReportSearch extends Journal
         $organizationTable = Organization::tableName();
         $dbName = DBNameHelper::getMainName();
 
-        $query->select('org.`name` as orgName, log.organization_id, SUM(case when log.`type` = \'success\' then 1 else 0 end) as succCount, SUM(case when log.`type` <> \'success\' then 1 else 0 end) as errorCount');
+        $query->select('org.name as orgName, log.organization_id, SUM(case when log.type = \'success\' then 1 else 0 end) as succCount, SUM(case when log.type <> \'success\' then 1 else 0 end) as errorCount');
         $query->from('journal as log');
         $query->leftJoin("$dbName.$organizationTable as org", 'org.id = log.organization_id');
-        $query->where('log.`operation_code` = 3');
+        $query->where('log.operation_code = 3');
         $query->groupBy(['log.organization_id']);
 
         $dataProvider = new ActiveDataProvider([

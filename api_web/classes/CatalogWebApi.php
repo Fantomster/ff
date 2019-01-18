@@ -465,8 +465,8 @@ class CatalogWebApi extends WebApi
             'cbg.article as article',
             'cbg.product as name',
             'cbg.ed as ed',
-            "{$catalog->currency_id} as `currency_id`",
-            "'{$catalog->currency->symbol}' as `currency`"
+            "{$catalog->currency_id} as currency_id",
+            "'{$catalog->currency->symbol}' as currency"
         ];
 
         $query = (new Query())->select($selectFields);

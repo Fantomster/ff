@@ -64,9 +64,10 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
 
     /**
      * Синхронизация складов
-     * @return integer
-     * @throws BadRequestHttpException
+     *
+     * @return int
      * @throws ValidationException
+     * @throws \Exception
      */
     protected function store()
     {
@@ -83,13 +84,13 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
                 //Если нет категории у нас, создаем
                 if (empty($model)) {
                     $model = new OuterStore([
-                        'outer_uid' => $store['id'],
-                        'org_id' => $this->orgId,
+                        'outer_uid'  => $store['id'],
+                        'org_id'     => $this->orgId,
                         'service_id' => self::SERVICE_ID,
                     ]);
 
                     if (!empty($store['type'])) {
-                        if($store['type'] == 'rootnode'){
+                        if ($store['type'] == 'rootnode') {
 
                             $model->makeRoot();
                             $rootNode = $model;
@@ -114,7 +115,10 @@ class IikoStoreSync extends IikoSyncConsumer implements ConsumerInterface
             }
         }
         //Обновляем колличество полученных объектов
-        return (int)OuterStore::find()->where(['is_deleted' => 0, 'org_id' => $this->orgId, 'service_id' => self::SERVICE_ID])->count();
+        return (int)OuterStore::find()
+            ->where(['is_deleted' => 0, 'org_id' => $this->orgId, 'service_id' => self::SERVICE_ID])
+            ->andFilterWhere(['!=', 'level', '0'])
+            ->count();
     }
 
 }

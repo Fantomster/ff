@@ -520,7 +520,7 @@ $js = <<< JS
                                             sel = sel+'<select id="selpos" name="list_tovar" class="swal2-input">';
                                             var index;
                                             for (index = 0; index < data.length; ++index) {
-                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['text']+'</option>';
+                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['txt']+'</option>';
                                             }
                                             sel = sel+'</select></div>';
                                     } else {
@@ -547,7 +547,7 @@ $js = <<< JS
                                             sel = sel+'<select id="selpos" name="list_postav" class="swal2-input">';
                                             var index;
                                             for (index = 0; index < data.length; ++index) {
-                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['text']+'</option>';
+                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['txt']+'</option>';
                                             }
                                             sel = sel+'</select></div>';
                                         } else {
@@ -561,10 +561,10 @@ $js = <<< JS
                             })
                         });
                     })
-                })
+                });
                 $('#denom_close').on('click', function() {
                     swal.close();
-                })
+                });
                 $('#denom_forever').on('click', function () {
                     var selectvalue = $('#selpos').val();
                     var selected_name = $("#selpos option:selected").text();
@@ -634,7 +634,7 @@ $js = <<< JS
                     $(this).prop('checked', true);
                     $(this).parents('tr').addClass('danger');
                 }
-            })
+            });
             var vca = verify_check_all();
             if (vca == 0) {
                 $('.select-on-check-all').val(1);
@@ -700,7 +700,7 @@ $js = <<< JS
                 if ($(this).is(':checked')) {
                     count_selected_checkbocks_on_page++;
                 }
-            })
+            });
             var difference = count_all_checkbocks_on_page - count_selected_checkbocks_on_page;
             return difference;
         }

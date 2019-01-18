@@ -178,7 +178,7 @@ class RequestController extends DefaultController
                     foreach ($deliveryRegions['allow'] as $row) {
                         if (!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
                             $p = $row['administrative_area_level_1'] . $row['locality'];
-                            $query->orWhere('CONCAT(`administrative_area_level_1`, `locality`) = :p', [':p' => $p]);
+                            $query->orWhere('CONCAT(administrative_area_level_1, locality) = :p', [':p' => $p]);
                         } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined') && !empty($row['locality'])) {
                             $query->orWhere(['=', 'locality', $row['locality']]);
                         } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])) {
@@ -192,7 +192,7 @@ class RequestController extends DefaultController
                         foreach ($deliveryRegions['exclude'] as $row) {
                             if (!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
                                 $p = $row['administrative_area_level_1'] . $row['locality'];
-                                $query->andWhere('CONCAT(`administrative_area_level_1`, `locality`) <> :s', [':s' => $p]);
+                                $query->andWhere('CONCAT(administrative_area_level_1, locality) <> :s', [':s' => $p]);
                             } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined') && !empty($row['locality'])) {
                                 $query->andWhere(['!=', 'locality', $row['locality']]);
                             } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])) {

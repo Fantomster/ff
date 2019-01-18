@@ -20,18 +20,21 @@ abstract class AbstractDaemonController extends DaemonController
 
     /**
      * Description
+     *
      * @var RabbitService
      */
     private $rabbit;
 
     /**
      * Description
+     *
      * @var AMQPStreamConnection
      */
     private $connect;
 
     /**
      * Description
+     *
      * @var AMQPChannel
      */
     private $channel = null;
@@ -43,12 +46,14 @@ abstract class AbstractDaemonController extends DaemonController
 
     /**
      * last_executed consumer time
+     *
      * @var \DateTime
      * */
     public $lastExec = null;
 
     /**
      * Check consumer implements interfaces methods
+     *
      * @param \console\modules\daemons\components\ConsumerInterface $consumer
      */
     private function getConsumer(ConsumerInterface $consumer)
@@ -58,6 +63,7 @@ abstract class AbstractDaemonController extends DaemonController
 
     /**
      * Generate class string
+     *
      * @return string
      */
     public function getConsumerClassName()
@@ -68,6 +74,8 @@ abstract class AbstractDaemonController extends DaemonController
     /**
      * Create consumer with different parameters
      * maybe refactoring to argument unpacking new class(...$arrayOfConstructorParameters)
+     *
+     * @throws \Exception
      */
     public function createConsumer()
     {
@@ -85,9 +93,12 @@ abstract class AbstractDaemonController extends DaemonController
         $dateTime = new \DateTime();
         (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
             'start_executing' => $dateTime->format('Y-m-d H:i:s')
-                ], $arWhere)->execute();
+        ], $arWhere)->execute();
     }
 
+    /**
+     * @throws
+     */
     public function loggingExecutedTime()
     {
         $arWhere = [
@@ -98,22 +109,23 @@ abstract class AbstractDaemonController extends DaemonController
             $arWhere['organization_id'] = $this->orgId;
         }
 
-        $dateTime       = new \DateTime();
+        $dateTime = new \DateTime();
         $this->lastExec = $dateTime->format('Y-m-d H:i:s');
         (new Query())->createCommand(\Yii::$app->db_api)->update(RabbitQueues::tableName(), [
             'start_executing' => new Expression('NULL'),
             'last_executed'   => $this->lastExec
-                ], $arWhere)->execute();
+        ], $arWhere)->execute();
     }
 
     /**
      * @return array|bool
+     * @throws \ErrorException
+     * @throws \yii\base\InvalidConfigException
      */
     protected function defineJobs()
     {
         $this->rabbit = \Yii::$app->get('rabbit');
-        $consumerTag  = get_class($this);
-
+        $consumerTag = get_class($this);
         //Получаем канал, если нет, создаем
         $channel = $this->getChannel($this->getQueueName(), $this->getExchangeName());
         //Получение сообщений из очереди по одному
@@ -127,7 +139,7 @@ abstract class AbstractDaemonController extends DaemonController
             try {
                 $channel->wait(null, true, 5);
             } catch (\PhpAmqpLib\Exception\AMQPTimeoutException $timeout) {
-                
+
             } catch (\PhpAmqpLib\Exception\AMQPRuntimeException $runtime) {
                 \Yii::error($runtime->getMessage());
             }
@@ -152,23 +164,19 @@ abstract class AbstractDaemonController extends DaemonController
     }
 
     /**
-     * Поддержка соединений
+     * @throws \yii\db\Exception
      */
     public function renewConnections()
     {
-        //if (\Yii::$app->db->isActive) {
         \Yii::$app->db->close();
         \Yii::$app->db->open();
-        //}
-        //if (\Yii::$app->db_api->isActive) {
         \Yii::$app->db_api->close();
         \Yii::$app->db_api->open();
-        //}
     }
 
     /**
-     * send to FCM when consumer complete work
-     * */
+     * @throws \yii\base\InvalidConfigException
+     */
     public function noticeToFCM(): void
     {
         $arFB = [
@@ -187,13 +195,15 @@ abstract class AbstractDaemonController extends DaemonController
 
     /**
      * Get last timeout from last exec time
-     * @return string|null
+     *
+     * @return false|string|null
+     * @throws \Exception
      */
     public function getLastTimeout()
     {
         if (!is_null($this->lastExec)) {
             $lastExec = new \DateTime($this->lastExec);
-            $timeOut  = $lastExec->getTimestamp() + $this->consumerClassName::$timeout;
+            $timeOut = $lastExec->getTimestamp() + $this->consumerClassName::$timeout;
             return date('Y-m-d H:i:s', $timeOut);
         }
         return null;
@@ -243,6 +253,7 @@ abstract class AbstractDaemonController extends DaemonController
 
     /**
      * Exchange name
+     *
      * @return string
      */
     protected function getExchangeName()
@@ -252,6 +263,7 @@ abstract class AbstractDaemonController extends DaemonController
 
     /**
      * Queue name
+     *
      * @return string
      */
     abstract protected function getQueueName();

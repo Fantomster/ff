@@ -63,7 +63,7 @@ class RkwsController extends Controller {
     public function actionIndex() {
         $searchModel = new \api\common\models\RkServiceSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $query0 = "select `created` from `rk_actions` where `id` = '1'";
+        $query0 = "select created from rk_actions where id = '1'";
         $a = Yii::$app->db_api->createCommand($query0)->queryScalar();
         $data_last_license = $a;
         $dataProvider->pagination->pageParam = 'page_outer';
@@ -92,12 +92,12 @@ class RkwsController extends Controller {
         $res->getObjects();
 
         $vrem = date("Y-m-d H:i:s");
-        $query0 = "update `rk_actions` set `created` = '".$vrem."' where `id` = '1'";
+        $query0 = "update rk_actions set created = '" . $vrem . "' where id = '1'";
         $a = Yii::$app->db_api->createCommand($query0)->execute();
-        $query0 = "select `td` from `rk_service` where `code` = '199990046'";
+        $query0 = "select td from rk_service where code = '199990046'";
         $a = Yii::$app->db_api->createCommand($query0)->queryScalar();
         if($a=='0001-01-05 00:00:00') {
-            $query0 = "update `rk_service` set `td` = '2100-01-01 00:00:00' where `code` = '199990046'";
+            $query0 = "update rk_service set td = '2100-01-01 00:00:00' where code = '199990046'";
             $a = Yii::$app->db_api->createCommand($query0)->execute();
         }
         
@@ -144,10 +144,10 @@ class RkwsController extends Controller {
         if (!is_null($term)) {
             $query = new \yii\db\Query;
 
-              $query->select(['id'=>'id','text' => 'CONCAT("(ID:",`id`,") ",`name`)'])
-                    ->from('organization')
-                    ->where('type_id = 1')  
-                    ->andwhere("id like :id or `name` like :name",[':id' => '%'.$term.'%', ':name' => '%'.$term.'%'])
+            $query->select(['id' => 'o.id', 'text' => 'CONCAT("(ID:",o.id,") ",o.name)'])
+                ->from('organization o')
+                ->where('o.type_id = 1')
+                ->andwhere("o.id like :id or o.name like :name", [':id' => '%' . $term . '%', ':name' => '%' . $term . '%'])
                     ->limit(20);
 
             $command = $query->createCommand();

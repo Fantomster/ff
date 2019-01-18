@@ -427,10 +427,10 @@ class EComIntegration extends Component
         }
 
         $catalog_base_goods = (new \yii\db\Query())
-            ->select(['id', 'barcode'])
-            ->from('catalog_base_goods')
+            ->select(['cbg.id', 'cbg.barcode'])
+            ->from('catalog_base_goods cbg')
             ->where(['cat_id' => $baseCatalog->id])
-            ->andWhere('`barcode` IS NOT NULL')
+            ->andWhere('cbg.barcode IS NOT NULL')
             ->all();
 
         foreach ($catalog_base_goods as $base_good) {

@@ -141,8 +141,8 @@ class OrganizationSearch extends Organization
     {
         $db = Yii::$app->get($db);
         $dbNameArr = explode(';dbname=', $db->dsn);
-        $dbName = $dbNameArr[1];
-        return "`" . $dbName . "`";
+
+        return $dbNameArr[1];
     }
 
     private function getSQLQuery($queue)

@@ -253,7 +253,7 @@ class WaybillHelper
     public function checkWaybillForVsdUuid($uuid)
     {
         return WaybillContent::find()
-            ->leftJoin(DBNameHelper::getMainName() . '.`' . OrderContent::tableName() . '` as oc', 'oc.id = order_content_id')
+            ->leftJoin(DBNameHelper::getMainName() . '.' . OrderContent::tableName() . ' as oc', 'oc.id = order_content_id')
             ->where(['oc.merc_uuid' => $uuid])
             ->exists();
     }

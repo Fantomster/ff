@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use api\common\models\RabbitQueues;
+use console\modules\daemons\components\AbstractConsumer;
 use yii\db\Expression;
 use yii\db\Query;
 
@@ -31,9 +32,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
     protected $sleep = 5;
 
     /**
-     * Реконнекты
-     *
-     * @return bool
+     * @throws \yii\db\Exception
      */
     protected function renewConnections()
     {
@@ -49,7 +48,6 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
 
     /**
      * @param $className
-     *
      * @return mixed
      */
     protected function getCommandNameBy($className)
@@ -90,7 +88,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
     protected function defineJobs()
     {
         sleep($this->sleep);
-        $res = \Yii::$app->db_api->createCommand('SELECT * FROM rabbit_queues')->queryAll();
+        $res = (new Query())->select('*')->from(RabbitQueues::tableName())->all(\Yii::$app->db_api);
 
         foreach ($res as $row) {
             try {
@@ -128,11 +126,15 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
     /**
      * Check condition for killing consumer or nor
      *
-     * @param array $row sql array from rabbit_queues table row
-     * @return boolean
-     * */
+     * @param $row
+     * @param $queue
+     * @return bool
+     * @throws \yii\db\Exception
+     * @throws \Exception
+     */
     protected function checkForKill($row, $queue)
     {
+        /** @var AbstractConsumer $consumerClass */
         $consumerClass = $this->getConsumerClassName($row['consumer_class_name']);
 
         if (!is_null($row['start_executing'])) {

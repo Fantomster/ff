@@ -160,7 +160,7 @@ class License extends ActiveRecord
                 'license.service_id',
                 'lo.org_id'
             ])
-            ->orderBy(['`license`.sort_index' => SORT_DESC]);
+            ->orderBy(['license.sort_index' => SORT_DESC]);
 
         if (!empty($service_ids)) {
             $license->andWhere(['in', 'license.service_id', $service_ids]);

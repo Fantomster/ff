@@ -43,9 +43,10 @@ abstract class WatcherDaemonController extends DaemonController
     /**
      * Job processing body
      *
-     * @param $job array
-     *
-     * @return boolean
+     * @param $job
+     * @return bool
+     * @throws \yii\base\InvalidRouteException
+     * @throws \yii\console\Exception
      */
     protected function doJob($job)
     {
@@ -71,8 +72,7 @@ abstract class WatcherDaemonController extends DaemonController
                         return true;
                     }
                 }
-            }
-            else{
+            } else {
                 $job['enabled'] = true;
             }
         }
@@ -122,6 +122,10 @@ abstract class WatcherDaemonController extends DaemonController
         return $this->daemonsList;
     }
 
+    /**
+     * @param $className
+     * @return string
+     */
     protected function getCommandNameBy($className)
     {
         $command = strtolower(
@@ -142,7 +146,6 @@ abstract class WatcherDaemonController extends DaemonController
 
     /**
      * @param $pid
-     *
      * @return bool
      */
     public function isProcessRunning($pid)

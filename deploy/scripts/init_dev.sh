@@ -8,6 +8,11 @@ if [ $? -gt 0 ]; then
     exit 1
 fi
 
+cd /var/www/html/dev.mixcart.ru/nightwatch
+chmod 777 nightwatch
+npm install
+#nightwatch
+
 sudo rm -rf /var/www/html/dev.mixcart.ru/frontend/web/assets/*
 sudo rm -rf /var/www/html/dev.mixcart.ru/backend/web/assets/*
 sudo rm -rf /var/www/html/dev.mixcart.ru/market/web/assets/*

@@ -17,6 +17,7 @@ use common\models\CatalogBaseGoods;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
 use api_web\components\WebApi;
@@ -465,8 +466,8 @@ class CatalogWebApi extends WebApi
             'cbg.article as article',
             'cbg.product as name',
             'cbg.ed as ed',
-            "{$catalog->currency_id} as currency_id",
-            "'{$catalog->currency->symbol}' as currency"
+            'currency_id' => new Expression("{$catalog->currency_id}"),
+            'currency'    => new Expression("'{$catalog->currency->symbol}'"),
         ];
 
         $query = (new Query())->select($selectFields);

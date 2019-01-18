@@ -937,7 +937,7 @@ $js = <<< JS
         
         FF.deleteBtn.init();
         
-        if ($way > 0;) {
+        if ($way > 0) {
 	        $('html, body').animate({
 	            scrollTop: $("#way$way").offset().top
 	        }, 1000);

@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use api\common\models\iiko\iikoAgent;
 use common\components\SimpleChecker;
 use common\models\OrderStatus;
+use common\models\RelationCategory;
 use Yii;
 use common\models\Currency;
 use common\models\ManagerAssociate;
@@ -26,6 +27,7 @@ use common\models\CatalogGoods;
 use common\models\GoodsNotes;
 use common\models\search\UserSearch;
 use common\components\AccessRule;
+use yii\db\Expression;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -1162,12 +1164,32 @@ class ClientController extends DefaultController
             }
             $categorys = Yii::$app->request->post('relationCategory');
             if ($categorys) {
-                $sql = "DELETE FROM relation_category WHERE rest_org_id=$currentUser->organization_id AND supp_org_id=$supplier_org_id";
-                \Yii::$app->db->createCommand($sql)->execute();
+                RelationCategory::deleteAll([
+                    'rest_org_id' => $currentUser->organization_id,
+                    'supp_org_id' => $supplier_org_id
+                ]);
 
-                foreach ($categorys as $arrCategorys) {
-                    $sql = "insert into relation_category (category_id,rest_org_id,supp_org_id,created_at) VALUES ($arrCategorys,$currentUser->organization_id,$supplier_org_id,NOW())";
-                    \Yii::$app->db->createCommand($sql)->execute();
+                $insert = [];
+                foreach ($categorys as $cat_id) {
+                    $insert[] = [
+                        $cat_id,
+                        $currentUser->organization_id,
+                        $supplier_org_id,
+                        new Expression('NOW')
+                    ];
+                }
+
+                if (!empty($insert)) {
+                    try {
+                        \Yii::$app->db->createCommand()->batchInsert(RelationCategory::tableName(), [
+                            'category_id',
+                            'rest_org_id',
+                            'supp_org_id',
+                            'created_at'
+                        ], $insert)->execute();
+                    } catch (\Exception $e) {
+                        exit($e->getMessage());
+                    }
                 }
 
                 $message = Yii::t('app', 'Сохранено');
@@ -1175,8 +1197,10 @@ class ClientController extends DefaultController
             } else {
                 $post = Yii::$app->request->post();
                 if ($post) {
-                    $sql = "DELETE FROM relation_category WHERE rest_org_id=$currentUser->organization_id AND supp_org_id=$supplier_org_id";
-                    \Yii::$app->db->createCommand($sql)->execute();
+                    RelationCategory::deleteAll([
+                        'rest_org_id' => $currentUser->organization_id,
+                        'supp_org_id' => $supplier_org_id
+                    ]);
                     $message = Yii::t('app', 'Сохранено');
                     return $this->renderAjax('suppliers/_success', ['message' => $message]);
                 }
@@ -1205,39 +1229,50 @@ class ClientController extends DefaultController
     public function actionViewCatalog($id)
     {
         $cat_id = $id;
-        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $catalog = Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one();
 
-        if (Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one()->type == Catalog::BASE_CATALOG) {
-            $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_base_goods.price,catalog_base_goods.status,currency.symbol as symbol "
-                . " FROM catalog "
-                . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
-                . " LEFT JOIN currency ON catalog.currency_id=currency.id"
-                . " WHERE "
-                . " catalog_base_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF);
-            $totalCount = Yii::$app->db->createCommand(" SELECT COUNT(*) "
-                . " FROM catalog "
-                . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
-                . " WHERE "
-                . " catalog_base_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF)->queryScalar();
+        if ($catalog->type == Catalog::BASE_CATALOG) {
+            $query = (new Query())
+                ->select('
+                catalog.id as id,
+                article,
+                catalog_base_goods.product as product,
+                units,
+                ed,
+                catalog_base_goods.price,
+                catalog_base_goods.status,
+                currency.symbol as symbol')
+                ->from(Catalog::tableName())
+                ->innerJoin(CatalogBaseGoods::tableName(), 'catalog.id = catalog_base_goods.cat_id')
+                ->leftJoin(Currency::tableName(), 'catalog.currency_id=currency.id')
+                ->where([
+                    'catalog_base_goods.cat_id' => $id,
+                    'deleted' => CatalogBaseGoods::DELETED_OFF
+                ]);
         }
-        if (Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one()->type == Catalog::CATALOG) {
-            $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_goods.price as price, catalog_base_goods.status,currency.symbol as symbol "
-                . " FROM catalog "
-                . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-                . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
-                . " LEFT JOIN currency ON catalog.currency_id=currency.id"
-                . " WHERE "
-                . " catalog_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF);
-            $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) "
-                . " FROM catalog "
-                . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-                . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
-                . " WHERE "
-                . " catalog_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF)->queryScalar();
+        if ($catalog->type == Catalog::CATALOG) {
+            $query = (new Query())
+                ->select('
+                catalog.id as id,
+                article,
+                catalog_base_goods.product as product,
+                units,
+                ed,
+                catalog_goods.price as price,
+                catalog_base_goods.status,
+                currency.symbol as symbol')
+                ->from(Catalog::tableName())
+                ->innerJoin(CatalogGoods::tableName(), 'catalog.id = catalog_goods.cat_id')
+                ->innerJoin(CatalogBaseGoods::tableName(), 'catalog_goods.base_goods_id = catalog_base_goods.id')
+                ->leftJoin(Currency::tableName(), 'catalog.currency_id=currency.id')
+                ->where([
+                    'catalog_base_goods.cat_id' => $id,
+                    'deleted' => CatalogBaseGoods::DELETED_OFF
+                ]);
         }
         $dataProvider = new \yii\data\SqlDataProvider([
-            'sql'        => $query->sql,
-            'totalCount' => $totalCount,
+            'sql'        => $query->createCommand()->getRawSql(),
+            'totalCount' => $query->count(),
             'pagination' => [
                 'pageSize' => 7,
             ],

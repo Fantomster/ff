@@ -641,7 +641,7 @@ class WaybillHelper
     public function throwException($serviceId, $orgId, $error)
     {
         if (\Yii::$app instanceof \Yii\web\Application) {
-            if ($this->user->integration_service_id == $serviceId) {
+            if (isset($this->user) && $this->user->integration_service_id == $serviceId) {
                 throw new BadRequestHttpException($error);
             } else {
                 $this->writeInJournal(\Yii::t('api_web', $error), $serviceId, $orgId, 'error');

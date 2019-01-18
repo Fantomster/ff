@@ -114,7 +114,6 @@ class TillypadApi
         if (!empty($this->token)) {
             try {
                 $this->sendAuth('/logout');
-                $this->deleteToken();
                 $this->token = null;
             } catch (\Exception $e) {
                 throw $e;
@@ -433,12 +432,5 @@ class TillypadApi
     private function getTokenFile()
     {
         return \Yii::getAlias('@api_web') . '/runtime/tillypad_auth/' . self::$_instance->orgId . '_' . $this->token . '.t';
-    }
-
-    private function deleteToken()
-    {
-        if (file_exists($this->getTokenFile())) {
-            unlink($this->getTokenFile());
-        }
     }
 }

@@ -821,7 +821,7 @@ class Organization extends \yii\db\ActiveRecord
                 . 'WHERE (order_chat.recipient_id = ' . $this->id . ') '
                 . 'AND ((order_chat.is_system=0) '
                 . 'AND (order_chat.viewed=0)) '
-                . 'GROUP BY order_chat.order_id ) AS oc2 ON order_chat.id = oc2.id'
+                . 'GROUP BY order_chat.order_id ) AS oc2 ON order_chat.id = oc2.id '
                 . 'ORDER BY order_chat.created_at DESC';
         }
 

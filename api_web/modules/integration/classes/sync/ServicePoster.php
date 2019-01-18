@@ -107,7 +107,7 @@ class ServicePoster extends AbstractSyncFactory
         $this->countWaybillSend = count($records);
 
         $api = Poster::getInstance($this->user->organization_id);
-        try {
+//        try {
             /** @var Waybill $model */
             foreach ($records as $model) {
                 if (empty($model->waybillContents)) {
@@ -136,13 +136,13 @@ class ServicePoster extends AbstractSyncFactory
                     $transaction->rollBack();
                     $model->status_id = Registry::WAYBILL_ERROR;
                     $model->save();
-                    $this->response($res, $model, $t->getMessage(), false);
+                    $this->response($res, $model, $t->getMessage() . PHP_EOL . $t->getTraceAsString(), false);
                 }
             }
 
-        } catch (\Throwable $t) {
-            throw new BadRequestHttpException($t->getMessage() . PHP_EOL . $t->getTraceAsString());
-        }
+//        } catch (\Throwable $t) {
+//            throw new BadRequestHttpException($t->getMessage() . PHP_EOL . $t->getTraceAsString());
+//        }
 
         return ['result' => $res];
     }

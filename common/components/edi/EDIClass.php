@@ -396,7 +396,7 @@ class EDIClass extends Component
             ->select(['id', 'barcode'])
             ->from(CatalogBaseGoods::tableName())
             ->where(['cat_id' => $baseCatalog->id])
-            ->andWhere('`barcode` IS NOT NULL')
+            ->andWhere('barcode IS NOT NULL')
             ->all();
         foreach ($catalog_base_goods as $base_good) {
             if (!in_array($base_good['barcode'], $barcodeArray) && !$isFollowActionRule) {

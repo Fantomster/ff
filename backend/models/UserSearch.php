@@ -190,7 +190,7 @@ class UserSearch extends User
     public static function getListToLanguage()
     {
 
-        $sql = 'SELECT DISTINCT `language` FROM `user` ORDER BY `language`';
+        $sql = 'SELECT DISTINCT u.language FROM user u ORDER BY u.language';
         $models0 = \Yii::$app->db->createCommand($sql)->queryAll();
         $models = array();
         foreach ($models0 as $m) {

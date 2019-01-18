@@ -89,8 +89,8 @@ class RequestController extends ActiveController {
             'pagination' => false,
         ));
 
-        $query->select("*, (select count(*) from request_counters where request_id = request.id) as `views`,
-(select count(*) from request_callback where request_id = request.id) as `callbacks`");
+        $query->select("*, (select count(*) from request_counters where request_id = request.id) as views,
+(select count(*) from request_callback where request_id = request.id) as callbacks");
 
         $user = Yii::$app->user->getIdentity();
         

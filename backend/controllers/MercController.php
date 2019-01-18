@@ -96,10 +96,10 @@ class MercController extends Controller
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         if (!is_null($term)) {
             $query = new \yii\db\Query;
-            $query->select(['id'=>'id','text' => 'CONCAT("(ID:",`id`,") ",`name`)'])
-                ->from('organization')
-                ->where('type_id in (1,2)')
-                ->andwhere("id like :id or `name` like :name",[':id' => '%'.$term.'%', ':name' => '%'.$term.'%'])
+            $query->select(['id' => 'o.id', 'text' => 'CONCAT("(ID:",o.id,") ",o.name)'])
+                ->from('organization o')
+                ->where('o.type_id in (1,2)')
+                ->andwhere("o.id like :id or o.name like :name", [':id' => '%' . $term . '%', ':name' => '%' . $term . '%'])
                 ->limit(20);
 
             $command = $query->createCommand();

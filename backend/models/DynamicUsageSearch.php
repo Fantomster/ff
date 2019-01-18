@@ -2,6 +2,7 @@
 
 namespace backend\models;
 
+use common\models\Order;
 use Yii;
 use yii\data\SqlDataProvider;
 
@@ -160,9 +161,9 @@ class DynamicUsageSearch extends \yii\base\Model
                             left join franchisee_associate b on a.id = b.organization_id
                             left join franchisee c on b.franchisee_id = c.id
                             where a.blacklisted = 0) as org
-                        left join (select id, client_id org_id, vendor_id, created_at, total_price from `order`
+                        left join (select id, client_id org_id, vendor_id, created_at, total_price from " . Order::tableName() . "
                                    union all
-                                   select id, vendor_id, vendor_id, created_at, total_price from `order`
+                                   select id, vendor_id, vendor_id, created_at, total_price from " . Order::tableName() . "
                             ) o on org.org_id = o.org_id
                         group by org_name, org_contact_name, org_city, org_email, org_id, org_type, org_registred,
                     org_registred_peroiod, franchisee_name, franchisee_region) as q

@@ -83,14 +83,14 @@ class OuterProductMapSearch extends OuterProductMap
              * фильтр по id продукта
              */
             if (!empty($post['search']['product_id'])) {
-                $query->andFilterWhere(["=", "d.`id`", $post['search']['product_id']]);
+                $query->andFilterWhere(["=", "d.id", $post['search']['product_id']]);
             } else {
                 /**
                  * фильтр по продукту
                  */
                 if (!empty($post['search']['product'])) {
-                    $query->andFilterWhere(['like', "f.`name`", $post['search']['product']]);
-                    $query->orFilterWhere(['like', "d.`product`", $post['search']['product']]);
+                    $query->andFilterWhere(['like', "f.name", $post['search']['product']]);
+                    $query->orFilterWhere(['like', "d.product", $post['search']['product']]);
                     $query->orderBy([
                         'IF(f.id is null, 0, 1)' => SORT_DESC
                     ]);

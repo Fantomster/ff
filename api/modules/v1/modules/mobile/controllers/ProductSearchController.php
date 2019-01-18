@@ -71,16 +71,16 @@ class ProductSearchController extends ActiveController {
         $fieldsCBG = [
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name as organization_name',
-            "(`cbg`.`article` + 0) AS c_article_1",
-            "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
-            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+            "(cbg.article + 0) AS c_article_1",
+            "cbg.article AS c_article", "cbg.article REGEXP '^-?[0-9]+$' AS i",
+            "cbg.product REGEXP '^-?[а-яА-Я].*$' AS alf_cyr"
         ];
         $fieldsCG = [
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name as organization_name',
-            "(`cbg`.`article` + 0) AS c_article_1",
-            "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
-            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+            "(cbg.article + 0) AS c_article_1",
+            "cbg.article AS c_article", "cbg.article REGEXP '^-?[0-9]+$' AS i",
+            "cbg.product REGEXP '^-?[а-яА-Я].*$' AS alf_cyr"
         ];
 
         $where = '';
@@ -89,10 +89,10 @@ class ProductSearchController extends ActiveController {
         SELECT * FROM (
            SELECT 
               " . implode(',', $fieldsCBG) . "
-           FROM `catalog_base_goods` `cbg`
-             LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
-             LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
-             LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+           FROM catalog_base_goods cbg
+             LEFT JOIN organization org ON cbg.supp_org_id = org.id
+             LEFT JOIN catalog cat ON cbg.cat_id = cat.id
+             LEFT JOIN currency curr ON cat.currency_id = curr.id
            WHERE
            cat_id IN (" . $catalogs . ")
            ".$where."
@@ -100,11 +100,11 @@ class ProductSearchController extends ActiveController {
         UNION ALL
           SELECT 
           " . implode(',', $fieldsCG) . "
-          FROM `catalog_goods` `cg`
-           LEFT JOIN `catalog_base_goods` `cbg` ON cg.base_goods_id = cbg.id
-           LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
-           LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
-           LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+          FROM catalog_goods cg
+           LEFT JOIN catalog_base_goods cbg ON cg.base_goods_id = cbg.id
+           LEFT JOIN organization org ON cbg.supp_org_id = org.id
+           LEFT JOIN catalog cat ON cg.cat_id = cat.id
+           LEFT JOIN currency curr ON cat.currency_id = curr.id
           WHERE 
           cg.cat_id IN (" . $catalogs . ")
           ".$where."

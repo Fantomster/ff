@@ -56,7 +56,7 @@ class OperatorReportSearch extends Order
             status_call_id,
             round(avg(TIME_TO_SEC(TIMEDIFF(a.closed_at, a.created_at))) / 60, 2) avg_resolve_mins"
         ])
-            ->from("`order` b")
+            ->from(Order::tableName() . " b")
             ->leftJoin(OperatorCall::tableName() . ' as a', 'a.order_id = b.id')
             ->leftJoin(User::tableName() . ' as c', 'c.id = a.operator_id')
             ->leftJoin("order_chat as d", "d.order_id = b.id 

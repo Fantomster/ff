@@ -116,14 +116,14 @@ class SiteController extends DefaultController
             $iso_code = $currency->iso_code;
         }
         //---graph start
-        $query = "SELECT truncate(sum(total_price),1) as spent, year(`order`.created_at) as year, month(`order`.created_at) as month, day(`order`.created_at) as day "
-            . "FROM `order` LEFT JOIN `franchisee_associate` ON `order`.vendor_id = `franchisee_associate`.organization_id "
+        $query = "SELECT truncate(sum(total_price),1) as spent, year(o.created_at) as year, month(o.created_at) as month, day(o.created_at) as day "
+            . "FROM " . Order::tableName() . " o LEFT JOIN franchisee_associate ON o.vendor_id = franchisee_associate.organization_id "
             . "where status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
-            . "and `order`.created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY AND `franchisee_associate`.franchisee_id = " . $this->currentFranchisee->id . " ";
+            . "and o.created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY AND franchisee_associate.franchisee_id = " . $this->currentFranchisee->id . " ";
         if ($currencyId) {
-            $query .= " AND `currency_id`=" . $currencyId . " ";
+            $query .= " AND currency_id=" . $currencyId . " ";
         }
-        $query .= "group by year(`order`.created_at), month(`order`.created_at), day(`order`.created_at)";
+        $query .= "group by year(o.created_at), month(o.created_at), day(o.created_at)";
         $command = Yii::$app->db->createCommand($query);
         $ordersByDay = $command->queryAll();
         $dayLabels = [];

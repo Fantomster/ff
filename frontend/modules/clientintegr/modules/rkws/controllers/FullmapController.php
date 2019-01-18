@@ -305,10 +305,10 @@ class FullmapController extends \frontend\modules\clientintegr\controllers\Defau
 
         if (!is_null($term)) {
 
-            $sql = "( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom = '".$term."' )".
-                " union ( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product  where acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '".$term."%' limit 10 )".
-                "union ( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product where  acc = ".User::findOne(Yii::$app->user->id)->organization_id." and denom like '%".$term."%' limit 5 )".
-                "order by case when length(trim(`text`)) = length('".$term."') then 1 else 2 end, `text`; ";
+            $sql = "( select id, CONCAT(denom, ' (' ,unitname, ')') as txt from rk_product where acc = " . User::findOne(Yii::$app->user->id)->organization_id . " and denom = '" . $term . "' )" .
+                " union ( select id, CONCAT(denom, ' (' ,unitname, ')') as txt from rk_product  where acc = " . User::findOne(Yii::$app->user->id)->organization_id . " and denom like '" . $term . "%' limit 10 )" .
+                "union ( select id, CONCAT(denom, ' (' ,unitname, ')') as txt from rk_product where  acc = " . User::findOne(Yii::$app->user->id)->organization_id . " and denom like '%" . $term . "%' limit 5 )" .
+                "order by case when length(trim(txt)) = length('" . $term . "') then 1 else 2 end, txt; ";
 
             $db = Yii::$app->db_api;
             $data = $db->createCommand($sql)->queryAll();

@@ -437,11 +437,11 @@ class GoodsController extends Controller
                             $cbg_id = array_search(mb_strtolower($row_product), $arr);
                             if ($cbg_id) {
                                 if ($batch < 1000) {
-                                    $data_update .= "UPDATE $cbgTable set `price` = $row_price where cat_id=$id and id=$cbg_id;";
+                                    $data_update .= "UPDATE $cbgTable set price = $row_price where cat_id=$id and id=$cbg_id;";
                                     $batch++;
                                 } else {
                                     Yii::$app->db->createCommand($data_update)->execute();
-                                    $data_update = "UPDATE $cbgTable set `price` = $row_price where cat_id=$id and id=$cbg_id;";
+                                    $data_update = "UPDATE $cbgTable set price = $row_price where cat_id=$id and id=$cbg_id;";
                                     $batch = 0;
                                 }
                             }
@@ -476,11 +476,11 @@ class GoodsController extends Controller
                             $cbg_id = array_search(mb_strtolower($row_product), $arr);
                             if ($cbg_id) {
                                 $data_update .= "UPDATE $cbgTable set 
-                                    `market_place` = 1,
-                                    `mp_show_price` = 1,
-                                    `es_status` = 1
+                                    market_place = 1,
+                                    mp_show_price = 1,
+                                    es_status = 1
                                      where cat_id=$id and id='$cbg_id'"
-                                    . " and `ed` is not null and `category_id` is not null;";
+                                    . " and ed is not null and category_id is not null;";
                             }
                         }
                     }

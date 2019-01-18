@@ -82,9 +82,9 @@ class RkPconst extends \yii\db\ActiveRecord
     {
         $res = self::find()
             ->select('*')
-            ->join('LEFT JOIN', 'rk_dicconst', '`rk_dicconst`.`denom` = "column_number_invoice"')
+            ->join('LEFT JOIN', 'rk_dicconst', 'rk_dicconst.denom = "column_number_invoice"')
             ->where(['org' => $organization])
-            ->andWhere('`rk_pconst`.`const_id` = `rk_dicconst`.`id`')
+            ->andWhere('rk_pconst.const_id = rk_dicconst.id')
             ->one();
         if($res)
         {

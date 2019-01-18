@@ -341,7 +341,7 @@ class TestRealization extends AbstractRealization implements RealizationInterfac
             ->select(['id', 'barcode'])
             ->from('catalog_base_goods')
             ->where(['cat_id' => $baseCatalog->id])
-            ->andWhere('`barcode` IS NOT NULL')
+            ->andWhere('barcode IS NOT NULL')
             ->all();
 
         foreach ($catalog_base_goods as $base_good) {

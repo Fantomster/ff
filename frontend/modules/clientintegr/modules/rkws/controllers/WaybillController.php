@@ -729,10 +729,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         if (!is_null($term)) {
             $organization_id = User::findOne(Yii::$app->user->id)->organization_id;
 
-            $sql = "( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product where acc = " . $organization_id . " and denom = '" . $term . "' )" .
-                "union ( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product  where acc = " . $organization_id . " and denom like '" . $term . "%' limit 15 )" .
-                "union ( select id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` from rk_product where  acc = " . $organization_id . " and denom like '%" . $term . "%' limit 10 )" .
-                "order by case when length(trim(`text`)) = length('" . $term . "') then 1 else 2 end, `text`; ";
+            $sql = "( select id, CONCAT(denom, ' (' ,unitname, ')') as txt from rk_product where acc = " . $organization_id . " and denom = '" . $term . "' )" .
+                "union ( select id, CONCAT(denom, ' (' ,unitname, ')') as txt from rk_product  where acc = " . $organization_id . " and denom like '" . $term . "%' limit 15 )" .
+                "union ( select id, CONCAT(denom, ' (' ,unitname, ')') as txt from rk_product where  acc = " . $organization_id . " and denom like '%" . $term . "%' limit 10 )" .
+                "order by case when length(trim(txt)) = length('" . $term . "') then 1 else 2 end, txt; ";
 
             $data = Yii::$app->get('db_api')->createCommand($sql)->queryAll();
             $out['results'] = array_values($data);
@@ -766,7 +766,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             //}
 
             $sql = <<<SQL
-            SELECT id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` FROM (
+            SELECT id, CONCAT(denom, ' (' ,unitname, ')') as txt FROM (
                   (SELECT id, denom, unitname FROM rk_product WHERE acc = :org_id AND denom = :term)
                     UNION
                   (SELECT id, denom, unitname FROM rk_product WHERE acc = :org_id AND denom LIKE :term_ LIMIT 15)
@@ -797,7 +797,7 @@ SQL;
             //$constId = RkDicconst::findOne(['denom' => 'main_org']);
             //$parentId = RkPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
             //$organizationID = !is_null($parentId) ? $parentId->value : $orgId;
-            $sql = "SELECT id, CONCAT(`denom`, ' (' ,unitname, ')') as `text` FROM rk_product WHERE acc = " . $orgId . ' ORDER BY denom LIMIT 100';
+            $sql = "SELECT id, CONCAT(denom, ' (' ,unitname, ')') as txt FROM rk_product WHERE acc = " . $orgId . ' ORDER BY denom LIMIT 100';
 
             /**
              * @var $db Connection
@@ -1177,8 +1177,8 @@ SQL;
             $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_koef' => $koef_all_map, ':w_id' => $id_all_map])->execute();
         }
         $dbName = DBNameHelper::getMainName();
-        $sql = "SELECT wd.id FROM `rk_waybill_data` `wd` LEFT JOIN `rk_waybill` `w` ON wd.waybill_id = w.id 
-                LEFT JOIN " . $dbName . ".`order` `o` ON w.order_id = o.id 
+        $sql = "SELECT wd.id FROM rk_waybill_data wd LEFT JOIN rk_waybill w ON wd.waybill_id = w.id 
+                LEFT JOIN " . $dbName . "." . Order::tableName() . " o ON w.order_id = o.id 
                 WHERE w.status_id = 1 AND o.vendor_id = :w_supp AND o.client_id = :w_org AND wd.product_id = :w_pid AND wd.product_rid IS NULL";
         $massivs = Yii::$app->db_api->createCommand($sql, [':w_pid' => $number, ':w_supp' => $supp_id, ':w_org' => $org_id])->queryAll();
         $ids = '';
@@ -1187,7 +1187,7 @@ SQL;
         }
         $ids = rtrim($ids, ',');
         if ($ids) {
-            $sql = "UPDATE `rk_waybill_data` SET `product_rid` = :w_spid, `munit_rid` = :w_munit, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
+            $sql = "UPDATE rk_waybill_data SET product_rid = :w_spid, munit_rid = :w_munit, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
             $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_munit' => $munit_id])->execute();
         }
 

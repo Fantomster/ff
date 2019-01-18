@@ -425,12 +425,4 @@ class TillypadApi
         $url = $this->host . "/licence/info?moduleId=2000";
         return file_get_contents($url);
     }
-
-    /**
-     * @return string
-     */
-    private function getTokenFile()
-    {
-        return \Yii::getAlias('@api_web') . '/runtime/tillypad_auth/' . self::$_instance->orgId . '_' . $this->token . '.t';
-    }
 }

@@ -469,7 +469,7 @@ class AbstractDictionary extends WebApi implements DictionaryInterface
     private function prepareStore($model)
     {
         $child = function ($model) {
-            $childrens = $model->children(1)->all();
+            $childrens = $model->children(1)->andWhere('is_deleted = 0')->all();
             $arReturn = [];
             if (!empty($childrens)) {
                 foreach ($childrens as $children) {
@@ -680,7 +680,7 @@ class AbstractDictionary extends WebApi implements DictionaryInterface
          * @return array
          */
         $child = function ($model) {
-            $childrens = $model->children(1)->all();
+            $childrens = $model->children(1)->andWhere('is_deleted = 0')->all();
             $arReturn = [];
             if (!empty($childrens)) {
                 foreach ($this->iterator($childrens) as $children) {

@@ -73,7 +73,10 @@ class PosterStoreSync extends PosterSyncConsumer implements ConsumerInterface
         $poster = Poster::getInstance($this->orgId);
         $poster->getStores();
         //Обновляем колличество полученных объектов
-        return OuterAgent::find()->where(['is_deleted' => 0, 'org_id' => $this->orgId, 'service_id' => self::SERVICE_ID])->count();
+        return OuterAgent::find()
+            ->where(['is_deleted' => 0, 'org_id' => $this->orgId, 'service_id' => self::SERVICE_ID])
+            ->andFilterWhere(['!=', 'level', '0'])
+            ->count();
     }
 
 }

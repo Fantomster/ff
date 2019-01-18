@@ -56,7 +56,7 @@ use yii\widgets\ActiveForm;
             <?php
             $service_id = $model->service_id ?? 1;
             echo $form->field($model, 'operation_code')->widget(\kartik\select2\Select2::classname(), [
-                'data'          => \yii\helpers\ArrayHelper::map(\common\models\AllServiceOperation::find()->select('code, ifnull(comment, denom) as denom')
+                'data'          => \yii\helpers\ArrayHelper::map(\common\models\AllServiceOperation::find()->select(['code, ifnull(comment, denom) as denom'])
                     ->where(['service_id' => $service_id])
                     ->all(), 'code', 'denom'),
                 'attribute'     => 'operation_code',

@@ -48,19 +48,19 @@ class OrderCatalogSearch extends \yii\base\Model
         $fieldsCG = [
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
-            "(`cbg`.`article` + 0) AS c_article_1",
-            "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
-            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'coalesce( cg.updated_at, cbg.updated_at) AS updated_at',
-            'curr.id as currency_id', '`cbg`.edi_supplier_article'
+            "(cbg.article + 0) AS c_article_1",
+            "cbg.article AS c_article", "cbg.article REGEXP '^-?[0-9]+$' AS i",
+            "cbg.product REGEXP '^-?[а-яА-Я].*$' AS alf_cyr", 'coalesce( cg.updated_at, cbg.updated_at) AS updated_at',
+            'curr.id as currency_id', 'cbg.edi_supplier_article'
         ];
 
         $fieldsCBG = [
             'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id', 'cbg.category_id',
             'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
-            "(`cbg`.`article` + 0) AS c_article_1",
-            "`cbg`.`article` AS c_article", "`cbg`.`article` REGEXP '^-?[0-9]+$' AS i",
-            "`cbg`.`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`", 'cbg.updated_at',
-            'curr.id as currency_id', '`cbg`.edi_supplier_article'
+            "(cbg.article + 0) AS c_article_1",
+            "cbg.article AS c_article", "cbg.article REGEXP '^-?[0-9]+$' AS i",
+            "cbg.product REGEXP '^-?[а-яА-Я].*$' AS alf_cyr", 'cbg.updated_at',
+            'curr.id as currency_id', 'cbg.edi_supplier_article'
         ];
 
         $where = '';
@@ -80,7 +80,7 @@ class OrderCatalogSearch extends \yii\base\Model
             } else {
                 $this->selectedVendor = (int)$this->selectedVendor;
             }
-            $where .= ' AND `org`.id IN (' . $this->selectedVendor . ') ';
+            $where .= ' AND org.id IN (' . $this->selectedVendor . ') ';
         }
 
         if (!empty($this->searchCategory)) {
@@ -120,11 +120,11 @@ class OrderCatalogSearch extends \yii\base\Model
         SELECT DISTINCT * FROM (
             SELECT 
               " . implode(',', $fieldsCG) . "
-              FROM `catalog_goods` `cg`
-               LEFT JOIN `catalog_base_goods` `cbg` ON cg.base_goods_id = cbg.id
-               LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
-               LEFT JOIN `catalog` `cat` ON cg.cat_id = cat.id
-               LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+              FROM catalog_goods cg
+               LEFT JOIN catalog_base_goods cbg ON cg.base_goods_id = cbg.id
+               LEFT JOIN organization org ON cbg.supp_org_id = org.id
+               LEFT JOIN catalog cat ON cg.cat_id = cat.id
+               LEFT JOIN currency curr ON cat.currency_id = curr.id
               WHERE 
               cat.id IN (" . $this->catalogs . ")
               " . $where . "
@@ -132,10 +132,10 @@ class OrderCatalogSearch extends \yii\base\Model
             UNION ALL
               SELECT 
                   " . implode(',', $fieldsCBG) . "
-               FROM `catalog_base_goods` `cbg`
-                 LEFT JOIN `organization` `org` ON cbg.supp_org_id = org.id
-                 LEFT JOIN `catalog` `cat` ON cbg.cat_id = cat.id
-                 LEFT JOIN `currency` `curr` ON cat.currency_id = curr.id
+               FROM catalog_base_goods cbg
+                 LEFT JOIN organization org ON cbg.supp_org_id = org.id
+                 LEFT JOIN catalog cat ON cbg.cat_id = cat.id
+                 LEFT JOIN currency curr ON cat.currency_id = curr.id
                WHERE
                cat.id IN (" . $this->catalogs . ")
                " . $where . "

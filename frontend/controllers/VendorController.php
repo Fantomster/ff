@@ -521,8 +521,8 @@ class VendorController extends DefaultController
                 }
 
                 $sql                      = "insert into {{%catalog_base_goods}}" .
-                        "(`cat_id`,`supp_org_id`,`article`,`product`,"
-                        . "`units`,`price`,`category_id`,`note`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
+                    "(cat_id,supp_org_id,article,product,"
+                    . "units,price,category_id,note,ed,status,market_place,deleted,created_at) VALUES ("
                         . $lastInsert_base_cat_id . ","
                         . $currentUser->organization_id . ","
                         . ":article,"
@@ -759,11 +759,11 @@ class VendorController extends DefaultController
                             $cbg_id = array_search(mb_strtolower($row_product), $arr);
                             if ($cbg_id) {
                                 if ($batch < 1000) {
-                                    $data_update .= "UPDATE $cbgTable set `price` = $row_price where cat_id=$id and id=$cbg_id;";
+                                    $data_update .= "UPDATE $cbgTable set price = $row_price where cat_id=$id and id=$cbg_id;";
                                     $batch++;
                                 } else {
                                     Yii::$app->db->createCommand($data_update)->execute();
-                                    $data_update = "UPDATE $cbgTable set `price` = $row_price where cat_id=$id and id=$cbg_id;";
+                                    $data_update = "UPDATE $cbgTable set price = $row_price where cat_id=$id and id=$cbg_id;";
                                     $batch       = 0;
                                 }
                             }
@@ -797,11 +797,11 @@ class VendorController extends DefaultController
                             $cbg_id = array_search(mb_strtolower($row_product), $arr);
                             if ($cbg_id) {
                                 $data_update .= "UPDATE $cbgTable set 
-                                    `market_place` = 1,
-                                    `mp_show_price` = 1,
-                                    `es_status` = 1
+                                    market_place = 1,
+                                    mp_show_price = 1,
+                                    es_status = 1
                                      where cat_id=$id and id='$cbg_id'"
-                                        . " and `ed` is not null and `category_id` is not null;";
+                                    . " and ed is not null and category_id is not null;";
                             }
                         }
                     }
@@ -954,7 +954,7 @@ class VendorController extends DefaultController
                             $cbg_id = array_search(mb_strtolower($row_product), $arr);
                             if ($cbg_id) {
                                 $data_update .= "UPDATE $cgTable set 
-                                        `price` = $row_price
+                                        price = $row_price
                                          where cat_id=$id and base_goods_id=$cbg_id;";
                             }
                         }
@@ -1030,7 +1030,7 @@ class VendorController extends DefaultController
             $transaction = Yii::$app->db->beginTransaction();
             try {
 
-                $sql                    = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
+                $sql = "insert into " . Catalog::tableName() . "(supp_org_id,name,type,created_at,status) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
                 \Yii::$app->db->createCommand($sql)->execute();
                 $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
 
@@ -1560,13 +1560,13 @@ class VendorController extends DefaultController
         $cat_id = $model->id; //новый каталог id
         if ($cat_type == Catalog::BASE_CATALOG) {
             $sql = "insert into " . CatalogGoods::tableName() .
-                    "(`cat_id`,`base_goods_id`,`price`,`created_at`) "
+                "(cat_id,base_goods_id,price,created_at) "
                     . "SELECT " . $cat_id . ", id, price, NOW() from " . CatalogBaseGoods::tableName() . " WHERE cat_id = $cat_id_old and deleted<>1";
             \Yii::$app->db->createCommand($sql)->execute();
         }
         if ($cat_type == Catalog::CATALOG) {
             $sql = "insert into " . CatalogGoods::tableName() .
-                    "(`cat_id`,`base_goods_id`,`price`,`created_at`) "
+                "(cat_id,base_goods_id,price,created_at) "
                     . "SELECT " . $cat_id . ", base_goods_id, price, NOW() from " . CatalogGoods::tableName() . " WHERE cat_id = $cat_id_old";
             \Yii::$app->db->createCommand($sql)->execute();
         }
@@ -1624,10 +1624,10 @@ class VendorController extends DefaultController
         $q->select([
             '*',
             "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
-            "(`article` + 0) AS c_article_1",
-            "`article` AS c_article",
-            "`article` REGEXP '^-?[0-9]+$' AS i",
-            "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+            "(article + 0) AS c_article_1",
+            "article AS c_article",
+            "article REGEXP '^-?[0-9]+$' AS i",
+            "product REGEXP '^-?[а-яА-Я].*$' AS alf_cyr"
         ]);
 
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
@@ -1637,9 +1637,9 @@ class VendorController extends DefaultController
         }
 
         if ($sort == 'product') {
-            $q->orderBy('`alf_cyr` DESC, `product` ASC');
+            $q->orderBy('alf_cyr DESC, product ASC');
         } elseif ($sort == '-product') {
-            $q->orderBy('`alf_cyr` ASC, `product` DESC');
+            $q->orderBy('alf_cyr ASC, product DESC');
         }
 
         if ($sort == 'article') {
@@ -1725,11 +1725,11 @@ class VendorController extends DefaultController
 
                 if ($price != $catalogGoods[$goods_id]) {
                     if ($batch < 1000) {
-                        $data_update .= "UPDATE $cgTable set `price` = $price where cat_id=$id and id=$goods_id;";
+                        $data_update .= "UPDATE $cgTable set price = $price where cat_id=$id and id=$goods_id;";
                         $batch++;
                     } else {
                         Yii::$app->db->createCommand($data_update)->execute();
-                        $data_update = "UPDATE $cgTable set `price` = $price where cat_id=$id and id=$goods_id;";
+                        $data_update = "UPDATE $cgTable set price = $price where cat_id=$id and id=$goods_id;";
                         $batch       = 0;
                     }
                 }
@@ -1744,8 +1744,8 @@ class VendorController extends DefaultController
                     . "catalog.id as id,"
                     . "article,"
                     . "case when LENGTH(article) != 0 then 1 ELSE 0 end as len,"
-                    . "(`article` + 0) AS c_article_1,"
-                    . "`article` REGEXP '^-?[0-9]+$' AS i,"
+                . "(article + 0) AS c_article_1,"
+                . "article REGEXP '^-?[0-9]+$' AS i,"
                     . "catalog_base_goods.product as product,"
                     . "catalog_base_goods.id as base_goods_id,"
                     . "catalog_goods.id as goods_id,"
@@ -1754,7 +1754,7 @@ class VendorController extends DefaultController
                     . "catalog_base_goods.price as base_price,"
                     . "catalog_goods.price as price,"
                     . "catalog_base_goods.status"
-                    . " FROM `catalog` "
+                . " FROM catalog "
                     . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                     . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
                     . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1 and catalog_base_goods.status = 1 "
@@ -2128,13 +2128,13 @@ class VendorController extends DefaultController
                             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                             date('Y-m-d', strtotime($filter_to_date)) . "')" .
                             $where .
-                            ") AS `total_price`
-                FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
+                ") AS total_price
+                FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS created_at 
                 FROM $orderTable where 
                 vendor_id = $currentUser->organization_id and status<>" . OrderStatus::STATUS_FORMING . " and("
                             . "DATE(created_at) between '" .
                             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
-                            date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")`tb`")->queryAll();
+                date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")tb")->queryAll();
         } else {
             $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
                 (select sum(total_price) FROM $orderTable LEFT JOIN $maTable ON $orderTable.client_id = $maTable.organization_id 
@@ -2144,13 +2144,13 @@ class VendorController extends DefaultController
                             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                             date('Y-m-d', strtotime($filter_to_date)) . "')" .
                             $where .
-                            ") AS `total_price`
-                FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
+                ") AS total_price
+                FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS created_at 
                 FROM $orderTable LEFT JOIN $maTable ON $orderTable.client_id = $maTable.organization_id WHERE 
                 vendor_id = $currentUser->organization_id AND $maTable.manager_id = $currentUser->id and status<>" . OrderStatus::STATUS_FORMING . " and("
                             . "DATE(created_at) between '" .
                             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
-                            date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")`tb`")->queryAll();
+                date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")tb")->queryAll();
         }
         $arr_create_at = [];
         $arr_price     = [];
@@ -2169,10 +2169,10 @@ class VendorController extends DefaultController
               product_id,
               c.iso_code
             FROM order_content oc 
-            LEFT JOIN `order` o ON o.id = oc.order_id
+            LEFT JOIN " . Order::tableName() . " o ON o.id = oc.order_id
             LEFT JOIN currency c ON c.id = o.currency_id
             WHERE order_id in (
-                SELECT id from `order` where 
+                SELECT id from " . Order::tableName() . " where 
                 (DATE(created_at) between '" .
                 date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
                 "and status<>" . OrderStatus::STATUS_FORMING . " and vendor_id = " . $currentUser->organization_id .
@@ -2181,13 +2181,13 @@ class VendorController extends DefaultController
         $totalCount   = Yii::$app->db->createCommand("
             SELECT COUNT(*) from (
             SELECT sum(price*quantity) as price, product_id FROM order_content WHERE order_id in (
-                SELECT id from `order` where 
+                SELECT id from " . Order::tableName() . " where 
                 (DATE(created_at) between '" .
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
                         "and status<>" . OrderStatus::STATUS_FORMING . " and vendor_id = " . $currentUser->organization_id .
                         $where .
                         ") group by product_id)tb")->queryScalar();
-        $total_price  = Yii::$app->db->createCommand("SELECT sum(total_price) as total from `order` where " .
+        $total_price = Yii::$app->db->createCommand("SELECT sum(total_price) as total from " . Order::tableName() . " where " .
                         "vendor_id = " . $currentUser->organization_id .
                         " and status<>" . OrderStatus::STATUS_FORMING . " and DATE_FORMAT(created_at,'%Y-%m-%d') between '" .
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
@@ -2211,7 +2211,7 @@ class VendorController extends DefaultController
         ]);
 
         $clients_query      = Yii::$app->db->createCommand("
-            SELECT client_id,sum(total_price) as total_price FROM `order` WHERE  
+            SELECT client_id,sum(total_price) as total_price FROM " . Order::tableName() . " WHERE  
                 (DATE(created_at) between '" .
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
                         $where .
@@ -2261,8 +2261,8 @@ class VendorController extends DefaultController
         $filter_from_date = date("d-m-Y", strtotime(" -1 months"));
         $filter_to_date   = date("d-m-Y");
 
-        $managerCondition = Yii::$app->user->can('manage') ? '' : "AND `manager_associate`.manager_id = $currentUser->id";
-        $managerJoin      = Yii::$app->user->can('manage') ? '' : "LEFT JOIN `manager_associate` ON `order`.client_id = `manager_associate`.organization_id ";
+        $managerCondition = Yii::$app->user->can('manage') ? '' : "AND manager_associate.manager_id = $currentUser->id";
+        $managerJoin = Yii::$app->user->can('manage') ? '' : "LEFT JOIN manager_associate ON order.client_id = manager_associate.organization_id ";
 
         $currencyList    = Currency::getAnalCurrencyList($currentUser->organization_id, $filter_from_date, $filter_to_date, 'vendor_id');
         $filter_currency = trim(\Yii::$app->request->get('filter_currency', key($currencyList)));
@@ -2273,19 +2273,19 @@ class VendorController extends DefaultController
         });
 
         $area_chart    = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
-            (select sum(total_price) FROM `order` $managerJoin
+            (select sum(total_price) FROM " . Order::tableName() . " $managerJoin
             where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
             vendor_id = $currentUser->organization_id $managerCondition and status<>" . OrderStatus::STATUS_FORMING . " and ("
                         . "DATE(created_at) between '" .
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                         date('Y-m-d', strtotime($filter_to_date)) . "')" . $where .
-                        ") AS `total_price`
-            FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
-            FROM `order` $managerJoin where 
+            ") AS total_price
+            FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS created_at 
+            FROM " . Order::tableName() . " $managerJoin where 
             vendor_id = $currentUser->organization_id $managerCondition and status<>" . OrderStatus::STATUS_FORMING . $where . " and("
                         . "DATE(created_at) between '" .
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
-                        date('Y-m-d', strtotime($filter_to_date)) . "'))`tb`")->queryAll();
+            date('Y-m-d', strtotime($filter_to_date)) . "'))tb")->queryAll();
         $arr_create_at = [];
         $arr_price     = [];
         if (count($area_chart) == 1) {
@@ -2300,19 +2300,19 @@ class VendorController extends DefaultController
         // <------ГРАФИК ПРОДАЖ
         //------>Статистика
         $stats                         = Yii::$app->db->createCommand("SELECT
-            (SELECT sum(total_price) FROM `order` $managerJoin 
+            (SELECT sum(total_price) FROM " . Order::tableName() . " $managerJoin 
             WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . OrderStatus::STATUS_FORMING . $where . " and DATE_FORMAT(created_at, '%Y-%m-%d') = CURDATE()) as 'curDay',
-            (SELECT sum(total_price) FROM `order` $managerJoin 
-             WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . OrderStatus::STATUS_FORMING . $where . " and (MONTH(`created_at`) = MONTH(NOW()) AND YEAR(`created_at`) = YEAR(NOW())))
+            (SELECT sum(total_price) FROM " . Order::tableName() . " $managerJoin 
+             WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . OrderStatus::STATUS_FORMING . $where . " and (MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW())))
             as 'curMonth',
-            (SELECT sum(total_price) FROM `order` $managerJoin 
-            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . OrderStatus::STATUS_FORMING . $where . " and YEAR(`created_at`) = YEAR(NOW()) AND WEEK(`created_at`, 1) = WEEK(NOW(), 1))
+            (SELECT sum(total_price) FROM " . Order::tableName() . " $managerJoin 
+            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . OrderStatus::STATUS_FORMING . $where . " and YEAR(created_at) = YEAR(NOW()) AND WEEK(created_at, 1) = WEEK(NOW(), 1))
              as 'curWeek',
-            (SELECT sum(total_price) FROM `order` $managerJoin 
-            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . OrderStatus::STATUS_FORMING . $where . " and MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
+            (SELECT sum(total_price) FROM " . Order::tableName() . " $managerJoin 
+            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . OrderStatus::STATUS_FORMING . $where . " and MONTH(created_at) = MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH)) AND YEAR(created_at) = YEAR(NOW()))
             as 'lastMonth',
-            (SELECT sum(total_price) FROM `order` $managerJoin 
-            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . OrderStatus::STATUS_FORMING . $where . " and MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -2 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
+            (SELECT sum(total_price) FROM " . Order::tableName() . " $managerJoin 
+            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . OrderStatus::STATUS_FORMING . $where . " and MONTH(created_at) = MONTH(DATE_ADD(NOW(), INTERVAL -2 MONTH)) AND YEAR(created_at) = YEAR(NOW()))
             as 'TwoLastMonth'")->queryOne();
         // <-------Статистика
         //GRIDVIEW ИСТОРИЯ ЗАКАЗОВ ----->
@@ -2418,8 +2418,8 @@ class VendorController extends DefaultController
                 . "catalog.id as id,"
                 . "article,"
                 . "case when LENGTH(article) != 0 then 1 ELSE 0 end as len,"
-                . "(`article` + 0) AS c_article_1,"
-                . "`article` REGEXP '^-?[0-9]+$' AS i,"
+            . "(article + 0) AS c_article_1,"
+            . "article REGEXP '^-?[0-9]+$' AS i,"
                 . "catalog_base_goods.product as product,"
                 . "catalog_base_goods.id as base_goods_id,"
                 . "catalog_goods.id as goods_id,"
@@ -2428,7 +2428,7 @@ class VendorController extends DefaultController
                 . "catalog_base_goods.price as base_price,"
                 . "catalog_goods.price as price,"
                 . "catalog_base_goods.status"
-                . " FROM `catalog` "
+            . " FROM catalog "
                 . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                 . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
                 . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1 "

@@ -688,7 +688,8 @@ class User extends \amnah\yii2\user\models\User
 
     public function getLastEmail()
     {
-        return EmailQueue::find()->where("`to` = :email", [':email' => $this->email])->orderBy('id DESC')->limit(1)->one();
+        return EmailQueue::find()->where("email_queue.to = :email", [':email' => $this->email])
+            ->orderBy('id DESC')->limit(1)->one();
     }
 
     //-- wtf begin

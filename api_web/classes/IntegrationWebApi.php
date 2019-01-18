@@ -96,11 +96,8 @@ class IntegrationWebApi extends WebApi
     {
         $this->validateRequest($post, ['service_id']);
 
-        $organizationID = $this->user->organization_id;
-        $acquirerID = $organizationID;
-        $ediNumber = '';
-        $outerAgentId = '';
-        $outerStoreId = '';
+        $acquirerID = $organizationID = $this->user->organization_id;
+        $outerAgentId = $outerStoreId = $ediNumber = '';
 
         if (isset($post['order_id'])) {
             $order = Order::findOne(['id' => (int)$post['order_id'], 'client_id' => $this->user->organization_id]);
@@ -112,7 +109,8 @@ class IntegrationWebApi extends WebApi
             if ($outerAgent) {
                 $outerAgentId = $outerAgent->id;
             }
-            $outerStore = OuterStore::find()->where(['org_id' => $organizationID])->andWhere('`right` - `left` = 1')->orderBy('`left`')->one();
+            $outerStore = OuterStore::find()->where(['org_id' => $organizationID])->andWhere('outer_store.right - outer_store.left = 1')->orderBy('outer_store.left')->one();
+
             if ($outerStore) {
                 $outerStoreId = $outerStore->id;
             }

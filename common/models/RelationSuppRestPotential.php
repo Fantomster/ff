@@ -193,6 +193,7 @@ class RelationSuppRestPotential extends \yii\db\ActiveRecord
      */
     public function getLastOrder()
     {
-        return $this->hasOne(Order::className(), ['vendor_id' => 'supp_org_id', 'client_id' => 'rest_org_id'])->orderBy(["`order`.updated_at" => SORT_DESC]);
+        return $this->hasOne(Order::className(), ['vendor_id' => 'supp_org_id', 'client_id' => 'rest_org_id'])
+            ->orderBy([Order::tableName() . ".updated_at" => SORT_DESC]);
     }
 }

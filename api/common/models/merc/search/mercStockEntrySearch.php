@@ -61,13 +61,13 @@ class mercStockEntrySearch extends MercStockEntry
         if ( !empty($this->date_from_production_date) && !empty($this->date_to_production_date)) {
         $start_date = date('Y-m-d 00:00:00',strtotime($this->date_from_production_date));
         $end_date = date('Y-m-d 23:59:59',strtotime($this->date_to_production_date));
-        $query->andFilterWhere(['between', 'STR_TO_DATE(`production_date`, \'%Y-%c-%e %H:%i:%s\')', $start_date, $end_date]);
+            $query->andFilterWhere(['between', 'STR_TO_DATE(production_date, \'%Y-%c-%e %H:%i:%s\')', $start_date, $end_date]);
         }
 
         if ( !empty($this->date_from_expiry_date) && !empty($this->date_to_expiry_date)) {
             $start_date = date('Y-m-d 00:00:00',strtotime($this->date_from_expiry_date));
             $end_date = date('Y-m-d 23:59:59',strtotime($this->date_to_expiry_date));
-            $query->andFilterWhere(['between', 'STR_TO_DATE(`expiry_date`, \'%Y-%c-%e %H:%i:%s\')', $start_date, $end_date]);
+            $query->andFilterWhere(['between', 'STR_TO_DATE(expiry_date, \'%Y-%c-%e %H:%i:%s\')', $start_date, $end_date]);
         }
 
         if($this->is_expiry == 1)

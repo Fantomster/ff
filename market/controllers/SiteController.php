@@ -169,18 +169,18 @@ class SiteController extends Controller
             ->count();
 
         //Популярные товары
-        $query = CatalogBaseGoods::find()->select(['`catalog_base_goods`.*', 'COUNT(`order`.id) as count'])
-            ->innerJoin('`order_content`', '`order_content`.product_id = `catalog_base_goods`.id')
-            ->innerJoin('`order`', '`order`.id = `order_content`.order_id')
-            ->innerJoin('`organization`', '`organization`.id = `order`.vendor_id')
+        $query = CatalogBaseGoods::find()->select(['catalog_base_goods.*', 'COUNT(o.id) as count'])
+            ->innerJoin('order_content', 'order_content.product_id = catalog_base_goods.id')
+            ->innerJoin('order o', 'o.id = order_content.order_id')
+            ->innerJoin('organization', 'organization.id = o.vendor_id')
             ->where([
-                '`organization`.white_list' => Organization::WHITE_LIST_ON,
-                '`catalog_base_goods`.market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                '`catalog_base_goods`.status' => CatalogBaseGoods::STATUS_ON,
-                '`catalog_base_goods`.deleted' => CatalogBaseGoods::DELETED_OFF
+                'organization.white_list'         => Organization::WHITE_LIST_ON,
+                'catalog_base_goods.market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                'catalog_base_goods.status'       => CatalogBaseGoods::STATUS_ON,
+                'catalog_base_goods.deleted'      => CatalogBaseGoods::DELETED_OFF
             ])
-            ->andWhere('`catalog_base_goods`.category_id is not null')
-            ->andWhere(['in', '`order`.status', [
+            ->andWhere('catalog_base_goods.category_id is not null')
+            ->andWhere(['in', 'o.status', [
                 Order::STATUS_DONE,
                 Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
                 Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
@@ -632,18 +632,18 @@ class SiteController extends Controller
             }
         }
 
-        $models = CatalogBaseGoods::find()->select(['`catalog_base_goods`.*', 'COUNT(`order`.id) as count'])
-            ->innerJoin('`order_content`', '`order_content`.product_id = `catalog_base_goods`.id')
-            ->innerJoin('`order`', '`order`.id = `order_content`.order_id')
-            ->innerJoin('`organization`', '`organization`.id = `order`.vendor_id')
+        $models = CatalogBaseGoods::find()->select(['catalog_base_goods.*', 'COUNT(o.id) as count'])
+            ->innerJoin('order_content', 'order_content.product_id = catalog_base_goods.id')
+            ->innerJoin('order o', 'o.id = order_content.order_id')
+            ->innerJoin('organization', 'organization.id = o.vendor_id')
             ->where([
-                '`organization`.white_list' => Organization::WHITE_LIST_ON,
-                '`catalog_base_goods`.market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                '`catalog_base_goods`.status' => CatalogBaseGoods::STATUS_ON,
-                '`catalog_base_goods`.deleted' => CatalogBaseGoods::DELETED_OFF
+                'organization.white_list'         => Organization::WHITE_LIST_ON,
+                'catalog_base_goods.market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                'catalog_base_goods.status'       => CatalogBaseGoods::STATUS_ON,
+                'catalog_base_goods.deleted'      => CatalogBaseGoods::DELETED_OFF
             ])
-            ->andWhere('`catalog_base_goods`.category_id is not null')
-            ->andWhere(['in', '`order`.status', [
+            ->andWhere('catalog_base_goods.category_id is not null')
+            ->andWhere(['in', 'o.status', [
                 Order::STATUS_DONE,
                 Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
                 Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,

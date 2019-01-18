@@ -175,13 +175,13 @@ class EdiWebApi extends WebApi
 
             $oldPrices = (new Query())->select(['oc.price as price', 'oc.product_id'])
                 ->from('order_content oc')
-                ->leftJoin('order', 'order.id = oc.order_id')
+                ->leftJoin('order o', 'o.id = oc.order_id')
                 ->andWhere([
-                    'oc.product_id'   => $productIds,
-                    'order.client_id' => $this->user->organization->id,
+                    'oc.product_id' => $productIds,
+                    'o.client_id'   => $this->user->organization->id,
                 ])
-                ->andWhere(['<', 'order.created_at', $order->created_at])
-                ->orderBy(['`order`.created_at' => SORT_DESC])
+                ->andWhere(['<', 'o.created_at', $order->created_at])
+                ->orderBy(['o.created_at' => SORT_DESC])
                 ->indexBy('product_id')
                 ->all();
 

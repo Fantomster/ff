@@ -105,13 +105,13 @@ class CatalogController extends DefaultController
                     . "catalog_base_goods.price as base_price,"
                     . "catalog_goods.price as price,"
                     . "catalog_base_goods.status"
-                    . " FROM `catalog` "
+                    . " FROM catalog "
                     . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                     . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
                     . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1 AND (catalog_base_goods.product LIKE :product or catalog_base_goods.article LIKE :article)";
                 $query = \Yii::$app->db->createCommand($sql, [':article' => $searchString, ':product' => $searchString]);
                 $sql2 = "SELECT count(*)"
-                    . " FROM `catalog` "
+                    . " FROM catalog "
                     . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                     . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
                     . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1 AND (catalog_base_goods.product LIKE :product or catalog_base_goods.article LIKE :article)";
@@ -138,13 +138,13 @@ class CatalogController extends DefaultController
                     . "catalog_base_goods.price as base_price,"
                     . "catalog_goods.price as price,"
                     . "catalog_base_goods.status"
-                    . " FROM `catalog` "
+                    . " FROM catalog "
                     . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                     . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
                     . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1";
                 $query = \Yii::$app->db->createCommand($sql);
                 $sql2 = "SELECT count(*)"
-                    . " FROM `catalog` "
+                    . " FROM catalog "
                     . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                     . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
                     . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1";
@@ -200,13 +200,13 @@ class CatalogController extends DefaultController
                 . "catalog_base_goods.price as base_price,"
                 . "catalog_goods.price as price,"
                 . "catalog_base_goods.status"
-                . " FROM `catalog` "
+                . " FROM catalog "
                 . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                 . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
                 . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1";
             $query = \Yii::$app->db->createCommand($sql);
             $sql2 = "SELECT count(*)"
-                . " FROM `catalog` "
+                . " FROM catalog "
                 . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                 . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
                 . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1";
@@ -382,13 +382,13 @@ class CatalogController extends DefaultController
         $cat_id = $model->id; //новый каталог id
         if ($cat_type == Catalog::BASE_CATALOG) {
             $sql = "insert into " . CatalogGoods::tableName() .
-                "(`cat_id`,`base_goods_id`,`price`,`created_at`) "
+                "(cat_id,base_goods_id,price,created_at) "
                 . "SELECT " . $cat_id . ", id, price, NOW() from " . CatalogBaseGoods::tableName() . " WHERE cat_id = $cat_id_old and deleted<>1";
             \Yii::$app->db->createCommand($sql)->execute();
         }
         if ($cat_type == Catalog::CATALOG) {
             $sql = "insert into " . CatalogGoods::tableName() .
-                "(`cat_id`,`base_goods_id`,`price`,`created_at`) "
+                "(cat_id,base_goods_id,price,created_at) "
                 . "SELECT " . $cat_id . ", base_goods_id, price, NOW() from " . CatalogGoods::tableName() . " WHERE cat_id = $cat_id_old";
             \Yii::$app->db->createCommand($sql)->execute();
         }
@@ -504,7 +504,7 @@ class CatalogController extends DefaultController
             . "catalog_base_goods.price as base_price,"
             . "catalog_goods.price as price,"
             . "catalog_base_goods.status"
-            . " FROM `catalog` "
+            . " FROM catalog "
             . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
             . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
             . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1";

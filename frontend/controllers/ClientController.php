@@ -1166,7 +1166,7 @@ class ClientController extends DefaultController
                 \Yii::$app->db->createCommand($sql)->execute();
 
                 foreach ($categorys as $arrCategorys) {
-                    $sql = "insert into relation_category (`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ($arrCategorys,$currentUser->organization_id,$supplier_org_id,NOW())";
+                    $sql = "insert into relation_category (category_id,rest_org_id,supp_org_id,created_at) VALUES ($arrCategorys,$currentUser->organization_id,$supplier_org_id,NOW())";
                     \Yii::$app->db->createCommand($sql)->execute();
                 }
 
@@ -1209,27 +1209,27 @@ class ClientController extends DefaultController
 
         if (Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one()->type == Catalog::BASE_CATALOG) {
             $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_base_goods.price,catalog_base_goods.status,currency.symbol as symbol "
-                . " FROM `catalog` "
+                . " FROM catalog "
                 . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
-                . " LEFT JOIN `currency` ON `catalog`.currency_id=`currency`.id"
+                . " LEFT JOIN currency ON catalog.currency_id=currency.id"
                 . " WHERE "
                 . " catalog_base_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF);
             $totalCount = Yii::$app->db->createCommand(" SELECT COUNT(*) "
-                . " FROM `catalog` "
+                . " FROM catalog "
                 . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
                 . " WHERE "
                 . " catalog_base_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF)->queryScalar();
         }
         if (Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one()->type == Catalog::CATALOG) {
             $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_goods.price as price, catalog_base_goods.status,currency.symbol as symbol "
-                . " FROM `catalog` "
+                . " FROM catalog "
                 . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                 . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
-                . " LEFT JOIN `currency` ON `catalog`.currency_id=`currency`.id"
+                . " LEFT JOIN currency ON catalog.currency_id=currency.id"
                 . " WHERE "
                 . " catalog_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF);
             $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) "
-                . " FROM `catalog` "
+                . " FROM catalog "
                 . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                 . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
                 . " WHERE "
@@ -1625,20 +1625,20 @@ class ClientController extends DefaultController
         empty($filter_currency) ? $where .= " and currency_id='1'" : $where .= " and currency_id='" . $filter_currency . "'";
 
         $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
-                (select sum(total_price) FROM `order` 
+                (select sum(total_price) FROM " . Order::tableName() . " 
                 where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
                 client_id = $currentUser->organization_id and status<>" . OrderStatus::STATUS_FORMING . " and ("
             . "DATE(created_at) between '" .
             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
             date('Y-m-d', strtotime($filter_to_date)) . "') " .
             $where .
-            ") AS `total_price`  
-                FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
-                FROM `order` where 
+            ") AS total_price  
+                FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS created_at 
+                FROM " . Order::tableName() . " where 
                 client_id = $currentUser->organization_id and status<>" . OrderStatus::STATUS_FORMING . " and("
             . "DATE(created_at) between '" .
             date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
-            date('Y-m-d', strtotime($filter_to_date)) . "') " . $where . ")`tb`")->queryAll();
+            date('Y-m-d', strtotime($filter_to_date)) . "') " . $where . ")tb")->queryAll();
         $arr_create_at = [];
         $arr_price = [];
         if (count($area_chart) == 1) {
@@ -1656,7 +1656,7 @@ class ClientController extends DefaultController
          *
          */
         $vendors_total_price_sql = Yii::$app->db->createCommand("
-            SELECT vendor_id,sum(total_price) AS total_price FROM `order` WHERE  
+            SELECT vendor_id,sum(total_price) AS total_price FROM " . Order::tableName() . " WHERE  
                 (DATE(created_at) BETWEEN '" .
             date('Y-m-d', strtotime($filter_from_date)) . "' AND '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
             $where .
@@ -1696,10 +1696,10 @@ class ClientController extends DefaultController
               product_id,
               c.iso_code
             FROM order_content oc 
-            LEFT JOIN `order` o ON o.id = oc.order_id
+            LEFT JOIN " . Order::tableName() . " o ON o.id = oc.order_id
             LEFT JOIN currency c ON c.id = o.currency_id
             WHERE order_id IN (
-                  SELECT id FROM `order` WHERE 
+                  SELECT id FROM " . Order::tableName() . " WHERE 
                   (DATE(created_at) BETWEEN '" . date('Y-m-d', strtotime($filter_from_date)) . "' AND '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
             " AND status<>" . OrderStatus::STATUS_FORMING .
             " AND client_id = " . $currentUser->organization_id . $where .
@@ -1796,18 +1796,18 @@ class ClientController extends DefaultController
          *
          */
         $searchString = "";
-        $where = " AND `relation_supp_rest`.deleted = 0";
+        $where = " AND relation_supp_rest.deleted = 0";
         if (Yii::$app->request->isAjax) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
 
             empty($searchString) ? "" : $where .= " and name LIKE :name";
         }
-        $sql = "SELECT picture,supp_org_id, name FROM `relation_supp_rest` join `organization`
-on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
+        $sql = "SELECT picture,supp_org_id, name FROM relation_supp_rest join organization
+on relation_supp_rest.supp_org_id = organization.id WHERE "
             . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where";
         $query = \Yii::$app->db->createCommand($sql);
-        $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM `relation_supp_rest` join `organization`
-on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
+        $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM relation_supp_rest join organization
+on relation_supp_rest.supp_org_id = organization.id WHERE "
             . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where", [':name' => $searchString])->queryScalar();
         $suppliers_dataProvider = new \yii\data\SqlDataProvider([
             'sql'        => $query->sql,

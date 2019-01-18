@@ -299,7 +299,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         $user = \Yii::$app->user->identity;
         $rest_id = $user->organization_id;
         $db = Yii::$app->db;
-        $query = 'SELECT `cat_id` FROM `relation_supp_rest` WHERE `rest_org_id` = ' . $rest_id . ' AND `supp_org_id` = ' . $vendor->id;
+        $query = 'SELECT cat_id FROM relation_supp_rest WHERE rest_org_id = ' . $rest_id . ' AND supp_org_id = ' . $vendor->id;
         $catalogs = $db->createCommand($query)->queryAll();
         if (empty($catalogs)) {
             return false;

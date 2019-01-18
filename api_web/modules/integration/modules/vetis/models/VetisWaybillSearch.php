@@ -14,6 +14,7 @@ use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use common\helpers\DBNameHelper;
 use common\models\IntegrationSetting;
+use common\models\IntegrationSettingValue;
 
 /**
  * Class VetisWaybillSearch
@@ -132,8 +133,8 @@ class VetisWaybillSearch extends MercVsd
                 
                 FROM (SELECT @row := 0, @page_size := :pageSize, @page := 0, @offset := 0, @prev_order_id := NULL) x,
                        merc_vsd a
-                left join integration_setting `is` on `is`.name=\'enterprise_guid\'
-                join integration_setting_value b on b.setting_id = `is`.id and b.value in (' . $mercPconst . ')
+                left join integration_setting i on i.name=\'enterprise_guid\'
+                join integration_setting_value b on b.setting_id = i.id and b.value in (' . $mercPconst . ')
                 left join ' . $tableName . '.order_content c on a.uuid = c.merc_uuid
                 left join ' . $tableName . '.order o on o.id = c.order_id
                 left join ' . $tableName . '.organization vendor on o.vendor_id = vendor.id
@@ -247,8 +248,8 @@ class VetisWaybillSearch extends MercVsd
             $pConstForCount = 'merc_vsd.' . $mercPconst;
         }
         $count = MercVsd::find()->distinct()
-            ->leftJoin(IntegrationSetting::tableName() . ' is', 'is.name=\'enterprise_guid\'')
-            ->leftJoin('integration_setting_value b', 'b.setting_id = is.id and b.value in (' . $pConstForCount . ')')
+            ->leftJoin(IntegrationSetting::tableName() . ' i', 'i.name=\'enterprise_guid\'')
+            ->leftJoin(IntegrationSettingValue::tableName() . ' b', 'b.setting_id = i.id and b.value in (' . $pConstForCount . ')')
             ->where(array_merge(['b.org_id' => explode(',', $strOrgIds)], $arCount)
             );
         if ($between) {

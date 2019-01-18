@@ -172,14 +172,14 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
             if ($this->store_rid === null) {
                 $records = OrderContent::find()
                         ->where(['order_id' => $this->order_id])
-                        ->leftJoin($dbName . '.all_map', 'order_content.product_id = ' . $dbName . '.`all_map`.`product_id` and ' . $dbName . '.all_map.service_id = ' . Registry::RK_SERVICE_ID/* and `' . $dbName . '`.all_map.org_id =' . $org_id . ')' */)
+                    ->leftJoin($dbName . '.all_map', 'order_content.product_id = ' . $dbName . '.all_map.product_id and ' . $dbName . '.all_map.service_id = ' . Registry::RK_SERVICE_ID/* and `' . $dbName . '`.all_map.org_id =' . $org_id . ')' */)
                         //  ->andWhere('product_id in ( select product_id from ' . $dbName . '.all_map where service_id = Registry::RK_SERVICE_ID and store_rid is null)')
                         ->andWhere($dbName . '.all_map.store_rid is null')
                         ->all();
             } else {
                 $records = OrderContent::find()
                         ->where(['order_id' => $this->order_id])
-                        ->leftJoin($dbName . '.`all_map`', 'order_content.product_id = ' . $dbName . '.`all_map`.`product_id` and ' . $dbName . '.all_map.service_id = ' . Registry::RK_SERVICE_ID/* and `' . $dbName . '`.all_map.org_id =' . $org_id . ')' */)
+                    ->leftJoin($dbName . '.all_map', 'order_content.product_id = ' . $dbName . '.all_map.product_id and ' . $dbName . '.all_map.service_id = ' . Registry::RK_SERVICE_ID/* and `' . $dbName . '`.all_map.org_id =' . $org_id . ')' */)
                         ->andWhere($dbName . '.all_map.store_rid =' . $this->store_rid)
                         ->all();
             }
@@ -285,7 +285,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
           ) and is_active = 1 ',[':org' => $order->client_id, ':order' => $order_id, ':serv' => Registry::RK_SERVICE_ID])->groupBy('store_rid')->column(); */
 
         $db  = Yii::$app->db_api;
-        $sql = ' SELECT m.store_rid FROM ' . $dbName . '.`order_content` o ' .
+        $sql = ' SELECT m.store_rid FROM ' . $dbName . '.order_content o ' .
                 ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = ' . Registry::RK_SERVICE_ID . ' AND m.org_id = ' . $order->client_id .
                 ' WHERE o.order_id = ' . $order_id .
                 ' GROUP BY store_rid';

@@ -40,10 +40,10 @@ class FullmapHelper extends yii\base\BaseObject  {
 
     public function getcats() {
 
-        $sql = "SELECT count(*) FROM `catalog_goods` a left join `catalog_base_goods` b on b.id = a.base_goods_id
-                left join `relation_supp_rest` c on a.cat_id = c.cat_id
+        $sql = "SELECT count(*) FROM catalog_goods a left join catalog_base_goods b on b.id = a.base_goods_id
+                left join relation_supp_rest c on a.cat_id = c.cat_id
                 where a.cat_id IN
-                                  (SELECT cat_id FROM `relation_supp_rest`
+                                  (SELECT cat_id FROM relation_supp_rest
                                   where rest_org_id = ".$this->org." and deleted = 0)
                                   LIMIT 5";
 
@@ -71,10 +71,10 @@ class FullmapHelper extends yii\base\BaseObject  {
 
         do {
 
-        $sql = "SELECT a.*, b.product as product_name, c.supp_org_id as supp_id FROM `catalog_goods` a left join `catalog_base_goods` b on b.id = a.base_goods_id
-                left join `relation_supp_rest` c on a.cat_id = c.cat_id
+            $sql = "SELECT a.*, b.product as product_name, c.supp_org_id as supp_id FROM catalog_goods a left join catalog_base_goods b on b.id = a.base_goods_id
+                left join relation_supp_rest c on a.cat_id = c.cat_id
                 where a.cat_id IN
-                                  (SELECT cat_id FROM `relation_supp_rest`
+                                  (SELECT cat_id FROM relation_supp_rest
                                   where rest_org_id = ".$this->org." and deleted = 0)
                                   LIMIT ".self::LIMIT." OFFSET ".$offset;
 

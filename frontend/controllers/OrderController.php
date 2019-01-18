@@ -237,8 +237,8 @@ class OrderController extends DefaultController
                     cbg.product as product, 
                     sum(quantity) as total_quantity,
                     cbg.ed
-                from `order_content` oc 
-                left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
+                from order_content oc 
+                left join catalog_base_goods cbg on oc.product_id = cbg.id
                 where oc.order_id in ($selected)
                 group by cbg.id")->queryAll();
 
@@ -2543,28 +2543,28 @@ class OrderController extends DefaultController
         $selected = implode(',', $selected);
 
         $sql = "SELECT org.id as id, org.parent_id as parent_id, concat_ws(', ',org.name, org.city, org.address) as client_name 
-                    FROM `order` 
-                    left join organization as org on org.id = `order`.client_id
-                    where `order`.id in ($selected) group by `order`.client_id order by org.parent_id";
+                    FROM " . Order::tableName() . " o
+                    left join organization as org on org.id = o.client_id
+                    where o.id in ($selected) group by o.client_id order by org.parent_id";
 
         $orgs = \Yii::$app->db->createCommand($sql)->queryAll();
         $sql = "SELECT cbg.product as '" . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . "', cbg.ed as '" . Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) . "', ";
-        $sql_ext = "SELECT `" . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . "`, `" . Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) . "`, ";
+        $sql_ext = "SELECT " . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . ", " . Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) . ", ";
         foreach ($orgs as $org) {
-            $sql .= "IF(SUM(IF (`order`.client_id = " . $org['id'] . ", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = " . $org['id'] . ", oc.quantity, 0))as CHAR(10))) as '" . $org['client_name'] . "',";
-            $sql_ext .= "SUM(`" . $org['client_name'] . "`) as '" . $org['client_name'] . "',";
+            $sql .= "IF(SUM(IF (o.client_id = " . $org['id'] . ", oc.quantity, 0)) = 0, '', CAST(SUM(IF (o.client_id = " . $org['id'] . ", oc.quantity, 0))as CHAR(10))) as '" . $org['client_name'] . "',";
+            $sql_ext .= "SUM(" . $org['client_name'] . ") as '" . $org['client_name'] . "',";
         }
 
         $sql = substr($sql, 0, -1);
         $sql_ext = substr($sql_ext, 0, -1);
 
-        $sql .= " from `order`
-                    left join order_content as oc on oc.order_id = `order`.id
+        $sql .= " from " . Order::tableName() . " o
+                    left join order_content as oc on oc.order_id = o.id
                     left join catalog_base_goods as cbg on cbg.id = oc.product_id
-                    left join organization as org on org.id = `order`.client_id
-                    where `order`.id in ($selected) and cbg.product is not null group by client_id, product_id  order by org.parent_id";
+                    left join organization as org on org.id = o.client_id
+                    where o.id in ($selected) and cbg.product is not null group by client_id, product_id  order by org.parent_id";
 
-        $sql_ext .= " from ( " . $sql . " ) ww group by `" . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . "`";
+        $sql_ext .= " from ( " . $sql . " ) ww group by " . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']);
 
         $report = \Yii::$app->db->createCommand($sql_ext)->queryAll();
 

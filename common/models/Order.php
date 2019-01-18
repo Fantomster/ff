@@ -579,7 +579,7 @@ class Order extends \yii\db\ActiveRecord
                 ->createCommand()->getRawSql();
 
             $total_price = (new Query())
-                ->select('SUM(COALESCE(waybill_sum, oc_sum))')
+                ->select(['SUM(COALESCE(waybill_sum, oc_sum))'])
                 ->from("(" . $query . ") as t")
                 ->scalar(\Yii::$app->db_api);
         } else {

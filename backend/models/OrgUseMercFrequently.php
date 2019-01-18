@@ -34,7 +34,7 @@ class OrgUseMercFrequently extends Model
             $not = 'not';
         }
         $dbName = DBNameHelper::getApiName();
-        $sql = "SELECT id, name FROM $dbName.organization WHERE id $not in
+        $sql = "SELECT id, name FROM organization WHERE id $not in
        (
            SELECT org FROM $dbName.merc_pconst where VALUE in (
            SELECT DISTINCT recipient_guid FROM $dbName.merc_vsd WHERE status = :status AND  last_update_date >= DATE(NOW()) - INTERVAL 30 DAY)

@@ -97,7 +97,6 @@ class TillypadApi
 
         try {
             $this->token = $this->sendAuth('/auth', $params, 'GET', [], $timeout);
-            $this->writeToken();
 
             return $this->token ? true : false;
         } catch (\Exception $e) {
@@ -434,16 +433,6 @@ class TillypadApi
     private function getTokenFile()
     {
         return \Yii::getAlias('@api_web') . '/runtime/tillypad_auth/' . self::$_instance->orgId . '_' . $this->token . '.t';
-    }
-
-    private function writeToken()
-    {
-        if (!file_exists(\Yii::getAlias('@api_web') . '/runtime/tillypad_auth')) {
-            mkdir(\Yii::getAlias('@api_web') . '/runtime/tillypad_auth');
-            chmod(\Yii::getAlias('@api_web') . '/runtime/tillypad_auth', 7777);
-        }
-
-        file_put_contents($this->getTokenFile(), '');
     }
 
     private function deleteToken()

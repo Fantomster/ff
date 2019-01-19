@@ -14,6 +14,7 @@ use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue as ISV;
 use common\models\OuterAgent;
 use common\models\OuterProduct;
+use common\models\OuterProductType;
 use common\models\OuterStore;
 use common\models\OuterUnit;
 use yii\web\BadRequestHttpException;
@@ -25,6 +26,11 @@ use yii\web\BadRequestHttpException;
  */
 class Poster
 {
+
+    const INGREDIENT_TYPE_VALUE = 4;
+    const PRODUCT_TYPE_VALUE = 1;
+    const MODIFICATION_TYPE_VALUE = 5;
+
     /**
      * @var string
      */
@@ -231,13 +237,14 @@ class Poster
         foreach ($response['response'] as $ingredient) {
             $model = OuterProduct::findOne(['outer_uid' => $ingredient['ingredient_id'], 'org_id' => $this->orgId, 'service_id' => Registry::POSTER_SERVICE_ID]);
             if (!$model) {
+                $outerProductTypeIngredient = OuterProductType::findOne(['value' => self::INGREDIENT_TYPE_VALUE]);
                 $model = new OuterProduct([
                     'outer_uid'             => $ingredient['ingredient_id'],
                     'service_id'            => Registry::POSTER_SERVICE_ID,
                     'org_id'                => $this->orgId,
                     'name'                  => $ingredient['ingredient_name'],
                     'is_deleted'            => 0,
-                    'outer_product_type_id' => 4,
+                    'outer_product_type_id' => $outerProductTypeIngredient->id,
                 ]);
             }
 
@@ -275,13 +282,14 @@ class Poster
         foreach ($response['response'] as $ingredient) {
             $model = OuterProduct::findOne(['outer_uid' => $ingredient['product_id'], 'org_id' => $this->orgId, 'service_id' => Registry::POSTER_SERVICE_ID]);
             if (!$model) {
+                $outerProductTypeIngredient = OuterProductType::findOne(['value' => self::PRODUCT_TYPE_VALUE]);
                 $model = new OuterProduct([
                     'outer_uid'             => $ingredient['product_id'],
                     'service_id'            => Registry::POSTER_SERVICE_ID,
                     'org_id'                => $this->orgId,
                     'name'                  => $ingredient['product_name'],
                     'is_deleted'            => 0,
-                    'outer_product_type_id' => 1,
+                    'outer_product_type_id' => $outerProductTypeIngredient->id,
                 ]);
             }
 

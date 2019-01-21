@@ -58,8 +58,9 @@ use yii\helpers\Json;
  * @property string $transport_info
  * @property string $unit_guid
  * @property string $user_status
+ * @property int $r13nClause
  * @property string $created_at
- * @property string $updated_at
+ *
  */
 class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
@@ -178,7 +179,7 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     {
         return [
             [['date_doc', 'last_update_date', 'raw_data', 'waybill_date', 'confirmed_by', 'other_info', 'laboratory_research', 'transport_info', 'batch_id', 'producer_name', 'producer_guid'], 'safe'],
-            [['finalized', 'product_type', 'perishable', 'low_grade_cargo'], 'integer'],
+            [['finalized', 'product_type', 'perishable', 'low_grade_cargo', 'r13nClause'], 'integer'],
             [['amount'], 'number'],
             [['uuid', 'number', 'type', 'status', 'recipient_name', 'recipient_guid', 'sender_guid',
                 'sender_name', 'product_name', 'unit', 'production_date', 'expiry_date', 'owner_guid', 'product_guid', 'sub_product_guid', 'product_item_guid', 'origin_country_guid', 'waybill_number', 'unit_guid'], 'string', 'max' => 255],

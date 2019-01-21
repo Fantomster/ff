@@ -30,7 +30,7 @@ class m190121_092151_add_settings_auth_login_and_auth_password extends Migration
         ];
         foreach ($arSettingNames as $settingName => $prop) {
             foreach ($services as $service) {
-                if (!IntegrationSetting::find()->where(['service_id' => $service, 'name' => $settingName])->exists())
+                if (!IntegrationSetting::find()->where(['service_id' => $service, 'name' => $settingName])->exists()) {
                     $model = new IntegrationSetting([
                         'name'          => $settingName,
                         'default_value' => $prop['default'],
@@ -39,8 +39,9 @@ class m190121_092151_add_settings_auth_login_and_auth_password extends Migration
                         'is_active'     => '1',
                         'service_id'    => $service,
                     ]);
-                if (!$model->save()) {
-                    throw new ValidationException($model->getFirstErrors());
+                    if (!$model->save()) {
+                        throw new ValidationException($model->getFirstErrors());
+                    }
                 }
             }
         }

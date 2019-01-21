@@ -2,6 +2,8 @@
 
 namespace api\modules\v1\modules\mobile\resources;
 
+use common\helpers\DBNameHelper;
+
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
@@ -32,27 +34,29 @@ class MpCategory extends \common\models\MpCategory
         $user = \Yii::$app->user->getIdentity();
         $client = $user->organization;
 
-        $query1 = "
-            SELECT  cbg.id as id
-            FROM catalog_base_goods as cbg
-            WHERE (cbg.status = 1) 
+
+        $query1 = (new \yii\db\Query())
+            ->select('cbg.id as id')
+            ->from(DBNameHelper::getMainName().'.'.CatalogBaseGoods::tableName().' as cbg' )
+            ->where("(cbg.status = 1) 
                 AND (cbg.deleted = 0) AND (cbg.category_id in ($categories))  
-                AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
-                ";
+                AND (cbg.cat_id IN (SELECT cat_id FROM ".\common\models\RelationSuppRest::tableName()." WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))");
 
-        $query2 = "SELECT cbg.id as id
-            FROM catalog_base_goods AS cbg 
-                    LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = cbg.id
-            WHERE (cbg.status = 1) 
+        $query2 = (new \yii\db\Query())
+            ->select('cbg.id as id')
+            ->from(DBNameHelper::getMainName().'.'.CatalogBaseGoods::tableName().' as cbg' )
+            ->leftJoin(DBNameHelper::getMainName().'.'.CatalogGoods::tableName().' as cg','cg.base_goods_id = cbg.id')
+            ->where("(cbg.status = 1) 
                 AND (cbg.deleted = 0) AND (cbg.category_id in ($categories)) 
-                AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
-                ";
+                AND (cg.cat_id IN (SELECT cat_id FROM ".\common\models\RelationSuppRest::tableName()." WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))");
 
-        $sql = "SELECT count(*) FROM($query1  UNION ALL ($query2)) as tbl";
 
-        $connection = \Yii::$app->getDb();
-        $command = $connection->createCommand($sql);
-        $res = $command->queryScalar();
+
+
+        $res = (new \yii\db\Query())
+            ->select('*')
+            ->from(['tb1' => $query1->union($query2)])
+            ->count();
        return $res;
     }
 

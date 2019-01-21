@@ -73,7 +73,8 @@ class DefaultController extends WebApiController
      *                                      "date_doc": "2018-08-30T15:00:00+03:00",
      *                                      "document_id": null,
      *                                      "status_text": "Статус",
-     *                                      "r13n_clause": 1
+     *                                      "r13nСlause": 1,
+     *                                      "location_prosperity":"Неблагополучна"
      *                                  },
      *                              },
      *                              "groups": {
@@ -155,7 +156,8 @@ class DefaultController extends WebApiController
      *                                "unit": "кг",
      *                                "production_date": "29.08.2018",
      *                                "date_doc": "29.08.2018",
-     *                                "r13n_clause": 1
+     *                                "r13nClause": 1,
+     *                                "location_prosperity":"Неблагополучна"
      *                                },
      *                                {
      *                                "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
@@ -169,7 +171,8 @@ class DefaultController extends WebApiController
      *                                "unit": "кг",
      *                                "production_date": "29.08.2018",
      *                                "date_doc": "29.08.2018",
-     *                                "r13n_clause":0
+     *                                "r13nClause":0,
+     *                                "location_prosperity":"Благополучна"
      *                                }
      *                           }
      *                      }

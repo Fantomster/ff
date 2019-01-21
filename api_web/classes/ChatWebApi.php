@@ -222,6 +222,7 @@ class ChatWebApi extends WebApi
     {
 
         $client = $this->user->organization;
+        /**@var Order $order */
         $order = Order::find()->where(['id' => $post['dialog_id']])
             ->andWhere(['or', ['client_id' => $client->id], ['vendor_id' => $client->id]])
             ->one();
@@ -246,11 +247,7 @@ class ChatWebApi extends WebApi
             'danger'       => 0
         ]);
 
-        if (!$dialogMessage->validate()) {
-            throw new ValidationException($dialogMessage->getFirstErrors());
-        }
-
-        if (!$dialogMessage->save()) {
+        if (!$dialogMessage->validate() || !$dialogMessage->save()) {
             throw new ValidationException($dialogMessage->getFirstErrors());
         }
 

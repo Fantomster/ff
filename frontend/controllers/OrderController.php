@@ -6,6 +6,8 @@ use api_web\components\Notice;
 use Yii;
 use Exception;
 use kartik\mpdf\Pdf;
+use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\Url;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -2535,7 +2537,7 @@ class OrderController extends DefaultController
     public function actionGridReport()
     {
         $this->actionSaveSelectedOrders();
-        $selected = Yii::$app->session->get('selected', []);
+        $selected = $arOrderIds = Yii::$app->session->get('selected', []);
         if (empty($selected)) {
             exit();
         }
@@ -2548,25 +2550,40 @@ class OrderController extends DefaultController
                     where o.id in ($selected) group by o.client_id order by org.parent_id";
 
         $orgs = \Yii::$app->db->createCommand($sql)->queryAll();
-        $sql = "SELECT cbg.product as '" . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . "', cbg.ed as '" . Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) . "', ";
-        $sql_ext = "SELECT " . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . ", " . Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) . ", ";
+
+        $subQuery = (new Query())->select([
+            \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) => 'cbg.product',
+            \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм'])               => 'cbg.ed',
+        ]);
+
+        $query = (new Query())->select([
+            \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) =>
+                \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']),
+            \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм'])               =>
+                \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']),
+        ]);
+
         foreach ($orgs as $org) {
-            $sql .= "IF(SUM(IF (o.client_id = " . $org['id'] . ", oc.quantity, 0)) = 0, '', CAST(SUM(IF (o.client_id = " . $org['id'] . ", oc.quantity, 0))as CHAR(10))) as '" . $org['client_name'] . "',";
-            $sql_ext .= "SUM(" . $org['client_name'] . ") as '" . $org['client_name'] . "',";
+            $subQuery->addSelect([new Expression("IF(SUM(IF (o.client_id = " . $org['id'] . ", oc.quantity, 0)) = 0, '', CAST(SUM(IF (o.client_id = " . $org['id'] . ", oc.quantity, 0))as CHAR(10))) as '" . $org['client_name'] . "'")]);
+            $query->addSelect([new Expression("SUM('" . $org['client_name'] . "') as '" . $org['client_name'] . "'")]);
         }
 
-        $sql = substr($sql, 0, -1);
-        $sql_ext = substr($sql_ext, 0, -1);
+        $subQuery->from(Order::tableName() . " o")
+            ->leftJoin(OrderContent::tableName() . " oc", "oc.order_id = o.id")
+            ->leftJoin(CatalogBaseGoods::tableName() . " cbg", "cbg.id = oc.product_id")
+            ->leftJoin(Organization::tableName() . " org", "org.id = o.client_id")
+            ->where([
+                'o.id' => $arOrderIds,
+            ])->andWhere([
+                'not', ['cbg.product' => null]
+            ])
+            ->groupBy(['client_id', 'product_id'])
+            ->orderBy('org.parent_id');;
 
-        $sql .= " from " . Order::tableName() . " o
-                    left join order_content as oc on oc.order_id = o.id
-                    left join catalog_base_goods as cbg on cbg.id = oc.product_id
-                    left join organization as org on org.id = o.client_id
-                    where o.id in ($selected) and cbg.product is not null group by client_id, product_id  order by org.parent_id";
+        $query->from(['ww' => $subQuery])
+            ->groupBy(\Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']));
 
-        $sql_ext .= " from ( " . $sql . " ) ww group by " . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']);
-
-        $report = \Yii::$app->db->createCommand($sql_ext)->queryAll();
+        $report = $query->all();
 
         $objPHPExcel = new \PHPExcel();
         $sheet = 0;

@@ -6,7 +6,6 @@ use common\models\OrderStatus;
 use common\models\PaymentSearch;
 use common\models\RelationSuppRestPotential;
 use common\models\RelationUserOrganization;
-use common\models\vendor\VendorChecker;
 use Yii;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -28,6 +27,7 @@ use yii\web\Response;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
 use yii\web\UploadedFile;
+use yii\db\Expression;
 
 /**
  * Controller for supplier
@@ -1618,6 +1618,7 @@ class VendorController extends DefaultController
         }
         $baseCurrencySymbol = $baseCatalog->currency->symbol;
 
+        $tblCBG = CatalogBaseGoods::tableName();
         $q = CatalogBaseGoods::find()->where('deleted = 0');
         $q->andWhere('cat_id = ' . $baseCatalog->id);
 
@@ -1626,8 +1627,8 @@ class VendorController extends DefaultController
             "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
             "(article + 0) AS c_article_1",
             "article AS c_article",
-            "article REGEXP '^-?[0-9]+$' AS i",
-            "product REGEXP '^-?[а-яА-Я].*$' AS alf_cyr"
+            new Expression("article REGEXP '^-?[0-9]+$' AS i"),
+            new Expression("product REGEXP '^-?[а-яА-Я].*$' AS alf_cyr")
         ]);
 
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {

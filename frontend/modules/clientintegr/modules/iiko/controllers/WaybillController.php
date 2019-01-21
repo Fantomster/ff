@@ -31,6 +31,7 @@ use common\components\SearchOrdersComponent;
 use api_web\components\Registry;
 use common\helpers\DBNameHelper;
 use common\models\OrderContent;
+use common\models\Order;
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
 {

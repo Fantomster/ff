@@ -10,6 +10,11 @@ use yii\db\Migration;
  */
 class m190121_092151_add_settings_auth_login_and_auth_password extends Migration
 {
+    public function init()
+    {
+        $this->db = 'db_api';
+        parent::init();
+    }
     /**
      * {@inheritdoc}
      */

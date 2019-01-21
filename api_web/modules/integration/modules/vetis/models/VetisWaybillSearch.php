@@ -115,6 +115,7 @@ class VetisWaybillSearch extends MercVsd
                 a.type,
                 a.last_error,
                 a.user_status,
+                a.r13nClause,
                 o.id ord_id,
                 o.created_at,
                 o.total_price,
@@ -164,6 +165,7 @@ class VetisWaybillSearch extends MercVsd
                 'vsd_direction'   => $row['vsd_direction'],
                 'last_error'      => $row['last_error'],
                 'user_status'     => $row['user_status'],
+                'r13n_clause'      => $row['r13nClause'],
             ];
             if (!is_null($row['ord_id'])) {
                 $status = $arGroups[$row['ord_id']]['statuses'] ?? '';

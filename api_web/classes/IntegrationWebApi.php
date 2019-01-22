@@ -109,10 +109,12 @@ class IntegrationWebApi extends WebApi
             if ($outerAgent) {
                 $outerAgentId = $outerAgent->id;
             }
-            $outerStore = OuterStore::find()->where(['org_id' => $organizationID])->andWhere('outer_store.right - outer_store.left = 1')->orderBy('outer_store.left')->one();
-
-            if ($outerStore) {
-                $outerStoreId = $outerStore->id;
+            $outerStoreId = null;
+            if (isset($post['service_id'])) {
+                $outerStore = OuterStore::find()->where(['org_id' => $organizationID, 'service_id' => $post['service_id'], 'is_deleted' => OuterStore::IS_DELETED_FALSE])->andWhere('outer_store.right - outer_store.left = 1')->orderBy('outer_store.left')->one();
+                if ($outerStore) {
+                    $outerStoreId = $outerStore->id;
+                }
             }
 
             $orderContent = OrderContent::findOne(['order_id' => $order->id]);

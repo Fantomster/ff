@@ -38,9 +38,11 @@ use \api_web\helpers\CurrencyHelper;
                     <td class="name"><?= $model->product_name ?></td>
                     <td class="article"><?= $model->article ?></td>
                     <td class="quantity <?= $model->getCssClassChatMessage('quantity') ?>"><?= number_format($model->quantity, 3, '.', '') ?>
-                        <p class="al-line-through-action-not-changed">
-                            <?= number_format($model->getOldAttribute('quantity'), 3, '.', '') ?>
-                        </p>
+                        <?php if ($model->quantity != $model->getOldAttribute('quantity')): ?>
+                            <p class="al-line-through-action-not-changed">
+                                <?= number_format($model->getOldAttribute('quantity'), 3, '.', '') ?>
+                            </p>
+                        <?php endif; ?>
                     </td>
                     <td class="quantity-action <?= $model->getCssClassChatMessage('quantity') ?>"><i
                                 class="material-icons"></i></td>
@@ -48,9 +50,11 @@ use \api_web\helpers\CurrencyHelper;
                         <?= CurrencyHelper::asDecimal($model->price) ?>
                         <?= $model->getCurrency()->symbol ?>
                         <?= $model->product->ed ? '/' . $model->product->ed : '' ?>
+                        <?php if ($model->price != $model->getOldAttribute('price')): ?>
                         <p class="al-line-through-action-not-changed">
                             <?= CurrencyHelper::asDecimal($model->getOldAttribute('price')) ?>
                         </p>
+                        <?php endif; ?>
                     </td>
                     <td class="price-action <?= $model->getCssClassChatMessage('price') ?>"><i
                                 class="material-icons"></i></td>

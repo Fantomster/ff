@@ -39,7 +39,8 @@ class OuterAgent extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\Connection the database connection used by this AR class.
+     * @return object|\yii\db\Connection|null
+     * @throws \yii\base\InvalidConfigException
      */
     public static function getDb()
     {
@@ -99,15 +100,19 @@ class OuterAgent extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return array|\yii\db\ActiveRecord|null
      */
     public function getVendor()
     {
+        if(empty($this->vendor_id)) {
+            return null;
+        }
+
         return (new ActiveQuery(Organization::class))
             ->from(DBNameHelper::getMainName() . '.' . Organization::tableName() . ' o')
             ->onCondition([
-                'o.id' => 'outer_agent.vendor_id'
-            ]);
+                'o.id' => $this->vendor_id
+            ])->one();
     }
 
     /**

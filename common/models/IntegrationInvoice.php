@@ -328,7 +328,7 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
         return Order::find()
                 ->select(new \yii\db\Expression("(FLOOR(COUNT(*) / $pageSize) + 1"))
                 ->where(['status' => Order::STATUS_DONE, 'client_id' => $this->organization_id])
-                ->andWhere(['>=', 'id' => $this->order_id])
+                ->andWhere(['>=', 'id', $this->order_id])
                 ->orderBy(['id' => SORT_DESC])
                 ->scalar();
     }

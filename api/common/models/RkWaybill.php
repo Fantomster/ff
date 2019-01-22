@@ -284,7 +284,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
         $stories = OrderContent::find()
             ->select("$allMapTableName.store_rid")
             ->leftJoin($allMapTableName, "$orderContentTableName.product_id = $allMapTableName.product_id and $allMapTableName.service_id = :service_id AND 
-            $allMapTableName.org_id = :client_id", [':service_isd' => Registry::RK_SERVICE_ID,
+            $allMapTableName.org_id = :client_id", [':service_id' => Registry::RK_SERVICE_ID,
                         ':client_id' => $order->client_id])
             ->where("$orderContentTableName.order_id = :order_id", [':order_id' => $order_id])
             ->groupBy('store_rid')

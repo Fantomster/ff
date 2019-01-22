@@ -319,14 +319,14 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param $pageSize
+     * @param int $pageSize
      * @return int
      */
     public function getOrderPage(int $pageSize = 20)
     {
         //$subQuery = (new \yii\db\Query())->select
         return Order::find()
-                ->select(new \yii\db\Expression("(FLOOR(COUNT(*) / $pageSize) + 1"))
+                ->select(new \yii\db\Expression("FLOOR(COUNT(*) / $pageSize) + 1"))
                 ->where(['status' => Order::STATUS_DONE, 'client_id' => $this->organization_id])
                 ->andWhere(['>=', 'id', $this->order_id])
                 ->orderBy(['id' => SORT_DESC])

@@ -132,7 +132,8 @@ class VetisWaybill extends WebApi
                 'vsd_direction'   => $arIncOut[$model->uuid] ?? null,
                 'last_error'      => $model->last_error,
                 'user_status'     => $model->user_status,
-                'r13n_clause'      => $model->r13nClause,
+                'r13nСlause'      => $model->r13nClause,
+                'location_prosperity' => $model->location_prosperity,
             ];
         }
 

@@ -33,8 +33,8 @@ use common\components\NestedSetsQuery;
 class OuterStore extends ActiveRecord
 {
 
-    const OUTER_STORE_IS_DELETED_FALSE = 0;
-    const OUTER_STORE_IS_DELETED_TRUE = 1;
+    const IS_DELETED_FALSE = 0;
+    const IS_DELETED_TRUE = 1;
 
     /**
      * NestedSets model

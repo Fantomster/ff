@@ -81,7 +81,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException("order.access.change.denied");
             }
         }
-        if (!$this->accessAllow($order)) {
+        if ($this->accessAllow($order) === false) {
             throw new BadRequestHttpException("order.access.change.denied");
         }
         //OrderStatus::checkEdiOrderPermissions($order, 'edit');
@@ -309,7 +309,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
-        if (!$this->accessAllow($order)) {
+        if ($this->accessAllow($order) === false) {
             throw new BadRequestHttpException("order.edit_comment_access_denied");
         }
         OrderStatus::checkEdiOrderPermissions($order, 'edit', [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]);
@@ -344,7 +344,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
-        if (!$this->accessAllow($order)) {
+        if ($this->accessAllow($order) === false) {
             throw new BadRequestHttpException("order.edit_comment_access_denied");
         }
         OrderStatus::checkEdiOrderPermissions($order, 'edit', [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]);

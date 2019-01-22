@@ -1200,21 +1200,20 @@ class OrderWebApi extends \api_web\components\WebApi
     /**
      * Доступ к изменению заказа
      *
-     * @param $order
+     * @param Order $order
      * @return bool
      */
     private function accessAllow($order)
     {
-        $user = $this->user;
+        $user_org_id = $this->user->organization->id;
 
-        if ($order->client_id == $user->organization_id) {
+        if ($order->client_id === $user_org_id) {
+            return true;
+        } elseif ($order->vendor_id === $user_org_id) {
             return true;
         }
 
-        if ($order->vendor_id == $user->organization_id) {
-            return true;
-        }
-
+        return false;
         /*
          $roles = ArrayHelper::merge([
             Role::ROLE_RESTAURANT_MANAGER,
@@ -1231,8 +1230,6 @@ class OrderWebApi extends \api_web\components\WebApi
             return true;
         }
         */
-
-        return false;
     }
 
     /**

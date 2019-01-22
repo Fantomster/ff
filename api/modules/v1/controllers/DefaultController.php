@@ -147,7 +147,7 @@ class DefaultController extends Controller
             $org = (new \yii\db\Query())
                 ->select('org')
                 ->from(DBNameHelper::getApiName() . '.'.ApiAccess::tableName())
-                ->where('id = :acc',[':acc' => $acc->acc])
+                ->where(['id' => $acc->acc])
                 ->scalar();
 
             $orgs = RelationSuppRest::find()
@@ -208,7 +208,7 @@ class DefaultController extends Controller
             $org = (new \yii\db\Query())
                 ->select('org')
                 ->from(DBNameHelper::getApiName() . '.'.ApiAccess::tableName())
-                ->where('id ='.$acc->acc)
+                ->where(['id' => $acc->acc])
                 ->scalar();
 
             $baseCat = (new \yii\db\Query())

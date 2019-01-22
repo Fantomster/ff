@@ -166,8 +166,8 @@ class VetisWaybillSearch extends MercVsd
                 'vsd_direction'   => $row['vsd_direction'],
                 'last_error'      => $row['last_error'],
                 'user_status'     => $row['user_status'],
-                'r13nClause'      => $row['r13nClause'],
-                'location_prosperity' => $row['location_prosperity'],
+                'r13nClause'      => (bool)$row['r13nClause'],
+                'location_prosperity' => (bool)!MercVsd::parsingLocationProsperity($row['location_prosperity']),
             ];
             if (!is_null($row['ord_id'])) {
                 $status = $arGroups[$row['ord_id']]['statuses'] ?? '';

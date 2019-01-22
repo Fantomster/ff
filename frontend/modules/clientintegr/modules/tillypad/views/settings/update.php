@@ -15,7 +15,7 @@ use yii\widgets\Breadcrumbs;
         'links'   => [
             [
                 'label' => 'Интеграция',
-                'url'   => ['/vendorintegr'],
+                'url'   => ['/clientintegr'],
             ],
             'Интеграция с Tillypad',
         ],

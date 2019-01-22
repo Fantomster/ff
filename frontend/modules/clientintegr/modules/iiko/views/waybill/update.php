@@ -1,17 +1,6 @@
 <?php
 
 use yii\widgets\Breadcrumbs;
-use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\widgets\Pjax;
-use yii\widgets\ActiveForm;
-use common\models\Order;
-use yii\web\View;
-use yii\widgets\ListView;
-use kartik\grid\GridView;
-use kartik\editable\Editable;
-use api\common\models\RkAccess;
-use api\common\models\RkWaybill;
 
 $this->title = 'Интеграция с iiko Office';
 ?>
@@ -24,10 +13,10 @@ $this->title = 'Интеграция с iiko Office';
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'links' => [
+        'links'   => [
             [
                 'label' => 'Интеграция',
-                'url' => ['/vendorintegr'],
+                'url'   => ['/clientintegr'],
             ],
             $this->title
         ],

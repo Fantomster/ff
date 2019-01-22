@@ -6,25 +6,25 @@ use yii\widgets\Breadcrumbs;
 <section class="content-header">
     <h1>
         <img src="<?= Yii::$app->request->baseUrl ?>/img/mercuriy_icon.png" style="width: 32px;">
-        <?= Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']) ?>
+        <?= Yii::t('message', 'frontend.client.integration.mercury', ['ru' => 'Интеграция с системой ВЕТИС "Меркурий"']) ?>
     </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'links' => [
+        'links'   => [
             [
-                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru'=>'Интеграция']),
-                'url' => ['/vendorintegr'],
+                'label' => Yii::t('message', 'frontend.views.layouts.client.integration', ['ru' => 'Интеграция']),
+                'url'   => ['/clientintegr'],
             ],
-            Yii::t('message', 'frontend.client.integration.mercury', ['ru'=>'Интеграция с системой ВЕТИС "Меркурий"']),
+            Yii::t('message', 'frontend.client.integration.mercury', ['ru' => 'Интеграция с системой ВЕТИС "Меркурий"']),
         ],
     ])
     ?>
 </section>
 <section class="content-header">
-    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.add_stock_entry', ['ru'=>'Добавление входной продукции на предприятие']) ?></h4>
+    <h4><?= Yii::t('message', 'frontend.client.integration.mercury.add_stock_entry', ['ru' => 'Добавление входной продукции на предприятие']) ?></h4>
 </section>
 <section class="content">
     <div class="catalog-index">
@@ -36,17 +36,23 @@ use yii\widgets\Breadcrumbs;
                         <?php $owner = \frontend\modules\clientintegr\modules\merc\models\createStoreEntryForm::getOwner(); ?>
                         <table id="w1" class="table table-striped table-bordered detail-view">
                             <tbody>
-                                <tr><th>Название предприятия</th><td><?= $owner[0]?></td></tr>
-                                <tr><th>Хозяйствующий субъект (владелец продукции):</th><td><?= $owner[1]?></td></tr>
+                            <tr>
+                                <th>Название предприятия</th>
+                                <td><?= $owner[0] ?></td>
+                            </tr>
+                            <tr>
+                                <th>Хозяйствующий субъект (владелец продукции):</th>
+                                <td><?= $owner[1] ?></td>
+                            </tr>
                             </tbody>
                         </table>
                         <div class="dict-agent-form">
-                        <?php echo $this->render('_mainForm', [
-                            'model' => $model,
-                            'productionDate' => $productionDate,
-                            'expiryDate' => $expiryDate,
-                            'inputDate' => $inputDate,
-                        ]) ?>
+                            <?php echo $this->render('_mainForm', [
+                                'model'          => $model,
+                                'productionDate' => $productionDate,
+                                'expiryDate'     => $expiryDate,
+                                'inputDate'      => $inputDate,
+                            ]) ?>
                         </div>
                     </div>
                 </div>

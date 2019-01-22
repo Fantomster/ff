@@ -3,6 +3,8 @@
 namespace frontend\controllers;
 
 use api_web\components\Notice;
+use Faker\ORM\Spot\EntityPopulator;
+use PHPExcel_Style_Fill;
 use Yii;
 use Exception;
 use kartik\mpdf\Pdf;
@@ -2542,49 +2544,60 @@ class OrderController extends DefaultController
             exit();
         }
 
-        $selected = implode(',', $selected);
-
-        $sql = "SELECT org.id as id, org.parent_id as parent_id, concat_ws(', ',org.name, org.city, org.address) as client_name 
-                    FROM " . Order::tableName() . " o
-                    left join organization as org on org.id = o.client_id
-                    where o.id in ($selected) group by o.client_id order by org.parent_id";
-
-        $orgs = \Yii::$app->db->createCommand($sql)->queryAll();
-
+        $countQuery = (new Query())->distinct()->from(Order::tableName())
+            ->where(['id' => $arOrderIds])->groupBy('client_id')->count();
         $subQuery = (new Query())->select([
-            \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) => 'cbg.product',
-            \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм'])               => 'cbg.ed',
-        ]);
+            'id'               => 'org.id',
+            'parent_id'        => 'org.parent_id',
+            'client_name'      => "concat_ws(', ',org.name, org.city, org.address)",
+            'product'          => 'cbg.product',
+            'quantity'         => 'oc.quantity',
+            'order_id'         => 'o.id',
+            'SUM(oc.quantity) OVER(PARTITION BY product, org.id) AS sum_quantity',
+            'SUM(oc.quantity) OVER(PARTITION BY product) AS total_sum_quantity',
+            'order_content_id' => 'oc.id',
+            'product_id'       => 'cbg.id',
+            'unit'             => 'cbg.ed',
+            'count_org'        => new Expression($countQuery),
 
-        $query = (new Query())->select([
-            \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) =>
-                \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']),
-            \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм'])               =>
-                \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']),
-        ]);
-
-        foreach ($orgs as $org) {
-            $subQuery->addSelect([new Expression("IF(SUM(IF (o.client_id = " . $org['id'] . ", oc.quantity, 0)) = 0, '', CAST(SUM(IF (o.client_id = " . $org['id'] . ", oc.quantity, 0))as CHAR(10))) as '" . $org['client_name'] . "'")]);
-            $query->addSelect([new Expression("SUM('" . $org['client_name'] . "') as '" . $org['client_name'] . "'")]);
-        }
-
-        $subQuery->from(Order::tableName() . " o")
+        ])->from(Order::tableName() . ' o')
+            ->leftJoin(Organization::tableName() . ' org', 'org.id=o.client_id')
             ->leftJoin(OrderContent::tableName() . " oc", "oc.order_id = o.id")
             ->leftJoin(CatalogBaseGoods::tableName() . " cbg", "cbg.id = oc.product_id")
-            ->leftJoin(Organization::tableName() . " org", "org.id = o.client_id")
             ->where([
                 'o.id' => $arOrderIds,
             ])->andWhere([
                 'not', ['cbg.product' => null]
             ])
-            ->groupBy(['client_id', 'product_id'])
-            ->orderBy('org.parent_id');;
+            ->orderBy('org.parent_id');
+        $dbResult = (new Query())->select('*')->from(['sq' => $subQuery])->groupBy('product,id')
+            ->orderBy('client_name')
+            ->all();
+        $arExcel = [];
+        $arExcelHeader = [
+            \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']),
+            \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед изм']),
+        ];
+        $report = [];
 
-        $query->from(['ww' => $subQuery])
-            ->groupBy(\Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']));
+        foreach ($dbResult as $item) {
+            $arExcelHeader[$item['id']] = $item['client_name'];
+            if (!isset($report[$item['product_id']])) {
+                $report[$item['product_id']] =
+                    [
+                        'product' => $item['product'],
+                        'unit'    => $item['unit'],
+                    ];
+                if (count($arExcelHeader) >= 3) {
+                    $report[$item['product_id']] = array_merge($report[$item['product_id']], array_fill(count($arExcelHeader), $item['count_org'], '0'));
+                }
+                $report[$item['product_id']][count($arExcelHeader) - 3] = $item['sum_quantity'];
+            } else {
+                $index = count($arExcelHeader) - 3;
+                $report[$item['product_id']][$index] = $item['sum_quantity'];
+            }
 
-        $report = $query->all();
-
+        }
         $objPHPExcel = new \PHPExcel();
         $sheet = 0;
         $objPHPExcel->setActiveSheetIndex($sheet);
@@ -2600,7 +2613,7 @@ class OrderController extends DefaultController
         $last_col = 'C';
         $start_grid_col = 'C';
         $grid = 1;
-        foreach ($orgs as $org) {
+        foreach ($dbResult as $org) {
 
             if ($org['parent_id'] != 0) {
                 $start_grid_col = $col;
@@ -2631,12 +2644,10 @@ class OrderController extends DefaultController
         $row_data = 2;
         $last_col = 'A';
 
-        foreach ($report[0] as $key => $data) {
+        foreach ($arExcelHeader as $key) {
             $last_col = $col;
             $objPHPExcel->getActiveSheet()->setCellValue($col . '1', $key);
             $col++;
-            if ($data == null)
-                ;
             $row_data = 3;
         }
 

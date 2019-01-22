@@ -311,23 +311,22 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         // Получаем список складов, чтобы понять сколько надо делать накладных
 
-        $allMapTableName = DBNameHelper::getApiName().'.'.AllMaps::tableName();
+        $allMapTableName = DBNameHelper::getApiName().AllMaps::tableName();
         $orderContentTableName = OrderContent::tableName();
         $client_id = self::getClientIDcondition($order->client_id, $allMapTableName.'.product_id');
         $stories = OrderContent::find()
             ->select("$allMapTableName.store_rid")
-            ->leftJoin($allMapTableName, "$orderContentTableName.product_id = $allMapTableName.product_id and $allMapTableName.service_id = $service_id AND 
-            $allMapTableName.org_id in ($client_id)")
+            ->leftJoin($allMapTableName, "$orderContentTableName.product_id = $allMapTableName.product_id and $allMapTableName.service_id = $service_id
+            $allMapTableName.org_id in ('$client_id')")
             ->where("$orderContentTableName.order_id = :order_id", [':order_id' => $order_id])
             ->groupBy('store_rid')
-            ->asArray()->all();
+            ->asArray();
 
         $contra = iikoAgent::findOne(['vendor_id' => $order->vendor_id]);
 
         $num = (count($stories) > 1) ? 1 : '';
 
         foreach ($stories as $store) {
-            $store = $store['store_rid'];
             $model = new iikoWaybill();
             $model->order_id = $order_id;
             $model->status_id = 1;

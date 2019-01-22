@@ -279,23 +279,22 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
             return false;
         }
 
-        $allMapTableName = DBNameHelper::getApiName().'.'.AllMaps::tableName();
+        $allMapTableName = DBNameHelper::getApiName().AllMaps::tableName();
         $orderContentTableName = OrderContent::tableName();
         $stories = OrderContent::find()
             ->select("$allMapTableName.store_rid")
-            ->leftJoin($allMapTableName, "$orderContentTableName.product_id = $allMapTableName.product_id and $allMapTableName.service_id = :service_id AND 
+            ->leftJoin($allMapTableName, "$orderContentTableName.product_id = $allMapTableName.product_id and $allMapTableName.service_id = :service_id
             $allMapTableName.org_id = :client_id", [':service_isd' => Registry::RK_SERVICE_ID,
                         ':client_id' => $order->client_id])
             ->where("$orderContentTableName.order_id = :order_id", [':order_id' => $order_id])
             ->groupBy('store_rid')
-            ->asArray()->all();
+            ->asArray();
 
         $contra = RkAgent::findOne(['vendor_id' => $order->vendor_id]);
 
         $num = (count($stories) > 1) ? 1 : '';
 
         foreach ($stories as $store) {
-            $store = $store['store_rid'];
             $model            = new RkWaybill();
             $model->order_id  = $order_id;
             $model->status_id = 1;

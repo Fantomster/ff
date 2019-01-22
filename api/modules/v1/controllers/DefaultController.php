@@ -140,25 +140,17 @@ class DefaultController extends Controller
 
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $acc = ApiSession::find()
-                ->where('token = :session_id',[':session_id' => $sessionId])
-                ->one();
-
             $org = (new \yii\db\Query())
                 ->select('org')
-                ->from(DBNameHelper::getApiName() . '.'.ApiAccess::tableName())
-                ->where('id = :acc',[':acc' => $acc->acc])
+                ->from(DBNameHelper::getApiName() . '.'.ApiSession::tableName())
+                ->where('id = (select acc from '.ApiSession::tableName().' where token = :session_id)', [':session_id' => $sessionId])
                 ->scalar();
-
-            $orgs = RelationSuppRest::find()
-                ->select('rest_org_id')
-                ->where("supp_org_id = $org");
 
             $cats = (new \yii\db\Query())
                 ->select('id as fid, type_id, name, city, address, zip_code,
           phone, email, website, created_at, updated_at, legal_entity, contact_name')
                 ->from(DBNameHelper::getMainName() . '.'.Organization::tableName())
-                ->where('in', 'id', $orgs)
+                ->where('id in ( select rest_org_id from '.RelationSuppRest::tableName().' where supp_org_id = :org)', [':org' => $org])
                 ->all();
 
             $this->save_action(__FUNCTION__, $sessionId, 1, 'OK', $this->ip);
@@ -201,14 +193,10 @@ class DefaultController extends Controller
 
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $acc = ApiSession::find()
-                ->where('token = :session_id',[':session_id' => $sessionId])
-                ->one();
-
             $org = (new \yii\db\Query())
                 ->select('org')
-                ->from(DBNameHelper::getApiName() . '.'.ApiAccess::tableName())
-                ->where('id = :acc',[':acc' => $acc->acc])
+                ->from(DBNameHelper::getApiName() . '.'.ApiSession::tableName())
+                ->where('id = (select acc from api_session where token = :session_id)', [':session_id' => $sessionId])
                 ->scalar();
 
             $baseCat = (new \yii\db\Query())

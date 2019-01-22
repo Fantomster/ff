@@ -1,0 +1,1 @@
+kill -9 $(ps aux | grep -e DaemonController | awk '{ print $2 }')

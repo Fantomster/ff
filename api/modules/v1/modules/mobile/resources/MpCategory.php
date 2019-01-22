@@ -35,23 +35,24 @@ class MpCategory extends \common\models\MpCategory
         $client = $user->organization;
 
 
+        $subQuery1 = (new \yii\db\Query())
+            ->select('cat_id')
+            ->from(\common\models\RelationSuppRest::tableName())
+            ->where("(supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)");
         $query1 = (new \yii\db\Query())
             ->select('cbg.id as id')
             ->from(DBNameHelper::getMainName().'.'.CatalogBaseGoods::tableName().' as cbg' )
             ->where("(cbg.status = 1) 
-                AND (cbg.deleted = 0) AND (cbg.category_id in ($categories))  
-                AND (cbg.cat_id IN (SELECT cat_id FROM ".\common\models\RelationSuppRest::tableName()." WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))");
+                AND (cbg.deleted = 0) AND (cbg.category_id in ($categories))")
+            ->andWhere('in' ,'cbg.cat_id', $subQuery1);
 
         $query2 = (new \yii\db\Query())
             ->select('cbg.id as id')
             ->from(DBNameHelper::getMainName().'.'.CatalogBaseGoods::tableName().' as cbg' )
             ->leftJoin(DBNameHelper::getMainName().'.'.CatalogGoods::tableName().' as cg','cg.base_goods_id = cbg.id')
             ->where("(cbg.status = 1) 
-                AND (cbg.deleted = 0) AND (cbg.category_id in ($categories)) 
-                AND (cg.cat_id IN (SELECT cat_id FROM ".\common\models\RelationSuppRest::tableName()." WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))");
-
-
-
+                AND (cbg.deleted = 0) AND (cbg.category_id in ($categories))")
+            ->andWhere('in' ,'cg.cat_id', $subQuery1);
 
         $res = (new \yii\db\Query())
             ->select('*')

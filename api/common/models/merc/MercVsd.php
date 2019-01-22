@@ -385,9 +385,15 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
         return $this->hasOne(OrderContent::className(), ['merc_uuid' => 'uuid']);
     }
 
+    /**
+     * Метод возвращает признак благополучия местности true - благополучна, false - неблагополучна
+     * @param $locationProsperity
+     * @return bool
+     *
+     */
     public static  function parsingLocationProsperity($locationProsperity)
     {
-        if(isset($locationProsperity)) {
+        if(!isset($locationProsperity)) {
             return true;
         }
 

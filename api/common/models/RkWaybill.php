@@ -7,6 +7,7 @@ use common\models\Order;
 use common\models\User;
 use frontend\modules\clientintegr\components\CreateWaybillByOrderInterface;
 use common\helpers\DBNameHelper;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use Yii;
 use common\models\OrderContent;
@@ -278,20 +279,16 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
             return false;
         }
 
-        $dbName = DBNameHelper::getMainName();
-
-        /* $stories2 = AllMaps::find()->select('store_rid')->andWhere('org_id = :org and service_id = :serv and product_id in (
-          SELECT product_id from '.$dbName.'.order_content where order_id = :order
-          ) and is_active = 1 ',[':org' => $order->client_id, ':order' => $order_id, ':serv' => Registry::RK_SERVICE_ID])->groupBy('store_rid')->column(); */
-
-        $db  = Yii::$app->db_api;
-        $sql = ' SELECT m.store_rid FROM ' . $dbName . '.order_content o ' .
-                ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = ' . Registry::RK_SERVICE_ID . ' AND m.org_id = ' . $order->client_id .
-                ' WHERE o.order_id = ' . $order_id .
-                ' GROUP BY store_rid';
-
-        $stories = $db->createCommand($sql)->queryAll();
-        $stories = ArrayHelper::getColumn($stories, 'store_rid');
+        $allMapTableName = DBNameHelper::getApiName().AllMaps::tableName();
+        $orderContentTableName = OrderContent::tableName();
+        $stories = OrderContent::find()
+            ->select("$allMapTableName.store_rid")
+            ->leftJoin($allMapTableName, "$orderContentTableName.product_id = $allMapTableName.product_id and $allMapTableName.service_id = :service_id
+            $allMapTableName.org_id = :client_id", [':service_isd' => Registry::RK_SERVICE_ID,
+                        ':client_id' => $order->client_id])
+            ->where("$orderContentTableName.order_id = :order_id", [':order_id' => $order_id])
+            ->groupBy('store_rid')
+            ->asArray();
 
         $contra = RkAgent::findOne(['vendor_id' => $order->vendor_id]);
 

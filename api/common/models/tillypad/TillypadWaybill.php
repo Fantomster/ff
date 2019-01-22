@@ -301,20 +301,16 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
             throw new \Exception('Ошибка при отправке.' . $order_id);
         }
 
-        $dbName = DBNameHelper::getMainName();
-
-        $client_id = self::getClientIDcondition($order->client_id, 'm.product_id');
-
-        // Получаем список складов, чтобы понять сколько надо делать накладных
-
-        $db = Yii::$app->db_api;
-        $sql = ' SELECT m.store_rid FROM ' . $dbName . '.order_content o ' .
-            ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = ' . $service_id . ' AND m.org_id in (' . $client_id . ') ' .
-            ' WHERE o.order_id = ' . $order_id .
-            ' GROUP BY store_rid';
-
-        $stories = $db->createCommand($sql)->queryAll();
-        $stories = ArrayHelper::getColumn($stories, 'store_rid');
+        $allMapTableName = DBNameHelper::getApiName().AllMaps::tableName();
+        $client_id = self::getClientIDcondition($order->client_id, $allMapTableName.'.product_id');
+        $orderContentTableName = OrderContent::tableName();
+        $stories = OrderContent::find()
+            ->select("$allMapTableName.store_rid")
+            ->leftJoin($allMapTableName, "$orderContentTableName.product_id = $allMapTableName.product_id and $allMapTableName.service_id = $service_id
+            $allMapTableName.org_id in ('$client_id')")
+            ->where("$orderContentTableName.order_id = :order_id", [':order_id' => $order_id])
+            ->groupBy('store_rid')
+            ->asArray();
 
         $contra = iikoAgent::findOne(['vendor_id' => $order->vendor_id]);
 
@@ -357,8 +353,8 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
         $mainOrg = iikoService::getMainOrg($org_id);
 
         if ($mainOrg != $org_id) {
-            $dbName = DBNameHelper::getApiName();
-            $client_id = "IF($product_field in (select product_id from $dbName.all_map where service_id = " . Registry::IIKO_SERVICE_ID . " and org_id = $client_id), $client_id, $mainOrg)";
+            $dbName = DBNameHelper::getApiName().".".AllMaps::tableName();
+            $client_id = "IF($product_field in (select product_id from $dbName where service_id = " . Registry::IIKO_SERVICE_ID . " and org_id = $client_id), $client_id, $mainOrg)";
         }
 
         return $client_id;
@@ -413,19 +409,21 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
 
         $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
 
+        $allmapTableName = $dbName.".".AllMaps::tableName();
+
         if ($waybillMode !== '0') {
             $client_id = self::getClientIDcondition($this->org, $dbName . '.all_map.product_id');
             if ($this->store_id === null) {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin($dbName . '.all_map', 'order_content.product_id = ' . $dbName . '.all_map.product_id and ' . $dbName . '.all_map.service_id = ' . $service_id . ' and ' . $dbName . '.all_map.org_id in (' . $client_id . ')')
-                    ->andWhere($dbName . '.all_map.store_rid is null')
+                    ->leftJoin($allmapTableName, OrderContent::tableName().".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ('$client_id')")
+                    ->andWhere($allmapTableName.'.store_rid is null')
                     ->all();
             } else {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin($dbName . '.all_map', 'order_content.product_id = ' . $dbName . '.all_map.product_id and ' . $dbName . '.all_map.service_id = ' . $service_id . ' and ' . $dbName . '.all_map.org_id in (' . $client_id . ')')
-                    ->andWhere($dbName . '.all_map.store_rid =' . $this->store_id)
+                    ->leftJoin($allmapTableName, OrderContent::tableName().".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ('$client_id')")
+                    ->andWhere($allmapTableName . '.store_rid =' . $this->store_id)
                     ->all();
             }
         } else {
@@ -460,7 +458,7 @@ class TillypadWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrd
                 // New check mapping
                 $client_id = $this->org;
                 if ($wdmodel->org != $this->org) {
-                    $client_id = "IF(product_id in (select product_id from all_map where service_id = ' . $service_id . ' and org_id = $client_id), $client_id, $wdmodel->org)";
+                    $client_id = "IF(product_id in (select product_id from $allmapTableName where service_id = $service_id and org_id = $client_id), $client_id, $wdmodel->org)";
                 }
 
                 $ch = AllMaps::find()

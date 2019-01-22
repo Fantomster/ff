@@ -130,6 +130,9 @@ class Registry
         self::VENDOR_DOC_MAIL_SERVICE_ID
     ];
 
+    const OUTER_STORE_IS_DELETED_FALSE = 0;
+    const OUTER_STORE_IS_DELETED_TRUE = 1;
+
     const DOC_GROUP_STATUS_WAIT_SENDING = 1;
     const DOC_GROUP_STATUS_WAIT_FORMING = 2;
     const DOC_GROUP_STATUS_SENT = 3;

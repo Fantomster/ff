@@ -1214,22 +1214,6 @@ class OrderWebApi extends \api_web\components\WebApi
         }
 
         return false;
-        /*
-         $roles = ArrayHelper::merge([
-            Role::ROLE_RESTAURANT_MANAGER,
-            Role::ROLE_RESTAURANT_EMPLOYEE,
-            Role::ROLE_SUPPLIER_MANAGER,
-            Role::ROLE_SUPPLIER_EMPLOYEE,
-            Role::ROLE_FKEEPER_MANAGER,
-            Role::ROLE_ADMIN
-        ],
-            Role::getFranchiseeEditorRoles()
-        );
-
-        if (in_array($user->role_id, $roles)) {
-            return true;
-        }
-        */
     }
 
     /**

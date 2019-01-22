@@ -370,9 +370,11 @@ class DocumentWebApi extends \api_web\components\WebApi
                      CASE
                      WHEN instr(group_concat(DISTINCT dat.waybill_status_id),:WAYBILL_UNLOADED) > 0
                           AND
-                          instr(group_concat(DISTINCT dat.waybill_status_id),':WAYBILL_UNLOADED,') = 0
+                          instr(group_concat(DISTINCT dat.waybill_status_id), concat(:WAYBILL_UNLOADED, ',')) = 0
                           AND
-                          instr(group_concat(DISTINCT dat.waybill_status_id),',:WAYBILL_UNLOADED') = 0
+                          instr(group_concat(DISTINCT dat.waybill_status_id), concat(',', :WAYBILL_UNLOADED)) = 0
+                          AND
+                          count(dat.order_content_id) = count(dat.waybill_content_id)
                        THEN :DOC_GROUP_STATUS_SENT
                      WHEN 
                         instr(group_concat(DISTINCT dat.waybill_status_id), :WAYBILL_FORMED) > 0

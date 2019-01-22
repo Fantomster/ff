@@ -203,7 +203,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if (empty($orderContent)) {
             throw new BadRequestHttpException("order_content.not_found");
         }
-        $oldOrderContentAttributes = $orderContent->attributes;
+        $orderContent->setOldAttributes($orderContent->attributes);
 
         if (!empty($product['quantity'])) {
             $orderContent->quantity = $product['quantity'];
@@ -214,10 +214,10 @@ class OrderWebApi extends \api_web\components\WebApi
         if (!empty($product['price']) || $product['price'] == 0) {
             $orderContent->price = round($product['price'], 3);
         }
+        $clone = clone $orderContent;
 
         if ($orderContent->save()) {
-            $orderContent->setOldAttributes($oldOrderContentAttributes);
-            return $orderContent;
+            return $clone;
         } else {
             throw new ValidationException($orderContent->getFirstErrors());
         }

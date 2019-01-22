@@ -116,6 +116,8 @@ class ParserTorg12
     private $sumWithoutTaxExcel = 0; //Сумма без НДС, указанная в накладной
     private $sumWithTaxExcel = 0; //Сумма c НДС, указанная в накладной
     public $sumNotEqual = false; //совпадения общих сумм в накладной с суммами всех строк
+    public $formulaHasSumWithoutTax = 0; //наличие формулы в ячейке Сумма всей накладной без НДС
+    public $formulaHasSumWithTax = 0; //наличие формулы в ячейке Сумма всей накладной с НДС
 
     /**
      * @param string $filePath       Путь к файлу
@@ -1026,8 +1028,10 @@ class ParserTorg12
                 if (in_array($this->normalizeHeaderCellValue($ws->getCellByColumnAndRow($col, $row)->getValue()), $this->settingsRow['total'])) {
                     $col_sum = $this->columnList['sum_without_tax']['col'];
                     $this->sumWithoutTaxExcel = $this->normalizeHeaderCellValue($ws->getCellByColumnAndRow($col_sum, $row)->getValue());
+                    ($this->sumWithoutTaxExcel[0] == '=') ? $this->formulaHasSumWithoutTax = 1 : $this->formulaHasSumWithoutTax = 0;
                     $col_sum = $this->columnList['sum_with_tax']['col'];
                     $this->sumWithTaxExcel = $this->normalizeHeaderCellValue($ws->getCellByColumnAndRow($col_sum, $row)->getValue());
+                    ($this->sumWithTaxExcel[0] == '=') ? $this->formulaHasSumWithTax = 1 : $this->formulaHasSumWithTax = 0;
                     $this->highestRow = $row - 1;
                     return;
                 }
@@ -1142,31 +1146,13 @@ class ParserTorg12
                 $invoiceRow->cnt = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['cnt']['col'], $row)->getValue(), true);
             }
 
-            // еденицы измерения
+            // единицы измерения
             if (isset($this->columnList['ed'])) {
                 $invoiceRow->ed = $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['ed']['col'], $row)->getValue(), true);
             }
 
             if (!$invoiceRow->cnt && isset($this->columnList['cnt_place'])) {
                 $invoiceRow->cnt = (int)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['cnt_place']['col'], $row)->getValue(), true);
-            }
-
-            if (($invoiceRow->name != '') and ($invoiceRow->num != 0)) {
-                // сумма без НДС
-                if (isset($this->columnList['sum_without_tax']))
-                    $invoiceRow->sum_without_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_without_tax']['col'], $row)->getValue(), true);
-                if ($invoiceRow->sum_without_tax) {
-                    $this->invoice->price_without_tax_sum += $invoiceRow->sum_without_tax;
-                    $this->invoice->price_without_tax_sum = round($this->invoice->price_without_tax_sum, 2);
-                }
-
-                // сумма  c НДС
-                if (isset($this->columnList['sum_with_tax']))
-                    $invoiceRow->sum_with_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_with_tax']['col'], $row)->getValue(), true);
-                if ($invoiceRow->sum_with_tax) {
-                    $this->invoice->price_with_tax_sum += $invoiceRow->sum_with_tax;
-                    $this->invoice->price_with_tax_sum = round($this->invoice->price_with_tax_sum, 2);
-                }
             }
             /*
               if (isset($this->columnList['price_with_tax'])) {
@@ -1195,6 +1181,13 @@ class ParserTorg12
              */
             // НДС
             $taxRate = $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['tax_rate']['col'], $row)->getValue(), true);
+            if ($taxRate == '') {
+                $taxRate = $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['tax_rate']['col'] + 1, $row)->getValue(), true);
+            }
+            if (strpos($taxRate,'.')) {
+                $taxRate = $taxRate * 100;
+                $taxRate = $taxRate.'%';
+            }
             $taxRate = str_replace('%', '', $taxRate);
             $taxRate = str_replace('без ндс', '0', strtolower($taxRate));
             $taxRate = intval($taxRate);
@@ -1207,23 +1200,37 @@ class ParserTorg12
                 $invoiceRow->errors['tax_rate'] = sprintf('Значение НДС "%s" отсутствует в списке доступных', $taxRate);
                 $this->invoice->errors['tax_rate'] = 'В накладной присутствует товар с некорректной ставкой НДС';
             }
-            /*
-              // проверка корректности указанной ставки НДС
-              $calcPriceWithTax = round($invoiceRow->price_without_tax * (1 + $invoiceRow->tax_rate / 100), 2);
-              $priceWithTax = round($invoiceRow->price_with_tax, 2);
-              $diffPriceWithTax = abs($calcPriceWithTax - $priceWithTax);
-              // погрешность 1 руб.
-              if ($diffPriceWithTax > 1) {
-              $invoiceRow->errors['diff_price_with_tax'] = sprintf('Некорректно указана ставка НДС (Цена с учётом НДС: %s, Рассчитанная цена с учетом НДС: %s', $priceWithTax, $calcPriceWithTax);
-              $this->invoice->errors['diff_price_with_tax'] = 'В накладной присутсвует товар, по которому указана некорректная цена или ставка НДС';
-              }
-             */
-            // Проверка на корректность расчета цены единицы
 
-            /*     if ($invoiceRow->price_without_tax == $invoiceRow->sum_without_tax) {
-              $invoiceRow->price_without_tax = round($invoiceRow->price_without_tax / $invoiceRow->cnt,2);
-              }
-             */
+            if (($invoiceRow->name != '') and ($invoiceRow->num != 0)) {
+                // сумма без НДС
+                if (isset($this->columnList['sum_without_tax'])) {
+                    $CellValue = $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_without_tax']['col'], $row)->getValue(), true);
+                    if ($CellValue[0] == '=') {
+                        $invoiceRow->sum_without_tax = (double)$invoiceRow->cnt * $invoiceRow->price_without_tax;
+                    } else {
+                        $invoiceRow->sum_without_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_without_tax']['col'], $row)->getValue(), true);
+                    }
+                }
+                if ($invoiceRow->sum_without_tax) {
+                    $this->invoice->price_without_tax_sum += $invoiceRow->sum_without_tax;
+                    $this->invoice->price_without_tax_sum = round($this->invoice->price_without_tax_sum, 2);
+                }
+
+                // сумма  c НДС
+                if (isset($this->columnList['sum_with_tax'])) {
+                    $CellValue = $this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_with_tax']['col'], $row)->getValue(), true);
+                    if ($CellValue[0] == '=') {
+                        $invoiceRow->sum_with_tax = (double)$invoiceRow->sum_without_tax * ((100 + $invoiceRow->tax_rate) / 100);
+                    } else {
+                        $invoiceRow->sum_with_tax = (double)$this->normalizeCellValue($ws->getCellByColumnAndRow($this->columnList['sum_with_tax']['col'], $row)->getValue(), true);
+                    }
+                }
+                if ($invoiceRow->sum_with_tax) {
+                    $this->invoice->price_with_tax_sum += $invoiceRow->sum_with_tax;
+                    $this->invoice->price_with_tax_sum = round($this->invoice->price_with_tax_sum, 2);
+                }
+            }
+
             if (($invoiceRow->name != '') and ($invoiceRow->num != 0)) {
                 if ($invoiceRow->cnt > 0)
                     $invoiceRow->price_with_tax = round($invoiceRow->sum_with_tax / $invoiceRow->cnt, 2);
@@ -1232,9 +1239,9 @@ class ParserTorg12
                 $this->invoice->rows[$invoiceRow->num] = $invoiceRow;
             }
         }
-        if ($this->invoice->price_without_tax_sum != $this->sumWithoutTaxExcel)
+        if (($this->formulaHasSumWithoutTax == 0) && ($this->invoice->price_without_tax_sum != $this->sumWithoutTaxExcel))
             $this->sumNotEqual = true;
-        if ($this->invoice->price_with_tax_sum != $this->sumWithTaxExcel)
+        if (($this->formulaHasSumWithTax == 0) && ($this->invoice->price_with_tax_sum != $this->sumWithTaxExcel))
             $this->sumNotEqual = true;
     }
 

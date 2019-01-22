@@ -111,7 +111,9 @@ class EmailIntegrationController extends Controller
         //$temp_file[67] = '/app/console/runtime/testnac64.xlsx';
         //$temp_file[68] = '/app/console/runtime/testnac65.xls';
         //$temp_file[69] = '/app/console/runtime/testnac66.xlsx';
-        $temp_file[70] = '/app/console/runtime/testnac70.XLS';
+        //$temp_file[70] = '/app/console/runtime/testnac70.XLS';
+        //$temp_file[71] = '/app/console/runtime/testnac71.xlsx';
+        $temp_file[72] = '/app/console/runtime/testnac72.xlsx';
 
 
         $i = 1;
@@ -144,7 +146,7 @@ class EmailIntegrationController extends Controller
             print_r("Result price_without_tax_sum:" . $result[$i - 1]['invoice']['price_without_tax_sum'] . PHP_EOL);
             print_r("Result price_with_tax_sum:" . $result[$i - 1]['invoice']['price_with_tax_sum'] . PHP_EOL);
             print_r("=================================" . PHP_EOL);
-            //print_r($result[$i - 1]['invoice']['rows']);
+            print_r($result[$i - 1]['invoice']['rows']);
             //file_put_contents('result_'.$i.'.txt', $filet.PHP_EOL,true);
             //file_put_contents('result_'.$i.'.txt', print_r($result[$i-1],true));
             $i++;

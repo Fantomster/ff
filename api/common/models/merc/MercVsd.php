@@ -384,4 +384,17 @@ class MercVsd extends \yii\db\ActiveRecord implements UpdateDictInterface
     {
         return $this->hasOne(OrderContent::className(), ['merc_uuid' => 'uuid']);
     }
+
+    public static  function parsingLocationProsperity($locationProsperity)
+    {
+        if(isset($locationProsperity)) {
+            return true;
+        }
+
+        if(strcasecmp($locationProsperity, "Регион с неопределенным статусом") == 0 || strcasecmp($locationProsperity, "Неблагополучный регион") == 0) {
+            return false;
+        }
+
+        return true;
+    }
 }

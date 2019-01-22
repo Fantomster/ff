@@ -5,111 +5,111 @@ use yii\widgets\ActiveForm;
 use yii\helpers\Url;
 
 ?>
-<section class="content-header">
-    <h1>
-        <i class="fa fa-upload"></i> Интеграция с iiko Office
-    </h1>
-    <?=
-    Breadcrumbs::widget([
-        'options' => [
-            'class' => 'breadcrumb',
-        ],
-        'links' => [
-            [
-                'label' => 'Интеграция',
-                'url' => ['/vendorintegr'],
+    <section class="content-header">
+        <h1>
+            <i class="fa fa-upload"></i> Интеграция с iiko Office
+        </h1>
+        <?=
+        Breadcrumbs::widget([
+            'options' => [
+                'class' => 'breadcrumb',
             ],
-            'Интеграция с iiko Office',
-        ],
-    ])
-    ?>
-</section>
-<section class="content-header">
-    <?= $this->render('/default/_menu.php'); ?>
-</section>
-<section class="content">
-    <div class="catalog-index">
-        <div class="box box-info">
-            <div class="box-header with-border">
-                <div class="panel-body">
-                    <div class="box-body table-responsive no-padding" style="overflow-x:visible;">
-	                    <?php $form = ActiveForm::begin();?>
-	                    <div class="col-md-4">
-		                    <?php
-		                    $models = $provider->getModels();
-		                    $model = current($models);
-		                    $options = [];
-                            $jsParentId = '';
-                            $items = \yii\helpers\ArrayHelper::map($models,'id','name');
-		                    if(!is_null($parentId)){
-		                    	$jsParentId = $parentId->value;
-                                foreach ($items as $key => $value) {
-                                	if($jsParentId != $value){
-                                        $arTmp[$key] = ['disabled' => true];
-	                                }
+            'links'   => [
+                [
+                    'label' => 'Интеграция',
+                    'url'   => ['/clientintegr'],
+                ],
+                'Интеграция с iiko Office',
+            ],
+        ])
+        ?>
+    </section>
+    <section class="content-header">
+        <?= $this->render('/default/_menu.php'); ?>
+    </section>
+    <section class="content">
+        <div class="catalog-index">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <div class="panel-body">
+                        <div class="box-body table-responsive no-padding" style="overflow-x:visible;">
+                            <?php $form = ActiveForm::begin(); ?>
+                            <div class="col-md-4">
+                                <?php
+                                $models = $provider->getModels();
+                                $model = current($models);
+                                $options = [];
+                                $jsParentId = '';
+                                $items = \yii\helpers\ArrayHelper::map($models, 'id', 'name');
+                                if (!is_null($parentId)) {
+                                    $jsParentId = $parentId->value;
+                                    foreach ($items as $key => $value) {
+                                        if ($jsParentId != $value) {
+                                            $arTmp[$key] = ['disabled' => true];
+                                        }
+                                    }
+                                    $arTmp[$jsParentId] = ['Selected' => true];
+                                    $arTmp['readonly'] = true;
+                                    $options = ['options' => $arTmp];
                                 }
-                                $arTmp[$jsParentId] = ['Selected' => true];
-                                $arTmp['readonly'] = true;
-                                $options = ['options' => $arTmp];
-		                    }
 
-	                        echo $form->field($model, 'name')->dropDownList($items, $options)->label('Укажите главный бизнес');
-	                        ?>
-                            <?= \yii\helpers\Html::a('Применить сопоставление', false, ['class' => 'btn btn-md fk-button', 'id' => 'apply_collation']); ?>
-		                    <?= \yii\helpers\Html::a('Отменить всё', false, ['class' => 'btn btn-danger', 'id' => 'cancel_collation']); ?>
-	                    </div>
-	                    <div class="col-md-8" style="padding: 18px 0 0;">
-	                        <?=
-	                        \kartik\grid\GridView::widget([
-	                            'dataProvider' => $provider,
-	                            'pjax' => true,
-	                            'summary' => '',
-	                            'filterPosition' => false,
-	                            'columns' => [
-	                                [
-	                                    'class' => 'kartik\grid\CheckboxColumn',
-	                                    'checkboxOptions' => function ($model, $key, $index, $column) {
-                                            $obConstModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'main_org']);
-                                            $pConst = \api\common\models\iiko\iikoPconst::findOne(['const_id' => $obConstModel->id, 'org' => $key]);
-                                            if(!is_null($pConst)){
-                                            	return [
+                                echo $form->field($model, 'name')->dropDownList($items, $options)->label('Укажите главный бизнес');
+                                ?>
+                                <?= \yii\helpers\Html::a('Применить сопоставление', false, ['class' => 'btn btn-md fk-button', 'id' => 'apply_collation']); ?>
+                                <?= \yii\helpers\Html::a('Отменить всё', false, ['class' => 'btn btn-danger', 'id' => 'cancel_collation']); ?>
+                            </div>
+                            <div class="col-md-8" style="padding: 18px 0 0;">
+                                <?=
+                                \kartik\grid\GridView::widget([
+                                    'dataProvider'     => $provider,
+                                    'pjax'             => true,
+                                    'summary'          => '',
+                                    'filterPosition'   => false,
+                                    'columns'          => [
+                                        [
+                                            'class'           => 'kartik\grid\CheckboxColumn',
+                                            'checkboxOptions' => function ($model, $key, $index, $column) {
+                                                $obConstModel = \api\common\models\iiko\iikoDicconst::findOne(['denom' => 'main_org']);
+                                                $pConst = \api\common\models\iiko\iikoPconst::findOne(['const_id' => $obConstModel->id, 'org' => $key]);
+                                                if (!is_null($pConst)) {
+                                                    return [
+                                                        'id'      => 'table-option-' . $key,
+                                                        'checked' => true,
+                                                    ];
+                                                }
+                                                return [
                                                     'id' => 'table-option-' . $key,
-		                                            'checked' => true,
-	                                            ];
+                                                ];
                                             }
-		                                    return [
-		                                    	'id' => 'table-option-' . $key,
-		                                    ];
-	                                    }
-	                                ],
-	                                [
-	                                    'attribute' => 'name',
-	                                    'value' => 'name',
-	                                    'label' => 'Название организации',
-	                                ],
-	                            ],
-	                            'options' => ['class' => 'table-responsive'],
-	                            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-	                            'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-	                            'bordered' => false,
-	                            'striped' => true,
-	                            'condensed' => false,
-	                            'responsive' => false,
-	                            'hover' => true,
-	                            'resizableColumns' => false,
-	                            'export' => [
-	                                'fontAwesome' => true,
-	                            ],
-	                        ]);
-	                        ?>
-	                    </div>
+                                        ],
+                                        [
+                                            'attribute' => 'name',
+                                            'value'     => 'name',
+                                            'label'     => 'Название организации',
+                                        ],
+                                    ],
+                                    'options'          => ['class' => 'table-responsive'],
+                                    'tableOptions'     => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                                    'formatter'        => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                                    'bordered'         => false,
+                                    'striped'          => true,
+                                    'condensed'        => false,
+                                    'responsive'       => false,
+                                    'hover'            => true,
+                                    'resizableColumns' => false,
+                                    'export'           => [
+                                        'fontAwesome' => true,
+                                    ],
+                                ]);
+                                ?>
+                            </div>
+                        </div>
+                        <?php ActiveForm::end(); ?>
                     </div>
-                    <?php ActiveForm::end(); ?>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 <?php
 $applyUrl = Url::toRoute('settings/apply-collation');
 $cancelUrl = Url::toRoute('settings/cancel-collation');

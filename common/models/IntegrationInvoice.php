@@ -286,36 +286,26 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
      * @return boolean
      * @throws Exception
      */
-    public function addProductsFromTorg12InCatalogGoods(Organization $vendor)
+    public function addProductsFromTorg12InCatalogGoods(Organization $vendor, Organization $client)
     {
-        /**
-         * @var $row IntegrationInvoiceContent
-         */
         //Ищем товары у поставщика по наименованию в специально назначенном для ресторана каталоге
         //Если не нашли, создаём
-        /**
-         * @var $user User
-         */
-        $user = \Yii::$app->user->identity;
-        $rest_id = $user->organization_id;
-        $db = Yii::$app->db;
-        $query = 'SELECT cat_id FROM relation_supp_rest WHERE rest_org_id = ' . $rest_id . ' AND supp_org_id = ' . $vendor->id;
-        $catalogs = $db->createCommand($query)->queryAll();
-        if (empty($catalogs)) {
+        $catalogIds = RelationSuppRest::find()->select('cat_id')->where(['rest_org_id' => $client->id, 'supp_org_id' => $vendor->id])->asArray()->column();
+        if (empty($catalogIds)) {
             return false;
         }
         foreach ($this->content as $row) {
             $model = CatalogBaseGoods::find()->where(['supp_org_id' => $vendor->id])
                 ->andWhere(['like', 'product', HtmlPurifier::process($row->title), 'status' => CatalogBaseGoods::STATUS_ON])
                 ->one();
-            foreach ($catalogs as $catalog) {
-                $model2 = CatalogGoods::find()->where(['cat_id' => $catalog['cat_id']])
+            foreach ($catalogIds as $catId) {
+                $model2 = CatalogGoods::find()->where(['cat_id' => $catId])
                     ->andWhere(['base_goods_id' => $model->id])
                     ->one();
 
                 if (empty($model2)) {
                     $model2 = new CatalogGoods();
-                    $model2->cat_id = $catalog['cat_id'];
+                    $model2->cat_id = $catId;
                     $model2->base_goods_id = $model->id;
                     $model2->price = $row->price_without_nds;
                     if (!$model2->save()) {
@@ -329,28 +319,17 @@ class IntegrationInvoice extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param $id
-     * @return float|int
+     * @param $pageSize
+     * @return int
      */
-    public function pageOrder($id)
+    public function getOrderPage(int $pageSize = 20)
     {
-        $user = \Yii::$app->user->identity;
-        $rest_id = $user->organization_id;
-        $zakazi = Order::find()->andWhere(['status' => 4, 'client_id' => $rest_id])->orderBy('id DESC')->all();
-        $i = 0;
-        foreach ($zakazi as $zakaz) {
-            $i++;
-            $orders[$i] = $zakaz['id'];
-        }
-        $key = array_search($id, $orders);
-        $page_size = 20;
-        $ostatok = $key % $page_size;
-        if ($ostatok == 0) {
-            $page = $key / $page_size;
-        } else {
-            $page = intdiv($key, $page_size) + 1;
-        }
-        return $page;
+        //$subQuery = (new \yii\db\Query())->select
+        return Order::find()
+                ->select(new \yii\db\Expression("(FLOOR(COUNT(*) / $pageSize) + 1"))
+                ->where(['status' => Order::STATUS_DONE, 'client_id' => $this->organization_id])
+                ->andWhere(['>=', 'id' => $this->order_id])
+                ->orderBy(['id' => SORT_DESC])
+                ->scalar();
     }
-
 }

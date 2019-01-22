@@ -658,6 +658,9 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         if (!empty($post['outer_number_additional'])) {
             $waybill->outer_number_additional = $post['outer_number_additional'];
+            if (!preg_match('#^[0-9]+$#', $waybill->outer_number_additional) && $waybill->service_id == Registry::RK_SERVICE_ID) {
+                throw new BadRequestHttpException('rkeeper.waybill.outer_number_additional.is_not_int');
+            }
         }
 
         if (!empty($post['outer_number_code'])) {

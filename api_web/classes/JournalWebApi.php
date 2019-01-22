@@ -9,6 +9,7 @@
 namespace api_web\classes;
 
 use api_web\components\WebApi;
+use api_web\helpers\WebApiHelper;
 use common\models\Journal;
 use common\models\Role;
 use yii\data\ActiveDataProvider;
@@ -90,7 +91,9 @@ class JournalWebApi extends WebApi
         $dataProvider->setPagination($pagination);
 
         $result = [];
+        /** @var Journal $model */
         foreach ($dataProvider->models as $model) {
+            $model->created_at = WebApiHelper::asDatetime($model->created_at);
             $result[] = $model;
         }
 

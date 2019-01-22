@@ -517,6 +517,7 @@ class ServiceRkws extends AbstractSyncFactory
                         'service_id'     => $this->serviceId,
                         'retry'          => 0,
                         'org_id'         => $this->user->organization_id,
+                        'user_id'        => $this->user->id,
                         'inner_guid'     => $guid,
                         'salespoint_id'  => (string)$this->licenseMixcartId,
                         'int_status_id'  => OuterTask::STATUS_REQUESTED,
@@ -716,27 +717,18 @@ class ServiceRkws extends AbstractSyncFactory
      */
     public function receiveXMLDataWaybill(OuterTask $task, string $data = null)
     {
-        # 1. Получаем массив входящих данных
-        $arrayNew = $this->parsingXml($data);
-
-        # 2. Фиксируем изменения в текущей задаче
-        if (!empty($arrayNew['0'])) {
-            $task->int_status_id = OuterTask::STATUS_CALLBACKED;
-            $task->retry++;
-            if (!$task->save()) {
-                $saveErr['task'][] = $task->errors;
-                /** @noinspection PhpUndefinedFieldInspection */
-                $saveErr['waybill'] = $arrayNew[0];
-            } else {
-                $this->log('Waybill successfully send');
-                return self::XML_LOAD_RESULT_SUCCESS;
-            }
-        } else {
-            $this->log('No rows were inserted or updated!');
-            $saveErr = ['save' => 'no_save_data'];
+        try {
+            $this->checkErrorResponse((array)simplexml_load_string($data));
+        } catch (\Exception $e) {
+            $this->log('Error: ' . $e->getMessage());
+            return self::XML_LOAD_RESULT_FAULT;
         }
-        $this->log('Fixed save errors: ' . json_encode($saveErr));
-        return self::XML_LOAD_RESULT_FAULT;
+
+        $task->int_status_id = OuterTask::STATUS_CALLBACKED;
+        $task->retry++;
+        $task->save();
+        $this->log('Waybill successfully send');
+        return self::XML_LOAD_RESULT_SUCCESS;
     }
 
     /**

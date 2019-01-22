@@ -146,6 +146,10 @@ class IntegrationWebApi extends WebApi
         $waybill->acquirer_id = $acquirerID;
         $waybill->doc_date = \gmdate('Y-m-d H:i:s');
 
+        if (!preg_match('#^[0-9]+$#', $waybill->outer_number_additional) && $waybill->service_id == Registry::RK_SERVICE_ID) {
+            throw new BadRequestHttpException('rkeeper.waybill.outer_number_additional.is_not_int');
+        }
+
         if (!$waybill->save()) {
             throw new ValidationException($waybill->getFirstErrors());
         }

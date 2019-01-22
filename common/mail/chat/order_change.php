@@ -6,7 +6,6 @@ use \api_web\helpers\CurrencyHelper;
  * @var \api_web\modules\integration\classes\documents\OrderContent[] $changed
  * @var \api_web\modules\integration\classes\documents\OrderContent[] $deleted
  */
-
 ?>
 <?php if (!empty($changed) || !empty($deleted)): ?>
     <p><?= Yii::t('app', 'Изменились детали заказа') ?>:</p>
@@ -28,7 +27,8 @@ use \api_web\helpers\CurrencyHelper;
 
         <?php if (!empty($changed)): $i = 0; ?>
             <?php foreach ($changed as $model) : $new = $model->isNewRecord; ?>
-                <?php if ($new) {
+                <?php
+                if ($new) {
                     $model->refresh();
                 } ?>
                 <tr class="<?= $new ? 'action-added' : 'action-changed' ?>">
@@ -37,13 +37,20 @@ use \api_web\helpers\CurrencyHelper;
                     <td class="order"><?= ++$i ?></td>
                     <td class="name"><?= $model->product_name ?></td>
                     <td class="article"><?= $model->article ?></td>
-                    <td class="quantity <?= $model->getCssClassChatMessage('quantity') ?>"><?= number_format($model->quantity, 3, '.', '') ?></td>
+                    <td class="quantity <?= $model->getCssClassChatMessage('quantity') ?>"><?= number_format($model->quantity, 3, '.', '') ?>
+                        <p class="al-line-through-action-not-changed">
+                            <?= number_format($model->getOldAttribute('quantity'), 3, '.', '') ?>
+                        </p>
+                    </td>
                     <td class="quantity-action <?= $model->getCssClassChatMessage('quantity') ?>"><i
                                 class="material-icons"></i></td>
                     <td class="price <?= $model->getCssClassChatMessage('price') ?>">
                         <?= CurrencyHelper::asDecimal($model->price) ?>
                         <?= $model->getCurrency()->symbol ?>
                         <?= $model->product->ed ? '/' . $model->product->ed : '' ?>
+                        <p class="al-line-through-action-not-changed">
+                            <?= CurrencyHelper::asDecimal($model->getOldAttribute('price')) ?>
+                        </p>
                     </td>
                     <td class="price-action <?= $model->getCssClassChatMessage('price') ?>"><i
                                 class="material-icons"></i></td>

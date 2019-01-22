@@ -3,7 +3,6 @@
 namespace frontend\controllers;
 
 use api_web\components\Notice;
-use Faker\ORM\Spot\EntityPopulator;
 use PHPExcel_Style_Fill;
 use Yii;
 use Exception;

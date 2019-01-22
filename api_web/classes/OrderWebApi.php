@@ -390,7 +390,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
-        if (!$this->accessAllow($order)) {
+        if ($this->accessAllow($order) === false) {
             throw new BadRequestHttpException("order.view_access_denied");
         }
 

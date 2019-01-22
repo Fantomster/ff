@@ -79,13 +79,15 @@ class RkwsWaybill extends ServiceRkws
      */
     private static function getItemSh4($rec)
     {
+        $vatSum = round(($rec['sum_without_vat'] * ($rec['vat_waybill'] / 100)) * 100, 0);
+
         return [
             'mu'      => $rec["unit_rid"],
             'quant'   => ($rec["quantity_waybill"] * 1000),
             'rid'     => $rec['product_rid'],
             'sum'     => ($rec['sum_without_vat'] * 100),
             'vatrate' => ($rec['vat_waybill'] * 100),
-            'vatsum'  => round((($rec['sum_without_vat'] * 100) * ($rec['vat_waybill'] / 100)), 2)
+            'vatsum'  => $vatSum
         ];
     }
 

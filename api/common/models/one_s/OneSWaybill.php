@@ -113,7 +113,7 @@ class OneSWaybill extends \yii\db\ActiveRecord
             $records = OrderContent::findAll(['order_id' => $this->order_id]);
             $transaction = \Yii::$app->db_api->beginTransaction();
             try {
-                $taxVat = (OneSDicstatus::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? OneSDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 2000;
+                $taxVat = (OneSDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? OneSDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 2000;
 
                 foreach ($records as $record) {
                     $wdmodel = new OneSWaybillData();

@@ -52,6 +52,7 @@ $this->title = 'Интеграция с iiko Office';
                                 'name',
                                 'measure',
                                 'updated_at',
+                                'is_active'
                             ],
                             'pjax' => false,
                             'filterPosition' => false,

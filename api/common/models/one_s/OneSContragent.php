@@ -39,7 +39,7 @@ class OneSContragent extends \yii\db\ActiveRecord
     {
         return [
             [['name','cid','org_id'], 'required'],
-            [['org_id','vendor_id'], 'integer'],
+            [['org_id','vendor_id', 'is_active'], 'integer'],
             [['name', 'inn_kpp'], 'string', 'max' => 255],
         ];
     }
@@ -55,7 +55,8 @@ class OneSContragent extends \yii\db\ActiveRecord
             'name' => 'Наименование',
             'inn_kpp' => 'ИНН/КПП',
             'updated_at' => 'Обновлено',
-            'vendor_id' => 'Поставщик MixCart'
+            'vendor_id' => 'Поставщик MixCart',
+            'is_active' => 'Показатель активности'
         ];
     }
 

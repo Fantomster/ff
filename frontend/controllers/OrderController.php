@@ -2572,7 +2572,6 @@ class OrderController extends DefaultController
         $dbResult = (new Query())->select('*')->from(['sq' => $subQuery])->groupBy('product,id')
             ->orderBy('client_name')
             ->all();
-        $arExcel = [];
         $arExcelHeader = [
             \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']),
             \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед изм']),
@@ -2580,7 +2579,7 @@ class OrderController extends DefaultController
         $report = [];
 
         foreach ($dbResult as $item) {
-            $arExcelHeader[$item['id']] = $item['client_name'];
+            $arExcelHeader[$item['client_name']] = $item['client_name'];
             if (!empty($item['product_id'])) {
                 if (!isset($report[$item['product_id']])) {
                     $report[$item['product_id']] =

@@ -8,7 +8,6 @@
 
 namespace frontend\controllers;
 
-use common\models\OrganizationSearch;
 use common\models\RelationUserOrganization;
 use common\models\search\BusinessSearch;
 use common\models\TestVendors;
@@ -18,7 +17,6 @@ use yii\web\Response;
 use yii\widgets\ActiveForm;
 use common\models\User;
 use common\models\Role;
-use common\models\Profile;
 use common\models\Organization;
 use yii\filters\AccessControl;
 

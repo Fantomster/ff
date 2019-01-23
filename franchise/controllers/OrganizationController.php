@@ -369,10 +369,10 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionAgent() {
-        $searchModel = new \common\models\OrganizationSearch();
+        $searchModel = new \franchise\models\AgentOrganizationSearch();
         $params = Yii::$app->request->getQueryParams();
         if(\Yii::$app->request->get('searchString')){
-            $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+            $searchModel['searchString'] = trim(\Yii::$app->request->get('searchString'));
         }
 
         $today = new \DateTime();
@@ -380,10 +380,7 @@ class OrganizationController extends DefaultController {
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
 
-        if (Yii::$app->request->post("ClientSearch")) {
-            $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");
-        }
-        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+        $dataProvider = $searchModel->search($params, $this->currentUser->id);
 
         $exportFilename = 'clients_' . date("Y-m-d_H-m-s");
         $exportColumns = (new Organization())->getClientsExportColumns();

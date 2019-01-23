@@ -2,11 +2,9 @@
 
 namespace backend\controllers;
 
-use backend\models\OrganizationSearch;
 use backend\models\UserSearch;
 use common\models\AgentRequest;
 use common\models\FranchiseeAssociate;
-use common\models\Organization;
 use common\models\Role;
 use yii\data\ActiveDataProvider;
 use yii\db\Query;

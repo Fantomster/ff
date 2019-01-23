@@ -140,7 +140,7 @@ class Currency extends \yii\db\ActiveRecord {
     }
 
 
-    public function getFullCurrencyList($franchId):array
+    public static function getFullCurrencyList($franchId):array
     {
         $array = [];
         $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -1 months"));
@@ -198,7 +198,7 @@ class Currency extends \yii\db\ActiveRecord {
     }
 
 
-    public function getMostPopularIsoCode($franchId):string
+    public static function getMostPopularIsoCode($franchId):string
     {
         $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -1 months"));
         $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");

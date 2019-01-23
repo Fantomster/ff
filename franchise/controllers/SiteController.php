@@ -3,17 +3,17 @@
 namespace franchise\controllers;
 
 use common\models\Catalog;
-use common\models\CatalogGoods;
 use common\models\Currency;
 use common\models\FranchiseeAssociate;
+use common\models\MpCountry;
 use common\models\RelationManagerLeader;
-use common\models\RelationSuppRest;
 use common\models\Request;
 use common\models\RequestCallback;
-use common\models\RequestCounters;
 use common\models\RequestSearch;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
+use yii\db\Query;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\Json;
@@ -66,10 +66,10 @@ class SiteController extends DefaultController
     {
         return [
             'access' => [
-                'class'      => AccessControl::className(),
+                'class'      => AccessControl::class,
                 // We will override the default rule config with the new AccessRule class
                 'ruleConfig' => [
-                    'class' => AccessRule::className(),
+                    'class' => AccessRule::class,
                 ],
                 'only'       => ['index', 'setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'requests', 'orders'],
                 'rules'      => [
@@ -86,12 +86,9 @@ class SiteController extends DefaultController
                         ],
                     ],
                 ],
-//             'denyCallback' => function($rule, $action) {
-//              throw new \yii\web\HttpException(404 ,Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
-//              } 
             ],
             'verbs'  => [
-                'class'   => VerbFilter::className(),
+                'class'   => VerbFilter::class,
                 'actions' => [
                     'logout' => ['post'],
                 ],
@@ -100,9 +97,8 @@ class SiteController extends DefaultController
     }
 
     /**
-     * Displays desktop.
-     *
-     * @return mixed
+     * @return string
+     * @throws \Exception
      */
     public function actionIndex()
     {
@@ -113,19 +109,30 @@ class SiteController extends DefaultController
         if (Yii::$app->request->get() && Yii::$app->request->isPjax) {
             $currencyId = Yii::$app->request->get('filter_currency');
             $currency = Currency::findOne($currencyId);
-            $iso_code = $currency->iso_code;
+            $iso_code = $currency->symbol;
         }
         //---graph start
-        $query = "SELECT truncate(sum(total_price),1) as spent, year(o.created_at) as year, month(o.created_at) as month, day(o.created_at) as day "
-            . "FROM " . Order::tableName() . " o LEFT JOIN franchisee_associate ON o.vendor_id = franchisee_associate.organization_id "
-            . "where status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
-            . "and o.created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY AND franchisee_associate.franchisee_id = " . $this->currentFranchisee->id . " ";
+        $query = (new Query())
+            ->select([
+                'spent' => new Expression("truncate(sum(total_price),1)"),
+                'year'  => new Expression("year(o.created_at)"),
+                'month' => new Expression("month(o.created_at)"),
+                'day'   => new Expression("day(o.created_at)")
+            ])
+            ->from(Order::tableName() . " o")
+            ->leftJoin(FranchiseeAssociate::tableName() . " f", "o.vendor_id = f.organization_id")
+            ->where([
+                "f.franchisee_id" => $this->currentFranchisee->id,
+                "o.status"        => [Order::STATUS_PROCESSING, Order::STATUS_DONE, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]
+            ])
+            ->andWhere("o.created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY")
+            ->groupBy("year(o.created_at), month(o.created_at), day(o.created_at)");
+
         if ($currencyId) {
-            $query .= " AND currency_id=" . $currencyId . " ";
+            $query->andWhere(['currency_id' => $currencyId]);
         }
-        $query .= "group by year(o.created_at), month(o.created_at), day(o.created_at)";
-        $command = Yii::$app->db->createCommand($query);
-        $ordersByDay = $command->queryAll();
+
+        $ordersByDay = $query->all();
         $dayLabels = [];
         $dayTurnover = [];
         $total = 0;
@@ -170,6 +177,9 @@ class SiteController extends DefaultController
         return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'total30Count', 'totalCount', 'clientsCount', 'vendorsCount', 'vendorsStats30', 'vendorsStats', 'franchiseeType', 'totalIncome', 'currencyList', 'iso_code', 'currencyId'));
     }
 
+    /**
+     * @return string
+     */
     public function actionSettings()
     {
         $franchisee = $this->currentFranchisee;
@@ -500,9 +510,11 @@ class SiteController extends DefaultController
             $catalogBaseGoods->supp_org_id = $cat->supp_org_id;
         }
 
-        $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
-	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
-        $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
+        $countrys = (new Query())
+            ->select(['id', 'name'])
+            ->from(MpCountry::tableName())
+            ->orderBy("CASE WHEN name = 'Россия' THEN -1 ELSE id END")
+            ->all();
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();

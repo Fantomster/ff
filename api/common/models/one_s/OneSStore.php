@@ -38,7 +38,7 @@ class OneSStore extends \yii\db\ActiveRecord
     {
         return [
             [['name','cid','org_id'], 'required'],
-            [['org_id'], 'integer'],
+            [['org_id', 'is_active'], 'integer'],
             [['name', 'address'], 'string', 'max' => 255],
         ];
     }
@@ -54,6 +54,7 @@ class OneSStore extends \yii\db\ActiveRecord
             'name' => 'Наименование',
             'address' => 'Адрес',
             'updated_at' => 'Обновлено',
+            'is_active' => 'Показатель активности'
         ];
     }
 
@@ -82,7 +83,7 @@ class OneSStore extends \yii\db\ActiveRecord
      */
     public function getStores($org_id, $all = true, $notMap=true) {
         $query = OneSStore::find()
-            ->select(['id', 'name'])->where(['org_id' => $org_id]);
+            ->select(['id', 'name'])->where(['org_id' => $org_id, 'is_active' => true]);
 
         if($notMap){
             $stores = ArrayHelper::map($query->orderBy(['name' => SORT_ASC])

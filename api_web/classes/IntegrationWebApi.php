@@ -15,6 +15,7 @@ use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
+use common\models\Organization;
 use common\models\OuterAgent;
 use common\models\OuterProduct;
 use common\models\OuterStore;
@@ -519,9 +520,12 @@ class IntegrationWebApi extends WebApi
         $pagination->setPageSize($pageSize);
         $dataProvider->setPagination($pagination);
         $models = $dataProvider->getModels();
+        $arVendors = [];
 
-        if (IntegrationSettingValue::getSettingsByServiceId($post['service_id'], $client->id, ['main_org'])) {
+        if ($mainOrg = IntegrationSettingValue::getSettingsByServiceId($post['service_id'], $client->id, ['main_org'])) {
             $isChildOrganization = true;
+            $client = Organization::findOne($mainOrg);
+            $arVendors = $client->getSuppliers();
         } else {
             $isChildOrganization = false;
         }
@@ -529,7 +533,7 @@ class IntegrationWebApi extends WebApi
         if (!empty($models)) {
             $result = new \SplObjectStorage();
             foreach (WebApiHelper::generator($models) as $model) {
-                $result->attach((object)$this->prepareOutProductMap($model, $isChildOrganization));
+                $result->attach((object)$this->prepareOutProductMap($model, $isChildOrganization, $arVendors));
             }
         } else {
             $result = [];
@@ -595,8 +599,11 @@ class IntegrationWebApi extends WebApi
      * @param bool  $isChild
      * @return array
      */
-    private function prepareOutProductMap(array $model, $isChild = false)
+    private function prepareOutProductMap(array $model, $isChild = false, $arVendors = [])
     {
+        if (!empty($arVendors) && !in_array($model['vendor_id'], $arVendors)) {
+            $isChild = false;
+        }
         $result = [
             "id"                            => $model['id'],
             "service_id"                    => (int)$model['service_id'],

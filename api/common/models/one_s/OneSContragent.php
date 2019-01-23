@@ -90,7 +90,7 @@ class OneSContragent extends \yii\db\ActiveRecord
      */
     public function getAgents($org_id, $all = true, $notMap=true) {
         $query = OneSContragent::find()
-            ->select(['id', 'name'])->where(['org_id' => $org_id]);
+            ->select(['id', 'name'])->where(['org_id' => $org_id, 'is_active' => true]);
 
         if($notMap){
             $agents = ArrayHelper::map($query->orderBy(['name' => SORT_ASC])

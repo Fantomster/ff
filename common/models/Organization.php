@@ -82,6 +82,8 @@ use common\models\guides\Guide;
  *           - не подтверждено, 1 - подтверждено)
  * @property int                        $vendor_is_work              Показатель, что организация-поставщик работает с
  *           системой (0 - не работает, 1 - работает)
+ * @property string                     $vetis_country_uuid          Уникальный идентификатор государства, в котором
+ *           находится организация
  * @property AdditionalEmail[]          $additionalEmail
  * @property BillingPayment[]           $billingPayments
  * @property BuisinessInfo[]            $buisinessInfo
@@ -161,7 +163,7 @@ class Organization extends \yii\db\ActiveRecord
             [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => Yii::t('app', 'common.models.organization_address_error', ['ru' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'])],
             [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id', 'blacklisted', 'gmt'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership', 'inn', 'kpp', 'lang', 'user_agreement', 'confidencial_policy'], 'safe'],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1', 'action'], 'string', 'max' => 255],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1', 'action', 'vetis_country_uuid'], 'string', 'max' => 255],
             [['gln_code'], 'integer', 'min' => 1000000000000, 'max' => 99999999999999999, 'tooSmall' => 'Too small value', 'tooBig' => 'To big value'],
             [['gln_code'], 'unique'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -260,6 +262,7 @@ class Organization extends \yii\db\ActiveRecord
             'gln_code'                    => Yii::t('app', 'GLN-код'),
             'gmt'                         => Yii::t('app', 'GMT'),
             'lang'                        => Yii::t('app', 'Язык организации'),
+            'vetis_country_uuid'          => Yii::t('app', 'common.models.vetis.country.uuid', ['ru' => 'Уникальный идентификатор государства, в котором находится организация ']),
         ];
     }
 
@@ -431,11 +434,11 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT && !$all) {
             return [];
         }
-        
+
         $tblOrg = Organization::tableName();
         $tblRelCat = RelationCategory::tableName();
         $tblRSR = RelationSuppRest::tableName();
-        
+
         $query = RelationSuppRest::find()
             ->select(["$tblOrg.id", "$tblOrg.name"])
             ->leftJoin($tblOrg, "$tblOrg.id = $tblRSR.supp_org_id")
@@ -475,10 +478,10 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT && !$addAllOption) {
             return [];
         }
-        
+
         $tblOrg = Organization::tableName();
         $tblRSR = RelationSuppRest::tableName();
-        
+
         $query = RelationSuppRest::find()
             ->select(["$tblOrg.id", "$tblOrg.name"])
             ->leftJoin($tblOrg, "$tblOrg.id = $tblRSR.supp_org_id")
@@ -500,11 +503,11 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT && !$all) {
             return [];
         }
-        
+
         $tblOrg = Organization::tableName();
         $tblRelCat = RelationCategory::tableName();
         $tblRSR = RelationSuppRest::tableName();
-        
+
         $query = RelationSuppRest::find()
             ->select(["$tblOrg.id", "$tblOrg.name as text"])
             ->leftJoin($tblOrg, "$tblOrg.id = $tblRSR.supp_org_id")
@@ -544,7 +547,7 @@ class Organization extends \yii\db\ActiveRecord
 
         $tblOrg = Organization::tableName();
         $tblRSR = RelationSuppRest::tableName();
-        
+
         $query = RelationSuppRest::find()
             ->select(["$tblOrg.id as id", "$tblOrg.name as name"])
             ->joinWith('client', false)
@@ -579,10 +582,10 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return '0';
         }
-        
+
         $tblRSR = RelationSuppRest::tableName();
         $tblCat = Catalog::tableName();
-        
+
         //$vendor_id = (int)$vendor_id;
         $query = RelationSuppRest::find()
             ->select(["$tblRSR.cat_id as cat_id"])
@@ -707,10 +710,10 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return 0;
         }
-        
+
         $tblCart = Cart::tableName();
         $tblCartContent = CartContent::tableName();
-        
+
         return (new Query())->from("$tblCart as c")
             ->innerJoin("$tblCartContent as cc", 'c.id = cc.cart_id')
             ->andWhere(['c.organization_id' => $this->id])

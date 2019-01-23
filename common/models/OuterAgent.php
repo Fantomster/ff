@@ -30,6 +30,10 @@ use yii\db\ActiveQuery;
  */
 class OuterAgent extends \yii\db\ActiveRecord
 {
+
+    const IS_DELETED_FALSE = 0;
+    const IS_DELETED_TRUE = 1;
+
     /**
      * {@inheritdoc}
      */

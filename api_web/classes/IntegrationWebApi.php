@@ -112,7 +112,22 @@ class IntegrationWebApi extends WebApi
             }
             $outerStoreId = null;
             if (isset($post['service_id'])) {
-                $outerStore = OuterStore::find()->where(['org_id' => $organizationID, 'service_id' => $post['service_id'], 'is_deleted' => OuterStore::IS_DELETED_FALSE])->andWhere('outer_store.right - outer_store.left = 1')->orderBy('outer_store.left')->one();
+                $outerAgentTable = OuterAgent::tableName();
+                $outerStoreTable = OuterStore::tableName();
+                $outerStore = OuterStore::find()
+                    ->leftJoin($outerAgentTable, "$outerAgentTable.store_id=$outerStoreTable.id")
+                    ->where([
+                        "$outerStoreTable.org_id"     => $organizationID,
+                        "$outerStoreTable.service_id" => (int)$post['service_id'],
+                        "$outerStoreTable.is_deleted" => OuterStore::IS_DELETED_FALSE,
+                        "$outerAgentTable.org_id"     => $organizationID,
+                        "$outerAgentTable.vendor_id"  => $order->vendor_id,
+                        "$outerAgentTable.is_deleted" => OuterAgent::IS_DELETED_FALSE
+                    ])
+                    ->andWhere("$outerStoreTable.right - $outerStoreTable.left = 1")
+                    ->andWhere("$outerAgentTable.store_id > 0")
+                    ->orderBy("$outerStoreTable.left")
+                    ->one();
                 if ($outerStore) {
                     $outerStoreId = $outerStore->id;
                 }

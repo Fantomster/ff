@@ -431,23 +431,26 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT && !$all) {
             return [];
         }
+        
+        $tblOrg = Organization::tableName();
+        $tblRelCat = RelationCategory::tableName();
+        $tblRSR = RelationSuppRest::tableName();
+        
         $query = RelationSuppRest::find()
-            ->select(['organization.id', 'organization.name'])
-            ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
-            ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id');
-//        if (!$all) {
-        $query->where(['relation_supp_rest.rest_org_id' => $this->id]);
-//        }
-        $query->andWhere(['relation_supp_rest.deleted' => false, 'relation_supp_rest.status' => 1]);
+            ->select(["$tblOrg.id", "$tblOrg.name"])
+            ->leftJoin($tblOrg, "$tblOrg.id = $tblRSR.supp_org_id")
+            ->leftJoin($tblRelCat, "$tblRelCat.supp_org_id = $tblRSR.supp_org_id");
+        $query->where(["$tblRSR.rest_org_id" => $this->id]);
+        $query->andWhere(["$tblRSR.deleted" => false, "$tblRSR.status" => 1]);
         if ($category_id) {
-            $query = $query->andWhere(['relation_category.category_id' => $category_id]);
+            $query = $query->andWhere(["$tblRelCat.category_id" => $category_id]);
         }
         if ($notMap) {
-            $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
+            $vendors = ArrayHelper::map($query->orderBy(["$tblOrg.name" => SORT_ASC])
                 ->asArray()
                 ->all(), 'id', 'name');
         } else {
-            $vendors = $query->orderBy(['organization.name' => SORT_ASC])
+            $vendors = $query->orderBy(["$tblOrg.name" => SORT_ASC])
                 ->asArray()
                 ->all();
         }
@@ -472,12 +475,16 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT && !$addAllOption) {
             return [];
         }
+        
+        $tblOrg = Organization::tableName();
+        $tblRSR = RelationSuppRest::tableName();
+        
         $query = RelationSuppRest::find()
-            ->select(['organization.id', 'organization.name'])
-            ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
-            ->where(['relation_supp_rest.rest_org_id' => $this->id]);
+            ->select(["$tblOrg.id", "$tblOrg.name"])
+            ->leftJoin($tblOrg, "$tblOrg.id = $tblRSR.supp_org_id")
+            ->where(["$tblRSR.rest_org_id" => $this->id]);
         $res = $query
-            ->orderBy(['organization.name' => SORT_ASC])
+            ->orderBy(["$tblOrg.name" => SORT_ASC])
             ->asArray()
             ->all();
         $res = ArrayHelper::map($res, 'id', 'name');
@@ -493,23 +500,26 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT && !$all) {
             return [];
         }
+        
+        $tblOrg = Organization::tableName();
+        $tblRelCat = RelationCategory::tableName();
+        $tblRSR = RelationSuppRest::tableName();
+        
         $query = RelationSuppRest::find()
-            ->select(['organization.id', 'organization.name as text'])
-            ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
-            ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id');
-//        if (!$all) {
-        $query->where(['relation_supp_rest.rest_org_id' => $this->id]);
-//        }
-        $query->andWhere(['relation_supp_rest.deleted' => false]);
+            ->select(["$tblOrg.id", "$tblOrg.name as text"])
+            ->leftJoin($tblOrg, "$tblOrg.id = $tblRSR.supp_org_id")
+            ->leftJoin($tblRelCat, "$tblRelCat.supp_org_id = $tblRSR.supp_org_id");
+        $query->where(["$tblRSR.rest_org_id" => $this->id]);
+        $query->andWhere(["$tblRSR.deleted" => false]);
         if ($category_id) {
-            $query = $query->andWhere(['relation_category.category_id' => $category_id]);
+            $query = $query->andWhere(["$tblRelCat.category_id" => $category_id]);
         }
         if ($notMap) {
-            $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
+            $vendors = ArrayHelper::map($query->orderBy(["$tblOrg.name" => SORT_ASC])
                 ->asArray()
                 ->all(), 'id', 'name');
         } else {
-            $vendors = $query->orderBy(['organization.name' => SORT_ASC])
+            $vendors = $query->orderBy(["$tblOrg.name" => SORT_ASC])
                 ->asArray()
                 ->all();
         }
@@ -532,11 +542,14 @@ class Organization extends \yii\db\ActiveRecord
             return [];
         }
 
+        $tblOrg = Organization::tableName();
+        $tblRSR = RelationSuppRest::tableName();
+        
         $query = RelationSuppRest::find()
-            ->select(['organization.id as id', 'organization.name as name'])
+            ->select(["$tblOrg.id as id", "$tblOrg.name as name"])
             ->joinWith('client', false)
-            ->where(['relation_supp_rest.supp_org_id' => $this->id])
-            ->orderBy(['organization.name' => SORT_ASC]);
+            ->where(["$tblRSR.supp_org_id" => $this->id])
+            ->orderBy(["$tblOrg.name" => SORT_ASC]);
 
         $clients = ArrayHelper::map($query
             ->asArray()
@@ -566,14 +579,18 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return '0';
         }
+        
+        $tblRSR = RelationSuppRest::tableName();
+        $tblCat = Catalog::tableName();
+        
         //$vendor_id = (int)$vendor_id;
         $query = RelationSuppRest::find()
-            ->select(['relation_supp_rest.cat_id as cat_id'])
-            ->leftJoin('catalog', 'relation_supp_rest.cat_id = catalog.id')
-            ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false, 'relation_supp_rest.status' => 1])
-            ->andWhere(['catalog.status' => Catalog::STATUS_ON]);
+            ->select(["$tblRSR.cat_id as cat_id"])
+            ->leftJoin($tblCat, "$tblRSR.cat_id = $tblCat.id")
+            ->where(["$tblRSR.rest_org_id" => $this->id, "$tblRSR.deleted" => 0, "$tblRSR.status" => 1])
+            ->andWhere(["$tblCat.status" => Catalog::STATUS_ON]);
         if ($vendor_id) {
-            $query->andFilterWhere(['relation_supp_rest.supp_org_id' => $vendor_id]);
+            $query->andFilterWhere(["$tblRSR.supp_org_id" => $vendor_id]);
         }
         $catalogs = ArrayHelper::getColumn($query->asArray()->all(), 'cat_id');
         if (empty($catalogs)) {
@@ -690,8 +707,12 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return 0;
         }
-        return (new Query())->from('cart as c')
-            ->innerJoin('cart_content as cc', 'c.id = cc.cart_id')
+        
+        $tblCart = Cart::tableName();
+        $tblCartContent = CartContent::tableName();
+        
+        return (new Query())->from("$tblCart as c")
+            ->innerJoin("$tblCartContent as cc", 'c.id = cc.cart_id')
             ->andWhere(['c.organization_id' => $this->id])
             ->count();
     }

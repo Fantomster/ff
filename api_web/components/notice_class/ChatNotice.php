@@ -26,7 +26,7 @@ class ChatNotice
             'organization' => $organization_id,
         ], [
             'unread_message_count' => self::getUnreadMessageCount($organization_id),
-            'unread_dialog_count'  => self::dialogUnreadCount($organization_id)['result']
+            'unread_dialog_count'  => self::dialogUnreadCount($organization_id)
         ]);
     }
 
@@ -60,7 +60,7 @@ class ChatNotice
             'organization' => $recipient_id
         ], [
             'unread_message_count' => self::getUnreadMessageCount($recipient_id),
-            'unread_dialog_count'  => self::dialogUnreadCount($recipient_id)['result']
+            'unread_dialog_count'  => self::dialogUnreadCount($recipient_id)
         ]);
     }
 

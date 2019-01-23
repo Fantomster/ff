@@ -45,50 +45,23 @@ class ChatWebApi extends WebApi
             throw new BadRequestHttpException('chat.access_denied');
         }
 
+        $lastMessageDateQuery = (new Query())->select(['COALESCE(MAX(order_chat.created_at), order.created_at)'])
+            ->from(OrderChat::tableName())->where(['order_id' => 'order.id']);
+        $unreadMessageQuery = (new Query())->from(OrderChat::tableName())
+            ->where(['order_id' => 'order.id', 'recipient_id' => ':org_id', 'viewed' => 0])->count();
+        $countMessageQuery = (new Query())->from(OrderChat::tableName())
+            ->where(['order_id' => 'order.id', 'recipient_id' => ':org_id'])->count();
+        $lastMessageQuery = (new Query())->select('message')->from(OrderChat::tableName())
+            ->where(['order_id' => 'order.id'])->orderBy('order_chat.created_at DESC')->limit(1);
+
         $search = Order::find()
             ->with(['vendor', 'client'])
             ->select([
                 'order.*',
-                'last_message_date' => '(
-                    SELECT 
-                       COALESCE(MAX(order_chat.created_at), order.created_at) 
-                    FROM 
-                       order_chat 
-                    WHERE 
-                    order_id = order.id 
-                )',
-                'unread_message'    => '(
-                    SELECT 
-                       COUNT(*) 
-                    FROM 
-                       order_chat 
-                    WHERE 
-                    order_id = order.id 
-                    AND
-                    recipient_id = :org_id  
-                    AND 
-                    viewed = 0
-                )',
-                'count_message'     => '(
-                    SELECT 
-                       COUNT(*) 
-                    FROM 
-                       order_chat 
-                    WHERE 
-                    order_id = order.id 
-                    AND
-                    recipient_id = :org_id
-                )',
-                'last_message'      => '(
-                    SELECT 
-                       message
-                    FROM 
-                       order_chat 
-                    WHERE 
-                    order_id = order.id
-                    ORDER BY order_chat.created_at DESC
-                    LIMIT 1
-                )'
+                'last_message_date' => $lastMessageDateQuery,
+                'unread_message'    => $unreadMessageQuery,
+                'count_message'     => $countMessageQuery,
+                'last_message'      => $lastMessageQuery,
             ])->where($where)->params(['org_id' => $client->id]);
 
         if (empty($search)) {

@@ -31,21 +31,20 @@ class IntegrationSettingsWebApi extends WebApi
     {
         $this->validateRequest($post, ['service_id']);
 
-        $result = IntegrationSettingValue::find()
+        $result = IntegrationSetting::find()->alias('int_set')
             ->select(['int_set.id', 'int_set.name', 'value', 'COALESCE(ch.new_value, NULL) as changed'])
             ->leftJoin(
-                IntegrationSetting::tableName() . ' as int_set',
-                "int_set.id = " . IntegrationSettingValue::tableName() . ".setting_id"
+                IntegrationSettingValue::tableName() . ' as isv',
+                "int_set.id = isv.setting_id AND isv.org_id = :org", [
+                    ':org' => $this->user->organization_id
+                ]
             )
             ->leftJoin(
                 IntegrationSettingChange::tableName() . ' as ch',
-                "ch.integration_setting_id = " . IntegrationSettingValue::tableName() . ".setting_id AND " .
-                "ch.org_id = " . IntegrationSettingValue::tableName() . ".org_id AND " .
-                "ch.is_active = 1"
+                "ch.integration_setting_id = isv.setting_id AND ch.org_id = isv.org_id AND ch.is_active = 1"
             )
             ->where(
-                IntegrationSettingValue::tableName() . ".org_id = :org and int_set.service_id = :service and int_set.is_active = true", [
-                ':org'     => $this->user->organization_id,
+                "int_set.service_id = :service and int_set.is_active = true", [
                 ':service' => $post['service_id']
             ])
             ->orderBy('setting_id')

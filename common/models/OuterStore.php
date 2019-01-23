@@ -32,6 +32,10 @@ use common\components\NestedSetsQuery;
  */
 class OuterStore extends ActiveRecord
 {
+
+    const IS_DELETED_FALSE = 0;
+    const IS_DELETED_TRUE = 1;
+
     /**
      * NestedSets model
      * https://yiigist.com/package/creocoder/yii2-nested-sets#!?tab=readme

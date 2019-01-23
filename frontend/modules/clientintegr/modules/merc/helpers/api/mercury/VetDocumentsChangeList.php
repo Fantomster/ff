@@ -81,7 +81,8 @@ class VetDocumentsChangeList extends Model
                 'laboratory_research' => isset($item->authentication->laboratoryResearch) ? json_encode($item->authentication->laboratoryResearch) : null,
                 'transport_info' => isset($item->certifiedConsignment->transportInfo) ? json_encode($item->certifiedConsignment->transportInfo) : null,
                 'unit_guid' => isset($item->certifiedConsignment->batch->unit->guid) ? $item->certifiedConsignment->batch->unit->guid : null,
-                'laboratory_research' => isset($item->authentication->r13nClause),
+                'r13nClause' => isset($item->authentication->r13nClause),
+                'location_prosperity' => isset($item->authentication->locationProsperity) ? $item->authentication->locationProsperity : null,
             ]);
 
             if (isset($item->referencedDocument)) {

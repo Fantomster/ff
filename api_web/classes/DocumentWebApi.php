@@ -370,9 +370,11 @@ class DocumentWebApi extends \api_web\components\WebApi
                      CASE
                      WHEN instr(group_concat(DISTINCT dat.waybill_status_id),:WAYBILL_UNLOADED) > 0
                           AND
-                          instr(group_concat(DISTINCT dat.waybill_status_id),':WAYBILL_UNLOADED,') = 0
+                          instr(group_concat(DISTINCT dat.waybill_status_id), concat(:WAYBILL_UNLOADED, ',')) = 0
                           AND
-                          instr(group_concat(DISTINCT dat.waybill_status_id),',:WAYBILL_UNLOADED') = 0
+                          instr(group_concat(DISTINCT dat.waybill_status_id), concat(',', :WAYBILL_UNLOADED)) = 0
+                          AND
+                          count(dat.order_content_id) = count(dat.waybill_content_id)
                        THEN :DOC_GROUP_STATUS_SENT
                      WHEN 
                         instr(group_concat(DISTINCT dat.waybill_status_id), :WAYBILL_FORMED) > 0
@@ -658,6 +660,9 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         if (!empty($post['outer_number_additional'])) {
             $waybill->outer_number_additional = $post['outer_number_additional'];
+            if (!preg_match('#^[0-9]+$#', $waybill->outer_number_additional) && $waybill->service_id == Registry::RK_SERVICE_ID) {
+                throw new BadRequestHttpException('rkeeper.waybill.outer_number_additional.is_not_int');
+            }
         }
 
         if (!empty($post['outer_number_code'])) {

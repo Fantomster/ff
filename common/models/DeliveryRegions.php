@@ -89,31 +89,25 @@ class DeliveryRegions extends \yii\db\ActiveRecord
             $region = Yii::$app->request->cookies->get('region');
         }
 
-        $tableName = static::tableName();
-        $sql = "SELECT supplier_id
-                FROM $tableName
-                WHERE ( locality = :locality
-                       OR ( administrative_area_level_1 = :region
-                           AND length(locality) < 1 ) )
-                  AND
-                  exception = :exception";
-
-        $command = Yii::$app->db->createCommand($sql)
-            ->bindValue(':locality', $city)
-            ->bindValue(':region', $region);
-
-        $supplierRegion = $command->bindValue(':exception', 0)->queryColumn();
-        $exclude_region = $command->bindValue(':exception', 1)->queryColumn();
-
-        if (!empty($supplierRegion)) {
-            if (!empty($exclude_region)) {
-                $supplierRegion = \array_udiff($supplierRegion, $exclude_region, function ($a, $b) {
-                    return $a - $b;
-                });
-            }
-            return (empty($supplierRegion) ? [0] : $supplierRegion);
-        } else {
+        $tblDR = self::tableName();
+        
+        $supplierRegions = (new \yii\db\Query())
+                ->select(['d1.supplier_id'])
+                ->from("$tblDR as d1")
+                ->leftJoin("$tblDR as d2", "d1.supplier_id = d2.supplier_id and d1.exception != d2.exception")
+                ->where(['d1.locality' => $city])
+                ->orWhere(['and', 
+                    ['d1.administrative_area_level_1' => $region], 
+                    ['<', new \yii\db\Expression('length(d1.locality)'), 1]
+                    ])
+                ->andWhere(['d1.exception' => 0])
+                ->andWhere('d2.exception is null')
+                ->column();
+        
+        if (empty($supplierRegions)) {
             return [0];
         }
+        
+        return $supplierRegions;
     }
 }

@@ -132,7 +132,8 @@ class VetisWaybill extends WebApi
                 'vsd_direction'   => $arIncOut[$model->uuid] ?? null,
                 'last_error'      => $model->last_error,
                 'user_status'     => $model->user_status,
-                'r13n_clause'      => $model->r13nClause,
+                'r13nСlause'      => (bool)$model->r13nClause,
+                'location_prosperity' => (bool)!MercVsd::parsingLocationProsperity($model->location_prosperity),
             ];
         }
 
@@ -456,6 +457,7 @@ class VetisWaybill extends WebApi
                 $error = $model->description;
             }
             $this->helper->setLastError($error, $request['uuid']);
+            throw new BadRequestHttpException($error);
         }
 
         return $result;

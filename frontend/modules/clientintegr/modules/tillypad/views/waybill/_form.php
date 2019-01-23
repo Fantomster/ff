@@ -21,7 +21,8 @@ $selectedStoreInit = iikoSelectedStore::find()->with('iikoStore')->where(['organ
 $selectedStore = ArrayHelper::map($selectedStoreInit, 'iikoStore.id', 'iikoStore.denom');
 
 if (!$selectedStore || count($selectedStore) == 0) {
-    $selectedStore = ArrayHelper::map(iikoStore::find()->where(['org_id' => $orgId, 'is_active' => 1])->all(), 'id', 'denom');
+    $selectedStore[0] = '';
+    $selectedStore += ArrayHelper::map(iikoStore::find()->where(['org_id' => $orgId, 'is_active' => 1])->all(), 'id', 'denom');
 }
 ?>
 

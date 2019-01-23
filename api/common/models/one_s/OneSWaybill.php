@@ -29,6 +29,7 @@ use Yii;
  */
 class OneSWaybill extends \yii\db\ActiveRecord
 {
+    const  DEFAULT_TAX_RATE = 2000;
 
     /**
      * @inheritdoc
@@ -113,7 +114,12 @@ class OneSWaybill extends \yii\db\ActiveRecord
             $records = OrderContent::findAll(['order_id' => $this->order_id]);
             $transaction = \Yii::$app->db_api->beginTransaction();
             try {
-                $taxVat = (OneSDicstatus::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? OneSDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 2000;
+                $dicConst = OneSDicconst::findOne(['denom' => 'taxVat']);
+                if ($dicConst) {
+                    $taxVat = OneSDicconst::findOne(['denom' => 'taxVat'])->getPconstValue();
+                } else {
+                    $taxVat = self::DEFAULT_TAX_RATE;
+                }
 
                 foreach ($records as $record) {
                     $wdmodel = new OneSWaybillData();

@@ -43,11 +43,10 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function get($post)
     {
-        if (!empty($post['email'])) {
+        if (isset($post['email']) && !empty($post['email'])) {
             $model = User::findOne(['email' => $post['email']]);
         } else {
-            $user_id = $post['id'] ?? $this->user->id;
-            $model = User::findOne($user_id);
+            $model = $this->user ?? User::findOne($post['id']);
         }
 
         if (empty($model)) {
@@ -99,7 +98,7 @@ class UserWebApi extends \api_web\components\WebApi
         $transaction = \Yii::$app->db->beginTransaction();
         try {
 
-            $organization = new Organization (["scenario" => "register"]);
+            $organization = new Organization(["scenario" => "register"]);
             $organization->load($post, 'organization');
             $organization->is_allowed_for_franchisee = 0;
 
@@ -107,10 +106,9 @@ class UserWebApi extends \api_web\components\WebApi
                 $organization->setAttribute('rating', 0);
             }
 
-            if (!$organization->validate()) {
+            if (!$organization->validate() || !$organization->save()) {
                 throw new ValidationException($organization->getFirstErrors());
             }
-            $organization->save();
 
             $user = $this->createUser($post, Role::getManagerRole($organization->type_id));
             $user->setOrganization($organization, true);
@@ -263,17 +261,19 @@ class UserWebApi extends \api_web\components\WebApi
         $this->validateRequest($post, ['user_id', 'code']);
         $transaction = \Yii::$app->db->beginTransaction();
         try {
-            $user_id = (int)trim($post['user_id']);
+            $userId = (int)trim($post['user_id']);
             $code = (int)trim($post['code']);
 
             $userToken = UserToken::findByPIN($code, [UserToken::TYPE_EMAIL_ACTIVATE]);
-            if (!$userToken || ($userToken->user_id !== $user_id)) {
+            if (!$userToken || $userToken->user_id !== $userId) {
                 throw new BadRequestHttpException(\Yii::t('app', 'api.modules.v1.modules.mobile.controllers.wrong_code'));
             }
 
-            $user = User::findOne($user_id);
+            $user = User::findOne($userId);
             $user->setAttribute('status', User::STATUS_ACTIVE);
-            $user->save();
+            if (!$user->save()) {
+                throw new ValidationException($user->getFirstErrors());
+            }
             Notice::init('User')->sendEmailWelcome($user);
             $userToken->delete();
             $transaction->commit();
@@ -388,10 +388,9 @@ class UserWebApi extends \api_web\components\WebApi
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
-        $currentOrganization = $this->user->organization;
         $searchModel = new \common\models\search\VendorSearch();
 
-        $dataProvider = $searchModel->search([], $currentOrganization->id);
+        $dataProvider = $searchModel->search([], $this->user->organization_id);
         $dataProvider->pagination->setPage($page - 1);
         $dataProvider->pagination->pageSize = $pageSize;
 
@@ -525,47 +524,31 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function getVendorLocationList()
     {
-        $currentOrganization = $this->user->organization;
         $searchModel = new \common\models\search\VendorSearch();
-        $dataProvider = $searchModel->search([], $currentOrganization->id);
+        $dataProvider = $searchModel->search([], $this->user->organization_id);
         $dataProvider->pagination->setPage(0);
         $dataProvider->pagination->pageSize = 1000;
+        $vendor_ids = $return = [];
 
-        $return = [];
-        $vendor_ids = [];
+        foreach ($dataProvider->getModels() as $model) {
+            $vendor_ids[$model->supp_org_id] = $model->supp_org_id;
+        }
 
-        $models = $dataProvider->getModels();
-        if (!empty($models)) {
-            foreach ($models as $model) {
-                $vendor_ids[] = $model->supp_org_id;
-            }
+        $query = (new Query())->distinct()->from(Organization::tableName())->select(['country', 'locality'])
+            ->where(['in', 'id', $vendor_ids])
+            ->andWhere('country is not null')
+            ->andWhere("country != 'undefined'")
+            ->andWhere("country != ''")
+            ->andWhere('locality is not null')
+            ->andWhere("locality != 'undefined'")
+            ->andWhere("locality != ''")
+            ->orderBy('country');
 
-            $vendor_ids = array_unique($vendor_ids);
-
-            $query = new Query();
-            $query->distinct();
-            $query->from(Organization::tableName());
-            $query->select(['country', 'locality']);
-            $query->where(['in', 'id', $vendor_ids]);
-            $query->andWhere('country is not null');
-            $query->andWhere("country != 'undefined'");
-            $query->andWhere("country != ''");
-            $query->andWhere('locality is not null');
-            $query->andWhere("locality != 'undefined'");
-            $query->andWhere("locality != ''");
-            $query->orderBy('country');
-
-            $result = $query->all();
-
-            if ($result) {
-                foreach ($result as $row) {
-                    $return[] = [
-                        'title' => $row['country'] . ', ' . $row['locality'],
-                        'value' => trim($row['country']) . ':' . trim($row['locality'])
-                    ];
-                }
-            }
-
+        foreach ($query->all() as $row) {
+            $return[] = [
+                'title' => $row['country'] . ', ' . $row['locality'],
+                'value' => trim($row['country']) . ':' . trim($row['locality'])
+            ];
         }
 
         return $return;
@@ -819,8 +802,8 @@ class UserWebApi extends \api_web\components\WebApi
             $model = $this->user->organization;
             if (is_null($model->gmt)) {
                 $model->gmt = $gmt;
-                if ($model->validate()) {
-                    $model->save();
+                if (!$model->validate() || !$model->save()) {
+                    throw new ValidationException($model->getFirstErrors());
                 }
             }
             $gmt = $model->gmt;
@@ -877,72 +860,61 @@ class UserWebApi extends \api_web\components\WebApi
     }
 
     /**
-     * @param $user_id
-     * @param $organization_id
+     * @param $userId
+     * @param $orgId
      * @return array|EmailNotification|null|\yii\db\ActiveRecord
      * @throws BadRequestHttpException
      */
-    public function setDefaultEmailNotification($user_id, $organization_id)
+    public function setDefaultEmailNotification($userId, $orgId)
     {
-        $relation = RelationUserOrganization::find()
-            ->select('id')
-            ->where(['user_id'         => $user_id,
-                     'organization_id' => $organization_id,
-                     'is_active'       => 1])
-            ->scalar();
-
-        if (!$relation) {
-            throw new BadRequestHttpException('no such user relation');
-        }
-
-        $notification = EmailNotification::findOne(['user_id' => $user_id, 'rel_user_org_id' => $relation]);
-
-        if (!$notification) {
-            $notification = new EmailNotification();
-            $notification->user_id = $user_id;
-            $notification->rel_user_org_id = $relation;
-        }
-
-        $notification->orders = true;
-        $notification->requests = true;
-        $notification->changes = true;
-        $notification->invites = true;
-        $notification->order_done = isset($organization) ? (($organization->type_id == Organization::TYPE_SUPPLIER) ? 0 : 1) : 0;
-        $notification->save();
-
-        return $notification;
+        return $this->setDefaultNotification('EmailNotification', $userId, $orgId);
     }
 
     /**
-     * @param $user_id
-     * @param $organization_id
-     * @return SmsNotification
+     * @param $userId
+     * @param $orgId
+     * @return SmsNotification|EmailNotification
      * @throws BadRequestHttpException
      */
-    public function setDefaultSmsNotification($user_id, $organization_id)
+    public function setDefaultSmsNotification($userId, $orgId)
+    {
+        return $this->setDefaultNotification('SmsNotification', $userId, $orgId);
+    }
+
+    /**
+     * @param string  $modelName
+     * @param integer $userId
+     * @param integer $orgId
+     * @return EmailNotification|null
+     * @throws BadRequestHttpException
+     */
+    private function setDefaultNotification(string $modelName, int $userId, int $orgId)
     {
         $relation = RelationUserOrganization::find()
             ->select('id')
-            ->where(['user_id'         => $user_id,
-                     'organization_id' => $organization_id,
+            ->where(['user_id'         => $userId,
+                     'organization_id' => $orgId,
                      'is_active'       => 1])
             ->scalar();
 
         if (!$relation) {
             throw new BadRequestHttpException('no such user relation');
         }
-
-        $notification = SmsNotification::findOne(['user_id' => $user_id, 'rel_user_org_id' => $relation]);
-
+        $modelName = '\common\models\notifications\\' . $modelName;
+        $notification = $modelName::findOne(['user_id' => $userId, 'rel_user_org_id' => $relation]);
         if (!$notification) {
-            $notification = new SmsNotification();
-            $notification->user_id = $user_id;
+            $notification = new ${$modelName}();
+            $notification->user_id = $userId;
             $notification->rel_user_org_id = $relation;
         }
+
         $notification->orders = true;
         $notification->requests = true;
         $notification->changes = true;
         $notification->invites = true;
+        if ($notification instanceof EmailNotification) {
+            $notification->order_done = isset($organization) ? (($organization->type_id == Organization::TYPE_SUPPLIER) ? 0 : 1) : 0;
+        }
         $notification->save();
 
         return $notification;
@@ -958,7 +930,7 @@ class UserWebApi extends \api_web\components\WebApi
      */
     public function initUserOptions($user_id, $organization_id, $profile, $associate_org_id = null)
     {
-        $user = \common\models\User::findOne(['id' => $user_id]);
+        $user = \common\models\User::findOne($user_id);
         if (!$user) {
             throw new BadRequestHttpException('user_not_found');
         }

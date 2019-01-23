@@ -81,7 +81,7 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException("order.access.change.denied");
             }
         }
-        if (!$this->accessAllow($order)) {
+        if ($this->accessAllow($order) === false) {
             throw new BadRequestHttpException("order.access.change.denied");
         }
         //OrderStatus::checkEdiOrderPermissions($order, 'edit');
@@ -203,7 +203,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if (empty($orderContent)) {
             throw new BadRequestHttpException("order_content.not_found");
         }
-        $oldOrderContentAttributes = $orderContent->attributes;
+        $orderContent->setOldAttributes($orderContent->attributes);
 
         if (!empty($product['quantity'])) {
             $orderContent->quantity = $product['quantity'];
@@ -214,10 +214,10 @@ class OrderWebApi extends \api_web\components\WebApi
         if (!empty($product['price']) || $product['price'] == 0) {
             $orderContent->price = round($product['price'], 3);
         }
+        $clone = clone $orderContent;
 
         if ($orderContent->save()) {
-            $orderContent->setOldAttributes($oldOrderContentAttributes);
-            return $orderContent;
+            return $clone;
         } else {
             throw new ValidationException($orderContent->getFirstErrors());
         }
@@ -309,7 +309,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
-        if (!$this->accessAllow($order)) {
+        if ($this->accessAllow($order) === false) {
             throw new BadRequestHttpException("order.edit_comment_access_denied");
         }
         OrderStatus::checkEdiOrderPermissions($order, 'edit', [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]);
@@ -344,7 +344,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
-        if (!$this->accessAllow($order)) {
+        if ($this->accessAllow($order) === false) {
             throw new BadRequestHttpException("order.edit_comment_access_denied");
         }
         OrderStatus::checkEdiOrderPermissions($order, 'edit', [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]);
@@ -390,7 +390,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
-        if (!$this->accessAllow($order)) {
+        if ($this->accessAllow($order) === false) {
             throw new BadRequestHttpException("order.view_access_denied");
         }
 
@@ -1200,33 +1200,16 @@ class OrderWebApi extends \api_web\components\WebApi
     /**
      * Доступ к изменению заказа
      *
-     * @param $order
+     * @param Order $order
      * @return bool
      */
     private function accessAllow($order)
     {
-        $user = $this->user;
+        $user_org_id = $this->user->organization->id;
 
-        if ($order->client_id == $user->organization_id) {
+        if ($order->client_id === $user_org_id) {
             return true;
-        }
-
-        if ($order->vendor_id == $user->organization_id) {
-            return true;
-        }
-
-        $roles = ArrayHelper::merge([
-            Role::ROLE_RESTAURANT_MANAGER,
-            Role::ROLE_RESTAURANT_EMPLOYEE,
-            Role::ROLE_SUPPLIER_MANAGER,
-            Role::ROLE_SUPPLIER_EMPLOYEE,
-            Role::ROLE_FKEEPER_MANAGER,
-            Role::ROLE_ADMIN
-        ],
-            Role::getFranchiseeEditorRoles()
-        );
-
-        if (in_array($user->role_id, $roles)) {
+        } elseif ($order->vendor_id === $user_org_id) {
             return true;
         }
 

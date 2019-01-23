@@ -652,13 +652,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model->is_invoice = $is_invoice;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            /*if ($model->getErrors()) {
-                var_dump($model->getErrors());
-                exit;
-            }*/
             return $this->redirect(['/clientintegr/odinsobsh/waybill/index', 'page' => $page, 'way' => $model->order_id]);
         } else {
-            $model->num_code = $order_id;
+            $model->num_code = $ord->waybill_number ?? $ord->id;
             return $this->render('create', [
                 'model' => $model,
             ]);

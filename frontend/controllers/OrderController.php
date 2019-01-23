@@ -2571,7 +2571,6 @@ class OrderController extends DefaultController
         $dbResult = (new Query())->select('*')->from(['sq' => $subQuery])->groupBy('product,id')
             ->orderBy('client_name')
             ->all();
-
         $arExcelHeader = [
             \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']),
             \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед изм']),
@@ -2579,22 +2578,23 @@ class OrderController extends DefaultController
         $report = [];
 
         foreach ($dbResult as $item) {
-            $arExcelHeader[$item['id']] = $item['client_name'];
-            if (!isset($report[$item['product_id']])) {
-                $report[$item['product_id']] =
-                    [
-                        'product' => $item['product'],
-                        'unit'    => $item['unit'],
-                    ];
-                if (count($arExcelHeader) >= 3) {
-                    $report[$item['product_id']] = array_merge($report[$item['product_id']], array_fill(count($arExcelHeader), $item['count_org'], '0'));
+            $arExcelHeader[$item['client_name']] = $item['client_name'];
+            if (!empty($item['product_id'])) {
+                if (!isset($report[$item['product_id']])) {
+                    $report[$item['product_id']] =
+                        [
+                            'product' => $item['product'],
+                            'unit'    => $item['unit'],
+                        ];
+                    if (count($arExcelHeader) >= 3) {
+                        $report[$item['product_id']] = array_merge($report[$item['product_id']], array_fill(count($arExcelHeader), $item['count_org'], '0'));
+                    }
+                    $report[$item['product_id']][count($arExcelHeader) - 3] = $item['sum_quantity'];
+                } else {
+                    $index = count($arExcelHeader) - 3;
+                    $report[$item['product_id']][$index] = $item['sum_quantity'];
                 }
-                $report[$item['product_id']][count($arExcelHeader) - 3] = $item['sum_quantity'];
-            } else {
-                $index = count($arExcelHeader) - 3;
-                $report[$item['product_id']][$index] = $item['sum_quantity'];
             }
-
         }
         $objPHPExcel = new \PHPExcel();
         $sheet = 0;

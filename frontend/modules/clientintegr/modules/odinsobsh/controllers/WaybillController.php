@@ -543,7 +543,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             //$constId = OneSDicconst::findOne(['denom' => 'main_org']);
             //$parentId = OneSPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
             //$organizationID = !is_null($parentId) ? $parentId->value : $orgId;
-            $sql = "SELECT id, CONCAT(name, ' (' ,measure, ')') as txt FROM one_s_good WHERE org_id = " . $orgId . ' ORDER BY name LIMIT 100';
+            $sql = "SELECT id, CONCAT(name, ' (' ,measure, ')') as txt FROM one_s_good WHERE org_id = " . $orgId . ' AND is_active > 0 ORDER BY name LIMIT 100';
 
             /**
              * @var $db Connection

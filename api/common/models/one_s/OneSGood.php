@@ -37,7 +37,7 @@ class OneSGood extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'cid', 'org_id'], 'required'],
-            [['org_id'], 'integer'],
+            [['org_id', 'is_active'], 'integer'],
             [['name', 'measure'], 'string', 'max' => 255],
         ];
     }
@@ -53,6 +53,7 @@ class OneSGood extends \yii\db\ActiveRecord
             'name' => 'Наименование',
             'measure' => 'Ед.измерения',
             'updated_at' => 'Обновлено',
+            'is_active' => 'Показатель активности'
         ];
     }
 

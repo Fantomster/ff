@@ -53,6 +53,7 @@ $this->title = 'Интеграция с iiko Office';
                                 'name',
                                 'address',
                                 'updated_at',
+                                'is_active'
                             ],
                             'filterPosition' => false,
                             'options' => ['class' => 'table-responsive'],

@@ -520,12 +520,11 @@ class IntegrationWebApi extends WebApi
         $models = $dataProvider->getModels();
         $arVendors = [];
 
+        $isChildOrganization = false;
         if ($mainOrg = IntegrationSettingValue::getSettingsByServiceId($post['service_id'], $client->id, ['main_org'])) {
             $isChildOrganization = true;
             $client = Organization::findOne($mainOrg);
-            $arVendors = $client->getSuppliers();
-        } else {
-            $isChildOrganization = false;
+            $arVendors = array_keys($client->getSuppliers('', false));
         }
 
         if (!empty($models)) {

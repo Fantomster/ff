@@ -258,7 +258,7 @@ class DocumentWebApi extends \api_web\components\WebApi
         }
 
         if (isset($post['search']['number']) && !empty($post['search']['number'])) {
-            $where_all .= " AND dat.supply = :doc_number";
+            $where_all .= " AND (dat.supply = :doc_number OR dat.order_id = :doc_number)";
             $params_sql[':doc_number'] = $post['search']['number'];
         }
 
@@ -323,7 +323,7 @@ class DocumentWebApi extends \api_web\components\WebApi
 
         $sql = "SELECT
                   if(order_id IS NULL, waybill_id, order_id)     id,
-                  if(order_id IS NULL, 'waybill', 'order')       `type`,
+                  if(order_id IS NULL, 'waybill', 'order')       type,
                   dat.sort_doc                                   doc_date,
                   group_concat(DISTINCT dat.supply)              documents,
                   coalesce(dat.order_acquirer_id, dat.waybill_acquirer_id)
@@ -415,7 +415,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                        FROM $apiShema.waybill a
                          LEFT JOIN $apiShema.waybill_content b ON b.waybill_id = a.id
                          LEFT JOIN order_content c ON c.id = b.order_content_id
-                         LEFT JOIN `order` d ON d.id = c.order_id
+                         LEFT JOIN " . OrderMC::tableName() . " d ON d.id = c.order_id
                        WHERE a.acquirer_id = :business_id AND a.service_id = :service_id
                        AND a.id not IN (
                                SELECT sqwc.waybill_id
@@ -454,7 +454,7 @@ class DocumentWebApi extends \api_web\components\WebApi
                          coalesce(d.doc_date, d.created_at)                     sort_waybill,
                          null                                                   waybill_date,
                          a.created_at                                           order_date
-                       FROM `order` a
+                       FROM " . OrderMC::tableName() . " a
                          JOIN order_content b ON b.order_id = a.id
                          LEFT JOIN $apiShema.waybill_content c ON c.order_content_id = b.id and c.waybill_id in (select id from $apiShema.waybill where service_id = :service_id and acquirer_id = :business_id)
                          LEFT JOIN $apiShema.waybill d ON d.id = c.waybill_id AND d.service_id = :service_id
@@ -605,6 +605,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Exception
      */
     public function getWaybillDetail(array $post)
     {
@@ -620,6 +621,7 @@ class DocumentWebApi extends \api_web\components\WebApi
      * @throws BadRequestHttpException
      * @throws \yii\base\InvalidArgumentException
      * @throws ValidationException
+     * @throws \Exception
      */
     public function editWaybillDetail(array $post)
     {
@@ -704,7 +706,7 @@ class DocumentWebApi extends \api_web\components\WebApi
     {
         $this->validateRequest($post, ['replaced_order_id', 'document_id']);
 
-        $replacedOrder = \common\models\Order::findOne([
+        $replacedOrder = OrderMC::findOne([
             'id'         => (int)$post['replaced_order_id'],
             'service_id' => Registry::MC_BACKEND
         ]);

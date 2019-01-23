@@ -91,7 +91,6 @@ class RequestWebApi extends WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws InvalidArgumentException
      */
     public function getListVendor(array $post)
     {
@@ -515,7 +514,7 @@ class RequestWebApi extends WebApi
             foreach ($deliveryRegions['allow'] as $row) {
                 if (!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
                     $p = $row['administrative_area_level_1'] . $row['locality'];
-                    $query->orWhere('CONCAT(`administrative_area_level_1`, `locality`) = :p', [':p' => $p]);
+                    $query->orWhere('CONCAT(administrative_area_level_1, locality) = :p', [':p' => $p]);
                 } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined') && !empty($row['locality'])) {
                     $query->orWhere(['=', 'locality', $row['locality']]);
                 } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])) {
@@ -532,7 +531,7 @@ class RequestWebApi extends WebApi
                 foreach ($deliveryRegions['exclude'] as $row) {
                     if (!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
                         $p = $row['administrative_area_level_1'] . $row['locality'];
-                        $query->andWhere('CONCAT(`administrative_area_level_1`, `locality`) <> :s', [':s' => $p]);
+                        $query->andWhere('CONCAT(administrative_area_level_1, locality) <> :s', [':s' => $p]);
                     } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined') && !empty($row['locality'])) {
                         $query->andWhere(['!=', 'locality', $row['locality']]);
                     } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])) {
@@ -563,11 +562,10 @@ class RequestWebApi extends WebApi
     }
 
     /**
-     * Информация по заявке
+     *  Информация по заявке
      *
      * @param Request $model
      * @return array
-     * @throws \yii\base\InvalidConfigException
      */
     private function prepareRequest(Request $model)
     {
@@ -598,7 +596,6 @@ class RequestWebApi extends WebApi
      *
      * @param RequestCallback $model
      * @return array
-     * @throws \yii\base\InvalidConfigException
      */
     private function prepareRequestCallback(RequestCallback $model)
     {

@@ -12,6 +12,8 @@ use api_web\classes\UserWebApi;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
+use api_web\modules\integration\classes\Integration;
+use api_web\modules\integration\interfaces\DictionaryInterface;
 use common\models\Organization;
 use common\models\OrganizationDictionary;
 use common\models\OuterAgent;
@@ -33,7 +35,7 @@ use yii\web\BadRequestHttpException;
  *
  * @package api_web\modules\integration\classes\dictionaries
  */
-class AbstractDictionary extends WebApi
+class AbstractDictionary extends WebApi implements DictionaryInterface
 {
     /**
      * @var
@@ -70,6 +72,16 @@ class AbstractDictionary extends WebApi
                 'org_id'       => $this->user->organization_id
             ])->all();
 
+        $service = Integration::$service_map[$this->service_id] ?? '';
+
+        $dictionaryUpload = [];
+        if (!empty($service)) {
+            $class = "api_web\modules\integration\classes\sync\\Service" . $service;
+            if (class_exists($class)) {
+                $dictionaryUpload = (new $class($service, $this->service_id))->dictionaryAvailable;
+            }
+        }
+
         $return = [];
         /**
          * Статус по умолчанию = "Синхронизация не проводилась"
@@ -84,6 +96,8 @@ class AbstractDictionary extends WebApi
                 'count'       => $model->count ?? 0,
                 'status_id'   => $model->status_id ?? 0,
                 'status_text' => $model->statusText ?? $defaultStatusText,
+                'upload'      => in_array($model->outerDic->name, $dictionaryUpload),
+                'prefix'      => Integration::$service_map[$this->service_id] ?? '',
                 'created_at'  => WebApiHelper::asDatetime($model->created_at),
                 'updated_at'  => WebApiHelper::asDatetime($model->updated_at),
             ];
@@ -158,7 +172,7 @@ class AbstractDictionary extends WebApi
         return [
             'id'        => (int)$model->id,
             'name'      => $model->name,
-            'unit'      => (OuterUnit::findOne($model->outer_unit_id))->name,
+            'unit'      => !empty($model->outerUnit) ? $model->outerUnit->name : '',
             'is_active' => (int)!$model->is_deleted
         ];
     }
@@ -179,14 +193,14 @@ class AbstractDictionary extends WebApi
         $search = OuterAgent::find()
             ->joinWith(['store', 'nameWaybills'])
             ->where([
-                '`outer_agent`.service_id' => $this->service_id,
-                '`outer_agent`.is_deleted' => 0
+                'outer_agent.service_id' => $this->service_id,
+                'outer_agent.is_deleted' => 0
             ]);
         $orgId = $this->user->organization->id;
 
         if (isset($request['search'])) {
             if (isset($request['search']['name']) && !empty($request['search']['name'])) {
-                $search->andWhere(['like', '`outer_agent`.name', $request['search']['name']]);
+                $search->andWhere(['like', 'outer_agent.name', $request['search']['name']]);
             }
 
             if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
@@ -194,7 +208,7 @@ class AbstractDictionary extends WebApi
             }
         }
 
-        $search->andWhere('`outer_agent`.org_id = :org_id', [':org_id' => $orgId]);
+        $search->andWhere('outer_agent.org_id = :org_id', [':org_id' => $orgId]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $search
@@ -232,9 +246,9 @@ class AbstractDictionary extends WebApi
     {
         $model = OuterAgent::find()->joinWith(['store', 'nameWaybills'])
             ->where([
-                '`outer_agent`.org_id'     => $this->user->organization->id,
-                '`outer_agent`.service_id' => $this->service_id,
-                '`outer_agent`.outer_uid'  => $agent_uid,
+                'outer_agent.org_id'     => $this->user->organization->id,
+                'outer_agent.service_id' => $this->service_id,
+                'outer_agent.outer_uid'  => $agent_uid,
             ])->one();
 
         if ($model === null) {
@@ -455,7 +469,7 @@ class AbstractDictionary extends WebApi
     private function prepareStore($model)
     {
         $child = function ($model) {
-            $childrens = $model->children(1)->all();
+            $childrens = $model->children(1)->andWhere('is_deleted = 0')->all();
             $arReturn = [];
             if (!empty($childrens)) {
                 foreach ($childrens as $children) {
@@ -666,7 +680,7 @@ class AbstractDictionary extends WebApi
          * @return array
          */
         $child = function ($model) {
-            $childrens = $model->children(1)->all();
+            $childrens = $model->children(1)->andWhere('is_deleted = 0')->all();
             $arReturn = [];
             if (!empty($childrens)) {
                 foreach ($this->iterator($childrens) as $children) {
@@ -715,17 +729,17 @@ class AbstractDictionary extends WebApi
             'p.outer_uid',
             'p.created_at',
             'p.updated_at',
-            'p.`left`',
-            'p.`right`',
+            'p.left',
+            'p.right',
             'if(p.is_deleted, 0,1) as is_active',
         ])->from($table . ' os, ' . $table . ' p')
-            ->andWhere('os.`left` BETWEEN p.`left` and p.`right`')
+            ->andWhere('os.left BETWEEN p.left and p.right')
             ->andWhere(['like', 'os.name', $strSearch])
             ->andWhere(['p.org_id' => $orgId])
             ->andWhere(['os.org_id' => $orgId])
             ->andWhere(['p.service_id' => $this->service_id])
             ->andWhere(['os.service_id' => $this->service_id])
-            ->orderBy('p.`left`')
+            ->orderBy('p.left')
             ->all(\Yii::$app->db_api);
     }
 }

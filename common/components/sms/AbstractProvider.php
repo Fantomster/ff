@@ -16,18 +16,28 @@ abstract class AbstractProvider
 
     /**
      * Сообщение в кодировке UTF-8
+     *
      * @var string
      */
     public $message;
 
     /**
      * Получатели
+     *
      * @var string
      */
     public $target;
 
     /**
+     * ID заказа
+     *
+     * @var string
+     */
+    public $order_id;
+
+    /**
      * Отправка СМС
+     *
      * @param $message
      * @param $target
      * @return mixed
@@ -36,6 +46,7 @@ abstract class AbstractProvider
 
     /**
      * Проверка статуса СМС от провайдера
+     *
      * @param $sms_id
      */
     public abstract function checkStatus($sms_id);
@@ -47,6 +58,7 @@ abstract class AbstractProvider
 
     /**
      * Установка свойств провайдера
+     *
      * @param $name
      * @param $value
      */
@@ -61,14 +73,14 @@ abstract class AbstractProvider
      */
     public function xmlToArray($data)
     {
-        $r   = $xml = simplexml_load_string($data);
-        return json_decode(json_encode((array) $r), TRUE);
+        $r = $xml = simplexml_load_string($data);
+        return json_decode(json_encode((array)$r), true);
     }
 
     /**
-     * @param $url
+     * @param       $url
      * @param array $post
-     * @param bool $gzip
+     * @param bool  $gzip
      * @return mixed|string
      * @throws Exception
      */
@@ -92,6 +104,7 @@ abstract class AbstractProvider
 
     /**
      * Сохраняем запись об успешной отправке СМС
+     *
      * @param $message
      * @param $target
      * @param $sms_id
@@ -111,9 +124,10 @@ abstract class AbstractProvider
 
     /**
      * Запись ошибки в базу
+     *
      * @param integer $sms_send_id
      * @param integer $error_code
-     * @param string $error_message
+     * @param string  $error_message
      */
     public function setError($sms_send_id, $error_code, $error_message)
     {

@@ -93,20 +93,23 @@ return [
         'storageBucket'     => "mixcart-test.appspot.com",
         'messagingSenderId' => "1068392671931"
     ],
-    'vtsHttp'                 => [
+    'vtsHttp'             => [
         'authLink'       => 'https://t2-mercury.vetrf.ru/hs/',
         'vsdLink'        => 'https://t2-mercury.vetrf.ru/pub/operatorui?_language=ru&_action=showVetDocumentFormByUuid&uuid=',
         'pdfLink'        => 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=1&preview=false&_action=printVetDocumentList&_language=ru&displayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=&printPk=',
         'shortPdfLink'   => 'https://t2-mercury.vetrf.ru/hs/operatorui?printType=3&preview=false&_action=printVetDocumentList&_language=ru&displayPreview=false&displayRecipient=true&transactionPk=&vetDocument=&batchNumber=&printPk=',
         'chooseFirmLink' => 'https://t2-mercury.vetrf.ru/hs/operatorui?_action=chooseServicedFirm&_language=ru&firmGuid=',
     ],
-    'edi_api_data'            => [
+    'edi_api_data'        => [
         'edi_api_leradata_url'       => 'https://leradata.pro/api/vetis/api.php',
         'edi_api_order_document_id'  => 220,
         'edi_api_recadv_document_id' => 351
     ],
-    'disable_daemon_logs'     => true,
-    'encrypt'                 => [
+    'disable_daemon_logs' => true,
+    'encrypt'             => [
         'salt' => '3652612C4A5B5D1B1719' // MixCart2.0 в шестнадцатеричной системе
-    ]
+    ],
+    'posterApiUrl'        => 'https://joinposter.com/api/',
+    'posterAppId'         => '418',
+    'posterAppSecretKey'  => 'b2a659d84bd581275f25fa146d87962a',
 ];

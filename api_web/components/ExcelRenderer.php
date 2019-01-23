@@ -251,6 +251,12 @@ class ExcelRenderer
         $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(20);
     }
 
+    /**
+     * @param \PHPExcel $objPHPExcel
+     * @param string    $column
+     * @param string    $data
+     * @throws \PHPExcel_Exception
+     */
     private function fillCellHeaderData(\PHPExcel $objPHPExcel, string $column, string $data): void
     {
         $objPHPExcel->getActiveSheet()->setCellValue($column . "17", \Yii::t('app', $data));
@@ -258,6 +264,15 @@ class ExcelRenderer
         $objPHPExcel->getActiveSheet()->getStyle($column . "17")->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
     }
 
+    /**
+     * @param \PHPExcel $objPHPExcel
+     * @param int       $row
+     * @param string    $leftData
+     * @param string    $rightData
+     * @param bool      $bold
+     * @return int
+     * @throws \PHPExcel_Exception
+     */
     private function fillCellBottomData(\PHPExcel $objPHPExcel, int $row, string $leftData, string $rightData, bool $bold = false): int
     {
         $objPHPExcel->getActiveSheet()->mergeCells("E$row:G$row");

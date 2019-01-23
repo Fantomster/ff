@@ -480,7 +480,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController
         $user = User::findIdentity(Yii::$app->user->id);
         $currentOrganization = $user->organization;
 
-        $sql = "select distinct parent_id as `parent_id` from (
+        $sql = "select distinct parent_id as parent_id from (
         select id, parent_id from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
         union all
         select id, parent_id from organization where id = " . $user->organization_id . ")tb";
@@ -490,17 +490,17 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController
             $parent_id = $user->organization_id;
         }
         $sql = "
-        select distinct id as `id`,`name`,`type_id` from (
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
+        select distinct id as id,name,type_id from (
+        select id,name,type_id from organization where parent_id = (select id from organization where id = " . $user->organization_id . ")
         union all
-        select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
+        select id,name,type_id from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
         union all
-        select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
+        select id,name,type_id from organization where id = " . $user->organization_id . "
         union all
-        select `parent_id`,
-        (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
-        (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
-        from `organization` o where id = " . $user->organization_id . "
+        select parent_id,
+        (select name from organization where id = o.parent_id) as name, 
+        (select type_id from organization where id = o.parent_id) as type_id
+        from organization o where id = " . $user->organization_id . "
         )tb where id is not null";
         $networks = \Yii::$app->db->createCommand($sql)->queryAll();
         $organization = new Organization();

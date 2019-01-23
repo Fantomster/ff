@@ -132,6 +132,7 @@ class VetisWaybill extends WebApi
                 'vsd_direction'   => $arIncOut[$model->uuid] ?? null,
                 'last_error'      => $model->last_error,
                 'user_status'     => $model->user_status,
+                'r13n_clause'      => $model->r13nClause,
             ];
         }
 
@@ -314,6 +315,7 @@ class VetisWaybill extends WebApi
             'volume'      => $request['amount'],
             'reason'      => $request['reason'],
             'description' => $request['description'],
+            'conditions'  => $request['conditions'] ?? null
         ];
 
         try {
@@ -355,6 +357,7 @@ class VetisWaybill extends WebApi
             'decision'    => VetDocumentDone::RETURN_ALL,
             'reason'      => $request['reason'],
             'description' => $request['description'],
+            'conditions'  => $request['conditions'] ?? null
         ];
 
         try {
@@ -411,5 +414,50 @@ class VetisWaybill extends WebApi
         $data = $vsdHttp->getPdfData($request['uuid'], $request['full']);
         $base64 = (isset($request['base64_encode']) && $request['base64_encode'] == 1 ? true : false);
         return ($base64 ? base64_encode($data) : $data);
+    }
+
+    /**
+     * Погашение ВСД
+     *
+     * @param $request
+     * @throws \Exception
+     * @return array
+     */
+    public function getRegionalizationInfo($request)
+    {
+        if (!isset($request['uuid']) && empty($request['uuid'])) {
+            throw new BadRequestHttpException('Uuid is required and must be array');
+        }
+        $records = $this->helper->getAvailableVsd([$request['uuid']]);
+        $result = [];
+        try {
+            $api = mercuryApi::getInstance();
+            if (array_key_exists($request['uuid'], $records)) {
+                $vsd = $records[$request['uuid']];
+                $conditions = $api->getRegionalizationConditions($vsd['recipient_guid'], $vsd['sender_guid'], $vsd['sub_product_guid']);
+                $result = ['relocation'             => true,
+                           'reason_for_prohibition' => null];
+
+                if (isset($conditions)) {
+                    $result['relocation'] = false;
+                    if (array_key_exists('reason_for_prohibition', $conditions)) {
+                        $result['reason_for_prohibition'] = $conditions['$conditions'];
+                    } else {
+                        $result['conditions'] = $conditions;
+                    }
+                }
+            } else {
+                throw new BadRequestHttpException('VSD does not belong to this organization|' . $request['uuid']);
+            }
+        } catch (\Throwable $t) {
+            $error = $t->getMessage();
+            $model = mercLog::findOne($error);
+            if ($model) {
+                $error = $model->description;
+            }
+            $this->helper->setLastError($error, $request['uuid']);
+        }
+
+        return $result;
     }
 }

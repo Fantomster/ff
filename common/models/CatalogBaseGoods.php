@@ -8,6 +8,7 @@ use Yii;
 use yii\data\ActiveDataProvider;
 use common\behaviors\ImageUploadBehavior;
 use Imagine\Image\ManipulatorInterface;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -387,10 +388,10 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             ->select([
                 '*',
                 "case when LENGTH(article) != 0 then 1 ELSE 0 end as len",
-                "`article` REGEXP '^-?[0-9]+$' as i",
-                "(`article` + 0) AS c_article_1",
-                "`article` AS c_article",
-                "`product` REGEXP '^-?[а-яА-Я].*$' AS `alf_cyr`"
+                new Expression('article REGEXP \'^-?[0-9]+$\' as i'),
+                "(article + 0) AS c_article_1",
+                "article AS c_article",
+                new Expression('product REGEXP \'^-?[а-яА-Я].*$\' AS alf_cyr'),
             ])
             ->where(['deleted' => 0]);
         if ($isBase) {
@@ -408,9 +409,9 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
         }
 
         if ($sort == 'product') {
-            $q->orderBy('`alf_cyr` DESC, `product` ASC');
+            $q->orderBy('alf_cyr DESC, product ASC');
         } elseif ($sort == '-product') {
-            $q->orderBy('`alf_cyr` ASC, `product` DESC');
+            $q->orderBy('alf_cyr ASC, product DESC');
         }
 
         if ($sort == 'article') {

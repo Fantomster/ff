@@ -8,6 +8,7 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\modules\integration\classes\dictionaries\AbstractDictionary;
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\classes\Integration;
 use yii\web\BadRequestHttpException;
@@ -59,6 +60,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                              "count": 7,
      *                              "status_id": 1,
      *                              "status_text": "Загружены",
+     *                              "upload": true,
+     *                              "prefix": "Rkws",
      *                              "created_at": "2018-10-18T16:50:54+03:00",
      *                              "updated_at": "2018-10-19T09:12:42+03:00"
      *                          },
@@ -68,6 +71,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *                              "title": "Склады",
      *                              "count": 10,
      *                              "status_id": 1,
+     *                              "upload": true,
+     *                              "prefix": "Rkws",
      *                              "status_text": "Загружены",
      *                              "created_at": "2018-10-18T16:50:54+03:00",
      *                              "updated_at": "2018-10-19T09:12:42+03:00"
@@ -92,7 +97,10 @@ class DictionaryController extends \api_web\components\WebApiController
             throw new BadRequestHttpException('empty_param|service_id');
         }
 
-        $this->response = (new Dictionary($this->request['service_id'], 'Dictionary'))->getList();
+        /** @var AbstractDictionary $dictionary */
+        $dictionary = (new Dictionary($this->request['service_id'], 'Dictionary'));
+
+        $this->response = $dictionary->getList();
     }
 
     /**
@@ -160,10 +168,14 @@ class DictionaryController extends \api_web\components\WebApiController
      *     )
      * )
      * @throws BadRequestHttpException
+     * @throws \Exception
      */
     public function actionProductList()
     {
-        $this->response = (new Dictionary($this->request['service_id'], 'Product'))->productList($this->request);
+        /** @var AbstractDictionary $dictionary */
+        $dictionary = (new Dictionary($this->request['service_id'], 'Product'));
+
+        $this->response = $dictionary->productList($this->request);
     }
 
     /**
@@ -246,6 +258,7 @@ class DictionaryController extends \api_web\components\WebApiController
      *     )
      * )
      * @throws BadRequestHttpException
+     * @throws \Exception
      */
     public function actionAgentList()
     {
@@ -253,7 +266,10 @@ class DictionaryController extends \api_web\components\WebApiController
             throw new BadRequestHttpException('empty_param|service_id');
         }
 
-        $this->response = (new Dictionary($this->request['service_id'], 'Agent'))->agentList($this->request);
+        /** @var AbstractDictionary $dictionary */
+        $dictionary = (new Dictionary($this->request['service_id'], 'Agent'));
+
+        $this->response = $dictionary->agentList($this->request);
     }
 
     /**
@@ -733,7 +749,7 @@ class DictionaryController extends \api_web\components\WebApiController
         if (!isset($this->request['service_id'])) {
             throw new BadRequestHttpException('empty_param|service_id');
         }
-        /** @var  $factory \api_web\modules\integration\classes\dictionaries\RkwsCategory */
+        /** @var  $factory \api_web\modules\integration\classes\dictionaries\AbstractDictionary */
         $factory = (new Dictionary($this->request['service_id'], 'Category'));
         $this->response = $factory->categorySetSelected($this->request);
     }
@@ -782,6 +798,7 @@ class DictionaryController extends \api_web\components\WebApiController
      *     )
      * )
      * @throws BadRequestHttpException
+     * @throws \yii\db\Exception
      */
     public function actionCheckAgentName()
     {

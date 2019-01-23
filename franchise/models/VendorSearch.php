@@ -2,6 +2,7 @@
 
 namespace franchise\models;
 
+use common\models\Order;
 use common\models\Role;
 use Yii;
 use yii\base\Model;
@@ -68,13 +69,13 @@ class VendorSearch extends Organization {
 
         $query = "SELECT fa.id as franchisee_associate_id, self_registered, org.id as id, org.name as name, (select count(id) from relation_supp_rest where supp_org_id=org.id) as clientCount, 
                 (select count(id) from relation_supp_rest where supp_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
-                (select count(id) from `order` where vendor_id=org.id and status in (1,2,3,4)) as orderCount,
-                (select count(id) from `order` where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
-                (select sum(total_price) from `order` where vendor_id=org.id $currencyOption and status in (1,2,3,4)) as orderSum,
-                (select sum(total_price) from `order` where vendor_id=org.id $currencyOption and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30,
+                (select count(id) from " . Order::tableName() . " where vendor_id=org.id and status in (1,2,3,4)) as orderCount,
+                (select count(id) from " . Order::tableName() . " where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
+                (select sum(total_price) from " . Order::tableName() . " where vendor_id=org.id $currencyOption and status in (1,2,3,4)) as orderSum,
+                (select sum(total_price) from " . Order::tableName() . " where vendor_id=org.id $currencyOption and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30,
                 org.created_at as created_at, org.contact_name as contact_name, org.phone as phone
-                FROM `organization` AS org
-                LEFT JOIN  `franchisee_associate` AS fa ON org.id = fa.organization_id 
+                FROM organization AS org
+                LEFT JOIN  franchisee_associate AS fa ON org.id = fa.organization_id 
                 WHERE fa.franchisee_id = $franchisee_id and org.type_id=".parent::TYPE_SUPPLIER." and (org.created_at between :dateFrom and :dateTo) 
                 and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)";
 
@@ -93,14 +94,14 @@ class VendorSearch extends Organization {
         $count = count(Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f])->queryAll());
 
         $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query,
-            'params' => [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f],
+            'sql'        => $query,
+            'params'     => [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f],
             'totalCount' => $count,
             'pagination' => [
                 'pageSize' => 20,
             ],
-            'sort' => [
-                'attributes' => [
+            'sort'       => [
+                'attributes'   => [
                     'name',
                     'self_registered',
                     'clientCount',

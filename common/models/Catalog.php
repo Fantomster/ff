@@ -442,4 +442,9 @@ class Catalog extends \yii\db\ActiveRecord
         }
     }
 
+    public function delete()
+    {
+        CatalogTemp::deleteAll(['cat_id' => $this->id]);
+        parent::delete();
+    }
 }

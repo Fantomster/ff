@@ -2,6 +2,9 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\components\Poster;
+use api_web\components\Registry;
+
 class SettingController extends \api_web\components\WebApiController
 {
     /**
@@ -444,5 +447,119 @@ class SettingController extends \api_web\components\WebApiController
     {
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
         $this->response = $this->container->get('IntegrationSettingsWebApi')->getItemsSetting($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/setting/generate-poster-auth-url",
+     *     tags={"Poster"},
+     *     summary="Генерация урла для авторизации в Poster",
+     *     description="Генерация урла для авторизации в Poster",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "redirect_url": "fronturl.ru"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                   "result":
+     *                   "https://joinposter.com/api/auth?application_id=418&redirect_uri=http://api.mixcart.loc/poster-auth&response_type=code"
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * )
+     * @throws \Exception
+     */
+    public function actionGeneratePosterAuthUrl()
+    {
+        $this->setLicenseServiceId(Registry::POSTER_SERVICE_ID);
+        $this->response = (new Poster($this->user->organization_id))->generateAuthUrl($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/setting/poster-auth",
+     *     tags={"Poster"},
+     *     summary="Авторизация по code полученного из oAuth2",
+     *     description="Авторизация по code полученного из oAuth2",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *             @SWG\Property(property="user", ref="#/definitions/User"),
+     *             @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "code": 123,
+     *                      "account": "qwe",
+     *                      "url": "https://backfronturl.ru"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *             default={
+     *                  "result": true,
+     *                  "data_from_server": {
+     *                    "access_token": "145072:7130848db640adf93839a485a4371b3f",
+     *                    "account_number": "145072",
+     *                    "user": {
+     *                        "id": 3,
+     *                        "name": "",
+     *                        "email": "makagonova@mixcart.ru",
+     *                        "role_id": 3
+     *                    },
+     *                    "ownerInfo": {
+     *                        "email": "makagonova@mixcart.ru",
+     *                        "phone": "+7 9035445138",
+     *                        "city": "",
+     *                        "country": "RU",
+     *                        "name": "",
+     *                        "company_name": "MixCart"
+     *                    },
+     *                    "tariff": {}
+     *                  }
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionPosterAuth()
+    {
+        $this->response = (new Poster($this->user->organization_id))->saveAccessKey($this->request);
     }
 }

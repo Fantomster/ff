@@ -108,38 +108,6 @@ $js = <<<JS
 
    
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
-        
-        $('#actionButtons').on('click', '.btnOrderAction', function() { 
-            
-            var clickedButton = $(this);
-            if ($(this).data("action") == "confirm" && dataEdited) {
-                var form = $("#editOrder");
-                extData = "&orderAction=confirm"; 
-                clickedButton.button("loading");
-                $.post(
-                    form.attr("action"),
-                    form.serialize() + extData
-                ).done(function(result) {
-                    dataEdited = 0;
-                    clickedButton.button("reset");
-                });
-            } else if ($(this).data("action") != "cancel") {
-                clickedButton.button("loading");
-                $.post(
-                    "$urlOrderAction",
-                        {"action": $(this).data("action"), "order_id": $order->id}
-                ).done(function(result) {
-                        $('#actionButtons').html(result);
-                        clickedButton.button("reset");
-                        swal(
-                            '$titleIntegration',
-                            '$textIntegration',
-                            'success'
-                        );
-                });
-                 
-            }
-        });
 
         $('.content').on('change keyup paste cut', '.view-data', function() {
             dataEdited = 1;
@@ -231,6 +199,46 @@ $js = <<<JS
             });        
         });
 
+        $(document).on('pjax:complete', function() {
+            dataEdited = 0;
+        })
+JS;
+
+if (Yii::$app->user->identity->role_id != \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR) {
+    $js .= <<<JS
+
+        $('#actionButtons').on('click', '.btnOrderAction', function() { 
+            
+            var clickedButton = $(this);
+            if ($(this).data("action") == "confirm" && dataEdited) {
+                var form = $("#editOrder");
+                extData = "&orderAction=confirm"; 
+                clickedButton.button("loading");
+                $.post(
+                    form.attr("action"),
+                    form.serialize() + extData
+                ).done(function(result) {
+                    dataEdited = 0;
+                    clickedButton.button("reset");
+                });
+            } else if ($(this).data("action") != "cancel") {
+                clickedButton.button("loading");
+                $.post(
+                    "$urlOrderAction",
+                        {"action": $(this).data("action"), "order_id": $order->id}
+                ).done(function(result) {
+                        $('#actionButtons').html(result);
+                        clickedButton.button("reset");
+                        swal(
+                            '$titleIntegration',
+                            '$textIntegration',
+                            'success'
+                        );
+                });
+                 
+            }
+        });
+
         $(document).on("click", ".cancel-order", function(e) {
             e.preventDefault();
             var clicked = $(this);
@@ -270,10 +278,9 @@ $js = <<<JS
                 }
             });
         });
-        $(document).on('pjax:complete', function() {
-            dataEdited = 0;
-        })
 JS;
+}
+
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 \common\assets\PrintThisAsset::register($this);
 

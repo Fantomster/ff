@@ -99,7 +99,8 @@ class VendorWebApi extends \api_web\components\WebApi
                 $result = [
                     'success'         => true,
                     'organization_id' => $organization->id,
-                    'message'         => "Приглашение отправлено."
+                    'message'         => "Приглашение отправлено.",
+                    'is_edi'          => $organization->isEdi()
                 ];
             } else {
                 throw new BadRequestHttpException(\Yii::t('app', 'common.models.already_exists_two', ['ru' => 'Данный поставщик уже имеется в вашем списке контактов!']));

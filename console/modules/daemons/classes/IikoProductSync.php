@@ -12,7 +12,6 @@ use common\models\OuterProduct;
 use common\models\OuterUnit;
 use console\modules\daemons\components\ConsumerInterface;
 use console\modules\daemons\components\IikoSyncConsumer;
-use api_web\helpers\iikoApi;
 
 /**
  * Class IikoProductSync

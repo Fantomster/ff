@@ -41,6 +41,8 @@ class CartWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
+     * @throws \Throwable
+     * @throws \yii\db\Exception
      */
     public function add(array $post, bool $ajax_published = false)
     {
@@ -71,7 +73,8 @@ class CartWebApi extends \api_web\components\WebApi
      *
      * @param array $post
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\db\Exception
      */
     private function addItem(array $post)
     {
@@ -518,6 +521,8 @@ class CartWebApi extends \api_web\components\WebApi
 
     /**
      * Отправка уведомлений
+     *
+     * @throws \yii\base\ErrorException
      */
     public function noticeWhenProductAddToCart()
     {

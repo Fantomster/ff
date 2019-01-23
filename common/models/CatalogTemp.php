@@ -91,4 +91,10 @@ class CatalogTemp extends \yii\db\ActiveRecord
         return $this->hasMany(CatalogTempContent::className(), ['temp_id' => 'id']);
     }
 
+    public function delete()
+    {
+        CatalogTempContent::deleteAll(['temp_id' => $this->id]);
+        parent::delete();
+    }
+    
 }

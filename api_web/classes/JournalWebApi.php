@@ -21,6 +21,13 @@ use yii\data\Pagination;
  */
 class JournalWebApi extends WebApi
 {
+    private $arAvailableFields = [
+        'response',
+        'created_at',
+        'service_id',
+        'type',
+        'user_id',
+    ];
 
     /**
      * @param $request
@@ -31,7 +38,7 @@ class JournalWebApi extends WebApi
     {
         $page = $request['pagination']['page'] ?? 1;
         $pageSize = $request['pagination']['page_size'] ?? 12;
-        $sort = $post['sort'] ?? null;
+        $sort = $request['sort'] ?? null;
 
         $query = Journal::find();
         if (isset($request['search'])) {
@@ -41,9 +48,6 @@ class JournalWebApi extends WebApi
                 if (isset($date['start']) && !empty($date['start'])) {
                     $query->andWhere('created_at >= :date_from',
                         [':date_from' => date('Y-m-d H:i:s', strtotime($date['start'] . ' 00:00:00'))]);
-                } else {
-                    $query->andWhere('created_at >= :date_from',
-                        [':date_from' => date('Y-m-d H:i:s', strtotime(date('Y-m-01') . ' 00:00:00'))]);
                 }
                 if (isset($date['end']) && !empty($date['end'])) {
                     $query->andWhere('created_at <= :date_to',
@@ -66,17 +70,12 @@ class JournalWebApi extends WebApi
             $query->andWhere(['user_id' => $this->user->id]);
         }
 
-        if ($sort) {
-            if ($sort == 'response') {
-                $query->orderBy('response ASC');
-            } elseif ($sort == '-response') {
-                $query->orderBy('response DESC');
+        if ($sort && in_array(ltrim($sort, '-'), $this->arAvailableFields)) {
+            $sortDirection = 'ASC';
+            if (strpos('-', $sort) !== false) {
+                $sortDirection = 'DESC';
             }
-            if ($sort == 'created_at') {
-                $query->orderBy('created_at ASC');
-            } elseif ($sort == '-created_at') {
-                $query->orderBy('created_at DESC');
-            }
+            $query->orderBy($sort . ' ' . $sortDirection);
         } else {
             $query->orderBy('id DESC');
         }

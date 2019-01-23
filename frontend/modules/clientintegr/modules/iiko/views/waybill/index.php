@@ -251,9 +251,12 @@ $columns = [
             }
             $order_id = $model->id;
             $query_string = Yii::$app->getRequest()->getQueryString();
-
             Yii::$app->session->set("query_string", $query_string);
-            return Yii::$app->controller->renderPartial('_expand-row-details', ['model' => $wmodel, 'order_id' => $order_id, 'lic' => $lic]);
+            $page = Yii::$app->request->get('page');
+            if ($page == '') {
+                $page = 1;
+            }
+            return Yii::$app->controller->renderPartial('_expand-row-details', ['model' => $wmodel, 'order_id' => $order_id, 'lic' => $lic, 'page' => $page]);
         },
         'headerOptions' => ['class' => 'kartik-sheet-style'],
         'expandOneOnly' => true,

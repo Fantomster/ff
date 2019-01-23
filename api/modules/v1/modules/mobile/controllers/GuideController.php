@@ -85,7 +85,7 @@ class GuideController extends ActiveController {
         $filters['client_id'] = $user->organization_id;
 
         $query->select([
-            '`guide`.*',
+            'guide.*',
             '(select catalog_base_goods.product from guide_product left join catalog_base_goods on catalog_base_goods.id = guide_product.cbg_id where guide_product.guide_id = guide.id and catalog_base_goods.status = 1 and catalog_base_goods.deleted = 0 limit 1 ) as product1',
             '(select catalog_base_goods.product from guide_product left join catalog_base_goods on catalog_base_goods.id = guide_product.cbg_id where guide_product.guide_id = guide.id and catalog_base_goods.status = 1 and catalog_base_goods.deleted = 0 limit 1 offset 1) as product2',
             '(select catalog_base_goods.product from guide_product left join catalog_base_goods on catalog_base_goods.id = guide_product.cbg_id where guide_product.guide_id = guide.id and catalog_base_goods.status = 1 and catalog_base_goods.deleted = 0 limit 1 offset 2) as product3']);

@@ -378,8 +378,9 @@ $infoUrl = Url::to(['/site/ajax-set-info']);
                                     case OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
                                     case OrderStatus::STATUS_PROCESSING:
                                         if ($data->isObsolete) {
+                                            $disabledString = (Yii::$app->user->identity->role_id == \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR) ? " disabled" : "";
                                             return Html::a(Yii::t('message', 'frontend.views.client.index.end', ['ru' => 'Завершить']), '#', [
-                                                        'class' => 'complete btn btn-outline-success',
+                                                        'class' => "complete btn btn-outline-success$disabledString",
                                                         'data' => [
                                                             'toggle' => 'tooltip',
                                                             'original-title' => Yii::t('message', 'frontend.views.client.index.end', ['ru' => 'Завершить заказ']),

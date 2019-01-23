@@ -97,7 +97,7 @@ class IikoSyncConsumer extends AbstractConsumer
                 //Информацию шлем в FCM
                 $dictionary->noticeToFCM();
                 if ($dictionary->outerDic->service_id == Registry::IIKO_SERVICE_ID && $dictionary->outerDic->name == 'product') {
-                    OrganizationDictionary::updateIikoUnitDictionary($dictionary->status_id, $dictionary->org_id);
+                    OrganizationDictionary::updateUnitDictionary($dictionary->status_id, $dictionary->org_id, Registry::IIKO_SERVICE_ID);
                 }
             }
             return ['success' => true];
@@ -107,42 +107,8 @@ class IikoSyncConsumer extends AbstractConsumer
     }
 
     /**
-     * Запрос на постановку в очередь обновлений справочника
-     *
-     * @param integer $org_id
+     * @throws \Exception
      */
-    public static function getUpdateData($org_id): void
-    {
-        $arClassName = explode("\\", static::class);
-        $className = array_pop($arClassName);
-        try {
-            //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
-            $queue = RabbitQueues::find()->where(['consumer_class_name' => $className, 'organization_id' => $org_id])->one();
-            if ($queue == null) {
-                $queue = new RabbitQueues();
-                $queue->consumer_class_name = $className;
-                $queue->organization_id = $org_id;
-                if ($queue->validate()) {
-                    $queue->save();
-                }
-            }
-
-            $queueName = $queue->consumer_class_name;
-
-            if (!empty($queue->organization_id)) {
-                $queueName .= '_' . $queue->organization_id;
-            }
-
-            //ставим задачу в очередь
-            \Yii::$app->get('rabbit')
-                ->setQueue($queueName)
-                ->addRabbitQueue('');
-
-        } catch (\Exception $e) {
-            \Yii::error($e->getMessage());
-        }
-    }
-
     public function __destruct()
     {
         $this->iikoApi->logout();

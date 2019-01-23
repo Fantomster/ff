@@ -164,6 +164,8 @@ class GuideWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function getProducts(array $post)
     {
@@ -389,7 +391,9 @@ class GuideWebApi extends \api_web\components\WebApi
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
+     * @throws \Throwable
      * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      * @throws \yii\di\NotInstantiableException
      */
     public function addToCart(array $post)
@@ -428,6 +432,7 @@ class GuideWebApi extends \api_web\components\WebApi
      * @param $params
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     public function actionProductFromGuide($params)
     {
@@ -567,6 +572,8 @@ class GuideWebApi extends \api_web\components\WebApi
      * @param bool  $product_list
      * @param array $attr
      * @return array
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     private function prepareGuide($id, $product_list = true, $attr = [])
     {

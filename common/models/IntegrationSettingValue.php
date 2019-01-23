@@ -56,7 +56,7 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['setting_id', 'org_id', 'value'], 'required'],
+            [['setting_id', 'org_id'], 'required'],
             [['setting_id', 'org_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['value'], 'string', 'max' => 255],
@@ -116,10 +116,10 @@ class IntegrationSettingValue extends \yii\db\ActiveRecord
     {
         $orgId = $orgId ?? \Yii::$app->user->identity->organization_id;
         $settingNames = $settingNames ?? ['*'];
-        $dbResult = (new Query())->select(['isv.value', 'is.name name'])->from(self::tableName() . ' isv')->leftJoin
-        (IntegrationSetting::tableName() . ' is', '`is`.`id`=`isv`.`setting_id`')
+        $dbResult = (new Query())->select(['isv.value', 'i.name name'])->from(self::tableName() . ' isv')->leftJoin
+        (IntegrationSetting::tableName() . ' i', 'i.id=isv.setting_id')
             ->where(['isv.org_id' => $orgId])
-            ->andFilterWhere(['is.name' => $settingNames, 'is.service_id' => $serviceId])
+            ->andFilterWhere(['i.name' => $settingNames, 'i.service_id' => $serviceId])
             ->all(\Yii::$app->db_api);
 
         if (count($dbResult) > 1 && (count($settingNames) > 1 || empty($settingNames))) {

@@ -10,6 +10,7 @@ namespace api_web\modules\integration\classes;
 
 use api_web\components\Registry;
 use api_web\components\WebApi;
+use api_web\modules\integration\classes\dictionaries\AbstractDictionary;
 use common\models\OuterAgent;
 use common\models\OuterAgentNameWaybill;
 use yii\db\Query;
@@ -18,9 +19,11 @@ use yii\web\BadRequestHttpException;
 class Integration
 {
     /** @var array */
-    static $service_map = [
-        Registry::RK_SERVICE_ID   => 'Rkws',
-        Registry::IIKO_SERVICE_ID => 'Iiko'
+    public static $service_map = [
+        Registry::RK_SERVICE_ID       => 'Rkws',
+        Registry::IIKO_SERVICE_ID     => 'Iiko',
+        Registry::POSTER_SERVICE_ID   => 'Poster',
+        Registry::TILLYPAD_SERVICE_ID => 'Tillypad',
     ];
 
     /**
@@ -35,7 +38,7 @@ class Integration
             throw new BadRequestHttpException('choose_integration_service');
         }
         $this->service_id = $serviceId;
-        $this->serviceName = self::$service_map[$serviceId];
+        $this->serviceName = self::$service_map[$serviceId] ?? null;
     }
 
     /**
@@ -54,7 +57,11 @@ class Integration
      */
     private function getDictName($type)
     {
-        return "api_web\modules\integration\classes\dictionaries\\" . $this->serviceName . $type;
+        $class = "api_web\modules\integration\classes\dictionaries\\" . $this->serviceName . $type;
+        if (!class_exists($class)) {
+            $class = AbstractDictionary::class;
+        }
+        return $class;
     }
 
     /**

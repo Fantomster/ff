@@ -13,7 +13,7 @@ use common\widgets\Alert;
 use nirvana\showloading\ShowLoadingAsset;
 
 ShowLoadingAsset::register($this);
-$this->registerCss('#loader-show {position:absolute;width:100%;display:none;}');
+$this->registerCss('#loader-show {position:absolute;width:100%;display:none;} .nav > li > a {padding: 10px 8px;}');
 
 AppAsset::register($this);
 

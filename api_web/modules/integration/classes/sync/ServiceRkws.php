@@ -4,6 +4,7 @@ namespace api_web\modules\integration\classes\sync;
 
 use api_web\components\Registry;
 use api_web\modules\integration\classes\documents\WaybillContent;
+use api_web\modules\integration\classes\sync\rkws\RkwsWaybill;
 use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\OuterAgent;
@@ -551,6 +552,7 @@ class ServiceRkws extends AbstractSyncFactory
      * @return string
      * @throws BadRequestHttpException
      * @throws \yii\db\Exception
+     * @throws \Exception
      */
     public function callbackData(OuterTask $task, string $data = null)
     {

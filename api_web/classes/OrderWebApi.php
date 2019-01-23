@@ -1188,7 +1188,7 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['brand'] = $model->product->brand ? $model->product->brand : '';
         $item['article'] = $model->product->article;
         $item['ed'] = $model->product->ed;
-        $item['units'] = $model->product->units;
+        $item['units'] = 0.001;
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);

@@ -59,7 +59,7 @@ class BaseProductSearch extends \common\models\CatalogBaseGoods {
                 }
             }
 
-            $query->leftJoin('guide_product', '`guide_product`.`cbg_id` = `catalog_base_goods`.`id`');
+            $query->leftJoin('guide_product', 'guide_product.cbg_id = catalog_base_goods.id');
 
             $query->where([
                 'catalog_base_goods.id' => $guideList,

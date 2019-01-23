@@ -91,12 +91,15 @@ abstract class AbstractProvider
      */
     public function getFilesList($orgID): array
     {
-        return (new \yii\db\Query())
+        $dateMinusThirtyMinutes = date("Y-m-d H:i:s", strtotime("-30 minutes"));
+        $list = (new \yii\db\Query())
             ->select(['id', 'name'])
             ->from('edi_files_queue')
             ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
+            ->orWhere("status = " . AbstractRealization::STATUS_PROCESSING . " AND updated_at < '" . $dateMinusThirtyMinutes . "'")
             ->andWhere(['organization_id' => $orgID])
             ->all();
+        return $list;
     }
 
     /**

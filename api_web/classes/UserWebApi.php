@@ -669,6 +669,7 @@ class UserWebApi extends \api_web\components\WebApi
     {
         WebApiHelper::clearRequest($post);
         $this->validateRequest($post, ['phone']);
+        $return = ['result' => true];
 
         $phone = preg_replace('#(\s|\(|\)|-)#', '', $post['phone']);
         if (mb_substr($phone, 0, 1) == '8') {
@@ -727,13 +728,22 @@ class UserWebApi extends \api_web\components\WebApi
             //Проверяем код
             if ($model->checkCode($post['code'])) {
                 //Меняем номер телефона, если все хорошо
-                $model->changePhoneUser();
+                try {
+                    $model->changePhoneUser();
+                    if ($isUnconfirmedUser) {
+                        //Отправляем приветственное письмо
+                        $model->user->sendWelcome();
+                        $return = ['token' => $model->user->getJWTToken()];
+                    }
+                } catch (\Throwable $e) {
+                    \Yii::info($e->getMessage());
+                }
             } else {
                 throw new BadRequestHttpException('bad_sms_code');
             }
         }
 
-        return ['result' => true];
+        return $return;
     }
 
     /**

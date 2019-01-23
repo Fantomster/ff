@@ -75,9 +75,9 @@ class iikoPconst extends \yii\db\ActiveRecord
     {
         $res = self::find()
             ->select('*')
-            ->join('LEFT JOIN', 'iiko_dicconst', '`iiko_dicconst`.`denom` = "column_number_invoice"')
+            ->join('LEFT JOIN', 'iiko_dicconst', 'iiko_dicconst.denom = "column_number_invoice"')
             ->where(['org' => $organization])
-            ->andWhere('`iiko_pconst`.`const_id` = `iiko_dicconst`.`id`')
+            ->andWhere('iiko_pconst.const_id = iiko_dicconst.id')
             ->one();
         if($res)
         {

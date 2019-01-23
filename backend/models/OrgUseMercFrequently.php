@@ -3,10 +3,10 @@
 
 namespace backend\models;
 
+use common\helpers\DBNameHelper;
 use yii\base\Model;
 use yii\data\SqlDataProvider;
 use Yii;
-
 
 class OrgUseMercFrequently extends Model
 {
@@ -33,22 +33,23 @@ class OrgUseMercFrequently extends Model
         if ($flag) {
             $not = 'not';
         }
-        $sql = "SELECT id, name FROM `{$this->db}`.`organization` WHERE id $not in
+        $dbName = DBNameHelper::getApiName();
+        $sql = "SELECT id, name FROM organization WHERE id $not in
        (
-           SELECT org FROM `{$this->db_api}`.`merc_pconst` where VALUE in (
-           SELECT DISTINCT recipient_guid FROM `{$this->db_api}`.`merc_vsd` WHERE status = :status AND  last_update_date >= DATE(NOW()) - INTERVAL 30 DAY)
+           SELECT org FROM $dbName.merc_pconst where VALUE in (
+           SELECT DISTINCT recipient_guid FROM $dbName.merc_vsd WHERE status = :status AND  last_update_date >= DATE(NOW()) - INTERVAL 30 DAY)
        )";
 
         $count = Yii::$app->db->createCommand($sql, [':status' => 'UTILIZED'])->execute();
 
         $provider = new SqlDataProvider([
-            'sql' => $sql,
-            'params' => [':status' => 'UTILIZED'],
+            'sql'        => $sql,
+            'params'     => [':status' => 'UTILIZED'],
             'totalCount' => $count,
             'pagination' => [
                 'pageSize' => 20,
             ],
-            'sort' => [
+            'sort'       => [
                 'attributes' => [
                     'name',
                 ],

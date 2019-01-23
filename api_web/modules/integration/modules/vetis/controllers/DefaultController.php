@@ -62,7 +62,8 @@ class DefaultController extends WebApiController
      *                            "items": {
      *                                  {
      *                                      "uuid": "774daf95-01ee-486c-ae05-4ab301a9b85d",
-     *                                      "sender_name": "Поставщик №1(600021, обл.Владимирская, г.Муром, ул.Октябрьской Революции,д.2Б)",
+     *                                      "sender_name": "Поставщик №1(600021, обл.Владимирская, г.Муром,
+     *                                      ул.Октябрьской Революции,д.2Б)",
      *                                      "product_name": "мясо верблюда",
      *                                      "status": "CONFIRMED",
      *                                      "status_date": "2018-08-30T13:11:02+03:00",
@@ -71,7 +72,8 @@ class DefaultController extends WebApiController
      *                                      "production_date": "2018-07-02T03:00:00+03:00",
      *                                      "date_doc": "2018-08-30T15:00:00+03:00",
      *                                      "document_id": null,
-     *                                      "status_text": "Статус"
+     *                                      "status_text": "Статус",
+     *                                      "r13n_clause": 1
      *                                  },
      *                              },
      *                              "groups": {
@@ -94,11 +96,11 @@ class DefaultController extends WebApiController
      *              }
      *          )
      *     ),
-     *     @SWG\Response(
+     * @SWG\Response(
      *         response = 400,
      *         description = "BadRequestHttpException"
      *     ),
-     *     @SWG\Response(
+     * @SWG\Response(
      *         response = 401,
      *         description = "error"
      *     )
@@ -144,26 +146,30 @@ class DefaultController extends WebApiController
      *                            {
      *                                "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
      *                                "product_name": "Говядина бескостная рубленая БИО, Замороженная",
-     *                                "sender_name": "Поставщик №1 (600021, Владимерская обл., г. Муром, ул. Октяборьской революции 16",
+     *                                "sender_name": "Поставщик №1 (600021, Владимерская обл., г. Муром, ул.
+     *                                Октяборьской революции 16",
      *                                "status": "CONFIRMED",
      *                                "status_text": "Оформлен",
      *                                "status_date": "29.08.2018",
      *                                "amount": 40,
      *                                "unit": "кг",
      *                                "production_date": "29.08.2018",
-     *                                "date_doc": "29.08.2018"
+     *                                "date_doc": "29.08.2018",
+     *                                "r13n_clause": 1
      *                                },
      *                                {
      *                                "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
      *                                "product_name": "Говядина бескостная рубленая БИО, Замороженная",
-     *                                "sender_name": "Поставщик №1 (600021, Владимерская обл., г. Муром, ул. Октяборьской революции 16",
+     *                                "sender_name": "Поставщик №1 (600021, Владимерская обл., г. Муром, ул.
+     *                                Октяборьской революции 16",
      *                                "status": "CONFIRMED",
      *                                "status_text": "Оформлен",
      *                                "status_date": "29.08.2018",
      *                                "amount": 40,
      *                                "unit": "кг",
      *                                "production_date": "29.08.2018",
-     *                                "date_doc": "29.08.2018"
+     *                                "date_doc": "29.08.2018",
+     *                                "r13n_clause":0
      *                                }
      *                           }
      *                      }
@@ -211,16 +217,17 @@ class DefaultController extends WebApiController
      *            @SWG\Schema(
      *              default={
      *                      "result": {
-     *                          "a2667f4a-f91b-4752-b400-1bb129617de6": "Поставщик №1(600021, обл.Владимирская, г.Муром, ул.Октябрьской Революции,д.2Б)"
+     *                          "a2667f4a-f91b-4752-b400-1bb129617de6": "Поставщик №1(600021, обл.Владимирская,
+     *                          г.Муром, ул.Октябрьской Революции,д.2Б)"
      *                      }
      *              }
      *          )
      *     ),
-     *     @SWG\Response(
+     * @SWG\Response(
      *         response = 400,
      *         description = "BadRequestHttpException"
      *     ),
-     *     @SWG\Response(
+     * @SWG\Response(
      *         response = 401,
      *         description = "error"
      *     )
@@ -413,8 +420,10 @@ class DefaultController extends WebApiController
      *                     },
      *                     "sender": {
      *                         "result": {
-     *                             "a2667f4a-f91b-4752-b400-1bb129617de6": "Поставщик №1(600021, обл.Владимирская, г.Муром, ул.Октябрьской Революции,д.2Б)",
-     *                            "f8805c8f-1da4-4bda-aaca-a08b5d1cab1b": "Поставщик №2(600021, обл.Владимирская, г.Муром, ул.Октябрьской Революции,д.2Б)"
+     *                             "a2667f4a-f91b-4752-b400-1bb129617de6": "Поставщик №1(600021, обл.Владимирская,
+     *                             г.Муром, ул.Октябрьской Революции,д.2Б)",
+     *                            "f8805c8f-1da4-4bda-aaca-a08b5d1cab1b": "Поставщик №2(600021, обл.Владимирская,
+     *                            г.Муром, ул.Октябрьской Революции,д.2Б)"
      *                         }
      *                     },
      *                     "product": {
@@ -427,11 +436,11 @@ class DefaultController extends WebApiController
      *              }
      *          )
      *     ),
-     *     @SWG\Response(
+     * @SWG\Response(
      *         response = 400,
      *         description = "BadRequestHttpException"
      *     ),
-     *     @SWG\Response(
+     * @SWG\Response(
      *         response = 401,
      *         description = "error"
      *     )
@@ -470,7 +479,8 @@ class DefaultController extends WebApiController
      *                  "result": {
      *                        "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
      *                        "country_name": "Россия",
-     *                        "producer_name":"ООО Мираторг, 600021, Владимирская обл., г. Муром, ул. Октябрьской революции 16",
+     *                        "producer_name":"ООО Мираторг, 600021, Владимирская обл., г. Муром, ул. Октябрьской
+     *                        революции 16",
      *                        "referenced_document":"3345 231234",
      *                        "referenced_date":"23.04.1025",
      *                        "cargo_expertized":"Положительный результат.",
@@ -541,7 +551,8 @@ class DefaultController extends WebApiController
      *                      "expiry_date_of_production": "Смерти рыбы",
      *                      "perishable_products": "Да",
      *                      "producers": "",
-     *                      "expertiseInfo": "ЭмпаерЛАБ эксп №1224 от 2018-05-17 ( Наличие паразитов - Паразиты отстутствуют )",
+     *                      "expertiseInfo": "ЭмпаерЛАБ эксп №1224 от 2018-05-17 ( Наличие паразитов - Паразиты
+     *                      отстутствуют )",
      *                      "transport_type": "Автомобильный",
      *                      "transport_number": "54258",
      *                      "transport_storage_type": "Охлаждаемый",
@@ -551,11 +562,11 @@ class DefaultController extends WebApiController
      *              }
      *          )
      *     ),
-     *     @SWG\Response(
+     * @SWG\Response(
      *         response = 400,
      *         description = "BadRequestHttpException"
      *     ),
-     *     @SWG\Response(
+     * @SWG\Response(
      *         response = 401,
      *         description = "error"
      *     )
@@ -583,7 +594,11 @@ class DefaultController extends WebApiController
      *                  default={
      *                      "uuid": "93cdc45a-edc3-472f-bd70-99ffca18edc9",
      *                      "reason":"Nulla in gravida ex. In hac habitasse platea dictumst.",
-     *                      "description":"long string description"
+     *                      "description":"long string description",
+     *                      "conditions": {
+     *                          "ed9839ef-5563-41a8-8f0a-c062ce0bca60",
+     *                          "ed9839ef-5577-41a8-8f0a-c062ce0bca69"
+     *                      }
      *                  }
      *              )
      *         )
@@ -633,7 +648,11 @@ class DefaultController extends WebApiController
      *                      "uuid": "93cdc45a-edc3-472f-bd70-99ffca18edc9",
      *                      "reason":"Nulla in gravida ex. In hac habitasse platea dictumst.",
      *                      "amount":"40",
-     *                      "description":"long string description"
+     *                      "description":"long string description",
+     *                      "conditions": {
+     *                          "ed9839ef-5563-41a8-8f0a-c062ce0bca60",
+     *                          "ed9839ef-5577-41a8-8f0a-c062ce0bca69"
+     *                      }
      *                  }
      *              )
      *         )
@@ -787,7 +806,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "org_id": ["1", "2", "3"]
+     *                      "org_id": {"1", "2", "3"}
      *                  }
      *              )
      *         )
@@ -885,5 +904,71 @@ class DefaultController extends WebApiController
             header("Content-type:application/pdf");
             exit($result);
         }
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/regionalization-get",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение информации по болезням",
+     *     description="Получение информации по болезням",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "ede52e76-6091-46bb-9349-87324ee1ae41",
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                      "relocation": false,
+     *                      "reason_for_prohibition": null,
+     *                      "conditions": {
+     *                      {
+     *                      "name": "Сибирская язва",
+     *                      "groups": {
+     *                      {
+     *                      {
+     *                      "guid": "ed9839ef-5563-41a8-8f0a-c062ce0bca60",
+     *                      "title": "Продукты убоя были получены от животных, которые были подвергнуты предубойному
+     *                      осмотру и по его результатам не имели признаков сибирской язвы, продукты убоя были
+     *                      подвернуты ветеринарно-санитарной экспертизе, по результатам которой не было выявлено
+     *                      изменений, характерных для сибирской язвы",
+     *                      "checked": false
+     *                      }
+     *                      }
+     *                      }
+     *                      }
+     *                      }
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionRegionalizationGet()
+    {
+        $this->response = (new VetisWaybill())->getRegionalizationInfo($this->request);
     }
 }

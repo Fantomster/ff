@@ -1102,7 +1102,7 @@ $js = <<< JS
                                         $('#bukv-tovar4').html('<i><span style="color:orange">Поиск осуществляется по '+data+' выбранным позициям.</span></i>');
                                     }
                                 }
-                            )
+                            );
                             $.post('auto-complete-new', {stroka: a}).done(
                                 function(data){
                                     if (data.length>0) {
@@ -1116,7 +1116,7 @@ $js = <<< JS
                                             sel = sel+'<select id="selpos" name="list_tovar" class="swal2-input">';
                                             var index;
                                             for (index = 0; index < data.length; ++index) {
-                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['text']+'</option>';
+                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['txt']+'</option>';
                                             }
                                             sel = sel+'</select></div>';
                                     } else {
@@ -1141,7 +1141,7 @@ $js = <<< JS
                                             sel = sel+'<select id="selpos" name="list_postav" class="swal2-input">';
                                             var index;
                                             for (index = 0; index < data.length; ++index) {
-                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['text']+'</option>';
+                                                sel = sel+'<option value="'+data[index]['id']+'">'+data[index]['txt']+'</option>';
                                             }
                                             sel = sel+'</select></div>';
                                         } else {
@@ -1154,10 +1154,10 @@ $js = <<< JS
                             })
                         });    
                      })
-                })    
+                });    
                 $('#denom_close').on('click', function() {
                    swal.close(); 
-                })
+                });
                 $('#denom_onlyone').on('click', function () {    
                    var selectvalue = $('#selpos').val();
                    var selected_name = $("#selpos option:selected").text();

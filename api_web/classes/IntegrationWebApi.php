@@ -15,6 +15,7 @@ use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\Order;
 use common\models\OrderContent;
+use common\models\Organization;
 use common\models\OuterAgent;
 use common\models\OuterProduct;
 use common\models\OuterStore;
@@ -76,10 +77,10 @@ class IntegrationWebApi extends WebApi
     {
         $result = array_values(AllService::getAllServiceAndLicense($this->user->organization_id, Registry::$integration_services));
         $user_service_id = $this->user->integration_service_id;
-        $result = array_map(function ($item) use ($user_service_id) {
+        foreach ($result as &$item) {
             $item['is_default'] = $user_service_id == $item['id'] ? true : false;
-            return $item;
-        }, $result);
+            $item['is_integration_service'] = in_array($item['id'], Registry::$waybill_services);
+        }
         return [
             'services' => $result
         ];
@@ -96,11 +97,8 @@ class IntegrationWebApi extends WebApi
     {
         $this->validateRequest($post, ['service_id']);
 
-        $organizationID = $this->user->organization_id;
-        $acquirerID = $organizationID;
-        $ediNumber = '';
-        $outerAgentId = '';
-        $outerStoreId = '';
+        $acquirerID = $organizationID = $this->user->organization_id;
+        $outerAgentId = $outerStoreId = $ediNumber = '';
 
         if (isset($post['order_id'])) {
             $order = Order::findOne(['id' => (int)$post['order_id'], 'client_id' => $this->user->organization_id]);
@@ -112,7 +110,8 @@ class IntegrationWebApi extends WebApi
             if ($outerAgent) {
                 $outerAgentId = $outerAgent->id;
             }
-            $outerStore = OuterStore::find()->where(['org_id' => $organizationID])->andWhere('`right` - `left` = 1')->orderBy('`left`')->one();
+            $outerStore = OuterStore::find()->where(['org_id' => $organizationID])->andWhere('outer_store.right - outer_store.left = 1')->orderBy('outer_store.left')->one();
+
             if ($outerStore) {
                 $outerStoreId = $outerStore->id;
             }
@@ -220,6 +219,7 @@ class IntegrationWebApi extends WebApi
     {
         $this->validateRequest($post, ['waybill_content_id']);
 
+        /**@var WaybillContent $waybillContent */
         $waybillContent = WaybillContent::find()
             ->joinWith('waybill')
             ->where([
@@ -245,14 +245,14 @@ class IntegrationWebApi extends WebApi
             'equality' => true
         ];
 
-        $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id]);
+        $outerProduct = OuterProduct::findOne(['id' => $waybillContent->outer_product_id, 'service_id' => $waybillContent->waybill->service_id]);
         if ($outerProduct) {
             $arr['outer_product']['id'] = $outerProduct->id;
             $arr['outer_product']['name'] = $outerProduct->name;
             $arr['outer_product']['equality'] = true;
         }
 
-        $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id]);
+        $outerStore = OuterStore::findOne(['id' => $waybillContent->waybill->outer_store_id, 'service_id' => $waybillContent->waybill->service_id]);
         if ($outerStore) {
             $arr['outer_store']['id'] = $outerStore->id;
             $arr['outer_store']['name'] = $outerStore->name;
@@ -280,11 +280,11 @@ class IntegrationWebApi extends WebApi
             if (!empty($outerProductMap)) {
                 $outerProductMap = (object)current($outerProductMap);
                 //Если отличаются продукты, надо подсвечивать на фронте
-                if ($outerProductMap->outer_product_id != $waybillContent->outer_product_id) {
+                if ($outerProductMap->outer_product_id != $waybillContent->outer_product_id && $outerProduct) {
                     $arr['outer_product']['equality'] = false;
                 }
                 //Если отличаются склады, надо подсвечивать на фронте
-                if ($outerProductMap->outer_store_id != $waybillContent->waybill->outer_store_id) {
+                if ($outerProductMap->outer_store_id != $waybillContent->waybill->outer_store_id && $outerStore) {
                     $arr['outer_store']['equality'] = false;
                 }
                 //Если ставка НДС отличается, то надо подсвечивать на фронте
@@ -518,9 +518,12 @@ class IntegrationWebApi extends WebApi
         $pagination->setPageSize($pageSize);
         $dataProvider->setPagination($pagination);
         $models = $dataProvider->getModels();
+        $arVendors = [];
 
-        if (IntegrationSettingValue::getSettingsByServiceId($post['service_id'], $client->id, ['main_org'])) {
+        if ($mainOrg = IntegrationSettingValue::getSettingsByServiceId($post['service_id'], $client->id, ['main_org'])) {
             $isChildOrganization = true;
+            $client = Organization::findOne($mainOrg);
+            $arVendors = $client->getSuppliers();
         } else {
             $isChildOrganization = false;
         }
@@ -528,7 +531,7 @@ class IntegrationWebApi extends WebApi
         if (!empty($models)) {
             $result = new \SplObjectStorage();
             foreach (WebApiHelper::generator($models) as $model) {
-                $result->attach((object)$this->prepareOutProductMap($model, $isChildOrganization));
+                $result->attach((object)$this->prepareOutProductMap($model, $isChildOrganization, $arVendors));
             }
         } else {
             $result = [];
@@ -551,7 +554,7 @@ class IntegrationWebApi extends WebApi
      * @return array
      * @throws BadRequestHttpException
      */
-    public function mapUpdate(array $post)
+    public function mapUpdate(array $post): array
     {
         $this->validateRequest($post, ['business_id', 'service_id', 'map']);
         $result = [];
@@ -594,8 +597,11 @@ class IntegrationWebApi extends WebApi
      * @param bool  $isChild
      * @return array
      */
-    private function prepareOutProductMap(array $model, $isChild = false)
+    private function prepareOutProductMap(array $model, $isChild = false, $arVendors = [])
     {
+        if (!empty($arVendors) && !in_array($model['vendor_id'], $arVendors)) {
+            $isChild = false;
+        }
         $result = [
             "id"                            => $model['id'],
             "service_id"                    => (int)$model['service_id'],

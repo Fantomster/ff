@@ -805,24 +805,24 @@ class Organization extends \yii\db\ActiveRecord
         $userId = Yii::$app->user->id;
 
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
-            $sql = 'SELECT `order_chat`.*, ord.`client_id` AS vid, ma.`manager_id` FROM `order_chat` INNER JOIN '
-                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
-                . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
-                . 'AND ((`order_chat`.`is_system`=0) '
-                . 'AND (`order_chat`.`viewed`=0)) '
-                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id` '
-                . 'LEFT JOIN `order` AS ord ON ord.`id` = `order_chat`.`order_id` '
-                . 'LEFT JOIN `manager_associate` AS ma ON ord.`client_id` = ma.`organization_id` '
-                . 'WHERE ma.`manager_id` = ' . $userId . ' '
-                . 'ORDER BY `order_chat`.`created_at` DESC';
+            $sql = 'SELECT order_chat.*, ord.client_id AS vid, ma.manager_id FROM order_chat INNER JOIN '
+                . '(SELECT MIN(order_chat.id) AS id, order_chat.order_id FROM order_chat '
+                . 'WHERE (order_chat.recipient_id = ' . $this->id . ') '
+                . 'AND ((order_chat.is_system=0) '
+                . 'AND (order_chat.viewed=0)) '
+                . 'GROUP BY order_chat.order_id ) AS oc2 ON order_chat.id = oc2.id '
+                . 'LEFT JOIN ' . Order::tableName() . ' AS ord ON ord.id = order_chat.order_id '
+                . 'LEFT JOIN manager_associate AS ma ON ord.client_id = ma.organization_id '
+                . 'WHERE ma.manager_id = ' . $userId . ' '
+                . 'ORDER BY order_chat.created_at DESC';
         } else {
-            $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
-                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
-                . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
-                . 'AND ((`order_chat`.`is_system`=0) '
-                . 'AND (`order_chat`.`viewed`=0)) '
-                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id`'
-                . 'ORDER BY `order_chat`.`created_at` DESC';
+            $sql = 'SELECT order_chat.* FROM order_chat INNER JOIN '
+                . '(SELECT MIN(order_chat.id) AS id, order_chat.order_id FROM order_chat '
+                . 'WHERE (order_chat.recipient_id = ' . $this->id . ') '
+                . 'AND ((order_chat.is_system=0) '
+                . 'AND (order_chat.viewed=0)) '
+                . 'GROUP BY order_chat.order_id ) AS oc2 ON order_chat.id = oc2.id '
+                . 'ORDER BY order_chat.created_at DESC';
         }
 
         return OrderChat::findBySql($sql)->all();
@@ -836,24 +836,24 @@ class Organization extends \yii\db\ActiveRecord
         $roleId = Yii::$app->getUser()->identity->role->id;
         $userId = Yii::$app->user->id;
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
-            $sql = 'SELECT `order_chat`.*, ord.`client_id` AS vid, ma.`manager_id` FROM `order_chat` INNER JOIN '
-                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
-                . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
-                . 'AND ((`order_chat`.`is_system`=1) '
-                . 'AND (`order_chat`.`viewed`=0)) '
-                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id` '
-                . 'LEFT JOIN `order` AS ord ON ord.`id` = `order_chat`.`order_id` '
-                . 'LEFT JOIN `manager_associate` AS ma ON ord.`client_id` = ma.`organization_id` '
-                . 'WHERE ma.`manager_id` = ' . $userId . ' '
-                . 'ORDER BY `order_chat`.`created_at` DESC';
+            $sql = 'SELECT order_chat.*, ord.client_id AS vid, ma.manager_id FROM order_chat INNER JOIN '
+                . '(SELECT MIN(order_chat.id) AS id, order_chat.order_id FROM order_chat '
+                . 'WHERE (order_chat.recipient_id = ' . $this->id . ') '
+                . 'AND ((order_chat.is_system=1) '
+                . 'AND (order_chat.viewed=0)) '
+                . 'GROUP BY order_chat.order_id ) AS oc2 ON order_chat.id = oc2.id '
+                . 'LEFT JOIN ' . Order::tableName() . ' AS ord ON ord.id = order_chat.order_id '
+                . 'LEFT JOIN manager_associate AS ma ON ord.client_id = ma.organization_id '
+                . 'WHERE ma.manager_id = ' . $userId . ' '
+                . 'ORDER BY order_chat.created_at DESC';
         } else {
-            $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
-                . '(SELECT MIN(`order_chat`.`id`) AS id, `order_chat`.`order_id` FROM `order_chat` '
-                . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
-                . 'AND ((`order_chat`.`is_system`=1) '
-                . 'AND (`order_chat`.`viewed`=0)) '
-                . 'GROUP BY `order_chat`.`order_id` ) AS oc2 ON `order_chat`.`id` = oc2.`id`'
-                . 'ORDER BY `order_chat`.`created_at` DESC';
+            $sql = 'SELECT order_chat.* FROM order_chat INNER JOIN '
+                . '(SELECT MIN(order_chat.id) AS id, order_chat.order_id FROM order_chat '
+                . 'WHERE (order_chat.recipient_id = ' . $this->id . ') '
+                . 'AND ((order_chat.is_system=1) '
+                . 'AND (order_chat.viewed=0)) '
+                . 'GROUP BY order_chat.order_id ) AS oc2 ON order_chat.id = oc2.id '
+                . 'ORDER BY order_chat.created_at DESC';
         }
         return OrderChat::findBySql($sql)->all();
     }
@@ -981,10 +981,10 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getFranchiseeManagerInfo()
     {
-        $sql = 'SELECT `franchisee`.* FROM `organization` 
-        JOIN `franchisee_associate` ON `organization`.id = `franchisee_associate`.`organization_id`
-        JOIN `franchisee` ON `franchisee_associate`.`franchisee_id` = `franchisee`.`id` 
-        WHERE `organization`.`id` = ' . $this->id;
+        $sql = 'SELECT franchisee.* FROM organization 
+        JOIN franchisee_associate ON organization.id = franchisee_associate.organization_id
+        JOIN franchisee ON franchisee_associate.franchisee_id = franchisee.id 
+        WHERE organization.id = ' . $this->id;
         return Franchisee::findBySql($sql)->one();
     }
 
@@ -1290,13 +1290,13 @@ class Organization extends \yii\db\ActiveRecord
         return "SELECT self_registered, org.id as id, org.name as name,
                 org.created_at as created_at, org.contact_name as contact_name, org.phone as phone, (select count(id) from relation_supp_rest where " . $type . "_org_id=org.id) as clientCount, 
                 (select count(id) from relation_supp_rest where " . $type . "_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
-                (select count(id) from `order` where " . $name . "_id=org.id and status in (1,2,3,4)) as orderCount,
-                (select count(id) from `order` where " . $name . "_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
-                (select sum(total_price) from `order` where " . $name . "_id=org.id and currency_id=$currency_id and status in (1,2,3,4)) as orderSum,
-                (select sum(total_price) from `order` where " . $name . "_id=org.id and currency_id=$currency_id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30
-                FROM `relation_supp_rest` AS rel
-                LEFT JOIN  `organization` AS org ON org.id = rel." . $type . "_org_id
-                LEFT JOIN  `franchisee_associate` AS fa ON rel." . $type . "_org_id = fa.organization_id
+                (select count(id) from " . Order::tableName() . " where " . $name . "_id=org.id and status in (1,2,3,4)) as orderCount,
+                (select count(id) from " . Order::tableName() . " where " . $name . "_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
+                (select sum(total_price) from " . Order::tableName() . " where " . $name . "_id=org.id and currency_id=$currency_id and status in (1,2,3,4)) as orderSum,
+                (select sum(total_price) from " . Order::tableName() . " where " . $name . "_id=org.id and currency_id=$currency_id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30
+                FROM relation_supp_rest AS rel
+                LEFT JOIN  organization AS org ON org.id = rel." . $type . "_org_id
+                LEFT JOIN  franchisee_associate AS fa ON rel." . $type . "_org_id = fa.organization_id
                 WHERE rel." . $prefix . "_org_id = " . $organization_id . " and org.type_id=" . $type_id;
     }
 

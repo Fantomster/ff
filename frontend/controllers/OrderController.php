@@ -3,9 +3,13 @@
 namespace frontend\controllers;
 
 use api_web\components\Notice;
+use Faker\ORM\Spot\EntityPopulator;
+use PHPExcel_Style_Fill;
 use Yii;
 use Exception;
 use kartik\mpdf\Pdf;
+use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\Url;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -157,7 +161,6 @@ class OrderController extends DefaultController
                     [
                         'actions' => [
                             'edit',
-                            'complete-obsolete',
                             'ajax-cancel-order',
                             'guides',
                             'create',
@@ -238,8 +241,8 @@ class OrderController extends DefaultController
                     cbg.product as product, 
                     sum(quantity) as total_quantity,
                     cbg.ed
-                from `order_content` oc 
-                left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
+                from order_content oc 
+                left join catalog_base_goods cbg on oc.product_id = cbg.id
                 where oc.order_id in ($selected)
                 group by cbg.id")->queryAll();
 
@@ -2536,39 +2539,65 @@ class OrderController extends DefaultController
     public function actionGridReport()
     {
         $this->actionSaveSelectedOrders();
-        $selected = Yii::$app->session->get('selected', []);
+        $selected = $arOrderIds = Yii::$app->session->get('selected', []);
         if (empty($selected)) {
             exit();
         }
 
-        $selected = implode(',', $selected);
+        $countQuery = (new Query())->distinct()->from(Order::tableName())
+            ->where(['id' => $arOrderIds])->groupBy('client_id')->count();
+        $subQuery = (new Query())->select([
+            'id'               => 'org.id',
+            'parent_id'        => 'org.parent_id',
+            'client_name'      => "concat_ws(', ',org.name, org.city, org.address)",
+            'product'          => 'cbg.product',
+            'quantity'         => 'oc.quantity',
+            'order_id'         => 'o.id',
+            'SUM(oc.quantity) OVER(PARTITION BY product, org.id) AS sum_quantity',
+            'SUM(oc.quantity) OVER(PARTITION BY product) AS total_sum_quantity',
+            'order_content_id' => 'oc.id',
+            'product_id'       => 'cbg.id',
+            'unit'             => 'cbg.ed',
+            'count_org'        => new Expression($countQuery),
 
-        $sql = "SELECT org.id as id, org.parent_id as parent_id, concat_ws(', ',org.name, org.city, org.address) as client_name 
-                    FROM `order` 
-                    left join organization as org on org.id = `order`.client_id
-                    where `order`.id in ($selected) group by `order`.client_id order by org.parent_id";
+        ])->from(Order::tableName() . ' o')
+            ->leftJoin(Organization::tableName() . ' org', 'org.id=o.client_id')
+            ->leftJoin(OrderContent::tableName() . " oc", "oc.order_id = o.id")
+            ->leftJoin(CatalogBaseGoods::tableName() . " cbg", "cbg.id = oc.product_id")
+            ->where([
+                'o.id' => $arOrderIds,
+            ])->andWhere([
+                'not', ['cbg.product' => null]
+            ])
+            ->orderBy('org.parent_id');
+        $dbResult = (new Query())->select('*')->from(['sq' => $subQuery])->groupBy('product,id')
+            ->orderBy('client_name')
+            ->all();
+        $arExcel = [];
+        $arExcelHeader = [
+            \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']),
+            \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед изм']),
+        ];
+        $report = [];
 
-        $orgs = \Yii::$app->db->createCommand($sql)->queryAll();
-        $sql = "SELECT cbg.product as '" . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . "', cbg.ed as '" . Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) . "', ";
-        $sql_ext = "SELECT `" . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . "`, `" . Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед.изм']) . "`, ";
-        foreach ($orgs as $org) {
-            $sql .= "IF(SUM(IF (`order`.client_id = " . $org['id'] . ", oc.quantity, 0)) = 0, '', CAST(SUM(IF (`order`.client_id = " . $org['id'] . ", oc.quantity, 0))as CHAR(10))) as '" . $org['client_name'] . "',";
-            $sql_ext .= "SUM(`" . $org['client_name'] . "`) as '" . $org['client_name'] . "',";
+        foreach ($dbResult as $item) {
+            $arExcelHeader[$item['id']] = $item['client_name'];
+            if (!isset($report[$item['product_id']])) {
+                $report[$item['product_id']] =
+                    [
+                        'product' => $item['product'],
+                        'unit'    => $item['unit'],
+                    ];
+                if (count($arExcelHeader) >= 3) {
+                    $report[$item['product_id']] = array_merge($report[$item['product_id']], array_fill(count($arExcelHeader), $item['count_org'], '0'));
+                }
+                $report[$item['product_id']][count($arExcelHeader) - 3] = $item['sum_quantity'];
+            } else {
+                $index = count($arExcelHeader) - 3;
+                $report[$item['product_id']][$index] = $item['sum_quantity'];
+            }
+
         }
-
-        $sql = substr($sql, 0, -1);
-        $sql_ext = substr($sql_ext, 0, -1);
-
-        $sql .= " from `order`
-                    left join order_content as oc on oc.order_id = `order`.id
-                    left join catalog_base_goods as cbg on cbg.id = oc.product_id
-                    left join organization as org on org.id = `order`.client_id
-                    where `order`.id in ($selected) and cbg.product is not null group by client_id, product_id  order by org.parent_id";
-
-        $sql_ext .= " from ( " . $sql . " ) ww group by `" . Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']) . "`";
-
-        $report = \Yii::$app->db->createCommand($sql_ext)->queryAll();
-
         $objPHPExcel = new \PHPExcel();
         $sheet = 0;
         $objPHPExcel->setActiveSheetIndex($sheet);
@@ -2584,7 +2613,7 @@ class OrderController extends DefaultController
         $last_col = 'C';
         $start_grid_col = 'C';
         $grid = 1;
-        foreach ($orgs as $org) {
+        foreach ($dbResult as $org) {
 
             if ($org['parent_id'] != 0) {
                 $start_grid_col = $col;
@@ -2615,12 +2644,10 @@ class OrderController extends DefaultController
         $row_data = 2;
         $last_col = 'A';
 
-        foreach ($report[0] as $key => $data) {
+        foreach ($arExcelHeader as $key) {
             $last_col = $col;
             $objPHPExcel->getActiveSheet()->setCellValue($col . '1', $key);
             $col++;
-            if ($data == null)
-                ;
             $row_data = 3;
         }
 

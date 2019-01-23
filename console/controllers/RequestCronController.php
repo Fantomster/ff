@@ -25,17 +25,17 @@ class RequestCronController extends Controller {
           //собираем массив менеджеров организаций подходящих под категории заявок
           $sql = "SELECT distinct(u.id) as user_id,u.email as email,
 p.full_name as full_name from (
-select supp_org_id,mpc.`parent` as category_id
+select supp_org_id,mpc.parent as category_id
 from catalog_base_goods cbg 
-join `mp_category` mpc on cbg.`category_id` = mpc.id
-where deleted = 0 group by supp_org_id, mpc.`parent`)tb 
-right join (SELECT category FROM `request` 
-WHERE (`created_at` BETWEEN '{$start_date}' AND '{$end_date}') AND 
-(`active_status`=1) AND 
-(`responsible_supp_org_id` is null and `created_at`<=end))tt
-on tb.`category_id` = tt.category
-join `user` u on `supp_org_id` = u.organization_id
-join `profile` p on u.id = p.`user_id`
+join mp_category mpc on cbg.category_id = mpc.id
+where deleted = 0 group by supp_org_id, mpc.parent)tb 
+right join (SELECT category FROM request 
+WHERE (created_at BETWEEN '{$start_date}' AND '{$end_date}') AND 
+(active_status=1) AND 
+(responsible_supp_org_id is null and created_at<=end))tt
+on tb.category_id = tt.category
+join user u on supp_org_id = u.organization_id
+join profile p on u.id = p.user_id
 order by u.organization_id LIMIT 4";//LIMIT на боевом убрать
         $vendors = \Yii::$app->db->createCommand($sql)->queryAll();
         //выход, если ничего нет

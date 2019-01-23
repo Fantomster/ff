@@ -9,6 +9,7 @@ use api\common\models\one_s\OneSPconst;
 use api\common\models\one_s\OneSStore;
 use api\common\models\OneSWaybillDataSearch;
 use api\common\models\VatData;
+use common\models\Order;
 use common\models\Organization;
 use common\models\search\OrderSearch;
 use Yii;
@@ -503,10 +504,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                  $data = $command->queryAll();
                  $out['results'] = array_values($data);
             */
-            $sql = "( select id, CONCAT(`name`, ' (' ,measure, ')') as `text` from one_s_good where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name = '" . $term . "' )" .
-                " union ( select id, CONCAT(`name`, ' (' ,measure, ')') as `text` from one_s_good  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '" . $term . "%' limit 15 )" .
-                "union ( select id, CONCAT(`name`, ' (' ,measure, ')') as `text` from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
-                "order by case when length(trim(`text`)) = length('" . $term . "') then 1 else 2 end, `text`; ";
+            $sql = "( select id, CONCAT(name, ' (' ,measure, ')') as txt from one_s_good where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name = '" . $term . "' )" .
+                " union ( select id, CONCAT(name, ' (' ,measure, ')') as txt from one_s_good  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '" . $term . "%' limit 15 )" .
+                "union ( select id, CONCAT(name, ' (' ,measure, ')') as txt from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
+                "order by case when length(trim(txt)) = length('" . $term . "') then 1 else 2 end, txt; ";
 
             $db = Yii::$app->db_api;
             $data = $db->createCommand($sql)->queryAll();
@@ -529,10 +530,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
         $out = [];
         if (!is_null($term)) {
-            $sql = "( select `id`, CONCAT(`name`, ' (' ,measure, ')') as `text` from `one_s_good` where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and `name` = '" . $term . "' )" .
-                " union ( select `id`, CONCAT(`name`, ' (' ,measure, ')') as `text` from `one_s_good`  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and `name` like '" . $term . "%' limit 15 )" .
-                "union ( select id, CONCAT(`name`, ' (' ,measure, ')') as `text` from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
-                "order by case when length(trim(`name`)) = length('" . $term . "') then 1 else 2 end, `name`; ";
+            $sql = "( select id, CONCAT(name, ' (' ,measure, ')') as txt from one_s_good where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name = '" . $term . "' )" .
+                " union ( select id, CONCAT(name, ' (' ,measure, ')') as txt from one_s_good  where org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '" . $term . "%' limit 15 )" .
+                "union ( select id, CONCAT(name, ' (' ,measure, ')') as txt from one_s_good where  org_id = " . User::findOne(Yii::$app->user->id)->organization_id . " and name like '%" . $term . "%' limit 10 )" .
+                "order by case when length(trim(name)) = length('" . $term . "') then 1 else 2 end, name; ";
 
             $db = Yii::$app->db_api;
             $data = $db->createCommand($sql)->queryAll();
@@ -542,7 +543,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             //$constId = OneSDicconst::findOne(['denom' => 'main_org']);
             //$parentId = OneSPconst::findOne(['const_id' => $constId->id, 'org' => $orgId]);
             //$organizationID = !is_null($parentId) ? $parentId->value : $orgId;
-            $sql = "SELECT id, CONCAT(`name`, ' (' ,measure, ')') as `text` FROM one_s_good WHERE org_id = " . $orgId . ' ORDER BY name LIMIT 100';
+            $sql = "SELECT id, CONCAT(name, ' (' ,measure, ')') as txt FROM one_s_good WHERE org_id = " . $orgId . ' ORDER BY name LIMIT 100';
 
             /**
              * @var $db Connection
@@ -581,9 +582,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     /**
      * @param $id
+     * @param $page
      * @return string|\yii\web\Response
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $page)
     {
         $model = $this->findModel($id);
         $lic = OneSService::getLicense();
@@ -617,7 +619,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 }
             }
             $model->save();
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            return $this->redirect(['/clientintegr/odinsobsh/waybill/index', 'page' => $page, 'way' => $model->order_id]);
         } else {
             return $this->render($vi, [
                 'model' => $model,
@@ -627,9 +629,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     /**
      * @param $order_id
+     * @param $page
      * @return string|\yii\web\Response
      */
-    public function actionCreate($order_id)
+    public function actionCreate($order_id, $page)
     {
         $user = $this->currentUser;
         $ord = \common\models\Order::findOne(['id' => $order_id]);
@@ -653,7 +656,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 var_dump($model->getErrors());
                 exit;
             }*/
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            return $this->redirect(['/clientintegr/odinsobsh/waybill/index', 'page' => $page, 'way' => $model->order_id]);
         } else {
             $model->num_code = $order_id;
             return $this->render('create', [
@@ -996,8 +999,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_koef' => $koef_all_map, ':w_id' => $id_all_map])->execute();
         }
         $dbName = DBNameHelper::getMainName();
-        $sql = "SELECT wd.id FROM `one_s_waybill_data` `wd` LEFT JOIN `one_s_waybill` `w` ON wd.waybill_id = w.id 
-                LEFT JOIN " . $dbName . ".`order` `o` ON w.order_id = o.id  
+        $sql = "SELECT wd.id FROM one_s_waybill_data wd LEFT JOIN one_s_waybill w ON wd.waybill_id = w.id 
+                LEFT JOIN " . $dbName . "." . Order::tableName() . " o ON w.order_id = o.id  
                 WHERE w.status_id = 1 AND o.vendor_id = :w_supp AND o.client_id = :w_org AND wd.product_id = :w_pid AND wd.product_rid IS NULL";
         $massivs = Yii::$app->db_api->createCommand($sql, [':w_pid' => $number, ':w_supp' => $supp_id, ':w_org' => $org_id])->queryAll();
         $ids = '';
@@ -1006,10 +1009,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
         $ids = rtrim($ids, ',');
         if ($ids) {
-            $sql = "UPDATE `one_s_waybill_data` SET `product_rid` = :w_spid, `munit` = :w_munit, updated_at = NOW() WHERE id in (" . $ids . ")";
+            $sql = "UPDATE one_s_waybill_data SET product_rid = :w_spid, munit = :w_munit, updated_at = NOW() WHERE id in (" . $ids . ")";
             $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_munit' => $munit])->execute();
         }
-
 
         return $munit;
     }

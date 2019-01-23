@@ -7,6 +7,7 @@ use api\common\models\iiko\iikoDicconst;
 use api\common\models\iiko\iikoPconst;
 use api\common\models\VatData;
 use api\common\models\iiko\iikoStore;
+use common\models\Order;
 use common\models\Organization;
 use frontend\modules\clientintegr\modules\tillypad\helpers\TillypadApi;
 use Yii;
@@ -555,9 +556,10 @@ return $out;
 
     /**
      * @param $id
+     * @param $page
      * @return string|\yii\web\Response
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id, $page)
     {
         $model = $this->findModel($id);
         $lic = TillypadService::getLicense();
@@ -586,10 +588,10 @@ return $out;
                     $model->readytoexport = 0;
                 }
             }
-            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');
-            $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+            $model->doc_date = Yii::$app->formatter->asDate(Yii::$app->formatter->asDate($model->doc_date, 'php:Y-m-d') . ' 16:00:00', 'php:Y-m-d H:i:s');
+            $model->payment_delay_date = Yii::$app->formatter->asDate(Yii::$app->formatter->asDate($model->payment_delay_date, 'php:Y-m-d') . ' 16:00:00', 'php:Y-m-d H:i:s');
             $model->save();
-            return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+            return $this->redirect(['/clientintegr/tillypad/waybill/index', 'page' => $page, 'way' => $model->order_id]);
         } else {
             return $this->render($vi, [
                 'model' => $model,
@@ -599,9 +601,10 @@ return $out;
 
     /**
      * @param $order_id
+     * @param $page
      * @return string|\yii\web\Response
      */
-    public function actionCreate($order_id)
+    public function actionCreate($order_id, $page)
     {
         $ord = \common\models\Order::findOne(['id' => $order_id]);
 
@@ -614,7 +617,7 @@ return $out;
 
         if ($waybillModeIiko !== '0') {
             iikoWaybill::createWaybill($order_id, Registry::TILLYPAD_SERVICE_ID);
-            return $this->redirect([$this->getLastUrl() . 'way=' . $order_id]);
+            return $this->redirect(['/clientintegr/tillypad/waybill/index', 'page' => $page, 'way' => $order_id]);
         } else {
             $model = new iikoWaybill();
             $model->setScenario('handMade');
@@ -628,7 +631,7 @@ return $out;
                 //$model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
                 $model->payment_delay_date = $model->doc_date;
                 $model->save();
-                return $this->redirect([$this->getLastUrl() . 'way=' . $model->order_id]);
+                return $this->redirect(['/clientintegr/tillypad/waybill/index', 'page' => $page, 'way' => $model->order_id]);
             } else {
                 return $this->render('create', [
                     'model' => $model,
@@ -756,7 +759,7 @@ return $out;
             }
 
             if ($model->readytoexport == 0) {
-                throw new \Exception('Не все товары сопоставлены!');
+                throw new \Exception('Накладная к выгрузке не готова! ');
             }
 
             if ($api->auth()) {
@@ -1081,8 +1084,8 @@ return $out;
         }
 
         $dbName = DBNameHelper::getMainName();
-        $sql = "SELECT wd.id FROM `iiko_waybill_data` `wd` LEFT JOIN `iiko_waybill` `w` ON wd.waybill_id = w.id 
-                LEFT JOIN " . $dbName . ".`order` `o` ON w.order_id = o.id 
+        $sql = "SELECT wd.id FROM iiko_waybill_data wd LEFT JOIN iiko_waybill w ON wd.waybill_id = w.id 
+                LEFT JOIN " . $dbName . "." . Order::tableName() . " o ON w.order_id = o.id 
                 WHERE w.status_id = 1 AND o.vendor_id = :w_supp AND o.client_id = :w_org AND wd.product_id = :w_pid AND wd.product_rid IS NULL";
         $massivs = Yii::$app->db_api->createCommand($sql, [':w_pid' => $number, ':w_supp' => $supp_id, ':w_org' => $org_id])->queryAll();
         $ids = '';
@@ -1091,7 +1094,7 @@ return $out;
         }
         $ids = rtrim($ids, ',');
         if ($ids) {
-            $sql = "UPDATE `iiko_waybill_data` SET `product_rid` = :w_spid, `munit` = :w_munit, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
+            $sql = "UPDATE iiko_waybill_data SET product_rid = :w_spid, munit = :w_munit, linked_at = NOW(), updated_at = NOW() WHERE id in (" . $ids . ")";
             $result = Yii::$app->db_api->createCommand($sql, [':w_spid' => $product_rid, ':w_munit' => $munit])->execute();
         }
         return $munit;
@@ -1126,7 +1129,7 @@ return $out;
             //}
 
             $sql = <<<SQL
-            SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as `text` FROM (
+            SELECT id, CONCAT(denom, ' (' ,unit, ')') as txt FROM (
                   (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom = :term)
                     UNION
                   (SELECT id, denom, unit FROM iiko_product WHERE is_active = 1 AND org_id = :org_id AND denom LIKE :term_ LIMIT 15)
@@ -1164,7 +1167,7 @@ SQL;
             //    $andWhere = ' AND id in (' . implode(',', $arr) . ')';
             //}
 
-            $sql = "SELECT id, CONCAT(`denom`, ' (' ,unit, ')') as `text` FROM iiko_product WHERE is_active = 1 AND org_id = " . $orgId . ' ORDER BY denom LIMIT 100';
+            $sql = "SELECT id, CONCAT(denom, ' (' ,unit, ')') as txt FROM iiko_product WHERE is_active = 1 AND org_id = " . $orgId . ' ORDER BY denom LIMIT 100';
 
             /**
              * @var $db Connection

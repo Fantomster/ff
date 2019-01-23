@@ -54,8 +54,8 @@ class OrganizationSearch extends Organization
     {
         $this->load($params);
         if ($isForLicenses) {
-            $this->dbApiName = $this->getDbName('db_api');
-            $this->dbName = $this->getDbName('db');
+            $this->dbApiName = \common\helpers\DBNameHelper::getApiName();
+            $this->dbName = \common\helpers\DBNameHelper::getMainName();
             $this->tenDaysAfter = new Expression('NOW() + INTERVAL 10 DAY');
             $this->tenDaysAgo = new Expression('NOW() - INTERVAL 1 DAY');
 
@@ -141,8 +141,8 @@ class OrganizationSearch extends Organization
     {
         $db = Yii::$app->get($db);
         $dbNameArr = explode(';dbname=', $db->dsn);
-        $dbName = $dbNameArr[1];
-        return "`" . $dbName . "`";
+
+        return $dbNameArr[1];
     }
 
     private function getSQLQuery($queue)

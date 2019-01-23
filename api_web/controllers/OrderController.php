@@ -1813,4 +1813,86 @@ class OrderController extends WebApiController
         header('Content-Transfer-Encoding: binary');
         exit ($result);
     }
+
+    /**
+     * @SWG\Post(path="/order/save-to-excel-by-unconfirmed-vendor",
+     *     tags={"Order/UnconfirmedVendorActions"},
+     *     summary="Сохранить заказ в Excel",
+     *     description="Сохранить заказ в Excel",
+     *     produces={"application/json", "application/vnd.ms-excel"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"order_id":1, "base64_encode":1}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description="Если все прошло хорошо вернет файл закодированый в base64",
+     *         @SWG\Schema(
+     *              default="JVBERi0xLjQKJeLjz9MKMyAwIG9iago8PC9UeXBlIC9QYWdlCi9QYXJlbnQgMSAwIFIKL01lZGlhQm94IFswIDAgNTk1LjI4MCA4NDEuOD"
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionSaveToExcelByUnconfirmedVendor()
+    {
+        $this->actionSaveToExcel();
+    }
+
+    /**
+     * @SWG\Post(path="/order/save-to-pdf-by-unconfirmed-vendor",
+     *     tags={"Order/UnconfirmedVendorActions"},
+     *     summary="Сохранить заказ в PDF",
+     *     description="Сохранить заказ в PDF",
+     *     produces={"application/json", "application/pdf"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"order_id":1, "base64_encode":1}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description="Если все прошло хорошо вернет файл закодированый в base64",
+     *         @SWG\Schema(
+     *              default="JVBERi0xLjQKJeLjz9MKMyAwIG9iago8PC9UeXBlIC9QYWdlCi9QYXJlbnQgMSAwIFIKL01lZGlhQm94IFswIDAgNTk1LjI4MCA4NDEuOD"
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionSaveToPdfByUnconfirmedVendor()
+    {
+        $this->actionSaveToPdf();
+    }
 }

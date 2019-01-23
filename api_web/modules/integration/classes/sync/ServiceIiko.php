@@ -21,11 +21,6 @@ use yii\web\ServerErrorHttpException;
 class ServiceIiko extends AbstractSyncFactory
 {
     /**
-     * @var null
-     */
-    public $queueName = null;
-
-    /**
      * @var array
      */
     public $dictionaryAvailable = [
@@ -35,15 +30,10 @@ class ServiceIiko extends AbstractSyncFactory
     ];
 
     /**
-     * @var int
-     */
-    private $countWaybillSend = 0;
-
-    /**
      * @var string
      */
     protected $logCategory = "iiko_log";
-    
+
     /**
      * @param array $params
      * @return array
@@ -197,39 +187,6 @@ class ServiceIiko extends AbstractSyncFactory
         }
 
         return ['result' => false];
-    }
-
-    /**
-     * @param      $res
-     * @param      $model
-     * @param      $message
-     * @param bool $success
-     * @return array
-     * @throws BadRequestHttpException
-     */
-    private function response(&$res, $model, $message, $success = true)
-    {
-        if ($this->countWaybillSend == 1 and $success === false) {
-            throw new BadRequestHttpException($message);
-        } else {
-            $res[] = $model->prepare();
-        }
-        return $res;
-    }
-
-    /**
-     * Получить модель справочника организыйии
-     *
-     * @return OrganizationDictionary
-     */
-    private function getModel()
-    {
-        $dictionary = OuterDictionary::findOne(['service_id' => $this->serviceId, 'name' => $this->index]);
-        $model = OrganizationDictionary::findOne([
-            'org_id'       => $this->user->organization_id,
-            'outer_dic_id' => $dictionary->id
-        ]);
-        return $model;
     }
 
     /**

@@ -163,6 +163,7 @@ class EDIClass extends Component
                 $oldQuantity = (float)$orderContent->quantity;
                 $newQuantity = (float)$arr[$index]['ACCEPTEDQUANTITY'];
 
+                $orderContent->setOldAttributes($orderContent->attributes);
                 if ($oldQuantity != $newQuantity) {
                     if (!$newQuantity || $newQuantity == 0.000) {
                         $deleted[] = $orderContent;
@@ -194,10 +195,11 @@ class EDIClass extends Component
                 if ($documentType == 3) {
                     $orderContent->edi_alcdes = $this->fileName;
                 }
+                $clone = clone $orderContent;
+                $changed[] = $clone;
                 if (!$orderContent->save()) {
                     throw new Exception('Error saving order content');
                 }
-                $changed[] = $orderContent;
             }
             foreach ($positions as $position) {
                 $quantity = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
@@ -229,11 +231,11 @@ class EDIClass extends Component
                     $newOrderContent->plan_price = $price;
                     $newOrderContent->units = $good->units;
                     $newOrderContent->vat_product = $position->VAT ?? 0.00;
+                    $changed[] = $newOrderContent;
                     if (!$newOrderContent->save()) {
                         throw new Exception('Error saving order content');
                     }
                     $isPositionChanged = true;
-                    $changed[] = $newOrderContent;
                     $total = $quan * $price;
                     $summ += $total;
                 }
@@ -383,7 +385,7 @@ class EDIClass extends Component
                 'ed'                   => $ed,
                 'name'                 => (String)$good->PRODUCTNAME ?? '',
                 'price'                => (float)$good->UNITPRICE ?? 0.0,
-                'article'              => (isset($good->IDBUYER) && $good->IDBUYER != '') ? (String)$good->IDBUYER : $barcode,
+                'article'              => $barcode,
                 'units'                => (float)$good->MINORDERQUANTITY ?? (float)$good->QUANTITYOFCUINTU ?? (float)$good->PACKINGMULTIPLENESS,
                 'edi_supplier_article' => (isset($good->IDSUPPLIER) && $good->IDSUPPLIER != '') ? (String)$good->IDSUPPLIER : $barcode,
                 'vat'                  => (int)$good->TAXRATE ?? null,
@@ -394,7 +396,7 @@ class EDIClass extends Component
             ->select(['id', 'barcode'])
             ->from(CatalogBaseGoods::tableName())
             ->where(['cat_id' => $baseCatalog->id])
-            ->andWhere('`barcode` IS NOT NULL')
+            ->andWhere('barcode IS NOT NULL')
             ->all();
         foreach ($catalog_base_goods as $base_good) {
             if (!in_array($base_good['barcode'], $barcodeArray) && !$isFollowActionRule) {
@@ -483,18 +485,6 @@ class EDIClass extends Component
         $catalog->save();
         $catalogID = $catalog->id;
         return $catalogID;
-    }
-
-    /**
-     * @return array
-     */
-    public function getFileList(): array
-    {
-        return (new \yii\db\Query())
-            ->select(['id', 'name'])
-            ->from(EdiFilesQueue::tableName())
-            ->where(['status' => [AbstractRealization::STATUS_NEW, AbstractRealization::STATUS_ERROR]])
-            ->all();
     }
 
     public function getSendingOrderContent($order, $done, $dateArray, $orderContent)

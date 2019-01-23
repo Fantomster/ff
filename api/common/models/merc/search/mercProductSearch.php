@@ -74,7 +74,7 @@ class mercProductSearch extends VetisProductItem
         if ( !empty($this->from_create_date) && !empty($this->to_create_date)) {
         $start_date = date('Y-m-d 00:00:00',strtotime($this->from_create_date));
         $end_date = date('Y-m-d 23:59:59',strtotime($this->to_create_date));
-        $query->andFilterWhere(['between', "STR_TO_DATE( $productTable.`createDate`, '%Y-%c-%e %H:%i:%s')", $start_date, $end_date]);
+            $query->andFilterWhere(['between', "STR_TO_DATE( $productTable.createDate, '%Y-%c-%e %H:%i:%s')", $start_date, $end_date]);
         }
 
         $query->andFilterWhere(['like', $productTable.'.name', $this->name]);

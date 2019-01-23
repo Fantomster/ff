@@ -55,13 +55,13 @@ class FavoriteSearch extends \yii\base\Model
             'count(oc.id) as count'
         ]);
         //Толео заказа
-        $query->from('`order_content` AS oc');
+        $query->from('order_content AS oc');
         //Заказ
-        $query->innerJoin('`order` as ord', 'oc.order_id = ord.id');
+        $query->innerJoin(Order::tableName() . ' ord', 'oc.order_id = ord.id');
         //Товар из главного каталога
-        $query->leftJoin('`catalog_base_goods` as cbg', 'oc.product_id = cbg.id');
+        $query->leftJoin('catalog_base_goods as cbg', 'oc.product_id = cbg.id');
         //Индивидуальный каталог
-        $query->leftJoin('`catalog_goods` as cg', 'oc.product_id = cg.base_goods_id');
+        $query->leftJoin('catalog_goods as cg', 'oc.product_id = cg.base_goods_id');
         //Организация
         $query->innerJoin('organization AS org', 'cbg.supp_org_id = org.id');
         //Валюта
@@ -81,7 +81,7 @@ class FavoriteSearch extends \yii\base\Model
             $query->andWhere('cbg.product LIKE :searchString', [':searchString' => "%$this->searchString%"]);
         }
 
-        $query->andWhere("`ord`.client_id = :cid", [':cid' => $clientId]);
+        $query->andWhere("ord.client_id = :cid", [':cid' => $clientId]);
         $query->addParams([':cid' => $clientId]);
         $query->andWhere([
             "OR",

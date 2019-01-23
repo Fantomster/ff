@@ -6,6 +6,7 @@ use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use backend\models\TestVendorsSearch;
+use common\helpers\DBNameHelper;
 use common\models\AllService;
 use common\models\edi\EdiOrganization;
 use common\models\edi\EdiProvider;
@@ -349,9 +350,7 @@ class OrganizationController extends Controller
     {
         $searchModel = new OrganizationSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, true);
-        $db = Yii::$app->get('db_api');
-        $dbNameArr = explode(';dbname=', $db->dsn);
-        $dbName = "`" . $dbNameArr[1] . "`";
+        $dbName = DBNameHelper::getApiName();
         $date = new \DateTime('+10 day');
         $tenDaysAfter = $date->format('Y-m-d H:i:s');
 

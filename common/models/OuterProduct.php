@@ -9,20 +9,22 @@ use yii\behaviors\TimestampBehavior;
  * This is the model class for table "outer_product".
  *
  * @property int               $id
- * @property int               $service_id    ID Сервиса
- * @property int               $org_id        ID организации
- * @property string            $outer_uid     Внешний уникальный ID
+ * @property int               $service_id               ID Сервиса
+ * @property int               $org_id                   ID организации
+ * @property string            $outer_uid                Внешний уникальный ID
  * @property string            $name
- * @property string            $parent_uid    Внешний уникальный ID родителя
- * @property int               $level         Уровень
- * @property int               $is_deleted    Статус удаления
- * @property int               $is_category   Статус категории
- * @property int               $outer_unit_id Связь с таблицей outer_unit
- * @property string            $comment       Комментарий
- * @property string            $created_at    Дата создания
- * @property string            $updated_at    Дата обновления
+ * @property string            $parent_uid               Внешний уникальный ID родителя
+ * @property int               $level                    Уровень
+ * @property int               $is_deleted               Статус удаления
+ * @property int               $is_category              Статус категории
+ * @property int               $outer_unit_id            Связь с таблицей outer_unit
+ * @property string            $comment                  Комментарий
+ * @property string            $created_at               Дата создания
+ * @property string            $updated_at               Дата обновления
+ * @property int               $outer_product_type_id    ID типа продукта
  * @property OuterProductMap[] $outerProductMaps
  * @property OuterUnit         $outerUnit
+ * @property OuterProductType  $outerProductType
  */
 class OuterProduct extends \yii\db\ActiveRecord
 {
@@ -105,6 +107,14 @@ class OuterProduct extends \yii\db\ActiveRecord
      */
     public function getOuterProductMaps()
     {
-        return $this->hasMany(OuterProductMap::className(), ['outer_product_id' => 'id']);
+        return $this->hasMany(OuterProductMap::class, ['outer_product_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOuterProductType()
+    {
+        return $this->hasOne(OuterProductType::class, ['id' => 'outer_product_type_id']);
     }
 }

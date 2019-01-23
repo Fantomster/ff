@@ -12,6 +12,8 @@ use common\models\WaybillContent;
 
 class iikoWaybill extends Waybill
 {
+    public $service = Registry::IIKO_SERVICE_ID;
+
     /**
      * @return mixed
      * @throws \Exception
@@ -32,7 +34,7 @@ class iikoWaybill extends Waybill
             $incomingDocumentNumber = $this->outer_number_code;
         }
 
-        $waybillMode = IntegrationSettingValue::getSettingsByServiceId(Registry::IIKO_SERVICE_ID, $this->acquirer_id, ['auto_unload_invoice']);
+        $waybillMode = IntegrationSettingValue::getSettingsByServiceId($this->service, $this->acquirer_id, ['auto_unload_invoice']);
         if ($waybillMode !== '0') {
             $documentNumber = $document_id . '-' . $this->outer_number_code;
         } else {

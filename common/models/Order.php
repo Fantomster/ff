@@ -56,8 +56,8 @@ use yii\web\BadRequestHttpException;
  * @property Organization       $vendor
  * @property OrderAssignment    $orderAssignment
  * @property OrderAttachment[]  $orderAttachments
- * @property OrderChat[]        $orderChats
- * @property OrderContent[]     $orderContents
+ * @property OrderChat[]        $orderChat
+ * @property OrderContent[]     $orderContent
  * @property EdiOrder           $ediOrder
  * @property Profile            $createdByProfile
  * @property Profile            $acceptedByProfile
@@ -579,7 +579,7 @@ class Order extends \yii\db\ActiveRecord
                 ->createCommand()->getRawSql();
 
             $total_price = (new Query())
-                ->select('SUM(COALESCE(`waybill_sum`, `oc_sum`))')
+                ->select(['SUM(COALESCE(waybill_sum, oc_sum))'])
                 ->from("(" . $query . ") as t")
                 ->scalar(\Yii::$app->db_api);
         } else {
@@ -986,7 +986,7 @@ class Order extends \yii\db\ActiveRecord
     {
         $query = new Query();
         $query->select('oc.id');
-        $query->from(['`order` o', 'order_content oc']);
+        $query->from([Order::tableName() . ' o', 'order_content oc']);
         $query->leftJoin(DBNameHelper::getApiName() . '.waybill_content wc', 'wc.order_content_id = oc.id');
         $query->leftJoin(DBNameHelper::getApiName() . '.waybill w', 'w.id = wc.waybill_id');
         $query->where(['o.id' => $this->id]);

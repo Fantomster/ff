@@ -75,9 +75,9 @@ class OneSPconst extends \yii\db\ActiveRecord
     {
         $res = self::find()
             ->select('*')
-            ->join('LEFT JOIN', 'one_s_dicconst', '`one_s_dicconst`.`denom` = "useAcceptedDocs"')
+            ->join('LEFT JOIN', 'one_s_dicconst', 'one_s_dicconst.denom = "useAcceptedDocs"')
             ->where(['org' => $organizationID])
-            ->andWhere('`one_s_pconst`.`const_id` = `one_s_dicconst`.`id`')
+            ->andWhere('one_s_pconst.const_id = one_s_dicconst.id')
             ->one();
         if($res)
         {

@@ -20,29 +20,29 @@ class MixedProvider extends Qtelecom
 
     /**
      * Отправка сообщения
+     *
      * @param string $message
      * @param string $target
-     * @param integer $order_id
      */
-    public function send($message, $target, $order_id = null)
+    public function send($message, $target)
     {
-        $target   = is_array($target) ? $target : [$target];
+        $target = is_array($target) ? $target : [$target];
         $smsQueue = [];
 
         foreach ($target as $recipient) {
-            $model      = new \common\models\SmsSend([
+            $model = new \common\models\SmsSend([
                 'provider'  => get_class($this),
                 'target'    => $recipient,
                 'text'      => $message,
                 'status_id' => \common\models\SmsStatus::STATUS_NEW,
-                'order_id'  => $order_id,
+                'order_id'  => $this->order_id,
             ]);
             $model->save();
             $smsQueue[] = $model->id;
         }
 
         try {
-            $result = \Yii::$app->get('sqsQueue')->sendMessage($this->sqsQueueUrl, $smsQueue);
+            \Yii::$app->get('sqsQueue')->sendMessage($this->sqsQueueUrl, $smsQueue);
         } catch (\Exception $e) {
             \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
         }

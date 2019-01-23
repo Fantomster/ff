@@ -175,7 +175,7 @@ class OrderSearch extends Order
             $orderTable = Order::tableName();
             $query->rightJoin($maTable, "$maTable.organization_id = $orderTable.client_id AND $maTable.manager_id = " . $this->manager_id);
         }
-        $query->where(Order::tableName() . '.`status` != :status', ['status' => OrderStatus::STATUS_FORMING]);
+        $query->where(Order::tableName() . '.status != :status', ['status' => OrderStatus::STATUS_FORMING]);
 
         $addSortAttributes = $this->vendor_search_id ? ['client.name'] : ['vendor.name'];
         $addSortAttributes[] = 'createdByProfile.full_name';
@@ -218,11 +218,11 @@ class OrderSearch extends Order
         if (!empty($this->vendor_array)) {
             $query->andFilterWhere(['in', 'vendor_id', $this->vendor_array]);
         } else {
-            $query->andFilterWhere(['`order`.`vendor_id`' => $this->vendor_id]);
+            $query->andFilterWhere([Order::tableName() . '.vendor_id' => $this->vendor_id]);
         }
         $query->andFilterWhere(['client_id' => $this->client_id]);
         if ((isset($params['invoice_id']) && !isset($params['show_waybill'])) || (isset($params['show_waybill']) && $params['show_waybill'] == 'false')) {
-            $query->rightJoin('integration_invoice', '`integration_invoice`.`number`=`order`.`waybill_number`');
+            $query->rightJoin('integration_invoice', 'integration_invoice.number=' . Order::tableName() . '.waybill_number');
         }
 
         /**

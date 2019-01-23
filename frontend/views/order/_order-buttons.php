@@ -52,7 +52,7 @@ $this->registerJs('
                     $("#alWaybillNumber").prop("disabled", "disabled");
                     var val = $("#swal-input1").val();
                     $.ajax({
-                        url: "'. $url . '",
+                        url: "' . $url . '",
                         "data": { "waybill_number": val, "order_id": ' . $order->id . ' },
                         "type": "POST",
                         "cache": false,
@@ -77,45 +77,46 @@ $this->registerJs('
 $currencySymbol = $order->currency->symbol;
 $statusInfo = '';
 $actionButtons = '';
+$disabledString = (Yii::$app->user->identity->role_id == \common\models\Role::ROLE_RESTAURANT_ORDER_INITIATOR) ? " disabled" : "";
 $btnCancel = Html::button('<span><i class="icon fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.order.cancel_seven', ['ru' => 'Отменить']) . ' </span>', [
-            'class' => "btn btn-outline-danger cancel-order",
-            'style' => "margin-right: 7px;",
-            'data' => [
-                'url' => \yii\helpers\Url::to(['order/ajax-cancel-order', 'order_id' => $order->id]),
-                'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.cancel_eight', ['ru' => 'Отменяем...']),
-            ],
-            'title' => Yii::t('message', 'frontend.views.order.cancel_order', ['ru' => 'Отменить заказ']),
-        ]);
+    'class' => "btn btn-outline-danger cancel-order$disabledString",
+    'style' => "margin-right: 7px;",
+    'data'  => [
+        'url'          => \yii\helpers\Url::to(['order/ajax-cancel-order', 'order_id' => $order->id]),
+        'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.cancel_eight', ['ru' => 'Отменяем...']),
+    ],
+    'title' => Yii::t('message', 'frontend.views.order.cancel_order', ['ru' => 'Отменить заказ']),
+]);
 $btnConfirm = Html::button('<span><i class="icon fa fa-check"></i> ' . Yii::t('message', 'frontend.views.order.confirm', ['ru' => 'Подтвердить']) . ' </span>', [
-            'class' => "btn btn-outline-success btnOrderAction",
-            'data' => [
-                'action' => "confirm",
-                'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.confirming', ['ru' => 'Подтверждаем...']),
-            ],
-        ]);
+    'class' => "btn btn-outline-success btnOrderAction",
+    'data'  => [
+        'action'       => "confirm",
+        'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.confirming', ['ru' => 'Подтверждаем...']),
+    ],
+]);
 $btnGetOrder = Html::button('<span><i class="icon fa fa-check"></i> ' . Yii::t('message', 'frontend.views.order.receive', ['ru' => 'Получить']) . ' </span>', [
-            'class' => "btn btn-outline-success btnOrderAction",
-            'data' => [
-                'action' => "confirm",
-                'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.receiving', ['ru' => 'Получаем...']),
-            ],
-        ]);
+    'class' => "btn btn-outline-success btnOrderAction",
+    'data'  => [
+        'action'       => "confirm",
+        'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.receiving', ['ru' => 'Получаем...']),
+    ],
+]);
 if (isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code > 0) {
     $data = [
-        'toggle' => 'tooltip',
+        'toggle'         => 'tooltip',
         'original-title' => Yii::t('message', 'frontend.views.order.complete_order', ['ru' => 'Завершить заказ']),
-        'url' => \yii\helpers\Url::to(['order/complete-obsolete', 'id' => $order->id])
+        'url'            => \yii\helpers\Url::to(['order/complete-obsolete', 'id' => $order->id])
     ];
 } else {
     $data = [
-        'action' => "confirm",
+        'action'       => "confirm",
         'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.ending_all', ['ru' => 'Завершаем...']),
     ];
 }
 $btnCloseOrder = Html::button('<span><i class="icon fa fa-check"></i> ' . Yii::t('message', 'frontend.views.order.end_all', ['ru' => 'Завершить']) . ' </span>', [
-            'class' => (isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code > 0) ? 'btn btn-outline-success completeEdi' : 'btn btn-outline-success btnOrderAction',
-            'data' => $data,
-        ]);
+    'class' => (isset($order->vendor->ediOrganization->gln_code) && $order->vendor->ediOrganization->gln_code > 0) ? "btn btn-outline-success completeEdi$disabledString" : "btn btn-outline-success btnOrderAction$disabledString",
+    'data'  => $data,
+]);
 $canEdit = false;
 if ($order->isObsolete) {
     if (!isset($order->vendor->ediOrganization->gln_code)) {
@@ -179,24 +180,24 @@ if ($order->isObsolete) {
     <div class="box-header">
         <?=
         Html::a('<i class="icon fa fa-print"></i> ' . Yii::t('message', 'frontend.views.order.open_in_pdf', ['ru' => 'Открыть в виде PDF']) . ' ', ['order/pdf', 'id' => $order->id], [
-            'class' => 'btn btn-outline-default pull-right',
-            'target' => '_blank',
+            'class'       => 'btn btn-outline-default pull-right',
+            'target'      => '_blank',
             'data-toggle' => 'tooltip',
-            'title' => Yii::t('message', 'frontend.views.order.new_window', ['ru' => 'Открыть PDF с заказом в новом окне'])
+            'title'       => Yii::t('message', 'frontend.views.order.new_window', ['ru' => 'Открыть PDF с заказом в новом окне'])
         ])
         ?>
         <?=
         (isset($canRepeatOrder) && $canRepeatOrder) ? Html::a('<i class="icon fa fa-refresh"></i> ' . Yii::t('message', 'frontend.views.order.repeat_order_two', ['ru' => 'Повторить заказ']) . ' ', ['order/repeat', 'id' => $order->id], [
-                    'class' => 'btn btn-default pull-right',
-                    'style' => 'margin-right: 7px;'
-                ]) : ""
+            'class' => 'btn btn-default pull-right',
+            'style' => 'margin-right: 7px;'
+        ]) : ""
         ?>
         <?=
         $edit ? Html::button('<span><i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.save_five', ['ru' => 'Сохранить']) . ' </span>', [
-                    'class' => 'btn btn-success pull-right btnSave',
-                    'style' => 'margin-right: 7px;',
-                    'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_two', ['ru' => 'Сохраняем...']),
-                ]) : ""
+            'class'             => 'btn btn-success pull-right btnSave',
+            'style'             => 'margin-right: 7px;',
+            'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_two', ['ru' => 'Сохраняем...']),
+        ]) : ""
         ?>
         <?= $canEdit && !$edit ? Html::a('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.edit', ['ru' => 'Редактировать']), ['/order/edit', "id" => $order->id], ['class' => 'btn btn-success pull-right btnSave', 'style' => 'margin-right: 7px;']) : "" ?>
         <div style="clear: both; height: 5px;"></div>
@@ -205,19 +206,19 @@ if ($order->isObsolete) {
         $licenses = $user->organization->getLicenseList();
         if (isset($licenses['mercury']))
             echo Html::a(' ' . Yii::t('app', 'frontend.views.order.index.mercury', ['ru' => 'Погасить ВСД']) . ' ', ['/clientintegr/merc/default'], [
-                'class' => 'btn btn-outline-processing pull-right',
-                'target' => '',
+                'class'       => 'btn btn-outline-processing pull-right',
+                'target'      => '',
                 'data-toggle' => 'tooltip',
-                'title' => Yii::t('app', 'frontend.views.order.index.mercury', ['ru' => 'Погасить ВСД'])
+                'title'       => Yii::t('app', 'frontend.views.order.index.mercury', ['ru' => 'Погасить ВСД'])
             ]);
         ?>
 
         <?=
         Html::a('<i class="icon fa fa-file-excel-o"></i> ' . Yii::t('app', 'frontend.views.order.index.report', ['ru' => 'отчет xls']) . ' ', ['order/order-to-xls', 'id' => $order->id], [
-            'class' => 'btn btn-outline-success pull-right',
-            'target' => '',
+            'class'       => 'btn btn-outline-success pull-right',
+            'target'      => '',
             'data-toggle' => 'tooltip',
-            'title' => Yii::t('app', 'frontend.views.order.index.report', ['ru' => 'отчет xls'])
+            'title'       => Yii::t('app', 'frontend.views.order.index.report', ['ru' => 'отчет xls'])
         ])
         ?>
 
@@ -226,7 +227,10 @@ if ($order->isObsolete) {
         <p class="ppp"><?= Yii::t('message', 'frontend.views.order.full_sum', ['ru' => 'Общая сумма']) ?></p>
 
         <p class="pppp"><?= $order->total_price ?> <?= $currencySymbol ?></i></p><br>
-        <p class="ps"><?= Html::button('<i class="icon fa fa-save"></i> ' . Yii::t('app', 'Номер накладной'), ['class' => 'btn btn-success btnWaybillNumber', 'id' => 'alWaybillNumber']) ?><input type="hidden" value="<?= ($order->waybill_number != null && $order->waybill_number != '') ? $order->waybill_number : Yii::t('app', 'common.config.main.empty', ['ru' => 'пусто']) ?>" id="alHiddenWaybillNumber"></p>
+        <p class="ps"><?= Html::button('<i class="icon fa fa-save"></i> ' . Yii::t('app', 'Номер накладной'), ['class' => 'btn btn-success btnWaybillNumber', 'id' => 'alWaybillNumber']) ?>
+            <input type="hidden"
+                   value="<?= ($order->waybill_number != null && $order->waybill_number != '') ? $order->waybill_number : Yii::t('app', 'common.config.main.empty', ['ru' => 'пусто']) ?>"
+                   id="alHiddenWaybillNumber"></p>
         <p class="ps"><?= Yii::t('message', 'frontend.views.order.including_delivery', ['ru' => 'включая доставку']) ?></p>
         <p class="ps"><?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
         <p class="ps"><?= Yii::t('message', 'frontend.views.order.creating_date_three', ['ru' => 'дата создания ']) ?></p>

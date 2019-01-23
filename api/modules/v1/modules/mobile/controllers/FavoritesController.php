@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\mobile\controllers;
 
+use common\models\Order;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
@@ -9,7 +10,6 @@ use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
 use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
 use yii\helpers\Json;
-
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
@@ -38,8 +38,8 @@ class FavoritesController extends ActiveController {
     public function actions() {
         return [
             'index' => [
-                'class' => 'yii\rest\IndexAction',
-                'modelClass' => $this->modelClass,
+                'class'               => 'yii\rest\IndexAction',
+                'modelClass'          => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
             ],
         ];
@@ -57,7 +57,7 @@ class FavoritesController extends ActiveController {
         }
         return $model;
     }
-    
+
     /**
      * @return SqlDataProvider
      */
@@ -70,9 +70,9 @@ class FavoritesController extends ActiveController {
         $query = "
             SELECT
                 cbg.id as id, cbg.product, cbg.units, cbg.price, cbg.cat_id, cbg.article, cbg.supp_org_id, cbg.category_id, org.name as organization_name, cbg.ed, curr.symbol, cbg.note
-            FROM `order_content` AS oc
-                LEFT JOIN `order` AS ord ON oc.order_id = ord.id
-                LEFT JOIN `catalog_base_goods` AS cbg ON oc.product_id = cbg.id
+            FROM order_content AS oc
+                LEFT JOIN " . Order::tableName() . " AS ord ON oc.order_id = ord.id
+                LEFT JOIN catalog_base_goods AS cbg ON oc.product_id = cbg.id
                 LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
                 LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
                     AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
@@ -84,9 +84,9 @@ class FavoritesController extends ActiveController {
             UNION ALL
             (SELECT
                 cbg.id as id, cbg.product, cbg.units, cg.price, cg.cat_id, cbg.article, cbg.supp_org_id, cbg.category_id, org.name as organization_name, cbg.ed, curr.symbol, cbg.note
-            FROM `order_content` AS oc
-                LEFT JOIN `order` AS ord ON oc.order_id = ord.id
-                LEFT JOIN `catalog_base_goods` AS cbg ON oc.product_id = cbg.id
+            FROM order_content AS oc
+                LEFT JOIN " . Order::tableName() . " AS ord ON oc.order_id = ord.id
+                LEFT JOIN catalog_base_goods AS cbg ON oc.product_id = cbg.id
                 LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = oc.product_id 
                     AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
                 LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
@@ -101,9 +101,9 @@ class FavoritesController extends ActiveController {
         $query1 = "
             SELECT
                 COUNT(DISTINCT cbg.id) 
-            FROM `order_content` AS oc
-                LEFT JOIN `order` AS ord ON oc.order_id = ord.id
-                LEFT JOIN `catalog_base_goods` AS cbg ON oc.product_id = cbg.id
+            FROM order_content AS oc
+                LEFT JOIN " . Order::tableName() . " AS ord ON oc.order_id = ord.id
+                LEFT JOIN catalog_base_goods AS cbg ON oc.product_id = cbg.id
                 LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
                 LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
                     AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
@@ -118,9 +118,9 @@ class FavoritesController extends ActiveController {
         $query2 = "
             SELECT
                 COUNT(DISTINCT cbg.id) 
-            FROM `order_content` AS oc
-                LEFT JOIN `order` AS ord ON oc.order_id = ord.id
-                LEFT JOIN `catalog_base_goods` AS cbg ON oc.product_id = cbg.id
+            FROM order_content AS oc
+                LEFT JOIN " . Order::tableName() . " AS ord ON oc.order_id = ord.id
+                LEFT JOIN catalog_base_goods AS cbg ON oc.product_id = cbg.id
                 LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = oc.product_id 
                     AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $client->id)))
                 LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
@@ -134,10 +134,10 @@ class FavoritesController extends ActiveController {
         $count2 = Yii::$app->db->createCommand($query2)->queryScalar();
 
         $dataProvider = new SqlDataProvider([
-            'sql' => $query,
+            'sql'        => $query,
             'totalCount' => 20,
-            'sort' => [
-                'attributes' => [
+            'sort'       => [
+                'attributes'   => [
                     'product',
                 ],
                 'defaultOrder' => [

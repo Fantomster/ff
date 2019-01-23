@@ -106,8 +106,8 @@ class OrderOperatorSearch extends Order
                     SELECT
                       GROUP_CONCAT(\' \', pm.full_name, \' \', pm.phone)
                     FROM relation_user_organization m
-                      LEFT JOIN `user` um ON um.id = m.user_id
-                      LEFT JOIN `profile` pm ON pm.user_id = m.user_id
+                      LEFT JOIN user um ON um.id = m.user_id
+                      LEFT JOIN profile pm ON pm.user_id = m.user_id
                     WHERE
                       m.organization_id = vendor.id
                       AND

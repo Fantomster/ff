@@ -86,3 +86,7 @@ Vagrantfile
 backend/web/upload/temp/
 franchise/web/runtime/
 franchise/web/upload/temp/
+/nightwatch/node_modules/
+/nightwatch/reports/
+/nightwatch/dev/reports/
+/nightwatch/qas/reports/

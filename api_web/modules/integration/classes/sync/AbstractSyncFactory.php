@@ -15,13 +15,13 @@ namespace api_web\modules\integration\classes\sync;
 
 use api_web\components\WebApi;
 use api_web\helpers\WebApiHelper;
+use api_web\modules\integration\classes\documents\Waybill;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
 use yii\web\BadRequestHttpException;
 
 abstract class AbstractSyncFactory extends WebApi
 {
-
     const XML_LOAD_RESULT_FAULT = 'Error!';
     const XML_LOAD_RESULT_SUCCESS = 'Success!';
 
@@ -43,16 +43,29 @@ abstract class AbstractSyncFactory extends WebApi
     const HTTP_CODE_OK = 200;
 
     /** List of dictionaries awailable for a service - By default it is an empty array */
-    public $dictionaryAvailable = [];
+    public $dictionaryAvailable = [
+        self::DICTIONARY_AGENT,
+        self::DICTIONARY_PRODUCT,
+        self::DICTIONARY_STORE,
+        self::DICTIONARY_UNIT,
+        self::DICTIONARY_CATEGORY
+    ];
 
     /** @var string $index Символьный идентификатор справочника */
     public $index;
+    /** @var string $index Имя очереди */
+    public $queueName = null;
+
+    /**
+     * @var int
+     */
+    protected $countWaybillSend = 0;
 
     /** service_id $_POST params */
     public $serviceId;
     /** Service Name identified by service_id in $_POST params and SyncServiceFactory->$allServicesMap */
     public $serviceName;
-    
+
     protected $logCategory = "sync_log";
 
     /**
@@ -69,7 +82,7 @@ abstract class AbstractSyncFactory extends WebApi
             $this->serviceId = $serviceId;
         }
     }
-    
+
     /**
      * @param string $message
      */
@@ -86,7 +99,6 @@ abstract class AbstractSyncFactory extends WebApi
      */
     public function getOrganizationDictionary(int $service_id, int $org_id): OrganizationDictionary
     {
-
         $outerDic = OuterDictionary::findOne(['service_id' => $service_id, 'name' => $this->index]);
         if (!$outerDic) {
             throw new BadRequestHttpException("outer_dic_not_found");
@@ -105,7 +117,6 @@ abstract class AbstractSyncFactory extends WebApi
                 throw new BadRequestHttpException("org_dic_not_accessible");
             }
         }
-
         return $orgDic;
     }
 
@@ -212,11 +223,32 @@ abstract class AbstractSyncFactory extends WebApi
      */
     public function factory(string $dictionary, int $serviceId): ?AbstractSyncFactory
     {
-        $className = __NAMESPACE__ . '\\' . $this->serviceName . ucfirst($dictionary);
+        $ns = __NAMESPACE__;
+        $directoryServiceClass = __DIR__ . DIRECTORY_SEPARATOR . strtolower($this->serviceName);
+        if (file_exists($directoryServiceClass)) {
+            $ns .= '\\' . strtolower($this->serviceName);
+        }
+
+        $className = $ns . '\\' . $this->serviceName . ucfirst($dictionary);
         if (class_exists($className)) {
-            return new $className($this->serviceName, $serviceId);
+            $s = new $className($this->serviceName, $serviceId);
+            $s->index = $dictionary;
+            return $s;
         } else {
-            throw new BadRequestHttpException("class_not_exist");
+            $serviceClass = $ns . '\\Service' . $this->serviceName;
+            if (class_exists($serviceClass)) {
+                /** @var AbstractSyncFactory $service */
+                $service = new $serviceClass($this->serviceName, $serviceId);
+                if (in_array($dictionary, $service->dictionaryAvailable)) {
+                    $service->index = $dictionary;
+                    $service->queueName = $this->serviceName . ucfirst($dictionary) . 'Sync';
+                    return $service;
+                } else {
+                    throw new BadRequestHttpException("Dictionary '{$dictionary}' not upload in service " . $this->serviceName);
+                }
+            } else {
+                throw new BadRequestHttpException("class_not_exist");
+            }
         }
     }
 
@@ -280,4 +312,37 @@ abstract class AbstractSyncFactory extends WebApi
         ];
     }
 
+    /**
+     * @param         $res
+     * @param Waybill $model
+     * @param         $message
+     * @param bool    $success
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Exception
+     */
+    protected function response(&$res, $model, $message, $success = true)
+    {
+        if ($this->countWaybillSend == 1 and $success === false) {
+            throw new BadRequestHttpException($message);
+        } else {
+            $res[] = $model->prepare();
+        }
+        return $res;
+    }
+
+    /**
+     * Получить модель справочника организыйии
+     *
+     * @return OrganizationDictionary
+     */
+    protected function getModel()
+    {
+        $dictionary = OuterDictionary::findOne(['service_id' => $this->serviceId, 'name' => $this->index]);
+        $model = OrganizationDictionary::findOne([
+            'org_id'       => $this->user->organization_id,
+            'outer_dic_id' => $dictionary->id
+        ]);
+        return $model;
+    }
 }

@@ -27,6 +27,7 @@ class ConsumerDaemonController extends AbstractDaemonController
      *
      * @param $job
      * @return bool
+     * @throws \yii\db\Exception
      */
     public function doJob($job)
     {

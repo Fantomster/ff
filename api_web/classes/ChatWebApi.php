@@ -11,6 +11,7 @@ use common\models\OrderChat;
 use common\models\Organization;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
@@ -38,31 +39,31 @@ class ChatWebApi extends WebApi
         $client = $this->user->organization;
 
         if ($client->type_id === Organization::TYPE_RESTAURANT) {
-            $where = ['client_id' => $client->id];
+            $where = ['o.client_id' => $client->id];
         } elseif ($client->type_id === Organization::TYPE_SUPPLIER) {
-            $where = ['vendor_id' => $client->id];
+            $where = ['o.vendor_id' => $client->id];
         } else {
             throw new BadRequestHttpException('chat.access_denied');
         }
 
-        $lastMessageDateQuery = (new Query())->select(['COALESCE(MAX(order_chat.created_at), order.created_at)'])
-            ->from(OrderChat::tableName())->where(['order_id' => 'order.id']);
-        $unreadMessageQuery = (new Query())->from(OrderChat::tableName())
-            ->where(['order_id' => 'order.id', 'recipient_id' => ':org_id', 'viewed' => 0])->count();
-        $countMessageQuery = (new Query())->from(OrderChat::tableName())
-            ->where(['order_id' => 'order.id', 'recipient_id' => ':org_id'])->count();
+        $lastMessageDateQuery = (new Query())->select(['COALESCE(MAX(order_chat.created_at), o.created_at)'])
+            ->from(OrderChat::tableName())->where(['order_id' => new Expression('o.id')]);
+        $unreadMessageQuery = (new Query())->from(OrderChat::tableName())->select('COUNT(*)')
+            ->where(['order_id' => new Expression('o.id'), 'recipient_id' => $client->id, 'viewed' => 0]);
+        $countMessageQuery = (new Query())->from(OrderChat::tableName())->select('COUNT(*)')
+            ->where(['order_id' => new Expression('o.id'), 'recipient_id' => $client->id]);
         $lastMessageQuery = (new Query())->select('message')->from(OrderChat::tableName())
-            ->where(['order_id' => 'order.id'])->orderBy('order_chat.created_at DESC')->limit(1);
+            ->where(['order_id' => new Expression('o.id')])->orderBy('order_chat.created_at DESC')->limit(1);
 
-        $search = Order::find()
+        $search = Order::find()->alias('o')
             ->with(['vendor', 'client'])
             ->select([
-                'order.*',
+                'o.*',
                 'last_message_date' => $lastMessageDateQuery,
                 'unread_message'    => $unreadMessageQuery,
                 'count_message'     => $countMessageQuery,
                 'last_message'      => $lastMessageQuery,
-            ])->where($where)->params(['org_id' => $client->id]);
+            ])->where($where);
 
         if (empty($search)) {
             throw new BadRequestHttpException("chat.dialogs_not_found");

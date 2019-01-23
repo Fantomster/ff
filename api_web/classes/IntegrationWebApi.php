@@ -139,22 +139,19 @@ class IntegrationWebApi extends WebApi
 
             if ($orderContent->edi_number) {
                 $tmp_ed_num = $orderContent->edi_number;
-                $existWaybill = Waybill::find()->where(['like', 'outer_number_code', $tmp_ed_num])
+                $ediNumber = $tmp_ed_num . $separator . "1";
+                $existWaybill = Waybill::find()
+                    ->where(['like', 'outer_number_code', $tmp_ed_num])
                     ->andWhere(['service_id' => (int)$post['service_id']])
-                    ->orderBy(['outer_number_code' => SORT_DESC])->limit(1)->one();
+                    ->orderBy(['outer_number_code' => SORT_DESC])
+                    ->limit(1)
+                    ->one();
                 if ($existWaybill && $existWaybill->outer_number_code) {
                     $ediNumber = $h->getLastEdiNumber($existWaybill->outer_number_code, $tmp_ed_num, $separator);
-                } else {
-                    $ediNumber = $orderContent->edi_number . $separator . "1";
                 }
             } else {
                 $waybillsCount = count($order->getWaybills($post['service_id']));
-                if ($waybillsCount == 0) {
-                    $waybillsCount = 1;
-                } else {
-                    $waybillsCount++;
-                }
-                $ediNumber = $post['order_id'] . $separator . $waybillsCount;
+                $ediNumber = $post['order_id'] . $separator . ++$waybillsCount;
             }
         }
 

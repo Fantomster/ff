@@ -2553,13 +2553,11 @@ class OrderController extends DefaultController
             'product'          => 'cbg.product',
             'quantity'         => 'oc.quantity',
             'order_id'         => 'o.id',
-            'SUM(oc.quantity) OVER(PARTITION BY product, org.id) AS sum_quantity',
-            'SUM(oc.quantity) OVER(PARTITION BY product) AS total_sum_quantity',
+            'sum_quantity'     => 'SUM(oc.quantity)',
             'order_content_id' => 'oc.id',
             'product_id'       => 'cbg.id',
             'unit'             => 'cbg.ed',
             'count_org'        => new Expression($countQuery),
-
         ])->from(Order::tableName() . ' o')
             ->leftJoin(Organization::tableName() . ' org', 'org.id=o.client_id')
             ->leftJoin(OrderContent::tableName() . " oc", "oc.order_id = o.id")
@@ -2569,11 +2567,12 @@ class OrderController extends DefaultController
             ])->andWhere([
                 'not', ['cbg.product' => null]
             ])
+            ->groupBy('cbg.id')
             ->orderBy('org.parent_id');
         $dbResult = (new Query())->select('*')->from(['sq' => $subQuery])->groupBy('product,id')
             ->orderBy('client_name')
             ->all();
-        $arExcel = [];
+
         $arExcelHeader = [
             \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']),
             \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед изм']),

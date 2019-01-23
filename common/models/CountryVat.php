@@ -1,6 +1,6 @@
 <?php
 
-namespace api\common\models;
+namespace common\models;
 
 use Yii;
 
@@ -60,23 +60,19 @@ class CountryVat extends \yii\db\ActiveRecord
         ];
     }
 
-    public function beforeSave($insert)
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors(): array
     {
-        if (parent::beforeSave($insert)) {
-
-            if (!$insert) {  // Обновление
-                $this->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-                $this->updated_by_id = Yii::$app->user->id;
-
-            } else { // Создание
-                $this->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-                $this->created_by_id = Yii::$app->user->id;
-            }
-
-            return true;
-        } else {
-            return false;
-        }
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
     }
 
 }

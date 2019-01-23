@@ -40,6 +40,7 @@ use yii\behaviors\TimestampBehavior;
  * @property int    $current_part     Текущий номер порции получаемых данных (при загрузке данных из источника
  *           порциями)
  * @property int    $waybill_id       Связь с накладной из waybill
+ * @property int    $user_id          пользователь создавший задачу
  */
 class OuterTask extends ActiveRecord
 {
@@ -69,7 +70,7 @@ class OuterTask extends ActiveRecord
     public function rules()
     {
         return [
-            [['service_id', 'org_id', 'oper_code', 'retry', 'int_status_id', 'broker_status_id', 'client_status_id', 'total_parts', 'current_part'], 'integer'],
+            [['service_id', 'org_id', 'user_id', 'oper_code', 'retry', 'int_status_id', 'broker_status_id', 'client_status_id', 'total_parts', 'current_part'], 'integer'],
             [['requested_at', 'responced_at', 'callbacked_at'], 'safe'],
             [['outer_guid', 'inner_guid'], 'string', 'max' => 45],
             [['salespoint_id', 'broker_version'], 'string', 'max' => 128],
@@ -99,6 +100,7 @@ class OuterTask extends ActiveRecord
             'broker_version'   => 'Broker Version',
             'total_parts'      => 'Total Parts',
             'current_part'     => 'Current Part',
+            'user_id'          => 'User ID',
         ];
     }
 

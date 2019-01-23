@@ -3,39 +3,21 @@
 namespace frontend\modules\clientintegr\controllers;
 
 use api\common\models\AllMaps;
-use api\common\models\iiko\iikoProduct;
 use api\common\models\iiko\iikoService;
 use api\common\models\one_s\OneSStore;
-use api\common\models\RkStore;
 use api\common\models\RkStoretree;
 use api\common\models\rkws\OrderCatalogSearchMap;
-use api\modules\v1\modules\mobile\resources\OrderCatalogSearch;
-use api_web\classes\CartWebApi;
 use api_web\modules\integration\classes\sync\IikoStore;
-use common\models\AllService;
 use common\models\CatalogBaseGoods;
-use common\models\OrderContent;
-use frontend\modules\clientintegr\modules\iiko\controllers\WaybillController;
 use Yii;
 use yii\helpers\Json;
-use yii\helpers\VarDumper;
-use yii\web\Controller;
-use api\common\models\RkWaybill;
-use api\common\models\RkAgentSearch;
-use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
-use api\common\models\RkWaybilldata;
-use yii\data\ActiveDataProvider;
 use common\models\User;
-use yii\helpers\ArrayHelper;
-use kartik\grid\EditableColumnAction;
 use common\models\Organization;
 use yii\helpers\Url;
-use frontend\modules\clientintegr\modules\rkws\components\FullmapHelper;
 use api\common\models\iiko\iikoDicconst;
 use api\common\models\iiko\iikoPconst;
 use api_web\components\Registry;
-
-//use api\common\models\iiko\iikoSelectedProduct;
+use common\models\RelationSuppRest;
 
 /**
  * Description of FullmapController
@@ -80,7 +62,7 @@ class FullmapController extends DefaultController
         $dataProvider->pagination->params['OrderCatalogSearchMap[selectedCategory]'] = $selectedCategory;
         $dataProvider->pagination->params['OrderCatalogSearchMap[service_id]'] = $service;
 
-        $cart = (new CartWebApi())->items(); //$client->getCart();
+        //$cart = (new CartWebApi())->items(); //$client->getCart();
         // Вывод по 10
         $dataProvider->pagination->pageSize = 10;
 
@@ -104,7 +86,16 @@ class FullmapController extends DefaultController
         $stores = AllMaps::getStoreListService($searchModel->service_id, $client->id);
         if ($service == Registry::IIKO_SERVICE_ID) {
             $mainOrg = iikoService::getMainOrg($client->id);
-            ($orgId == $mainOrg) ? $editCan = 1 : $editCan = 0;
+            if ($orgId == $mainOrg) {
+                $editCan = 1;
+            } else {
+                if (($selectedVendor != null) && ($selectedVendor != 0)) {
+                    $vendorIsMain = RelationSuppRest::find()->where(['rest_org_id' => $mainOrg, 'supp_org_id' => $selectedVendor, 'status' => 1, 'deleted' => 0])->one();
+                    ($vendorIsMain) ? $editCan = 0 : $editCan = 1;
+                } else {
+                    $editCan = 0;
+                }
+            }
         } else {
             $editCan = 1;
             $mainOrg = null;

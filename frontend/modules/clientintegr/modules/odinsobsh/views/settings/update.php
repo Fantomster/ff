@@ -12,10 +12,10 @@ use yii\widgets\Breadcrumbs;
         'options' => [
             'class' => 'breadcrumb',
         ],
-        'links' => [
+        'links'   => [
             [
                 'label' => 'Интеграция',
-                'url' => ['/vendorintegr'],
+                'url'   => ['/clientintegr'],
             ],
             'Интеграция с 1С Общепит',
         ],
@@ -33,7 +33,7 @@ use yii\widgets\Breadcrumbs;
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding" style="overflow-x:visible;">
                         <?php echo $this->render('_form', [
-                            'model' => $model,
+                            'model'    => $model,
                             'dicConst' => $dicConst
                         ]) ?>
                     </div>

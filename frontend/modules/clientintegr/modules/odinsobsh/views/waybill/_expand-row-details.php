@@ -15,11 +15,11 @@ $waybillMode = OneSDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPco
 
 if (empty($model)) {
     echo "<div  style=\"text-align:right;\">";
-    if ($waybillMode === "0") {
-        echo Html::a('Создать накладную', ['create', 'order_id' => $order_id, 'page' => $page], ['class' => 'btn btn-md fk-button']);
-    } else {
+    //if ($waybillMode === "0") {
+    echo Html::a('Создать накладную', ['create', 'order_id' => $order_id, 'page' => $page], ['class' => 'btn btn-md fk-button']);
+    /*} else {
         echo "Включен автоматический режим создания накладных.";
-    }
+    }*/
     echo "</div>";
 } else {
     $columns = [

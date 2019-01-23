@@ -172,7 +172,7 @@ class InvoiceController extends Controller
 
             //Создаём товары для накладных, и получаем их модели
             $content = $invoice->getBaseGoods($vendor);
-            $temp = $invoice->addProductsFromTorg12InCatalogGoods($vendor);
+            $temp = $invoice->addProductsFromTorg12InCatalogGoods($vendor, $user->organization);
             if (empty($content)) {
                 throw new Exception('Содержимое накладной не может быть пустым.');
             }
@@ -208,7 +208,7 @@ class InvoiceController extends Controller
             $invoice->order_id = $order->id;
             $invoice->save();
             $transaction->commit();
-            $page = \common\models\IntegrationInvoice::pageOrder($order->id);
+            $page = $invoice->getOrderPage();
             return ['status' => true, 'order_id' => $order->id, 'us' => $link, 'page' => $page];
         } catch (\Exception $e) {
             $transaction->rollBack();

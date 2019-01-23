@@ -309,26 +309,25 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             throw new \Exception('Ошибка при отправке.' . $order_id);
         }
 
-        $dbName = DBNameHelper::getMainName();
-
-        $client_id = self::getClientIDcondition($order->client_id, 'm.product_id');
-
         // Получаем список складов, чтобы понять сколько надо делать накладных
 
-        $db = Yii::$app->db_api;
-        $sql = ' SELECT m.store_rid FROM ' . $dbName . '.order_content o ' .
-            ' LEFT JOIN all_map m ON o.product_id = m.product_id AND m.service_id = ' . $service_id . ' AND m.org_id in (' . $client_id . ') ' .
-            ' WHERE o.order_id = ' . $order_id .
-            ' GROUP BY store_rid';
-
-        $stories = $db->createCommand($sql)->queryAll();
-        $stories = ArrayHelper::getColumn($stories, 'store_rid');
+        $allMapTableName = DBNameHelper::getApiName().'.'.AllMaps::tableName();
+        $orderContentTableName = OrderContent::tableName();
+        $client_id = self::getClientIDcondition($order->client_id, $allMapTableName.'.product_id');
+        $stories = OrderContent::find()
+            ->select("$allMapTableName.store_rid")
+            ->leftJoin($allMapTableName, "$orderContentTableName.product_id = $allMapTableName.product_id and $allMapTableName.service_id = $service_id AND 
+            $allMapTableName.org_id in ($client_id)")
+            ->where("$orderContentTableName.order_id = :order_id", [':order_id' => $order_id])
+            ->groupBy('store_rid')
+            ->asArray()->all();
 
         $contra = iikoAgent::findOne(['vendor_id' => $order->vendor_id]);
 
         $num = (count($stories) > 1) ? 1 : '';
 
         foreach ($stories as $store) {
+            $store = $store['store_rid'];
             $model = new iikoWaybill();
             $model->order_id = $order_id;
             $model->status_id = 1;
@@ -366,7 +365,19 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         if ($mainOrg != $org_id) {
             $dbName = DBNameHelper::getApiName();
-            $client_id = "IF($product_field in (select product_id from $dbName.all_map where service_id = " . Registry::IIKO_SERVICE_ID . " and org_id = $client_id), $client_id, $mainOrg)";
+            $res = AllMaps::find()
+                ->select('product_id')
+                ->where("service_id = " . Registry::IIKO_SERVICE_ID . " and org_id = $client_id")
+                ->asArray()->all();
+
+            $maps = [];
+            foreach ($res as $key => $value) {
+                $maps[] = $value['product_id'];
+            }
+
+            $maps = implode(",", $maps);
+
+            $client_id = "IF($product_field in ($maps), $client_id, $mainOrg)";
         }
 
         return $client_id;
@@ -426,20 +437,21 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         $dbName = DBNameHelper::getApiName();
 
         $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+        $allmapTableName = $dbName . '.'.AllMaps::tableName();
 
         if ($waybillMode !== '0') {
             $client_id = self::getClientIDcondition($this->org, $dbName . '.all_map.product_id');
             if ($this->store_id === null) {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin($dbName . '.all_map', 'order_content.product_id = ' . $dbName . '.all_map.product_id and ' . $dbName . '.all_map.service_id = ' . $service_id . ' and ' . $dbName . '.all_map.org_id in (' . $client_id . ')')
-                    ->andWhere($dbName . '.all_map.store_rid is null')
+                    ->leftJoin($allmapTableName, OrderContent::tableName().".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ('$client_id')")
+                    ->andWhere($allmapTableName.'.store_rid is null')
                     ->all();
             } else {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin($dbName . '.all_map', 'order_content.product_id = ' . $dbName . '.all_map.product_id and ' . $dbName . '.all_map.service_id = ' . $service_id . ' and ' . $dbName . '.all_map.org_id in (' . $client_id . ')')
-                    ->andWhere($dbName . '.all_map.store_rid =' . $this->store_id)
+                    ->leftJoin($allmapTableName, OrderContent::tableName().".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ('$client_id')")
+                    ->andWhere($allmapTableName. '.store_rid =' . $this->store_id)
                     ->all();
             }
         } else {
@@ -449,6 +461,18 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         $transaction = \Yii::$app->db_api->beginTransaction();
         try {
             $taxVat = (iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() != null) ? iikoDicconst::findOne(['denom' => 'taxVat'])->getPconstValue() : 2000;
+            $res = AllMaps::find()
+                ->select('product_id')
+                ->where("service_id = " . $service_id . " and org_id = $client_id")
+                ->asArray()->all();
+
+            $maps = [];
+            foreach ($res as $key => $value) {
+                $maps[] = $value['product_id'];
+            }
+
+            $maps = implode(",", $maps);
+
             foreach ($records as $record) {
                 $wdmodel = new iikoWaybillData();
                 if (($record->into_quantity != null) and ($record->into_price != null) and ($record->into_price_vat != null) and ($record->into_price_sum != null) and ($record->into_price_sum_vat != null) and ($record->vat_product != null) and ($record->quantity == $record->into_quantity)) {
@@ -479,7 +503,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 // New check mapping
                 $client_id = $this->org;
                 if ($wdmodel->org != $this->org) {
-                    $client_id = "IF(product_id in (select product_id from all_map where service_id = ' . $service_id . ' and org_id = $client_id), $client_id, $wdmodel->org)";
+                    $client_id = "IF(product_id in ($maps), $client_id, $wdmodel->org)";
                 }
 
                 $ch = AllMaps::find()

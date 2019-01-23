@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\supp\controllers;
 
+use common\models\Organization;
 use Yii;
 use yii\web\Controller;
 use api\common\models\ApiAccess;
@@ -79,18 +80,20 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $persCat = Yii::$app->db->createCommand('select id from catalog where supp_org_id =' . $org . ' and type = 2 and id=' . $cat_fid)
-                ->queryScalar();
+            $persCat = Catalog::find()
+                ->where("supp_org_id = $org->org and type = 2 and id= $cat_fid")
+                ->one();
 
-            if (!$persCat) {
+            if (!isset($persCat)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Personal catalog not found', $this->ip);
                 return 'Catalog error. Personal catalog not found.';
             }
 
-            $priceModel = CatalogGoods::find()->andwhere('base_goods_id=' . $fid)->andwhere('cat_id=' . $persCat)->one();
+            $priceModel = CatalogGoods::find()->andwhere('base_goods_id=' . $fid)->andwhere('cat_id=' . $persCat->id)->one();
 
             if (!$priceModel) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Item with FID is not found in catalog', $this->ip);
@@ -124,18 +127,20 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $persCat = Yii::$app->db->createCommand('select id from catalog where supp_org_id =' . $org . ' and type = 2 and id=' . $cat_fid)
-                ->queryScalar();
+            $persCat = Catalog::find()
+                ->where("supp_org_id = $org->org and type = 2 and id= $cat_fid")
+                ->one();
 
-            if (!$persCat) {
+            if (!isset($persCat)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Personal catalog not found', $this->ip);
                 return 'Catalog error. Personal catalog not found.';
             }
 
-            $priceModel = CatalogGoods::find()->andwhere('base_goods_id=' . $fid)->andwhere('cat_id=' . $persCat)->one();
+            $priceModel = CatalogGoods::find()->andwhere('base_goods_id=' . $fid)->andwhere('cat_id=' . $persCat->id)->one();
 
             if ($priceModel) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Item with FID exists in catalog already', $this->ip);
@@ -175,18 +180,20 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $persCat = Yii::$app->db->createCommand('select id from catalog where supp_org_id =' . $org . ' and type = 2 and id=' . $cat_fid)
-                ->queryScalar();
+            $persCat = Catalog::find()
+                ->where("supp_org_id = $org->org and type = 2 and id= $cat_fid")
+                ->one();
 
-            if (!$persCat) {
+            if (!isset($persCat)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Personal catalog not found', $this->ip);
                 return 'Catalog error. Personal catalog not found.';
             }
 
-            $priceModel = CatalogGoods::find()->andwhere('base_goods_id=' . $fid)->andwhere('cat_id=' . $persCat)->one();
+            $priceModel = CatalogGoods::find()->andwhere('base_goods_id=' . $fid)->andwhere('cat_id=' . $persCat->id)->one();
 
             if (!$priceModel) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Item with FID is not found', $this->ip);
@@ -221,18 +228,20 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $baseCat = Yii::$app->db->createCommand('select id from catalog where supp_org_id =' . $org . ' and type = 1')
-                ->queryScalar();
+            $baseCat = Catalog::find()
+                ->where("supp_org_id =  $org->org and type = 1")
+                ->scalar();
 
-            if (!$baseCat) {
+            if (!isset($baseCat)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Base catalog not found', $this->ip);
                 return 'Catalog error. Base catalog not found.';
             }
 
-            $priceModel = CatalogBaseGoods::find()->andwhere('id=' . $fid)->andwhere('cat_id=' . $baseCat)->one();
+            $priceModel = CatalogBaseGoods::find()->andwhere('id=' . $fid)->andwhere('cat_id=' . $baseCat->id)->one();
 
             if (!$priceModel) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Item with FID is not found', $this->ip);
@@ -267,19 +276,24 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $persCat = Yii::$app->db->createCommand('select id from catalog where supp_org_id =' . $org . ' and type = 2 and id=' . $cat_fid)
-                ->queryScalar();
+            $persCat = Catalog::find()
+                ->where("supp_org_id = $org->org and type = 2 and id= $cat_fid")
+                ->one();
 
-            if (!$persCat) {
+
+            if (!isset($persCat)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Personal catalog not found', $this->ip);
                 return 'Catalog error. Personal catalog not found.';
             }
 
-            $cats = Yii::$app->db->createCommand('select base_goods_id as fid from catalog_goods where cat_id=' . $cat_fid)
-                ->queryAll();
+            $cats = CatalogGoods::find()
+                ->select('base_goods_id as fid')
+                ->where("cat_id= $cat_fid")
+                ->scalar();
 
             if (!$cats) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Personal catalog is empty', $this->ip);
@@ -307,28 +321,32 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $persCat = Yii::$app->db->createCommand("select id from catalog where supp_org_id =" . $org . " and type = 2 and id=" . $cat_fid)
-                ->queryScalar();
+            $persCat = Catalog::find()
+                ->where("supp_org_id = $org->org and type = 2 and id= $cat_fid")
+                ->one();
 
-            if (!$persCat) {
+
+            if (!isset($persCat)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Personal catalog not found', $this->ip);
                 return 'Catalog error. Personal catalog with this FID not found.';
             }
 
-            $agent = Yii::$app->db->createCommand("select rest_org_id from relation_supp_rest where supp_org_id =" . $org . " and rest_org_id =" . $agent_fid)
-                ->queryScalar();
+            $agent = RelationSuppRest::find()
+                ->where("supp_org_id = $org->org and rest_org_id = $agent_fid")
+                ->one();
 
-            if (!$agent) {
+            if (!isset($agent)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Agent not found', $this->ip);
                 return 'Catalog error. Agent for Personal catalog with this FID not found.';
             }
 
             $catModel = RelationSuppRest::find()
                 ->andwhere('rest_org_id=' . $agent_fid)
-                ->andwhere('supp_org_id=' . $org)
+                ->andwhere('supp_org_id=' . $org->org)
                 ->andwhere('cat_id=' . $cat_fid)
                 ->andwhere('deleted=0')
                 ->one();
@@ -367,28 +385,33 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $persCat = Yii::$app->db->createCommand("select id from catalog where supp_org_id =" . $org . " and type = 2 and id=" . $cat_fid)
-                ->queryScalar();
+            $persCat = Catalog::find()
+                ->where("supp_org_id = $org->org and type = 2 and id= $cat_fid")
+                ->one();
 
-            if (!$persCat) {
+
+            if (!isset($persCat)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Personal catalog not found', $this->ip);
                 return 'Catalog error. Personal catalog with this FID not found.';
             }
 
-            $agent = Yii::$app->db->createCommand("select rest_org_id from relation_supp_rest where deleted = 0 and supp_org_id =" . $org . " and rest_org_id =" . $agent_fid)
-                ->queryScalar();
+            $agent = RelationSuppRest::find()
+                ->select('rest_org_id')
+                ->where("deleted = 0 and supp_org_id  = $org->org and rest_org_id = $agent_fid")
+                ->one();
 
-            if (!$agent) {
+            if (!isset($agent)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Agent not found', $this->ip);
                 return 'Catalog error. Agent for Personal catalog with this FID not found.';
             }
 
             $catModel = RelationSuppRest::find()
                 ->andwhere('rest_org_id=' . $agent_fid)
-                ->andwhere('supp_org_id=' . $org)
+                ->andwhere('supp_org_id=' . $org->org)
                 ->andwhere('cat_id=' . $cat_fid)
                 ->andwhere('deleted=0')
                 ->all();
@@ -401,7 +424,7 @@ class DefaultController extends Controller
             $catModel = new RelationSuppRest;
 
             $catModel->rest_org_id = $agent_fid;
-            $catModel->supp_org_id = $org;
+            $catModel->supp_org_id = $org->org;
             $catModel->cat_id = $cat_fid;
 
             if (!$catModel->save()) {
@@ -430,13 +453,16 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $persCat = Yii::$app->db->createCommand("select id from catalog where supp_org_id =" . $org . " and type = 2 and id=" . $cat_fid)
-                ->queryScalar();
+            $persCat = Catalog::find()
+                ->where("supp_org_id = $org->org and type = 2 and id= $cat_fid")
+                ->one();
 
-            if (!$persCat) {
+
+            if (!isset($persCat)) {
 
                 $res = $this->save_action(__FUNCTION__, $sessionId, 0, 'Personal catalog not found', $this->ip);
                 return 'Catalog error. Personal catalog with this FID not found.';
@@ -483,13 +509,16 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $persCat = Yii::$app->db->createCommand("select id from catalog where supp_org_id =" . $org . " and type = 2 and id=" . $cat_fid)
-                ->queryScalar();
+            $persCat = Catalog::find()
+                ->where("supp_org_id = $org->org and type = 2 and id= $cat_fid")
+                ->one();
 
-            if (!$persCat) {
+
+            if (!isset($persCat)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Personal catalog not found', $this->ip);
                 return 'Catalog error. Personal catalog with this FID not found.';
             }
@@ -528,13 +557,16 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $persCats = Yii::$app->db->createCommand("select count(*) from catalog where supp_org_id =" . $org . " and type = 2 and name='" . $newname . "'")
-                ->queryScalar();
+            $persCats = Catalog::find()
+                ->where("supp_org_id = $org->org  and type = 2 and name = '$newname'")
+                ->one();
 
-            if ($persCats > 0) {
+
+            if (isset($persCats)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Personal catalog: name already exists', $this->ip);
                 return 'Catalog error. Personal catalog with name already exists.';
             }
@@ -542,7 +574,7 @@ class DefaultController extends Controller
             $catModel = new Catalog;
 
             $catModel->type = 2;
-            $catModel->supp_org_id = $org;
+            $catModel->supp_org_id = $org->org;
             $catModel->name = $newname;
             $catModel->status = 1;
 
@@ -571,17 +603,19 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $persCats = Yii::$app->db->createCommand('select id as fid, name, status, created_at, updated_at from catalog where supp_org_id =' . $org . ' and type = 2')
-                ->queryAll();
+            $persCats = Catalog::find()
+                ->where("supp_org_id = $org->org  and type = 2")
+                ->one();
 
-            if (!$persCats) {
+            if (!isset($persCats)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Personal catalogs  not found', $this->ip);
                 return 'Product error. Personal catalog not found.';
             }
-            return $persCats;
+            return $persCats->id;
         } else {
             $this->save_action(__FUNCTION__, $sessionId, 0, 'No active session', $this->ip);
             return 'Session error. Active session is not found.';
@@ -600,32 +634,24 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $baseCat = Yii::$app->db->createCommand('select id from catalog where supp_org_id =' . $org . ' and type = 1')
-                ->queryScalar();
+            $baseCat = Catalog::find()
+                ->where("supp_org_id = $org->org and type = 1")
+                ->one();
 
-            if (!$baseCat) {
+            if (!isset($baseCat)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Base catalog not found', $this->ip);
                 return 'Product error. Base catalog not found.';
             }
 
-            $item = Yii::$app->db->createCommand('select '
-                . ' id as fid,'
-                . ' cat_id as catalog_id,'
-                . ' article,'
-                . ' product,'
-                . ' status,'
-                . ' created_at,'
-                . ' updated_at,'
-                . ' price,'
-                . ' units,'
-                . ' category_id,'
-                . ' ed,'
-                . ' note'
-                . ' from catalog_base_goods where deleted = 0 and supp_org_id =' . $org . ' and cat_id=' . $baseCat . ' and id = ' . $fid)
-                ->queryAll();
+            $item = (new \yii\db\Query())
+                ->select('id as fid, cat_id as catalog_id, article, product, status, created_at, updated_at, price, units, category_id, ed, note')
+                ->from(DBNameHelper::getMainName().'.'.CatalogGoods::tableName() )
+                ->where("deleted = 0 and supp_org_id = $org->org and cat_id= $baseCat->id and id = $fid")
+                ->all();
 
             if (!$item) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Item not found in Base catalog', $this->ip);
@@ -648,21 +674,25 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $baseCat = Yii::$app->db->createCommand('select id from catalog where supp_org_id =' . $org . ' and type = 1')
-                ->queryScalar();
+            $baseCat = Catalog::tableName()
+                ->where("supp_org_id = $org->org  and type = 1")
+                ->one();
 
-            if (!$baseCat) {
+            if (!isset($baseCat)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Base catalog not found', $this->ip);
                 return 'Product error. Base catalog not found.';
             }
 
-            $cats = Yii::$app->db->createCommand('select id as fid from catalog_base_goods where supp_org_id =' . $org . ' and cat_id=' . $baseCat . ' and deleted =0')
-                ->queryAll();
+            $cats = CatalogBaseGoods::find()
+                ->select('id')
+                ->where("supp_org_id = $org->org and cat_id= $baseCat->id and deleted =0")
+                ->scalar();
 
-            if (!$cats) {
+            if (!isset($cats)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Base catalog is empty', $this->ip);
                 return 'Product error. Base catalog is empty.';
             }
@@ -686,19 +716,23 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $baseCat = Yii::$app->db->createCommand('select id from catalog where supp_org_id =' . $org . ' and type = 1')
-                ->queryScalar();
+            $baseCat = Catalog::tableName()
+                ->where("supp_org_id = $org->org  and type = 1")
+                ->one();
 
-            if (!$baseCat) {
+            if (!isset($baseCat)) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Base catalog not found', $this->ip);
                 return 'Product error. Base catalog not found.';
             }
 
-            $item = Yii::$app->db->createCommand('select id from catalog_base_goods where deleted = 0 and cat_id = ' . $baseCat . ' and supp_org_id =' . $org . ' and id=' . $fid)
-                ->queryScalar();
+            $item = CatalogBaseGoods::find()
+                ->select('id')
+                ->where("deleted = 0 and cat_id = $baseCat->id  and supp_org_id = $org->id and id= $fid")
+                ->scalar();
 
             if (!$item) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Item not found in base catalog', $this->ip);
@@ -751,8 +785,10 @@ class DefaultController extends Controller
                 $catview = 'api_category_rus_v';
             }
 
-            $cats = Yii::$app->db_api->createCommand('SELECT fid, denom, ifnull(up,0) as up FROM ' . $catview)
-                ->queryAll();
+            $cats = (new \yii\db\Query())
+                ->select('fid, denom, ifnull(up,0) as up')
+                ->from(DBNameHelper::getMainName(). '.'.$catview )
+                ->all();
 
             $this->save_action(__FUNCTION__, $sessionId, 1, 'OK', $this->ip);
             return $cats;
@@ -773,13 +809,17 @@ class DefaultController extends Controller
     {
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $cats = Yii::$app->db->createCommand('select id as fid, type_id, name, city, address, zip_code,
-          phone, email, website, created_at, updated_at, legal_entity, contact_name from organization 
-          where id in ( select rest_org_id from relation_supp_rest where supp_org_id =' . $org . ')')
-                ->queryAll();
+            $cats = (new \yii\db\Query())
+                ->select('id as fid, type_id, name, city, address, zip_code,
+          phone, email, website, created_at, updated_at, legal_entity, contact_name from organization')
+                ->from(DBNameHelper::getMainName(). '.'.Organization::tableName())
+                ->where("id in ( select rest_org_id from ".RelationSuppRest::tableName()." where supp_org_id = $org )")
+                ->all();
+
             $this->save_action(__FUNCTION__, $sessionId, 1, 'OK', $this->ip);
             return $cats ? $cats : 'No agents found!';
         } else {
@@ -809,11 +849,14 @@ class DefaultController extends Controller
 
         if ($sess = $this->check_session($sessionId, $nonce)) {
 
-            $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="' . $sessionId . '");')
-                ->queryScalar();
+            $org = ApiAccess::find()
+                ->where("id = (select acc from api_session where token ='$sessionId')")
+                ->one();
 
-            $baseCat = Yii::$app->db->createCommand('select id from catalog where supp_org_id =' . $org . ' and type = 1')
-                ->queryScalar();
+            $baseCat = Catalog::find()
+                ->select('id')
+                ->where("supp_org_id = $org->org and type = 1")
+                ->scalar();
 
             if (!$baseCat) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Base catalog is not found', $this->ip);
@@ -822,16 +865,18 @@ class DefaultController extends Controller
 
             $clearProduct = "'" . str_replace('"', '`', $product) . "'";
 
-            $countProd = Yii::$app->db->createCommand('select count(*) from catalog_base_goods where product =' . $clearProduct . 'and cat_id=' . $baseCat . " and deleted =0")
-                ->queryScalar();
+            $countProd = CatalogBaseGoods::find()
+                ->where("product = '$clearProduct' and cat_id= $baseCat and deleted =0")
+                ->count();
 
             if ($countProd > 0) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Product name exists', $this->ip);
                 return 'Product error. Name already exists.';
             }
 
-            $countArt = Yii::$app->db->createCommand("select count(*) from catalog_base_goods where article ='" . $article . "'and cat_id=" . $baseCat . " and deleted = 0")
-                ->queryScalar();
+            $countArt = CatalogGoods::find()
+                ->where("article = '$article' and cat_id= $baseCat and deleted =0")
+                ->count();
 
             if ($countArt > 0) {
                 $this->save_action(__FUNCTION__, $sessionId, 0, 'Product art exists', $this->ip);
@@ -849,7 +894,7 @@ class DefaultController extends Controller
             $goodsModel->market_place = 0;
             $goodsModel->status = 1;
             $goodsModel->ed = Yii::t('app', MpEd::find()->andwhere('id='.$units_fid)->one()->name);
-            $goodsModel->supp_org_id = $org;
+            $goodsModel->supp_org_id = $org->org;
             $goodsModel->es_status = 1;
             $goodsModel->category_id = $category_fid;
 
@@ -883,8 +928,10 @@ class DefaultController extends Controller
                 $catview = 'api_units_rus_v';
             }
 
-            $cats = Yii::$app->db_api->createCommand('SELECT fid, denom FROM ' . $catview)
-                ->queryAll();
+            $cats = (new \yii\db\Query())
+                ->select('fid, denom')
+                ->from(DBNameHelper::getMainName(). '.'. $catview )
+                ->all();
 
             $this->save_action(__FUNCTION__, $sessionId, 1, 'OK', $this->ip);
             return $cats;

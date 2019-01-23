@@ -110,22 +110,42 @@ class IntegrationWebApi extends WebApi
             if ($outerAgent) {
                 $outerAgentId = $outerAgent->id;
             }
-            $outerStore = OuterStore::find()->where(['org_id' => $organizationID])->andWhere('outer_store.right - outer_store.left = 1')->orderBy('outer_store.left')->one();
-
-            if ($outerStore) {
-                $outerStoreId = $outerStore->id;
+            $outerStoreId = null;
+            if (isset($post['service_id'])) {
+                $outerAgentTable = OuterAgent::tableName();
+                $outerStoreTable = OuterStore::tableName();
+                $outerStore = OuterStore::find()
+                    ->leftJoin($outerAgentTable, "$outerAgentTable.store_id=$outerStoreTable.id")
+                    ->where([
+                        "$outerStoreTable.org_id"     => $organizationID,
+                        "$outerStoreTable.service_id" => (int)$post['service_id'],
+                        "$outerStoreTable.is_deleted" => OuterStore::IS_DELETED_FALSE,
+                        "$outerAgentTable.org_id"     => $organizationID,
+                        "$outerAgentTable.vendor_id"  => $order->vendor_id,
+                        "$outerAgentTable.is_deleted" => OuterAgent::IS_DELETED_FALSE
+                    ])
+                    ->andWhere("$outerStoreTable.right - $outerStoreTable.left = 1")
+                    ->andWhere("$outerAgentTable.store_id > 0")
+                    ->orderBy("$outerStoreTable.left")
+                    ->one();
+                if ($outerStore) {
+                    $outerStoreId = $outerStore->id;
+                }
             }
 
             $orderContent = OrderContent::findOne(['order_id' => $order->id]);
+            $h = new WaybillHelper();
+            $separator = $h->getEdiNumberSeparator((int)$post['service_id']);
+
             if ($orderContent->edi_number) {
                 $tmp_ed_num = $orderContent->edi_number;
                 $existWaybill = Waybill::find()->where(['like', 'outer_number_code', $tmp_ed_num])
-                    ->andWhere(['service_id' => $post['service_id']])
+                    ->andWhere(['service_id' => (int)$post['service_id']])
                     ->orderBy(['outer_number_code' => SORT_DESC])->limit(1)->one();
                 if ($existWaybill && $existWaybill->outer_number_code) {
-                    $ediNumber = WaybillHelper::getLastEdiNumber($existWaybill->outer_number_code, $tmp_ed_num);
+                    $ediNumber = $h->getLastEdiNumber($existWaybill->outer_number_code, $tmp_ed_num, $separator);
                 } else {
-                    $ediNumber = $orderContent->edi_number . "-1";
+                    $ediNumber = $orderContent->edi_number . $separator . "1";
                 }
             } else {
                 $waybillsCount = count($order->getWaybills($post['service_id']));
@@ -134,7 +154,7 @@ class IntegrationWebApi extends WebApi
                 } else {
                     $waybillsCount++;
                 }
-                $ediNumber = $post['order_id'] . "-" . $waybillsCount;
+                $ediNumber = $post['order_id'] . $separator . $waybillsCount;
             }
         }
 

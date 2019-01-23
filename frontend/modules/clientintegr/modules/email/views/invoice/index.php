@@ -241,7 +241,7 @@ $this->registerJs('
                                     if (!$data->order_id) {
                                         return $data->number;
                                     } else {
-                                        $page = \common\models\IntegrationInvoice::pageOrder($data->order_id);
+                                        $page = $data->getOrderPage();
                                         return (!empty($data->order_id) && isset($link)) ? \yii\helpers\Html::a($data->number, ['/clientintegr/' . $link . '/waybill/index', 'way' => $data->order_id, 'page' => $page]) : $data->number;
                                     }
                                 }

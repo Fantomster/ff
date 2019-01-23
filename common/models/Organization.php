@@ -825,6 +825,15 @@ class Organization extends \yii\db\ActiveRecord
         $roleId = Yii::$app->getUser()->identity->role->id;
         $userId = Yii::$app->user->id;
 
+        $tblOrderChat = OrderChat::tableName();
+        $tblOrder = Order::tableName();
+        $tblMA = ManagerAssociate::tableName();
+        
+        $subQuery = (new Query())
+                ->select([new \yii\db\Expression("MIN($tblOrderChat.id) AS id"), "$tblOrderChat.order_id"])
+                ->from($tblOrderChat)
+                ->where(["$tblOrderChat.recipinet_id" => $this->id, "$tblOrderChat.is_system" => 0, "$tblOrderChat.viewed" => 0])
+                ->groupBy("$tblOrderChat.order_id");
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
             $sql = 'SELECT order_chat.*, ord.client_id AS vid, ma.manager_id FROM order_chat INNER JOIN '
                 . '(SELECT MIN(order_chat.id) AS id, order_chat.order_id FROM order_chat '
@@ -836,6 +845,12 @@ class Organization extends \yii\db\ActiveRecord
                 . 'LEFT JOIN manager_associate AS ma ON ord.client_id = ma.organization_id '
                 . 'WHERE ma.manager_id = ' . $userId . ' '
                 . 'ORDER BY order_chat.created_at DESC';
+            $query = OrderChat::find()
+                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                    ->leftJoin(["ord" => $tblOrder], "ord.id = $tblOrderChat.order_id")
+                    ->leftJoin(["ma" => $tblMA], "ord.client_id = ma.organization_id")
+                    ->where(["ma.manager_id" => $userId])
+                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         } else {
             $sql = 'SELECT order_chat.* FROM order_chat INNER JOIN '
                 . '(SELECT MIN(order_chat.id) AS id, order_chat.order_id FROM order_chat '

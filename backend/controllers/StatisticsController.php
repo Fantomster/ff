@@ -140,7 +140,7 @@ class StatisticsController extends Controller
             ->where("($userTable.status=1) AND 
                     ($orgTable.created_at BETWEEN :dateFrom AND :dateTo) AND 
                     $orgTable.blacklisted = 0",
-                        [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')])
+                [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')])
             ->groupBy("YEAR($orgTable.created_at), MONTH($orgTable.created_at), DAY($orgTable.created_at)")
             ->all();
 
@@ -243,48 +243,57 @@ class StatisticsController extends Controller
         $totalCountThisMonth = $ordersStatThisMonth["count"];
         unset($ordersStatThisMonth["count"]);
 
-        $query = "select " . $select . " from $orderTable left join $orgTable on $orderTable.client_id=$orgTable.id "
-            . "where $orgTable.blacklisted = 0 and $orderTable.created_at > '$thisDayStart'" . " and status <> " . OrderStatus::STATUS_FORMING;
-        $command = Yii::$app->db->createCommand($query);
-        $ordersStatThisDay = $command->queryAll()[0];
+        $ordersStatThisDay = (new Query())->select($select)->from($orderTable)
+            ->leftJoin($orgTable, "$orderTable.client_id=$orgTable.id")
+            ->where(["$orgTable.blacklisted" => 0])
+            ->andWhere([">", "$orderTable.created_at", $thisDayStart])
+            ->andWhere(["<>", "$orderTable.status", OrderStatus::STATUS_FORMING])
+            ->all()[0];
 
         $totalCountThisDay = $ordersStatThisDay["count"];
         unset($ordersStatThisDay["count"]);
 
-        $query = "select aa.count as total, bb.first as first, aa.year as year, aa.month as month, aa.day as day 
-            from (SELECT count($orderTable.id) as count,year($orderTable.created_at) as year, month($orderTable.created_at) as month, day($orderTable.created_at) as day FROM $orderTable left join $orgTable on $orderTable.client_id=$orgTable.id where $orgTable.blacklisted=0 and $orderTable.status <> 7 and $orderTable.created_at BETWEEN :dateFrom AND :dateTo group by year($orderTable.created_at), month($orderTable.created_at), day($orderTable.created_at)) aa 
-            left outer join (select count(b.id) as first,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day from (select * from $orderTable a where a.status <> 7 and a.created_at BETWEEN :dateFrom AND :dateTo group by a.client_id order by a.id) b group by year(b.created_at), month(b.created_at), day(b.created_at)) bb
-            on aa.year = bb.year and aa.month=bb.month and aa.day=bb.day";
-        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
-        $ordersByDay = $command->queryAll();
         $fromSelect = (new Query())->select("count($orderTable.id) as count,
                 year($orderTable.created_at) as year, 
                 month($orderTable.created_at) as month, 
                 day($orderTable.created_at) as day")
             ->from($orderTable)
             ->leftJoin($orgTable, "$orderTable.client_id=$orgTable.id")
-            ->where(["$orgTable.blacklisted" => ':q0'])
-            ->andWhere(["<>", "$orderTable.status", 'q1'])
-            ->andWhere(['BETWEEN', "$orderTable.created_at", ':dateFrom', ':dateTo'])
-            ->groupBy(["year($orderTable.created_at)", "month($orderTable.created_at)", "day($orderTable.created_at)"])
-            ->params([':dateFrom' => $dt->format('Y-m-d'),
-                      ':dateTo' => $end->format('Y-m-d'),
-                      ':q0' => 0,
-                      ':q1' => 7
-                ])
+            ->where(["<>", "$orderTable.status", ':qp0'])
+            ->andWhere(['BETWEEN', "$orderTable.created_at", ':qp1', ':qp2'])
+            ->andWhere(["$orgTable.blacklisted" => ':qp3'])
+            ->groupBy(["year($orderTable.created_at)",
+                "month($orderTable.created_at)",
+                "day($orderTable.created_at)"])
             ->createCommand()->sql;
-        //dd($fromSelect);
+
+        $leftJoinInnerSelect = (new Query())->select("*")
+            ->from("$orderTable a")
+            ->where(["<>", "a.status", ':qp0'])
+            ->andWhere(['BETWEEN', "a.created_at", ':qp1', ':qp2'])
+            ->groupBy(["a.client_id"])
+            ->orderBy("a.id")
+            ->createCommand()->sql;
+
+        $leftJoinOuterSelect = (new Query())->select("count(b.id) as first,
+                year(b.created_at) as year, 
+                month(b.created_at) as month, 
+                day(b.created_at) as day")
+            ->from("($leftJoinInnerSelect) b")
+            ->groupBy(["year(b.created_at)",
+                "month(b.created_at)",
+                "day(b.created_at)"])
+            ->createCommand()->sql;
 
         $ordersByDay = (new Query())->select("aa.count as total, bb.first as first, aa.year as year, aa.month as month, aa.day as day")
             ->from("($fromSelect) aa")
-            ->leftJoin("(select count(b.id) as first,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day from (select * from $orderTable a where a.status <> 7 and a.created_at BETWEEN :dateFrom AND :dateTo group by a.client_id order by a.id) b group by year(b.created_at), month(b.created_at), day(b.created_at)) bb", "aa.year = bb.year and aa.month=bb.month and aa.day=bb.day")
-            ->params([':dateFrom' => $dt->format('Y-m-d'),
-                      ':dateTo' => $end->format('Y-m-d'),
-                      ':q0' => 0,
-                      ':q1' => 7
-            ]);
-
-        dd($ordersByDay);
+            ->leftJoin("($leftJoinOuterSelect) bb", "aa.year = bb.year and aa.month=bb.month and aa.day=bb.day")
+            ->params([
+                ':qp0' => 7,
+                ':qp1' => $dt->format('Y-m-d'),
+                ':qp2' => $end->format('Y-m-d'),
+                ':qp3' => 0,
+            ])->all();
 
         $dayLabels = [];
         $dayStats = [];
@@ -349,12 +358,30 @@ class StatisticsController extends Controller
         $end = $dtEnd->add(new \DateInterval('P1D'));
         $date = $dt->format('Y-m-d');
 
-        $query = "SELECT truncate(sum($orderTable.total_price),1) as spent,truncate(sum($orderTable.total_price)/count($orderTable.id),1) as cheque, year($orderTable.created_at) as year, month($orderTable.created_at) as month, day($orderTable.created_at) as day "
-            . "FROM $orderTable LEFT JOIN $orgTable ON $orderTable.client_id = $orgTable.id "
-            . "where $orderTable.status in (" . OrderStatus::STATUS_PROCESSING . "," . OrderStatus::STATUS_DONE . "," . OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") and $orgTable.blacklisted = 0 and $orderTable.created_at between :dateFrom and :dateTo "
-            . "group by year($orderTable.created_at), month($orderTable.created_at), day($orderTable.created_at)";
-        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
-        $ordersByDay = $command->queryAll();
+        $ordersByDay = (new Query())->select([
+            "spent"  => "truncate(sum($orderTable.total_price), 1)",
+            "cheque" => "truncate(sum($orderTable.total_price)/count($orderTable.id),1)",
+            "year"   => "year($orderTable.created_at)",
+            "month"  => "month($orderTable.created_at)",
+            "day"    => "day($orderTable.created_at)"
+        ])
+            ->from($orderTable)
+            ->leftJoin($orgTable, "$orderTable.client_id = $orgTable.id")
+            ->where(['in', "$orderTable.status", [
+                OrderStatus::STATUS_PROCESSING,
+                OrderStatus::STATUS_DONE,
+                OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR
+            ]])
+            ->andWhere(["$orgTable.blacklisted" => 0])
+            ->andWhere(["BETWEEN", "$orderTable.created_at", $dt->format('Y-m-d'), $end->format('Y-m-d')])
+            ->groupBy([
+                "year($orderTable.created_at)",
+                "month($orderTable.created_at)",
+                "day($orderTable.created_at)"
+            ])
+            ->all();
+
         $dayLabels = [];
         $dayTurnover = [];
         $dayCheque = [];

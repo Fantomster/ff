@@ -181,8 +181,9 @@ class iikoApi
                 ->select('value')
                 ->innerJoin(OuterProductTypeSelected::tableName() . " opts", 'opts.outer_product_type_id = t.id')
                 ->where([
-                    'service_id'  => Registry::IIKO_SERVICE_ID,
-                    'opts.org_id' => $this->orgId
+                    'service_id'    => Registry::IIKO_SERVICE_ID,
+                    'opts.org_id'   => $this->orgId,
+                    'opts.selected' => 1
                 ])->column();
 
             foreach ($result['productDto'] as $item) {

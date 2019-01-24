@@ -846,20 +846,16 @@ SQL;
         $vi = $lic ? 'update' : '/default/_nolic';
 
         if ($model->load(Yii::$app->request->post())) {
-            /*if ($model->getErrors()) {
-                var_dump($model->getErrors());
-                exit;
-            }*/
 
             $existingWaybill = RkWaybill::find()->where(['order_id' => $model->order_id, 'store_rid' => $model->store_rid])->andWhere(['!=', 'id', $id])->one();
             if (!empty($existingWaybill)) {
                 $model = RkWaybill::moveContentToExistingWaybill($model, $existingWaybill);
             }
 
-            if ($model->corr_rid === 0) {
+            if ($model->corr_rid == 0) {
                 $model->corr_rid = null;
             }
-            if ($model->store_rid === 0) {
+            if ($model->store_rid == 0) {
                 $model->store_rid = null;
             }
             $sql = "SELECT COUNT(*) FROM rk_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";

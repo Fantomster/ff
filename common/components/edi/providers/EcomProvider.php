@@ -35,6 +35,7 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
     private $pass;
     private $glnCode;
     private $orgID;
+    private $remoteFile;
 
     /**
      * Provider constructor.
@@ -96,7 +97,7 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
             }
             $string = $this->realization->getSendingOrderContent($order, $done, $dateArray, $orderContent);
             $result = $this->sendDoc($string, $done, $order);
-            $order->updateAttributes(['edi_order' => $order->id]);
+            $order->updateAttributes(['edi_order' => $this->remoteFile ?? $order->id]);
             $transaction->commit();
         } catch (Exception $e) {
             $transaction->rollback();
@@ -117,9 +118,9 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
     {
         $currentDate = date("Ymdhis");
         $fileName = $done ? 'recadv_' : 'order_';
-        $remoteFile = $fileName . $currentDate . '_' . $order->id . '.xml';
+        $this->remoteFile = $fileName . $currentDate . '_' . $order->id . '.xml';
 
-        $obj = $this->client->sendDoc(['user' => ['login' => $this->login, 'pass' => $this->pass], 'fileName' => $remoteFile, 'content' => $string]);
+        $obj = $this->client->sendDoc(['user' => ['login' => $this->login, 'pass' => $this->pass], 'fileName' => $this->remoteFile, 'content' => $string]);
         if (isset($obj) && isset($obj->result->errorCode) && $obj->result->errorCode == 0) {
             return true;
         } else {

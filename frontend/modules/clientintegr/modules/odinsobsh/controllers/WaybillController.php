@@ -593,7 +593,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 var_dump($model->getErrors());
                 exit;
             }*/
-            if ($model->agent_uuid == 0) {
+            if ($model->agent_uuid == '') {
                 $model->agent_uuid = null;
             }
             if ($model->store_id == 0) {

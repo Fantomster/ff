@@ -2,10 +2,6 @@
 
 namespace frontend\modules\clientintegr\modules\odinsobsh\controllers;
 
-use api\common\models\iiko\iikoDicconst;
-use api\common\models\iiko\iikoPconst;
-use api\common\models\iiko\iikoService;
-use api\common\models\iiko\search\iikoDicconstSearch;
 use api\common\models\one_s\OneSDicconst;
 use api\common\models\one_s\OneSPconst;
 use api\common\models\one_s\OneSService;
@@ -21,12 +17,11 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
     protected $authenticated = false;
     public $organisation_id;
 
-
     public function beforeAction($action)
     {
         $this->organisation_id = Organization::findOne(User::findOne(Yii::$app->user->id)->organization_id);
 
-        if(empty($this->organisation_id)) {
+        if (empty($this->organisation_id)) {
             return false;
         }
 
@@ -44,15 +39,15 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         $vi = $lic ? 'index' : '/default/_nolic';
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
-                'searchModel' => $searchModel,
+                'searchModel'  => $searchModel,
                 'dataProvider' => $dataProvider,
-                'lic' => $lic,
+                'lic'          => $lic,
             ]);
         } else {
             return $this->render($vi, [
-                'searchModel' => $searchModel,
+                'searchModel'  => $searchModel,
                 'dataProvider' => $dataProvider,
-                'lic' => $lic,
+                'lic'          => $lic,
             ]);
         }
     }
@@ -88,7 +83,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         } else {
             $dicConst = OneSDicconst::findOne(['id' => $pConst->const_id]);
             return $this->render($vi, [
-                'model' => $pConst,
+                'model'    => $pConst,
                 'dicConst' => $dicConst,
             ]);
         }

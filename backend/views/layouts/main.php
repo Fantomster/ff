@@ -230,6 +230,10 @@ if ($countSettingChange > 0) {
                             'label' => 'Валюты',
                             'url'   => ['/currency/index'],
                         ],
+                        [
+                            'label' => 'Ставки налогов',
+                            'url'   => ['/vats/index'],
+                        ],
                     ],
                 ],
             ]);

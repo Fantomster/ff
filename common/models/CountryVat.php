@@ -2,18 +2,21 @@
 
 namespace common\models;
 
+use common\models\vetis\VetisCountry;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "country_vat".
  *
- * @property int    $id
- * @property string $uuid
- * @property string $vats
- * @property string $created_at
- * @property string $updated_at
- * @property int    $created_by_id
- * @property int    $updated_by_id
+ * @property int          $id
+ * @property string       $uuid
+ * @property string       $vats
+ * @property string       $created_at
+ * @property string       $updated_at
+ * @property int          $created_by_id
+ * @property int          $updated_by_id
+ * @property VetisCountry $country
  */
 class CountryVat extends \yii\db\ActiveRecord
 {
@@ -38,9 +41,10 @@ class CountryVat extends \yii\db\ActiveRecord
     {
         return [
             [['uuid', 'vats'], 'required'],
-            [['id', 'uuid', 'created_by_id', 'updated_by_id'], 'integer'],
+            [['id', 'created_by_id', 'updated_by_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['uuid', 'vats'], 'string']
+            [['uuid', 'vats'], 'string'],
+            [['country'], 'exist', 'skipOnError' => true, 'targetClass' => VetisCountry::className(), 'targetAttribute' => ['uuid' => 'uuid']],
         ];
     }
 
@@ -73,6 +77,36 @@ class CountryVat extends \yii\db\ActiveRecord
                 'value'              => \gmdate('Y-m-d H:i:s'),
             ],
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCountry()
+    {
+        return $this->hasOne(VetisCountry::class, ['uuid' => 'uuid']);
+    }
+
+    /** Возвращает массив стран, у которых не указан перечень ставок налогов
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getListNotVatCountries()
+    {
+        $ListVatCountries = CountryVat::find()->select('uuid')->column();
+        $ListNotVatCountries = VetisCountry::find()->where(['not in', 'uuid', $ListVatCountries])->andWhere(['active' => 1])->orderBy('name')->all();
+        return $ListNotVatCountries;
+    }
+
+    /** Возвращает количество стран, у которых не указан перечень ставок налогов
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCountNotVatCountries()
+    {
+        $ListVatCountries = CountryVat::find()->select('uuid')->column();
+        $CountNotVatCountries = VetisCountry::find()->where(['not in', 'uuid', $ListVatCountries])->andWhere(['active' => 1])->count();
+        return $CountNotVatCountries;
     }
 
 }

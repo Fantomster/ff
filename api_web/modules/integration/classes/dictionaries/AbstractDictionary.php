@@ -741,7 +741,9 @@ class AbstractDictionary extends WebApi implements DictionaryInterface
             ])
             ->where([
                 'opt.service_id' => $this->service_id
-            ])->asArray();
+            ])
+            ->asArray()
+            ->orderBy(['opt.id' => SORT_ASC]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $search

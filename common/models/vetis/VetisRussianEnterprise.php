@@ -12,9 +12,9 @@ use Yii;
  *
  * @property string $uuid
  * @property string $guid
- * @property int $last
- * @property int $active
- * @property int $type
+ * @property int    $last
+ * @property int    $active
+ * @property int    $type
  * @property string $next
  * @property string $previous
  * @property string $name
@@ -25,8 +25,6 @@ use Yii;
  * @property object $enterprise
  * @property string $owner_guid
  * @property string $owner_uuid
- * 
- * @property object $enterprise
  */
 class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
@@ -109,7 +107,7 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
             //Проверяем наличие записи для очереди в таблице консюмеров abaddon и создаем новую при необходимогсти
             $queue = RabbitQueues::find()->where(['consumer_class_name' => 'MercRussianEnterpriseList'])->one();
             if ($queue == null) {
-                $queue                      = new RabbitQueues();
+                $queue = new RabbitQueues();
                 $queue->consumer_class_name = 'MercRussianEnterpriseList';
                 $queue->save();
             }
@@ -117,16 +115,16 @@ class VetisRussianEnterprise extends \yii\db\ActiveRecord implements UpdateDictI
             //Формируем данные для запроса
             $data['method'] = 'getRussianEnterpriseChangesList';
             $data['struct'] = ['listName'     => 'enterpriseList',
-                'listItemName' => 'enterprise'
+                               'listItemName' => 'enterprise'
             ];
 
-            $listOptions['count']  = 1000;
+            $listOptions['count'] = 1000;
             $listOptions['offset'] = 0;
 
             $queueDate = $queue->last_executed ?? $queue->start_executing;
 
-            $startDate       = gmdate("Y-m-d H:i:s", time() - 60*60*24*80); //!isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
-            $instance        = cerberApi::getInstance($org_id);
+            $startDate = gmdate("Y-m-d H:i:s", time() - 60 * 60 * 24 * 80); //!isset($queueDate) ? date("Y-m-d H:i:s", mktime(0, 0, 0, 1, 1, 2000)) : $queueDate;
+            $instance = cerberApi::getInstance($org_id);
             $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
             if (!empty($queue->organization_id)) {

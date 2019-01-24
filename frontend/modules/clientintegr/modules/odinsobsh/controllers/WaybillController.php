@@ -593,10 +593,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 var_dump($model->getErrors());
                 exit;
             }*/
-            if ($model->agent_uuid === 0) {
+            if ($model->agent_uuid == 0) {
                 $model->agent_uuid = null;
             }
-            if ($model->store_id === 0) {
+            if ($model->store_id == 0) {
                 $model->store_id = null;
             }
             $sql = "SELECT COUNT(*) FROM one_s_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";

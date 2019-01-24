@@ -667,10 +667,10 @@ SQL;
                 $model = iikoWaybill::moveContentToExistingWaybill($model, $existingWaybill);
             }
 
-            if ($model->agent_uuid === 0) {
+            if ($model->agent_uuid == 0) {
                 $model->agent_uuid = null;
             }
-            if ($model->store_id === 0) {
+            if ($model->store_id == 0) {
                 $model->store_id = null;
             }
             $sql = "SELECT COUNT(*) FROM iiko_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";

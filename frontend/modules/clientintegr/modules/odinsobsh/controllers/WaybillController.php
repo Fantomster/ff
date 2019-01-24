@@ -3,7 +3,6 @@
 namespace frontend\modules\clientintegr\modules\odinsobsh\controllers;
 
 use api\common\models\one_s\OneSContragent;
-use api\common\models\one_s\OneSDicconst;
 use api\common\models\one_s\OneSGood;
 use api\common\models\one_s\OneSPconst;
 use api\common\models\one_s\OneSStore;
@@ -11,7 +10,6 @@ use api\common\models\OneSWaybillDataSearch;
 use api\common\models\VatData;
 use common\models\Order;
 use common\models\Organization;
-use common\models\search\OrderSearch;
 use Yii;
 use common\models\User;
 use yii\db\Connection;
@@ -595,6 +593,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 var_dump($model->getErrors());
                 exit;
             }*/
+            if ($model->agent_uuid === 0) {
+                $model->agent_uuid = null;
+            }
+            if ($model->store_id === 0) {
+                $model->store_id = null;
+            }
             $sql = "SELECT COUNT(*) FROM one_s_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
             $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
             if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->store_id === null)) {

@@ -565,6 +565,12 @@ return $out;
         $lic = TillypadService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            if ($model->agent_uuid === 0) {
+                $model->agent_uuid = null;
+            }
+            if ($model->store_id === 0) {
+                $model->store_id = null;
+            }
             $sql = "SELECT COUNT(*) FROM iiko_waybill_data WHERE waybill_id = :w_wid AND product_rid IS NULL";
             $kolvo_nesopost = Yii::$app->db_api->createCommand($sql, [':w_wid' => $model->id])->queryScalar();
             if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_id === null)) {

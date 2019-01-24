@@ -586,7 +586,7 @@ class WaybillHelper
         $journal->type = $type;
         $journal->log_guide = 'CreateWaybill';
         $journal->organization_id = $orgId;
-        $journal->user_id = \Yii::$app instanceof \Yii\web\Application ? $this->user->id : null;
+        $journal->user_id = (\Yii::$app instanceof \Yii\web\Application && isset($this->user->id)) ? $this->user->id : null;
         $journal->operation_code = (string)(Registry::$operation_code_send_waybill[$service_id] ?? 0);
         if (!$journal->save()) {
             throw new ValidationException($journal->getFirstErrors());

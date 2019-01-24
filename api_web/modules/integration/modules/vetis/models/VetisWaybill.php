@@ -457,7 +457,7 @@ class VetisWaybill extends WebApi
                 $error = $model->description;
             }
             $this->helper->setLastError($error, $request['uuid']);
-            throw new BadRequestHttpException($error);
+            throw new BadRequestHttpException('Error getting data on regionalization');
         }
 
         return $result;

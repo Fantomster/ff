@@ -172,10 +172,11 @@ class AbstractDictionary extends WebApi implements DictionaryInterface
     private function prepareProduct(OuterProduct $model)
     {
         return [
-            'id'        => (int)$model->id,
-            'name'      => $model->name,
-            'unit'      => !empty($model->outerUnit) ? $model->outerUnit->name : '',
-            'is_active' => (int)!$model->is_deleted
+            'id'           => (int)$model->id,
+            'name'         => $model->name,
+            'unit'         => !empty($model->outerUnit) ? $model->outerUnit->name : '',
+            'product_type' => !empty($model->outerProductType) ? $model->outerProductType->comment : '',
+            'is_active'    => (int)!$model->is_deleted
         ];
     }
 

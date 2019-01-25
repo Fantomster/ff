@@ -16,6 +16,8 @@ use common\models\Organization;
 use common\models\CatalogBaseGoods;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
+use common\models\CountryVat;
+use Yii;
 
 /**
  * Class CartWebApi
@@ -539,6 +541,15 @@ class CartWebApi extends \api_web\components\WebApi
         foreach ($items as $item) {
             yield $item;
         }
+    }
+
+    public function getVatsByOrganization()
+    {
+        $org_id = $this->user->organization_id;
+        $uuid = Organization::find()->select('vetis_country_uuid')->where(['id' => $org_id])->scalar();
+        $vats_string = CountryVat::find()->select('vats')->where(['uuid' => $uuid])->scalar();
+        $vats_array = explode(';', $vats_string);
+        return $vats_array;
     }
 
 }

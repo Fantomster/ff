@@ -734,6 +734,7 @@ class ServiceRkws extends AbstractSyncFactory
     /**
      * @param array $request
      * @return array
+     * @throws BadRequestHttpException
      */
     public function checkConnect($request = [])
     {
@@ -760,7 +761,7 @@ class ServiceRkws extends AbstractSyncFactory
             }
             return ['result' => true];
         } catch (\Exception $e) {
-            return ['result' => false, 'message' => $e->getMessage()];
+            throw new BadRequestHttpException($e->getMessage());
         }
     }
 

@@ -548,7 +548,11 @@ class CartWebApi extends \api_web\components\WebApi
         $org_id = $this->user->organization_id;
         $model_org = Organization::find()->where(['id' => $org_id])->one();
         $model_vats = CountryVat::find()->where(['uuid' => $model_org->uuid])->one();
-        ($model_vats) ? $vats_array = explode(';', $model_vats->vats) : $vats_array = Registry::$nds_list;
+        if ($model_vats) {
+            $vats_array = explode(';', $model_vats->vats);
+        } else {
+            $vats_array = array_values(Registry::$nds_list);
+        }
         return $vats_array;
     }
 

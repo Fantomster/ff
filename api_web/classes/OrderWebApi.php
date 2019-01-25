@@ -3,7 +3,7 @@
 namespace api_web\classes;
 
 use api_web\components\{
-    ExcelRenderer, Registry, WebApiController
+    ExcelRenderer, Registry, WebApiController, WebApi
 };
 use api_web\components\notice_class\OrderNotice;
 use api_web\helpers\{
@@ -17,7 +17,6 @@ use common\models\{
     OrderContent,
     OrderStatus,
     RelationSuppRest,
-    Role,
     Order,
     Organization
 };
@@ -33,7 +32,6 @@ use yii\data\{
 use yii\db\{
     Expression, Query
 };
-use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
 
@@ -42,7 +40,7 @@ use api_web\exceptions\ValidationException;
  *
  * @package api_web\classes
  */
-class OrderWebApi extends \api_web\components\WebApi
+class OrderWebApi extends WebApi
 {
     /**
      * Редактирование заказа
@@ -717,6 +715,10 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('order_not_found');
             }
             $organizationID = $this->user->organization_id;
+            /*todo_refactoring: method $this->checkUnconfirmedVendorAccess()
+                passing id, but always you have initialized Order object, and in method you always again create obj
+                and get data from DB, so very bad for App
+            */
             if ($this->checkUnconfirmedVendorAccess($order->id, $organizationID, $this->user->status)) {
                 $searchSupplier = $organizationID;
                 $client = Organization::findOne(['id' => $order->client_id]);
@@ -830,6 +832,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $this->validateRequest($post, ['order_id']);
 
             $order = Order::findOne(['id' => $post['order_id']]);
+            //todo_refactoring: $this->checkUnconfirmedVendorAccess
             if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
                 $suppliers = [$this->user->organization_id];
                 $organizationID = $order->client_id;
@@ -856,6 +859,7 @@ class OrderWebApi extends \api_web\components\WebApi
         foreach ($query as $id) {
 
             if ($id == 0) {
+                //todo_refactoring: uniqid()
                 $return[9999] = [
                     'id'            => (int)$id,
                     'name'          => 'Без категории',
@@ -892,10 +896,8 @@ class OrderWebApi extends \api_web\components\WebApi
 
         //Сортируем по ключу
         ksort($return);
-        //Убиваем ключи сортировки
-        $return = array_values($return);
 
-        return $return;
+        return array_values($return);
     }
 
     /**

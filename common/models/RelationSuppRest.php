@@ -66,7 +66,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
                 },
             ],
             [
-                'class'     => UploadBehavior::className(),
+                'class'     => UploadBehavior::class,
                 'attribute' => 'uploaded_catalog',
                 'scenarios' => ['default'],
                 'path'      => '@app/web/upload/temp/',
@@ -97,21 +97,8 @@ class RelationSuppRest extends \yii\db\ActiveRecord
             'id'          => 'ID',
             'rest_org_id' => 'Rest Org ID',
             'supp_org_id' => 'Supp Org ID',
-            'cat_id'      => Yii::t('app', 'common.models.catalogue', ['ru' => 'Каталог']),
+            'cat_id'      => \Yii::t('app', 'common.models.catalogue', ['ru' => 'Каталог']),
         ];
-    }
-
-    /**
-     * @return array|Allow[]|AllService[]|Cart[]|Catalog[]|CatalogBaseGoods[]|Category[]|Franchisee[]|FranchiseeGeo[]|FranchiseType[]|Gender[]|IntegrationSettingFromEmail[]|Job[]|MpCategory[]|MpCountry[]|MpEd[]|notifications\EmailNotification[]|Order[]|OrderChat[]|OrganizationType[]|RelationSuppRest[]|User[]|Waybill[]|\yii\db\ActiveRecord[]
-     */
-    public static function GetRelationCatalogs()
-    {
-        $catalog = RelationSuppRest::find()
-            ->select(['id', 'cat_id', 'rest_org_id', 'invite'])
-            ->where(['supp_org_id' => User::getOrganizationUser(Yii::$app->user->id)])
-            ->andWhere(['not', ['cat_id' => null]])
-            ->all();
-        return $catalog;
     }
 
     /**
@@ -174,7 +161,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
      */
     public function getCatalog()
     {
-        return $this->hasOne(Catalog::className(), ['id' => 'cat_id']);
+        return $this->hasOne(Catalog::class, ['id' => 'cat_id']);
     }
 
     /**
@@ -182,7 +169,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
      */
     public function getVendor()
     {
-        return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
+        return $this->hasOne(Organization::class, ['id' => 'supp_org_id']);
     }
 
     /**
@@ -190,7 +177,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
      */
     public function getClient()
     {
-        return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
+        return $this->hasOne(Organization::class, ['id' => 'rest_org_id']);
     }
 
     /**
@@ -198,8 +185,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
      */
     public function getLastOrder()
     {
-        return $this->hasOne(Order::className(), ['vendor_id' => 'supp_org_id', 'client_id' => 'rest_org_id'])
+        return $this->hasOne(Order::class, ['vendor_id' => 'supp_org_id', 'client_id' => 'rest_org_id'])
             ->orderBy([Order::tableName() . ".updated_at" => SORT_DESC]);
     }
-
 }

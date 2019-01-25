@@ -450,15 +450,9 @@ class CatalogWebApi extends WebApi
 
         $this->validateRequest($request, ['vendor_id']);
 
-        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
-
+        $catalog = $this->getPersonalCatalogByVendorId($request['vendor_id'], $this->user->organization);
         if (empty($catalog)) {
             throw new BadRequestHttpException('catalog_not_found');
-        }
-
-        $catalogs = explode(',', $this->user->organization->getCatalogs());
-        if (!in_array($catalog->id, $catalogs)) {
-            throw new BadRequestHttpException('this_is_not_your_catalog');
         }
 
         $selectFields = [
@@ -600,6 +594,35 @@ class CatalogWebApi extends WebApi
             "ed"      => $row['ed'],
             "CountOf" => (int)$row['CountOf'] ?? 1
         ];
+    }
+
+    /**
+     * @param int          $vendorId
+     * @param Organization $obRestaurant
+     * @return Catalog
+     * @throws BadRequestHttpException
+     */
+    public function getPersonalCatalogByVendorId(int $vendorId, Organization $obRestaurant)
+    {
+        /**@var RelationSuppRest $relation */
+        $relation = RelationSuppRest::find()
+            ->with(['catalog' => function ($query) {
+                /**@var Query $query */
+                $query->andWhere(['status' => Catalog::STATUS_ON]);
+            },])
+            ->where([
+                'supp_org_id' => $vendorId,
+                'rest_org_id' => $obRestaurant->id,
+                'status'      => RelationSuppRest::CATALOG_STATUS_ON,
+                'deleted'     => 0,
+            ])
+            ->andWhere([">", "cat_id", 0])
+            ->one();
+        if (!$relation) {
+            throw new BadRequestHttpException('dictionary.you_not_work_this_vendor');
+        }
+
+        return $relation->catalog;
     }
 
     /**

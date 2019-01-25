@@ -3,7 +3,6 @@
 namespace common\models;
 
 use api_web\exceptions\ValidationException;
-use Yii;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -21,7 +20,6 @@ use yii\web\BadRequestHttpException;
  * @property string            $main_index   Имя индекса для полнотекстового поиска
  * @property string            $mapping      Альтернативные варианты названия при полнотекстовом поиске
  * @property int               $index_column Идентификатор поля для индексации при полнотекстовом поиске
- *
  * @property Organization      $vendor
  * @property Currency          $currency
  * @property CatalogSnapshot[] $catalogSnapshots
@@ -31,7 +29,6 @@ use yii\web\BadRequestHttpException;
  */
 class Catalog extends \yii\db\ActiveRecord
 {
-
     const BASE_CATALOG = 1;
     const CATALOG = 2;
     const NON_CATALOG = 0;
@@ -47,6 +44,9 @@ class Catalog extends \yii\db\ActiveRecord
         return '{{%catalog}}';
     }
 
+    /**
+     * @return array
+     */
     public function behaviors()
     {
         return [
@@ -95,18 +95,9 @@ class Catalog extends \yii\db\ActiveRecord
         if ($this->type == 1) {
             $baseCheck = self::find()->where(['supp_org_id' => $this->supp_org_id, 'type' => 1])->all();
             if ($baseCheck) {
-                $this->addError('type', Yii::t('app', 'common.models.one_catalog', ['ru' => 'Может быть только один базовый каталог']));
+                $this->addError('type', \Yii::t('app', 'common.models.one_catalog', ['ru' => 'Может быть только один базовый каталог']));
             }
         }
-    }
-
-    /**
-     * @param $id
-     * @return array|Catalog|\yii\db\ActiveRecord|null
-     */
-    public static function getNameCatalog($id)
-    {
-        return Catalog::find()->where(['id' => $id])->one();
     }
 
     /**
@@ -131,7 +122,7 @@ class Catalog extends \yii\db\ActiveRecord
     {
         $catalog = Catalog::find()
             ->select(['id', 'status', 'name', 'created_at', 'currency_id'])
-            ->where(['supp_org_id' => $vendorId ? $vendorId : \common\models\User::getOrganizationUser(Yii::$app->user->id), 'type' => $type])->all();
+            ->where(['supp_org_id' => $vendorId ? $vendorId : \common\models\User::getOrganizationUser(\Yii::$app->user->id), 'type' => $type])->all();
         return $catalog;
     }
 
@@ -160,30 +151,30 @@ class Catalog extends \yii\db\ActiveRecord
     public function addCatalog($arrCatalog, bool $isWebApi = false)
     {
         if (empty($arrCatalog) && !$isWebApi) {
-            throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.empty_catalog', ['ru' => 'Каталог пустой!']));
+            throw new BadRequestHttpException(\Yii::t('message', 'frontend.controllers.client.empty_catalog', ['ru' => 'Каталог пустой!']));
         }
 
         $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
         if (count($arrCatalog) > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
-            throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.more_position', ['ru' => 'Чтобы добавить больше <strong> {max} </strong> позиций, пожалуйста свяжитесь с нами', 'max' => CatalogBaseGoods::MAX_INSERT_FROM_XLS])
+            throw new BadRequestHttpException(\Yii::t('message', 'frontend.controllers.client.more_position', ['ru' => 'Чтобы добавить больше <strong> {max} </strong> позиций, пожалуйста свяжитесь с нами', 'max' => CatalogBaseGoods::MAX_INSERT_FROM_XLS])
                 . '<a href="mailto://info@mixcart.ru" target="_blank" class="text-success">info@mixcart.ru</a>');
         }
         $productNames = [];
         foreach ($arrCatalog as $arrCatalogs) {
             if (!isset($arrCatalogs['product'])) {
-                throw new BadRequestHttpException(Yii::t('message', 'frontend.controllers.client.empty_catalog', ['ru' => 'Каталог пустой!']));
+                throw new BadRequestHttpException(\Yii::t('message', 'frontend.controllers.client.empty_catalog', ['ru' => 'Каталог пустой!']));
             }
             $product = strip_tags(trim($arrCatalogs['product']));
             $price = floatval(trim(str_replace(',', '.', $arrCatalogs['price'])));
             $ed = strip_tags(trim($arrCatalogs['ed']));
             if (empty($product)) {
-                $result = ['attribute' => 'product', 'message' => Yii::t('error', 'frontend.controllers.client.empty_field', ['ru' => 'Ошибка: Пустое поле'])];
+                $result = ['attribute' => 'product', 'message' => \Yii::t('error', 'frontend.controllers.client.empty_field', ['ru' => 'Ошибка: Пустое поле'])];
                 throw new ValidationException($result);
             }
 
             $price = str_replace(',', '.', $price);
             if (empty($price) || !preg_match($numberPattern, $price)) {
-                $result = ['attribute' => 'price', 'message' => Yii::t('message', 'frontend.controllers.client.wrong_price', ['ru' => 'Ошибка: <strong>[Цена]</strong> в неверном формате!'])];
+                $result = ['attribute' => 'price', 'message' => \Yii::t('message', 'frontend.controllers.client.wrong_price', ['ru' => 'Ошибка: <strong>[Цена]</strong> в неверном формате!'])];
                 throw new ValidationException($result);
             }
             if (empty($units) || $units < 0) {
@@ -191,18 +182,18 @@ class Catalog extends \yii\db\ActiveRecord
             }
             $units = str_replace(',', '.', $units);
             if (!empty($units) && !preg_match($numberPattern, $units)) {
-                $result = ['attribute' => 'units', 'message' => Yii::t('message', 'frontend.controllers.client.wrong_measure', ['ru' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате'])];
+                $result = ['attribute' => 'units', 'message' => \Yii::t('message', 'frontend.controllers.client.wrong_measure', ['ru' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате'])];
                 throw new ValidationException($result);
             }
             if (empty($ed)) {
-                $result = ['attribute' => 'ed', 'message' => Yii::t('message', 'frontend.controllers.client.empty', ['ru' => 'Ошибка: Пустое поле <strong>[Единица измерения]</strong>!'])];
+                $result = ['attribute' => 'ed', 'message' => \Yii::t('message', 'frontend.controllers.client.empty', ['ru' => 'Ошибка: Пустое поле <strong>[Единица измерения]</strong>!'])];
                 throw new ValidationException($result);
             }
             array_push($productNames, mb_strtolower(trim($product)));
         }
 
         if (count($productNames) !== count(array_flip($productNames))) {
-            throw new BadRequestHttpException(Yii::t('app', 'Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием!'));
+            throw new BadRequestHttpException(\Yii::t('app', 'Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием!'));
         }
     }
 
@@ -223,7 +214,7 @@ class Catalog extends \yii\db\ActiveRecord
         if ($check['eventType'] == 5) {
             $newBaseCatalog = new Catalog();
             $newBaseCatalog->supp_org_id = $get_supp_org_id;
-            $newBaseCatalog->name = Yii::t('app', 'Главный каталог');
+            $newBaseCatalog->name = \Yii::t('app', 'Главный каталог');
             $newBaseCatalog->type = Catalog::BASE_CATALOG;
             $newBaseCatalog->status = Catalog::STATUS_ON;
             if (!is_null($currency)) {
@@ -243,7 +234,7 @@ class Catalog extends \yii\db\ActiveRecord
             } else {
                 $newBaseCatalog = new Catalog();
                 $newBaseCatalog->supp_org_id = $get_supp_org_id;
-                $newBaseCatalog->name = Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);
+                $newBaseCatalog->name = \Yii::t('message', 'frontend.controllers.client.main_cat', ['ru' => 'Главный каталог']);
                 $newBaseCatalog->type = Catalog::BASE_CATALOG;
                 $newBaseCatalog->status = Catalog::STATUS_ON;
                 if (isset($currency)) {
@@ -372,19 +363,19 @@ class Catalog extends \yii\db\ActiveRecord
         try {
             $this->deleteAllProducts($saveCurrent);
             $this->main_index = $lastSnapshot->main_index;
-            $this->currency_id = $this->currency_id;
-            if ($this->save()) {
-                $sql = "INSERT INTO catalog_base_goods "
-                    . "(supp_org_id, cat_id,article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid) "
-                    . "(SELECT :supp_org_id, :cat_id"
-                    . ",article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid "
-                    . "FROM catalog_snapshot_content WHERE snapshot_id = :snapshot_id)";
-                \Yii::$app->db->createCommand($sql)
-                    ->bindValues([":snapshot_id" => $lastSnapshot->id, ":cat_id" => $this->id, ":supp_org_id" => $this->supp_org_id])
-                    ->execute();
-                $transaction->commit();
-                return true;
+            if (!$this->save()) {
+                throw new ValidationException($this->getFirstErrors());
             }
+            $sql = "INSERT INTO catalog_base_goods "
+                . "(supp_org_id, cat_id,article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid) "
+                . "(SELECT :supp_org_id, :cat_id"
+                . ",article, product, status, market_place, deleted, price, units, category_id, note, ed, image, brand, region, weight, mp_show_price, barcode, edi_supplier_article, ssid "
+                . "FROM catalog_snapshot_content WHERE snapshot_id = :snapshot_id)";
+            \Yii::$app->db->createCommand($sql)
+                ->bindValues([":snapshot_id" => $lastSnapshot->id, ":cat_id" => $this->id, ":supp_org_id" => $this->supp_org_id])
+                ->execute();
+            $transaction->commit();
+            return true;
         } catch (\Exception $e) {
             $transaction->rollBack();
             return false;
@@ -414,9 +405,9 @@ class Catalog extends \yii\db\ActiveRecord
     public static function getMainIndexesList()
     {
         return [
-            'product' => Yii::t('message', 'frontend.views.vendor.name_of_good', ['ru' => 'Наименование']),
-            'article' => Yii::t('message', 'frontend.views.vendor.art_five', ['ru' => 'Артикул']),
-            'ssid'    => Yii::t('message', 'frontend.views.vendor.ssid', ['ru' => 'SSID']),
+            'product' => \Yii::t('message', 'frontend.views.vendor.name_of_good', ['ru' => 'Наименование']),
+            'article' => \Yii::t('message', 'frontend.views.vendor.art_five', ['ru' => 'Артикул']),
+            'ssid'    => \Yii::t('message', 'frontend.views.vendor.ssid', ['ru' => 'SSID']),
         ];
     }
 
@@ -442,6 +433,11 @@ class Catalog extends \yii\db\ActiveRecord
         }
     }
 
+    /**
+     * @return false|int|void
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function delete()
     {
         CatalogTemp::deleteAll(['cat_id' => $this->id]);

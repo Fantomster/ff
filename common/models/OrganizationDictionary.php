@@ -263,8 +263,13 @@ class OrganizationDictionary extends ActiveRecord
                     'opts.org_id'    => $this->org_id
                 ])->all(\Yii::$app->db_api);
 
-            $count = ArrayHelper::getColumn($all, 'selected_count');
-            return $count[1] . "/" . ($count[0] + $count[1]);
+            if(!empty($all)) {
+                $count = ArrayHelper::getColumn($all, 'selected_count');
+                $count = ($count[1] ?? 0) . "/" . (($count[0] ?? 0) + ($count[1] ?? 0));
+            } else {
+                $count = 0;
+            }
+            return $count;
         } else {
             return $this->count ?? 0;
         }

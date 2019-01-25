@@ -95,7 +95,7 @@ class AbstractDictionary extends WebApi implements DictionaryInterface
                 'id'          => $model->id,
                 'name'        => $model->outerDic->name,
                 'title'       => \Yii::t('api_web', 'dictionary.' . $model->outerDic->name),
-                'count'       => $model->count ?? 0,
+                'count'       => $model->getCount(),
                 'status_id'   => $model->status_id ?? 0,
                 'status_text' => $model->statusText ?? $defaultStatusText,
                 'upload'      => in_array($model->outerDic->name, $dictionaryUpload),

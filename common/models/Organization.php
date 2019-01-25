@@ -2023,4 +2023,12 @@ class Organization extends \yii\db\ActiveRecord
         return $result;
     }
 
+    public static function getDefaultOrganizationManager($orgID)
+    {
+        $rel = RelationUserOrganization::find()->select(['user_id'])->where(['organization_id' => $orgID])->orderBy(['role_id' => SORT_ASC])->one();
+        if($rel) {
+            return $rel->user_id;
+        }
+        return null;
+    }
 }

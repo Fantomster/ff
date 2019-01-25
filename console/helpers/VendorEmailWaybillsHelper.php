@@ -114,10 +114,20 @@ class VendorEmailWaybillsHelper
             }
 
             $transaction = \Yii::$app->db->beginTransaction();
+            if (isset($invoice['organization_id'])) {
+                $restOrganization = Organization::findOne(['id' => $invoice['organization_id']]);
+                if ($restOrganization) {
+                    $createdByID = Organization::getDefaultOrganizationManager($restOrganization->id);
+                }
+            } else {
+                $createdByID = null;
+            }
+
             $order = new Order();
             $docDate = !empty($invoice['invoice']['date']) ? date('Y-m-d', strtotime($invoice['invoice']['date'])) : null;
             $order->created_at = $docDate;
             $order->vendor_id = $vendorId;
+            $order->created_by_id = $createdByID;
             $order->client_id = $invoice['organization_id'];
             $order->service_id = $this->serviceId;
             $order->status = Order::STATUS_EDI_SENT_BY_VENDOR;
@@ -177,7 +187,7 @@ class VendorEmailWaybillsHelper
                         }
                     }
                     $catalogGood = CatalogGoods::findOne(['base_goods_id' => $product->id, 'cat_id' => $catalog->id]);
-                    if (!$catalogGood){
+                    if (!$catalogGood) {
                         $catGood = new CatalogGoods();
                         $catGood->base_goods_id = $product->id;
                         $catGood->cat_id = $catalog->id;

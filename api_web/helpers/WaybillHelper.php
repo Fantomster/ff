@@ -90,6 +90,9 @@ class WaybillHelper
             throw new BadRequestHttpException('order_not_found');
         }
         $this->user = $order->createdBy;
+        if (!$this->user){
+            throw new BadRequestHttpException('user_not_found');
+        }
         if (is_null($arOrderContentForCreate)) {
             $arOrderContentForCreate = $order->orderContent;
         }

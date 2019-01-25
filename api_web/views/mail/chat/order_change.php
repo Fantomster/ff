@@ -42,7 +42,7 @@ use \api_web\helpers\CurrencyHelper;
                     <td class="article"><?= $model->article ?></td>
                     <td class="quantity <?= $model->getCssClassChatMessage('quantity') ?>"><?= number_format($model->quantity, 3, '.', '') ?>
                         <?php if ($model->quantity != $oldQuantity): ?>
-                            <p class="al-line-through-action-not-changed">
+                            <p class="value-old">
                                 <?= number_format($oldQuantity, 3, '.', '') ?>
                             </p>
                         <?php endif; ?>
@@ -54,7 +54,7 @@ use \api_web\helpers\CurrencyHelper;
                         <?= $model->getCurrency()->symbol ?>
                         <?= $model->product->ed ? '/' . $model->product->ed : '' ?>
                         <?php if ($model->price != $oldPrice): ?>
-                            <p class="al-line-through-action-not-changed">
+                            <p class="value-old">
                                 <?= CurrencyHelper::asDecimal($oldPrice) ?>
                             </p>
                         <?php endif; ?>

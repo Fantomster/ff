@@ -54,6 +54,7 @@ use Lcobucci\JWT\Signer\Hmac\Sha256;
  */
 class User extends \amnah\yii2\user\models\User
 {
+    const USER_STATUS_ACTIVE = 1;
 
     public function __get($name)
     {

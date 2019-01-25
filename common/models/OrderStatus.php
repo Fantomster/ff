@@ -108,6 +108,16 @@ class OrderStatus extends ActiveRecord
         return $res;
     }
 
+    public static function getStatusesArrayForBackend()
+    {
+        return [
+            self::STATUS_PROCESSING,
+            self::STATUS_DONE,
+            self::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+            self::STATUS_AWAITING_ACCEPT_FROM_VENDOR
+        ];
+    }
+
     /**
      * Get a custom permission for a client that is "the owner of the order" by the status of an order
      *

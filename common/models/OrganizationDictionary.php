@@ -245,31 +245,24 @@ class OrganizationDictionary extends ActiveRecord
     }
 
     /**
-     *
      * @return int
      */
     public function getCount()
     {
         if ($this->outerDic->name == 'product_type') {
-            $all = (new Query())
+            $result = (new Query())
                 ->select([
-                    'opts.selected',
-                    'COUNT(*) OVER(PARTITION BY opts.selected) as selected_count'
+                    'selected' => 'coalesce(SUM(opts.selected), 0)',
+                    'all'      => 'coalesce(COUNT(*), 0)'
                 ])->distinct()
                 ->from(OuterProductTypeSelected::tableName() . " opts")
                 ->innerJoin(OuterProductType::tableName() . " opt", "opt.id = opts.outer_product_type_id")
                 ->where([
                     'opt.service_id' => $this->outerDic->service_id,
                     'opts.org_id'    => $this->org_id
-                ])->all(\Yii::$app->db_api);
+                ])->one(\Yii::$app->db_api);
 
-            if(!empty($all)) {
-                $count = ArrayHelper::getColumn($all, 'selected_count');
-                $count = ($count[1] ?? 0) . "/" . (($count[0] ?? 0) + ($count[1] ?? 0));
-            } else {
-                $count = 0;
-            }
-            return $count;
+            return $result['selected'] . "/" . $result['all'];
         } else {
             return $this->count ?? 0;
         }

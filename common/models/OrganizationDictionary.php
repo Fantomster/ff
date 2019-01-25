@@ -254,12 +254,12 @@ class OrganizationDictionary extends ActiveRecord
                 ->select([
                     'selected' => 'coalesce(SUM(opts.selected), 0)',
                     'all'      => 'coalesce(COUNT(*), 0)'
-                ])->distinct()
-                ->from(OuterProductTypeSelected::tableName() . " opts")
-                ->innerJoin(OuterProductType::tableName() . " opt", "opt.id = opts.outer_product_type_id")
+                ])->from(OuterProductType::tableName() . " opt")
+                ->leftJoin(OuterProductTypeSelected::tableName() . " opts", "opt.id = opts.outer_product_type_id AND opts.org_id = :org", [
+                    ':org' => $this->org_id
+                ])
                 ->where([
-                    'opt.service_id' => $this->outerDic->service_id,
-                    'opts.org_id'    => $this->org_id
+                    'opt.service_id' => $this->outerDic->service_id
                 ])->one(\Yii::$app->db_api);
 
             return $result['selected'] . "/" . $result['all'];

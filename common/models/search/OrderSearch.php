@@ -6,6 +6,7 @@ use api\common\models\iiko\iikoWaybill;
 use api\common\models\one_s\OneSWaybill;
 use api\common\models\RkStoretree;
 use api\common\models\RkWaybill;
+use api\modules\v1\modules\mobile\resources\Currency;
 use common\models\AllService;
 use common\models\OrderStatus;
 use Yii;
@@ -170,6 +171,13 @@ class OrderSearch extends Order
                 $query->from(Profile::tableName() . ' acceptedByProfile');
             },
         ], true);
+
+        $query->joinWith([
+            'currency' => function ($query) {
+                $query->from(Currency::tableName() . ' currency_id');
+            },
+        ], true);
+
         if ($this->manager_id) {
             $maTable = \common\models\ManagerAssociate::tableName();
             $orderTable = Order::tableName();

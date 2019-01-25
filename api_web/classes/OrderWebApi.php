@@ -617,6 +617,7 @@ class OrderWebApi extends WebApi
                     'status_text'       => $model->statusText,
                     'vendor'            => $model->vendor->name,
                     'currency_id'       => $model->currency_id,
+                    'currency'          => $model->currency->symbol ?? "RUB",
                     'create_user'       => $model->createdByProfile->full_name ?? '',
                     'accept_user'       => $model->acceptedByProfile->full_name ?? '',
                     'count_position'    => count($model->orderContent),

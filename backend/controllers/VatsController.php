@@ -34,7 +34,6 @@ class VatsController extends Controller
                         'allow'   => true,
                         'roles'   => [
                             Role::ROLE_ADMIN,
-//                            Role::ROLE_FKEEPER_OBSERVER,
                         ],
                     ],
                 ],
@@ -76,13 +75,11 @@ class VatsController extends Controller
             $country = Yii::$app->request->post('CountryVat');
             $country['vats'] = str_replace(' ', '', $country['vats']);
             $country['vats'] = str_replace(',', '.', $country['vats']);
-            $pattern = '/^[0-9]{1,2}[.]?[0-9]{0,2}([;]{1}[0-9]{1,2}[.]?[0-9]{0,2})*$/';
-            if (!preg_match($pattern, $country['vats'])) {
-                throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.vats.not.correct', ['ru' => 'Перечень ставок налогов введён некорректно!']));
-            }
             $model->vats = $country['vats'];
-            $model->updated_by_id = Yii::$app->user->identity->id;
-            if (!$model->save()) throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.vats.not.save', ['ru' => 'Сохранить ставки налогов не удалось']));
+            $model->updated_by_id = Yii::$app->user->getId();
+            if (!$model->save()) {
+                throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.vats.not.save', ['ru' => 'Сохранить ставки налогов не удалось']));
+            }
             return $this->redirect(['/vats/index']);
         } else {
             return $this->render('/vats/update', [
@@ -95,22 +92,17 @@ class VatsController extends Controller
     {
         $count = CountryVat::getCountNotVatCountries();
         $model = new CountryVat();
-        if (!$model) {
-            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.request.page_error', ['ru' => 'The requested page does not exist.']));
-        }
 
         if (Yii::$app->request->post()) {
             $country = Yii::$app->request->post('CountryVat');
             $country['vats'] = str_replace(' ', '', $country['vats']);
             $country['vats'] = str_replace(',', '.', $country['vats']);
-            $pattern = '/^[0-9]{1,2}[.]?[0-9]{0,2}([;]{1}[0-9]{1,2}[.]?[0-9]{0,2})*$/';
-            if (!preg_match($pattern, $country['vats'])) {
-                throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.vats.not.correct', ['ru' => 'Перечень ставок налогов введён некорректно!']));
-            }
             $model->uuid = $country['country'];
             $model->vats = $country['vats'];
-            $model->created_by_id = Yii::$app->user->identity->id;
-            if (!$model->save()) throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.vats.not.save', ['ru' => 'Сохранить ставки налогов не удалось']));
+            $model->created_by_id = Yii::$app->user->getId();
+            if (!$model->save()) {
+                throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.vats.not.save', ['ru' => 'Сохранить ставки налогов не удалось']));
+            }
             return $this->redirect(['/vats/index']);
         } else {
             return $this->render('/vats/create', [

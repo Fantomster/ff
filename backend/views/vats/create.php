@@ -23,7 +23,9 @@ if ($count > 0) {
             <div class="box box-info order-history">
                 <div class="box-body">
 
-                    <?php $form = ActiveForm::begin(); ?>
+                    <?php $form = ActiveForm::begin([
+                        'enableClientValidation' => false,
+                    ]); ?>
 
                     <?= $form->field($model, 'country')->dropDownList(ArrayHelper::map(CountryVat::getListNotVatCountries(), 'uuid', 'name')); ?>
 

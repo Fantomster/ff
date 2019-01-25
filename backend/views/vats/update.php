@@ -20,7 +20,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="box box-info order-history">
             <div class="box-body">
 
-                <?php $form = ActiveForm::begin(); ?>
+                <?php $form = ActiveForm::begin([
+                    'enableClientValidation' => false,
+                ]); ?>
 
                 <?= $form->field($model, 'vats')->textInput(['maxlength' => true])->label('Ставки налогов') ?>
 

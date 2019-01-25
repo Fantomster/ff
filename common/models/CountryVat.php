@@ -44,6 +44,8 @@ class CountryVat extends \yii\db\ActiveRecord
             [['id', 'created_by_id', 'updated_by_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['uuid', 'vats'], 'string'],
+            [['vats'], 'match', 'pattern' => '/^[0-9]{1,2}[.]?[0-9]{0,2}([;]{1}[0-9]{1,2}[.]?[0-9]{0,2})*$/',
+                                'message' => Yii::t('error', 'backend.controllers.vats.not.correct', ['ru' => 'Перечень ставок налогов введён некорректно!'])],
             [['country'], 'exist', 'skipOnError' => true, 'targetClass' => VetisCountry::className(), 'targetAttribute' => ['uuid' => 'uuid']],
         ];
     }

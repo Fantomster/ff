@@ -852,7 +852,7 @@ SQL;
                 $model = RkWaybill::moveContentToExistingWaybill($model, $existingWaybill);
             }
 
-            if ($model->corr_rid == 0) {
+            if ($model->corr_rid == '') {
                 $model->corr_rid = null;
             }
             if ($model->store_rid == 0) {

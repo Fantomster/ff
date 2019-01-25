@@ -667,7 +667,7 @@ SQL;
                 $model = iikoWaybill::moveContentToExistingWaybill($model, $existingWaybill);
             }
 
-            if ($model->agent_uuid == 0) {
+            if ($model->agent_uuid == '') {
                 $model->agent_uuid = null;
             }
             if ($model->store_id == 0) {

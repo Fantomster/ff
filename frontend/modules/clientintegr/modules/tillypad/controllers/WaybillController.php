@@ -565,7 +565,7 @@ return $out;
         $lic = TillypadService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            if ($model->agent_uuid == 0) {
+            if ($model->agent_uuid == '') {
                 $model->agent_uuid = null;
             }
             if ($model->store_id == 0) {

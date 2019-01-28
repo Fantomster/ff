@@ -213,6 +213,7 @@ class License extends ActiveRecord
      * @param array $service_ids
      * @return false|string
      * @throws HttpException
+     * @throws \yii\base\InvalidConfigException
      */
     public static function checkLicense($org_id, $service_ids = [])
     {
@@ -232,6 +233,9 @@ class License extends ActiveRecord
                 $licenseName = $l->name;
             }
         }
+
+        \Yii::$app->response->headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
+        \Yii::$app->response->headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
 
         #Проверяем, не стухла ли лицензия
         if (strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
@@ -253,12 +257,10 @@ class License extends ActiveRecord
      */
     public static function checkEnterLicenseResponse($org_id)
     {
-        $licenseDate = self::checkLicense($org_id, Registry::$allow_enter_services);
-        \Yii::$app->response->headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
-        \Yii::$app->response->headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
-        #Проверяем, не стухла ли лицензия
-        if (strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
-            throw new HttpException(402, 'license.payment_required', 402);
+        try {
+            self::checkLicense($org_id, Registry::$allow_enter_services);
+        } catch (HttpException $e) {
+            throw new HttpException(402, $e->getMessage(), 402);
         }
     }
 }

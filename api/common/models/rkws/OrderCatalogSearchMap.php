@@ -196,9 +196,9 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             ->from("  (((".RelationSuppRest::tableName()." a
                                     join ".Catalog::tableName()." b on
                                         ((a.cat_id = b.id)))
-                                    join ".CatalogBaseGoods::tableName()." c on
+                                    join ".CatalogGoods::tableName()." c on
                                         ((c.cat_id = b.id)))
-                                    join catalog_base_goods d on
+                                    join ".CatalogBaseGoods::tableName()." d on
                                         ((d.id = c.base_goods_id)))")
             ->where(" (b.type = 1) AND a.rest_org_id = $client_id AND a.supp_org_id in ($vendorInList)
                                             AND b.status = 1
@@ -210,7 +210,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             $sql = (new \yii\db\Query())
                 ->select("acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id])
                 ->from(['acp' => $assigned_catalog_products])
-                ->leftJoin("$dbName.".AllMaps::tableName(). " amap", "cp.product_id = amap.product_id AND amap.org_id = $client_id AND amap.service_id = :service_id", [':service_id' => $this->service_id])
+                ->leftJoin("$dbName.".AllMaps::tableName(). " amap", "acp.product_id = amap.product_id AND amap.org_id = $client_id AND amap.service_id = :service_id", [':service_id' => $this->service_id])
                 ->leftJoin("$dbName.".AllService::tableName()." aser", "amap.service_id = aser.id ")
                 ->where("amap.service_id = 0");
             if (!empty($where)) {

@@ -264,8 +264,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
         return $dataProvider;
     }
-
-Вячеслав Грозный, [28.01.19 14:24]
+    
     private function addQueryJoins(&$query, $service_id)
     {
         $dbName = DBNameHelper::getApiName();

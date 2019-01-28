@@ -38,7 +38,7 @@ class OuterProductMapSearch extends OuterProductMap
             $mainOrgId = $mainOrgSetting;
             $mainOrgModel = Organization::findOne($mainOrgId);
             $mainVendors = array_keys($mainOrgModel->getSuppliers(null, false));
-            $vendorsNotInMainOrg = implode(',', array_diff_key($vendors, $mainVendors));
+            $vendorsNotInMainOrg = implode('\',\'', array_diff_key($vendors, $mainVendors));
         }
 
         $query = (new Query())->select([
@@ -68,12 +68,12 @@ class OuterProductMapSearch extends OuterProductMap
             ->innerJoin('organization d_v', 'd_v.id = d.supp_org_id')
             ->leftJoin("$outerProductMapTableName e_m", "e_m.product_id=d.id and e_m.service_id=:service_id and e_m.organization_id =:parent_org")
             ->leftJoin("$outerProductMapTableName e_c", 'e_c.product_id = d.id and e_c.service_id=:service_id and e_c.organization_id=:real_org_id')
-            ->leftJoin("$outerProductTableName f", "f.id=if (d_v.id IN (:not_in_main_org), e_c.outer_product_id, e_m.outer_product_id)")
+            ->leftJoin("$outerProductTableName f", 'f.id=if (d_v.id IN (\'' . $vendorsNotInMainOrg . '\'), e_c.outer_product_id, e_m.outer_product_id)')
             ->leftJoin("$outerUnitTableName g", "g.id=f.outer_unit_id")
             ->leftJoin("$outerStoreTableName h", "h.id=e_c.outer_store_id")
             ->where(["a.rest_org_id" => $client->id])
             ->params([':service_id' => $this->service_id, ':real_org_id' => $client->id,
-                      ':parent_org' => $mainOrgId, ':not_in_main_org' => $vendorsNotInMainOrg]);
+                      ':parent_org' => $mainOrgId]);
 
         if (count($vendors) > 10) {
             $queryVendors = array_slice($vendors, -3, 3);

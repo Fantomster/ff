@@ -143,10 +143,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                                         c.rating AS rating,
                                         c.barcode AS barcode,
                                         c.edi_supplier_article AS edi_supplier_article,
-                                        c.ssid AS ssid,
-                                        NULL AS discount_percent,
-                                        NULL AS discount,
-                                        NULL AS discount_fixed")
+                                        c.ssid AS ssid")
             ->from('(('.RelationSuppRest::tableName().' a
                                     join '.Catalog::tableName().' b on
                                         ((a.cat_id = b.id)))
@@ -189,16 +186,13 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                                         d.rating AS rating,
                                         d.barcode AS barcode,
                                         d.edi_supplier_article AS edi_supplier_article,
-                                        d.ssid AS ssid,
-                                        c.discount_percent AS discount_percent,
-                                        c.discount AS discount,
-                                        c.discount_fixed AS discount_fixed")
+                                        d.ssid AS ssid")
             ->from("  (((".RelationSuppRest::tableName()." a
                                     join ".Catalog::tableName()." b on
                                         ((a.cat_id = b.id)))
-                                    join ".CatalogBaseGoods::tableName()." c on
+                                    join ".CatalogGoods::tableName()." c on
                                         ((c.cat_id = b.id)))
-                                    join catalog_base_goods d on
+                                    join ".CatalogBaseGoods::tableName()." d on
                                         ((d.id = c.base_goods_id)))")
             ->where(" (b.type = 1) AND a.rest_org_id = $client_id AND a.supp_org_id in ($vendorInList)
                                             AND b.status = 1
@@ -210,7 +204,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             $sql = (new \yii\db\Query())
                 ->select("acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id])
                 ->from(['acp' => $assigned_catalog_products])
-                ->leftJoin("$dbName.".AllMaps::tableName(). " amap", "cp.product_id = amap.product_id AND amap.org_id = $client_id AND amap.service_id = :service_id", [':service_id' => $this->service_id])
+                ->leftJoin("$dbName.".AllMaps::tableName(). " amap", "acp.product_id = amap.product_id AND amap.org_id = $client_id AND amap.service_id = :service_id", [':service_id' => $this->service_id])
                 ->leftJoin("$dbName.".AllService::tableName()." aser", "amap.service_id = aser.id ")
                 ->where("amap.service_id = 0");
             if (!empty($where)) {
@@ -228,6 +222,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
 
         $this->addQueryJoins($sql, $this->service_id );
+        $sql = $sql->createCommand()->getRawSql();
         if ($vendorInList) {
             $dataProvider = new SqlDataProvider([
                 'sql'    => $sql,
@@ -269,7 +264,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
         return $dataProvider;
     }
-
+    
     private function addQueryJoins(&$query, $service_id)
     {
         $dbName = DBNameHelper::getApiName();
@@ -280,7 +275,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                 $query->leftJoin("$dbName.".RkStoretree::tableName()." fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.acc  AND fstore.type = 2");
                 break;
             case Registry::IIKO_SERVICE_ID :
-                $query->leftJoin("$dbName.".iikoProduct::tableName()." fprod ", "amap.serviceproduct_id = fprod.id");
+                $query->leftJoin("$dbName.".iikoProduct::tableName()." fprod", "amap.serviceproduct_id = fprod.id");
                 $query->leftJoin("$dbName.".iikoStore::tableName()." fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1");
                 break;
             case Registry::ONE_S_CLIENT_SERVICE_ID :
@@ -288,8 +283,8 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                 $query->leftJoin("$dbName.".OneSStore::tableName()." fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.org_id");
                 break;
             case Registry::TILLYPAD_SERVICE_ID :
-                $query->leftJoin("$dbName".RkProduct::tableName()." fprod", "amap.serviceproduct_id = fprod.id");
-                $query->leftJoin("$dbName".RkStoretree::tableName()." fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1");
+                $query->leftJoin("$dbName".iikoProduct::tableName()." fprod", "amap.serviceproduct_id = fprod.id");
+                $query->leftJoin("$dbName".iikoStore::tableName()." fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1");
                 break;
         }
     }

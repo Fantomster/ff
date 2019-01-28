@@ -265,6 +265,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         return $dataProvider;
     }
 
+Вячеслав Грозный, [28.01.19 14:24]
     private function addQueryJoins(&$query, $service_id)
     {
         $dbName = DBNameHelper::getApiName();
@@ -275,7 +276,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                 $query->leftJoin("$dbName.".RkStoretree::tableName()." fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.acc  AND fstore.type = 2");
                 break;
             case Registry::IIKO_SERVICE_ID :
-                $query->leftJoin("$dbName.".iikoProduct::tableName()." fprod ", "amap.serviceproduct_id = fprod.id");
+                $query->leftJoin("$dbName.".iikoProduct::tableName()." fprod", "amap.serviceproduct_id = fprod.id");
                 $query->leftJoin("$dbName.".iikoStore::tableName()." fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1");
                 break;
             case Registry::ONE_S_CLIENT_SERVICE_ID :
@@ -283,8 +284,8 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                 $query->leftJoin("$dbName.".OneSStore::tableName()." fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.org_id");
                 break;
             case Registry::TILLYPAD_SERVICE_ID :
-                $query->leftJoin("$dbName".RkProduct::tableName()." fprod", "amap.serviceproduct_id = fprod.id");
-                $query->leftJoin("$dbName".RkStoretree::tableName()." fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1");
+                $query->leftJoin("$dbName".iikoProduct::tableName()." fprod", "amap.serviceproduct_id = fprod.id");
+                $query->leftJoin("$dbName".iikoStore::tableName()." fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1");
                 break;
         }
     }

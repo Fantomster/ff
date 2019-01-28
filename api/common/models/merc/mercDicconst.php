@@ -8,9 +8,9 @@ use Yii;
  * This is the model class for table "{{%merc_dicconst}}".
  *
  * @property integer $id
- * @property string $denom
- * @property string $def_value
- * @property string $comment
+ * @property string  $denom
+ * @property string  $def_value
+ * @property string  $comment
  * @property integer $type
  * @property integer $is_active
  */
@@ -19,6 +19,7 @@ class mercDicconst extends \yii\db\ActiveRecord
     const TYPE_DROP = 1;
     const TYPE_PASSWORD = 3;
     const TYPE_CHECKBOX = 4;
+
     /**
      * @inheritdoc
      */
@@ -52,11 +53,11 @@ class mercDicconst extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'denom' => Yii::t('app', 'Denom'),
+            'id'        => Yii::t('app', 'ID'),
+            'denom'     => Yii::t('app', 'Denom'),
             'def_value' => Yii::t('app', 'Def Value'),
-            'comment' => Yii::t('app', 'Comment'),
-            'type' => Yii::t('app', 'Type'),
+            'comment'   => Yii::t('app', 'Comment'),
+            'type'      => Yii::t('app', 'Type'),
             'is_active' => Yii::t('app', 'Is Active')
         ];
     }
@@ -82,32 +83,33 @@ class mercDicconst extends \yii\db\ActiveRecord
      */
     public static function getSetting($denom, $org = null)
     {
-        $iskl = ['hand_load_only'=> 0,'vetis_password' => ''];
+        $iskl = ['hand_load_only' => 0, 'vetis_password' => ''];
         $model = self::findOne(['denom' => $denom]);
-            if ($model) {
-                if (is_a(Yii::$app, 'yii\web\Application') && ($org == null)) {
-                    $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => Yii::$app->user->identity->organization_id]);
-                } else {
-                    $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => $org]);
-                }
-                if (isset($pConst) || (key_exists($denom, $iskl))) {
-                    return isset($pConst) ? $pConst->value : $iskl[$denom];
+        if ($model) {
+            if (is_a(Yii::$app, 'yii\web\Application') && ($org == null)) {
+                $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => Yii::$app->user->identity->organization_id]);
+            } else {
+                $pConst = mercPconst::findOne(['const_id' => $model->id, 'org' => $org]);
+            }
+            if (isset($pConst) || (key_exists($denom, $iskl))) {
+                return isset($pConst) ? $pConst->value : $iskl[$denom];
+            } else {
+                if ($org) {
+                    return null;
                 } else {
                     throw new \Exception('Не заполнено свойство в настройках ' . $denom);
                 }
             }
+        }
     }
 
     public static function checkSettings()
     {
         $consts = self::find()->all();
-        foreach ($consts as $item)
-        {
+        foreach ($consts as $item) {
             try {
                 self::getSetting($item->denom);
-            }
-            catch (\Exception $e)
-            {
+            } catch (\Exception $e) {
                 return false;
             }
         }

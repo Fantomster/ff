@@ -526,7 +526,7 @@ class WaybillHelper
                 $this->writeInJournal($e->getMessage(), 0, $this->orgId, 'error');
             }
             $waybillToService = [];
-            $query = $this->createQueryWyabillToOrder($request['order_id']);
+            $query = $this->createQueryWaybillToOrder($request['order_id']);
             $dbResult = $query->andWhere(['status_id' => [Registry::WAYBILL_ERROR, Registry::WAYBILL_COMPARED]])
                 ->all(\Yii::$app->db_api);
 
@@ -602,7 +602,7 @@ class WaybillHelper
      * @param $orderId
      * @return Query
      */
-    public function createQueryWyabillToOrder($orderId)
+    public function createQueryWaybillToOrder($orderId)
     {
         return (new Query())->distinct()->select(['w.id', 'w.service_id'])
             ->from('waybill w')
@@ -653,14 +653,11 @@ class WaybillHelper
      */
     public function throwException($serviceId, $orgId, $error)
     {
+        $this->writeInJournal(\Yii::t('api_web', $error), $serviceId, $orgId, 'error');
         if (\Yii::$app instanceof \Yii\web\Application) {
             if (isset($this->user) && $this->user->integration_service_id == $serviceId) {
                 throw new BadRequestHttpException($error);
-            } else {
-                $this->writeInJournal(\Yii::t('api_web', $error), $serviceId, $orgId, 'error');
             }
-        } else {
-            $this->writeInJournal(\Yii::t('api_web', $error), $serviceId, $orgId, 'error');
         }
     }
 

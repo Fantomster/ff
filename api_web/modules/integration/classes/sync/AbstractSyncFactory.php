@@ -13,9 +13,12 @@
 
 namespace api_web\modules\integration\classes\sync;
 
+use api_web\components\Registry;
 use api_web\components\WebApi;
+use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\classes\documents\Waybill;
+use common\models\Journal;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
 use yii\web\BadRequestHttpException;
@@ -39,10 +42,10 @@ abstract class AbstractSyncFactory extends WebApi
     /** Dictionary name for RKeeper storehouses data */
     const DICTIONARY_STORE = 'store';
 
-    /** Valid only HTTP-code for curl resqponse */
+    /** Valid only HTTP-code for curl response */
     const HTTP_CODE_OK = 200;
 
-    /** List of dictionaries awailable for a service - By default it is an empty array */
+    /** List of dictionaries available for a service - By default it is an empty array */
     public $dictionaryAvailable = [
         self::DICTIONARY_AGENT,
         self::DICTIONARY_PRODUCT,
@@ -344,5 +347,29 @@ abstract class AbstractSyncFactory extends WebApi
             'outer_dic_id' => $dictionary->id
         ]);
         return $model;
+    }
+
+    /**
+     * Запись в журнал
+     *
+     * @param        $message
+     * @param        $serviceId
+     * @param int    $orgId
+     * @param string $type
+     * @throws ValidationException
+     */
+    protected function writeInJournal($message, int $serviceId, int $orgId, $type = 'success'): void
+    {
+        $journal = new Journal();
+        $journal->response = $message;
+        $journal->service_id = (int)$serviceId;
+        $journal->type = $type;
+        $journal->log_guide = 'SendWaybill';
+        $journal->organization_id = $orgId;
+        $journal->user_id = null;
+        $journal->operation_code = (string)(Registry::$operation_code_send_waybill[$serviceId] ?? 0);
+        if (!$journal->save()) {
+            throw new ValidationException($journal->getFirstErrors());
+        }
     }
 }

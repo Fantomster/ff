@@ -3,7 +3,6 @@
 namespace common\models\search;
 
 use common\helpers\DBNameHelper;
-use common\models\CatalogBaseGoods;
 use common\models\IntegrationSettingValue;
 use common\models\Organization;
 use common\models\OuterProduct;
@@ -31,14 +30,21 @@ class OuterProductMapSearch extends OuterProductMap
         $outerUnitTableName = $dbName . OuterUnit::tableName();
         $outerStoreTableName = $dbName . OuterStore::tableName();
 
+        $vendors = array_keys($client->getSuppliers(null, false));
         $this->service_id = $post['service_id'] ?? 0;
         $mainOrgSetting = IntegrationSettingValue::getSettingsByServiceId($this->service_id, $client->id, ['main_org']);
-        $mainOrgId = !empty($mainOrgSetting) ? $mainOrgSetting : $client->id;
+        $mainOrgId = $client->id;
+        if (!empty($mainOrgSetting)) {
+            $mainOrgId = $mainOrgSetting;
+            $mainOrgModel = Organization::findOne($mainOrgId);
+            $mainVendors = array_keys($mainOrgModel->getSuppliers(null, false));
+            $vendorsNotInMainOrg = implode('\',\'', array_diff_key($vendors, $mainVendors));
+        }
 
         $query = (new Query())->select([
             "coalesce(e_c.id, e_m.id) id",
             "e_c.outer_store_id",
-            "e_m.service_id",
+            "coalesce(e_m.service_id, e_c.service_id) service_id",
             "e_c.organization_id",
             "d_v.id vendor_id",
             "d_v.name vendor_name",
@@ -50,10 +56,10 @@ class OuterProductMapSearch extends OuterProductMap
             "g.id outer_unit_id",
             "g.name outer_unit_name",
             "h.name outer_store_name",
-            "e_m.coefficient",
+            "coalesce(e_m.coefficient, e_c.coefficient) coefficient",
             "e_c.vat",
             "coalesce(e_c.created_at, e_m.created_at) created_at",
-            "coalesce(e_c.updated_at, e_m.updated_at)"
+            "coalesce(e_c.updated_at, e_m.updated_at) updated_at"
         ])
             ->from("relation_supp_rest a")
             ->innerJoin('catalog b', 'b.id = a.cat_id and b.type = 2')
@@ -62,13 +68,16 @@ class OuterProductMapSearch extends OuterProductMap
             ->innerJoin('organization d_v', 'd_v.id = d.supp_org_id')
             ->leftJoin("$outerProductMapTableName e_m", "e_m.product_id=d.id and e_m.service_id=:service_id and e_m.organization_id =:parent_org")
             ->leftJoin("$outerProductMapTableName e_c", 'e_c.product_id = d.id and e_c.service_id=:service_id and e_c.organization_id=:real_org_id')
-            ->leftJoin("$outerProductTableName f", "f.id=e_m.outer_product_id")
+            ->leftJoin("$outerProductTableName f", 'f.id=if (d_v.id IN (\'' . $vendorsNotInMainOrg . '\'), e_c.outer_product_id, e_m.outer_product_id)')
             ->leftJoin("$outerUnitTableName g", "g.id=f.outer_unit_id")
             ->leftJoin("$outerStoreTableName h", "h.id=e_c.outer_store_id")
             ->where(["a.rest_org_id" => $client->id])
-            ->params([':service_id' => $this->service_id, ':real_org_id' => $client->id, ':parent_org' => $mainOrgId]);
+            ->params([':service_id' => $this->service_id, ':real_org_id' => $client->id,
+                      ':parent_org' => $mainOrgId]);
 
-        $vendors = array_keys($client->getSuppliers(null));
+        if (count($vendors) > 10) {
+            $queryVendors = array_slice($vendors, -3, 3);
+        }
 
         /**
          * ВНИМАНИЕ !!!!!!!
@@ -99,12 +108,12 @@ class OuterProductMapSearch extends OuterProductMap
                  * фильтр по поставщику
                  */
                 if (!empty($post['search']['vendor'])) {
-                    $vendors = [$post['search']['vendor']];
+                    $queryVendors = [$post['search']['vendor']];
                 }
             }
         }
 
-        $query->andWhere(['in', "a.supp_org_id", $vendors]);
+        $query->andWhere(['in', "a.supp_org_id", $queryVendors]);
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query->createCommand()->getRawSql(),

@@ -38,8 +38,9 @@ class ChatController extends WebApiController
      *                  type="object",
      *                  default={
      *                      "search":{
-     *                          "recipient_id":1
-     *                          "order_id":14},
+     *                          "recipient_id":1,
+     *                          "order_id":14
+     *                      },
      *                      "pagination":{
      *                          "page":1,
      *                          "page_size":12

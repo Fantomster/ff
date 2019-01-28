@@ -143,10 +143,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                                         c.rating AS rating,
                                         c.barcode AS barcode,
                                         c.edi_supplier_article AS edi_supplier_article,
-                                        c.ssid AS ssid,
-                                        NULL AS discount_percent,
-                                        NULL AS discount,
-                                        NULL AS discount_fixed")
+                                        c.ssid AS ssid")
             ->from('(('.RelationSuppRest::tableName().' a
                                     join '.Catalog::tableName().' b on
                                         ((a.cat_id = b.id)))
@@ -189,10 +186,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                                         d.rating AS rating,
                                         d.barcode AS barcode,
                                         d.edi_supplier_article AS edi_supplier_article,
-                                        d.ssid AS ssid,
-                                        c.discount_percent AS discount_percent,
-                                        c.discount AS discount,
-                                        c.discount_fixed AS discount_fixed")
+                                        d.ssid AS ssid")
             ->from("  (((".RelationSuppRest::tableName()." a
                                     join ".Catalog::tableName()." b on
                                         ((a.cat_id = b.id)))
@@ -228,6 +222,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
         }
 
         $this->addQueryJoins($sql, $this->service_id );
+        $sql = $sql->createCommand()->getRawSql();
         if ($vendorInList) {
             $dataProvider = new SqlDataProvider([
                 'sql'    => $sql,

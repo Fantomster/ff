@@ -34,6 +34,7 @@ class OuterProductMapSearch extends OuterProductMap
         $this->service_id = $post['service_id'] ?? 0;
         $mainOrgSetting = IntegrationSettingValue::getSettingsByServiceId($this->service_id, $client->id, ['main_org']);
         $mainOrgId = $client->id;
+        $vendorsNotInMainOrg = null;
         if (!empty($mainOrgSetting)) {
             $mainOrgId = $mainOrgSetting;
             $mainOrgModel = Organization::findOne($mainOrgId);

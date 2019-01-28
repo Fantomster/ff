@@ -234,16 +234,19 @@ class OrderController extends DefaultController
 
               $selected = ($selected[strlen($selected)-1] == ',') ? substr($selected, 0, $count) : $selected; */
 
-            $model = \Yii::$app->db->createCommand("
-                select 
-                    cbg.article,
-                    cbg.product as product, 
-                    sum(quantity) as total_quantity,
-                    cbg.ed
-                from order_content oc 
-                left join catalog_base_goods cbg on oc.product_id = cbg.id
-                where oc.order_id in ($selected)
-                group by cbg.id")->queryAll();
+            $model = (new Query())
+                ->select([
+                    "cbg.article",
+                    "product"        => "cbg.product",
+                    "total_quantity" => "sum(quantity)",
+                    "cbg.ed",
+                ])
+                ->from(["oc" => OrderContent::tableName()])
+                ->leftJoin(["cbg" => CatalogBaseGoods::tableName()], "oc.product_id = cbg.id")
+                ->where("oc.order_id IN ({$selected})")
+                ->groupBy("cbg.id")
+                ->createCommand()
+                ->queryAll();
 
             $objPHPExcel = new \PHPExcel();
             $sheet = 0;
@@ -2538,8 +2541,8 @@ class OrderController extends DefaultController
     public function actionGridReport()
     {
         $this->actionSaveSelectedOrders();
-        $selected = $arOrderIds = Yii::$app->session->get('selected', []);
-        if (empty($selected)) {
+        $arOrderIds = Yii::$app->session->get('selected', []);
+        if (empty($arOrderIds)) {
             exit();
         }
 

@@ -6,6 +6,8 @@ use common\models\Catalog;
 use common\models\CatalogGoods;
 use common\models\RelationSuppRest;
 use Yii;
+use yii\db\Expression;
+use yii\db\Query;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
 use common\models\Role;
@@ -15,7 +17,6 @@ use common\models\CatalogBaseGoods;
 use yii\helpers\Json;
 use yii\web\HttpException;
 use yii\web\Response;
-
 
 /**
  * Description of AppController
@@ -28,14 +29,15 @@ class CatalogController extends DefaultController
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
                         'actions' => [
                             'ajax-delete-product',
@@ -43,10 +45,10 @@ class CatalogController extends DefaultController
                             'ajax-update-product-market-place',
                             'get-sub-cat',
                             'index',
-                            'changecatalogprop',
-                            'changecatalogstatus',
-                            'changesetcatalog',
-                            'mycatalogdelcatalog',
+                            'change-catalog-prop',
+                            'change-catalog-status',
+                            'change-set-catalog',
+                            'my-catalog-del-catalog',
                             'step-1',
                             'step-1-clone',
                             'step-1-update',
@@ -56,11 +58,11 @@ class CatalogController extends DefaultController
                             'step-3-copy',
                             'step-3-update-product',
                             'step-4',
-                            'basecatalog',
+                            'base-catalog',
                         ],
-                        'allow' => true,
+                        'allow'   => true,
                         // Allow suppliers managers
-                        'roles' => [
+                        'roles'   => [
                             Role::ROLE_FRANCHISEE_OWNER,
                             Role::ROLE_FRANCHISEE_OPERATOR,
                             Role::ROLE_FRANCHISEE_ACCOUNTANT,
@@ -74,8 +76,7 @@ class CatalogController extends DefaultController
         ];
     }
 
-
-    public function actionBasecatalog($vendor_id, $cat_id = null)
+    public function actionBaseCatalog($vendor_id, $cat_id = null)
     {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentUser->organization_id = $vendor_id;
@@ -85,80 +86,101 @@ class CatalogController extends DefaultController
         $currentCatalog = $baseCatalog;
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-            if(!$cat_id){
-                $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
-                    . "WHERE cat_id = $baseCatalog->id AND "
-                    . "deleted=0 AND (product LIKE :product or article LIKE :article)";
-                $query = \Yii::$app->db->createCommand($sql);
-                $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                    . "WHERE cat_id = $baseCatalog->id AND "
-                    . "deleted=0 AND (product LIKE :product or article LIKE :article)", [':article' => $searchString, ':product' => $searchString])->queryScalar();
-            }else{
-                $sql = "SELECT "
-                    . "catalog.id as id,"
-                    . "article,"
-                    . "catalog_base_goods.product as product,"
-                    . "catalog_base_goods.id as base_goods_id,"
-                    . "catalog_goods.id as goods_id,"
-                    . "units,"
-                    . "ed,"
-                    . "catalog_base_goods.price as base_price,"
-                    . "catalog_goods.price as price,"
-                    . "catalog_base_goods.status"
-                    . " FROM catalog "
-                    . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-                    . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-                    . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1 AND (catalog_base_goods.product LIKE :product or catalog_base_goods.article LIKE :article)";
-                $query = \Yii::$app->db->createCommand($sql, [':article' => $searchString, ':product' => $searchString]);
-                $sql2 = "SELECT count(*)"
-                    . " FROM catalog "
-                    . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-                    . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-                    . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1 AND (catalog_base_goods.product LIKE :product or catalog_base_goods.article LIKE :article)";
-                $totalCount = Yii::$app->db->createCommand($sql2, [':article' => $searchString, ':product' => $searchString])->queryScalar();
+            if (!$cat_id) {
+                $query = (new Query())
+                    ->select([
+                        "id",
+                        "article",
+                        "product",
+                        "units",
+                        "category_id",
+                        "price",
+                        "ed",
+                        "note",
+                        "status",
+                        "market_place"
+                    ])
+                    ->from(CatalogBaseGoods::tableName())
+                    ->where([
+                        "cat_id"  => $baseCatalog->id,
+                        "deleted" => 0
+                    ])
+                    ->andFilterWhere(["LIKE", "product", $searchString])
+                    ->orFilterWhere(["LIKE", "article", $searchString]);
+            } else {
+                $query = (new Query())
+                    ->select([
+                        "id"            => "cat.id",
+                        "article",
+                        "product"       => "cbg.product",
+                        "base_goods_id" => "cbg.id",
+                        "goods_id"      => "cg.id",
+                        "units",
+                        "ed",
+                        "base_price"    => "cbg.price",
+                        "price"         => "cg.price",
+                        "cbg.status"
+                    ])
+                    ->from(["cat" => Catalog::tableName()])
+                    ->leftJoin(["cg" => CatalogGoods::tableName()], "cat.id = cg.cat_id")
+                    ->leftJoin(["cbg" => CatalogBaseGoods::tableName()], "cg.base_goods_id = cbg.id")
+                    ->where("cat.id = :catalogId AND cbg.deleted <> :deleted", [
+                        ":catalogId" => $cat_id,
+                        ":deleted"   => 1
+                    ])
+                    ->andFilterWhere(["LIKE", "cbg.product", $searchString])
+                    ->orFilterWhere(["LIKE", "cbg.article", $searchString]);
             }
         } else {
-            if(!$cat_id) {
-                $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
-                    . "WHERE cat_id = $baseCatalog->id AND "
-                    . "deleted=0";
-                $query = \Yii::$app->db->createCommand($sql);
-                $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                    . "WHERE cat_id = $baseCatalog->id AND "
-                    . "deleted=0", [':article' => $searchString, ':product' => $searchString])->queryScalar();
-            }else{
-                $sql = "SELECT "
-                    . "catalog.id as id,"
-                    . "article,"
-                    . "catalog_base_goods.product as product,"
-                    . "catalog_base_goods.id as base_goods_id,"
-                    . "catalog_goods.id as goods_id,"
-                    . "units,"
-                    . "ed,"
-                    . "catalog_base_goods.price as base_price,"
-                    . "catalog_goods.price as price,"
-                    . "catalog_base_goods.status"
-                    . " FROM catalog "
-                    . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-                    . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-                    . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1";
-                $query = \Yii::$app->db->createCommand($sql);
-                $sql2 = "SELECT count(*)"
-                    . " FROM catalog "
-                    . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-                    . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-                    . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1";
-                $totalCount = Yii::$app->db->createCommand($sql2)->queryScalar();
+            if (!$cat_id) {
+                $query = (new Query())
+                    ->select([
+                        "id",
+                        "article",
+                        "product",
+                        "units",
+                        "category_id",
+                        "price",
+                        "ed",
+                        "note",
+                        "status",
+                        "market_place"
+                    ])
+                    ->from(CatalogBaseGoods::tableName())
+                    ->where("cat_id = :catalogId AND deleted <> :deleted", [
+                        ":catalogId" => $baseCatalog->id,
+                        ":deleted"   => 1
+                    ]);
+            } else {
+                $query = (new Query())
+                    ->select([
+                        "id"            => "cat.id",
+                        "article",
+                        "product"       => "cbg.product",
+                        "base_goods_id" => "cbg.id",
+                        "goods_id"      => "cg.id",
+                        "units",
+                        "ed",
+                        "base_price"    => "cbg.price",
+                        "price"         => "cg.price",
+                        "cbg.status"
+                    ])
+                    ->from(["cat" => Catalog::tableName()])
+                    ->leftJoin(["cg" => CatalogGoods::tableName()], "cat.id = cg.cat_id")
+                    ->leftJoin(["cbg" => CatalogBaseGoods::tableName()], "cg.base_goods_id = cbg.id")
+                    ->where("cat.id = :catalogId AND cbg.deleted <> :deleted", [
+                        ":catalogId" => $cat_id,
+                        ":deleted"   => 1
+                    ]);
             }
         }
         $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query->sql,
-            'totalCount' => $totalCount,
-            'params' => [':article' => $searchString, ':product' => $searchString],
+            'sql'        => $query->createCommand()->getRawSql(),
+            'totalCount' => $query->count(),
             'pagination' => [
                 'pageSize' => 20,
             ],
-            'sort' => [
+            'sort'       => [
                 'attributes' => [
                     'article',
                     'product',
@@ -178,56 +200,73 @@ class CatalogController extends DefaultController
         return $this->renderPartial('basecatalog_new', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog', 'vendor_id', 'catalog', 'cat_id'));
     }
 
-
     private function getCatalogData($vendor_id, $cat_id = null)
     {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentUser->organization_id = $vendor_id;
 
-        $searchString = "";
-        $catalog = ($cat_id) ? Catalog::findOne(['supp_org_id' => $vendor_id, 'id' => $cat_id]) : Catalog::findOne(['supp_org_id' => $vendor_id, 'type' => Catalog::BASE_CATALOG]);
-        $catalogId = $catalog->id;
-        if ($cat_id != null) {
-            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-            $sql = "SELECT "
-                . "catalog.id as id,"
-                . "article,"
-                . "catalog_base_goods.product as product,"
-                . "catalog_base_goods.id as base_goods_id,"
-                . "catalog_goods.id as goods_id,"
-                . "units,"
-                . "ed,"
-                . "catalog_base_goods.price as base_price,"
-                . "catalog_goods.price as price,"
-                . "catalog_base_goods.status"
-                . " FROM catalog "
-                . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-                . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-                . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1";
-            $query = \Yii::$app->db->createCommand($sql);
-            $sql2 = "SELECT count(*)"
-                . " FROM catalog "
-                . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-                . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-                . "WHERE catalog.id = $cat_id and catalog_base_goods.deleted != 1";
-            $totalCount = Yii::$app->db->createCommand($sql2)->queryScalar();
+        if (!empty($cat_id)) {
+            $catalog = Catalog::findOne([
+                'supp_org_id' => $vendor_id,
+                'id'          => $cat_id
+            ]);
         } else {
-            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
-                . "WHERE cat_id = $catalogId AND "
-                . "deleted=0";
-            $query = \Yii::$app->db->createCommand($sql);
-            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $catalogId AND "
-                . "deleted=0", [':article' => $searchString, ':product' => $searchString])->queryScalar();
+            $catalog = Catalog::findOne([
+                'supp_org_id' => $vendor_id,
+                'type'        => Catalog::BASE_CATALOG
+            ]);
+        }
+
+        $catalogId = $catalog->id;
+        $searchString = trim(\Yii::$app->request->get('searchString'));
+        if ($cat_id != null) {
+            $query = (new Query())
+                ->select([
+                    "id"            => "cat.id",
+                    "article",
+                    "product"       => "cbg.product",
+                    "base_goods_id" => "cbg.id",
+                    "goods_id"      => "cg.id",
+                    "units",
+                    "ed",
+                    "base_price"    => "cbg.price",
+                    "price"         => "cg.price",
+                    "cbg.status"
+                ])
+                ->from(["cat" => Catalog::tableName()])
+                ->leftJoin(["cg" => CatalogGoods::tableName()], "cat.id = cg.cat_id")
+                ->leftJoin(["cbg" => CatalogBaseGoods::tableName()], "cg.base_goods_id = cbg.id")
+                ->where("cat.id = :catalogId AND cbg.deleted <> :deleted", [
+                    ":catalogId" => $cat_id,
+                    ":deleted"   => 1
+                ]);
+        } else {
+            $query = (new Query())
+                ->select([
+                    "id",
+                    "article",
+                    "product",
+                    "units",
+                    "category_id",
+                    "price",
+                    "ed",
+                    "note",
+                    "status",
+                    "market_place"
+                ])
+                ->from(CatalogBaseGoods::tableName())
+                ->where("cat_id = :catalogId AND deleted <> :deleted", [
+                    ":catalogId" => $catalogId,
+                    ":deleted"   => 1
+                ]);
         }
         $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query->sql,
-            'totalCount' => $totalCount,
-            'params' => [':article' => $searchString, ':product' => $searchString],
+            'sql'        => $query->createCommand()->getRawSql(),
+            'totalCount' => $query->count(),
             'pagination' => [
                 'pageSize' => 20,
             ],
-            'sort' => [
+            'sort'       => [
                 'attributes' => [
                     'article',
                     'product',
@@ -246,13 +285,13 @@ class CatalogController extends DefaultController
         return $this->renderPartial('basecatalog_new', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'catalog', 'vendor_id', 'cat_id'));
     }
 
-
-    public function actionIndex($id, $cat_id = null) {
+    public function actionIndex($id, $cat_id = null)
+    {
         $vendor_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentOrganization = Organization::findOne($vendor_id);
-        if($currentOrganization->franchisee->id!=$currentUser->franchiseeUser->franchisee_id){
-            throw new HttpException(403, Yii::t('app', 'franchise.controllers.catalog.no_access', ['ru'=>'Доступ запрещен']));
+        if ($currentOrganization->franchisee->id != $currentUser->franchiseeUser->franchisee_id) {
+            throw new HttpException(403, Yii::t('app', 'franchise.controllers.catalog.no_access', ['ru' => 'Доступ запрещен']));
         }
         if (!Catalog::find()->where(['supp_org_id' => $vendor_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
             $step = $currentUser->organization->step;
@@ -284,7 +323,7 @@ class CatalogController extends DefaultController
                     andFilterWhere(['id' => \common\models\RelationSuppRest::find()->
                     select(['cat_id'])->
                     where(['supp_org_id' => $vendor_id,
-                        'rest_org_id' => $restaurant])])->one();
+                           'rest_org_id' => $restaurant])])->one();
                     if (empty($arrCatalog)) {
                         $arrCatalog == "";
                     } else {
@@ -303,7 +342,7 @@ class CatalogController extends DefaultController
                 }
             }
             $catalog = Catalog::findOne($cat_id);
-            if($catalog && $catalog->type == \common\models\Catalog::BASE_CATALOG){
+            if ($catalog && $catalog->type == \common\models\Catalog::BASE_CATALOG) {
                 $cat_id = null;
             }
             $arrCatalog = array_merge($arrBaseCatalog, $arrCatalog);
@@ -312,8 +351,8 @@ class CatalogController extends DefaultController
         }
     }
 
-
-    public function actionStep1($vendor_id) {
+    public function actionStep1($vendor_id)
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $catalog = new Catalog();
@@ -326,12 +365,12 @@ class CatalogController extends DefaultController
                     $catalog->save();
                     return (['success' => true, 'cat_id' => $catalog->id]);
                 } else {
-                    $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'franchise.controllers.oops', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('app', 'franchise.controllers.catalog_name', ['ru'=>'Укажите корректное  <strong>Имя</strong> каталога'])]];
+                    $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'franchise.controllers.oops', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('app', 'franchise.controllers.catalog_name', ['ru' => 'Укажите корректное  <strong>Имя</strong> каталога'])]];
                     return $result;
                     exit;
                 }
             } else {
-                return (['success' => false, 'type' => 2, Yii::t('app', 'franchise.controllers.post_undefined', ['ru'=>'POST не определен'])]);
+                return (['success' => false, 'type' => 2, Yii::t('app', 'franchise.controllers.post_undefined', ['ru' => 'POST не определен'])]);
                 exit;
             }
         }
@@ -340,8 +379,8 @@ class CatalogController extends DefaultController
         return $this->render('newcatalog/step-1', compact('catalog', 'cat_id', 'vendor_id'));
     }
 
-
-    public function actionStep1Update($vendor_id, $id) {
+    public function actionStep1Update($vendor_id, $id)
+    {
         $cat_id = $id;
         if (!Catalog::find()->where(['id' => $id, 'supp_org_id' => $vendor_id])->exists()) {
             return $this->redirect(['vendor/index']);
@@ -355,7 +394,7 @@ class CatalogController extends DefaultController
                     $catalog->save();
                     return (['success' => true, 'cat_id' => $catalog->id]);
                 } else {
-                    $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('app', 'franchise.controllers.oops_two', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('app', 'franchise.controllers.catalog_name_two', ['ru'=>'Укажите корректное  <strong>Имя</strong> каталога'])]];
+                    $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('app', 'franchise.controllers.oops_two', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('app', 'franchise.controllers.catalog_name_two', ['ru' => 'Укажите корректное  <strong>Имя</strong> каталога'])]];
                     return $result;
                     exit;
                 }
@@ -364,12 +403,19 @@ class CatalogController extends DefaultController
         return $this->render('newcatalog/step-1', compact('catalog', 'cat_id', 'searchModel', 'dataProvider', 'vendor_id'));
     }
 
-
-    public function actionStep1Clone($vendor_id, $id) {
+    /**
+     * @param $vendor_id
+     * @param $id
+     * @return Response
+     * @throws HttpException
+     * @throws \yii\db\Exception
+     */
+    public function actionStep1Clone($vendor_id, $id)
+    {
         $cat_id_old = $id; //id исходного каталога
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $vendor_id]);
         if (empty($model)) {
-            throw new \yii\web\HttpException(404, Yii::t('error', 'franchise.controllers.get_out', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
+            throw new \yii\web\HttpException(404, Yii::t('error', 'franchise.controllers.get_out', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
         $model->id = null;
         $model->name = $model->name . ' ' . date('H:i:s');
@@ -380,24 +426,29 @@ class CatalogController extends DefaultController
         $model->save();
 
         $cat_id = $model->id; //новый каталог id
+        $cgTable = CatalogGoods::tableName();
+        $cbgTable = CatalogBaseGoods::tableName();
+        $now = new Expression("NOW()");
         if ($cat_type == Catalog::BASE_CATALOG) {
-            $sql = "insert into " . CatalogGoods::tableName() .
-                "(cat_id,base_goods_id,price,created_at) "
-                . "SELECT " . $cat_id . ", id, price, NOW() from " . CatalogBaseGoods::tableName() . " WHERE cat_id = $cat_id_old and deleted<>1";
-            \Yii::$app->db->createCommand($sql)->execute();
+            Yii::$app->db->createCommand(
+                "INSERT INTO {$cgTable} (cat_id, base_goods_id, price, created_at) "
+                . "SELECT {$cat_id}, id, price, {$now} FROM {$cbgTable} "
+                . "WHERE cat_id = {$cat_id_old} AND deleted <> 1"
+            )->execute();
         }
         if ($cat_type == Catalog::CATALOG) {
-            $sql = "insert into " . CatalogGoods::tableName() .
-                "(cat_id,base_goods_id,price,created_at) "
-                . "SELECT " . $cat_id . ", base_goods_id, price, NOW() from " . CatalogGoods::tableName() . " WHERE cat_id = $cat_id_old";
-            \Yii::$app->db->createCommand($sql)->execute();
+            Yii::$app->db->createCommand(
+                "INSERT INTO {$cgTable} (cat_id, base_goods_id, price, created_at) "
+                . "SELECT {$cat_id}, base_goods_id, price, {$now} FROM {$cgTable} "
+                . "WHERE cat_id = {$cat_id_old}"
+            )->execute();
         }
 
-        return $this->redirect(['catalog/step-1-update', 'vendor_id'=>$vendor_id, 'id' => $cat_id]);
+        return $this->redirect(['catalog/step-1-update', 'vendor_id' => $vendor_id, 'id' => $cat_id]);
     }
 
-
-    public function actionStep2AddProduct() {
+    public function actionStep2AddProduct()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             if (Yii::$app->request->post('state') == 'true') {
@@ -408,22 +459,23 @@ class CatalogController extends DefaultController
 
                 $catalogGoods->price = CatalogBaseGoods::findOne(['id' => $product_id])->price;
                 $catalogGoods->save();
-                return (['success' => true, Yii::t('app', 'franchise.controllers.added', ['ru'=>'Добавлен'])]);
+                return (['success' => true, Yii::t('app', 'franchise.controllers.added', ['ru' => 'Добавлен'])]);
                 exit;
             } else {
                 $product_id = Yii::$app->request->post('baseProductId');
                 $catalog_id = Yii::$app->request->post('cat_id');
-                if($product_id && $catalog_id){
+                if ($product_id && $catalog_id) {
                     CatalogGoods::deleteAll(['base_goods_id' => $product_id, 'cat_id' => $catalog_id]);
-                    return (['success' => true, Yii::t('app', 'franchise.controllers.deleted', ['ru'=>'Удален'])]);
+                    return (['success' => true, Yii::t('app', 'franchise.controllers.deleted', ['ru' => 'Удален'])]);
                     exit;
                 }
-                return (['success' => false, Yii::t('error', 'franchise.controllers.error', ['ru'=>'Ошибка'])]);
+                return (['success' => false, Yii::t('error', 'franchise.controllers.error', ['ru' => 'Ошибка'])]);
             }
         }
     }
 
-    public function actionStep2($vendor_id, $id) {
+    public function actionStep2($vendor_id, $id)
+    {
         $cat_id = $id;
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -431,7 +483,7 @@ class CatalogController extends DefaultController
                 if (CatalogGoods::find()->where(['cat_id' => $cat_id])->exists()) {
                     return (['success' => true, 'cat_id' => $cat_id]);
                 } else {
-                    return (['success' => false, 'type' => 1, 'message' => Yii::t('app', 'franchise.controllers.empty_catalog', ['ru'=>'Пустой каталог'])]);
+                    return (['success' => false, 'type' => 1, 'message' => Yii::t('app', 'franchise.controllers.empty_catalog', ['ru' => 'Пустой каталог'])]);
                     exit;
                 }
             }
@@ -439,36 +491,38 @@ class CatalogController extends DefaultController
 
         $baseCatalog = Catalog::findOne(['supp_org_id' => $vendor_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($baseCatalog)) {
-            throw new \yii\web\HttpException(404, Yii::t('error', 'franchise.controllers.get_out_two', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
+            throw new \yii\web\HttpException(404, Yii::t('error', 'franchise.controllers.get_out_two', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
-        $searchString = "";
+        $query = (new Query())
+            ->select([
+                "id",
+                "article",
+                "product",
+                "units",
+                "category_id",
+                "price",
+                "ed",
+                "status",
+            ])
+            ->from(CatalogBaseGoods::tableName())
+            ->where("cat_id = :catalogId AND deleted <> :deleted", [
+                ":catalogId" => $baseCatalog->id,
+                ":deleted"   => 1
+            ]);
+
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
-            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-            $sql = "SELECT id,article,product,units,category_id,price,ed,status FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog->id AND "
-                . "deleted=0 AND (product LIKE :product or article LIKE :article)";
-            $query = \Yii::$app->db->createCommand($sql);
-            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog->id AND "
-                . "deleted=0 AND (product LIKE :product or article LIKE :article)", [':article' => $searchString, ':product' => $searchString])->queryScalar();
-        } else {
-            $sql = "SELECT id,article,product,units,category_id,price,ed,status FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog->id AND "
-                . "deleted=0";
-            $query = \Yii::$app->db->createCommand($sql);
-            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog->id AND "
-                . "deleted=0")->queryScalar();
+            $searchString = trim(\Yii::$app->request->get('searchString'));
+            $query->andFilterWhere(["LIKE", "product", $searchString]);
         }
+
         $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query->sql,
-            'params' => [':article' => $searchString, ':product' => $searchString],
-            'totalCount' => $totalCount,
+            'sql'        => $query->createCommand()->getRawSql(),
+            'totalCount' => $query->count(),
             'pagination' => [
                 'pageSize' => 20,
             ],
-            'sort' => [
-                'attributes' => [
+            'sort'       => [
+                'attributes'   => [
                     'id',
                     'article',
                     'product',
@@ -486,49 +540,46 @@ class CatalogController extends DefaultController
         return $this->render('newcatalog/step-2', compact('searchModel', 'dataProvider', 'cat_id', 'vendor_id'));
     }
 
-    public function actionStep3Copy($vendor_id, $id) {
+    public function actionStep3Copy($vendor_id, $id)
+    {
         $cat_id = $id;
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $vendor_id]);
         if (empty($model)) {
-            throw new \yii\web\HttpException(404, Yii::t('error', 'franchise.controllers.get_out_three', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
+            throw new \yii\web\HttpException(404, Yii::t('error', 'franchise.controllers.get_out_three', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
-
-        $sql = "SELECT "
-            . "catalog.id as id,"
-            . "article,"
-            . "catalog_base_goods.product as product,"
-            . "catalog_base_goods.id as base_goods_id,"
-            . "catalog_goods.id as goods_id,"
-            . "units,"
-            . "ed,"
-            . "catalog_base_goods.price as base_price,"
-            . "catalog_goods.price as price,"
-            . "catalog_base_goods.status"
-            . " FROM catalog "
-            . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-            . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-            . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1";
-        $arr = \Yii::$app->db->createCommand($sql)->queryAll();
+        $productList = (new Query())
+            ->select([
+                "id"            => "cat.id",
+                "article",
+                "product"       => "cbg.product",
+                "base_goods_id" => "cbg.id",
+                "goods_id"      => "cg.id",
+                "units",
+                "ed",
+                "base_price"    => "cbg.price",
+                "price"         => "cg.price",
+                "cbg.status"
+            ])
+            ->from(["cat" => Catalog::tableName()])
+            ->leftJoin(["cg" => CatalogGoods::tableName()], "cat.id = cg.cat_id")
+            ->leftJoin(["cbg" => CatalogBaseGoods::tableName()], "cg.base_goods_id = cbg.id")
+            ->where("cat.id = :catalogId AND cbg.deleted <> :deleted", [
+                ":catalogId" => $id,
+                ":deleted"   => 1
+            ])
+            ->all();
 
         $array = [];
-        foreach ($arr as $arrs) {
-            $c_article = $arrs['article'];
-            $c_product = $arrs['product'];
-            $c_base_goods_id = $arrs['base_goods_id'];
-            $c_goods_id = $arrs['goods_id'];
-            $c_base_price = $arrs['base_price'];
-            $c_ed = $arrs['ed'];
-            $c_price = $arrs['price'];
-
+        foreach ($productList as $product) {
             array_push($array, [
-                'article' => $c_article,
-                'product' => html_entity_decode($c_product),
-                'base_goods_id' => $c_base_goods_id,
-                'goods_id' => $c_goods_id,
-                'base_price' => $c_base_price,
-                'price' => $c_price,
-                'ed' => $c_ed,
-                'total_price' => $c_price]);
+                'article'       => $product['article'],
+                'product'       => html_entity_decode($product['product']),
+                'base_goods_id' => $product['base_goods_id'],
+                'goods_id'      => $product['goods_id'],
+                'base_price'    => $product['base_price'],
+                'price'         => $product['price'],
+                'ed'            => $product['ed'],
+                'total_price'   => $product['price']]);
         }
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -540,7 +591,7 @@ class CatalogController extends DefaultController
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['total_price']));
 
                 if (!CatalogGoods::find()->where(['id' => $goods_id])->exists()) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'franchise.controllers.oops_two', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('app', 'franchise.controllers.wrong_good', ['ru'=>'Неверный товар'])]];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'franchise.controllers.oops_two', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('app', 'franchise.controllers.wrong_good', ['ru' => 'Неверный товар'])]];
                     return $result;
                     exit;
                 }
@@ -548,7 +599,7 @@ class CatalogController extends DefaultController
                 $price = str_replace(',', '.', $price);
 
                 if (!preg_match($numberPattern, $price)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'franchise.controllers.oops_three', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('app', 'franchise.controllers.wrong_format', ['ru'=>'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>'])]];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'franchise.controllers.oops_three', ['ru' => 'УПС! Ошибка']), 'body' => Yii::t('app', 'franchise.controllers.wrong_format', ['ru' => 'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>'])]];
                     return $result;
                     exit;
                 }
@@ -563,26 +614,28 @@ class CatalogController extends DefaultController
                 $catalogGoods->price = $price;
                 $catalogGoods->update();
             }
-            $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => Yii::t('app', 'franchise.controllers.saved', ['ru'=>'Сохранено']), 'body' => Yii::t('app', 'franchise.controllers.data_updated', ['ru'=>'Данные успешно обновлены'])]];
+            $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => Yii::t('app', 'franchise.controllers.saved', ['ru' => 'Сохранено']), 'body' => Yii::t('app', 'franchise.controllers.data_updated', ['ru' => 'Данные успешно обновлены'])]];
             return $result;
             exit;
         }
         return $this->renderPartial('newcatalog/step-3-copy', compact('array', 'cat_id', 'vendor_id'));
     }
 
-    public function actionStep3($id) {
+    public function actionStep3($id)
+    {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
         if (empty($model)) {
-            throw new \yii\web\HttpException(404, Yii::t('error', 'franchise.controllers.get_out_four', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
+            throw new \yii\web\HttpException(404, Yii::t('error', 'franchise.controllers.get_out_four', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
         $searchModel = new CatalogGoods();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $cat_id);
         return $this->render('newcatalog/step-3', compact('searchModel', 'dataProvider', 'exportModel'));
     }
 
-    public function actionStep3UpdateProduct($id) {
+    public function actionStep3UpdateProduct($id)
+    {
         $catalogGoods = CatalogGoods::find()->where(['id' => $id])->one();
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -591,7 +644,7 @@ class CatalogController extends DefaultController
 
                     $catalogGoods->save();
 
-                    $message = Yii::t('app', 'franchise.controllers.product_updated', ['ru'=>'Продукт обновлен!']);
+                    $message = Yii::t('app', 'franchise.controllers.product_updated', ['ru' => 'Продукт обновлен!']);
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);
                 }
             }
@@ -599,14 +652,14 @@ class CatalogController extends DefaultController
         return $this->renderAjax('catalogs/_productForm', compact('catalogGoods'));
     }
 
-
-    public function actionStep4($vendor_id, $id) {
+    public function actionStep4($vendor_id, $id)
+    {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentUser->organization_id = $vendor_id;
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $vendor_id]);
         if (empty($model)) {
-            throw new \yii\web\HttpException(404, Yii::t('app', 'franchise.controllers.get_out_six', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
+            throw new \yii\web\HttpException(404, Yii::t('app', 'franchise.controllers.get_out_six', ['ru' => 'Нет здесь ничего такого, проходите, гражданин']));
         }
         $searchModel = new RelationSuppRest;
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
@@ -628,7 +681,7 @@ class CatalogController extends DefaultController
                             Yii::$app->sms->send($text, $row->profile->phone);
                         }
                     }
-                    return (['success' => true, Yii::t('app', 'franchise.controllers.subscribed', ['ru'=>'Подписан'])]);
+                    return (['success' => true, Yii::t('app', 'franchise.controllers.subscribed', ['ru' => 'Подписан'])]);
                     exit;
                 } else {
                     $rest_org_id = Yii::$app->request->post('rest_org_id');
@@ -636,7 +689,7 @@ class CatalogController extends DefaultController
                     $relation_supp_rest->cat_id = Catalog::NON_CATALOG;
                     $relation_supp_rest->status = 0;
                     $relation_supp_rest->update();
-                    return (['success' => true, Yii::t('app', 'franchise.controllers.not_subscribed', ['ru'=>'Не подписан'])]);
+                    return (['success' => true, Yii::t('app', 'franchise.controllers.not_subscribed', ['ru' => 'Не подписан'])]);
                     exit;
                 }
             }
@@ -644,8 +697,8 @@ class CatalogController extends DefaultController
         return $this->render('newcatalog/step-4', compact('searchModel', 'dataProvider', 'currentCatalog', 'cat_id', 'vendor_id'));
     }
 
-
-    public function actionChangecatalogprop() {
+    public function actionChangecatalogprop()
+    {
         if (Yii::$app->request->isAjax) {
 
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -683,7 +736,8 @@ class CatalogController extends DefaultController
         }
     }
 
-    public function actionChangesetcatalog($vendor_id) {
+    public function actionChangesetcatalog($vendor_id)
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -707,7 +761,7 @@ class CatalogController extends DefaultController
                         Yii::$app->sms->send($text, $row->profile->phone);
                     }
                 }
-                return (['success' => true, Yii::t('app', 'franchise.controllers.subscribed_two', ['ru'=>'Подписан'])]);
+                return (['success' => true, Yii::t('app', 'franchise.controllers.subscribed_two', ['ru' => 'Подписан'])]);
                 exit;
             } else {
                 $rest_org_id = $id;
@@ -715,13 +769,14 @@ class CatalogController extends DefaultController
                 $relation_supp_rest->cat_id = Catalog::NON_CATALOG;
                 $relation_supp_rest->status = 0;
                 $relation_supp_rest->update();
-                return (['success' => true, Yii::t('app', 'franchise.controllers.not_subscribed_two', ['ru'=>'Не подписан'])]);
+                return (['success' => true, Yii::t('app', 'franchise.controllers.not_subscribed_two', ['ru' => 'Не подписан'])]);
                 exit;
             }
         }
     }
 
-    public function actionChangecatalogstatus() {
+    public function actionChangecatalogstatus()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $id = \Yii::$app->request->post('id');
@@ -735,7 +790,8 @@ class CatalogController extends DefaultController
         }
     }
 
-    public function actionCreateCatalog() {
+    public function actionCreateCatalog()
+    {
         $relation_supp_rest = new RelationSuppRest;
         if (Yii::$app->request->isAjax) {
 
@@ -743,8 +799,8 @@ class CatalogController extends DefaultController
         return $this->renderAjax('catalogs/_create', compact('relation_supp_rest'));
     }
 
-
-    public function actionMycatalogdelcatalog() {
+    public function actionMycatalogdelcatalog()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
@@ -753,9 +809,9 @@ class CatalogController extends DefaultController
             $Catalog = Catalog::find()->where(['id' => $cat_id, 'type' => 2])->one();
             $Catalog->delete();
 
-            $CatalogGoods = CatalogGoods::deleteAll(['cat_id' => $cat_id]);
+            CatalogGoods::deleteAll(['cat_id' => $cat_id]);
 
-            $RelationSuppRest = RelationSuppRest::updateAll(['cat_id' => null], ['cat_id' => $cat_id]);
+            RelationSuppRest::updateAll(['cat_id' => null], ['cat_id' => $cat_id]);
 
             $result = ['success' => true];
             return $result;
@@ -763,13 +819,13 @@ class CatalogController extends DefaultController
         }
     }
 
-
-    public function actionAjaxDeleteProduct() {
+    public function actionAjaxDeleteProduct()
+    {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
             $product_id = \Yii::$app->request->post('id');
-            $catalogBaseGoods = CatalogBaseGoods::updateAll(['deleted' => 1, 'es_status' => 2], ['id' => $product_id]);
+            CatalogBaseGoods::updateAll(['deleted' => 1, 'es_status' => 2], ['id' => $product_id]);
 
             $result = ['success' => true];
             return $result;
@@ -777,18 +833,32 @@ class CatalogController extends DefaultController
         }
     }
 
-
-    public function actionAjaxUpdateProductMarketPlace($id, $supp_org_id = null, $catalog_id = null) {
-        if($id){
+    public function actionAjaxUpdateProductMarketPlace($id, $supp_org_id = null, $catalog_id = null)
+    {
+        if ($id) {
             $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
-        }else{
+        } else {
             $catalogBaseGoods = new CatalogBaseGoods();
         }
         $catalogBaseGoods->scenario = 'marketPlace';
-        $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
-	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
-        $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
-        foreach ($countrys as &$country){
+        $countrys = (new Query())
+            ->select([
+                "id",
+                "name"
+            ])
+            ->from([MpCountry::tableName()])
+            ->where(["name" => "Россия"])
+            ->union((new Query())
+                ->select([
+                    "id",
+                    "name"
+                ])
+                ->from([MpCountry::tableName()])
+                ->where("name <> :name", [":name" => "Россия"]))
+            ->createCommand()
+            ->queryAll();
+
+        foreach ($countrys as &$country) {
             $country['name'] = Yii::t('app', $country['name']);
         }
         if (!empty($catalogBaseGoods->category_id)) {
@@ -799,7 +869,7 @@ class CatalogController extends DefaultController
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
-                if($supp_org_id){
+                if ($supp_org_id) {
                     $catalogBaseGoods->supp_org_id = $supp_org_id;
                     $catalogBaseGoods->cat_id = $catalog_id;
                 }
@@ -808,7 +878,7 @@ class CatalogController extends DefaultController
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
-                        $message = Yii::t('app', 'franchise.controllers.product_updated_two', ['ru'=>'Продукт обновлен!']);
+                        $message = Yii::t('app', 'franchise.controllers.product_updated_two', ['ru' => 'Продукт обновлен!']);
                         return $this->renderAjax('_success', ['message' => $message]);
                     }
                 } else {
@@ -816,7 +886,7 @@ class CatalogController extends DefaultController
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub1 ? $catalogBaseGoods->sub2 : null;
                         $catalogBaseGoods->es_status = 2;
                         $catalogBaseGoods->save();
-                        $message = Yii::t('app', 'franchise.controllers.product_updated_three', ['ru'=>'Продукт обновлен!']);
+                        $message = Yii::t('app', 'franchise.controllers.product_updated_three', ['ru' => 'Продукт обновлен!']);
                         return $this->renderAjax('_success', ['message' => $message]);
                     }
                 }
@@ -825,8 +895,8 @@ class CatalogController extends DefaultController
         return $this->renderAjax('_form', compact('catalogBaseGoods', 'countrys', 'supp_org_id', 'catalog_id'));
     }
 
-
-    public function actionGetSubCat() {
+    public function actionGetSubCat()
+    {
         $out = [];
         if (isset($_POST['depdrop_parents'])) {
             $id = end($_POST['depdrop_parents']);
@@ -857,6 +927,5 @@ class CatalogController extends DefaultController
         }
         echo Json::encode(['output' => '', 'selected' => '']);
     }
-
 
 }

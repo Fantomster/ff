@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\CatalogBaseGoods;
 use Yii;
+use yii\db\Query;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -114,6 +115,7 @@ class SiteController extends Controller
      * Displays homepage.
      *
      * @return mixed
+     * @throws \yii\db\Exception
      */
     public function actionIndex()
     {
@@ -123,8 +125,15 @@ class SiteController extends Controller
         $profile->scenario = 'register';
         $organization = new Organization();
         $organization->scenario = 'register';
-        $sql = "select rest_count,supp_count from main_counter";
-        $counter = \Yii::$app->db->createCommand($sql)->queryOne();
+        $counter = (new Query())
+            ->select([
+                "rest_count",
+                "supp_count"
+            ])
+            ->from("main_counter")
+            ->createCommand()
+            ->queryOne();
+
         return $this->render('index', compact("user", "profile", "organization", "counter"));
     }
 

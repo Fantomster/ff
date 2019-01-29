@@ -78,9 +78,10 @@ class ServiceIiko extends AbstractSyncFactory
     /**
      * Метод отправки накладной
      *
-     * @param $request
+     * @param array $request
      * @return array
-     * @throws \Exception
+     * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     public function sendWaybill($request): array
     {
@@ -163,6 +164,7 @@ class ServiceIiko extends AbstractSyncFactory
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     public function checkConnect($request = [])
     {

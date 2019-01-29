@@ -9,6 +9,7 @@
 namespace console\modules\daemons\classes;
 
 use common\models\OuterProduct;
+use common\models\OuterProductType;
 use common\models\OuterUnit;
 use console\modules\daemons\components\ConsumerInterface;
 use console\modules\daemons\components\IikoSyncConsumer;
@@ -49,6 +50,13 @@ class IikoProductSync extends IikoSyncConsumer implements ConsumerInterface
     public $type = 'product';
 
     /**
+     * Description
+     *
+     * @var array
+     */
+    public $types = [];
+
+    /**
      * @throws \yii\web\BadRequestHttpException
      */
     public function getData()
@@ -74,6 +82,12 @@ class IikoProductSync extends IikoSyncConsumer implements ConsumerInterface
     {
         $this->items = $this->iikoApi->getProducts();
         $this->iikoApi->logout();
+
+        $this->types = OuterProductType::find()
+            ->select(['id'])
+            ->where(['service_id' => self::SERVICE_ID])
+            ->indexBy('value')->asArray()->column();
+
         //Если пришли продукты, обновляем их
         if (!empty($this->items['products'])) {
             //поскольку мы не можем отследить изменения на стороне провайдера
@@ -116,11 +130,13 @@ class IikoProductSync extends IikoSyncConsumer implements ConsumerInterface
     {
         try {
             $model = OuterProduct::findOne(['outer_uid' => $uuid, 'org_id' => $this->orgId, 'service_id' => self::SERVICE_ID,]);
+            $productType = $this->getOuterProductTypeID($item);
             //Если нет товара у нас, создаем
             if (empty($model)) {
                 $model = new OuterProduct(['outer_uid' => $uuid]);
                 $model->org_id = $this->orgId;
                 $model->service_id = self::SERVICE_ID;
+                $model->outer_product_type_id = $productType;
             }
             //Родительская категория если есть
             if (isset($item['parentId']) && !empty($item['parentId'])) {
@@ -128,6 +144,10 @@ class IikoProductSync extends IikoSyncConsumer implements ConsumerInterface
             }
             if (!empty($item['name'])) {
                 $model->name = $item['name'];
+            }
+
+            if (is_null($model->outer_product_type_id) && !is_null($productType)) {
+                $model->outer_product_type_id = $productType;
             }
 
             if (!empty($item['mainUnit'])) {
@@ -164,5 +184,14 @@ class IikoProductSync extends IikoSyncConsumer implements ConsumerInterface
         } catch (\Exception $e) {
             throw $e;
         }
+    }
+
+    /**
+     * @param $item
+     * @return int|mixed
+     */
+    private function getOuterProductTypeID($item)
+    {
+        return isset($this->types[$item['productType']]) ? $this->types[$item['productType']] : null;
     }
 }

@@ -19,6 +19,8 @@ use api_web\modules\integration\classes\Integration;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "organization_dictionary".
@@ -240,5 +242,29 @@ class OrganizationDictionary extends ActiveRecord
         ]);
 
         return $unit->id;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCount()
+    {
+        if ($this->outerDic->name == 'product_type') {
+            $result = (new Query())
+                ->select([
+                    'selected' => 'coalesce(SUM(opts.selected), 0)',
+                    'all'      => 'coalesce(COUNT(*), 0)'
+                ])->from(OuterProductType::tableName() . " opt")
+                ->leftJoin(OuterProductTypeSelected::tableName() . " opts", "opt.id = opts.outer_product_type_id AND opts.org_id = :org", [
+                    ':org' => $this->org_id
+                ])
+                ->where([
+                    'opt.service_id' => $this->outerDic->service_id
+                ])->one(\Yii::$app->db_api);
+
+            return $result['selected'] . "/" . $result['all'];
+        } else {
+            return $this->count ?? 0;
+        }
     }
 }

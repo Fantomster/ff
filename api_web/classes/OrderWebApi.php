@@ -34,6 +34,7 @@ use yii\db\{
 };
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
+use Yii;
 
 /**
  * Class OrderWebApi
@@ -60,7 +61,7 @@ class OrderWebApi extends WebApi
         if (!$order) {
             throw new BadRequestHttpException('order_not_found');
         }
-
+        $additionalParams = [];
         //If user is unconfirmed
         if ($isUnconfirmedVendor) {
             $organizationID = $this->user->organization_id;
@@ -72,8 +73,14 @@ class OrderWebApi extends WebApi
                         $delivery = new Delivery();
                         $delivery->vendor_id = $organizationID;
                     }
-                    $delivery->delivery_charge = (float)$post['delivery_price'];
-                    $delivery->save();
+                    $deliveryPrice = (float)$post['delivery_price'];
+                    if ($delivery->delivery_charge != $deliveryPrice) {
+                        $additionalParams['delivery_price']['old_value'] = $delivery->delivery_charge;
+                        $additionalParams['delivery_price']['value'] = $deliveryPrice;
+                        $additionalParams['delivery_price']['name'] = Yii::t('app', 'Стоимость доставки');
+                        $delivery->delivery_charge = $deliveryPrice;
+                        $delivery->save();
+                    }
                 }
             } else {
                 throw new BadRequestHttpException("order.access.change.denied");
@@ -94,7 +101,12 @@ class OrderWebApi extends WebApi
         }
         //Если сменили дату доставки
         if (!empty($post['actual_delivery'])) {
-            $order->actual_delivery = $post['actual_delivery'];
+            if ($order->actual_delivery != $post['actual_delivery']) {
+                $additionalParams['actual_delivery']['old_value'] = $order->actual_delivery;
+                $additionalParams['actual_delivery']['value'] = $post['actual_delivery'];
+                $additionalParams['actual_delivery']['name'] = Yii::t('app', 'Дата доставки');
+                $order->actual_delivery = $post['actual_delivery'];
+            }
         }
         //Если поменяли скидку
         if (isset($post['discount']) && !empty($post['discount'])) {
@@ -104,13 +116,25 @@ class OrderWebApi extends WebApi
             if (!isset($post['discount']['amount'])) {
                 throw new BadRequestHttpException("order.discount.empty_amount");
             }
-            $order->discount_type = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
+            $discountType = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
+            if ($order->discount_type != $discountType) {
+                $additionalParams['discount_type']['old_value'] = $order->discount_type;
+                $additionalParams['discount_type']['value'] = $discountType;
+                $additionalParams['discount_type']['name'] = Yii::t('app', 'Тип скидки');
+                $order->discount_type = $discountType;
+            }
 
             if ($order->discount_type == Order::DISCOUNT_PERCENT && 100 < $post['discount']['amount']) {
                 throw new BadRequestHttpException("order.discount.100_percent");
             }
 
-            $order->discount = $post['discount']['amount'];
+            if ($order->discount != $post['discount']['amount']) {
+                $discountAmont = $post['discount']['amount'];
+                $additionalParams['discount']['old_value'] = $order->discount;
+                $additionalParams['discount']['value'] = $discountAmont;
+                $additionalParams['discount']['name'] = Yii::t('app', 'Скидка');
+                $order->discount = $discountAmont;
+            }
         }
         $tr = \Yii::$app->db->beginTransaction();
         if (is_null($order->created_by_id)) {
@@ -167,7 +191,10 @@ class OrderWebApi extends WebApi
                                 $changed[] = $change;
                                 break;
                             case 'edit':
-                                $changed[] = $this->editProduct($order, $product);
+                                $editingResult = $this->editProduct($order, $product);
+                                if ($editingResult) {
+                                    $changed[] = $editingResult;
+                                }
                                 break;
                         }
                     }
@@ -202,8 +229,9 @@ class OrderWebApi extends WebApi
             if ($order->vendor_id == $this->user->organization_id || $isUnconfirmedVendor) {
                 $sender = $order->vendor;
             }
-            if (!empty($changed) || !empty($deleted)) {
-                Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted);
+
+            if (!empty($changed) || !empty($deleted) || !empty($additionalParams)) {
+                Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted, $additionalParams);
             }
             return $this->getOrderInfo($order);
         } catch (\Throwable $e) {
@@ -230,6 +258,9 @@ class OrderWebApi extends WebApi
         $orderContent = $order->getOrderContent()->where(['product_id' => $product['id']])->one();
         if (empty($orderContent)) {
             throw new BadRequestHttpException("order_content.not_found");
+        }
+        if ($orderContent->quantity == $product['quantity'] && $orderContent->price == round($product['price'], 3)) {
+            return false;
         }
         $orderContent->setOldAttributes($orderContent->attributes);
 

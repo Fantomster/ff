@@ -786,7 +786,7 @@ class OrderWebApi extends WebApi
 
                 $units = round(($model['units'] ?? 0), 3);
                 if ($isUnconfirmedVendor) {
-                    $units = ($model['units'] == 0) ? 0 : 0.001;
+                    $units = 0;
                 }
 
                 $return['products'][] = [
@@ -1197,7 +1197,7 @@ class OrderWebApi extends WebApi
         $item['brand'] = $model->product->brand ? $model->product->brand : '';
         $item['article'] = $model->product->article;
         $item['ed'] = $model->product->ed;
-        $item['units'] = ($model->product->units == 0) ? 0 : 0.001;
+        $item['units'] = 0;
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);

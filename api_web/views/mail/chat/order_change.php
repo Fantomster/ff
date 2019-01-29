@@ -93,3 +93,9 @@ use \api_web\helpers\CurrencyHelper;
         </tbody>
     </table>
 <?php endif; ?>
+
+<?php if (!empty($additionalParams)): $i = 0; ?>
+    <?php foreach ($additionalParams as $param): ?>
+        <p><?= $param['name'] ?> : <?= $param['value'] ?> <span class="value-old"><?= $param['old_value'] ?></span></p>
+    <?php endforeach; ?>
+<?php endif; ?>

@@ -101,7 +101,7 @@ class iikoApi
     }
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function __destruct()
     {
@@ -148,7 +148,7 @@ class iikoApi
     /**
      * Выход с апи
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function logout()
     {
@@ -381,7 +381,6 @@ class iikoApi
      * @param $str
      * @return int
      */
-
     function Callback($ch, $str)
     {
         $response = &$this->response;

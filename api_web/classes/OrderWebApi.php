@@ -783,6 +783,12 @@ class OrderWebApi extends WebApi
 
             $result = $dataProvider->getModels();
             foreach ($result as $model) {
+
+                $units = round(($model['units'] ?? 0), 3);
+                if ($isUnconfirmedVendor) {
+                    $units = ($model['units'] == 0) ? 0 : 0.001;
+                }
+
                 $return['products'][] = [
                     'id'          => (int)$model['id'],
                     'product_id'  => (int)$model['id'],
@@ -794,7 +800,7 @@ class OrderWebApi extends WebApi
                     'category_id' => (int)$model['category_id'],
                     'price'       => round($model['price'], 2),
                     'ed'          => $model['ed'],
-                    'units'       => round(($model['units'] ?? 0), 3),
+                    'units'       => $units,
                     'currency'    => $model['symbol'],
                     'currency_id' => (int)$model['currency_id'],
                     'image'       => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
@@ -1191,7 +1197,7 @@ class OrderWebApi extends WebApi
         $item['brand'] = $model->product->brand ? $model->product->brand : '';
         $item['article'] = $model->product->article;
         $item['ed'] = $model->product->ed;
-        $item['units'] = 0.001;
+        $item['units'] = ($model->product->units == 0) ? 0 : 0.001;
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
         $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);

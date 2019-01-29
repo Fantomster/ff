@@ -122,7 +122,37 @@ class OrderWebApi extends WebApi
             //Тут операции с продуктами в этом заказе
             if (isset($post['products']) && !empty($post['products'])) {
                 if (is_array($post['products'])) {
-                    foreach ($post['products'] as $product) {
+                    $products = $post['products'];
+                    $reversedProducts = array_reverse($products, true);
+                    foreach ($reversedProducts as $firstKey => $item) {
+                        $operation = strtolower($item['operation']);
+                        $itemID = $item['id'];
+                        if ($operation == 'delete') {
+                            $filteredArray = array_filter($products, function ($innerArray) use ($itemID) {
+                                return ($innerArray['id'] == $itemID);
+                            });
+                            foreach ($filteredArray as $key => $value) {
+                                $innerOperation = strtolower($value['operation']);
+                                if ($innerOperation != 'delete') {
+                                    unset($products[$key]);
+                                }
+                            }
+                        }
+                        if ($operation == 'edit') {
+                            $filteredArray = array_filter($products, function ($innerArray) use ($itemID) {
+                                return ($innerArray['id'] == $itemID);
+                            });
+                            if (count($filteredArray) > 1) {
+                                foreach ($filteredArray as $key => $value) {
+                                    $innerOperation = strtolower($value['operation']);
+                                    if (($innerOperation == 'edit' || $innerOperation == 'add') && $key != $firstKey) {
+                                        unset($products[$key]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    foreach ($products as $product) {
                         $operation = strtolower($product['operation']);
                         if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
                             throw new BadRequestHttpException("error.request");

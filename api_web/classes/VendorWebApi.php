@@ -294,7 +294,7 @@ class VendorWebApi extends \api_web\components\WebApi
 
         if (!empty($models)) {
             /**
-             * @var $model Organization
+             * @var Organization $model
              */
             foreach ($models as $model) {
                 $r = WebApiHelper::prepareOrganization($model);
@@ -311,6 +311,12 @@ class VendorWebApi extends \api_web\components\WebApi
                 }
 
                 $result[] = $r;
+            }
+        } else {
+            $obRest = Organization::findOne(['email' => $email, 'type_id' => Organization::TYPE_RESTAURANT]);
+            $obUser = User::findOne(['email' => $email]);
+            if ($obRest || $obUser) {
+                throw new BadRequestHttpException(\Yii::t('api_web', 'email_belong_restaurant'));
             }
         }
 

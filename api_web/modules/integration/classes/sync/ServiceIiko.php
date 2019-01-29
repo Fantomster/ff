@@ -101,7 +101,7 @@ class ServiceIiko extends AbstractSyncFactory
 
         $this->countWaybillSend = count($records);
 
-        $api = iikoApi::getInstance();
+        $api = iikoApi::getInstance($this->user->organization_id);
         try {
             if ($api->auth()) {
                 /** @var iikoWaybill $model */
@@ -166,7 +166,7 @@ class ServiceIiko extends AbstractSyncFactory
      */
     public function checkConnect($request = [])
     {
-        $api = iikoApi::getInstance();
+        $api = iikoApi::getInstance($this->user->organization_id);
 
         if (!empty($request['params'])) {
             if (!empty($request['params']['URL'])) {

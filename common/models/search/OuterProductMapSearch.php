@@ -77,7 +77,7 @@ class OuterProductMapSearch extends OuterProductMap
                       ':parent_org' => $mainOrgId]);
 
         if (count($vendors) > 10) {
-            $queryVendors = array_slice($vendors, -3, 3);
+            $vendors = array_slice($vendors, -3, 3);
         }
 
         /**
@@ -109,12 +109,12 @@ class OuterProductMapSearch extends OuterProductMap
                  * фильтр по поставщику
                  */
                 if (!empty($post['search']['vendor'])) {
-                    $queryVendors = [$post['search']['vendor']];
+                    $vendors = [$post['search']['vendor']];
                 }
             }
         }
 
-        $query->andWhere(['in', "a.supp_org_id", $queryVendors]);
+        $query->andWhere(['in', "a.supp_org_id", $vendors]);
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query->createCommand()->getRawSql(),

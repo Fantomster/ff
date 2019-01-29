@@ -103,6 +103,10 @@ class ChatWebApi extends WebApi
                 }
                 $search->andWhere([$search_field => (int)$post['search']['recipient_id']]);
             }
+            if (isset($post['search']['order_id'])) {
+                $search_field = 'id';
+                $search->andWhere([$search_field => (int)$post['search']['order_id']]);
+            }
         }
 
         $search->orderBy("last_message_date DESC, created_at DESC");

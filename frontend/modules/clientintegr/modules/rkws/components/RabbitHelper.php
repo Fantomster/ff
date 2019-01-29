@@ -16,18 +16,17 @@ class RabbitHelper
 {
     public function callback($mess)
     {
+        $model = RabbitJournal::find()->where(['id' => $mess['id']])->one();
         if (call_user_func([$this, $mess['action']], $mess['body'])) {
-            $model = RabbitJournal::find()->where(['id' => $mess['id']])->one();
-            $model->success_count = $model->success_count++;
-            if (!$model->save) {
-                throw new NotFoundHttpException(Yii::t('error', 'api.rkws.components.rabbit.journal.not.save', ['ru' => 'Сохранить изменения в журнале Rabbit не удалось.']));
-            }
+            $attr = 'success_count';
         } else {
-            $model = RabbitJournal::find()->where(['id' => $mess['id']])->one();
-            $model->fail_count = $model->fail_count++;
-            if (!$model->save) {
-                throw new NotFoundHttpException(Yii::t('error', 'api.rkws.components.rabbit.journal.not.save', ['ru' => 'Сохранить изменения в журнале Rabbit не удалось.']));
-            }
+            $attr = 'fail_count';
+        }
+
+        $model->setAttribute($attr, ($model->{$attr} + 1));
+
+        if (!$model->save()) {
+            throw new NotFoundHttpException(Yii::t('error', 'api.rkws.components.rabbit.journal.not.save', ['ru' => 'Сохранить изменения в журнале Rabbit не удалось.']));
         }
 
         $cache = \Yii::$app->cache;
@@ -37,8 +36,9 @@ class RabbitHelper
 
             $clientUsers = User::findall()->where(['organization_id' => $mess['body']['org_id']])->column('id');
 
-            if (isset($clientUsers))
+            if (isset($clientUsers)) {
                 $cache->set('clientUsers_' . $mess['id'], $clientUsers, 60 * 10);
+            }
         }
 
         foreach ($clientUsers as $clientUser) {

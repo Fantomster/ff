@@ -491,7 +491,7 @@ class OrderNotice
             $senderUser = $order->acceptedBy ?? User::findOne(1);
         }
 
-        if (!empty($changed) || !empty($deleted)) {
+        if (!empty($changed) || !empty($deleted) || !empty($additionalParams)) {
             $systemMessage = \Yii::$app->view->renderFile('@mail_views/chat/order_change.php', [
                 'changed'          => $changed,
                 'deleted'          => $deleted,

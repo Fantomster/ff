@@ -1,14 +1,15 @@
 <?php
 
 use \api_web\helpers\CurrencyHelper;
+use common\models\Order;
 
 /**
  * @var \api_web\modules\integration\classes\documents\OrderContent[] $changed
  * @var \api_web\modules\integration\classes\documents\OrderContent[] $deleted
  */
 ?>
+<p><?= Yii::t('app', 'Изменились детали заказа') ?>:</p>
 <?php if (!empty($changed) || !empty($deleted)): ?>
-    <p><?= Yii::t('app', 'Изменились детали заказа') ?>:</p>
     <table class="table">
         <thead>
         <tr>
@@ -95,7 +96,15 @@ use \api_web\helpers\CurrencyHelper;
 <?php endif; ?>
 
 <?php if (!empty($additionalParams)): $i = 0; ?>
-    <?php foreach ($additionalParams as $param): ?>
-        <p><?= $param['name'] ?> : <?= $param['value'] ?> <span class="value-old"><?= $param['old_value'] ?></span></p>
+    <?php foreach ($additionalParams as $key => $param): ?>
+        <?php if ($key == 'discount_type') {
+            $newValue = ($param['value'] == Order::DISCOUNT_FIXED) ? "RUB" : "%";
+            $oldValue = ($param['old_value'] == Order::DISCOUNT_FIXED) ? "RUB" : "%";
+        } else {
+            $newValue = $param['value'];
+            $oldValue = $param['old_value'];
+        }
+        ?>
+        <p><?= $param['name'] ?> : <?= $newValue ?> <span class="value-old"><?= $oldValue ?></span></p>
     <?php endforeach; ?>
 <?php endif; ?>

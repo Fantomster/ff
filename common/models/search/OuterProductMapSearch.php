@@ -39,7 +39,7 @@ class OuterProductMapSearch extends OuterProductMap
             $mainOrgId = $mainOrgSetting;
             $mainOrgModel = Organization::findOne($mainOrgId);
             $mainVendors = array_keys($mainOrgModel->getSuppliers(null, false));
-            $vendorsNotInMainOrg = implode('\',\'', array_diff_key($vendors, $mainVendors));
+            $vendorsNotInMainOrg = implode('\',\'', array_diff($vendors, $mainVendors));
         }
 
         $query = (new Query())->select([

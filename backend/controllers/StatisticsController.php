@@ -636,7 +636,7 @@ class StatisticsController extends Controller
             ])
             ->andWhere(['between', "a.created_at", ":qp2", ":qp3"])
             ->andWhere([
-                'in', "a.status", $statusesArray
+                'in', "a.status", ":qp4"
             ])
             ->groupBy([
                 "client_id",
@@ -657,7 +657,7 @@ class StatisticsController extends Controller
                 ':qp5' => Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
                 ':qp6' => Order::STATUS_PROCESSING,
                 ':qp7' => Order::STATUS_DONE,
-            ])->count();
+            ])->createCommand()->sql;
 
 
         dd($dayOrderCount);

@@ -206,10 +206,16 @@ class Waybill extends \yii\db\ActiveRecord
      */
     public function getOrder()
     {
-        $wcModel = WaybillContent::find()->where('waybill_id = :wid AND order_content_id is not null', [':wid' => $this->id])->one();
-        if (!empty($wcModel)) {
+        $wcModel = WaybillContent::find()
+            ->where('waybill_id = :wid AND order_content_id IS NOT NULL', [
+                ':wid' => $this->id
+            ])
+            ->one();
+
+        if (!empty($wcModel) && !empty($wcModel->orderContent)) {
             return $wcModel->orderContent->order;
         }
+
         return null;
     }
 

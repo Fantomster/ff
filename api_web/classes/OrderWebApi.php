@@ -803,7 +803,6 @@ class OrderWebApi extends WebApi
 
         //Готовим ответ
         $return = [
-            'headers'    => [],
             'products'   => [],
             'pagination' => [
                 'page'       => $page,
@@ -843,6 +842,8 @@ class OrderWebApi extends WebApi
             }
 
             $result = $dataProvider->getModels();
+            $cartClass= new CartWebApi();
+            $marketClass= new MarketWebApi();
             foreach ($result as $model) {
 
                 $units = round(($model['units'] ?? 0), 3);
@@ -864,19 +865,10 @@ class OrderWebApi extends WebApi
                     'units'       => $units,
                     'currency'    => $model['symbol'],
                     'currency_id' => (int)$model['currency_id'],
-                    'image'       => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
-                    'in_basket'   => $this->container->get('CartWebApi')->countProductInCart($model['id']),
+                    'image'       => @$marketClass->getProductImage(CatalogBaseGoods::findOne($model['id'])),
+                    'in_basket'   => $cartClass->countProductInCart($model['id']),
                     'edi_product' => $model['edi_supplier_article'] > 0 ? true : false,
                 ];
-            }
-
-            /**
-             * @var CatalogBaseGoods $model
-             */
-            if (isset($return['products'][0])) {
-                foreach (array_keys($return['products'][0]) as $key) {
-                    $return['headers'][$key] = (new CatalogBaseGoods())->getAttributeLabel($key);
-                }
             }
         }
 

@@ -2,6 +2,7 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\CartWebApi;
 use api_web\components\WebApiController;
 use common\models\Order;
 
@@ -11,6 +12,15 @@ use common\models\Order;
  */
 class CartController extends WebApiController
 {
+    /** @var CartWebApi */
+    private $cartClass;
+
+    public function beforeAction($action)
+    {
+        $this->cartClass = new CartWebApi();
+        return parent::beforeAction($action);
+    }
+
     /**
      * @SWG\Post(path="/cart/add",
      *     tags={"Cart"},
@@ -46,7 +56,7 @@ class CartController extends WebApiController
      */
     public function actionAdd()
     {
-        $this->response = $this->container->get('CartWebApi')->add($this->request);
+        $this->response = $this->cartClass->add($this->request);
     }
 
     /**
@@ -81,10 +91,11 @@ class CartController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionItems()
     {
-        $this->response = $this->container->get('CartWebApi')->items();
+        $this->response = $this->cartClass->items();
     }
 
     /**
@@ -122,10 +133,11 @@ class CartController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionClear()
     {
-        $this->response = $this->container->get('CartWebApi')->clear($this->request);
+        $this->response = $this->cartClass->clear($this->request);
     }
 
     /**
@@ -153,10 +165,11 @@ class CartController extends WebApiController
      *          ),
      *     )
      * )
+     * @throws
      */
     public function actionRegistration()
     {
-        $this->response = $this->container->get('CartWebApi')->registration($this->request);
+        $this->response = $this->cartClass->registration($this->request);
     }
 
     /**
@@ -225,9 +238,10 @@ class CartController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionProductComment()
     {
-        $this->response = $this->container->get('CartWebApi')->productComment($this->request);
+        $this->response = $this->cartClass->productComment($this->request);
     }
 }

@@ -87,7 +87,7 @@ use common\models\guides\Guide;
  *           находится организация
  * @property AdditionalEmail[]          $additionalEmail
  * @property BillingPayment[]           $billingPayments
- * @property BuisinessInfo[]            $buisinessInfo
+ * @property BuisinessInfo              $buisinessInfo
  * @property Cart[]                     $cart
  * @property User[]                     $users
  * @property CartContent[]              $cartContents

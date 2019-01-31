@@ -179,6 +179,14 @@ class WebApiHelper
         $item['user_agreement'] = $model->user_agreement;
         $item['confidencial_policy'] = $model->confidencial_policy;
 
+        $item['nds_country'] = null;
+        if (!empty($model->vetis_country_uuid)) {
+            $item['nds_country'] = [
+                'uuid' => $model->vetis_country_uuid,
+                'name' => $model->vetisCountry->name
+            ];
+        }
+
         if ($model->type_id == Organization::TYPE_SUPPLIER) {
             $item['inn'] = $model->buisinessInfo->inn ?? $model->inn ?? null;
             $item['allow_editing'] = $model->allow_editing;

@@ -11,6 +11,7 @@ use api\common\models\merc\MercVsd;
 use api\common\models\RkServicedata;
 use common\models\edi\EdiOrganization;
 use common\models\licenses\LicenseOrganization;
+use common\models\vetis\VetisCountry;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
@@ -103,6 +104,7 @@ use common\models\guides\Guide;
  * @property Profile                    $Profile
  * @property Guide                      $Favorite
  * @property Payment[]                  $Payments
+ * @property VetisCountry               $vetisCountry
  */
 class Organization extends \yii\db\ActiveRecord
 {
@@ -2026,9 +2028,17 @@ class Organization extends \yii\db\ActiveRecord
     public static function getDefaultOrganizationManager($orgID)
     {
         $rel = RelationUserOrganization::find()->select(['user_id'])->where(['organization_id' => $orgID])->orderBy(['role_id' => SORT_ASC])->one();
-        if($rel) {
+        if ($rel) {
             return $rel->user_id;
         }
         return null;
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getVetisCountry()
+    {
+        return $this->hasOne(VetisCountry::class, ['uuid' => 'vetis_country_uuid']);
     }
 }

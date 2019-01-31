@@ -2,6 +2,7 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\ClientWebApi;
 use api_web\components\WebApiController;
 use common\models\licenses\License;
 
@@ -12,6 +13,15 @@ use common\models\licenses\License;
  */
 class ClientController extends WebApiController
 {
+    /** @var ClientWebApi */
+    private $clientClass;
+
+    public function beforeAction($action)
+    {
+        $this->clientClass = new ClientWebApi();
+        return parent::beforeAction($action);
+    }
+
     /**
      * Список методов которые не нужно логировать
      * Можно выключать передачу файлов в base64, так как бывает очень жирные файлы попадаются
@@ -63,7 +73,11 @@ class ClientController extends WebApiController
      *                          "city": "Казань",
      *                          "administrative_area_level_1": "Республика Татарстан",
      *                          "country": "Россия",
-     *                          "about": "Вот контора так контора"
+     *                          "about": "Вот контора так контора",
+     *                          "nds_country": {
+     *                              "uuid": "72a84b51-5c5e-11e1-b9b7-001966f192f1",
+     *                              "name": "Российская Федерация"
+     *                          }
      *             }
      *          ),
      *     ),
@@ -76,10 +90,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionDetail()
     {
-        $this->response = $this->container->get('ClientWebApi')->detail();
+        $this->response = $this->clientClass->detail();
     }
 
     /**
@@ -105,6 +120,7 @@ class ClientController extends WebApiController
      *                             "about": "Вот контора так контора",
      *                             "is_allowed_for_franchisee": 1,
      *                             "gmt": 3,
+     *                             "nds_country_uuid": "72a84b51-5c5e-11e1-b9b7-001966f192f1",
      *                             "address": {
      *                                  "country":"Россия",
      *                                  "region": "Московская область",
@@ -133,10 +149,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionDetailUpdate()
     {
-        $this->response = $this->container->get('ClientWebApi')->detailUpdate($this->request);
+        $this->response = $this->clientClass->detailUpdate($this->request);
     }
 
     /**
@@ -199,8 +216,58 @@ class ClientController extends WebApiController
      */
     public function actionDetailUpdateLogo()
     {
-        //Отключаем логирование этого метода, картинки могут быть очень большими, в базу их не впихнешь
-        $this->response = $this->container->get('ClientWebApi')->detailUpdateLogo($this->request);
+        $this->response = $this->clientClass->detailUpdateLogo($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/client/nds-country-list",
+     *     tags={"Client"},
+     *     summary="Список стран для настроек НДС ресторана",
+     *     description="Список стран для настроек НДС ресторана",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object"
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  "items": {
+     *                      {
+     *                          "uuid": "72a84b51-5c5e-11e1-b9b7-001966f192f1",
+     *                          "name": "Российская Федерация"
+     *                      },
+     *                      {
+     *                          "uuid": "388beb78-47c5-1f4c-8875-aa5ebf3a3671",
+     *                          "name": "Абхазия"
+     *                      }
+     *                  }
+     *             }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionCountryList()
+    {
+        $this->response = $this->clientClass->ndsCountryList();
     }
 
     /**
@@ -271,10 +338,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionNotificationList()
     {
-        $this->response = $this->container->get('ClientWebApi')->notificationList();
+        $this->response = $this->clientClass->notificationList();
     }
 
     /**
@@ -354,10 +422,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionNotificationUpdate()
     {
-        $this->response = $this->container->get('ClientWebApi')->notificationUpdate($this->request);
+        $this->response = $this->clientClass->notificationUpdate($this->request);
     }
 
     /**
@@ -412,10 +481,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionAdditionalEmailCreate()
     {
-        $this->response = $this->container->get('ClientWebApi')->additionalEmailCreate($this->request);
+        $this->response = $this->clientClass->additionalEmailCreate($this->request);
     }
 
     /**
@@ -457,7 +527,7 @@ class ClientController extends WebApiController
      */
     public function actionAdditionalEmailDelete()
     {
-        $this->response = $this->container->get('ClientWebApi')->additionalEmailDelete($this->request);
+        $this->response = $this->clientClass->additionalEmailDelete($this->request);
     }
 
     /**
@@ -510,7 +580,7 @@ class ClientController extends WebApiController
      */
     public function actionEmployeeCreate()
     {
-        $this->response = $this->container->get('ClientWebApi')->employeeAdd($this->request);
+        $this->response = $this->clientClass->employeeAdd($this->request);
     }
 
     /**
@@ -558,7 +628,7 @@ class ClientController extends WebApiController
      */
     public function actionEmployeeGet()
     {
-        $this->response = $this->container->get('ClientWebApi')->employeeGet($this->request);
+        $this->response = $this->clientClass->employeeGet($this->request);
     }
 
     /**
@@ -611,7 +681,7 @@ class ClientController extends WebApiController
      */
     public function actionEmployeeUpdate()
     {
-        $this->response = $this->container->get('ClientWebApi')->employeeUpdate($this->request);
+        $this->response = $this->clientClass->employeeUpdate($this->request);
     }
 
     /**
@@ -652,7 +722,7 @@ class ClientController extends WebApiController
      */
     public function actionEmployeeDelete()
     {
-        $this->response = $this->container->get('ClientWebApi')->employeeDelete($this->request);
+        $this->response = $this->clientClass->employeeDelete($this->request);
     }
 
     /**
@@ -727,7 +797,7 @@ class ClientController extends WebApiController
      */
     public function actionEmployeeList()
     {
-        $this->response = $this->container->get('ClientWebApi')->employeeList($this->request);
+        $this->response = $this->clientClass->employeeList($this->request);
     }
 
     /**
@@ -775,7 +845,7 @@ class ClientController extends WebApiController
      */
     public function actionEmployeeSearch()
     {
-        $this->response = $this->container->get('ClientWebApi')->employeeSearch($this->request);
+        $this->response = $this->clientClass->employeeSearch($this->request);
     }
 
     /**
@@ -821,7 +891,7 @@ class ClientController extends WebApiController
      */
     public function actionEmployeeRoles()
     {
-        $this->response = $this->container->get('ClientWebApi')->employeeRoles($this->request);
+        $this->response = $this->clientClass->employeeRoles($this->request);
     }
 
     /**

@@ -13,7 +13,9 @@ use common\models\RelationUserOrganization;
 use common\models\Role;
 use common\models\search\UserSearch;
 use common\models\User;
+use common\models\vetis\VetisCountry;
 use yii\data\Pagination;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -62,8 +64,11 @@ class ClientWebApi extends WebApi
         $transaction = \Yii::$app->db->beginTransaction();
         try {
 
-            if (isset($post['legal_entity']) && $post['legal_entity'] !== null) {
-                $model->legal_entity = $post['legal_entity'];
+            if (!empty($post['nds_country_uuid'])) {
+                $vetisCountryModel = VetisCountry::findOne($post['nds_country_uuid']);
+                if ($vetisCountryModel) {
+                    $model->vetis_country_uuid = $vetisCountryModel->uuid;
+                }
             }
 
             if (isset($post['about']) && $post['about'] !== null) {
@@ -795,6 +800,23 @@ class ClientWebApi extends WebApi
             $transaction->rollBack();
             throw $e;
         }
+    }
+
+    /**
+     * Список стран для настройки НДС
+     *
+     * @return array
+     */
+    public function ndsCountryList()
+    {
+        $models = VetisCountry::find()
+            ->select(['uuid', 'name'])
+            ->where(['active' => 1])
+            ->orderBy(new Expression("CASE WHEN name = 'Российская Федерация' THEN 0 ELSE name END"))
+            ->asArray()
+            ->all();
+
+        return ['items' => $models];
     }
 
     /**

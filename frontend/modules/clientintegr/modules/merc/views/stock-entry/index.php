@@ -121,14 +121,12 @@ Modal::widget([
                                                            });}'
             ],
             'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
-                return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => (in_array($model['id'], $selected)) ? 'checked' : ""];
+                if(in_array($model['id'], $selected)){
+                    return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => 'checked'];
+                } else {
+                    return ['value' => $model['id'], 'class' => 'checkbox-export'];
+                }
             },
-
-            /* 'class' => 'yii\grid\CheckboxColumn',
-         'contentOptions' => ['class' => 'small_cell_checkbox'],
-         'headerOptions' => ['style' => 'text-align:center; '],
-
-         }*/
         ],
         [
             'attribute' => 'entryNumber',

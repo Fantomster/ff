@@ -68,7 +68,7 @@ class CheckboxColumn extends \kartik\grid\CheckboxColumn
             console.log($pageCount);
             $('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]').attr(\"disabled\", true);
             $('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]').prop(\"checked\", checked);
-            $('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]').removeAttr(\"disabled\");
+            $('input[type=\"checkbox\"][name=\"" . $this->getHeaderCheckBoxName() . "\"]').removeAttr(\"disabled\"); 
            // }
            // initSelectedAll();
             ";

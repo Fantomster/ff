@@ -933,12 +933,21 @@ class User extends \amnah\yii2\user\models\User
     /**
      * Список организаций доступных для пользователя
      *
+     * @param null $searchString
+     * @param null $type
      * @return array
      */
     public function getAllOrganization($searchString = null, $type = null): array
     {
+        $roles = [
+            Role::ROLE_ADMIN,
+            Role::ROLE_FKEEPER_MANAGER,
+            Role::ROLE_FRANCHISEE_OWNER,
+            Role::ROLE_FRANCHISEE_OPERATOR
+        ];
         $userID = $this->id;
-        if ($this->role_id == Role::ROLE_ADMIN || $this->role_id == Role::ROLE_FKEEPER_MANAGER || $this->role_id == Role::ROLE_FRANCHISEE_OWNER || $this->role_id == Role::ROLE_FRANCHISEE_OPERATOR) {
+
+        if (in_array($this->role_id, $roles)) {
             $org = Organization::findOne(['id' => $this->organization_id]);
             $orgArray = Organization::find()->distinct()->leftJoin(['org2' => 'organization'], 'org2.parent_id=organization.id')->where(['organization.id' => $this->organization_id]);
             if ($searchString) {
@@ -955,9 +964,7 @@ class User extends \amnah\yii2\user\models\User
             if ($type) {
                 $orgArray->andWhere(['organization.type_id' => $type]);
             }
-
             $orgArray = $orgArray->orderBy('organization.name')->all();
-            return $orgArray;
         } else {
             $orgArray = Organization::find()->distinct()->joinWith('relationUserOrganization')->where(['relation_user_organization.user_id' => $userID]);
             if ($searchString) {
@@ -967,8 +974,8 @@ class User extends \amnah\yii2\user\models\User
                 $orgArray->andWhere(['organization.type_id' => $type]);
             }
             $orgArray = $orgArray->orderBy('organization.name')->all();
-            return $orgArray;
         }
+        return $orgArray;
     }
 
     public function getAllOrganizationsDataProvider($searchString = null, $showEmpty = false): ArrayDataProvider

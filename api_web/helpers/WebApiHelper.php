@@ -200,7 +200,6 @@ class WebApiHelper
             }
             $item['is_edi'] = $model->isEdi();
         }
-
         return $item;
     }
 

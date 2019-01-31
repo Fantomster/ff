@@ -15,15 +15,10 @@ class WebApi
      * @var \common\models\User
      */
     public $user;
-    /**
-     * @var \common\components\resourcemanager\AmazonS3ResourceManager
-     */
-    public $resourceManager;
 
     function __construct()
     {
         $this->getUser();
-        $this->resourceManager = \Yii::$app->get('resourceManager');
     }
 
     /**

@@ -2549,7 +2549,7 @@ class OrderController extends DefaultController
         $subQuery = (new Query())->select([
             'id'               => 'org.id',
             'parent_id'        => 'org.parent_id',
-            'client_name'      => "concat_ws(', ',org.name, org.city, org.address)",
+            'client_name'      => "coalesce(concat_ws(', ',org.name, org.city, org.address), org.id)",
             'product'          => 'cbg.product',
             'quantity'         => 'oc.quantity',
             'order_id'         => 'o.id',
@@ -2580,7 +2580,7 @@ class OrderController extends DefaultController
         $report = [];
 
         foreach ($dbResult as $item) {
-            $arExcelHeader[$item['client_name']] = $item['client_name'];
+            $arExcelHeader[$item['client_name'] . $item['id']] = $item['client_name'];
             if (!empty($item['product_id'])) {
                 if (!isset($report[$item['product_id']])) {
                     $report[$item['product_id']] =

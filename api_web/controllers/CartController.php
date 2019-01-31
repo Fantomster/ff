@@ -53,6 +53,7 @@ class CartController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionAdd()
     {

@@ -3,19 +3,24 @@
 namespace backend\models;
 
 use common\models\TestVendors;
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
 /**
  * OrganizationSearch represents the model behind the search form about `common\models\Organization`.
+ *
+ * @property int    $vendor_id  [int(11)]  Идентификатор организации-поставщика
+ * @property string $guide_name [varchar(255)]  Наименование шаблона закупок
+ * @property bool   $is_active  [tinyint(1)]  Показатель состояния активности (0 - не активно, 1 - активно)
  */
-class TestVendorsSearch extends TestVendors {
+class TestVendorsSearch extends TestVendors
+{
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['vendor_id'], 'integer'],
             [['guide_name'], 'string'],
@@ -26,7 +31,8 @@ class TestVendorsSearch extends TestVendors {
     /**
      * @inheritdoc
      */
-    public function scenarios() {
+    public function scenarios()
+    {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
@@ -35,26 +41,31 @@ class TestVendorsSearch extends TestVendors {
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
-    public function search($params) {
+    public function search($params)
+    {
         $query = TestVendors::find();
+
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'query'      => $query,
+            'sort'       => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => ['pageSize' => 20]
         ]);
+
         $this->load($params);
+
         if (!$this->validate()) {
             return $dataProvider;
         }
+
         $query->andFilterWhere([
-            'id' => $this->id,
-            'vendor_id' => $this->vendor_id,
+            'id'         => $this->id,
+            'vendor_id'  => $this->vendor_id,
             'guide_name' => $this->guide_name,
-            'is_active' => $this->is_active,
+            'is_active'  => $this->is_active,
         ]);
+
         return $dataProvider;
     }
 

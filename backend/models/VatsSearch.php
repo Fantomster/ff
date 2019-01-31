@@ -42,29 +42,34 @@ class VatsSearch extends CountryVat
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function search($params = null, $id = null)
+    public function search($params = null)
     {
+        $this->load($params);
+
         $countryVatTable = CountryVat::tableName();
         $countryTable = VetisCountry::tableName();
 
-        $query = CountryVat::find()->joinWith('country', true);
-        $this->load($params);
+        $query = CountryVat::find()
+            ->joinWith('country', true)
+            ->andFilterWhere(['like', 'vats', $this->vats])
+            ->andFilterWhere(['like', "$countryTable.name", $this->country_name])
+            ->orderBy(["$countryTable.name" => SORT_ASC]);
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'  => [
+                'attributes' => [
+                    'country_name' => [
+                        'asc'  => ["$countryTable.name" => SORT_ASC],
+                        'desc' => ["$countryTable.name" => SORT_DESC],
+                    ],
+                    'vats'         => [
+                        'asc'  => ["$countryVatTable.vats" => SORT_ASC],
+                        'desc' => ["$countryVatTable.vats" => SORT_DESC],
+                    ],
+                ],
+            ]
         ]);
-
-        $dataProvider->sort->attributes['country_name'] = [
-            'asc'  => ["$countryTable.name" => SORT_ASC],
-            'desc' => ["$countryTable.name" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['vats'] = [
-            'asc'  => ["$countryVatTable.vats" => SORT_ASC],
-            'desc' => ["$countryVatTable.vats" => SORT_DESC],
-        ];
-
-        $query->andFilterWhere(['like', 'vats', $this->vats])
-            ->andFilterWhere(['like', "$countryTable.name", $this->country_name]);
-        $query->orderBy(["$countryTable.name" => SORT_ASC]);
 
         return $dataProvider;
     }

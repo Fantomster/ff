@@ -15,10 +15,12 @@ use yii\base\Model;
  *
  * @author elbabuino
  */
-class TestMail extends Model {
+class TestMail extends Model
+{
     public $email;
-    
-    public function rules() {
+
+    public function rules()
+    {
         return [
             ['email', 'required'],
             ['email', 'email'],

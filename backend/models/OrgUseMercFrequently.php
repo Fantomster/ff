@@ -1,12 +1,16 @@
 <?php
 
-
 namespace backend\models;
 
+use api\common\models\merc\mercPconst;
+use api\common\models\merc\MercVsd;
 use common\helpers\DBNameHelper;
+use common\models\Organization;
 use yii\base\Model;
 use yii\data\SqlDataProvider;
 use Yii;
+use yii\db\Expression;
+use yii\db\Query;
 
 class OrgUseMercFrequently extends Model
 {
@@ -29,23 +33,44 @@ class OrgUseMercFrequently extends Model
 
     public function getOrgList(bool $flag = false)
     {
-        $not = '';
-        if ($flag) {
-            $not = 'not';
-        }
         $dbName = DBNameHelper::getApiName();
-        $sql = "SELECT id, name FROM organization WHERE id $not in
-       (
-           SELECT org FROM $dbName.merc_pconst where VALUE in (
-           SELECT DISTINCT recipient_guid FROM $dbName.merc_vsd WHERE status = :status AND  last_update_date >= DATE(NOW()) - INTERVAL 30 DAY)
-       )";
+        $mercPconst = mercPconst::tableName();
+        $merc_vsd = MercVsd::tableName();
 
-        $count = Yii::$app->db->createCommand($sql, [':status' => 'UTILIZED'])->execute();
+        $value = (new Query())
+            ->distinct()
+            ->select("recipient_guid")
+            ->from("{$dbName}.{$merc_vsd}")
+            ->where(["status" => "UTILIZED"])
+            ->andWhere("last_update_date >= :last_update_date", [
+                ":last_update_date" => new Expression("DATE(NOW()) - INTERVAL 30 DAY")
+            ])
+            ->createCommand()
+            ->getRawSql();
+
+        $condition = (new Query())
+            ->select("org")
+            ->from("{$dbName}.{$mercPconst}")
+            ->where("VALUE IN ({$value})")
+            ->createCommand()
+            ->getRawSql();
+
+        $query = (new Query())
+            ->select([
+                "id",
+                "name"
+            ])
+            ->from(Organization::tableName());
+
+        if ($flag) {
+            $query->where("NOT id IN ({$condition})");
+        } else {
+            $query->where("id IN ({$condition})");
+        }
 
         $provider = new SqlDataProvider([
-            'sql'        => $sql,
-            'params'     => [':status' => 'UTILIZED'],
-            'totalCount' => $count,
+            'sql'        => $query->createCommand()->getRawSql(),
+            'totalCount' => $query->count(),
             'pagination' => [
                 'pageSize' => 20,
             ],

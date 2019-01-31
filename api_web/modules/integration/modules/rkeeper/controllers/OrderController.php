@@ -2,11 +2,20 @@
 
 namespace api_web\modules\integration\modules\rkeeper\controllers;
 
+use api_web\classes\RkeeperWebApi;
 use api_web\components\WebApiController;
 use api_web\modules\integration\modules\rkeeper\models\rkeeperOrder;
 
+/**
+ * Class OrderController
+ *
+ * @property RkeeperWebApi $classWebApi
+ * @package api_web\modules\integration\modules\rkeeper\controllers
+ */
 class OrderController extends WebApiController
 {
+    public $className = RkeeperWebApi::class;
+
     /**
      * @SWG\Post(path="/integration/rkeeper/order/list",
      *     tags={"Integration/rkeeper/order"},
@@ -70,10 +79,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionList()
     {
-        $this->response = $this->container->get('RkeeperWebApi')->getCompletedOrdersList($this->request);
+        $this->response = $this->classWebApi->getCompletedOrdersList($this->request);
     }
 
     /**
@@ -118,10 +128,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionWaybillsList()
     {
-        $this->response = $this->container->get('RkeeperWebApi')->getOrderWaybillsList($this->request);
+        $this->response = $this->classWebApi->getOrderWaybillsList($this->request);
     }
 
     /**
@@ -186,6 +197,7 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionGetWaybill()
     {
@@ -237,12 +249,12 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionCreateWaybill()
     {
-        $this->response = $this->container->get('RkeeperWebApi')->handleWaybill($this->request);
+        $this->response = $this->classWebApi->handleWaybill($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/integration/rkeeper/order/update-waybill",
@@ -289,10 +301,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionUpdateWaybill()
     {
-        $this->response = $this->container->get('RkeeperWebApi')->handleWaybill($this->request);
+        $this->response = $this->classWebApi->handleWaybill($this->request);
     }
 
 }

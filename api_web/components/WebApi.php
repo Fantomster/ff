@@ -12,10 +12,6 @@ use yii\web\BadRequestHttpException;
 class WebApi
 {
     /**
-     * @var \yii\di\Container
-     */
-    public $container;
-    /**
      * @var \common\models\User
      */
     public $user;
@@ -26,7 +22,6 @@ class WebApi
 
     function __construct()
     {
-        $this->getContainerClasses();
         $this->getUser();
         $this->resourceManager = \Yii::$app->get('resourceManager');
     }
@@ -43,26 +38,6 @@ class WebApi
             }
         }
         return $this->user;
-    }
-
-    /**
-     * @return mixed|\yii\di\Container
-     */
-    private function getContainerClasses()
-    {
-        if (!$this->container) {
-            $this->container = new \yii\di\Container();
-
-            $classes = array_filter(scandir(\Yii::getAlias('@api_web/classes/')), function ($name) {
-                return strstr($name, 'WebApi.php');
-            });
-
-            foreach ($classes as $file) {
-                $class = basename($file, '.php');
-                $this->container->set($class, '\api_web\classes\\' . $class);
-            }
-        }
-        return $this->container;
     }
 
     /**

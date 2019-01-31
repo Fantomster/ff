@@ -2,6 +2,7 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\UserWebApi;
 use api_web\components\Notice;
 use api_web\components\WebApiController;
 use yii\web\BadRequestHttpException;
@@ -9,10 +10,13 @@ use yii\web\BadRequestHttpException;
 /**
  * Class UserController
  *
+ * @property UserWebApi $classWebApi
  * @package api\modules\v1\modules\web\controllers
  */
 class UserController extends WebApiController
 {
+    public $className = UserWebApi::class;
+
     /**
      * @SWG\Post(path="/user/get",
      *     tags={"User"},
@@ -59,7 +63,7 @@ class UserController extends WebApiController
      */
     public function actionGet()
     {
-        $this->response = $this->container->get('UserWebApi')->get($this->request);
+        $this->response = $this->classWebApi->get($this->request);
     }
 
     /**
@@ -105,10 +109,11 @@ class UserController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws
      */
     public function actionGetGmt()
     {
-        $this->response = $this->container->get('UserWebApi')->getGmt($this->request);
+        $this->response = $this->classWebApi->getGmt();
     }
 
     /**
@@ -147,11 +152,12 @@ class UserController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws
      */
     public function actionRegistration()
     {
         $this->response = [
-            'user_id' => $this->container->get('UserWebApi')->create($this->request)
+            'user_id' => $this->classWebApi->create($this->request)
         ];
     }
 
@@ -190,10 +196,11 @@ class UserController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws
      */
     public function actionRegistrationRepeatSms()
     {
-        $this->response = $this->container->get('UserWebApi')->registrationRepeatSms($this->request);
+        $this->response = $this->classWebApi->registrationRepeatSms($this->request);
     }
 
     /**
@@ -231,11 +238,12 @@ class UserController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws
      */
     public function actionRegistrationConfirm()
     {
         $this->response = [
-            'token' => $this->container->get('UserWebApi')->confirm($this->request)
+            'token' => $this->classWebApi->confirm($this->request)
         ];
     }
 
@@ -277,6 +285,7 @@ class UserController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws
      */
     public function actionLogin()
     {
@@ -336,10 +345,11 @@ class UserController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws
      */
     public function actionOrganization()
     {
-        $this->response = $this->container->get('UserWebApi')->getAllOrganization();
+        $this->response = $this->classWebApi->getAllOrganization();
     }
 
     /**
@@ -377,11 +387,12 @@ class UserController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws
      */
     public function actionSetOrganization()
     {
         $this->response = [
-            'result' => $this->container->get('UserWebApi')->setOrganization($this->request),
+            'result'    => $this->classWebApi->setOrganization($this->request),
             'jwt_token' => $this->user->getJWTToken(\Yii::$app->jwt),
         ];
     }
@@ -417,6 +428,7 @@ class UserController extends WebApiController
      *         description = "BadRequestHttpException"
      *     )
      * )
+     * @throws
      */
     public function actionPasswordRecovery()
     {
@@ -462,7 +474,7 @@ class UserController extends WebApiController
      */
     public function actionVendorStatusList()
     {
-        $this->response = $this->container->get('UserWebApi')->getVendorStatusList();
+        $this->response = $this->classWebApi->getVendorStatusList();
     }
 
     /**
@@ -505,7 +517,7 @@ class UserController extends WebApiController
      */
     public function actionVendorLocationList()
     {
-        $this->response = $this->container->get('UserWebApi')->getVendorLocationList();
+        $this->response = $this->classWebApi->getVendorLocationList();
     }
 
     /**
@@ -597,7 +609,7 @@ class UserController extends WebApiController
      */
     public function actionVendors()
     {
-        $this->response = $this->container->get('UserWebApi')->getVendors($this->request);
+        $this->response = $this->classWebApi->getVendors($this->request);
     }
 
     /**
@@ -636,10 +648,11 @@ class UserController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionRemoveVendor()
     {
-        $this->response = $this->container->get('UserWebApi')->removeVendor($this->request);
+        $this->response = $this->classWebApi->removeVendor($this->request);
     }
 
     /**
@@ -680,10 +693,11 @@ class UserController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionPasswordChange()
     {
-        $this->response = $this->container->get('UserWebApi')->changePassword($this->request);
+        $this->response = $this->classWebApi->changePassword($this->request);
     }
 
     /**
@@ -725,10 +739,11 @@ class UserController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionMobileChange()
     {
-        $this->response = $this->container->get('UserWebApi')->mobileChange($this->request);
+        $this->response = $this->classWebApi->mobileChange($this->request);
     }
 
     /**
@@ -768,6 +783,7 @@ class UserController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws
      */
     public function actionGetAgreement()
     {
@@ -818,10 +834,11 @@ class UserController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws
      */
     public function actionChangeUnconfirmedUsersPhone()
     {
-        $this->response = $this->container->get('UserWebApi')->mobileChange($this->request, true);
+        $this->response = $this->classWebApi->mobileChange($this->request, true);
     }
 
     /**
@@ -882,7 +899,7 @@ class UserController extends WebApiController
      */
     public function actionGetAvailableBusinesses()
     {
-        $this->response = $this->container->get('UserWebApi')->getUserOrganizationBusinessList();
+        $this->response = $this->classWebApi->getUserOrganizationBusinessList();
     }
 
     /**
@@ -970,7 +987,7 @@ class UserController extends WebApiController
      */
     public function actionSetAgreement()
     {
-        $this->response = $this->container->get('UserWebApi')->setAgreement($this->request);
+        $this->response = $this->classWebApi->setAgreement($this->request);
     }
 
 }

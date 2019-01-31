@@ -2,11 +2,20 @@
 
 namespace api_web\modules\integration\modules\one_s\controllers;
 
+use api_web\classes\OneSWebApi;
 use api_web\components\WebApiController;
 use api_web\modules\integration\modules\one_s\models\one_sOrder;
 
+/**
+ * Class OrderController
+ *
+ * @property OneSWebApi $classWebApi
+ * @package api_web\modules\integration\modules\one_s\controllers
+ */
 class OrderController extends WebApiController
 {
+
+    public $className = OneSWebApi::class;
 
     /**
      * @SWG\Post(path="/integration/one_s/order/list",
@@ -71,10 +80,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionList()
     {
-        $this->response = $this->container->get('OneSWebApi')->getCompletedOrdersList($this->request);
+        $this->response = $this->classWebApi->getCompletedOrdersList($this->request);
     }
 
 
@@ -121,10 +131,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionWaybillsList()
     {
-        $this->response = $this->container->get('OneSWebApi')->getOrderWaybillsList($this->request);
+        $this->response = $this->classWebApi->getOrderWaybillsList($this->request);
     }
 
     /**
@@ -189,6 +200,7 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionGetWaybill()
     {
@@ -240,10 +252,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionCreateWaybill()
     {
-        $this->response = $this->container->get('OneSWebApi')->handleWaybill($this->request);
+        $this->response = $this->classWebApi->handleWaybill($this->request);
     }
 
 
@@ -292,9 +305,10 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionUpdateWaybill()
     {
-        $this->response = $this->container->get('OneSWebApi')->handleWaybill($this->request);
+        $this->response = $this->classWebApi->handleWaybill($this->request);
     }
 }

@@ -2,11 +2,20 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\classes\IntegrationSettingsWebApi;
 use api_web\components\Poster;
 use api_web\components\Registry;
 
+/**
+ * Class SettingController
+ *
+ * @property IntegrationSettingsWebApi $classWebApi
+ * @package api_web\modules\integration\controllers
+ */
 class SettingController extends \api_web\components\WebApiController
 {
+    public $className = IntegrationSettingsWebApi::class;
+
     /**
      * @SWG\Post(path="/integration/setting/list",
      *     tags={"Integration/settings"},
@@ -62,7 +71,7 @@ class SettingController extends \api_web\components\WebApiController
 
     public function actionList()
     {
-        $this->response = $this->container->get('IntegrationSettingsWebApi')->list($this->request);
+        $this->response = $this->classWebApi->list($this->request);
     }
 
     /**
@@ -110,7 +119,7 @@ class SettingController extends \api_web\components\WebApiController
 
     public function actionGet()
     {
-        $this->response = $this->container->get('IntegrationSettingsWebApi')->getSetting($this->request);
+        $this->response = $this->classWebApi->getSetting($this->request);
     }
 
     /**
@@ -173,7 +182,7 @@ class SettingController extends \api_web\components\WebApiController
     public function actionUpdate()
     {
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
-        $this->response = $this->container->get('IntegrationSettingsWebApi')->update($this->request);
+        $this->response = $this->classWebApi->update($this->request);
     }
 
     /**
@@ -216,13 +225,12 @@ class SettingController extends \api_web\components\WebApiController
      *     )
      * )
      * )
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws \Exception
      */
     public function actionRejectChange()
     {
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
-        $this->response = $this->container->get('IntegrationSettingsWebApi')->rejectChange($this->request);
+        $this->response = $this->classWebApi->rejectChange($this->request);
     }
 
     /**
@@ -291,7 +299,7 @@ class SettingController extends \api_web\components\WebApiController
     public function actionGetMainOrganizations()
     {
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
-        $this->response = $this->container->get('IntegrationSettingsWebApi')->getMainOrganizations($this->request);
+        $this->response = $this->classWebApi->getMainOrganizations($this->request);
     }
 
     /**
@@ -349,7 +357,7 @@ class SettingController extends \api_web\components\WebApiController
     public function actionSetMainOrganizations()
     {
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
-        $this->response = $this->container->get('IntegrationSettingsWebApi')->setMainOrganizations($this->request);
+        $this->response = $this->classWebApi->setMainOrganizations($this->request);
     }
 
     /**
@@ -397,7 +405,7 @@ class SettingController extends \api_web\components\WebApiController
     public function actionResetMainOrgSetting()
     {
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
-        $this->response = $this->container->get('IntegrationSettingsWebApi')->resetMainOrgSetting($this->request);
+        $this->response = $this->classWebApi->resetMainOrgSetting($this->request);
     }
 
     /**
@@ -446,7 +454,7 @@ class SettingController extends \api_web\components\WebApiController
     public function actionGetItemsSetting()
     {
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
-        $this->response = $this->container->get('IntegrationSettingsWebApi')->getItemsSetting($this->request);
+        $this->response = $this->classWebApi->getItemsSetting($this->request);
     }
 
     /**

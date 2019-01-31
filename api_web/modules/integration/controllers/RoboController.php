@@ -2,17 +2,21 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\classes\EmailRoboWebApi;
 use api_web\components\Registry;
 
 /**
  * Class RoboController
  * Робот парсер рассылок
  *
+ * @property EmailRoboWebApi $classWebApi
  * @package api_web\modules\integration\controllers
  */
 class RoboController extends \api_web\components\WebApiController
 {
     public $license_service_id = Registry::VENDOR_DOC_MAIL_SERVICE_ID;
+
+    public $className = EmailRoboWebApi::class;
 
     /**
      * @SWG\Post(path="/integration/robo/list",
@@ -63,7 +67,7 @@ class RoboController extends \api_web\components\WebApiController
 
     public function actionList()
     {
-        $this->response = $this->container->get('EmailRoboWebApi')->list($this->request);
+        $this->response = $this->classWebApi->list($this->request);
     }
 
     /**
@@ -123,7 +127,7 @@ class RoboController extends \api_web\components\WebApiController
 
     public function actionGet()
     {
-        $this->response = $this->container->get('EmailRoboWebApi')->getSetting($this->request);
+        $this->response = $this->classWebApi->getSetting($this->request);
     }
 
     /**
@@ -187,11 +191,11 @@ class RoboController extends \api_web\components\WebApiController
      *     )
      * )
      * )
-     * @throws \Exception
+     * @throws
      */
     public function actionUpdate()
     {
-        $this->response = $this->container->get('EmailRoboWebApi')->update($this->request);
+        $this->response = $this->classWebApi->update($this->request);
     }
 
     /**
@@ -252,11 +256,11 @@ class RoboController extends \api_web\components\WebApiController
      *     )
      * )
      * )
-     * @throws \Exception
+     * @throws
      */
     public function actionAdd()
     {
-        $this->response = $this->container->get('EmailRoboWebApi')->add($this->request);
+        $this->response = $this->classWebApi->add($this->request);
     }
 
     /**
@@ -298,10 +302,10 @@ class RoboController extends \api_web\components\WebApiController
      *     )
      * )
      * )
-     * @throws \Exception
+     * @throws
      */
     public function actionDelete()
     {
-        $this->response = $this->container->get('EmailRoboWebApi')->delete($this->request);
+        $this->response = $this->classWebApi->delete($this->request);
     }
 }

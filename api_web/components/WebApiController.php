@@ -51,10 +51,6 @@ class WebApiController extends \yii\rest\Controller
      * @var array $response
      */
     protected $response;
-    /**
-     * @var \yii\di\Container $container
-     */
-    public $container;
 
     /**
      * @var array
@@ -95,7 +91,6 @@ class WebApiController extends \yii\rest\Controller
     {
         $this->addHeaders();
         $this->checkOptionsHeader();
-        $this->container = (new WebApi())->container;
         $this->authUser();
     }
 

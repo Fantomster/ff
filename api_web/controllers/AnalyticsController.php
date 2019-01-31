@@ -2,19 +2,19 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\AnalyticsWebApi;
 use api_web\components\WebApiController;
 
 /**
  * Class AnalyticsController
- * @package api\modules\v1\modules\web\controllers
- * @createdBy Basil A Konakov
- * @createdAt 2018-08-28
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
+ *
+ * @property AnalyticsWebApi $classWebApi
+ * @package api_web\controllers
  */
 class AnalyticsController extends WebApiController
 {
+
+    public $className = AnalyticsWebApi::class;
 
     /**
      * @SWG\Post(path="/analytics/client-goods",
@@ -105,7 +105,7 @@ class AnalyticsController extends WebApiController
      */
     public function actionClientGoods()
     {
-        $this->response = $this->container->get('AnalyticsWebApi')->clientGoods($this->request);
+        $this->response = $this->classWebApi->clientGoods($this->request);
     }
 
     /**
@@ -182,7 +182,7 @@ class AnalyticsController extends WebApiController
      */
     public function actionClientPurchases()
     {
-        $this->response = $this->container->get('AnalyticsWebApi')->clientPurchases($this->request);
+        $this->response = $this->classWebApi->clientPurchases($this->request);
     }
 
     /**
@@ -259,7 +259,7 @@ class AnalyticsController extends WebApiController
      */
     public function actionClientOrders()
     {
-        $this->response = $this->container->get('AnalyticsWebApi')->clientOrders($this->request);
+        $this->response = $this->classWebApi->clientOrders($this->request);
     }
 
     /**
@@ -339,7 +339,7 @@ class AnalyticsController extends WebApiController
      */
     public function actionClientVendors()
     {
-        $this->response = $this->container->get('AnalyticsWebApi')->clientVendors($this->request);
+        $this->response = $this->classWebApi->clientVendors($this->request);
     }
 
 
@@ -410,7 +410,7 @@ class AnalyticsController extends WebApiController
      */
     public function actionClientSummary()
     {
-        $this->response = $this->container->get('AnalyticsWebApi')->clientSummary($this->request);
+        $this->response = $this->classWebApi->clientSummary($this->request);
     }
 
 
@@ -466,7 +466,7 @@ class AnalyticsController extends WebApiController
      */
     public function actionCurrencies()
     {
-        $this->response = $this->container->get('AnalyticsWebApi')->currencies($this->request);
+        $this->response = $this->classWebApi->currencies();
     }
 
 }

@@ -2,15 +2,19 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\CatalogWebApi;
+use api_web\classes\VendorWebApi;
 use api_web\components\WebApiController;
 
 /**
  * Class VendorController
  *
+ * @property VendorWebApi $classWebApi
  * @package api_web\controllers
  */
 class VendorController extends WebApiController
 {
+    public $className = VendorWebApi::class;
     /**
      * Отключение логирования
      *
@@ -61,7 +65,7 @@ class VendorController extends WebApiController
      */
     public function actionGet()
     {
-        $this->response = $this->container->get('VendorWebApi')->get($this->request);
+        $this->response = $this->classWebApi->get($this->request);
     }
 
     /**
@@ -128,7 +132,7 @@ class VendorController extends WebApiController
      */
     public function actionCreate()
     {
-        $this->response = $this->container->get('VendorWebApi')->create($this->request);
+        $this->response = $this->classWebApi->create($this->request);
     }
 
     /**
@@ -169,7 +173,7 @@ class VendorController extends WebApiController
      */
     public function actionSearch()
     {
-        $this->response = $this->container->get('VendorWebApi')->search($this->request);
+        $this->response = $this->classWebApi->search($this->request);
     }
 
     /**
@@ -229,7 +233,7 @@ class VendorController extends WebApiController
      */
     public function actionUpdate()
     {
-        $this->response = $this->container->get('VendorWebApi')->update($this->request);
+        $this->response = $this->classWebApi->update($this->request);
     }
 
     /**
@@ -273,7 +277,7 @@ class VendorController extends WebApiController
      */
     public function actionUploadLogo()
     {
-        $this->response = $this->container->get('VendorWebApi')->uploadLogo($this->request);
+        $this->response = $this->classWebApi->uploadLogo($this->request);
     }
 
     /**
@@ -318,7 +322,7 @@ class VendorController extends WebApiController
      */
     public function actionPersonalCatalogList()
     {
-        $this->response = $this->container->get('CatalogWebApi')->getGoodsInCatalog($this->request);
+        $this->response = (new CatalogWebApi())->getGoodsInCatalog($this->request);
     }
 
     /**
@@ -363,7 +367,7 @@ class VendorController extends WebApiController
      */
     public function actionTempCatalogList()
     {
-        $this->response = $this->container->get('CatalogWebApi')->getGoodsInTempCatalog($this->request);
+        $this->response = (new CatalogWebApi())->getGoodsInTempCatalog($this->request);
     }
 
     /**
@@ -437,11 +441,11 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
+     * @throws
      */
     public function actionUploadFile()
     {
-        $this->response = $this->container->get('CatalogWebApi')->uploadFile($this->request);
+        $this->response = (new CatalogWebApi())->uploadFile($this->request);
     }
 
     /**
@@ -487,7 +491,7 @@ class VendorController extends WebApiController
      */
     public function actionGetListMainIndex()
     {
-        $this->response = $this->container->get('CatalogWebApi')->getListMainIndex($this->request);
+        $this->response = (new CatalogWebApi())->getListMainIndex();
     }
 
     /**
@@ -574,7 +578,7 @@ class VendorController extends WebApiController
      */
     public function actionPrepareTemporary()
     {
-        $this->response = $this->container->get('CatalogWebApi')->prepareTemporary($this->request);
+        $this->response = (new CatalogWebApi())->prepareTemporary($this->request);
     }
 
     /**
@@ -616,11 +620,11 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
+     * @throws
      */
     public function actionUploadTemporary()
     {
-        $this->response = $this->container->get('CatalogWebApi')->uploadTemporary($this->request);
+        $this->response = (new CatalogWebApi())->uploadTemporary($this->request);
     }
 
     /**
@@ -663,11 +667,11 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
+     * @throws
      */
     public function actionDeleteItemTemporary()
     {
-        $this->response = $this->container->get('CatalogWebApi')->deleteItemTemporary($this->request);
+        $this->response = (new CatalogWebApi())->deleteItemTemporary($this->request);
     }
 
     /**
@@ -710,26 +714,33 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
+     * @throws
      */
     public function actionDeleteItemPersonalCatalog()
     {
-        $this->response = $this->container->get('CatalogWebApi')->deleteItemPersonalCatalog($this->request);
+        $this->response = (new CatalogWebApi())->deleteItemPersonalCatalog($this->request);
     }
 
     public function actionImportCustomCatalog()
     {
-        $this->response = $this->container->get('CatalogWebApi')->importCustomCatalog($this->request);
+        (new CatalogWebApi())->importCustomCatalog($this->request);
     }
 
+    /**
+     * @throws \yii\db\Exception
+     * @throws \yii\web\BadRequestHttpException
+     */
     public function actionDeleteMainCatalog()
     {
-        $this->response = $this->container->get('CatalogWebApi')->deleteMainCatalog($this->request);
+        $this->response = (new CatalogWebApi())->deleteMainCatalog($this->request);
     }
 
+    /**
+     * @throws \yii\web\BadRequestHttpException
+     */
     public function actionChangeMainIndex()
     {
-        $this->response = $this->container->get('CatalogWebApi')->changeMainIndex($this->request);
+        $this->response = (new CatalogWebApi())->changeMainIndex($this->request);
     }
 
     /**
@@ -771,16 +782,19 @@ class VendorController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
+     * @throws
      */
     public function actionCancelTemporary()
     {
-        $this->response = $this->container->get('CatalogWebApi')->cancelTemporary($this->request);
+        $this->response = (new CatalogWebApi())->cancelTemporary($this->request);
     }
 
+    /**
+     * @throws \yii\base\InvalidConfigException
+     */
     public function actionGetTempMainCatalog()
     {
-        $this->response = $this->container->get('CatalogWebApi')->getTempMainCatalog($this->request);
+        $this->response = (new CatalogWebApi())->getTempMainCatalog($this->request);
     }
 
     /**
@@ -849,7 +863,7 @@ class VendorController extends WebApiController
      */
     public function actionGetTempDuplicatePosition()
     {
-        $this->response = $this->container->get('CatalogWebApi')->getTempDuplicatePosition($this->request);
+        $this->response = (new CatalogWebApi())->getTempDuplicatePosition($this->request);
     }
 
     /**
@@ -895,7 +909,7 @@ class VendorController extends WebApiController
      */
     public function actionAutoDeleteDuplicateTemporary()
     {
-        $this->response = $this->container->get('CatalogWebApi')->autoDeleteDuplicateTemporary($this->request);
+        $this->response = (new CatalogWebApi())->autoDeleteDuplicateTemporary($this->request);
     }
 
     /**
@@ -942,6 +956,6 @@ class VendorController extends WebApiController
      */
     public function actionSetCurrencyForPersonalCatalog()
     {
-        $this->response = $this->container->get('CatalogWebApi')->setCurrencyForPersonalCatalog($this->request);
+        $this->response = (new CatalogWebApi())->setCurrencyForPersonalCatalog($this->request);
     }
 }

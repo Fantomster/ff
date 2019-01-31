@@ -2,10 +2,19 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\NotificationWebApi;
 use api_web\components\WebApiController;
 
+/**
+ * Class NotificationController
+ *
+ * @property NotificationWebApi $classWebApi
+ * @package api_web\controllers
+ */
 class NotificationController extends WebApiController
 {
+    public $className = NotificationWebApi::class;
+
     /**
      * @SWG\Post(path="/notification/get",
      *     tags={"Notification"},
@@ -48,10 +57,11 @@ class NotificationController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionGet()
     {
-        $this->response = $this->container->get('NotificationWebApi')->get($this->request);
+        $this->response = $this->classWebApi->get($this->request);
     }
 
     /**
@@ -96,10 +106,11 @@ class NotificationController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionPush()
     {
-        $this->response = $this->container->get('NotificationWebApi')->push($this->request);
+        $this->response = $this->classWebApi->push($this->request);
     }
 
     /**
@@ -144,10 +155,11 @@ class NotificationController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionDelete()
     {
-        $this->response = $this->container->get('NotificationWebApi')->delete($this->request);
+        $this->response = $this->classWebApi->delete($this->request);
     }
 
     /**
@@ -193,10 +205,11 @@ class NotificationController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionPushAnyUser()
     {
-        $this->response = $this->container->get('NotificationWebApi')->pushAnyUser($this->request);
+        $this->response = $this->classWebApi->pushAnyUser($this->request);
     }
 
 }

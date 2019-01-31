@@ -2,6 +2,7 @@
 
 namespace api_web\modules\integration\modules\vetis\controllers;
 
+use api_web\classes\UserWebApi;
 use api_web\components\Registry;
 use api_web\components\WebApiController;
 use api_web\modules\integration\modules\vetis\models\VetisWaybill;
@@ -791,7 +792,7 @@ class DefaultController extends WebApiController
      */
     public function actionAcquirerFilter()
     {
-        $this->response = $this->container->get('UserWebApi')->getUserOrganizationBusinessList(null, $this->request['search']['name'] ?? null);
+        $this->response = (new UserWebApi())->getUserOrganizationBusinessList(null, $this->request['search']['name'] ?? null);
     }
 
     /**

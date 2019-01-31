@@ -52,6 +52,6 @@ class DefaultController extends WebApiController
      */
     public function actionGetNdsList()
     {
-        $this->response = (new CartWebApi())->getVatsByOrganization($this->request);
+        $this->response = (new CartWebApi())->getVatsByOrganization();
     }
 }

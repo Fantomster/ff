@@ -8,19 +8,13 @@ use api_web\components\WebApiController;
 /**
  * Class ChatController
  *
+ * @property ChatWebApi $classWebApi
  * @package api_web\controllers
  */
 class ChatController extends WebApiController
 {
 
-    /** @var ChatWebApi */
-    private $classChat;
-
-    public function beforeAction($action)
-    {
-        $this->classChat = new ChatWebApi();
-        return parent::beforeAction($action);
-    }
+    public $className = ChatWebApi::class;
 
     /**
      * Список методов которые не нужно логировать
@@ -100,7 +94,7 @@ class ChatController extends WebApiController
      */
     public function actionDialogList()
     {
-        $this->response = $this->classChat->getDialogList($this->request);
+        $this->response = $this->classWebApi->getDialogList($this->request);
     }
 
     /**
@@ -167,7 +161,7 @@ class ChatController extends WebApiController
      */
     public function actionDialogMessages()
     {
-        $this->response = $this->classChat->getDialogMessages($this->request);
+        $this->response = $this->classWebApi->getDialogMessages($this->request);
     }
 
     /**
@@ -228,7 +222,7 @@ class ChatController extends WebApiController
      */
     public function actionRecipientList()
     {
-        $this->response = $this->classChat->getRecipientList($this->request);
+        $this->response = $this->classWebApi->getRecipientList($this->request);
     }
 
     /**
@@ -292,7 +286,7 @@ class ChatController extends WebApiController
      */
     public function actionDialogAddMessage()
     {
-        $this->response = $this->classChat->addMessage($this->request);
+        $this->response = $this->classWebApi->addMessage($this->request);
     }
 
     /**
@@ -332,7 +326,7 @@ class ChatController extends WebApiController
      */
     public function actionDialogRead()
     {
-        $this->response = $this->classChat->readMessages($this->request);
+        $this->response = $this->classWebApi->readMessages($this->request);
     }
 
     /**
@@ -372,7 +366,7 @@ class ChatController extends WebApiController
      */
     public function actionDialogReadAll()
     {
-        $this->response = $this->classChat->readAllMessages();
+        $this->response = $this->classWebApi->readAllMessages();
     }
 
     /**
@@ -411,6 +405,6 @@ class ChatController extends WebApiController
      */
     public function actionDialogUnreadCount()
     {
-        $this->response = $this->classChat->dialogUnreadCount();
+        $this->response = $this->classWebApi->dialogUnreadCount();
     }
 }

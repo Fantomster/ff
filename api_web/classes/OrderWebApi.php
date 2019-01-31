@@ -842,8 +842,8 @@ class OrderWebApi extends WebApi
             }
 
             $result = $dataProvider->getModels();
-            $cartClass= new CartWebApi();
-            $marketClass= new MarketWebApi();
+            $cartClass = new CartWebApi();
+            $marketClass = new MarketWebApi();
             foreach ($result as $model) {
 
                 $units = round(($model['units'] ?? 0), 3);
@@ -1035,7 +1035,8 @@ class OrderWebApi extends WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\db\Exception
      */
     public function repeat(array $post)
     {
@@ -1047,6 +1048,7 @@ class OrderWebApi extends WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
+        $cart = new CartWebApi();
         $t = \Yii::$app->db->beginTransaction();
         try {
 
@@ -1060,9 +1062,9 @@ class OrderWebApi extends WebApi
                 $request[] = $this->prepareProduct($item);
             }
             //Добавляем товары для заказа в корзину
-            $this->container->get('CartWebApi')->add($request);
+            $cart->add($request);
             $t->commit();
-            return $this->container->get('CartWebApi')->items();
+            return $cart->items();
         } catch (\Exception $e) {
             $t->rollBack();
             throw $e;
@@ -1230,12 +1232,12 @@ class OrderWebApi extends WebApi
      * @param null         $currency
      * @param null         $currency_id
      * @return array
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     private function prepareProduct(OrderContent $model, $currency = null, $currency_id = null)
     {
         $quantity = !empty($model->quantity) ? round($model->quantity, 3) : round($model->product->units, 3);
+
+        $market = new MarketWebApi();
 
         $item = [];
         $item['id'] = (int)$model->id;
@@ -1253,7 +1255,7 @@ class OrderWebApi extends WebApi
         $item['units'] = 0;
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
-        $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
+        $item['image'] = $market->getProductImage($model->product);
         $item['edi_number'] = $model->edi_number;
         $item['edi_product'] = $model->product->edi_supplier_article > 0 ? true : false;
         return $item;

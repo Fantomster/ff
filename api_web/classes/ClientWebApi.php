@@ -633,7 +633,7 @@ class ClientWebApi extends WebApi
                 /**
                  * @var $user_api UserWebApi
                  */
-                $user_api = $this->container->get('UserWebApi');
+                $user_api = new UserWebApi();
                 //Это новый пользователь, идем создавать
                 //готовим запрос на создание пользователя
                 $request = [

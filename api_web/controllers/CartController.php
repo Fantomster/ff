@@ -8,18 +8,13 @@ use common\models\Order;
 
 /**
  * Class CartController
+ *
+ * @property CartWebApi $classWebApi
  * @package api_web\controllers
  */
 class CartController extends WebApiController
 {
-    /** @var CartWebApi */
-    private $cartClass;
-
-    public function beforeAction($action)
-    {
-        $this->cartClass = new CartWebApi();
-        return parent::beforeAction($action);
-    }
+    public $className = CartWebApi::class;
 
     /**
      * @SWG\Post(path="/cart/add",
@@ -57,7 +52,7 @@ class CartController extends WebApiController
      */
     public function actionAdd()
     {
-        $this->response = $this->cartClass->add($this->request);
+        $this->response = $this->classWebApi->add($this->request);
     }
 
     /**
@@ -96,7 +91,7 @@ class CartController extends WebApiController
      */
     public function actionItems()
     {
-        $this->response = $this->cartClass->items();
+        $this->response = $this->classWebApi->items();
     }
 
     /**
@@ -138,7 +133,7 @@ class CartController extends WebApiController
      */
     public function actionClear()
     {
-        $this->response = $this->cartClass->clear($this->request);
+        $this->response = $this->classWebApi->clear($this->request);
     }
 
     /**
@@ -170,7 +165,7 @@ class CartController extends WebApiController
      */
     public function actionRegistration()
     {
-        $this->response = $this->cartClass->registration($this->request);
+        $this->response = $this->classWebApi->registration($this->request);
     }
 
     /**
@@ -203,7 +198,8 @@ class CartController extends WebApiController
     {
         $o = Order::findOne($this->request['o']);
         $_ = $o->getRecipientsList();
-        var_dump($_['emails']);exit();
+        var_dump($_['emails']);
+        exit();
     }
 
     /**
@@ -243,6 +239,6 @@ class CartController extends WebApiController
      */
     public function actionProductComment()
     {
-        $this->response = $this->cartClass->productComment($this->request);
+        $this->response = $this->classWebApi->productComment($this->request);
     }
 }

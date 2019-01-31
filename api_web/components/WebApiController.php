@@ -8,10 +8,12 @@ namespace api_web\components;
  * @package api\modules\v1\modules\web\components
  */
 
+use api_web\classes\UserWebApi;
 use api_web\helpers\Logger;
 use common\models\licenses\License;
 use common\models\Organization;
 use yii\web\HttpException;
+use \api_web\components\MyCompositeAuth;
 
 /**
  * @SWG\Swagger(
@@ -72,6 +74,17 @@ class WebApiController extends \yii\rest\Controller
     public $enableCsrfValidation = false;
 
     /**
+     * Класс экземпляр которого поместим в $this->classWebApi
+     *  Например ChatWebApi::class
+     */
+    public $className = null;
+
+    /**
+     * Экземпляр класса из $this->className
+     */
+    protected $classWebApi;
+
+    /**
      * @throws HttpException
      * @throws \yii\base\ExitException
      * @throws \yii\base\InvalidConfigException
@@ -94,12 +107,12 @@ class WebApiController extends \yii\rest\Controller
         $behaviors = parent::behaviors();
 
         $my['authenticator'] = [
-            'class'       => \api_web\components\MyCompositeAuth::className(),
+            'class'       => MyCompositeAuth::class,
             'no_auth'     => \Yii::$app->params['allow_methods'],
             'authMethods' => [
-                WebApiAuth::className(),
-                \yii\filters\auth\HttpBearerAuth::className(),
-                \yii\filters\auth\QueryParamAuth::className(),
+                WebApiAuth::class,
+                \yii\filters\auth\HttpBearerAuth::class,
+                \yii\filters\auth\QueryParamAuth::class,
                 /*[
                     'class' => \yii\filters\auth\HttpBasicAuth::className(),
                     'auth' => function ($username, $password) {
@@ -113,7 +126,7 @@ class WebApiController extends \yii\rest\Controller
         ];
 
         $my['contentNegotiator'] = [
-            'class'   => \yii\filters\ContentNegotiator::className(),
+            'class'   => \yii\filters\ContentNegotiator::class,
             'formats' => [
                 'application/json' => \yii\web\Response::FORMAT_JSON
             ]
@@ -132,6 +145,10 @@ class WebApiController extends \yii\rest\Controller
      */
     public function beforeAction($action)
     {
+        if (isset($this->className) && !is_null($this->className)) {
+            $this->classWebApi = new $this->className();
+        }
+
         if (parent::beforeAction($action)) {
             $this->authUser();
             if (strstr(\Yii::$app->request->contentType, 'multipart/form-data') !== false) {
@@ -247,7 +264,7 @@ class WebApiController extends \yii\rest\Controller
             }
         }
 
-        $this->user = $this->container->get('UserWebApi')->getUser();
+        $this->user = (new UserWebApi())->getUser();
         /**
          * Проверка лицензии только если это пользователь
          **/

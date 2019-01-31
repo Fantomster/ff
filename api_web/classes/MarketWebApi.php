@@ -20,6 +20,15 @@ use yii\web\BadRequestHttpException;
  */
 class MarketWebApi extends WebApi
 {
+    /** @var CartWebApi  */
+    private $cart;
+
+    public function __construct()
+    {
+        $this->cart = new CartWebApi();
+        parent::__construct();
+    }
+
     /**
      * Список доступных для заказа продуктов на маркете
      *
@@ -349,8 +358,6 @@ class MarketWebApi extends WebApi
      *
      * @param $model
      * @return mixed
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     public function prepareProduct($model)
     {
@@ -380,7 +387,7 @@ class MarketWebApi extends WebApi
         $item['currency'] = $model->catalog->currency->symbol;
         $item['currency_id'] = (int)$model->catalog->currency->id;
         $item['image'] = $this->getProductImage($model);
-        $item['in_basket'] = $this->container->get('CartWebApi')->countProductInCart($model->id);
+        $item['in_basket'] = $this->cart->countProductInCart($model->id);
         $item['edi_product'] = $model->edi_supplier_article > 0 ? true : false;
 
         return $item;

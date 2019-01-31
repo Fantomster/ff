@@ -9,18 +9,12 @@ use common\models\licenses\License;
 /**
  * Class ClientController
  *
+ * @property ClientWebApi $classWebApi
  * @package api_web\controllers
  */
 class ClientController extends WebApiController
 {
-    /** @var ClientWebApi */
-    private $clientClass;
-
-    public function beforeAction($action)
-    {
-        $this->clientClass = new ClientWebApi();
-        return parent::beforeAction($action);
-    }
+    public $className = ClientWebApi::class;
 
     /**
      * Список методов которые не нужно логировать
@@ -94,7 +88,7 @@ class ClientController extends WebApiController
      */
     public function actionDetail()
     {
-        $this->response = $this->clientClass->detail();
+        $this->response = $this->classWebApi->detail();
     }
 
     /**
@@ -153,7 +147,7 @@ class ClientController extends WebApiController
      */
     public function actionDetailUpdate()
     {
-        $this->response = $this->clientClass->detailUpdate($this->request);
+        $this->response = $this->classWebApi->detailUpdate($this->request);
     }
 
     /**
@@ -216,7 +210,7 @@ class ClientController extends WebApiController
      */
     public function actionDetailUpdateLogo()
     {
-        $this->response = $this->clientClass->detailUpdateLogo($this->request);
+        $this->response = $this->classWebApi->detailUpdateLogo($this->request);
     }
 
     /**
@@ -265,9 +259,9 @@ class ClientController extends WebApiController
      *     )
      * )
      */
-    public function actionCountryList()
+    public function actionNdsCountryList()
     {
-        $this->response = $this->clientClass->ndsCountryList();
+        $this->response = $this->classWebApi->ndsCountryList();
     }
 
     /**
@@ -342,7 +336,7 @@ class ClientController extends WebApiController
      */
     public function actionNotificationList()
     {
-        $this->response = $this->clientClass->notificationList();
+        $this->response = $this->classWebApi->notificationList();
     }
 
     /**
@@ -426,7 +420,7 @@ class ClientController extends WebApiController
      */
     public function actionNotificationUpdate()
     {
-        $this->response = $this->clientClass->notificationUpdate($this->request);
+        $this->response = $this->classWebApi->notificationUpdate($this->request);
     }
 
     /**
@@ -485,7 +479,7 @@ class ClientController extends WebApiController
      */
     public function actionAdditionalEmailCreate()
     {
-        $this->response = $this->clientClass->additionalEmailCreate($this->request);
+        $this->response = $this->classWebApi->additionalEmailCreate($this->request);
     }
 
     /**
@@ -524,10 +518,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionAdditionalEmailDelete()
     {
-        $this->response = $this->clientClass->additionalEmailDelete($this->request);
+        $this->response = $this->classWebApi->additionalEmailDelete($this->request);
     }
 
     /**
@@ -577,10 +572,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionEmployeeCreate()
     {
-        $this->response = $this->clientClass->employeeAdd($this->request);
+        $this->response = $this->classWebApi->employeeAdd($this->request);
     }
 
     /**
@@ -625,10 +621,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionEmployeeGet()
     {
-        $this->response = $this->clientClass->employeeGet($this->request);
+        $this->response = $this->classWebApi->employeeGet($this->request);
     }
 
     /**
@@ -678,10 +675,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionEmployeeUpdate()
     {
-        $this->response = $this->clientClass->employeeUpdate($this->request);
+        $this->response = $this->classWebApi->employeeUpdate($this->request);
     }
 
     /**
@@ -719,10 +717,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionEmployeeDelete()
     {
-        $this->response = $this->clientClass->employeeDelete($this->request);
+        $this->response = $this->classWebApi->employeeDelete($this->request);
     }
 
     /**
@@ -794,10 +793,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionEmployeeList()
     {
-        $this->response = $this->clientClass->employeeList($this->request);
+        $this->response = $this->classWebApi->employeeList($this->request);
     }
 
     /**
@@ -842,10 +842,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionEmployeeSearch()
     {
-        $this->response = $this->clientClass->employeeSearch($this->request);
+        $this->response = $this->classWebApi->employeeSearch($this->request);
     }
 
     /**
@@ -888,10 +889,11 @@ class ClientController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionEmployeeRoles()
     {
-        $this->response = $this->clientClass->employeeRoles($this->request);
+        $this->response = $this->classWebApi->employeeRoles();
     }
 
     /**

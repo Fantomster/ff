@@ -8,12 +8,21 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\IntegrationWebApi;
 use api_web\components\WebApiController;
 use api_web\helpers\WaybillHelper;
 use api_web\helpers\WebApiHelper;
 
+/**
+ * Class WaybillController
+ *
+ * @property IntegrationWebApi $classWebApi
+ * @package api_web\controllers
+ */
 class WaybillController extends WebApiController
 {
+    public $className = IntegrationWebApi::class;
+
     /**
      * @SWG\Post(path="/waybill/regenerate-by-order",
      *     tags={"Waybill"},
@@ -153,7 +162,7 @@ class WaybillController extends WebApiController
      */
     public function actionCreateWaybill()
     {
-        $this->response = $this->container->get('IntegrationWebApi')->handleWaybill($this->request);
+        $this->response = $this->classWebApi->handleWaybill($this->request);
     }
 
     /**
@@ -195,10 +204,11 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionDeleteWaybill()
     {
-        $this->response = $this->container->get('IntegrationWebApi')->deleteWaybill($this->request);
+        $this->response = $this->classWebApi->deleteWaybill($this->request);
     }
 
     /**
@@ -239,10 +249,11 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionResetWaybillContent()
     {
-        $this->response = $this->container->get('IntegrationWebApi')->resetWaybillContent($this->request);
+        $this->response = $this->classWebApi->resetWaybillContent($this->request);
     }
 
     /**
@@ -305,10 +316,11 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionShowWaybillContent()
     {
-        $this->response = $this->container->get('IntegrationWebApi')->showWaybillContent($this->request);
+        $this->response = $this->classWebApi->showWaybillContent($this->request);
     }
 
     /**
@@ -357,10 +369,11 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionUpdateWaybillContent()
     {
-        $this->response = $this->container->get('IntegrationWebApi')->updateWaybillContent($this->request);
+        $this->response = $this->classWebApi->updateWaybillContent($this->request);
     }
 
     /**
@@ -407,10 +420,11 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionCreateWaybillContent()
     {
-        $this->response = $this->container->get('IntegrationWebApi')->createWaybillContent($this->request);
+        $this->response = $this->classWebApi->createWaybillContent($this->request);
     }
 
     /**
@@ -451,10 +465,11 @@ class WaybillController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionDeleteWaybillContent()
     {
-        $this->response = $this->container->get('IntegrationWebApi')->deleteWaybillContent($this->request);
+        $this->response = $this->classWebApi->deleteWaybillContent($this->request);
     }
 
     /**

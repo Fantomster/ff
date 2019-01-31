@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use common\models\MpCategory;
+use common\models\MpCountry;
 use Yii;
 use common\models\CatalogBaseGoods;
 use common\models\Role;
@@ -99,9 +100,9 @@ class GoodsController extends Controller
             $catalogBaseGoods = new CatalogBaseGoods();
         }
         $catalogBaseGoods->scenario = 'marketPlace';
-        $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
-	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
-        $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
+        $arrayOne = MpCountry::find()->select(['id', 'name'])->where(['LIKE', 'name', 'Россия'])->asArray()->all();
+        $arrayTwo = MpCountry::find()->select(['id', 'name'])->where(['<>', 'name', 'Россия'])->asArray()->all();
+        $countrys = array_merge($arrayOne, $arrayTwo);
 
         if (!empty($catalogBaseGoods->category_id)) {
             $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
@@ -152,7 +153,6 @@ class GoodsController extends Controller
         if (Yii::$app->request->isAjax) {
             $model = new \common\models\MpCountry();
             Yii::$app->response->format = Response::FORMAT_JSON;
-            //return 'aaa';
             return $model->ajaxsearch($q);
         }
         return false;
@@ -176,9 +176,6 @@ class GoodsController extends Controller
                     $id2 = $params[1]; // get the value of 2
                     foreach ($list as $i => $cat) {
                         $out[] = ['id' => $cat['id'], 'name' => $cat['name']];
-                        //if ($i == 0){$aux = $cat['id'];}
-                        //($cat['id'] == $id1) ? $selected = $id1 : $selected = $aux;
-                        //$selected = $id1; 
                         if ($cat['id'] == $id1) {
                             $selected = $cat['id'];
                         }
@@ -236,11 +233,6 @@ class GoodsController extends Controller
             Yii::$app->db->createCommand()
                 ->update(CatalogBaseGoods::tableName(), ['category_id' => $post['category_id']], ['in', 'id', $post['pk']])
                 ->execute();
-            /* $products = CatalogBaseGoods::find()->where(['in', 'id', $post['pk']])->all();
-             foreach ($products as $product) {
-                 $product->category_id = $post['category_id'];
-                 $product->save(false);
-             }*/
             return true;
         }
         return false;
@@ -253,11 +245,6 @@ class GoodsController extends Controller
             Yii::$app->db->createCommand()
                 ->update(CatalogBaseGoods::tableName(), ['category_id' => null], ['in', 'id', $post['pk']])
                 ->execute();
-            /*$products = CatalogBaseGoods::find()->where(['in', 'id', $post['pk']])->all();
-            foreach ($products as $product) {
-                $product->category_id = null;
-                $product->save(false);
-            }*/
             return true;
         }
         return false;
@@ -276,7 +263,7 @@ class GoodsController extends Controller
 
     public function actionUploadedCatalogs()
     {
-        $query = RelationSuppRest::find()->where('uploaded_catalog is not null')->andWhere(['uploaded_processed' => RelationSuppRest::UPLOADED_NOT_PROCESSED]);
+        $query = RelationSuppRest::find()->where(['is not', 'uploaded_catalog', null])->andWhere(['uploaded_processed' => RelationSuppRest::UPLOADED_NOT_PROCESSED]);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -292,18 +279,10 @@ class GoodsController extends Controller
 
         if (Yii::$app->request->isPost) {
             $importType = \Yii::$app->request->post('UploadForm')['importType'];
-            //$unique = 'product'; //уникальное поле
             $sql_array_products = CatalogBaseGoods::find()->select(['id', 'product'])->where(['cat_id' => $id, 'deleted' => 0])->asArray()->all();
             $arr = \yii\helpers\ArrayHelper::map($sql_array_products, 'id', 'product');
             unset($sql_array_products);
-            //$count_array = count($sql_array_products);
             $arr = array_map('mb_strtolower', $arr);
-            //массив уникального поля из базы
-//            if (!empty($sql_array_products)) {
-//                for ($i = 0; $i < $count_array; $i++) {
-//                    array_push($arr, strtolower(trim($sql_array_products[$i][$unique])));
-//                }
-//            }
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
@@ -383,32 +362,10 @@ class GoodsController extends Controller
                                 $new_item->note = $row_note;
                                 $new_item->status = CatalogBaseGoods::STATUS_ON;
                                 $new_item->save();
-                                /*$data_insert[] = [
-                                    $id,
-                                    $vendor_id,
-                                    $row_article,
-                                    $row_product,
-                                    $row_units,
-                                    $row_price,
-                                    $row_ed,
-                                    $row_note,
-                                    CatalogBaseGoods::STATUS_ON
-                                ];*/
                             }
                         }
                     }
                     unset($worksheet);
-                    /*if (!empty($data_insert)) {
-                        $db = Yii::$app->db;
-                        $data_chunks = array_chunk($data_insert, 1000);
-                        unset($data_insert);
-                        foreach ($data_chunks as $data_insert) {
-                            $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
-                                'cat_id', 'supp_org_id', 'article', 'product', 'units', 'price', 'ed', 'note', 'status'
-                            ], $data_insert);
-                            Yii::$app->db->createCommand($sql)->execute();
-                        }
-                    }*/
                     $transaction->commit();
                     unlink($path);
                     return $this->redirect(Url::to(['goods/vendor', 'id' => $vendor_id]));
@@ -436,19 +393,9 @@ class GoodsController extends Controller
                             }
                             $cbg_id = array_search(mb_strtolower($row_product), $arr);
                             if ($cbg_id) {
-                                if ($batch < 1000) {
-                                    $data_update .= "UPDATE $cbgTable set price = $row_price where cat_id=$id and id=$cbg_id;";
-                                    $batch++;
-                                } else {
-                                    Yii::$app->db->createCommand($data_update)->execute();
-                                    $data_update = "UPDATE $cbgTable set price = $row_price where cat_id=$id and id=$cbg_id;";
-                                    $batch = 0;
-                                }
+                                Yii::$app->db->createCommand()->update($cbgTable, ['price' => $row_price], ['cat_id' => $id, 'id' => $cbg_id])->execute();
                             }
                         }
-                    }
-                    if (!empty($data_update)) {
-                        Yii::$app->db->createCommand($data_update)->execute();
                     }
                     $transaction->commit();
                     unlink($path);
@@ -475,17 +422,20 @@ class GoodsController extends Controller
                             }
                             $cbg_id = array_search(mb_strtolower($row_product), $arr);
                             if ($cbg_id) {
-                                $data_update .= "UPDATE $cbgTable set 
-                                    market_place = 1,
-                                    mp_show_price = 1,
-                                    es_status = 1
-                                     where cat_id=$id and id='$cbg_id'"
-                                    . " and ed is not null and category_id is not null;";
+                                Yii::$app->db->createCommand()->update($cbgTable,
+                                    [
+                                        'market_place'  => 1,
+                                        'mp_show_price' => 1,
+                                        'es_status'     => 1
+                                    ],
+                                    [
+                                        'cat_id' => $id,
+                                        'id'     => $cbg_id,
+                                        ['is not', 'ed', null],
+                                        ['is not', 'category_id', null]
+                                    ])->execute();
                             }
                         }
-                    }
-                    if (!empty($data_update)) {
-                        Yii::$app->db->createCommand($data_update)->execute();
                     }
                     $transaction->commit();
                     unlink($path);

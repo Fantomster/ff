@@ -198,7 +198,7 @@ class VendorWebApi extends \api_web\components\WebApi
             }
 
             if (count($arrCatalog)) {
-                $lastInsert_cat_id = $this->container->get('CatalogWebApi')->addBaseCatalog($get_supp_org_id, $currentUser, $arrCatalog, $currency);
+                $lastInsert_cat_id = (new CatalogWebApi())->addBaseCatalog($get_supp_org_id, $currentUser, $arrCatalog, $currency);
             } else {
                 $lastInsert_cat_id = 0;
             }

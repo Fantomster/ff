@@ -916,6 +916,7 @@ class OrderWebApi extends WebApi
             ->where(['in', 'supp_org_id', $suppliers])
             ->column();
         $return = [];
+        $marketWebApi = new MarketWebApi();
         foreach ($query as $id) {
 
             if ($id == 0) {
@@ -934,13 +935,13 @@ class OrderWebApi extends WebApi
                     $return[$model->parentCategory->id] = [
                         'id'    => $model->parentCategory->id,
                         'name'  => $model->parentCategory->name,
-                        'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->parentCategory->id)
+                        'image' => $marketWebApi->getCategoryImage($model->parentCategory->id)
                     ];
                 }
                 $return[$model->parentCategory->id]['subcategories'][] = [
                     'id'            => $model->id,
                     'name'          => $model->name,
-                    'image'         => $this->container->get('MarketWebApi')->getCategoryImage($model->id),
+                    'image'         => $marketWebApi->getCategoryImage($model->id),
                     'count_product' => $model->getProductCount(null, $this->user->organization_id),
                 ];
             } else {
@@ -948,7 +949,7 @@ class OrderWebApi extends WebApi
                     $return[$model->id] = [
                         'id'    => $model->id,
                         'name'  => $model->name,
-                        'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->id)
+                        'image' => $marketWebApi->getCategoryImage($model->id)
                     ];
                 }
             }

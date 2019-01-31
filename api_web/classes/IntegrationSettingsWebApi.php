@@ -263,12 +263,10 @@ class IntegrationSettingsWebApi extends WebApi
     /**
      * @param $serviceId
      * @return array
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     private function getSettingsToOrgByService($serviceId)
     {
-        $arOrgs = $this->container->get('UserWebApi')->getUserOrganizationBusinessList();
+        $arOrgs = (new UserWebApi())->getUserOrganizationBusinessList();
         $arOrgIds = array_map(function ($el) {
             return (int)$el['id'];
         }, $arOrgs['result']);

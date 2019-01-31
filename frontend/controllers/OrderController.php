@@ -2578,7 +2578,7 @@ class OrderController extends DefaultController
             ])
             ->groupBy('cbg.product')
             ->orderBy('org.parent_id');
-        $dbResult = (new Query())->select('*')->from(['sq' => $subQuery])->groupBy('product,id')
+        $dbResult = (new Query())->select('*')->from(['sq' => $subQuery])->groupBy('product,client_name')
             ->orderBy('product')
             ->all();
         $arExcelHeader = [
@@ -2587,8 +2587,8 @@ class OrderController extends DefaultController
         ];
         $report = [];
         foreach ($dbResult as $item) {
-            $arExcelHeader[$item['client_name'] . $item['id']] = $item['client_name'];
             if (!empty($item['product'])) {
+                $arExcelHeader[$item['client_name'] . $item['id']] = $item['client_name'];
                 if (!isset($report[$item['product']])) {
                     $report[$item['product']] =
                         [
@@ -2596,7 +2596,7 @@ class OrderController extends DefaultController
                             'unit'    => $item['unit'],
                         ];
                     if (count($arExcelHeader) >= 3) {
-                        $report[$item['product']] = array_merge($report[$item['product']], array_fill(2, $item['count_org'], '0'));
+                        $report[$item['product']] = array_merge_recursive($report[$item['product']], array_fill(0, $item['count_org'], 0));
                     }
                 }
                 $report[$item['product']][count($arExcelHeader) - 3] = $item['sum_quantity'];

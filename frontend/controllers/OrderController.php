@@ -2576,7 +2576,7 @@ class OrderController extends DefaultController
             ])->andWhere([
                 'not', ['cbg.product' => null],
             ])
-            ->groupBy('cbg.product')
+            ->groupBy('cbg.product, org.id')
             ->orderBy('org.parent_id');
         $dbResult = (new Query())->select('*')->from(['sq' => $subQuery])->groupBy('product,client_name')
             ->orderBy('product')

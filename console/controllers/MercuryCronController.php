@@ -2,6 +2,7 @@
 
 namespace console\controllers;
 
+use api\common\models\merc\mercPconst;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVisits;
 use api\common\models\merc\MercVsd;
@@ -17,45 +18,56 @@ use common\models\vetis\VetisUnit;
 use console\modules\daemons\classes\IikoProductSync;
 use console\modules\daemons\classes\MercRussianEnterpriseList;
 use console\modules\daemons\classes\MercStockEntryList;
-use console\modules\daemons\classes\MercStoreEntryList;
-use console\modules\daemons\classes\MercSubProductListList;
 use console\modules\daemons\classes\MercVSDList;
 use frontend\modules\clientintegr\modules\merc\helpers\api\products\Products;
 use yii\console\Controller;
 use api\common\models\merc\mercService;
 use frontend\modules\clientintegr\modules\merc\helpers\api\cerber\cerberApi;
-use Yii;
 use api_web\components\FireBase;
+use yii\db\Expression;
+use yii\db\Query;
 
 class MercuryCronController extends Controller
 {
-
     /**
      * Автоматическая загрузка списка ВСД и журнала склада для всех пользователей (за прошедшие сутки)
+     *
+     * @param int $interval
      */
     public function actionVetDocumentsChangeList($interval = 86000)
     {
-        /*$sql = "
-        select distinct vre.guid as guid, mp.org as org, ms.code as code from merc_service as ms
-            left join merc_pconst as mp on mp.org = ms.org and const_id = 5
-            left join vetis_russian_enterprise as vre on vre.owner_guid = mp.value 
-            where ms.status_id = 1 and now() between ms.fd and ms.td and mp.value is not null and vre.active = 1 and vre.last = 1 
-            group by guid order by guid, code desc
-        ";*/
-
-        $sql = "
-        select distinct mp2.value as guid, mp.org as org, ms.code as code from merc_service as ms
-            left join merc_pconst as mp on mp.org = ms.org and mp.const_id = 5
-            left join merc_pconst as mp2 on mp2.org = ms.org and mp2.const_id = 10
-            where ms.status_id = 1 and now() between ms.fd and ms.td and mp.value is not null and mp2.value is not null
-            group by guid order by guid, code desc
-        ";
-
-        $locations = \Yii::$app->db_api->createCommand($sql)->queryAll();
+        $locations = (new Query())
+            ->distinct()
+            ->select([
+                "guid" => "mp2.value",
+                "org"  => "mp.org",
+                "code" => "ms.code"
+            ])
+            ->from(["ms" => mercService::tableName()])
+            ->leftJoin(["mp" => mercPconst::tableName()], "mp.org = ms.org AND mp.const_id = 5")
+            ->leftJoin(["mp2" => mercPconst::tableName()], "mp2.org = ms.org AND mp2.const_id = 10")
+            ->where(["ms.status_id" => 1])
+            ->andWhere([
+                "BETWEEN",
+                new Expression("NOW()"),
+                new Expression("ms.fd"),
+                new Expression("ms.td")
+            ])
+            ->andWhere([
+                "AND",
+                ["IS NOT", "mp.value", null],
+                ["IS NOT", "mp2.value", null],
+            ])
+            ->groupBy("guid")
+            ->orderBy([
+                new Expression("guid"),
+                "code" => SORT_DESC
+            ])
+            ->all(\Yii::$app->db_api);
 
         foreach ($locations as $item) {
             try {
-                echo "Guid: ".$item['guid'].PHP_EOL;
+                echo "Guid: " . $item['guid'] . PHP_EOL;
 
                 $start_date = gmdate("Y-m-d H:i:s", time() - (int)$interval);
                 echo "GET MercVSDList: " . $item['guid'] . PHP_EOL;
@@ -67,7 +79,7 @@ class MercuryCronController extends Controller
                     MercStockEntry::getUpdateData($item['org'], $item['guid'], $start_date);
                 }
             } catch (\Exception $e) {
-                \Yii::error($e->getMessage(),$e->getTraceAsString());
+                \Yii::error($e->getMessage(), $e->getTraceAsString());
             }
         }
     }
@@ -130,11 +142,11 @@ class MercuryCronController extends Controller
                            'listItemName' => 'enterprise'
         ];
 
-        $listOptions['count']  = 1000;
+        $listOptions['count'] = 1000;
         $listOptions['offset'] = 0;
 
-        $startDate       = gmdate("Y-m-d H:i:s", time() - 60*60*24*80);
-        $instance        = cerberApi::getInstance($org_id);
+        $startDate = gmdate("Y-m-d H:i:s", time() - 60 * 60 * 24 * 80);
+        $instance = cerberApi::getInstance($org_id);
         $data['request'] = json_encode($instance->{$data['method']}(['listOptions' => $listOptions, 'startDate' => $startDate]));
 
         $w = new MercRussianEnterpriseList($org_id);
@@ -147,9 +159,9 @@ class MercuryCronController extends Controller
     public function actionTestVsd($org_id = 5144, $enterpriseGuid = 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b', $start_date = null)
     {
         echo "START" . PHP_EOL;
-        echo "ORG: " .$org_id. PHP_EOL;
-        echo "EnterpriseGuid: " .$enterpriseGuid. PHP_EOL;
-        echo "Start date: " .$start_date. PHP_EOL;
+        echo "ORG: " . $org_id . PHP_EOL;
+        echo "EnterpriseGuid: " . $enterpriseGuid . PHP_EOL;
+        echo "Start date: " . $start_date . PHP_EOL;
         $w = new MercVSDList($org_id);
         MercVsd::getUpdateData($org_id);
 
@@ -165,9 +177,9 @@ class MercuryCronController extends Controller
     public function actionTestStock($org_id = 5144, $enterpriseGuid = 'f8805c8f-1da4-4bda-aaca-a08b5d1cab1b', $start_date = null)
     {
         echo "START" . PHP_EOL;
-        echo "ORG: " .$org_id. PHP_EOL;
-        echo "EnterpriseGuid: " .$enterpriseGuid. PHP_EOL;
-        echo "Start date: " .$start_date. PHP_EOL;
+        echo "ORG: " . $org_id . PHP_EOL;
+        echo "EnterpriseGuid: " . $enterpriseGuid . PHP_EOL;
+        echo "Start date: " . $start_date . PHP_EOL;
         $w = new MercStockEntryList($org_id);
         MercStockEntry::getUpdateData($org_id);
         $data['startDate'] = $start_date ?? MercVisits::getLastVisit($org_id, 'MercStockEntryList', $enterpriseGuid);
@@ -189,5 +201,4 @@ class MercuryCronController extends Controller
             'update_date' => strtotime(gmdate("M d Y H:i:s")),
         ]);
     }
-
 }

@@ -2,32 +2,44 @@
 
 namespace console\controllers;
 
+use api\common\models\merc\mercPconst;
+use api\common\models\merc\MercStockEntry;
+use api\common\models\merc\MercVsd;
 use common\components\ecom\providers\Provider;
 use common\components\ecom\realization\Realization;
-use common\components\EComIntegration;
 use common\components\edi\EDIIntegration;
 use common\models\EcomIntegrationConfig;
 use common\models\edi\EdiOrganization;
 use common\models\edi\EdiProvider;
+use common\models\ES\Product;
+use common\models\ES\Supplier;
+use common\models\RelationUserOrganization;
+use common\models\Role;
 use Yii;
-use yii\web\View;
 use yii\console\Controller;
 use common\models\WhiteList;
 use common\models\CatalogBaseGoods;
 use common\models\Organization;
 use api_web\components\Notice;
 use common\models\User;
+use yii\db\Expression;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 
-//`php yii cron/count`
 class CronController extends Controller
 {
-
     /**
      * Отправка Емайлов пользователем, кто у нас ровно неделю
+     *
+     * @throws \yii\base\ErrorException
      */
     public function actionSendEmailWeekend()
     {
-        $users = User::find()->where(['status' => 1, 'send_week_message' => 0, 'language' => 'ru'])
+        $users = User::find()->where([
+            'status'            => 1,
+            'send_week_message' => 0,
+            'language'          => 'ru'
+        ])
             ->andWhere('created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)')
             ->all();
 
@@ -45,10 +57,16 @@ class CronController extends Controller
 
     /**
      * Отправка Емайлов пользователем, через час после логина
+     *
+     * @throws \yii\base\ErrorException
      */
     public function actionSendMessageManager()
     {
-        $users = User::find()->where(['status' => 1, 'send_manager_message' => 0, 'language' => 'ru'])
+        $users = User::find()->where([
+            'status'               => 1,
+            'send_manager_message' => 0,
+            'language'             => 'ru'
+        ])
             ->andWhere('first_logged_in_at is not null')
             ->andWhere('first_logged_in_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)')
             ->limit(10)
@@ -68,10 +86,16 @@ class CronController extends Controller
 
     /**
      * Отправка Емайлов пользователем, через 2 дня после создания
+     *
+     * @throws \yii\base\ErrorException
      */
     public function actionSendDemonstration()
     {
-        $users = User::find()->where(['status' => 1, 'send_demo_message' => 0, 'language' => 'ru'])
+        $users = User::find()->where([
+            'status'            => 1,
+            'send_demo_message' => 0,
+            'language'          => 'ru'
+        ])
             ->andWhere('created_at < DATE_SUB(NOW(), INTERVAL 2 DAY)')
             ->all();
 
@@ -87,26 +111,47 @@ class CronController extends Controller
         }
     }
 
+    /**
+     * @throws \yii\db\Exception
+     */
     public function actionCount()
     {
-        $restourants = rand(15, 25);
+        $restaurants = rand(15, 25);
         $suppliers = rand(5, 10);
-        $sql = "update main_counter set supp_count = supp_count + $suppliers, rest_count = rest_count + $restourants ";
-        \Yii::$app->db->createCommand($sql)->execute();
+
+        \Yii::$app->db->createCommand(
+            "UPDATE main_counter SET "
+            . "supp_count = supp_count + {$suppliers}, "
+            . "rest_count = rest_count + {$restaurants}"
+        )->execute();
     }
 
+    /**
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
+     * @throws \Exception
+     */
     public function actionPlusOne()
     {
-        $query = "SELECT updated_at FROM main_counter LIMIT 1";
-        $latest = Yii::$app->db->createCommand($query)->queryScalar();
+        $latest = Yii::$app->db->createCommand(
+            "SELECT updated_at FROM main_counter LIMIT 1"
+        )->queryScalar();
+
         $now = new \DateTime();
         $latest = new \DateTime($latest);
-        $randomInterval = rand(3, 15);
         $interval = $now->diff($latest, true)->i;
-        echo "latest:" . Yii::$app->formatter->asTime($latest, "php:j M Y, H:i:s") . ";now:" . Yii::$app->formatter->asTime($now, "php:j M Y, H:i:s") . ";diff:" . $interval . "\n";
+        echo "latest:" . Yii::$app->formatter->asTime($latest, "php:j M Y, H:i:s")
+            . "; now:" . Yii::$app->formatter->asTime($now, "php:j M Y, H:i:s")
+            . "; diff:" . $interval . "\n";
     }
 
-    //обновление одного продукта (крон запускается каждые 2 минуты)
+    /**
+     * обновление одного продукта (крон запускается каждые 2 минуты)
+     *
+     * @throws \yii\db\Exception
+     * @throws \yii\db\StaleObjectException
+     * @throws \yii\elasticsearch\Exception
+     */
     public function actionUpdateCollection()
     {
         $base = CatalogBaseGoods::find()
@@ -125,7 +170,10 @@ class CronController extends Controller
                 $product_price = $catalogBaseGoods->price;
                 $product_currency = $catalogBaseGoods->catalog->currency->symbol;
                 $product_category_id = $catalogBaseGoods->category->parent;
-                $product_category_name = \common\models\MpCategory::find()->where(['id' => $catalogBaseGoods->category->parent])->one()->name;
+                $product_category_name = \common\models\MpCategory::find()
+                    ->where(['id' => $catalogBaseGoods->category->parent])
+                    ->one()
+                    ->name;
                 $product_category_sub_id = $catalogBaseGoods->category->id;
                 $product_category_sub_name = $catalogBaseGoods->category->name;
                 $product_show_price = $catalogBaseGoods->mp_show_price;
@@ -146,9 +194,11 @@ class CronController extends Controller
                     ($catalogBaseGoods->vendor->white_list == 1) &&
                     ($catalogBaseGoods->status == 1)) {
 
-                    if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->exists()) {
+                    if (Product::find()->where(['product_id' => $product_id])->exists()) {
 
-                        $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
+                        $es_product = Product::find()
+                            ->where(['product_id' => $product_id])
+                            ->one();
                         $es_product->attributes = [
                             "product_id"                => $product_id,
                             "product_image"             => $product_image,
@@ -168,7 +218,7 @@ class CronController extends Controller
                         ];
                         $es_product->save();
                     } else {
-                        $es_product = new \common\models\ES\Product();
+                        $es_product = new Product();
                         $es_product->attributes = [
                             "product_id"                => $product_id,
                             "product_image"             => $product_image,
@@ -192,8 +242,8 @@ class CronController extends Controller
                     $catalogBaseGoods->rating = $product_rating;
                     $catalogBaseGoods->save(false);
                 } else {
-                    if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->exists()) {
-                        $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
+                    if (Product::find()->where(['product_id' => $product_id])->exists()) {
+                        $es_product = Product::find()->where(['product_id' => $product_id])->one();
                         $es_product->delete();
                     }
                     $catalogBaseGoods->es_status = 0;
@@ -201,8 +251,8 @@ class CronController extends Controller
                 }
             } catch (\Exception $e) {
                 echo($e->getMessage());
-                if (\common\models\ES\Product::find()->where(['product_id' => $catalogBaseGoods->id])->exists()) {
-                    $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
+                if (Product::find()->where(['product_id' => $catalogBaseGoods->id])->exists()) {
+                    $es_product = Product::find()->where(['product_id' => $product_id])->one();
                     $es_product->delete();
                 }
                 $catalogBaseGoods->es_status = 0;
@@ -221,14 +271,14 @@ class CronController extends Controller
             $category_sub_id = $name->id;
             $category_name = $name->name;
 //            if(\common\models\ES\Category::find()->where(['category_sub_id'=>$category_sub_id]) && \common\models\ES\Category::find()->exists()){
-//            $category = \common\models\ES\Category::find()->where(['category_sub_id'=>$category_sub_id])->one();   
+//            $category = \common\models\ES\Category::find()->where(['category_sub_id'=>$category_sub_id])->one();
 //            $category->attributes = [
 //                "category_id" => $category_id,
 //                "category_slug" => $category_slug,
 //                "category_sub_id" => $category_sub_id,
 //                "category_name" => $category_name
 //            ];
-//            $category->save();    
+//            $category->save();
 //            }else{
             $category->attributes = [
                 "category_id"     => $category_id,
@@ -241,17 +291,23 @@ class CronController extends Controller
         }
     }
 
+    /**
+     * @throws \yii\db\Exception
+     * @throws \yii\db\StaleObjectException
+     * @throws \yii\elasticsearch\Exception
+     */
     public function actionUpdateSuppliers()
     {
         $suppliers = Organization::find()
             ->where([
                 'type_id'    => Organization::TYPE_SUPPLIER,
-                'white_list' => Organization::WHITE_LIST_ON])
+                'white_list' => Organization::WHITE_LIST_ON
+            ])
             ->andWhere(['in', 'es_status', [
                 Organization::ES_UPDATED,
                 Organization::ES_DELETED
             ]])
-            ->andWhere('locality is not null and locality <> \'undefined\'')
+            ->andWhere('locality IS NOT NULL AND locality <> \'undefined\'')
             ->limit(20)
             ->all();
         foreach ($suppliers as $supplier) {
@@ -279,8 +335,8 @@ class CronController extends Controller
             }
 
             if ($supplier->es_status == Organization::ES_UPDATED) {
-                if (\common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->count() == 0) {
-                    $es_supplier = new \common\models\ES\Supplier();
+                if (Supplier::find()->where(['supplier_id' => $supplier->id])->count() == 0) {
+                    $es_supplier = new Supplier();
                     $es_supplier->attributes = [
                         "supplier_id"          => $supplier->id,
                         "supplier_image"       => !empty($supplier->picture) ? $supplier->pictureUrl : '',
@@ -290,8 +346,8 @@ class CronController extends Controller
                     ];
                     $es_supplier->save();
                 }
-                if (\common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->count() > 0) {
-                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->one();
+                if (Supplier::find()->where(['supplier_id' => $supplier->id])->count() > 0) {
+                    $es_supplier = Supplier::find()->where(['supplier_id' => $supplier->id])->one();
                     $es_supplier->attributes = [
                         "supplier_image"       => !empty($supplier->picture) ? $supplier->pictureUrl : '',
                         "supplier_name"        => $supplier->name,
@@ -302,40 +358,32 @@ class CronController extends Controller
                 }
             }
             if ($supplier->es_status == Organization::ES_DELETED) {
-                if (\common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->count() > 0) {
-                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->one();
-                    $es_supplier->delete();
+                if (Supplier::find()->where(['supplier_id' => $supplier->id])->count() > 0) {
+                    Supplier::findOne(['supplier_id' => $supplier->id])->delete();
                 }
-                Yii::$app->db->createCommand("update " . CatalogBaseGoods::tableName() . " set "
-                    . "es_status = " . Organization::ES_DELETED . " "
-                    . "where supp_org_id = " . $supplier->id)->execute();
+                CatalogBaseGoods::updateAll(["es_status" => 2], ["supp_org_id" => $supplier->id]);
             }
-            Yii::$app->db->createCommand("update organization set "
-                . "es_status = " . Organization::ES_INACTIVE . ","
-                . "rating = " . $rating . " "
-                . "where id = " . $supplier->id)->execute();
+            Organization::updateAll(["es_status" => 0, "rating" => $rating], ["id" => $supplier->id]);
+
             if ($supplier->white_list == 1) {
-                Yii::$app->db->createCommand("update " . CatalogBaseGoods::tableName() . " set "
-                    . "es_status = " . CatalogBaseGoods::ES_UPDATE . " "
-                    . "where supp_org_id = " . $supplier->id . " and "
-                    . "es_status <> " . CatalogBaseGoods::ES_DELETED)->execute();
+                CatalogBaseGoods::updateAll([
+                    "es_status" => CatalogBaseGoods::ES_UPDATE
+                ], [
+                    "AND",
+                    ["supp_org_id1" => $supplier->id],
+                    ["<>", "es_status", CatalogBaseGoods::ES_DELETED]
+                ]);
             }
         }
     }
 
-    public function actionUpdateOrganizationRating()
-    {
-
-    }
-
-    public function actionUpdateProductRating()
-    {
-
-    }
-
     public function actionMappingOrganizationFromGoogleApiMaps()
     {
-        $model = Organization::find()->where('lng is not null and lat is not null and country is not null and administrative_area_level_1 is null')->limit(500)->all();
+        $model = Organization::find()
+            ->where('lng IS NOT NULL AND lat IS NOT NULL AND country IS NOT NULL AND administrative_area_level_1 IS NULL')
+            ->limit(500)
+            ->all();
+
         foreach ($model as $s) {
             $address_url = 'https://maps.googleapis.com/maps/api/geocode/json?key=' . Yii::$app->params['google-api']['key-id'] . '&latlng=' . $s->lat . ',' . $s->lng . '&language=ru&sensor=false';
             $address_json = json_decode(file_get_contents($address_url));
@@ -359,20 +407,11 @@ class CronController extends Controller
                     }
                 }
 
-                $country = $location['country'];
-                $locality = $location['locality'];
-                $administrative_area_level_1 = $location['admin_1'];
-
                 $organization = Organization::findOne($s->id);
-                $organization->administrative_area_level_1 = $administrative_area_level_1;
+                $organization->administrative_area_level_1 = $location['admin_1'];
                 $organization->save();
             }
         }
-    }
-
-    public function actionSendMailNewRequests()
-    {
-        //
     }
 
     public function actionUpdateBlacklist()
@@ -385,13 +424,19 @@ class CronController extends Controller
     {
         $ediOrganizations = EdiOrganization::find()->all();
         if ($ediOrganizations) {
-            foreach ($ediOrganizations as $organization) {
-                $orgId = $organization->organization_id;
-                $providerID = $organization->provider_id;
-                $provider = EdiProvider::findOne(['id' => $providerID]);
-                if ($provider->provider_class == 'LeradataProvider' && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
-                $ediIntegration = new EDIIntegration(['orgId' => $orgId, 'providerID' => $providerID]);
-                $ediIntegration->handleFilesList();
+            foreach ($ediOrganizations as $org) {
+                $provider = EdiProvider::findOne(['id' => $org->provider_id]);
+                $providerClass = $provider->provider_class;
+                $orgTypeId = $org->organization->type_id;
+
+                if ($providerClass == 'LeradataProvider' && $orgTypeId == Organization::TYPE_SUPPLIER) {
+                    continue;
+                }
+
+                (new EDIIntegration([
+                    'orgId'      => $org->organization_id,
+                    'providerID' => $org->provider_id
+                ]))->handleFilesList();
             }
         }
     }
@@ -401,39 +446,54 @@ class CronController extends Controller
     {
         $ediOrganizations = EdiOrganization::find()->all();
         if ($ediOrganizations) {
-            foreach ($ediOrganizations as $organization) {
-                $orgId = $organization->organization_id;
-                $providerID = $organization->provider_id;
-                $provider = EdiProvider::findOne(['id' => $providerID]);
-                if ($provider->provider_class == 'LeradataProvider' && $organization->organization->type_id == Organization::TYPE_SUPPLIER) continue;
-                $ediIntegration = new EDIIntegration(['orgId' => $orgId, 'providerID' => $providerID]);
-                $ediIntegration->handleFilesListQueue();
+            foreach ($ediOrganizations as $org) {
+                $provider = EdiProvider::findOne(['id' => $org->provider_id]);
+                $providerClass = $provider->provider_class;
+                $orgTypeId = $org->organization->type_id;
+
+                if ($providerClass == 'LeradataProvider' && $orgTypeId == Organization::TYPE_SUPPLIER) {
+                    continue;
+                }
+
+                (new EDIIntegration([
+                    'orgId'      => $org->organization_id,
+                    'providerID' => $org->provider_id
+                ]))->handleFilesListQueue();
             }
         }
     }
 
     public function actionProcessMercVsd()
     {
-        $organizations = \yii\helpers\ArrayHelper::map(Yii::$app->db_api->CreateCommand("
-            SELECT count(mvsd.id) AS vsd_count, mpconst.org AS organization_id
-            FROM merc_vsd AS mvsd LEFT JOIN merc_pconst AS mpconst ON mvsd.recipient_guid = mpconst.value AND mpconst.const_id = 10
-            WHERE mvsd.status = 'CONFIRMED'
-            GROUP BY mpconst.org;
-        ")->queryAll(), 'organization_id', 'vsd_count');
-        var_dump($organizations);
+        $query = (new Query())
+            ->select([
+                "vsd_count"       => new Expression("count(mvsd.id)"),
+                "organization_id" => "mpconst.org"
+            ])
+            ->from(["mvsd" => MercVsd::tableName()])
+            ->leftJoin([
+                "mpconst" => mercPconst::tableName()
+            ], "mvsd.recipient_guid = mpconst.value AND mpconst.const_id = 10")
+            ->where([
+                "mvsd.status" => "CONFIRMED"
+            ])
+            ->groupBy("mpconst.org")
+            ->all(\Yii::$app->db_api);
+
+        $organizations = ArrayHelper::map($query, 'organization_id', 'vsd_count');
 
         foreach ($organizations as $organization_id => $vsd_count) {
             $organization = Organization::findOne(['id' => $organization_id]);
             if (isset($organization)) {
                 $recipients = [];
-                $relatedUsers = \common\models\RelationUserOrganization::findAll([
+                $relatedUsers = RelationUserOrganization::findAll([
                     'organization_id' => $organization_id,
                     'is_active'       => true,
                     'role_id'         => [
-                        \common\models\Role::ROLE_RESTAURANT_MANAGER,
-                        \common\models\Role::ROLE_SUPPLIER_MANAGER,
-                        \common\models\Role::ROLE_ADMIN,
-                        \common\models\Role::ROLE_FKEEPER_MANAGER,
+                        Role::ROLE_RESTAURANT_MANAGER,
+                        Role::ROLE_SUPPLIER_MANAGER,
+                        Role::ROLE_ADMIN,
+                        Role::ROLE_FKEEPER_MANAGER,
                     ],
                 ]);
                 foreach ($relatedUsers as $relatedUser) {
@@ -446,11 +506,12 @@ class CronController extends Controller
                         $recipients[] = $addEmail->email;
                     }
                 }
-                var_dump($recipients);
                 foreach ($recipients as $recipient) {
                     Yii::$app->mailer->htmlLayout = '@common/mail/layouts/mail';
                     $mailer = Yii::$app->mailer;
-                    $subject = Yii::t('app', 'common.mail.merc_vsd.subject', ['ru' => 'Уведомление о непогашенных ВСД для'], 'ru') . '  ' . $organization->name;
+                    $subject = Yii::t('app', 'common.mail.merc_vsd.subject', [
+                            'ru' => 'Уведомление о непогашенных ВСД для'
+                        ], 'ru') . '  ' . $organization->name;
                     $mailer->compose('merc_vsd', compact("vsd_count"))
                         ->setTo($recipient)
                         ->setSubject($subject)
@@ -462,40 +523,47 @@ class CronController extends Controller
 
     public function actionProcessMercStockExpiry()
     {
-        $organizations = Yii::$app->db_api->CreateCommand("
-            SELECT mpconst.org AS organization_id
-            FROM merc_stock_entry AS stock 
-            LEFT JOIN merc_pconst AS mpconst ON stock.owner_guid COLLATE utf8_unicode_ci = mpconst.value COLLATE utf8_unicode_ci AND mpconst.const_id = 10
-            WHERE stock.expiry_date < now()
-            GROUP BY mpconst.org;
-        ")->queryColumn();
-        var_dump($organizations);
+        $organizations = (new Query())
+            ->select([
+                "organization_id" => "mpconst.org"
+            ])
+            ->from(["stock" => MercStockEntry::tableName()])
+            ->leftJoin([
+                "mpconst" => mercPconst::tableName()
+            ], new Expression("stock.owner_guid COLLATE utf8_unicode_ci = mpconst.value COLLATE utf8_unicode_ci AND mpconst.const_id = 10"))
+            ->where("stock.expiry_date < :expiry_date", [
+                ":expiry_date" => new Expression("NOW()")
+            ])
+            ->groupBy("mpconst.org")
+            ->column(\Yii::$app->db_api);
 
         foreach ($organizations as $organization_id) {
             $organization = Organization::findOne(['id' => $organization_id]);
             if (isset($organization)) {
                 $recipients = [];
-                $relatedUsers = \common\models\RelationUserOrganization::findAll([
+                $relatedUsers = RelationUserOrganization::findAll([
                     'organization_id' => $organization_id,
                     'is_active'       => true,
                     'role_id'         => [
-                        \common\models\Role::ROLE_RESTAURANT_MANAGER,
-                        \common\models\Role::ROLE_SUPPLIER_MANAGER,
-                        \common\models\Role::ROLE_ADMIN,
-                        \common\models\Role::ROLE_FKEEPER_MANAGER,
+                        Role::ROLE_RESTAURANT_MANAGER,
+                        Role::ROLE_SUPPLIER_MANAGER,
+                        Role::ROLE_ADMIN,
+                        Role::ROLE_FKEEPER_MANAGER,
                     ],
                 ]);
+
                 foreach ($relatedUsers as $relatedUser) {
                     if ($relatedUser->user->emailNotification->merc_stock_expiry) {
                         $recipients[] = $relatedUser->user->email;
                     }
                 }
+
                 foreach ($organization->additionalEmail as $addEmail) {
                     if ($addEmail->merc_stock_expiry) {
                         $recipients[] = $addEmail->email;
                     }
                 }
-                var_dump($recipients);
+
                 foreach ($recipients as $recipient) {
                     Yii::$app->mailer->htmlLayout = '@common/mail/layouts/mail';
                     $mailer = Yii::$app->mailer;
@@ -508,5 +576,4 @@ class CronController extends Controller
             }
         }
     }
-
 }

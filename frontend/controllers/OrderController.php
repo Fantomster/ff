@@ -2546,8 +2546,15 @@ class OrderController extends DefaultController
             exit();
         }
 
-        $countQuery = (new Query())->distinct()->from(Order::tableName())
-            ->where(['id' => $arOrderIds])->groupBy('client_id')->count();
+        $countQuery = (new Query())->select(['o.client_id'])->distinct()->from(Order::tableName() . " o")
+            ->leftJoin(OrderContent::tableName() . " oc", "oc.order_id = o.id")
+            ->leftJoin(CatalogBaseGoods::tableName() . " cbg", "cbg.id = oc.product_id")
+            ->where(['o.id' => $arOrderIds])
+            ->andWhere([
+                'not', ['cbg.product' => null],
+            ])
+            ->groupBy('o.client_id')->count();
+
         $subQuery = (new Query())->select([
             'id'               => 'org.id',
             'parent_id'        => 'org.parent_id',
@@ -2569,34 +2576,30 @@ class OrderController extends DefaultController
             ])->andWhere([
                 'not', ['cbg.product' => null]
             ])
-            ->groupBy('cbg.id')
+            ->groupBy('cbg.product')
             ->orderBy('org.parent_id');
         $dbResult = (new Query())->select('*')->from(['sq' => $subQuery])->groupBy('product,id')
-            ->orderBy('client_name')
+            ->orderBy('product')
             ->all();
         $arExcelHeader = [
             \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']),
             \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед изм']),
         ];
         $report = [];
-
         foreach ($dbResult as $item) {
             $arExcelHeader[$item['client_name'] . $item['id']] = $item['client_name'];
-            if (!empty($item['product_id'])) {
-                if (!isset($report[$item['product_id']])) {
-                    $report[$item['product_id']] =
+            if (!empty($item['product'])) {
+                if (!isset($report[$item['product']])) {
+                    $report[$item['product']] =
                         [
                             'product' => $item['product'],
                             'unit'    => $item['unit'],
                         ];
                     if (count($arExcelHeader) >= 3) {
-                        $report[$item['product_id']] = array_merge($report[$item['product_id']], array_fill(count($arExcelHeader), $item['count_org'], '0'));
+                        $report[$item['product']] = array_merge($report[$item['product']], array_fill(2, $item['count_org'], '0'));
                     }
-                    $report[$item['product_id']][count($arExcelHeader) - 3] = $item['sum_quantity'];
-                } else {
-                    $index = count($arExcelHeader) - 3;
-                    $report[$item['product_id']][$index] = $item['sum_quantity'];
                 }
+                $report[$item['product']][count($arExcelHeader) - 3] = $item['sum_quantity'];
             }
         }
         $objPHPExcel = new \PHPExcel();

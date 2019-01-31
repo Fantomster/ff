@@ -6,12 +6,14 @@ use backend\models\DynamicUsageSearch;
 use backend\models\MercuryReportSearch;
 use backend\models\OrgUseMercFrequently;
 use common\models\OrderStatus;
+use Matrix\Exception;
 use Yii;
 use common\models\User;
 use common\models\Role;
 use common\models\Organization;
 use common\models\Order;
 use backend\models\UserSearch;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -610,71 +612,66 @@ class StatisticsController extends Controller
             ->count();
 
         //Среднее количество заказов ресторанами в день за период
-        $query = "select avg(cnt)
-                        from (
-                        select a.client_id, count(a.id) cnt, DATE_FORMAT(a.created_at,'%Y-%m-%d') d
-                        from $orderTable a,
-                             organization b
-                        where a.client_id = b.id
-                          and b.blacklisted = 0
-                          and a.status in (3,4,2,1)
-                          and a.created_at between :dateFrom and :dateTo
-                        group by client_id, d) a";
-        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
-        $dayOrderCount = $command->queryScalar();
-
-
         $dayOrderCountInnerSelect = (new Query())->select([
             "a.client_id",
             "cnt" => "count(a.id)",
-            "d" => "DATE_FORMAT(a.created_at,'%Y-%m-%d')",
+            "d"   => "DATE_FORMAT(a.created_at,'%Y-%m-%d')",
         ])
-            ->from(["$orderTable a", "$orgTable b"])
-            ->where([
-                "a.client_id"     => ":qp0",
-                "b.blacklisted" => ":qp1",
-            ])
-            ->andWhere(['between', "a.created_at", ":qp2", ":qp3"])
-            ->andWhere([
-                'in', "a.status", ":qp4"
-            ])
+            ->from(["$orderTable as a", "$orgTable as b"])
+            ->where("a.client_id=b.id AND b.blacklisted=:qp1 AND a.status IN (:qp2, :qp3, :qp4, :qp5) AND a.created_at BETWEEN :qp6 AND :qp7")
             ->groupBy([
                 "client_id",
                 "d"
-            ])
-            ->createCommand()->sql;
+            ])->createCommand()->sql;
 
-        $dayOrderCount = (new Query())->select([
+        $fullDayOrderCount = (new Query())->select([
             "avg(cnt)"
         ])
             ->from("($dayOrderCountInnerSelect) as a")
             ->params([
-                ':qp0' => "b.id",
                 ':qp1' => Organization::STATUS_WHITELISTED,
-                ':qp2' => $dt->format('Y-m-d'),
-                ':qp3' => $end->format('Y-m-d'),
-                ':qp4' => Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-                ':qp5' => Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-                ':qp6' => Order::STATUS_PROCESSING,
-                ':qp7' => Order::STATUS_DONE,
-            ])->createCommand()->sql;
-
-
-        dd($dayOrderCount);
+                ':qp2' => Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                ':qp3' => Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                ':qp4' => Order::STATUS_PROCESSING,
+                ':qp5' => Order::STATUS_DONE,
+                ':qp6' => $dt->format('Y-m-d'),
+                ':qp7' => $end->format('Y-m-d'),
+            ])->createCommand()->getRawSql();
+        $arr = explode("WHERE", $fullDayOrderCount);
+        $secondDayOrderCount = str_replace("`", "", $arr[1]);
+        $dayQuery = $arr[0] . 'WHERE' . $secondDayOrderCount;
+        $dayOrderCount = (new Query())->createCommand()->setRawSql($dayQuery)->queryScalar();
 
         //Среднее количество заказов ресторанами в месяц за период
-        $query = "select avg(cnt)
-                        from (
-                        select a.client_id, count(a.id) cnt, DATE_FORMAT(a.created_at,'%Y-%m') d
-                        from $orderTable a,
-                             organization b
-                        where a.client_id = b.id
-                          and b.blacklisted = 0
-                          and a.status in (3,4,2,1)
-                          and a.created_at between :dateFrom and :dateTo
-                        group by client_id, d) a";
-        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
-        $monthOrderCount = $command->queryScalar();
+        $monthOrderCountInnerSelect = (new Query())->select([
+            "a.client_id",
+            "cnt" => "count(a.id)",
+            "d"   => "DATE_FORMAT(a.created_at,'%Y-%m')",
+        ])
+            ->from(["$orderTable as a", "$orgTable as b"])
+            ->where("a.client_id=b.id AND b.blacklisted=:qp1 AND a.status IN (:qp2, :qp3, :qp4, :qp5) AND a.created_at BETWEEN :qp6 AND :qp7")
+            ->groupBy([
+                "client_id",
+                "d"
+            ])->createCommand()->sql;
+
+        $fullMonthOrderCount = (new Query())->select([
+            "avg(cnt)"
+        ])
+            ->from("($monthOrderCountInnerSelect) as a")
+            ->params([
+                ':qp1' => Organization::STATUS_WHITELISTED,
+                ':qp2' => Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                ':qp3' => Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                ':qp4' => Order::STATUS_PROCESSING,
+                ':qp5' => Order::STATUS_DONE,
+                ':qp6' => $dt->format('Y-m-d'),
+                ':qp7' => $end->format('Y-m-d'),
+            ])->createCommand()->getRawSql();
+        $arr = explode("WHERE", $fullMonthOrderCount);
+        $secondMonthOrderCount = str_replace("`", "", $arr[1]);
+        $monthQuery = $arr[0] . 'WHERE' . $secondMonthOrderCount;
+        $monthOrderCount = (new Query())->createCommand()->setRawSql($monthQuery)->queryScalar();
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('misc', compact(

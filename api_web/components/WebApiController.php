@@ -264,14 +264,15 @@ class WebApiController extends \yii\rest\Controller
             }
         }
 
-        $this->user = (new UserWebApi())->getUser();
+        $userWebApi = new UserWebApi();
+        $this->user = $userWebApi->getUser();
         /**
          * Проверка лицензии только если это пользователь
          **/
         $this->checkLicense();
 
         $this->request = \Yii::$app->request->getBodyParam('request');
-        \Yii::$app->setTimeZone('Etc/GMT' . $this->container->get('UserWebApi')->checkGMTFromDb());
+        \Yii::$app->setTimeZone('Etc/GMT' . $userWebApi->checkGMTFromDb());
     }
 
     /**

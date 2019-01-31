@@ -15,7 +15,6 @@ use api_web\modules\integration\classes\sync\ServiceRkws;
 use common\models\Journal;
 use common\models\Waybill;
 use api_web\modules\integration\classes\sync\AbstractSyncFactory;
-use api_web\modules\integration\classes\SyncServiceFactory;
 use yii\web\BadRequestHttpException;
 use common\models\AllServiceOperation;
 use common\models\OuterTask;

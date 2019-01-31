@@ -809,10 +809,18 @@ class ClientWebApi extends WebApi
      */
     public function ndsCountryList()
     {
+        $order = "CASE 
+            WHEN uuid = :selected_uuid THEN 0
+            WHEN name = :name THEN 1
+            ELSE name 
+        END";
         $models = VetisCountry::find()
             ->select(['uuid', 'name'])
             ->where(['active' => 1])
-            ->orderBy(new Expression("CASE WHEN name = 'Российская Федерация' THEN 0 ELSE name END"))
+            ->orderBy(new Expression($order, [
+                ':name'          => 'Российская Федерация',
+                ':selected_uuid' => $this->user->organization->vetis_country_uuid
+            ]))
             ->asArray()
             ->all();
 

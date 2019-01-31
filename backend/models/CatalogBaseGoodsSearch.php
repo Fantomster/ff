@@ -2,7 +2,6 @@
 
 namespace backend\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\CatalogBaseGoods;
@@ -39,7 +38,7 @@ class CatalogBaseGoodsSearch extends CatalogBaseGoods
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
+     * @param null  $id
      * @return ActiveDataProvider
      */
     public function search($params = null, $id = null)

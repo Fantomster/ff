@@ -2,18 +2,22 @@
 
 namespace backend\models;
 
+use common\models\Franchisee;
+use common\models\FranchiseeAssociate;
 use common\models\Order;
+use common\models\Organization;
 use Yii;
 use yii\data\SqlDataProvider;
+use yii\db\Expression;
+use yii\db\Query;
 
 /**
- * Description of GuideProductsSearch
+ * Class DynamicUsageSearch
  *
- * @author elbabuino
+ * @package backend\models
  */
 class DynamicUsageSearch extends \yii\base\Model
 {
-
     public $org_name;
     public $org_id;
     public $org_contact_name;
@@ -42,6 +46,18 @@ class DynamicUsageSearch extends \yii\base\Model
     public $w1_vendor;
     public $sort;
     public $start_date;
+
+    public function __construct(array $config = [])
+    {
+        $this->start_date = Yii::$app->request->get("start_date");
+        if (!empty($this->start_date)) {
+            $dateTime = \DateTime::createFromFormat('d.m.Y H:i:s', "{$this->start_date} 00:00:00");
+            $this->start_date = " '{$dateTime->format('Y-m-d H:i:s')}' ";
+        } else {
+            $this->start_date = " NOW() ";
+        }
+        parent::__construct($config);
+    }
 
     /**
      * @inheritdoc
@@ -91,102 +107,145 @@ class DynamicUsageSearch extends \yii\base\Model
     /**
      * Creates data provider instance with search query applied
      *
-     * @param array   $params
-     * @param integer $guideId
-     * @param integer $clientId
+     * @param array $params
      * @return SqlDataProvider
      */
     public function search(array $params)
     {
         $this->load($params);
-        $this->start_date = Yii::$app->request->get("start_date");
-        $where = [];
 
-        if ($this->start_date != null) {
-            $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $this->start_date . " 00:00:00");
-            $start_date = " '" . $dt->format('Y-m-d H:i:s') . "' ";
-            $where[] = "(order_max_date > $start_date)";
-        } else {
-            $start_date = " NOW() ";
-        }
-
-        if ($this->org_name)
-            $where[] = "(org_name LIKE '%$this->org_name%')";
-
-        if ($this->franchisee_name)
-            $where[] = "(franchisee_name LIKE '%$this->franchisee_name%')";
-
-        if (count($where) > 0)
-            $where = "WHERE " . implode(' AND ', $where) . " ";
-        else
-            $where = '';
-
-        $query = "select q.*
-                      from (
-                    select org.*,
-                           DATE_FORMAT(max(o.created_at), '%Y-%m-%d') order_max_date,
-                           count(o.id) order_cnt,
-                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 37 day) and DATE_SUB($start_date, INTERVAL 30 day) then o.total_price else 0 end) w5_sum,
-                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 37 day) and DATE_SUB($start_date, INTERVAL 30 day) then 1 else 0 end) w5_count,
-                           count(distinct case when o.created_at between DATE_SUB($start_date, INTERVAL 37 day) and DATE_SUB($start_date, INTERVAL 30 day) then o.vendor_id else null end) w5_vendor,
-                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 31 day) and DATE_SUB($start_date, INTERVAL 24 day) then o.total_price else 0 end) w4_sum,
-                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 31 day) and DATE_SUB($start_date, INTERVAL 24 day) then 1 else 0 end) w4_count,
-                           count(distinct case when o.created_at between DATE_SUB($start_date, INTERVAL 31 day) and DATE_SUB($start_date, INTERVAL 24 day) then o.vendor_id else null end) w4_vendor,
-                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 23 day) and DATE_SUB($start_date, INTERVAL 16 day) then o.total_price else 0 end) w3_sum,
-                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 23 day) and DATE_SUB($start_date, INTERVAL 16 day) then 1 else 0 end) w3_count,
-                           count(distinct case when o.created_at between DATE_SUB($start_date, INTERVAL 23 day) and DATE_SUB($start_date, INTERVAL 16 day) then o.vendor_id else null end) w3_vendor,
-                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 15 day) and DATE_SUB($start_date, INTERVAL 8 day) then o.total_price else 0 end) w2_sum,
-                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 15 day) and DATE_SUB($start_date, INTERVAL 8 day) then 1 else 0 end) w2_count,
-                           count(distinct case when o.created_at between DATE_SUB($start_date, INTERVAL 15 day) and DATE_SUB($start_date, INTERVAL 8 day) then o.vendor_id else null end) w2_vendor,
-                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 7 day) and $start_date then o.total_price else 0 end) w1_sum,
-                           sum(case when o.created_at between DATE_SUB($start_date, INTERVAL 7 day) and $start_date then 1 else 0 end) w1_count,
-                           count(distinct case when o.created_at between DATE_SUB($start_date, INTERVAL 7 day) and $start_date then o.vendor_id else null end) w1_vendor
-                    from (select a.name org_name, a.contact_name org_contact_name, a.city org_city, a.email org_email, a.id org_id,
-                                   case a.type_id 
-                                     when 1 then 'Ресторан'
-                                     when 2 then 'Поставщик'
-                                     else 'Неизвестный'
-                                   end org_type,
-                                   a.type_id org_type_id,
-                                   DATE_FORMAT(a.created_at,'%Y-%m-%d') org_registred,
-                                   DATE_FORMAT(a.created_at,'%Y-%m') org_registred_peroiod,
-                                   case when c.id in (1, 2, 34) then 'MixCart Москва'
-                                        when c.id is null then 'MixCart n/a'
-                                        else c.legal_entity
-                                   end franchisee_name,
-                                   case when c.id in (1, 2, 34) or c.id is null then 'Москва'
-                                        else 'Регионы'
-                                   end franchisee_region
-                            from organization a
-                            left join franchisee_associate b on a.id = b.organization_id
-                            left join franchisee c on b.franchisee_id = c.id
-                            where a.blacklisted = 0) as org
-                        left join (select id, client_id org_id, vendor_id, created_at, total_price from " . Order::tableName() . "
-                                   union all
-                                   select id, vendor_id, vendor_id, created_at, total_price from " . Order::tableName() . "
-                            ) o on org.org_id = o.org_id
-                        group by org_name, org_contact_name, org_city, org_email, org_id, org_type, org_registred,
-                    org_registred_peroiod, franchisee_name, franchisee_region) as q
-                    $where
-                    order by case when order_cnt > 0 then 1 else 2 end, franchisee_region, org_type_id,
-                             case when w1_count=0 and w2_count=0 and w3_count=0 and w4_count=0 and w5_count>0 then 1 else 2 end,
-                             case when w1_count=0 and w2_count=0 and w3_count=0 and (w4_count>0 or w5_count>0) then 1 else 2 end,
-                             case when w1_count=0 and w2_count=0 and (w3_count>0 or w4_count>0 or w5_count>0) then 1 else 2 end,
-                             case when w1_count=0 and (w2_count>0 or w3_count>0 or w4_count>0 or w5_count>0) then 1 else 2 end,
-                             case when w1_count>0 and w2_count>0 and w3_count>0 and w4_count>0 and w5_count>0 then 1 else 2 end,
-                             case when w1_count=0 and w2_count=0 and w3_count=0 and w4_count=0 and w5_count=0 then 1 else 2 end,  
-                             case when order_cnt > 1 then 1 when order_cnt > 0 then 2 else 3 end,
-                             order_max_date desc,
-                             order_cnt desc
-                ";
+        $query = (new Query())
+            ->select("q.*")
+            ->from([
+                "q" => (new Query())
+                    ->select([
+                        "org.*",
+                        "order_max_date" => new Expression("DATE_FORMAT(MAX(o.created_at), '%Y-%m-%d')"),
+                        "order_cnt"      => new Expression("COUNT(o.id)"),
+                        "w5_sum"         => $this->getSum("sum", 37, 30),
+                        "w5_count"       => $this->getSum("count", 37, 30),
+                        "w5_vendor"      => $this->getCount(37, 30),
+                        "w4_sum"         => $this->getSum("sum", 31, 24),
+                        "w4_count"       => $this->getSum("count", 31, 24),
+                        "w4_vendor"      => $this->getCount(31, 24),
+                        "w3_sum"         => $this->getSum("sum", 23, 16),
+                        "w3_count"       => $this->getSum("count", 23, 16),
+                        "w3_vendor"      => $this->getCount(23, 16),
+                        "w2_sum"         => $this->getSum("sum", 15, 8),
+                        "w2_count"       => $this->getSum("count", 15, 8),
+                        "w2_vendor"      => $this->getCount(15, 8),
+                        "w1_sum"         => $this->getSum("sum", 7, false),
+                        "w1_count"       => $this->getSum("count", 7, false),
+                        "w1_vendor"      => $this->getCount(7, false),
+                    ])
+                    ->from([
+                        "org" => (new Query())
+                            ->select([
+                                "org_name"              => "a.name",
+                                "org_contact_name"      => "a.contact_name",
+                                "org_city"              => "a.city",
+                                "org_email"             => "a.email",
+                                "org_id"                => "a.id",
+                                "org_type"              => new Expression("CASE a.type_id WHEN 1 THEN 'Ресторан' WHEN 2 THEN 'Поставщик' ELSE 'Неизвестный'end"),
+                                "org_type_id"           => "a.type_id",
+                                "org_registred"         => new Expression("DATE_FORMAT(a.created_at,'%Y-%m-%d')"),
+                                "org_registred_peroiod" => new Expression("DATE_FORMAT(a.created_at,'%Y-%m')"),
+                                "franchisee_name"       => new Expression("CASE WHEN c.id IN (1, 2, 34) THEN 'MixCart Москва' WHEN c.id IS NULL THEN 'MixCart n/a' ELSE c.legal_entity END"),
+                                "franchisee_region"     => new Expression("CASE WHEN c.id in (1, 2, 34) OR c.id IS NULL THEN 'Москва' ELSE 'Регионы' END")
+                            ])
+                            ->from(["a" => Organization::tableName()])
+                            ->leftJoin(["b" => FranchiseeAssociate::tableName()], "a.id = b.organization_id")
+                            ->leftJoin(["c" => Franchisee::tableName()], "b.franchisee_id = c.id")
+                            ->where(["a.blacklisted" => 0])
+                    ])
+                    ->leftJoin([
+                        "o" => (new Query())
+                            ->select([
+                                "id",
+                                "org_id" => "client_id",
+                                "vendor_id",
+                                "created_at",
+                                "total_price",
+                            ])
+                            ->from(Order::tableName())
+                            ->union((new Query())
+                                ->select([
+                                    "id",
+                                    "vendor_id",
+                                    "vendor_id" => "vendor_id",
+                                    "created_at",
+                                    "total_price"
+                                ])
+                                ->from(Order::tableName()))
+                    ], "org.org_id = o.org_id")
+                    ->groupBy([
+                        "org_name",
+                        "org_contact_name",
+                        "org_city",
+                        "org_email",
+                        "org_id",
+                        "org_type",
+                        "org_registred",
+                        "org_registred_peroiod",
+                        "franchisee_name",
+                        "franchisee_region"
+                    ])
+            ])
+            ->filterWhere(["LIKE", "org_name", $this->org_name])
+            ->andFilterWhere(["LIKE", "franchisee_name", $this->franchisee_name])
+            ->orderBy([
+                new Expression("CASE WHEN order_cnt > 0 then 1 else 2 end"),
+                new Expression("franchisee_region"),
+                new Expression("org_type_id"),
+                new Expression("CASE WHEN w1_count = 0 AND w2_count = 0 AND w3_count = 0 and w4_count = 0 and w5_count > 0 then 1 else 2 end"),
+                new Expression("CASE WHEN w1_count = 0 AND w2_count = 0 AND w3_count = 0 and (w4_count > 0 or w5_count > 0) then 1 else 2 end"),
+                new Expression("CASE WHEN w1_count = 0 AND w2_count = 0 AND (w3_count > 0 or w4_count > 0 or w5_count > 0) then 1 else 2 end"),
+                new Expression("CASE WHEN w1_count = 0 AND (w2_count > 0 OR w3_count > 0 or w4_count > 0 or w5_count > 0) then 1 else 2 end"),
+                new Expression("CASE WHEN w1_count > 0 AND w2_count > 0 AND w3_count > 0 and w4_count > 0 and w5_count > 0 then 1 else 2 end"),
+                new Expression("CASE WHEN w1_count = 0 AND w2_count = 0 AND w3_count = 0 and w4_count = 0 and w5_count = 0 then 1 else 2 end"),
+                new Expression("CASE WHEN order_cnt > 1 THEN 1 WHEN order_cnt > 0 THEN 2 ELSE 3 END"),
+                "order_max_date" => SORT_DESC,
+                "order_cnt"      => SORT_DESC,
+            ]);
 
         $dataProvider = new SqlDataProvider([
-            'sql'        => $query,
+            'sql'        => $query->createCommand()->getRawSql(),
             'pagination' => [
                 'page'     => isset($params['page']) ? ($params['page'] - 1) : 0,
                 'pageSize' => 20,],
         ]);
 
         return $dataProvider;
+    }
+
+    private function getSum($nameField, $fromInterval, $toInterval): string
+    {
+        $then = ($nameField === "sum") ? "o.total_price" : 1;
+
+        $format = "SUM(CASE WHEN o.created_at "
+            . "BETWEEN DATE_SUB({$this->start_date}, INTERVAL %s DAY) "
+            . "AND %s THEN %s ELSE 0 END)";
+
+        return new Expression(sprintf($format, $fromInterval, $this->checkInterval($toInterval), $then));
+    }
+
+    private function getCount($fromInterval, $toInterval): string
+    {
+        $format = "COUNT(DISTINCT CASE WHEN o.created_at "
+            . "BETWEEN DATE_SUB({$this->start_date}, INTERVAL %s DAY) "
+            . "AND %s then o.vendor_id ELSE NULL END)";
+
+        return new Expression(sprintf($format, $fromInterval, $this->checkInterval($toInterval)));
+    }
+
+    private function checkInterval($toInterval): string
+    {
+        if ($toInterval !== false) {
+            $toInterval = sprintf("DATE_SUB(%s, INTERVAL %s DAY)", $this->start_date, $toInterval);
+        } else {
+            $toInterval = $this->start_date;
+        }
+
+        return $toInterval;
     }
 }

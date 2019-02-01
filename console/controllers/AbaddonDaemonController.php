@@ -92,10 +92,14 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
         sleep($this->sleep);
         $res = (new Query())
             ->select('*')
-            ->from(RabbitQueues::tableName())
-            ->all(\Yii::$app->db_api);
+            ->from(RabbitQueues::tableName());
+        if (!is_null($this->queuePrefix)) {
+            $res->andWhere(['like', 'consumer_class_name', $this->queuePrefix . '%', false]);
+        } else {
+            $res->andWhere(['not like', 'consumer_class_name', 'Merc%', false]);
+        }
 
-        foreach ($res as $row) {
+        foreach ($res->all(\Yii::$app->db_api) as $row) {
             try {
                 $queue = \Yii::$app->get('rabbit')
                     ->setQueue($this->getQueueName($row))

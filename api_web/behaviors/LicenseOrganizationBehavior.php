@@ -2,11 +2,14 @@
 
 namespace api_web\behaviors;
 
+use api_web\components\Registry;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
 use common\models\licenses\LicenseOrganization;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
+use common\models\OuterProductType;
+use common\models\OuterProductTypeSelected;
 use yii\base\Behavior;
 use yii\db\ActiveRecord;
 
@@ -43,24 +46,59 @@ class LicenseOrganizationBehavior extends Behavior
             if (!empty($dictionaryList)) {
                 //Проверяем, нет ли уже справочников для этой организации в этой интеграции
                 //Если нет, создаем
+                /** @var OuterDictionary $dictionary */
                 foreach ($dictionaryList as $dictionary) {
-                    $exists = OrganizationDictionary::find()->where([
-                        'org_id'       => $this->model->org_id,
-                        'outer_dic_id' => $dictionary->id
-                    ])->exists();
-
-                    if (!$exists) {
-                        $model = new OrganizationDictionary([
-                            'outer_dic_id' => $dictionary->id,
-                            'org_id'       => $this->model->org_id,
-                            'status_id'    => OrganizationDictionary::STATUS_DISABLED,
-                            'count'        => 0
-                        ]);
-                        $model->save();
-                    }
+                    $this->createServiceDictionary($dictionary, $service_id, $this->model->org_id);
                 }
             }
         }
+    }
+
+    /**
+     * @param OuterDictionary $dictionary
+     * @param int             $service_id
+     * @param int             $org_id
+     */
+    private function createServiceDictionary(OuterDictionary $dictionary, int $service_id, int $org_id)
+    {
+        $exists = OrganizationDictionary::find()->where([
+            'org_id'       => $org_id,
+            'outer_dic_id' => $dictionary->id
+        ])->exists();
+
+        if (!$exists) {
+            $status = OrganizationDictionary::STATUS_DISABLED;
+            //Для iiko
+            if ($service_id == Registry::IIKO_SERVICE_ID && $dictionary->name == 'product_type') {
+                $status = OrganizationDictionary::STATUS_ACTIVE;
+                $this->addProductTypeSelectedInIiko($org_id);
+            }
+
+            $model = new OrganizationDictionary([
+                'outer_dic_id' => $dictionary->id,
+                'org_id'       => $org_id,
+                'status_id'    => $status
+            ]);
+            $model->count = 0;
+            $model->save();
+        }
+    }
+
+    /**
+     * @param $org_id
+     */
+    private function addProductTypeSelectedInIiko($org_id)
+    {
+        $goodsType = OuterProductType::find()->where([
+            'service_id' => Registry::IIKO_SERVICE_ID,
+            'value'      => 'GOODS'
+        ])->one();
+
+        $model = new OuterProductTypeSelected();
+        $model->org_id = $org_id;
+        $model->outer_product_type_id = $goodsType->id;
+        $model->selected = 1;
+        $model->save();
     }
 
     /**

@@ -104,11 +104,13 @@ class Mailer extends \yii\mail\BaseMailer
             $newEmail->status = EmailQueue::STATUS_FAILED;
         }
         //check blacklist
-        if (EmailBlacklist::find()->where(['email' => $this->to])->exists()) {
+        if (EmailBlacklist::find()->where(['email' => $newEmail->to])->exists()) {
             $newEmail->status = EmailQueue::STATUS_FAILED;
         }
 
         $save = $newEmail->save();
+        $result = false;
+        
         if ($save && !($newEmail->status == EmailQueue::STATUS_FAILED)) {
             try {
                 $result = \Yii::$app->get('sqsQueue')->sendMessage($this->sqsQueueUrl, [$newEmail->id]);

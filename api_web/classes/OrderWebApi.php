@@ -443,7 +443,9 @@ class OrderWebApi extends WebApi
         $this->validateRequest($post, ['order_id']);
 
         /**@var Order $order */
-        $order = Order::find()->where(['id' => $post['order_id'], 'service_id' => Registry::MC_BACKEND])->one();
+        $order = Order::find()
+            ->where(['id' => $post['order_id'], 'service_id' => [Registry::MC_BACKEND, Registry::VENDOR_DOC_MAIL_SERVICE_ID]])
+            ->one();
 
         if (empty($order)) {
             throw new BadRequestHttpException("order_not_found");

@@ -127,8 +127,11 @@ class GuideProductsSearch extends \yii\base\Model
                     "price_updated_at" => "cg.updated_at" 
                 ])
                 ->from(["gp" => $tblGP])
-        //LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
-                ->leftJoin([]);
+                ->leftJoin(['cbg' => $tblCBG], "gp.cbg_id = cbg.id")
+//LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = gp.cbg_id 
+//                            AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $clientId)))                
+                ->leftJoin()
+                ;
         
         
         if (isset($params['sort'])) {

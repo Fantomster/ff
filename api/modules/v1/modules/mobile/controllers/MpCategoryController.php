@@ -3,6 +3,7 @@
 namespace api\modules\v1\modules\mobile\controllers;
 
 use Yii;
+use yii\db\Expression;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\MpCategory;
@@ -74,12 +75,18 @@ class MpCategoryController extends ActiveController {
             return $dataProvider;
         }
 
-        if($params->language != null) {
-            $query->select('mp_category.id, mp_category.parent, mp_category.slug, mp_category.title,
-            mp_category.text, mp_category.description, mp_category.keywords, 
-            IFNULL(message.translation, mp_category.name) as name ');
+        if ($params->language != null) {
+            $query->select([
+                'mp_category.id',
+                'mp_category.parent',
+                'mp_category.slug',
+                'mp_category.title',
+                'mp_category.text',
+                'mp_category.description',
+                'mp_category.keywords',
+                new Expression('IFNULL(message.translation, mp_category.name) as name')]);
             $query->innerJoin('source_message', "source_message.category = 'app' and source_message.message = mp_category.name");
-            $query->innerJoin('message', 'message.id = source_message.id and message.language = "'.$params->language.'"');
+            $query->innerJoin('message', 'message.id = source_message.id and message.language = "' . $params->language . '"');
         }
 
         if($params->parent == 0)

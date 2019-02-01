@@ -116,14 +116,14 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $page = intdiv($last_row, $page_size) + 1;
         }
 
-        $waybill_data = iikoWaybillData::find()->where(['id' => ':w_id', [':w_id' => $number]])->one();
+        $waybill_data = iikoWaybillData::find()->where('id = :w_id', [':w_id' => $number])->one();
         $waybill_id = $waybill_data->waybill_id;
         $product_id = $waybill_data->product_id;
         $org_id = $waybill_data->org;
         $vat = $waybill_data->vat;
         $koef = $waybill_data->koef;
 
-        $product = iikoProduct::find()->where(['id' => ':w_id', [':w_id' => $product_rid]])->one();
+        $product = iikoProduct::find()->where('id = :w_id', [':w_id' => $product_rid])->one();
         $munit = $product->unit;
 
         $waybill_data->product_rid = $product_rid;
@@ -133,11 +133,11 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             throw new NotFoundHttpException(Yii::t('error', 'api.iiko.controllers.waybill.data.not.save', ['ru' => 'Сохранить позицию в приходной накладной IIKO не удалось.']));
         }
 
-        $kolvo_nesopost = iikoWaybillData::find()->where(['id' => ':w_wid', [':w_wid' => $waybill_id]])->andWhere(['product_rid' => null])->count();
+        $kolvo_nesopost = iikoWaybillData::find()->where('id = :w_wid', [':w_wid' => $waybill_id])->andWhere(['product_rid' => null])->count();
 
         $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
-        $waybill = iikoWaybill::find()->where(['id' => ':w_wid', [':w_wid' => $waybill_id]])->one();
+        $waybill = iikoWaybill::find()->where('id = :w_wid', [':w_wid' => $waybill_id])->one();
         $agent_uuid = $waybill->agent_uuid;
         $num_code = $waybill->num_code;
         $text_code = $waybill->text_code;
@@ -213,7 +213,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $koef_id = Yii::$app->request->post('editableKey');
         $querys = $massiv_post["querys"];
 
-        $waybill_data = iikoWaybillData::find()->where(['id' => ':w_id', [':w_id' => $koef_id]])->one();
+        $waybill_data = iikoWaybillData::find()->where('id = :w_id', [':w_id' => $koef_id])->one();
         $waybill_id = $waybill_data->waybill_id;
         $product_id = $waybill_data->product_id;
         $product_rid = $waybill_data->product_rid;
@@ -238,7 +238,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         if ($buttons == 'forever') {
             $existence = AllMaps::find()->where(['service_id' => Registry::IIKO_SERVICE_ID, 'org_id' => $org_id, 'product_id' => $product_id])->count();
             if ($existence == 0) {
-                $waybill = iikoWaybill::find()->where(['id' => ':w_wid', [':w_wid' => $waybill_id]])->one();
+                $waybill = iikoWaybill::find()->where('id = :w_wid', [':w_wid' => $waybill_id])->one();
                 $store = $waybill->store_id;
                 $position = new AllMaps();
                 $position->service_id = Registry::IIKO_SERVICE_ID;
@@ -596,7 +596,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             if ($model->store_id == 0) {
                 $model->store_id = null;
             }
-            $kolvo_nesopost = iikoWaybillData::find()->where(['id' => ':w_wid', [':w_wid' => $model->id]])->andWhere(['product_rid' => null])->count();
+            $kolvo_nesopost = iikoWaybillData::find()->where('id = :w_wid', [':w_wid' => $model->id])->andWhere(['product_rid' => null])->count();
             if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_id === null)) {
                 $shapka = 0;
             } else {
@@ -827,9 +827,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findModel($waybill_id);
 
         if ($vatf == 1) {
-            $iiko_waybill_datas = iikoWaybillData::find()->where(['waybill_id' => ':w_wid', [':w_wid' => $waybill_id]])->all();
+            $iiko_waybill_datas = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->all();
         } else {
-            $iiko_waybill_datas = iikoWaybillData::find()->where(['waybill_id' => ':w_wid', [':w_wid' => $waybill_id], 'vat' => $vatf])->all();
+            $iiko_waybill_datas = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->andWhere(['vat' => $vatf])->all();
         }
 
         if ($page != 'undefined') {
@@ -858,7 +858,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
                 $existence = AllMaps::find()->where(['service_id' => Registry::IIKO_SERVICE_ID, 'org_id' => $org_id, 'product_id' => $product_id])->count();
                 if ($existence == 0) {
-                    $waybill = iikoWaybill::find()->where(['id' => ':w_wid', [':w_wid' => $waybill_id]])->one();
+                    $waybill = iikoWaybill::find()->where('id = :w_wid', [':w_wid' => $waybill_id])->one();
                     $store = $waybill->store_id;
                     $position = new AllMaps();
                     $position->service_id = Registry::IIKO_SERVICE_ID;
@@ -1040,7 +1040,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $organizationID = (isset($parentId, $parentId->value) && strlen((int)$parentId->value) ==
             strlen($parentId->value) && $parentId->value > 0) ? $parentId->value : $orgId;
 
-        $result = iikoSelectedProduct::find()->where(['organization_id' => ':w_wid', [':w_wid' => $organizationID]])->count();
+        $result = iikoSelectedProduct::find()->where('organization_id = :w_wid', [':w_wid' => $organizationID])->count();
 
         return $result;
     }
@@ -1051,7 +1051,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $number = Yii::$app->request->post('number');
         $org_id = User::findOne(Yii::$app->user->id)->organization_id;
 
-        $product = iikoProduct::find()->where(['id' => ':w_id', [':w_id' => $product_rid]])->one();
+        $product = iikoProduct::find()->where('id = :w_id', [':w_id' => $product_rid])->one();
         $munit = $product->unit;
 
         $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);

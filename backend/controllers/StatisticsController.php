@@ -18,9 +18,9 @@ use common\components\AccessRule;
 use common\models\CatalogBaseGoods;
 
 /**
- * Description of StatisticsController
+ * Class StatisticsController
  *
- * @author sharaf
+ * @package backend\controllers
  */
 class StatisticsController extends Controller
 {
@@ -52,6 +52,10 @@ class StatisticsController extends Controller
         return $this->render('index');
     }
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function actionRegistered()
     {
         $userTable = User::tableName();
@@ -63,8 +67,6 @@ class StatisticsController extends Controller
 
         $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
         $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 00:00:00");
-        $day = $dt->format('w');
-        $date = $dt->format('Y-m-d');
 
         $clientTotalCount = Organization::find()
             ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
@@ -139,15 +141,9 @@ class StatisticsController extends Controller
 
         $todayArr = [$clientCountThisDay, $vendorCountThisDay];
 
-        $all = [];
         $clients = [];
         $vendors = [];
-        $weeks = [];
 
-        $start = $dt;
-        if (!$day) {
-            $day = 7;
-        }
         $end = $dtEnd->add(new \DateInterval('P1D'));
 
         $clientsByDay = (new Query())->select([
@@ -214,10 +210,13 @@ class StatisticsController extends Controller
         }
     }
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function actionOrders()
     {
         $orderTable = Order::tableName();
-        $userTable = User::tableName();
         $orgTable = Organization::tableName();
 
         $today = new \DateTime();
@@ -227,7 +226,6 @@ class StatisticsController extends Controller
         $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
         $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 00:00:00");
         $end = $dtEnd->add(new \DateInterval('P1D'));
-        $date = $dt->format('Y-m-d');
 
         $labelsTotal = [];
         $colorsTotal = [];
@@ -381,10 +379,13 @@ class StatisticsController extends Controller
         }
     }
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function actionTurnover()
     {
         $orderTable = Order::tableName();
-        $userTable = User::tableName();
         $orgTable = Organization::tableName();
 
         $today = new \DateTime();
@@ -482,6 +483,11 @@ class StatisticsController extends Controller
         }
     }
 
+    /**
+     * @return string
+     * @throws \Exception
+     * @throws \yii\db\Exception
+     */
     public function actionMisc()
     {
         $orderTable = Order::tableName();
@@ -497,7 +503,6 @@ class StatisticsController extends Controller
         $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
         $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 00:00:00");
         $end = $dtEnd->add(new \DateInterval('P1D'));
-        $date = $dt->format('Y-m-d');
 
         $totalClients = Organization::find()
             ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
@@ -696,6 +701,10 @@ class StatisticsController extends Controller
 
     }
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function actionDynamics()
     {
         $params = Yii::$app->request->getQueryParams();
@@ -711,9 +720,8 @@ class StatisticsController extends Controller
     }
 
     /**
-     * Lists all mercuryStatistic.
-     *
-     * @return mixed
+     * @return string
+     * @throws \Exception
      */
     public function actionMercury()
     {
@@ -724,6 +732,9 @@ class StatisticsController extends Controller
         return $this->render('mercury', compact('searchModel', 'dataProvider'));
     }
 
+    /**
+     * @return string
+     */
     public function actionMercActiveOrg()
     {
         $mercOrg = new OrgUseMercFrequently();

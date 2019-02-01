@@ -157,7 +157,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                         <h3 class="box-title"><?= Yii::t('message', 'frontend.views.vendor.history', ['ru' => 'История заказов']) ?></h3>
 
                         <div class="box-tools pull-right">
-                            <?= Html::a(Yii::t('message', 'frontend.views.vendor.history_two', ['ru' => 'История заказов']), ['order/index'], ['class' => 'btn btn-success btn-sm', 'data' => ['pjax' => 0]]) ?>
+                            <?= Html::a(Yii::t('message', 'frontend.views.vendor.history_two', ['ru' => 'История заказов']), ['order/index'], ['class' => 'btn btn-success btn-sm']) ?>
                             </button>
                         </div>
                     </div>

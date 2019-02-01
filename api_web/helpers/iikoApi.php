@@ -12,8 +12,6 @@ use api\common\models\iiko\iikoWaybill;
 use api_web\components\Registry;
 use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
 use common\models\IntegrationSettingValue;
-use common\models\OuterProductType;
-use common\models\OuterProductTypeSelected;
 use common\models\Waybill;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
@@ -173,25 +171,14 @@ class iikoApi
         $products = [];
         $categories = [];
         $units = [];
-        $result = self::xmlToArray($this->send('/products/', ['includeDeleted' => false]));
+        $result = self::xmlToArray($this->send('/products/'));
         if (!empty($result) && isset($result['productDto'])) {
-            //Получаем типы, которые отметил пользователь для загрузки
-            $types = OuterProductType::find()
-                ->alias('t')
-                ->select('value')
-                ->innerJoin(OuterProductTypeSelected::tableName() . " opts", 'opts.outer_product_type_id = t.id')
-                ->where([
-                    'service_id'    => Registry::IIKO_SERVICE_ID,
-                    'opts.org_id'   => $this->orgId,
-                    'opts.selected' => 1
-                ])->column();
-
             foreach ($result['productDto'] as $item) {
                 $id = $item['id'];
                 if (isset($item['productGroupType'])) {
                     $categories[$id] = $item;
                 } else {
-                    if (in_array($item['productType'], $types)) {
+                    if ($item['productType'] == 'GOODS') {
                         $products[$id] = $item;
                         $units[] = $item['mainUnit'];
                     }
@@ -283,7 +270,7 @@ class iikoApi
         if ($info['http_code'] != 200) {
             $logger->setType('error');
             $logger->response(['info' => $info, 'response' => $response]);
-            throw new \Exception(\Yii::t('api_web', "Server response:{code}|{text}", ['ru' => 'Код ответа сервера:{code}|{text}', 'code' => $info['http_code'], 'text' => curl_error($ch)]));
+            throw new \Exception(\Yii::t('api_web', "Server response:{code}|{text}", ['ru'=>'Код ответа сервера:{code}|{text}', 'code' => $info['http_code'], 'text' =>curl_error($ch)]));
         }
         $logger->response($response);
         return $response;
@@ -334,7 +321,7 @@ class iikoApi
         if ($info['http_code'] != 200) {
             $logger->setType('error');
             $logger->response(['info' => $info, 'response' => $response]);
-            throw new \Exception(\Yii::t('api_web', "Server response:{code}|{text}", ['ru' => 'Код ответа сервера:{code}|{text}', 'code' => $info['http_code'], 'text' => curl_error($ch)]));
+            throw new \Exception(\Yii::t('api_web', "Server response:{code}|{text}", ['ru'=>'Код ответа сервера:{code}|{text}', 'code' => $info['http_code'], 'text' =>curl_error($ch)]));
         }
 
         $response = '';
@@ -368,7 +355,7 @@ class iikoApi
         if ($info['http_code'] != 200) {
             $logger->setType('error');
             $logger->response(['info' => $info, 'response' => $response]);
-            throw new \Exception(\Yii::t('api_web', "Server response:{code}|{text}", ['ru' => 'Код ответа сервера:{code}|{text}', 'code' => $info['http_code'], 'text' => curl_error($ch)]));
+            throw new \Exception(\Yii::t('api_web', "Server response:{code}|{text}", ['ru'=>'Код ответа сервера:{code}|{text}', 'code' => $info['http_code'], 'text' =>curl_error($ch)]));
         }
 
         $logger->response($response);

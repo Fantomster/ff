@@ -196,7 +196,7 @@ class ServiceIiko extends AbstractSyncFactory
      */
     private function prepareErrorMessage($message, $api)
     {
-        if (mb_strtolower(str_replace(' ', '', $message)) == mb_strtolower('кодответасервера:0')) {
+        if (strpos($message, 'Код ответа сервера: 0') !== false) {
             $message = "Не удалось соединиться с сервером, проверьте настройки подключения к iiko";
         }
         if (strpos($message, '401') !== false) {

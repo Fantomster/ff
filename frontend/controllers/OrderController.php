@@ -2585,22 +2585,27 @@ class OrderController extends DefaultController
             \Yii::t('message', 'frontend.controllers.order.good', ['ru' => 'Наименование товара']),
             \Yii::t('message', 'frontend.controllers.order.mea', ['ru' => 'Ед изм']),
         ];
-        $report = $arOrgs = [];
+        $report = $arOrgs = $arOrgIndex = [];
+        foreach ($dbResult as $item) {
+            if (!isset($report[$item['product']])) {
+                $report[$item['product']] =
+                    [
+                        'product' => $item['product'],
+                        'unit'    => $item['unit'],
+                    ];
+                $report[$item['product']] = array_merge_recursive($report[$item['product']], array_fill(0, $item['count_org'], 0));
+            }
+        }
+        $i = 0;
         foreach ($dbResult as $item) {
             if (!empty($item['product'])) {
-                $arExcelHeader[$item['client_name'] . $item['id']] = $item['client_name'];
-                $arOrgs[$item['id']] = $item['parent_id'];
-                if (!isset($report[$item['product']])) {
-                    $report[$item['product']] =
-                        [
-                            'product' => $item['product'],
-                            'unit'    => $item['unit'],
-                        ];
-                    if (count($arExcelHeader) >= 3) {
-                        $report[$item['product']] = array_merge_recursive($report[$item['product']], array_fill(0, $item['count_org'], 0));
-                    }
+                if (!array_key_exists($item['client_name'] . $item['id'], $arExcelHeader)) {
+                    $arExcelHeader[$item['client_name'] . $item['id']] = $item['client_name'];
+                    $arOrgIndex[$item['id']] = $i;
+                    $i++;
                 }
-                $report[$item['product']][count($arExcelHeader) - 3] = $item['sum_quantity'];
+                $arOrgs[$item['id']] = $item['parent_id'];
+                $report[$item['product']][$arOrgIndex[$item['id']]] = $report[$item['product']][$arOrgIndex[$item['id']]] + $item['sum_quantity'];
             }
         }
         $objPHPExcel = new \PHPExcel();

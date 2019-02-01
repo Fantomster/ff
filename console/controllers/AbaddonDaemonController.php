@@ -40,6 +40,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
             \Yii::$app->db_api->close();
             \Yii::$app->db_api->open();
         }
+
         if (isset(\Yii::$app->db)) {
             \Yii::$app->db->close();
             \Yii::$app->db->open();
@@ -66,6 +67,7 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
         if (!empty($row['organization_id'])) {
             return $row['consumer_class_name'] . '_' . $row['organization_id'];
         }
+
         return $row['consumer_class_name'];
     }
 
@@ -88,11 +90,17 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
     protected function defineJobs()
     {
         sleep($this->sleep);
-        $res = (new Query())->select('*')->from(RabbitQueues::tableName())->all(\Yii::$app->db_api);
+        $res = (new Query())
+            ->select('*')
+            ->from(RabbitQueues::tableName())
+            ->all(\Yii::$app->db_api);
 
         foreach ($res as $row) {
             try {
-                $queue = \Yii::$app->get('rabbit')->setQueue($this->getQueueName($row))->checkQueueCount();
+                $queue = \Yii::$app->get('rabbit')
+                    ->setQueue($this->getQueueName($row))
+                    ->checkQueueCount();
+
                 $kill = $this->checkForKill($row, $queue);
                 $this->daemons[$row['consumer_class_name'] . $row['organization_id'] . $row['store_id']] = [
                     'className'     => 'ConsumerDaemonController',
@@ -110,13 +118,11 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
             }
         }
 
-//			Testing string
-//			$log = \Yii::getLogger();
-//			$log->log($kill, $log::LEVEL_ERROR, 'abaddon');
-
         if (!empty($this->daemons)) {
             foreach ($this->daemons as $daemon) {
-                \Yii::$app->controllerMap[$daemon['className']] = ['class' => 'console\modules\daemons\controllers\\' . $daemon['className']];
+                \Yii::$app->controllerMap[$daemon['className']] = [
+                    'class' => 'console\modules\daemons\controllers\\' . $daemon['className']
+                ];
             }
         }
 

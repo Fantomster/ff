@@ -4,7 +4,7 @@ namespace common\models\search;
 
 use common\models\CatalogGoodsBlocked;
 use Yii;
-use yii\data\SqlDataProvider;
+use yii\data\ActiveDataProvider;
 
 /**
  * Description of GuideProductsSearch
@@ -37,16 +37,14 @@ class GuideProductsSearch extends \yii\base\Model
      * @param integer $guideId
      * @param integer $clientId
      *
-     * @return SqlDataProvider
+     * @return ActiveDataProvider
      */
-    public function search(array $params, int $guideId, int $clientId): SqlDataProvider
+    public function search(array $params, int $guideId, int $clientId): ActiveDataProvider
     {
         $this->load($params);
         if (empty($this->searchString) || $this->searchString == '') {
             $this->searchString = $params['search_string'] ?? '';
         }
-
-        $searchString = "%$this->searchString%";
 
         $where = [];
 
@@ -110,6 +108,29 @@ class GuideProductsSearch extends \yii\base\Model
                 ) as c  group by c.id 
                 ";
 
+        $tblGP = \common\models\guides\GuideProduct::tableName();
+        $tblCBG = \common\models\CatalogBaseGoods::tableName();
+        
+        $subQueryCG = (new Query())
+                ->select([
+                    "id" => "gp.id", 
+                    "cbg_id" => "cbg.id", 
+                    "product" => "cbg.product", 
+                    "units" => "cbg.units", 
+                    "price" => "cg.price", 
+                    "cat_id" => "cg.cat_id", 
+                    "name" => "org.name", 
+                    "ed" => "cbg.ed", 
+                    "symbol" => "curr.symbol", 
+                    "note" => "cbg.note", 
+                    "updated_at" => "gp.updated_at", 
+                    "price_updated_at" => "cg.updated_at" 
+                ])
+                ->from(["gp" => $tblGP])
+        //LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
+                ->leftJoin([]);
+        
+        
         if (isset($params['sort'])) {
             $query .= " ORDER BY ";
             if ($params['sort'] == '') {

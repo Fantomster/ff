@@ -47,36 +47,6 @@ class GuideProductsSearch extends \yii\base\Model
         //Блокировка продуктов
         $blockedItems = CatalogGoodsBlocked::getBlockedList($clientId);
 
-//        $query = "
-//        SELECT DISTINCT * FROM (
-//            SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cg.price, cg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note, gp.updated_at as updated_at, cg.updated_at as price_updated_at
-//                FROM guide_product AS gp
-//                    LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
-//                    LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = gp.cbg_id 
-//                            AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $clientId)))
-//                LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
-//                LEFT JOIN catalog AS cat ON cg.cat_id = cat.id 
-//                JOIN currency curr ON cat.currency_id = curr.id 
-//                WHERE ($where gp.guide_id = $guideId)
-//                    AND (cbg.product LIKE :searchString) 
-//                AND (cbg.status = 1) 
-//                AND (cbg.deleted = 0)
-//                AND (cat.status = 1)
-//            UNION ALL
-//            (SELECT gp.id, cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note, gp.updated_at as updated_at, cbg.updated_at as price_updated_at
-//                FROM guide_product AS gp
-//                    LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
-//                    LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
-//                LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
-//                            AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $clientId)))
-//                JOIN currency curr ON cat.currency_id = curr.id 
-//                WHERE ($where gp.guide_id = $guideId)
-//                    AND (cbg.product LIKE :searchString) 
-//                AND (cbg.status = 1) 
-//                AND (cbg.deleted = 0) )
-//                ) as c  group by c.id 
-//                ";
-
         $tblGP = \common\models\guides\GuideProduct::tableName();
         $tblCBG = \common\models\CatalogBaseGoods::tableName();
         $tblCG = \common\models\CatalogGoods::tableName();
@@ -122,8 +92,8 @@ class GuideProductsSearch extends \yii\base\Model
                 ])
                 ->andFilterWhere(["like", "cbg.product", $this->searchString])
                 ->andFilterWhere(["cbg.supp_org_id" => $this->vendor_id])
-                ->andFilterWhere(['>=', 'cbg.price', $this->price_from])
-                ->andFilterWhere(['<=', 'cbg.price', $this->price_to]);
+                ->andFilterWhere(['>=', 'cg.price', $this->price_from])
+                ->andFilterWhere(['<=', 'cg.price', $this->price_to]);
         
         $subQueryCBG = (new Query())
                 ->select([
@@ -161,6 +131,7 @@ class GuideProductsSearch extends \yii\base\Model
         $query = (new Query())
                 ->from(["c" => $subQueryCG->union($subQueryCBG, true)])
                 ->distinct()
+                ->where(["not in", "c.cbg.id", $blockedItems])
                 ->groupBy(["c.id"]);
         
         if (isset($params['limit'])) {

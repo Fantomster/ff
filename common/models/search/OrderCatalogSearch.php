@@ -42,92 +42,101 @@ class OrderCatalogSearch extends \yii\base\Model
      */
     public function search($params)
     {
-
         $this->load($params);
 
-        $fieldsCG = [
-            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cg.price', 'cg.cat_id', 'cbg.category_id',
-            'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
-            "(cbg.article + 0) AS c_article_1",
-            "cbg.article AS c_article", "cbg.article REGEXP '^-?[0-9]+$' AS i",
-            "cbg.product REGEXP '^-?[а-яА-Я].*$' AS alf_cyr", 'coalesce( cg.updated_at, cbg.updated_at) AS updated_at',
-            'curr.id as currency_id', 'cbg.edi_supplier_article'
-        ];
+        $tblCBG   = \common\models\CatalogBaseGoods::tableName();
+        $tblCG    = \common\models\CatalogGoods::tableName();
+        $tblOrg   = \common\models\Organization::tableName();
+        $tblCat   = \common\models\Catalog::tableName();
+        $tblCurr  = \common\models\Currency::tableName();
+        $catalogs = explode(',', $this->catalogs);
+        $blockedList = CatalogGoodsBlocked::getBlockedList($this->client->id);
+        
+        $selectedVendor = ($this->selectedVendor == 0) ? null : $this->selectedVendor;
+            
+        $subQueryCG = (new Query())
+                ->select([
+                    "id"                   => "cbg.id",
+                    "product"              => "cbg.product",
+                    "supp_org_id"          => "cbg.supp_org_id",
+                    "units"                => "cbg.units",
+                    "price"                => "cg.price",
+                    "cat_id"               => "cg.cat_id",
+                    "category_id"          => "cbg.category_id",
+                    "article"              => "cbg.article",
+                    "note"                 => "cbg.note",
+                    "ed"                   => "cbg.ed",
+                    "symbol"               => "curr.symbol",
+                    "name"                 => "org.name",
+                    "c_article_1"          => new Expression("(cbg.article + 0)"),
+                    "c_article"            => "cbg.article",
+                    "i"                    => new Expression("cbg.article REGEXP '^-?[0-9]+$'"),
+                    "alf_cyr"              => new Expression("cbg.product REGEXP '^-?[а-яА-Я].*$'"),
+                    "updated_at"           => new Expression("coalesce(cg.updated_at, cbg.updated_at)"),
+                    "currency_id"          => "curr.id",
+                    "edi_supplier_article" => "cbg.edi_supplier_article"
+                ])
+                ->from(["cg" => $tblCG])
+                ->leftJoin(['cbg' => $tblCBG], "cg.base_goods_id = cbg.id")
+                ->leftJoin(["org" => $tblOrg], "cbg.supp_org_id = org.id")
+                ->leftJoin(["cat" => $tblCat], "cg.cat_id = cat.id")
+                ->leftJoin(["curr" => $tblCurr], "cat.currency_id = curr.id")
+                ->where([
+                    "and",
+                    ["cat.id" => $catalogs],
+                    ["cbg.status" => 1],
+                    ["cbg.deleted" => 0],
+                ])
+                ->andFilterWhere(["like", "cbg.product", $this->searchString])
+                ->andFilterWhere(["cbg.supp_org_id" => $selectedVendor])
+                ->andFilterWhere(['>=', 'cg.price', $this->searchPrice['from']])
+                ->andFilterWhere(['<=', 'cg.price', $this->searchPrice['to']]);
 
-        $fieldsCBG = [
-            'cbg.id', 'cbg.product', 'cbg.supp_org_id', 'cbg.units', 'cbg.price', 'cbg.cat_id', 'cbg.category_id',
-            'cbg.article', 'cbg.note', 'cbg.ed', 'curr.symbol', 'org.name',
-            "(cbg.article + 0) AS c_article_1",
-            "cbg.article AS c_article", "cbg.article REGEXP '^-?[0-9]+$' AS i",
-            "cbg.product REGEXP '^-?[а-яА-Я].*$' AS alf_cyr", 'cbg.updated_at',
-            'curr.id as currency_id', 'cbg.edi_supplier_article'
-        ];
+        $subQueryCBG = (new Query())
+                ->select([
+                    "id"                   => "cbg.id",
+                    "product"              => "cbg.product",
+                    "supp_org_id"          => "cbg.supp_org_id",
+                    "units"                => "cbg.units",
+                    "price"                => "cbg.price",
+                    "cat_id"               => "cbg.cat_id",
+                    "category_id"          => "cbg.category_id",
+                    "article"              => "cbg.article",
+                    "note"                 => "cbg.note",
+                    "ed"                   => "cbg.ed",
+                    "symbol"               => "curr.symbol",
+                    "name"                 => "org.name",
+                    "c_article_1"          => new Expression("(cbg.article + 0)"),
+                    "c_article"            => "cbg.article",
+                    "i"                    => new Expression("cbg.article REGEXP '^-?[0-9]+$'"),
+                    "alf_cyr"              => new Expression("cbg.product REGEXP '^-?[а-яА-Я].*$'"),
+                    "updated_at"           => "cbg.updated_at",
+                    "currency_id"          => "curr.id",
+                    "edi_supplier_article" => "cbg.edi_supplier_article"
+                ])
+                ->from(["cbg" => $tblCBG])
+                ->leftJoin(["org" => $tblOrg], "cbg.supp_org_id = org.id")
+                ->leftJoin(["cat" => $tblCat], "cbg.cat_id = cat.id")
+                ->leftJoin(["curr" => $tblCurr], "cat.currency_id = curr.id")
+                ->where([
+                    "and",
+                    ["cat.id" => $catalogs],
+                    ["cbg.status" => 1],
+                    ["cbg.deleted" => 0],
+                ])
+                ->andFilterWhere(["like", "cbg.product", $this->searchString])
+                ->andFilterWhere(["cbg.supp_org_id" => $selectedVendor])
+                ->andFilterWhere(['>=', 'cbg.price', $this->searchPrice['from']])
+                ->andFilterWhere(['<=', 'cbg.price', $this->searchPrice['to']]);
 
-        $where = '';
-        $where_all = '';
-        $params_sql = [];
-        if (!empty($this->searchString)) {
-            $where .= 'AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString)';
-            $params_sql[':searchString'] = "%" . $this->searchString . "%";
-        }
+        $query = (new Query())
+                ->from(["c" => $subQueryCG->union($subQueryCBG, true)])
+                ->distinct()
+                ->where(["not in", "c.id", $blockedList])
+                ->groupBy(["c.id"]);
 
-        if (!empty($this->selectedVendor)) {
-            if (is_array($this->selectedVendor)) {
-                foreach ($this->selectedVendor as $key => $supp_org_id) {
-                    $this->selectedVendor[$key] = (int)$supp_org_id;
-                }
-                $this->selectedVendor = implode(', ', $this->selectedVendor);
-            } else {
-                $this->selectedVendor = (int)$this->selectedVendor;
-            }
-            $where .= ' AND org.id IN (' . $this->selectedVendor . ') ';
-        }
-
-        if (!empty($this->searchPrice)) {
-            if (isset($this->searchPrice['from'])) {
-                $params_sql[':price_start'] = $this->searchPrice['from'];
-                $where_all .= ' AND price >= :price_start ';
-            }
-            if (isset($this->searchPrice['to'])) {
-                $params_sql[':price_end'] = $this->searchPrice['to'];
-                $where_all .= ' AND price <= :price_end ';
-            }
-        }
-
-        if ($this->product_block) {
-            $blockedList = CatalogGoodsBlocked::getBlockedList($this->client->id);
-            $blockedItems = empty($blockedList) ? '0' : implode(",", $blockedList);
-            $where_all .= ' AND id NOT IN (' . $blockedItems . ')';
-        }
-
-        $sql = "
-        SELECT DISTINCT * FROM (
-            SELECT 
-              " . implode(',', $fieldsCG) . "
-              FROM catalog_goods cg
-               LEFT JOIN catalog_base_goods cbg ON cg.base_goods_id = cbg.id
-               LEFT JOIN organization org ON cbg.supp_org_id = org.id
-               LEFT JOIN catalog cat ON cg.cat_id = cat.id
-               LEFT JOIN currency curr ON cat.currency_id = curr.id
-              WHERE 
-              cat.id IN (" . $this->catalogs . ")
-              " . $where . "
-              AND (cbg.status = 1 AND cbg.deleted = 0)
-            UNION ALL
-              SELECT 
-                  " . implode(',', $fieldsCBG) . "
-               FROM catalog_base_goods cbg
-                 LEFT JOIN organization org ON cbg.supp_org_id = org.id
-                 LEFT JOIN catalog cat ON cbg.cat_id = cat.id
-                 LEFT JOIN currency curr ON cat.currency_id = curr.id
-               WHERE
-               cat.id IN (" . $this->catalogs . ")
-               " . $where . "
-               AND (cbg.status = 1 AND cbg.deleted = 0)
-        ) AS c WHERE id != 0 " . $where_all . " GROUP BY c.id";
-        $dataProvider = new SqlDataProvider([
-            'sql'        => $sql,
-            'params'     => $params_sql,
+        $dataProvider = new ActiveDataProvider([
+            'query'      => $query,
             'pagination' => [
                 'page'     => isset($params['page']) ? ($params['page'] - 1) : 0,
                 'pageSize' => isset($params['pageSize']) ? $params['pageSize'] : null,

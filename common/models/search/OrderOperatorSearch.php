@@ -79,11 +79,13 @@ class OrderOperatorSearch extends Order
             $status = $params['OrderOperatorSearch']['status'];
         }
 
+        $tblOrder = Order::tableName();
+        
         $query = (new Query())->select([
-            'order.id as id',
-            'order.created_at',
-            'order.total_price',
-            'order.status',
+            "$tblOrder.id as id",
+            "$tblOrder.created_at",
+            "$tblOrder.total_price",
+            "$tblOrder.status",
             'client.id as client_id',
             'vendor.id as vendor_id',
             'client.name as client_title',
@@ -121,24 +123,24 @@ class OrderOperatorSearch extends Order
             'op.updated_at as operator_updated_at',
             'c.iso_code',
             'opvc.comment as vendor_comment'
-        ])->from(Order::tableName())
-            ->leftJoin(Organization::tableName() . ' as vendor', 'order.vendor_id = vendor.id')
-            ->leftJoin(Organization::tableName() . ' as client', 'order.client_id = client.id')
+        ])->from($tblOrder)
+            ->leftJoin(Organization::tableName() . ' as vendor', "$tblOrder.vendor_id = vendor.id")
+            ->leftJoin(Organization::tableName() . ' as client', "$tblOrder.client_id = client.id")
             ->leftJoin(OperatorCall::tableName() . ' as op', 'op.order_id = order.id')
-            ->leftJoin(OperatorVendorComment::tableName() . ' as opvc', 'opvc.vendor_id = order.vendor_id')
+            ->leftJoin(OperatorVendorComment::tableName() . ' as opvc', "opvc.vendor_id = $tblOrder.vendor_id")
             ->leftJoin(User::tableName() . ' as user', 'user.id = op.operator_id')
             ->leftJoin(Profile::tableName() . ' as profile', 'profile.user_id = user.id')
-            ->leftJoin(Currency::tableName() . ' as c', 'c.id = order.currency_id')
+            ->leftJoin(Currency::tableName() . ' as c', "c.id = $tblOrder.currency_id")
             ->where([
                 'OR',
-                'order.status in (' . Order::STATUS_DONE . ', ' . Order::STATUS_PROCESSING . ') AND op.status_call_id != 3',
+                "$tblOrder.status in (" . Order::STATUS_DONE . ', ' . Order::STATUS_PROCESSING . ') AND op.status_call_id != 3',
                 [
                     'AND',
                     ['in', 'order.status', $status],
                 ]
             ])
             ->andWhere('op.operator_id is null OR op.operator_id = :current_user', [':current_user' => $this->user_id])
-            ->andWhere("order.created_at > '2018-10-17 00:00:00'");
+            ->andWhere("$tblOrder.created_at > '2018-10-17 00:00:00'");
 
         $query->orderBy([
             'status_call_id' => SORT_DESC,
@@ -233,8 +235,8 @@ class OrderOperatorSearch extends Order
             $total_price = (float)$params['OrderOperatorSearch']['total_price'];
             $query->andWhere([
                 'or',
-                'order.total_price LIKE :total_price',
-                'order.total_price LIKE :total_price_',
+                "$tblOrder.total_price LIKE :total_price",
+                "$tblOrder.total_price LIKE :total_price_",
             ], [
                 ':total_price'  => $total_price,
                 ':total_price_' => $total_price . '%',
@@ -246,7 +248,7 @@ class OrderOperatorSearch extends Order
          */
         if (!empty($params['OrderOperatorSearch']['created_at'])) {
             $created_at = trim($params['OrderOperatorSearch']['created_at']);
-            $query->andWhere('CAST(order.created_at as DATE) = CAST(:created_at as DATE)', [
+            $query->andWhere("CAST($tblOrder.created_at as DATE) = CAST(:created_at as DATE)", [
                 ':created_at' => date('Y-m-d', strtotime($created_at))
             ]);
         }

@@ -6,8 +6,8 @@ use common\models\CatalogBaseGoods;
 use common\models\CatalogGoodsBlocked;
 use Yii;
 use yii\data\ActiveDataProvider;
-use yii\data\SqlDataProvider;
 use yii\db\Query;
+use yii\db\Expression;
 
 /**
  *  Model for order catalog search form
@@ -81,22 +81,6 @@ class OrderCatalogSearch extends \yii\base\Model
                 $this->selectedVendor = (int)$this->selectedVendor;
             }
             $where .= ' AND org.id IN (' . $this->selectedVendor . ') ';
-        }
-
-        if (!empty($this->searchCategory)) {
-            if (is_array($this->searchCategory)) {
-                foreach ($this->searchCategory as $key => $category_id) {
-                    $this->searchCategory[$key] = (int)$category_id;
-                }
-                $this->searchCategory = implode(', ', $this->searchCategory);
-            } else {
-                $this->searchCategory = (int)$this->searchCategory;
-            }
-            $where .= ' AND category_id IN (' . $this->searchCategory . ') ';
-        }
-
-        if ($this->searchCategory === 0) {
-            $where .= ' AND category_id IS NULL ';
         }
 
         if (!empty($this->searchPrice)) {

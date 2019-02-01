@@ -88,7 +88,7 @@ class SettingsController extends DefaultController
 
     public function actionAjaxDeleteAvatar()
     {
-        $profile = $this->currentUser->profile;
+        $profile         = $this->currentUser->profile;
         $profile->avatar = 'delete';
         if ($profile->save()) {
             return $profile->avatarUrl;
@@ -98,7 +98,13 @@ class SettingsController extends DefaultController
     public function actionNotifications()
     {
         $emailNotification = $this->currentUser->emailNotification;
-        $smsNotification = $this->currentUser->smsNotification;
+        $smsNotification   = $this->currentUser->smsNotification;
+
+        if (!\common\models\RelationUserOrganization::find()
+                        ->where(['organization_id' => $this->currentUser->organization_id, 'user_id' => $this->currentUser->id])
+                        ->exists()) {
+            throw new HttpException(403, 'Access denied');
+        }
 
         $user = $this->currentUser;
 
@@ -113,9 +119,9 @@ class SettingsController extends DefaultController
         if ($emailNotification->load(Yii::$app->request->post()) && $smsNotification->load(Yii::$app->request->post()) && $user->load(Yii::$app->request->post())) {
 
             $emailNotification->rel_user_org_id = $this->currentUser->relationUserOrganization->id;
-            $smsNotification->rel_user_org_id = $this->currentUser->relationUserOrganization->id;
-            $emailNotification->user_id = $this->currentUser->id;
-            $smsNotification->user_id = $this->currentUser->id;
+            $smsNotification->rel_user_org_id   = $this->currentUser->relationUserOrganization->id;
+            $emailNotification->user_id         = $this->currentUser->id;
+            $smsNotification->user_id           = $this->currentUser->id;
             if ($emailNotification->validate() && $smsNotification->validate() && $user->validate()) {
                 $emailNotification->save();
                 $smsNotification->save();
@@ -168,8 +174,8 @@ class SettingsController extends DefaultController
                 throw new \Exception('Ajax only');
             }
             if ($email = Yii::$app->request->post('email', null)) {
-                $model = new AdditionalEmail();
-                $model->email = $email;
+                $model                  = new AdditionalEmail();
+                $model->email           = $email;
                 $model->organization_id = $this->currentUser->organization->id;
                 if ($model->validate()) {
                     $model->save();
@@ -195,8 +201,8 @@ class SettingsController extends DefaultController
                 throw new \Exception('Ajax only');
             }
             if ($id = Yii::$app->request->post('id', null)) {
-                $model = AdditionalEmail::findOne(['id' => $id, 'confirmed' => true]);
-                $attribute = Yii::$app->request->post('attribute', null);
+                $model             = AdditionalEmail::findOne(['id' => $id, 'confirmed' => true]);
+                $attribute         = Yii::$app->request->post('attribute', null);
                 $model->$attribute = Yii::$app->request->post('value', 0);
                 if ($model->validate()) {
                     $model->save();

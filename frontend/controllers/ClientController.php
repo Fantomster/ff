@@ -195,7 +195,7 @@ class ClientController extends DefaultController
         $post = Yii::$app->request->post();
         if ($organization->load($post) && $organization->validate()) {
             $organization->address = $organization->formatted_address;
-            if (!$post['Organization']['is_allowed_for_franchisee']) {
+            if (isset($post['Organization']['is_allowed_for_franchisee']) && !$post['Organization']['is_allowed_for_franchisee']) {
                 User::updateAll(['organization_id' => null], [
                     'organization_id' => $organization->id,
                     'role_id'         => Role::getFranchiseeEditorRoles()

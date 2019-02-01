@@ -102,8 +102,8 @@ class OrderWebApi extends WebApi
         //Если сменили дату доставки
         if (!empty($post['actual_delivery'])) {
             if ($order->actual_delivery != $post['actual_delivery']) {
-                $additionalParams['actual_delivery']['old_value'] = $order->actual_delivery;
-                $additionalParams['actual_delivery']['value'] = $post['actual_delivery'];
+                $additionalParams['actual_delivery']['old_value'] = (new \DateTime($order->actual_delivery))->format('d.m.Y');
+                $additionalParams['actual_delivery']['value'] = (new \DateTime(trim($post['actual_delivery'])))->format('d.m.Y');
                 $additionalParams['actual_delivery']['name'] = Yii::t('app', 'Дата доставки');
                 $order->actual_delivery = $post['actual_delivery'];
             }

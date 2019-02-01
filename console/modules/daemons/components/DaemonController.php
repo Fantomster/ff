@@ -91,6 +91,19 @@ abstract class DaemonController extends Controller
      * @default 5sec
      */
     protected $sleep = 5;
+
+    /**
+     * How to use:
+     * console/config/main-local.php - add this code
+     * 'controllerMap'       => [
+     *     'abaddon-daemon' => [
+     *         'queuePrefix' => 'Merc',
+     *     ],
+     * ],
+     *
+     * @var null
+     */
+    public $queuePrefix = null;
     
     protected $pidDir = "@runtime/daemons/pids";
     protected $logDir = "@runtime/daemons/logs";

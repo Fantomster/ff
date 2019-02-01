@@ -21,6 +21,8 @@ use common\models\OuterAgentNameWaybill;
 use common\models\OuterCategory;
 use common\models\OuterDictionary;
 use common\models\OuterProduct;
+use common\models\OuterProductType;
+use common\models\OuterProductTypeSelected;
 use common\models\OuterStore;
 use common\models\OuterUnit;
 use yii\data\ActiveDataProvider;
@@ -93,7 +95,7 @@ class AbstractDictionary extends WebApi implements DictionaryInterface
                 'id'          => $model->id,
                 'name'        => $model->outerDic->name,
                 'title'       => \Yii::t('api_web', 'dictionary.' . $model->outerDic->name),
-                'count'       => $model->count ?? 0,
+                'count'       => $model->getCount(),
                 'status_id'   => $model->status_id ?? 0,
                 'status_text' => $model->statusText ?? $defaultStatusText,
                 'upload'      => in_array($model->outerDic->name, $dictionaryUpload),
@@ -170,10 +172,11 @@ class AbstractDictionary extends WebApi implements DictionaryInterface
     private function prepareProduct(OuterProduct $model)
     {
         return [
-            'id'        => (int)$model->id,
-            'name'      => $model->name,
-            'unit'      => !empty($model->outerUnit) ? $model->outerUnit->name : '',
-            'is_active' => (int)!$model->is_deleted
+            'id'           => (int)$model->id,
+            'name'         => $model->name,
+            'unit'         => !empty($model->outerUnit) ? $model->outerUnit->name : '',
+            'product_type' => !empty($model->outerProductType) ? $model->outerProductType->comment : '',
+            'is_active'    => (int)!$model->is_deleted
         ];
     }
 
@@ -665,6 +668,102 @@ class AbstractDictionary extends WebApi implements DictionaryInterface
         $model->selectedParent();
 
         return ['selected' => (bool)$model->selected];
+    }
+
+    /**
+     * Выбор типа продукта для загрузки
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     */
+    public function productTypeSetSelected($request): array
+    {
+        $outerProductType = OuterProductType::findOne([
+            'id'         => (int)$request['product_type_id'],
+            'service_id' => $this->service_id
+        ]);
+
+        if (empty($outerProductType)) {
+            throw new BadRequestHttpException('dictionary.product_type_not_found');
+        }
+
+        $orgId = $request['business_id'] ?? $this->user->organization->id;
+
+        if (!$this->user->isAllowOrganization($orgId)) {
+            throw new BadRequestHttpException('organization.access_denied');
+        }
+
+        $model = OuterProductTypeSelected::findOne([
+            'outer_product_type_id' => $outerProductType->id,
+            'org_id'                => $orgId
+        ]);
+
+        if (empty($model)) {
+            $model = new OuterProductTypeSelected();
+            $model->org_id = $orgId;
+            $model->outer_product_type_id = $outerProductType->id;
+        }
+
+        $model->selected = (int)$request['selected'] ?? 0;
+        if (!$model->save()) {
+            throw new ValidationException($model->getFirstErrors());
+        }
+
+        return ['selected' => (bool)$model->selected];
+    }
+
+    /**
+     * Список агентов
+     *
+     * @param $request
+     * @throws \Exception
+     * @return array
+     */
+    public function productTypeList($request)
+    {
+        $orgId = $this->user->organization->id;
+        if (isset($request['search'])) {
+            if (isset($request['search']['business_id']) && !empty($request['search']['business_id'])) {
+                $orgId = $request['search']['business_id'];
+            }
+        }
+
+        if (!$this->user->isAllowOrganization($orgId)) {
+            throw new BadRequestHttpException('organization.access_denied');
+        }
+
+        $search = OuterProductType::find()
+            ->select(['opt.*', 'opts.selected'])
+            ->alias('opt')
+            ->leftJoin(OuterProductTypeSelected::tableName() . ' opts', 'opt.id = opts.outer_product_type_id AND opts.org_id = :oid', [
+                ":oid" => $orgId
+            ])
+            ->where([
+                'opt.service_id' => $this->service_id
+            ])
+            ->asArray()
+            ->orderBy(['opt.id' => SORT_ASC]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $search
+        ]);
+
+        $result = [];
+        foreach ($dataProvider->models as $model) {
+            $result[] = [
+                'product_type_id' => (int)$model['id'],
+                'comment'         => $model['comment'],
+                'selected'        => (bool)$model['selected'],
+            ];
+        }
+
+        $return = [
+            'product_types' => empty($result) ? [] : $result
+        ];
+
+        return $return;
     }
 
     /**

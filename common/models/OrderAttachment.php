@@ -93,11 +93,12 @@ class OrderAttachment extends \yii\db\ActiveRecord
     public function getFile()
     {
         Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
-        header('Content-Disposition: inline; filename=' . $this->file);
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $this->file . '"');
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
-        flush();
         readfile($this->getRawUploadUrl('file'));
     }
 

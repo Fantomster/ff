@@ -80,6 +80,12 @@ class OrderOperatorSearch extends Order
         }
 
         $tblOrder = Order::tableName();
+        $tblOrg = Organization::tableName();
+        $tblUser = User::tableName();
+        $tblProf = Profile::tableName();
+        $tblOpC = OperatorCall::tableName();
+        $tblOpVC = OperatorVendorComment::tableName();
+        $tblCurr = Currency::tableName();
         
         $query = (new Query())->select([
             "$tblOrder.id as id",
@@ -99,7 +105,7 @@ class OrderOperatorSearch extends Order
                 WHEN vendor.legal_entity is null THEN vendor.name 
                 ELSE vendor.legal_entity 
               END) as vendor_name',
-            'REPLACE(CONCAT(
+            "REPLACE(CONCAT(
                   vendor.contact_name,
                   \' \',
                   vendor.phone,
@@ -108,35 +114,35 @@ class OrderOperatorSearch extends Order
                     SELECT
                       GROUP_CONCAT(\' \', pm.full_name, \' \', pm.phone)
                     FROM relation_user_organization m
-                      LEFT JOIN user um ON um.id = m.user_id
-                      LEFT JOIN profile pm ON pm.user_id = m.user_id
+                      LEFT JOIN $tblUser um ON um.id = m.user_id
+                      LEFT JOIN $tblProf pm ON pm.user_id = m.user_id
                     WHERE
                       m.organization_id = vendor.id
                       AND
                       um.status = 1
                   )
-              ), \' ,  \', \'\') AS vendor_contact',
+              ), \' ,  \', \'\') AS vendor_contact",
             'op.operator_id as operator',
-            'profile.full_name as operator_name',
+            "$tblProf.full_name as operator_name",
             'op.status_call_id',
             'op.comment',
             'op.updated_at as operator_updated_at',
             'c.iso_code',
             'opvc.comment as vendor_comment'
         ])->from($tblOrder)
-            ->leftJoin(Organization::tableName() . ' as vendor', "$tblOrder.vendor_id = vendor.id")
-            ->leftJoin(Organization::tableName() . ' as client', "$tblOrder.client_id = client.id")
-            ->leftJoin(OperatorCall::tableName() . ' as op', 'op.order_id = order.id')
-            ->leftJoin(OperatorVendorComment::tableName() . ' as opvc', "opvc.vendor_id = $tblOrder.vendor_id")
-            ->leftJoin(User::tableName() . ' as user', 'user.id = op.operator_id')
-            ->leftJoin(Profile::tableName() . ' as profile', 'profile.user_id = user.id')
-            ->leftJoin(Currency::tableName() . ' as c', "c.id = $tblOrder.currency_id")
+            ->leftJoin($tblOrg . ' as vendor', "$tblOrder.vendor_id = vendor.id")
+            ->leftJoin($tblOrg . ' as client', "$tblOrder.client_id = client.id")
+            ->leftJoin($tblOpC . ' as op', "op.order_id = $tblOrder.id")
+            ->leftJoin($tblOpVC . ' as opvc', "opvc.vendor_id = $tblOrder.vendor_id")
+            ->leftJoin($tblUser, "$tblUser.id = op.operator_id")
+            ->leftJoin($tblProf, "$tblProf.user_id = $tblUser.id")
+            ->leftJoin($tblCurr . ' as c', "c.id = $tblOrder.currency_id")
             ->where([
                 'OR',
                 "$tblOrder.status in (" . Order::STATUS_DONE . ', ' . Order::STATUS_PROCESSING . ') AND op.status_call_id != 3',
                 [
                     'AND',
-                    ['in', 'order.status', $status],
+                    ['in', "$tblOrder.status", $status],
                 ]
             ])
             ->andWhere('op.operator_id is null OR op.operator_id = :current_user', [':current_user' => $this->user_id])

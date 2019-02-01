@@ -11,34 +11,33 @@ use common\models\OrderContent;
 use frontend\modules\clientintegr\components\CreateWaybillByOrderInterface;
 use Yii;
 use frontend\controllers\ClientController;
-use yii\helpers\ArrayHelper;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use api_web\components\Registry;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "iiko_waybill".
  *
- * @property integer $id
- * @property string  $agent_uuid
- * @property integer $org
- * @property integer $order_id
- * @property string  $num_code
- * @property string  $text_code
- * @property integer $readytoexport
- * @property integer $status_id
- * @property integer $store_id
- * @property string  $note
- * @property integer $is_duedate
- * @property integer $active
- * @property integer $vat_included
- * @property string  $doc_date
- * @property string  $created_at
- * @property string  $exported_at
- * @property string  $updated_at
- * @property integer $payment_delay_date
- * @property integer $service_id
- * @property Order   $order;
- * 
+ * @property integer           $id
+ * @property string            $agent_uuid
+ * @property integer           $org
+ * @property integer           $order_id
+ * @property string            $num_code
+ * @property string            $text_code
+ * @property integer           $readytoexport
+ * @property integer           $status_id
+ * @property integer           $store_id
+ * @property string            $note
+ * @property integer           $is_duedate
+ * @property integer           $active
+ * @property integer           $vat_included
+ * @property string            $doc_date
+ * @property string            $created_at
+ * @property string            $exported_at
+ * @property string            $updated_at
+ * @property integer           $payment_delay_date
+ * @property integer           $service_id
+ * @property Order             $order;
  * @property iikoWaybillData[] $waybillData
  */
 class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInterface
@@ -118,6 +117,21 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             'updated_at'         => Yii::t('app', 'Updated At'),
             'payment_delay_date' => Yii::t('app', 'Дата отсрочки платежа'),
             'service_id'         => Yii::t('app', 'Идентификатор учётного сервиса'),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
         ];
     }
 
@@ -299,7 +313,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
     public static function createWaybill($order_id, $service_id = Registry::IIKO_SERVICE_ID, $auto = false)
     {
         $order_id = (int)$order_id; //переписать без raw запросов
-        
+
         $res = true;
 
         $order = \common\models\Order::findOne(['id' => $order_id]);
@@ -311,9 +325,9 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
 
         // Получаем список складов, чтобы понять сколько надо делать накладных
 
-        $allMapTableName = DBNameHelper::getApiName().'.'.AllMaps::tableName();
+        $allMapTableName = DBNameHelper::getApiName() . '.' . AllMaps::tableName();
         $orderContentTableName = OrderContent::tableName();
-        $client_id = self::getClientIDcondition($order->client_id, $allMapTableName.'.product_id');
+        $client_id = self::getClientIDcondition($order->client_id, $allMapTableName . '.product_id');
         $stories = OrderContent::find()
             ->select("$allMapTableName.store_rid")
             ->leftJoin($allMapTableName, "$orderContentTableName.product_id = $allMapTableName.product_id and $allMapTableName.service_id = $service_id AND 
@@ -401,7 +415,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 return false;
             }
         }
-        
+
         $api = iikoApi::getInstance();
 
         if ($api->auth()) {
@@ -417,7 +431,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                     } else {
                         \Yii::error('Waybill' . $model->id . 'has been exported');
                     }
-                    
+
                     $model->status_id = 2;
                     $model->save();
                     $transaction->commit();
@@ -437,21 +451,21 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         $dbName = DBNameHelper::getApiName();
 
         $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
-        $allmapTableName = $dbName . '.'.AllMaps::tableName();
+        $allmapTableName = $dbName . '.' . AllMaps::tableName();
 
         if ($waybillMode !== '0') {
             $client_id = self::getClientIDcondition($this->org, $dbName . '.all_map.product_id');
             if ($this->store_id === null) {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin($allmapTableName, OrderContent::tableName().".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ('$client_id')")
-                    ->andWhere($allmapTableName.'.store_rid is null')
+                    ->leftJoin($allmapTableName, OrderContent::tableName() . ".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ('$client_id')")
+                    ->andWhere($allmapTableName . '.store_rid is null')
                     ->all();
             } else {
                 $records = OrderContent::find()
                     ->where(['order_id' => $this->order_id])
-                    ->leftJoin($allmapTableName, OrderContent::tableName().".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ('$client_id')")
-                    ->andWhere($allmapTableName. '.store_rid =' . $this->store_id)
+                    ->leftJoin($allmapTableName, OrderContent::tableName() . ".product_id = $allmapTableName.product_id and $allmapTableName.service_id = $service_id and $allmapTableName.org_id in ('$client_id')")
+                    ->andWhere($allmapTableName . '.store_rid =' . $this->store_id)
                     ->all();
             }
         } else {
@@ -498,8 +512,6 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 $wdmodel->product_id = $record->product_id;
                 $wdmodel->org = iikoService::getMainOrg($this->org);
                 $wdmodel->koef = 1;
-                $wdmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
-                $wdmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
                 // New check mapping
                 $client_id = $this->org;
                 if ($wdmodel->org != $this->org) {
@@ -548,12 +560,12 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
     }
 
     /**
-     * 
      * @param iikoWaybill $contributorWaybill
      * @param iikoWaybill $recipientWaybill
      * @return iikoWaybill
      */
-    public static function moveContentToExistingWaybill($contributorWaybill, $recipientWaybill) {
+    public static function moveContentToExistingWaybill($contributorWaybill, $recipientWaybill)
+    {
         foreach ($contributorWaybill->waybillData as $position) {
             $position->waybill_id = $recipientWaybill->id;
             $position->save();
@@ -561,5 +573,5 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         $contributorWaybill->delete();
         return $recipientWaybill;
     }
-    
+
 }

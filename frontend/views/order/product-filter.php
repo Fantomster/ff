@@ -92,7 +92,7 @@ $this->registerJs('
                             ],
                         ]);
                         ?>
-                        <?= "fff".$selectedVendor ?>
+                        <?= $selectedVendor ?>
                         <?=
                         $form->field($searchModel, 'searchString', [
                             'addon' => [

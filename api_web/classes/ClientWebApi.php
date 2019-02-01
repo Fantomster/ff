@@ -4,16 +4,19 @@ namespace api_web\classes;
 
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
+use api_web\helpers\BaseHelper;
 use api_web\helpers\WebApiHelper;
-use common\models\AdditionalEmail;
-use common\models\notifications\EmailNotification;
-use common\models\notifications\SmsNotification;
-use common\models\Organization;
-use common\models\RelationUserOrganization;
-use common\models\Role;
-use common\models\search\UserSearch;
-use common\models\User;
-use common\models\vetis\VetisCountry;
+use common\models\{
+    AdditionalEmail,
+    notifications\EmailNotification,
+    notifications\SmsNotification,
+    Organization,
+    RelationUserOrganization,
+    Role,
+    search\UserSearch,
+    User,
+    vetis\VetisCountry
+};
 use yii\data\Pagination;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
@@ -26,6 +29,19 @@ use yii\web\BadRequestHttpException;
  */
 class ClientWebApi extends WebApi
 {
+    /**
+     * @var BaseHelper
+     */
+    private $helper;
+
+    /**
+     * ClientWebApi constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->helper = new BaseHelper();
+    }
 
     /**
      * Детальная информация о ресторане
@@ -56,6 +72,7 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
         //Поиск ресторана в системе
+        /**@var Organization $model */
         $model = Organization::find()->where(['id' => $this->user->organization->id, 'type_id' => Organization::TYPE_RESTAURANT])->one();
         if (empty($model)) {
             throw new BadRequestHttpException('client_not_found');
@@ -71,29 +88,7 @@ class ClientWebApi extends WebApi
                 }
             }
 
-            if (isset($post['about']) && $post['about'] !== null) {
-                $model->about = $post['about'];
-            }
-
-            if (isset($post['contact_name']) && $post['contact_name'] !== null) {
-                $model->contact_name = $post['contact_name'];
-            }
-
-            if (isset($post['phone']) && $post['phone'] !== null) {
-                $model->phone = $post['phone'];
-            }
-
-            if (isset($post['email']) && $post['email'] !== null) {
-                $model->email = $post['email'];
-            }
-
-            if (isset($post['name']) && $post['name'] !== null) {
-                $model->name = $post['name'];
-            }
-
-            if (isset($post['gmt']) && $post['gmt'] !== null) {
-                $model->gmt = $post['gmt'];
-            }
+            $this->helper->set($model, $post, ['about', 'contact_name', 'phone', 'email', 'name', 'gmt']);
 
             if (isset($post['is_allowed_for_franchisee']) && in_array($post['is_allowed_for_franchisee'], [0, 1, true, false])) {
                 $model->is_allowed_for_franchisee = (int)$post['is_allowed_for_franchisee'];
@@ -102,8 +97,9 @@ class ClientWebApi extends WebApi
             $strAddress = '';
 
             if (isset($post['address']) && $post['address'] !== null) {
+                $this->helper->set($model, $post['address'],
+                    ['country', 'locality', 'route', 'lat', 'lng', 'place_id']);
                 if (isset($post['address']['country']) && !empty($post['address']['country'])) {
-                    $model->country = $post['address']['country'];
                     $strAddress .= $post['address']['country'];
                 }
                 if (isset($post['address']['region']) && !empty($post['address']['region'])) {
@@ -111,32 +107,19 @@ class ClientWebApi extends WebApi
                     $strAddress .= ', ' . $post['address']['region'];
                 }
                 if (isset($post['address']['locality']) && !empty($post['address']['locality'])) {
-                    $model->locality = $post['address']['locality'];
                     $model->city = $post['address']['locality'];
                     $strAddress .= ', ' . $post['address']['locality'];
                 }
                 if (isset($post['address']['route']) && !empty($post['address']['route'])) {
-                    $model->route = $post['address']['route'];
                     $strAddress .= ', ' . $post['address']['route'];
                 }
                 if (isset($post['address']['house']) && !empty($post['address']['house'])) {
-                    $model->street_number = $post['address']['house'];
                     $strAddress .= ', ' . $post['address']['house'];
-                }
-                if (isset($post['address']['lat']) && !empty($post['address']['lat'])) {
-                    $model->lat = $post['address']['lat'];
-                }
-                if (isset($post['address']['lng']) && !empty($post['address']['lng'])) {
-                    $model->lng = $post['address']['lng'];
-                }
-                if (isset($post['address']['place_id']) && !empty($post['address']['place_id'])) {
-                    $model->place_id = $post['address']['place_id'];
                 }
                 unset($post['address']['lat']);
                 unset($post['address']['lng']);
                 unset($post['address']['place_id']);
-                $model->address = $strAddress;
-                $model->formatted_address = $model->address;
+                $model->formatted_address = $model->address = $strAddress;
             }
 
             if (!$model->validate($model->getDirtyAttributes()) || !$model->save()) {
@@ -686,9 +669,8 @@ class ClientWebApi extends WebApi
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $user = $this->userGet($post['id']);
-
             if ($user->id != $this->user->id) {
-                if ($this->user->role_id != Role::ROLE_RESTAURANT_MANAGER) {
+                if (!in_array($this->user->role_id, [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_ADMIN])) {
                     throw new BadRequestHttpException('user.employee.update.access_denied');
                 }
             }
@@ -737,7 +719,7 @@ class ClientWebApi extends WebApi
                 throw new ValidationException($user->profile->getFirstErrors());
             }
 
-            if (!$relation->validate() || !$relation->save()) {
+            if (!$relation->save()) {
                 throw new ValidationException($relation->getFirstErrors());
             }
 

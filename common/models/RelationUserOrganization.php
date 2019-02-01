@@ -165,7 +165,7 @@ class RelationUserOrganization extends \yii\db\ActiveRecord
 
             $smsNotification->save();
             if ($this->role_id == Role::ROLE_SUPPLIER_MANAGER) {
-                $userId = $this->id;
+                $userId = $this->user_id;
                 $organizationId = $this->organization_id;
                 $clients = \common\models\RelationSuppRest::findAll(['supp_org_id' => $organizationId]);
                 if ($clients) {

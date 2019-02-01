@@ -1577,9 +1577,9 @@ class OrderController extends DefaultController
             OrderStatus::STATUS_EDI_SENT_BY_VENDOR
         ];
         if ($user->organization->type_id == Organization::TYPE_SUPPLIER) {
-            $order = $this->findOrder([Order::tableName() . '.id' => $id, Order::tableName() . '.status' => $editableOrders], Yii::$app->user->can('manage'));
+            $order = $this->findOrder(['id' => $id, 'status' => $editableOrders], Yii::$app->user->can('manage'));
         } else {
-            $order = Order::findOne(['id' => $id, Order::tableName() . '.status' => $editableOrders]);
+            $order = Order::findOne(['id' => $id, 'status' => $editableOrders]);
         }
 
         if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
@@ -2839,7 +2839,6 @@ class OrderController extends DefaultController
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
-        $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
 
         $blockedItems = CatalogGoodsBlocked::getBlockedList($client->id);
         //Вывод по 10

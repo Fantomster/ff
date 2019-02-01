@@ -830,28 +830,29 @@ class Organization extends \yii\db\ActiveRecord
         $roleId = Yii::$app->getUser()->identity->role->id;
         $userId = Yii::$app->user->id;
 
+        $tblOrderChat = OrderChat::tableName();
+        $tblOrder = Order::tableName();
+        $tblMA = ManagerAssociate::tableName();
+        
+        $subQuery = (new Query())
+                ->select([new \yii\db\Expression("MIN($tblOrderChat.id) AS id"), "$tblOrderChat.order_id"])
+                ->from($tblOrderChat)
+                ->where(["$tblOrderChat.recipient_id" => $this->id, "$tblOrderChat.is_system" => 0, "$tblOrderChat.viewed" => 0])
+                ->groupBy("$tblOrderChat.order_id");
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
-            $sql = 'SELECT order_chat.*, ord.client_id AS vid, ma.manager_id FROM order_chat INNER JOIN '
-                . '(SELECT MIN(order_chat.id) AS id, order_chat.order_id FROM order_chat '
-                . 'WHERE (order_chat.recipient_id = ' . $this->id . ') '
-                . 'AND ((order_chat.is_system=0) '
-                . 'AND (order_chat.viewed=0)) '
-                . 'GROUP BY order_chat.order_id ) AS oc2 ON order_chat.id = oc2.id '
-                . 'LEFT JOIN ' . Order::tableName() . ' AS ord ON ord.id = order_chat.order_id '
-                . 'LEFT JOIN manager_associate AS ma ON ord.client_id = ma.organization_id '
-                . 'WHERE ma.manager_id = ' . $userId . ' '
-                . 'ORDER BY order_chat.created_at DESC';
+            $query = OrderChat::find()
+                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                    ->leftJoin(["ord" => $tblOrder], "ord.id = $tblOrderChat.order_id")
+                    ->leftJoin(["ma" => $tblMA], "ord.client_id = ma.organization_id")
+                    ->where(["ma.manager_id" => $userId])
+                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         } else {
-            $sql = 'SELECT order_chat.* FROM order_chat INNER JOIN '
-                . '(SELECT MIN(order_chat.id) AS id, order_chat.order_id FROM order_chat '
-                . 'WHERE (order_chat.recipient_id = ' . $this->id . ') '
-                . 'AND ((order_chat.is_system=0) '
-                . 'AND (order_chat.viewed=0)) '
-                . 'GROUP BY order_chat.order_id ) AS oc2 ON order_chat.id = oc2.id '
-                . 'ORDER BY order_chat.created_at DESC';
+            $query = OrderChat::find()
+                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         }
 
-        return OrderChat::findBySql($sql)->all();
+        return $query->all();
     }
 
     /**
@@ -861,27 +862,30 @@ class Organization extends \yii\db\ActiveRecord
     {
         $roleId = Yii::$app->getUser()->identity->role->id;
         $userId = Yii::$app->user->id;
+        
+        $tblOrderChat = OrderChat::tableName();
+        $tblOrder = Order::tableName();
+        $tblMA = ManagerAssociate::tableName();
+        
+        $subQuery = (new Query())
+                ->select([new \yii\db\Expression("MIN($tblOrderChat.id) AS id"), "$tblOrderChat.order_id"])
+                ->from($tblOrderChat)
+                ->where(["$tblOrderChat.recipient_id" => $this->id, "$tblOrderChat.is_system" => 1, "$tblOrderChat.viewed" => 0])
+                ->groupBy("$tblOrderChat.order_id");
+        
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
-            $sql = 'SELECT order_chat.*, ord.client_id AS vid, ma.manager_id FROM order_chat INNER JOIN '
-                . '(SELECT MIN(order_chat.id) AS id, order_chat.order_id FROM order_chat '
-                . 'WHERE (order_chat.recipient_id = ' . $this->id . ') '
-                . 'AND ((order_chat.is_system=1) '
-                . 'AND (order_chat.viewed=0)) '
-                . 'GROUP BY order_chat.order_id ) AS oc2 ON order_chat.id = oc2.id '
-                . 'LEFT JOIN ' . Order::tableName() . ' AS ord ON ord.id = order_chat.order_id '
-                . 'LEFT JOIN manager_associate AS ma ON ord.client_id = ma.organization_id '
-                . 'WHERE ma.manager_id = ' . $userId . ' '
-                . 'ORDER BY order_chat.created_at DESC';
+            $query = OrderChat::find()
+                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                    ->leftJoin(["ord" => $tblOrder], "ord.id = $tblOrderChat.order_id")
+                    ->leftJoin(["ma" => $tblMA], "ord.client_id = ma.organization_id")
+                    ->where(["ma.manager_id" => $userId])
+                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         } else {
-            $sql = 'SELECT order_chat.* FROM order_chat INNER JOIN '
-                . '(SELECT MIN(order_chat.id) AS id, order_chat.order_id FROM order_chat '
-                . 'WHERE (order_chat.recipient_id = ' . $this->id . ') '
-                . 'AND ((order_chat.is_system=1) '
-                . 'AND (order_chat.viewed=0)) '
-                . 'GROUP BY order_chat.order_id ) AS oc2 ON order_chat.id = oc2.id '
-                . 'ORDER BY order_chat.created_at DESC';
+            $query = OrderChat::find()
+                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         }
-        return OrderChat::findBySql($sql)->all();
+        return $query->all();
     }
 
     /**
@@ -999,7 +1003,7 @@ class Organization extends \yii\db\ActiveRecord
     public function getFranchisee()
     {
         return $this->hasOne(Franchisee::className(), ['id' => 'franchisee_id'])
-            ->viaTable('franchisee_associate', ['organization_id' => 'id']);
+            ->viaTable(FranchiseeAssociate::tableName(), ['organization_id' => 'id']);
     }
 
     /**
@@ -1007,11 +1011,15 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getFranchiseeManagerInfo()
     {
-        $sql = 'SELECT franchisee.* FROM organization 
-        JOIN franchisee_associate ON organization.id = franchisee_associate.organization_id
-        JOIN franchisee ON franchisee_associate.franchisee_id = franchisee.id 
-        WHERE organization.id = ' . $this->id;
-        return Franchisee::findBySql($sql)->one();
+        $tblFA = FranchiseeAssociate::tableName();
+        $tblFr = Franchisee::tableName();
+        $tblOrg = Organization::tableName();
+        
+        return Franchisee::find()
+                ->leftJoin($tblFA, "$tblFA.franchisee_id = $tblFr.id")
+                ->leftJoin($tblOrg, "$tblOrg.id = $tblFA.organization_id")
+                ->where(["$tblOrg.id" => $this->id])
+                ->one();
     }
 
     /**
@@ -1378,15 +1386,15 @@ class Organization extends \yii\db\ActiveRecord
             ],
             [
                 'label' => Yii::t('app', 'common.models.amount_vendor', ['ru' => 'Кол-во поставщиков']),
-                'value' => 'vendorCount',
+                'value' => 'vendor_count',
             ],
             [
                 'label' => Yii::t('app', 'common.models.orders_amount', ['ru' => 'Кол-во заказов']),
-                'value' => 'orderCount',
+                'value' => 'order_count',
             ],
             [
                 'label' => Yii::t('app', 'common.models.order_sum', ['ru' => 'Сумма заказов']),
-                'value' => 'orderSum',
+                'value' => 'order_sum',
             ],
             [
                 'label' => Yii::t('app', 'common.models.reg_date', ['ru' => 'Дата регистрации']),

@@ -114,7 +114,7 @@ class OrganizationController extends DefaultController {
             $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");
         }
 
-        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, $this->currentUser);
         $exportFilename = 'clients_' . date("Y-m-d_H-m-s");
         $exportColumns = (new Organization())->getClientsExportColumns();
 
@@ -369,10 +369,10 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionAgent() {
-        $searchModel = new \common\models\OrganizationSearch();
+        $searchModel = new \franchise\models\AgentOrganizationSearch();
         $params = Yii::$app->request->getQueryParams();
         if(\Yii::$app->request->get('searchString')){
-            $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+            $searchModel['searchString'] = trim(\Yii::$app->request->get('searchString'));
         }
 
         $today = new \DateTime();
@@ -380,10 +380,7 @@ class OrganizationController extends DefaultController {
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
 
-        if (Yii::$app->request->post("ClientSearch")) {
-            $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");
-        }
-        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+        $dataProvider = $searchModel->search($params, $this->currentUser->id);
 
         $exportFilename = 'clients_' . date("Y-m-d_H-m-s");
         $exportColumns = (new Organization())->getClientsExportColumns();
@@ -580,11 +577,8 @@ class OrganizationController extends DefaultController {
             $organization->refresh();
         }
 
-        $searchModel = ($type=='vendor') ? new \franchise\models\ClientSearch() : new \franchise\models\VendorSearch();
+        $searchModel = new \franchise\models\AssociatedOrganizationsSearch();
         $params = Yii::$app->request->getQueryParams();
-        $today = new \DateTime();
-        $searchModel->date_to = $today->format('d.m.Y');
-        $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
 
         $currencyData = Currency::getCurrencyData(\Yii::$app->request->get('filter_currency'), $this->currentFranchisee->id, $type.'_id', $searchModel->date_from, $searchModel->date_to);
         if(count($currencyData['currency_list'])){
@@ -595,8 +589,8 @@ class OrganizationController extends DefaultController {
             $searchModel['filter_currency'] = $searchModel->filter_currency = trim(\Yii::$app->request->get('filter_currency'));
         }
 
-        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, $id);
-        $model = Organization::get_value($id);
+        $model = Organization::findOne(['id' => $id]);
+        $dataProvider = $searchModel->search($params, $model, $this->currentUser);
         $managersDataProvider = $model->getOrganizationManagersDataProvider();
 
         if(isset($organization->franchiseeAssociate->franchisee_id) && $organization->franchiseeAssociate->franchisee_id == $this->currentFranchisee->id){

@@ -2,39 +2,42 @@
 
 namespace franchise\models;
 
-use common\models\Order;
-use common\models\Role;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Organization;
+use common\models\Order;
+use yii\db\Query;
+use yii\db\Expression;
 
 /**
- * Description of VendorSearch
+ * Description of AgentOrganizationSearch
  *
  * @author sharaf
  */
-class VendorSearch extends Organization {
+class AgentOrganizationSearch extends Organization
+{
 
     public $searchString;
     public $date_from;
     public $date_to;
-    public $filter_currency;
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['id', 'type_id'], 'integer'],
-            [['name', 'clientCount', 'orderCount', 'orderSum', 'created_at', 'contact_name', 'phone', 'date_from', 'date_to', 'searchString'], 'safe'],
+            [['name', 'vendorCount', 'orderCount', 'orderSum', 'created_at', 'contact_name', 'phone', 'date_from', 'date_to', 'searchString'], 'safe'],
         ];
     }
 
     /**
      * @inheritdoc
      */
-    public function scenarios() {
+    public function scenarios()
+    {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
@@ -44,14 +47,13 @@ class VendorSearch extends Organization {
      *
      * @param array $params
      *
-     * @return SqlDataProvider
+     * @return ActiveDataProvider
      */
-    public function search($params, $franchiseeId, $user) {
+    public function search($params, $userId)
+    {
         $this->load($params);
 
-        $searchString = "%{$this->searchString}%";
-        $filter_date_from = strtotime($this->date_from);
-        $filter_date_to = strtotime($this->date_to);
+        //$searchString = "%$this->searchString%";
 
         $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
         if ($from) {
@@ -62,7 +64,7 @@ class VendorSearch extends Organization {
             $to->add(new \DateInterval('P1D'));
             $t2_f = $to->format('Y-m-d');
         }
-        
+
         $tblRSR   = \common\models\RelationSuppRest::tableName();
         $tblOrder = Order::tableName();
         $tblOrg   = Organization::tableName();
@@ -75,72 +77,68 @@ class VendorSearch extends Organization {
             Order::STATUS_DONE,
         ];
 
-        $subQueryClientCount = (new Query())
+        $subQueryVendorCount = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblRSR)
-                ->where(["supp_org_id" => "org.id"]);
+                ->where(["rest_org_id" => "org.id"]);
 
-        $subQueryClientCountPrev30 = (new Query())
+        $subQueryVendorCountPrev30 = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblRSR)
                 ->where([
-                    "supp_org_id" => "org.id",
+                    "rest_org_id" => "org.id",
                     "deleted"     => 0,
                 ])
                 ->andWhere([
-                    "between",
-                    "created_at",
-                    new Expression("CURDATE() - INTERVAL 30 DAY"),
-                    new Expression("CURDATE() + INTERVAL 1 DAY"),
-                ]);
+            "between",
+            "created_at",
+            new Expression("CURDATE() - INTERVAL 30 DAY"),
+            new Expression("CURDATE() + INTERVAL 1 DAY"),
+        ]);
 
         $subQueryOrderCount = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblOrder)
                 ->where([
-                    "vendor_id" => "org.id",
-                    "status"    => $orderStatuses,
-                ]);
+            "client_id" => "org.id",
+            "status"    => $orderStatuses,
+        ]);
 
         $subQueryOrderCountPrev30 = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblOrder)
                 ->where([
-                    "vendor_id" => "org.id",
+                    "client_id" => "org.id",
                     "status"    => $orderStatuses,
                 ])
                 ->andWhere([
-                    "between",
-                    "created_at",
-                    new Expression("CURDATE() - INTERVAL 30 DAY"),
-                    new Expression("CURDATE() + INTERVAL 1 DAY"),
-                ]);
+            "between",
+            "created_at",
+            new Expression("CURDATE() - INTERVAL 30 DAY"),
+            new Expression("CURDATE() + INTERVAL 1 DAY"),
+        ]);
 
         $subQueryOrderSum = (new Query())
                 ->select([new Expression("SUM(total_price)")])
                 ->from($tblOrder)
                 ->where([
-                    "vendor_id" => "org.id",
-                    "status"    => $orderStatuses,
-                ])->andFilterWhere([
-                    "currency_id" => $this->filter_currency
-                ]);
+            "client_id" => "org.id",
+            "status"    => $orderStatuses,
+        ]);
 
         $subQueryOrderSumPrev30 = (new Query())
                 ->select([new Expression("SUM(total_price)")])
                 ->from($tblOrder)
                 ->where([
-                    "vendor_id" => "org.id",
+                    "client_id" => "org.id",
                     "status"    => $orderStatuses,
                 ])
                 ->andWhere([
-                    "between",
-                    "created_at",
-                    new Expression("CURDATE() - INTERVAL 30 DAY"),
-                    new Expression("CURDATE() + INTERVAL 1 DAY"),
-                ])->andFilterWhere([
-                    "currency_id" => $this->filter_currency
-                ]);
+            "between",
+            "created_at",
+            new Expression("CURDATE() - INTERVAL 30 DAY"),
+            new Expression("CURDATE() + INTERVAL 1 DAY"),
+        ]);
 
         $query = (new Query())
                 ->select([
@@ -148,8 +146,8 @@ class VendorSearch extends Organization {
                     "self_registered"         => "self_registered",
                     "id"                      => "org.id",
                     "name"                    => "org.name",
-                    "client_count"            => $subQueryClientCount,
-                    "client_count_prev30"     => $subQueryClientCountPrev30,
+                    "vendor_count"            => $subQueryVendorCount,
+                    "vendor_count_prev30"     => $subQueryVendorCountPrev30,
                     "order_count"             => $subQueryOrderCount,
                     "order_count_prev30"      => $subQueryOrderCountPrev30,
                     "order_sum"               => $subQueryOrderSum,
@@ -162,8 +160,7 @@ class VendorSearch extends Organization {
                 ->leftJoin(['fa' => $tblFA], "org.id = fa.organization_id")
                 ->where([
                     "and",
-                    ["fa.franchisee_id" => $franchiseeId],
-                    ["org.type_id" => Organization::TYPE_SUPPLIER],
+                    ["fa.agent_id" => $userId],
                     [
                         "between",
                         "org.created_at",
@@ -177,22 +174,6 @@ class VendorSearch extends Organization {
             ["like", "org.contact_name", $this->searchString],
             ["like", "org.phone", $this->searchString],
         ]);
-
-        if ($user->role_id == Role::ROLE_FRANCHISEE_LEADER) {
-            $subQueryManagerIds = (new Query())
-                ->select(["manager_id"])
-                ->from(\common\models\RelationManagerLeader::tableName())
-                ->where(["leader_id" => $user->id]);
-            $query->andWhere([
-                "or",
-                ["org.manager_id" => $user->id],
-                ["org.manager_id" => $subQueryManagerIds],
-            ]);
-        }
-        
-        if ($user->role_id == Role::ROLE_FRANCHISEE_MANAGER){
-            $query->andWhere(["org.manager_id" => $user->id]);
-        }
 
         $dataProvider = new \yii\data\ActiveDataProvider([
             'query'      => $query,
@@ -215,7 +196,8 @@ class VendorSearch extends Organization {
                 ]
             ],
         ]);
-        
+
         return $dataProvider;
     }
+
 }

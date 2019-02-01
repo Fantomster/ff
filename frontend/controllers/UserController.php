@@ -20,7 +20,6 @@ use yii\web\Response;
 use yii\widgets\ActiveForm;
 use common\models\User;
 use common\models\Role;
-use common\models\Profile;
 use common\models\Organization;
 use yii\filters\AccessControl;
 

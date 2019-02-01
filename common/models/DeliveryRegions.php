@@ -94,7 +94,7 @@ class DeliveryRegions extends \yii\db\ActiveRecord
         $supplierRegions = (new \yii\db\Query())
                 ->select(['d1.supplier_id'])
                 ->from("$tblDR as d1")
-                ->leftJoin("$tblDR as d2", "d1.supplier_id = d2.supplier_id and d1.exception != d2.exception")
+                ->leftJoin(["d2" => "$tblDR"], "d1.supplier_id = d2.supplier_id and d1.exception != d2.exception")
                 ->where(['d1.locality' => $city])
                 ->orWhere(['and', 
                     ['d1.administrative_area_level_1' => $region], 

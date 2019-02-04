@@ -58,8 +58,31 @@ $this->registerJs($js);
         ?>
     </div>
 
-    <?php
+    <div>
+        <?php
+        echo \kartik\grid\GridView::widget([
+            'dataProvider' => $totalOperatorsDataProvider,
+            'filterModel'  => $searchModel,
+            'options'      => ['style' => 'table-layout:fixed;'],
+            'columns'      => [
+                [
+                    'attribute' => 'operator_name',
+                    'label'     => 'Оператор'
+                ],
+                [
+                    'attribute' => 'cnt_order',
+                    'label'     => 'Кол-во заказов в статусе заказа'
+                ],
+                [
+                    'attribute' => 'cnt_order_changed',
+                    'label'     => 'Кол-во заказов отредактированных поставщиком'
+                ],
+            ]
+        ]);
+        ?>
+    </div>
 
+    <?php
     echo \kartik\grid\GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel'  => $searchModel,

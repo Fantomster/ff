@@ -10,6 +10,7 @@ use common\models\Organization;
 use common\models\Profile;
 use common\models\User;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 use yii\db\Query;
 
 class OperatorReportSearch extends Order
@@ -27,7 +28,7 @@ class OperatorReportSearch extends Order
      * @param $params
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params, $isTotal = false)
     {
         /**
          * Фильтр по дате заказа
@@ -39,23 +40,39 @@ class OperatorReportSearch extends Order
         } else {
             $timeCondition = "a.created_at between now() - interval 7 day and now()";
         }
-        $query = (new Query())->select(["
-            count(a.order_id) cnt_order, 
-            count(distinct d.order_id) cnt_order_changed,
-            coalesce(c.username, c.email) operator_name,
-            DATE_FORMAT(a.created_at, '%Y-%m-%d') dt,
-            count(distinct b.vendor_id) cnt_vendor, 
-            case b.status
-                when 1 then 'Ожидает подтверждения поставщика'
-                when 3 then 'Выполняется'
-                when 4 then 'Завершен'
-                when 5 then 'Отклонен поставщиком'
-                when 6 then 'Отменен'
-                else b.status
-            end status,
-            status_call_id,
-            round(avg(TIME_TO_SEC(TIMEDIFF(a.closed_at, a.created_at))) / 60, 2) avg_resolve_mins"
-        ])
+
+        $select = [
+            'cnt_order'         => 'count(a.order_id)',
+            'cnt_order_changed' => 'count(distinct d.order_id)',
+            'operator_name'     => 'coalesce(c.username, c.email)',
+            'dt'                => "DATE_FORMAT(a.created_at, '%Y-%m-%d')",
+            'cnt_vendor'        => 'count(distinct b.vendor_id)',
+            'status'            => new Expression("case b.status
+                        when 1 then 'Ожидает подтверждения поставщика'
+                        when 3 then 'Выполняется'
+                        when 4 then 'Завершен'
+                        when 5 then 'Отклонен поставщиком'
+                        when 6 then 'Отменен'
+                        else b.status
+                    end"),
+            'status_call_id'    => 'status_call_id',
+            'avg_resolve_mins'  => 'round(avg(TIME_TO_SEC(TIMEDIFF(a.closed_at, a.created_at))) / 60, 2)',
+        ];
+
+        if ($isTotal) {
+            $groupBy = [
+                "c.email"
+            ];
+        } else {
+            $groupBy = [
+                "c.email",
+                "dt",
+                "status",
+                "status_call_id"
+            ];
+        }
+
+        $query = (new Query())->select($select)
             ->from(Order::tableName() . " b")
             ->leftJoin(OperatorCall::tableName() . ' as a', 'a.order_id = b.id')
             ->leftJoin(User::tableName() . ' as c', 'c.id = a.operator_id')
@@ -67,7 +84,7 @@ class OperatorReportSearch extends Order
                                 and a.operator_id = c.id
                                 and $timeCondition
                                 and b.status in (3, 4)")
-            ->groupBy("c.email, dt, status, status_call_id")
+            ->groupBy($groupBy)
             ->orderBy("a.created_at, email, status");
 
         $dataProvider = new ActiveDataProvider([

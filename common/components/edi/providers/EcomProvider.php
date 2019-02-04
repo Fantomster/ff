@@ -9,8 +9,10 @@
 namespace common\components\edi\providers;
 
 use common\components\edi\AbstractProvider;
+use common\components\edi\EDIClass;
 use common\components\edi\ProviderInterface;
 use common\models\EdiOrder;
+use common\models\Journal;
 use common\models\OrderContent;
 use yii\base\Exception;
 use Yii;
@@ -119,11 +121,14 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
         $currentDate = date("Ymdhis");
         $fileName = $done ? 'recadv_' : 'order_';
         $this->remoteFile = $fileName . $currentDate . '_' . $order->id . '.xml';
-
         $obj = $this->client->sendDoc(['user' => ['login' => $this->login, 'pass' => $this->pass], 'fileName' => $this->remoteFile, 'content' => $string]);
         if (isset($obj) && isset($obj->result->errorCode) && $obj->result->errorCode == 0) {
+            //$journalMessage = Yii::t("app", 'По заказу {order} отправлен файл {file}', ['order' => $order->id, 'file' => $this->remoteFile]);
+            //EDIClass::writeEdiDataToJournal($this->orgID, $journalMessage);
             return true;
         } else {
+            $journalMessage = Yii::t("app", 'Ecom вернул код ошибки ') . $obj->result->errorCode;
+            EDIClass::writeEdiDataToJournal($this->orgID, $journalMessage, 'error');
             Yii::error("Ecom returns error code");
             return false;
         }

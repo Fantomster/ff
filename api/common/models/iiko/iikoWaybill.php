@@ -158,14 +158,6 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         return parent::beforeSave($insert);
     }
 
-    /*public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
-        if ($insert) {
-            $this->createWaybillData($this->service_id);
-        }
-    }*/
-
     /**
      * @return \yii\db\ActiveQuery
      */

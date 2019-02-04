@@ -133,8 +133,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             throw new NotFoundHttpException(Yii::t('error', 'api.iiko.controllers.waybill.data.not.save', ['ru' => 'Сохранить позицию в приходной накладной IIKO не удалось.']));
         }
 
-        $kolvo_nesopost = iikoWaybillData::find()->where('id = :w_wid', [':w_wid' => $waybill_id])->andWhere(['product_rid' => null])->count();
-
+        $kolvo_nesopost = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->andWhere(['product_rid' => null])->count();
         $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
         $waybill = iikoWaybill::find()->where('id = :w_wid', [':w_wid' => $waybill_id])->one();
@@ -180,7 +179,6 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $position->koef = $koef;
                 $position->vat = $vat;
                 $position->is_active = 1;
-                $daughters = FullmapController::actionAddProductFromMain($org_id, $product_id);
             } else {
                 $position = AllMaps::find()->where(['service_id' => Registry::IIKO_SERVICE_ID, 'org_id' => $org_id, 'product_id' => $product_id])->one();
                 $position->serviceproduct_id = $product_rid;
@@ -190,6 +188,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             if (!$position->save()) {
                 throw new NotFoundHttpException(Yii::t('error', 'api.allmaps.position.not.save', ['ru' => 'Сохранить позицию в глобальном сопоставлении не удалось.']));
             }
+                $daughters = FullmapController::actionAddProductFromMain($org_id, $product_id);
         }
         return $munit;
     }
@@ -596,7 +595,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             if ($model->store_id == 0) {
                 $model->store_id = null;
             }
-            $kolvo_nesopost = iikoWaybillData::find()->where('id = :w_wid', [':w_wid' => $model->id])->andWhere(['product_rid' => null])->count();
+            $kolvo_nesopost = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $model->id])->andWhere(['product_rid' => null])->count();
             if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_id === null)) {
                 $shapka = 0;
             } else {
@@ -660,9 +659,38 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $model->service_id = Registry::IIKO_SERVICE_ID;
 
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-                $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');//date('d.m.Y', strtotime($model->doc_date));
+                $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');
                 $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
-                $model->save();
+                if (!$model->save()) {
+                    throw new NotFoundHttpException(Yii::t('error', 'api.iiko.controllers.waybill.not.save', ['ru' => 'Сохранить приходную накладную IIKO не удалось.']));
+                } else {
+                    $model->createWaybillData();
+                }
+                $kolvo_nesopost = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $model->id])->andWhere(['product_rid' => null])->count();
+                if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_id === null)) {
+                    $shapka = 0;
+                } else {
+                    $shapka = 1;
+                }
+                if ($kolvo_nesopost == 0) {
+                    if ($shapka == 1) {
+                        $model->readytoexport = 1;
+                        $model->status_id = 4;
+                    } else {
+                        $model->readytoexport = 0;
+                        $model->status_id = 1;
+                    }
+                } else {
+                    if ($shapka == 1) {
+                        $model->readytoexport = 0;
+                        $model->status_id = 1;
+                    } else {
+                        $model->readytoexport = 0;
+                    }
+                }
+                if (!$model->save()) {
+                    throw new NotFoundHttpException(Yii::t('error', 'api.iiko.controllers.waybill.not.save', ['ru' => 'Сохранить приходную накладную IIKO не удалось.']));
+                }
                 return $this->redirect(['/clientintegr/iiko/waybill/index', 'page' => $page, 'way' => $model->order_id]);
             } else {
                 return $this->render('create', [

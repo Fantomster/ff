@@ -158,14 +158,6 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         return parent::beforeSave($insert);
     }
 
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
-        if ($insert) {
-            $this->createWaybillData($this->service_id);
-        }
-    }
-
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -313,7 +305,6 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
     public static function createWaybill($order_id, $service_id = Registry::IIKO_SERVICE_ID, $auto = false)
     {
         $order_id = (int)$order_id; //переписать без raw запросов
-
         $res = true;
 
         $order = \common\models\Order::findOne(['id' => $order_id]);
@@ -323,7 +314,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             throw new \Exception('Ошибка при отправке.' . $order_id);
         }
 
-        // Получаем список складов, чтобы понять сколько надо делать накладных
+        // Получаем список складов, чтобы понять, сколько надо делать накладных
 
         $allMapTableName = DBNameHelper::getApiName() . '.' . AllMaps::tableName();
         $orderContentTableName = OrderContent::tableName();
@@ -362,8 +353,35 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
             if (!$model->save()) {
                 $num++;
                 $res = false;
-                \yii::error('Error during saving auto waybill' . print_r($model->getErrors(), true));
+                throw new NotFoundHttpException(Yii::t('error', 'api.iiko.controllers.waybill.not.save', ['ru' => 'Сохранить приходную накладную IIKO не удалось.']));
                 continue;
+            } else {
+                $model->createWaybillData();
+                $kolvo_nesopost = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $model->id])->andWhere(['product_rid' => null])->count();
+                if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_id === null)) {
+                    $shapka = 0;
+                } else {
+                    $shapka = 1;
+                }
+                if ($kolvo_nesopost == 0) {
+                    if ($shapka == 1) {
+                        $model->readytoexport = 1;
+                        $model->status_id = 4;
+                    } else {
+                        $model->readytoexport = 0;
+                        $model->status_id = 1;
+                    }
+                } else {
+                    if ($shapka == 1) {
+                        $model->readytoexport = 0;
+                        $model->status_id = 1;
+                    } else {
+                        $model->readytoexport = 0;
+                    }
+                }
+                if (!$model->save()) {
+                    throw new NotFoundHttpException(Yii::t('error', 'api.iiko.controllers.waybill.not.save', ['ru' => 'Сохранить приходную накладную IIKO не удалось.']));
+                }
             }
 
             $num++;
@@ -446,12 +464,12 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         return $res;
     }
 
-    protected function createWaybillData($service_id = Registry::IIKO_SERVICE_ID)
+    public function createWaybillData($service_id = Registry::IIKO_SERVICE_ID)
     {
         $dbName = DBNameHelper::getApiName();
-
         $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
         $allmapTableName = $dbName . '.' . AllMaps::tableName();
+        $client_id = $this->org;
 
         if ($waybillMode !== '0') {
             $client_id = self::getClientIDcondition($this->org, $dbName . '.all_map.product_id');
@@ -479,7 +497,6 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 ->select('product_id')
                 ->where("service_id = " . $service_id . " and org_id = $client_id")
                 ->asArray()->all();
-
             $maps = [];
             foreach ($res as $key => $value) {
                 $maps[] = $value['product_id'];

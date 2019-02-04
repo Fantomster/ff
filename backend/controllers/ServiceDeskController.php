@@ -147,9 +147,10 @@ class ServiceDeskController extends Controller
         $searchModel->load($params);
         $filterValues['date_from'] = $params['date_from'] ?? ((new \DateTime('-7 day'))->format('d-m-Y'));
         $filterValues['date_to'] = $params['date_to'] ?? ((new \DateTime())->format('d-m-Y'));
+        $totalOperatorsDataProvider = $searchModel->search($params, true);
         $dataProvider = $searchModel->search($params);
 
-        return $this->render('operator', ['dataProvider' => $dataProvider, 'searchModel' => $searchModel, 'filterValues' => $filterValues]);
+        return $this->render('operator', ['dataProvider' => $dataProvider, 'totalOperatorsDataProvider' => $totalOperatorsDataProvider, 'searchModel' => $searchModel, 'filterValues' => $filterValues]);
     }
 
     /**

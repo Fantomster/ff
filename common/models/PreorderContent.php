@@ -3,19 +3,19 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "{{%preorder_content}}".
  *
- * @property int $id
- * @property int $preorder_id id предзаказа из таблицы preorder
- * @property int $product_id id предзаказа из таблицы preorder
- * @property string $plan_quantity планируемое для заказа количество
- * @property string $created_at Дата и время создания записи в таблице
- * @property string $updated_at Дата и время последнего изменения записи в таблице
- *
+ * @property int              $id
+ * @property int              $preorder_id   id предзаказа из таблицы preorder
+ * @property int              $product_id    id предзаказа из таблицы preorder
+ * @property string           $plan_quantity планируемое для заказа количество
+ * @property string           $created_at    Дата и время создания записи в таблице
+ * @property string           $updated_at    Дата и время последнего изменения записи в таблице
  * @property CatalogBaseGoods $product
- * @property Preorder $preorder
+ * @property Preorder         $preorder
  */
 class PreorderContent extends \yii\db\ActiveRecord
 {
@@ -25,6 +25,21 @@ class PreorderContent extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return '{{%preorder_content}}';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
     }
 
     /**
@@ -47,12 +62,12 @@ class PreorderContent extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'preorder_id' => 'Preorder ID',
-            'product_id' => 'Product ID',
+            'id'            => 'ID',
+            'preorder_id'   => 'Preorder ID',
+            'product_id'    => 'Product ID',
             'plan_quantity' => 'Plan Quantity',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
+            'created_at'    => 'Created At',
+            'updated_at'    => 'Updated At',
         ];
     }
 

@@ -14,10 +14,10 @@ class m190204_110216_create_preorder_content_table extends Migration
     {
         $tableOptions = 'ENGINE=InnoDB';
         $this->createTable('{{%preorder_content}}', [
-            'id' => $this->primaryKey(),
-            'preorder_id' => $this->integer(11)->comment('id предзаказа из таблицы preorder'),
-            'product_id' => $this->integer(11)->comment('id предзаказа из таблицы preorder'),
-            'plan_quantity' => $this->decimal(20,3)->comment('планируемое для заказа количество'),
+            'id'            => $this->primaryKey(),
+            'preorder_id'   => $this->integer(11)->comment('id предзаказа из таблицы preorder'),
+            'product_id'    => $this->integer(11)->comment('id предзаказа из таблицы preorder'),
+            'plan_quantity' => $this->decimal(20, 3)->comment('планируемое для заказа количество'),
             'created_at'    => $this->timestamp()->null()->defaultValue(null)->comment('Дата и время создания записи в таблице'),
             'updated_at'    => $this->timestamp()->null()->defaultValue(null)->comment('Дата и время последнего изменения записи в таблице'),
         ], $tableOptions);

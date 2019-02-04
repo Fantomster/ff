@@ -14,7 +14,6 @@ class m190204_111407_add_preorder_id_column_to_order_table extends Migration
     {
         $this->addColumn('order', 'preorder_id', $this->integer(11)->comment('id предзаказа в таблице preorder'));
 
-
         // add foreign key for table `preorder`
         $this->addForeignKey(
             'fk-order_preorder-preorder_id',

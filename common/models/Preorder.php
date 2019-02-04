@@ -3,20 +3,20 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "{{%preorder}}".
  *
- * @property int $id Идентификатор записи в таблице
- * @property int $organization_id id организации, которая сделала предзаказ
- * @property int $user_id id пользователя, который создал предзаказ
- * @property int $is_active активен ли данный предзаказ
- * @property string $created_at Дата и время создания записи в таблице
- * @property string $updated_at Дата и время последнего изменения записи в таблице
- *
- * @property Order[] $orders
- * @property Organization $organization
- * @property User $user
+ * @property int               $id              Идентификатор записи в таблице
+ * @property int               $organization_id id организации, которая сделала предзаказ
+ * @property int               $user_id         id пользователя, который создал предзаказ
+ * @property int               $is_active       активен ли данный предзаказ
+ * @property string            $created_at      Дата и время создания записи в таблице
+ * @property string            $updated_at      Дата и время последнего изменения записи в таблице
+ * @property Order[]           $orders
+ * @property Organization      $organization
+ * @property User              $user
  * @property PreorderContent[] $preorderContents
  */
 class Preorder extends \yii\db\ActiveRecord
@@ -27,6 +27,21 @@ class Preorder extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return '{{%preorder}}';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
     }
 
     /**
@@ -48,12 +63,12 @@ class Preorder extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id'              => 'ID',
             'organization_id' => 'Organization ID',
-            'user_id' => 'User ID',
-            'is_active' => 'Is Active',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
+            'user_id'         => 'User ID',
+            'is_active'       => 'Is Active',
+            'created_at'      => 'Created At',
+            'updated_at'      => 'Updated At',
         ];
     }
 

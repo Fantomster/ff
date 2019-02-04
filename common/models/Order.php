@@ -79,6 +79,7 @@ class Order extends \yii\db\ActiveRecord
     const STATUS_EDI_ACCEPTANCE_FINISHED = 9;
     const STATUS_EDI_SENDING_TO_VENDOR = 10;
     const STATUS_EDI_SENDING_ERROR = 11;
+    const STATUS_PREORDER = 12;
     const DISCOUNT_NO_DISCOUNT = null;
     const DISCOUNT_FIXED = 1;
     const DISCOUNT_PERCENT = 2;

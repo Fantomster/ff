@@ -47,6 +47,7 @@ use yii\web\BadRequestHttpException;
  * @property string             $edi_doc_date       Дата накладной заказа по EDI
  * @property int                $is_recadv_sent     Показатель состояния отправки файла recadv (0 - не отправлен, 1 -
  *           отправлен)
+ * @property int                $preorder_id
  *
  * @property EmailQueue[]       $emailQueues
  * @property User               $acceptedBy

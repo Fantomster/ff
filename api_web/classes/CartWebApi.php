@@ -213,7 +213,7 @@ class CartWebApi extends \api_web\components\WebApi
                     if (isset($orders) && empty($orders[$vendor->id])) {
                         continue;
                     }
-                    if ($this->createOrder($cart, $vendor, $orders[$vendor->id])) {
+                    if ($this->createOrder($cart, $vendor, $orders[$vendor->id], OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
                         $result['success'] += 1;
                     }
                 }
@@ -233,11 +233,13 @@ class CartWebApi extends \api_web\components\WebApi
      * @param Cart  $cart
      * @param       $vendor
      * @param array $post ['id', 'delivery_date', 'comment']
-     * @return bool
+     * @param int   $orderStatus
+     * @param int   $preOrderId
+     * @return bool|mixed
      * @throws \Exception
      * @throws \Throwable
      */
-    private function createOrder(Cart $cart, Organization $vendor, array $post)
+    public function createOrder(Cart $cart, Organization $vendor, array $post, int $orderStatus, int $preOrderId = null)
     {
         $client = $this->user->organization;
         $transaction = \Yii::$app->db->beginTransaction();
@@ -247,16 +249,19 @@ class CartWebApi extends \api_web\components\WebApi
             $order->client_id = $client->id;
             $order->created_by_id = $this->user->id;
             $order->vendor_id = $vendor->id;
-            $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+            $order->status = $orderStatus;
             $order->currency_id = ($cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->one())->currency_id;
             $order->service_id = 9;
+            if ($preOrderId) {
+                $order->preorder_id = $preOrderId;
+            }
 
-            if (!empty($post['delivery_date'])) {
+            if (!empty($post['delivery_date']) && ($orderStatus === OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
                 $d = str_replace('.', '-', $post['delivery_date']);
                 $order->requested_delivery = date('Y-m-d H:i:s', strtotime($d . ' 19:00:00'));
             }
 
-            if (!empty($post['comment'])) {
+            if (!empty($post['comment']) && ($orderStatus === OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
                 $order->comment = $post['comment'];
             }
 
@@ -298,7 +303,7 @@ class CartWebApi extends \api_web\components\WebApi
             $transaction->rollBack();
             throw $e;
         }
-        if ($orderCreated) {
+        if ($orderCreated && $orderStatus === OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR) {
             //Емайл и смс о новом заказе
             Notice::init('Order')->sendEmailAndSmsOrderCreated($client, $order);
             try {
@@ -310,6 +315,8 @@ class CartWebApi extends \api_web\components\WebApi
                 \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
             }
             return true;
+        } else {
+            return $contents;
         }
         return false;
     }

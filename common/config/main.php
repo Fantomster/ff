@@ -14,6 +14,10 @@ return [
     'timeZone'       => 'Asia/Baghdad',
     'charset'        => 'utf-8',
     'components'     => [
+        'authManager'           => [
+            'class'        => 'yii\rbac\DbManager',
+            'defaultRoles' => ['guest'],
+        ],
         'formatter'             => [
             'decimalSeparator'  => '.',
             'thousandSeparator' => '',
@@ -72,39 +76,43 @@ return [
         ],
         'i18n'                  => [
             'translations' => [
-                'kvexport'    => [
+                'kvexport'     => [
                     'class' => 'yii\i18n\PhpMessageSource'
                 ],
 //                'user' => [
 //                    'class' => 'yii\i18n\PhpMessageSource'
 //                ],
-                'backend'     => [
+                'backend'      => [
                     'class' => 'yii\i18n\PhpMessageSource'
                 ],
 //                'prequest' => [
 //                    'class' => 'yii\i18n\PhpMessageSource'
 //                ],
-                'yii'         => [
+                'yii'          => [
                     'class' => 'yii\i18n\PhpMessageSource'
                 ],
-                'app'         => [
-                    'class'                 => 'yii\i18n\DbMessageSource',
-                    //'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
-                ],
-                'message'     => [
-                    'class'                 => 'yii\i18n\DbMessageSource',
-                    //'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
-                ],
-                'sms_message' => [
-                    'class'                 => 'yii\i18n\DbMessageSource',
-                    //'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
-                ],
-                'error'       => [
-                    'class'                 => 'yii\i18n\DbMessageSource',
-                    //'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
-                ],
-                'api_web'     => [
+                'app'          => [
                     'class' => 'yii\i18n\DbMessageSource',
+                    //'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
+                ],
+                'message'      => [
+                    'class' => 'yii\i18n\DbMessageSource',
+                    //'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
+                ],
+                'sms_message'  => [
+                    'class' => 'yii\i18n\DbMessageSource',
+                    //'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
+                ],
+                'error'        => [
+                    'class' => 'yii\i18n\DbMessageSource',
+                    //'on missingTranslation' => ['common\components\TranslationEventHandler', 'handleMissingTranslation']
+                ],
+                'api_web'      => [
+                    'class' => 'yii\i18n\DbMessageSource',
+                ],
+                'yii2mod.rbac' => [
+                    'class'    => 'yii\i18n\PhpMessageSource',
+                    'basePath' => '@yii2mod/rbac/messages',
                 ],
             ],
         ],

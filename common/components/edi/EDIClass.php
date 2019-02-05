@@ -4,7 +4,9 @@ namespace common\components\edi;
 
 use api_web\components\notice_class\OrderNotice;
 use api_web\components\Registry;
+use common\models\AllService;
 use common\models\edi\EdiFilesQueue;
+use common\models\Journal;
 use common\models\OuterUnit;
 use common\models\RelationUserOrganization;
 use common\models\Role;
@@ -281,6 +283,7 @@ class EDIClass extends Component
             $action = ($isDesadv) ? " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
             $systemMessage = $order->vendor->name . '' . $action;
             OrderController::sendSystemMessage($user, $order->id, $systemMessage);
+            self::writeEdiDataToJournal($order->client_id, Yii::t('app', 'По заказу {order} получен файл {file}', ['order' => $order->id, 'file' => $this->fileName]), 'success', $user->id);
             return true;
         } catch (Exception $e) {
             if ($isLeraData) {
@@ -498,6 +501,10 @@ class EDIClass extends Component
         }
 
         $glnArray = $client->getGlnCodes($client->id, $vendor->id);
+        if (!$glnArray) {
+            Yii::error('Empty GLN');
+            return false;
+        }
         $string = $controller->renderPartial($done ? '@common/views/e_com/order_done' : '@common/views/e_com/create_order', compact('order', 'glnArray', 'dateArray', 'orderContent'));
         return $string;
     }
@@ -525,5 +532,19 @@ class EDIClass extends Component
             'AMOUNTWITHVAT'      => isset($position->AMOUNTWITHVAT) ? $position->AMOUNTWITHVAT : null,
         ];
         return $arr;
+    }
+
+    public static function writeEdiDataToJournal($organizationID, $response = null, $type = 'success', $userID = null)
+    {
+        $userID = $userID ?? Yii::$app->user->id ?? null;
+        $organizationID = $organizationID ?? Yii::$app->user->identity->organization_id ?? null;
+        $journal = new Journal();
+        $journal->user_id = $userID;
+        $journal->organization_id = $organizationID;
+        $journal->service_id = Registry::EDI_SERVICE_ID;
+        $journal->response = $response;
+        $journal->type = $type;
+        $journal->operation_code = '0';
+        $journal->save();
     }
 }

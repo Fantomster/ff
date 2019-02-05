@@ -14,7 +14,10 @@ use api_web\ {
 };
 use common\models\ {
     Order,
-    Preorder
+    Preorder,
+    Cart,
+    Organization,
+    PreorderContent
 };
 use yii\web\BadRequestHttpException;
 
@@ -25,16 +28,79 @@ use yii\web\BadRequestHttpException;
  */
 class PreorderWebApi extends WebApi
 {
+    /**
+     * @param array $vendors
+     * @param Cart  $cart
+     * @return Preorder
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \Throwable
+     */
+    private function createPreorder(array $vendors, Cart $cart)
+    {
+        $preOrder = new Preorder();
+        $preOrder->organization_id = $this->user->organization->id;
+        $preOrder->user_id = $this->user->id;
+        $preOrder->is_active = 1;
+        if (!$preOrder->save(true)) {
+            throw new ValidationException($preOrder->getFirstErrors());
+        }
+        $cartWebApi = new CartWebApi();
+        $noCommentAndDate = [];
+        $preOrderId = $preOrder->id;
+        foreach ($vendors as $index => $vendor) {
+            $contents = $cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->all();
+            if (empty($contents)) {
+                throw new BadRequestHttpException('preorder.no_vendor_product_in_cart');
+            }
+            if ($cartWebApi->createOrder($cart, $vendor, $noCommentAndDate, Order::STATUS_PREORDER, $preOrderId)) {
+                foreach ($contents as $key => $item) {
+                    $preOrderContent = new PreorderContent();
+                    $preOrderContent->preorder_id = $preOrderId;
+                    $preOrderContent->product_id = $item->product_id;
+                    $preOrderContent->plan_quantity = $item->quantity;
+                    if (!$preOrderContent->save(true)) {
+                        throw new ValidationException($preOrderContent->getFirstErrors());
+                    }
+                }
+            }
+        }
+        return $preOrder;
+    }
 
     /**
      * Создание предзаказа из корзины
      *
      * @param $post
      * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \Throwable
      */
     public function create($post)
     {
-        return ['STATUS_PREORDER' => Order::STATUS_PREORDER];
+        $cart = Cart::findOne(['organization_id' => $this->user->organization->id]);
+        if (empty($cart)) {
+            throw new BadRequestHttpException('preorder.cart_was_not_found');
+        }
+        if (!empty($post['vendor_id']) && ($post['vendor_id'] !== 0)) {
+            $myVendors = $this->user->organization->getSuppliers();
+            if (!isset($myVendors[$post['vendor_id']])) {
+                throw new BadRequestHttpException('preorder.not_your_vendor');;
+            }
+            $vendor = Organization::findOne(['id' => $post['vendor_id'], 'type_id' => Organization::TYPE_SUPPLIER]);
+            if (empty($vendor)) {
+                throw new BadRequestHttpException('preorder.vendor_id_not_found');
+            }
+            $vendors[] = $vendor;
+        } else {
+            $vendors = $cart->getVendors();
+            if (empty($vendors)) {
+                throw new BadRequestHttpException('preorder.cart_empty');
+            }
+        }
+        $preOrder = $this->createPreorder($vendors, $cart);
+        return $this->prepareModel($preOrder);
     }
 
     /**

@@ -168,7 +168,7 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             $model->decision = VetDocumentDone::PARTIALLY;
         }
 
-        //try {
+        try {
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $api = mercuryApi::getInstance();
 
@@ -203,13 +203,14 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
             }
             return $this->redirect(['view', 'uuid' => $uuid]);
         }
-        /* } catch (\Error $e) {
+
+         } catch (\Error $e) {
              Yii::$app->session->setFlash('error', $this->getErrorText($e));
              return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
          } catch (\Exception $e) {
              Yii::$app->session->setFlash('error', $this->getErrorText($e));
              return $this->goBack((!empty(Yii::$app->request->referrer) ? Yii::$app->request->referrer : ['index']));
-         }*/
+         }
 
         try {
             $document = new getVetDocumentByUUID();

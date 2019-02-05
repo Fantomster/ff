@@ -14,6 +14,7 @@ use frontend\controllers\ClientController;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use api_web\components\Registry;
 use yii\behaviors\TimestampBehavior;
+use yii\web\NotFoundHttpException;
 
 /**
  * This is the model class for table "iiko_waybill".

@@ -4,6 +4,7 @@ namespace api\common\models\one_s;
 
 use common\models\CatalogBaseGoods;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "one_s_waybill_data".
@@ -102,6 +103,21 @@ class OneSWaybillData extends \yii\db\ActiveRecord
             'koef_forever' => Yii::t('app', ''),
             'querys' => Yii::t('app', ''),
             'unload_status' => Yii::t('app', 'Статус для отправления'),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
         ];
     }
 

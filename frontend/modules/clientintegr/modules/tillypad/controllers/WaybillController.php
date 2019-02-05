@@ -20,6 +20,8 @@ use api\common\models\iikoWaybillDataSearch;
 use common\models\search\OrderSearch2;
 use common\components\SearchOrdersComponent;
 use api_web\components\Registry;
+use yii\web\NotFoundHttpException;
+use api\common\models\iiko\iikoWaybillData;
 
 class WaybillController extends \frontend\modules\clientintegr\modules\iiko\controllers\WaybillController
 {
@@ -254,8 +256,8 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
             $organization->id, $this->currentUser->organization_id, $wbStatuses, ['pageSize' => 20],
             ['defaultOrder' => ['id' => SORT_DESC]]);
         $lisences = $organization->getLicenseList();
-        if (isset($lisences['iiko']) && $lisences['iiko']) {
-            $lisences = $lisences['iiko'];
+        if (isset($lisences['tillypad']) && $lisences['tillypad']) {
+            $lisences = $lisences['tillypad'];
             $view = 'index';
         } else {
             $view = '/default/_nolic';
@@ -344,7 +346,7 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
     public function actionUpdate($id, $page)
     {
         $model = $this->findModel($id);
-        $lic = iikoService::getLicense();
+        $lic = TillypadService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
 
@@ -387,7 +389,7 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
             if (!$model->save()) {
                 throw new NotFoundHttpException(Yii::t('error', 'api.tillypad.controllers.waybill.not.save', ['ru' => 'Сохранить приходную накладную Tillypad не удалось.']));
             }
-            return $this->redirect(['/clientintegr/iiko/waybill/index', 'way' => $model->order_id, 'page' => $page]);
+            return $this->redirect(['/clientintegr/tillypad/waybill/index', 'way' => $model->order_id, 'page' => $page]);
 
         } else {
             return $this->render($vi, [
@@ -409,58 +411,51 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
             throw new NotFoundHttpException(Yii::t('error', 'api.controllers.order.not.find', ['ru' => 'Заказа с таким номером не существует.']));
         }
 
-        $waybillModeIiko = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
+        $model = new iikoWaybill();
+        $model->setScenario('handMade');
+        $model->order_id = $order_id;
+        $model->status_id = 1;
+        $model->org = $ord->client_id;
+        $model->service_id = Registry::TILLYPAD_SERVICE_ID;
 
-        if ($waybillModeIiko !== '0') {
-            iikoWaybill::createWaybill($order_id, Registry::TILLYPAD_SERVICE_ID);
-            return $this->redirect(['/clientintegr/iiko/waybill/index', 'page' => $page, 'way' => $order_id]);
-        } else {
-            $model = new iikoWaybill();
-            $model->setScenario('handMade');
-            $model->order_id = $order_id;
-            $model->status_id = 1;
-            $model->org = $ord->client_id;
-            $model->service_id = Registry::TILLYPAD_SERVICE_ID;
-
-            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-                $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');
-                $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
-                if (!$model->save()) {
-                    throw new NotFoundHttpException(Yii::t('error', 'api.tillypad.controllers.waybill.not.save', ['ru' => 'Сохранить приходную накладную Tillypad не удалось.']));
-                } else {
-                    $model->createWaybillData();
-                }
-                $kolvo_nesopost = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $model->id])->andWhere(['product_rid' => null])->count();
-                if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_id === null)) {
-                    $shapka = 0;
-                } else {
-                    $shapka = 1;
-                }
-                if ($kolvo_nesopost == 0) {
-                    if ($shapka == 1) {
-                        $model->readytoexport = 1;
-                        $model->status_id = 4;
-                    } else {
-                        $model->readytoexport = 0;
-                        $model->status_id = 1;
-                    }
-                } else {
-                    if ($shapka == 1) {
-                        $model->readytoexport = 0;
-                        $model->status_id = 1;
-                    } else {
-                        $model->readytoexport = 0;
-                    }
-                }
-                if (!$model->save()) {
-                    throw new NotFoundHttpException(Yii::t('error', 'api.tillypad.controllers.waybill.not.save', ['ru' => 'Сохранить приходную накладную Tillypad не удалось.']));
-                }
-                return $this->redirect(['/clientintegr/iiko/waybill/index', 'page' => $page, 'way' => $model->order_id]);
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->doc_date = Yii::$app->formatter->asDate($model->doc_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+            $model->payment_delay_date = Yii::$app->formatter->asDate($model->payment_delay_date . ' 16:00:00', 'php:Y-m-d H:i:s');
+            if (!$model->save()) {
+                throw new NotFoundHttpException(Yii::t('error', 'api.tillypad.controllers.waybill.not.save', ['ru' => 'Сохранить приходную накладную Tillypad не удалось.']));
             } else {
-                return $this->render('create', [
-                    'model' => $model,
-                ]);
+                $model->createWaybillData();
             }
+            $kolvo_nesopost = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $model->id])->andWhere(['product_rid' => null])->count();
+            if (($model->agent_uuid === null) or ($model->num_code === null) or ($model->text_code === null) or ($model->store_id === null)) {
+                $shapka = 0;
+            } else {
+                $shapka = 1;
+            }
+            if ($kolvo_nesopost == 0) {
+                if ($shapka == 1) {
+                    $model->readytoexport = 1;
+                    $model->status_id = 4;
+                } else {
+                    $model->readytoexport = 0;
+                    $model->status_id = 1;
+                }
+            } else {
+                if ($shapka == 1) {
+                    $model->readytoexport = 0;
+                    $model->status_id = 1;
+                } else {
+                    $model->readytoexport = 0;
+                }
+            }
+            if (!$model->save()) {
+                throw new NotFoundHttpException(Yii::t('error', 'api.tillypad.controllers.waybill.not.save', ['ru' => 'Сохранить приходную накладную Tillypad не удалось.']));
+            }
+            return $this->redirect(['/clientintegr/tillypad/waybill/index', 'page' => $page, 'way' => $model->order_id]);
+        } else {
+            return $this->render('create', [
+                'model' => $model,
+            ]);
         }
     }
 
@@ -741,7 +736,6 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
             $position->product_id = $number;
             $position->supp_id = $supp_id;
             $position->serviceproduct_id = $product_rid;
-            $position->unit_rid = null;
             $position->store_rid = null;
             $position->koef = 1;
             $position->vat = null;
@@ -756,6 +750,7 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
             $position->koef = $existence->koef;
             $position->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         }
+        $position->unit_rid = null;
         if (!$position->save()) {
             throw new NotFoundHttpException(Yii::t('error', 'api.allmaps.position.not.save', ['ru' => 'Сохранить позицию в глобальном сопоставлении не удалось.']));
         }
@@ -813,6 +808,19 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
             $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $orgId])->all(), 'id', 'product_id');
 
             $query2 = (new Query())
+                ->select([
+                    "id"    => "id",
+                    "denom" => "denom",
+                    "unit"  => "unit"
+                ])
+                ->from('iiko_product')
+                ->where(['is_active' => 1])
+                ->andWhere(['org_id' => $organizationID])
+                ->andWhere("denom LIKE :term", [':term' => $term . '%'])
+                ->orderBy(['denom' => SORT_ASC, "unit" => SORT_ASC])
+                ->limit(15);
+
+            $query3 = (new Query())
                 ->select([
                     "id"    => "id",
                     "denom" => "denom",

@@ -256,12 +256,12 @@ class CartWebApi extends \api_web\components\WebApi
                 $order->preorder_id = $preOrderId;
             }
 
-            if (!empty($post['delivery_date']) && ($orderStatus === OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
+            if (isset($post['delivery_date'])) {
                 $d = str_replace('.', '-', $post['delivery_date']);
                 $order->requested_delivery = date('Y-m-d H:i:s', strtotime($d . ' 19:00:00'));
             }
 
-            if (!empty($post['comment']) && ($orderStatus === OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
+            if (isset($post['comment'])) {
                 $order->comment = $post['comment'];
             }
 

@@ -31,7 +31,7 @@ class PreorderWebApi extends WebApi
     /**
      * @param array $vendors
      * @param Cart  $cart
-     * @return int
+     * @return Preorder
      * @throws BadRequestHttpException
      * @throws ValidationException
      * @throws \Throwable
@@ -41,6 +41,7 @@ class PreorderWebApi extends WebApi
         $preOrder = new Preorder();
         $preOrder->organization_id = $this->user->organization->id;
         $preOrder->user_id = $this->user->id;
+        $preOrder->is_active = 1;
         if (!$preOrder->save(true)) {
             throw new ValidationException($preOrder->getFirstErrors());
         }
@@ -64,7 +65,7 @@ class PreorderWebApi extends WebApi
                 }
             }
         }
-        return $preOrder->id;
+        return $preOrder;
     }
 
     /**
@@ -88,19 +89,15 @@ class PreorderWebApi extends WebApi
                 throw new BadRequestHttpException('У вас нет поставщика с таким id');
             }
             $vendors[] = $vendor;
-            $preOrderId = $this->createPreorder($vendors, $cart);
-            $preOrder = Preorder::findOne(['id' => $preOrderId]);
-            return $this->prepareModel($preOrder);
+            $preOrder = $this->createPreorder($vendors, $cart);
         } else {
             $vendors = $cart->getVendors();
             if (empty($vendors)) {
                 throw new BadRequestHttpException('Корзина в данный момент пуста');
             }
-
-            $preOrderId = $this->createPreorder($vendors, $cart);
-            $preOrder = Preorder::findOne(['id' => $preOrderId]);
-            return $this->prepareModel($preOrder);
+            $preOrder = $this->createPreorder($vendors, $cart);
         }
+        return $this->prepareModel($preOrder);
     }
 
     /**

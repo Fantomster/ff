@@ -900,11 +900,11 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $org_id = User::findOne(Yii::$app->user->id)->organization_id;
 
         $product = OneSGood::find()->where('id = :w_id', [':w_id' => $product_rid])->one();
-        $munit = $product->unit;
+        $munit = $product->measure;
 
         $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);
 
-        $existence = AllMaps::fine()->where(['service_id' => Registry::ONE_S_CLIENT_SERVICE_ID, 'org_id' => $org_id, 'product_id' => $number])->one();
+        $existence = AllMaps::find()->where(['service_id' => Registry::ONE_S_CLIENT_SERVICE_ID, 'org_id' => $org_id, 'product_id' => $number])->one();
         if (!$existence) {
             $position = new AllMaps();
             $position->service_id = Registry::ONE_S_CLIENT_SERVICE_ID;
@@ -936,7 +936,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         foreach ($orders as $order) {
             $waybills = OneSWaybill::find()->where(['order_id' => $order->id, 'status_id' => 1])->all();
             foreach ($waybills as $waybill) {
-                $waybill_datas = OneSWaybillData::find()->where(['waybill_data' => $waybill->id, 'product_id' => $number, 'product_rid' => null])->all();
+                $waybill_datas = OneSWaybillData::find()->where(['waybill_id' => $waybill->id, 'product_id' => $number, 'product_rid' => null])->all();
                 foreach ($waybill_datas as $waybill_data) {
                     $waybill_data->product_rid = $product_rid;
                     if (!$waybill_data->save()) {

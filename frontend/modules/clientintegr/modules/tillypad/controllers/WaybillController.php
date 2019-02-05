@@ -26,6 +26,7 @@ use yii\helpers\ArrayHelper;
 use api\common\models\iiko\iikoSelectedProduct;
 use yii\db\Query;
 use api\common\models\AllMaps;
+use api\common\models\iiko\iikoProduct;
 
 class WaybillController extends \frontend\modules\clientintegr\modules\iiko\controllers\WaybillController
 {

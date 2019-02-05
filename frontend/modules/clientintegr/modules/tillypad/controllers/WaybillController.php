@@ -346,7 +346,7 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
     public function actionUpdate($id, $page)
     {
         $model = $this->findModel($id);
-        $lic = iikoService::getLicense();
+        $lic = TillypadService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
 
@@ -736,7 +736,6 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
             $position->product_id = $number;
             $position->supp_id = $supp_id;
             $position->serviceproduct_id = $product_rid;
-            $position->unit_rid = null;
             $position->store_rid = null;
             $position->koef = 1;
             $position->vat = null;
@@ -751,6 +750,7 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
             $position->koef = $existence->koef;
             $position->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         }
+        $position->unit_rid = null;
         if (!$position->save()) {
             throw new NotFoundHttpException(Yii::t('error', 'api.allmaps.position.not.save', ['ru' => 'Сохранить позицию в глобальном сопоставлении не удалось.']));
         }

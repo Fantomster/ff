@@ -8,14 +8,14 @@
  * Time: 15:27
  */
 
-namespace backend\modules\rbac\models;
+namespace common\models\rbac;
 
 use Yii;
 use yii\rbac\Rule;
 
 class BizRuleModel extends \yii2mod\rbac\models\BizRuleModel
 {
-    public $nameSpaceRules = "backend\\modules\\rbac\\rules\\";
+    public $nameSpaceRules = "common\\models\\rbac\\rules\\";
 
     /**
      * Validate className

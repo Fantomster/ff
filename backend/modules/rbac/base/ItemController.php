@@ -10,8 +10,8 @@
 
 namespace backend\modules\rbac\base;
 
-use backend\modules\rbac\models\AuthItemModel;
-use backend\modules\rbac\models\search\AuthItemSearch;
+use common\models\rbac\AuthItemModel;
+use common\models\rbac\search\AuthItemSearch;
 use yii\filters\VerbFilter;
 use yii\rbac\Item;
 use yii\web\NotFoundHttpException;

@@ -5,12 +5,12 @@
  * Vk: https://vk.com/a.arsik
  * Inst: https://www.instagram.com/arsen.web/
  * Date: 2019-02-05
- * Time: 13:36
+ * Time: 14:46
  */
 
-namespace backend\modules\rbac\models;
+namespace common\models\rbac\search;
 
-class AssignmentModel extends \yii2mod\rbac\models\AssignmentModel
+class AuthItemSearch extends \yii2mod\rbac\models\search\AuthItemSearch
 {
 
 }

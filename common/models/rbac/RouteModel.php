@@ -8,7 +8,7 @@
  * Time: 15:13
  */
 
-namespace backend\modules\rbac\models;
+namespace common\models\rbac;
 
 use Yii;
 use yii\base\BaseObject;

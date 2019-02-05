@@ -10,11 +10,11 @@
 
 namespace backend\modules\rbac\controllers;
 
+use common\models\rbac\RouteModel;
 use Yii;
 use yii\web\Response;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
-use backend\modules\rbac\models\RouteModel;
 
 class RouteController extends Controller
 {

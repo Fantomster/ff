@@ -10,8 +10,8 @@
 
 namespace backend\modules\rbac\controllers;
 
-use backend\modules\rbac\models\BizRuleModel;
-use backend\modules\rbac\models\search\BizRuleSearch;
+use common\models\rbac\BizRuleModel;
+use common\models\rbac\search\BizRuleSearch;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\web\Controller;

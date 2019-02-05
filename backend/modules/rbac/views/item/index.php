@@ -15,7 +15,7 @@ use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider \yii\data\ArrayDataProvider */
-/* @var $searchModel \backend\modules\rbac\models\search\AuthItemSearch */
+/* @var $searchModel \common\models\rbac\search\AuthItemSearch */
 
 $labels = $this->context->getLabels();
 $this->title = Yii::t('yii2mod.rbac', $labels['Items']);

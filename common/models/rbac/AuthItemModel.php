@@ -8,21 +8,21 @@
  * Time: 14:48
  */
 
-namespace backend\modules\rbac\models;
+namespace common\models\rbac;
 
 use Yii;
 use yii\rbac\Rule;
 
 class AuthItemModel extends \yii2mod\rbac\models\AuthItemModel
 {
-    public $nameSpaceRules = "backend\\modules\\rbac\\rules\\";
+    public $nameSpaceRules = "common\\models\\rbac\\rules\\";
 
     /**
      * Check for rule
      */
     public function checkRule()
     {
-        $this->ruleName = $this->nameSpaceRules . $name = $this->ruleName;
+        $this->ruleName = $this->nameSpaceRules . $this->ruleName;
 
         if (!$this->manager->getRule($this->ruleName)) {
             try {

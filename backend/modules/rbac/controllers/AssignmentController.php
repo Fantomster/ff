@@ -10,12 +10,12 @@
 
 namespace backend\modules\rbac\controllers;
 
+use common\models\rbac\AssignmentModel;
+use common\models\rbac\search\AssignmentSearch;
 use Yii;
 use yii\web\Response;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use backend\modules\rbac\models\AssignmentModel;
-use backend\modules\rbac\models\search\AssignmentSearch;
 
 class AssignmentController extends Controller
 {

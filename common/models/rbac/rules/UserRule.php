@@ -1,21 +1,21 @@
 <?php
 
-namespace backend\modules\rbac\rules;
+namespace common\models\rbac\rules;
 
 use Yii;
 use yii\rbac\Rule;
 
 /**
- * Class GuestRule
+ * Class UserRule
  *
  * @package yii2mod\rbac\rules
  */
-class GuestRule extends Rule
+class UserRule extends Rule
 {
     /**
      * @inheritdoc
      */
-    public $name = 'guestRule';
+    public $name = 'userRule';
 
     /**
      * @param int|string     $user
@@ -25,6 +25,6 @@ class GuestRule extends Rule
      */
     public function execute($user, $item, $params)
     {
-        return Yii::$app->user->isGuest;
+        return !Yii::$app->user->isGuest;
     }
 }

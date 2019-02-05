@@ -8,7 +8,7 @@
  * Time: 15:45
  */
 
-namespace backend\modules\rbac\models\search;
+namespace common\models\rbac\search;
 
 class AssignmentSearch extends \yii2mod\rbac\models\search\AssignmentSearch
 {

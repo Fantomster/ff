@@ -16,7 +16,7 @@ return [
     'components'     => [
         'authManager'           => [
             'class'        => 'yii\rbac\DbManager',
-            'defaultRoles' => ['guest', 'user'],
+            'defaultRoles' => ['guest'],
         ],
         'formatter'             => [
             'decimalSeparator'  => '.',
@@ -111,7 +111,7 @@ return [
                     'class' => 'yii\i18n\DbMessageSource',
                 ],
                 'yii2mod.rbac' => [
-                    'class' => 'yii\i18n\PhpMessageSource',
+                    'class'    => 'yii\i18n\PhpMessageSource',
                     'basePath' => '@yii2mod/rbac/messages',
                 ],
             ],

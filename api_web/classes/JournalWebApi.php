@@ -11,12 +11,12 @@ namespace api_web\classes;
 use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\helpers\WebApiHelper;
-use common\models\AllService;
 use common\models\AllServiceOperation;
 use common\models\Journal;
 use common\models\Role;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
+use yii\db\Expression;
 
 /**
  * Class JournalWebApi
@@ -59,7 +59,7 @@ class JournalWebApi extends WebApi
                 }
             }
             if (isset($search['service_id']) && !empty($search['service_id'])) {
-                $query->andWhere([Journal::tableName().'.service_id' => $search['service_id']]);
+                $query->andWhere([Journal::tableName() . '.service_id' => $search['service_id']]);
             }
             if (isset($search['type']) && !empty($search['type'])) {
                 $query->andWhere(['type' => $search['type']]);
@@ -75,20 +75,37 @@ class JournalWebApi extends WebApi
         }
 
         if ($sort && in_array(ltrim($sort, '-'), $this->arAvailableFields)) {
-            $sortDirection = 'ASC';
-            if (strpos('-', $sort) !== false) {
-                $sortDirection = 'DESC';
+            $sortDirection = SORT_ASC;
+            if (strpos($sort, '-') !== false) {
+                $sortDirection = SORT_DESC;
             }
-            $query->orderBy($sort . ' ' . $sortDirection);
+            $query->orderBy([ltrim($sort, '-') => $sortDirection]);
         } else {
             $query->orderBy('id DESC');
         }
 
         $tableName = Journal::tableName();
-        $query->select([$tableName.".id", $tableName.".service_id",
-            Journal::tableName().".operation_code", $tableName.".user_id", $tableName.".organization_id",
-            "IF ($tableName.service_id = ".Registry::MERC_SERVICE_ID.", ".AllServiceOperation::tableName().".comment, $tableName.response) as response",
-            $tableName.".log_guide", $tableName.".type", $tableName.".created_at"]);
+        $allServiceTable = AllServiceOperation::tableName();
+
+        $query->select([
+            "{$tableName}.id",
+            "{$tableName}.service_id",
+            "{$tableName}.operation_code",
+            "{$tableName}.user_id",
+            "{$tableName}.organization_id",
+            "response" => new Expression(
+                "CASE WHEN {$tableName}.service_id = :m_service_id 
+                 THEN {$allServiceTable}.comment 
+                 ELSE {$tableName}.response 
+                 END", [
+                    ':m_service_id' => Registry::MERC_SERVICE_ID
+                ]
+            ),
+            "{$tableName}.log_guide",
+            "{$tableName}.type",
+            "{$tableName}.created_at"
+        ]);
+
         $query->joinWith('operation');
 
         $dataProvider = new ActiveDataProvider([
@@ -102,9 +119,11 @@ class JournalWebApi extends WebApi
 
         $result = [];
         /** @var Journal $model */
-        foreach ($dataProvider->models as $model) {
-            $model->created_at = WebApiHelper::asDatetime($model->created_at);
-            $result[] = $model;
+        if (!empty($dataProvider->models)) {
+            foreach (WebApiHelper::generator($dataProvider->models) as $model) {
+                $model->created_at = WebApiHelper::asDatetime($model->created_at);
+                $result[] = $model;
+            }
         }
 
         $return = [

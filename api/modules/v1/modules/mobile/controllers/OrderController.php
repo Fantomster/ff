@@ -182,9 +182,8 @@ class OrderController extends ActiveController {
                     $res[] = $notes;
                 }
             }
-            $newOrder = new \common\models\Order();
-            $newOrder->load($post, 'Order');
-            $newOrder->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+
+            $newOrder->status = OrderStatus::STATUS_FORMING;
             $newOrder->currency_id = 1;
             if (!$newOrder->save()) {
                 echo json_encode(['Order' => $newOrder->getErrors()]);
@@ -203,6 +202,13 @@ class OrderController extends ActiveController {
                     $transaction->rollback();
                     return;
                 }
+            }
+
+            $newOrder->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+            if (!$newOrder->save()) {
+                echo json_encode(['Order' => $newOrder->getErrors()]);
+                $transaction->rollback();
+                return;
             }
 
             $transaction->commit();

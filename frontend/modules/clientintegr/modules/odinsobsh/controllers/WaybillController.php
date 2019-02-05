@@ -684,9 +684,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findModel($waybill_id);
 
         if ($vatf == 1) {
-            $ones_waybill_datas = OneSWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->all();
+            $waybill_datas = OneSWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->all();
         } else {
-            $ones_waybill_datas = OneSWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->andWhere(['vat' => $vatf])->all();
+            $waybill_datas = OneSWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->andWhere(['vat' => $vatf])->all();
         }
         if ($page != 'undefined') {
             $page_not_parsing = $page;
@@ -703,12 +703,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $page = 1;
         }
 
-        if (count($ones_waybill_datas) > 0) {
-            foreach ($ones_waybill_datas as $ones_waybill_data) {
-                $product_id = $ones_waybill_data->product_id;
-                $product_rid = $ones_waybill_data->product_rid;
-                $org_id = $ones_waybill_data->org;
-                $koef = $ones_waybill_data->koef;
+        if (count($waybill_datas) > 0) {
+            foreach ($waybill_datas as $waybill_data) {
+                $product_id = $waybill_data->product_id;
+                $product_rid = $waybill_data->product_rid;
+                $org_id = $waybill_data->org;
+                $koef = $waybill_data->koef;
 
                 $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
@@ -736,6 +736,10 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $position->unit_rid = null;
                 if (!$position->save()) {
                     throw new NotFoundHttpException(Yii::t('error', 'api.allmaps.position.not.save', ['ru' => 'Сохранить позицию в глобальном сопоставлении не удалось.']));
+                }
+                $waybill_data->vat = $vat;
+                if (!$waybill_data->save()) {
+                    throw new NotFoundHttpException(Yii::t('error', 'api.one.s.controllers.waybill.data.not.save', ['ru' => 'Сохранить позицию в приходной накладной 1С не удалось.']));
                 }
             }
         }

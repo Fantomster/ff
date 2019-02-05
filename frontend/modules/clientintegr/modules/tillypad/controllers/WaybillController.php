@@ -22,6 +22,10 @@ use common\components\SearchOrdersComponent;
 use api_web\components\Registry;
 use yii\web\NotFoundHttpException;
 use api\common\models\iiko\iikoWaybillData;
+use yii\helpers\ArrayHelper;
+use api\common\models\iiko\iikoSelectedProduct;
+use yii\db\Query;
+use api\common\models\AllMaps;
 
 class WaybillController extends \frontend\modules\clientintegr\modules\iiko\controllers\WaybillController
 {
@@ -614,9 +618,9 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
         $model = $this->findModel($waybill_id);
 
         if ($vatf == 1) {
-            $iiko_waybill_datas = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->all();
+            $waybill_datas = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->all();
         } else {
-            $iiko_waybill_datas = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->andWhere(['vat' => $vatf])->all();
+            $waybill_datas = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->andWhere(['vat' => $vatf])->all();
         }
 
         if ($page != 'undefined') {
@@ -634,12 +638,12 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
             $page = 1;
         }
 
-        if (count($iiko_waybill_datas) > 0) {
-            foreach ($iiko_waybill_datas as $iiko_waybill_data) {
-                $product_id = $iiko_waybill_data->product_id;
-                $product_rid = $iiko_waybill_data->product_rid;
-                $org_id = $iiko_waybill_data->org;
-                $koef = $iiko_waybill_data->koef;
+        if (count($waybill_datas) > 0) {
+            foreach ($waybill_datas as $waybill_data) {
+                $product_id = $waybill_data->product_id;
+                $product_rid = $waybill_data->product_rid;
+                $org_id = $waybill_data->org;
+                $koef = $waybill_data->koef;
 
                 $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
@@ -667,6 +671,10 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
                 $position->unit_rid = null;
                 if (!$position->save()) {
                     throw new NotFoundHttpException(Yii::t('error', 'api.allmaps.position.not.save', ['ru' => 'Сохранить позицию в глобальном сопоставлении не удалось.']));
+                }
+                $waybill_data->vat = $vat;
+                if (!$waybill_data->save()) {
+                    throw new NotFoundHttpException(Yii::t('error', 'api.tillypad.controllers.waybill.data.not.save', ['ru' => 'Сохранить позицию в приходной накладной Tillypad не удалось.']));
                 }
             }
         }

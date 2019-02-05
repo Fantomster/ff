@@ -71,7 +71,6 @@ class iikoWaybillData extends \yii\db\ActiveRecord
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
             }],
-            //[['koef', 'quant'], 'number', 'min' => 0.0001],
         ];
     }
 

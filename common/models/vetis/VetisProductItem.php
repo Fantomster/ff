@@ -61,6 +61,9 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
         return Yii::$app->get('db_api');
     }
 
+    /**
+     * @return array|string[]
+     */
     public static function primaryKey()
     {
         return ['uuid'];
@@ -124,46 +127,73 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
         ];
     }
 
+    /**
+     * @return mixed
+     * @throws \yii\base\InvalidArgumentException
+     */
     public function getProductItem()
     {
         return \yii\helpers\Json::decode($this->data);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getUnit()
     {
         if(!is_null($this->unit_uuid)) {
-            return $this->hasOne(VetisUnit::className(), ['uuid' => 'unit_uuid']);
+            return $this->hasOne(VetisUnit::class, ['uuid' => 'unit_uuid']);
         }
 
-        return $this->hasOne(VetisUnit::className(), ['guid' => 'unit_guid']);
+        return $this->hasOne(VetisUnit::class, ['guid' => 'unit_guid']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getPackingType()
     {
         if(!is_null($this->packagingType_uuid)) {
-            return $this->hasOne(VetisUnit::className(), ['uuid' => 'packagingType_uuid']);
+            return $this->hasOne(VetisUnit::class, ['uuid' => 'packagingType_uuid']);
         }
 
-        return $this->hasOne(VetisUnit::className(), ['guid' => 'packagingType_guid']);
+        return $this->hasOne(VetisUnit::class, ['guid' => 'packagingType_guid']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getProduct()
     {
         if(!is_null($this->product_uuid))
-            return $this->hasOne(VetisProductByType::className(), ['uuid' => 'product_uuid']);
+            return $this->hasOne(VetisProductByType::class, ['uuid' => 'product_uuid']);
 
-        return $this->hasOne(VetisProductByType::className(), ['guid' => 'product_guid']);
+        return $this->hasOne(VetisProductByType::class, ['guid' => 'product_guid']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getSubProduct()
     {
         if(!is_null($this->subproduct_uuid)) {
-            return $this->hasOne(VetisSubproductByProduct::className(), ['uuid' => 'subproduct_uuid']);
+            return $this->hasOne(VetisSubproductByProduct::class, ['uuid' => 'subproduct_uuid']);
         }
 
-        return $this->hasOne(VetisSubproductByProduct::className(), ['guid' => 'subproduct_guid']);
+        return $this->hasOne(VetisSubproductByProduct::class, ['guid' => 'subproduct_guid']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getIngredients()
+    {
+        return $this->hasMany(VetisIngredients::class, ['guid' => 'guid']);
+    }
+
+    /**
+     * @param $org_id
+     */
     public static function getUpdateData($org_id)
     {
         try {
@@ -206,7 +236,10 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
         }
     }
 
-
+    /**
+     * @param $subproduct_uuid
+     * @return array
+     */
     public static function getProductItemList($subproduct_uuid)
     {
         $models = self::find()

@@ -283,7 +283,7 @@ class EDIClass extends Component
             $action = ($isDesadv) ? " " . Yii::t('app', 'отправил заказ!') : Yii::t('message', 'frontend.controllers.order.confirm_order_two', ['ru' => ' подтвердил заказ!']);
             $systemMessage = $order->vendor->name . '' . $action;
             OrderController::sendSystemMessage($user, $order->id, $systemMessage);
-            writeEdiDataToJournal($organization, Yii::t('app', 'По заказу {order} получен файл {file}', ['order' => $order->id, 'file' => $this->fileName]), 'success', $user->id);
+            self::writeEdiDataToJournal($order->client_id, Yii::t('app', 'По заказу {order} получен файл {file}', ['order' => $order->id, 'file' => $this->fileName]), 'success', $user->id);
             return true;
         } catch (Exception $e) {
             if ($isLeraData) {
@@ -537,7 +537,7 @@ class EDIClass extends Component
     public static function writeEdiDataToJournal($organizationID, $response = null, $type = 'success', $userID = null)
     {
         $userID = $userID ?? Yii::$app->user->id ?? null;
-        $organizationID = Yii::$app->user->identity->organization_id ?? $organizationID ?? null;
+        $organizationID = $organizationID ?? Yii::$app->user->identity->organization_id ?? null;
         $journal = new Journal();
         $journal->user_id = $userID;
         $journal->organization_id = $organizationID;

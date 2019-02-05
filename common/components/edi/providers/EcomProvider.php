@@ -87,7 +87,7 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
 
     public function sendOrderInfo($order, $done = false): bool
     {
-        $transaction = Yii::$app->db_api->beginTransaction();
+        $transaction = Yii::$app->db->beginTransaction();
         $result = false;
         try {
             $orderContent = OrderContent::findAll(['order_id' => $order->id]);
@@ -123,13 +123,14 @@ class EcomProvider extends AbstractProvider implements ProviderInterface
         $this->remoteFile = $fileName . $currentDate . '_' . $order->id . '.xml';
         $obj = $this->client->sendDoc(['user' => ['login' => $this->login, 'pass' => $this->pass], 'fileName' => $this->remoteFile, 'content' => $string]);
         if (isset($obj) && isset($obj->result->errorCode) && $obj->result->errorCode == 0) {
-            //$journalMessage = Yii::t("app", 'По заказу {order} отправлен файл {file}', ['order' => $order->id, 'file' => $this->remoteFile]);
-            //EDIClass::writeEdiDataToJournal($this->orgID, $journalMessage);
+            $journalMessage = Yii::t("app", 'По заказу {order} отправлен файл {file}', ['order' => $order->id, 'file' => $this->remoteFile]);
+            EDIClass::writeEdiDataToJournal($order->client_id, $journalMessage);
             return true;
         } else {
             $journalMessage = Yii::t("app", 'Ecom вернул код ошибки ') . $obj->result->errorCode;
-            EDIClass::writeEdiDataToJournal($this->orgID, $journalMessage, 'error');
-            Yii::error("Ecom returns error code");
+            EDIClass::writeEdiDataToJournal($order->client_id, $journalMessage, 'error');
+            $error = $obj ?? 'error';
+            Yii::error("Ecom returns error code: " . print_r($error, 1));
             return false;
         }
     }

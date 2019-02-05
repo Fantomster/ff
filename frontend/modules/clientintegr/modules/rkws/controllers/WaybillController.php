@@ -28,6 +28,7 @@ use yii\web\Response;
 use api_web\components\Registry;
 use yii\db\Query;
 use api\common\models\AllMaps;
+use api\common\models\RkProduct;
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
 {

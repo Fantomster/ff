@@ -131,7 +131,7 @@ class GuideProductsSearch extends \yii\base\Model
         $query = (new Query())
                 ->from(["c" => $subQueryCG->union($subQueryCBG, true)])
                 ->distinct()
-                ->where(["not in", "c.cbg.id", $blockedItems])
+                ->where(["not in", "c.cbg_id", $blockedItems])
                 ->groupBy(["c.id"]);
         
         if (isset($params['limit'])) {

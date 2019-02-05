@@ -44,6 +44,9 @@ class Registry
     /**@var int const for Poster service_id in all_service table */
     const POSTER_SERVICE_ID = 11;
 
+    /** @var int ID из таблицы Currency значение валюты по умолчанию */
+    const DEFAULT_CURRENCY_ID = 1;
+
     /** - Waybill section - */
     const WAYBILL_COMPARED = 1;
     const WAYBILL_FORMED = 2;

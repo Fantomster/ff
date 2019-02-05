@@ -189,6 +189,7 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionList()
     {
@@ -236,6 +237,7 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionFilterSender()
     {
@@ -284,6 +286,7 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionFilterProduct()
     {
@@ -449,6 +452,7 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionFilters()
     {
@@ -575,6 +579,7 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionFullInfoVsd()
     {
@@ -681,6 +686,7 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionPartialAcceptance()
     {
@@ -729,6 +735,7 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionRepayVsd()
     {
@@ -850,6 +857,7 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionGetNotConfirmedVsd()
     {
@@ -894,6 +902,7 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionGetVsdPdf()
     {
@@ -970,9 +979,81 @@ class DefaultController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionRegionalizationGet()
     {
         $this->response = (new VetisWaybill())->getRegionalizationInfo($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/product-item-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Наименования продукции",
+     *     description="Получение списка Наименования продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                     "business_id": 1,
+     *                     "pagination": {
+     *                         "page": 1,
+     *                         "page_size": 12
+     *                     }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "Сельдь ф/к с луком \"Мозаика\" ;2.2кг",
+     *                          "uuid": "00f4334f-23d5-468b-81c7-258f097bab0e",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                          "form": "Рыба и морепродукты.",
+     *                          "article": null,
+     *                          "gtin": null,
+     *                          "gost": "",
+     *                          "active": 1
+     *                      },
+     *                      {
+     *                          "name": "Шашлык из говядины, кат А, в/у, охл, вес Не исп",
+     *                          "uuid": "00f4682b-b09b-42ef-8773-6a4beea42680",
+     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
+     *                          "form": "Пищевые продукты.",
+     *                          "article": "1134",
+     *                          "gtin": null,
+     *                          "gost": null,
+     *                          "active": 1
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionProductItemList()
+    {
+        $this->response = (new VetisWaybill())->getProductItemList($this->request);
+    }
+
 }

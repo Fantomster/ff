@@ -83,7 +83,7 @@ class PreorderWebApi extends WebApi
         if (empty($cart)) {
             throw new BadRequestHttpException('preorder.cart_was_not_found');
         }
-        if (isset($post['vendor_id']) && ($post['vendor_id'] !== 0)) {
+        if (!empty($post['vendor_id']) && ($post['vendor_id'] !== 0)) {
             $myVendors = $this->user->organization->getSuppliers();
             if (!isset($myVendors[$post['vendor_id']])) {
                 throw new BadRequestHttpException('preorder.not_your_vendor');;

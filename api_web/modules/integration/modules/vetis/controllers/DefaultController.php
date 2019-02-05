@@ -1017,23 +1017,23 @@ class DefaultController extends WebApiController
      *              default={
      *                  "result": {
      *                      {
-     *                          "name": "Сельдь ф/к с луком \"Мозаика\" ;2.2кг",
+     *                          "name": "Сельдь ф/к с луком",
      *                          "uuid": "00f4334f-23d5-468b-81c7-258f097bab0e",
      *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
-     *                          "form": "Рыба и морепродукты.",
-     *                          "article": null,
-     *                          "gtin": null,
+     *                          "form": "Рыба и морепродукты",
+     *                          "article": "null",
+     *                          "gtin": "null",
      *                          "gost": "",
      *                          "active": 1
      *                      },
      *                      {
-     *                          "name": "Шашлык из говядины, кат А, в/у, охл, вес Не исп",
+     *                          "name": "Шашлык",
      *                          "uuid": "00f4682b-b09b-42ef-8773-6a4beea42680",
      *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
-     *                          "form": "Пищевые продукты.",
+     *                          "form": "Пищевые продукты",
      *                          "article": "1134",
-     *                          "gtin": null,
-     *                          "gost": null,
+     *                          "gtin": "null",
+     *                          "gost": "null",
      *                          "active": 1
      *                      }
      *                  }

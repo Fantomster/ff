@@ -2007,7 +2007,7 @@ class Organization extends \yii\db\ActiveRecord
         foreach ($relations as $relation) {
             $relation->delete();
         }
-        $this->blacklisted = true;
+        $this->blacklisted = 1;
         $this->parent_id = null;
         return $this->save();
     }

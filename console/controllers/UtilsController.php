@@ -396,4 +396,14 @@ class UtilsController extends Controller
             }
         }
     }
+    
+    public function actionCopyGuide(int $guideId, array $clientsList)
+    {
+        $guide = \common\models\guides\Guide::findOne(['id' => $guideId]);
+        if (empty($guide)) {
+            echo "Шаблон не найден" . PHP_EOL;
+        }
+        var_dump($clientsList);
+        $guide->copyTo($clientsList);
+    }
 }

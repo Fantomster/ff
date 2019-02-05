@@ -1107,6 +1107,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $position->koef = $existence->koef;
             $position->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         }
+        $position->unit_rid = null;
         if (!$position->save()) {
             throw new NotFoundHttpException(Yii::t('error', 'api.allmaps.position.not.save', ['ru' => 'Сохранить позицию в глобальном сопоставлении не удалось.']));
         }

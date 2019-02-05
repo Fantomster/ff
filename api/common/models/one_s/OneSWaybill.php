@@ -5,6 +5,7 @@ namespace api\common\models\one_s;
 use common\models\Order;
 use common\models\OrderContent;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "one_s_waybill".
@@ -84,6 +85,21 @@ class OneSWaybill extends \yii\db\ActiveRecord
             'exported_at'   => Yii::t('app', 'Exported At'),
             'updated_at'    => Yii::t('app', 'Updated At'),
             'is_invoice'    => Yii::t('app', 'Флаг, указывающий надо ли проводить документ при загрузке '),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
         ];
     }
 

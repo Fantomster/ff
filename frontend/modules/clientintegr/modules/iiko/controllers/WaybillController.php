@@ -1087,7 +1087,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);
 
-        $existence = AllMaps::fine()->where(['service_id' => Registry::IIKO_SERVICE_ID, 'org_id' => $org_id, 'product_id' => $number])->one();
+        $existence = AllMaps::find()->where(['service_id' => Registry::IIKO_SERVICE_ID, 'org_id' => $org_id, 'product_id' => $number])->one();
         if (!$existence) {
             $position = new AllMaps();
             $position->service_id = Registry::IIKO_SERVICE_ID;
@@ -1132,7 +1132,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         foreach ($orders as $order) {
             $waybills = iikoWaybill::find()->where(['order_id' => $order->id, 'status_id' => 1])->all();
             foreach ($waybills as $waybill) {
-                $waybill_datas = iikoWaybillData::find()->where(['waybill_data' => $waybill->id, 'product_id' => $number, 'product_rid' => null])->all();
+                $waybill_datas = iikoWaybillData::find()->where(['waybill_id' => $waybill->id, 'product_id' => $number, 'product_rid' => null])->all();
                 foreach ($waybill_datas as $waybill_data) {
                     $waybill_data->product_rid = $product_rid;
                     $waybill_data->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');

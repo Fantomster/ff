@@ -2,8 +2,8 @@
 
 namespace api\common\models;
 
-use api_web\modules\integration\modules\rkeeper\models\rkeeperService;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "rk_waybill_data".
@@ -52,12 +52,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     {
         return [
             [['waybill_id', 'product_id'], 'required'],
-            //  [['koef'], 'number'],
-            //
             [['koef', 'sum', 'quant'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
-            // ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800,2000]],
-            //   [['koef','sum','quant'], 'number', 'min' => 0.000001],
-            // ['vat', 'in', 'allowArray' => true, 'range' => [0, 1000, 1800,2000]],
             ['koef', 'filter', 'filter' => function ($value) {
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
@@ -70,8 +65,6 @@ class RkWaybilldata extends \yii\db\ActiveRecord
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
             }],
-            //[['koef', 'quant'], 'number', 'min' => 0.0001],
-            //   [['comment'], 'string', 'max' => 255],
             [['waybill_id', 'product_rid', 'product_id', 'munit_rid', 'updated_at', 'quant', 'sum', 'vat', 'pdenom', 'koef', 'org', 'vat_included', 'linked_at'], 'safe']
         ];
     }
@@ -107,6 +100,21 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
+        ];
+    }
+
     public static function getStatusArray()
     {
         return [
@@ -121,12 +129,6 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     public function getWaybill()
     {
         return RkWaybill::findOne(['id' => $this->waybill_id]);
-    }
-
-    public function getVat()
-    {
-
-
     }
 
     public function getProduct()
@@ -156,15 +158,6 @@ class RkWaybilldata extends \yii\db\ActiveRecord
 
             if (!$insert) {  // Обновление
 
-                /*    if (strrpos($this->koef,','))
-                  $this->koef = (double) str_replace(',', '.',$this->koef);
-
-                  if (strrpos($this->sum,','))
-                  $this->sum = (double)  str_replace(',', '.', $this->sum);
-
-                  if (strrpos($this->quant,','))
-                  $this->quant = (double) str_replace(',', '.', $this->quant);
-                 */
                 if ($this->attributes['koef'] != $this->oldAttributes['koef']) {
 
                     if (!$this->koef)
@@ -193,43 +186,6 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         }
     }
 
-    /*    public function beforeValidate() {
-
-            if (parent::beforeValidate()) {
-                $this->koef = 0 + str_replace(',', '.', $this->koef);
-
-                return true;
-            }
-            return false;
-        }
-    */
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
-
-        // $this->saveAllMap();
-
-        $wmodel = $this->waybill;
-        $check = $this::find()
-            ->andwhere('waybill_id= :id', [':id' => $wmodel->id])
-            ->andwhere('product_rid is null or munit_rid is null')
-            ->andWhere('unload_status=1')
-            ->count('*');
-
-        if ($check > 0) {
-            $wmodel->readytoexport = 0;
-            $wmodel->status_id = 1;
-        } else {
-            $wmodel->readytoexport = 1;
-            $wmodel->status_id = 5;
-        }
-
-        if (!$wmodel->save(false)) {
-            echo "Can't save model in after save";
-            exit;
-        }
-    }
-
     public static function getDb()
     {
         return \Yii::$app->db_api;
@@ -248,41 +204,6 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         }
         $sum = number_format($sum, 2, ',', ' ');
         return $sum;
-    }
-
-    /**
-     * @return bool
-     */
-    public function saveAllMap()
-    {
-        $client_id = $this->getWaybill()->org;
-        $vendor_id = $this->getWaybill()->getOrder()->vendor_id;
-
-        $allMapModel = AllMaps::findOne([
-            'service_id' => rkeeperService::getServiceId(),
-            'org_id'     => $client_id,
-            //    'supp_id' => $vendor_id,
-            'product_id' => $this->product_id
-        ]);
-
-        if (empty($allMapModel)) {
-            $allMapModel = new AllMaps([
-                'service_id' => rkeeperService::getServiceId(),
-                'org_id'     => $client_id,
-                'supp_id'    => $vendor_id,
-                'product_id' => $this->product_id,
-                'created_at' => Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss')
-            ]);
-        }
-
-        $allMapModel->serviceproduct_id = $this->product_rid;
-        $allMapModel->unit_rid = $this->munit_rid;
-        // $allMapModel->store_rid = $this->getWaybill()->store_rid;
-        $allMapModel->koef = $this->koef;
-        $allMapModel->vat = $this->vat * 100;
-        $allMapModel->is_active = 1;
-
-        return !empty($allMapModel->dirtyAttributes) ? $allMapModel->save() : false;
     }
 
 }

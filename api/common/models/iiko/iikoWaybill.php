@@ -311,8 +311,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         $order = \common\models\Order::findOne(['id' => $order_id]);
 
         if (!$order) {
-            \Yii::error('Cant find order during sending waybill');
-            throw new \Exception('Ошибка при отправке.' . $order_id);
+            throw new NotFoundHttpException(Yii::t('error', 'api.controllers.order.not.find', ['ru' => 'Заказа с таким номером не существует.']));
         }
 
         // Получаем список складов, чтобы понять, сколько надо делать накладных

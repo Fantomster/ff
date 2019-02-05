@@ -235,7 +235,7 @@ class CartWebApi extends \api_web\components\WebApi
      * @param array $post ['id', 'delivery_date', 'comment']
      * @param int   $orderStatus
      * @param int   $preOrderId
-     * @return bool|mixed
+     * @return bool
      * @throws \Exception
      * @throws \Throwable
      */
@@ -316,7 +316,7 @@ class CartWebApi extends \api_web\components\WebApi
             }
             return true;
         } else {
-            return $contents;
+            return true;
         }
         return false;
     }

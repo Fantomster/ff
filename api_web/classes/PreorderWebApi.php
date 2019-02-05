@@ -28,48 +28,79 @@ use yii\web\BadRequestHttpException;
  */
 class PreorderWebApi extends WebApi
 {
-
-    private function createPreorder($vendor)
+    /**
+     * @param array $vendors
+     * @param Cart  $cart
+     * @return int
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \Throwable
+     */
+    private function createPreorder(array $vendors, Cart $cart)
     {
-        $cart = Cart::findOne(['organization_id' => $this->user->organization->id]);
         $preOrder = new Preorder();
-        $preOrder->organization_id=$this->user->organization->id;
-        $preOrder->user_id=$this->user->id;
-        $preOrder->save(true);
+        $preOrder->organization_id = $this->user->organization->id;
+        $preOrder->user_id = $this->user->id;
+        if (!$preOrder->save(true)) {
+            throw new ValidationException($preOrder->getFirstErrors());
+        }
         $cartWebApi = new CartWebApi();
         $noCommentAndDate = [];
         $preOrderId = $preOrder->id;
-        if ($contents = $cartWebApi->createOrder($cart,$vendor,$noCommentAndDate,Order::STATUS_PREORDER, $preOrderId)) {
-            foreach ($contents as $index => $item) {
-                $preOrderContent = new PreorderContent();
-                $preOrderContent->preorder_id = $preOrderId;
-                $preOrderContent->product_id = $item->product_id;
-                $preOrderContent->plan_quantity = $item->quantity;
-                $preOrderContent->save(true);
+        foreach ($vendors as $index => $vendor) {
+            $contents = $cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->all();
+            if (empty($contents)) {
+                throw new BadRequestHttpException('В корзине нет товаров данного веднора');
+            }
+            if ($cartWebApi->createOrder($cart, $vendor, $noCommentAndDate, Order::STATUS_PREORDER, $preOrderId)) {
+                foreach ($contents as $key => $item) {
+                    $preOrderContent = new PreorderContent();
+                    $preOrderContent->preorder_id = $preOrderId;
+                    $preOrderContent->product_id = $item->product_id;
+                    $preOrderContent->plan_quantity = $item->quantity;
+                    if (!$preOrderContent->save(true)) {
+                        throw new ValidationException($preOrderContent->getFirstErrors());
+                    }
+                }
             }
         }
-
+        return $preOrder->id;
     }
+
     /**
      * Создание предзаказа из корзины
      *
      * @param $post
      * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \Throwable
      */
     public function create($post)
     {
-        if (isset($post['vendor_id'])) {
-            $vendor = Organization::findOne(['id'=>$post['vendor_id'],'type_id'=>2]);
-            $this->createPreorder($vendor);
-        } else {
-            $cart = Cart::findOne(['organization_id' => $this->user->organization->id]);
-            $vendors = $cart->getVendors();
-            foreach ($vendors as $index => $vendor) {
-                $this->createPreorder($vendor);
-            }
+        $cart = Cart::findOne(['organization_id' => $this->user->organization->id]);
+        if (empty($cart)) {
+            throw new BadRequestHttpException('Вы ещё не создавали корзину');
         }
+        if (isset($post['vendor_id'])) {
+            $vendor = Organization::findOne(['id' => $post['vendor_id'], 'type_id' => 2]);
+            if (empty($vendor)) {
+                throw new BadRequestHttpException('У вас нет поставщика с таким id');
+            }
+            $vendors[] = $vendor;
+            $preOrderId = $this->createPreorder($vendors, $cart);
+            $preOrder = Preorder::findOne(['id' => $preOrderId]);
+            return $this->prepareModel($preOrder);
+        } else {
+            $vendors = $cart->getVendors();
+            if (empty($vendors)) {
+                throw new BadRequestHttpException('Корзина в данный момент пуста');
+            }
 
-        return ['STATUS_PREORDER' => Order::STATUS_PREORDER];
+            $preOrderId = $this->createPreorder($vendors, $cart);
+            $preOrder = Preorder::findOne(['id' => $preOrderId]);
+            return $this->prepareModel($preOrder);
+        }
     }
 
     /**

@@ -456,7 +456,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController
 
         $relationUserOrg = RelationUserOrganization::findOne(['user_id' => $user->id, 'organization_id' => $id]);
 
-        if (empty($relationUserOrg) && !(in_array($relationUserOrg->role_id, [
+        if (empty($relationUserOrg) || !(in_array($relationUserOrg->role_id, [
                 Role::ROLE_ADMIN,
                 Role::ROLE_FKEEPER_MANAGER,
                 Role::ROLE_RESTAURANT_MANAGER,

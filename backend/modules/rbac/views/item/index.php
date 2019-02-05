@@ -36,7 +36,7 @@ $this->render('/layouts/_sidebar');
             ['class' => 'yii\grid\SerialColumn'],
             [
                 'attribute' => 'name',
-                'label'     => 'Название',
+                'label'     => Yii::t('yii2mod.rbac', 'Name'),
             ],
             [
                 'attribute'          => 'ruleName',

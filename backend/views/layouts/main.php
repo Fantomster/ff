@@ -101,6 +101,27 @@ if ($countSettingChange > 0) {
         if (Yii::$app->user->identity->role_id === \common\models\Role::ROLE_ADMIN) {
             $menuItems = array_merge($menuItems, [
                 [
+                    'label' => 'RBAC',
+                    'items' => [
+                        [
+                            'label' => 'Маршруты',
+                            'url'   => ['/rbac/route'],
+                        ],
+                        [
+                            'label' => 'Разрешения',
+                            'url'   => ['/rbac/permission'],
+                        ],
+                        [
+                            'label' => 'Роли',
+                            'url'   => ['/rbac/role'],
+                        ],
+                        [
+                            'label' => 'Правила',
+                            'url'   => ['/rbac/rule'],
+                        ],
+                    ]
+                ],
+                [
                     'label' => 'SEO',
                     'items' => [
                         [

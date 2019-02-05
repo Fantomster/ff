@@ -51,7 +51,7 @@ class PreorderWebApi extends WebApi
         foreach ($vendors as $index => $vendor) {
             $contents = $cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->all();
             if (empty($contents)) {
-                throw new BadRequestHttpException('В корзине нет товаров данного веднора');
+                throw new BadRequestHttpException('preorder.no_vendor_product_in_cart');
             }
             if ($cartWebApi->createOrder($cart, $vendor, $noCommentAndDate, Order::STATUS_PREORDER, $preOrderId)) {
                 foreach ($contents as $key => $item) {
@@ -81,19 +81,23 @@ class PreorderWebApi extends WebApi
     {
         $cart = Cart::findOne(['organization_id' => $this->user->organization->id]);
         if (empty($cart)) {
-            throw new BadRequestHttpException('Вы ещё не создавали корзину');
+            throw new BadRequestHttpException('preorder.cart_was_not_found');
         }
-        if (isset($post['vendor_id'])) {
-            $vendor = Organization::findOne(['id' => $post['vendor_id'], 'type_id' => 2]);
+        if (isset($post['vendor_id']) && ($post['vendor_id'] !== 0)) {
+            $myVendors = $this->user->organization->getSuppliers();
+            if (!isset($myVendors[$post['vendor_id']])) {
+                throw new BadRequestHttpException('preorder.not_your_vendor');;
+            }
+            $vendor = Organization::findOne(['id' => $post['vendor_id'], 'type_id' => Organization::TYPE_SUPPLIER]);
             if (empty($vendor)) {
-                throw new BadRequestHttpException('У вас нет поставщика с таким id');
+                throw new BadRequestHttpException('preorder.vendor_id_not_found');
             }
             $vendors[] = $vendor;
             $preOrder = $this->createPreorder($vendors, $cart);
         } else {
             $vendors = $cart->getVendors();
             if (empty($vendors)) {
-                throw new BadRequestHttpException('Корзина в данный момент пуста');
+                throw new BadRequestHttpException('preorder.cart_empty');
             }
             $preOrder = $this->createPreorder($vendors, $cart);
         }

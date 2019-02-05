@@ -83,7 +83,7 @@ class PreorderWebApi extends WebApi
                 'name' => $model->user->profile->full_name
             ],
             'count'        => [
-                'produtcs' => $model->getPreorderContents()->count(),
+                'products' => $model->getPreorderContents()->count(),
                 'orders'   => $model->getOrders()->count(),
             ],
             'sum'          => $model->getSum(),

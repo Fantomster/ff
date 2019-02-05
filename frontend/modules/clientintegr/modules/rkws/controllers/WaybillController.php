@@ -27,6 +27,7 @@ use common\components\SearchOrdersComponent;
 use yii\web\Response;
 use api_web\components\Registry;
 use yii\db\Query;
+use api\common\models\AllMaps;
 
 class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController
 {
@@ -510,8 +511,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     "unitname" => "unitname"
                 ])
                 ->from('rk_product')
-                ->where(['is_active' => 1])
-                ->andWhere(['org_id' => $orgId])
+                ->andWhere(['acc' => $orgId])
                 ->andWhere("denom LIKE :term", [':term' => $term . '%'])
                 ->orderBy(['denom' => SORT_ASC, "unitname" => SORT_ASC])
                 ->limit(15);
@@ -523,8 +523,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     "unitname" => "unitname"
                 ])
                 ->from('rk_product')
-                ->where(['is_active' => 1])
-                ->andWhere(['org_id' => $orgId])
+                ->andWhere(['acc' => $orgId])
                 ->andWhere("denom LIKE :term", [':term' => '%' . $term . '%'])
                 ->orderBy(['denom' => SORT_ASC, "unitname" => SORT_ASC])
                 ->limit(10);
@@ -538,8 +537,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 ->from('rk_product')
                 ->union($query2)
                 ->union($query3)
-                ->where(['is_active' => 1])
-                ->andWhere(['org_id' => $orgId])
+                ->andWhere(['acc' => $orgId])
                 ->andWhere(['denom' => ':term'], [':term' => $term])
                 ->orderBy(['denom' => SORT_ASC, "unitname" => SORT_ASC])
                 ->limit(10);
@@ -562,8 +560,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     "txt" => "CONCAT(denom, ' (' ,unitname, ')')"
                 ])
                 ->from('rk_product')
-                ->where(['is_active' => 1])
-                ->andWhere(['org_id' => $orgId])
+                ->andWhere(['acc' => $orgId])
                 ->orderBy(['txt' => SORT_ASC])
                 ->limit(100);
             $result = $query->all(\Yii::$app->get('db_api'));
@@ -802,7 +799,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 $existence = AllMaps::find()->where(['service_id' => Registry::RK_SERVICE_ID, 'org_id' => $org_id, 'product_id' => $product_id])->count();
                 if ($existence == 0) {
                     $waybill = RkWaybill::find()->where('id = :w_wid', [':w_wid' => $waybill_id])->one();
-                    $store = $waybill->store_id;
+                    $store = $waybill->store_rid;
                     $position = new AllMaps();
                     $position->service_id = Registry::RK_SERVICE_ID;
                     $position->org_id = $org_id;

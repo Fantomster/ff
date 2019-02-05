@@ -346,7 +346,7 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
     public function actionUpdate($id, $page)
     {
         $model = $this->findModel($id);
-        $lic = TillypadService::getLicense();
+        $lic = iikoService::getLicense();
         $vi = $lic ? 'update' : '/default/_nolic';
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
 
@@ -808,6 +808,19 @@ class WaybillController extends \frontend\modules\clientintegr\modules\iiko\cont
             $arr = ArrayHelper::map(iikoSelectedProduct::find()->where(['organization_id' => $orgId])->all(), 'id', 'product_id');
 
             $query2 = (new Query())
+                ->select([
+                    "id"    => "id",
+                    "denom" => "denom",
+                    "unit"  => "unit"
+                ])
+                ->from('iiko_product')
+                ->where(['is_active' => 1])
+                ->andWhere(['org_id' => $organizationID])
+                ->andWhere("denom LIKE :term", [':term' => $term . '%'])
+                ->orderBy(['denom' => SORT_ASC, "unit" => SORT_ASC])
+                ->limit(15);
+
+            $query3 = (new Query())
                 ->select([
                     "id"    => "id",
                     "denom" => "denom",

@@ -8,7 +8,7 @@ use yii\db\Migration;
 class m190205_122700_add_lang extends Migration
 {
     public $translations = [
-        'preorder.no_vendor_product_in_cart' => 'В корзине нет товаров данного веднора',
+        'preorder.no_vendor_product_in_cart' => 'В корзине нет товаров данного поставщика.',
         'preorder.cart_was_not_found' => 'Вы ещё не создавали корзину.',
         'preorder.vendor_id_not_found' => 'У вас нет поставщика с таким id.',
         'preorder.cart_empty' => 'Корзина в данный момент пуста.',

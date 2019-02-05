@@ -93,14 +93,13 @@ class PreorderWebApi extends WebApi
                 throw new BadRequestHttpException('preorder.vendor_id_not_found');
             }
             $vendors[] = $vendor;
-            $preOrder = $this->createPreorder($vendors, $cart);
         } else {
             $vendors = $cart->getVendors();
             if (empty($vendors)) {
                 throw new BadRequestHttpException('preorder.cart_empty');
             }
-            $preOrder = $this->createPreorder($vendors, $cart);
         }
+        $preOrder = $this->createPreorder($vendors, $cart);
         return $this->prepareModel($preOrder);
     }
 

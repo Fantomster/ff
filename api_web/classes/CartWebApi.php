@@ -256,12 +256,12 @@ class CartWebApi extends \api_web\components\WebApi
                 $order->preorder_id = $preOrderId;
             }
 
-            if (isset($post['delivery_date'])) {
+            if (!empty($post['delivery_date'])) {
                 $d = str_replace('.', '-', $post['delivery_date']);
                 $order->requested_delivery = date('Y-m-d H:i:s', strtotime($d . ' 19:00:00'));
             }
 
-            if (isset($post['comment'])) {
+            if (!empty($post['comment'])) {
                 $order->comment = $post['comment'];
             }
 

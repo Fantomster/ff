@@ -48,7 +48,6 @@ use yii\web\BadRequestHttpException;
  * @property int                $is_recadv_sent     Показатель состояния отправки файла recadv (0 - не отправлен, 1 -
  *           отправлен)
  * @property int                $preorder_id
- *
  * @property EmailQueue[]       $emailQueues
  * @property User               $acceptedBy
  * @property Organization       $client
@@ -80,7 +79,7 @@ class Order extends \yii\db\ActiveRecord
     const STATUS_EDI_ACCEPTANCE_FINISHED = 9;
     const STATUS_EDI_SENDING_TO_VENDOR = 10;
     const STATUS_EDI_SENDING_ERROR = 11;
-    const STATUS_PREORDER = 12;
+    const STATUS_PREORDER = OrderStatus::STATUS_PREORDER;
     const DISCOUNT_NO_DISCOUNT = null;
     const DISCOUNT_FIXED = 1;
     const DISCOUNT_PERCENT = 2;
@@ -406,6 +405,7 @@ class Order extends \yii\db\ActiveRecord
             OrderStatus::STATUS_CANCELLED                   => Yii::t('app', 'common.models.canceled', ['ru' => 'Отменен']),
             OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT => Yii::t('app', 'common.models.waiting_client', ['ru' => 'Ожидает подтверждения клиента']),
             OrderStatus::STATUS_REJECTED                    => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
+            OrderStatus::STATUS_PREORDER                    => Yii::t('app', 'common.models.order.status_preorder', ['ru' => 'Предзаказ']),
         ];
     }
 
@@ -422,6 +422,7 @@ class Order extends \yii\db\ActiveRecord
             OrderStatus::STATUS_DONE                        => Yii::t('app', 'common.models.done_two', ['ru' => 'Завершен']),
             OrderStatus::STATUS_REJECTED                    => Yii::t('app', 'common.models.vendor_canceled', ['ru' => 'Отклонен поставщиком']),
             OrderStatus::STATUS_CANCELLED                   => Yii::t('app', 'common.models.client_canceled', ['ru' => 'Отменен клиентом']),
+            OrderStatus::STATUS_PREORDER                    => Yii::t('app', 'common.models.order.status_preorder', ['ru' => 'Предзаказ']),
         ];
         if (!$short) {
             $result[OrderStatus::STATUS_FORMING] = Yii::t('app', 'common.models.forming', ['ru' => 'Формируется']);

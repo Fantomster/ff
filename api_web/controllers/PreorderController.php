@@ -231,4 +231,130 @@ class PreorderController extends WebApiController
     {
         $this->response = $this->classWebApi->complete($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/preorder/get-orders",
+     *     tags={"Preorder"},
+     *     summary="Список заказов в предзаказе",
+     *     description="Список заказов в предзаказе",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                      "id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *         default={"items":{{
+     *              "id": 1,
+     *              "total_price": 22,
+     *              "invoice_relation": "",
+     *              "created_at": "2016-09-28 15:22:20",
+     *              "requested_delivery": "",
+     *              "actual_delivery": "",
+     *              "comment": "",
+     *              "discount": 0,
+     *              "completion_date": "",
+     *              "order_code": 1,
+     *              "currency": "RUB",
+     *              "currency_id": 1,
+     *              "status_id": 4,
+     *              "status_text": "Завершен",
+     *              "position_count": 2,
+     *              "delivery_price": 0,
+     *              "min_order_price": 3191,
+     *              "total_price_without_discount": 22,
+     *              "items": {
+     *                  {
+     *                      "id": 2,
+     *                      "product": "мясо",
+     *                      "product_id": 9,
+     *                      "catalog_id": 5,
+     *                      "price": 3,
+     *                      "quantity": 2.001,
+     *                      "comment": "",
+     *                      "total": 6,
+     *                      "rating": 0,
+     *                      "brand": "",
+     *                      "article": "4545",
+     *                      "ed": "",
+     *                      "currency": "RUB",
+     *                      "currency_id": 1,
+     *                      "image":
+     *                      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAADhCAAAAACixZ6CAAAGCUlEQVRo3u3bWXabShRA0cx/hDQSnUQjRJMhvDzHjgpEdRSIYq1z"
+     *                  }
+     *              },
+     *              "client": {
+     *                  "id": 2,
+     *                  "name": "j262@mail.ru",
+     *                  "legal_entity": "",
+     *                  "contact_name": "",
+     *                  "phone": "",
+     *                  "email": "",
+     *                  "site": "",
+     *                  "address": "",
+     *                  "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/restaurant-noavatar.gif",
+     *                  "type_id": 1,
+     *                  "type": "Ресторан",
+     *                  "rating": 0,
+     *                  "house": "",
+     *                  "route": "",
+     *                  "city": "",
+     *                  "administrative_area_level_1": "",
+     *                  "country": "",
+     *                  "place_id": "",
+     *                  "about": ""
+     *              },
+     *              "vendor": {
+     *                  "id": 3,
+     *                  "name": "bcpostavshik2@yandex.ru",
+     *                  "legal_entity": "",
+     *                  "contact_name": "",
+     *                  "phone": "+7 (926) 499 18 89",
+     *                  "email": "j262@mail.ru",
+     *                  "site": "ww.ru",
+     *                  "address": "Ломоносовчкий проспект 34 к 1",
+     *                  "image": "https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/vendor-noavatar.gif",
+     *                  "type_id": 2,
+     *                  "type": "Поставщик",
+     *                  "rating": 0,
+     *                  "house": "",
+     *                  "route": "",
+     *                  "city": "",
+     *                  "administrative_area_level_1": "",
+     *                  "country": "",
+     *                  "place_id": "",
+     *                  "about": "",
+     *                  "allow_editing": 0
+     *              }
+     *          }}}
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     * @throws
+     */
+    public function actionGetOrders()
+    {
+        $this->response = $this->classWebApi->orders($this->request);
+    }
 }

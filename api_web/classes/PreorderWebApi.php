@@ -241,6 +241,39 @@ class PreorderWebApi extends WebApi
     }
 
     /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function orders($request)
+    {
+        $this->validateRequest($request, ['id']);
+        $model = Preorder::findOne([
+            'id'              => (int)$request['id'],
+            'organization_id' => $this->user->organization_id
+        ]);
+        if (empty($model)) {
+            throw new BadRequestHttpException('preorder.not_found');
+        }
+
+        $items = [];
+        $orders = $model->orders;
+        if (!empty($orders)) {
+            $orderWebApi = new OrderWebApi();
+            /** @var Order $order */
+            foreach (WebApiHelper::generator($orders) as $order) {
+                $items[] = $orderWebApi->getOrderInfo($order);
+            }
+        }
+
+        return [
+            'items' => $items
+        ];
+    }
+
+    /**
      * Подготовка модели к выдаче фронту
      *
      * @param Preorder $model

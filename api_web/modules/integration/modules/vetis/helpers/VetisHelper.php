@@ -340,6 +340,7 @@ class VetisHelper extends BaseHelper
 
     /**
      * @param $orgId
+     * @return array|string
      * @throws BadRequestHttpException
      */
     public function getIssuerId($orgId)
@@ -348,5 +349,22 @@ class VetisHelper extends BaseHelper
         if (!$issueId) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.setting_issuer_id_not_defined'));
         }
+
+        return $issueId;
+    }
+
+    /**
+     * @param $orgId
+     * @return array|string
+     * @throws BadRequestHttpException
+     */
+    public function getEnterpriseGuid($orgId)
+    {
+        $enterpriseGuid = $this->getSettings($orgId, ['enterprise_guid']);
+        if (!$enterpriseGuid) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.setting_enterprise_guid_not_defined'));
+        }
+
+        return $enterpriseGuid;
     }
 }

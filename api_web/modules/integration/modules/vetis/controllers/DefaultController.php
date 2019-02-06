@@ -1443,4 +1443,52 @@ class DefaultController extends WebApiController
     {
         $this->response = (new VetisWaybill())->getBusinessEntity();
     }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/ingredient-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Ингредиентов",
+     *     description="Получение списка Ингредиентов",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "search": {
+     *                          "name": "ко"
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "говядина КРУТЕЙШАЯ",
+     *                  "лев белый"
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionIngredientList()
+    {
+        $this->response = (new VetisWaybill())->getIngredientList($this->request);
+    }
 }

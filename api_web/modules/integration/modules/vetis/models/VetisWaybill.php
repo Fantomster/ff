@@ -3,6 +3,7 @@
 namespace api_web\modules\integration\modules\vetis\models;
 
 use api\common\models\merc\mercLog;
+use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
 use api_web\components\Registry;
 use api_web\components\ValidateRequest;
@@ -481,14 +482,8 @@ class VetisWaybill extends WebApi
         $reqPag = $request['pagination'] ?? [];
         $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
         $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
-
         $orgId = $request['business_id'] ?? $this->user->organization_id;
-
-        $enterpriseGuid = $this->helper->getSettings($orgId, ['enterprise_guid']);
-
-        if (!$enterpriseGuid) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.setting_enterprise_guid_not_defined'));
-        }
+        $enterpriseGuid = $this->helper->getEnterpriseGuid($orgId);
         $query = VetisProductItem::find()->select(['name', 'uuid', 'guid', 'productType', 'code', 'globalID', 'gost', 'active'])
             ->where(['producer_guid' => $enterpriseGuid, 'active' => 1]);
 
@@ -598,5 +593,20 @@ class VetisWaybill extends WebApi
             ->where(['guid' => $issueId])->one();
     }
 
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getIngredientList($request)
+    {
+        $query = MercStockEntry::find()->select(['product_name'])->distinct()
+            ->where(['owner_guid' => $this->helper->getEnterpriseGuid($this->user->organization_id)]);
+        if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+            $query->andWhere(['like', 'product_name', $request['search']['name'] . '%', false]);
+        }
+
+        return $query->column();
+    }
 
 }

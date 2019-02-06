@@ -351,7 +351,7 @@ class OrganizationController extends DefaultController {
         }
 
 
-        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, $this->currentUser);
 
         $exportFilename = 'vendors_' . date("Y-m-d_H-m-s");
         $exportColumns = (new Organization())->getVendorsExportColumns();

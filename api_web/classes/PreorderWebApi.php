@@ -12,13 +12,12 @@ use api_web\ {
     exceptions\ValidationException,
     components\WebApi
 };
-use common\models\ {
-    Order,
-    Preorder,
-    Cart,
-    Organization,
-    PreorderContent
+use common\models\{Order, Preorder, Cart, Organization, PreorderContent, Profile};
+use yii\data\{
+    ArrayDataProvider,
+    Pagination
 };
+use yii\db\Expression;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -28,6 +27,13 @@ use yii\web\BadRequestHttpException;
  */
 class PreorderWebApi extends WebApi
 {
+
+    private $arAvailableFields = [
+        'id',
+        'sum',
+        'user',
+    ];
+
     /**
      * @param array $vendors
      * @param Cart  $cart
@@ -86,7 +92,7 @@ class PreorderWebApi extends WebApi
         if (!empty($post['vendor_id']) && ($post['vendor_id'] !== 0)) {
             $myVendors = $this->user->organization->getSuppliers();
             if (!isset($myVendors[$post['vendor_id']])) {
-                throw new BadRequestHttpException('preorder.not_your_vendor');;
+                throw new BadRequestHttpException('preorder.not_your_vendor');
             }
             $vendor = Organization::findOne(['id' => $post['vendor_id'], 'type_id' => Organization::TYPE_SUPPLIER]);
             if (empty($vendor)) {
@@ -127,6 +133,111 @@ class PreorderWebApi extends WebApi
         } else {
             throw new ValidationException($model->getFirstErrors());
         }
+    }
+
+    /**
+     * Список предзаказов
+     *
+     * @param $request
+     * @return array
+     */
+    public function list($request)
+    {
+        $page = $request['pagination']['page'] ?? 1;
+        $pageSize = $request['pagination']['page_size'] ?? 12;
+        $sort = $request['sort'] ?? '-id';
+        $result = [];
+
+        $tableName = Preorder::tableName();
+        $tableNameProfile = Profile::tableName();
+        $tableNameOrder = Order::tableName();
+        $sumExpression = new Expression("SUM({$tableNameOrder}.total_price)");
+        $models = Preorder::find()
+            ->joinWith(['orders', 'user.profile'])
+            ->select("{$tableName}.*")
+            ->addSelect([
+                'sum'  => $sumExpression,
+                'user' => "{$tableNameProfile}.full_name"
+            ])
+            ->where(["{$tableName}.organization_id" => $this->user->organization_id])
+            ->groupBy("{$tableName}.id");
+
+        if (isset($request['search'])) {
+            //Поисковая строка
+            if (!empty($request['search']['query'])) {
+                $models->andFilterWhere(['OR',
+                    ['like', "{$tableName}.id", $request['search']['query'], false],
+                    ['like', "{$tableNameProfile}.full_name", $request['search']['query']],
+                ]);
+            }
+            //Фильтр по статусу
+            if (!empty($request['search']['status'])) {
+                $is_active = $request['search']['status'] ?? null;
+                if (!is_null($is_active)) {
+                    $models->andFilterWhere(["{$tableName}.is_active" => (int)$is_active]);
+                }
+            }
+            //Фильтр по сумме
+            if (!empty($request['search']['price'])) {
+                $priceFrom = $request['search']['price']['from'] ?? null;
+                $priceTo = $request['search']['price']['to'] ?? null;
+                if (!is_null($priceFrom)) {
+                    $models->andHaving(['>', 'sum', $priceFrom]);
+                }
+                if (!is_null($priceTo)) {
+                    $models->andHaving(['<', 'sum', $priceTo]);
+                }
+            }
+            //Фильтр по дате
+            if (!empty($request['search']['date'])) {
+                $dateFrom = WebApiHelper::asDatetime($request['search']['date']['from'] ?? null);
+                $dateTo = WebApiHelper::asDatetime($request['search']['date']['to'] ?? null);
+                if (!is_null($dateFrom)) {
+                    $models->andWhere(['>', "{$tableName}.created_at", $dateFrom]);
+                }
+                $models->andWhere(['<', "{$tableName}.created_at", WebApiHelper::asDatetime($dateTo)]);
+            }
+        }
+
+        if ($models->count()) {
+            if ($sort && in_array(ltrim($sort, '-'), $this->arAvailableFields)) {
+                $sortDirection = SORT_ASC;
+                if (strpos($sort, '-') !== false) {
+                    $sortDirection = SORT_DESC;
+                }
+                $models->orderBy([ltrim($sort, '-') => $sortDirection]);
+            }
+
+            $dataProvider = new ArrayDataProvider([
+                'allModels' => $models->all()
+            ]);
+
+            $pagination = new Pagination();
+            $pagination->setPage($page - 1);
+            $pagination->setPageSize($pageSize);
+            $dataProvider->setPagination($pagination);
+            /** @var Preorder $model */
+            if (!empty($dataProvider->models)) {
+                foreach (WebApiHelper::generator($dataProvider->models) as $model) {
+                    $result[] = $this->prepareModel($model);
+                }
+            }
+            $page = ($dataProvider->pagination->page + 1);
+            $pageSize = $dataProvider->pagination->pageSize;
+            $totalPage = ceil($dataProvider->totalCount / $pageSize);
+        }
+
+        $return = [
+            'items'      => $result,
+            'pagination' => [
+                'page'       => $page,
+                'page_size'  => $pageSize,
+                'total_page' => $totalPage ?? 0
+            ],
+            'sort'       => $sort
+        ];
+
+        return $return;
     }
 
     /**

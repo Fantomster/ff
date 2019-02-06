@@ -145,9 +145,9 @@ class Registry
 
     /** @var array коды операций выгрузки накладныхх по сервисам */
     static $operation_code_send_waybill = [
-        self::RK_SERVICE_ID           => 33,
-        self::IIKO_SERVICE_ID         => 5,
-        self::TILLYPAD_SERVICE_ID     => 5
+        self::RK_SERVICE_ID       => 33,
+        self::IIKO_SERVICE_ID     => 5,
+        self::TILLYPAD_SERVICE_ID => 5
     ];
 
     /** @var array Список ставок НДС */
@@ -156,5 +156,22 @@ class Registry
         10 => 10,
         18 => 18,
         20 => 20,
+    ];
+
+    /**
+     * Список типов из меркурия
+     *
+     * @see http://help.vetrf.ru/wiki/ProductType
+     * @var array
+     */
+    static $vetis_product_types = [
+        1 => 'Мясо и мясопродукты.',
+        2 => 'Корма и кормовые добавки.',
+        3 => 'Живые животные.',
+        4 => 'Лекарственные средства.',
+        5 => 'Пищевые продукты.',
+        6 => 'Непищевые продукты и другое.',
+        7 => 'Рыба и морепродукты.',
+        8 => 'Продукция, не требующая разрешения.',
     ];
 }

@@ -2,7 +2,6 @@
 
 namespace api_web\modules\integration\modules\vetis\models;
 
-use api\common\models\merc\mercDicconst;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercVsd;
 use api_web\components\Registry;
@@ -15,6 +14,9 @@ use api_web\modules\integration\modules\vetis\api\mercury\VetDocumentDone;
 use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
+use common\models\vetis\VetisProductItem;
+use yii\data\ActiveDataProvider;
+use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
@@ -118,21 +120,21 @@ class VetisWaybill extends WebApi
         $models = MercVsd::findAll(['uuid' => array_keys($uuids)]);
         foreach ($models as $model) {
             $result[$model->uuid] = [
-                'uuid'            => $model->uuid,
-                'document_id'     => $uuids[$model->uuid],
-                'product_name'    => $model->product_name,
-                'sender_name'     => $model->sender_name,
-                'status'          => $model->status,
-                'status_text'     => MercVsd::$statuses[$model->status],
-                'status_date'     => WebApiHelper::asDatetime($model->last_update_date),
-                'amount'          => $model->amount,
-                'unit'            => $model->unit,
-                'production_date' => WebApiHelper::asDatetime($model->production_date),
-                'date_doc'        => WebApiHelper::asDatetime($model->date_doc),
-                'vsd_direction'   => $arIncOut[$model->uuid] ?? null,
-                'last_error'      => $model->last_error,
-                'user_status'     => $model->user_status,
-                'r13nСlause'      => (bool)$model->r13nClause,
+                'uuid'                => $model->uuid,
+                'document_id'         => $uuids[$model->uuid],
+                'product_name'        => $model->product_name,
+                'sender_name'         => $model->sender_name,
+                'status'              => $model->status,
+                'status_text'         => MercVsd::$statuses[$model->status],
+                'status_date'         => WebApiHelper::asDatetime($model->last_update_date),
+                'amount'              => $model->amount,
+                'unit'                => $model->unit,
+                'production_date'     => WebApiHelper::asDatetime($model->production_date),
+                'date_doc'            => WebApiHelper::asDatetime($model->date_doc),
+                'vsd_direction'       => $arIncOut[$model->uuid] ?? null,
+                'last_error'          => $model->last_error,
+                'user_status'         => $model->user_status,
+                'r13nСlause'          => (bool)$model->r13nClause,
                 'location_prosperity' => (bool)!MercVsd::parsingLocationProsperity($model->location_prosperity),
             ];
         }
@@ -461,5 +463,63 @@ class VetisWaybill extends WebApi
         }
 
         return $result;
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function getProductItemList($request)
+    {
+        $reqPag = $request['pagination'] ?? [];
+        $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
+        $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
+
+        $orgId = $request['business_id'] ?? $this->user->organization_id;
+
+        $enterpriseGuid = $this->helper->getSettings($orgId, ['enterprise_guid']);
+
+        if (!$enterpriseGuid) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.setting_enterprise_guid_not_defined'));
+        }
+        $query = VetisProductItem::find()->select(['name', 'uuid', 'guid', 'productType', 'code', 'globalID', 'gost', 'active'])
+            ->where(['producer_guid' => $enterpriseGuid, 'active' => 1]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+        $result = [];
+
+        /**@var VetisProductItem $model */
+        foreach ($dataProvider->models as $model) {
+            $result[] = [
+                'name'    => $model->name,
+                'uuid'    => $model->uuid,
+                'guid'    => $model->guid,
+                'form'    => Registry::$vetis_product_types[$model->productType],
+                'article' => $model->code,
+                'gtin'    => $model->globalID,
+                'gost'    => $model->gost,
+                'active'  => $model->active,
+            ];
+        }
+
+        $return = [
+            'result'     => $result,
+            'pagination' => [
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
+
+        return $return;
     }
 }

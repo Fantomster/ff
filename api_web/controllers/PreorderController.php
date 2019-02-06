@@ -357,4 +357,90 @@ class PreorderController extends WebApiController
     {
         $this->response = $this->classWebApi->orders($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/preorder/get",
+     *     tags={"Preorder"},
+     *     summary="Детальная информация предзаказа",
+     *     description="Детальная информация предзаказа",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                      "id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *            default={
+     *                          "id": 1,
+     *                          "is_active": true,
+     *                          "organization": {
+     *                              "id": 1,
+     *                              "name": "Ресторан 1"
+     *                          },
+     *                          "user": {
+     *                              "id": 1,
+     *                              "name": "Иванов Иван"
+     *                          },
+     *                          "count": {
+     *                              "produtcs": 18,
+     *                              "orders": 4
+     *                          },
+     *                          "summ": "250000,50",
+     *                          "currency": {
+     *                              "id": 1,
+     *                              "symbol": "RUB"
+     *                          },
+     *                          "products": {
+     *                          {
+     *                             "id": 1,
+     *                             "name": "Колбаса сушенная горная",
+     *                             "article": "БС-1-200 VM",
+     *                             "plan_quantity": 10,
+     *                             "quantity": 17,
+     *                             "sum": "611,66",
+     *                             "isset_analog": false
+     *                          },
+     *                          {
+     *                             "id": 2,
+     *                             "name": "Колбаса вареная",
+     *                             "article": "KVM",
+     *                             "plan_quantity": 10,
+     *                             "quantity": 13,
+     *                             "sum": "811,66",
+     *                             "isset_analog": false
+     *                          }
+     *                          },
+     *                          "created_at": "2019-02-05T23:00:00+03:00",
+     *                          "upated_at": "2019-02-05T23:00:00+03:00"
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     * @throws
+     */
+    public function actionGet()
+    {
+        $this->response = $this->classWebApi->get($this->request);
+    }
 }

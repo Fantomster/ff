@@ -23,7 +23,7 @@ class RuleForUser extends BaseRule
             return false;
         }
 
-        if (isset(\Yii::$app->authManager->getRolesByUser($user)[$role->name])) {
+        if (isset(\Yii::$app->authManager->getRolesByUser($user)[$item->name])) {
             return true;
         }
 

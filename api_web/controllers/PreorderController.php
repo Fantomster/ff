@@ -443,4 +443,50 @@ class PreorderController extends WebApiController
     {
         $this->response = $this->classWebApi->get($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/preorder/confirm-orders",
+     *     tags={"Preorder"},
+     *     summary="Оформить все заказы",
+     *     description="Метод переводит все заказы в этом предзаказе в `статус ожидает подтверждения поставщика`",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                      "id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *            default={
+     *                 "result": true
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     * @throws
+     */
+    public function actionConfirmOrders()
+    {
+        $this->response=$this->classWebApi->confirmOrders($this->request);
+    }
 }

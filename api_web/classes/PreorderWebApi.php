@@ -365,4 +365,9 @@ class PreorderWebApi extends WebApi
 
         return $return;
     }
+
+    public function confirmOrders($post)
+    {
+        return 'test';
+    }
 }

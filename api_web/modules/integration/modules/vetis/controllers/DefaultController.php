@@ -1106,4 +1106,61 @@ class DefaultController extends WebApiController
     {
         $this->response = Registry::$vetis_product_types;
     }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/product-subtype-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Продукция",
+     *     description="Получение списка Продукция",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                     "type_id": 3
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "свиньи",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                      },
+     *                      {
+     *                          "name": "пчелы",
+     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionProductSubtypeList()
+    {
+        $this->response = (new VetisWaybill())->getProductSubtypeList($this->request);
+    }
+
+
+
 }

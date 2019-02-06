@@ -14,6 +14,7 @@ use api_web\modules\integration\modules\vetis\api\mercury\VetDocumentDone;
 use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
+use common\models\vetis\VetisProductByType;
 use common\models\vetis\VetisProductItem;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
@@ -521,5 +522,18 @@ class VetisWaybill extends WebApi
         ];
 
         return $return;
+    }
+
+    /**
+     * @param $request
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function getProductSubtypeList($request)
+    {
+        $this->validateRequest($request, ['type_id']);
+        $models = VetisProductByType::find()->select(['name', 'guid'])->where(['productType' => $request['type_id']])->all();
+
+        return $models;
     }
 }

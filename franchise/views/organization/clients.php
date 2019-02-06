@@ -270,9 +270,9 @@ if(preg_match("~/organization/clients~",$_SERVER['REQUEST_URI'])) {
                             ],
                             [
                                 'format' => 'raw',
-                                'attribute' => 'vendorCount',
+                                'attribute' => 'vendor_count',
                                 'value' => function ($data) {
-                                    $progress = $data["vendorCount"] > 0 ? round($data["vendorCount_prev30"] * 100 / $data["vendorCount"], 2) : 0;
+                                    $progress = $data["vendor_count"] > 0 ? round($data["vendor_count_prev30"] * 100 / $data["vendor_count"], 2) : 0;
 //                                            if ($progress > 0) {
                                     $divider = '<i class="fa fa-caret-up"></i>';
                                     //                                          }
@@ -282,15 +282,15 @@ if(preg_match("~/organization/clients~",$_SERVER['REQUEST_URI'])) {
                                     } elseif ($progress > 0) {
                                         $class = " text-orange";
                                     }
-                                    return $data["vendorCount"] . " <span class='description-percentage $class'>$divider $progress%";
+                                    return $data["vendor_count"] . " <span class='description-percentage $class'>$divider $progress%";
                                 },
                                 'label' => Yii::t('app', 'franchise.views.organization.vendors_quan', ['ru'=>'Кол-во поставщиков']),
                             ],
                             [
                                 'format' => 'raw',
-                                'attribute' => 'orderCount',
+                                'attribute' => 'order_count',
                                 'value' => function ($data) {
-                                    $progress = $data["orderCount"] > 0 ? round($data["orderCount_prev30"] * 100 / $data["orderCount"], 2) : 0;
+                                    $progress = $data["order_count"] > 0 ? round($data["order_count_prev30"] * 100 / $data["order_count"], 2) : 0;
 //                                            if ($progress > 0) {
                                     $divider = '<i class="fa fa-caret-up"></i>';
                                     //                                          }
@@ -300,15 +300,15 @@ if(preg_match("~/organization/clients~",$_SERVER['REQUEST_URI'])) {
                                     } elseif ($progress > 0) {
                                         $class = " text-orange";
                                     }
-                                    return $data["orderCount"] . " <span class='description-percentage $class'>$divider $progress%";
+                                    return $data["order_count"] . " <span class='description-percentage $class'>$divider $progress%";
                                 },
                                 'label' => Yii::t('app', 'franchise.views.organization.orders_quan_two', ['ru'=>'Кол-во заказов']),
                             ],
                             [
                                 'format' => 'raw',
-                                'attribute' => 'orderSum',
+                                'attribute' => 'order_sum',
                                 'value' => function ($data) use($currencyData) {
-                                    $progress = $data["orderSum"] > 0 ? round($data["orderSum_prev30"] * 100 / $data["orderSum"], 2) : 0;
+                                    $progress = $data["order_sum"] > 0 ? round($data["order_sum_prev30"] * 100 / $data["order_sum"], 2) : 0;
 //                                            if ($progress > 0) {
                                     $divider = '<i class="fa fa-caret-up"></i>';
                                     //                                          }
@@ -318,7 +318,7 @@ if(preg_match("~/organization/clients~",$_SERVER['REQUEST_URI'])) {
                                     } elseif ($progress > 0) {
                                         $class = " text-orange";
                                     }
-                                    return ($data["orderSum"] ? $data["orderSum"] : 0) . " " . $currencyData['iso_code'] . " <span class='description-percentage $class'>$divider $progress%";
+                                    return ($data["order_sum"] ? $data["order_sum"] : 0) . " " . $currencyData['iso_code'] . " <span class='description-percentage $class'>$divider $progress%";
                                 },
                                 'label' => Yii::t('app', 'franchise.views.organization.clients.sum', ['ru'=>'Сумма заказов']),
                             ],

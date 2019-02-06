@@ -1280,6 +1280,63 @@ class DefaultController extends WebApiController
      */
     public function actionUnitList()
     {
-        $this->response = (new VetisWaybill())->getUnitList($this->request);
+        $this->response = (new VetisWaybill())->getUnitList();
     }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/packing-type-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Тип упаковки",
+     *     description="Получение списка Тип упаковки",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "Бочка (емкостью около 164 л) деревянная шпунтованная",
+     *                          "uuid": "021bc2d9-f514-4491-b21a-ffe63023236f",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                      },
+     *                      {
+     *                          "name": "Сундук, морской",
+     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionPackingTypeList()
+    {
+        $this->response = (new VetisWaybill())->getPackingTypeList();
+    }
+
 }

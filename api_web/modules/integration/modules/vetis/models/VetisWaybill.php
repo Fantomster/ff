@@ -14,6 +14,7 @@ use api_web\modules\integration\modules\vetis\api\mercury\VetDocumentDone;
 use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
+use common\models\vetis\VetisPackingType;
 use common\models\vetis\VetisProductByType;
 use common\models\vetis\VetisProductItem;
 use common\models\vetis\VetisSubproductByProduct;
@@ -556,11 +557,18 @@ class VetisWaybill extends WebApi
     }
 
     /**
-     * @param $request
      * @return array|\yii\db\ActiveRecord[]
      */
-    public function getUnitList($request)
+    public function getUnitList()
     {
         return VetisUnit::find()->select(['name', 'uuid', 'guid'])->all();
+    }
+
+    /**
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    public function getPackingTypeList()
+    {
+        return VetisPackingType::find()->select(['name', 'uuid', 'guid'])->all();
     }
 }

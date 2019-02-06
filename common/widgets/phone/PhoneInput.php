@@ -1,6 +1,6 @@
 <?php
 
-namespace common\widgets;
+namespace common\widgets\phone;
 
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;

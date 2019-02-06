@@ -21,7 +21,7 @@
         "amnah/yii2-user": "^5.0",
         "asimlqt/php-google-spreadsheet-client": "3.0.*",
         "aws/aws-sdk-php": "3.*",
-        "borales/yii2-phone-input": "*",
+        "borales/yii2-phone-input": "0.1.2",
         "bower-asset/bootbox": "~4.3.0",
         "bower-asset/bootstrap": "^3.3",
         "bower-asset/perfect-scrollbar": "*",

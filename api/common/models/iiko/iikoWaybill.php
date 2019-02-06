@@ -136,29 +136,6 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         ];
     }
 
-    public function beforeSave($insert)
-    {
-
-        $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
-
-        if ($waybillMode !== '2') { // Is not a manual mode
-            if (empty($this->text_code)) {
-                $this->text_code = 'mixcart';
-            }
-            if (empty($this->num_code)) {
-                $this->num_code = $this->order_id;
-            }
-        }
-
-        $doc_num = $this->order->waybill_number;
-
-        if (!empty($doc_num)) {
-            $this->num_code = $doc_num;
-        }
-
-        return parent::beforeSave($insert);
-    }
-
     /**
      * @return \yii\db\ActiveQuery
      */

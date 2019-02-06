@@ -168,16 +168,7 @@ class RkWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderInte
         }
     }
 
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
-
-        if ($insert) {
-            $this->createWaybillData();
-        }
-    }
-
-    protected function createWaybillData()
+    public function createWaybillData()
     {
         $dbName = DBNameHelper::getApiName();
         $waybillMode = RkDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();

@@ -28,6 +28,7 @@ class SiteController extends Controller
             Yii::getAlias('@api_web/controllers/CartController.php'),
             Yii::getAlias('@api_web/controllers/OrderController.php'),
             Yii::getAlias('@api_web/controllers/PreorderController.php'),
+            Yii::getAlias('@api_web/controllers/LazyVendorController.php'),
             Yii::getAlias('@api_web/controllers/ClientController.php'),
             Yii::getAlias('@api_web/controllers/VendorController.php'),
             Yii::getAlias('@api_web/controllers/GuideController.php'),

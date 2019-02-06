@@ -21,7 +21,7 @@ $form = ActiveForm::begin([
 <?= $form->field($profile, 'full_name')->textInput(['class' => 'input_type_2_1', 'placeholder' => Yii::t('message', 'frontend.views.client.supp.fio', ['ru'=>'Введите ФИО поставщика']), 'disabled' => $disabled]) ?>
 <?=
         $form->field($profile, 'phone')
-        ->widget(\common\widgets\PhoneInput::className(), [
+        ->widget(\common\widgets\phone\PhoneInput::className(), [
             'jsOptions' => [
                 'preferredCountries' => ['ru'],
                 'nationalMode' => false,

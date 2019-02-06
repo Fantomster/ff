@@ -50,7 +50,7 @@ $language = (Yii::$app->language == 'en') ? 'gb' : Yii::$app->language;
     <label>
         <?=
                 $form->field($profile, 'phone')
-                ->widget(\common\widgets\PhoneInput::className(), [
+                ->widget(\common\widgets\phone\PhoneInput::className(), [
                     'jsOptions' => [
                         'preferredCountries' => [$language],
                         'nationalMode'       => false,

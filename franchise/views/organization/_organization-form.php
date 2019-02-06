@@ -19,7 +19,7 @@ use common\models\Organization;
                             $form->field($organization, 'phone', [
 //                                'addon' => ['prepend' => ['content' => '<i class="fa fa-phone"></i>']]
                             ])
-                            ->widget(\common\widgets\PhoneInput::className(), [
+                            ->widget(\common\widgets\phone\PhoneInput::className(), [
                                 'jsOptions' => [
                                     'preferredCountries' => ['ru'],
                                     'nationalMode' => false,
@@ -50,7 +50,7 @@ use common\models\Organization;
                                     $form->field($profile, 'phone', [
 //                    'addon' => ['prepend' => ['content' => '<i class="fa fa-phone"></i>']]
                                     ])
-                                    ->widget(\common\widgets\PhoneInput::className(), [
+                                    ->widget(\common\widgets\phone\PhoneInput::className(), [
                                         'jsOptions' => [
                                             'preferredCountries' => ['ru'],
                                             'nationalMode' => false,
@@ -83,7 +83,7 @@ use common\models\Organization;
                     <?= $form->field($buisinessInfo, 'ogrn')->textInput() ?>
                     <?= $form->field($buisinessInfo, 'bank_name')->textInput() ?>
                     <?= $form->field($buisinessInfo, 'bik')->textInput() ?>
-                    <?= $form->field($buisinessInfo, 'phone')->widget(\common\widgets\PhoneInput::className(), [
+                    <?= $form->field($buisinessInfo, 'phone')->widget(\common\widgets\phone\PhoneInput::className(), [
                                 'jsOptions' => [
                                     'preferredCountries' => ['ru'],
                                     'nationalMode' => false,

@@ -183,7 +183,7 @@ $this->registerCss("
                             <div class="form-group">
                                 <?=
                                     $form->field($franchisee, 'phone_manager')
-                                    ->widget(\common\widgets\PhoneInput::className(), [
+                                    ->widget(\common\widgets\phone\PhoneInput::className(), [
                                     'jsOptions' => [
                                         'preferredCountries' => ['ru'],
                                         'nationalMode' => false,

@@ -14,11 +14,11 @@ class m190206_144602_add_lang extends Migration
 
     public function safeUp()
     {
-        \console\helpers\BatchTranslations::insertCategory('ru', 'app', $this->translations);
+        \console\helpers\BatchTranslations::insertCategory('ru', 'api_web', $this->translations);
     }
 
     public function safeDown()
     {
-        \console\helpers\BatchTranslations::deleteCategory('ru', 'app', $this->translations);
+        \console\helpers\BatchTranslations::deleteCategory('ru', 'api_web', $this->translations);
     }
 }

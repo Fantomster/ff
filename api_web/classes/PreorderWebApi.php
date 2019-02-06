@@ -274,12 +274,59 @@ class PreorderWebApi extends WebApi
     }
 
     /**
+     * @param Preorder $preOrder
+     * @return array
+     */
+    private function productsInfo(Preorder $preOrder)
+    {
+        $orders = $preOrder->getOrders()->all();
+        $products = [];
+        foreach ($orders as $index => $order) {
+            $orderContent = $order->getOrderContent()->all();
+            foreach ($orderContent as $index => $item) {
+                $contents = $preOrder
+                    ->getPreorderContents()
+                    ->where(['product_id' => $item->product_id])
+                    ->one();
+                $products[] = [
+                    'id'            => $item->product_id,
+                    'name'          => $item->product_name,
+                    'article'       => $item->article,
+                    'plan_quantity' => $contents->plan_quantity,
+                    'quantity'      => $item->quantity,
+                    'sum'           => number_format($item->quantity * $item->price, 2),
+                    'isset_analog'  => false,
+                ];
+            }
+        }
+        return $products;
+    }
+
+    /**
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function get($post)
+    {
+        $this->validateRequest($post, ['id']);
+        $model = Preorder::findOne([
+            'id'              => (int)$post['id'],
+            'organization_id' => $this->user->organization_id
+        ]);
+        if (empty($model)) {
+            throw new BadRequestHttpException('preorder.not_found');
+        }
+        return $this->prepareModel($model, true);
+    }
+
+    /**
      * Подготовка модели к выдаче фронту
      *
      * @param Preorder $model
      * @return array
      */
-    private function prepareModel(Preorder $model)
+    private function prepareModel(Preorder $model, bool $products = false)
     {
         $return = [
             'id'           => $model->id,
@@ -304,6 +351,10 @@ class PreorderWebApi extends WebApi
             'created_at'   => WebApiHelper::asDatetime($model->created_at),
             'updated_at'   => WebApiHelper::asDatetime($model->updated_at)
         ];
+
+        if ($products) {
+            $return['products'] = $this->productsInfo($model);
+        }
 
         return $return;
     }

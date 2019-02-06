@@ -7,15 +7,20 @@ use common\models\Role;
 use yii\data\ActiveDataProvider;
 use common\models\Organization;
 use common\models\User;
+use yii\db\Query;
+use yii\db\Expression;
 
 /**
  * Description of ClientSearch
  *
  * @author sharaf
  */
-class AssociatedOrganizationsSearch {
+class AssociatedOrganizationsSearch extends Organization{
 
     public $filter_currency = 1;
+    public $searchString;
+    public $date_from;
+    public $date_to;
 
     /**
      * Creates data provider instance with search query applied
@@ -128,8 +133,8 @@ class AssociatedOrganizationsSearch {
                     "phone"                   => "org.phone",
                 ])
                 ->from(["rel" => $tblRSR])
-                ->leftJoin(['fa' => $tblFA], "org.id = fa.organization_id")
                 ->leftJoin(["org" => $tblOrg], "org.id = rel.{$prefix}_org_id")
+                ->leftJoin(['fa' => $tblFA], "org.id = fa.organization_id")
                 ->where([
                     "and",
                     ["rel.{$prefix}_org_id" => $organization->id],

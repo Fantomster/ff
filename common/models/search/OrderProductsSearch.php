@@ -53,6 +53,12 @@ class OrderProductsSearch extends \yii\base\Model {
                 ->from($tblOrdC)
                 ->where(["order_id" => $order->id]);
         
+        $subQueryCatIds = (new Query())
+                ->select(["cat_id"])
+                ->from($tblRSR)
+                ->where("supp_org_id = cbg.supp_org_id")
+                ->andWhere(["rest_org_id" => $order->client_id]);
+        
         $subQueryCG = (new Query())
                 ->select([
                     "cbg_id" => "cbg.id", 
@@ -72,6 +78,7 @@ class OrderProductsSearch extends \yii\base\Model {
                 ->leftJoin(["curr" => $tblCurr], "cat.currency_id = curr.id")
                 ->where([
                     "and",
+                    ["cg.cat_id" => $subQueryCatIds],
                     ["cbg.supp_org_id" => $order->vendor_id],
                     ["cbg.status" => 1],
                     ["cbg.deleted" => 0],
@@ -98,6 +105,7 @@ class OrderProductsSearch extends \yii\base\Model {
                 ->leftJoin(["curr" => $tblCurr], "cat.currency_id = curr.id")
                 ->where([
                     "and",
+                    ["cbg.cat_id" => $subQueryCatIds],
                     ["cbg.supp_org_id" => $order->vendor_id],
                     ["cbg.status" => 1],
                     ["cbg.deleted" => 0],

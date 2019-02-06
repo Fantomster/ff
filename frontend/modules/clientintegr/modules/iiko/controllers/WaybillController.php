@@ -188,7 +188,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             if (!$position->save()) {
                 throw new NotFoundHttpException(Yii::t('error', 'api.allmaps.position.not.save', ['ru' => 'Сохранить позицию в глобальном сопоставлении не удалось.']));
             }
-                $daughters = FullmapController::actionAddProductFromMain($org_id, $product_id);
+            $daughters = FullmapController::actionAddProductFromMain($org_id, $product_id);
         }
         return $munit;
     }
@@ -855,9 +855,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findModel($waybill_id);
 
         if ($vatf == 1) {
-            $iiko_waybill_datas = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->all();
+            $waybill_datas = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->all();
         } else {
-            $iiko_waybill_datas = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->andWhere(['vat' => $vatf])->all();
+            $waybill_datas = iikoWaybillData::find()->where('waybill_id = :w_wid', [':w_wid' => $waybill_id])->andWhere(['vat' => $vatf])->all();
         }
 
         if ($page != 'undefined') {
@@ -875,12 +875,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $page = 1;
         }
 
-        if (count($iiko_waybill_datas) > 0) {
-            foreach ($iiko_waybill_datas as $iiko_waybill_data) {
-                $product_id = $iiko_waybill_data->product_id;
-                $product_rid = $iiko_waybill_data->product_rid;
-                $org_id = $iiko_waybill_data->org;
-                $koef = $iiko_waybill_data->koef;
+        if (count($waybill_datas) > 0) {
+            foreach ($waybill_datas as $waybill_data) {
+                $product_id = $waybill_data->product_id;
+                $product_rid = $waybill_data->product_rid;
+                $org_id = $waybill_data->org;
+                $koef = $waybill_data->koef;
 
                 $supp_id = \common\models\CatalogBaseGoods::getSuppById($product_id);
 
@@ -909,9 +909,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                 if (!$position->save()) {
                     throw new NotFoundHttpException(Yii::t('error', 'api.allmaps.position.not.save', ['ru' => 'Сохранить позицию в глобальном сопоставлении не удалось.']));
                 }
+                $waybill_data->vat = $vat;
+                if (!$waybill_data->save()) {
+                    throw new NotFoundHttpException(Yii::t('error', 'api.iiko.controllers.waybill.data.not.save', ['ru' => 'Сохранить позицию в приходной накладной IIKO не удалось.']));
+                }
             }
         }
-
         return $this->redirect(['map', 'waybill_id' => $model->id, 'way' => 0, 'iikoWaybillDataSearch[vat]' => $vatf, 'sort' => $sort, 'page' => $page]);
     }
 
@@ -1084,7 +1087,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
         $supp_id = \common\models\CatalogBaseGoods::getSuppById($number);
 
-        $existence = AllMaps::fine()->where(['service_id' => Registry::IIKO_SERVICE_ID, 'org_id' => $org_id, 'product_id' => $number])->one();
+        $existence = AllMaps::find()->where(['service_id' => Registry::IIKO_SERVICE_ID, 'org_id' => $org_id, 'product_id' => $number])->one();
         if (!$existence) {
             $position = new AllMaps();
             $position->service_id = Registry::IIKO_SERVICE_ID;
@@ -1107,6 +1110,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             $position->koef = $existence->koef;
             $position->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         }
+        $position->unit_rid = null;
         if (!$position->save()) {
             throw new NotFoundHttpException(Yii::t('error', 'api.allmaps.position.not.save', ['ru' => 'Сохранить позицию в глобальном сопоставлении не удалось.']));
         }
@@ -1128,7 +1132,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         foreach ($orders as $order) {
             $waybills = iikoWaybill::find()->where(['order_id' => $order->id, 'status_id' => 1])->all();
             foreach ($waybills as $waybill) {
-                $waybill_datas = iikoWaybillData::find()->where(['waybill_data' => $waybill->id, 'product_id' => $number, 'product_rid' => null])->all();
+                $waybill_datas = iikoWaybillData::find()->where(['waybill_id' => $waybill->id, 'product_id' => $number, 'product_rid' => null])->all();
                 foreach ($waybill_datas as $waybill_data) {
                     $waybill_data->product_rid = $product_rid;
                     $waybill_data->linked_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');

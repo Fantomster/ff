@@ -14,6 +14,7 @@ use frontend\controllers\ClientController;
 use frontend\modules\clientintegr\modules\iiko\helpers\iikoApi;
 use api_web\components\Registry;
 use yii\behaviors\TimestampBehavior;
+use yii\web\NotFoundHttpException;
 
 /**
  * This is the model class for table "iiko_waybill".
@@ -133,29 +134,6 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
                 'value'              => \gmdate('Y-m-d H:i:s'),
             ],
         ];
-    }
-
-    public function beforeSave($insert)
-    {
-
-        $waybillMode = iikoDicconst::findOne(['denom' => 'auto_unload_invoice'])->getPconstValue();
-
-        if ($waybillMode !== '2') { // Is not a manual mode
-            if (empty($this->text_code)) {
-                $this->text_code = 'mixcart';
-            }
-            if (empty($this->num_code)) {
-                $this->num_code = $this->order_id;
-            }
-        }
-
-        $doc_num = $this->order->waybill_number;
-
-        if (!empty($doc_num)) {
-            $this->num_code = $doc_num;
-        }
-
-        return parent::beforeSave($insert);
     }
 
     /**
@@ -310,8 +288,7 @@ class iikoWaybill extends \yii\db\ActiveRecord implements CreateWaybillByOrderIn
         $order = \common\models\Order::findOne(['id' => $order_id]);
 
         if (!$order) {
-            \Yii::error('Cant find order during sending waybill');
-            throw new \Exception('Ошибка при отправке.' . $order_id);
+            throw new NotFoundHttpException(Yii::t('error', 'api.controllers.order.not.find', ['ru' => 'Заказа с таким номером не существует.']));
         }
 
         // Получаем список складов, чтобы понять, сколько надо делать накладных

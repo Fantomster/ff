@@ -218,7 +218,7 @@ class DefaultController extends Controller
 
     private function handlePositions($positions, $modelName, $res, $type)
     {
-        $modelName::updateAll(['is_active' => false], ['org_id' => $res]);
+        $modelName::updateAll(['is_active' => 0], ['org_id' => $res]);
         $i = 0;
         $returnArray = [];
         foreach ($positions as $position) {
@@ -247,7 +247,7 @@ class DefaultController extends Controller
                     $oneSPosition->measure = $position->measure;
             }
             $oneSPosition->updated_at = new Expression('NOW()');
-            $oneSPosition->is_active = true;
+            $oneSPosition->is_active = 1;
             if ($oneSPosition->validate()) {
                 $oneSPosition->save();
             } else {

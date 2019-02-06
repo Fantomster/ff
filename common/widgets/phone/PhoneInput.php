@@ -14,7 +14,7 @@ class PhoneInput extends \borales\extensions\phoneInput\PhoneInput{
     public function init()
     {
         parent::init();
-        \borales\extensions\phoneInput\PhoneInputAsset::register($this->view);
+        PhoneInputAsset::register($this->view);
         $id = ArrayHelper::getValue($this->options, 'id');
         $jsOptions = $this->jsOptions ? Json::encode($this->jsOptions) : "";
         $this->view->registerJs("$('#$id').intlTelInput($jsOptions);");

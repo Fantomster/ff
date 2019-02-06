@@ -226,9 +226,9 @@ $this->registerCss("
                                 ],
                                 [
                                     'format' => 'raw',
-                                    'attribute' => 'orderCount',
+                                    'attribute' => 'order_count',
                                     'value' => function ($data) {
-                                        $progress = $data["orderCount"] > 0 ? round($data["orderCount_prev30"] * 100 / $data["orderCount"], 2) : 0;
+                                        $progress = $data["order_count"] > 0 ? round($data["order_count_prev30"] * 100 / $data["order_count"], 2) : 0;
 //                                            if ($progress > 0) {
                                         $divider = '<i class="fa fa-caret-up"></i>';
                                         //                                          }
@@ -238,15 +238,15 @@ $this->registerCss("
                                         } elseif ($progress > 0) {
                                             $class = " text-orange";
                                         }
-                                        return $data["orderCount"] . " <span class='description-percentage $class'>$divider $progress%";
+                                        return $data["order_count"] . " <span class='description-percentage $class'>$divider $progress%";
                                     },
                                     'label' => Yii::t('app', 'franchise.views.organization.orders_quan', ['ru'=>'Кол-во заказов']),
                                 ],
                                 [
                                     'format' => 'raw',
-                                    'attribute' => 'orderSum',
+                                    'attribute' => 'order_sum',
                                     'value' => function ($data) {
-                                        $progress = $data["orderSum"] > 0 ? round($data["orderSum_prev30"] * 100 / $data["orderSum"], 2) : 0;
+                                        $progress = $data["order_sum"] > 0 ? round($data["order_sum_prev30"] * 100 / $data["order_sum"], 2) : 0;
 //                                            if ($progress > 0) {
                                         $divider = '<i class="fa fa-caret-up"></i>';
                                         //                                          }
@@ -256,7 +256,7 @@ $this->registerCss("
                                         } elseif ($progress > 0) {
                                             $class = " text-orange";
                                         }
-                                        return ($data["orderSum"] ? $data["orderSum"] : 0) . " руб. <span class='description-percentage $class'>$divider $progress%";
+                                        return ($data["order_sum"] ? $data["order_sum"] : 0) . " руб. <span class='description-percentage $class'>$divider $progress%";
                                     },
                                     'label' => Yii::t('app', 'franchise.views.organization.orders_sum', ['ru'=>'Сумма заказов']),
                                 ],

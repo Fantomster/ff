@@ -78,9 +78,10 @@ class ServiceIiko extends AbstractSyncFactory
     /**
      * Метод отправки накладной
      *
-     * @param $request
+     * @param array $request
      * @return array
-     * @throws \Exception
+     * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     public function sendWaybill($request): array
     {
@@ -101,7 +102,7 @@ class ServiceIiko extends AbstractSyncFactory
 
         $this->countWaybillSend = count($records);
 
-        $api = iikoApi::getInstance();
+        $api = iikoApi::getInstance($this->user->organization_id);
         try {
             if ($api->auth()) {
                 /** @var iikoWaybill $model */
@@ -128,6 +129,8 @@ class ServiceIiko extends AbstractSyncFactory
                         $model->save();
                         $this->response($res, $model, \Yii::t('api_web', 'service_iiko.success_unloading_waybill'));
                         $transaction->commit();
+                        $this->writeInJournal(\Yii::t('api_web', 'integration.waybill_send') . $model->id,
+                            Registry::IIKO_SERVICE_ID, $model->acquirer_id);
                     } catch (\Exception $e) {
                         $transaction->rollBack();
                         $model->status_id = Registry::WAYBILL_ERROR;
@@ -139,6 +142,8 @@ class ServiceIiko extends AbstractSyncFactory
                             $api->logout();
                         }
                         $this->response($res, $model, $e->getMessage(), false);
+                        $this->writeInJournal(\Yii::t('api_web', 'integration.waybill_not_send') . $model->id,
+                            Registry::IIKO_SERVICE_ID, $model->acquirer_id, 'error');
                     }
                 }
                 $api->logout();
@@ -159,10 +164,11 @@ class ServiceIiko extends AbstractSyncFactory
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
      */
     public function checkConnect($request = [])
     {
-        $api = iikoApi::getInstance();
+        $api = iikoApi::getInstance($this->user->organization_id);
 
         if (!empty($request['params'])) {
             if (!empty($request['params']['URL'])) {
@@ -177,16 +183,16 @@ class ServiceIiko extends AbstractSyncFactory
         }
 
         try {
-            if ($api->auth(null, null, 2)) {
+            $result = $api->auth(null, null, 2);
+            if ($result) {
                 $api->logout();
-                return ['result' => true];
             }
         } catch (\Exception $e) {
             $message = $this->prepareErrorMessage($e->getMessage(), $api);
             throw new BadRequestHttpException($message);
         }
 
-        return ['result' => false];
+        return ['result' => $result];
     }
 
     /**

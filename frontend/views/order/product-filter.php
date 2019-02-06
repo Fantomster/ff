@@ -92,7 +92,7 @@ $this->registerJs('
                             ],
                         ]);
                         ?>
-                        <?= "fff".$selectedVendor ?>
+                        <?= $selectedVendor ?>
                         <?=
                         $form->field($searchModel, 'searchString', [
                             'addon' => [
@@ -197,7 +197,11 @@ $this->registerJs('
                                                            });}'
                                                      ],
                                     'checkboxOptions' => function ($model, $key, $index, $widget) use ($blockedItems) {
-                                        return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => (in_array($model['id'], $blockedItems)) ? 'checked' : ""];
+                                        if(in_array($model['id'], $blockedItems)){
+                                            return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => 'checked'];
+                                        } else {
+                                            return ['value' => $model['id'], 'class' => 'checkbox-export'];
+                                        }
                                     },
                                 ],
                                 [

@@ -13,16 +13,21 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\EdiWebApi;
+use api_web\classes\GuideWebApi;
+use api_web\classes\OrderWebApi;
 use api_web\components\Registry;
 use api_web\components\WebApiController;
 
 /**
  * Class EdiController
  *
+ * @property EdiWebApi $classWebApi
  * @package api_web\controllers
  */
 class EdiController extends WebApiController
 {
+    public $className = EdiWebApi::class;
 
     public $license_service_id = [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID];
 
@@ -114,7 +119,7 @@ class EdiController extends WebApiController
      */
     public function actionOrderHistory()
     {
-        $this->response = $this->container->get('EdiWebApi')->getOrderHistory($this->request);
+        $this->response = $this->classWebApi->getOrderHistory($this->request);
     }
 
     /**
@@ -296,7 +301,7 @@ class EdiController extends WebApiController
      */
     public function actionOrderInfo()
     {
-        $this->response = $this->container->get('EdiWebApi')->getOrderInfo($this->request);
+        $this->response = $this->classWebApi->getOrderInfo($this->request);
     }
 
     /**
@@ -341,7 +346,7 @@ class EdiController extends WebApiController
      */
     public function actionAcceptProducts()
     {
-        $this->response = $this->container->get('EdiWebApi')->acceptProducts($this->request);
+        $this->response = $this->classWebApi->acceptProducts($this->request);
     }
 
     /**
@@ -386,7 +391,7 @@ class EdiController extends WebApiController
      */
     public function actionOrderComplete()
     {
-        $this->response = $this->container->get('EdiWebApi')->orderComplete($this->request);
+        $this->response = $this->classWebApi->orderComplete($this->request);
     }
 
     /**
@@ -431,7 +436,7 @@ class EdiController extends WebApiController
      */
     public function actionOrderCancel()
     {
-        $this->response = $this->container->get('EdiWebApi')->orderCancel($this->request);
+        $this->response = $this->classWebApi->orderCancel($this->request);
     }
 
     /**
@@ -479,7 +484,7 @@ class EdiController extends WebApiController
      */
     public function actionHistoryCount()
     {
-        $this->response = $this->container->get('EdiWebApi')->getHistoryCount($this->request);
+        $this->response = $this->classWebApi->getHistoryCount();
     }
 
     /**
@@ -606,11 +611,11 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
+     * @throws
      */
     public function actionOrderUpdate()
     {
-        $this->response = $this->container->get('OrderWebApi')->update($this->request);
+        $this->response = (new OrderWebApi())->update($this->request);
     }
 
     /**
@@ -645,11 +650,11 @@ class EdiController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
+     * @throws
      */
     public function actionOrderRepeat()
     {
-        $this->response = $this->container->get('OrderWebApi')->repeat($this->request);
+        $this->response = (new OrderWebApi())->repeat($this->request);
     }
 
     /**
@@ -690,7 +695,7 @@ class EdiController extends WebApiController
      */
     public function actionOrderPrintPdf()
     {
-        $result = $this->container->get('OrderWebApi')->saveToPdf($this->request, $this);
+        $result = (new OrderWebApi())->saveToPdf($this->request, $this);
         if (is_array($result)) {
             $this->response = $result;
         } else {
@@ -759,7 +764,7 @@ class EdiController extends WebApiController
      */
     public function actionOrderCreateGuide()
     {
-        $this->response = $this->container->get('GuideWebApi')->createFromOrder($this->request);
+        $this->response = (new GuideWebApi())->createFromOrder($this->request);
     }
 
     /**
@@ -876,7 +881,7 @@ class EdiController extends WebApiController
      */
     public function actionSaveToPdf()
     {
-        $result = $this->container->get('OrderWebApi')->saveToPdf($this->request, $this);
+        $result = (new OrderWebApi())->saveToPdf($this->request, $this);
         if (is_array($result)) {
             $this->response = $result;
         } else {

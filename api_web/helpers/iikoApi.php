@@ -14,6 +14,7 @@ use api_web\modules\integration\modules\iiko\helpers\iikoLogger;
 use common\models\IntegrationSettingValue;
 use common\models\OuterProductType;
 use common\models\OuterProductTypeSelected;
+use common\models\OuterToken;
 use common\models\Waybill;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
@@ -100,7 +101,7 @@ class iikoApi
     }
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function __destruct()
     {
@@ -147,7 +148,7 @@ class iikoApi
     /**
      * Выход с апи
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function logout()
     {
@@ -380,7 +381,6 @@ class iikoApi
      * @param $str
      * @return int
      */
-
     function Callback($ch, $str)
     {
         $response = &$this->response;
@@ -477,27 +477,30 @@ class iikoApi
     }
 
     /**
-     * @return string
+     * @return bool
      */
-    private function getTokenFile()
-    {
-        return \Yii::getAlias('@api_web') . '/runtime/iiko_auth/' . self::$_instance->orgId . '_' . $this->token . '.t';
-    }
-
     private function writeToken()
     {
-        if (!file_exists(\Yii::getAlias('@api_web') . '/runtime/iiko_auth')) {
-            mkdir(\Yii::getAlias('@api_web') . '/runtime/iiko_auth');
-            chmod(\Yii::getAlias('@api_web') . '/runtime/iiko_auth', 7777);
-        }
-
-        file_put_contents($this->getTokenFile(), '');
+        $tokenModel = new OuterToken();
+        $tokenModel->service_id = Registry::IIKO_SERVICE_ID;
+        $tokenModel->organization_id = self::$_instance->orgId;
+        $tokenModel->token = $this->token;
+        return $tokenModel->save();
     }
 
+    /**
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     private function deleteToken()
     {
-        if (file_exists($this->getTokenFile())) {
-            unlink($this->getTokenFile());
+        $tokenModel = OuterToken::findOne([
+            'service_id'      => Registry::IIKO_SERVICE_ID,
+            'organization_id' => self::$_instance->orgId,
+            'token'           => $this->token
+        ]);
+        if ($tokenModel) {
+            $tokenModel->delete();
         }
     }
 }

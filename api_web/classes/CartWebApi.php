@@ -3,6 +3,7 @@
 namespace api_web\classes;
 
 use api_web\components\Notice;
+use api_web\components\Registry;
 use api_web\helpers\Product;
 use api_web\helpers\WebApiHelper;
 use common\models\Cart;
@@ -16,6 +17,7 @@ use common\models\Organization;
 use common\models\CatalogBaseGoods;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
+use common\models\CountryVat;
 
 /**
  * Class CartWebApi
@@ -539,6 +541,19 @@ class CartWebApi extends \api_web\components\WebApi
         foreach ($items as $item) {
             yield $item;
         }
+    }
+
+    public function getVatsByOrganization()
+    {
+        $org_id = $this->user->organization_id;
+        $model_org = Organization::find()->where(['id' => $org_id])->one();
+        $model_vats = CountryVat::find()->where(['uuid' => $model_org->vetis_country_uuid])->one();
+        if ($model_vats) {
+            $vats_array = explode(';', $model_vats->vats);
+        } else {
+            $vats_array = array_values(Registry::$nds_list);
+        }
+        return $vats_array;
     }
 
 }

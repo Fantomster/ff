@@ -4,11 +4,10 @@ namespace common\models\search;
 
 use common\models\CatalogGoodsBlocked;
 use common\models\Order;
-use common\models\OrderStatus;
 use common\models\Organization;
 use Yii;
-use yii\data\SqlDataProvider;
 use yii\db\Query;
+use yii\db\Expression;
 
 /**
  * Description of FavoriteSearch
@@ -41,73 +40,78 @@ class FavoriteSearch extends \yii\base\Model
     public function search($params, $clientId)
     {
         $this->load($params);
-        //Создаем запрос
+
+        $tblOrder        = Order::tableName();
+        $tblOrderContent = \common\models\OrderContent::tableName();
+        $tblCBG          = \common\models\CatalogBaseGoods::tableName();
+        $tblCG           = \common\models\CatalogGoods::tableName();
+        $tblOrg          = Organization::tableName();
+        $tblCurr         = \common\models\Currency::tableName();
+        $tblRSR          = \common\models\RelationSuppRest::tableName();
+
+        $orderStatuses = [
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+            Order::STATUS_PROCESSING,
+            Order::STATUS_DONE,
+        ];
+
         $query = (new Query())->select([
-            'oc.product_id as cbg_id',
-            'cbg.product',
-            'cbg.units',
-            'COALESCE(cg.price, cbg.price) as price',
-            'COALESCE(cbg.cat_id, cg.cat_id) as cat_id',
-            'org.name',
-            'cbg.ed',
-            'curr.symbol',
-            'cbg.note',
-            'count(oc.id) as count'
+                    "cbg_id"  => 'oc.product_id',
+                    "product" => 'cbg.product',
+                    "units"   => 'cbg.units',
+                    "price"   => new Expression('COALESCE(cg.price, cbg.price)'),
+                    "cat_id"  => new Expression('COALESCE(cbg.cat_id, cg.cat_id)'),
+                    "name"    => 'org.name',
+                    "ed"      => 'cbg.ed',
+                    "symbol"  => 'curr.symbol',
+                    "note"    => 'cbg.note',
+                    "count"   => new Expression('count(oc.id)')
+                ])
+                ->from(["oc" => $tblOrderContent])
+                ->leftJoin(["ord" => $tblOrder], 'oc.order_id = ord.id')
+                ->leftJoin(["cbg" => $tblCBG], 'oc.product_id = cbg.id')
+                ->leftJoin(["cg" => $tblCG], 'oc.product_id = cg.base_goods_id')
+                ->leftJoin(["org" => $tblOrg], 'cbg.supp_org_id = org.id')
+                ->leftJoin(["curr" => $tblCurr], 'ord.currency_id = curr.id')
+                ->where([
+            "and",
+            ["cbg.deleted" => 0],
+            ["!=", new Expression("COALESCE(cbg.cat_id, cg.cat_id)"), 0],
+            ["ord.status" => $orderStatuses],
+            ["ord.client_id" => $clientId],
         ]);
-        //Толео заказа
-        $query->from('order_content AS oc');
-        //Заказ
-        $query->innerJoin(Order::tableName() . ' ord', 'oc.order_id = ord.id');
-        //Товар из главного каталога
-        $query->leftJoin('catalog_base_goods as cbg', 'oc.product_id = cbg.id');
-        //Индивидуальный каталог
-        $query->leftJoin('catalog_goods as cg', 'oc.product_id = cg.base_goods_id');
-        //Организация
-        $query->innerJoin('organization AS org', 'cbg.supp_org_id = org.id');
-        //Валюта
-        $query->innerJoin('currency AS curr', 'ord.currency_id = curr.id');
-        //Условия отбора
-        $query->where('cbg.deleted = 0 AND COALESCE(cbg.cat_id, cg.cat_id) != 0');
 
-        //Только эти заказы
-        $query->andWhere(['in', 'ord.status', [
-            OrderStatus::STATUS_PROCESSING,
-            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-            OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-            OrderStatus::STATUS_DONE
-        ]]);
+        $subQueryCatIds = (new Query())
+                ->select(["cat_id"])
+                ->from($tblRSR)
+                ->where(['rest_org_id' => $clientId])
+                ->distinct();
 
-        if (!empty($this->searchString)) {
-            $query->andWhere('cbg.product LIKE :searchString', [':searchString' => "%$this->searchString%"]);
-        }
-
-        $query->andWhere("ord.client_id = :cid", [':cid' => $clientId]);
-        $query->addParams([':cid' => $clientId]);
         $query->andWhere([
-            "OR",
-            "cbg.cat_id IN (SELECT DISTINCT cat_id FROM relation_supp_rest WHERE rest_org_id = :cid)",
-            "cg.cat_id IN (SELECT DISTINCT cat_id FROM relation_supp_rest WHERE rest_org_id = :cid)"
+            "or",
+            ["cbg.cat_id" => $subQueryCatIds],
+            ["cg.cat_id" => $subQueryCatIds],
         ]);
 
         //Добавляем блокировку запрещенных товаров
-        $blockedItems = implode(",", CatalogGoodsBlocked::getBlockedList($clientId));
-        $query->andWhere(["AND",
-            "oc.product_id NOT IN ($blockedItems)"
-            ]);
+        $blockedItems = CatalogGoodsBlocked::getBlockedList($clientId);
+        $query->andWhere(["not in", "oc.product_id", $blockedItems]);
+
+        $query->andFilterWhere(["like", "cbg.product", $this->searchString]);
 
         //Группируем по товару
-        $query->groupBy('cbg_id');
-        $query->having("cat_id IN (SELECT DISTINCT cat_id FROM relation_supp_rest WHERE rest_org_id = :cid)", [':cid' => $clientId]);
+        $query->groupBy(['cbg_id']);
+        $query->having(["cat_id" => $subQueryCatIds]);
 
         //Выдача в датапровайдер
-        $dataProvider = new SqlDataProvider([
-            'sql' => $query->createCommand()->getRawSql(),
-            'totalCount' => $query->count(),
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query'      => $query,
             'pagination' => [
                 'pageSize' => 10,
             ],
-            'sort' => [
-                'attributes' => [
+            'sort'       => [
+                'attributes'   => [
                     'count',
                 ],
                 'defaultOrder' => [

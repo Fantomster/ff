@@ -149,35 +149,43 @@ class WebApiHelper
      * @param Organization $model
      * @return mixed
      */
-    public static function prepareOrganization($model)
+    public static function prepareOrganization(Organization $model)
     {
         if (empty($model)) {
             return null;
         }
 
         $item['id'] = (int)$model->id;
-        $item['name'] = $model->name ?? "";
+        $item['name'] = self::clearValue($model->name);
         $item['legal_entity'] = $model->buisinessInfo->legal_entity ?? $model->legal_entity ?? "";
-        $item['contact_name'] = $model->contact_name ?? "";
-        $item['phone'] = $model->phone ?? "";
+        $item['contact_name'] = self::clearValue($model->contact_name);
+        $item['phone'] = self::clearValue($model->phone);
         $item['email'] = $model->buisinessInfo->legal_email ?? $model->email ?? "";
-        $item['site'] = $model->website ?? "";
-        $item['address'] = $model->address ?? "";
+        $item['site'] = self::clearValue($model->website);
+        $item['address'] = self::clearValue($model->address);
         $item['image'] = $model->pictureUrl;
         $item['type_id'] = (int)$model->type_id;
-        $item['type'] = $model->type->name ?? "";
+        $item['type'] = self::clearValue($model->type->name);
         $item['rating'] = round($model->ratingStars, 1);
-        $item['house'] = ($model->street_number === 'undefined' ? "" : $model->street_number ?? "");
-        $item['route'] = ($model->route === 'undefined' ? "" : $model->route ?? "");
-        $item['city'] = ($model->locality === 'undefined' ? "" : $model->locality ?? "");
-        $item['administrative_area_level_1'] = ($model->administrative_area_level_1 === 'undefined' ? "" : $model->administrative_area_level_1 ?? "");
-        $item['country'] = ($model->country === 'undefined' ? "" : $model->country ?? "");
-        $item['place_id'] = ($model->place_id === 'undefined' ? "" : $model->place_id ?? "");
-        $item['about'] = $model->about ?? "";
-        $item['is_allowed_for_franchisee'] = $model->is_allowed_for_franchisee ?? 0;
-        $item['gmt'] = $model->gmt ?? 0;
+        $item['house'] = self::clearValue($model->street_number);
+        $item['route'] = self::clearValue($model->route);
+        $item['city'] = self::clearValue($model->locality);
+        $item['administrative_area_level_1'] = self::clearValue($model->administrative_area_level_1);
+        $item['country'] = self::clearValue($model->country);
+        $item['place_id'] = self::clearValue($model->place_id);
+        $item['about'] = self::clearValue($model->about);
+        $item['is_allowed_for_franchisee'] = self::clearValue($model->is_allowed_for_franchisee, 0);
+        $item['gmt'] = self::clearValue($model->gmt, 0);
         $item['user_agreement'] = $model->user_agreement;
         $item['confidencial_policy'] = $model->confidencial_policy;
+
+        $item['nds_country'] = null;
+        if (!empty($model->vetis_country_uuid) && isset($model->vetisCountry)) {
+            $item['nds_country'] = [
+                'uuid' => $model->vetis_country_uuid,
+                'name' => $model->vetisCountry->name
+            ];
+        }
 
         if ($model->type_id == Organization::TYPE_SUPPLIER) {
             $item['inn'] = $model->buisinessInfo->inn ?? $model->inn ?? null;
@@ -192,8 +200,22 @@ class WebApiHelper
             }
             $item['is_edi'] = $model->isEdi();
         }
-
         return $item;
+    }
+
+    /**
+     * @param        $value
+     * @param string $defaultValue
+     * @return string
+     */
+    private static function clearValue($value, $defaultValue = "")
+    {
+        if ($value === 'undefined') {
+            $r = $defaultValue;
+        } else {
+            $r = $value ?? $defaultValue ?? "";
+        }
+        return $r;
     }
 
     /**

@@ -2,10 +2,19 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\classes\IntegrationWebApi;
 use api_web\modules\integration\classes\SyncServiceFactory;
 
+/**
+ * Class DefaultController
+ *
+ * @property IntegrationWebApi $classWebApi
+ * @package api_web\modules\integration\controllers
+ */
 class DefaultController extends \api_web\components\WebApiController
 {
+    public $className = IntegrationWebApi::class;
+
     /**
      * @SWG\Post(path="/integration/default/service-list",
      *     tags={"Integration"},
@@ -35,7 +44,7 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionServiceList()
     {
-        $this->response = $this->container->get('IntegrationWebApi')->list($this->request);
+        $this->response = $this->classWebApi->list();
     }
 
     /**
@@ -79,7 +88,7 @@ class DefaultController extends \api_web\components\WebApiController
      */
     public function actionUserServiceSet()
     {
-        $this->response = $this->container->get('IntegrationWebApi')->userServiceSet($this->request);
+        $this->response = $this->classWebApi->userServiceSet($this->request);
     }
 
     /**
@@ -172,7 +181,7 @@ class DefaultController extends \api_web\components\WebApiController
     public function actionMapList()
     {
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
-        $this->response = $this->container->get('IntegrationWebApi')->getProductMapList($this->request);
+        $this->response = $this->classWebApi->getProductMapList($this->request);
     }
 
     /**
@@ -242,7 +251,7 @@ class DefaultController extends \api_web\components\WebApiController
     public function actionMapUpdate()
     {
         $this->setLicenseServiceId($this->request['service_id'] ?? null);
-        $this->response = $this->container->get('IntegrationWebApi')->mapUpdate($this->request);
+        $this->response = $this->classWebApi->mapUpdate($this->request);
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace common\models\licenses;
 
 use api_web\components\Registry;
+use api_web\helpers\WaybillHelper;
 use api_web\helpers\WebApiHelper;
 use Exception;
 use Yii;
@@ -249,16 +250,20 @@ class License extends ActiveRecord
      *
      * @param $org_id
      * @throws HttpException
-     * @throws \yii\base\InvalidConfigException
      */
     public static function checkEnterLicenseResponse($org_id)
     {
-        $licenseDate = self::checkLicense($org_id, Registry::$allow_enter_services);
-        \Yii::$app->response->headers->add('License-Expire', \Yii::$app->formatter->asDatetime($licenseDate, WebApiHelper::$formatDate));
-        \Yii::$app->response->headers->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
-        #Проверяем, не стухла ли лицензия
-        if (strtotime($licenseDate) < strtotime(date('Y-m-d H:i:s'))) {
-            throw new HttpException(402, 'license.payment_required', 402);
+        try {
+            $licenseDate = self::checkLicense($org_id, Registry::$allow_enter_services);
+            $h = \Yii::$app->response->headers;
+            if (!$h->has('License-Expire')) {
+                $h->add('License-Expire', WebApiHelper::asDatetime($licenseDate));
+            }
+            if (!$h->has('License-Manager-Phone')) {
+                $h->add('License-Manager-Phone', \Yii::$app->params['licenseManagerPhone']);
+            }
+        } catch (HttpException $e) {
+            throw new HttpException(402, $e->getMessage(), 402);
         }
     }
 }

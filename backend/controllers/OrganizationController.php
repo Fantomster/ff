@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use api_web\classes\IntegrationWebApi;
 use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
@@ -579,14 +580,13 @@ class OrganizationController extends Controller
     /**
      * @param $id
      * @return string
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws \Exception
      */
     public function actionIntegrationSettings($id)
     {
         $organization = Organization::findOne(['id' => $id]);
-        $api = new WebApi();
-        $list = $api->container->get('IntegrationWebApi')->list([])['services'];
+        $integrationWebApi = new IntegrationWebApi();
+        $list = $integrationWebApi->list()['services'];
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $list

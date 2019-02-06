@@ -100,7 +100,11 @@ $dataColumns = [
                                                            });}'
         ],
         'checkboxOptions' => function ($model, $key, $index, $widget) use ($selected) {
-            return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => (in_array($model['id'], $selected)) ? 'checked' : ""];
+            if(in_array($model['id'], $selected)){
+                return ['value' => $model['id'], 'class' => 'checkbox-export', 'checked' => 'checked'];
+            } else {
+                return ['value' => $model['id'], 'class' => 'checkbox-export'];
+            }
         },
     ],
     // 2. ID заказа

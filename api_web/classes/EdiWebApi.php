@@ -135,14 +135,13 @@ class EdiWebApi extends WebApi
      * История заказов
      *
      * @param array $post
-     * @return mixed
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @return array
+     * @throws \Exception
      */
     public function getOrderHistory(array $post)
     {
         $post['search']['service_id'] = Registry::$edo_documents;
-        return $this->container->get('OrderWebApi')->getHistory($post);
+        return (new OrderWebApi())->getHistory($post);
     }
 
     /**
@@ -166,7 +165,7 @@ class EdiWebApi extends WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
-        $res = $this->container->get('OrderWebApi')->getOrderInfo($order);
+        $res = (new OrderWebApi())->getOrderInfo($order);
 
         if (isset($res['items']) && !empty($res['items'])) {
             $productIds = array_map(function ($el) {

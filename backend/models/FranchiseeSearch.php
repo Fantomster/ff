@@ -2,7 +2,6 @@
 
 namespace backend\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Franchisee;
@@ -36,12 +35,11 @@ class FranchiseeSearch extends Franchisee
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
     {
-        $query = Franchisee::find()->select('*,(select count(*) from franchisee_associate where franchisee_id = franchisee.id) as c_partners')->where(['deleted' => false]);
+        $query = Franchisee::find()->where(['deleted' => false]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -57,8 +55,8 @@ class FranchiseeSearch extends Franchisee
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
-            'type_id' => $this->type_id,
+            'id'         => $this->id,
+            'type_id'    => $this->type_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);

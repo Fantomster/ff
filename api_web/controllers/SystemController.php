@@ -1,25 +1,20 @@
 <?php
 
-/**
- * Class SystemController
- * @package api\modules\v1\modules\web\controllers
- * @createdBy Basil A Konakov
- * @createdAt 2018-09-03
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
- */
-
 namespace api_web\controllers;
 
+use api_web\classes\SystemWebApi;
 use api_web\components\WebApiController;
 
 /**
  * Class SystemController
+ *
+ * @property SystemWebApi $classWebApi
  * @package api_web\controllers
  */
 class SystemController extends WebApiController
 {
+
+    public $className = SystemWebApi::class;
 
     /**
      * @SWG\Post(path="/system/datetime",
@@ -63,10 +58,10 @@ class SystemController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionDatetime()
     {
-        $this->response = $this->container->get('SystemWebApi')->datetime();
+        $this->classWebApi->datetime();
     }
-
 }

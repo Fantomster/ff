@@ -30,10 +30,6 @@ class WebApiNoAuthController extends Controller
      */
     protected $response;
 
-    /**
-     * @var yii\di\Container $container
-     */
-    public $container;
 
     /**
      * Получаем контейнер
@@ -50,7 +46,6 @@ class WebApiNoAuthController extends Controller
         if (!$task_id) {
             $task_id = null;
         }
-        $this->container = (new WebApiNoAuth())->container;
     }
 
     /**

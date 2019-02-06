@@ -4,7 +4,8 @@ namespace common\models\search;
 
 use common\models\CatalogGoodsBlocked;
 use Yii;
-use yii\data\SqlDataProvider;
+use yii\data\ActiveDataProvider;
+use yii\db\Query;
 
 /**
  * Description of GuideProductsSearch
@@ -37,11 +38,107 @@ class OrderProductsSearch extends \yii\base\Model {
     public function search(array $params, $order) {
         $this->load($params);
         
-        $searchString = "%$this->searchString%";
-
         $blockedList = CatalogGoodsBlocked::getBlockedList($order->client->id);
-        $blockedItems = empty($blockedList) ? '0' : implode(",", $blockedList);
 
+        $tblCBG = \common\models\CatalogBaseGoods::tableName();
+        $tblCG = \common\models\CatalogGoods::tableName();
+        $tblRSR = \common\models\RelationSuppRest::tableName();
+        $tblOrg = \common\models\Organization::tableName();
+        $tblCat = \common\models\Catalog::tableName();
+        $tblCurr = \common\models\Currency::tableName();
+        $tblOrdC = \common\models\OrderContent::tableName();
+        
+        $subQueryOrderContent = (new Query())
+                ->select(["product_id"])
+                ->from($tblOrdC)
+                ->where(["order_id" => $order->id]);
+        
+        $subQueryCatIds = (new Query())
+                ->select(["cat_id"])
+                ->from($tblRSR)
+                ->where("supp_org_id = cbg.supp_org_id")
+                ->andWhere(["rest_org_id" => $order->client_id]);
+        
+        $subQueryCG = (new Query())
+                ->select([
+                    "cbg_id" => "cbg.id", 
+                    "product" => "cbg.product", 
+                    "units" => "cbg.units", 
+                    "price" => "cg.price", 
+                    "cat_id" => "cg.cat_id", 
+                    "name" => "org.name", 
+                    "ed" => "cbg.ed", 
+                    "symbol" => "curr.symbol", 
+                    "note" => "cbg.note", 
+                ])
+                ->from(['cbg' => $tblCBG])
+                ->leftJoin(["cg" => $tblCG], "cg.base_goods_id = cbg.id")
+                ->leftJoin(["org" => $tblOrg], "cbg.supp_org_id = org.id")
+                ->leftJoin(["cat" => $tblCat], "cg.cat_id = cat.id")
+                ->leftJoin(["curr" => $tblCurr], "cat.currency_id = curr.id")
+                ->where([
+                    "and",
+                    ["cg.cat_id" => $subQueryCatIds],
+                    ["cbg.supp_org_id" => $order->vendor_id],
+                    ["cbg.status" => 1],
+                    ["cbg.deleted" => 0],
+                    ["not in", "cbg.id", $blockedList],
+                    ["not in", "cbg.id", $subQueryOrderContent],
+                ])
+                ->andFilterWhere(["like", "cbg.product", $this->searchString]);
+        
+        $subQueryCBG = (new Query())
+                ->select([
+                    "cbg_id" => "cbg.id", 
+                    "product" => "cbg.product", 
+                    "units" => "cbg.units", 
+                    "price" => "cbg.price", 
+                    "cat_id" => "cbg.cat_id", 
+                    "name" => "org.name", 
+                    "ed" => "cbg.ed", 
+                    "symbol" => "curr.symbol", 
+                    "note" => "cbg.note", 
+                ])
+                ->from(['cbg' => $tblCBG])
+                ->leftJoin(["org" => $tblOrg], "cbg.supp_org_id = org.id")
+                ->leftJoin(["cat" => $tblCat], "cbg.cat_id = cat.id")
+                ->leftJoin(["curr" => $tblCurr], "cat.currency_id = curr.id")
+                ->where([
+                    "and",
+                    ["cbg.cat_id" => $subQueryCatIds],
+                    ["cbg.supp_org_id" => $order->vendor_id],
+                    ["cbg.status" => 1],
+                    ["cbg.deleted" => 0],
+                    ["not in", "cbg.id", $blockedList],
+                    ["not in", "cbg.id", $subQueryOrderContent],
+                ])
+                ->andFilterWhere(["like", "cbg.product", $this->searchString]);
+        
+        $query = (new Query())
+                ->from(["c" => $subQueryCG->union($subQueryCBG, true)]);
+        
+        if (isset($params['limit'])) {
+            $query->limit($params['limit']);
+        }
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 8,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'product',
+                ],
+                'defaultOrder' => [
+                    'product' => SORT_ASC
+                ]
+            ],
+        ]);
+
+        return $dataProvider;
+        
+        /*
         $query = "
             SELECT cbg.id as cbg_id, cbg.product, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.ed, curr.symbol, cbg.note 
             FROM catalog_base_goods AS cbg
@@ -75,11 +172,11 @@ class OrderProductsSearch extends \yii\base\Model {
         $sort = [
 
         ];
-        if(isset($params['sort'])){
-            $arr = explode(' ', $params['sort']);
-            $query.= " ORDER BY ";
-            $query.= str_replace('3', "ASC", str_replace('4', "DESC", $params['sort']));
-        }
+//        if(isset($params['sort'])){
+//            $arr = explode(' ', $params['sort']);
+//            $query.= " ORDER BY ";
+//            $query.= str_replace('3', "ASC", str_replace('4', "DESC", $params['sort']));
+//        } сотонизмъ, переделать опосля, пока сортировка отключена
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query,
@@ -91,6 +188,6 @@ class OrderProductsSearch extends \yii\base\Model {
             'sort' => $sort,
         ]);
         
-        return $dataProvider;
+        return $dataProvider;*/
     }
 }

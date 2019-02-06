@@ -3,18 +3,15 @@
 namespace backend\models;
 
 use common\models\AmoFields;
-use common\models\Currency;
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\CatalogBaseGoods;
 
 /**
  * CatalogBaseGoodsSearch represents the model behind the search form about `common\models\CatalogBaseGoods`.
  */
 class AmoSearch extends AmoFields
 {
-    
+
     /**
      * @inheritdoc
      */
@@ -39,13 +36,10 @@ class AmoSearch extends AmoFields
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
-    public function search($params = null, $id = null)
+    public function search($params = null)
     {
-        $currencyTable = AmoFields::tableName();
-        
         $query = AmoFields::find();
 
         $dataProvider = new ActiveDataProvider([
@@ -59,14 +53,14 @@ class AmoSearch extends AmoFields
             // $query->where('0=1');
             return $dataProvider;
         }
-        
+
         // grid filtering conditions
         $query->andFilterWhere([
-            'amo_field' => $this->amo_field,
+            'amo_field'           => $this->amo_field,
             'responsible_user_id' => $this->responsible_user_id,
-            'pipeline_id' => $this->pipeline_id,
+            'pipeline_id'         => $this->pipeline_id,
         ]);
-        
+
         return $dataProvider;
     }
 }

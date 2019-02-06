@@ -2,14 +2,18 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\RequestWebApi;
 use api_web\components\WebApiController;
 
 /**
  * Class RequestController
+ *
+ * @property RequestWebApi $classWebApi
  * @package api_web\controllers
  */
 class RequestController extends WebApiController
 {
+    public $className = RequestWebApi::class;
     /**
      * @SWG\Post(path="/request/get",
      *     tags={"Request"},
@@ -78,10 +82,11 @@ class RequestController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionGet()
     {
-        $this->response = $this->container->get('RequestWebApi')->getRequest($this->request);
+        $this->response = $this->classWebApi->getRequest($this->request);
     }
 
     /**
@@ -170,10 +175,11 @@ class RequestController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionListClient()
     {
-        $this->response = $this->container->get('RequestWebApi')->getListClient($this->request);
+        $this->response = $this->classWebApi->getListClient($this->request);
     }
 
     /**
@@ -264,10 +270,11 @@ class RequestController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionListVendor()
     {
-        $this->response = $this->container->get('RequestWebApi')->getListVendor($this->request);
+        $this->response = $this->classWebApi->getListVendor($this->request);
     }
 
     /**
@@ -303,7 +310,7 @@ class RequestController extends WebApiController
      */
     public function actionCategoryList()
     {
-        $this->response = $this->container->get('RequestWebApi')->getCategoryList();
+        $this->response = $this->classWebApi->getCategoryList();
     }
 
     /**
@@ -401,10 +408,11 @@ class RequestController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionCreate()
     {
-        $this->response = $this->container->get('RequestWebApi')->create($this->request);
+        $this->response = $this->classWebApi->create($this->request);
     }
 
     /**
@@ -483,10 +491,11 @@ class RequestController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionClose()
     {
-        $this->response = $this->container->get('RequestWebApi')->close($this->request);
+        $this->response = $this->classWebApi->close($this->request);
     }
 
     /**
@@ -519,10 +528,11 @@ class RequestController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionAddCallback()
     {
-        $this->response = $this->container->get('RequestWebApi')->addCallback($this->request);
+        $this->response = $this->classWebApi->addCallback($this->request);
     }
 
     /**
@@ -561,10 +571,11 @@ class RequestController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionCallbackList()
     {
-        $this->response = $this->container->get('RequestWebApi')->getCallbackList($this->request);
+        $this->response = $this->classWebApi->getCallbackList($this->request);
     }
 
     /**
@@ -638,10 +649,11 @@ class RequestController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionSetContractor()
     {
-        $this->response = $this->container->get('RequestWebApi')->setContractor($this->request);
+        $this->response = $this->classWebApi->setContractor($this->request);
     }
 
     /**
@@ -714,9 +726,10 @@ class RequestController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws 
      */
     public function actionUnsetContractor()
     {
-        $this->response = $this->container->get('RequestWebApi')->unsetContractor($this->request);
+        $this->response = $this->classWebApi->unsetContractor($this->request);
     }
 }

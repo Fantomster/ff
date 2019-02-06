@@ -13,7 +13,6 @@ use common\models\OrderContent;
 use common\models\PaymentSearch;
 use common\models\RelationSuppRestPotential;
 use common\models\RelationUserOrganization;
-use common\models\UserToken;
 use common\models\User;
 use common\models\Role;
 use common\models\Order;
@@ -31,7 +30,6 @@ use yii\db\Expression;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\helpers\Json;
 use yii\web\Response;
 use common\models\restaurant\RestaurantChecker;
 use yii\widgets\ActiveForm;
@@ -43,7 +41,6 @@ use Exception;
  */
 class ClientController extends DefaultController
 {
-
     const AJAX_STATUS_SUCCESS = 'Y';
     const AJAX_STATUS_FAIL = 'N';
     const MAX_DELAY_PAYMENT = 365;
@@ -55,13 +52,12 @@ class ClientController extends DefaultController
      */
     public function behaviors()
     {
-
         return [
             'access' => [
-                'class'      => AccessControl::className(),
+                'class'      => AccessControl::class,
                 // We will override the default rule config with the new AccessRule class
                 'ruleConfig' => [
-                    'class' => AccessRule::className(),
+                    'class' => AccessRule::class,
                 ],
 //                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'suppliers', 'tutorial', 'employees'],
                 'rules'      => [
@@ -187,62 +183,66 @@ class ClientController extends DefaultController
         ];
     }
 
-    /*
-     *  Main settings page
+    /**
+     * Main settings page
+     *
+     * @return string|Response
      */
-
     public function actionSettings()
     {
         $organization = $this->currentUser->organization;
         $organization->scenario = "settings";
         $post = Yii::$app->request->post();
-        if ($organization->load($post)) {
-            if ($organization->validate()) {
-                $organization->address = $organization->formatted_address;
-                if (!$post['Organization']['is_allowed_for_franchisee']) {
-                    User::updateAll(['organization_id' => null], ['organization_id' => $organization->id, 'role_id' => Role::getFranchiseeEditorRoles()]);
-                }
-                if ($organization->step == Organization::STEP_SET_INFO) {
-                    $organization->step = Organization::STEP_ADD_VENDOR;
-                    $organization->save();
-                    return $this->redirect(['client/suppliers']);
-                }
-                $organization->save();
+        if ($organization->load($post) && $organization->validate()) {
+            $organization->address = $organization->formatted_address;
+            if (isset($post['Organization']['is_allowed_for_franchisee']) && !$post['Organization']['is_allowed_for_franchisee']) {
+                User::updateAll(['organization_id' => null], [
+                    'organization_id' => $organization->id,
+                    'role_id'         => Role::getFranchiseeEditorRoles()
+                ]);
             }
+            if ($organization->step == Organization::STEP_SET_INFO) {
+                $organization->step = Organization::STEP_ADD_VENDOR;
+                $organization->save();
+
+                return $this->redirect(['client/suppliers']);
+            }
+            $organization->save();
         }
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('settings', compact('organization'));
-        } else {
-            return $this->render('settings', compact('organization'));
         }
+
+        return $this->render('settings', compact('organization'));
     }
 
-    /*
-     *  user list page
+    /**
+     * user list page
+     *
+     * @return String
      */
-
     public function actionEmployees(): String
     {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
-        $params['UserSearch'] = Yii::$app->request->post("UserSearch");
-        $this->loadCurrentUser();
         $organizationId = $this->currentUser->organization_id;
+        $params['UserSearch'] = Yii::$app->request->post("UserSearch") ?? [];
         $params['UserSearch']['organization_id'] = $organizationId;
         $dataProvider = $searchModel->search($params);
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('employees', compact('searchModel', 'dataProvider', 'organizationId'));
-        } else {
-            return $this->render('employees', compact('searchModel', 'dataProvider', 'organizationId'));
         }
+
+        return $this->render('employees', compact('searchModel', 'dataProvider', 'organizationId'));
     }
 
-    /*
-     *  User validate
+    /**
+     * User validate
+     *
+     * @return false|string
      */
-
     public function actionAjaxValidateUser()
     {
         $user = new User();
@@ -255,6 +255,7 @@ class ClientController extends DefaultController
 
                 if ($user->validate() && $profile->validate()) {
                     Yii::$app->response->format = Response::FORMAT_JSON;
+
                     return json_encode(ActiveForm::validateMultiple([$user, $profile]));
                 }
             }
@@ -293,6 +294,7 @@ class ClientController extends DefaultController
         $this->formatJson();
         $result = ['status' => self::AJAX_STATUS_FAIL];
         $result['error'] = $message;
+
         return $result;
     }
 
@@ -308,6 +310,7 @@ class ClientController extends DefaultController
         $this->formatJson();
         $result = ['status' => self::AJAX_STATUS_SUCCESS];
         $result['error'] = $message;
+
         return $result;
     }
 
@@ -320,8 +323,6 @@ class ClientController extends DefaultController
      */
     public function actionAjaxSetAgentAttrPaymentDelay(): array
     {
-
-
         $this->checkAjax();
         $post = Yii::$app->request->post();
         if (isset($post['delay_days'])) {
@@ -349,6 +350,7 @@ class ClientController extends DefaultController
         $result['status'] = self::AJAX_STATUS_SUCCESS;
         $agent->payment_delay = (int)$post['delay_days'];
         $agent->save();
+
         return $this->success();
     }
 
@@ -1229,47 +1231,55 @@ class ClientController extends DefaultController
     public function actionViewCatalog($id)
     {
         $cat_id = $id;
-        $catalog = Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one();
+        $catalog = Catalog::find()
+            ->where([
+                'id'     => $cat_id,
+                'status' => 1
+            ])
+            ->one();
 
         if ($catalog->type == Catalog::BASE_CATALOG) {
             $query = (new Query())
-                ->select('
-                catalog.id as id,
-                article,
-                catalog_base_goods.product as product,
-                units,
-                ed,
-                catalog_base_goods.price,
-                catalog_base_goods.status,
-                currency.symbol as symbol')
-                ->from(Catalog::tableName())
-                ->innerJoin(CatalogBaseGoods::tableName(), 'catalog.id = catalog_base_goods.cat_id')
-                ->leftJoin(Currency::tableName(), 'catalog.currency_id=currency.id')
+                ->select([
+                    'cat.id as id',
+                    'article',
+                    'cbg.product as product',
+                    'units',
+                    'ed',
+                    'cbg.price',
+                    'cbg.status',
+                    'curr.symbol as symbol',
+                ])
+                ->from(['cat' => Catalog::tableName()])
+                ->innerJoin(['cbg' => CatalogBaseGoods::tableName()], 'cat.id = cbg.cat_id')
+                ->leftJoin(['curr' => Currency::tableName()], 'cat.currency_id = curr.id')
                 ->where([
-                    'catalog_base_goods.cat_id' => $id,
-                    'deleted' => CatalogBaseGoods::DELETED_OFF
+                    'cbg.cat_id' => $id,
+                    'deleted'    => CatalogBaseGoods::DELETED_OFF
                 ]);
         }
         if ($catalog->type == Catalog::CATALOG) {
             $query = (new Query())
-                ->select('
-                catalog.id as id,
-                article,
-                catalog_base_goods.product as product,
-                units,
-                ed,
-                catalog_goods.price as price,
-                catalog_base_goods.status,
-                currency.symbol as symbol')
-                ->from(Catalog::tableName())
-                ->innerJoin(CatalogGoods::tableName(), 'catalog.id = catalog_goods.cat_id')
-                ->innerJoin(CatalogBaseGoods::tableName(), 'catalog_goods.base_goods_id = catalog_base_goods.id')
-                ->leftJoin(Currency::tableName(), 'catalog.currency_id=currency.id')
+                ->select([
+                    "cat.id as id",
+                    "article",
+                    "cbg.product as product",
+                    "units",
+                    "ed",
+                    "cbg.price as price",
+                    "cbg.status",
+                    "curr.symbol as symbol",
+                ])
+                ->from(['cat' => Catalog::tableName()])
+                ->innerJoin(['cg' => CatalogGoods::tableName()], 'cat.id = cg.cat_id')
+                ->innerJoin(['cbg' => CatalogBaseGoods::tableName()], 'cg.base_goods_id = cbg.id')
+                ->leftJoin(['curr' => Currency::tableName()], 'cat.currency_id = curr.id')
                 ->where([
-                    'catalog_base_goods.cat_id' => $id,
-                    'deleted' => CatalogBaseGoods::DELETED_OFF
+                    'cbg.cat_id' => $id,
+                    'deleted'    => CatalogBaseGoods::DELETED_OFF
                 ]);
         }
+
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql'        => $query->createCommand()->getRawSql(),
             'totalCount' => $query->count(),
@@ -1291,6 +1301,7 @@ class ClientController extends DefaultController
                 ]
             ],
         ]);
+
         return $this->renderAjax('suppliers/_viewCatalog', compact('searchModel', 'dataProvider', 'cat_id'));
     }
 
@@ -1306,6 +1317,7 @@ class ClientController extends DefaultController
                 'title' => 'УПС! Ошибка',
                 'body'  => 'Каталог пустой']];
             Yii::$app->response->format = Response::FORMAT_JSON;
+
             return $result;
         }
 
@@ -1618,10 +1630,11 @@ class ClientController extends DefaultController
         select('id')->
         where(['organization_id' => $currentUser->organization_id])])->all(), 'user_id', 'full_name');
         $filter_status = "";
+        $filter_supplier = "";
+        $filter_employee = "";
         $filter_from_date = date("d-m-Y", strtotime(" -2 months"));
         $filter_from_date_two = date("d-m-Y", strtotime(" -1 weeks"));
         $filter_to_date = date("d-m-Y");
-        $where = "";
 
         //pieChart
         function hex()
@@ -1648,32 +1661,62 @@ class ClientController extends DefaultController
             $filter_employee = trim(\Yii::$app->request->get('filter_employee'));
             $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
             $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
-
-            empty($filter_status) ? "" : $where .= " and status='" . $filter_status . "'";
-            empty($filter_supplier) ? "" : $where .= " and vendor_id='" . $filter_supplier . "'";
-            empty($filter_employee) ? "" : $where .= " and created_by_id='" . $filter_employee . "'";
         }
 
         $currencyList = Currency::getAnalCurrencyList($currentUser->organization_id, $filter_from_date, $filter_to_date);
 
-        $filter_currency = trim(\Yii::$app->request->get('filter_currency', key($currencyList)));
-        empty($filter_currency) ? $where .= " and currency_id='1'" : $where .= " and currency_id='" . $filter_currency . "'";
+        $currency = trim(\Yii::$app->request->get('filter_currency', key($currencyList)));
+        $filter_currency = !empty($currency) ? $currency : 1;
 
-        $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
-                (select sum(total_price) FROM " . Order::tableName() . " 
-                where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
-                client_id = $currentUser->organization_id and status<>" . OrderStatus::STATUS_FORMING . " and ("
-            . "DATE(created_at) between '" .
-            date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
-            date('Y-m-d', strtotime($filter_to_date)) . "') " .
-            $where .
-            ") AS total_price  
-                FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS created_at 
-                FROM " . Order::tableName() . " where 
-                client_id = $currentUser->organization_id and status<>" . OrderStatus::STATUS_FORMING . " and("
-            . "DATE(created_at) between '" .
-            date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
-            date('Y-m-d', strtotime($filter_to_date)) . "') " . $where . ")tb")->queryAll();
+        $totalPrice = (new Query())
+            ->select("sum(total_price)")
+            ->from(Order::tableName())
+            ->where("DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at")
+            ->andWhere(["client_id" => $currentUser->organization_id])
+            ->andWhere("status <> :status", [":status" => OrderStatus::STATUS_FORMING])
+            ->andWhere([
+                'BETWEEN',
+                "DATE(created_at)",
+                date('Y-m-d', strtotime($filter_from_date)),
+                date('Y-m-d', strtotime($filter_to_date))
+            ])
+            ->andFilterWhere([
+                "status"        => $filter_status,
+                "vendor_id"     => $filter_supplier,
+                "created_by_id" => $filter_employee,
+                "currency_id"   => $filter_currency,
+            ])
+            ->createCommand()
+            ->getRawSql();
+
+        $area_chart = (new Query())
+            ->select([
+                "created_at"  => "DATE_FORMAT(created_at,'%d-%m-%Y')",
+                "total_price" => "({$totalPrice})"
+            ])
+            ->from([
+                'tb' => (new Query())
+                    ->distinct()
+                    ->select(["created_at" => "DATE_FORMAT(created_at,'%Y-%m-%d')"])
+                    ->from(Order::tableName())
+                    ->where(["client_id" => $currentUser->organization_id])
+                    ->andWhere("status <> :status", [":status" => OrderStatus::STATUS_FORMING])
+                    ->andWhere([
+                        'BETWEEN',
+                        "DATE(created_at)",
+                        date('Y-m-d', strtotime($filter_from_date)),
+                        date('Y-m-d', strtotime($filter_to_date))
+                    ])
+                    ->andFilterWhere([
+                        "status"        => $filter_status,
+                        "vendor_id"     => $filter_supplier,
+                        "created_by_id" => $filter_employee,
+                        "currency_id"   => $filter_currency,
+                    ])
+            ])
+            ->createCommand()
+            ->queryAll();
+
         $arr_create_at = [];
         $arr_price = [];
         if (count($area_chart) == 1) {
@@ -1690,13 +1733,31 @@ class ClientController extends DefaultController
          * PIE CHART Аналитика по поставщикам
          *
          */
-        $vendors_total_price_sql = Yii::$app->db->createCommand("
-            SELECT vendor_id,sum(total_price) AS total_price FROM " . Order::tableName() . " WHERE  
-                (DATE(created_at) BETWEEN '" .
-            date('Y-m-d', strtotime($filter_from_date)) . "' AND '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
-            $where .
-            " AND client_id = " . $currentUser->organization_id .
-            " AND STATUS<>" . OrderStatus::STATUS_FORMING . " GROUP BY vendor_id ORDER BY total_price DESC")->queryAll();
+        $vendors_total_price_sql = (new Query())
+            ->select([
+                "vendor_id",
+                "total_price" => "sum(total_price)",
+            ])
+            ->from(Order::tableName())
+            ->where(["client_id" => $currentUser->organization_id])
+            ->andWhere("status <> :status", [":status" => OrderStatus::STATUS_FORMING])
+            ->andWhere([
+                'BETWEEN',
+                "DATE(created_at)",
+                date('Y-m-d', strtotime($filter_from_date)),
+                date('Y-m-d', strtotime($filter_to_date))
+            ])
+            ->andFilterWhere([
+                "status"        => $filter_status,
+                "vendor_id"     => $filter_supplier,
+                "created_by_id" => $filter_employee,
+                "currency_id"   => $filter_currency,
+            ])
+            ->groupBy('vendor_id')
+            ->orderBy(['total_price' => SORT_DESC])
+            ->createCommand()
+            ->queryAll();
+
         $vendors_total_price = [];
         $vendors_labels = [];
         $vendors_colors = [];
@@ -1724,29 +1785,46 @@ class ClientController extends DefaultController
          * GridView Аналитика ТОП продуктов
          *
          */
-        $query = Yii::$app->db->createCommand("
-            SELECT 
-              sum(price*quantity) AS price,
-              sum(quantity) AS quantity,
-              product_id,
-              c.iso_code
-            FROM order_content oc 
-            LEFT JOIN " . Order::tableName() . " o ON o.id = oc.order_id
-            LEFT JOIN currency c ON c.id = o.currency_id
-            WHERE order_id IN (
-                  SELECT id FROM " . Order::tableName() . " WHERE 
-                  (DATE(created_at) BETWEEN '" . date('Y-m-d', strtotime($filter_from_date)) . "' AND '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
-            " AND status<>" . OrderStatus::STATUS_FORMING .
-            " AND client_id = " . $currentUser->organization_id . $where .
-            ") 
-            GROUP BY product_id ORDER BY sum(price*quantity) DESC
-            ");
-        $countQuery = "SELECT count(*) FROM (" . $query->sql . ") AS a";
-        $count = Yii::$app->db->createCommand($countQuery)->queryScalar();
+
+        $orders = (new Query())
+            ->select("id")
+            ->from(Order::tableName())
+            ->where(["client_id" => $currentUser->organization_id])
+            ->andWhere("status <> :status", [":status" => OrderStatus::STATUS_FORMING])
+            ->andWhere([
+                'BETWEEN',
+                "DATE(created_at)",
+                date('Y-m-d', strtotime($filter_from_date)),
+                date('Y-m-d', strtotime($filter_to_date))
+            ])
+            ->andFilterWhere([
+                "status"        => $filter_status,
+                "vendor_id"     => $filter_supplier,
+                "created_by_id" => $filter_employee,
+                "currency_id"   => $filter_currency,
+            ])
+            ->createCommand()
+            ->getRawSql();
+
+        $query = (new Query())
+            ->select([
+                "price"    => "sum(price*quantity)",
+                "quantity" => "sum(quantity)",
+                "product_id",
+                "c.iso_code"
+            ])
+            ->from(["oc" => OrderContent::tableName()])
+            ->leftJoin(["o" => Order::tableName()], "o.id = oc.order_id")
+            ->leftJoin(["c" => Currency::tableName()], "c.id = o.currency_id")
+            ->where("order_id IN ({$orders})")
+            ->groupBy("product_id")
+            ->orderBy(["sum(price * quantity)" => SORT_DESC]);
+
         $page = Yii::$app->request->get("page");
+
         $dataProvider = new \yii\data\SqlDataProvider([
-            'sql'        => $query->sql,
-            'totalCount' => $count,
+            'sql'        => $query->createCommand()->getRawSql(),
+            'totalCount' => $query->count(),
             'pagination' => [
                 'pageSize' => 7,
                 'page'     => isset($page) ? ($page - 1) : 0,
@@ -1824,40 +1902,33 @@ class ClientController extends DefaultController
     public function actionIndex()
     {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $suppliers_where = "";
-        /*
-         *
-         * Поставщики
-         *
-         */
-        $searchString = "";
-        $where = " AND relation_supp_rest.deleted = 0";
-        if (Yii::$app->request->isAjax) {
-            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
 
-            empty($searchString) ? "" : $where .= " and name LIKE :name";
-        }
-        $sql = "SELECT picture,supp_org_id, name FROM relation_supp_rest join organization
-on relation_supp_rest.supp_org_id = organization.id WHERE "
-            . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where";
-        $query = \Yii::$app->db->createCommand($sql);
-        $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM relation_supp_rest join organization
-on relation_supp_rest.supp_org_id = organization.id WHERE "
-            . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where", [':name' => $searchString])->queryScalar();
+        // Поставщики
+        $searchString = Yii::$app->request->isAjax ? trim(\Yii::$app->request->get('searchString')) : "";
+        $query = (new Query())
+            ->select([
+                "picture",
+                "supp_org_id",
+                "name",
+            ])
+            ->from(["rsr" => RelationSuppRest::tableName()])
+            ->leftJoin(["org" => Organization::tableName()], "rsr.supp_org_id = org.id")
+            ->where([
+                "rest_org_id" => $currentUser->organization_id,
+                "invite"      => RelationSuppRest::INVITE_ON,
+                "rsr.deleted" => 0
+            ])
+            ->andFilterWhere(['LIKE', 'name', $searchString]);
+
         $suppliers_dataProvider = new \yii\data\SqlDataProvider([
-            'sql'        => $query->sql,
-            'totalCount' => $totalCount,
-            'params'     => [':name' => $searchString],
+            'sql'        => $query->createCommand()->getRawSql(),
+            'totalCount' => $query->count(),
             'pagination' => [
                 'pageSize' => 0,
             ],
         ]);
 
-        /*
-         *
-         * Поставщики END
-         *
-         */
+        // Поставщики END
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $orders = $currentUser->organization->getCart();
         $totalCart = count($orders);
@@ -1869,16 +1940,11 @@ on relation_supp_rest.supp_org_id = organization.id WHERE "
                 'market_place'            => CatalogBaseGoods::MARKETPLACE_ON,
                 'status'                  => CatalogBaseGoods::STATUS_ON,
                 'deleted'                 => CatalogBaseGoods::DELETED_OFF])
-            ->andWhere('category_id is not null')
+            ->andWhere(["IS NOT", "category_id", NULL])
             ->count();
-
-        $filter_from_date = date("d-m-Y", strtotime(" -1 months"));
-        $filter_to_date = date("d-m-Y");
 
         //GRIDVIEW ИСТОРИЯ ЗАКАЗОВ ----->
         $searchModel = new \common\models\search\OrderSearch();
-        $today = new \DateTime();
-        //$searchModel->date_from = date("d.m.Y", strtotime(" -1 months"));
         $searchModel->client_id = $currentUser->organization_id;
         $searchModel->client_search_id = $currentUser->organization_id;
 
@@ -1887,16 +1953,16 @@ on relation_supp_rest.supp_org_id = organization.id WHERE "
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
 
         $organization = $currentUser->organization;
-//        if ($organization->step == Organization::STEP_SET_INFO) {
         $profile = $currentUser->profile;
+
         return $this->render('index', compact(
-            'dataProvider', 'suppliers_dataProvider', 'totalCart', 'count_products_from_mp', 'profile', 'organization'
+            'dataProvider',
+            'suppliers_dataProvider',
+            'totalCart',
+            'count_products_from_mp',
+            'profile',
+            'organization'
         ));
-//        } else {
-//            return $this->render('index', compact(
-//                                    'dataProvider', 'suppliers_dataProvider', 'totalCart', 'count_products_from_mp'
-//            ));
-//        }
     }
 
     public function actionSuppliers()

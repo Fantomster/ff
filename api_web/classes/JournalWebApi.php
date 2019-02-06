@@ -8,7 +8,11 @@
 
 namespace api_web\classes;
 
+use api_web\components\Registry;
 use api_web\components\WebApi;
+use api_web\helpers\WebApiHelper;
+use common\models\AllService;
+use common\models\AllServiceOperation;
 use common\models\Journal;
 use common\models\Role;
 use yii\data\ActiveDataProvider;
@@ -55,7 +59,7 @@ class JournalWebApi extends WebApi
                 }
             }
             if (isset($search['service_id']) && !empty($search['service_id'])) {
-                $query->andWhere(['service_id' => $search['service_id']]);
+                $query->andWhere([Journal::tableName().'.service_id' => $search['service_id']]);
             }
             if (isset($search['type']) && !empty($search['type'])) {
                 $query->andWhere(['type' => $search['type']]);
@@ -80,6 +84,13 @@ class JournalWebApi extends WebApi
             $query->orderBy('id DESC');
         }
 
+        $tableName = Journal::tableName();
+        $query->select([$tableName.".id", $tableName.".service_id",
+            Journal::tableName().".operation_code", $tableName.".user_id", $tableName.".organization_id",
+            "IF ($tableName.service_id = ".Registry::MERC_SERVICE_ID.", ".AllServiceOperation::tableName().".comment, $tableName.response) as response",
+            $tableName.".log_guide", $tableName.".type", $tableName.".created_at"]);
+        $query->joinWith('operation');
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query
         ]);
@@ -90,7 +101,9 @@ class JournalWebApi extends WebApi
         $dataProvider->setPagination($pagination);
 
         $result = [];
+        /** @var Journal $model */
         foreach ($dataProvider->models as $model) {
+            $model->created_at = WebApiHelper::asDatetime($model->created_at);
             $result[] = $model;
         }
 

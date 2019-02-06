@@ -15,7 +15,6 @@ use api_web\modules\integration\classes\sync\ServiceRkws;
 use common\models\Journal;
 use common\models\Waybill;
 use api_web\modules\integration\classes\sync\AbstractSyncFactory;
-use api_web\modules\integration\classes\SyncServiceFactory;
 use yii\web\BadRequestHttpException;
 use common\models\AllServiceOperation;
 use common\models\OuterTask;
@@ -105,9 +104,10 @@ class NoAuthWebApi
                 $waybill = Waybill::findOne($task->waybill_id);
                 $journal = new Journal();
                 $journal->service_id = $waybill->service_id;
-                $journal->operation_code = $operation->code;
+                $journal->operation_code = (string)$operation->code;
                 $journal->log_guide = 'any_call';
                 $journal->organization_id = $waybill->acquirer_id;
+                $journal->user_id = $task->user_id;
                 // Когда все хорошо и накладная создалась в R-keeper
                 if (array_key_exists('DOC', $xml)) {
                     $doc = (array)$xml['DOC'];
@@ -120,7 +120,7 @@ class NoAuthWebApi
                     $error = (array)$xml['ERROR'];
                     $waybill->status_id = Registry::WAYBILL_ERROR;
                     $journal->type = 'error';
-                    $journal->response = $error['@attributes']['Text'];
+                    $journal->response = "Waybill ID: " . $waybill->id . ' Error: ' . $error['@attributes']['Text'];
                 }
                 $waybill->save();
                 $journal->save();

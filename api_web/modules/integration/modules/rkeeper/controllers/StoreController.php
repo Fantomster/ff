@@ -2,6 +2,7 @@
 
 namespace api_web\modules\integration\modules\rkeeper\controllers;
 
+use api_web\classes\RkeeperWebApi;
 use api_web\components\WebApiController;
 
 class StoreController extends WebApiController
@@ -59,9 +60,10 @@ class StoreController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionList()
     {
-        $this->response = $this->container->get('RkeeperWebApi')->getStoreList($this->request);
+        $this->response = (new RkeeperWebApi())->getStoreList($this->request);
     }
 }

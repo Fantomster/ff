@@ -421,7 +421,7 @@ class GuideWebApi extends \api_web\components\WebApi
         /**
          * @var $cart CartWebApi
          */
-        $cart = $this->container->get('CartWebApi');
+        $cart = new CartWebApi();
         $cart->add($products);
         return $cart->items();
     }
@@ -448,7 +448,7 @@ class GuideWebApi extends \api_web\components\WebApi
         try {
             foreach ($params['products'] as &$product) {
                 if (!in_array($product['operation'], ['add', 'del'])) {
-                    throw new BadRequestHttpException("guide.operation_not_found|{$product['operation']}" );
+                    throw new BadRequestHttpException("guide.operation_not_found|{$product['operation']}");
                 }
                 //Добавляем продукт в шаблон
                 if ($product['operation'] == 'add') {
@@ -604,8 +604,6 @@ class GuideWebApi extends \api_web\components\WebApi
     /**
      * @param $row
      * @return mixed
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     private function prepareProduct($row)
     {
@@ -613,6 +611,9 @@ class GuideWebApi extends \api_web\components\WebApi
         if (empty($model)) {
             $model = CatalogBaseGoods::find()->where(['id' => $row['cbg_id'], 'cat_id' => $row['cat_id']])->one();
         }
+
+        $cart = new CartWebApi();
+        $market = new MarketWebApi();
 
         $item['id'] = ($model instanceof CatalogGoods) ? (int)$model->baseProduct->id : (int)$model->id;
         $item['product'] = $model->baseProduct->product;
@@ -630,8 +631,8 @@ class GuideWebApi extends \api_web\components\WebApi
         $item['currency'] = $model->catalog->currency->symbol;
         $item['currency_id'] = (int)$model->catalog->currency->id;
         $item['updated_at'] = isset($row['updated_at']) ? WebApiHelper::asDatetime($row['updated_at']) : null;
-        $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->baseProduct);
-        $item['in_basket'] = $this->container->get('CartWebApi')->countProductInCart($model->id);
+        $item['image'] = $market->getProductImage($model->baseProduct);
+        $item['in_basket'] = $cart->countProductInCart($model->id);
         return $item;
     }
 

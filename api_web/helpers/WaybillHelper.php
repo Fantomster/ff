@@ -52,6 +52,20 @@ class WaybillHelper
      */
     public $orgId;
 
+    const EDI_DEFAULT_SEPARATOR = '-';
+    /**
+     * Разделители для генерации номеров входящего документа
+     */
+    const EDI_NUMBER_CODE_SEPARATORS = [
+    ];
+
+    /**
+     * Разделители для генерации номеров счета фактуры
+     */
+    const EDI_NUMBER_ADDITIONAL_SEPARATORS = [
+        Registry::RK_SERVICE_ID => 0
+    ];
+
     /**
      * WaybillHelper constructor.
      */
@@ -76,6 +90,9 @@ class WaybillHelper
             throw new BadRequestHttpException('order_not_found');
         }
         $this->user = $order->createdBy;
+        if (!$this->user){
+            throw new BadRequestHttpException('user_not_found');
+        }
         if (is_null($arOrderContentForCreate)) {
             $arOrderContentForCreate = $order->orderContent;
         }
@@ -431,58 +448,54 @@ class WaybillHelper
         $orderContent = current($arOuterStoreProducts)['orderContent'];
         $tmp_ed_num = $orderContent->order_id;
         $waybillSearchField = $onlyByOrderId ? 'outer_number_additional' : 'outer_number_code';
+
+        $separator = $this->getEdiNumberSeparator($serviceId, $onlyByOrderId);
+
         if ($orderContent->edi_number && !$onlyByOrderId) {
             $tmp_ed_num = $orderContent->edi_number;
         }
-        $ed_num = $tmp_ed_num . '-1';
+        $ed_num = $tmp_ed_num . $separator . '1';
 
-        $existOrderContent = OrderContent::find()->where(['like', 'edi_number', $tmp_ed_num])
+        $existOrderContent = OrderContent::find()
+            ->where(['like', 'edi_number', $tmp_ed_num])
             ->andWhere(['order_id' => $orderContent->order_id])
-            ->orderBy(['edi_number' => SORT_DESC])->limit(1)->one();
-        if ($existOrderContent) {
-            $existWaybill = Waybill::find()->where(['like', $waybillSearchField, $tmp_ed_num])
-                ->andWhere(['service_id' => $serviceId])
-                ->orderBy([$waybillSearchField => SORT_DESC])->limit(1)->one();
-            $ediNumber = $existWaybill->{$waybillSearchField} ?? $existOrderContent->edi_number;
+            ->orderBy(['edi_number' => SORT_DESC])
+            ->limit(1)
+            ->one();
 
-            return $this->getLastEdiNumber($ediNumber, $tmp_ed_num);
+        if ($existOrderContent) {
+            $existWaybill = Waybill::find()
+                ->where(['like', $waybillSearchField, $tmp_ed_num])
+                ->andWhere(['service_id' => $serviceId])
+                ->orderBy([$waybillSearchField => SORT_DESC])
+                ->limit(1)
+                ->one();
+            $ediNumber = $existWaybill->{$waybillSearchField} ?? $existOrderContent->edi_number;
+            $ed_num = $this->getLastEdiNumber($ediNumber, $tmp_ed_num, $separator);
         } else {
             $existWaybill = Waybill::find()->where(['like', $waybillSearchField, $tmp_ed_num])
                 ->andWhere(['service_id' => $serviceId])
-                ->orderBy([$waybillSearchField => SORT_DESC])->limit(1)->one();
+                ->orderBy([$waybillSearchField => SORT_DESC])
+                ->limit(1)
+                ->one();
             if ($existWaybill) {
-                return $this->getLastEdiNumber($existWaybill->{$waybillSearchField}, $tmp_ed_num);
+                $ed_num = $this->getLastEdiNumber($existWaybill->{$waybillSearchField}, $tmp_ed_num, $separator);
             }
         }
-
         return $ed_num;
     }
 
     /**
-     * @param $ediNumber
-     * @return int|mixed|string
+     * @param        $ediNumber
+     * @param        $tmp_ed_num
+     * @param string $separator
+     * @return string
      */
-    public function getLastEdiNumber($ediNumber, $tmp_ed_num)
+    public function getLastEdiNumber($ediNumber, $tmp_ed_num, $separator = self::EDI_DEFAULT_SEPARATOR)
     {
-        $ed_num = '';
-        if (strpos($ediNumber, '-') != false && strlen($ediNumber) != strlen($tmp_ed_num)) {
-            $ed_nums = explode('-', $ediNumber);
-            $count = count($ed_nums);
-            if ($count > 1) {
-                $ed_num2 = (int)$ed_nums[$count-1] + 1;
-                $preCount = $count - 1;
-                for($i = 0; $i < $preCount; $i++){
-                    $ed_num .= $ed_nums[$i];
-                    $ed_num .= '-';
-                }
-                $ed_num .= $ed_num2;
-            } else {
-                $ed_num = $ediNumber . '-1';
-            }
-        } else {
-            $ed_num = $ediNumber . '-1';
-        }
-        return $ed_num;
+        $postfix = substr($ediNumber, (strlen($tmp_ed_num) + strlen($separator)));
+        $i = (int)filter_var($postfix, FILTER_VALIDATE_INT);
+        return $tmp_ed_num . $separator . ++$i;
     }
 
     /**
@@ -513,7 +526,7 @@ class WaybillHelper
                 $this->writeInJournal($e->getMessage(), 0, $this->orgId, 'error');
             }
             $waybillToService = [];
-            $query = $this->createQueryWyabillToOrder($request['order_id']);
+            $query = $this->createQueryWaybillToOrder($request['order_id']);
             $dbResult = $query->andWhere(['status_id' => [Registry::WAYBILL_ERROR, Registry::WAYBILL_COMPARED]])
                 ->all(\Yii::$app->db_api);
 
@@ -576,7 +589,7 @@ class WaybillHelper
         $journal->type = $type;
         $journal->log_guide = 'CreateWaybill';
         $journal->organization_id = $orgId;
-        $journal->user_id = \Yii::$app instanceof \Yii\web\Application ? $this->user->id : null;
+        $journal->user_id = (\Yii::$app instanceof \Yii\web\Application && isset($this->user->id)) ? $this->user->id : null;
         $journal->operation_code = (string)(Registry::$operation_code_send_waybill[$service_id] ?? 0);
         if (!$journal->save()) {
             throw new ValidationException($journal->getFirstErrors());
@@ -589,7 +602,7 @@ class WaybillHelper
      * @param $orderId
      * @return Query
      */
-    public function createQueryWyabillToOrder($orderId)
+    public function createQueryWaybillToOrder($orderId)
     {
         return (new Query())->distinct()->select(['w.id', 'w.service_id'])
             ->from('waybill w')
@@ -640,14 +653,24 @@ class WaybillHelper
      */
     public function throwException($serviceId, $orgId, $error)
     {
+        $this->writeInJournal(\Yii::t('api_web', $error), $serviceId, $orgId, 'error');
         if (\Yii::$app instanceof \Yii\web\Application) {
             if (isset($this->user) && $this->user->integration_service_id == $serviceId) {
                 throw new BadRequestHttpException($error);
-            } else {
-                $this->writeInJournal(\Yii::t('api_web', $error), $serviceId, $orgId, 'error');
             }
-        } else {
-            $this->writeInJournal(\Yii::t('api_web', $error), $serviceId, $orgId, 'error');
         }
+    }
+
+    /**
+     * Разделитель между номером поставки и порядковым номером накладной
+     *
+     * @param string $serviceId
+     * @param bool   $number_additional
+     * @return mixed
+     */
+    public function getEdiNumberSeparator($serviceId, $number_additional = false)
+    {
+        $separators = $number_additional ? self::EDI_NUMBER_ADDITIONAL_SEPARATORS : self::EDI_NUMBER_CODE_SEPARATORS;
+        return $separators[$serviceId] ?? self::EDI_DEFAULT_SEPARATOR;
     }
 }

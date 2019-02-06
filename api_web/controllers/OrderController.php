@@ -2,15 +2,20 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\ChatWebApi;
+use api_web\classes\OrderWebApi;
 use api_web\components\WebApiController;
 
 /**
  * Class OrderController
  *
+ * @property OrderWebApi $classWebApi
  * @package api_web\controllers
  */
 class OrderController extends WebApiController
 {
+    public $className = OrderWebApi::class;
+
     /**
      * @SWG\Post(path="/order/info",
      *     tags={"Order"},
@@ -129,10 +134,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionInfo()
     {
-        $this->response = $this->container->get('OrderWebApi')->getInfo($this->request);
+        $this->response = $this->classWebApi->getInfo($this->request);
     }
 
     /**
@@ -265,11 +271,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
-     * @throws \Exception
+     * @throws
      */
     public function actionUpdate()
     {
-        $this->response = $this->container->get('OrderWebApi')->update($this->request);
+        $this->response = $this->classWebApi->update($this->request);
     }
 
     /**
@@ -404,10 +410,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionUpdateOrderByUnconfirmedVendor()
     {
-        $this->response = $this->container->get('OrderWebApi')->update($this->request, true);
+        $this->response = $this->classWebApi->update($this->request, true);
     }
 
     /**
@@ -488,7 +495,7 @@ class OrderController extends WebApiController
      */
     public function actionProducts()
     {
-        $this->response = $this->container->get('OrderWebApi')->products($this->request);
+        $this->response = $this->classWebApi->products($this->request);
     }
 
     /**
@@ -565,10 +572,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionProductsListForUnconfirmedVendor()
     {
-        $this->response = $this->container->get('OrderWebApi')->products($this->request, true);
+        $this->response = $this->classWebApi->products($this->request, true);
     }
 
     /**
@@ -617,10 +625,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionCategories()
     {
-        $this->response = $this->container->get('OrderWebApi')->categories($this->request);
+        $this->response = $this->classWebApi->categories($this->request);
     }
 
     /**
@@ -671,10 +680,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionCategoriesForUnconfirmedVendor()
     {
-        $this->response = $this->container->get('OrderWebApi')->categories($this->request, true);
+        $this->response = $this->classWebApi->categories($this->request, true);
     }
 
     /**
@@ -711,10 +721,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionComment()
     {
-        $this->response = $this->container->get('OrderWebApi')->addComment($this->request);
+        $this->response = $this->classWebApi->addComment($this->request);
     }
 
     /**
@@ -751,10 +762,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionProductComment()
     {
-        $this->response = $this->container->get('OrderWebApi')->addProductComment($this->request);
+        $this->response = $this->classWebApi->addProductComment($this->request);
     }
 
     /**
@@ -873,10 +885,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionCancel()
     {
-        $this->response = $this->container->get('OrderWebApi')->cancel($this->request);
+        $this->response = $this->classWebApi->cancel($this->request);
     }
 
     /**
@@ -994,10 +1007,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionCancelOrderByUnconfirmedVendor()
     {
-        $this->response = $this->container->get('OrderWebApi')->cancel($this->request, true);
+        $this->response = $this->classWebApi->cancel($this->request, true);
     }
 
     /**
@@ -1115,10 +1129,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionCompleteOrderByUnconfirmedVendor()
     {
-        $this->response = $this->container->get('OrderWebApi')->complete($this->request, true);
+        $this->response = $this->classWebApi->complete($this->request, true);
     }
 
     /**
@@ -1236,10 +1251,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionInfoByUnconfirmedVendor()
     {
-        $this->response = $this->container->get('OrderWebApi')->getInfo($this->request);
+        $this->response = $this->classWebApi->getInfo($this->request);
     }
 
     /**
@@ -1274,10 +1290,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionRepeat()
     {
-        $this->response = $this->container->get('OrderWebApi')->repeat($this->request);
+        $this->response = $this->classWebApi->repeat($this->request);
     }
 
     /**
@@ -1383,10 +1400,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionComplete()
     {
-        $this->response = $this->container->get('OrderWebApi')->complete($this->request);
+        $this->response = $this->classWebApi->complete($this->request);
     }
 
     /**
@@ -1444,7 +1462,7 @@ class OrderController extends WebApiController
      */
     public function actionHistory()
     {
-        $this->response = $this->container->get('OrderWebApi')->getHistory($this->request);
+        $this->response = $this->classWebApi->getHistory($this->request);
     }
 
     /**
@@ -1486,10 +1504,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionHistoryCount()
     {
-        $this->response = $this->container->get('OrderWebApi')->getHistoryCount($this->request);
+        $this->response = $this->classWebApi->getHistoryCount();
     }
 
     /**
@@ -1584,7 +1603,7 @@ class OrderController extends WebApiController
      */
     public function actionSaveToPdf()
     {
-        $result = $this->container->get('OrderWebApi')->saveToPdf($this->request, $this);
+        $result = $this->classWebApi->saveToPdf($this->request, $this);
         header('Access-Control-Allow-Origin:*');
         header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
         header('Access-Control-Allow-Headers:Content-Type, Authorization');
@@ -1633,7 +1652,7 @@ class OrderController extends WebApiController
      */
     public function actionSetDocumentNumber()
     {
-        $this->response = $this->container->get('OrderWebApi')->setDocumentNumber($this->request);
+        $this->response = $this->classWebApi->setDocumentNumber($this->request);
     }
 
     /**
@@ -1696,10 +1715,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionMessagesByUnconfirmedVendor()
     {
-        $this->response = $this->container->get('ChatWebApi')->getDialogMessages($this->request);
+        $this->response = (new ChatWebApi())->getDialogMessages($this->request);
     }
 
     /**
@@ -1759,10 +1779,11 @@ class OrderController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionSendMessageByUnconfirmedVendor()
     {
-        $this->response = $this->container->get('ChatWebApi')->addMessage($this->request);
+        $this->response = (new ChatWebApi())->addMessage($this->request);
     }
 
     /**
@@ -1803,7 +1824,7 @@ class OrderController extends WebApiController
      */
     public function actionSaveToExcel()
     {
-        $result = $this->container->get('OrderWebApi')->saveToExcel($this->request);
+        $result = $this->classWebApi->saveToExcel($this->request);
         header('Access-Control-Allow-Origin:*');
         header('Access-Control-Allow-Methods:GET, POST, OPTIONS');
         header('Access-Control-Allow-Headers:Content-Type, Authorization');

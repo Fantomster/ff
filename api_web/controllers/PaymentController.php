@@ -2,14 +2,18 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\PaymentWebApi;
 use api_web\components\WebApiController;
 
 /**
  * Class PaymentController
+ *
+ * @property PaymentWebApi $classWebApi
  * @package api_web\controllers
  */
 class PaymentController extends WebApiController
 {
+    public $className = PaymentWebApi::class;
     /**
      * @SWG\Post(path="/payment/currency-list",
      *     tags={"Payment"},
@@ -47,7 +51,7 @@ class PaymentController extends WebApiController
      */
     public function actionCurrencyList()
     {
-        $this->response = $this->container->get('PaymentWebApi')->currencyList();
+        $this->response = $this->classWebApi->currencyList();
     }
 
     /**
@@ -87,7 +91,7 @@ class PaymentController extends WebApiController
      */
     public function actionTarif()
     {
-        $this->response = $this->container->get('PaymentWebApi')->getTarif();
+        $this->response = $this->classWebApi->getTarif();
     }
 
     /**
@@ -134,9 +138,10 @@ class PaymentController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws
      */
     public function actionCreate()
     {
-        $this->response['redirect_url'] = $this->container->get('PaymentWebApi')->create($this->request);
+        $this->response['redirect_url'] = $this->classWebApi->create($this->request);
     }
 }

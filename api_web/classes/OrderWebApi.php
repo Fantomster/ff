@@ -3,7 +3,7 @@
 namespace api_web\classes;
 
 use api_web\components\{
-    ExcelRenderer, Registry, WebApiController
+    ExcelRenderer, Registry, WebApiController, WebApi
 };
 use api_web\components\notice_class\OrderNotice;
 use api_web\helpers\{
@@ -17,7 +17,6 @@ use common\models\{
     OrderContent,
     OrderStatus,
     RelationSuppRest,
-    Role,
     Order,
     Organization
 };
@@ -33,16 +32,16 @@ use yii\data\{
 use yii\db\{
     Expression, Query
 };
-use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use api_web\exceptions\ValidationException;
+use Yii;
 
 /**
  * Class OrderWebApi
  *
  * @package api_web\classes
  */
-class OrderWebApi extends \api_web\components\WebApi
+class OrderWebApi extends WebApi
 {
     /**
      * Редактирование заказа
@@ -62,7 +61,7 @@ class OrderWebApi extends \api_web\components\WebApi
         if (!$order) {
             throw new BadRequestHttpException('order_not_found');
         }
-
+        $additionalParams = [];
         //If user is unconfirmed
         if ($isUnconfirmedVendor) {
             $organizationID = $this->user->organization_id;
@@ -74,14 +73,20 @@ class OrderWebApi extends \api_web\components\WebApi
                         $delivery = new Delivery();
                         $delivery->vendor_id = $organizationID;
                     }
-                    $delivery->delivery_charge = (float)$post['delivery_price'];
-                    $delivery->save();
+                    $deliveryPrice = (float)$post['delivery_price'];
+                    if ($delivery->delivery_charge != $deliveryPrice) {
+                        $additionalParams['delivery_price']['old_value'] = $delivery->delivery_charge;
+                        $additionalParams['delivery_price']['value'] = $deliveryPrice;
+                        $additionalParams['delivery_price']['name'] = Yii::t('app', 'Стоимость доставки');
+                        $delivery->delivery_charge = $deliveryPrice;
+                        $delivery->save();
+                    }
                 }
             } else {
                 throw new BadRequestHttpException("order.access.change.denied");
             }
         }
-        if (!$this->accessAllow($order)) {
+        if ($this->accessAllow($order) === false) {
             throw new BadRequestHttpException("order.access.change.denied");
         }
         //OrderStatus::checkEdiOrderPermissions($order, 'edit');
@@ -96,7 +101,12 @@ class OrderWebApi extends \api_web\components\WebApi
         }
         //Если сменили дату доставки
         if (!empty($post['actual_delivery'])) {
-            $order->actual_delivery = $post['actual_delivery'];
+            if ($order->actual_delivery != $post['actual_delivery']) {
+                $additionalParams['actual_delivery']['old_value'] = (new \DateTime($order->actual_delivery))->format('d.m.Y');
+                $additionalParams['actual_delivery']['value'] = (new \DateTime(trim($post['actual_delivery'])))->format('d.m.Y');
+                $additionalParams['actual_delivery']['name'] = Yii::t('app', 'Дата доставки');
+                $order->actual_delivery = $post['actual_delivery'];
+            }
         }
         //Если поменяли скидку
         if (isset($post['discount']) && !empty($post['discount'])) {
@@ -106,13 +116,25 @@ class OrderWebApi extends \api_web\components\WebApi
             if (!isset($post['discount']['amount'])) {
                 throw new BadRequestHttpException("order.discount.empty_amount");
             }
-            $order->discount_type = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
+            $discountType = strtoupper($post['discount']['type']) == 'FIXED' ? Order::DISCOUNT_FIXED : Order::DISCOUNT_PERCENT;
+            if ($order->discount_type != $discountType) {
+                $additionalParams['discount_type']['old_value'] = $order->discount_type;
+                $additionalParams['discount_type']['value'] = $discountType;
+                $additionalParams['discount_type']['name'] = Yii::t('app', 'Тип скидки');
+                $order->discount_type = $discountType;
+            }
 
             if ($order->discount_type == Order::DISCOUNT_PERCENT && 100 < $post['discount']['amount']) {
                 throw new BadRequestHttpException("order.discount.100_percent");
             }
 
-            $order->discount = $post['discount']['amount'];
+            if ($order->discount != $post['discount']['amount']) {
+                $discountAmont = $post['discount']['amount'];
+                $additionalParams['discount']['old_value'] = $order->discount;
+                $additionalParams['discount']['value'] = $discountAmont;
+                $additionalParams['discount']['name'] = Yii::t('app', 'Скидка');
+                $order->discount = $discountAmont;
+            }
         }
         $tr = \Yii::$app->db->beginTransaction();
         if (is_null($order->created_by_id)) {
@@ -124,7 +146,37 @@ class OrderWebApi extends \api_web\components\WebApi
             //Тут операции с продуктами в этом заказе
             if (isset($post['products']) && !empty($post['products'])) {
                 if (is_array($post['products'])) {
-                    foreach ($post['products'] as $product) {
+                    $products = $post['products'];
+                    $reversedProducts = array_reverse($products, true);
+                    foreach ($reversedProducts as $firstKey => $item) {
+                        $operation = strtolower($item['operation']);
+                        $itemID = $item['id'];
+                        if ($operation == 'delete') {
+                            $filteredArray = array_filter($products, function ($innerArray) use ($itemID) {
+                                return ($innerArray['id'] == $itemID);
+                            });
+                            foreach ($filteredArray as $key => $value) {
+                                $innerOperation = strtolower($value['operation']);
+                                if ($innerOperation != 'delete') {
+                                    unset($products[$key]);
+                                }
+                            }
+                        }
+                        if ($operation == 'edit') {
+                            $filteredArray = array_filter($products, function ($innerArray) use ($itemID) {
+                                return ($innerArray['id'] == $itemID);
+                            });
+                            if (count($filteredArray) > 1) {
+                                foreach ($filteredArray as $key => $value) {
+                                    $innerOperation = strtolower($value['operation']);
+                                    if (($innerOperation == 'edit' || $innerOperation == 'add') && $key != $firstKey) {
+                                        unset($products[$key]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    foreach ($products as $product) {
                         $operation = strtolower($product['operation']);
                         if (empty($operation) or !in_array($operation, ['delete', 'edit', 'add'])) {
                             throw new BadRequestHttpException("error.request");
@@ -139,7 +191,10 @@ class OrderWebApi extends \api_web\components\WebApi
                                 $changed[] = $change;
                                 break;
                             case 'edit':
-                                $changed[] = $this->editProduct($order, $product);
+                                $editingResult = $this->editProduct($order, $product);
+                                if ($editingResult) {
+                                    $changed[] = $editingResult;
+                                }
                                 break;
                         }
                     }
@@ -174,8 +229,9 @@ class OrderWebApi extends \api_web\components\WebApi
             if ($order->vendor_id == $this->user->organization_id || $isUnconfirmedVendor) {
                 $sender = $order->vendor;
             }
-            if (!empty($changed) || !empty($deleted)) {
-                Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted);
+
+            if (!empty($changed) || !empty($deleted) || !empty($additionalParams)) {
+                Notice::init('Order')->sendOrderChange($sender, $order, $changed, $deleted, $additionalParams);
             }
             return $this->getOrderInfo($order);
         } catch (\Throwable $e) {
@@ -203,7 +259,10 @@ class OrderWebApi extends \api_web\components\WebApi
         if (empty($orderContent)) {
             throw new BadRequestHttpException("order_content.not_found");
         }
-        $oldOrderContentAttributes = $orderContent->attributes;
+        if ($orderContent->quantity == $product['quantity'] && $orderContent->price == round($product['price'], 3)) {
+            return false;
+        }
+        $orderContent->setOldAttributes($orderContent->attributes);
 
         if (!empty($product['quantity'])) {
             $orderContent->quantity = $product['quantity'];
@@ -214,10 +273,10 @@ class OrderWebApi extends \api_web\components\WebApi
         if (!empty($product['price']) || $product['price'] == 0) {
             $orderContent->price = round($product['price'], 3);
         }
+        $clone = clone $orderContent;
 
         if ($orderContent->save()) {
-            $orderContent->setOldAttributes($oldOrderContentAttributes);
-            return $orderContent;
+            return $clone;
         } else {
             throw new ValidationException($orderContent->getFirstErrors());
         }
@@ -309,7 +368,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
-        if (!$this->accessAllow($order)) {
+        if ($this->accessAllow($order) === false) {
             throw new BadRequestHttpException("order.edit_comment_access_denied");
         }
         OrderStatus::checkEdiOrderPermissions($order, 'edit', [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]);
@@ -344,7 +403,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
-        if (!$this->accessAllow($order)) {
+        if ($this->accessAllow($order) === false) {
             throw new BadRequestHttpException("order.edit_comment_access_denied");
         }
         OrderStatus::checkEdiOrderPermissions($order, 'edit', [OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR]);
@@ -384,13 +443,15 @@ class OrderWebApi extends \api_web\components\WebApi
         $this->validateRequest($post, ['order_id']);
 
         /**@var Order $order */
-        $order = Order::find()->where(['id' => $post['order_id'], 'service_id' => Registry::MC_BACKEND])->one();
+        $order = Order::find()
+            ->where(['id' => $post['order_id'], 'service_id' => [Registry::MC_BACKEND, Registry::VENDOR_DOC_MAIL_SERVICE_ID]])
+            ->one();
 
         if (empty($order)) {
             throw new BadRequestHttpException("order_not_found");
         }
 
-        if (!$this->accessAllow($order)) {
+        if ($this->accessAllow($order) === false) {
             throw new BadRequestHttpException("order.view_access_denied");
         }
 
@@ -718,6 +779,10 @@ class OrderWebApi extends \api_web\components\WebApi
                 throw new BadRequestHttpException('order_not_found');
             }
             $organizationID = $this->user->organization_id;
+            /*todo_refactoring: method $this->checkUnconfirmedVendorAccess()
+                passing id, but always you have initialized Order object, and in method you always again create obj
+                and get data from DB, so very bad for App
+            */
             if ($this->checkUnconfirmedVendorAccess($order->id, $organizationID, $this->user->status)) {
                 $searchSupplier = $organizationID;
                 $client = Organization::findOne(['id' => $order->client_id]);
@@ -740,7 +805,6 @@ class OrderWebApi extends \api_web\components\WebApi
 
         //Готовим ответ
         $return = [
-            'headers'    => [],
             'products'   => [],
             'pagination' => [
                 'page'       => $page,
@@ -780,7 +844,15 @@ class OrderWebApi extends \api_web\components\WebApi
             }
 
             $result = $dataProvider->getModels();
+            $cartClass = new CartWebApi();
+            $marketClass = new MarketWebApi();
             foreach ($result as $model) {
+
+                $units = round(($model['units'] ?? 0), 3);
+                if ($isUnconfirmedVendor) {
+                    $units = 0;
+                }
+
                 $return['products'][] = [
                     'id'          => (int)$model['id'],
                     'product_id'  => (int)$model['id'],
@@ -792,22 +864,13 @@ class OrderWebApi extends \api_web\components\WebApi
                     'category_id' => (int)$model['category_id'],
                     'price'       => round($model['price'], 2),
                     'ed'          => $model['ed'],
-                    'units'       => round(($model['units'] ?? 0), 3),
+                    'units'       => $units,
                     'currency'    => $model['symbol'],
                     'currency_id' => (int)$model['currency_id'],
-                    'image'       => @$this->container->get('MarketWebApi')->getProductImage(CatalogBaseGoods::findOne($model['id'])),
-                    'in_basket'   => $this->container->get('CartWebApi')->countProductInCart($model['id']),
+                    'image'       => @$marketClass->getProductImage(CatalogBaseGoods::findOne($model['id'])),
+                    'in_basket'   => $cartClass->countProductInCart($model['id']),
                     'edi_product' => $model['edi_supplier_article'] > 0 ? true : false,
                 ];
-            }
-
-            /**
-             * @var CatalogBaseGoods $model
-             */
-            if (isset($return['products'][0])) {
-                foreach (array_keys($return['products'][0]) as $key) {
-                    $return['headers'][$key] = (new CatalogBaseGoods())->getAttributeLabel($key);
-                }
             }
         }
 
@@ -831,6 +894,7 @@ class OrderWebApi extends \api_web\components\WebApi
             $this->validateRequest($post, ['order_id']);
 
             $order = Order::findOne(['id' => $post['order_id']]);
+            //todo_refactoring: $this->checkUnconfirmedVendorAccess
             if ($this->checkUnconfirmedVendorAccess($post['order_id'], $organizationID, $this->user->status)) {
                 $suppliers = [$this->user->organization_id];
                 $organizationID = $order->client_id;
@@ -854,9 +918,11 @@ class OrderWebApi extends \api_web\components\WebApi
             ->where(['in', 'supp_org_id', $suppliers])
             ->column();
         $return = [];
+        $marketWebApi = new MarketWebApi();
         foreach ($query as $id) {
 
             if ($id == 0) {
+                //todo_refactoring: uniqid()
                 $return[9999] = [
                     'id'            => (int)$id,
                     'name'          => 'Без категории',
@@ -871,13 +937,13 @@ class OrderWebApi extends \api_web\components\WebApi
                     $return[$model->parentCategory->id] = [
                         'id'    => $model->parentCategory->id,
                         'name'  => $model->parentCategory->name,
-                        'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->parentCategory->id)
+                        'image' => $marketWebApi->getCategoryImage($model->parentCategory->id)
                     ];
                 }
                 $return[$model->parentCategory->id]['subcategories'][] = [
                     'id'            => $model->id,
                     'name'          => $model->name,
-                    'image'         => $this->container->get('MarketWebApi')->getCategoryImage($model->id),
+                    'image'         => $marketWebApi->getCategoryImage($model->id),
                     'count_product' => $model->getProductCount(null, $this->user->organization_id),
                 ];
             } else {
@@ -885,7 +951,7 @@ class OrderWebApi extends \api_web\components\WebApi
                     $return[$model->id] = [
                         'id'    => $model->id,
                         'name'  => $model->name,
-                        'image' => $this->container->get('MarketWebApi')->getCategoryImage($model->id)
+                        'image' => $marketWebApi->getCategoryImage($model->id)
                     ];
                 }
             }
@@ -893,10 +959,8 @@ class OrderWebApi extends \api_web\components\WebApi
 
         //Сортируем по ключу
         ksort($return);
-        //Убиваем ключи сортировки
-        $return = array_values($return);
 
-        return $return;
+        return array_values($return);
     }
 
     /**
@@ -974,7 +1038,8 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param array $post
      * @return array
      * @throws BadRequestHttpException
-     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\db\Exception
      */
     public function repeat(array $post)
     {
@@ -986,6 +1051,7 @@ class OrderWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException("order_not_found");
         }
 
+        $cart = new CartWebApi();
         $t = \Yii::$app->db->beginTransaction();
         try {
 
@@ -999,9 +1065,9 @@ class OrderWebApi extends \api_web\components\WebApi
                 $request[] = $this->prepareProduct($item);
             }
             //Добавляем товары для заказа в корзину
-            $this->container->get('CartWebApi')->add($request);
+            $cart->add($request);
             $t->commit();
-            return $this->container->get('CartWebApi')->items();
+            return $cart->items();
         } catch (\Exception $e) {
             $t->rollBack();
             throw $e;
@@ -1169,12 +1235,12 @@ class OrderWebApi extends \api_web\components\WebApi
      * @param null         $currency
      * @param null         $currency_id
      * @return array
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     private function prepareProduct(OrderContent $model, $currency = null, $currency_id = null)
     {
         $quantity = !empty($model->quantity) ? round($model->quantity, 3) : round($model->product->units, 3);
+
+        $market = new MarketWebApi();
 
         $item = [];
         $item['id'] = (int)$model->id;
@@ -1189,10 +1255,10 @@ class OrderWebApi extends \api_web\components\WebApi
         $item['brand'] = $model->product->brand ? $model->product->brand : '';
         $item['article'] = $model->product->article;
         $item['ed'] = $model->product->ed;
-        $item['units'] = 0.001;
+        $item['units'] = 0;
         $item['currency'] = $currency ?? $model->product->catalog->currency->symbol;
         $item['currency_id'] = $currency_id ?? (int)$model->product->catalog->currency->id;
-        $item['image'] = $this->container->get('MarketWebApi')->getProductImage($model->product);
+        $item['image'] = $market->getProductImage($model->product);
         $item['edi_number'] = $model->edi_number;
         $item['edi_product'] = $model->product->edi_supplier_article > 0 ? true : false;
         return $item;
@@ -1201,33 +1267,16 @@ class OrderWebApi extends \api_web\components\WebApi
     /**
      * Доступ к изменению заказа
      *
-     * @param $order
+     * @param Order $order
      * @return bool
      */
     private function accessAllow($order)
     {
-        $user = $this->user;
+        $user_org_id = $this->user->organization->id;
 
-        if ($order->client_id == $user->organization_id) {
+        if ($order->client_id === $user_org_id) {
             return true;
-        }
-
-        if ($order->vendor_id == $user->organization_id) {
-            return true;
-        }
-
-        $roles = ArrayHelper::merge([
-            Role::ROLE_RESTAURANT_MANAGER,
-            Role::ROLE_RESTAURANT_EMPLOYEE,
-            Role::ROLE_SUPPLIER_MANAGER,
-            Role::ROLE_SUPPLIER_EMPLOYEE,
-            Role::ROLE_FKEEPER_MANAGER,
-            Role::ROLE_ADMIN
-        ],
-            Role::getFranchiseeEditorRoles()
-        );
-
-        if (in_array($user->role_id, $roles)) {
+        } elseif ($order->vendor_id === $user_org_id) {
             return true;
         }
 

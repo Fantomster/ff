@@ -2,8 +2,8 @@
 
 namespace api\common\models\iiko;
 
-use api\common\models\iikoWaybillDataSearch;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "iiko_waybill_data".
@@ -12,17 +12,17 @@ use Yii;
  * @property integer $waybill_id
  * @property integer $product_id
  * @property integer $product_rid
- * @property string $munit
+ * @property string  $munit
  * @property integer $org
  * @property integer $vat
  * @property integer $vat_included
- * @property double $sum
- * @property double $quant
- * @property double $defsum
- * @property double $defquant
- * @property double $koef
- * @property string $created_at
- * @property string $updated_at
+ * @property double  $sum
+ * @property double  $quant
+ * @property double  $defsum
+ * @property double  $defquant
+ * @property double  $koef
+ * @property string  $created_at
+ * @property string  $updated_at
  * @property integer $unload_status
  */
 class iikoWaybillData extends \yii\db\ActiveRecord
@@ -71,7 +71,6 @@ class iikoWaybillData extends \yii\db\ActiveRecord
                 $newValue = 0 + str_replace(',', '.', $value);
                 return $newValue;
             }],
-            //[['koef', 'quant'], 'number', 'min' => 0.0001],
         ];
     }
 
@@ -81,27 +80,42 @@ class iikoWaybillData extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'waybill_id' => Yii::t('app', 'Waybill ID'),
-            'product_id' => Yii::t('app', 'ID в Mixcart'),
-            'product_rid' => Yii::t('app', 'Product Rid'),
-            'munit' => Yii::t('app', 'Munit'),
-            'org' => Yii::t('app', 'Org'),
-            'vat' => Yii::t('app', 'Vat'),
-            'vat_included' => Yii::t('app', 'Vat Included'),
-            'sum' => Yii::t('app', 'Сумма б/н'),
-            'quant' => Yii::t('app', 'Количество'),
-            'defsum' => Yii::t('app', 'Defsum'),
-            'defquant' => Yii::t('app', 'Defquant'),
-            'koef' => Yii::t('app', 'Коэфф.'),
-            'created_at' => Yii::t('app', 'Created At'),
-            'updated_at' => Yii::t('app', 'Updated At'),
+            'id'                  => Yii::t('app', 'ID'),
+            'waybill_id'          => Yii::t('app', 'Waybill ID'),
+            'product_id'          => Yii::t('app', 'ID в Mixcart'),
+            'product_rid'         => Yii::t('app', 'Product Rid'),
+            'munit'               => Yii::t('app', 'Munit'),
+            'org'                 => Yii::t('app', 'Org'),
+            'vat'                 => Yii::t('app', 'Vat'),
+            'vat_included'        => Yii::t('app', 'Vat Included'),
+            'sum'                 => Yii::t('app', 'Сумма б/н'),
+            'quant'               => Yii::t('app', 'Количество'),
+            'defsum'              => Yii::t('app', 'Defsum'),
+            'defquant'            => Yii::t('app', 'Defquant'),
+            'koef'                => Yii::t('app', 'Коэфф.'),
+            'created_at'          => Yii::t('app', 'Created At'),
+            'updated_at'          => Yii::t('app', 'Updated At'),
             'fproductnameProduct' => Yii::t('app', 'Наименование продукции'),
-            'enable_all_map' => Yii::t('app', 'Сохранить в сопоставлении'),
-            'koef_buttons' => Yii::t('app', ''),
-            'koef_forever' => Yii::t('app', ''),
-            'querys' => Yii::t('app', ''),
-            'unload_status' => Yii::t('app', 'Статус для отправления'),
+            'enable_all_map'      => Yii::t('app', 'Сохранить в сопоставлении'),
+            'koef_buttons'        => Yii::t('app', ''),
+            'koef_forever'        => Yii::t('app', ''),
+            'querys'              => Yii::t('app', ''),
+            'unload_status'       => Yii::t('app', 'Статус для отправления'),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ],
         ];
     }
 

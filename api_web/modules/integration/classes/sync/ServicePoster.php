@@ -132,11 +132,15 @@ class ServicePoster extends AbstractSyncFactory
                     $model->save();
                     $this->response($res, $model, \Yii::t('api_web', 'service_iiko.success_unloading_waybill'));
                     $transaction->commit();
+                    $this->writeInJournal(\Yii::t('api_web', 'integration.waybill_send') . $model->id,
+                        Registry::POSTER_SERVICE_ID, $model->acquirer_id);
                 } catch (\Throwable $t) {
                     $transaction->rollBack();
                     $model->status_id = Registry::WAYBILL_ERROR;
                     $model->save();
                     $this->response($res, $model, $t->getMessage(), false);
+                    $this->writeInJournal(\Yii::t('api_web', 'integration.waybill_not_send') . $model->id,
+                        Registry::POSTER_SERVICE_ID, $model->acquirer_id);
                 }
             }
 

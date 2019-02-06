@@ -2,6 +2,7 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\CartWebApi;
 use api_web\components\Registry;
 use api_web\components\WebApiController;
 
@@ -51,6 +52,6 @@ class DefaultController extends WebApiController
      */
     public function actionGetNdsList()
     {
-        $this->response = array_values(Registry::$nds_list);
+        $this->response = (new CartWebApi())->getVatsByOrganization();
     }
 }

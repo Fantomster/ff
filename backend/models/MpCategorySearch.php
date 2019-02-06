@@ -2,7 +2,6 @@
 
 namespace backend\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\MpCategory;
@@ -36,7 +35,6 @@ class MpCategorySearch extends MpCategory
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
@@ -59,7 +57,7 @@ class MpCategorySearch extends MpCategory
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            'id'     => $this->id,
             'parent' => $this->parent,
         ]);
 

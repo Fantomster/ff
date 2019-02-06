@@ -8,14 +8,18 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\RabbitWebApi;
 use api_web\components\WebApiController;
 
 /**
  * Class RabbitController
+ *
+ * @property RabbitWebApi $classWebApi
  * @package api_web\controllers
  */
 class RabbitController extends WebApiController
 {
+    public $className = RabbitWebApi::class;
     /**
      * @SWG\Post(path="/rabbit/add-to-queue",
      *     tags={"Rabbit"},
@@ -54,6 +58,6 @@ class RabbitController extends WebApiController
      */
     public function actionAddToQueue()
     {
-        $this->response = $this->container->get('RabbitWebApi')->addToQueue($this->request);
+        $this->response = $this->classWebApi->addToQueue($this->request);
     }
 }

@@ -1,17 +1,8 @@
 <?php
 
-/**
- * Class CallbackController
- * @package api\modules\v1\modules\web\controllers
- * @createdBy Basil A Konakov
- * @createdAt 2018-10-04
- * @author Mixcart
- * @module WEB-API
- * @version 2.0
- */
-
 namespace api_web\controllers;
 
+use api_web\classes\NoAuthWebApi;
 use api_web\modules\integration\classes\sync\AbstractSyncFactory;
 use common\models\OuterTask;
 use \Yii;
@@ -20,6 +11,7 @@ use yii\web\BadRequestHttpException;
 
 /**
  * Class CallbackController
+ *
  * @package api_web\controllers
  */
 class CallbackController extends WebApiNoAuthController
@@ -32,10 +24,6 @@ class CallbackController extends WebApiNoAuthController
      * @var array $response
      */
     protected $response;
-    /**
-     * @var \yii\di\Container $container
-     */
-    public $container;
 
     /**
      * @SWG\Post(path="/callback/load-dictionary",
@@ -70,6 +58,7 @@ class CallbackController extends WebApiNoAuthController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionLoadDictionary()
     {
@@ -83,7 +72,7 @@ class CallbackController extends WebApiNoAuthController
             throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
 
-        $this->response = $this->container->get('NoAuthWebApi')->loadDictionary($mcTask);
+        $this->response = (new NoAuthWebApi())->loadDictionary($mcTask);
     }
 
     /**
@@ -119,6 +108,7 @@ class CallbackController extends WebApiNoAuthController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionSendWaybill()
     {
@@ -132,7 +122,7 @@ class CallbackController extends WebApiNoAuthController
             throw new BadRequestHttpException("wrong_param|" . AbstractSyncFactory::CALLBACK_TASK_IDENTIFIER);
         }
 
-        $this->response = $this->container->get('NoAuthWebApi')->sendWaybill($mcTask);
+        $this->response = (new NoAuthWebApi())->sendWaybill($mcTask);
     }
 
 }

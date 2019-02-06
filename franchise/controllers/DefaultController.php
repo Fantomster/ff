@@ -2,6 +2,7 @@
 
 namespace franchise\controllers;
 
+use common\models\Franchisee;
 use Yii;
 use yii\web\Controller;
 
@@ -12,6 +13,12 @@ use yii\web\Controller;
 class DefaultController extends Controller {
 
     protected $currentUser;
+
+    /**
+     * Description
+     *
+     * @var Franchisee
+     */
     protected $currentFranchisee;
 
     /*

@@ -2,6 +2,7 @@
 
 namespace api_web\modules\integration\modules\one_s\controllers;
 
+use api_web\classes\OneSWebApi;
 use api_web\components\WebApiController;
 
 class AgentController extends WebApiController
@@ -63,9 +64,10 @@ class AgentController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionList()
     {
-        $this->response = $this->container->get('OneSWebApi')->getAgentsList($this->request);
+        $this->response = (new OneSWebApi())->getAgentsList($this->request);
     }
 }

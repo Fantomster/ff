@@ -11,6 +11,7 @@ namespace api_web\modules\integration\modules\vetis\helpers;
 use api\common\models\merc\MercVsd;
 use api_web\classes\UserWebApi;
 use api_web\components\Registry;
+use api_web\helpers\BaseHelper;
 use api_web\helpers\WebApiHelper;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
@@ -26,7 +27,7 @@ use yii\web\BadRequestHttpException;
 /**
  * Класс для работы с ВСД
  * */
-class VetisHelper
+class VetisHelper extends BaseHelper
 {
     /**@var MercVsd model */
     private $vsdModel;
@@ -176,42 +177,6 @@ class VetisHelper
         $this->waybillSeries = $this->vsdModel->waybill_number;
         $this->waybillDate = WebApiHelper::asDatetime($this->vsdModel->waybill_date);
         return $this;
-    }
-
-    /**
-     * @param      $param
-     * @param null $default
-     * @return null
-     */
-    public function isSetDef($param, $default = null)
-    {
-        if (isset($param) && !empty($param)) {
-            return $param;
-        }
-        return $default;
-    }
-
-    /**
-     * @param $var
-     * @param $arParams
-     * @param $arLabels
-     * @return array
-     */
-    public function set(&$var, $arParams, $arLabels)
-    {
-        $arGoodParams = [];
-        foreach ($arLabels as $label) {
-            if (isset($arParams[$label]) && !empty($arParams[$label])) {
-                if ($label == 'date') {
-                    $this->set($var, $arParams[$label], ['from', 'to']);
-                } else {
-                    $var->{$label} = $arParams[$label];
-                }
-                $arGoodParams[$label] = $arParams[$label];
-            }
-        }
-
-        return $arGoodParams;
     }
 
     /**

@@ -1,7 +1,6 @@
 <?php
 
 use api_web\components\Registry;
-use api_web\exceptions\ValidationException;
 use common\models\IntegrationSetting;
 use yii\db\Migration;
 
@@ -39,12 +38,16 @@ class m190121_092151_add_settings_auth_login_and_auth_password extends Migration
                         'is_active'     => '1',
                         'service_id'    => $service,
                     ]);
+
                     if (!$model->save()) {
-                        throw new ValidationException($model->getFirstErrors());
+                        print_r($model->getFirstErrors());
+                        return false;
                     }
                 }
             }
         }
+
+        return true;
     }
 
     /**

@@ -2,14 +2,19 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\MarketWebApi;
 use api_web\components\WebApiController;
 
 /**
  * Class MarketController
+ *
+ * @property MarketWebApi $classWebApi
  * @package api_web\controllers
  */
 class MarketController extends WebApiController
 {
+    public $className = MarketWebApi::class;
+
     /**
      * @SWG\Post(path="/market/products",
      *     tags={"Market"},
@@ -110,10 +115,11 @@ class MarketController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionProducts()
     {
-        $this->response = $this->container->get('MarketWebApi')->products($this->request);
+        $this->response = $this->classWebApi->products($this->request);
     }
 
     /**
@@ -165,7 +171,7 @@ class MarketController extends WebApiController
      */
     public function actionCategories()
     {
-        $this->response = $this->container->get('MarketWebApi')->categories($this->request);
+        $this->response = $this->classWebApi->categories();
     }
 
     /**
@@ -221,10 +227,11 @@ class MarketController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws
      */
     public function actionProduct()
     {
-        $this->response['product'] = $this->container->get('MarketWebApi')->product($this->request);
+        $this->response['product'] = $this->classWebApi->product($this->request);
     }
 
     /**
@@ -285,14 +292,17 @@ class MarketController extends WebApiController
      *                                      "phone": "+7 926 844-31-82",
      *                                      "email": "fruttiroom@mail.ru",
      *                                      "address": "Новохохловская улица, 14, Москва, Москва, Россия",
-     *                                      "image": "https://fkeeper.s3.amazonaws.com/org-picture/7a845f0eaf944721f11a53bc06640268.jpg",
+     *                                      "image":
+     *                                      "https://fkeeper.s3.amazonaws.com/org-picture/7a845f0eaf944721f11a53bc06640268.jpg",
      *                                      "type_id": 2,
      *                                      "type": "Поставщик",
      *                                      "rating": 5,
      *                                      "city": "Москва",
      *                                      "administrative_area_level_1": "Москва",
      *                                      "country": "Россия",
-     *                                      "about": "Доставка овощей и фруктов, а также высококачественных продуктов, для кафе, баров, ресторанов, столовых, линий фудкортов, служб кейтеринговых услуг и др."
+     *                                      "about": "Доставка овощей и фруктов, а также высококачественных продуктов,
+     *                                      для кафе, баров, ресторанов, столовых, линий фудкортов, служб кейтеринговых
+     *                                      услуг и др."
      *                               }}
      *                               ,
      *                               "pagination":{
@@ -316,6 +326,6 @@ class MarketController extends WebApiController
      */
     public function actionOrganizations()
     {
-        $this->response = $this->container->get('MarketWebApi')->organizations($this->request);
+        $this->response = $this->classWebApi->organizations($this->request);
     }
 }

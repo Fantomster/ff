@@ -2,18 +2,22 @@
 
 namespace api\modules\v1\modules\mobile\controllers;
 
+use api\common\models\Profile;
+use api\modules\v1\modules\mobile\resources\Organization;
+use api\modules\v1\modules\mobile\resources\User;
 use common\models\Order;
 use Yii;
+use yii\db\Query;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\OrderChat;
-use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-class OrderChatController extends ActiveController {
+class OrderChatController extends ActiveController
+{
 
     /**
      * @var string
@@ -23,7 +27,8 @@ class OrderChatController extends ActiveController {
     /**
      * @return array
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         $behaviors = parent::behaviors();
 
         $behaviors = array_merge($behaviors, $this->module->controllerBehaviors);
@@ -34,7 +39,8 @@ class OrderChatController extends ActiveController {
     /**
      * @inheritdoc
      */
-    public function actions() {
+    public function actions()
+    {
         return [
             'index'   => [
                 'class'               => 'yii\rest\IndexAction',
@@ -54,120 +60,116 @@ class OrderChatController extends ActiveController {
 
     /**
      * @param $id
-     * @return null|static
+     * @return OrderChat
      * @throws NotFoundHttpException
      */
-    public function findModel($id) {
+    public function findModel($id)
+    {
         $model = OrderChat::findOne($id);
         if (!$model) {
             throw new NotFoundHttpException;
         }
+
         return $model;
     }
 
     /**
-     * @return ActiveDataProvider
+     * @return SqlDataProvider
+     * @throws \Throwable
      */
     public function prepareDataProvider()
     {
         $params = new OrderChat();
+        $params->setAttributes(Yii::$app->request->queryParams);
 
-        $query = "SELECT 
-                    order_chat.*, profile.full_name, 
-                    organization.name AS organization_name, 
-                    organization.picture AS organization_picture 
-                    FROM order_chat 
-                    INNER JOIN user ON user.id = order_chat.sent_by_id
-                    INNER JOIN profile ON profile.user_id = order_chat.sent_by_id 
-                    INNER JOIN organization ON organization.id = user.organization_id 
-                    INNER JOIN " . Order::tableName() . " o ON o.id = order_chat.order_id and (o.client_id = " . Yii::$app->user->identity->organization_id . " OR o.vendor_id = " . Yii::$app->user->identity->organization_id . ")";
+        /** @var User $user */
+        $user = Yii::$app->user->getIdentity();
+        $org = $user->organization;
 
-        if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
-            return new SqlDataProvider([
-                'sql'        => $query . " ORDER BY created_at DESC",
-                'pagination' => false,
+        $query = (new Query())
+            ->select([
+                'oc.*',
+                'p.full_name',
+                'org.name AS organization_name',
+                'org.picture AS organization_picture'
+            ])
+            ->from(['oc' => OrderChat::tableName()])
+            ->innerJoin(['u' => User::tableName()], 'u.id = oc.sent_by_id')
+            ->innerJoin(['p' => Profile::tableName()], 'p.user_id = oc.sent_by_id')
+            ->innerJoin(['org' => Organization::tableName()], 'org.id = u.organization_id')
+            ->innerJoin(['ord' => Order::tableName()], "ord.id = oc.order_id")
+            ->where([
+                'or',
+                ['ord.client_id' => $org->id],
+                ['ord.vendor_id' => $org->id]
             ]);
+
+        $query->andFilterWhere([
+            'oc.id'        => $params->id,
+            'order_id'     => $params->order_id,
+            'is_system'    => $params->is_system,
+            'viewed'       => $params->viewed,
+            'recipient_id' => $params->recipient_id,
+            'danger'       => $params->danger,
+
+        ])
+            ->andFilterWhere(['>=', 'oc.created_at', $params->created_at])
+            ->andFilterWhere(['LIKE', 'message', $params->message]);
+
+        if ($params->type == OrderChat::TYPE_DIALOGS) {
+            $dialogs = (new Query())
+                ->select('id')
+                ->from(OrderChat::tableName())
+                ->innerJoin([
+                    'max' => (new Query())
+                        ->select([
+                            'order_id',
+                            'MAX(created_at) AS created_at'
+                        ])
+                        ->from(OrderChat::tableName())
+                        ->groupBy('order_id')
+                ])
+                ->createCommand()
+                ->getRawSql();
+
+            $query->andWhere(['IN', 'oc.id', "({$dialogs})"]);
         }
 
-        $filters = [];
-        if ($params->type == OrderChat::TYPE_DIALOGS)
-            $filters[] = ' order_chat.id in (
-                        SELECT order_chat.id 
-                        FROM order_chat
-                        INNER JOIN (
-                          SELECT order_id, MAX(created_at) AS created_at
-                          FROM order_chat GROUP BY order_id
-                        ) AS max USING (order_id, created_at))';
-
-        $filter = (isset($params->id)) ? "id = $params->id" : null;
-        if ($filter != null)
-            $filters[] = $filter;
-
-        $filter = (isset($params->order_id)) ? "order_id = $params->order_id" : null;
-        if($filter != null)
-            $filters[] = $filter;
-
-        $filter = (isset($params->is_system)) ? "is_system = $params->is_system" : null;
-        if($filter != null)
-            $filters[] = $filter;
-
-        $filter = (isset($params->message)) ? "message = $params->message" : null;
-        if($filter != null)
-            $filters[] = $filter;
-
-        $filter = (isset($params->created_at)) ? "created_at = $params->created_at" : null;
-        if($filter != null)
-            $filters[] = $filter;
-
-        $filter = (isset($params->viewed)) ? "viewed = $params->viewed" : null;
-        if($filter != null)
-            $filters[] = $filter;
-
-        $filter = (isset($params->recipient_id)) ? "recipient_id = $params->recipient_id" : null;
-        if($filter != null)
-            $filters[] = $filter;
-
-        $filter = (isset($params->danger)) ? "danger = $params->danger" : null;
-        if($filter != null)
-            $filters[] = $filter;
-
-        $filter = implode(" AND ", $filters);
-
-        if (strlen($filter) > 0)
-            $query .= " WHERE " . $filter;
-
-        $query .= " ORDER BY created_at DESC";
-        if (isset($params->count)) {
-            $query .= " LIMIT " . $params->count;
-            if (isset($params->page)) {
-                $offset = ($params->page * $params->count) - $params->count;
-                $query .= " OFFSET ".$offset;
-            }
-        }
-
-        $dataProvider = new SqlDataProvider([
-            'sql'        => $query,
-            'pagination' => false,
+        return new SqlDataProvider([
+            'sql'        => $query->orderBy(['created_at' => SORT_DESC])->createCommand()->getRawSql(),
+            'pagination' => [
+                'page'     => isset($params->page) ? ($params->page - 1) : 0,
+                'pageSize' => isset($params->count) ? $params->count : null,
+            ],
         ]);
-
-        return $dataProvider;
     }
 
-    public function actionCreate() {
+    /**
+     * @return string
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function actionCreate()
+    {
         $user = Yii::$app->user->identity;
         if (Yii::$app->request->post() && Yii::$app->request->post('message')) {
             $message = Yii::$app->request->post('message');
             $order_id = Yii::$app->request->post('order_id');
+
             return (OrderChat::sendChatMessage($user, $order_id, $message)) ? "success" : "fail";
         } else {
             throw new \yii\web\BadRequestHttpException(Yii::t('yii', 'Unable to verify your data submission.'));
         }
     }
 
-    public function actionViewed() {
+    /**
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function actionViewed()
+    {
         if (Yii::$app->request->post() && Yii::$app->request->post('message_id')) {
-            $message = OrderChat::findOne(['id' =>Yii::$app->request->post('message_id')]);
-            if($message == mull)
+            $message = OrderChat::findOne(['id' => Yii::$app->request->post('message_id')]);
+            if ($message == null)
+
                 return;
             $message->viewed = 1;
             $message->save();

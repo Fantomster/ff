@@ -12,31 +12,46 @@ class OrderChat extends \common\models\OrderChat
     public $page;
     public $organization_picture;
     public $organization_name;
-    
-    const TYPE_DIALOGS=1;
-    const TYPE_MESSAGES=2;
-    
+
+    const TYPE_DIALOGS = 1;
+    const TYPE_MESSAGES = 2;
+
     public function fields()
     {
-        return ['id', 'order_id', 'sent_by_id', 'is_system', 'message', 'created_at', 'viewed',  
-            'recipient_id', 'danger', 'type', 'count', 'page', 'organization_picture', 'organization_name'];
+        return [
+            'id',
+            'order_id',
+            'sent_by_id',
+            'is_system',
+            'message',
+            'created_at',
+            'viewed',
+            'recipient_id',
+            'danger',
+            'type',
+            'count',
+            'page',
+            'organization_picture',
+            'organization_name'
+        ];
     }
-    
-     /**
+
+    /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['order_id', 'sent_by_id', 'viewed', 'recipient_id', 'count', 'type', 'page'], 'integer'],
+            [['id', 'order_id', 'sent_by_id', 'viewed', 'recipient_id', 'count', 'type', 'page'], 'integer'],
             [['message', 'created_at', 'is_system', 'danger', 'organization_name', 'organization_picture'], 'safe'],
             [['message'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process', 'on' => 'userSent'],
-            [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
-            [['sent_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['sent_by_id' => 'id']],
+            [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::class, 'targetAttribute' => ['order_id' => 'id']],
+            [['sent_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['sent_by_id' => 'id']],
         ];
     }
-    
-    public static function sendChatMessage($user, $order_id, $message) {
+
+    public static function sendChatMessage($user, $order_id, $message)
+    {
         $order = \common\models\Order::findOne(['id' => $order_id]);
 
         $newMessage = new \common\models\OrderChat(['scenario' => 'userSent']);
@@ -48,8 +63,10 @@ class OrderChat extends \common\models\OrderChat
         } else {
             $newMessage->recipient_id = $order->client_id;
         }
-        if(!$newMessage->save())
-           return false;
+        if (!$newMessage->save())
+
+            return false;
+
         return true;
     }
 

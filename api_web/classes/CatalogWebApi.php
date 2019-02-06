@@ -330,14 +330,13 @@ class CatalogWebApi extends WebApi
      * @param array $request
      * @return array
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
+     * @throws ValidationException
      */
     public function getTempDuplicatePosition(array $request)
     {
         $this->validateRequest($request, ['vendor_id']);
 
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         $catalogTemp = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (empty($catalogTemp)) {
             throw new BadRequestHttpException('catalog_temp_not_found');
@@ -450,15 +449,9 @@ class CatalogWebApi extends WebApi
 
         $this->validateRequest($request, ['vendor_id']);
 
-        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
-
+        $catalog = $this->getPersonalCatalogByVendorId($request['vendor_id'], $this->user->organization);
         if (empty($catalog)) {
             throw new BadRequestHttpException('catalog_not_found');
-        }
-
-        $catalogs = explode(',', $this->user->organization->getCatalogs());
-        if (!in_array($catalog->id, $catalogs)) {
-            throw new BadRequestHttpException('this_is_not_your_catalog');
         }
 
         $selectFields = [
@@ -516,10 +509,8 @@ class CatalogWebApi extends WebApi
      *
      * @param $request
      * @return array
-     * @throws \yii\base\InvalidArgumentException
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
-     * @throws \yii\web\BadRequestHttpException
+     * @throws BadRequestHttpException
+     * @throws ValidationException
      */
     public function getGoodsInTempCatalog($request)
     {
@@ -528,7 +519,7 @@ class CatalogWebApi extends WebApi
 
         $this->validateRequest($request, ['vendor_id']);
 
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (!$catalog) {
             throw new BadRequestHttpException("catalog.not_found");
         }
@@ -600,6 +591,35 @@ class CatalogWebApi extends WebApi
             "ed"      => $row['ed'],
             "CountOf" => (int)$row['CountOf'] ?? 1
         ];
+    }
+
+    /**
+     * @param int          $vendorId
+     * @param Organization $obRestaurant
+     * @return Catalog
+     * @throws BadRequestHttpException
+     */
+    public function getPersonalCatalogByVendorId(int $vendorId, Organization $obRestaurant)
+    {
+        /**@var RelationSuppRest $relation */
+        $relation = RelationSuppRest::find()
+            ->with(['catalog' => function ($query) {
+                /**@var Query $query */
+                $query->andWhere(['status' => Catalog::STATUS_ON]);
+            },])
+            ->where([
+                'supp_org_id' => $vendorId,
+                'rest_org_id' => $obRestaurant->id,
+                'status'      => RelationSuppRest::CATALOG_STATUS_ON,
+                'deleted'     => 0,
+            ])
+            ->andWhere([">", "cat_id", 0])
+            ->one();
+        if (!$relation) {
+            throw new BadRequestHttpException('dictionary.you_not_work_this_vendor');
+        }
+
+        return $relation->catalog;
     }
 
     /**
@@ -675,7 +695,6 @@ class CatalogWebApi extends WebApi
      * @throws \yii\base\Exception
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\db\StaleObjectException
-     * @throws \yii\di\NotInstantiableException
      */
     public function uploadFile(array $request)
     {
@@ -697,7 +716,7 @@ class CatalogWebApi extends WebApi
             throw new BadRequestHttpException('vendor.is_work');
         }
 
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($vendor->id, $this->user->organization, true);
+        $catalog = $this->getPersonalCatalog($vendor->id, $this->user->organization, true);
         if (empty($catalog)) {
             throw new BadRequestHttpException('Catalog not found');
         }
@@ -752,7 +771,7 @@ class CatalogWebApi extends WebApi
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException('empty_param|vendor_id');
         }
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
         if (!$catalog) {
             throw new BadRequestHttpException("Catalog not found");
         }
@@ -788,12 +807,12 @@ class CatalogWebApi extends WebApi
                 $tempCatalog->save();
             }
         }
-        $dubles = $this->container->get('CatalogWebApi')->getTempDuplicatePosition($request);
+        $dubles = $this->getTempDuplicatePosition($request);
         if ($dubles) {
             return ['duplicates' => $dubles];
         }
 
-        return ['products' => $this->container->get('CatalogWebApi')->getGoodsInTempCatalog($request)];
+        return ['products' => $this->getGoodsInTempCatalog($request)];
     }
 
     /**
@@ -827,14 +846,13 @@ class CatalogWebApi extends WebApi
      * @throws \Throwable
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\db\StaleObjectException
-     * @throws \yii\di\NotInstantiableException
      */
     public function cancelTemporary(array $request)
     {
         if (empty($request['vendor_id'])) {
             throw new BadRequestHttpException('empty_param|vendor_id');
         }
-        $catalog = $this->container->get('CatalogWebApi')->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
+        $catalog = $this->getPersonalCatalog($request['vendor_id'], $this->user->organization, true);
 
         $tempCatalog = CatalogTemp::findOne(['cat_id' => $catalog->id, 'user_id' => $this->user->id]);
         if (!empty($tempCatalog)) {
@@ -850,12 +868,10 @@ class CatalogWebApi extends WebApi
      * Список ключей для выбора
      *
      * @return array
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\di\NotInstantiableException
      */
     public function getListMainIndex()
     {
-        return $this->container->get('CatalogWebApi')->getKeys();
+        return $this->getKeys();
     }
 
     /**

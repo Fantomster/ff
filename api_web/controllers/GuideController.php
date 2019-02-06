@@ -2,14 +2,18 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\GuideWebApi;
 use api_web\components\WebApiController;
 
 /**
  * Class GuideController
+ * @property GuideWebApi $classWebApi
  * @package api_web\controllers
  */
 class GuideController extends WebApiController
 {
+    public $className = GuideWebApi::class;
+
     /**
      * @SWG\Post(path="/guide/get",
      *     tags={"Guide"},
@@ -64,10 +68,11 @@ class GuideController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionGet()
     {
-        $this->response = $this->container->get('GuideWebApi')->getInfo($this->request);
+        $this->response = $this->classWebApi->getInfo($this->request);
     }
 
     /**
@@ -151,7 +156,7 @@ class GuideController extends WebApiController
      */
     public function actionList()
     {
-        $this->response = $this->container->get('GuideWebApi')->getList($this->request);
+        $this->response = $this->classWebApi->getList($this->request);
     }
 
     /**
@@ -210,10 +215,11 @@ class GuideController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionCreate()
     {
-        $this->response = $this->container->get('GuideWebApi')->create($this->request);
+        $this->response = $this->classWebApi->create($this->request);
     }
 
     /**
@@ -270,10 +276,11 @@ class GuideController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionCreateFromOrder()
     {
-        $this->response = $this->container->get('GuideWebApi')->createFromOrder($this->request);
+        $this->response = $this->classWebApi->createFromOrder($this->request);
     }
 
     /**
@@ -308,10 +315,11 @@ class GuideController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionDelete()
     {
-        $this->response = $this->container->get('GuideWebApi')->delete($this->request);
+        $this->response = $this->classWebApi->delete($this->request);
     }
 
     /**
@@ -369,10 +377,11 @@ class GuideController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionRename()
     {
-        $this->response = $this->container->get('GuideWebApi')->rename($this->request);
+        $this->response = $this->classWebApi->rename($this->request);
     }
 
     /**
@@ -430,10 +439,11 @@ class GuideController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionChangeColor()
     {
-        $this->response = $this->container->get('GuideWebApi')->changeColorGuide($this->request);
+        $this->response = $this->classWebApi->changeColorGuide($this->request);
     }
 
     /**
@@ -490,10 +500,11 @@ class GuideController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionGetProducts()
     {
-        $this->response = $this->container->get('GuideWebApi')->getProducts($this->request);
+        $this->response = $this->classWebApi->getProducts($this->request);
     }
 
     /**
@@ -579,10 +590,11 @@ class GuideController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionAddToCart()
     {
-        $this->response = $this->container->get('GuideWebApi')->addToCart($this->request);
+        $this->response = $this->classWebApi->addToCart($this->request);
     }
 
 
@@ -635,9 +647,10 @@ class GuideController extends WebApiController
      *         description = "BadRequestHttpException||ValidationException"
      *     )
      * )
+     * @throws
      */
     public function actionActionProduct()
     {
-        $this->response = $this->container->get('GuideWebApi')->actionProductFromGuide($this->request);
+        $this->response = $this->classWebApi->actionProductFromGuide($this->request);
     }
 }

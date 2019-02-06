@@ -2,15 +2,20 @@
 
 namespace api_web\controllers;
 
+use api_web\classes\ChatWebApi;
 use api_web\components\WebApiController;
 
 /**
  * Class ChatController
  *
+ * @property ChatWebApi $classWebApi
  * @package api_web\controllers
  */
 class ChatController extends WebApiController
 {
+
+    public $className = ChatWebApi::class;
+
     /**
      * Список методов которые не нужно логировать
      *
@@ -39,7 +44,8 @@ class ChatController extends WebApiController
      *                  default={
      *                      "search":{
      *                          "recipient_id":1,
-     *                          "order_id":14},
+     *                          "order_id":14
+     *                      },
      *                      "pagination":{
      *                          "page":1,
      *                          "page_size":12
@@ -84,10 +90,11 @@ class ChatController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionDialogList()
     {
-        $this->response = $this->container->get('ChatWebApi')->getDialogList($this->request);
+        $this->response = $this->classWebApi->getDialogList($this->request);
     }
 
     /**
@@ -150,10 +157,11 @@ class ChatController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionDialogMessages()
     {
-        $this->response = $this->container->get('ChatWebApi')->getDialogMessages($this->request);
+        $this->response = $this->classWebApi->getDialogMessages($this->request);
     }
 
     /**
@@ -210,10 +218,11 @@ class ChatController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionRecipientList()
     {
-        $this->response = $this->container->get('ChatWebApi')->getRecipientList($this->request);
+        $this->response = $this->classWebApi->getRecipientList($this->request);
     }
 
     /**
@@ -273,10 +282,11 @@ class ChatController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionDialogAddMessage()
     {
-        $this->response = $this->container->get('ChatWebApi')->addMessage($this->request);
+        $this->response = $this->classWebApi->addMessage($this->request);
     }
 
     /**
@@ -312,10 +322,11 @@ class ChatController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionDialogRead()
     {
-        $this->response = $this->container->get('ChatWebApi')->readMessages($this->request);
+        $this->response = $this->classWebApi->readMessages($this->request);
     }
 
     /**
@@ -351,10 +362,11 @@ class ChatController extends WebApiController
      *         description = "error"
      *     )
      * )
+     * @throws \Exception
      */
     public function actionDialogReadAll()
     {
-        $this->response = $this->container->get('ChatWebApi')->readAllMessages();
+        $this->response = $this->classWebApi->readAllMessages();
     }
 
     /**
@@ -393,6 +405,6 @@ class ChatController extends WebApiController
      */
     public function actionDialogUnreadCount()
     {
-        $this->response = $this->container->get('ChatWebApi')->dialogUnreadCount();
+        $this->response = $this->classWebApi->dialogUnreadCount();
     }
 }

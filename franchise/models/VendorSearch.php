@@ -46,7 +46,7 @@ class VendorSearch extends Organization {
      *
      * @return SqlDataProvider
      */
-    public function search($params, $franchisee_id, $client_id = null) {
+    public function search($params, $franchiseeId, $user) {
         $this->load($params);
 
         $searchString = "%{$this->searchString}%";
@@ -62,41 +62,140 @@ class VendorSearch extends Organization {
             $to->add(new \DateInterval('P1D'));
             $t2_f = $to->format('Y-m-d');
         }
-        $currencyOption = '';
-        if($this->filter_currency){
-            $currencyOption = " and currency_id=$this->filter_currency";
+        
+        $tblRSR   = \common\models\RelationSuppRest::tableName();
+        $tblOrder = Order::tableName();
+        $tblOrg   = Organization::tableName();
+        $tblFA    = \common\models\FranchiseeAssociate::tableName();
+
+        $orderStatuses = [
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+            Order::STATUS_PROCESSING,
+            Order::STATUS_DONE,
+        ];
+
+        $subQueryClientCount = (new Query())
+                ->select([new Expression("COUNT(id)")])
+                ->from($tblRSR)
+                ->where(["supp_org_id" => "org.id"]);
+
+        $subQueryClientCountPrev30 = (new Query())
+                ->select([new Expression("COUNT(id)")])
+                ->from($tblRSR)
+                ->where([
+                    "supp_org_id" => "org.id",
+                    "deleted"     => 0,
+                ])
+                ->andWhere([
+                    "between",
+                    "created_at",
+                    new Expression("CURDATE() - INTERVAL 30 DAY"),
+                    new Expression("CURDATE() + INTERVAL 1 DAY"),
+                ]);
+
+        $subQueryOrderCount = (new Query())
+                ->select([new Expression("COUNT(id)")])
+                ->from($tblOrder)
+                ->where([
+                    "vendor_id" => "org.id",
+                    "status"    => $orderStatuses,
+                ]);
+
+        $subQueryOrderCountPrev30 = (new Query())
+                ->select([new Expression("COUNT(id)")])
+                ->from($tblOrder)
+                ->where([
+                    "vendor_id" => "org.id",
+                    "status"    => $orderStatuses,
+                ])
+                ->andWhere([
+                    "between",
+                    "created_at",
+                    new Expression("CURDATE() - INTERVAL 30 DAY"),
+                    new Expression("CURDATE() + INTERVAL 1 DAY"),
+                ]);
+
+        $subQueryOrderSum = (new Query())
+                ->select([new Expression("SUM(total_price)")])
+                ->from($tblOrder)
+                ->where([
+                    "vendor_id" => "org.id",
+                    "status"    => $orderStatuses,
+                ])->andFilterWhere([
+                    "currency_id" => $this->filter_currency
+                ]);
+
+        $subQueryOrderSumPrev30 = (new Query())
+                ->select([new Expression("SUM(total_price)")])
+                ->from($tblOrder)
+                ->where([
+                    "vendor_id" => "org.id",
+                    "status"    => $orderStatuses,
+                ])
+                ->andWhere([
+                    "between",
+                    "created_at",
+                    new Expression("CURDATE() - INTERVAL 30 DAY"),
+                    new Expression("CURDATE() + INTERVAL 1 DAY"),
+                ])->andFilterWhere([
+                    "currency_id" => $this->filter_currency
+                ]);
+
+        $query = (new Query())
+                ->select([
+                    "franchisee_associate_id" => "fa.id",
+                    "self_registered"         => "self_registered",
+                    "id"                      => "org.id",
+                    "name"                    => "org.name",
+                    "client_count"            => $subQueryClientCount,
+                    "client_count_prev30"     => $subQueryClientCountPrev30,
+                    "order_count"             => $subQueryOrderCount,
+                    "order_count_prev30"      => $subQueryOrderCountPrev30,
+                    "order_sum"               => $subQueryOrderSum,
+                    "order_sum_prev30"        => $subQueryOrderSumPrev30,
+                    "created_at"              => "org.created_at",
+                    "contact_name"            => "org.contact_name",
+                    "phone"                   => "org.phone",
+                ])
+                ->from(["org" => $tblOrg])
+                ->leftJoin(['fa' => $tblFA], "org.id = fa.organization_id")
+                ->where([
+                    "and",
+                    ["fa.franchisee_id" => $franchiseeId],
+                    ["org.type_id" => Organization::TYPE_SUPPLIER],
+                    [
+                        "between",
+                        "org.created_at",
+                        $t1_f,
+                        $t2_f,
+                    ]
+                ])
+                ->andFilterWhere([
+            "or",
+            ["like", "org.name", $this->searchString],
+            ["like", "org.contact_name", $this->searchString],
+            ["like", "org.phone", $this->searchString],
+        ]);
+
+        if ($user->role_id == Role::ROLE_FRANCHISEE_LEADER) {
+            $subQueryManagerIds = (new Query())
+                ->select(["manager_id"])
+                ->from(\common\models\RelationManagerLeader::tableName())
+                ->where(["leader_id" => $user->id]);
+            $query->andWhere([
+                "or",
+                ["org.manager_id" => $user->id],
+                ["org.manager_id" => $subQueryManagerIds],
+            ]);
+        }
+        
+        if ($user->role_id == Role::ROLE_FRANCHISEE_MANAGER){
+            $query->andWhere(["org.manager_id" => $user->id]);
         }
 
-        $query = "SELECT fa.id as franchisee_associate_id, self_registered, org.id as id, org.name as name, (select count(id) from relation_supp_rest where supp_org_id=org.id) as clientCount, 
-                (select count(id) from relation_supp_rest where supp_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
-                (select count(id) from " . Order::tableName() . " where vendor_id=org.id and status in (1,2,3,4)) as orderCount,
-                (select count(id) from " . Order::tableName() . " where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
-                (select sum(total_price) from " . Order::tableName() . " where vendor_id=org.id $currencyOption and status in (1,2,3,4)) as orderSum,
-                (select sum(total_price) from " . Order::tableName() . " where vendor_id=org.id $currencyOption and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30,
-                org.created_at as created_at, org.contact_name as contact_name, org.phone as phone
-                FROM organization AS org
-                LEFT JOIN  franchisee_associate AS fa ON org.id = fa.organization_id 
-                WHERE fa.franchisee_id = $franchisee_id and org.type_id=".parent::TYPE_SUPPLIER." and (org.created_at between :dateFrom and :dateTo) 
-                and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)";
-
-        if($client_id){
-            $query = parent::getOrganizationQuery($client_id, 'supp', $this->filter_currency ?? 1);
-        }
-
-        if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_LEADER){
-            $query.=" and (org.manager_id=".Yii::$app->user->id." or org.manager_id in(select manager_id from relation_manager_leader where leader_id=".Yii::$app->user->id."))";
-        }
-
-        if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_MANAGER){
-            $query.=" and org.manager_id=".Yii::$app->user->id;
-        }
-
-        $count = count(Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f])->queryAll());
-
-        $dataProvider = new \yii\data\SqlDataProvider([
-            'sql'        => $query,
-            'params'     => [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f],
-            'totalCount' => $count,
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query'      => $query,
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -104,9 +203,9 @@ class VendorSearch extends Organization {
                 'attributes'   => [
                     'name',
                     'self_registered',
-                    'clientCount',
-                    'orderCount',
-                    'orderSum',
+                    'vendor_count',
+                    'order_count',
+                    'order_sum',
                     'created_at',
                     'contact_name',
                     'phone'
@@ -116,7 +215,7 @@ class VendorSearch extends Organization {
                 ]
             ],
         ]);
-
+        
         return $dataProvider;
     }
 }

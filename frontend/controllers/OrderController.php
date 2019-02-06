@@ -3,7 +3,6 @@
 namespace frontend\controllers;
 
 use api_web\components\Notice;
-use Faker\ORM\Spot\EntityPopulator;
 use PHPExcel_Style_Fill;
 use Yii;
 use Exception;
@@ -235,16 +234,19 @@ class OrderController extends DefaultController
 
               $selected = ($selected[strlen($selected)-1] == ',') ? substr($selected, 0, $count) : $selected; */
 
-            $model = \Yii::$app->db->createCommand("
-                select 
-                    cbg.article,
-                    cbg.product as product, 
-                    sum(quantity) as total_quantity,
-                    cbg.ed
-                from order_content oc 
-                left join catalog_base_goods cbg on oc.product_id = cbg.id
-                where oc.order_id in ($selected)
-                group by cbg.id")->queryAll();
+            $model = (new Query())
+                ->select([
+                    "cbg.article",
+                    "product"        => "cbg.product",
+                    "total_quantity" => "sum(quantity)",
+                    "cbg.ed",
+                ])
+                ->from(["oc" => OrderContent::tableName()])
+                ->leftJoin(["cbg" => CatalogBaseGoods::tableName()], "oc.product_id = cbg.id")
+                ->where("oc.order_id IN ({$selected})")
+                ->groupBy("cbg.id")
+                ->createCommand()
+                ->queryAll();
 
             $objPHPExcel = new \PHPExcel();
             $sheet = 0;
@@ -1575,9 +1577,9 @@ class OrderController extends DefaultController
             OrderStatus::STATUS_EDI_SENT_BY_VENDOR
         ];
         if ($user->organization->type_id == Organization::TYPE_SUPPLIER) {
-            $order = $this->findOrder([Order::tableName() . '.id' => $id, Order::tableName() . '.status' => $editableOrders], Yii::$app->user->can('manage'));
+            $order = $this->findOrder(['id' => $id, 'status' => $editableOrders], Yii::$app->user->can('manage'));
         } else {
-            $order = Order::findOne(['id' => $id, Order::tableName() . '.status' => $editableOrders]);
+            $order = Order::findOne(['id' => $id, 'status' => $editableOrders]);
         }
 
         if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
@@ -2539,8 +2541,8 @@ class OrderController extends DefaultController
     public function actionGridReport()
     {
         $this->actionSaveSelectedOrders();
-        $selected = $arOrderIds = Yii::$app->session->get('selected', []);
-        if (empty($selected)) {
+        $arOrderIds = Yii::$app->session->get('selected', []);
+        if (empty($arOrderIds)) {
             exit();
         }
 
@@ -2837,7 +2839,6 @@ class OrderController extends DefaultController
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
-        $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
 
         $blockedItems = CatalogGoodsBlocked::getBlockedList($client->id);
         //Вывод по 10

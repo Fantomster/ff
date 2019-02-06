@@ -2,8 +2,17 @@
 
 namespace api\common\models\rkws;
 
+use api\common\models\AllMaps;
+use api\common\models\iiko\iikoProduct;
 use api\common\models\iiko\iikoService;
+use api\common\models\iiko\iikoStore;
+use api\common\models\one_s\OneSGood;
+use api\common\models\one_s\OneSStore;
+use api\common\models\RkProduct;
+use api\common\models\RkStoretree;
+use api_web\modules\integration\modules\one_s\models\one_sProduct;
 use common\helpers\DBNameHelper;
+use common\models\AllService;
 use common\models\CatalogBaseGoods;
 use common\models\CatalogGoods;
 use common\models\RelationSuppRest;
@@ -72,22 +81,6 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             Registry::TILLYPAD_SERVICE_ID     => ',fprod.denom as pdenom, fstore.denom as store, fprod.unit as unitname', // tillypad
         ];
 
-        $joins = [
-            0                       => '',
-            Registry::RK_SERVICE_ID => " LEFT JOIN $dbName.rk_product fprod ON amap.serviceproduct_id = fprod.id
-                   LEFT JOIN $dbName.rk_storetree fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.acc  AND fstore.type = 2 ",
-
-            Registry::IIKO_SERVICE_ID => " LEFT JOIN $dbName.iiko_product fprod ON amap.serviceproduct_id = fprod.id
-                   LEFT JOIN $dbName.iiko_store fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
-
-            Registry::ONE_S_CLIENT_SERVICE_ID => " LEFT JOIN $dbName.one_s_good fprod ON amap.serviceproduct_id = fprod.id
-                   LEFT JOIN $dbName.one_s_store fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.org_id ",
-
-            Registry::TILLYPAD_SERVICE_ID => " LEFT JOIN $dbName.iiko_product fprod ON amap.serviceproduct_id = fprod.id
-                   LEFT JOIN $dbName.iiko_store fstore ON amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1 ",
-
-        ];
-
         $where = '';
         $params_sql = [];
 
@@ -116,8 +109,9 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             $arrayVendorsId = implode(",", $arrayVendorsId);
             $vendorInList = $arrayVendorsId;
         }
-        $assigned_catalog_products = "select
-                                        a.id AS relation_supp_rest_id,
+
+        $query1 = (new \yii\db\Query())
+            ->select("  a.id AS relation_supp_rest_id,
                                         a.rest_org_id AS rest_org_id,
                                         a.supp_org_id AS supp_org_id,
                                         a.invite AS relation_supp_rest_invite,
@@ -149,22 +143,18 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                                         c.rating AS rating,
                                         c.barcode AS barcode,
                                         c.edi_supplier_article AS edi_supplier_article,
-                                        c.ssid AS ssid,
-                                        NULL AS discount_percent,
-                                        NULL AS discount,
-                                        NULL AS discount_fixed
-                                    from
-                                        ((relation_supp_rest a
-                                    join catalog b on
+                                        c.ssid AS ssid")
+            ->from('((' . RelationSuppRest::tableName() . ' a
+                                    join ' . Catalog::tableName() . ' b on
                                         ((a.cat_id = b.id)))
-                                    join catalog_base_goods c on
-                                        ((c.cat_id = b.id)))
-                                    where
-                                        (b.type = 1) AND a.rest_org_id = $client_id AND a.supp_org_id in ($vendorInList)
+                                    join ' . CatalogBaseGoods::tableName() . ' c on
+                                        ((c.cat_id = b.id)))')
+            ->where("(b.type = 1) AND a.rest_org_id = $client_id AND a.supp_org_id in ($vendorInList)
                                             AND b.status = 1
-                                            AND a.deleted = 0
-                                    union all select
-                                        a.id AS relation_supp_rest_id,
+                                            AND a.deleted = 0");
+
+        $query2 = (new \yii\db\Query())
+            ->select("a.id AS relation_supp_rest_id,
                                         a.rest_org_id AS rest_org_id,
                                         a.supp_org_id AS supp_org_id,
                                         a.invite AS relation_supp_rest_invite,
@@ -196,37 +186,43 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                                         d.rating AS rating,
                                         d.barcode AS barcode,
                                         d.edi_supplier_article AS edi_supplier_article,
-                                        d.ssid AS ssid,
-                                        c.discount_percent AS discount_percent,
-                                        c.discount AS discount,
-                                        c.discount_fixed AS discount_fixed
-                                    from
-                                        (((relation_supp_rest a
-                                    join catalog b on
+                                        d.ssid AS ssid")
+            ->from("  (((" . RelationSuppRest::tableName() . " a
+                                    join " . Catalog::tableName() . " b on
                                         ((a.cat_id = b.id)))
-                                    join catalog_goods c on
+                                    join " . CatalogGoods::tableName() . " c on
                                         ((c.cat_id = b.id)))
-                                    join catalog_base_goods d on
-                                        ((d.id = c.base_goods_id)))
-                                    where
-                                        (b.type = 2) AND a.rest_org_id = $client_id AND a.supp_org_id in ($vendorInList)
+                                    join " . CatalogBaseGoods::tableName() . " d on
+                                        ((d.id = c.base_goods_id)))")
+            ->where(" (b.type = 1) AND a.rest_org_id = $client_id AND a.supp_org_id in ($vendorInList)
                                             AND b.status = 1
-                                            AND a.deleted = 0
-	";
+                                            AND a.deleted = 0");
+
+        $assigned_catalog_products = (new \yii\db\Query())->from(['tb1' => $query1->union($query2)]);
+
         if ($this->service_id == 0) {
-            $sql = "SELECT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id] .
-                " FROM ($assigned_catalog_products) acp
-            LEFT JOIN $dbName.all_map amap ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
-            LEFT JOIN $dbName.all_service aser ON amap.service_id = aser.id " . $joins[$this->service_id] . "
-            WHERE amap.service_id = 0" . (empty($where) ? "" : " AND " . $where);
+            $sql = (new \yii\db\Query())
+                ->select("acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id])
+                ->from(['acp' => $assigned_catalog_products])
+                ->leftJoin("$dbName." . AllMaps::tableName() . " amap", "acp.product_id = amap.product_id AND amap.org_id = $client_id AND amap.service_id = :service_id", [':service_id' => $this->service_id])
+                ->leftJoin("$dbName." . AllService::tableName() . " aser", "amap.service_id = aser.id ")
+                ->where("amap.service_id = 0");
+            if (!empty($where)) {
+                $sql->andWhere($where);
+            }
         } else {
-            $sql = "SELECT acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id] .
-                " FROM ($assigned_catalog_products) acp
-            LEFT JOIN $dbName.all_map amap ON acp.product_id = amap.product_id AND amap.org_id = " . $client_id . " AND amap.service_id = " . $this->service_id . " 
-            LEFT JOIN $dbName.all_service aser ON amap.service_id = aser.id " . $joins[$this->service_id] .
-                (empty($where) ? "" : " WHERE " . $where);
+            $sql = (new \yii\db\Query())
+                ->select("acp.catalog_id as cat_id,acp.product_id as id,acp.product,acp.article,acp.ed,amap.id as amap_id,amap.vat as vat,amap.koef as koef,amap.service_id as service_id,aser.denom as service_denom" . $fields[$this->service_id])
+                ->from(['acp' => $assigned_catalog_products])
+                ->leftJoin("$dbName." . AllMaps::tableName() . " amap", "acp.product_id = amap.product_id AND amap.org_id = $client_id AND amap.service_id = :service_id", [':service_id' => $this->service_id])
+                ->leftJoin("$dbName." . AllService::tableName() . " aser", "amap.service_id = aser.id ");
+            if (!empty($where)) {
+                $sql->Where($where);
+            }
         }
 
+        $this->addQueryJoins($sql, $this->service_id);
+        $sql = $sql->createCommand()->getRawSql();
         if ($vendorInList) {
             $dataProvider = new SqlDataProvider([
                 'sql'    => $sql,
@@ -252,7 +248,11 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                 ],
             ]);
         } else {
-            $sql = "SELECT id from catalog_base_goods WHERE id = 100000000"; // Запрос, заведомо возвращающий пустой результат во избежание ошибки у ресторана,
+            $sql = (new \yii\db\Query())
+                ->select("id")
+                ->from(CatalogBaseGoods::tableName())
+                ->where("id = 0"); // Запрос, заведомо возвращающий пустой результат во избежание ошибки у ресторана,
+
             // у которого нет ни одной записи в relation_supp_rest
             $dataProvider = new SqlDataProvider([
                 'sql'        => $sql,
@@ -263,5 +263,29 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
             ]);
         }
         return $dataProvider;
+    }
+
+    private function addQueryJoins(&$query, $service_id)
+    {
+        $dbName = DBNameHelper::getApiName();
+        switch ($service_id) {
+
+            case Registry::RK_SERVICE_ID :
+                $query->leftJoin("$dbName." . RkProduct::tableName() . " fprod", "amap.serviceproduct_id = fprod.id");
+                $query->leftJoin("$dbName." . RkStoretree::tableName() . " fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.acc  AND fstore.type = 2");
+                break;
+            case Registry::IIKO_SERVICE_ID :
+                $query->leftJoin("$dbName." . iikoProduct::tableName() . " fprod", "amap.serviceproduct_id = fprod.id");
+                $query->leftJoin("$dbName." . iikoStore::tableName() . " fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1");
+                break;
+            case Registry::ONE_S_CLIENT_SERVICE_ID :
+                $query->leftJoin("$dbName." . OneSGood::tableName() . " fprod", "amap.serviceproduct_id = fprod.id");
+                $query->leftJoin("$dbName." . OneSStore::tableName() . " fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.org_id");
+                break;
+            case Registry::TILLYPAD_SERVICE_ID :
+                $query->leftJoin("$dbName." . iikoProduct::tableName() . " fprod", "amap.serviceproduct_id = fprod.id");
+                $query->leftJoin("$dbName." . iikoStore::tableName() . " fstore", "amap.store_rid = fstore.id AND amap.org_id = fstore.org_id  AND fstore.is_active = 1");
+                break;
+        }
     }
 }

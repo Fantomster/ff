@@ -6,6 +6,7 @@ use common\helpers\DBNameHelper;
 use common\models\Journal;
 use yii\data\ActiveDataProvider;
 use common\models\Organization;
+use yii\db\Expression;
 
 /**
  * UserSearch represents the model behind the search form about `common\models\User`.
@@ -38,16 +39,20 @@ class MercuryReportSearch extends Journal
      */
     public function search($params)
     {
-        $query = self::find();
-
         $organizationTable = Organization::tableName();
         $dbName = DBNameHelper::getMainName();
 
-        $query->select('org.name as orgName, log.organization_id, SUM(case when log.type = \'success\' then 1 else 0 end) as succCount, SUM(case when log.type <> \'success\' then 1 else 0 end) as errorCount');
-        $query->from('journal as log');
-        $query->leftJoin("$dbName.$organizationTable as org", 'org.id = log.organization_id');
-        $query->where('log.operation_code = 3');
-        $query->groupBy(['log.organization_id']);
+        $query = self::find()
+            ->select([
+                "orgName"    => "org.name",
+                "log.organization_id",
+                "succCount"  => new Expression("SUM(CASE WHEN log.type = 'success' THEN 1 ELSE 0 END)"),
+                "errorCount" => new Expression("SUM(CASE WHEN log.type <> 'success' THEN 1 ELSE 0 END)")
+            ])
+            ->from(["log" => Journal::tableName()])
+            ->leftJoin(["org" => "{$dbName}.{$organizationTable}"], 'org.id = log.organization_id')
+            ->where(["log.operation_code" => 3])
+            ->groupBy('log.organization_id');
 
         $dataProvider = new ActiveDataProvider([
             'query'      => $query,
@@ -66,17 +71,18 @@ class MercuryReportSearch extends Journal
         if (!$this->validate()) {
             $this->dateFrom = date('Y-m-d', strtotime(date('Y-m-d') . ' - 3 month'));
             $this->dateTo = date('Y-m-d');
-            $query->andWhere('log.created_at between :dateFrom and :dateTo', [':dateFrom' => $this->dateFrom, ':dateTo' => $this->dateTo]);
+            $query->andWhere('log.created_at BETWEEN :dateFrom AND :dateTo', [
+                ':dateFrom' => $this->dateFrom,
+                ':dateTo'   => $this->dateTo
+            ]);
+
             return $dataProvider;
         }
-
-
 
         if (empty(\Yii::$app->request->get("date") || \Yii::$app->request->get("date2"))) {
             $this->dateFrom = date('Y-m-d', strtotime(date('Y-m-d') . ' - 3 month'));
             $this->dateTo = date('Y-m-d');
-        }
-        else {
+        } else {
             $today = new \DateTime();
             $dateFilterFrom = !empty(\Yii::$app->request->get("date")) ? \Yii::$app->request->get("date") : "01.12.2016";
             $dateFilterTo = !empty(\Yii::$app->request->get("date2")) ? \Yii::$app->request->get("date2") : $today->format('d.m.Y');
@@ -88,10 +94,12 @@ class MercuryReportSearch extends Journal
             $this->dateFrom = $dt->format('Y-m-d');
             $this->dateTo = $end->format('Y-m-d');
         }
-        $query->andWhere('log.created_at between :dateFrom and :dateTo', [':dateFrom' => $this->dateFrom, ':dateTo' => $this->dateTo]);
+        $query->andWhere('log.created_at BETWEEN :dateFrom AND :dateTo', [
+            ':dateFrom' => $this->dateFrom,
+            ':dateTo'   => $this->dateTo
+        ]);
 
-        if (isset($this->orgName))
-            $query->andWhere('org.name like :org_name', [':org_name' => '%' . $this->orgName . '%']);
+        $query->andFilterWhere(["LIKE", "org.name", $this->orgName]);
 
         return $dataProvider;
     }

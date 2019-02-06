@@ -4,35 +4,32 @@ namespace backend\models;
 
 use common\models\Message;
 use common\models\SourceMessage;
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\User;
-use common\models\Role;
-use common\models\Profile;
-use common\models\Organization;
 
 /**
  * UserSearch represents the model behind the search form about `common\models\User`.
  */
-class TranslationSearch extends SourceMessage {
+class TranslationSearch extends SourceMessage
+{
 
     public $category;
     public $message;
     public $translation;
 
-
     /**
      * @inheritdoc
      */
-    public static function tableName() {
+    public static function tableName()
+    {
         return "{{%source_message}}";
     }
 
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['id'], 'integer'],
             [['message', 'category', 'translation'], 'safe'],
@@ -42,7 +39,8 @@ class TranslationSearch extends SourceMessage {
     /**
      * @inheritdoc
      */
-    public function scenarios() {
+    public function scenarios()
+    {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
@@ -51,10 +49,10 @@ class TranslationSearch extends SourceMessage {
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
-    public function search($params) {
+    public function search($params)
+    {
         $sourceMessageTable = SourceMessage::tableName();
         $messageTable = Message::tableName();
 
@@ -62,8 +60,8 @@ class TranslationSearch extends SourceMessage {
         $query->joinWith(['messages']);
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'query'      => $query,
+            'sort'       => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 20
             ]
@@ -76,7 +74,7 @@ class TranslationSearch extends SourceMessage {
         }
 
         $dataProvider->sort->attributes['message'] = [
-            'asc' => ["$sourceMessageTable.message" => SORT_ASC],
+            'asc'  => ["$sourceMessageTable.message" => SORT_ASC],
             'desc' => ["$sourceMessageTable.message" => SORT_DESC],
         ];
 
@@ -87,5 +85,4 @@ class TranslationSearch extends SourceMessage {
 
         return $dataProvider;
     }
-
 }

@@ -16,6 +16,7 @@ use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
 use common\models\vetis\VetisBusinessEntity;
+use common\models\vetis\VetisIngredients;
 use common\models\vetis\VetisPackingType;
 use common\models\vetis\VetisProductByType;
 use common\models\vetis\VetisProductItem;
@@ -609,4 +610,16 @@ class VetisWaybill extends WebApi
         return $query->column();
     }
 
+    /**
+     * @param $request
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function getProductIngredientList($request)
+    {
+        $this->validateRequest($request, ['guid']);
+
+        return VetisIngredients::find()->select(['product_name', 'amount', 'id'])
+            ->where(['guid' => $request['guid']])->all();
+    }
 }

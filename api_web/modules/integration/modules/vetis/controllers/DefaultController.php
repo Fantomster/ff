@@ -1459,9 +1459,7 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "search": {
-     *                          "name": "ко"
-     *                      }
+     *                      "guid": "021bc2d9-f514-4491-b21a-ffe63023236f"
      *                  }
      *              )
      *         )
@@ -1490,5 +1488,59 @@ class DefaultController extends WebApiController
     public function actionIngredientList()
     {
         $this->response = (new VetisWaybill())->getIngredientList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/product-ingredient-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Ингредиентов",
+     *     description="Получение списка Ингредиентов",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "guid": "f73bad6a-8894-44e6-911e-b7f1c1e71466"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "product_name": "Ваниль",
+     *                      "amount": "1.000",
+     *                      "id": 2
+     *                  },
+     *                  {
+     *                      "product_name": "Валерьянка",
+     *                      "amount": "1.000",
+     *                      "id": 3
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionProductIngredientList()
+    {
+        $this->response = (new VetisWaybill())->getProductIngredientList($this->request);
     }
 }

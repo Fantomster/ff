@@ -17,6 +17,7 @@ use common\models\licenses\LicenseOrganization;
 use common\models\vetis\VetisPackingType;
 use common\models\vetis\VetisProductByType;
 use common\models\vetis\VetisProductItem;
+use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
 use yii\data\ActiveDataProvider;
@@ -570,5 +571,20 @@ class VetisWaybill extends WebApi
     public function getPackingTypeList()
     {
         return VetisPackingType::find()->select(['name', 'uuid', 'guid'])->all();
+    }
+
+    /**
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function getRussianEnterpriseList()
+    {
+        $issueId = $this->helper->getSettings($this->user->organization_id, ['issuer_id']);
+        if (!$issueId) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.setting_issuer_id_not_defined'));
+        }
+
+        return VetisRussianEnterprise::find()->select(['name', 'uuid', 'guid'])
+            ->where(['owner_guid' => $issueId])->all();
     }
 }

@@ -15,7 +15,7 @@ return [
     'charset'        => 'utf-8',
     'components'     => [
         'authManager'           => [
-            'class'        => 'yii\rbac\DbManager',
+            'class'        => 'common\components\DbManager',
             'defaultRoles' => ['guest'],
         ],
         'formatter'             => [

@@ -1451,7 +1451,10 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "guid": "021bc2d9-f514-4491-b21a-ffe63023236f"
+     *                      "guid": "021bc2d9-f514-4491-b21a-ffe63023236f",
+     *                      "search": {
+     *                          "name": "ко"
+     *                      }
      *                  }
      *              )
      *         )

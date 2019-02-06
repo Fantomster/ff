@@ -23,6 +23,7 @@ use common\models\vetis\VetisProductItem;
 use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
+use frontend\modules\clientintegr\modules\merc\models\productForm;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
@@ -649,5 +650,30 @@ class VetisWaybill extends WebApi
             'active'       => $model->active,
             'package_type' => $model->unit->name ?? null,
         ];
+    }
+
+    public function createProductItem($request)
+    {
+        $this->validateRequest($request, ['name', 'product_type', 'form_guid', 'subtype_guid']);
+        $model = new productForm();
+
+        $model->name = $request['name'];
+        $model->productType = $request['product_type'];
+        $model->product_guid = $request['form_guid'];
+        $model->product_guid = $request['form_guid'];
+
+        if ($model->load(\Yii::$app->request->post()) && $model->validate()) {
+            if (!\Yii::$app->request->isAjax) {
+                try {
+                    $result = mercuryApi::getInstance()->modifyProducerStockListOperation('CREATE', null, $model);
+                    if (!isset($result)) {
+                        throw new \Exception('Error create Product');
+                    }
+
+                } catch (\Error $e) {
+                } catch (\Exception $e) {
+                }
+            }
+        }
     }
 }

@@ -44,19 +44,19 @@ class OrderCatalogSearch extends \yii\base\Model
     {
         $this->load($params);
 
-        $tblCBG   = \common\models\CatalogBaseGoods::tableName();
-        $tblCG    = \common\models\CatalogGoods::tableName();
-        $tblOrg   = \common\models\Organization::tableName();
-        $tblCat   = \common\models\Catalog::tableName();
-        $tblCurr  = \common\models\Currency::tableName();
-        $catalogs = explode(',', $this->catalogs);
+        $tblCBG      = \common\models\CatalogBaseGoods::tableName();
+        $tblCG       = \common\models\CatalogGoods::tableName();
+        $tblOrg      = \common\models\Organization::tableName();
+        $tblCat      = \common\models\Catalog::tableName();
+        $tblCurr     = \common\models\Currency::tableName();
+        $catalogs    = explode(',', $this->catalogs);
         $blockedList = CatalogGoodsBlocked::getBlockedList($this->client->id);
-        
+
         $selectedVendor = ($this->selectedVendor == 0) ? null : $this->selectedVendor;
-        
+
         $priceFrom = $this->searchPrice['from'] ?? null;
-        $priceTo = $this->searchPrice['to'] ?? null;
-            
+        $priceTo   = $this->searchPrice['to'] ?? null;
+
         $subQueryCG = (new Query())
                 ->select([
                     "id"                   => "cbg.id",
@@ -129,8 +129,8 @@ class OrderCatalogSearch extends \yii\base\Model
                 ])
                 ->andFilterWhere(["like", "cbg.product", $this->searchString])
                 ->andFilterWhere(["cbg.supp_org_id" => $selectedVendor])
-                ->andFilterWhere(['>=', 'cbg.price', $this->searchPrice['from']])
-                ->andFilterWhere(['<=', 'cbg.price', $this->searchPrice['to']]);
+                ->andFilterWhere(['>=', 'cbg.price', $priceFrom])
+                ->andFilterWhere(['<=', 'cbg.price', $priceTo]);
 
         $query = (new Query())
                 ->from(["c" => $subQueryCG->union($subQueryCBG, true)])

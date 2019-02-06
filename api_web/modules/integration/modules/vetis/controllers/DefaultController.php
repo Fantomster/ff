@@ -1395,4 +1395,52 @@ class DefaultController extends WebApiController
         $this->response = (new VetisWaybill())->getRussianEnterpriseList();
     }
 
+    /**
+     * @SWG\Post(path="/integration/vetis/business-entity",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение Фирмы производителя",
+     *     description="Получение Фирмы производителя",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "name": "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ ОНЛАЙН МАРКЕТ",
+     *                      "uuid": "021bc2d9-f514-4491-b21a-ffe63023236f",
+     *                      "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionBusinessEntity()
+    {
+        $this->response = (new VetisWaybill())->getBusinessEntity();
+    }
 }

@@ -14,6 +14,7 @@ use api_web\modules\integration\modules\vetis\api\mercury\VetDocumentDone;
 use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
+use common\models\vetis\VetisBusinessEntity;
 use common\models\vetis\VetisPackingType;
 use common\models\vetis\VetisProductByType;
 use common\models\vetis\VetisProductItem;
@@ -579,12 +580,23 @@ class VetisWaybill extends WebApi
      */
     public function getRussianEnterpriseList()
     {
-        $issueId = $this->helper->getSettings($this->user->organization_id, ['issuer_id']);
-        if (!$issueId) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.setting_issuer_id_not_defined'));
-        }
+        $issueId = $this->helper->getIssuerId($this->user->organization_id);
 
         return VetisRussianEnterprise::find()->select(['name', 'uuid', 'guid'])
             ->where(['owner_guid' => $issueId])->all();
     }
+
+    /**
+     * @return array|\yii\db\ActiveRecord|null
+     * @throws BadRequestHttpException
+     */
+    public function getBusinessEntity()
+    {
+        $issueId = $this->helper->getIssuerId($this->user->organization_id);
+
+        return VetisBusinessEntity::find()->select(['name', 'uuid', 'guid'])
+            ->where(['guid' => $issueId])->one();
+    }
+
+
 }

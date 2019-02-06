@@ -14,6 +14,13 @@ use api_web\modules\integration\modules\vetis\models\VetisWaybill;
  */
 class DefaultController extends WebApiController
 {
+    /**
+     * @param $action
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\web\BadRequestHttpException
+     * @throws \yii\web\HttpException
+     */
     public function beforeAction($action)
     {
         $this->setLicenseServiceId(Registry::MERC_SERVICE_ID);
@@ -1056,4 +1063,484 @@ class DefaultController extends WebApiController
         $this->response = (new VetisWaybill())->getProductItemList($this->request);
     }
 
+    /**
+     * @SWG\Post(path="/integration/vetis/product-type-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Тип продукции",
+     *     description="Получение списка Тип продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "1": "Мясо и мясопродукты.",
+     *                  "2": "Корма и кормовые добавки.",
+     *                  "3": "Живые животные.",
+     *                  "4": "Лекарственные средства.",
+     *                  "5": "Пищевые продукты.",
+     *                  "6": "Непищевые продукты и другое.",
+     *                  "7": "Рыба и морепродукты.",
+     *                  "8": "Продукция, не требующая разрешения."
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionProductTypeList()
+    {
+        $this->response = Registry::$vetis_product_types;
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/product-subtype-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Продукция",
+     *     description="Получение списка Продукция",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                     "type_id": 3
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "свиньи",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                      },
+     *                      {
+     *                          "name": "пчелы",
+     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionProductSubtypeList()
+    {
+        $this->response = (new VetisWaybill())->getProductSubtypeList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/product-form-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Продукция",
+     *     description="Получение списка Продукция",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                     "guid": "41fb53ea-31c3-b116-9ce2-7d7df18c5835",
+     *                     "search": {
+     *                          "name": "хе"
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "хек тихоокеанский мороженый",
+     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                      },
+     *                      {
+     *                          "name": "саварин мороженый",
+     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionProductFormList()
+    {
+        $this->response = (new VetisWaybill())->getProductFormList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/unit-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка единиц измерений из справочника меркурия",
+     *     description="Получение списка единиц измерений из справочника меркурия",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "тонна",
+     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                      },
+     *                      {
+     *                          "name": "кг",
+     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionUnitList()
+    {
+        $this->response = (new VetisWaybill())->getUnitList();
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/packing-type-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Тип упаковки",
+     *     description="Получение списка Тип упаковки",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "Бочка (емкостью около 164 л) деревянная шпунтованная",
+     *                          "uuid": "021bc2d9-f514-4491-b21a-ffe63023236f",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                      },
+     *                      {
+     *                          "name": "Сундук, морской",
+     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionPackingTypeList()
+    {
+        $this->response = (new VetisWaybill())->getPackingTypeList();
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/russian-enterprise-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Предприятий производителей",
+     *     description="Получение списка Предприятий производителей",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "Поставщик №2",
+     *                          "uuid": "021bc2d9-f514-4491-b21a-ffe63023236f",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                      },
+     *                      {
+     *                          "name": "Поставщик №3",
+     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionRussianEnterpriseList()
+    {
+        $this->response = (new VetisWaybill())->getRussianEnterpriseList();
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/business-entity",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение Фирмы производителя",
+     *     description="Получение Фирмы производителя",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "name": "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ ОНЛАЙН МАРКЕТ",
+     *                      "uuid": "021bc2d9-f514-4491-b21a-ffe63023236f",
+     *                      "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionBusinessEntity()
+    {
+        $this->response = (new VetisWaybill())->getBusinessEntity();
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/ingredient-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Ингредиентов",
+     *     description="Получение списка Ингредиентов",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "guid": "021bc2d9-f514-4491-b21a-ffe63023236f"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "говядина КРУТЕЙШАЯ",
+     *                  "лев белый"
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionIngredientList()
+    {
+        $this->response = (new VetisWaybill())->getIngredientList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/product-ingredient-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Ингредиентов",
+     *     description="Получение списка Ингредиентов",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "guid": "f73bad6a-8894-44e6-911e-b7f1c1e71466"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "product_name": "Ваниль",
+     *                      "amount": "1.000",
+     *                      "id": 2
+     *                  },
+     *                  {
+     *                      "product_name": "Валерьянка",
+     *                      "amount": "1.000",
+     *                      "id": 3
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionProductIngredientList()
+    {
+        $this->response = (new VetisWaybill())->getProductIngredientList($this->request);
+    }
 }

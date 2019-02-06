@@ -337,4 +337,34 @@ class VetisHelper extends BaseHelper
         return IntegrationSettingValue::getSettingsByServiceId(Registry::MERC_SERVICE_ID,
             $orgId, $settingNames);
     }
+
+    /**
+     * @param $orgId
+     * @return array|string
+     * @throws BadRequestHttpException
+     */
+    public function getIssuerId($orgId)
+    {
+        $issueId = $this->getSettings($orgId, ['issuer_id']);
+        if (!$issueId) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.setting_issuer_id_not_defined'));
+        }
+
+        return $issueId;
+    }
+
+    /**
+     * @param $orgId
+     * @return array|string
+     * @throws BadRequestHttpException
+     */
+    public function getEnterpriseGuid($orgId)
+    {
+        $enterpriseGuid = $this->getSettings($orgId, ['enterprise_guid']);
+        if (!$enterpriseGuid) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.setting_enterprise_guid_not_defined'));
+        }
+
+        return $enterpriseGuid;
+    }
 }

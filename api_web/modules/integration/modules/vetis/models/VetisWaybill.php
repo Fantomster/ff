@@ -3,6 +3,7 @@
 namespace api_web\modules\integration\modules\vetis\models;
 
 use api\common\models\merc\mercLog;
+use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
 use api_web\components\Registry;
 use api_web\components\ValidateRequest;
@@ -14,7 +15,14 @@ use api_web\modules\integration\modules\vetis\api\mercury\VetDocumentDone;
 use common\models\IntegrationSettingValue;
 use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
+use common\models\vetis\VetisBusinessEntity;
+use common\models\vetis\VetisIngredients;
+use common\models\vetis\VetisPackingType;
+use common\models\vetis\VetisProductByType;
 use common\models\vetis\VetisProductItem;
+use common\models\vetis\VetisRussianEnterprise;
+use common\models\vetis\VetisSubproductByProduct;
+use common\models\vetis\VetisUnit;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
@@ -432,7 +440,6 @@ class VetisWaybill extends WebApi
             throw new BadRequestHttpException('Uuid is required and must be array');
         }
         $records = $this->helper->getAvailableVsd([$request['uuid']]);
-        $result = [];
         try {
             $api = mercuryApi::getInstance();
             if (array_key_exists($request['uuid'], $records)) {
@@ -476,14 +483,8 @@ class VetisWaybill extends WebApi
         $reqPag = $request['pagination'] ?? [];
         $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
         $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
-
         $orgId = $request['business_id'] ?? $this->user->organization_id;
-
-        $enterpriseGuid = $this->helper->getSettings($orgId, ['enterprise_guid']);
-
-        if (!$enterpriseGuid) {
-            throw new BadRequestHttpException(\Yii::t('api_web', 'vetis.setting_enterprise_guid_not_defined'));
-        }
+        $enterpriseGuid = $this->helper->getEnterpriseGuid($orgId);
         $query = VetisProductItem::find()->select(['name', 'uuid', 'guid', 'productType', 'code', 'globalID', 'gost', 'active'])
             ->where(['producer_guid' => $enterpriseGuid, 'active' => 1]);
 
@@ -521,5 +522,104 @@ class VetisWaybill extends WebApi
         ];
 
         return $return;
+    }
+
+    /**
+     * @param $request
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function getProductSubtypeList($request)
+    {
+        $this->validateRequest($request, ['type_id']);
+        $models = VetisProductByType::find()->select(['name', 'guid'])->where(['productType' => $request['type_id']])->all();
+
+        return $models;
+    }
+
+    /**
+     * @param $request
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function getProductFormList($request)
+    {
+        $this->validateRequest($request, ['guid']);
+        $query = VetisSubproductByProduct::find()->select(['name', 'uuid', 'guid'])
+            ->where(['productGuid' => $request['guid']]);
+        if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+            $query->andWhere(['like', 'name', $request['search']['name'] . '%', false]);
+        }
+
+        return $query->all();
+    }
+
+    /**
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    public function getUnitList()
+    {
+        return VetisUnit::find()->select(['name', 'uuid', 'guid'])->all();
+    }
+
+    /**
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    public function getPackingTypeList()
+    {
+        return VetisPackingType::find()->select(['name', 'uuid', 'guid'])->all();
+    }
+
+    /**
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function getRussianEnterpriseList()
+    {
+        $issueId = $this->helper->getIssuerId($this->user->organization_id);
+
+        return VetisRussianEnterprise::find()->select(['name', 'uuid', 'guid'])
+            ->where(['owner_guid' => $issueId])->all();
+    }
+
+    /**
+     * @return array|\yii\db\ActiveRecord|null
+     * @throws BadRequestHttpException
+     */
+    public function getBusinessEntity()
+    {
+        $issueId = $this->helper->getIssuerId($this->user->organization_id);
+
+        return VetisBusinessEntity::find()->select(['name', 'uuid', 'guid'])
+            ->where(['guid' => $issueId])->one();
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getIngredientList($request)
+    {
+        $query = MercStockEntry::find()->select(['product_name'])->distinct()
+            ->where(['owner_guid' => $this->helper->getEnterpriseGuid($this->user->organization_id)]);
+        if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+            $query->andWhere(['like', 'product_name', $request['search']['name'] . '%', false]);
+        }
+
+        return $query->column();
+    }
+
+    /**
+     * @param $request
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function getProductIngredientList($request)
+    {
+        $this->validateRequest($request, ['guid']);
+
+        return VetisIngredients::find()->select(['product_name', 'amount', 'id'])
+            ->where(['guid' => $request['guid']])->all();
     }
 }

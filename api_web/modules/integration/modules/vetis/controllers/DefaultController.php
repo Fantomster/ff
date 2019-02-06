@@ -14,6 +14,13 @@ use api_web\modules\integration\modules\vetis\models\VetisWaybill;
  */
 class DefaultController extends WebApiController
 {
+    /**
+     * @param $action
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\web\BadRequestHttpException
+     * @throws \yii\web\HttpException
+     */
     public function beforeAction($action)
     {
         $this->setLicenseServiceId(Registry::MERC_SERVICE_ID);
@@ -1220,5 +1227,59 @@ class DefaultController extends WebApiController
         $this->response = (new VetisWaybill())->getProductFormList($this->request);
     }
 
-
+    /**
+     * @SWG\Post(path="/integration/vetis/unit-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка единиц измерений из справочника меркурия",
+     *     description="Получение списка единиц измерений из справочника меркурия",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "тонна",
+     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                      },
+     *                      {
+     *                          "name": "кг",
+     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionUnitList()
+    {
+        $this->response = (new VetisWaybill())->getUnitList($this->request);
+    }
 }

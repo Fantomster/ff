@@ -17,6 +17,7 @@ use common\models\licenses\LicenseOrganization;
 use common\models\vetis\VetisProductByType;
 use common\models\vetis\VetisProductItem;
 use common\models\vetis\VetisSubproductByProduct;
+use common\models\vetis\VetisUnit;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
@@ -434,7 +435,6 @@ class VetisWaybill extends WebApi
             throw new BadRequestHttpException('Uuid is required and must be array');
         }
         $records = $this->helper->getAvailableVsd([$request['uuid']]);
-        $result = [];
         try {
             $api = mercuryApi::getInstance();
             if (array_key_exists($request['uuid'], $records)) {
@@ -553,5 +553,14 @@ class VetisWaybill extends WebApi
         }
 
         return $query->all();
+    }
+
+    /**
+     * @param $request
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    public function getUnitList($request)
+    {
+        return VetisUnit::find()->select(['name', 'uuid', 'guid'])->all();
     }
 }

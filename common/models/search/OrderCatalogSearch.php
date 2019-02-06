@@ -53,6 +53,9 @@ class OrderCatalogSearch extends \yii\base\Model
         $blockedList = CatalogGoodsBlocked::getBlockedList($this->client->id);
         
         $selectedVendor = ($this->selectedVendor == 0) ? null : $this->selectedVendor;
+        
+        $priceFrom = $this->searchPrice['from'] ?? null;
+        $priceTo = $this->searchPrice['to'] ?? null;
             
         $subQueryCG = (new Query())
                 ->select([
@@ -89,8 +92,8 @@ class OrderCatalogSearch extends \yii\base\Model
                 ])
                 ->andFilterWhere(["like", "cbg.product", $this->searchString])
                 ->andFilterWhere(["cbg.supp_org_id" => $selectedVendor])
-                ->andFilterWhere(['>=', 'cg.price', $this->searchPrice['from']])
-                ->andFilterWhere(['<=', 'cg.price', $this->searchPrice['to']]);
+                ->andFilterWhere(['>=', 'cg.price', $priceFrom])
+                ->andFilterWhere(['<=', 'cg.price', $priceTo]);
 
         $subQueryCBG = (new Query())
                 ->select([

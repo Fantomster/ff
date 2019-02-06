@@ -8,6 +8,8 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Organization;
+use yii\db\Query;
+use yii\db\Expression;
 
 /**
  * Description of VendorSearch

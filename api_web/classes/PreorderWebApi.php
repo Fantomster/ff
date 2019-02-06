@@ -10,7 +10,8 @@ namespace api_web\classes;
 use api_web\ {
     helpers\WebApiHelper,
     exceptions\ValidationException,
-    components\WebApi
+    components\WebApi,
+    helpers\CurrencyHelper
 };
 use common\models\{Order, Preorder, Cart, Organization, PreorderContent, Profile};
 use yii\data\{
@@ -141,6 +142,7 @@ class PreorderWebApi extends WebApi
      *
      * @param $request
      * @return array
+     * @throws BadRequestHttpException
      */
     public function list($request)
     {
@@ -277,6 +279,7 @@ class PreorderWebApi extends WebApi
     /**
      * @param Preorder $preOrder
      * @return array
+     * @throws BadRequestHttpException
      */
     private function productsInfo(Preorder $preOrder)
     {
@@ -296,7 +299,7 @@ class PreorderWebApi extends WebApi
                     'article'       => $item->article,
                     'plan_quantity' => $planQuantity[$item->product_id],
                     'quantity'      => $item->quantity,
-                    'sum'           => number_format($item->quantity * $item->price, 2),
+                    'sum'           => CurrencyHelper::asDecimal($item->quantity * $item->price),
                     'isset_analog'  => false,
                 ];
             }
@@ -326,7 +329,9 @@ class PreorderWebApi extends WebApi
      * Подготовка модели к выдаче фронту
      *
      * @param Preorder $model
+     * @param bool     $products
      * @return array
+     * @throws BadRequestHttpException
      */
     private function prepareModel(Preorder $model, bool $products = false)
     {

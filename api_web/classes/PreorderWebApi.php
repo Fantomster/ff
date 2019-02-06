@@ -287,6 +287,9 @@ class PreorderWebApi extends WebApi
         foreach ($orders as $order) {
             $orderContent = $order->orderContent;
             foreach ($orderContent as $item) {
+                if (empty($planQuantity[$item->product_id])) {
+                    throw new BadRequestHttpException('preorder.wrong_preorder');
+                }
                 $products[] = [
                     'id'            => $item->product_id,
                     'name'          => $item->product_name,

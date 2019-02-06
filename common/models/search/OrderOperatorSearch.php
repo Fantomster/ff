@@ -107,12 +107,12 @@ class OrderOperatorSearch extends Order
               END) as vendor_name',
             "REPLACE(CONCAT(
                   vendor.contact_name,
-                  \' \',
+                  ' ',
                   vendor.phone,
-                  \', \',
+                  ', ',
                   (
                     SELECT
-                      GROUP_CONCAT(\' \', pm.full_name, \' \', pm.phone)
+                      GROUP_CONCAT(' ', pm.full_name, ' ', pm.phone)
                     FROM relation_user_organization m
                       LEFT JOIN $tblUser um ON um.id = m.user_id
                       LEFT JOIN $tblProf pm ON pm.user_id = m.user_id
@@ -121,7 +121,7 @@ class OrderOperatorSearch extends Order
                       AND
                       um.status = 1
                   )
-              ), \' ,  \', \'\') AS vendor_contact",
+              ), ' ,  ', '') AS vendor_contact",
             'op.operator_id as operator',
             "$tblProf.full_name as operator_name",
             'op.status_call_id',

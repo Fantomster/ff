@@ -1161,6 +1161,64 @@ class DefaultController extends WebApiController
         $this->response = (new VetisWaybill())->getProductSubtypeList($this->request);
     }
 
+    /**
+     * @SWG\Post(path="/integration/vetis/product-form-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Продукция",
+     *     description="Получение списка Продукция",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                     "guid": "41fb53ea-31c3-b116-9ce2-7d7df18c5835",
+     *                     "search": {
+     *                          "name": "хе"
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "хек тихоокеанский мороженый",
+     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                      },
+     *                      {
+     *                          "name": "саварин мороженый",
+     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionProductFormList()
+    {
+        $this->response = (new VetisWaybill())->getProductFormList($this->request);
+    }
 
 
 }

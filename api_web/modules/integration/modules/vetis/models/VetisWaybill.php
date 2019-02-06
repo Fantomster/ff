@@ -16,6 +16,7 @@ use common\models\licenses\License;
 use common\models\licenses\LicenseOrganization;
 use common\models\vetis\VetisProductByType;
 use common\models\vetis\VetisProductItem;
+use common\models\vetis\VetisSubproductByProduct;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
@@ -535,5 +536,22 @@ class VetisWaybill extends WebApi
         $models = VetisProductByType::find()->select(['name', 'guid'])->where(['productType' => $request['type_id']])->all();
 
         return $models;
+    }
+
+    /**
+     * @param $request
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function getProductFormList($request)
+    {
+        $this->validateRequest($request, ['guid']);
+        $query = VetisSubproductByProduct::find()->select(['name', 'uuid', 'guid'])
+            ->where(['productGuid' => $request['guid']]);
+        if (isset($request['search']['name']) && !empty($request['search']['name'])) {
+            $query->andWhere(['like', 'name', $request['search']['name'] . '%', false]);
+        }
+
+        return $query->all();
     }
 }

@@ -1139,15 +1139,13 @@ class DefaultController extends WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  "result": {
-     *                      {
-     *                          "name": "свиньи",
-     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
-     *                      },
-     *                      {
-     *                          "name": "пчелы",
-     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
-     *                      }
+     *                  {
+     *                      "name": "свиньи",
+     *                      "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                  },
+     *                  {
+     *                      "name": "пчелы",
+     *                      "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
      *                  }
      *              }
      *          )
@@ -1196,17 +1194,15 @@ class DefaultController extends WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  "result": {
-     *                      {
-     *                          "name": "хек тихоокеанский мороженый",
-     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
-     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
-     *                      },
-     *                      {
-     *                          "name": "саварин мороженый",
-     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
-     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
-     *                      }
+     *                  {
+     *                      "name": "хек тихоокеанский мороженый",
+     *                      "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                      "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                  },
+     *                  {
+     *                      "name": "саварин мороженый",
+     *                      "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                      "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
      *                  }
      *              }
      *          )
@@ -1252,17 +1248,15 @@ class DefaultController extends WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  "result": {
-     *                      {
-     *                          "name": "тонна",
-     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
-     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
-     *                      },
-     *                      {
-     *                          "name": "кг",
-     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
-     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
-     *                      }
+     *                  {
+     *                      "name": "тонна",
+     *                      "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                      "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                  },
+     *                  {
+     *                      "name": "кг",
+     *                      "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                      "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
      *                  }
      *              }
      *          )
@@ -1308,17 +1302,15 @@ class DefaultController extends WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  "result": {
-     *                      {
-     *                          "name": "Бочка (емкостью около 164 л) деревянная шпунтованная",
-     *                          "uuid": "021bc2d9-f514-4491-b21a-ffe63023236f",
-     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
-     *                      },
-     *                      {
-     *                          "name": "Сундук, морской",
-     *                          "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
-     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
-     *                      }
+     *                  {
+     *                      "name": "Бочка (емкостью около 164 л) деревянная шпунтованная",
+     *                      "uuid": "021bc2d9-f514-4491-b21a-ffe63023236f",
+     *                      "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                  },
+     *                  {
+     *                      "name": "Сундук, морской",
+     *                      "uuid": "004afcc5-6f7e-a246-425a-80c85095ec5b",
+     *                      "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
      *                  }
      *              }
      *          )
@@ -1542,5 +1534,58 @@ class DefaultController extends WebApiController
     public function actionProductIngredientList()
     {
         $this->response = (new VetisWaybill())->getProductIngredientList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/product-info",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка Ингредиентов",
+     *     description="Получение списка Ингредиентов",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "guid": "f73bad6a-8894-44e6-911e-b7f1c1e71466"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "name": "Агуша БиоКефир 3.2% 204г БЗ 12Х",
+     *                  "uuid": "0001b743-21c1-41a3-aac0-bd4e6d21cfa6",
+     *                  "guid": "308a4f21-a5fd-47c4-bb98-71a967999561",
+     *                  "form": "кисломолочный напиток",
+     *                  "article": "340033884",
+     *                  "gtin": "4602541000035",
+     *                  "gost": "ТУ 10.86.10-115-05268977-2014",
+     *                  "active": 1,
+     *                  "package_type": "кг",
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionProductInfo()
+    {
+        $this->response = (new VetisWaybill())->getProductInfo($this->request);
     }
 }

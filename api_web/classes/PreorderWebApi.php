@@ -17,6 +17,7 @@ use yii\data\{
     ArrayDataProvider,
     Pagination
 };
+use yii\helpers\ArrayHelper;
 use yii\db\Expression;
 use yii\web\BadRequestHttpException;
 
@@ -279,20 +280,18 @@ class PreorderWebApi extends WebApi
      */
     private function productsInfo(Preorder $preOrder)
     {
-        $orders = $preOrder->getOrders()->all();
+        $orders = $preOrder->orders;
         $products = [];
-        foreach ($orders as $index => $order) {
-            $orderContent = $order->getOrderContent()->all();
-            foreach ($orderContent as $index => $item) {
-                $contents = $preOrder
-                    ->getPreorderContents()
-                    ->where(['product_id' => $item->product_id])
-                    ->one();
+        $contents = $preOrder->getPreorderContents()->asArray()->all();
+        $planQuantity = ArrayHelper::map($contents, 'product_id', 'plan_quantity');
+        foreach ($orders as $order) {
+            $orderContent = $order->orderContent;
+            foreach ($orderContent as $item) {
                 $products[] = [
                     'id'            => $item->product_id,
                     'name'          => $item->product_name,
                     'article'       => $item->article,
-                    'plan_quantity' => $contents->plan_quantity,
+                    'plan_quantity' => $planQuantity[$item->product_id],
                     'quantity'      => $item->quantity,
                     'sum'           => number_format($item->quantity * $item->price, 2),
                     'isset_analog'  => false,

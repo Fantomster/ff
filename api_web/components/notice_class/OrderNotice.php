@@ -457,6 +457,28 @@ class OrderNotice
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
+
+        /**
+         * Отправка сообщения в чат
+         */
+        if ($senderOrg->id == $order->client_id) {
+            $senderUser = $order->createdBy;
+        } else {
+            $senderUser = $order->acceptedBy ?? User::findOne(1);
+        }
+
+        if (!empty($changed) || !empty($deleted) || !empty($additionalParams)) {
+            $systemMessage = \Yii::$app->view->renderFile('@mail_views/chat/order_change.php', [
+                'changed'          => $changed,
+                'deleted'          => $deleted,
+                'additionalParams' => $additionalParams
+            ]);
+
+            $this->sendSystemMessage($senderUser, $order->id, $systemMessage, false, $subject);
+            $recipient_org_id = $senderOrg->id == $order->client_id ? $order->vendor_id : $order->client_id;
+            Notice::init('Chat')->updateCountMessageAndDialog($recipient_org_id, $order, $subject);
+        }
+
         $orgs[] = $order->vendor_id;
         $orgs[] = $order->client_id;
         foreach ($order->recipientsList as $recipient) {
@@ -482,26 +504,6 @@ class OrderNotice
             }
         }
 
-        /**
-         * Отправка сообщения в чат
-         */
-        if ($senderOrg->id == $order->client_id) {
-            $senderUser = $order->createdBy;
-        } else {
-            $senderUser = $order->acceptedBy ?? User::findOne(1);
-        }
-
-        if (!empty($changed) || !empty($deleted) || !empty($additionalParams)) {
-            $systemMessage = \Yii::$app->view->renderFile('@mail_views/chat/order_change.php', [
-                'changed'          => $changed,
-                'deleted'          => $deleted,
-                'additionalParams' => $additionalParams
-            ]);
-
-            $this->sendSystemMessage($senderUser, $order->id, $systemMessage, false, $subject);
-            $recipient_org_id = $senderOrg->id == $order->client_id ? $order->vendor_id : $order->client_id;
-            Notice::init('Chat')->updateCountMessageAndDialog($recipient_org_id, $order, $subject);
-        }
     }
 
 }

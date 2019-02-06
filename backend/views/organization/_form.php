@@ -297,7 +297,7 @@ function changeFields(fields, results) {
     <?= ''//$form->field($model, 'phone')->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])->textInput(['maxlength' => true])  ?>
 
     <?=
-    $form->field($model, 'phone')->widget(\common\widgets\PhoneInput::className(), [
+    $form->field($model, 'phone')->widget(\common\widgets\phone\PhoneInput::className(), [
         'jsOptions' => [
             'preferredCountries' => ['ru'],
             'nationalMode'       => false,

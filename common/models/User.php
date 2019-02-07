@@ -50,6 +50,7 @@ use Lcobucci\JWT\Signer\Hmac\Sha256;
  * @property Job                        $job
  * @property EmailQueue                 $lastEmail
  * @property RelationUserOrganization[] $relationsUserOrganization
+ * @property RelationUserOrganization   $relationUserOrganization
  * @property Profile                    $profile
  */
 class User extends \amnah\yii2\user\models\User

@@ -13,6 +13,13 @@ use yii\web\BadRequestHttpException;
 class WebApiHelper
 {
     /**
+     * Возвращать полное наименование организации
+     *
+     * @var bool
+     */
+    public static $fullNameOrganization = false;
+
+    /**
      * Атрибуты, в которых дата
      *
      * @var array
@@ -155,8 +162,10 @@ class WebApiHelper
             return null;
         }
 
+        $name = static::$fullNameOrganization ? $model->getName() : $model->name;
+
         $item['id'] = (int)$model->id;
-        $item['name'] = self::clearValue($model->name);
+        $item['name'] = self::clearValue($name);
         $item['legal_entity'] = $model->buisinessInfo->legal_entity ?? $model->legal_entity ?? "";
         $item['contact_name'] = self::clearValue($model->contact_name);
         $item['phone'] = self::clearValue($model->phone);

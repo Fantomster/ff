@@ -98,8 +98,8 @@ use common\models\Order;
 <?php if (!empty($additionalParams)): $i = 0; ?>
     <?php foreach ($additionalParams as $key => $param): ?>
         <?php if ($key == 'discount_type') {
-            $newValue = ($param['value'] == Order::DISCOUNT_FIXED) ? "RUB" : "%";
-            $oldValue = ($param['old_value'] == Order::DISCOUNT_FIXED) ? "RUB" : "%";
+            $newValue = ($param['value'] == Order::DISCOUNT_FIXED) ? $model->getCurrency()->symbol : "%";
+            $oldValue = ($param['old_value'] == Order::DISCOUNT_FIXED) ? $model->getCurrency()->symbol : "%";
         } else {
             $newValue = $param['value'];
             $oldValue = $param['old_value'];

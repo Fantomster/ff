@@ -8,6 +8,7 @@ use api\common\models\merc\MercVsd;
 use api_web\components\Registry;
 use api_web\components\ValidateRequest;
 use api_web\components\WebApi;
+use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use api_web\modules\integration\modules\vetis\api\mercury\mercuryApi;
@@ -23,6 +24,7 @@ use common\models\vetis\VetisProductItem;
 use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
+use frontend\modules\clientintegr\modules\merc\models\productForm;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
@@ -649,5 +651,59 @@ class VetisWaybill extends WebApi
             'active'       => $model->active,
             'package_type' => $model->unit->name ?? null,
         ];
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function createProductItem($request)
+    {
+        $this->validateRequest($request, ['name', 'product_type', 'form_guid', 'subtype_guid']);
+        $model = new productForm();
+
+        $model->name = $request['name'];
+        $model->productType = $request['product_type'];
+        $model->product_guid = $request['form_guid'];
+        $model->subproduct_guid = $request['subtype_guid'];
+        $model->code = $request['article'];
+        $model->globalID = $request['gtin'];
+        $model->correspondsToGost = (int)$request['has_gost'];
+        $model->gost = $request['gost'];
+
+        if ($model->validate()) {
+            try {
+                $result = mercuryApi::getInstance()->modifyProducerStockListOperation('CREATE', null, $model);
+                if (!isset($result)) {
+                    throw new \Exception('Error create Product');
+                }
+                $this->addIngredients($result->application->result->any['modifyProducerStockListResponse']->productItemList->productItem->guid, $request['ingredients']);
+            } catch (\Throwable $e) {
+                $this->helper->writeInJournal($e->getMessage(), $this->user->id, $this->user->organization_id);
+            }
+        }
+
+        return ['result' => true];
+    }
+
+    /**
+     * @param $guid
+     * @param $ingredients
+     * @throws ValidationException
+     */
+    private function addIngredients($guid, $ingredients)
+    {
+        foreach ($ingredients as $ingredient) {
+            $model = new VetisIngredients();
+            $model->guid = $guid;
+            $model->product_name = $ingredient['name'];
+            $model->amount = $ingredient['amount'];
+            if (!$model->save()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
+        }
     }
 }

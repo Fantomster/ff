@@ -10,13 +10,15 @@ namespace api_web\classes;
 use api_web\ {
     helpers\WebApiHelper,
     exceptions\ValidationException,
-    components\WebApi
+    components\WebApi,
+    helpers\CurrencyHelper
 };
 use common\models\{Order, Preorder, Cart, Organization, PreorderContent, Profile};
 use yii\data\{
     ArrayDataProvider,
     Pagination
 };
+use yii\helpers\ArrayHelper;
 use yii\db\Expression;
 use yii\web\BadRequestHttpException;
 
@@ -140,6 +142,7 @@ class PreorderWebApi extends WebApi
      *
      * @param $request
      * @return array
+     * @throws BadRequestHttpException
      */
     public function list($request)
     {
@@ -274,12 +277,63 @@ class PreorderWebApi extends WebApi
     }
 
     /**
+     * @param Preorder $preOrder
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    private function productsInfo(Preorder $preOrder)
+    {
+        $orders = $preOrder->orders;
+        $products = [];
+        $contents = $preOrder->getPreorderContents()->asArray()->all();
+        $planQuantity = ArrayHelper::map($contents, 'product_id', 'plan_quantity');
+        foreach ($orders as $order) {
+            $orderContent = $order->orderContent;
+            foreach ($orderContent as $item) {
+                if (empty($planQuantity[$item->product_id])) {
+                    throw new BadRequestHttpException('preorder.wrong_preorder');
+                }
+                $products[] = [
+                    'id'            => $item->product_id,
+                    'name'          => $item->product_name,
+                    'article'       => $item->article,
+                    'plan_quantity' => $planQuantity[$item->product_id],
+                    'quantity'      => $item->quantity,
+                    'sum'           => CurrencyHelper::asDecimal($item->quantity * $item->price),
+                    'isset_analog'  => false,
+                ];
+            }
+        }
+        return $products;
+    }
+
+    /**
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function get($post)
+    {
+        $this->validateRequest($post, ['id']);
+        $model = Preorder::findOne([
+            'id'              => (int)$post['id'],
+            'organization_id' => $this->user->organization_id
+        ]);
+        if (empty($model)) {
+            throw new BadRequestHttpException('preorder.not_found');
+        }
+        return $this->prepareModel($model, true);
+    }
+
+    /**
      * Подготовка модели к выдаче фронту
      *
      * @param Preorder $model
+     * @param bool     $products
      * @return array
+     * @throws BadRequestHttpException
      */
-    private function prepareModel(Preorder $model)
+    private function prepareModel(Preorder $model, bool $products = false)
     {
         $return = [
             'id'           => $model->id,
@@ -304,6 +358,10 @@ class PreorderWebApi extends WebApi
             'created_at'   => WebApiHelper::asDatetime($model->created_at),
             'updated_at'   => WebApiHelper::asDatetime($model->updated_at)
         ];
+
+        if ($products) {
+            $return['products'] = $this->productsInfo($model);
+        }
 
         return $return;
     }

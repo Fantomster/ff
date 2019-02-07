@@ -622,4 +622,32 @@ class VetisWaybill extends WebApi
         return VetisIngredients::find()->select(['product_name', 'amount', 'id'])
             ->where(['guid' => $request['guid']])->all();
     }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getProductInfo($request)
+    {
+        $this->validateRequest($request, ['guid']);
+        /**@var VetisProductItem $model */
+        $model = VetisProductItem::find()->joinWith(['subProduct', 'unit'])
+            ->where(['vetis_product_item.guid' => $request['guid']])->one();
+        if (!$model) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
+
+        return [
+            'form'         => $model->subProduct->name ?? null,
+            'name'         => $model->name,
+            'uuid'         => $model->uuid,
+            'guid'         => $model->guid,
+            'article'      => $model->code,
+            'gtin'         => $model->globalID,
+            'gost'         => $model->gost,
+            'active'       => $model->active,
+            'package_type' => $model->unit->name ?? null,
+        ];
+    }
 }

@@ -7,13 +7,13 @@
 
 namespace api_web\classes;
 
-use api_web\ {
+use api_web\{components\definitions\Vendor,
     helpers\WebApiHelper,
     exceptions\ValidationException,
     components\WebApi,
-    helpers\CurrencyHelper
-};
-use common\models\{Order, Preorder, Cart, Organization, PreorderContent, Profile};
+    components\Notice,
+    helpers\CurrencyHelper};
+use common\models\{Order, OrderStatus, Preorder, Cart, Organization, PreorderContent, Profile};
 use yii\data\{
     ArrayDataProvider,
     Pagination
@@ -325,6 +325,37 @@ class PreorderWebApi extends WebApi
         return $this->prepareModel($model, true);
     }
 
+    public function confirmOrders($post)
+    {
+        $this->validateRequest($post, ['id']);
+        $model = Preorder::findOne([
+            'id'              => (int)$post['id'],
+            'organization_id' => $this->user->organization_id
+        ]);
+        if (empty($model)) {
+            throw new BadRequestHttpException('preorder.not_found');
+        }
+        $orders = $model->orders;
+        foreach ($orders as $order) {
+            $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+            if (!$order->save()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
+            $vendor = $order->vendor;
+            //Емайл и смс о новом заказе
+            Notice::init('Order')->sendEmailAndSmsOrderCreated($this->user->organization, $order);
+            try {
+                //Сообщение в очередь поставщику, что есть новый заказ
+                Notice::init('Order')->sendOrderToTurnVendor($vendor);
+                //Сообщение в очередь, Изменение количества товара в корзине
+                Notice::init('Order')->sendOrderToTurnClient($this->user);
+            } catch (\Exception $e) {
+                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            }
+        }
+        return ['result' => true];
+    }
+
     /**
      * Подготовка модели к выдаче фронту
      *
@@ -364,10 +395,5 @@ class PreorderWebApi extends WebApi
         }
 
         return $return;
-    }
-
-    public function confirmOrders($post)
-    {
-        return 'test';
     }
 }

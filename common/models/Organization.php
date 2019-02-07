@@ -12,6 +12,7 @@ use api\common\models\RkServicedata;
 use common\models\edi\EdiOrganization;
 use common\models\licenses\LicenseOrganization;
 use common\models\vetis\VetisCountry;
+use frontend\modules\billing\models\BillingPayment;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
@@ -169,11 +170,11 @@ class Organization extends \yii\db\ActiveRecord
             [['gln_code'], 'integer', 'min' => 1000000000000, 'max' => 99999999999999999, 'tooSmall' => 'Too small value', 'tooBig' => 'To big value'],
             [['gln_code'], 'unique'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
-            [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()],
+            [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::class],
             [['email'], 'email'],
             [['lat', 'lng'], 'number'],
-            [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
-            [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => EdiOrganization::className(), 'targetAttribute' => ['id' => 'organization_id']],
+            [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::class, 'targetAttribute' => ['type_id' => 'id']],
+            [['gln_code'], 'exist', 'skipOnError' => true, 'targetClass' => EdiOrganization::class, 'targetAttribute' => ['id' => 'organization_id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => ['settings', 'logo']],
             [['is_allowed_for_franchisee', 'is_work'], 'boolean'],
             [['inn'], 'match', 'pattern' => '/^[0-9]{10}$|^[0-9]{12}$/', 'message' => Yii::t('app', 'common.models.organization_inn_error', ['ru' => 'Поле должно состоять из 10 или 12 цифр'])],
@@ -194,7 +195,7 @@ class Organization extends \yii\db\ActiveRecord
                 },
             ],
             [
-                'class'     => ImageUploadBehavior::className(),
+                'class'     => ImageUploadBehavior::class,
                 'attribute' => 'picture',
                 'scenarios' => ['settings', 'logo'],
                 'path'      => '@app/web/upload/temp',
@@ -273,7 +274,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getBillingPayments()
     {
-        return $this->hasMany(BillingPayment::className(), ['organization_id' => 'id']);
+        return $this->hasMany(BillingPayment::class, ['organization_id' => 'id']);
     }
 
     /**
@@ -281,7 +282,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getCartContents()
     {
-        return $this->hasMany(CartContent::className(), ['vendor_id' => 'id']);
+        return $this->hasMany(CartContent::class, ['vendor_id' => 'id']);
     }
 
     /**
@@ -289,7 +290,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getRelationUserOrganization()
     {
-        return $this->hasMany(RelationUserOrganization::className(), ['organization_id' => 'id']);
+        return $this->hasMany(RelationUserOrganization::class, ['organization_id' => 'id']);
     }
 
     /**
@@ -297,7 +298,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getLicenseOrganization()
     {
-        return $this->hasMany(LicenseOrganization::className(), ['org_id' => 'id']);
+        return $this->hasMany(LicenseOrganization::class, ['org_id' => 'id']);
     }
 
     /**
@@ -305,15 +306,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getEdiOrganization(): ActiveQuery
     {
-        return $this->hasMany(EdiOrganization::className(), ['organization_id' => 'id']);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getGlnCode()
-    {
-        return $this->ediOrganization->gln_code;
+        return $this->hasMany(EdiOrganization::class, ['organization_id' => 'id']);
     }
 
     /**
@@ -392,7 +385,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getType()
     {
-        return $this->hasOne(OrganizationType::className(), ['id' => 'type_id']);
+        return $this->hasOne(OrganizationType::class, ['id' => 'type_id']);
     }
 
     /**
@@ -427,8 +420,9 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
-     * get list of suppliers for selected categories
-     *
+     * @param string $category_id
+     * @param bool   $all
+     * @param bool   $notMap
      * @return array
      */
     public function getSuppliers($category_id = '', $all = true, $notMap = true)
@@ -537,8 +531,7 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
-     * get list of clients
-     *
+     * @param bool $all
      * @return array
      */
     public function getClients($all = true)
@@ -612,7 +605,7 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_SUPPLIER) {
             return null;
         }
-        return $this->hasOne(Delivery::className(), ['vendor_id' => 'id']);
+        return $this->hasOne(Delivery::class, ['vendor_id' => 'id']);
     }
 
     /**
@@ -638,24 +631,26 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery|null
      */
     public function getDeliveryRegionsAllow()
     {
         if ($this->type_id == Organization::TYPE_SUPPLIER) {
-            return $this->hasMany(DeliveryRegions::className(), ['supplier_id' => 'id'])->andWhere(['exception' => 0]);
+            return $this->hasMany(DeliveryRegions::class, ['supplier_id' => 'id'])->andWhere(['exception' => 0]);
         }
+        return null;
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery|null
      */
     public function getDeliveryRegionsExclude()
     {
         if ($this->type_id == Organization::TYPE_SUPPLIER) {
-            return $this->hasMany(DeliveryRegions::className(), ['supplier_id' => 'id'])->andWhere(['exception' => 1]);
+            return $this->hasMany(DeliveryRegions::class, ['supplier_id' => 'id'])->andWhere(['exception' => 1]);
         }
-    }
+        return null;
+}
 
     /**
      * Метод возвращает корзину организации//пользователя
@@ -694,7 +689,7 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return Order|array
      */
     public function getCart()
     {
@@ -722,10 +717,10 @@ class Organization extends \yii\db\ActiveRecord
             ->count();
     }
 
-    /*
-     * @return integer
+    /**
+     * @param null $manager_id
+     * @return int|string
      */
-
     public function getNewOrdersCount($manager_id = null)
     {
         $result = 0;
@@ -775,6 +770,10 @@ class Organization extends \yii\db\ActiveRecord
         return $result;
     }
 
+    /**
+     * @return mixed|string
+     * @throws \Exception
+     */
     public function getEarliestOrderDate()
     {
         $today = new \DateTime();
@@ -822,7 +821,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getAdditionalEmail()
     {
-        return $this->hasMany(AdditionalEmail::className(), ['organization_id' => 'id']);
+        return $this->hasMany(AdditionalEmail::class, ['organization_id' => 'id']);
     }
 
     public function getUnreadMessages()
@@ -888,18 +887,12 @@ class Organization extends \yii\db\ActiveRecord
         return $query->all();
     }
 
-    /**
-     * @throws \yii\db\Exception
-     */
-    public function setMessagesRead()
+    public function setMessagesRead(): void
     {
         OrderChat::updateAll(['viewed' => 1], ['recipient_id' => $this->id, 'is_system' => 0]);
     }
 
-    /**
-     * @throws \yii\db\Exception
-     */
-    public function setNotificationsRead()
+    public function setNotificationsRead(): void
     {
         OrderChat::updateAll(['viewed' => 1], ['recipient_id' => $this->id, 'is_system' => 1]);
     }
@@ -944,6 +937,7 @@ class Organization extends \yii\db\ActiveRecord
     /**
      * @param bool  $insert
      * @param array $changedAttributes
+     * @throws \yii\db\Exception
      */
     public function afterSave($insert, $changedAttributes)
     {
@@ -978,7 +972,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getBuisinessInfo()
     {
-        return $this->hasOne(BuisinessInfo::className(), ['organization_id' => 'id']);
+        return $this->hasOne(BuisinessInfo::class, ['organization_id' => 'id']);
     }
 
     /**
@@ -986,7 +980,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getFranchiseeAssociate()
     {
-        return $this->hasOne(FranchiseeAssociate::className(), ['organization_id' => 'id']);
+        return $this->hasOne(FranchiseeAssociate::class, ['organization_id' => 'id']);
     }
 
     /**
@@ -994,15 +988,16 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getProfile()
     {
-        return $this->hasOne(Profile::className(), ['user_id' => 'manager_id']);
+        return $this->hasOne(Profile::class, ['user_id' => 'manager_id']);
     }
 
     /**
      * @return ActiveQuery
+     * @throws \yii\base\InvalidConfigException
      */
     public function getFranchisee()
     {
-        return $this->hasOne(Franchisee::className(), ['id' => 'franchisee_id'])
+        return $this->hasOne(Franchisee::class, ['id' => 'franchisee_id'])
             ->viaTable(FranchiseeAssociate::tableName(), ['organization_id' => 'id']);
     }
 
@@ -1023,7 +1018,7 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return string url to avatar image
+     * @return mixed
      */
     public function getPictureUrl()
     {
@@ -1272,7 +1267,7 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return null;
         }
-        return $this->hasOne(Guide::className(), ['client_id' => 'id', 'type' => Guide::TYPE_FAVORITE]);
+        return $this->hasOne(Guide::class, ['client_id' => 'id', 'type' => Guide::TYPE_FAVORITE]);
     }
 
     /**
@@ -1283,11 +1278,11 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return [];
         }
-        return $this->hasMany(Guide::className(), ['client_id' => 'id', 'type' => Guide::TYPE_GUIDE]);
+        return $this->hasMany(Guide::class, ['client_id' => 'id', 'type' => Guide::TYPE_GUIDE]);
     }
 
     /**
-     * @return organization managers data provider
+     * @return ActiveDataProvider
      */
     public function getOrganizationManagersDataProvider()
     {
@@ -1314,7 +1309,10 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return organization data query
+     * @param        $organization_id
+     * @param string $type
+     * @param int    $currency_id
+     * @return string
      */
     protected function getOrganizationQuery($organization_id, $type = 'supp', $currency_id = 1)
     {
@@ -1348,7 +1346,10 @@ class Organization extends \yii\db\ActiveRecord
         $mailer = Yii::$app->mailer;
         $email = $user->email;
         $subject = Yii::$app->id . " - " . Yii::t('app', 'common.config.params.pass', ['ru' => 'Создание пароля для входа в систему MixCart']);
-        $mailer->compose('changePassword', compact(['userToken', 'isFranchise']))
+        $mailer->compose('changePassword', [
+            'userToken'   => $userToken,
+            'isFranchise' => $isFranchise
+        ])
             ->setTo($email)
             ->setSubject($subject)
             ->send();
@@ -1508,7 +1509,8 @@ class Organization extends \yii\db\ActiveRecord
     /**
      * return product if it is available to client
      *
-     * @return CatalogBaseGoods
+     * @param $product_id
+     * @return array|CatalogBaseGoods|CatalogGoods|\yii\db\ActiveRecord|null
      */
     public function getProductIfAvailable($product_id)
     {
@@ -1561,8 +1563,9 @@ class Organization extends \yii\db\ActiveRecord
     /**
      * Прикрепление организации к франчази
      *
-     * @param bool $delete_assoc  удаление всех связей с франчайзи
-     * @param bool $cancel_sorted удаление признака привязки к франчу
+     * @param bool $delete_assoc
+     * @param bool $cancel_sorted
+     * @throws \yii\db\Exception
      */
     public function setFranchise($delete_assoc = false, $cancel_sorted = false)
     {
@@ -1681,6 +1684,7 @@ class Organization extends \yii\db\ActiveRecord
      *                        'franchisee.receiving_organization'
      *                        ], ... ]
      * @return bool
+     * @throws \yii\db\Exception
      */
     private function setTypeFranchiseeAndSaveAssoc($franchise_pull)
     {
@@ -1790,6 +1794,7 @@ class Organization extends \yii\db\ActiveRecord
      * @param      $result
      * @param bool $p - принудительно обновление
      * @return array
+     * @throws \yii\db\Exception
      */
     private function setReceivingOrganization($result, $p = false)
     {
@@ -1816,7 +1821,7 @@ class Organization extends \yii\db\ActiveRecord
      */
     public function getPayments()
     {
-        return $this->hasMany(Payment::className(), ['organization_id' => 'id'])->orderBy('payment.payment_id DESC');
+        return $this->hasMany(Payment::class, ['organization_id' => 'id'])->orderBy('payment.payment_id DESC');
     }
 
     /**
@@ -1834,7 +1839,7 @@ class Organization extends \yii\db\ActiveRecord
     {
         $return = [];
 
-        $lic = \api\common\models\RkServicedata::find()->andWhere('org = :org', ['org' => $this->id])->one();
+        $lic = RkServicedata::find()->andWhere('org = :org', ['org' => $this->id])->one();
         $t = strtotime(date('Y-m-d H:i:s', time()));
         if ($lic) {
             if ($t >= strtotime($lic->fd) && $t <= strtotime($lic->td) && $lic->status_id === 1) {
@@ -1975,6 +1980,9 @@ class Organization extends \yii\db\ActiveRecord
 
     /**
      * Temporary. To be removed after business rework.
+     *
+     * @return bool
+     * @throws \Exception
      */
     public function setPrimary()
     {
@@ -1993,7 +2001,7 @@ class Organization extends \yii\db\ActiveRecord
             }
         } catch (\Exception $e) {
             $transaction->rollBack();
-            throw new Exception($e->getMessage(), $e->getCode());
+            throw new \Exception($e->getMessage(), $e->getCode());
         }
         return false;
     }
@@ -2048,5 +2056,19 @@ class Organization extends \yii\db\ActiveRecord
     public function getVetisCountry()
     {
         return $this->hasOne(VetisCountry::class, ['uuid' => 'vetis_country_uuid']);
+    }
+
+    /**
+     * Наименование оргнизации
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        $name = $this->name;
+        if (!empty($this->legal_entity) && !is_null($this->legal_entity) && trim($this->legal_entity) != '') {
+            $name = "{$this->legal_entity} ({$this->name})";
+        }
+        return $name;
     }
 }

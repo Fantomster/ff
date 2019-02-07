@@ -217,6 +217,7 @@ class Poster
                 }
             }
             $model->is_deleted = (int)$store['delete'];
+            $model->updated_at = \gmdate('Y-m-d H:i:s');
             if (!$model->save()) {
                 throw new ValidationException($model->getFirstErrors());
             }

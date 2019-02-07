@@ -5,6 +5,7 @@ namespace api_web\controllers;
 use api_web\classes\ChatWebApi;
 use api_web\classes\OrderWebApi;
 use api_web\components\WebApiController;
+use api_web\helpers\WebApiHelper;
 
 /**
  * Class OrderController
@@ -1255,6 +1256,7 @@ class OrderController extends WebApiController
      */
     public function actionInfoByUnconfirmedVendor()
     {
+        WebApiHelper::$fullNameOrganization = true;
         $this->response = $this->classWebApi->getInfo($this->request);
     }
 

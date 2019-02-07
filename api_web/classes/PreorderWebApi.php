@@ -175,7 +175,7 @@ class PreorderWebApi extends WebApi
                 ]);
             }
             //Фильтр по статусу
-            if (!empty($request['search']['status'])) {
+            if (isset($request['search']['status'])) {
                 $is_active = $request['search']['status'] ?? null;
                 if (!is_null($is_active)) {
                     $models->andFilterWhere(["{$tableName}.is_active" => (int)$is_active]);

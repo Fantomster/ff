@@ -359,7 +359,7 @@ class ClientWebApi extends WebApi
             }
 
             //Если пользователь не руководитель, он обновлять может только свои уведомления
-            if ($this->user->role_id != Role::ROLE_RESTAURANT_MANAGER) {
+            if (!in_array($this->user->role_id, [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_ADMIN])) {
                 $rel = RelationUserOrganization::findOne(['user_id' => $this->user->id, 'organization_id' => $this->user->organization->id]);
                 if (empty($rel)) {
                     throw new BadRequestHttpException('RelationUserOrganization_not_found');

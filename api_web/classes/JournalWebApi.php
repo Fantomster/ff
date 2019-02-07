@@ -87,6 +87,8 @@ class JournalWebApi extends WebApi
         $tableName = Journal::tableName();
         $allServiceTable = AllServiceOperation::tableName();
 
+        $services = [Registry::MERC_SERVICE_ID, Registry::IIKO_SERVICE_ID];
+
         $query->select([
             "{$tableName}.id",
             "{$tableName}.service_id",
@@ -94,12 +96,10 @@ class JournalWebApi extends WebApi
             "{$tableName}.user_id",
             "{$tableName}.organization_id",
             "response" => new Expression(
-                "CASE WHEN {$tableName}.service_id = :m_service_id 
+                "CASE WHEN {$tableName}.service_id in (" . implode(',', $services) . ") 
                  THEN {$allServiceTable}.comment 
                  ELSE {$tableName}.response 
-                 END", [
-                    ':m_service_id' => Registry::MERC_SERVICE_ID
-                ]
+                 END"
             ),
             "{$tableName}.log_guide",
             "{$tableName}.type",

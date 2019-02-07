@@ -259,7 +259,7 @@ class iikoApi
      */
     private function sendAuth($url, $params = [], $method = 'GET', $headers = [], $timeout = 300)
     {
-        $logger = new iikoLogger();
+        $logger = new iikoLogger(self::$_instance->orgId);
         $logger->setOperation($url);
         $logger->request($params);
 
@@ -300,7 +300,7 @@ class iikoApi
      */
     private function send($url, $params = [], $method = 'GET', $headers = [])
     {
-        $logger = new iikoLogger();
+        $logger = new iikoLogger(self::$_instance->orgId);
         $logger->setOperation($url);
         $logger->request($params);
 
@@ -398,7 +398,7 @@ class iikoApi
      */
     private function sendXml($url, $body, $headers = [])
     {
-        $logger = new iikoLogger();
+        $logger = new iikoLogger(self::$_instance->orgId);
         $logger->setOperation($url);
         $logger->request($body);
 

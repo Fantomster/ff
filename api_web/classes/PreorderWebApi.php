@@ -7,12 +7,13 @@
 
 namespace api_web\classes;
 
-use api_web\{components\definitions\Vendor,
+use api_web\{
     helpers\WebApiHelper,
     exceptions\ValidationException,
     components\WebApi,
     components\Notice,
-    helpers\CurrencyHelper};
+    helpers\CurrencyHelper
+};
 use common\models\{Order, OrderStatus, Preorder, Cart, Organization, PreorderContent, Profile};
 use yii\data\{
     ArrayDataProvider,
@@ -325,6 +326,16 @@ class PreorderWebApi extends WebApi
         return $this->prepareModel($model, true);
     }
 
+    /**
+     * Оформление заказов
+     *
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
     public function confirmOrders($post)
     {
         $this->validateRequest($post, ['id']);
@@ -336,24 +347,28 @@ class PreorderWebApi extends WebApi
             throw new BadRequestHttpException('preorder.not_found');
         }
         $orders = $model->orders;
-        foreach ($orders as $order) {
-            $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-            if (!$order->save()) {
-                throw new ValidationException($model->getFirstErrors());
+        if (!empty($orders)) {
+            /** @var Order $order */
+            foreach (WebApiHelper::generator($orders) as $order) {
+                $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                if (!$order->save()) {
+                    throw new ValidationException($model->getFirstErrors());
+                }
+                //Емайл и смс о новом заказе
+                try {
+                    Notice::init('Order')->sendEmailAndSmsOrderCreated($this->user->organization, $order);
+                    //Сообщение в очередь поставщику, что есть новый заказ
+                    Notice::init('Order')->sendOrderToTurnVendor($order->vendor);
+                    //Сообщение в очередь, Изменение количества товара в корзине
+                    Notice::init('Order')->sendOrderToTurnClient($this->user);
+                } catch (\Exception $e) {
+                    \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                }
             }
-            $vendor = $order->vendor;
-            //Емайл и смс о новом заказе
-            Notice::init('Order')->sendEmailAndSmsOrderCreated($this->user->organization, $order);
-            try {
-                //Сообщение в очередь поставщику, что есть новый заказ
-                Notice::init('Order')->sendOrderToTurnVendor($vendor);
-                //Сообщение в очередь, Изменение количества товара в корзине
-                Notice::init('Order')->sendOrderToTurnClient($this->user);
-            } catch (\Exception $e) {
-                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
-            }
+        } else {
+            throw new BadRequestHttpException('order.not_found');
         }
-        return ['result' => true];
+        return $this->orders(['id' => $model->id]);
     }
 
     /**

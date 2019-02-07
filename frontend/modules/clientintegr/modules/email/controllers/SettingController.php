@@ -22,7 +22,7 @@ class SettingController extends Controller
          */
         $user = \Yii::$app->user->identity;
         $organization = $user->organization;
-        $models = IntegrationSettingFromEmail::find()->where(['organization_id' => $organization->id])->all();
+        $models = IntegrationSettingFromEmail::find()->where(['organization_id' => $organization->id, 'version' => 1])->all();
 
         return $this->render('index', ['models' => $models]);
     }
@@ -62,7 +62,7 @@ class SettingController extends Controller
             $id = \Yii::$app->request->get('setting_id');
         }
 
-        $model = IntegrationSettingFromEmail::find()->where(['id' => $id, 'organization_id' => $organization->id])->one();
+        $model = IntegrationSettingFromEmail::find()->where(['id' => $id, 'organization_id' => $organization->id, 'version' => 1])->one();
         if (isset($model) && isset($user)) {
 
             if (isset($post)) {

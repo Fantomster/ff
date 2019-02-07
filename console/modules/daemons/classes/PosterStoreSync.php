@@ -10,7 +10,7 @@ namespace console\modules\daemons\classes;
 
 use api_web\components\Poster;
 use api_web\exceptions\ValidationException;
-use common\models\OuterAgent;
+use common\models\OuterStore;
 use console\modules\daemons\components\ConsumerInterface;
 use console\modules\daemons\components\PosterSyncConsumer;
 
@@ -73,7 +73,7 @@ class PosterStoreSync extends PosterSyncConsumer implements ConsumerInterface
         $poster = Poster::getInstance($this->orgId);
         $poster->getStores();
         //Обновляем колличество полученных объектов
-        return OuterAgent::find()
+        return OuterStore::find()
             ->where(['is_deleted' => 0, 'org_id' => $this->orgId, 'service_id' => self::SERVICE_ID])
             ->andFilterWhere(['!=', 'level', '0'])
             ->count();

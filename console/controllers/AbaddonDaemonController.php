@@ -93,9 +93,10 @@ class AbaddonDaemonController extends \console\modules\daemons\components\Watche
         $res = (new Query())
             ->select('*')
             ->from(RabbitQueues::tableName());
-        if (!is_null($this->queuePrefix)) {
+
+        if (!is_null($this->queuePrefix) && $this->queuePrefix != 'all') {
             $res->andWhere(['like', 'consumer_class_name', $this->queuePrefix . '%', false]);
-        } else {
+        } elseif (is_null($this->queuePrefix)) {
             $res->andWhere(['not like', 'consumer_class_name', 'Merc%', false]);
         }
 

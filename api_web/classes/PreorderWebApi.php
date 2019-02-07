@@ -297,8 +297,8 @@ class PreorderWebApi extends WebApi
                     'id'            => $item->product_id,
                     'name'          => $item->product_name,
                     'article'       => $item->article,
-                    'plan_quantity' => $planQuantity[$item->product_id],
-                    'quantity'      => $item->quantity,
+                    'plan_quantity' => round($planQuantity[$item->product_id], 3),
+                    'quantity'      => round($item->quantity, 3),
                     'sum'           => CurrencyHelper::asDecimal($item->quantity * $item->price),
                     'isset_analog'  => false,
                 ];
@@ -347,8 +347,8 @@ class PreorderWebApi extends WebApi
                 'name' => $model->user->profile->full_name
             ],
             'count'        => [
-                'products' => $model->getPreorderContents()->count(),
-                'orders'   => $model->getOrders()->count(),
+                'products' => (int)$model->getPreorderContents()->count(),
+                'orders'   => (int)$model->getOrders()->count(),
             ],
             'sum'          => $model->getSum(),
             'currency'     => [

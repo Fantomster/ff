@@ -10,11 +10,19 @@ namespace api_web\classes;
 use api_web\components\{Registry, WebApi};
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
-use common\models\{Catalog, Delivery, Organization, RelationSuppRest};
+use common\models\{Catalog, CatalogBaseGoods, Delivery, Organization, RelationSuppRest};
+use yii\data\ArrayDataProvider;
+use yii\data\Pagination;
+use yii\db\Expression;
+use yii\db\Query;
 use yii\web\BadRequestHttpException;
 
 class LazyVendorWebApi extends WebApi
 {
+    private $arAvailableFields = [
+        'name'
+    ];
+
     /**
      * Создание поставщика (Ленивого)
      *
@@ -86,6 +94,116 @@ class LazyVendorWebApi extends WebApi
             $transaction->rollBack();
             throw $e;
         }
+    }
+
+    /**
+     * Список ленивых поставщиков
+     *
+     * @param $request
+     * @return array
+     */
+    public function list($request)
+    {
+        $page = $request['pagination']['page'] ?? 1;
+        $pageSize = $request['pagination']['page_size'] ?? 12;
+        $sort = $request['sort'] ?? 'name';
+        $result = [];
+
+        $tableName = Organization::tableName();
+        $tableNameRelation = RelationSuppRest::tableName();
+        $tableNameCBG = CatalogBaseGoods::tableName();
+
+        $countQueryAll = (new Query())
+            ->select('COUNT(*)')
+            ->from($tableNameCBG)
+            ->where("$tableNameCBG.cat_id = $tableNameRelation.cat_id");
+
+        $countQueryAllow = (new Query())
+            ->select('COUNT(*)')
+            ->from($tableNameCBG)
+            ->where("$tableNameCBG.cat_id = $tableNameRelation.cat_id AND $tableNameCBG.status = :s", [
+                ":s" => CatalogBaseGoods::STATUS_ON
+            ]);
+
+        $query = (new Query())
+            ->select($tableName . '.*')
+            ->addSelect([
+                $tableNameRelation . '.cat_id',
+                'product_count'       => $countQueryAll,
+                'product_count_allow' => $countQueryAllow
+            ])
+            ->from($tableName)
+            ->innerJoin($tableNameRelation, "$tableNameRelation.supp_org_id = $tableName.id")
+            ->where([
+                $tableName . '.type_id'             => Organization::TYPE_LAZY_VENDOR,
+                $tableNameRelation . '.rest_org_id' => $this->user->organization_id
+            ]);
+
+        if (isset($request['search'])) {
+            //Поисковая строка
+            if (!empty($request['search']['query'])) {
+                $query->andFilterWhere(['like', "{$tableName}.name", $request['search']['query']]);
+            }
+        }
+
+        if ($query->count()) {
+            if ($sort && in_array(ltrim($sort, '-'), $this->arAvailableFields)) {
+                $sortDirection = SORT_ASC;
+                if (strpos($sort, '-') !== false) {
+                    $sortDirection = SORT_DESC;
+                }
+                $query->orderBy([ltrim($sort, '-') => $sortDirection]);
+            }
+
+            $dataProvider = new ArrayDataProvider([
+                'allModels' => $query->all()
+            ]);
+
+            $pagination = new Pagination();
+            $pagination->setPage($page - 1);
+            $pagination->setPageSize($pageSize);
+            $dataProvider->setPagination($pagination);
+            /** @var Organization $model */
+            if (!empty($dataProvider->models)) {
+                foreach (WebApiHelper::generator($dataProvider->models) as $model) {
+                    $result[] = $this->prepareModel($model);
+                }
+            }
+            $page = ($dataProvider->pagination->page + 1);
+            $pageSize = $dataProvider->pagination->pageSize;
+            $totalPage = ceil($dataProvider->totalCount / $pageSize);
+        }
+
+        $return = [
+            'items'      => $result,
+            'pagination' => [
+                'page'       => $page,
+                'page_size'  => $pageSize,
+                'total_page' => $totalPage ?? 0
+            ],
+            'sort'       => $sort
+        ];
+
+        return $return;
+    }
+
+    /**
+     * @param $model
+     * @return array
+     */
+    private function prepareModel($model)
+    {
+        return [
+            "id"            => (int)$model['id'],
+            "name"          => $model['name'],
+            "address"       => $model['address'],
+            "contact_count" => 0,
+            "product_count" => [
+                "all"   => (int)$model['product_count'],
+                "allow" => (int)$model['product_count_allow']
+            ],
+            "cat_id"        => (int)$model['cat_id']
+        ];
     }
 
     /**

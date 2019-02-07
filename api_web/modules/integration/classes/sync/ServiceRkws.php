@@ -175,7 +175,7 @@ class ServiceRkws extends AbstractSyncFactory
                         'salespoint_id'  => (string)$this->licenseMixcartId,
                         'int_status_id'  => OuterTask::STATUS_REQUESTED,
                         'outer_guid'     => $xml['@attributes']['taskguid'],
-                        'broker_version' => $xml['@attributes']['version'],
+                        'broker_version' => $xml['@attributes']['version'] ?? "not_version",
                         'oper_code'      => $operation->code
                     ]);
                     $task->save();

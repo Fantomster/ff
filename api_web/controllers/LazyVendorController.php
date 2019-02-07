@@ -106,4 +106,64 @@ class LazyVendorController extends WebApiController
     {
         $this->response = $this->classWebApi->create($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/lazy-vendor/list",
+     *     tags={"LazyVendor"},
+     *     summary="Создание нового ленивого поставщика",
+     *     description="Создание нового ленивого поставщика",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                               "items":{
+     *                                   {
+     *                                       "id": 3998,
+     *                                       "name": "name vendor",
+     *                                       "address": "Россия, Москва, Привольная 70",
+     *                                       "contact_count": 0,
+     *                                       "product_count": {
+     *                                          "all": 2,
+     *                                          "allow": 1
+     *                                       },
+     *                                       "cat_id": 4173
+     *                                 }
+     *                               },
+     *                                "pagination": {
+     *                                  "page": 1,
+     *                                  "page_size": 12
+     *                              },
+     *                          "sort": "name"
+     *                      }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionList()
+    {
+        $this->response = $this->classWebApi->list($this->request);
+    }
 }

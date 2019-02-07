@@ -469,6 +469,20 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
+     * get count of suppliers for this organization
+     *
+     * @return integer
+     */
+    public function getSuppliersCount()
+    {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT) {
+            return 0;
+        }
+        $count = RelationSuppRest::find()->where(['rest_org_id' => $this->id, 'status' => 1, 'deleted' => 0])->count();
+        return $count;
+    }
+
+    /**
      * Get the list of organization type restaurant suppliers - filtered by categories
      *
      * @var $addAllOption bool "Don't use filter" indicator
@@ -834,23 +848,23 @@ class Organization extends \yii\db\ActiveRecord
         $tblOrderChat = OrderChat::tableName();
         $tblOrder = Order::tableName();
         $tblMA = ManagerAssociate::tableName();
-        
+
         $subQuery = (new Query())
-                ->select([new \yii\db\Expression("MIN($tblOrderChat.id) AS id"), "$tblOrderChat.order_id"])
-                ->from($tblOrderChat)
-                ->where(["$tblOrderChat.recipient_id" => $this->id, "$tblOrderChat.is_system" => 0, "$tblOrderChat.viewed" => 0])
-                ->groupBy("$tblOrderChat.order_id");
+            ->select([new \yii\db\Expression("MIN($tblOrderChat.id) AS id"), "$tblOrderChat.order_id"])
+            ->from($tblOrderChat)
+            ->where(["$tblOrderChat.recipient_id" => $this->id, "$tblOrderChat.is_system" => 0, "$tblOrderChat.viewed" => 0])
+            ->groupBy("$tblOrderChat.order_id");
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
             $query = OrderChat::find()
-                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
-                    ->leftJoin(["ord" => $tblOrder], "ord.id = $tblOrderChat.order_id")
-                    ->leftJoin(["ma" => $tblMA], "ord.client_id = ma.organization_id")
-                    ->where(["ma.manager_id" => $userId])
-                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
+                ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                ->leftJoin(["ord" => $tblOrder], "ord.id = $tblOrderChat.order_id")
+                ->leftJoin(["ma" => $tblMA], "ord.client_id = ma.organization_id")
+                ->where(["ma.manager_id" => $userId])
+                ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         } else {
             $query = OrderChat::find()
-                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
-                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
+                ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         }
 
         return $query->all();
@@ -863,28 +877,28 @@ class Organization extends \yii\db\ActiveRecord
     {
         $roleId = Yii::$app->getUser()->identity->role->id;
         $userId = Yii::$app->user->id;
-        
+
         $tblOrderChat = OrderChat::tableName();
         $tblOrder = Order::tableName();
         $tblMA = ManagerAssociate::tableName();
-        
+
         $subQuery = (new Query())
-                ->select([new \yii\db\Expression("MIN($tblOrderChat.id) AS id"), "$tblOrderChat.order_id"])
-                ->from($tblOrderChat)
-                ->where(["$tblOrderChat.recipient_id" => $this->id, "$tblOrderChat.is_system" => 1, "$tblOrderChat.viewed" => 0])
-                ->groupBy("$tblOrderChat.order_id");
-        
+            ->select([new \yii\db\Expression("MIN($tblOrderChat.id) AS id"), "$tblOrderChat.order_id"])
+            ->from($tblOrderChat)
+            ->where(["$tblOrderChat.recipient_id" => $this->id, "$tblOrderChat.is_system" => 1, "$tblOrderChat.viewed" => 0])
+            ->groupBy("$tblOrderChat.order_id");
+
         if ($roleId == Role::ROLE_SUPPLIER_EMPLOYEE) {
             $query = OrderChat::find()
-                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
-                    ->leftJoin(["ord" => $tblOrder], "ord.id = $tblOrderChat.order_id")
-                    ->leftJoin(["ma" => $tblMA], "ord.client_id = ma.organization_id")
-                    ->where(["ma.manager_id" => $userId])
-                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
+                ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                ->leftJoin(["ord" => $tblOrder], "ord.id = $tblOrderChat.order_id")
+                ->leftJoin(["ma" => $tblMA], "ord.client_id = ma.organization_id")
+                ->where(["ma.manager_id" => $userId])
+                ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         } else {
             $query = OrderChat::find()
-                    ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
-                    ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
+                ->innerJoin(["oc2" => $subQuery], "$tblOrderChat.id = oc2.id")
+                ->orderBy(["$tblOrderChat.created_at" => SORT_DESC]);
         }
         return $query->all();
     }
@@ -1015,12 +1029,12 @@ class Organization extends \yii\db\ActiveRecord
         $tblFA = FranchiseeAssociate::tableName();
         $tblFr = Franchisee::tableName();
         $tblOrg = Organization::tableName();
-        
+
         return Franchisee::find()
-                ->leftJoin($tblFA, "$tblFA.franchisee_id = $tblFr.id")
-                ->leftJoin($tblOrg, "$tblOrg.id = $tblFA.organization_id")
-                ->where(["$tblOrg.id" => $this->id])
-                ->one();
+            ->leftJoin($tblFA, "$tblFA.franchisee_id = $tblFr.id")
+            ->leftJoin($tblOrg, "$tblOrg.id = $tblFA.organization_id")
+            ->where(["$tblOrg.id" => $this->id])
+            ->one();
     }
 
     /**

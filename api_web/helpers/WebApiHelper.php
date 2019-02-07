@@ -149,7 +149,7 @@ class WebApiHelper
      * @param Organization $model
      * @return mixed
      */
-    public static function prepareOrganization(Organization $model)
+    public static function prepareOrganization(Organization $model = null)
     {
         if (empty($model)) {
             return null;

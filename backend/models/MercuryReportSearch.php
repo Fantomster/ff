@@ -2,6 +2,7 @@
 
 namespace backend\models;
 
+use api_web\components\Registry;
 use common\helpers\DBNameHelper;
 use common\models\Journal;
 use yii\data\ActiveDataProvider;
@@ -53,7 +54,7 @@ class MercuryReportSearch extends Journal
             ->rightJoin(["org" => "{$dbName}.{$organizationTable}"], 'org.id = log.organization_id')
             ->where([
                 "log.operation_code" => 3,
-                "log.service_id" => 4,
+                "log.service_id" => Registry::MERC_SERVICE_ID,
                 "org.blacklisted" => Organization::STATUS_WHITELISTED
             ])
             ->groupBy('log.organization_id');

@@ -144,6 +144,10 @@ class LazyVendorWebApi extends WebApi
             if (!empty($request['search']['query'])) {
                 $query->andFilterWhere(['like', "{$tableName}.name", $request['search']['query']]);
             }
+            //Поиск по адресу
+            if (!empty($request['search']['address'])) {
+                $query->andFilterWhere(['like', "{$tableName}.address", $request['search']['address']]);
+            }
         }
 
         if ($query->count()) {

@@ -121,7 +121,17 @@ class LazyVendorController extends WebApiController
      *              @SWG\Property(property="user", ref="#/definitions/User"),
      *              @SWG\Property(
      *                  property="request",
-     *                  default={}
+     *                  default={
+     *                      "search": {
+     *                          "query": "ООО Рога и копыта",
+     *                          "address": "Москва"
+     *                      },
+     *                      "pagination": {
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      },
+     *                      "sort": "-name"
+     *                  }
      *              )
      *         )
      *     ),

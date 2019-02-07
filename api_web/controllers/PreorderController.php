@@ -94,6 +94,7 @@ class PreorderController extends WebApiController
      *         description = "UnauthorizedHttpException"
      *     )
      * )
+     * @throws
      */
     public function actionList()
     {

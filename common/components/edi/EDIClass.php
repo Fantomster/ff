@@ -214,7 +214,22 @@ class EDIClass extends Component
                 $barcode = (int)$position->PRODUCT;
                 if (!in_array($contID, $orderContentArr) && !in_array($barcode, $barcodeArray)) {
                     $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
-                    if (!$good) continue;
+                    if (!$good) {
+                        $rel = RelationSuppRest::findOne(['supp_org_id' => $order->vendor_id, 'rest_org_id' => $ediOrganization->organization_id]);
+                        $good = new CatalogBaseGoods();
+                        $good->cat_id = $rel->cat_id;
+                        $good->article = $position->PRODUCTIDSUPPLIER;
+                        $good->product = $position->DESCRIPTION;
+                        $good->status = CatalogBaseGoods::STATUS_ON;
+                        $good->supp_org_id = $organization->id;
+                        $good->price = $position->PRICE;
+                        $good->units = 0;
+                        $good->ed = 0;
+                        $good->category_id = null;
+                        $good->barcode = $barcode;
+                        $good->edi_supplier_article = $barcode;
+                        $good->save();
+                    };
                     if ($isDesadv) {
                         $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
                     } else {

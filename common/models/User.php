@@ -164,6 +164,21 @@ class User extends \amnah\yii2\user\models\User
     }
 
     /**
+     * @param bool  $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        if (!$insert && $this->role_id == Role::ROLE_ONE_S_INTEGRATION) {
+            $organizationId = $this->organization_id;
+            if ($organizationId) {
+                $this->createOneSIntegrationAccount($this->email, $this->password, $this->organization_id);
+            }
+        }
+        parent::afterSave($insert, $changedAttributes);
+    }
+
+    /**
      * Set organization id
      *
      * @param      $organization Organization

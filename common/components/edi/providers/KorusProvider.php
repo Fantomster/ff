@@ -11,6 +11,7 @@ namespace common\components\edi\providers;
 use common\components\edi\AbstractProvider;
 use common\components\edi\EDIClass;
 use common\components\edi\ProviderInterface;
+use common\models\Order;
 use common\models\OrderContent;
 use yii\base\Exception;
 use yii\web\BadRequestHttpException;
@@ -165,7 +166,8 @@ EOXML;
 </soapenv:Envelope>
 EOXML;
         $array = $this->executeCurl($soap_request, $action);
-        $organizationID = Yii::$app->user->identity->organization_id;
+        $order = Order::findOne(['id' => $this->orderID]);
+        $organizationID = $order->client_id;
         if ($array['ns2SendResponse']['ns2Res'] == 1) {
             $journalMessage = Yii::t("app", 'По заказу {order} отправлен файл {file}', ['order' => $this->orderID, 'file' => $relationId]);
             EDIClass::writeEdiDataToJournal($organizationID, $journalMessage);

@@ -3,7 +3,9 @@
 namespace api_web\controllers;
 
 use api_web\classes\ChatWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
+use yii\filters\AccessControl;
 
 /**
  * Class ChatController
@@ -13,8 +15,41 @@ use api_web\components\WebApiController;
  */
 class ChatController extends WebApiController
 {
-
     public $className = ChatWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'dialog-list',
+                        'dialog-messages',
+                        'dialog-read-all',
+                        'dialog-add-message',
+                    ],
+                    'roles'   => [Registry::PROCUREMENT_INITIATOR],
+                ],
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'recipient-list',
+                        'dialog-read',
+                        'dialog-unread-count',
+                    ],
+                    'roles'   => [Registry::OPERATOR],
+                ]
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * Список методов которые не нужно логировать

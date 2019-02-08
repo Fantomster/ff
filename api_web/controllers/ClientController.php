@@ -3,8 +3,10 @@
 namespace api_web\controllers;
 
 use api_web\classes\ClientWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
 use common\models\licenses\License;
+use yii\filters\AccessControl;
 
 /**
  * Class ClientController
@@ -15,6 +17,52 @@ use common\models\licenses\License;
 class ClientController extends WebApiController
 {
     public $className = ClientWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'detail-update-logo',
+                        'employee-create',
+                        'employee-update',
+                        'employee-delete',
+                        'notification-update',
+                        'additional-email-create',
+                        'additional-email-delete',
+                    ],
+                    'roles'   => [Registry::ADMINISTRATOR_RESTAURANT],
+                ],
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'detail-update',
+                        'detail',
+                        'nds-country-list',
+                        'notification-list',
+                        'employee-get',
+                        'employee-list',
+                        'employee-search',
+                        'employee-roles',
+                        'get-license-mix-cart',
+                    ],
+                    'roles'   => [
+                        Registry::OPERATOR,
+                        Registry::BOOKER_RESTAURANT
+                    ],
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * Список методов которые не нужно логировать

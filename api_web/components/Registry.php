@@ -174,4 +174,18 @@ class Registry
         7 => 'Рыба и морепродукты.',
         8 => 'Продукция, не требующая разрешения.',
     ];
+
+    /**
+     * Список ролей RBAC
+     */
+    const ADMINISTRATOR_MIXCART = 'ADMINISTRATOR_MIXCART';
+    const MANAGER_MIXCART = 'MANAGER_MIXCART';
+    const BUSINESS_OWNER = 'BUSINESS_OWNER';
+    const ADMINISTRATOR_RESTAURANT = 'ADMINISTRATOR_RESTAURANT';
+    const MANAGER_RESTAURANT = 'MANAGER_RESTAURANT';
+    const BOOKER_RESTAURANT = 'BOOKER_RESTAURANT';
+    const PURCHASER_RESTAURANT = 'PURCHASER_RESTAURANT';
+    const JUNIOR_PURCHASER = 'JUNIOR_PURCHASER';
+    const PROCUREMENT_INITIATOR = 'PROCUREMENT_INITIATOR';
+    const OPERATOR = 'OPERATOR';
 }

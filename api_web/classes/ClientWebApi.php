@@ -2,6 +2,7 @@
 
 namespace api_web\classes;
 
+use api_web\components\Registry;
 use api_web\components\WebApi;
 use api_web\exceptions\ValidationException;
 use api_web\helpers\BaseHelper;
@@ -21,6 +22,7 @@ use yii\data\Pagination;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 
 /**
  * Class ClientWebApi
@@ -86,6 +88,13 @@ class ClientWebApi extends WebApi
                 if ($vetisCountryModel) {
                     $model->vetis_country_uuid = $vetisCountryModel->uuid;
                 }
+            }
+
+            if (\Yii::$app->user->can(Registry::OPERATOR) &&
+                !\Yii::$app->user->can(Registry::ADMINISTRATOR_RESTAURANT) &&
+                !isset($post['is_allowed_for_franchisee'])
+            ) {
+                throw new ForbiddenHttpException('Access denied!');
             }
 
             $this->helper->set($model, $post, ['about', 'contact_name', 'phone', 'email', 'name', 'gmt']);
@@ -257,7 +266,15 @@ class ClientWebApi extends WebApi
             $relations[] = $rel->id;
         }
 
+        $additional_emails = $this->user->organization->additionalEmail;
+        if (!\Yii::$app->user->can(Registry::MANAGER_RESTAURANT)) {
+            $users = $this->user->id;
+            $additional_emails = [];
+        }
+
         $user_emails = EmailNotification::find()->where(['user_id' => $users, 'rel_user_org_id' => $relations])->orderBy('created_at')->all();
+        $user_phones = SmsNotification::find()->where(['user_id' => $users, 'rel_user_org_id' => $relations])->orderBy('created_at')->all();
+
         if (!empty($user_emails)) {
             foreach ($user_emails as $user_email) {
                 $value = $user_email->user->email;
@@ -280,7 +297,6 @@ class ClientWebApi extends WebApi
             }
         }
 
-        $user_phones = SmsNotification::find()->where(['user_id' => $users, 'rel_user_org_id' => $relations])->orderBy('created_at')->all();
         if (!empty($user_phones)) {
             /** @var SmsNotification $user_phone */
             foreach ($user_phones as $user_phone) {
@@ -305,7 +321,6 @@ class ClientWebApi extends WebApi
 
         ArrayHelper::multisort($result, 'user_id', SORT_ASC, SORT_REGULAR);
 
-        $additional_emails = $this->user->organization->additionalEmail;
         if (!empty($additional_emails)) {
             foreach ($additional_emails as $row) {
                 $result[] = [
@@ -528,6 +543,29 @@ class ClientWebApi extends WebApi
             throw new BadRequestHttpException('method_access_to_vendor');
         }
 
+        $attr = new User();
+
+        $headers = [
+            'headers' => [
+                'id'    => $attr->getAttributeLabel('id'),
+                'name'  => $attr->getAttributeLabel('name'),
+                'email' => $attr->getAttributeLabel('email'),
+                'phone' => $attr->getAttributeLabel('phone'),
+                'role'  => $attr->getAttributeLabel('role')
+            ],
+        ];
+
+        if (!\Yii::$app->user->can(Registry::ADMINISTRATOR_RESTAURANT)) {
+            return ArrayHelper::merge($headers, [
+                'employees'  => [$this->prepareEmployee($this->user)],
+                'pagination' => [
+                    'page'       => 1,
+                    'page_size'  => 1,
+                    'total_page' => 1
+                ]
+            ]);
+        }
+
         $page = (isset($post['pagination']['page']) ? $post['pagination']['page'] : 1);
         $pageSize = (isset($post['pagination']['page_size']) ? $post['pagination']['page_size'] : 12);
 
@@ -555,15 +593,7 @@ class ClientWebApi extends WebApi
             }
         }
 
-        $h = new User();
         $return = [
-            'headers'    => [
-                'id'    => $h->getAttributeLabel('id'),
-                'name'  => $h->getAttributeLabel('name'),
-                'email' => $h->getAttributeLabel('email'),
-                'phone' => $h->getAttributeLabel('phone'),
-                'role'  => $h->getAttributeLabel('role')
-            ],
             'employees'  => $result,
             'pagination' => [
                 'page'       => ($dataProvider->pagination->page + 1),
@@ -572,7 +602,7 @@ class ClientWebApi extends WebApi
             ]
         ];
 
-        return $return;
+        return ArrayHelper::merge($headers, $return);
     }
 
     /**

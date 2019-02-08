@@ -4,7 +4,9 @@ namespace api_web\controllers;
 
 use api_web\classes\UserWebApi;
 use api_web\components\Notice;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
+use yii\filters\AccessControl;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -16,6 +18,58 @@ use yii\web\BadRequestHttpException;
 class UserController extends WebApiController
 {
     public $className = UserWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'get',
+                        'vendors',
+                        'organization',
+                    ],
+                    'roles'   => [Registry::OPERATOR],
+                ],
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'remove-vendor',
+                    ],
+                    'roles'   => [Registry::PURCHASER_RESTAURANT],
+                ],
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'get-gmt',
+                        'registration',
+                        'registration-repeat-sms',
+                        'registration-confirm',
+                        'login',
+                        'set-organization',
+                        'password-recovery',
+                        'vendor-status-list',
+                        'vendor-location-list',
+                        'password-change',
+                        'mobile-change',
+                        'get-agreement',
+                        'change-unconfirmedUsers-phone',
+                        'get-available-businesses',
+                        'set-agreement',
+                    ],
+                    'roles'   => [Registry::OPERATOR],
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/user/get",

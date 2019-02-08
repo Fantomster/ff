@@ -3,7 +3,9 @@
 namespace api_web\controllers;
 
 use api_web\classes\JournalWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
+use yii\filters\AccessControl;
 
 /**
  * Class JournalController
@@ -14,6 +16,31 @@ use api_web\components\WebApiController;
 class JournalController extends WebApiController
 {
     public $className = JournalWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'list'
+                    ],
+                    'roles'   => [
+                        Registry::MANAGER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT,
+                    ],
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/journal/list",

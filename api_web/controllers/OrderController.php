@@ -4,7 +4,9 @@ namespace api_web\controllers;
 
 use api_web\classes\ChatWebApi;
 use api_web\classes\OrderWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
+use yii\filters\AccessControl;
 
 /**
  * Class OrderController
@@ -15,6 +17,67 @@ use api_web\components\WebApiController;
 class OrderController extends WebApiController
 {
     public $className = OrderWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'products',
+                        'products-list-for-unconfirmed-vendor',
+                    ],
+                    'roles'   => [Registry::OPERATOR],
+                ],
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'history',
+                        'info',
+                        'history-count',
+                        'status-list',
+                        'save-to-pdf',
+                        'save-to-excel-by-unconfirmed-vendor',
+                        'save-to-pdf-by-unconfirmed-vendor',
+                        'save-to-excel',
+                        'complete',
+                        'complete-order-by-unconfirmed-vendor',
+                        'repeat',
+                        'update',
+                        'update-order-by-unconfirmed-vendor',
+                        'cancel',
+                        'cancel-order-by-unconfirmed-vendor',
+                        'comment',
+                        'product-comment',
+                        'set-document-number',
+                        'info-by-unconfirmed-vendor',
+                        'messages-by-unconfirmed-vendor',
+                        'send-message-by-unconfirmed-vendor',
+                    ],
+                    'roles'   => [
+                        Registry::PROCUREMENT_INITIATOR,
+                        Registry::BOOKER_RESTAURANT
+                    ],
+                ],
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'categories',
+                        'categories-for-unconfirmed-vendor',
+                    ],
+                    'roles'   => [Registry::OPERATOR],
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/order/info",

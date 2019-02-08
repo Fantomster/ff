@@ -4,11 +4,12 @@
  * Developer: Arsen
  * Vk: https://vk.com/a.arsik
  * Inst: https://www.instagram.com/arsen.web/
- * Date: 2019-02-06
- * Time: 09:46
+ * Date: 2019-02-06 * Time: 09:46
  */
 
 namespace common\models\rbac\rules;
+
+use yii\db\Query;
 
 class RuleForUser extends BaseRule
 {
@@ -24,7 +25,19 @@ class RuleForUser extends BaseRule
             return false;
         }
 
-        if (isset(\Yii::$app->authManager->getRolesByUser($user)[$item->name])) {
+        // Все роли пользователя (дочернии и свои) без дубликатов
+        $roles = array_unique((new Query())
+            ->select(['role' => 'aic.child',])
+            ->from(['aic' => 'auth_item_child'])
+            ->innerJoin(['aa' => 'auth_assignment'], 'aa.item_name = aic.parent')
+            ->union((new Query())
+                ->select(['role' => 'item_name'])
+                ->from('auth_assignment')
+                ->where(['user_id' => $user]))
+            ->where(['aa.user_id' => $user])
+            ->column());
+
+        if (in_array($item->name, $roles)) {
             return true;
         }
 

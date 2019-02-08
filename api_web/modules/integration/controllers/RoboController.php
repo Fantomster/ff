@@ -4,6 +4,7 @@ namespace api_web\modules\integration\controllers;
 
 use api_web\classes\EmailRoboWebApi;
 use api_web\components\Registry;
+use yii\filters\AccessControl;
 
 /**
  * Class RoboController
@@ -17,6 +18,35 @@ class RoboController extends \api_web\components\WebApiController
     public $license_service_id = Registry::VENDOR_DOC_MAIL_SERVICE_ID;
 
     public $className = EmailRoboWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'list',
+                        'get',
+                        'update',
+                        'add',
+                        'delete',
+                    ],
+                    'roles'   => [
+                        Registry::MANAGER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT,
+                    ],
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/integration/robo/list",

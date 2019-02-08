@@ -531,7 +531,7 @@ class VetisWaybill extends WebApi
      * @return array|\yii\db\ActiveRecord[]
      * @throws BadRequestHttpException
      */
-    public function getProductFormList($request)
+    public function getProductSubtypeList($request)
     {
         $this->validateRequest($request, ['type_id']);
         $models = VetisProductByType::find()->select(['name', 'guid'])->distinct()->where(['productType' => $request['type_id']])->all();
@@ -544,7 +544,7 @@ class VetisWaybill extends WebApi
      * @return array|\yii\db\ActiveRecord[]
      * @throws BadRequestHttpException
      */
-    public function getProductSubtypeList($request)
+    public function getProductFormList($request)
     {
         $this->validateRequest($request, ['guid']);
         $query = VetisSubproductByProduct::find()->select(['name', 'uuid', 'guid'])

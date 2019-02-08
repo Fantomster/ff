@@ -2,6 +2,7 @@
 
 namespace backend\models;
 
+use api_web\components\Registry;
 use common\helpers\DBNameHelper;
 use common\models\Journal;
 use yii\data\ActiveDataProvider;
@@ -50,8 +51,12 @@ class MercuryReportSearch extends Journal
                 "errorCount" => new Expression("SUM(CASE WHEN log.type <> 'success' THEN 1 ELSE 0 END)")
             ])
             ->from(["log" => Journal::tableName()])
-            ->leftJoin(["org" => "{$dbName}.{$organizationTable}"], 'org.id = log.organization_id')
-            ->where(["log.operation_code" => 3])
+            ->rightJoin(["org" => "{$dbName}.{$organizationTable}"], 'org.id = log.organization_id')
+            ->where([
+                "log.operation_code" => 3,
+                "log.service_id" => Registry::MERC_SERVICE_ID,
+                "org.blacklisted" => Organization::STATUS_WHITELISTED
+            ])
             ->groupBy('log.organization_id');
 
         $dataProvider = new ActiveDataProvider([
@@ -60,7 +65,7 @@ class MercuryReportSearch extends Journal
                 'attributes'   => ['orgName', 'succCount', 'errorCount'],
                 'defaultOrder' => ['orgName' => SORT_ASC]],
             'pagination' => [
-                'pageSize' => 20
+                'pageSize' => 10
             ]
         ]);
 

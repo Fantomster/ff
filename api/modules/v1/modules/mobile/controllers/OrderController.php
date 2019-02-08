@@ -2,6 +2,7 @@
 
 namespace api\modules\v1\modules\mobile\controllers;
 
+use api_web\components\Registry;
 use common\models\OrderStatus;
 use Yii;
 use yii\rest\ActiveController;
@@ -17,7 +18,8 @@ use yii\helpers\Json;
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-class OrderController extends ActiveController {
+class OrderController extends ActiveController
+{
 
     /**
      * @var string
@@ -27,7 +29,8 @@ class OrderController extends ActiveController {
     /**
      * @return array
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         $behaviors = parent::behaviors();
 
         $behaviors = array_merge($behaviors, $this->module->controllerBehaviors);
@@ -38,17 +41,18 @@ class OrderController extends ActiveController {
     /**
      * @inheritdoc
      */
-    public function actions() {
+    public function actions()
+    {
         return [
-            'index' => [
-                'class' => 'yii\rest\IndexAction',
-                'modelClass' => $this->modelClass,
+            'index'  => [
+                'class'               => 'yii\rest\IndexAction',
+                'modelClass'          => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
             ],
-            'view' => [
-                'class' => 'yii\rest\ViewAction',
+            'view'   => [
+                'class'      => 'yii\rest\ViewAction',
                 'modelClass' => $this->modelClass,
-                'findModel' => [$this, 'findModel']
+                'findModel'  => [$this, 'findModel']
             ],
             /*'update' => [
                 'class' => 'yii\rest\UpdateAction',
@@ -57,8 +61,8 @@ class OrderController extends ActiveController {
                 'scenario' => $this->updateScenario,
             ],*/
             'delete' => [
-                'class' => 'yii\rest\DeleteAction',
-                'modelClass' => 'common\models\Order',
+                'class'       => 'yii\rest\DeleteAction',
+                'modelClass'  => 'common\models\Order',
                 'checkAccess' => [$this, 'checkAccess'],
             ],
         ];
@@ -69,7 +73,8 @@ class OrderController extends ActiveController {
      * @return null|static
      * @throws NotFoundHttpException
      */
-    public function findModel($id) {
+    public function findModel($id)
+    {
         $model = Order::findOne($id);
         if (!$model) {
             throw new NotFoundHttpException;
@@ -80,30 +85,30 @@ class OrderController extends ActiveController {
     /**
      * @return ActiveDataProvider
      */
-    public function prepareDataProvider() {
+    public function prepareDataProvider()
+    {
         $params = new Order();
         $query = Order::find();
 
-        $dataProvider = new ActiveDataProvider(array(
-            'query' => $query,
+        $dataProvider = new ActiveDataProvider([
+            'query'      => $query,
             'pagination' => false,
-        ));
+        ]);
         $filters = [];
         $user = Yii::$app->user->getIdentity();
 
         $filters['client_id'] = ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT) ? $user->organization_id : $params->client_id;
         $filters['vendor_id'] = ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) ? $user->organization_id : $params->vendor_id;
 
-
         $currencyTable = \common\models\Currency::tableName();
         $orderTable = \common\models\Order::tableName();
         $organizationTable = Organization::tableName();
-        
+
         $query->select("$orderTable.*, $currencyTable.symbol as symbol, client_org.name as client_name, vendor_org.name as vendor_name ");
-        $query->leftJoin($currencyTable,"$currencyTable.id = $orderTable.currency_id");
-        $query->leftJoin("$organizationTable as client_org","client_org.id = $orderTable.client_id");
-        $query->leftJoin("$organizationTable as vendor_org","vendor_org.id = $orderTable.vendor_id");
-        
+        $query->leftJoin($currencyTable, "$currencyTable.id = $orderTable.currency_id");
+        $query->leftJoin("$organizationTable as client_org", "client_org.id = $orderTable.client_id");
+        $query->leftJoin("$organizationTable as vendor_org", "vendor_org.id = $orderTable.vendor_id");
+
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             $query->andFilterWhere($filters);
             return $dataProvider;
@@ -136,7 +141,8 @@ class OrderController extends ActiveController {
         return $dataProvider;
     }
 
-    public function actionNewOrder() {
+    public function actionNewOrder()
+    {
         $post = Yii::$app->request->post();
         $user = Yii::$app->user->getIdentity();
         $res = [];
@@ -145,7 +151,7 @@ class OrderController extends ActiveController {
         $newOrder->load($post, 'Order');
         $min_delivery = $newOrder->vendor->delivery->min_order_price;
 
-        if($newOrder->total_price < $min_delivery) {
+        if ($newOrder->total_price < $min_delivery) {
             echo "Total price is less than the minimum";
             return;
         }
@@ -184,6 +190,7 @@ class OrderController extends ActiveController {
             }
 
             $newOrder->status = OrderStatus::STATUS_FORMING;
+            $newOrder->service_id = Registry::MC_BACKEND;
             $newOrder->currency_id = 1;
             if (!$newOrder->save()) {
                 echo json_encode(['Order' => $newOrder->getErrors()]);
@@ -237,16 +244,16 @@ class OrderController extends ActiveController {
 
     public function actionUpdate($id)
     {
-        $model = Order::findOne(['id'=>$id]);
+        $model = Order::findOne(['id' => $id]);
         $status = $model->status;
-        $this->checkAccess ($model->id, $model);
+        $this->checkAccess($model->id, $model);
 
         $model->load(Yii::$app->getRequest()->getBodyParams(), '');
         if ($model->save() === false && !$model->hasErrors()) {
             throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
         }
 
-        if(($status <> $model->status) && ($model->status == OrderStatus::STATUS_DONE)) {
+        if (($status <> $model->status) && ($model->status == OrderStatus::STATUS_DONE)) {
             $currentUser = Yii::$app->user->getIdentity();
             $systemMessage = $model->client->name . ' получил заказ!';
             $model->actual_delivery = gmdate("Y-m-d H:i:s");
@@ -259,7 +266,8 @@ class OrderController extends ActiveController {
         return $model;
     }
 
-    public function actionCancelOrder() {
+    public function actionCancelOrder()
+    {
 
         $user = Yii::$app->user->getIdentity();
         $initiator = $user->organization;
@@ -295,11 +303,12 @@ class OrderController extends ActiveController {
         }
     }
 
-    public function actionConfirmOrder() {
+    public function actionConfirmOrder()
+    {
         if (Yii::$app->request->post()) {
             $currentUser = Yii::$app->user->getIdentity();
             $user_id = $currentUser->id;
-            
+
             $order = Order::findOne(['id' => Yii::$app->request->post('id')]);
             $organizationType = $currentUser->organization->type_id;
             $danger = false;
@@ -330,27 +339,27 @@ class OrderController extends ActiveController {
                 $this->sendOrderDone($order->createdBy, $order);
             }
 
-            if(!empty($systemMessage))
-            if ($order->save()) {
-                $this->sendSystemMessage($currentUser, $order->id, $systemMessage, $danger);
-                return ["title" => $systemMessage, "type" => "success"];
-            }
+            if (!empty($systemMessage))
+                if ($order->save()) {
+                    $this->sendSystemMessage($currentUser, $order->id, $systemMessage, $danger);
+                    return ["title" => $systemMessage, "type" => "success"];
+                }
         }
     }
 
     /**
      * Checks the privilege of the current user.
-     *
      * This method should be overridden to check whether the current user has the privilege
      * to run the specified action against the specified data model.
      * If the user does not have access, a [[ForbiddenHttpException]] should be thrown.
      *
-     * @param string $action the ID of the action to be executed
-     * @param \yii\base\Model $model the model to be accessed. If `null`, it means no specific model is being accessed.
-     * @param array $params additional parameters
+     * @param string          $action the ID of the action to be executed
+     * @param \yii\base\Model $model  the model to be accessed. If `null`, it means no specific model is being accessed.
+     * @param array           $params additional parameters
      * @throws ForbiddenHttpException if the user does not have access
      */
-    public function checkAccess($action, $model = null, $params = []) {
+    public function checkAccess($action, $model = null, $params = [])
+    {
         // check if the user can access $action and $model
         // throw ForbiddenHttpException if access should be denied
         if ($action === 'update' || $action === 'delete') {
@@ -363,11 +372,12 @@ class OrderController extends ActiveController {
 
     /**
      * Sends mail informing both sides that order is delivered and accepted
-     * 
-     * @param User $sender
+     *
+     * @param User  $sender
      * @param Order $order
      */
-    private function sendOrderDone($sender, $order) {
+    private function sendOrderDone($sender, $order)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -407,14 +417,15 @@ class OrderController extends ActiveController {
             }
         }
     }
-    
+
     /**
      * Sends mail informing both sides that vendor confirmed order
-     * 
+     *
      * @param Organization $senderOrg
-     * @param Order $order
+     * @param Order        $order
      */
-    private function sendOrderProcessing($senderOrg, $order) {
+    private function sendOrderProcessing($senderOrg, $order)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -431,27 +442,28 @@ class OrderController extends ActiveController {
             $email = $recipient->email;
             if ($recipient->getEmailNotification($order->vendor_id)->order_processing) {
                 $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                        ->setTo($email)
-                        ->setSubject($subject)
-                        ->send();
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
             }
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
 
             if ($profile->phone && $recipient->getSmsNotification($order->vendor_id)->order_created) {
-                $text = "Заказ у ".$order->vendor->name." согласован ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//"Заказ в системе №" . $order->id . " согласован.";
+                $text = "Заказ у " . $order->vendor->name . " согласован " . Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//"Заказ в системе №" . $order->id . " согласован.";
                 $target = $profile->phone;
                 Yii::$app->sms->send($text, $target);
             }
         }
     }
-    
+
     /**
      * Sends mail informing both sides about new order
-     * 
+     *
      * @param Organization $sender
-     * @param Order $order
+     * @param Order        $order
      */
-    private function sendOrderCreated($sender, $order) {
+    private function sendOrderCreated($sender, $order)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -497,11 +509,12 @@ class OrderController extends ActiveController {
 
     /**
      * Sends mail informing both sides about cancellation of order
-     * 
+     *
      * @param Organization $senderOrg
-     * @param Order $order
+     * @param Order        $order
      */
-    private function sendOrderCanceled($senderOrg, $order) {
+    private function sendOrderCanceled($senderOrg, $order)
+    {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -541,7 +554,8 @@ class OrderController extends ActiveController {
         }
     }
 
-    private function sendSystemMessage($user, $order_id, $message, $danger = false) {
+    private function sendSystemMessage($user, $order_id, $message, $danger = false)
+    {
         $order = Order::findOne(['id' => $order_id]);
 
         $newMessage = new OrderChat();
@@ -557,42 +571,42 @@ class OrderController extends ActiveController {
         }
         $newMessage->save();
         $body = $this->renderPartial('@frontend/views/order/_chat-message', [
-            'name' => '',
-            'message' => $newMessage->message,
-            'time' => $newMessage->created_at,
-            'isSystem' => 1,
+            'name'      => '',
+            'message'   => $newMessage->message,
+            'time'      => $newMessage->created_at,
+            'isSystem'  => 1,
             'sender_id' => $user->id,
-            'ajax' => 1,
-            'danger' => $danger,
+            'ajax'      => 1,
+            'danger'    => $danger,
         ]);
 
         $clientUsers = $order->client->users;
         $vendorUsers = $order->vendor->users;
 
-         foreach ($clientUsers as $clientUser) {
-          $channel = 'user' . $clientUser->id;
-          Yii::$app->redis->executeCommand('PUBLISH', [
-          'channel' => 'chat',
-          'message' => Json::encode([
-          'body' => $body,
-          'channel' => $channel,
-          'isSystem' => 1,
-          'order_id' => $order_id,
-          ])
-          ]);
-          }
-          foreach ($vendorUsers as $vendorUser) {
-          $channel = 'user' . $vendorUser->id;
-          Yii::$app->redis->executeCommand('PUBLISH', [
-          'channel' => 'chat',
-          'message' => Json::encode([
-          'body' => $body,
-          'channel' => $channel,
-          'isSystem' => 1,
-          'order_id' => $order_id,
-          ])
-          ]);
-          }
+        foreach ($clientUsers as $clientUser) {
+            $channel = 'user' . $clientUser->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                'channel' => 'chat',
+                'message' => Json::encode([
+                    'body'     => $body,
+                    'channel'  => $channel,
+                    'isSystem' => 1,
+                    'order_id' => $order_id,
+                ])
+            ]);
+        }
+        foreach ($vendorUsers as $vendorUser) {
+            $channel = 'user' . $vendorUser->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                'channel' => 'chat',
+                'message' => Json::encode([
+                    'body'     => $body,
+                    'channel'  => $channel,
+                    'isSystem' => 1,
+                    'order_id' => $order_id,
+                ])
+            ]);
+        }
 
         return true;
     }

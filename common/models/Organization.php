@@ -106,6 +106,7 @@ use common\models\guides\Guide;
  * @property Guide                      $Favorite
  * @property Payment[]                  $Payments
  * @property VetisCountry               $vetisCountry
+ * @property OrganizationContact[]      $organizationContact
  */
 class Organization extends \yii\db\ActiveRecord
 {
@@ -665,7 +666,7 @@ class Organization extends \yii\db\ActiveRecord
             return $this->hasMany(DeliveryRegions::class, ['supplier_id' => 'id'])->andWhere(['exception' => 1]);
         }
         return null;
-}
+    }
 
     /**
      * Метод возвращает корзину организации//пользователя
@@ -2085,5 +2086,13 @@ class Organization extends \yii\db\ActiveRecord
             $name = "{$this->legal_entity} ({$this->name})";
         }
         return $name;
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getOrganizationContact()
+    {
+        return $this->hasMany(OrganizationContact::class, ['organization_id' => 'id']);
     }
 }

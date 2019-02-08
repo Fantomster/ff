@@ -13,6 +13,7 @@ use common\components\edi\AbstractRealization;
 use common\components\edi\EDIClass;
 use common\components\edi\ProviderInterface;
 use common\models\EdiOrder;
+use common\models\Order;
 use common\models\OrderContent;
 use yii\base\Exception;
 use yii\web\BadRequestHttpException;
@@ -175,7 +176,8 @@ EOXML;
         } else {
             $error = $array['ns2SendResponse']['ns2Res'] ?? 'error';
             $journalMessage = Yii::t("app", 'Korus вернул код ошибки ') . $error;
-            EDIClass::writeEdiDataToJournal($this->orgID, $journalMessage, 'error');
+            $order = Order::findOne(['id' => $this->orderID]);
+            EDIClass::writeEdiDataToJournal($order->client_id, $journalMessage, 'error');
             Yii::error("Korus returns error code: " . print_r($array, 1));
             return false;
         }

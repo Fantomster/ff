@@ -171,13 +171,12 @@ EOXML;
 
         if ($array['ns2SendResponse']['ns2Res'] == 1) {
             $journalMessage = Yii::t("app", 'По заказу {order} отправлен файл {file}', ['order' => $this->orderID, 'file' => $relationId]);
-            EDIClass::writeEdiDataToJournal($this->orgID, $journalMessage);
+            EDIClass::writeEdiDataToJournal(Yii::$app->user->identity->organization_id, $journalMessage);
             return true;
         } else {
             $error = $array['ns2SendResponse']['ns2Res'] ?? 'error';
             $journalMessage = Yii::t("app", 'Korus вернул код ошибки ') . $error;
-            $order = Order::findOne(['id' => $this->orderID]);
-            EDIClass::writeEdiDataToJournal($order->client_id, $journalMessage, 'error');
+            EDIClass::writeEdiDataToJournal(Yii::$app->user->identity->organization_id, $journalMessage, 'error');
             Yii::error("Korus returns error code: " . print_r($array, 1));
             return false;
         }

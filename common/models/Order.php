@@ -650,14 +650,10 @@ class Order extends \yii\db\ActiveRecord
         }
 
         //Новые контакты, для ленивых поставщиков
-        if ($this->vendor->type_id == Organization::TYPE_LAZY_VENDOR) {
-            if (!empty($this->vendor->organizationContact)) {
-                /** @var OrganizationContact[] $organizationContact */
-                $organizationContact = $this->vendor->organizationContact;
-                /** @var OrganizationContact $model */
-                foreach ($organizationContact as $model) {
-                    $recipients[] = $model;
-                }
+        if ($this->vendor->type_id == Organization::TYPE_LAZY_VENDOR && !empty($this->vendor->organizationContact)) {
+            /** @var OrganizationContact $model */
+            foreach ($this->vendor->organizationContact as $model) {
+                $recipients[] = $model;
             }
         }
 

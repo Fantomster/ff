@@ -9,11 +9,8 @@
 namespace common\components\edi\providers;
 
 use common\components\edi\AbstractProvider;
-use common\components\edi\AbstractRealization;
 use common\components\edi\EDIClass;
 use common\components\edi\ProviderInterface;
-use common\models\EdiOrder;
-use common\models\Order;
 use common\models\OrderContent;
 use yii\base\Exception;
 use yii\web\BadRequestHttpException;

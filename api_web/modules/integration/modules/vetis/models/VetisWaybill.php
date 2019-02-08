@@ -531,10 +531,10 @@ class VetisWaybill extends WebApi
      * @return array|\yii\db\ActiveRecord[]
      * @throws BadRequestHttpException
      */
-    public function getProductSubtypeList($request)
+    public function getProductFormList($request)
     {
         $this->validateRequest($request, ['type_id']);
-        $models = VetisProductByType::find()->select(['name', 'guid'])->where(['productType' => $request['type_id']])->all();
+        $models = VetisProductByType::find()->select(['name', 'guid'])->distinct()->where(['productType' => $request['type_id']])->all();
 
         return $models;
     }
@@ -544,7 +544,7 @@ class VetisWaybill extends WebApi
      * @return array|\yii\db\ActiveRecord[]
      * @throws BadRequestHttpException
      */
-    public function getProductFormList($request)
+    public function getProductSubtypeList($request)
     {
         $this->validateRequest($request, ['guid']);
         $query = VetisSubproductByProduct::find()->select(['name', 'uuid', 'guid'])
@@ -680,7 +680,9 @@ class VetisWaybill extends WebApi
                 if (!isset($result)) {
                     throw new \Exception('Error create Product');
                 }
-                $this->addIngredients($result->application->result->any['modifyProducerStockListResponse']->productItemList->productItem->guid, $request['ingredients']);
+                if (!isset($request['ingredients']) && !empty($request['ingredients'])) {
+                    $this->addIngredients($result->application->result->any['modifyProducerStockListResponse']->productItemList->productItem->guid, $request['ingredients']);
+                }
             } catch (\Throwable $e) {
                 $this->helper->writeInJournal($e->getMessage(), $this->user->id, $this->user->organization_id);
             }

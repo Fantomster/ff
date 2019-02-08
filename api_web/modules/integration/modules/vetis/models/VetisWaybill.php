@@ -680,7 +680,7 @@ class VetisWaybill extends WebApi
                 if (!isset($result)) {
                     throw new \Exception('Error create Product');
                 }
-                if (!isset($request['ingredients']) && !empty($request['ingredients'])) {
+                if (isset($request['ingredients']) && !empty($request['ingredients'])) {
                     $this->addIngredients($result->application->result->any['modifyProducerStockListResponse']->productItemList->productItem->guid, $request['ingredients']);
                 }
             } catch (\Throwable $e) {

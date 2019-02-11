@@ -12,7 +12,8 @@ use api_web\{
     exceptions\ValidationException,
     components\WebApi,
     components\Notice,
-    helpers\CurrencyHelper};
+    helpers\CurrencyHelper
+};
 use common\models\{Catalog, CatalogGoods, Order, OrderContent, OrderStatus, Preorder, Cart, Organization, PreorderContent, Profile};
 use yii\data\{
     ArrayDataProvider,

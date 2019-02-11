@@ -104,7 +104,7 @@ class MercDictionary extends WebApi implements DictionaryInterface
         $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
         $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
 
-        $query = VetisBusinessEntity::find()->select(['fullname', 'uuid', 'guid', 'inn', 'addressView', 'active'])
+        $query = VetisBusinessEntity::find()->select(['fullname', 'uuid', 'guid', 'inn', 'addressView', 'active', 'name'])
             ->where(['active' => 1]);
 
         $dataProvider = new ActiveDataProvider([
@@ -120,12 +120,13 @@ class MercDictionary extends WebApi implements DictionaryInterface
         /**@var VetisBusinessEntity $model */
         foreach ($dataProvider->models as $model) {
             $result[] = [
-                'name'    => $model->fullname,
-                'uuid'    => $model->uuid,
-                'guid'    => $model->guid,
-                'inn'     => $model->inn,
-                'address' => $model->addressView,
-                'active'  => $model->active,
+                'fullname' => $model->fullname,
+                'name'     => $model->name,
+                'uuid'     => $model->uuid,
+                'guid'     => $model->guid,
+                'inn'      => $model->inn,
+                'address'  => $model->addressView,
+                'active'   => $model->active,
             ];
         }
 

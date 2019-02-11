@@ -161,7 +161,7 @@ class SettingsController extends \frontend\modules\clientintegr\controllers\Defa
         return $count;
     }
 
-    private function handleSelectedStores($post, $org)
+    public function handleSelectedStores($post, $org)
     {
         $stores = $post['Stores'];
         foreach ($stores as $storeID => $selected) {

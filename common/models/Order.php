@@ -615,6 +615,7 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getRecipientsList()
     {
+        $recipients = [];
         $recipients[] = $this->createdBy;
         if (isset($this->accepted_by_id)) {
             $recipients[] = $this->acceptedBy;
@@ -645,6 +646,14 @@ class Order extends \yii\db\ActiveRecord
         if (!empty($this->vendor->additionalEmail)) {
             foreach ($this->vendor->additionalEmail as $addEmail) {
                 $recipients[] = $addEmail;
+            }
+        }
+
+        //Новые контакты, для ленивых поставщиков
+        if ($this->vendor->type_id == Organization::TYPE_LAZY_VENDOR && !empty($this->vendor->organizationContact)) {
+            /** @var OrganizationContact $model */
+            foreach ($this->vendor->organizationContact as $model) {
+                $recipients[] = $model;
             }
         }
 

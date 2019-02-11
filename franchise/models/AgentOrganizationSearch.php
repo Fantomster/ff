@@ -80,15 +80,13 @@ class AgentOrganizationSearch extends Organization
         $subQueryVendorCount = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblRSR)
-                ->where(["rest_org_id" => "org.id"]);
+                ->where(["rest_org_id = org.id"]);
 
         $subQueryVendorCountPrev30 = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblRSR)
-                ->where([
-                    "rest_org_id" => "org.id",
-                    "deleted"     => 0,
-                ])
+                ->where(["deleted"     => 0])
+                ->andWhere("rest_org_id = org.id")
                 ->andWhere([
             "between",
             "created_at",
@@ -99,18 +97,14 @@ class AgentOrganizationSearch extends Organization
         $subQueryOrderCount = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblOrder)
-                ->where([
-            "client_id" => "org.id",
-            "status"    => $orderStatuses,
-        ]);
+                ->where(["status"    => $orderStatuses])
+                ->andWhere("client_id = org.id");
 
         $subQueryOrderCountPrev30 = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblOrder)
-                ->where([
-                    "client_id" => "org.id",
-                    "status"    => $orderStatuses,
-                ])
+                ->where(["status"    => $orderStatuses])
+                ->andWhere("client_id = org.id")
                 ->andWhere([
             "between",
             "created_at",
@@ -121,18 +115,14 @@ class AgentOrganizationSearch extends Organization
         $subQueryOrderSum = (new Query())
                 ->select([new Expression("SUM(total_price)")])
                 ->from($tblOrder)
-                ->where([
-            "client_id" => "org.id",
-            "status"    => $orderStatuses,
-        ]);
+                ->where(["status"    => $orderStatuses])
+                ->andWhere("client_id = org.id");
 
         $subQueryOrderSumPrev30 = (new Query())
                 ->select([new Expression("SUM(total_price)")])
                 ->from($tblOrder)
-                ->where([
-                    "client_id" => "org.id",
-                    "status"    => $orderStatuses,
-                ])
+                ->where(["status"    => $orderStatuses])
+                ->andWhere("client_id = org.id")
                 ->andWhere([
             "between",
             "created_at",

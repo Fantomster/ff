@@ -175,7 +175,7 @@ class PreorderWebApi extends WebApi
                 ]);
             }
             //Фильтр по статусу
-            if (!empty($request['search']['status'])) {
+            if (isset($request['search']['status'])) {
                 $is_active = $request['search']['status'] ?? null;
                 if (!is_null($is_active)) {
                     $models->andFilterWhere(["{$tableName}.is_active" => (int)$is_active]);
@@ -298,8 +298,8 @@ class PreorderWebApi extends WebApi
                     'id'            => $item->product_id,
                     'name'          => $item->product_name,
                     'article'       => $item->article,
-                    'plan_quantity' => $planQuantity[$item->product_id],
-                    'quantity'      => $item->quantity,
+                    'plan_quantity' => round($planQuantity[$item->product_id], 3),
+                    'quantity'      => round($item->quantity, 3),
                     'sum'           => CurrencyHelper::asDecimal($item->quantity * $item->price),
                     'isset_analog'  => false,
                 ];
@@ -326,6 +326,16 @@ class PreorderWebApi extends WebApi
         return $this->prepareModel($model, true);
     }
 
+    /**
+     * Оформление заказов
+     *
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
     public function confirmOrders($post)
     {
         $this->validateRequest($post, ['id']);
@@ -337,24 +347,28 @@ class PreorderWebApi extends WebApi
             throw new BadRequestHttpException('preorder.not_found');
         }
         $orders = $model->orders;
-        foreach ($orders as $order) {
-            $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-            if (!$order->save()) {
-                throw new ValidationException($model->getFirstErrors());
+        if (!empty($orders)) {
+            /** @var Order $order */
+            foreach (WebApiHelper::generator($orders) as $order) {
+                $order->status = OrderStatus::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                if (!$order->save()) {
+                    throw new ValidationException($model->getFirstErrors());
+                }
+                //Емайл и смс о новом заказе
+                try {
+                    Notice::init('Order')->sendEmailAndSmsOrderCreated($this->user->organization, $order);
+                    //Сообщение в очередь поставщику, что есть новый заказ
+                    Notice::init('Order')->sendOrderToTurnVendor($order->vendor);
+                    //Сообщение в очередь, Изменение количества товара в корзине
+                    Notice::init('Order')->sendOrderToTurnClient($this->user);
+                } catch (\Exception $e) {
+                    \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+                }
             }
-            $vendor = $order->vendor;
-            //Емайл и смс о новом заказе
-            Notice::init('Order')->sendEmailAndSmsOrderCreated($this->user->organization, $order);
-            try {
-                //Сообщение в очередь поставщику, что есть новый заказ
-                Notice::init('Order')->sendOrderToTurnVendor($vendor);
-                //Сообщение в очередь, Изменение количества товара в корзине
-                Notice::init('Order')->sendOrderToTurnClient($this->user);
-            } catch (\Exception $e) {
-                \Yii::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
-            }
+        } else {
+            throw new BadRequestHttpException('order.not_found');
         }
-        return ['result' => true];
+        return $this->orders(['id' => $model->id]);
     }
 
     /**
@@ -379,8 +393,8 @@ class PreorderWebApi extends WebApi
                 'name' => $model->user->profile->full_name
             ],
             'count'        => [
-                'products' => $model->getPreorderContents()->count(),
-                'orders'   => $model->getOrders()->count(),
+                'products' => (int)$model->getPreorderContents()->count(),
+                'orders'   => (int)$model->getOrders()->count(),
             ],
             'sum'          => $model->getSum(),
             'currency'     => [

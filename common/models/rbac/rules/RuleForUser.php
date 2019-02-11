@@ -19,6 +19,7 @@ class RuleForUser extends BaseRule
         if ($parent === 1) {
             return true;
         }
+
         if ($parent == false) {
             return false;
         }

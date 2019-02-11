@@ -251,7 +251,7 @@ class CartWebApi extends \api_web\components\WebApi
             $order->vendor_id = $vendor->id;
             $order->status = $orderStatus;
             $order->currency_id = ($cart->getCartContents()->andWhere(['vendor_id' => $vendor->id])->one())->currency_id;
-            $order->service_id = 9;
+            $order->service_id = Registry::MC_BACKEND;
             if ($preOrderId) {
                 $order->preorder_id = $preOrderId;
             }

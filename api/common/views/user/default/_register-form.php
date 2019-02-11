@@ -75,7 +75,7 @@ $form = ActiveForm::begin([
     ?>
     <?=
             $form->field($profile, 'phone')
-            ->widget(\common\widgets\PhoneInput::className(), [
+            ->widget(\common\widgets\phone\PhoneInput::className(), [
                                 'jsOptions' => [
                                     'preferredCountries' => ['ru'],
                                     'nationalMode' => false,

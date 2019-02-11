@@ -9,11 +9,17 @@
 namespace api_web\modules\integration\classes\dictionaries;
 
 use api_web\components\WebApi;
+use api_web\helpers\BaseHelper;
 use api_web\helpers\WebApiHelper;
 use api_web\modules\integration\classes\Integration;
 use api_web\modules\integration\interfaces\DictionaryInterface;
 use common\models\OrganizationDictionary;
 use common\models\OuterDictionary;
+use common\models\vetis\VetisBusinessEntity;
+use common\models\vetis\VetisForeignEnterprise;
+use common\models\vetis\VetisRussianEnterprise;
+use yii\data\ActiveDataProvider;
+use yii\data\Pagination;
 
 /**
  * Class MercCommonDictionaries
@@ -28,6 +34,11 @@ class MercDictionary extends WebApi implements DictionaryInterface
     public $service_id;
 
     /**
+     * @var BaseHelper
+     */
+    private $helper;
+
+    /**
      * AbstractDictionary constructor.
      *
      * @param $serviceId
@@ -36,6 +47,7 @@ class MercDictionary extends WebApi implements DictionaryInterface
     {
         parent::__construct();
         $this->service_id = $serviceId;
+        $this->helper = new BaseHelper();
     }
 
     /**
@@ -79,6 +91,151 @@ class MercDictionary extends WebApi implements DictionaryInterface
                 'updated_at'  => WebApiHelper::asDatetime($model->updated_at),
             ];
         }
+
+        return $return;
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function getBusinessEntityList($request)
+    {
+        $reqPag = $request['pagination'] ?? [];
+        $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
+        $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
+
+        $query = VetisBusinessEntity::find()->select(['fullname', 'uuid', 'guid', 'inn', 'addressView', 'active', 'name'])
+            ->where(['active' => 1]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+        $result = [];
+
+        /**@var VetisBusinessEntity $model */
+        foreach ($dataProvider->models as $model) {
+            $result[] = [
+                'fullname' => $model->fullname,
+                'name'     => $model->name,
+                'uuid'     => $model->uuid,
+                'guid'     => $model->guid,
+                'inn'      => $model->inn,
+                'address'  => $model->addressView,
+                'active'   => $model->active,
+            ];
+        }
+
+        $return = [
+            'result'     => $result,
+            'pagination' => [
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
+
+        return $return;
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function getRussianEnterpriseList($request)
+    {
+        $reqPag = $request['pagination'] ?? [];
+        $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
+        $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
+
+        $query = VetisRussianEnterprise::find()->select(['uuid', 'guid', 'inn', 'addressView', 'active', 'name'])
+            ->where(['active' => 1]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+        $result = [];
+
+        /**@var VetisBusinessEntity $model */
+        foreach ($dataProvider->models as $model) {
+            $result[] = [
+                'name'    => $model->name,
+                'uuid'    => $model->uuid,
+                'guid'    => $model->guid,
+                'inn'     => $model->inn,
+                'address' => $model->addressView,
+                'active'  => $model->active,
+            ];
+        }
+
+        $return = [
+            'result'     => $result,
+            'pagination' => [
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
+
+        return $return;
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function getForeignEnterpriseList($request)
+    {
+        $reqPag = $request['pagination'] ?? [];
+        $page = $this->helper->isSetDef($reqPag['page'] ?? null, 1);
+        $pageSize = $this->helper->isSetDef($reqPag['page_size'] ?? null, 12);
+
+        $query = VetisForeignEnterprise::find()->select(['uuid', 'guid', 'inn', 'addressView', 'active', 'name'])
+            ->where(['active' => 1]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+        $result = [];
+
+        /**@var VetisBusinessEntity $model */
+        foreach ($dataProvider->models as $model) {
+            $result[] = [
+                'name'    => $model->name,
+                'uuid'    => $model->uuid,
+                'guid'    => $model->guid,
+                'inn'     => $model->inn,
+                'address' => $model->addressView,
+                'active'  => $model->active,
+            ];
+        }
+
+        $return = [
+            'result'     => $result,
+            'pagination' => [
+                'page'       => ($dataProvider->pagination->page + 1),
+                'page_size'  => $dataProvider->pagination->pageSize,
+                'total_page' => ceil($dataProvider->totalCount / $pageSize)
+            ]
+        ];
 
         return $return;
     }

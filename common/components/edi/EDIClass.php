@@ -216,6 +216,9 @@ class EDIClass extends Component
                     $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
                     if (!$good) {
                         $rel = RelationSuppRest::findOne(['supp_org_id' => $order->vendor_id, 'rest_org_id' => $ediOrganization->organization_id]);
+                        if (!$rel) {
+                            continue;
+                        }
                         $good = new CatalogBaseGoods();
                         $good->cat_id = $rel->cat_id;
                         $good->article = $position->PRODUCTIDSUPPLIER;

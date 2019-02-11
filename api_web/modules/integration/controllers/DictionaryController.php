@@ -8,6 +8,7 @@
 
 namespace api_web\modules\integration\controllers;
 
+use api_web\components\Registry;
 use api_web\modules\integration\classes\dictionaries\AbstractDictionary;
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\classes\Integration;
@@ -435,7 +436,6 @@ class DictionaryController extends \api_web\components\WebApiController
      * )
      * @throws BadRequestHttpException
      */
-
     public function actionStoreList()
     {
         if (!isset($this->request['service_id'])) {
@@ -510,7 +510,6 @@ class DictionaryController extends \api_web\components\WebApiController
      * )
      * @throws BadRequestHttpException
      */
-
     public function actionStoreFlatList()
     {
         if (!isset($this->request['service_id'])) {
@@ -746,7 +745,7 @@ class DictionaryController extends \api_web\components\WebApiController
         if (!isset($this->request['service_id'])) {
             throw new BadRequestHttpException('empty_param|service_id');
         }
-        /** @var \api_web\modules\integration\classes\dictionaries\AbstractDictionary $factory */
+        /** @var  $factory \api_web\modules\integration\classes\dictionaries\AbstractDictionary */
         $factory = (new Dictionary($this->request['service_id'], 'Category'));
         $this->response = $factory->categorySetSelected($this->request);
     }
@@ -933,11 +932,11 @@ class DictionaryController extends \api_web\components\WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "pagination": {
+     *                      "pagination":{
      *                          "page": 1,
      *                          "page_size": 12
      *                      }
-     *                  }
+     *                    }
      *              )
      *         )
      *     ),
@@ -960,15 +959,12 @@ class DictionaryController extends \api_web\components\WebApiController
      *     )
      * )
      * @throws BadRequestHttpException
-     * @throws \api_web\exceptions\ValidationException
+     * @throws \yii\base\InvalidArgumentException
      */
     public function actionVetisBusinessEntity()
     {
-        if (!isset($this->request['service_id'])) {
-            throw new BadRequestHttpException('empty_param|service_id');
-        }
-        /** @var \api_web\modules\integration\classes\dictionaries\AbstractDictionary $factory */
-        $factory = (new Dictionary($this->request['service_id'], 'Dictionaries'));
-        $this->response = $factory->productTypeSetSelected($this->request);
+        /** @var \api_web\modules\integration\classes\dictionaries\MercDictionary $factory */
+        $factory = (new Dictionary(Registry::MERC_SERVICE_ID, 'Dictionary'));
+        $this->response = $factory->getBusinessEntityList($this->request);
     }
 }

@@ -206,7 +206,7 @@ class WebApiHelper
             //Дни доставки
             $days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
             foreach ($days as $day) {
-                $item['delivery_days'][$day] = (int)$model->delivery->{$day};
+                $item['delivery_days'][$day] = (int)($model->delivery->{$day} ?? 0);
             }
             $item['is_edi'] = $model->isEdi();
         }

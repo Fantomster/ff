@@ -388,7 +388,7 @@ class VetisHelper extends BaseHelper
         $journal->log_guide = 'CreateVetisProductItem';
         $journal->organization_id = $orgId;
         $journal->user_id = $userId;
-        $journal->operation_code = 0;
+        $journal->operation_code = '0';
         if (!$journal->save()) {
             throw new ValidationException($journal->getFirstErrors());
         }

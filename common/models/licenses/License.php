@@ -3,7 +3,6 @@
 namespace common\models\licenses;
 
 use api_web\components\Registry;
-use api_web\helpers\WaybillHelper;
 use api_web\helpers\WebApiHelper;
 use Exception;
 use Yii;
@@ -11,7 +10,6 @@ use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
-use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
 
 /**

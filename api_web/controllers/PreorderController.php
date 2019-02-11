@@ -489,4 +489,64 @@ class PreorderController extends WebApiController
     {
         $this->response=$this->classWebApi->confirmOrders($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/preorder/add-product",
+     *     tags={"Preorder"},
+     *     summary="Добавить продукт в предзаказ",
+     *     description="Метод добавляет продукт(ы) в предзаказ",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  type="object",
+     *                  default={
+     *                       "id": 1,
+     *                       "products": {
+     *                           {
+     *                               "id": 467832,
+     *                               "cat_id": 3454,
+     *                               "vendor_id": 12,
+     *                               "quantity": 10
+     *                           },
+     *                           {
+     *                               "id": 467831,
+     *                               "cat_id": 3451,
+     *                               "vendor_id": 1,
+     *                               "quantity": 4
+     *                           }
+     *                       }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *            default={
+     *                 "result": true
+     *              }
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "UnauthorizedHttpException"
+     *     )
+     * )
+     * @throws
+     */
+    public function actionAddProduct()
+    {
+        $this->response=$this->classWebApi->addProduct($this->request);
+    }
 }

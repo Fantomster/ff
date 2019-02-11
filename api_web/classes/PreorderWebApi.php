@@ -7,16 +7,13 @@
 
 namespace api_web\classes;
 
-use api_web\{components\definitions\Vendor,
-    components\definitions\VendorCatalogGood,
+use api_web\{
     helpers\WebApiHelper,
     exceptions\ValidationException,
     components\WebApi,
     components\Notice,
-    helpers\CurrencyHelper,
-    helpers\Product};
+    helpers\CurrencyHelper};
 use common\models\{Catalog,
-    CatalogBaseGoods,
     CatalogGoods,
     Order,
     OrderContent,

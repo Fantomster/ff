@@ -170,14 +170,14 @@ class EmailIntegrationController extends Controller
 
             $message_console = 'SETTING: ' . $setting->id . '  ' . 'ORGANIZATION: ' . $setting->organization->id;
 
-            $this->log([
+            /*$this->log([
                 PHP_EOL . str_pad('', 100, '='),
                 str_pad('RUN ' . $message_console, 99, ' ') . '|',
                 str_pad('', 100, '=')
-            ]);
+            ]);*/
 
             if ($setting->is_active == 0) {
-                $this->log('SETTING IS DISABLED!');
+                $this->log('SETTING ' . $setting->id . ' IS DISABLED! ORGANIZATION: ' . $setting->organization->id . PHP_EOL);
                 continue;
             }
 
@@ -196,25 +196,25 @@ class EmailIntegrationController extends Controller
                         foreach ($files as $file) {
                             $transaction = \Yii::$app->db->beginTransaction();
                             try {
-                                $this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) . PHP_EOL);
+                                //$this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) . PHP_EOL);
                                 $transaction->commit();
                             } catch (\Exception $e) {
                                 $transaction->rollBack();
                                 $this->log('ERROR_' . $setting->organization->id . ' CREATED INVOICE');
-                                $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
+                                $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine() . PHP_EOL);
                             }
                         }
-                        $this->log([
+                        /*$this->log([
                             PHP_EOL . str_pad('', 100, '='),
                             str_pad('END ' . $message_console, 99, ' ') . '|',
                             str_pad('', 100, '=')
-                        ]);
+                        ]);*/
                     }
                 }
                 $this->connect->disconnect();
             } catch (\Exception $e) {
                 $this->log('ERROR_' . $setting->organization->id);
-                $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
+                $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine() . PHP_EOL);
             }
         }
         \Yii::error($this->log, 'email-integration-log');

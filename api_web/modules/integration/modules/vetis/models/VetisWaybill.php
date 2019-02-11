@@ -688,8 +688,7 @@ class VetisWaybill extends WebApi
                 $this->helper->writeInJournal($e->getMessage(), $this->user->id, $this->user->organization_id);
             }
         } else {
-            $model->save();
-            throw new ValidationException($model->getFirstErrors());
+            throw new ValidationException($model->errors);
         }
 
         return ['result' => true];

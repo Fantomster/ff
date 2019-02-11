@@ -13,17 +13,8 @@ use api_web\{
     components\WebApi,
     components\Notice,
     helpers\CurrencyHelper};
-use common\models\{Catalog,
-    CatalogGoods,
-    Order,
-    OrderContent,
-    OrderStatus,
-    Preorder,
-    Cart,
-    Organization,
-    PreorderContent,
-    Profile,
-    RelationSuppRest};
+use common\models\{Catalog, CatalogGoods, Order, OrderContent, OrderStatus, Preorder, Cart, Organization, PreorderContent,
+    Profile, RelationSuppRest};
 use function GuzzleHttp\Promise\all;
 use yii\data\{
     ArrayDataProvider,

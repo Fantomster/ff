@@ -947,7 +947,8 @@ class DictionaryController extends \api_web\components\WebApiController
      *              default={
      *                  {
      *                      "name": "СЕЛЬСКОХОЗЯЙСТВЕННЫЙ ПРОИЗВОДСТВЕННЫЙ КООПЕРАТИВ ПЛЕМЗАВОД КОЛХОЗ ИМЕНИ КИРОВА",
-     *                      "fullname": "СЕЛЬСКОХОЗЯЙСТВЕННЫЙ ПРОИЗВОДСТВЕННЫЙ КООПЕРАТИВ ПЛЕМЗАВОД КОЛХОЗ ИМЕНИ КИРОВА",
+     *                      "fullname": "СЕЛЬСКОХОЗЯЙСТВЕННЫЙ ПРОИЗВОДСТВЕННЫЙ КООПЕРАТИВ ПЛЕМЗАВОД КОЛХОЗ ИМЕНИ
+     *                      КИРОВА",
      *                      "uuid": "00000c3b-48d1-40bf-ba74-4899f99d032a",
      *                      "guid": "0605cda7-e107-49af-abfe-970714f99849",
      *                      "inn": null,
@@ -983,5 +984,71 @@ class DictionaryController extends \api_web\components\WebApiController
         /** @var \api_web\modules\integration\classes\dictionaries\MercDictionary $factory */
         $factory = (new Dictionary(Registry::MERC_SERVICE_ID, 'Dictionary'));
         $this->response = $factory->getBusinessEntityList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/vetis-russian-enterprise",
+     *     tags={"Integration/dictionary"},
+     *     summary="Словарь Отечественные предприятия",
+     *     description="Словарь Отечественные предприятия",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "pagination":{
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "name": "ИП Рогов Андрей Сергеевич",
+     *                      "uuid": "00000c3b-48d1-40bf-ba74-4899f99d032a",
+     *                      "guid": "0605cda7-e107-49af-abfe-970714f99849",
+     *                      "inn": null,
+     *                      "address": "Российская Федерация, г. Москва, Осенний б-р",
+     *                      "active": 1
+     *                  },
+     *                  {
+     *                      "name": "Пудожское райпо",
+     *                      "uuid": "0000331b-68ec-42a7-9ef6-b1715af275fa",
+     *                      "guid": "58b751b5-d236-4c97-9f3c-fa21268e7f21",
+     *                      "inn": null,
+     *                      "address": "353795 ст.Андреевская ул.Красная д. 12",
+     *                      "active": 1
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function actionVetisRussianEnterprise()
+    {
+        /** @var \api_web\modules\integration\classes\dictionaries\MercDictionary $factory */
+        $factory = (new Dictionary(Registry::MERC_SERVICE_ID, 'Dictionary'));
+        $this->response = $factory->getRussianEnterpriseList($this->request);
     }
 }

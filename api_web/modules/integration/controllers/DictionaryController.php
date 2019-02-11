@@ -592,7 +592,6 @@ class DictionaryController extends \api_web\components\WebApiController
      * )
      * @throws BadRequestHttpException
      */
-
     public function actionUnitList()
     {
         if (!isset($this->request['service_id'])) {
@@ -690,7 +689,6 @@ class DictionaryController extends \api_web\components\WebApiController
      * )
      * @throws BadRequestHttpException
      */
-
     public function actionCategoryList()
     {
         if (!isset($this->request['service_id'])) {
@@ -743,13 +741,12 @@ class DictionaryController extends \api_web\components\WebApiController
      * @throws BadRequestHttpException
      * @throws \api_web\exceptions\ValidationException
      */
-
     public function actionCategorySetSelected()
     {
         if (!isset($this->request['service_id'])) {
             throw new BadRequestHttpException('empty_param|service_id');
         }
-        /** @var  $factory \api_web\modules\integration\classes\dictionaries\AbstractDictionary */
+        /** @var \api_web\modules\integration\classes\dictionaries\AbstractDictionary $factory */
         $factory = (new Dictionary($this->request['service_id'], 'Category'));
         $this->response = $factory->categorySetSelected($this->request);
     }
@@ -859,7 +856,6 @@ class DictionaryController extends \api_web\components\WebApiController
      * )
      * @throws BadRequestHttpException
      */
-
     public function actionProductTypeList()
     {
         if (!isset($this->request['service_id'])) {
@@ -912,14 +908,67 @@ class DictionaryController extends \api_web\components\WebApiController
      * @throws BadRequestHttpException
      * @throws \api_web\exceptions\ValidationException
      */
-
     public function actionProductTypeSetSelected()
     {
         if (!isset($this->request['service_id'])) {
             throw new BadRequestHttpException('empty_param|service_id');
         }
-        /** @var  $factory \api_web\modules\integration\classes\dictionaries\AbstractDictionary */
+        /** @var \api_web\modules\integration\classes\dictionaries\AbstractDictionary $factory */
         $factory = (new Dictionary($this->request['service_id'], 'ProductType'));
+        $this->response = $factory->productTypeSetSelected($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/vetis-business-entity",
+     *     tags={"Integration/dictionary"},
+     *     summary="Словарь Хозяйствующие субъекты",
+     *     description="Словарь Хозяйствующие субъекты",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "pagination": {
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "selected": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     * @throws \api_web\exceptions\ValidationException
+     */
+    public function actionVetisBusinessEntity()
+    {
+        if (!isset($this->request['service_id'])) {
+            throw new BadRequestHttpException('empty_param|service_id');
+        }
+        /** @var \api_web\modules\integration\classes\dictionaries\AbstractDictionary $factory */
+        $factory = (new Dictionary($this->request['service_id'], 'Dictionaries'));
         $this->response = $factory->productTypeSetSelected($this->request);
     }
 }

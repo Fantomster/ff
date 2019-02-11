@@ -196,8 +196,7 @@ class EmailIntegrationController extends Controller
                         foreach ($files as $file) {
                             $transaction = \Yii::$app->db->beginTransaction();
                             try {
-                                //$this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) . PHP_EOL);
-                                (new IntegrationInvoice())->saveInvoice($file);
+                                $this->log('+ CREATED INVOICE: id = ' . (new IntegrationInvoice())->saveInvoice($file) .' ORGANIZATION: '.$setting->organization->id. PHP_EOL);
                                 $transaction->commit();
                             } catch (\Exception $e) {
                                 $transaction->rollBack();

@@ -200,8 +200,8 @@ class WebApiHelper
             $item['inn'] = $model->buisinessInfo->inn ?? $model->inn ?? null;
             $item['allow_editing'] = $model->allow_editing;
             $item['min_order_price'] = round($model->delivery->min_order_price ?? 0, 2);
-            $item['min_free_delivery_charge'] = round($model->delivery->min_free_delivery_charge, 2);
-            $item['delivery_discount_percent'] = $model->delivery->delivery_discount_percent;
+            $item['min_free_delivery_charge'] = round($model->delivery->min_free_delivery_charge ?? 0, 2);
+            $item['delivery_discount_percent'] = $model->delivery->delivery_discount_percent ?? 0;
             $item['disabled_delivery_days'] = $model->getDisabledDeliveryDays();
             //Дни доставки
             $days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];

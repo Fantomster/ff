@@ -351,7 +351,7 @@ class EDIClass extends Component
         }
         $ediRest = EdiOrganization::findOne(['gln_code' => $buyerGLN, 'provider_id' => $providerID]);
         if (!$ediRest) {
-            \Yii::error('No EDI organization(rest)');
+            \Yii::error("No EDI organization(rest) org_id:{$organization->id}, gln_code: {$buyerGLN}, provider_id:$providerID");
             return false;
         }
         $rest = Organization::findOne(['id' => $ediRest->organization_id]);

@@ -314,7 +314,7 @@ class EmailIntegrationController extends Controller
             $excelExtension = (substr(mb_strtolower($name_file), -4) === ".xls") || (substr(mb_strtolower($name_file), -5) === ".xlsx");
             //Собираем только разрешённые вложения
             if (!(in_array(trim($mime_type), $allow_mime_types) || $excelExtension)) {
-                //echo '- Missed File MIME-TYPE:' . $mime_type . PHP_EOL;
+                echo '- Missed File MIME-TYPE:' . $mime_type . PHP_EOL;
                 continue;
             }
 
@@ -342,7 +342,7 @@ class EmailIntegrationController extends Controller
                 'file_hash_summ'                    => md5($file_content),
             ]);
             if (!empty($model)) {
-                //$this->log('- File (' . $name_file . ') has previously been processed by the parser `integration_invoice`.`id` = ' . $model->id);
+                $this->log('- File (' . $name_file . ') has previously been processed by the parser `integration_invoice`.`id` = ' . $model->id);
                 continue;
             }
             //Сохраняем темп файл

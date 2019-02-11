@@ -680,12 +680,16 @@ class VetisWaybill extends WebApi
                 if (!isset($result)) {
                     throw new \Exception('Error create Product');
                 }
+                $productItem = $result->application->result->any['modifyProducerStockListResponse']->productItemList->productItem;
                 if (isset($request['ingredients']) && !empty($request['ingredients'])) {
-                    $this->addIngredients($result->application->result->any['modifyProducerStockListResponse']->productItemList->productItem->guid, $request['ingredients']);
+                    $this->addIngredients($productItem->guid, $request['ingredients']);
                 }
             } catch (\Throwable $e) {
                 $this->helper->writeInJournal($e->getMessage(), $this->user->id, $this->user->organization_id);
             }
+        } else {
+            $model->save();
+            throw new ValidationException($model->getFirstErrors());
         }
 
         return ['result' => true];

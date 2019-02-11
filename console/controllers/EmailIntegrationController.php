@@ -115,7 +115,6 @@ class EmailIntegrationController extends Controller
         //$temp_file[71] = '/app/console/runtime/testnac71.xlsx';
         $temp_file[72] = '/app/console/runtime/testnac72.xlsx';
 
-
         $i = 1;
 
         foreach ($temp_file as $filet) {
@@ -162,7 +161,7 @@ class EmailIntegrationController extends Controller
         error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
 
         //Получаем все активные настройки или конкретную настройку
-        $where    = (isset($this->setting_id) ? ['id' => $this->setting_id] : ['is_active' => 1]);
+        $where = (isset($this->setting_id) ? ['id' => $this->setting_id] : ['is_active' => 1]);
         $settings = IntegrationSettingFromEmail::find()->where($where)
             ->andWhere(['version' => 1])->all();
         \Yii::$app->db->createCommand('SET SESSION wait_timeout = 28800;')->execute();
@@ -201,6 +200,7 @@ class EmailIntegrationController extends Controller
                                 $transaction->commit();
                             } catch (\Exception $e) {
                                 $transaction->rollBack();
+                                $this->log('ERROR_' . $setting->organization->id . ' CREATED INVOICE');
                                 $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
                             }
                         }
@@ -213,6 +213,7 @@ class EmailIntegrationController extends Controller
                 }
                 $this->connect->disconnect();
             } catch (\Exception $e) {
+                $this->log('ERROR_' . $setting->organization->id);
                 $this->log('SETTING_ID:' . $setting->id . ' - ' . $e->getMessage() . ' FILE:' . $e->getFile() . ' ROW:' . $e->getLine());
             }
         }
@@ -233,6 +234,7 @@ class EmailIntegrationController extends Controller
 
     /**
      * Подключение к серверу
+     *
      * @param IntegrationSettingFromEmail $setting
      * @return Imap|Pop3
      * @throws Exception
@@ -257,6 +259,7 @@ class EmailIntegrationController extends Controller
 
     /**
      * Получим 20 последних сообщений
+     *
      * @param int $start
      * @param int $limit
      * @return array
@@ -278,7 +281,8 @@ class EmailIntegrationController extends Controller
 
     /**
      * Получим список вложений, которые не обрабатывали
-     * @param array $email
+     *
+     * @param array                       $email
      * @param IntegrationSettingFromEmail $setting
      * @return array|null
      */
@@ -304,9 +308,9 @@ class EmailIntegrationController extends Controller
         foreach ($email['attachment'] as $name_file => $file) {
             //print $setting->language.PHP_EOL;
             //Узнаём тип вложения
-            $mime_type      = array_keys($file)[0];
+            $mime_type = array_keys($file)[0];
             //Декодируем имя файла
-            $name_file      = iconv_mime_decode($name_file, 0, "UTF-8");
+            $name_file = iconv_mime_decode($name_file, 0, "UTF-8");
             $excelExtension = (substr(mb_strtolower($name_file), -4) === ".xls") || (substr(mb_strtolower($name_file), -5) === ".xlsx");
             //Собираем только разрешённые вложения
             if (!(in_array(trim($mime_type), $allow_mime_types) || $excelExtension)) {
@@ -322,9 +326,9 @@ class EmailIntegrationController extends Controller
               ]); */
 
             //Получаем тело файла
-            $content      = array_values($file)[0];
+            $content = array_values($file)[0];
             //Темповый файл, для прочтения и парсинга
-            $temp_file    = \Yii::getAlias('@app') . '/runtime/' . md5($email['id']) . '_' . $name_file;
+            $temp_file = \Yii::getAlias('@app') . '/runtime/' . md5($email['id']) . '_' . $name_file;
             //Тело файла в BASE64 для возможности записи в базу
             $file_content = base64_encode($content);
             //Проверяем на всякий темповый файл, если есть, удаляем

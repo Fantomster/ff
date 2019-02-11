@@ -42,7 +42,7 @@ class LicenseOrganizationBehavior extends Behavior
         //Если у лицензии есть сервис
         if (!empty($service_id)) {
             //Список справочников необходимых для интеграции
-            $dictionaryList = OuterDictionary::findAll(['service_id' => $service_id]);
+            $dictionaryList = OuterDictionary::findAll(['service_id' => $service_id, 'is_common' => 0]);
             if (!empty($dictionaryList)) {
                 //Проверяем, нет ли уже справочников для этой организации в этой интеграции
                 //Если нет, создаем

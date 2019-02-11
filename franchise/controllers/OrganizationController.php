@@ -93,7 +93,7 @@ class OrganizationController extends DefaultController {
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
 
         if(\Yii::$app->request->get('searchString')){
-            $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+            $searchModel['searchString'] = trim(\Yii::$app->request->get('searchString'));
         }
         if(\Yii::$app->request->get('date_from')){
             $searchModel['date_from'] = $searchModel->date_from = trim(\Yii::$app->request->get('date_from'));
@@ -329,7 +329,7 @@ class OrganizationController extends DefaultController {
 
 
         if(\Yii::$app->request->get('searchString')){
-            $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+            $searchModel['searchString'] = trim(\Yii::$app->request->get('searchString'));
         }
         if(\Yii::$app->request->get('date_from')){
             $searchModel['date_from'] = $searchModel->date_from = trim(\Yii::$app->request->get('date_from'));

@@ -1503,7 +1503,10 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "guid": "021bc2d9-f514-4491-b21a-ffe63023236f"
+     *                      "guid": "021bc2d9-f514-4491-b21a-ffe63023236f",
+     *                      "search": {
+     *                          "name": "ко"
+     *                      }
      *                  }
      *              )
      *         )
@@ -1639,5 +1642,78 @@ class DefaultController extends WebApiController
     public function actionProductInfo()
     {
         $this->response = (new VetisWaybill())->getProductInfo($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/product-item-create",
+     *     tags={"Integration/vetis"},
+     *     summary="Добавление новой продукции в справочник наименований продукции",
+     *     description="Добавление новой продукции в справочник наименований продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "product_type": 3,
+     *                      "form_guid": "20dda083-72d0-93e0-de2c-76ac4f88c5ce",
+     *                      "subtype_guid": "98748766-2894-b5db-ab2f-035db5f44945",
+     *                      "name": "new Kotleta()",
+     *                      "article": "7d7df18c5832",
+     *                      "gtin": "4602471014317",
+     *                      "has_gost": true,
+     *                      "gost": "ГОСТ-123",
+     *                      "ingredients": {
+     *                          {
+     *                              "name": "Грибы",
+     *                              "amount": 0.001,
+     *                          },
+     *                          {
+     *                              "name": "Грибы",
+     *                              "amount": 0.001,
+     *                          }
+     *                      },
+     *                      "subject": "41fb53ea-31c3-b116-9ce2-7d7df18c5832",
+     *                      "producers": {
+     *                          "41fb53ea-31c3-b116-9ce2-7d7df18c5832",
+     *                          "41fb53ea-31c3-b116-9ce2-7d7df18c5832"
+     *                      },
+     *                      "package": {
+     *                          "type_guid": "41fb53ea-31c3-b116-9ce2-7d7df18c5832",
+     *                          "amount": 1,
+     *                          "volume": 12,
+     *                          "unit_guid": "41fb53ea-31c3-b116-9ce2-7d7df18c5832"
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionProductItemCreate()
+    {
+        $this->response = (new VetisWaybill())->createProductItem($this->request);
     }
 }

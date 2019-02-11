@@ -75,7 +75,7 @@ abstract class AbstractConsumer
             //ставим задачу в очередь
             \Yii::$app->get('rabbit')
                 ->setQueue($queueName)
-                ->addRabbitQueue('');
+                ->addRabbitQueue(uniqid());
 
         } catch (\Exception $e) {
             \Yii::error($e->getMessage());

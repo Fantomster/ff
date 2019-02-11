@@ -24,6 +24,7 @@ class Integration
         Registry::IIKO_SERVICE_ID     => 'Iiko',
         Registry::POSTER_SERVICE_ID   => 'Poster',
         Registry::TILLYPAD_SERVICE_ID => 'Tillypad',
+        Registry::MERC_SERVICE_ID     => 'Merc',
     ];
 
     /**

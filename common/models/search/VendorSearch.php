@@ -9,7 +9,6 @@ use common\models\RelationSuppRestPotential;
 use yii\data\ActiveDataProvider;
 
 /**
- *
  * @author sharaf
  */
 class VendorSearch extends RelationSuppRest
@@ -51,8 +50,8 @@ class VendorSearch extends RelationSuppRest
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     * @param $client_id
-     * @param bool $tmp
+     * @param       $client_id
+     * @param bool  $tmp
      * @return ActiveDataProvider
      */
     public function search($params, $client_id, $tmp = false)
@@ -84,7 +83,8 @@ class VendorSearch extends RelationSuppRest
             ->joinWith('vendor')
             ->where([
                 "$rspTable.rest_org_id" => $client_id,
-                "$rspTable.deleted" => false
+                "$rspTable.deleted"     => false,
+                "$orgTable.type_id"     => Organization::TYPE_SUPPLIER
             ]);
 
         if (isset($this->search_address)) {
@@ -119,7 +119,7 @@ class VendorSearch extends RelationSuppRest
             ->joinWith('vendor')
             ->where([
                 "$rspPTable.rest_org_id" => $client_id,
-                "$rspPTable.deleted" => false
+                "$rspPTable.deleted"     => false
             ]);
 
         $query3 = RelationSuppRest::find()
@@ -127,21 +127,21 @@ class VendorSearch extends RelationSuppRest
             ->from(['u' => $query->union($query2, true)]);
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query3,
-            'sort' => [
+            'query'      => $query3,
+            'sort'       => [
                 'defaultOrder' => ['vendor_name' => SORT_ASC],
-                'attributes' => [
+                'attributes'   => [
                     'vendor_name',
                     'status' => [
-                        'asc' => [
-                            'invite' => SORT_ASC,
+                        'asc'  => [
+                            'invite'         => SORT_ASC,
                             'catalog_status' => SORT_ASC,
-                            'status' => SORT_ASC
+                            'status'         => SORT_ASC
                         ],
                         'desc' => [
-                            'invite' => SORT_DESC,
+                            'invite'         => SORT_DESC,
                             'catalog_status' => SORT_DESC,
-                            'status' => SORT_DESC
+                            'status'         => SORT_DESC
                         ],
                     ],
                 ],
@@ -161,7 +161,7 @@ class VendorSearch extends RelationSuppRest
 
         // grid filtering conditions
         $query3->andFilterWhere([
-            "invite" => $this->invite,
+            "invite"     => $this->invite,
             "catalog_id" => $this->cat_id,
         ]);
 

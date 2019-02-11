@@ -2,9 +2,10 @@
 
 namespace common\models;
 
-use common\models\notifications\EmailNotification;
-use common\models\notifications\SmsNotification;
 use Yii;
+use common\components\mailer\Mailer;
+use common\models\notifications\{EmailNotification, SmsNotification};
+
 
 /**
  * This is the model class for table "additional_email".
@@ -30,7 +31,6 @@ use Yii;
  *           подтверждён, 1 - подтверждён)
  * @property string       $token             Хэш данного е-мэйла
  * @property int          $merc_stock_expiry Уведомление о проблемной продукции в меркурии
- *
  * @property Organization $organization
  */
 class AdditionalEmail extends \yii\db\ActiveRecord
@@ -55,7 +55,7 @@ class AdditionalEmail extends \yii\db\ActiveRecord
             ['email', 'filter', 'filter' => 'trim'],
             ['email', 'required'],
             ['email', 'email'],
-            [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
+            [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::class, 'targetAttribute' => ['organization_id' => 'id']],
         ];
     }
 
@@ -84,7 +84,7 @@ class AdditionalEmail extends \yii\db\ActiveRecord
      */
     public function getOrganization()
     {
-        return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
+        return $this->hasOne(Organization::class, ['id' => 'organization_id']);
     }
 
     /**
@@ -99,9 +99,7 @@ class AdditionalEmail extends \yii\db\ActiveRecord
             return $model;
         }
 
-        if (!empty($org_id) && $org_id !== $this->organization_id) {
-            return EmailNotification::emptyInstance();
-        }
+        return EmailNotification::emptyInstance();
     }
 
     /**
@@ -123,7 +121,6 @@ class AdditionalEmail extends \yii\db\ActiveRecord
     /**
      * Send confirmation mail
      *
-     * @param Organization $organization
      * @return int
      */
     public function sendConfirmationEmail()

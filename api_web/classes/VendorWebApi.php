@@ -39,7 +39,10 @@ class VendorWebApi extends \api_web\components\WebApi
         if (!ArrayHelper::keyExists($post['vendor_id'], $this->user->organization->getSuppliers('', false))) {
             throw new BadRequestHttpException('vendor.you_are_not_working_with_this_supplier');
         }
-        return WebApiHelper::prepareOrganization(Organization::findOne($post['vendor_id']));
+        return WebApiHelper::prepareOrganization(Organization::findOne([
+            'id'      => $post['vendor_id'],
+            'type_id' => Organization::TYPE_SUPPLIER
+        ]));
     }
 
     /**

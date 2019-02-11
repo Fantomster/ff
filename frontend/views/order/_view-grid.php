@@ -47,7 +47,8 @@ echo GridView::widget([
             'format' => 'raw',
             'attribute' => 'total',
             'value' => function($data) use ($currencySymbol) {
-                return '<b>' . number_format($data->total, 2, '.', '') . '</b> '.$currencySymbol.'</i>';
+                $sum = $data->price * $data->quantity;
+                return '<b>' . number_format($sum, 2, '.', '') . '</b> '.$currencySymbol.'</i>';
             },
             'label' => Yii::t('message', 'frontend.views.order.summ_three', ['ru'=>'Сумма']),
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],

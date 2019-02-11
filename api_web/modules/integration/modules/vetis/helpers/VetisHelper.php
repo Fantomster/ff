@@ -11,11 +11,13 @@ namespace api_web\modules\integration\modules\vetis\helpers;
 use api\common\models\merc\MercVsd;
 use api_web\classes\UserWebApi;
 use api_web\components\Registry;
+use api_web\exceptions\ValidationException;
 use api_web\helpers\BaseHelper;
 use api_web\helpers\WebApiHelper;
 use common\models\IntegrationSetting;
 use common\models\IntegrationSettingValue;
 use api_web\modules\integration\modules\vetis\api\cerber\cerberApi;
+use common\models\Journal;
 use common\models\vetis\VetisCountry;
 use common\models\vetis\VetisProductByType;
 use common\models\vetis\VetisSubproductByProduct;
@@ -366,5 +368,29 @@ class VetisHelper extends BaseHelper
         }
 
         return $enterpriseGuid;
+    }
+
+    /**
+     * Запись в журнал
+     *
+     * @param        $message
+     * @param        $userId
+     * @param int    $orgId
+     * @param string $type
+     * @throws ValidationException
+     */
+    public function writeInJournal($message, int $userId, int $orgId = 0, $type = 'success'): void
+    {
+        $journal = new Journal();
+        $journal->response = is_array($message) ? json_encode($message) : $message;
+        $journal->service_id = Registry::MERC_SERVICE_ID;
+        $journal->type = $type;
+        $journal->log_guide = 'CreateVetisProductItem';
+        $journal->organization_id = $orgId;
+        $journal->user_id = $userId;
+        $journal->operation_code = '0';
+        if (!$journal->save()) {
+            throw new ValidationException($journal->getFirstErrors());
+        }
     }
 }

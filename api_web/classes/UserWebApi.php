@@ -833,7 +833,7 @@ class UserWebApi extends \api_web\components\WebApi
             ->where('coalesce(a.parent_id, a.id) = coalesce(c.parent_id, c.id)')
             ->andWhere([
                 'b.user_id' => $this->user->id,
-                'a.type_id' => 1,
+                'a.type_id' => Organization::TYPE_RESTAURANT,
                 'b.role_id' => [
                     Role::ROLE_RESTAURANT_MANAGER,
                     Role::ROLE_RESTAURANT_EMPLOYEE,

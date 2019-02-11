@@ -240,7 +240,7 @@ class StatisticsController extends Controller
             $status = (int)$status;
             $select .= ", sum(case when $orderTable.status=$status then 1 else 0 end) as status_$status";
             $labelsTotal[] = $statusesList[$status];
-            $colorsTotal[] = $colorsList[$status];
+            $colorsTotal[] = $colorsList[$status] ?? $colorsList[1];
         }
 
         $ordersStat = (new Query())->select($select)->from($orderTable)
@@ -295,7 +295,7 @@ class StatisticsController extends Controller
 
         $leftJoinInnerSelect = (new Query())->select("*")
             ->from("$orderTable a")
-            ->where(["<>", "a.status", ':qp0'])
+            ->where(["a.status" => ':qp0'])
             ->andWhere(['BETWEEN', "a.created_at", ':qp1', ':qp2'])
             ->groupBy(["a.client_id"])
             ->orderBy("a.id")
@@ -325,7 +325,7 @@ class StatisticsController extends Controller
             ->from("($fromSelect) aa")
             ->leftJoin("($leftJoinOuterSelect) bb", "aa.year = bb.year and aa.month=bb.month and aa.day=bb.day")
             ->params([
-                ':qp0' => Order::STATUS_FORMING,
+                ':qp0' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING, Order::STATUS_DONE],
                 ':qp1' => $dt->format('Y-m-d'),
                 ':qp2' => $end->format('Y-m-d'),
                 ':qp3' => Organization::STATUS_WHITELISTED,

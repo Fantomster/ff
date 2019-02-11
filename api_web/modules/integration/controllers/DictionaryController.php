@@ -12,8 +12,15 @@ use api_web\components\Registry;
 use api_web\modules\integration\classes\dictionaries\AbstractDictionary;
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\classes\Integration;
+use api_web\modules\integration\modules\vetis\models\VetisWaybill;
 use yii\web\BadRequestHttpException;
 
+/**
+ * Класс для работы со Справочниками
+ * Class DictionaryController
+ *
+ * @package api_web\modules\integration\controllers
+ */
 class DictionaryController extends \api_web\components\WebApiController
 {
     /**
@@ -1116,5 +1123,75 @@ class DictionaryController extends \api_web\components\WebApiController
         /** @var \api_web\modules\integration\classes\dictionaries\MercDictionary $factory */
         $factory = (new Dictionary(Registry::MERC_SERVICE_ID, 'Dictionary'));
         $this->response = $factory->getForeignEnterpriseList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/vetis-product-item",
+     *     tags={"Integration/dictionary"},
+     *     summary="Словарь Отечественные предприятия",
+     *     description="Словарь Отечественные предприятия",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "pagination":{
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "name": "Сельдь ф/к с луком",
+     *                          "uuid": "00f4334f-23d5-468b-81c7-258f097bab0e",
+     *                          "guid": "0eff77d2-bb8a-470c-8124-2bcc0a7f814c",
+     *                          "form": "Рыба и морепродукты",
+     *                          "article": "null",
+     *                          "gtin": "null",
+     *                          "gost": "",
+     *                          "active": 1
+     *                      },
+     *                      {
+     *                          "name": "Шашлык",
+     *                          "uuid": "00f4682b-b09b-42ef-8773-6a4beea42680",
+     *                          "guid": "99ebd7ac-fb42-44e1-a711-f82b365fc75a",
+     *                          "form": "Пищевые продукты",
+     *                          "article": "1134",
+     *                          "gtin": "null",
+     *                          "gost": "null",
+     *                          "active": 1
+     *                      }
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function actionVetisProductItem()
+    {
+        $this->response = (new VetisWaybill())->getProductItemList($this->request);
     }
 }

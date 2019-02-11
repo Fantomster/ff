@@ -14,7 +14,7 @@ use api_web\{
     components\Notice,
     helpers\CurrencyHelper
 };
-use common\models\{Catalog, CatalogGoods, Order, OrderContent, OrderStatus, Preorder, Cart, Organization, PreorderContent, Profile};
+use common\models\{Order, OrderContent, OrderStatus, Preorder, Cart, Organization, PreorderContent, Profile, Catalog, CatalogGoods};
 use yii\data\{
     ArrayDataProvider,
     Pagination

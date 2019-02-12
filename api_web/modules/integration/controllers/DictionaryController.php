@@ -1087,21 +1087,28 @@ class DictionaryController extends \api_web\components\WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  {
-     *                      "name": "Curvaceiras",
-     *                      "uuid": "00000c3b-48d1-40bf-ba74-4899f99d032a",
-     *                      "guid": "0605cda7-e107-49af-abfe-970714f99849",
-     *                      "inn": null,
-     *                      "address": "Estrada da Lamarosa, Paialvo - Tomar",
-     *                      "active": 1
+     *                  "result": {
+     *                      {
+     *                          "name": "Curvaceiras",
+     *                          "uuid": "00000c3b-48d1-40bf-ba74-4899f99d032a",
+     *                          "guid": "0605cda7-e107-49af-abfe-970714f99849",
+     *                          "inn": null,
+     *                          "address": "Estrada da Lamarosa, Paialvo - Tomar",
+     *                          "active": 1
+     *                      },
+     *                      {
+     *                          "name": "ФОП Гастов И.В.",
+     *                          "uuid": "0000331b-68ec-42a7-9ef6-b1715af275fa",
+     *                          "guid": "58b751b5-d236-4c97-9f3c-fa21268e7f21",
+     *                          "inn": null,
+     *                          "address": "Киевская область, пгт Ворзель, ул.Ворошилова 44",
+     *                          "active": 1
+     *                      }
      *                  },
-     *                  {
-     *                      "name": "ФОП Гастов И.В.",
-     *                      "uuid": "0000331b-68ec-42a7-9ef6-b1715af275fa",
-     *                      "guid": "58b751b5-d236-4c97-9f3c-fa21268e7f21",
-     *                      "inn": null,
-     *                      "address": "Киевская область, пгт Ворзель, ул.Ворошилова 44",
-     *                      "active": 1
+     *                  "pagination": {
+     *                       "page": 1,
+     *                       "total_page": 17,
+     *                       "page_size": 12
      *                  }
      *              }
      *          )
@@ -1123,6 +1130,78 @@ class DictionaryController extends \api_web\components\WebApiController
         /** @var \api_web\modules\integration\classes\dictionaries\MercDictionary $factory */
         $factory = (new Dictionary(Registry::MERC_SERVICE_ID, 'Dictionary'));
         $this->response = $factory->getForeignEnterpriseList($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/dictionary/vetis-transport",
+     *     tags={"Integration/dictionary"},
+     *     summary="Словарь Транспортных средств",
+     *     description="Словарь Транспортных средств",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "org_id": 1,
+     *                      "pagination":{
+     *                          "page": 1,
+     *                          "page_size": 12
+     *                      }
+     *                    }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": {
+     *                      {
+     *                          "vehicle_number": "номер машины",
+     *                          "trailer_number": "номер полуприцепа",
+     *                          "container_number": "номер контейнера",
+     *                          "transport_storage_type": "способ хранения",
+     *                          "id": 1
+     *                      },
+     *                      {
+     *                          "vehicle_number": "номер машины",
+     *                          "trailer_number": "номер полуприцепа",
+     *                          "container_number": "номер контейнера",
+     *                          "transport_storage_type": "способ хранения",
+     *                          "id": 2
+     *                      }
+     *                  },
+     *                  "pagination": {
+     *                       "page": 1,
+     *                       "total_page": 17,
+     *                       "page_size": 12
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidArgumentException
+     */
+    public function actionVetisTransport()
+    {
+        /** @var \api_web\modules\integration\classes\dictionaries\MercDictionary $factory */
+        $factory = (new Dictionary(Registry::MERC_SERVICE_ID, 'Dictionary'));
+        $this->response = $factory->getTransportList($this->request);
     }
 
     /**

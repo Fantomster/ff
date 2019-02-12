@@ -723,7 +723,7 @@ class VetisWaybill extends WebApi
     public function createTransport($request)
     {
         $orgId = $request['org_id'] ?? $this->user->organization_id;
-        (new EmailRoboWebApi())->validateOrgId($orgId);
+        $this->validateOrgId($orgId);
         $model = new VetisTransport();
         $model->org_id = $orgId;
         $model->vehicle_number = $request['vehicle_number'] ?? null;

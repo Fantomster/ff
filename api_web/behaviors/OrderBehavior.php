@@ -98,7 +98,7 @@ class OrderBehavior extends Behavior
             $promise->wait(true);
         } catch (\Throwable $e) {
             //Запись в лог, если произошла ошибка отправки
-            \Yii::info($e->getMessage(), __METHOD__);
+            \Yii::error($e->getMessage(), __METHOD__);
         }
         return true;
     }

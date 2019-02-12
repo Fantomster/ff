@@ -26,6 +26,7 @@ class WebApiErrorHandler extends ErrorHandler
      */
     protected function renderException($exception)
     {
+        \Yii::error($exception->getMessage() . PHP_EOL . $exception->getTraceAsString());
         if (Yii::$app->has('response')) {
             $response = Yii::$app->getResponse();
         } else {

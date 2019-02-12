@@ -15,10 +15,11 @@ use yii2mod\rbac\RbacAsset;
 RbacAsset::register($this);
 
 /* @var $this yii\web\View */
-/* @var $model \yii2mod\rbac\models\AssignmentModel */
+/* @var $user */
 /* @var $usernameField string */
+/* @var $orgList array */
 
-$userName = $model->user->{$usernameField};
+$userName = $user->{$usernameField};
 $this->title = Yii::t('yii2mod.rbac', 'Assignment : {0}', $userName);
 $this->params['breadcrumbs'][] = ['label' => Yii::t('yii2mod.rbac', 'Assignments'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $userName;
@@ -28,12 +29,15 @@ $this->render('/layouts/_sidebar');
 
     <h1><?php echo Html::encode($this->title); ?></h1>
 
-    <?php echo $this->render('../_dualListBox', [
-        'opts' => Json::htmlEncode([
-            'items' => $model->getItems(),
+    <?php echo $this->render('../_assignListBox', [
+        'opts'       => Json::htmlEncode([
+            'items' => $items,
         ]),
-        'assignUrl' => ['assign', 'id' => $model->userId],
-        'removeUrl' => ['remove', 'id' => $model->userId],
+        'assignUrl'  => ['assign', 'id' => $user->id],
+        'removeUrl'  => ['remove', 'id' => $user->id],
+        'rolesByOrg' => \yii\helpers\Url::to(['assignment/view', 'id' => $user->id]),
+        'orgId'      => $orgId,
+        'orgList'    => $orgList
     ]); ?>
 
 </div>

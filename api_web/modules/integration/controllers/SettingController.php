@@ -5,6 +5,7 @@ namespace api_web\modules\integration\controllers;
 use api_web\classes\IntegrationSettingsWebApi;
 use api_web\components\Poster;
 use api_web\components\Registry;
+use yii\filters\AccessControl;
 
 /**
  * Class SettingController
@@ -15,6 +16,40 @@ use api_web\components\Registry;
 class SettingController extends \api_web\components\WebApiController
 {
     public $className = IntegrationSettingsWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'list',
+                        'get',
+                        'update',
+                        'reject-change',
+                        'get-main-organizations',
+                        'set-main-organizations',
+                        'reset-main-org-setting',
+                        'get-items-setting',
+                        'generate-poster-auth-url',
+                        'poster-auth',
+                    ],
+                    'roles'   => [
+                        Registry::MANAGER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT,
+                    ],
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/integration/setting/list",

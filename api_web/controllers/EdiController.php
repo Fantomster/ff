@@ -18,6 +18,7 @@ use api_web\classes\GuideWebApi;
 use api_web\classes\OrderWebApi;
 use api_web\components\Registry;
 use api_web\components\WebApiController;
+use yii\filters\AccessControl;
 
 /**
  * Class EdiController
@@ -30,6 +31,56 @@ class EdiController extends WebApiController
     public $className = EdiWebApi::class;
 
     public $license_service_id = [Registry::EDI_SERVICE_ID, Registry::VENDOR_DOC_MAIL_SERVICE_ID];
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'order-history',
+                        'order-info',
+                        'order-print-pdf',
+                        'order-update',
+                        'order-complete',
+                        'order-cancel',
+                        'history-count',
+                        'order-repeat',
+                        'accept-products',
+                        'status-list',
+                        'save-to-pdf',
+                    ],
+                    'roles'      => [
+                        Registry::PROCUREMENT_INITIATOR,
+                        Registry::BOOKER_RESTAURANT
+                    ],
+                    'roleParams' => $roleParams
+                ],
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'order-create-guide',
+                    ],
+                    'roles'      => [
+                        Registry::PURCHASER_RESTAURANT,
+                    ],
+                    'roleParams' => $roleParams
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/edi/order-history",

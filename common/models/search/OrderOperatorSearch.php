@@ -10,6 +10,7 @@ use common\models\Organization;
 use common\models\Profile;
 use common\models\User;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 use yii\db\Query;
 
 class OrderOperatorSearch extends Order
@@ -86,7 +87,7 @@ class OrderOperatorSearch extends Order
         $tblOpC = OperatorCall::tableName();
         $tblOpVC = OperatorVendorComment::tableName();
         $tblCurr = Currency::tableName();
-        
+
         $query = (new Query())->select([
             "$tblOrder.id as id",
             "$tblOrder.created_at",
@@ -146,7 +147,13 @@ class OrderOperatorSearch extends Order
                 ]
             ])
             ->andWhere('op.operator_id is null OR op.operator_id = :current_user', [':current_user' => $this->user_id])
-            ->andWhere("$tblOrder.created_at > '2018-10-17 00:00:00'");
+            ->andWhere("$tblOrder.created_at > '2018-10-17 00:00:00'")
+            //Показывать заказы только если они простояли 1 час
+            ->andWhere([
+                '<',
+                "$tblOrder.created_at",
+                \gmdate('Y-m-d H:i:s', strtotime("-1 hour"))
+            ]);
 
         $query->orderBy([
             'status_call_id' => SORT_DESC,
@@ -268,7 +275,7 @@ class OrderOperatorSearch extends Order
                 ':operator_updated_at' => date('Y-m-d', strtotime($operator_updated_at))
             ]);
         }
-
+        
         $dataProvider = new ActiveDataProvider([
             'query'      => $query,
             'pagination' => ['pageSize' => 20],

@@ -5,6 +5,7 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
+use api_web\classes\EmailRoboWebApi;
 use api_web\components\Registry;
 use api_web\components\ValidateRequest;
 use api_web\components\WebApi;
@@ -24,6 +25,7 @@ use common\models\vetis\VetisProductItem;
 use common\models\vetis\VetisRussianEnterprise;
 use common\models\vetis\VetisSubproductByProduct;
 use common\models\vetis\VetisUnit;
+use common\models\VetisTransport;
 use frontend\modules\clientintegr\modules\merc\models\productForm;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
@@ -506,7 +508,7 @@ class VetisWaybill extends WebApi
                 'name'    => $model->name,
                 'uuid'    => $model->uuid,
                 'guid'    => $model->guid,
-                'form'    => Registry::$vetis_product_types[$model->productType],
+                'form'    => VetisHelper::$vetis_product_types[$model->productType],
                 'article' => $model->code,
                 'gtin'    => $model->globalID,
                 'gost'    => $model->gost,
@@ -710,5 +712,28 @@ class VetisWaybill extends WebApi
                 throw new ValidationException($model->getFirstErrors());
             }
         }
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws ValidationException
+     * @throws BadRequestHttpException
+     */
+    public function createTransport($request)
+    {
+        $orgId = $request['org_id'] ?? $this->user->organization_id;
+        (new EmailRoboWebApi())->validateOrgId($orgId);
+        $model = new VetisTransport();
+        $model->org_id = $orgId;
+        $model->vehicle_number = $request['vehicle_number'] ?? null;
+        $model->trailer_number = $request['trailer_number'] ?? null;
+        $model->container_number = $request['container_number'] ?? null;
+        $model->transport_storage_type = $request['transport_storage_type'] ?? null;
+        if (!$model->save()) {
+            throw new ValidationException($model->getFirstErrors());
+        }
+
+        return ['result' => true];
     }
 }

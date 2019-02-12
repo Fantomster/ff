@@ -59,12 +59,9 @@ class TestVendorsSearch extends TestVendors
             return $dataProvider;
         }
 
-        $query->andFilterWhere([
-            'id'         => $this->id,
-            'vendor_id'  => $this->vendor_id,
-            'guide_name' => $this->guide_name,
-            'is_active'  => $this->is_active,
-        ]);
+        $query->andFilterWhere(['like', 'vendor_id', $this->vendor_id])
+            ->andFilterWhere(['like', 'guide_name', $this->guide_name])
+            ->andFilterWhere(['like', 'is_active', $this->is_active]);
 
         return $dataProvider;
     }

@@ -36,6 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'attribute' => 'status_id',
+                        'filter'    => [0 => 'Не активно', 1 => 'Активно'],
                         'value'     => function ($model) {
                             if ($model) return ($model->status_id == 1) ? 'Активно' : 'Не активно';
                         },

@@ -4,25 +4,25 @@ namespace api\common\models\merc;
 
 use Yii;
 use common\models\Organization;
-use yii\db\Expression;
 
 /**
  * This is the model class for table "merc_service".
  *
- * @property integer $id
- * @property integer $org
- * @property string $fd
- * @property string $td
- * @property integer $status_id
- * @property integer $is_deleted
- * @property string $object_id
- * @property integer $user_id
- * @property string $created_at
- * @property string $updated_at
- * @property string $code
- * @property string $name
- * @property string $address
- * @property string $phone
+ * @property integer      $id
+ * @property integer      $org
+ * @property string       $fd
+ * @property string       $td
+ * @property integer      $status_id
+ * @property integer      $is_deleted
+ * @property string       $object_id
+ * @property integer      $user_id
+ * @property string       $created_at
+ * @property string       $updated_at
+ * @property string       $code
+ * @property string       $name
+ * @property string       $address
+ * @property string       $phone
+ * @property Organization $organization
  */
 class mercService extends \yii\db\ActiveRecord
 {
@@ -31,8 +31,8 @@ class mercService extends \yii\db\ActiveRecord
 
     public static $licenses_list = [
         '1' => 'Стандартная лицензия',
-        '2' => 'Расширеная лицензия',
-        ];
+        '2' => 'Расширенная лицензия',
+    ];
 
     /**
      * @inheritdoc
@@ -61,6 +61,7 @@ class mercService extends \yii\db\ActiveRecord
             [['object_id', 'phone'], 'string', 'max' => 45],
             [['code'], 'string', 'max' => 128],
             [['name', 'address'], 'string', 'max' => 255],
+            [['org'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::class, 'targetAttribute' => ['org' => 'id']],
         ];
     }
 
@@ -70,20 +71,20 @@ class mercService extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'org' => 'Организация MixCart',
-            'fd' => 'Активно с',
-            'td' => 'Активно по',
-            'status_id' => 'Статус',
+            'id'         => 'ID',
+            'org'        => 'Организация MixCart',
+            'fd'         => 'Активно с',
+            'td'         => 'Активно по',
+            'status_id'  => 'Статус',
             'is_deleted' => 'Is Deleted',
-            'object_id' => 'Object ID',
-            'user_id' => 'User ID',
+            'object_id'  => 'Object ID',
+            'user_id'    => 'User ID',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'code' => 'Code',
-            'name' => 'Название',
-            'address' => 'Address',
-            'phone' => 'Phone',
+            'code'       => 'Code',
+            'name'       => 'Название',
+            'address'    => 'Address',
+            'phone'      => 'Phone',
         ];
     }
 
@@ -113,13 +114,14 @@ class mercService extends \yii\db\ActiveRecord
 
     /**
      * Лизензия
+     *
      * @return iikoService|array|null|\yii\db\ActiveRecord
      */
     public static function getLicense($org_id = null)
     {
         return self::find()
             //->where(['status_id' => 2])
-            ->andWhere('org = :org', ['org' => ($org_id??(Yii::$app->user->identity)->organization_id)])
+            ->andWhere('org = :org', ['org' => ($org_id ?? (Yii::$app->user->identity)->organization_id)])
             //->andOnCondition('td >= NOW()')
             //->andOnCondition('fd <= NOW()')
             ->one();

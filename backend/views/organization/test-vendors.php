@@ -1,10 +1,8 @@
 <?php
 
 use yii\helpers\Html;
-//use yii\grid\GridView;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
-use kartik\export\ExportMenu;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\OrganizationSearch */
@@ -16,20 +14,21 @@ $this->params['breadcrumbs'][] = $this->title;
 $gridColumns = [
     [
         'attribute' => 'vendor_id',
-        'format' => 'raw',
-        'value' => function ($data) {
+        'format'    => 'raw',
+        'value'     => function ($data) {
             return Html::a($data['vendor_id'], ['organization/update-test-vendor', 'id' => $data['id']]);
         },
     ],
     [
-            'attribute' => 'guide_name'
+        'attribute' => 'guide_name'
     ],
     [
         'attribute' => 'is_active',
-        'format' => 'raw',
-        'value' => function ($data) {
-            if(!empty($data->is_active)){
-              return '<span class="text-success">Да</span>';
+        'format'    => 'raw',
+        'filter'    => [0 => 'Нет', 1 => 'Да'],
+        'value'     => function ($data) {
+            if (!empty($data->is_active)) {
+                return '<span class="text-success">Да</span>';
             }
             return '';
         }
@@ -58,8 +57,8 @@ $gridColumns = [
     <?=
     GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => $gridColumns,
+        'filterModel'  => $searchModel,
+        'columns'      => $gridColumns,
     ]);
     ?>
     <?php Pjax::end(); ?></div>

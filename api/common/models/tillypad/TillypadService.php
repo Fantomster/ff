@@ -27,6 +27,7 @@ use yii\db\Expression;
  * @property string  $name
  * @property string  $address
  * @property string  $phone
+ * @property Organization $organization
  */
 class TillypadService extends \yii\db\ActiveRecord
 {
@@ -57,6 +58,7 @@ class TillypadService extends \yii\db\ActiveRecord
             [['object_id', 'phone'], 'string', 'max' => 45],
             [['code'], 'string', 'max' => 128],
             [['name', 'address'], 'string', 'max' => 255],
+            [['org'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::class, 'targetAttribute' => ['org' => 'id']],
         ];
     }
 

@@ -5,6 +5,8 @@ namespace api\common\models\tillypad\search;
 use api\common\models\tillypad\TillypadService;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use common\models\Organization;
+use common\helpers\DBNameHelper;
 
 class TillypadServiceSearch extends TillypadService
 {
@@ -35,6 +37,7 @@ class TillypadServiceSearch extends TillypadService
     public function search($params)
     {
         $query = TillypadService::find();
+        $dbName = DBNameHelper::getMainName();
 
         // add conditions that should always apply here
 
@@ -43,24 +46,17 @@ class TillypadServiceSearch extends TillypadService
         ]);
 
         $this->load($params);
+        $query->leftJoin($dbName . '.' . Organization::tableName(), 'organization.id = org');
 
         if (!$this->validate()) {
             return $dataProvider;
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
-            'id'        => $this->id,
-            'name'      => $this->name,
-            'org'       => $this->org,
-            'fd'        => $this->fd,
-            'td'        => $this->td,
-            'code'      => $this->code,
-            'status_id' => $this->status_id,
-        ]);
-
-        $query->andFilterWhere(['like', 'code', $this->code])
-            ->andFilterWhere(['like', 'name', $this->name]);
+        $query->andFilterWhere(['status_id' => $this->status_id])
+            ->andFilterWhere(['like', 'fd', $this->fd])
+            ->andFilterWhere(['like', 'td', $this->td])
+            ->andFilterWhere(['like', 'organization.name', $this->org]);
 
         return $dataProvider;
     }

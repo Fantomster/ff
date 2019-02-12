@@ -17,22 +17,22 @@ class IikoController extends Controller
     public function behaviors()
     {
         return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
+            'verbs'  => [
+                'class'   => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
             'access' => [
-                'class' => AccessControl::className(),
+                'class'      => AccessControl::className(),
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'rules' => [
+                'rules'      => [
                     [
                         'actions' => ['index', 'update', 'create', 'delete', 'autocomplete'],
-                        'allow' => true,
-                        'roles' => [
+                        'allow'   => true,
+                        'roles'   => [
                             Role::ROLE_ADMIN,
                         ],
                     ],
@@ -47,7 +47,7 @@ class IikoController extends Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
+            'searchModel'  => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
@@ -55,6 +55,7 @@ class IikoController extends Controller
     /**
      * Updates an existing Organization model.
      * If update is successful, the browser will be redirected to the 'view' page.
+     *
      * @param integer $id
      * @return mixed
      */
@@ -90,7 +91,8 @@ class IikoController extends Controller
         }
     }
 
-    public function actionAutocomplete($term = null) {
+    public function actionAutocomplete($term = null)
+    {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         if (!is_null($term)) {
             $query = new \yii\db\Query;

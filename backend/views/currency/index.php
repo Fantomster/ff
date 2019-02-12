@@ -7,8 +7,6 @@ use yii\web\View;
 use yii\bootstrap\Modal;
 use common\assets\CroppieAsset;
 use yii\helpers\Url;
-use yii\helpers\ArrayHelper;
-use kartik\depdrop\DepDrop;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\CatalogBaseGoodsSearch */
@@ -103,41 +101,42 @@ $this->registerJs($customJs, View::POS_READY);
     <?php Pjax::begin(); ?>    <?=
     GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'pjax' => true, // pjax is set to always true for this demo
+        'filterModel'  => $searchModel,
+        'pjax'         => true, // pjax is set to always true for this demo
         'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
-        'columns' => [
+        'columns'      => [
             [
-                'format' => 'raw',
+                'format'    => 'raw',
                 'attribute' => 'text',
-                'label' => 'Название',
+                'label'     => 'Название',
             ],
             [
-                'format' => 'raw',
+                'format'    => 'raw',
                 'attribute' => 'iso_code',
-                'label' => 'ISO код',
+                'label'     => 'ISO код',
             ],
             [
-                'format' => 'raw',
+                'format'    => 'raw',
                 'attribute' => 'num_code',
-                'label' => 'Числовой код',
+                'label'     => 'Числовой код',
             ],
             [
-                'format' => 'raw',
+                'format'    => 'raw',
                 'attribute' => 'is_active',
-                'value' => function ($data) {
-                    return ($data['is_active'])?'Активна':'<span style="color: red;">Не активна</span>';
+                'filter'    => [0 => 'Не активна', 1 => 'Активна'],
+                'value'     => function ($data) {
+                    return ($data['is_active']) ? 'Активна' : '<span style="color: red;">Не активна</span>';
                 },
-                'label' => 'Статус',
+                'label'     => 'Статус',
             ],
 
             [
-                'class' => 'yii\grid\ActionColumn',
+                'class'    => 'yii\grid\ActionColumn',
                 'template' => '{edit}',
-                'buttons' => [
-                    'edit' => function ($url,$model) {
-                        $customurl=Yii::$app->getUrlManager()->createUrl(['currency/update','id'=>$model['id']]);
-                        return \yii\helpers\Html::a( '<span class="glyphicon glyphicon-pencil"></span>', $customurl,
+                'buttons'  => [
+                    'edit' => function ($url, $model) {
+                        $customurl = Yii::$app->getUrlManager()->createUrl(['currency/update', 'id' => $model['id']]);
+                        return \yii\helpers\Html::a('<span class="glyphicon glyphicon-pencil"></span>', $customurl,
                             ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
                     },
                 ],
@@ -148,9 +147,9 @@ $this->registerJs($customJs, View::POS_READY);
     <?php Pjax::end(); ?></div>
 <?php
 Modal::begin([
-    'id' => 'add-product-market-place',
+    'id'            => 'add-product-market-place',
     'clientOptions' => false,
-    'size' => 'modal-lg',
+    'size'          => 'modal-lg',
 ]);
 Modal::end();
 ?>

@@ -2,10 +2,8 @@
 
 namespace api\common\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use api\common\models\RkProduct;
 
 /**
  * RkAccessSearch represents the model behind the search form about `api\common\models\RkAccess`.
@@ -18,9 +16,9 @@ class RkServiceSearch extends RkService
     public function rules()
     {
         return [
-        //    [['org','fd','td','object_id','status_id'], 'required'],
-        //    [['id','fid','org','ver'], 'integer'],
-            [['created_at','updated_at','is_deleted','user_id','org','fd','td','status_id','is_deleted','code','name','address','phone'], 'safe'],
+            //    [['org','fd','td','object_id','status_id'], 'required'],
+            //    [['id','fid','org','ver'], 'integer'],
+            [['id', 'last_active', 'created_at', 'updated_at', 'is_deleted', 'user_id', 'org', 'fd', 'td', 'status_id', 'is_deleted', 'code', 'name', 'address', 'phone'], 'safe'],
         ];
     }
 
@@ -37,7 +35,6 @@ class RkServiceSearch extends RkService
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
@@ -59,22 +56,13 @@ class RkServiceSearch extends RkService
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'name' => $this->name,
-            'org' => $this->org,
-            'fd' => $this->fd,
-            'td' => $this->td,
-            'code' => $this->code,
-            'status_id' => $this->status_id,
-        ]);
-
-        $query->andFilterWhere(['like', 'code', $this->code])
-              ->andFilterWhere(['like', 'name', $this->name]);
-          //  ->andFilterWhere(['like', 'token', $this->token])
-          //  ->andFilterWhere(['like', 'lic', $this->lic])
-          //  ->andFilterWhere(['like', 'usereq', $this->usereq])
-          //  ->andFilterWhere(['like', 'comment', $this->comment]);
+        $query->andFilterWhere(['status_id' => $this->status_id])
+            ->andFilterWhere(['like', 'id', $this->id])
+            ->andFilterWhere(['like', 'code', $this->code])
+            ->andFilterWhere(['like', 'address', $this->address])
+            ->andFilterWhere(['like', 'name', $this->name])
+            ->andFilterWhere(['like', 'td', $this->td])
+            ->andFilterWhere(['like', 'last_active', $this->last_active]);
 
         return $dataProvider;
     }

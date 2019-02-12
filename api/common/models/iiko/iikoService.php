@@ -9,20 +9,21 @@ use yii\db\Expression;
 /**
  * This is the model class for table "iiko_service".
  *
- * @property integer $id
- * @property integer $org
- * @property string $fd
- * @property string $td
- * @property integer $status_id
- * @property integer $is_deleted
- * @property string $object_id
- * @property integer $user_id
- * @property string $created_at
- * @property string $updated_at
- * @property string $code
- * @property string $name
- * @property string $address
- * @property string $phone
+ * @property integer      $id
+ * @property integer      $org
+ * @property string       $fd
+ * @property string       $td
+ * @property integer      $status_id
+ * @property integer      $is_deleted
+ * @property string       $object_id
+ * @property integer      $user_id
+ * @property string       $created_at
+ * @property string       $updated_at
+ * @property string       $code
+ * @property string       $name
+ * @property string       $address
+ * @property string       $phone
+ * @property Organization $organization
  */
 class iikoService extends \yii\db\ActiveRecord
 {
@@ -53,6 +54,7 @@ class iikoService extends \yii\db\ActiveRecord
             [['object_id', 'phone'], 'string', 'max' => 45],
             [['code'], 'string', 'max' => 128],
             [['name', 'address'], 'string', 'max' => 255],
+            [['org'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::class, 'targetAttribute' => ['org' => 'id']],
         ];
     }
 
@@ -62,20 +64,20 @@ class iikoService extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'org' => 'Организация MixCart',
-            'fd' => 'Активно с',
-            'td' => 'Активно по',
-            'status_id' => 'Статус',
+            'id'         => 'ID',
+            'org'        => 'Организация MixCart',
+            'fd'         => 'Активно с',
+            'td'         => 'Активно по',
+            'status_id'  => 'Статус',
             'is_deleted' => 'Is Deleted',
-            'object_id' => 'Object ID',
-            'user_id' => 'User ID',
+            'object_id'  => 'Object ID',
+            'user_id'    => 'User ID',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'code' => 'Code',
-            'name' => 'Название',
-            'address' => 'Address',
-            'phone' => 'Phone',
+            'code'       => 'Code',
+            'name'       => 'Название',
+            'address'    => 'Address',
+            'phone'      => 'Phone',
         ];
     }
 
@@ -129,6 +131,7 @@ class iikoService extends \yii\db\ActiveRecord
 
     /**
      * Лицензия
+     *
      * @return iikoService|array|null|\yii\db\ActiveRecord
      */
     public static function getLicense()

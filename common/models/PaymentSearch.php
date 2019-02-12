@@ -53,12 +53,9 @@ class PaymentSearch extends Payment
             return $dataProvider;
         }
 
-        $query->andFilterWhere([
-            'payment_id' => $this->payment_id,
-            'total'      => $this->total,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-        ]);
+        $query->andFilterWhere(['like', 'payment_id', $this->payment_id])
+            ->andFilterWhere(['like', 'receipt_number', $this->receipt_number])
+            ->andFilterWhere(['like', 'total', $this->total]);
 
         if (isset($this->date) && !empty($this->date)) {
             $query->andFilterWhere(['date' => date('Y-m-d', strtotime($this->date))]);
@@ -71,10 +68,6 @@ class PaymentSearch extends Payment
         if (isset($this->type_payment) && !empty($this->type_payment) && $this->type_payment != 0) {
             $query->andFilterWhere(['type_payment' => $this->type_payment]);
         }
-
-        $query->andFilterWhere(['like', 'receipt_number', $this->receipt_number])
-            ->andFilterWhere(['like', 'email', $this->email])
-            ->andFilterWhere(['like', 'phone', $this->phone]);
 
         return $dataProvider;
     }

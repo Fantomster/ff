@@ -5,6 +5,8 @@ namespace api\common\models\iiko\search;
 use api\common\models\iiko\iikoService;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use common\models\Organization;
+use common\helpers\DBNameHelper;
 
 class iikoServiceSearch extends iikoService
 {
@@ -14,7 +16,7 @@ class iikoServiceSearch extends iikoService
     public function rules()
     {
         return [
-            [['created_at','updated_at','is_deleted','user_id','org','fd','td','status_id','is_deleted','code','name','address','phone'], 'safe'],
+            [['created_at', 'updated_at', 'is_deleted', 'user_id', 'org', 'fd', 'td', 'status_id', 'is_deleted', 'code', 'name', 'address', 'phone'], 'safe'],
         ];
     }
 
@@ -30,12 +32,12 @@ class iikoServiceSearch extends iikoService
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     *
      * @return ActiveDataProvider
      */
     public function search($params)
     {
         $query = iikoService::find();
+        $dbName = DBNameHelper::getMainName();
 
         // add conditions that should always apply here
 
@@ -44,24 +46,17 @@ class iikoServiceSearch extends iikoService
         ]);
 
         $this->load($params);
+        $query->leftJoin($dbName . '.' . Organization::tableName(), 'organization.id = org');
 
         if (!$this->validate()) {
             return $dataProvider;
         }
 
         // grid filtering conditions
-        $query->andFilterWhere([
-            'id' => $this->id,
-            'name' => $this->name,
-            'org' => $this->org,
-            'fd' => $this->fd,
-            'td' => $this->td,
-            'code' => $this->code,
-            'status_id' => $this->status_id,
-        ]);
-
-        $query->andFilterWhere(['like', 'code', $this->code])
-            ->andFilterWhere(['like', 'name', $this->name]);
+        $query->andFilterWhere(['status_id' => $this->status_id])
+            ->andFilterWhere(['like', 'fd', $this->fd])
+            ->andFilterWhere(['like', 'td', $this->td])
+            ->andFilterWhere(['like', 'organization.name', $this->org]);
 
         return $dataProvider;
     }

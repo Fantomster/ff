@@ -13,6 +13,13 @@ use yii\web\BadRequestHttpException;
 class WebApiHelper
 {
     /**
+     * Возвращать полное наименование организации
+     *
+     * @var bool
+     */
+    public static $fullNameOrganization = false;
+
+    /**
      * Атрибуты, в которых дата
      *
      * @var array
@@ -149,14 +156,16 @@ class WebApiHelper
      * @param Organization $model
      * @return mixed
      */
-    public static function prepareOrganization(Organization $model)
+    public static function prepareOrganization(Organization $model = null)
     {
         if (empty($model)) {
             return null;
         }
 
+        $name = static::$fullNameOrganization ? $model->getName() : $model->name;
+
         $item['id'] = (int)$model->id;
-        $item['name'] = self::clearValue($model->name);
+        $item['name'] = self::clearValue($name);
         $item['legal_entity'] = $model->buisinessInfo->legal_entity ?? $model->legal_entity ?? "";
         $item['contact_name'] = self::clearValue($model->contact_name);
         $item['phone'] = self::clearValue($model->phone);
@@ -190,14 +199,14 @@ class WebApiHelper
         if (in_array($model->type_id, [Organization::TYPE_SUPPLIER, Organization::TYPE_LAZY_VENDOR])) {
             $item['inn'] = $model->buisinessInfo->inn ?? $model->inn ?? null;
             $item['allow_editing'] = $model->allow_editing;
-            $item['min_order_price'] = round($model->delivery->min_order_price, 2);
-            $item['min_free_delivery_charge'] = round($model->delivery->min_free_delivery_charge, 2);
-            $item['delivery_discount_percent'] = $model->delivery->delivery_discount_percent;
+            $item['min_order_price'] = round($model->delivery->min_order_price ?? 0, 2);
+            $item['min_free_delivery_charge'] = round($model->delivery->min_free_delivery_charge ?? 0, 2);
+            $item['delivery_discount_percent'] = $model->delivery->delivery_discount_percent ?? 0;
             $item['disabled_delivery_days'] = $model->getDisabledDeliveryDays();
             //Дни доставки
             $days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
             foreach ($days as $day) {
-                $item['delivery_days'][$day] = (int)$model->delivery->{$day};
+                $item['delivery_days'][$day] = (int)($model->delivery->{$day} ?? 0);
             }
             $item['is_edi'] = $model->isEdi();
         }

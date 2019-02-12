@@ -2,6 +2,7 @@
 
 namespace api_web\components;
 
+use api_web\classes\UserWebApi;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -50,5 +51,20 @@ class WebApi
                 throw new BadRequestHttpException('empty_param|' . $param);
             }
         }
+    }
+
+    /**
+     * @param $orgId
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+    public function validateOrgId($orgId)
+    {
+        $availableBusinesses = (new UserWebApi())->getUserOrganizationBusinessList('id');
+        if (!in_array($orgId, array_keys($availableBusinesses['result']))) {
+            throw new BadRequestHttpException('integration.email.bad_organization_id');
+        }
+
+        return $orgId;
     }
 }

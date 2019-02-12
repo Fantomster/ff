@@ -67,6 +67,7 @@ class OrgUseMercFrequently extends Model
         } else {
             $query->where("id IN ({$condition})");
         }
+        $query->andWhere(['blacklisted' => Organization::STATUS_WHITELISTED]);
 
         $provider = new SqlDataProvider([
             'sql'        => $query->createCommand()->getRawSql(),

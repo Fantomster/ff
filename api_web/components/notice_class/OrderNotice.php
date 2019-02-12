@@ -105,12 +105,11 @@ class OrderNotice
         $dataProvider = new ArrayDataProvider(['allModels' => $order->orderContent, 'pagination' => false]);
         $orgs[] = $order->vendor_id;
         $orgs[] = $order->client_id;
-
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             foreach ($orgs as $org) {
                 $notification = $recipient->getEmailNotification($org);
-                if ($notification && $notification->order_created) {
+                if ($notification && $notification->order_created && !empty($email)) {
 
 //                    if ($recipient->organization->type_id == Organization::TYPE_RESTAURANT) {
 //                        //
@@ -175,7 +174,7 @@ class OrderNotice
             foreach ($orgs as $org) {
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification) {
-                    if ($notification->order_canceled) {
+                    if ($notification->order_canceled && !empty($email)) {
                         $mailer->compose('@mail_views/orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                             ->setTo($email)
                             ->setSubject($subject)
@@ -237,7 +236,7 @@ class OrderNotice
             foreach ($orgs as $org) {
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification) {
-                    if ($notification->order_done) {
+                    if ($notification->order_done && !empty($email)) {
                         $mailer->compose('@mail_views/orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                             ->setTo($email)
                             ->setSubject($subject)
@@ -302,7 +301,7 @@ class OrderNotice
             foreach ($organizations as $org) {
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification) {
-                    if ($notification->order_processing) {
+                    if ($notification->order_processing && !empty($email)) {
                         $mailer->compose('@mail_views/orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient", "isDesadv"))
                             ->setTo($email)
                             ->setSubject($subject)
@@ -486,7 +485,7 @@ class OrderNotice
             foreach ($orgs as $org) {
                 $notification = $recipient->getEmailNotification($org);
                 if ($notification)
-                    if ($notification->order_changed) {
+                    if ($notification->order_changed && !empty($email)) {
                         $mailer->compose('@mail_views/orderChange', compact("subject", "senderOrg", "order", "dataProvider", "recipient", "changed", "deleted"))
                             ->setTo($email)
                             ->setSubject($subject)

@@ -136,8 +136,27 @@ class LicenseOrganization extends ActiveRecord
             ->leftJoin($licenseTableName, "$licenseTableName.id = $licenseOrgTablename.license_id")
             ->leftJoin($licenseServiceTableName, "$licenseServiceTableName.license_id = $licenseTableName.id")
             ->where("$licenseTableName.is_active = 1 and now() between $licenseOrgTablename.fd 
-            and $licenseOrgTablename.td and $licenseOrgTablename.org_id = :organization and $licenseServiceTableName.service_id = :service",
+            and $licenseOrgTablename.td and $licenseOrgTablename.org_id = :organization and $licenseTableName.service_id = :service",
                 [':organization' => $organization_id, ':service' => $service_id])
+            ->one();
+    }
+
+    /**
+     * Получение всех активных лицензий всех организаций для определенного сервиса
+     *
+     * @param $service_id
+     * @return ActiveRecord[]
+     */
+    public static function getLicensesForService($service_id)
+    {
+        $licenseTableName = License::tableName();
+        $licenseOrgTablename = self::tableName();
+        return self::find()
+            ->select(["$licenseOrgTablename.*"])
+            ->leftJoin($licenseTableName, "$licenseTableName.id = $licenseOrgTablename.license_id")
+            ->where("$licenseTableName.is_active = 1 and now() between $licenseOrgTablename.fd 
+            and $licenseOrgTablename.td and $licenseTableName.service_id = :service",
+                [':service' => $service_id])
             ->all();
     }
 }

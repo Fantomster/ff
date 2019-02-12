@@ -203,6 +203,7 @@ class EDIClass extends Component
                     throw new Exception('Error saving order content');
                 }
             }
+
             foreach ($positions as $position) {
                 $quantity = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
                 if (!$quantity || $quantity == 0.000 || $position->PRICE == 0.00) continue;
@@ -214,7 +215,25 @@ class EDIClass extends Component
                 $barcode = (int)$position->PRODUCT;
                 if (!in_array($contID, $orderContentArr) && !in_array($barcode, $barcodeArray)) {
                     $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
-                    if (!$good) continue;
+                    if (!$good) {
+                        $rel = RelationSuppRest::findOne(['supp_org_id' => $order->vendor_id, 'rest_org_id' => $ediOrganization->organization_id]);
+                        if (empty($rel)) {
+                            throw new Exception("Not found RelationSuppRest: supp_org_id = {$order->vendor_id} AND rest_org_id = {$ediOrganization->organization_id}");
+                        }
+                        $good = new CatalogBaseGoods();
+                        $good->cat_id = $rel->cat_id;
+                        $good->article = $position->PRODUCTIDSUPPLIER;
+                        $good->product = $position->DESCRIPTION;
+                        $good->status = CatalogBaseGoods::STATUS_ON;
+                        $good->supp_org_id = $organization->id;
+                        $good->price = $position->PRICE;
+                        $good->units = 0;
+                        $good->ed = 0;
+                        $good->category_id = null;
+                        $good->barcode = $barcode;
+                        $good->edi_supplier_article = $barcode;
+                        $good->save();
+                    };
                     if ($isDesadv) {
                         $quan = $position->DELIVEREDQUANTITY ?? $position->ORDEREDQUANTITY;
                     } else {
@@ -333,7 +352,7 @@ class EDIClass extends Component
         }
         $ediRest = EdiOrganization::findOne(['gln_code' => $buyerGLN, 'provider_id' => $providerID]);
         if (!$ediRest) {
-            \Yii::error('No EDI organization(rest)');
+            \Yii::error("No EDI organization(rest) org_id:{$organization->id}, gln_code: {$buyerGLN}, provider_id:$providerID");
             return false;
         }
         $rest = Organization::findOne(['id' => $ediRest->organization_id]);

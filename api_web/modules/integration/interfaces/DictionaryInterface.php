@@ -8,8 +8,15 @@
 
 namespace api_web\modules\integration\interfaces;
 
-
+/**
+ * Interface DictionaryInterface
+ *
+ * @package api_web\modules\integration\interfaces
+ */
 interface DictionaryInterface
 {
-    public function productList($request);
+    /**
+     * @return mixed
+     */
+    public function getList();
 }

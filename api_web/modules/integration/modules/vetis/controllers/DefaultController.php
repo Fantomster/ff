@@ -5,6 +5,7 @@ namespace api_web\modules\integration\modules\vetis\controllers;
 use api_web\classes\UserWebApi;
 use api_web\components\Registry;
 use api_web\components\WebApiController;
+use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use api_web\modules\integration\modules\vetis\models\VetisWaybill;
 use yii\filters\AccessControl;
 
@@ -1140,14 +1141,30 @@ class DefaultController extends WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  "1": "Мясо и мясопродукты.",
-     *                  "2": "Корма и кормовые добавки.",
-     *                  "3": "Живые животные.",
-     *                  "4": "Лекарственные средства.",
-     *                  "5": "Пищевые продукты.",
-     *                  "6": "Непищевые продукты и другое.",
-     *                  "7": "Рыба и морепродукты.",
-     *                  "8": "Продукция, не требующая разрешения."
+     *                  {
+     *                      "1": "Мясо и мясопродукты."
+     *                  },
+     *                  {
+     *                      "2": "Корма и кормовые добавки."
+     *                  },
+     *                  {
+     *                      "3": "Живые животные."
+     *                  },
+     *                  {
+     *                      "4": "Лекарственные средства."
+     *                  },
+     *                  {
+     *                      "5": "Пищевые продукты."
+     *                  },
+     *                  {
+     *                      "6": "Непищевые продукты и другое."
+     *                  },
+     *                  {
+     *                      "7": "Рыба и морепродукты."
+     *                  },
+     *                  {
+     *                      "8": "Продукция, не требующая разрешения."
+     *                  }
      *              }
      *          )
      *     ),
@@ -1163,7 +1180,70 @@ class DefaultController extends WebApiController
      */
     public function actionProductTypeList()
     {
-        $this->response = Registry::$vetis_product_types;
+        $arResponse = [];
+        foreach (VetisHelper::$vetis_product_types as $key => $item) {
+            $arResponse[] = [$key => $item];
+        }
+        $this->response = $arResponse;
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/transport-storage-type-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка транспортных типов перевозки",
+     *     description="Получение списка транспортных типов перевозки",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "1": "замороженные"
+     *                  },
+     *                  {
+     *                      "2": "охлаженные"
+     *                  },
+     *                  {
+     *                      "3": "охлаждаемые"
+     *                  },
+     *                  {
+     *                      "4": "вентилируемые"
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionTransportStorageTypeList()
+    {
+        $arResponse = [];
+        foreach (VetisHelper::$transport_storage_types as $key => $item) {
+            $arResponse[] = [$key => $item];
+        }
+        $this->response = $arResponse;
     }
 
     /**
@@ -1503,7 +1583,10 @@ class DefaultController extends WebApiController
      *              @SWG\Property(
      *                  property="request",
      *                  default={
-     *                      "guid": "021bc2d9-f514-4491-b21a-ffe63023236f"
+     *                      "guid": "021bc2d9-f514-4491-b21a-ffe63023236f",
+     *                      "search": {
+     *                          "name": "ко"
+     *                      }
      *                  }
      *              )
      *         )
@@ -1640,4 +1723,175 @@ class DefaultController extends WebApiController
     {
         $this->response = (new VetisWaybill())->getProductInfo($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/create-product-item",
+     *     tags={"Integration/vetis"},
+     *     summary="Добавление новой продукции в справочник наименований продукции",
+     *     description="Добавление новой продукции в справочник наименований продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "product_type": 3,
+     *                      "form_guid": "20dda083-72d0-93e0-de2c-76ac4f88c5ce",
+     *                      "subtype_guid": "98748766-2894-b5db-ab2f-035db5f44945",
+     *                      "name": "new Kotleta()",
+     *                      "article": "7d7df18c5832",
+     *                      "gtin": "4602471014317",
+     *                      "has_gost": true,
+     *                      "gost": "ГОСТ-123",
+     *                      "ingredients": {
+     *                          {
+     *                              "name": "Грибы",
+     *                              "amount": 0.001,
+     *                          },
+     *                          {
+     *                              "name": "Грибы",
+     *                              "amount": 0.001,
+     *                          }
+     *                      },
+     *                      "subject": "41fb53ea-31c3-b116-9ce2-7d7df18c5832",
+     *                      "producers": {
+     *                          "41fb53ea-31c3-b116-9ce2-7d7df18c5832",
+     *                          "41fb53ea-31c3-b116-9ce2-7d7df18c5832"
+     *                      },
+     *                      "package": {
+     *                          "type_guid": "41fb53ea-31c3-b116-9ce2-7d7df18c5832",
+     *                          "amount": 1,
+     *                          "volume": 12,
+     *                          "unit_guid": "41fb53ea-31c3-b116-9ce2-7d7df18c5832"
+     *                      }
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionCreateProductItem()
+    {
+        $this->response = (new VetisWaybill())->createProductItem($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/create-transport",
+     *     tags={"Integration/vetis"},
+     *     summary="Добавление нового транспорта в справочник Транспортные средства",
+     *     description="Если не отправлять org_id создат ТС в текущей организации",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vehicle_number": "1",
+     *                      "trailer_number": "1",
+     *                      "container_number": "1",
+     *                      "transport_storage_type": 1,
+     *                      "org_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionCreateTransport()
+    {
+        $this->response = (new VetisWaybill())->createTransport($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/delete-transport",
+     *     tags={"Integration/vetis"},
+     *     summary="Удаление транспорта из справочника Транспортные средства",
+     *     description="Если не отправлять org_id попробует удалить ТС в текущей организации",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 1,
+     *                      "org_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionDeleteTransport()
+    {
+        $this->response = (new VetisWaybill())->deleteTransport($this->request);
+    }
+
+
 }

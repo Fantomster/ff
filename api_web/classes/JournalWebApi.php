@@ -68,7 +68,7 @@ class JournalWebApi extends WebApi
 
         if (isset($request['search']['user_id']) && !empty($request['search']['user_id'])) {
             $query->andWhere(['user_id' => $request['search']['user_id']]);
-        } elseif ($this->user->role_id == Role::ROLE_RESTAURANT_MANAGER) {
+        } elseif (in_array($this->user->role_id, [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_FKEEPER_MANAGER])) {
             $query->andWhere(['organization_id' => $this->user->organization_id]);
         } else {
             $query->andWhere(['user_id' => $this->user->id]);
@@ -87,6 +87,8 @@ class JournalWebApi extends WebApi
         $tableName = Journal::tableName();
         $allServiceTable = AllServiceOperation::tableName();
 
+        $services = [Registry::MERC_SERVICE_ID, Registry::IIKO_SERVICE_ID];
+
         $query->select([
             "{$tableName}.id",
             "{$tableName}.service_id",
@@ -94,12 +96,10 @@ class JournalWebApi extends WebApi
             "{$tableName}.user_id",
             "{$tableName}.organization_id",
             "response" => new Expression(
-                "CASE WHEN {$tableName}.service_id = :m_service_id 
+                "CASE WHEN {$tableName}.service_id in (" . implode(',', $services) . ") 
                  THEN {$allServiceTable}.comment 
                  ELSE {$tableName}.response 
-                 END", [
-                    ':m_service_id' => Registry::MERC_SERVICE_ID
-                ]
+                 END"
             ),
             "{$tableName}.log_guide",
             "{$tableName}.type",

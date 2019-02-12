@@ -580,7 +580,7 @@ class RequestWebApi extends WebApi
             "amount"            => $model->amount,
             "comment"           => $model->comment,
             "client"            => WebApiHelper::prepareOrganization($model->client),
-            "vendor"            => WebApiHelper::prepareOrganization($model->vendor) ?? null,
+            "vendor"            => !empty($model->vendor) ? WebApiHelper::prepareOrganization($model->vendor) : null,
             "hits"              => (int)$model->hits ?? 0,
             "count_callback"    => (int)$model->countCallback ?? 0,
             "urgent"            => (int)$model->rush_order ?? 0,

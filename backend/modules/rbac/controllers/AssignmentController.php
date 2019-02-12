@@ -11,8 +11,10 @@
 namespace backend\modules\rbac\controllers;
 
 use common\models\rbac\AssignmentModel;
+use backend\modules\rbac\helpers\RbacHelper;
 use common\models\rbac\search\AssignmentSearch;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\web\Response;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -94,17 +96,26 @@ class AssignmentController extends Controller
      * Displays a single Assignment model.
      *
      * @param int $id
+     * @param     $orgId
      * @return mixed
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
      */
-    public function actionView(int $id)
+    public function actionView(int $id, $orgId = null)
     {
         $model = $this->findModel($id);
+        $orgList = RbacHelper::getOrgByUserId($id);
+
+        if (!empty($orgList) && is_null($orgId)) {
+            $orgId = key($orgList);
+        }
 
         return $this->render('view', [
-            'model'         => $model,
+            'user'          => $model->user,
+            'items'         => $model->getUserItemsByOrg($orgId),
             'usernameField' => $this->usernameField,
+            'orgId'         => $orgId,
+            'orgList'       => $orgList
         ]);
     }
 
@@ -112,34 +123,46 @@ class AssignmentController extends Controller
      * Assign items
      *
      * @param int $id
-     * @return array
+     * @param int $orgId
+     * @return Response
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
+     * @throws \Exception
      */
-    public function actionAssign(int $id)
+    public function actionAssign(int $id, int $orgId)
     {
         $items = Yii::$app->getRequest()->post('items', []);
         $assignmentModel = $this->findModel($id);
-        $assignmentModel->assign($items);
+        $assignmentModel->assignUserByOrg($items, $orgId);
 
-        return $assignmentModel->getItems();
+        return $this->redirect([
+            'assignment/view',
+            'id'    => $id,
+            'orgId' => $orgId
+        ]);
     }
 
     /**
      * Remove items
      *
      * @param int $id
-     * @return array
+     * @param int $orgId
+     * @return Response
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
      */
-    public function actionRemove(int $id)
+    public function actionRemove(int $id, int $orgId)
     {
         $items = Yii::$app->getRequest()->post('items', []);
         $assignmentModel = $this->findModel($id);
-        $assignmentModel->revoke($items);
+        $assignmentModel->revokeUserByOrg($items, $orgId);
 
-        return $assignmentModel->getItems();
+        return $this->redirect([
+            'assignment/view',
+            'id'    => $id,
+            'orgId' => $orgId
+        ]);
     }
 
     /**

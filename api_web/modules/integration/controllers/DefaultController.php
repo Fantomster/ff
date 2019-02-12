@@ -3,7 +3,9 @@
 namespace api_web\modules\integration\controllers;
 
 use api_web\classes\IntegrationWebApi;
+use api_web\components\Registry;
 use api_web\modules\integration\classes\SyncServiceFactory;
+use yii\filters\AccessControl;
 
 /**
  * Class DefaultController
@@ -14,6 +16,43 @@ use api_web\modules\integration\classes\SyncServiceFactory;
 class DefaultController extends \api_web\components\WebApiController
 {
     public $className = IntegrationWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'map-list',
+                        'map-update',
+                        'service-list',
+                    ],
+                    'roles'   => [
+                        Registry::MANAGER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT,
+                    ],
+                ],
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'user-service-set',
+                        'check-connect',
+                    ],
+                    'roles'   => [
+                        Registry::OPERATOR
+                    ],
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/integration/default/service-list",

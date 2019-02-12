@@ -12,6 +12,7 @@ use api_web\components\Registry;
 use api_web\modules\integration\classes\dictionaries\AbstractDictionary;
 use api_web\modules\integration\classes\Dictionary;
 use api_web\modules\integration\classes\Integration;
+use yii\filters\AccessControl;
 use api_web\modules\integration\modules\vetis\models\VetisWaybill;
 use yii\web\BadRequestHttpException;
 
@@ -23,6 +24,50 @@ use yii\web\BadRequestHttpException;
  */
 class DictionaryController extends \api_web\components\WebApiController
 {
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'list',
+                    ],
+                    'roles'   => [
+                        Registry::MANAGER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT,
+                    ],
+                ],
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'product-list',
+                        'agent-list',
+                        'agent-update',
+                        'store-list',
+                        'store-flat-list',
+                        'unit-list',
+                        'category-list',
+                        'category-set-selected',
+                        'check-agent-name',
+                        'product-type-list',
+                        'product-type-set-selected',
+                    ],
+                    'roles'   => [
+                        Registry::OPERATOR
+                    ],
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
+
     /**
      * @param $action
      * @return bool

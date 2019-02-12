@@ -5,7 +5,6 @@ namespace api_web\modules\integration\modules\vetis\models;
 use api\common\models\merc\mercLog;
 use api\common\models\merc\MercStockEntry;
 use api\common\models\merc\MercVsd;
-use api_web\classes\EmailRoboWebApi;
 use api_web\components\Registry;
 use api_web\components\ValidateRequest;
 use api_web\components\WebApi;

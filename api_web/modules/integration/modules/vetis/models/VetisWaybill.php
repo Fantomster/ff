@@ -667,7 +667,8 @@ class VetisWaybill extends WebApi
     }
 
     /**
-     * @param $request
+     * @param array  $request
+     * @param string $operation
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException

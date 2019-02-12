@@ -59,7 +59,8 @@ class DefaultController extends WebApiController
                         'product-info',
                         'create-product-item',
                         'create-transport',
-                        'delete-transport'
+                        'delete-transport',
+                        'delete-ingredient',
                     ],
                     'roles'      => [
                         Registry::MANAGER_RESTAURANT,
@@ -1150,28 +1151,36 @@ class DefaultController extends WebApiController
      *            @SWG\Schema(
      *              default={
      *                  {
-     *                      "1": "Мясо и мясопродукты."
+     *                      "id": 1,
+     *                      "name": "Мясо и мясопродукты."
      *                  },
      *                  {
-     *                      "2": "Корма и кормовые добавки."
+     *                      "id": 2,
+     *                      "name": "Корма и кормовые добавки."
      *                  },
      *                  {
-     *                      "3": "Живые животные."
+     *                      "id": 3,
+     *                      "name": "Живые животные."
      *                  },
      *                  {
-     *                      "4": "Лекарственные средства."
+     *                      "id": 4,
+     *                      "name": "Лекарственные средства."
      *                  },
      *                  {
-     *                      "5": "Пищевые продукты."
+     *                      "id": 5,
+     *                      "name": "Пищевые продукты."
      *                  },
      *                  {
-     *                      "6": "Непищевые продукты и другое."
+     *                      "id": 6,
+     *                      "name": "Непищевые продукты и другое."
      *                  },
      *                  {
-     *                      "7": "Рыба и морепродукты."
+     *                      "id": 7,
+     *                      "name": "Рыба и морепродукты."
      *                  },
      *                  {
-     *                      "8": "Продукция, не требующая разрешения."
+     *                      "id": 8,
+     *                      "name": "Продукция, не требующая разрешения."
      *                  }
      *              }
      *          )
@@ -1190,7 +1199,7 @@ class DefaultController extends WebApiController
     {
         $arResponse = [];
         foreach (VetisHelper::$vetis_product_types as $key => $item) {
-            $arResponse[] = [$key => $item];
+            $arResponse[] = ['id' => $key, 'name' => $item];
         }
         $this->response = $arResponse;
     }
@@ -1221,16 +1230,20 @@ class DefaultController extends WebApiController
      *            @SWG\Schema(
      *              default={
      *                  {
-     *                      "1": "замороженные"
+     *                      "id": 1,
+     *                      "name": "замороженные"
      *                  },
      *                  {
-     *                      "2": "охлаженные"
+     *                      "id": 2,
+     *                      "name": "охлаженные"
      *                  },
      *                  {
-     *                      "3": "охлаждаемые"
+     *                      "id": 3,
+     *                      "name": "охлаждаемые"
      *                  },
      *                  {
-     *                      "4": "вентилируемые"
+     *                      "id": 4,
+     *                      "name": "вентилируемые"
      *                  }
      *              }
      *          )
@@ -1249,7 +1262,7 @@ class DefaultController extends WebApiController
     {
         $arResponse = [];
         foreach (VetisHelper::$transport_storage_types as $key => $item) {
-            $arResponse[] = [$key => $item];
+            $arResponse[] = ['id' => $key, 'name' => $item];
         }
         $this->response = $arResponse;
     }

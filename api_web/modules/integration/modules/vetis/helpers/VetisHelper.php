@@ -76,7 +76,7 @@ class VetisHelper extends BaseHelper
      */
     static $transport_storage_types = [
         1 => 'замороженные',
-        2 => 'охлаженные',
+        2 => 'охлажденные',
         3 => 'охлаждаемые',
         4 => 'вентилируемые',
     ];

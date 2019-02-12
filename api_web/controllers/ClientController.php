@@ -22,12 +22,16 @@ class ClientController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'detail-update-logo',
                         'employee-create',
                         'employee-update',
@@ -36,11 +40,12 @@ class ClientController extends WebApiController
                         'additional-email-create',
                         'additional-email-delete',
                     ],
-                    'roles'   => [Registry::ADMINISTRATOR_RESTAURANT],
+                    'roles'      => [Registry::ADMINISTRATOR_RESTAURANT],
+                    'roleParams' => $roleParams
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'detail-update',
                         'detail',
                         'nds-country-list',
@@ -51,10 +56,11 @@ class ClientController extends WebApiController
                         'employee-roles',
                         'get-license-mix-cart',
                     ],
-                    'roles'   => [
+                    'roles'      => [
                         Registry::OPERATOR,
                         Registry::BOOKER_RESTAURANT
                     ],
+                    'roleParams' => $roleParams
                 ],
             ],
         ];

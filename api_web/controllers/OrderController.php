@@ -22,20 +22,25 @@ class OrderController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'products',
                         'products-list-for-unconfirmed-vendor',
                     ],
-                    'roles'   => [Registry::OPERATOR],
+                    'roles'      => [Registry::OPERATOR],
+                    'roleParams' => $roleParams
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'history',
                         'info',
                         'history-count',
@@ -58,18 +63,20 @@ class OrderController extends WebApiController
                         'messages-by-unconfirmed-vendor',
                         'send-message-by-unconfirmed-vendor',
                     ],
-                    'roles'   => [
+                    'roles'      => [
                         Registry::PROCUREMENT_INITIATOR,
                         Registry::BOOKER_RESTAURANT
                     ],
+                    'roleParams' => $roleParams
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'categories',
                         'categories-for-unconfirmed-vendor',
                     ],
-                    'roles'   => [Registry::OPERATOR],
+                    'roles'      => [Registry::OPERATOR],
+                    'roleParams' => $roleParams
                 ],
             ],
         ];

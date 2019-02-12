@@ -21,27 +21,33 @@ class ChatController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'dialog-list',
                         'dialog-messages',
                         'dialog-read-all',
                         'dialog-add-message',
                     ],
-                    'roles'   => [Registry::PROCUREMENT_INITIATOR],
+                    'roles'      => [Registry::PROCUREMENT_INITIATOR],
+                    'roleParams' => $roleParams
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'recipient-list',
                         'dialog-read',
                         'dialog-unread-count',
                     ],
-                    'roles'   => [Registry::OPERATOR],
+                    'roles'      => [Registry::OPERATOR],
+                    'roleParams' => $roleParams
                 ]
             ],
         ];

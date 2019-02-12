@@ -21,12 +21,16 @@ class AnalyticsController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'client-goods',
                         'client-purchases',
                         'client-orders',
@@ -34,10 +38,11 @@ class AnalyticsController extends WebApiController
                         'client-summary',
                         'currencies',
                     ],
-                    'roles'   => [
+                    'roles'      => [
                         Registry::PURCHASER_RESTAURANT,
                         Registry::BOOKER_RESTAURANT
                     ],
+                    'roleParams' => $roleParams
                 ],
             ],
         ];

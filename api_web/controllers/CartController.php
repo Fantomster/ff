@@ -22,33 +22,40 @@ class CartController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'add',
                         'items',
                         'clear',
                         'product-comment',
                     ],
-                    'roles'   => [Registry::PROCUREMENT_INITIATOR],
+                    'roles'      => [Registry::PROCUREMENT_INITIATOR],
+                    'roleParams' => $roleParams
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'registration',
                     ],
-                    'roles'   => [Registry::JUNIOR_PURCHASER],
+                    'roles'      => [Registry::JUNIOR_PURCHASER],
+                    'roleParams' => $roleParams
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'check-recipient',
                         'product-comment',
                     ],
-                    'roles'   => [Registry::OPERATOR],
+                    'roles'      => [Registry::OPERATOR],
+                    'roleParams' => $roleParams
                 ],
             ],
         ];

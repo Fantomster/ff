@@ -21,6 +21,10 @@ class RequestController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
@@ -37,6 +41,7 @@ class RequestController extends WebApiController
                         'unset-contractor',
                     ],
                     'roles'   => [Registry::PURCHASER_RESTAURANT],
+                    'roleParams' => $roleParams
                 ],
                 [
                     'allow'   => true,
@@ -46,6 +51,7 @@ class RequestController extends WebApiController
                         'category-list'
                     ],
                     'roles'   => [Registry::OPERATOR],
+                    'roleParams' => $roleParams
                 ],
             ],
         ];
@@ -90,8 +96,7 @@ class RequestController extends WebApiController
      *                           "phone": "",
      *                           "email": "investor@f-keeper.ru",
      *                           "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
-     *                           "image":
-     *                           "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                           "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
      *                           "type_id": 1,
      *                           "type": "Ресторан",
      *                           "rating": 0,
@@ -106,8 +111,7 @@ class RequestController extends WebApiController
      *                           "phone": "",
      *                           "email": "",
      *                           "address": "ул. Госпитальный Вал, Москва, Россия",
-     *                           "image":
-     *                           "https://fkeeper.s3.amazonaws.com/org-picture/c49766f11fe1908675cb4c2808126ee8.jpg",
+     *                           "image": "https://fkeeper.s3.amazonaws.com/org-picture/c49766f11fe1908675cb4c2808126ee8.jpg",
      *                           "type_id": 2,
      *                           "type": "Поставщик",
      *                           "rating": 3.7,
@@ -177,8 +181,7 @@ class RequestController extends WebApiController
      *                           "phone": "",
      *                           "email": "investor@f-keeper.ru",
      *                           "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
-     *                           "image":
-     *                           "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                           "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
      *                           "type_id": 1,
      *                           "type": "Ресторан",
      *                           "rating": 0,
@@ -193,8 +196,7 @@ class RequestController extends WebApiController
      *                           "phone": "",
      *                           "email": "",
      *                           "address": "ул. Госпитальный Вал, Москва, Россия",
-     *                           "image":
-     *                           "https://fkeeper.s3.amazonaws.com/org-picture/c49766f11fe1908675cb4c2808126ee8.jpg",
+     *                           "image": "https://fkeeper.s3.amazonaws.com/org-picture/c49766f11fe1908675cb4c2808126ee8.jpg",
      *                           "type_id": 2,
      *                           "type": "Поставщик",
      *                           "rating": 3.7,
@@ -274,8 +276,7 @@ class RequestController extends WebApiController
      *                           "phone": "",
      *                           "email": "investor@f-keeper.ru",
      *                           "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
-     *                           "image":
-     *                           "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                           "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
      *                           "type_id": 1,
      *                           "type": "Ресторан",
      *                           "rating": 0,
@@ -290,8 +291,7 @@ class RequestController extends WebApiController
      *                           "phone": "",
      *                           "email": "",
      *                           "address": "ул. Госпитальный Вал, Москва, Россия",
-     *                           "image":
-     *                           "https://fkeeper.s3.amazonaws.com/org-picture/c49766f11fe1908675cb4c2808126ee8.jpg",
+     *                           "image": "https://fkeeper.s3.amazonaws.com/org-picture/c49766f11fe1908675cb4c2808126ee8.jpg",
      *                           "type_id": 2,
      *                           "type": "Поставщик",
      *                           "rating": 3.7,
@@ -376,6 +376,7 @@ class RequestController extends WebApiController
     2 - Ежедневно
     3 - Каждую неделю
     4 - Каждый месяц
+
     payment_type
     1- Наличные (default)
     2- безнал",
@@ -414,10 +415,8 @@ class RequestController extends WebApiController
      *                              "name": "Космическая пятница",
      *                              "phone": "",
      *                              "email": "investor@f-keeper.ru",
-     *                              "address": "Бакалейная улица, 50А, Казань, город Казань, Республика Татарстан,
-     *                              Россия",
-     *                              "image":
-     *                              "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                              "address": "Бакалейная улица, 50А, Казань, город Казань, Республика Татарстан, Россия",
+     *                              "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
      *                              "type_id": 1,
      *                              "type": "Ресторан",
      *                              "rating": 0,
@@ -431,10 +430,8 @@ class RequestController extends WebApiController
      *                              "name": "Космическая пятница",
      *                              "phone": "",
      *                              "email": "investor@f-keeper.ru",
-     *                              "address": "Бакалейная улица, 50А, Казань, город Казань, Республика Татарстан,
-     *                              Россия",
-     *                              "image":
-     *                              "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                              "address": "Бакалейная улица, 50А, Казань, город Казань, Республика Татарстан, Россия",
+     *                              "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
      *                              "type_id": 1,
      *                              "type": "Ресторан",
      *                              "rating": 0,
@@ -501,10 +498,8 @@ class RequestController extends WebApiController
      *                              "name": "Космическая пятница",
      *                              "phone": "",
      *                              "email": "investor@f-keeper.ru",
-     *                              "address": "Бакалейная улица, 50А, Казань, город Казань, Республика Татарстан,
-     *                              Россия",
-     *                              "image":
-     *                              "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                              "address": "Бакалейная улица, 50А, Казань, город Казань, Республика Татарстан, Россия",
+     *                              "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
      *                              "type_id": 1,
      *                              "type": "Ресторан",
      *                              "rating": 0,
@@ -518,10 +513,8 @@ class RequestController extends WebApiController
      *                              "name": "Космическая пятница",
      *                              "phone": "",
      *                              "email": "investor@f-keeper.ru",
-     *                              "address": "Бакалейная улица, 50А, Казань, город Казань, Республика Татарстан,
-     *                              Россия",
-     *                              "image":
-     *                              "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                              "address": "Бакалейная улица, 50А, Казань, город Казань, Республика Татарстан, Россия",
+     *                              "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
      *                              "type_id": 1,
      *                              "type": "Ресторан",
      *                              "rating": 0,
@@ -670,8 +663,7 @@ class RequestController extends WebApiController
      *                           "phone": "",
      *                           "email": "investor@f-keeper.ru",
      *                           "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
-     *                           "image":
-     *                           "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                           "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
      *                           "type_id": 1,
      *                           "type": "Ресторан",
      *                           "rating": 0,
@@ -686,8 +678,7 @@ class RequestController extends WebApiController
      *                           "phone": "",
      *                           "email": "",
      *                           "address": "ул. Госпитальный Вал, Москва, Россия",
-     *                           "image":
-     *                           "https://fkeeper.s3.amazonaws.com/org-picture/c49766f11fe1908675cb4c2808126ee8.jpg",
+     *                           "image": "https://fkeeper.s3.amazonaws.com/org-picture/c49766f11fe1908675cb4c2808126ee8.jpg",
      *                           "type_id": 2,
      *                           "type": "Поставщик",
      *                           "rating": 3.7,
@@ -749,8 +740,7 @@ class RequestController extends WebApiController
      *                           "phone": "",
      *                           "email": "investor@f-keeper.ru",
      *                           "address": "Бакалейная ул., 50А, Казань, Респ. Татарстан, Россия, 420095",
-     *                           "image":
-     *                           "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
+     *                           "image": "https://fkeeper.s3.amazonaws.com/org-picture/8f060fc32d84198ec60212d7595191a0.jpg",
      *                           "type_id": 1,
      *                           "type": "Ресторан",
      *                           "rating": 0,
@@ -765,8 +755,7 @@ class RequestController extends WebApiController
      *                           "phone": "",
      *                           "email": "",
      *                           "address": "ул. Госпитальный Вал, Москва, Россия",
-     *                           "image":
-     *                           "https://fkeeper.s3.amazonaws.com/org-picture/c49766f11fe1908675cb4c2808126ee8.jpg",
+     *                           "image": "https://fkeeper.s3.amazonaws.com/org-picture/c49766f11fe1908675cb4c2808126ee8.jpg",
      *                           "type_id": 2,
      *                           "type": "Поставщик",
      *                           "rating": 3.7,

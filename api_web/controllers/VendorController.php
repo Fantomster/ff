@@ -22,22 +22,27 @@ class VendorController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'search',
                         'create',
                         'update',
                         'upload-file',
                     ],
-                    'roles'   => [Registry::PURCHASER_RESTAURANT],
+                    'roles'      => [Registry::PURCHASER_RESTAURANT],
+                    'roleParams' => $roleParams
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'get',
                         'upload-logo',
                         'personal-catalog-list',
@@ -56,7 +61,8 @@ class VendorController extends WebApiController
                         'auto-delete-duplicate-temporary',
                         'set-currency-for-personal-catalog'
                     ],
-                    'roles'   => [Registry::OPERATOR],
+                    'roles'      => [Registry::OPERATOR],
+                    'roleParams' => $roleParams
                 ]
             ],
         ];

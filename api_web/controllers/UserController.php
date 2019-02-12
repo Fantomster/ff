@@ -23,28 +23,34 @@ class UserController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'get',
                         'vendors',
                         'organization',
                     ],
-                    'roles'   => [Registry::OPERATOR],
+                    'roles'      => [Registry::OPERATOR],
+                    'roleParams' => $roleParams
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'remove-vendor',
                     ],
-                    'roles'   => [Registry::PURCHASER_RESTAURANT],
+                    'roles'      => [Registry::PURCHASER_RESTAURANT],
+                    'roleParams' => $roleParams
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'get-gmt',
                         'registration',
                         'registration-repeat-sms',
@@ -61,7 +67,8 @@ class UserController extends WebApiController
                         'get-available-businesses',
                         'set-agreement',
                     ],
-                    'roles'   => [Registry::OPERATOR],
+                    'roles'      => [Registry::OPERATOR],
+                    'roleParams' => $roleParams
                 ],
             ],
         ];

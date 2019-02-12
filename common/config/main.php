@@ -93,7 +93,7 @@ return [
 //                    'class' => 'yii\i18n\PhpMessageSource'
 //                ],
                 'yii'          => [
-                    'class' => 'yii\i18n\PhpMessageSource'
+                    'class' => 'yii\i18n\DbMessageSource'
                 ],
                 'app'          => [
                     'class' => 'yii\i18n\DbMessageSource',

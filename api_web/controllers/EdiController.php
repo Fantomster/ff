@@ -36,12 +36,16 @@ class EdiController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'order-history',
                         'order-info',
                         'order-print-pdf',
@@ -54,19 +58,21 @@ class EdiController extends WebApiController
                         'status-list',
                         'save-to-pdf',
                     ],
-                    'roles'   => [
+                    'roles'      => [
                         Registry::PROCUREMENT_INITIATOR,
                         Registry::BOOKER_RESTAURANT
                     ],
+                    'roleParams' => $roleParams
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'order-create-guide',
                     ],
-                    'roles'   => [
+                    'roles'      => [
                         Registry::PURCHASER_RESTAURANT,
                     ],
+                    'roleParams' => $roleParams
                 ],
             ],
         ];

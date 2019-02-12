@@ -10,6 +10,9 @@
 
 namespace common\components;
 
+use common\models\rbac\base\Assignment;
+use yii\db\Query;
+
 class DbManager extends \yii\rbac\DbManager
 {
     protected function addRule($rule)
@@ -121,5 +124,107 @@ class DbManager extends \yii\rbac\DbManager
         $this->invalidateCache();
 
         return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     * @param $role
+     * @param $userId
+     * @param $orgId
+     * @return bool|Assignment
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\db\Exception
+     */
+    public function assignUserByOrg($role, $userId, $orgId)
+    {
+        $assignment = new Assignment([
+            'userId'    => $userId,
+            'roleName'  => $role->name,
+            'createdAt' => \Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'),
+            'orgId'     => $orgId
+        ]);
+
+        $existsRole = (new Query())
+            ->select(['*'])
+            ->from('{{%auth_assignment}}')
+            ->where([
+                'item_name'       => $assignment->roleName,
+                'organization_id' => $assignment->orgId,
+                'user_id'         => $assignment->userId
+            ])
+            ->exists();
+
+        if ($existsRole) {
+            return true;
+        }
+
+        $this->db->createCommand()
+            ->insert($this->assignmentTable, [
+                'user_id'         => $assignment->userId,
+                'item_name'       => $assignment->roleName,
+                'created_at'      => $assignment->createdAt,
+                'organization_id' => $assignment->orgId
+            ])->execute();
+
+        return $assignment;
+    }
+
+    /**
+     * @param $role
+     * @param $userId
+     * @param $orgId
+     * @return bool
+     * @throws \yii\db\Exception
+     */
+    public function revokeUserByOrg($role, $userId, $orgId)
+    {
+        if ($this->isEmpty($userId) || $this->isEmpty($orgId)) {
+            return false;
+        }
+
+        return $this->db->createCommand()
+                ->delete($this->assignmentTable, [
+                    'user_id'         => (string)$userId,
+                    'item_name'       => $role->name,
+                    'organization_id' => $orgId
+                ])
+                ->execute() > 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getUserAssignmentsByOrg($userId, $orgId)
+    {
+        if ($this->isEmpty($userId)) {
+            return [];
+        }
+
+        $query = (new Query())
+            ->from($this->assignmentTable)
+            ->where(['user_id' => (string)$userId, 'organization_id' => $orgId]);
+
+        $assignments = [];
+        foreach ($query->all($this->db) as $row) {
+            $assignments[$row['item_name']] = new Assignment([
+                'userId'    => $row['user_id'],
+                'roleName'  => $row['item_name'],
+                'createdAt' => $row['created_at'],
+                'orgId'     => $row['organization_id'],
+            ]);
+        }
+
+        return $assignments;
+    }
+
+    /**
+     * Check whether $userId is empty.
+     *
+     * @param mixed $attribute
+     * @return bool
+     */
+    private function isEmpty($attribute)
+    {
+        return !isset($attribute) || $attribute === '';
     }
 }

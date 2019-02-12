@@ -29,12 +29,16 @@ class WaybillController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'create-waybill',
                         'update-waybill-content',
                         'regenerate-by-order',
@@ -46,10 +50,11 @@ class WaybillController extends WebApiController
                         'delete-waybill-content',
                         'create-and-send-waybill-async',
                     ],
-                    'roles'   => [
+                    'roles'      => [
                         Registry::MANAGER_RESTAURANT,
                         Registry::BOOKER_RESTAURANT,
                     ],
+                    'roleParams' => $roleParams
                 ],
             ],
         ];

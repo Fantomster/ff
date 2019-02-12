@@ -21,21 +21,27 @@ class GuideController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'list',
                         'get',
                         'add-to-cart'
                     ],
-                    'roles'   => [Registry::PROCUREMENT_INITIATOR],
+                    'roles'      => [Registry::PROCUREMENT_INITIATOR],
+                    'roleParams' => $roleParams
+
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'create',
                         'create-from-order',
                         'delete',
@@ -43,14 +49,18 @@ class GuideController extends WebApiController
                         'change-color',
                         'action-product',
                     ],
-                    'roles'   => [Registry::PURCHASER_RESTAURANT],
+                    'roles'      => [Registry::PURCHASER_RESTAURANT],
+                    'roleParams' => $roleParams
+
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'get-products',
                     ],
-                    'roles'   => [Registry::OPERATOR],
+                    'roles'      => [Registry::OPERATOR],
+                    'roleParams' => $roleParams
+
                 ],
             ],
         ];

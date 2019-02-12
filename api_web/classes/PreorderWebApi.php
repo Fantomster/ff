@@ -7,14 +7,22 @@
 
 namespace api_web\classes;
 
-use api_web\{
+use api_web\{components\Registry,
     helpers\WebApiHelper,
     exceptions\ValidationException,
     components\WebApi,
     components\Notice,
-    helpers\CurrencyHelper
-};
-use common\models\{Order, OrderStatus, Preorder, Cart, Organization, PreorderContent, Profile, OrderContent, Catalog, CatalogGoods};
+    helpers\CurrencyHelper};
+use common\models\{Order,
+    OrderStatus,
+    Preorder,
+    Cart,
+    Organization,
+    PreorderContent,
+    Profile,
+    OrderContent,
+    Catalog,
+    CatalogGoods};
 use yii\data\{
     ArrayDataProvider,
     Pagination
@@ -399,11 +407,9 @@ class PreorderWebApi extends WebApi
     }
 
     /**
-     * Находим предзаказ по id
-     *
      * @param int  $id
      * @param bool $withContent
-     * @return array|Preorder|\yii\db\ActiveRecord[]|null
+     * @return array|Preorder|\yii\db\ActiveRecord|null
      * @throws BadRequestHttpException
      */
     private function findPreorder(int $id, bool $withContent = false)
@@ -420,13 +426,21 @@ class PreorderWebApi extends WebApi
                     'organization_id' => $this->user->organization_id,
                 ])
                 ->with('preorderContents')
-                ->asArray()
                 ->one();
         }
         if (empty($model)) {
             throw new BadRequestHttpException('preorder.not_found');
         }
         return $model;
+    }
+
+    /**
+     * @param $id
+     * @return \yii\db\ActiveQuery
+     */
+    private function getPreorderContent($id)
+    {
+        return PreorderContent::find()->where(['id' => $id]);
     }
 
     /**
@@ -464,6 +478,39 @@ class PreorderWebApi extends WebApi
     }
 
     /**
+     * @param array $productSorted1
+     * @param array $orders
+     * @param array $productSorted2
+     * @param array $catalogGoods
+     * @param array $vendorNeeded
+     * @param array $catalogNeeded
+     * @throws ValidationException
+     */
+    private function createOrderContents(array $productSorted1, array $orders, array &$productSorted2, array &$catalogGoods, array &$vendorNeeded, array &$catalogNeeded)
+    {
+        foreach ($productSorted1 as $index => $item) {
+            if (!empty($orders[$item['vendor_id']])) {
+                if (!empty($vendorNeeded[$item['vendor_id']])) {
+                    unset($vendorNeeded[$item['vendor_id']]);
+                }
+                if (!empty($catalogNeeded[$item['cat_id']])) {
+                    unset($catalogNeeded[$item['cat_id']]);
+                }
+                $orderId = $orders[$item['vendor_id']]['id'];
+                $productId = $item['id'];
+                $quantity = $item['quantity'];
+                $price = $catalogGoods[$item['id']]['price'];
+                $productName = $catalogGoods[$item['id']]['baseProduct']['product'];
+                $units = $catalogGoods[$item['id']]['baseProduct']['units'];
+                $article = $catalogGoods[$item['id']]['baseProduct']['article'];
+                $this->createOrderContent($orderId, $productId, $quantity, $price, $productName, $units, $article);
+                unset($catalogGoods[$item['id']]);
+                unset($productSorted2[$index]);
+            }
+        }
+    }
+
+    /**
      * @param int   $vendorId
      * @param int   $preorderId
      * @param array $catalog
@@ -482,9 +529,9 @@ class PreorderWebApi extends WebApi
         $order->vendor_id = $vendorId;
         $order->status = Order::STATUS_PREORDER;
         $order->currency_id = $catalog['currency_id'];
-        $order->service_id = 9;
+        $order->service_id = Registry::MC_BACKEND;
         $order->preorder_id = $preorderId;
-        if (!$order->validate() || !$order->save()) {
+        if (!$order->save()) {
             \Yii::error(\yii\helpers\Json::encode($order->getErrors()));
             throw new ValidationException($order->getFirstErrors());
         }
@@ -511,33 +558,73 @@ class PreorderWebApi extends WebApi
     }
 
     /**
-     * @param array $post
+     * @param array $preOrderContent
+     * @param int   $preorderId
+     * @throws ValidationException
+     */
+    private function createPreorderContent(array $preOrderContent, int $preorderId)
+    {
+        foreach ($preOrderContent as $index => $product) {
+            $preOrderContent = new PreorderContent();
+            $preOrderContent->preorder_id = $preorderId;
+            $preOrderContent->product_id = $product['id'];
+            $preOrderContent->plan_quantity = $product['quantity'];
+            if (!$preOrderContent->save()) {
+                throw new ValidationException($preOrderContent->getFirstErrors());
+            }
+        }
+    }
+
+    /**
+     * @param Order $order
+     * @param array $productIds
+     * @param array $newQuantity
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    private function updateOrderContent(Order $order, array $productIds, array $newQuantity)
+    {
+        $orderId = $order->id;
+        $orderContents = OrderContent::find()
+            ->where(['order_id' => $orderId, 'product_id' => $productIds])
+            ->indexBy('product_id')->all();
+        foreach ($orderContents as $productId => $orderContent) {
+            if (in_array($productId, $productIds)) {
+                $orderContent->quantity = $newQuantity[$productId];
+                $orderContent->update(true, ['quantity']);
+            }
+        }
+        $order->calculateTotalPrice();
+    }
+
+    /**
+     * @param array    $products
+     * @param Preorder $preOrder
+     * @param array    $catArray
+     * @param array    $vendors
      * @return array
      * @throws BadRequestHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
-    public function addProduct(array $post)
+    private function validateProductInfo(array $products, Preorder $preOrder, array $catArray, array $vendors)
     {
-        $this->validateRequest($post, ['id', 'products']);
-        $preOrder = $this->findPreorder($post['id'], true);
-        $productsInPreorder = ArrayHelper::map($preOrder['preorderContents'], 'id', 'product_id');
-        if (!is_array($post['products'])) {
-            throw new BadRequestHttpException('Неправильное значение параметра.');
+        $preorderContentToProductId = [];
+        foreach ($preOrder->preorderContents as $index => $preorderContent) {
+            $preorderContentToProductId[$preorderContent->product_id] = $index + 1;
         }
-        $catArray = explode(',', $this->user->organization->getCatalogs());
-        $vendors = $this->user->organization->getSuppliers();
-        unset($vendors[0]);
-        $productIds = [];
-        $productCount = count($post['products']);
+
         $vendorNeeded = [];
         $catalogNeeded = [];
-        foreach ($post['products'] as $product) {
+        $productIdInOrderToUpdate = [];
+        $newQuantityArray = [];
+        $productIds = [];
+        $result = [];
+
+        foreach ($products as $product) {
             $this->validateRequest($product, ['id', 'cat_id', 'vendor_id', 'quantity']);
             if (!(is_int($product['id']) && is_int($product['cat_id']) && is_int($product['vendor_id']))) {
                 throw new BadRequestHttpException('preorder.wrong_value_type');
-            }
-            $productIds[] = $product['id'];
-            if (in_array($product['id'], $productsInPreorder)) {
-                throw new BadRequestHttpException('preorder.product_already_exist_in_preorder');
             }
             if (empty($vendors[$product['vendor_id']])) {
                 throw new BadRequestHttpException('preorder.not_your_supplier');
@@ -548,19 +635,45 @@ class PreorderWebApi extends WebApi
             if (!(is_float($product['quantity']) || is_int($product['quantity']))) {
                 throw new BadRequestHttpException('preorder.wrong_value_type');
             }
+            $productIds[] = $product['id'];
             if (!in_array($product['cat_id'], $catArray)) {
                 throw new BadRequestHttpException('preorder.not_your_catalog');
             }
             if (empty($catalogNeeded[$product['cat_id']])) {
                 $catalogNeeded[$product['cat_id']] = $product['cat_id'];
             }
+
+            if (!empty($preorderContentToProductId[$product['id']])) {
+                $index = $preorderContentToProductId[$product['id']] - 1;
+                $newQuantity = (float)$preOrder->preorderContents[$index]->plan_quantity + $product['quantity'];
+                $preorderContent = $preOrder->preorderContents[$index];
+                $preorderContent->plan_quantity = $newQuantity;
+                $preorderContent->update(true, ['plan_quantity']);
+                $productIdInOrderToUpdate[] = $product['id'];
+                $newQuantityArray[$product['id']] = $newQuantity;
+            } else {
+                $result[] = $product;
+            }
         }
 
-        if ($productCount > count(array_unique($productIds))) {
-            throw new BadRequestHttpException('preorder.product_id_repeat');
+        if (!empty($newQuantityArray)) {
+            $orders = Order::find()->where(['preorder_id' => $preOrder->id])
+                ->with('orderContent')->indexBy('id')->all();
+            foreach ($orders as $index => $order) {
+                $this->updateOrderContent($order, $productIdInOrderToUpdate, $newQuantityArray);
+            }
         }
+        return $result;
+    }
 
-        $catalogGoods = CatalogGoods::find()
+    /**
+     * @param array $productIds
+     * @param array $catalogNeeded
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    private function getCatalogGoods(array $productIds, array $catalogNeeded)
+    {
+        return CatalogGoods::find()
             ->where([
                 'base_goods_id' => $productIds,
                 'cat_id'        => $catalogNeeded,
@@ -570,77 +683,102 @@ class PreorderWebApi extends WebApi
             ->indexBy('base_goods_id')
             ->asArray()
             ->all();
+    }
 
-        if (empty($catalogGoods)) {
-            throw new BadRequestHttpException('preorder.product_not_found');
+    /**
+     * @param array $catalogNeeded
+     * @param array $vendorNeeded
+     * @return array
+     */
+    private function getCatalogs(array $catalogNeeded, array $vendorNeeded)
+    {
+        return Catalog::find()
+            ->where(['id' => $catalogNeeded, 'supp_org_id' => $vendorNeeded])
+            ->asArray()
+            ->indexBy('supp_org_id')
+            ->all();
+    }
+
+    /**
+     * @param Preorder $preOrder
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    private function getOrders(Preorder $preOrder)
+    {
+        return Order::find()
+            ->where(['preorder_id' => $preOrder->id])
+            ->with('orderContent')
+            ->orderBy(['vendor_id' => SORT_ASC])
+            ->indexBy('vendor_id')
+            ->asArray()
+            ->all();
+    }
+
+    /**
+     * @param array $post
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ValidationException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function addProduct(array $post)
+    {
+        $this->validateRequest($post, ['id', 'products']);
+        $preOrder = $this->findPreorder($post['id'], true);
+        $preorderContentToProductId = [];
+        foreach ($preOrder->preorderContents as $index => $preorderContent) {
+            $preorderContentToProductId[$preorderContent->product_id] = $index;
         }
-
-        foreach ($post['products'] as $index => $product) {
-            if (empty($catalogGoods[$product['id']])) {
+        if (!is_array($post['products'])) {
+            throw new BadRequestHttpException('Неправильное значение параметра.');
+        }
+        $catArray = explode(',', $this->user->organization->getCatalogs());
+        $vendors = $this->user->organization->getSuppliers();
+        unset($vendors[0]);
+            $result = $this->validateProductInfo($post['products'], $preOrder, $catArray, $vendors);
+            if (empty($result)) {
+                $preOrder->refresh();
+                return $this->prepareModel($preOrder, true);
+            }
+            $productIds = ArrayHelper::map($result, 'id', 'id');;
+            $productCount = count($result);
+            $vendorNeeded = ArrayHelper::map($result, 'vendor_id', 'vendor_id');
+            $catalogNeeded = ArrayHelper::map($result, 'cat_id', 'cat_id');
+            if ($productCount > count(array_unique($productIds))) {
+                throw new BadRequestHttpException('preorder.product_id_repeat');
+            }
+            $catalogGoods = $this->getCatalogGoods($productIds, $catalogNeeded);
+            if (empty($catalogGoods)) {
                 throw new BadRequestHttpException('preorder.product_not_found');
             }
-            if ((int)$catalogGoods[$product['id']]['cat_id'] !== $product['cat_id']) {
-                throw new BadRequestHttpException('preorder.product_not_in_cat');
-            }
-            if ((int)$catalogGoods[$product['id']]['baseProduct']['supp_org_id'] !== $product['vendor_id']) {
-                throw new BadRequestHttpException('preorder.not_supp_product');
-            }
-        }
-
-        $transaction = \Yii::$app->db->beginTransaction();
-        try {
-            foreach ($post['products'] as $index => $product) {
-                $preOrderContent = new PreorderContent();
-                $preOrderContent->preorder_id = $post['id'];
-                $preOrderContent->product_id = $product['id'];
-                $preOrderContent->plan_quantity = $product['quantity'];
-                if (!$preOrderContent->save()) {
-                    throw new ValidationException($preOrderContent->getFirstErrors());
+            foreach ($result as $index => $product) {
+                if (empty($catalogGoods[$product['id']])) {
+                    throw new BadRequestHttpException('preorder.product_not_found');
+                }
+                if ((int)$catalogGoods[$product['id']]['cat_id'] !== $product['cat_id']) {
+                    throw new BadRequestHttpException('preorder.product_not_in_cat');
+                }
+                if ((int)$catalogGoods[$product['id']]['baseProduct']['supp_org_id'] !== $product['vendor_id']) {
+                    throw new BadRequestHttpException('preorder.not_supp_product');
                 }
             }
+            $this->createPreorderContent($result, $preOrder->id);
 
-            $orders = Order::find()
-                ->where(['preorder_id' => $post['id']])
-                ->with('orderContent')
-                ->orderBy(['vendor_id' => SORT_ASC])
-                ->indexBy('vendor_id')
-                ->asArray()
-                ->all();
+            $orders = $this->getOrders($preOrder);
 
-            $productSorted = $post['products'];
+            $productSorted = $result;
             ArrayHelper::multisort($productSorted, ['vendor_id'], [SORT_ASC]);
             $productSorted1 = $productSorted2 = ArrayHelper::index($productSorted, 'id');
 
-            foreach ($productSorted1 as $index => $item) {
-                if (!empty($orders[$item['vendor_id']])) {
-                    if (!empty($vendorNeeded[$item['vendor_id']])) {
-                        unset($vendorNeeded[$item['vendor_id']]);
-                    }
-                    if (!empty($catalogNeeded[$item['cat_id']])) {
-                        unset($catalogNeeded[$item['cat_id']]);
-                    }
-                    $orderId = $orders[$item['vendor_id']]['id'];
-                    $productId = $item['id'];
-                    $quantity = $item['quantity'];
-                    $price = $catalogGoods[$item['id']]['price'];
-                    $productName = $catalogGoods[$item['id']]['baseProduct']['product'];
-                    $units = $catalogGoods[$item['id']]['baseProduct']['units'];
-                    $article = $catalogGoods[$item['id']]['baseProduct']['article'];
-                    $this->createOrderContent($orderId, $productId, $quantity, $price, $productName, $units, $article);
-                    unset($catalogGoods[$item['id']]);
-                    unset($productSorted2[$index]);
-                }
-            }
+            $this->createOrderContents($productSorted1, $orders, $productSorted2, $catalogGoods, $vendorNeeded, $catalogNeeded);
 
             if (empty($productSorted2)) {
-                $changedPreOrder = Preorder::findOne(['id' => $post['id']]);
-                return $this->prepareModel($changedPreOrder, true);
+                $preOrder->refresh();
+                return $this->prepareModel($preOrder, true);
             }
-
             $vendorNewOrders = ArrayHelper::index($productSorted2, 'id', 'vendor_id');
-
             $catalogByVendors = [];
-
             foreach ($vendorNewOrders as $vendorId => $vendorNewOrder) {
                 if (empty($catalogByVendors[$vendorId])) {
                     $catalogByVendors[$vendorId] = [];
@@ -651,25 +789,11 @@ class PreorderWebApi extends WebApi
                     }
                 }
             }
-
-            $currency = Catalog::find()
-                ->where(['id' => $catalogNeeded, 'supp_org_id' => $vendorNeeded])
-                ->asArray()
-                ->indexBy('supp_org_id')
-                ->all();
-
+            $catalogs = $this->getCatalogs($catalogNeeded, $vendorNeeded);
             foreach ($vendorNewOrders as $vendorId => $content) {
-                $this->createOrder($vendorId, $post['id'], $currency[$vendorId], $content, $catalogByVendors[$vendorId]);
+                $this->createOrder($vendorId, $post['id'], $catalogs[$vendorId], $content, $catalogByVendors[$vendorId]);
             }
-
-            $transaction->commit();
-
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            throw $e;
-        }
-
-        $changedPreOrder = Preorder::findOne(['id' => $post['id']]);
-        return $this->prepareModel($changedPreOrder, true);
+        $preOrder->refresh();
+        return $this->prepareModel($preOrder, true);
     }
 }

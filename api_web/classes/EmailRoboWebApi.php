@@ -156,19 +156,4 @@ class EmailRoboWebApi extends WebApi
 
         return ['result' => true];
     }
-
-    /**
-     * @param $orgId
-     * @return mixed
-     * @throws BadRequestHttpException
-     */
-    public function validateOrgId($orgId)
-    {
-        $availableBusinesses = (new UserWebApi())->getUserOrganizationBusinessList('id');
-        if (!in_array($orgId, array_keys($availableBusinesses['result']))) {
-            throw new BadRequestHttpException('integration.email.bad_organization_id');
-        }
-
-        return $orgId;
-    }
 }

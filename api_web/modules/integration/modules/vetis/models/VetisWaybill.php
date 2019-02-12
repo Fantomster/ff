@@ -748,7 +748,7 @@ class VetisWaybill extends WebApi
     {
         $this->validateRequest($request, ['id']);
         $orgId = $request['org_id'] ?? $this->user->organization_id;
-        (new EmailRoboWebApi())->validateOrgId($orgId);
+        $this->validateOrgId($orgId);
         $model = VetisTransport::findOne($request['id']);
         if (!$model) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));

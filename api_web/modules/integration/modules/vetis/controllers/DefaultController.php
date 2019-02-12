@@ -5,6 +5,7 @@ namespace api_web\modules\integration\modules\vetis\controllers;
 use api_web\classes\UserWebApi;
 use api_web\components\Registry;
 use api_web\components\WebApiController;
+use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use api_web\modules\integration\modules\vetis\models\VetisWaybill;
 
 /**
@@ -1088,14 +1089,30 @@ class DefaultController extends WebApiController
      *         description = "success",
      *            @SWG\Schema(
      *              default={
-     *                  "1": "Мясо и мясопродукты.",
-     *                  "2": "Корма и кормовые добавки.",
-     *                  "3": "Живые животные.",
-     *                  "4": "Лекарственные средства.",
-     *                  "5": "Пищевые продукты.",
-     *                  "6": "Непищевые продукты и другое.",
-     *                  "7": "Рыба и морепродукты.",
-     *                  "8": "Продукция, не требующая разрешения."
+     *                  {
+     *                      "1": "Мясо и мясопродукты."
+     *                  },
+     *                  {
+     *                      "2": "Корма и кормовые добавки."
+     *                  },
+     *                  {
+     *                      "3": "Живые животные."
+     *                  },
+     *                  {
+     *                      "4": "Лекарственные средства."
+     *                  },
+     *                  {
+     *                      "5": "Пищевые продукты."
+     *                  },
+     *                  {
+     *                      "6": "Непищевые продукты и другое."
+     *                  },
+     *                  {
+     *                      "7": "Рыба и морепродукты."
+     *                  },
+     *                  {
+     *                      "8": "Продукция, не требующая разрешения."
+     *                  }
      *              }
      *          )
      *     ),
@@ -1111,7 +1128,70 @@ class DefaultController extends WebApiController
      */
     public function actionProductTypeList()
     {
-        $this->response = Registry::$vetis_product_types;
+        $arResponse = [];
+        foreach (VetisHelper::$vetis_product_types as $key => $item) {
+            $arResponse[] = [$key => $item];
+        }
+        $this->response = $arResponse;
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/transport-storage-type-list",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение списка транспортных типов перевозки",
+     *     description="Получение списка транспортных типов перевозки",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "1": "замороженные"
+     *                  },
+     *                  {
+     *                      "2": "охлаженные"
+     *                  },
+     *                  {
+     *                      "3": "охлаждаемые"
+     *                  },
+     *                  {
+     *                      "4": "вентилируемые"
+     *                  }
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     */
+    public function actionTransportStorageTypeList()
+    {
+        $arResponse = [];
+        foreach (VetisHelper::$transport_storage_types as $key => $item) {
+            $arResponse[] = [$key => $item];
+        }
+        $this->response = $arResponse;
     }
 
     /**
@@ -1593,7 +1673,7 @@ class DefaultController extends WebApiController
     }
 
     /**
-     * @SWG\Post(path="/integration/vetis/product-item-create",
+     * @SWG\Post(path="/integration/vetis/create-product-item",
      *     tags={"Integration/vetis"},
      *     summary="Добавление новой продукции в справочник наименований продукции",
      *     description="Добавление новой продукции в справочник наименований продукции",
@@ -1660,8 +1740,106 @@ class DefaultController extends WebApiController
      * )
      * @throws \Exception
      */
-    public function actionProductItemCreate()
+    public function actionCreateProductItem()
     {
         $this->response = (new VetisWaybill())->createProductItem($this->request);
     }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/create-transport",
+     *     tags={"Integration/vetis"},
+     *     summary="Добавление нового транспорта в справочник Транспортные средства",
+     *     description="Если не отправлять org_id создат ТС в текущей организации",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vehicle_number": "1",
+     *                      "trailer_number": "1",
+     *                      "container_number": "1",
+     *                      "transport_storage_type": 1,
+     *                      "org_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionCreateTransport()
+    {
+        $this->response = (new VetisWaybill())->createTransport($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/delete-transport",
+     *     tags={"Integration/vetis"},
+     *     summary="Удаление транспорта из справочника Транспортные средства",
+     *     description="Если не отправлять org_id попробует удалить ТС в текущей организации",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 1,
+     *                      "org_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionDeleteTransport()
+    {
+        $this->response = (new VetisWaybill())->deleteTransport($this->request);
+    }
+
+
 }

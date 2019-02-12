@@ -68,7 +68,7 @@ class JournalWebApi extends WebApi
 
         if (isset($request['search']['user_id']) && !empty($request['search']['user_id'])) {
             $query->andWhere(['user_id' => $request['search']['user_id']]);
-        } elseif (in_array($this->user->role_id, [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE])) {
+        } elseif (in_array($this->user->role_id, [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_FKEEPER_MANAGER])) {
             $query->andWhere(['organization_id' => $this->user->organization_id]);
         } else {
             $query->andWhere(['user_id' => $this->user->id]);

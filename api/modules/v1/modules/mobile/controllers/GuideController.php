@@ -89,8 +89,8 @@ class GuideController extends ActiveController
             ->select(['cbg.product'])
             ->from(['gp' => GuideProduct::tableName()])
             ->leftJoin(['cbg' => CatalogBaseGoods::tableName()], 'cbg.id = gp.cbg_id')
-            ->innerJoin(['guide' => Guide::tableName()], 'gp.guide_id = guide.id')
-            ->where([
+            ->where(            'gp.guide_id = guide.id')
+            ->andWhere([
                 'cbg.status'  => 1,
                 'cbg.deleted' => 0
             ])

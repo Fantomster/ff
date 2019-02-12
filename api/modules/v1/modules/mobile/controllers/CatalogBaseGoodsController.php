@@ -98,6 +98,7 @@ class CatalogBaseGoodsController extends ActiveController
 
         $vendors = $client->getSuppliers(null);
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor) : '';
+        $catalogs = ($catalogs != '-1') ? $catalogs : '';
 
         if (!empty($catalogs) && !is_array($catalogs)) {
             $catalogs = explode(',', $catalogs);
@@ -127,7 +128,7 @@ class CatalogBaseGoodsController extends ActiveController
                 "cbg.status"  => 1,
                 "cbg.deleted" => 0
             ])
-            ->andFilterWhere(['org_id' => $params->vendor_id])
+            ->andFilterWhere(['org.id' => $params->vendor_id])
             ->andFilterWhere(['LIKE', 'cbg.product', $params->product])
             ->orFilterWhere(['LIKE', 'cbg.article', $params->product]);
 
@@ -156,7 +157,7 @@ class CatalogBaseGoodsController extends ActiveController
                 "cbg.status"  => 1,
                 "cbg.deleted" => 0
             ])
-            ->andFilterWhere(['org_id' => $params->vendor_id])
+            ->andFilterWhere(['org.id' => $params->vendor_id])
             ->andFilterWhere(['like', 'cbg.product', $params->product])
             ->orFilterWhere(['like', 'cbg.article', $params->product]);
 

@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
 use yii\data\ActiveDataProvider;
 use common\behaviors\UploadBehavior;
 use yii\helpers\ArrayHelper;
@@ -15,6 +16,8 @@ use yii\helpers\ArrayHelper;
  * @property int          $supp_org_id        Идентификатор организации-поставщика
  * @property int          $cat_id             Идентификатор каталога товаров
  * @property int          $invite             Показатель наличия связи с поставщиком (0 - нет связи, 1 - есть связь)
+ * @property int          $discount_product   "Скидка на товары" (в процентах) - применяется для всех товаров прайса
+ *           поставщика
  * @property string       $created_at         Дата и время создания записи в таблице
  * @property string       $updated_at         Дата и время последнего изменения записи в таблице
  * @property int          $status             Показатель состояния активности каталога (0 - не активен, 1 - активен)
@@ -24,7 +27,6 @@ use yii\helpers\ArrayHelper;
  * @property int          $is_from_market     Показатель состояния получения каталога из Маркета (0 - получен не из
  *           Маркета, 1 - получен из Маркета)
  * @property int          $deleted            Показатель состояния удаления каталога (0 - не удалён, 1 - удалён)
- *
  * @property Catalog      $catalog
  * @property Organization $client
  * @property Organization $restOrg
@@ -59,11 +61,11 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public function behaviors()
     {
         return ArrayHelper::merge(parent::behaviors(), [
-            'timestamp' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'value' => function ($event) {
-                    return gmdate("Y-m-d H:i:s");
-                },
+            'timestamp'  => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
             ],
             [
                 'class'     => UploadBehavior::class,
@@ -82,7 +84,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     {
         return [
             [['rest_org_id', 'supp_org_id'], 'required'],
-            [['rest_org_id', 'supp_org_id', 'cat_id', 'status'], 'integer'],
+            [['rest_org_id', 'supp_org_id', 'cat_id', 'status', 'discount_product'], 'integer'],
             [['uploaded_catalog'], 'file'],
             [['uploaded_processed', 'vendor_manager_id'], 'safe'],
         ];
@@ -94,10 +96,11 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'          => 'ID',
-            'rest_org_id' => 'Rest Org ID',
-            'supp_org_id' => 'Supp Org ID',
-            'cat_id'      => \Yii::t('app', 'common.models.catalogue', ['ru' => 'Каталог']),
+            'id'               => 'ID',
+            'rest_org_id'      => 'Rest Org ID',
+            'supp_org_id'      => 'Supp Org ID',
+            'cat_id'           => \Yii::t('app', 'common.models.catalogue', ['ru' => 'Каталог']),
+            'discount_product' => "Скидка на товары (в процентах) - применяется для всех товаров прайса поставщика"
         ];
     }
 

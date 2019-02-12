@@ -1,0 +1,265 @@
+<?php
+/**
+ * Date: 06.02.2019
+ * Author: Mike N.
+ * Time: 12:16
+ */
+
+namespace api_web\classes;
+
+use api_web\components\{Registry, WebApi};
+use api_web\exceptions\ValidationException;
+use api_web\helpers\WebApiHelper;
+use common\models\{Catalog, CatalogBaseGoods, Delivery, Organization, RelationSuppRest};
+use yii\data\ArrayDataProvider;
+use yii\data\Pagination;
+use yii\db\Expression;
+use yii\db\Query;
+use yii\web\BadRequestHttpException;
+
+class LazyVendorWebApi extends WebApi
+{
+    private $arAvailableFields = [
+        'name'
+    ];
+
+    /**
+     * Создание поставщика (Ленивого)
+     *
+     * @param $post
+     * @return mixed
+     * @throws \Exception
+     */
+    public function create($post)
+    {
+        $this->validateRequest($post, ['lazy-vendor']);
+        $request = $post['lazy-vendor'];
+        $this->validateRequest($request, ['name', 'address', 'email', 'phone', 'contact_name', 'inn', 'additional_params']);
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $addParams = $request['additional_params'];
+            $exists = Organization::find()->where([
+                'name'    => $request['name'],
+                'inn'     => $request['inn'],
+                'type_id' => Organization::TYPE_LAZY_VENDOR
+            ])->exists();
+            if ($exists) {
+                throw new BadRequestHttpException('vendor.exists');
+            }
+            /**
+             * Создаем организацию
+             */
+            $model = new Organization();
+            $model->name = $request['name'];
+            $model->address = $request['address'];
+            $model->email = $request['email'];
+            $model->phone = $request['phone'];
+            $model->contact_name = $request['contact_name'];
+            $model->inn = $request['inn'];
+            $model->type_id = Organization::TYPE_LAZY_VENDOR;
+            if (!$model->save()) {
+                throw new ValidationException($model->getFirstErrors());
+            }
+            /**
+             * Создаем каталог
+             */
+            $catalog = $this->createCatalog($model->id);
+            /**
+             * Создаем связь с каталогом
+             */
+            $this->createRelation($model->id, $catalog->id, $addParams['discount_product'] ?? 0);
+            /**
+             * Создаем запись в доставку поставщика
+             */
+            $delivery = Delivery::findOne(['vendor_id' => $model->id]);
+            if (empty($delivery)) {
+                $delivery = new Delivery();
+                $delivery->vendor_id = $model->id;
+                $delivery->delivery_charge = $addParams['delivery_price'] ?? 0;
+                $delivery->delivery_discount_percent = $addParams['delivery_discount_percent'] ?? 0;
+                $delivery->min_order_price = $addParams['min_order_price'] ?? 0;
+                if (!empty($addParams['delivery_days'])) {
+                    foreach ($addParams['delivery_days'] as $key => $value) {
+                        $delivery->setAttribute($key, (int)$value);
+                    }
+                }
+                if (!$delivery->save()) {
+                    throw new ValidationException($delivery->getFirstErrors());
+                }
+            }
+            $transaction->commit();
+            return WebApiHelper::prepareOrganization($model);
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Список ленивых поставщиков
+     *
+     * @param $request
+     * @return array
+     */
+    public function list($request)
+    {
+        $page = $request['pagination']['page'] ?? 1;
+        $pageSize = $request['pagination']['page_size'] ?? 12;
+        $sort = $request['sort'] ?? 'name';
+        $result = [];
+
+        $tableName = Organization::tableName();
+        $tableNameRelation = RelationSuppRest::tableName();
+        $tableNameCBG = CatalogBaseGoods::tableName();
+
+        $countQueryAll = (new Query())
+            ->select('COUNT(*)')
+            ->from($tableNameCBG)
+            ->where("$tableNameCBG.cat_id = $tableNameRelation.cat_id");
+
+        $countQueryAllow = (new Query())
+            ->select('COUNT(*)')
+            ->from($tableNameCBG)
+            ->where("$tableNameCBG.cat_id = $tableNameRelation.cat_id AND $tableNameCBG.status = :s", [
+                ":s" => CatalogBaseGoods::STATUS_ON
+            ]);
+
+        $query = (new Query())
+            ->select($tableName . '.*')
+            ->addSelect([
+                $tableNameRelation . '.cat_id',
+                'product_count'       => $countQueryAll,
+                'product_count_allow' => $countQueryAllow
+            ])
+            ->from($tableName)
+            ->innerJoin($tableNameRelation, "$tableNameRelation.supp_org_id = $tableName.id")
+            ->where([
+                $tableName . '.type_id'             => Organization::TYPE_LAZY_VENDOR,
+                $tableNameRelation . '.rest_org_id' => $this->user->organization_id
+            ]);
+
+        if (isset($request['search'])) {
+            //Поисковая строка
+            if (!empty($request['search']['query'])) {
+                $query->andFilterWhere(['like', "{$tableName}.name", $request['search']['query']]);
+            }
+            //Поиск по адресу
+            if (!empty($request['search']['address'])) {
+                $query->andFilterWhere(['like', "{$tableName}.address", $request['search']['address']]);
+            }
+        }
+
+        if ($query->count()) {
+            if ($sort && in_array(ltrim($sort, '-'), $this->arAvailableFields)) {
+                $sortDirection = SORT_ASC;
+                if (strpos($sort, '-') !== false) {
+                    $sortDirection = SORT_DESC;
+                }
+                $query->orderBy([ltrim($sort, '-') => $sortDirection]);
+            }
+
+            $dataProvider = new ArrayDataProvider([
+                'allModels' => $query->all()
+            ]);
+
+            $pagination = new Pagination();
+            $pagination->setPage($page - 1);
+            $pagination->setPageSize($pageSize);
+            $dataProvider->setPagination($pagination);
+            /** @var Organization $model */
+            if (!empty($dataProvider->models)) {
+                foreach (WebApiHelper::generator($dataProvider->models) as $model) {
+                    $result[] = $this->prepareModel($model);
+                }
+            }
+            $page = ($dataProvider->pagination->page + 1);
+            $pageSize = $dataProvider->pagination->pageSize;
+            $totalPage = ceil($dataProvider->totalCount / $pageSize);
+        }
+
+        $return = [
+            'items'      => $result,
+            'pagination' => [
+                'page'       => $page,
+                'page_size'  => $pageSize,
+                'total_page' => $totalPage ?? 0
+            ],
+            'sort'       => $sort
+        ];
+
+        return $return;
+    }
+
+    /**
+     * @param $model
+     * @return array
+     */
+    private function prepareModel($model)
+    {
+        return [
+            "id"            => (int)$model['id'],
+            "name"          => $model['name'],
+            "address"       => $model['address'],
+            "contact_count" => 0,
+            "product_count" => [
+                "all"   => (int)$model['product_count'],
+                "allow" => (int)$model['product_count_allow']
+            ],
+            "cat_id"        => (int)$model['cat_id']
+        ];
+    }
+
+    /**
+     * Создание пустого каталога для ленивого поставщика
+     *
+     * @param $vendor_id
+     * @return Catalog
+     * @throws ValidationException
+     */
+    private function createCatalog($vendor_id)
+    {
+        $name = trim($this->user->organization->name) . '_LC';
+        $catalog = Catalog::findOne(['supp_org_id' => $vendor_id, 'name' => $name]);
+        if (!empty($catalog)) {
+            return $catalog;
+        }
+        $model = new Catalog();
+        $model->supp_org_id = $vendor_id;
+        $model->currency_id = Registry::DEFAULT_CURRENCY_ID;
+        $model->name = $name;
+        $model->status = Catalog::STATUS_ON;
+        $model->type = Catalog::CATALOG;
+        if (!$model->save()) {
+            throw new ValidationException($model->getFirstErrors());
+        }
+        return $model;
+    }
+
+    /**
+     * Создание связи ресторана с поставщиком
+     *
+     * @param      $supp_org_id
+     * @param null $cat_id
+     * @param int  $discount_products
+     * @return RelationSuppRest
+     * @throws ValidationException
+     */
+    private function createRelation($supp_org_id, $cat_id = null, $discount_products = 0)
+    {
+        $rest_org_id = $this->user->organization->id;
+        $relation = RelationSuppRest::findOne(['supp_org_id' => $supp_org_id, 'rest_org_id' => $rest_org_id]);
+        if (empty($relation)) {
+            $relation = new RelationSuppRest();
+            $relation->rest_org_id = $rest_org_id;
+            $relation->supp_org_id = $supp_org_id;
+            $relation->discount_product = $discount_products;
+            $relation->invite = RelationSuppRest::INVITE_OFF;
+            $relation->cat_id = $cat_id;
+            if (!$relation->save()) {
+                throw new ValidationException($relation->getFirstErrors());
+            }
+        }
+        return $relation;
+    }
+}

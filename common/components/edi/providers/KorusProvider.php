@@ -9,10 +9,9 @@
 namespace common\components\edi\providers;
 
 use common\components\edi\AbstractProvider;
-use common\components\edi\AbstractRealization;
 use common\components\edi\EDIClass;
 use common\components\edi\ProviderInterface;
-use common\models\EdiOrder;
+use common\models\Order;
 use common\models\OrderContent;
 use yii\base\Exception;
 use yii\web\BadRequestHttpException;
@@ -167,15 +166,16 @@ EOXML;
 </soapenv:Envelope>
 EOXML;
         $array = $this->executeCurl($soap_request, $action);
-
+        $order = Order::findOne(['id' => $this->orderID]);
+        $organizationID = $order->client_id;
         if ($array['ns2SendResponse']['ns2Res'] == 1) {
             $journalMessage = Yii::t("app", 'По заказу {order} отправлен файл {file}', ['order' => $this->orderID, 'file' => $relationId]);
-            EDIClass::writeEdiDataToJournal($this->orgID, $journalMessage);
+            EDIClass::writeEdiDataToJournal($organizationID, $journalMessage);
             return true;
         } else {
             $error = $array['ns2SendResponse']['ns2Res'] ?? 'error';
             $journalMessage = Yii::t("app", 'Korus вернул код ошибки ') . $error;
-            EDIClass::writeEdiDataToJournal($this->orgID, $journalMessage, 'error');
+            EDIClass::writeEdiDataToJournal($organizationID, $journalMessage, 'error');
             Yii::error("Korus returns error code: " . print_r($array, 1));
             return false;
         }

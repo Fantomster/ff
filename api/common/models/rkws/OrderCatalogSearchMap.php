@@ -194,7 +194,7 @@ class OrderCatalogSearchMap extends \common\models\search\OrderCatalogSearch
                                         ((c.cat_id = b.id)))
                                     join " . CatalogBaseGoods::tableName() . " d on
                                         ((d.id = c.base_goods_id)))")
-            ->where(" (b.type = 1) AND a.rest_org_id = $client_id AND a.supp_org_id in ($vendorInList)
+            ->where(" (b.type = 2) AND a.rest_org_id = $client_id AND a.supp_org_id in ($vendorInList)
                                             AND b.status = 1
                                             AND a.deleted = 0");
 

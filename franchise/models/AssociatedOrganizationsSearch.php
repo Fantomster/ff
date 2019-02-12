@@ -15,7 +15,8 @@ use yii\db\Expression;
  *
  * @author sharaf
  */
-class AssociatedOrganizationsSearch extends Organization{
+class AssociatedOrganizationsSearch extends Organization
+{
 
     public $filter_currency = 1;
     public $searchString;
@@ -31,7 +32,8 @@ class AssociatedOrganizationsSearch extends Organization{
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $organization, $user) {
+    public function search($params, $organization, $user)
+    {
         $this->load($params);
 
         $tblRSR   = \common\models\RelationSuppRest::tableName();
@@ -39,9 +41,11 @@ class AssociatedOrganizationsSearch extends Organization{
         $tblOrg   = Organization::tableName();
         $tblFA    = \common\models\FranchiseeAssociate::tableName();
 
-        $prefix = ($organization->type_id == Organization::TYPE_RESTAURANT) ? 'supp' : 'rest';
-        $name = ($organization->type_id == Organization::TYPE_RESTAURANT) ? 'client' : 'vendor';
-        
+        $prefix1 = ($organization->type_id == Organization::TYPE_RESTAURANT) ? 'supp' : 'rest';
+        $prefix2 = ($organization->type_id == Organization::TYPE_RESTAURANT) ? 'rest' : 'supp';
+//        $name    = ($organization->type_id == Organization::TYPE_RESTAURANT) ? 'client' : 'vendor';
+        $name    = ($organization->type_id == Organization::TYPE_RESTAURANT) ? 'vendor' : 'client';
+
         $orderStatuses = [
             Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
             Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
@@ -52,69 +56,60 @@ class AssociatedOrganizationsSearch extends Organization{
         $subQueryAssociatedCount = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblRSR)
-                ->where(["{$prefix}_org_id" => "org.id"]);
+                ->where("{$prefix1}_org_id = org.id");
 
         $subQueryAssociatedCountPrev30 = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblRSR)
-                ->where([
-                    "{$prefix}_org_id" => "org.id",
-                    "deleted"     => 0,
-                ])
+                ->where(["deleted" => 0])
+                ->andWhere("{$prefix1}_org_id = org.id")
                 ->andWhere([
-                    "between",
-                    "created_at",
-                    new Expression("CURDATE() - INTERVAL 30 DAY"),
-                    new Expression("CURDATE() + INTERVAL 1 DAY"),
-                ]);
+            "between",
+            "created_at",
+            new Expression("CURDATE() - INTERVAL 30 DAY"),
+            new Expression("CURDATE() + INTERVAL 1 DAY"),
+        ]);
 
         $subQueryOrderCount = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblOrder)
-                ->where([
-                    "{$name}_id" => "org.id",
-                    "status"    => $orderStatuses,
-                ]);
+                ->where(["status" => $orderStatuses])
+                ->andWhere("{$name}_id = org.id");
 
         $subQueryOrderCountPrev30 = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblOrder)
-                ->where([
-                    "{$name}_id" => "org.id",
-                    "status"    => $orderStatuses,
-                ])
+                ->where(["status" => $orderStatuses])
+                ->andWhere("{$name}_id = org.id")
                 ->andWhere([
-                    "between",
-                    "created_at",
-                    new Expression("CURDATE() - INTERVAL 30 DAY"),
-                    new Expression("CURDATE() + INTERVAL 1 DAY"),
-                ]);
+            "between",
+            "created_at",
+            new Expression("CURDATE() - INTERVAL 30 DAY"),
+            new Expression("CURDATE() + INTERVAL 1 DAY"),
+        ]);
 
         $subQueryOrderSum = (new Query())
                 ->select([new Expression("SUM(total_price)")])
                 ->from($tblOrder)
-                ->where([
-                    "{$name}_id" => "org.id",
-                    "status"    => $orderStatuses,
-                ])->andFilterWhere([
-                    "currency_id" => $this->filter_currency
-                ]);
+                ->where(["status" => $orderStatuses])
+                ->andWhere("{$name}_id = org.id")
+                ->andFilterWhere([
+            "currency_id" => $this->filter_currency
+        ]);
 
         $subQueryOrderSumPrev30 = (new Query())
-                ->select([new Expression("SUM(total_price)")])
-                ->from($tblOrder)
-                ->where([
-                    "{$name}_id" => "org.id",
-                    "status"    => $orderStatuses,
-                ])
-                ->andWhere([
-                    "between",
-                    "created_at",
-                    new Expression("CURDATE() - INTERVAL 30 DAY"),
-                    new Expression("CURDATE() + INTERVAL 1 DAY"),
-                ])->andWhere([
-                    "currency_id" => $this->filter_currency
-                ]);
+                        ->select([new Expression("SUM(total_price)")])
+                        ->from($tblOrder)
+                        ->where(["status" => $orderStatuses])
+                        ->andWhere("{$name}_id = org.id")
+                        ->andWhere([
+                            "between",
+                            "created_at",
+                            new Expression("CURDATE() - INTERVAL 30 DAY"),
+                            new Expression("CURDATE() + INTERVAL 1 DAY"),
+                        ])->andWhere([
+            "currency_id" => $this->filter_currency
+        ]);
 
         $query = (new Query())
                 ->select([
@@ -133,33 +128,33 @@ class AssociatedOrganizationsSearch extends Organization{
                     "phone"                   => "org.phone",
                 ])
                 ->from(["rel" => $tblRSR])
-                ->leftJoin(["org" => $tblOrg], "org.id = rel.{$prefix}_org_id")
+                ->leftJoin(["org" => $tblOrg], "org.id = rel.{$prefix1}_org_id")
                 ->leftJoin(['fa' => $tblFA], "org.id = fa.organization_id")
                 ->where([
                     "and",
-                    ["rel.{$prefix}_org_id" => $organization->id],
-                    ["org.type_id" => $organization->type_id],
+                    ["rel.{$prefix2}_org_id" => $organization->id],
+                        //["org.type_id" => $organization->type_id],
                 ])
                 ->andFilterWhere([
-                    "or",
-                    ["like", "org.name", $this->searchString],
-                    ["like", "org.contact_name", $this->searchString],
-                    ["like", "org.phone", $this->searchString],
-                ]);
+            "or",
+            ["like", "org.name", $this->searchString],
+            ["like", "org.contact_name", $this->searchString],
+            ["like", "org.phone", $this->searchString],
+        ]);
 
         if ($user->role_id == Role::ROLE_FRANCHISEE_LEADER) {
             $subQueryManagerIds = (new Query())
-                ->select(["manager_id"])
-                ->from(\common\models\RelationManagerLeader::tableName())
-                ->where(["leader_id" => $user->id]);
+                    ->select(["manager_id"])
+                    ->from(\common\models\RelationManagerLeader::tableName())
+                    ->where(["leader_id" => $user->id]);
             $query->andWhere([
                 "or",
                 ["org.manager_id" => $user->id],
                 ["org.manager_id" => $subQueryManagerIds],
             ]);
         }
-        
-        if ($user->role_id == Role::ROLE_FRANCHISEE_MANAGER){
+
+        if ($user->role_id == Role::ROLE_FRANCHISEE_MANAGER) {
             $query->andWhere(["org.manager_id" => $user->id]);
         }
 
@@ -184,7 +179,7 @@ class AssociatedOrganizationsSearch extends Organization{
                 ]
             ],
         ]);
-        
+
         return $dataProvider;
     }
 

@@ -51,7 +51,7 @@ use kartik\checkbox\CheckboxX;
       ?>
     <?php //echo $form->field($profile, 'email') ?>
 
-    <?= $form->field($profile, 'phone')->widget(\common\widgets\PhoneInput::className(), [
+    <?= $form->field($profile, 'phone')->widget(\common\widgets\phone\PhoneInput::className(), [
         'jsOptions' => [
             'preferredCountries' => ['ru'],
             'nationalMode' => false,

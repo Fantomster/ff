@@ -60,7 +60,7 @@ $form = ActiveForm::begin([
         <div class="row">
             <div class="col-md-6">
                 <?= $userStatus == 0 ?
-                    $form->field($organization, 'phone')->widget(\common\widgets\PhoneInput::className(), [
+                    $form->field($organization, 'phone')->widget(\common\widgets\phone\PhoneInput::className(), [
                         'jsOptions' => [
                             'preferredCountries' => ['ru'],
                             'nationalMode' => false,
@@ -72,7 +72,7 @@ $form = ActiveForm::begin([
                             'id' => 'organization-view-supplirs-phone'
                         ],
                     ]) :
-                    $form->field($organization, 'phone')->widget(\common\widgets\PhoneInput::className(), [
+                    $form->field($organization, 'phone')->widget(\common\widgets\phone\PhoneInput::className(), [
                         'jsOptions' => [
                             'preferredCountries' => ['ru'],
                             'nationalMode' => false,

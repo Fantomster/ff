@@ -16,7 +16,8 @@ use yii\db\Expression;
  *
  * @author sharaf
  */
-class ClientSearch extends Organization {
+class ClientSearch extends Organization
+{
 
     public $searchString;
     public $date_from;
@@ -26,7 +27,8 @@ class ClientSearch extends Organization {
     /**
      * @inheritdoc
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             [['id', 'type_id'], 'integer'],
             [['name', 'vendorCount', 'orderCount', 'orderSum', 'created_at', 'contact_name', 'phone', 'date_from', 'date_to', 'searchString'], 'safe'],
@@ -36,7 +38,8 @@ class ClientSearch extends Organization {
     /**
      * @inheritdoc
      */
-    public function scenarios() {
+    public function scenarios()
+    {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
@@ -50,7 +53,8 @@ class ClientSearch extends Organization {
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $franchiseeId, $user) {
+    public function search($params, $franchiseeId, $user)
+    {
         $this->load($params);
 
         $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
@@ -78,69 +82,60 @@ class ClientSearch extends Organization {
         $subQueryVendorCount = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblRSR)
-                ->where(["rest_org_id" => "org.id"]);
+                ->where("rest_org_id = org.id");
 
         $subQueryVendorCountPrev30 = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblRSR)
-                ->where([
-                    "rest_org_id" => "org.id",
-                    "deleted"     => 0,
-                ])
+                ->where(["deleted" => 0])
+                ->andWhere("rest_org_id = org.id")
                 ->andWhere([
-                    "between",
-                    "created_at",
-                    new Expression("CURDATE() - INTERVAL 30 DAY"),
-                    new Expression("CURDATE() + INTERVAL 1 DAY"),
-                ]);
+            "between",
+            "created_at",
+            new Expression("CURDATE() - INTERVAL 30 DAY"),
+            new Expression("CURDATE() + INTERVAL 1 DAY"),
+        ]);
 
         $subQueryOrderCount = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblOrder)
-                ->where([
-                    "client_id" => "org.id",
-                    "status"    => $orderStatuses,
-                ]);
+                ->where(["status" => $orderStatuses])
+                ->andWhere("client_id = org.id");
 
         $subQueryOrderCountPrev30 = (new Query())
                 ->select([new Expression("COUNT(id)")])
                 ->from($tblOrder)
-                ->where([
-                    "client_id" => "org.id",
-                    "status"    => $orderStatuses,
-                ])
+                ->where(["status" => $orderStatuses])
+                ->andWhere("client_id = org.id")
                 ->andWhere([
-                    "between",
-                    "created_at",
-                    new Expression("CURDATE() - INTERVAL 30 DAY"),
-                    new Expression("CURDATE() + INTERVAL 1 DAY"),
-                ]);
+            "between",
+            "created_at",
+            new Expression("CURDATE() - INTERVAL 30 DAY"),
+            new Expression("CURDATE() + INTERVAL 1 DAY"),
+        ]);
 
         $subQueryOrderSum = (new Query())
                 ->select([new Expression("SUM(total_price)")])
                 ->from($tblOrder)
-                ->where([
-                    "client_id" => "org.id",
-                    "status"    => $orderStatuses,
-                ])->andFilterWhere([
-                    "currency_id" => $this->filter_currency
-                ]);
+                ->where(["status" => $orderStatuses])
+                ->andWhere("client_id = org.id")
+                ->andFilterWhere([
+            "currency_id" => $this->filter_currency
+        ]);
 
         $subQueryOrderSumPrev30 = (new Query())
-                ->select([new Expression("SUM(total_price)")])
-                ->from($tblOrder)
-                ->where([
-                    "client_id" => "org.id",
-                    "status"    => $orderStatuses,
-                ])
-                ->andWhere([
-                    "between",
-                    "created_at",
-                    new Expression("CURDATE() - INTERVAL 30 DAY"),
-                    new Expression("CURDATE() + INTERVAL 1 DAY"),
-                ])->andFilterWhere([
-                    "currency_id" => $this->filter_currency
-                ]);
+                        ->select([new Expression("SUM(total_price)")])
+                        ->from($tblOrder)
+                        ->where(["status" => $orderStatuses])
+                        ->andWhere("client_id = org.id")
+                        ->andWhere([
+                            "between",
+                            "created_at",
+                            new Expression("CURDATE() - INTERVAL 30 DAY"),
+                            new Expression("CURDATE() + INTERVAL 1 DAY"),
+                        ])->andFilterWhere([
+            "currency_id" => $this->filter_currency
+        ]);
 
         $query = (new Query())
                 ->select([
@@ -180,17 +175,17 @@ class ClientSearch extends Organization {
 
         if ($user->role_id == Role::ROLE_FRANCHISEE_LEADER) {
             $subQueryManagerIds = (new Query())
-                ->select(["manager_id"])
-                ->from(\common\models\RelationManagerLeader::tableName())
-                ->where(["leader_id" => $user->id]);
+                    ->select(["manager_id"])
+                    ->from(\common\models\RelationManagerLeader::tableName())
+                    ->where(["leader_id" => $user->id]);
             $query->andWhere([
                 "or",
                 ["org.manager_id" => $user->id],
                 ["org.manager_id" => $subQueryManagerIds],
             ]);
         }
-        
-        if ($user->role_id == Role::ROLE_FRANCHISEE_MANAGER){
+
+        if ($user->role_id == Role::ROLE_FRANCHISEE_MANAGER) {
             $query->andWhere(["org.manager_id" => $user->id]);
         }
 
@@ -215,7 +210,7 @@ class ClientSearch extends Organization {
                 ]
             ],
         ]);
-        
+
         return $dataProvider;
     }
 

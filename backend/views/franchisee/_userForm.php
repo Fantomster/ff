@@ -28,7 +28,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
     <?= ''//$form->field($profile, 'phone')->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',]) ?>
 
     <?=
-    $form->field($profile, 'phone')->widget(\common\widgets\PhoneInput::className(), [
+    $form->field($profile, 'phone')->widget(\common\widgets\phone\PhoneInput::className(), [
         'jsOptions' => [
             'preferredCountries' => ['ru'],
             'nationalMode' => false,

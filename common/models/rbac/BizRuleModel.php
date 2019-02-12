@@ -32,19 +32,9 @@ class BizRuleModel extends \yii2mod\rbac\models\BizRuleModel
 
         if (!is_subclass_of($this->className, Rule::class)) {
             $message = Yii::t('yii2mod.rbac', "'{class}' must extend from 'yii\\rbac\\Rule' or its child class", [
-                'class' => $this->className,]);
+                'class' => $this->className
+            ]);
             $this->addError('className', $message);
         }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function attributeLabels(): array
-    {
-        return [
-            'name' => 'Название',
-            'className' => 'Название класса',
-        ];
     }
 }

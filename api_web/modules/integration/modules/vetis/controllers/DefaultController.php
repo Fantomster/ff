@@ -1748,8 +1748,8 @@ class DefaultController extends WebApiController
     /**
      * @SWG\Post(path="/integration/vetis/update-product-item",
      *     tags={"Integration/vetis"},
-     *     summary="Добавление новой продукции в справочник наименований продукции",
-     *     description="Добавление новой продукции в справочник наименований продукции",
+     *     summary="Обновление продукции в справочник наименований продукции",
+     *     description="Обновление продукции в справочник наименований продукции",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",

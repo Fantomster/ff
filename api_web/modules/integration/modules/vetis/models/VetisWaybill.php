@@ -642,15 +642,19 @@ class VetisWaybill extends WebApi
         }
 
         return [
-            'form'         => $model->subProduct->name ?? null,
-            'name'         => $model->name,
-            'uuid'         => $model->uuid,
-            'guid'         => $model->guid,
-            'article'      => $model->code,
-            'gtin'         => $model->globalID,
-            'gost'         => $model->gost,
-            'active'       => $model->active,
-            'package_type' => $model->unit->name ?? null,
+            'form'             => $model->subProduct->name ?? null,
+            'name'             => $model->name,
+            'uuid'             => $model->uuid,
+            'guid'             => $model->guid,
+            'article'          => $model->code,
+            'gtin'             => $model->globalID,
+            'gost'             => $model->gost,
+            'active'           => $model->active,
+            'package_type'     => $model->unit->name ?? null,
+            'package_quantity' => $model->packagingQuantity ?? null,
+            'package_volume'   => $model->packagingVolume ?? null,
+            'package_unit'     => $model->packingType->name ?? null,
+//            'producer_name' => $model-> ?? null,
         ];
     }
 

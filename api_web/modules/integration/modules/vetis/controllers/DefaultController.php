@@ -1249,8 +1249,8 @@ class DefaultController extends WebApiController
     /**
      * @SWG\Post(path="/integration/vetis/product-form-list",
      *     tags={"Integration/vetis"},
-     *     summary="Получение списка Продукция",
-     *     description="Получение списка Продукция",
+     *     summary="Получение списка Вид Продукции",
+     *     description="Получение списка Вид Продукции",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",

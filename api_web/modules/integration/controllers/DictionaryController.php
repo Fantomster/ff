@@ -55,6 +55,11 @@ class DictionaryController extends \api_web\components\WebApiController
                         'check-agent-name',
                         'product-type-list',
                         'product-type-set-selected',
+                        'vetis-business-entity',
+                        'vetis-russian-enterprise',
+                        'vetis-foreign-enterprise',
+                        'vetis-transport',
+                        'vetis-product-item',
                     ],
                     'roles'   => [
                         Registry::OPERATOR

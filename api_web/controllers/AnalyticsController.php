@@ -3,7 +3,9 @@
 namespace api_web\controllers;
 
 use api_web\classes\AnalyticsWebApi;
+use api_web\components\Registry;
 use api_web\components\WebApiController;
+use yii\filters\AccessControl;
 
 /**
  * Class AnalyticsController
@@ -13,8 +15,42 @@ use api_web\components\WebApiController;
  */
 class AnalyticsController extends WebApiController
 {
-
     public $className = AnalyticsWebApi::class;
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'client-goods',
+                        'client-purchases',
+                        'client-orders',
+                        'client-vendors',
+                        'client-summary',
+                        'currencies',
+                    ],
+                    'roles'      => [
+                        Registry::PURCHASER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT
+                    ],
+                    'roleParams' => $roleParams
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
 
     /**
      * @SWG\Post(path="/analytics/client-goods",
@@ -342,7 +378,6 @@ class AnalyticsController extends WebApiController
         $this->response = $this->classWebApi->clientVendors($this->request);
     }
 
-
     /**
      * @SWG\Post(path="/analytics/client-summary",
      *     tags={"Analytics"},
@@ -412,7 +447,6 @@ class AnalyticsController extends WebApiController
     {
         $this->response = $this->classWebApi->clientSummary($this->request);
     }
-
 
     /**
      * @SWG\Post(path="/analytics/currencies",

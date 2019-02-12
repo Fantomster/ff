@@ -7,6 +7,7 @@ use api_web\components\Registry;
 use api_web\components\WebApiController;
 use api_web\modules\integration\modules\vetis\helpers\VetisHelper;
 use api_web\modules\integration\modules\vetis\models\VetisWaybill;
+use yii\filters\AccessControl;
 
 /**
  * Class DefaultController
@@ -15,6 +16,65 @@ use api_web\modules\integration\modules\vetis\models\VetisWaybill;
  */
 class DefaultController extends WebApiController
 {
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $roleParams = function () {
+            return ['user' => $this->user,];
+        };
+
+        $access['access'] = [
+            'class' => AccessControl::class,
+            'rules' => [
+                [
+                    'allow'      => true,
+                    'actions'    => [
+                        'groups-list',
+                        'short-info-vsd',
+                        'full-info-vsd',
+                        'filter-sender',
+                        'filter-product',
+                        'filter-status',
+                        'filter-vsd',
+                        'filters',
+                        'get-vsd-pdf',
+                        'list',
+                        'return-vsd',
+                        'partial-acceptance',
+                        'repay-vsd',
+                        'acquirer-filter',
+                        'get-not-confirmed-vsd',
+                        'regionalization-get',
+                        'product-item-list',
+                        'product-type-list',
+                        'product-subtype-list',
+                        'product-form-list',
+                        'unit-list',
+                        'packing-type-list',
+                        'russian-enterprise-list',
+                        'business-entity',
+                        'ingredient-list',
+                        'product-ingredient-list',
+                        'product-info',
+                        'create-product-item',
+                        'create-transport',
+                        'delete-transport'
+                    ],
+                    'roles'      => [
+                        Registry::MANAGER_RESTAURANT,
+                        Registry::BOOKER_RESTAURANT,
+                    ],
+                    'roleParams' => $roleParams
+                ],
+            ],
+        ];
+
+        $behaviors = array_merge($behaviors, $access);
+
+        return $behaviors;
+    }
+
     /**
      * @param $action
      * @return bool
@@ -1961,6 +2021,5 @@ class DefaultController extends WebApiController
     {
         $this->response = (new VetisWaybill())->deleteIngredient($this->request);
     }
-
 
 }

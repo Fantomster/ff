@@ -82,7 +82,7 @@ $gridColumns = [
         'template'      => '{view} {update} {rbac/assignment/view} {delete}',
         'buttons'       => [
             'rbac/assignment/view' => function ($url) {
-                return "<a href='{$url}' title='View'><span class='glyphicon glyphicon-wrench'></span></a>";
+                return "<a href=" . $url . " title='View'><span class='glyphicon glyphicon-wrench'></span></a>";
             }
         ],
     ],

@@ -1794,5 +1794,52 @@ class DefaultController extends WebApiController
         $this->response = (new VetisWaybill())->createTransport($this->request);
     }
 
+    /**
+     * @SWG\Post(path="/integration/vetis/delete-transport",
+     *     tags={"Integration/vetis"},
+     *     summary="Удаление транспорта из справочника Транспортные средства",
+     *     description="Если не отправлять org_id попробует удалить ТС в текущей организации",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 1,
+     *                      "org_id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "result": true
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionDeleteTransport()
+    {
+        $this->response = (new VetisWaybill())->deleteTransport($this->request);
+    }
+
 
 }

@@ -736,4 +736,24 @@ class VetisWaybill extends WebApi
 
         return ['result' => true];
     }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function deleteTransport($request)
+    {
+        $this->validateRequest($request, ['id']);
+        $orgId = $request['org_id'] ?? $this->user->organization_id;
+        (new EmailRoboWebApi())->validateOrgId($orgId);
+        $model = VetisTransport::findOne($request['id']);
+        if (!$model) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
+
+        return ['result' => (bool)$model->delete()];
+    }
 }

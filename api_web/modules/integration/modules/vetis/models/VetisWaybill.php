@@ -640,17 +640,29 @@ class VetisWaybill extends WebApi
         if (!$model) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
         }
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\Products();
+        $attributes = unserialize($model->data);
+        if (isset($attributes->producing->location->guid)) {
+            $productionName = VetisRussianEnterprise::find()->select(['name', 'uuid', 'guid'])
+                ->where(['guid' => $attributes->producing->location->guid])->one();
+        }
 
         return [
-            'form'         => $model->subProduct->name ?? null,
-            'name'         => $model->name,
-            'uuid'         => $model->uuid,
-            'guid'         => $model->guid,
-            'article'      => $model->code,
-            'gtin'         => $model->globalID,
-            'gost'         => $model->gost,
-            'active'       => $model->active,
-            'package_type' => $model->unit->name ?? null,
+            'form'             => $model->subProduct->name ?? null,
+            'name'             => $model->name,
+            'uuid'             => $model->uuid,
+            'guid'             => $model->guid,
+            'article'          => $model->code,
+            'gtin'             => $model->globalID,
+            'gost'             => $model->gost,
+            'active'           => $model->active,
+            'package_type'     => $model->unit->name ?? null,
+            'package_quantity' => $model->packagingQuantity ?? null,
+            'package_volume'   => $model->packagingVolume ?? null,
+            'package_unit'     => $model->packingType->name ?? null,
+            'producer_name'    => $this->getBusinessEntity()->name ?? null,
+            'production_name'  => $productionName ?? null,
         ];
     }
 

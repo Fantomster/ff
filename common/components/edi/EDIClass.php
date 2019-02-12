@@ -202,12 +202,6 @@ class EDIClass extends Component
                 }
             }
 
-            $rel = RelationSuppRest::findOne(['supp_org_id' => $order->vendor_id, 'rest_org_id' => $ediOrganization->organization_id]);
-
-            if (empty($rel)) {
-                throw new Exception("Not found RelationSuppRest: supp_org_id = {$order->vendor_id} AND rest_org_id = {$ediOrganization->organization_id}");
-            }
-
             foreach ($positions as $position) {
                 $quantity = $position->ACCEPTEDQUANTITY ?? $position->ORDEREDQUANTITY;
                 if (!$quantity || $quantity == 0.000 || $position->PRICE == 0.00) continue;
@@ -220,6 +214,10 @@ class EDIClass extends Component
                 if (!in_array($contID, $orderContentArr) && !in_array($barcode, $barcodeArray)) {
                     $good = CatalogBaseGoods::findOne(['barcode' => $position->PRODUCT]);
                     if (!$good) {
+                        $rel = RelationSuppRest::findOne(['supp_org_id' => $order->vendor_id, 'rest_org_id' => $ediOrganization->organization_id]);
+                        if (empty($rel)) {
+                            throw new Exception("Not found RelationSuppRest: supp_org_id = {$order->vendor_id} AND rest_org_id = {$ediOrganization->organization_id}");
+                        }
                         $good = new CatalogBaseGoods();
                         $good->cat_id = $rel->cat_id;
                         $good->article = $position->PRODUCTIDSUPPLIER;

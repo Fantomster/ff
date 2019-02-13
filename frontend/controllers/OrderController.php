@@ -65,153 +65,156 @@ class OrderController extends DefaultController
                 'rules'      => [
                     [
                         'actions' => [
-                            'index',
-                            'view',
-                            'edit',
-                            'send-message',
-                            'ajax-order-action',
-                            'ajax-cancel-order',
-                            'ajax-refresh-buttons',
-                            'ajax-order-grid',
-                            'ajax-refresh-stats',
-                            'ajax-set-comment',
-                            'ajax-calculate-total',
-                            'pdf',
-                            'export-to-xls',
-                            'order-to-xls',
-                            'grid-report',
-                            'ajax-show-products',
-                            'ajax-add-to-order',
-                            'save-selected-orders',
-                            'upload-attachment',
-                            'get-attachment',
-                            'delete-attachment',
-                            'ajax-get-vsd-list',
-                            'ajax-add-good-quantity-to-session',
-                            'ajax-clear-session'
+                            'index', // Показывает список всех созданных заказов
+                            'view', // Показывает содержимое заказа
+                            'edit', // Редактирует содержимое заказа
+                            'ajax-cancel-order', // Отменяет заказ
+                            'ajax-refresh-buttons', // Обновляет кнопки статусов заказов
+                            'ajax-set-comment', // Добавляет комментарий к заказу
+                            'ajax-calculate-total', // Пересчитывает стоимость корзины
+                            'pdf', // Выгружает заказ в файл .pdf
+                            'export-to-xls', // Выгружает выбранные заказы в файл .xls
+                            'order-to-xls', // Выгружает заказ в файл .xls
+                            'grid-report', // Создаёт сеточный отчёт
+                            'ajax-show-products', // Показывает товары заказа согласно параметрам
+                            'save-selected-orders', // Сохраняет выбранные заказы
+                            'ajax-get-vsd-list', // Возвращает список ВСД
+                            'ajax-add-good-quantity-to-session', // Добавляет количество товара в сессию
+                            'ajax-clear-session', // Очищает сессию
+                            'ajax-refresh-stats', // Обновляет статистику по заказам
+                            'ajax-add-to-order', // Добавляет товар в заказ
+                            'ajax-order-grid', // Создаёт таблицу данных заказа для показа
+                            // Действия, на которые не имеет прав роль "Инициатор закупки":
+                            'send-message', // Посылает сообщение в чат
+                            'ajax-order-action', // Рассылает сообщения о действиях с заказом
+                            'upload-attachment', // Загружает в заказ данные из файла-вложения
+                            'get-attachment', // Возвращает файл-вложение для загрузки из него данных в заказ
+                            'delete-attachment' // Удаляет файл-вложение
                         ],
                         'allow'   => true,
                         // Allow restaurant managers
                         'roles'   => [
-                            Role::ROLE_RESTAURANT_MANAGER,
-                            Role::ROLE_ONE_S_INTEGRATION,
-                            Role::ROLE_RESTAURANT_EMPLOYEE,
-                            Role::ROLE_SUPPLIER_MANAGER,
-                            Role::ROLE_SUPPLIER_EMPLOYEE,
-                            Role::ROLE_FKEEPER_MANAGER,
-                            Role::ROLE_ADMIN,
-                            Role::getFranchiseeEditorRoles(),
-                            Role::ROLE_RESTAURANT_JUNIOR_BUYER,
-                            Role::ROLE_RESTAURANT_ACCOUNTANT,
-                            Role::ROLE_RESTAURANT_BUYER,
+                            Role::ROLE_RESTAURANT_MANAGER, // Руководитель (ресторан)
+                            Role::ROLE_ONE_S_INTEGRATION, // 1С Интеграция (ресторан)
+                            Role::ROLE_RESTAURANT_EMPLOYEE, // Менеджер (ресторан)
+                            Role::ROLE_SUPPLIER_MANAGER, // Руководитель (поставщик)
+                            Role::ROLE_SUPPLIER_EMPLOYEE, // Менеджер (поставщик)
+                            Role::ROLE_FKEEPER_MANAGER, // Менеджер MixCart (MixCart)
+                            Role::ROLE_ADMIN, // Admin (MixCart)
+                            Role::getFranchiseeEditorRoles(), // Владелец (франчайзи), оператор (франчайзи), руководитель (франчайзи), менеджер (франчайзи)
+                            Role::ROLE_RESTAURANT_JUNIOR_BUYER, // Младший закупщик
+                            Role::ROLE_RESTAURANT_ACCOUNTANT, // Бухгалтер (ресторан)
+                            Role::ROLE_RESTAURANT_BUYER, // Закупщик (ресторан)
                         ],
                     ],
                     [
                         'actions' => [
-                            'create',
-                            'guides',
-                            'favorites',
-                            'product-filter',
-                            'edit-guide',
-                            'reset-guide',
-                            'save-guide',
-                            'checkout',
-                            'repeat',
-                            'refresh-cart',
-                            'ajax-add-to-cart',
-                            'ajax-add-to-cart-notice',
-                            'ajax-add-guide-to-cart',
-                            'ajax-delete-order',
-                            'ajax-make-order',
-                            'ajax-change-quantity',
-                            'ajax-remove-position',
-                            'ajax-show-details',
-                            'ajax-refresh-vendors',
-                            'ajax-set-note',
-                            'ajax-set-delivery',
-                            'ajax-show-details',
-                            'ajax-create-guide',
-                            'ajax-rename-guide',
-                            'ajax-add-to-guide',
-                            'ajax-delete-guide',
-                            'ajax-remove-from-guide',
-                            'ajax-show-guide',
-                            'ajax-select-vendor',
-                            'ajax-order-update-waybill',
-                            'complete-obsolete',
-                            'pjax-cart',
-                            'blocked-products',
-                            'clear-all-blocked',
+                            'create', // Показывает список товаров для отбора их в корзину
+                            'guides', //Показывает список шаблонов для заказа
+                            'favorites', // Возвращает список Часто заказываемых товаров
+                            'product-filter', // Показывает список товаров для блокировки
+                            'edit-guide', // Редактирует шаблон для заказов
+                            'reset-guide', // Отменяет изменения в шаблоне для заказов
+                            'save-guide', // Сохраняет шаблон для заказов
+                            'repeat', // Повторяет бывший ранее заказ в корзину
+                            'refresh-cart', // Обновляет корзину
+                            'ajax-add-to-cart', // Добавляет товар в корзину
+                            'ajax-add-to-cart-notice', // Уведомляет о добавлении товара в корзину
+                            'ajax-add-guide-to-cart', // Добавляет шаблон для заказа в корзину
+                            'ajax-delete-order', // Удаляет заказ
+                            'ajax-change-quantity', // Изменяет количество товара в заказе
+                            'ajax-remove-position', // Удаляет товар из корзины
+                            'ajax-show-details', // Показывает подробную информацию о товаре
+                            'ajax-refresh-vendors', // Обновляет список поставщиков
+                            'ajax-set-note', // Добавляет комментарий к товару в корзине
+                            'ajax-set-delivery', // Устанавливает дату доставки
+                            'ajax-create-guide', // Создаёт шаблон для заказа
+                            'ajax-rename-guide', // Переименовывает шаблон для заказа
+                            'ajax-add-to-guide', // Добавляет товар в шаблон для заказа
+                            'ajax-delete-guide', // Удаляет шаблон из списка шаблонов для заказа
+                            'ajax-remove-from-guide', // Удаляет товар из шаблона для заказа
+                            'ajax-show-guide', // Показывает шаблон для заказов
+                            'ajax-select-vendor', // Устанавливает поставщика в шаблоне для заказов при редактировании
+                            'pjax-cart', // Показывает новую корзину при помощи Pjax
+                            'blocked-products', // Блокирует выбранные товары
+                            'clear-all-blocked', // Разблокирует все товары
+                            'checkout', // Сохраняет изменения в корзине
+                            'ajax-make-order', // Оформляет заказы
+                            // Действия, на которые не имеет прав роль "Инициатор закупки":
+                            'ajax-order-update-waybill', // Добавляет в заказ номер приходной накладной
+                            'complete-obsolete' // Завершает заказ
                         ],
                         'allow'   => true,
                         // Allow restaurant managers
                         'roles'   => [
-                            Role::ROLE_RESTAURANT_MANAGER,
-                            Role::ROLE_ONE_S_INTEGRATION,
-                            Role::ROLE_RESTAURANT_EMPLOYEE,
-                            Role::ROLE_FKEEPER_MANAGER,
-                            Role::ROLE_ADMIN,
-                            Role::getFranchiseeEditorRoles(),
-                            Role::ROLE_RESTAURANT_JUNIOR_BUYER,
-                            Role::ROLE_RESTAURANT_ACCOUNTANT,
-                            Role::ROLE_RESTAURANT_BUYER,
+                            Role::ROLE_RESTAURANT_MANAGER, // Руководитель (ресторан)
+                            Role::ROLE_ONE_S_INTEGRATION, // 1С Интеграция (ресторан)
+                            Role::ROLE_RESTAURANT_EMPLOYEE, // Менеджер (ресторан)
+                            Role::ROLE_FKEEPER_MANAGER, // Менеджер MixCart (MixCart)
+                            Role::ROLE_ADMIN, // Admin (MixCart)
+                            Role::getFranchiseeEditorRoles(), // Владелец (франчайзи), оператор (франчайзи), руководитель (франчайзи), менеджер (франчайзи)
+                            Role::ROLE_RESTAURANT_JUNIOR_BUYER, // Младший закупщик (ресторан)
+                            Role::ROLE_RESTAURANT_ACCOUNTANT, // Бухгалтер (ресторан)
+                            Role::ROLE_RESTAURANT_BUYER, // Закупщик (ресторан)
                         ],
                     ],
                     [
                         'actions' => [
-                            'edit',
-                            'ajax-cancel-order',
-                            'guides',
-                            'create',
-                            'favorites',
-                            'product-filter',
-                            'edit-guide',
-                            'reset-guide',
-                            'save-guide',
-                            'repeat',
-                            'refresh-cart',
-                            'ajax-add-to-cart',
-                            'ajax-add-to-cart-notice',
-                            'ajax-add-guide-to-cart',
-                            'ajax-delete-order',
-                            'ajax-change-quantity',
-                            'ajax-remove-position',
-                            'ajax-show-details',
-                            'ajax-refresh-vendors',
-                            'ajax-set-note',
-                            'ajax-set-delivery',
-                            'ajax-show-details',
-                            'ajax-create-guide',
-                            'ajax-rename-guide',
-                            'ajax-add-to-guide',
-                            'ajax-delete-guide',
-                            'ajax-remove-from-guide',
-                            'ajax-show-guide',
-                            'ajax-select-vendor',
-                            'pjax-cart',
-                            'blocked-products',
-                            'clear-all-blocked',
-                            'index',
-                            'view',
-                            'ajax-refresh-buttons',
-                            'ajax-refresh-stats',
-                            'ajax-set-comment',
-                            'ajax-calculate-total',
-                            'pdf',
-                            'export-to-xls',
-                            'order-to-xls',
-                            'grid-report',
-                            'ajax-show-products',
-                            'ajax-add-to-order',
-                            'save-selected-orders',
-                            'ajax-get-vsd-list',
-                            'ajax-add-good-quantity-to-session',
-                            'ajax-clear-session'
+                            'index', // Показывает список всех созданных заказов
+                            'view', // Показывает содержимое заказа
+                            'edit', // Редактирует содержимое заказа
+                            'ajax-cancel-order', // Отменяет заказ
+                            'ajax-refresh-buttons', // Обновляет кнопки статусов заказов
+                            'ajax-set-comment', // Добавляет комментарий к заказу
+                            'ajax-calculate-total', // Пересчитывает стоимость корзины
+                            'pdf', // Выгружает заказ в файл .pdf
+                            'export-to-xls', // Выгружает выбранные заказы в файл .xls
+                            'order-to-xls', // Выгружает заказ в файл .xls
+                            'grid-report', // Создаёт сеточный отчёт
+                            'ajax-show-products', // Показывает товары заказа согласно параметрам
+                            'save-selected-orders', // Сохраняет выбранные заказы
+                            'ajax-get-vsd-list', // Возвращает список ВСД
+                            'ajax-add-good-quantity-to-session', // Добавляет количество товара в сессию
+                            'ajax-clear-session', // Очищает сессию
+                            'create', // Показывает список товаров для отбора их в корзину
+                            'guides', // Показывает список шаблонов для заказа
+                            'favorites', // Возвращает список Часто заказываемых товаров
+                            'product-filter', // Показывает список товаров для блокировки
+                            'edit-guide', // Редактирует шаблон для заказов
+                            'reset-guide', // Отменяет изменения в шаблоне для заказов
+                            'save-guide', // Сохраняет шаблон для заказов
+                            'repeat', // Повторяет бывший ранее заказ в корзину
+                            'refresh-cart', // Обновляет корзину
+                            'ajax-add-to-cart', // Добавляет товар в корзину
+                            'ajax-add-to-cart-notice', // Уведомляет о добавлении товара в корзину
+                            'ajax-add-guide-to-cart', // Добавляет шаблон для заказа в корзину
+                            'ajax-delete-order', // Удаляет заказ
+                            'ajax-change-quantity', // Изменяет количество товара в заказе
+                            'ajax-remove-position', // Удаляет товар из корзины
+                            'ajax-show-details', // Показывает подробную информацию о товаре
+                            'ajax-refresh-vendors', // Обновляет список поставщиков
+                            'ajax-set-note', // Добавляет комментарий к товару в корзине
+                            'ajax-set-delivery', // Устанавливает дату доставки
+                            'ajax-create-guide', // Создаёт шаблон для заказа
+                            'ajax-rename-guide', // Переименовывает шаблон для заказа
+                            'ajax-add-to-guide', // Добавляет товар в шаблон для заказа
+                            'ajax-delete-guide', // Удаляет шаблон из списка шаблонов для заказа
+                            'ajax-remove-from-guide', // Удаляет товар из шаблона для заказа
+                            'ajax-show-guide', // Показывает шаблон для заказов
+                            'ajax-select-vendor', // Устанавливает поставщика в шаблоне для заказов при редактировании
+                            'pjax-cart', // Показывает новую корзину при помощи Pjax
+                            'blocked-products', // Блокирует выбранные товары
+                            'clear-all-blocked', // Разблокирует все товары
+                            'ajax-refresh-stats', // Обновляет статистику по заказам
+                            'ajax-add-to-order', // Добавляет товар в заказ
+                            'ajax-order-grid', // Создаёт таблицу данных заказа для показа
+                            'checkout', // Сохраняет изменения в корзине
+                            'ajax-make-order', // Оформляет заказы
                         ],
                         'allow'   => true,
                         // Allow restaurant managers
                         'roles'   => [
-                            Role::ROLE_RESTAURANT_ORDER_INITIATOR,
+                            Role::ROLE_RESTAURANT_ORDER_INITIATOR, // Инициатор закупки (ресторан)
                         ],
                     ],
                 ],
@@ -221,6 +224,10 @@ class OrderController extends DefaultController
             ],
         ];
     }
+
+    /**
+     * Выгружает выбранные заказы в файл .xls
+     */
 
     public function actionExportToXls()
     {
@@ -277,6 +284,10 @@ class OrderController extends DefaultController
             exit();
         }
     }
+
+    /**
+     * Выгружает заказ в файл .xls
+     */
 
     public function actionOrderToXls(int $id): void
     {
@@ -472,6 +483,10 @@ class OrderController extends DefaultController
         exit;
     }
 
+    /**
+     * Заполняет ячейку Excel данными
+     */
+
     private function fillCellData(\PHPExcel $objPHPExcel, int $row, string $client_string, string $vendor_string): void
     {
         $objPHPExcel->getActiveSheet()->mergeCells("A$row:D$row");
@@ -481,12 +496,20 @@ class OrderController extends DefaultController
         $objPHPExcel->getActiveSheet()->getRowDimension($row)->setRowHeight(20);
     }
 
+    /**
+     * Заполняет заголовок ячейки Excel данными
+     */
+
     private function fillCellHeaderData(\PHPExcel $objPHPExcel, string $column, string $data): void
     {
         $objPHPExcel->getActiveSheet()->setCellValue($column . "17", Yii::t('app', $data));
         $objPHPExcel->getActiveSheet()->getStyle($column . "17")->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $objPHPExcel->getActiveSheet()->getStyle($column . "17")->applyFromArray(['font' => ['bold' => true]])->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
     }
+
+    /**
+     * Заполняет подвал ячейки Excel данными
+     */
 
     private function fillCellBottomData(\PHPExcel $objPHPExcel, int $row, string $leftData, string $rightData, bool $bold = false): int
     {
@@ -504,6 +527,10 @@ class OrderController extends DefaultController
         $row++;
         return $row;
     }
+
+    /**
+     * Показывает товары для отбора их в корзину
+     */
 
     public function actionCreate()
     {
@@ -558,6 +585,10 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Показывает список шаблонов для заказа
+     */
+
     public function actionGuides(): String
     {
         $client = $this->currentUser->organization;
@@ -574,6 +605,10 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Удаляет шаблон из списка шаблонов для заказа
+     */
+
     public function actionAjaxDeleteGuide(int $id)
     {
         $client = $this->currentUser->organization;
@@ -584,6 +619,10 @@ class OrderController extends DefaultController
         }
         return false;
     }
+
+    /**
+     * Создаёт шаблон для заказа
+     */
 
     public function actionAjaxCreateGuide($name)
     {
@@ -601,6 +640,10 @@ class OrderController extends DefaultController
             return ['type' => 'fail'];
         }
     }
+
+    /**
+     * Переименовывает шаблон для заказа
+     */
 
     public function actionAjaxRenameGuide()
     {
@@ -621,6 +664,10 @@ class OrderController extends DefaultController
         endif;
     }
 
+    /**
+     * Возвращает список ВСД
+     */
+
     public function actionAjaxGetVsdList()
     {
         $guid = mercDicconst::getSetting('enterprise_guid');
@@ -629,7 +676,7 @@ class OrderController extends DefaultController
     }
 
     /**
-     * Редактирование шаблона
+     * Возвращает товарные позиции шаблона для заказов
      *
      * @param $initGuideItems array
      * @return array
@@ -861,6 +908,8 @@ class OrderController extends DefaultController
     }
 
     /**
+     * Показывает шаблон для заказов
+     *
      * @param int $id
      * @return String
      */
@@ -1025,6 +1074,10 @@ class OrderController extends DefaultController
         return true; //$this->renderPartial('_orders', compact('orders'));
     }
 
+    /**
+     * Возвращает список Часто заказываемых товаров
+     */
+
     public function actionFavorites()
     {
         $client = $this->currentUser->organization;
@@ -1038,6 +1091,10 @@ class OrderController extends DefaultController
         return $this->render('favorites', compact('searchModel', 'dataProvider', 'client'));
     }
 
+    /**
+     * Показывает новую корзину при помощи Pjax
+     */
+
     public function actionPjaxCart()
     {
         if (Yii::$app->request->isPjax) {
@@ -1047,6 +1104,10 @@ class OrderController extends DefaultController
             return $this->redirect('/order/checkout');
         }
     }
+
+    /**
+     * Добавляет товар в корзину
+     */
 
     public function actionAjaxAddToCart()
     {
@@ -1068,6 +1129,10 @@ class OrderController extends DefaultController
         return $post['id'];
     }
 
+    /**
+     * Уведомляет о добавлении товара в корзину
+     */
+
     public function actionAjaxAddToCartNotice()
     {
         try {
@@ -1079,6 +1144,10 @@ class OrderController extends DefaultController
 
         return true;
     }
+
+    /**
+     * Показывает подробную информацию о товаре
+     */
 
     public function actionAjaxShowDetails()
     {
@@ -1101,6 +1170,10 @@ class OrderController extends DefaultController
         return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId', 'currencySymbol'));
     }
 
+    /**
+     * Удаляет товар из корзины
+     */
+
     public function actionAjaxRemovePosition($product_id)
     {
         $client = $this->currentUser->organization;
@@ -1111,6 +1184,10 @@ class OrderController extends DefaultController
 
         return $product_id;
     }
+
+    /**
+     * Изменяет количество товара в заказе
+     */
 
     public function actionAjaxChangeQuantity($vendor_id = null, $product_id = null)
     {
@@ -1145,6 +1222,10 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Добавляет комментарий к заказу
+     */
+
     public function actionAjaxSetComment($vendor_id)
     {
         if (Yii::$app->request->post()) {
@@ -1159,6 +1240,10 @@ class OrderController extends DefaultController
         }
         return false;
     }
+
+    /**
+     * Отменяет заказ
+     */
 
     public function actionAjaxCancelOrder($order_id = null)
     {
@@ -1197,6 +1282,10 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Добавляет комментарий к товару в корзине
+     */
+
     public function actionAjaxSetNote($product_id)
     {
 
@@ -1214,6 +1303,10 @@ class OrderController extends DefaultController
         }
         return false;
     }
+
+    /**
+     * Оформляет заказы
+     */
 
     public function actionAjaxMakeOrder()
     {
@@ -1281,6 +1374,10 @@ class OrderController extends DefaultController
         return false;
     }
 
+    /**
+     * Пересчитывает стоимость корзины
+     */
+
     public function actionAjaxCalculateTotal($id)
     {
         if (Yii::$app->request->post()) {
@@ -1325,6 +1422,10 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Удаляет заказ
+     */
+
     public function actionAjaxDeleteOrder($vendor_id = null)
     {
         $client = $this->currentUser->organization;
@@ -1334,6 +1435,10 @@ class OrderController extends DefaultController
         $this->sendCartChange($client, $cartCount);
         return true;
     }
+
+    /**
+     * Устанавливает дату доставки
+     */
 
     public function actionAjaxSetDelivery()
     {
@@ -1375,12 +1480,20 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Обновляет корзину
+     */
+
     public function actionRefreshCart()
     {
         $client = $this->currentUser->organization;
         $orders = $client->getCart();
         return $this->renderAjax('_cart', compact('orders'));
     }
+
+    /**
+     * Показывает список всех созданных заказов
+     */
 
     public function actionIndex()
     {
@@ -1430,6 +1543,10 @@ class OrderController extends DefaultController
             return $this->render('index', $renderParams);
         }
     }
+
+    /**
+     * Показывает содержимое заказа
+     */
 
     public function actionView($id)
     {
@@ -1563,6 +1680,10 @@ class OrderController extends DefaultController
             return $this->render('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
         }
     }
+
+    /**
+     * Редактирует содержимое заказа
+     */
 
     public function actionEdit($id)
     {
@@ -1737,6 +1858,10 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Выгружает заказ в файл .pdf
+     */
+
     public function actionPdf($id)
     {
         $order = Order::findOne(['id' => $id]);
@@ -1767,14 +1892,14 @@ class OrderController extends DefaultController
             // stream to browser inline
             'destination' => Pdf::DEST_BROWSER,
             'content'     => $this->renderPartial('_pdf_order', compact('dataProvider', 'order')),
-            'options' => [
+            'options'     => [
                 'defaultfooterline'      => false,
                 'defaultfooterfontstyle' => false,
 //                'title' => 'Privacy Policy - Krajee.com',
 //                'subject' => 'Generating PDF files via yii2-mpdf extension has never been easy'
 //            'showImageErrors' => true,
             ],
-            'methods' => [
+            'methods'     => [
 //                'SetHeader' => ['Generated By: Krajee Pdf Component||Generated On: ' . date("r")],
                 'SetFooter' => $this->renderPartial('_pdf_signature'),
             ],
@@ -1788,6 +1913,10 @@ class OrderController extends DefaultController
         \Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
         \Yii::$app->response->data = $pdf->render();
     }
+
+    /**
+     * Сохраняет изменения в корзине
+     */
 
     public function actionCheckout()
     {
@@ -1812,6 +1941,10 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Создаёт таблицу данных заказа для показа
+     */
+
     public function actionAjaxOrderGrid($id)
     {
         $order = Order::findOne(['id' => $id]);
@@ -1833,6 +1966,10 @@ class OrderController extends DefaultController
         $dataProvider = $searchModel->search($params);
         return $this->renderPartial('_view-grid', compact('dataProvider', 'order'));
     }
+
+    /**
+     * Рассылает сообщения о действиях с заказом
+     */
 
     public function actionAjaxOrderAction()
     {
@@ -1888,6 +2025,10 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Завершает заказ
+     */
+
     public function actionCompleteObsolete($id)
     {
         $currentOrganization = $this->currentUser->organization;
@@ -1911,6 +2052,10 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Посылает сообщение в чат
+     */
+
     public function actionSendMessage()
     {
         $user = $this->currentUser;
@@ -1920,6 +2065,10 @@ class OrderController extends DefaultController
             $this->sendChatMessage($user, $order_id, $message);
         }
     }
+
+    /**
+     * Обновляет кнопки статусов заказов
+     */
 
     public function actionAjaxRefreshButtons()
     {
@@ -1941,6 +2090,10 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Обновляет список поставщиков
+     */
+
     public function actionAjaxRefreshVendors()
     {
         if (Yii::$app->request->post()) {
@@ -1950,6 +2103,10 @@ class OrderController extends DefaultController
             return \yii\helpers\Html::dropDownList('OrderCatalogSearch[selectedVendor]', null, $vendors, ['id' => 'selectedVendor', "class" => "form-control"]);
         }
     }
+
+    /**
+     * Обновляет статистику по заказам
+     */
 
     public function actionAjaxRefreshStats($setMessagesRead = 0, $setNotificationsRead = 0)
     {
@@ -1988,6 +2145,10 @@ class OrderController extends DefaultController
         ];
     }
 
+    /**
+     * Повторяет бывший ранее заказ в корзину
+     */
+
     public function actionRepeat($id)
     {
         $order = Order::findOne(['id' => $id]);
@@ -2005,6 +2166,10 @@ class OrderController extends DefaultController
         }
         $this->redirect(['order/checkout']);
     }
+
+    /**
+     * Создаёт сообщение для чата
+     */
 
     private function sendChatMessage($user, $order_id, $message)
     {
@@ -2070,6 +2235,10 @@ class OrderController extends DefaultController
         return true;
     }
 
+    /**
+     * Создаёт системное сообщение для чата
+     */
+
     public function sendSystemMessage($user, $order_id, $message, $danger = false)
     {
         $order = Order::findOne(['id' => $order_id]);
@@ -2132,6 +2301,10 @@ class OrderController extends DefaultController
         return true;
     }
 
+    /**
+     * Посылает сообщение через Redis всем сотрудникам клиента об изменении в корзине
+     */
+
     private function sendCartChange($client, $cartCount)
     {
         $clientUsers = $client->users;
@@ -2146,6 +2319,10 @@ class OrderController extends DefaultController
 
         return true;
     }
+
+    /**
+     * Посылает сообщение через Redis всем сотрудникам клиента о создании заказа
+     */
 
     private function sendNewOrder($vendor)
     {
@@ -2409,6 +2586,10 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Сохраняет изменения в корзине
+     */
+
     private function saveCartChanges($content)
     {
         $data = [];
@@ -2422,6 +2603,10 @@ class OrderController extends DefaultController
             return false;
         }
     }
+
+    /**
+     * Находит заказ по параметрам
+     */
 
     private function findOrder($condition, $canManage = false)
     {
@@ -2439,6 +2624,10 @@ class OrderController extends DefaultController
         return $order;
     }
 
+    /**
+     * Показывает товары заказа согласно параметрам
+     */
+
     public function actionAjaxShowProducts($order_id)
     {
         $order = Order::findOne(['id' => $order_id]);
@@ -2455,6 +2644,10 @@ class OrderController extends DefaultController
             return $this->renderAjax('/order/add-position/_view', compact('productsSearchModel', 'productsDataProvider', 'order'));
         }
     }
+
+    /**
+     * Добавляет товар в заказ
+     */
 
     public function actionAjaxAddToOrder()
     {
@@ -2537,6 +2730,10 @@ class OrderController extends DefaultController
         }
         return true;
     }
+
+    /**
+     * Создаёт сеточный отчёт
+     */
 
     public function actionGridReport()
     {
@@ -2692,6 +2889,10 @@ class OrderController extends DefaultController
         exit();
     }
 
+    /**
+     * Сохраняет выбранные заказы
+     */
+
     public function actionSaveSelectedOrders()
     {
         $selected = Yii::$app->request->get('selected');
@@ -2718,6 +2919,10 @@ class OrderController extends DefaultController
         $session->set('selected', $list);
         return true;
     }
+
+    /**
+     * Загружает в заказ данные из файла-вложения
+     */
 
     public function actionUploadAttachment($id)
     {
@@ -2762,17 +2967,29 @@ class OrderController extends DefaultController
         return ['files' => $files];
     }
 
+    /**
+     * Возвращает файл-вложение для загрузки из него данных в заказ
+     */
+
     public function actionGetAttachment($id)
     {
         $attachment = OrderAttachment::findOne(['id' => $id]);
         $attachment->getFile();
     }
 
+    /**
+     * Удаляет файл-вложение
+     */
+
     public function actionDeleteAttachment($id)
     {
         $attachment = OrderAttachment::findOne(['id' => $id]);
         return $attachment->delete();
     }
+
+    /**
+     * Добавляет количество товара в сессию
+     */
 
     public function actionAjaxAddGoodQuantityToSession()
     {
@@ -2781,6 +2998,10 @@ class OrderController extends DefaultController
         $session = Yii::$app->session;
         $session['GuideProductCount.' . $key] = $value;
     }
+
+    /**
+     * Добавляет в заказ номер приходной накладной
+     */
 
     public function actionAjaxOrderUpdateWaybill()
     {
@@ -2796,6 +3017,10 @@ class OrderController extends DefaultController
         return $waybillNumber;
     }
 
+    /**
+     * Очищает сессию
+     */
+
     public function actionAjaxClearSession()
     {
         foreach ($_SESSION as $key => $item) {
@@ -2804,6 +3029,10 @@ class OrderController extends DefaultController
             }
         }
     }
+
+    /**
+     * Показывает список товаров для блокировки
+     */
 
     public function actionProductFilter()
     {
@@ -2851,6 +3080,10 @@ class OrderController extends DefaultController
         }
     }
 
+    /**
+     * Разблокирует все товары
+     */
+
     public function actionClearAllBlocked()
     {
         $client = isset($this->currentUser->organization->parent_id) ? Organization::findOne($this->currentUser->organization->parent_id) : $this->currentUser->organization;
@@ -2858,6 +3091,10 @@ class OrderController extends DefaultController
         CatalogGoodsBlocked::deleteAll(['owner_organization_id' => $client->id]);
         return true;
     }
+
+    /**
+     * Блокирует выбранные товары
+     */
 
     public function actionBlockedProducts()
     {

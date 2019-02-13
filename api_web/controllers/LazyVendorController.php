@@ -19,6 +19,11 @@ use common\models\OrganizationContact;
  */
 class LazyVendorController extends WebApiController
 {
+    /**
+     * Класс с методами для работы с API
+     *
+     * @var string
+     */
     public $className = LazyVendorWebApi::class;
 
     /**
@@ -226,50 +231,6 @@ class LazyVendorController extends WebApiController
         ];
     }
 
-    /**
-     * @SWG\Post(path="/lazy-vendor/contact-check",
-     *     tags={"LazyVendor"},
-     *     summary="Отправка проверочного email или SMS",
-     *     description="Отправка проверочного email или SMS",
-     *     produces={"application/json"},
-     *     @SWG\Parameter(
-     *         name="post",
-     *         in="body",
-     *         required=true,
-     *         @SWG\Schema (
-     *              @SWG\Property(property="user", ref="#/definitions/User"),
-     *              @SWG\Property(
-     *                  property="request",
-     *                  default={
-     *                      "id": 1
-     *                  }
-     *              )
-     *         )
-     *     ),
-     *     @SWG\Response(
-     *         response = 200,
-     *         description = "success",
-     *         @SWG\Schema(
-     *              default={
-     *                        "result":true
-     *                      }
-     *          ),
-     *     ),
-     *     @SWG\Response(
-     *         response = 400,
-     *         description = "BadRequestHttpException"
-     *     ),
-     *     @SWG\Response(
-     *         response = 401,
-     *         description = "error"
-     *     )
-     * )
-     * @throws \Exception
-     */
-    public function actionContactCheck()
-    {
-        $this->response = $this->classWebApi->contactCheck($this->request);
-    }
 	
 	  /**
      * @SWG\Post(path="/lazy-vendor/search",
@@ -347,5 +308,168 @@ class LazyVendorController extends WebApiController
     public function actionSearch()
     {
         $this->response = $this->classWebApi->search($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/lazy-vendor/contact-check-type",
+     *     tags={"LazyVendor"},
+     *     summary="Проверка типа контакта",
+     *     description="Проверка типа контакта",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "contact": "ema@email.ru"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={"type":1}
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionContactCheckType()
+    {
+        $this->response = $this->classWebApi->contactCheckType($this->request);
+    }
+    
+    /**
+     * @SWG\Post(path="/lazy-vendor/contact-create",
+     *     tags={"LazyVendor"},
+     *     summary="Создание контакта поставщика",
+     *     description="Создание контакта поставщика",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "vendor_id": 3998,
+     *                      "contact": "email@email.ru",
+     *                      "type_id": 1,
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                               "items":{
+     *                                   {
+     *                                       "id": 3998,
+     *                                       "contact": "email@test.ru",
+     *                                       "type": 1,
+     *                                       "notification":{
+     *                                          "order_created":1,
+     *                                          "order_canceled":0,
+     *                                          "order_changed":1,
+     *                                          "order_done":0
+     *                                       }
+     *                                 },
+     *                                 {
+     *                                       "id": 2,
+     *                                       "contact": "+79162807272",
+     *                                       "type": 2,
+     *                                       "notification":{
+     *                                          "order_created":1,
+     *                                          "order_canceled":0,
+     *                                          "order_changed":1,
+     *                                          "order_done":0
+     *                                       }
+     *                                 }
+     *                               },
+     *                               "pagination": {
+     *                                  "page": 1,
+     *                                  "page_size": 12
+     *                              }
+     *                      }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws
+     */
+    public function actionContactCreate()
+    {
+        $this->response = $this->classWebApi->contactCreate($this->request);
+    }
+    
+
+    /**
+     * @SWG\Post(path="/lazy-vendor/contact-send-test-message",
+     *     tags={"LazyVendor"},
+     *     summary="Отправка проверочного email или SMS",
+     *     description="Отправка проверочного email или SMS",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                        "result":true
+     *                      }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionContactSendTestMessage()
+    {
+        $this->response = $this->classWebApi->contactSendTestMessage($this->request);
     }
 }

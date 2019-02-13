@@ -27,8 +27,16 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
+/**
+ * Class LazyVendorWebApi
+ *
+ * @package api_web\classes
+ */
 class LazyVendorWebApi extends WebApi
 {
+    /**
+     * @var array
+     */
     private $arAvailableFields = [
         'name'
     ];
@@ -215,15 +223,7 @@ class LazyVendorWebApi extends WebApi
         $page = $request['pagination']['page'] ?? 1;
         $pageSize = $request['pagination']['page_size'] ?? 12;
 
-        $vendor_id = (int)$request['id'];
-        $model = Organization::findOne(['id' => $vendor_id, 'type_id' => Organization::TYPE_LAZY_VENDOR]);
-        if (empty($model)) {
-            throw new BadRequestHttpException('lazy_vendor.not_found');
-        }
-
-        if ($this->isMyVendor($model->id) === false) {
-            throw new BadRequestHttpException('lazy_vendor.not_is_my_vendor');
-        }
+        $model = $this->getVendor((int)$request['id']);
 
         $notificationFields = array_keys((new OrganizationContactNotification())->getRulesAttributes());
         $fields = ArrayHelper::merge(['oc.id', 'oc.type_id', 'oc.contact'], $notificationFields);
@@ -262,9 +262,8 @@ class LazyVendorWebApi extends WebApi
      * @param $request
      * @return array
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
      */
-    public function contactCheck($request)
+    public function contactSendTestMessage($request)
     {
         $this->validateRequest($request, ['id']);
         $model = OrganizationContactNotification::findOne([
@@ -277,6 +276,129 @@ class LazyVendorWebApi extends WebApi
         }
 
         return ['result' => $model->organizationContact->sendTestMessage()];
+    }
+
+    /**
+     * Получить тип контакта по значению
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function contactCheckType($request)
+    {
+        $this->validateRequest($request, ['contact']);
+        $type = OrganizationContact::checkType($request['contact']);
+        return ['type' => $type];
+    }
+
+    /**
+     * Создание контакта поставщика
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Throwable
+     */
+    public function contactCreate($request)
+    {
+        $this->validateRequest($request, ['vendor_id', 'contact', 'type_id']);
+        //проверим тип который прилетел
+        if (!isset(OrganizationContact::TYPE_CLASS[$request['type_id']])) {
+            throw new BadRequestHttpException('lazy_vendor.type_not_found');
+        }
+        //Поиск вендора ленивого
+        $model = $this->getVendor((int)$request['vendor_id']);
+        //Проверяем нет ли уже такого контакта
+        $exists = $model->getOrganizationContact()->andWhere(['contact' => $request['contact']])->exists();
+        if ($exists) {
+            throw new BadRequestHttpException('lazy_vendor.contact_exists');
+        }
+        //Проверяем совпадение типов с фронта и с нашим
+        $type = OrganizationContact::checkType($request['contact']);
+        if ($type !== (int)$request['type_id']) {
+            throw new BadRequestHttpException('lazy_vendor.types_do_not_match');
+        }
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            //Создаем контакт
+            $contactModel = new OrganizationContact([
+                'contact'         => $request['contact'],
+                'type_id'         => (int)$type,
+                'organization_id' => $model->id
+            ]);
+            if (!$contactModel->save()) {
+                throw new ValidationException($contactModel->getFirstErrors());
+            }
+            //Создаем уведомления для текущего ресторана
+            $contactModel->setNotifications($this->user->organization_id);
+            $transaction->commit();
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+
+        //Возвращаем список контактов
+        return $this->contactList(['id' => $model->id]);
+    }
+
+    /**
+     * Поиск ленивого поставщика по email
+     *
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function search($post)
+    {
+        $this->validateRequest($post, ['email']);
+
+        $result = [];
+        $email = $post['email'];
+
+        $models = Organization::find()
+            ->joinWith(['relationUserOrganization', 'relationUserOrganization.user'])
+            ->where(['organization.type_id' => Organization::TYPE_LAZY_VENDOR])
+            ->andWhere(['or', [
+                'organization.email' => $email
+            ], [
+                'user.email' => $email
+            ]])->all();
+
+        if (!empty($models)) {
+            /**
+             * @var Organization $model
+             */
+            foreach ($models as $model) {
+                $r = WebApiHelper::prepareOrganization($model);
+
+                if ($user = RelationUserOrganization::find()->joinWith('user')->where([
+                    'relation_user_organization.organization_id' => $model->id,
+                    'user.email'                                 => $email
+                ])->one()) {
+                    $r['user'] = [
+                        'email' => $user->user->email,
+                        'name'  => $user->user->profile->full_name,
+                        'phone' => $user->user->profile->phone,
+                    ];
+                }
+
+                $result[] = $r;
+            }
+        } else {
+            $obOrg = Organization::findOne([
+                'email'   => $email,
+                'type_id' => [
+                    Organization::TYPE_RESTAURANT,
+                    Organization::TYPE_SUPPLIER
+                ]]);
+            $obUser = User::findOne(['email' => $email]);
+            if ($obOrg || $obUser) {
+                throw new BadRequestHttpException('lazy_vendor.rest_or_common_supplier');
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -369,13 +491,13 @@ class LazyVendorWebApi extends WebApi
         }
         return $relation;
     }
-  
-   /**
+
+    /**
      * Работаю ли с этим поставщиком
      *
      * @param $vendor_id
      * @return bool
-    */
+     */
     private function isMyVendor($vendor_id)
     {
         return (bool)RelationSuppRest::find()->where([
@@ -385,61 +507,20 @@ class LazyVendorWebApi extends WebApi
     }
 
     /**
-     * Поиск ленивого поставщика по email
-     *
-     * @param $post
-     * @return array
+     * @param $vendor_id
+     * @return Organization|null
      * @throws BadRequestHttpException
      */
-    public function search($post)
+    private function getVendor($vendor_id)
     {
-        $this->validateRequest($post, ['email']);
-
-        $result = [];
-        $email = $post['email'];
-
-        $models = Organization::find()
-            ->joinWith(['relationUserOrganization', 'relationUserOrganization.user'])
-            ->where(['organization.type_id' => Organization::TYPE_LAZY_VENDOR])
-            ->andWhere(['or', [
-                'organization.email' => $email
-            ], [
-                'user.email' => $email
-            ]])->all();
-
-        if (!empty($models)) {
-            /**
-             * @var Organization $model
-             */
-            foreach ($models as $model) {
-                $r = WebApiHelper::prepareOrganization($model);
-
-                if ($user = RelationUserOrganization::find()->joinWith('user')->where([
-                    'relation_user_organization.organization_id' => $model->id,
-                    'user.email'                                 => $email
-                ])->one()) {
-                    $r['user'] = [
-                        'email' => $user->user->email,
-                        'name'  => $user->user->profile->full_name,
-                        'phone' => $user->user->profile->phone,
-                    ];
-                }
-
-                $result[] = $r;
-            }
-        } else {
-            $obOrg = Organization::findOne([
-                'email'   => $email,
-                'type_id' => [
-                    Organization::TYPE_RESTAURANT,
-                    Organization::TYPE_SUPPLIER
-                ]]);
-            $obUser = User::findOne(['email' => $email]);
-            if ($obOrg || $obUser) {
-                throw new BadRequestHttpException('lazy_vendor.rest_or_common_supplier');
-            }
+        $model = Organization::findOne(['id' => $vendor_id, 'type_id' => Organization::TYPE_LAZY_VENDOR]);
+        if (empty($model)) {
+            throw new BadRequestHttpException('lazy_vendor.not_found');
         }
 
-        return $result;
+        if ($this->isMyVendor($model->id) === false) {
+            throw new BadRequestHttpException('lazy_vendor.not_is_my_vendor');
+        }
+        return $model;
     }
 }

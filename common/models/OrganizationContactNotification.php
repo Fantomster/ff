@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "{{%organization_contact_notification}}".
@@ -16,11 +17,28 @@ use common\models\notifications\SmsNotification;
  * @property int                 $order_done               Подписка на завершение заказа
  * @property string              $created_at
  * @property string              $updated_at
+ * @property array               $rulesAttributes
  * @property Organization        $client
  * @property OrganizationContact $organizationContact
  */
 class OrganizationContactNotification extends \yii\db\ActiveRecord
 {
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class'              => TimestampBehavior::class,
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value'              => \gmdate('Y-m-d H:i:s'),
+            ]
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */

@@ -25,26 +25,32 @@ class DefaultController extends \api_web\components\WebApiController
             'class' => AccessControl::class,
             'rules' => [
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'map-list',
                         'map-update',
                         'service-list',
                     ],
-                    'roles'   => [
+                    'roles'      => [
                         Registry::MANAGER_RESTAURANT,
                         Registry::BOOKER_RESTAURANT,
                     ],
+                    'roleParams' => [
+                        'user' => $this->user
+                    ]
                 ],
                 [
-                    'allow'   => true,
-                    'actions' => [
+                    'allow'      => true,
+                    'actions'    => [
                         'user-service-set',
                         'check-connect',
                     ],
-                    'roles'   => [
+                    'roles'      => [
                         Registry::OPERATOR
                     ],
+                    'roleParams' => [
+                        'user' => $this->user
+                    ]
                 ],
             ],
         ];

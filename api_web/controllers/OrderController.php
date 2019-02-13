@@ -23,10 +23,6 @@ class OrderController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
-        $roleParams = function () {
-            return ['user' => $this->user,];
-        };
-
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
@@ -37,7 +33,7 @@ class OrderController extends WebApiController
                         'products-list-for-unconfirmed-vendor',
                     ],
                     'roles'      => [Registry::OPERATOR],
-                    'roleParams' => $roleParams
+                    'roleParams' => ['user' => $this->user]
                 ],
                 [
                     'allow'      => true,
@@ -68,7 +64,7 @@ class OrderController extends WebApiController
                         Registry::PROCUREMENT_INITIATOR,
                         Registry::BOOKER_RESTAURANT
                     ],
-                    'roleParams' => $roleParams
+                    'roleParams' => ['user' => $this->user]
                 ],
                 [
                     'allow'      => true,
@@ -77,7 +73,7 @@ class OrderController extends WebApiController
                         'categories-for-unconfirmed-vendor',
                     ],
                     'roles'      => [Registry::OPERATOR],
-                    'roleParams' => $roleParams
+                    'roleParams' => ['user' => $this->user]
                 ],
             ],
         ];

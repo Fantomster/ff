@@ -23,10 +23,6 @@ class UserController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
-        $roleParams = function () {
-            return ['user' => $this->user,];
-        };
-
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
@@ -38,7 +34,7 @@ class UserController extends WebApiController
                         'organization',
                     ],
                     'roles'      => [Registry::OPERATOR],
-                    'roleParams' => $roleParams
+                    'roleParams' => ['user' => $this->user]
                 ],
                 [
                     'allow'      => true,
@@ -46,7 +42,7 @@ class UserController extends WebApiController
                         'remove-vendor',
                     ],
                     'roles'      => [Registry::PURCHASER_RESTAURANT],
-                    'roleParams' => $roleParams
+                    'roleParams' => ['user' => $this->user]
                 ],
                 [
                     'allow'      => true,
@@ -56,7 +52,6 @@ class UserController extends WebApiController
                         'registration-repeat-sms',
                         'registration-confirm',
                         'login',
-                        'set-organization',
                         'password-recovery',
                         'vendor-status-list',
                         'vendor-location-list',
@@ -68,8 +63,16 @@ class UserController extends WebApiController
                         'set-agreement',
                     ],
                     'roles'      => [Registry::OPERATOR],
-                    'roleParams' => $roleParams
+                    'roleParams' => ['user' => $this->user]
                 ],
+                [
+                    'allow'   => true,
+                    'actions' => [
+                        'organization',
+                        'set-organization',
+                    ],
+                    'roles'   => [Registry::AUTH_USER]
+                ]
             ],
         ];
 

@@ -20,10 +20,6 @@ class DocumentController extends \api_web\components\WebApiController
     {
         $behaviors = parent::behaviors();
 
-        $roleParams = function () {
-            return ['user' => $this->user,];
-        };
-
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
@@ -45,7 +41,7 @@ class DocumentController extends \api_web\components\WebApiController
                         Registry::MANAGER_RESTAURANT,
                         Registry::BOOKER_RESTAURANT,
                     ],
-                    'roleParams' => $roleParams
+                    'roleParams' => ['user' => $this->user]
                 ],
             ],
         ];

@@ -20,10 +20,6 @@ class DefaultController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
-        $roleParams = function () {
-            return ['user' => $this->user,];
-        };
-
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
@@ -66,7 +62,7 @@ class DefaultController extends WebApiController
                         Registry::MANAGER_RESTAURANT,
                         Registry::BOOKER_RESTAURANT,
                     ],
-                    'roleParams' => $roleParams
+                    'roleParams' => ['user' => $this->user]
                 ],
             ],
         ];

@@ -21,10 +21,6 @@ class RequestController extends WebApiController
     {
         $behaviors = parent::behaviors();
 
-        $roleParams = function () {
-            return ['user' => $this->user,];
-        };
-
         $access['access'] = [
             'class' => AccessControl::class,
             'rules' => [
@@ -41,7 +37,7 @@ class RequestController extends WebApiController
                         'unset-contractor',
                     ],
                     'roles'   => [Registry::PURCHASER_RESTAURANT],
-                    'roleParams' => $roleParams
+                    'roleParams' => ['user' => $this->user]
                 ],
                 [
                     'allow'   => true,
@@ -51,7 +47,7 @@ class RequestController extends WebApiController
                         'category-list'
                     ],
                     'roles'   => [Registry::OPERATOR],
-                    'roleParams' => $roleParams
+                    'roleParams' => ['user' => $this->user]
                 ],
             ],
         ];

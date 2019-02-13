@@ -14,7 +14,9 @@ use common\models\{
     Organization,
     OrganizationContact,
     OrganizationContactNotification,
-    RelationSuppRest
+    RelationSuppRest,
+    RelationUserOrganization,
+    User
 };
 use api_web\components\{Registry, WebApi};
 use api_web\exceptions\ValidationException;
@@ -367,18 +369,77 @@ class LazyVendorWebApi extends WebApi
         }
         return $relation;
     }
-
-    /**
+  
+   /**
      * Работаю ли с этим поставщиком
      *
      * @param $vendor_id
      * @return bool
-     */
+    */
     private function isMyVendor($vendor_id)
     {
         return (bool)RelationSuppRest::find()->where([
             'supp_org_id' => $vendor_id,
             'rest_org_id' => $this->user->organization->id
         ])->exists();
+    }
+
+    /**
+     * Поиск ленивого поставщика по email
+     *
+     * @param $post
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function search($post)
+    {
+        $this->validateRequest($post, ['email']);
+
+        $result = [];
+        $email = $post['email'];
+
+        $models = Organization::find()
+            ->joinWith(['relationUserOrganization', 'relationUserOrganization.user'])
+            ->where(['organization.type_id' => Organization::TYPE_LAZY_VENDOR])
+            ->andWhere(['or', [
+                'organization.email' => $email
+            ], [
+                'user.email' => $email
+            ]])->all();
+
+        if (!empty($models)) {
+            /**
+             * @var Organization $model
+             */
+            foreach ($models as $model) {
+                $r = WebApiHelper::prepareOrganization($model);
+
+                if ($user = RelationUserOrganization::find()->joinWith('user')->where([
+                    'relation_user_organization.organization_id' => $model->id,
+                    'user.email'                                 => $email
+                ])->one()) {
+                    $r['user'] = [
+                        'email' => $user->user->email,
+                        'name'  => $user->user->profile->full_name,
+                        'phone' => $user->user->profile->phone,
+                    ];
+                }
+
+                $result[] = $r;
+            }
+        } else {
+            $obOrg = Organization::findOne([
+                'email'   => $email,
+                'type_id' => [
+                    Organization::TYPE_RESTAURANT,
+                    Organization::TYPE_SUPPLIER
+                ]]);
+            $obUser = User::findOne(['email' => $email]);
+            if ($obOrg || $obUser) {
+                throw new BadRequestHttpException('lazy_vendor.rest_or_common_supplier');
+            }
+        }
+
+        return $result;
     }
 }

@@ -176,4 +176,83 @@ class LazyVendorController extends WebApiController
     {
         $this->response = $this->classWebApi->list($this->request);
     }
+
+
+    /**
+     * @SWG\Post(path="/lazy-vendor/search",
+     *     tags={"LazyVendor"},
+     *     summary="Поиск ленивого поставщика",
+     *     description="Поиск организаций с типом `Organization::TYPE_LAZY_VENDOR`",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={"email":"lazy@vendor.ru"}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                 {
+     *                       "id": 1,
+     *                       "name": "Рога и Копыта",
+     *                       "legal_entity": "ООО Рога и Копыта",
+     *                       "contact_name": "Имя контакта",
+     *                       "phone": "+79251112233",
+     *                       "email": "lazyvendor@supply.org",
+     *                       "address": "Волгоградский пр., 1, Москва, Россия",
+     *                       "image": "https://fkeeper.s3.amazonaws.com/org-picture/b2d4e76a753e40a60fbb4002339771ca",
+     *                       "type_id": 4,
+     *                       "type": "Поставщик",
+     *                       "rating": 4.5,
+     *                       "city": "Москва",
+     *                       "administrative_area_level_1": "Московская область",
+     *                       "country": "Россия",
+     *                       "about": "Очень хорошая компания",
+     *                       "inn": "0001112223",
+     *                       "allow_editing": 1,
+     *                       "min_order_price": 100,
+     *                       "min_free_delivery_charge": 100,
+     *                       "disabled_delivery_days": {
+     *                                   1,
+     *                                   2,
+     *                                   3,
+     *                                   5
+     *                       },
+     *                       "delivery_days": {
+     *                            "mon": 0,
+     *                            "tue": 1,
+     *                            "wed": 0,
+     *                            "thu": 0,
+     *                            "fri": 0,
+     *                            "sat": 1,
+     *                            "sun": 1
+     *                       }
+     *                  }
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionSearch()
+    {
+        $this->response = $this->classWebApi->search($this->request);
+    }
 }

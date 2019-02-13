@@ -11,6 +11,7 @@ use Yii;
  * @property int    $id
  * @property int    $organization_id
  * @property int    $gln_code
+ * @property int    $pricat_action_attribute_rule
  * @property string $login
  * @property string $pass
  * @property string $int_user_id       intUserID - ID юзера в системе Leradata

@@ -653,6 +653,18 @@ class mercuryApi extends baseApi
             $productItem->producing->location = new Enterprise();
             $productItem->producing->location->guid = $this->enterpriseGuid;
 
+            /*if(isset($form->packagingType_guid))
+            {
+                $packaging = new Packaging();
+                $packaging->packagingType = new PackingType();
+                $packaging->packagingType->guid = $form->packagingType_guid;
+                if(isset($form->unit_guid)) {
+                    $packaging->unit = new Unit();
+                    $packaging->unit->guid = $form->unit_guid;
+                }
+                $productItem->packaging = $packaging;
+            }*/
+
             $resultingList->productItem = $productItem;
             $request_body->modificationOperation->resultingList = $resultingList;
         }

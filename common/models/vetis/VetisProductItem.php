@@ -43,6 +43,7 @@ use yii\helpers\ArrayHelper;
  * @property float                    packagingVolume
  * @property VetisSubproductByProduct $subProduct
  * @property VetisUnit                $unit
+ * @property VetisPackingType         $packingType
  */
 class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterface
 {
@@ -155,10 +156,10 @@ class VetisProductItem extends \yii\db\ActiveRecord implements UpdateDictInterfa
     public function getPackingType()
     {
         if (!is_null($this->packagingType_uuid)) {
-            return $this->hasOne(VetisUnit::class, ['uuid' => 'packagingType_uuid']);
+            return $this->hasOne(VetisPackingType::class, ['uuid' => 'packagingType_uuid']);
         }
 
-        return $this->hasOne(VetisUnit::class, ['guid' => 'packagingType_guid']);
+        return $this->hasOne(VetisPackingType::class, ['guid' => 'packagingType_guid']);
     }
 
     /**

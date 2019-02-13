@@ -7,14 +7,24 @@
 
 namespace api_web\classes;
 
+use common\models\{
+    Catalog,
+    CatalogBaseGoods,
+    Delivery,
+    Organization,
+    OrganizationContact,
+    OrganizationContactNotification,
+    RelationSuppRest,
+    RelationUserOrganization,
+    User
+};
 use api_web\components\{Registry, WebApi};
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
-use common\models\{Catalog, CatalogBaseGoods, Delivery, Organization, RelationSuppRest, RelationUserOrganization, User};
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
-use yii\db\Expression;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 
 class LazyVendorWebApi extends WebApi
@@ -192,6 +202,84 @@ class LazyVendorWebApi extends WebApi
     }
 
     /**
+     * Список контактов ленивого поставщика
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function contactList($request)
+    {
+        $this->validateRequest($request, ['id']);
+
+        $page = $request['pagination']['page'] ?? 1;
+        $pageSize = $request['pagination']['page_size'] ?? 12;
+
+        $vendor_id = (int)$request['id'];
+        $model = Organization::findOne(['id' => $vendor_id, 'type_id' => Organization::TYPE_LAZY_VENDOR]);
+        if (empty($model)) {
+            throw new BadRequestHttpException('lazy_vendor.not_found');
+        }
+
+        if ($this->isMyVendor($model->id) === false) {
+            throw new BadRequestHttpException('lazy_vendor.not_is_my_vendor');
+        }
+
+        $notificationFields = array_keys((new OrganizationContactNotification())->getRulesAttributes());
+        $fields = ArrayHelper::merge(['oc.id', 'oc.type_id', 'oc.contact'], $notificationFields);
+
+        $contacts = (new Query())
+            ->select($fields)
+            ->from(OrganizationContact::tableName() . " as oc")
+            ->leftJoin(OrganizationContactNotification::tableName() . " as ocn", "oc.id = ocn.organization_contact_id")
+            ->where(['oc.organization_id' => $model->id])
+            ->all();
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $this->prepareContactRows($contacts, $notificationFields)
+        ]);
+
+        $pagination = new Pagination();
+        $pagination->setPage($page - 1);
+        $pagination->setPageSize($pageSize);
+        $dataProvider->setPagination($pagination);
+
+        $return = [
+            'items'      => $dataProvider->models ?? [],
+            'pagination' => [
+                'page'       => $page,
+                'page_size'  => $pageSize,
+                'total_page' => $totalPage ?? 0
+            ]
+        ];
+
+        return $return;
+    }
+
+    /**
+     * Отправка тестового сообщения
+     *
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function contactCheck($request)
+    {
+        $this->validateRequest($request, ['id']);
+        $model = OrganizationContactNotification::findOne([
+            'client_id'               => $this->user->organization_id,
+            'organization_contact_id' => $request['id']
+        ]);
+
+        if (empty($model)) {
+            throw new BadRequestHttpException('model_not_found');
+        }
+
+        return ['result' => $model->organizationContact->sendTestMessage()];
+    }
+
+    /**
      * @param $model
      * @return array
      */
@@ -208,6 +296,25 @@ class LazyVendorWebApi extends WebApi
             ],
             "cat_id"        => (int)$model['cat_id']
         ];
+    }
+
+    /**
+     * @param $rows
+     * @param $notificationFields
+     * @return array
+     */
+    private function prepareContactRows($rows, $notificationFields)
+    {
+        $array_map = [];
+        foreach ($rows as $key => $contact) {
+            $contact['id'] = (int)$contact['id'];
+            $contact['type_id'] = (int)$contact['type_id'];
+            foreach ($notificationFields as $field) {
+                $contact[$field] = (int)$contact[$field];
+            }
+            $array_map[$key] = $contact;
+        }
+        return $array_map;
     }
 
     /**
@@ -261,6 +368,20 @@ class LazyVendorWebApi extends WebApi
             }
         }
         return $relation;
+    }
+  
+   /**
+     * Работаю ли с этим поставщиком
+     *
+     * @param $vendor_id
+     * @return bool
+    */
+    private function isMyVendor($vendor_id)
+    {
+        return (bool)RelationSuppRest::find()->where([
+            'supp_org_id' => $vendor_id,
+            'rest_org_id' => $this->user->organization->id
+        ])->exists();
     }
 
     /**

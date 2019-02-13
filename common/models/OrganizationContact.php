@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\mailer\Mailer;
 use common\models\notifications\{EmailNotification, SmsNotification};
 use yii\db\ActiveRecord;
 
@@ -149,5 +150,33 @@ class OrganizationContact extends ActiveRecord
             $object->phone = null;
         }
         return $object;
+    }
+
+    /**
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function sendTestMessage()
+    {
+        try {
+            $message = \Yii::t('app', 'organization_contact.test_message', ['ru' => 'MixCart шлет привет!']);
+            if ($this->type_id == self::TYPE_EMAIL) {
+                /** @var \common\components\mailer\Message $s */
+                $s = new \common\components\mailer\Message();
+                $s->setFrom('no-reply@mixcart.ru');
+                $s->setTo($this->contact);
+                $s->setSubject($message);
+                $s->setBody($message);
+                /** @var Mailer $mailer */
+                \Yii::$app->mailer->send($s);
+            }
+            if ($this->type_id == self::TYPE_PHONE) {
+                \Yii::$app->get('sms')->send($message, $this->contact);
+            }
+            return true;
+        } catch (\Exception $e) {
+            \Yii::error($e->getMessage());
+            return false;
+        }
     }
 }

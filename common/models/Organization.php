@@ -92,6 +92,7 @@ use common\models\guides\Guide;
  * @property Cart[]                     $cart
  * @property User[]                     $users
  * @property CartContent[]              $cartContents
+ * @property Catalog                    $baseCatalog
  * @property DeliveryRegions[]          $deliveryRegionsAllow
  * @property DeliveryRegions[]          $deliveryRegionsExclude
  * @property FranchiseeAssociate[]      $franchiseeAssociate

@@ -640,29 +640,51 @@ class VetisWaybill extends WebApi
         if (!$model) {
             throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
         }
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\Products();
+        $attributes = unserialize($model->data);
+        if (isset($attributes->producing->location->guid)) {
+            $productionName = VetisRussianEnterprise::find()->select(['name', 'uuid', 'guid'])
+                ->where(['guid' => $attributes->producing->location->guid])->one();
+        }
 
         return [
-            'form'         => $model->subProduct->name ?? null,
-            'name'         => $model->name,
-            'uuid'         => $model->uuid,
-            'guid'         => $model->guid,
-            'article'      => $model->code,
-            'gtin'         => $model->globalID,
-            'gost'         => $model->gost,
-            'active'       => $model->active,
-            'package_type' => $model->unit->name ?? null,
+            'form'             => $model->subProduct->name ?? null,
+            'name'             => $model->name,
+            'uuid'             => $model->uuid,
+            'guid'             => $model->guid,
+            'article'          => $model->code,
+            'gtin'             => $model->globalID,
+            'gost'             => $model->gost,
+            'active'           => $model->active,
+            'package_type'     => $model->unit->name ?? null,
+            'package_quantity' => $model->packagingQuantity ?? null,
+            'package_volume'   => $model->packagingVolume ?? null,
+            'package_unit'     => $model->packingType->name ?? null,
+            'producer_name'    => $this->getBusinessEntity()->name ?? null,
+            'production_name'  => $productionName ?? null,
         ];
     }
 
     /**
-     * @param $request
+     * @param array  $request
+     * @param string $operation
      * @return array
      * @throws BadRequestHttpException
      * @throws ValidationException
      * @throws \yii\base\InvalidArgumentException
      */
-    public function createProductItem($request)
+    public function createProductItem($request, $operation)
     {
+        $uuid = null;
+        if ($operation == 'UPDATE') {
+            $this->validateRequest($request, ['uuid']);
+            $uuid = $request['uuid'];
+            $product = VetisProductItem::findOne(['uuid' => $uuid, 'last' => true, 'active' => true]);
+            if (!$product) {
+                throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+            }
+        }
         $this->validateRequest($request, ['name', 'product_type', 'form_guid', 'subtype_guid']);
         $model = new productForm();
 
@@ -677,7 +699,7 @@ class VetisWaybill extends WebApi
 
         if ($model->validate()) {
             try {
-                $result = mercuryApi::getInstance()->modifyProducerStockListOperation('CREATE', null, $model);
+                $result = mercuryApi::getInstance()->modifyProducerStockListOperation($operation, $uuid, $model);
                 if (!isset($result)) {
                     throw new \Exception('Error create Product');
                 }
@@ -703,14 +725,35 @@ class VetisWaybill extends WebApi
     private function addIngredients($guid, $ingredients)
     {
         foreach ($ingredients as $ingredient) {
-            $model = new VetisIngredients();
-            $model->guid = $guid;
-            $model->product_name = $ingredient['name'];
+            $model = VetisIngredients::findOne(['guid' => $guid, 'product_name' => $ingredient['name']]);
+            if (!$model) {
+                $model = new VetisIngredients();
+                $model->guid = $guid;
+                $model->product_name = $ingredient['name'];
+            }
             $model->amount = $ingredient['amount'];
             if (!$model->save()) {
                 throw new ValidationException($model->getFirstErrors());
             }
         }
+    }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function deleteIngredient($request)
+    {
+        $this->validateRequest($request, ['id']);
+        $model = VetisIngredients::findOne($request['id']);
+        if (!$model) {
+            throw new BadRequestHttpException(\Yii::t('api_web', 'model_not_found'));
+        }
+
+        return ['result' => (bool)$model->delete()];
     }
 
     /**

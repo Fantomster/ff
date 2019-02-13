@@ -9,6 +9,7 @@ namespace api_web\controllers;
 
 use api_web\classes\LazyVendorWebApi;
 use api_web\components\WebApiController;
+use common\models\OrganizationContact;
 
 /**
  * Class LazyVendorController
@@ -110,8 +111,8 @@ class LazyVendorController extends WebApiController
     /**
      * @SWG\Post(path="/lazy-vendor/list",
      *     tags={"LazyVendor"},
-     *     summary="Создание нового ленивого поставщика",
-     *     description="Создание нового ленивого поставщика",
+     *     summary="Список ленивых поставщиков",
+     *     description="Список ленивых поставщиков",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -177,8 +178,100 @@ class LazyVendorController extends WebApiController
         $this->response = $this->classWebApi->list($this->request);
     }
 
+     /**
+     * @SWG\Post(path="/lazy-vendor/contact-type-list",
+     *     tags={"LazyVendor"},
+     *     summary="Список типов контактов",
+     *     description="Список типов контактов",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                         1:"email",
+     *                          2:"phone"
+     *                      }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionContactTypeList()
+    {
+        $this->response = [
+            OrganizationContact::TYPE_EMAIL => 'Email',
+            OrganizationContact::TYPE_PHONE => 'Phone',
+        ];
+    }
 
     /**
+     * @SWG\Post(path="/lazy-vendor/contact-check",
+     *     tags={"LazyVendor"},
+     *     summary="Отправка проверочного email или SMS",
+     *     description="Отправка проверочного email или SMS",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "id": 1
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                        "result":true
+     *                      }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionContactCheck()
+    {
+        $this->response = $this->classWebApi->contactCheck($this->request);
+    }
+	
+	  /**
      * @SWG\Post(path="/lazy-vendor/search",
      *     tags={"LazyVendor"},
      *     summary="Поиск ленивого поставщика",

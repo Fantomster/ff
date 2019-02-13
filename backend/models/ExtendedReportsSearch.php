@@ -88,17 +88,12 @@ class ExtendedReportsSearch extends Model
                               and e.created_at between :dateFrom and :dateTo
                               and e.status in (3,4,2,1)", [':dateFrom' => $this->dateFrom, ':dateTo' => $this->dateTo])
             ->groupBy(['owners', 'order_period'])
-            ->orderBy([new Expression('order_period'),
+            ->orderBy(['order_period' => 'order_period',
                 new Expression('case when a.id is null or a.id in (1, 2, 34) then 1 else 2 end'),
                 new Expression('upper(owners)')]);
 
-
-        $dataProvider = new SqlDataProvider([
-            'sql'  => $query->createCommand()->getRawSql(),
-            'totalCount' => $query->count()
-            /*'pagination' => [
-                'pageSize' => 10
-            ]*/
+        $dataProvider = new ActiveDataProvider([
+            'query'  => $query,
         ]);
 
         return $dataProvider;
@@ -129,12 +124,8 @@ class ExtendedReportsSearch extends Model
             ->groupBy(['d.name'])
             ->orderBy('d.name');
 
-        $dataProvider = new SqlDataProvider([
-            'sql'  => $query->createCommand()->getRawSql(),
-            'totalCount' => $query->count()
-            /*'pagination' => [
-                'pageSize' => 10
-            ]*/
+        $dataProvider = new ActiveDataProvider([
+            'query'  => $query,
         ]);
 
         return $dataProvider;
@@ -245,12 +236,8 @@ class ExtendedReportsSearch extends Model
             ->select('*')
             ->from(['tb1' => $queryUnion1->union($queryRow3)]);
 
-        $dataProvider = new SqlDataProvider([
-            'sql'  => $query->createCommand()->getRawSql(),
-            'totalCount' => $query->count()
-            /*'pagination' => [
-                'pageSize' => 10
-            ]*/
+        $dataProvider = new ActiveDataProvider([
+            'query'  => $query,
         ]);
 
         return $dataProvider;

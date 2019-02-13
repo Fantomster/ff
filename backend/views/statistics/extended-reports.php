@@ -5,6 +5,7 @@ use kartik\grid\GridView;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use yii\widgets\Pjax;
+use kartik\export\ExportMenu;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\UserSearch */
@@ -70,75 +71,169 @@ $this->registerJs('
     </div>
     <?php ActiveForm::end(); ?>
     <h3>Показатели оборота по франчайзи</h3>
+    <p>
+    <?php
+    $gridColumns = [
+        [
+            'format'    => 'raw',
+            'attribute' => 'owners',
+            'label'     => 'Франшиза',
+        ],
+        [
+            'format'    => 'raw',
+            'attribute' => 'total_sum',
+            'label'     => 'Оборот',
+            'filter'    => false,
+        ],
+        [
+            'format'    => 'raw',
+            'attribute' => 'org_count',
+            'label'     => 'Активных ресторанов',
+            'filter'    => false,
+        ],
+        [
+            'format'    => 'raw',
+            'attribute' => 'ord_count',
+            'label'     => 'Кол-во заказов',
+            'filter'    => false,
+        ],
+    ];
+
+    echo ExportMenu::widget([
+        'dataProvider'    => $report1,
+        'columns'         => $gridColumns,
+        'target'          => ExportMenu::TARGET_BLANK,
+        'batchSize'       => 20,
+        'timeout'         => 0,
+        'exportConfig'    => [
+            ExportMenu::FORMAT_HTML    => false,
+            ExportMenu::FORMAT_TEXT    => false,
+            ExportMenu::FORMAT_EXCEL   => false,
+            ExportMenu::FORMAT_PDF     => false,
+            ExportMenu::FORMAT_CSV     => false,
+            ExportMenu::FORMAT_EXCEL_X => [
+                'label'       => Yii::t('kvexport', 'Excel 2007+ (xlsx)'),
+                'icon'        => 'floppy-remove',
+                'iconOptions' => ['class' => 'text-success'],
+                'linkOptions' => [],
+                'options'     => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                'alertMsg'    => Yii::t('kvexport', 'The EXCEL 2007+ (xlsx) export file will be generated for download.'),
+                'mime'        => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'extension'   => 'xlsx',
+                'writer'      => 'Xlsx'
+            ],
+        ],
+    ]);
+    ?>
+    </p>
     <?=
     GridView::widget([
         'dataProvider' => $report1,
-        //'filterModel'  => $searchModel,
-        'columns'      => [
-            [
-                'format'    => 'raw',
-                'attribute' => 'owners',
-                'label'     => 'Франшиза',
-            ],
-            [
-                'format'    => 'raw',
-                'attribute' => 'total_sum',
-                'label'     => 'Оборот',
-                'filter'    => false,
-            ],
-            [
-                'format'    => 'raw',
-                'attribute' => 'org_count',
-                'label'     => 'Активных ресторанов',
-                'filter'    => false,
-            ],
-            [
-                'format'    => 'raw',
-                'attribute' => 'ord_count',
-                'label'     => 'Кол-во заказов',
-                'filter'    => false,
-            ],
-        ]
+        'layout' => "{items}",
+        'columns'      => $gridColumns
     ]);
     ?>
     <h3>Новые регистрации</h3>
+    <p>
+    <?php
+    $gridColumns = [
+        [
+            'format'    => 'raw',
+            'attribute' => 'name',
+            'label'     => 'Тип',
+        ],
+        [
+            'format'    => 'raw',
+            'attribute' => 'cnt',
+            'label'     => 'Регистраций',
+            'filter'    => false,
+        ],
+    ];
+
+
+    echo ExportMenu::widget([
+        'dataProvider'    => $report1,
+        'columns'         => $gridColumns,
+        'target'          => ExportMenu::TARGET_BLANK,
+        'batchSize'       => 20,
+        'timeout'         => 0,
+        'exportConfig'    => [
+            ExportMenu::FORMAT_HTML    => false,
+            ExportMenu::FORMAT_TEXT    => false,
+            ExportMenu::FORMAT_EXCEL   => false,
+            ExportMenu::FORMAT_PDF     => false,
+            ExportMenu::FORMAT_CSV     => false,
+            ExportMenu::FORMAT_EXCEL_X => [
+                'label'       => Yii::t('kvexport', 'Excel 2007+ (xlsx)'),
+                'icon'        => 'floppy-remove',
+                'iconOptions' => ['class' => 'text-success'],
+                'linkOptions' => [],
+                'options'     => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                'alertMsg'    => Yii::t('kvexport', 'The EXCEL 2007+ (xlsx) export file will be generated for download.'),
+                'mime'        => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'extension'   => 'xlsx',
+                'writer'      => 'Xlsx'
+            ],
+        ],
+    ]);
+    ?>
+    </p>
     <?=
     GridView::widget([
         'dataProvider' => $report2,
-        //'filterModel'  => $searchModel,
-        'columns'      => [
-            [
-                'format'    => 'raw',
-                'attribute' => 'name',
-                'label'     => 'Тип',
-            ],
-            [
-                'format'    => 'raw',
-                'attribute' => 'cnt',
-                'label'     => 'Регистраций',
-                'filter'    => false,
-            ],
-        ]
+        'layout' => "{items}",
+        'columns'      => $gridColumns
     ]);
     ?>
     <h3>Сводка по Меркурию</h3>
+    <p>
+    <?php
+    $gridColumns = [
+        [
+            'format'    => 'raw',
+            'attribute' => 'name',
+            'label'     => 'Использование',
+        ],
+        [
+            'format'    => 'raw',
+            'attribute' => 'cnt',
+            'label'     => 'Количество',
+            'filter'    => false,
+        ],
+    ];
+
+    echo ExportMenu::widget([
+        'dataProvider'    => $report3,
+        'columns'         => $gridColumns,
+        'target'          => ExportMenu::TARGET_BLANK,
+        'batchSize'       => 20,
+        'timeout'         => 0,
+        'exportConfig'    => [
+            ExportMenu::FORMAT_HTML    => false,
+            ExportMenu::FORMAT_TEXT    => false,
+            ExportMenu::FORMAT_EXCEL   => false,
+            ExportMenu::FORMAT_PDF     => false,
+            ExportMenu::FORMAT_CSV     => false,
+            ExportMenu::FORMAT_EXCEL_X => [
+                'label'       => Yii::t('kvexport', 'Excel 2007+ (xlsx)'),
+                'icon'        => 'floppy-remove',
+                'iconOptions' => ['class' => 'text-success'],
+                'linkOptions' => [],
+                'options'     => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                'alertMsg'    => Yii::t('kvexport', 'The EXCEL 2007+ (xlsx) export file will be generated for download.'),
+                'mime'        => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'extension'   => 'xlsx',
+                'writer'      => 'Xlsx'
+            ],
+        ],
+    ]);
+    ?>
+    </p>
     <?=
     GridView::widget([
         'dataProvider' => $report3,
-        //'filterModel'  => $searchModel,
-        'columns'      => [
-            [
-                'format'    => 'raw',
-                'attribute' => 'name',
-                'label'     => 'Использование',
-            ],
-            [
-                'format'    => 'raw',
-                'attribute' => 'cnt',
-                'label'     => 'Количество',
-                'filter'    => false,
-            ],
-        ]
+        'layout' => "{items}",
+        'columns'      => $gridColumns
     ]);
     ?>
     <?php Pjax::end(); ?></div>

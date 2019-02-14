@@ -65,6 +65,7 @@ class DefaultController extends WebApiController
                         'production-journal-producer-filter',
                         'production-journal-sort',
                         'production-journal-short-info',
+                        'production-journal-full-info',
                     ],
                     'roles'      => [
                         Registry::MANAGER_RESTAURANT,
@@ -1649,8 +1650,8 @@ class DefaultController extends WebApiController
     /**
      * @SWG\Post(path="/integration/vetis/product-ingredient-list",
      *     tags={"Integration/vetis"},
-     *     summary="Получение списка Ингредиентов",
-     *     description="Получение списка Ингредиентов",
+     *     summary="Получение списка Ингредиентов для конкретной продукции из нашего справочника",
+     *     description="Получение списка Ингредиентов для конкретной продукции из нашего справочника",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -1703,8 +1704,8 @@ class DefaultController extends WebApiController
     /**
      * @SWG\Post(path="/integration/vetis/product-info",
      *     tags={"Integration/vetis"},
-     *     summary="Получение списка Ингредиентов",
-     *     description="Получение списка Ингредиентов",
+     *     summary="Краткая информация о продукции",
+     *     description="Краткая информация о продукции",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -2252,8 +2253,8 @@ class DefaultController extends WebApiController
     /**
      * @SWG\Post(path="/integration/vetis/production-journal-short-info",
      *     tags={"Integration/vetis"},
-     *     summary="Получение списка сортировки",
-     *     description="Получение списка сортировки",
+     *     summary="Получение краткой информации о продукции",
+     *     description="Получение краткой информации о продукции",
      *     produces={"application/json"},
      *     @SWG\Parameter(
      *         name="post",
@@ -2295,6 +2296,54 @@ class DefaultController extends WebApiController
     public function actionProductionJournalShortInfo()
     {
         $this->response = (new VetisWaybill())->getProductionJournalShortInfo($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/integration/vetis/production-journal-full-info",
+     *     tags={"Integration/vetis"},
+     *     summary="Получение полной информации о продукции",
+     *     description="Получение полной информации о продукции",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={
+     *                      "uuid": "94a54162-a7ca-4534-9f96-39cacc934e8f"
+     *                  }
+     *              )
+     *         )
+     *     ),
+     *    @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *            @SWG\Schema(
+     *              default={
+     *                  "product_form": "говядина",
+     *                  "batch_id": "123456",
+     *                  "packing": null
+     *              }
+     *          )
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function actionProductionJournalFullInfo()
+    {
+        $this->response = (new VetisWaybill())->getProductionJournalFullInfo($this->request);
     }
 
 }

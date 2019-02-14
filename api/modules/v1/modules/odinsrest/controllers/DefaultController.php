@@ -261,7 +261,7 @@ class DefaultController extends Controller
             $returnArray[$i]['cid'] = $oneSPosition->cid;
             $returnArray[$i]['updated_at'] = date('Y-m-d h:i:s');
         }
-        $where = (new Query)
+        $where = (new Query())
                 ->where(['org_id' => $res])
                 ->andWhere([
                     '<',
@@ -269,7 +269,6 @@ class DefaultController extends Controller
                     \gmdate('Y-m-d H:i:s', strtotime("-1 hour"))
                 ]);
         $modelName::updateAll(['is_active' => 0], $where);
-        OneSGood::updateAll($returnArray)
         $arr = [
             'updated_count' => $i,
             'data' => $returnArray

@@ -21,7 +21,6 @@ use common\models\{
 use api_web\components\{Registry, WebApi};
 use api_web\exceptions\ValidationException;
 use api_web\helpers\WebApiHelper;
-use function PHPSTORM_META\type;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
 use yii\db\Query;

@@ -24,6 +24,11 @@ use yii\behaviors\TimestampBehavior;
 class OrganizationContactNotification extends \yii\db\ActiveRecord
 {
 
+    public static function primaryKey()
+    {
+        return ['organization_contact_id', 'client_id'];
+    }
+
     /**
      * {@inheritdoc}
      */

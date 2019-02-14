@@ -183,7 +183,7 @@ class LazyVendorController extends WebApiController
         $this->response = $this->classWebApi->list($this->request);
     }
 
-     /**
+    /**
      * @SWG\Post(path="/lazy-vendor/contact-type-list",
      *     tags={"LazyVendor"},
      *     summary="Список типов контактов",
@@ -231,8 +231,7 @@ class LazyVendorController extends WebApiController
         ];
     }
 
-	
-	  /**
+    /**
      * @SWG\Post(path="/lazy-vendor/search",
      *     tags={"LazyVendor"},
      *     summary="Поиск ленивого поставщика",
@@ -352,7 +351,7 @@ class LazyVendorController extends WebApiController
     {
         $this->response = $this->classWebApi->contactCheckType($this->request);
     }
-    
+
     /**
      * @SWG\Post(path="/lazy-vendor/contact-create",
      *     tags={"LazyVendor"},
@@ -426,7 +425,6 @@ class LazyVendorController extends WebApiController
     {
         $this->response = $this->classWebApi->contactCreate($this->request);
     }
-    
 
     /**
      * @SWG\Post(path="/lazy-vendor/contact-send-test-message",
@@ -471,5 +469,74 @@ class LazyVendorController extends WebApiController
     public function actionContactSendTestMessage()
     {
         $this->response = $this->classWebApi->contactSendTestMessage($this->request);
+    }
+
+    /**
+     * @SWG\Post(path="/lazy-vendor/contact-update",
+     *     tags={"LazyVendor"},
+     *     summary="Редактирование уведомлений в контактах ленивого поставщика",
+     *     description="Редактирование уведомлений в контактах ленивого поставщика",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         name="post",
+     *         in="body",
+     *         required=true,
+     *         @SWG\Schema (
+     *              @SWG\Property(property="user", ref="#/definitions/User"),
+     *              @SWG\Property(
+     *                  property="request",
+     *                  default={{
+     *                      "id": 2,
+     *                      "order_created": 1,
+     *                      "order_canceled": 1,
+     *                      "order_changed": 1,
+     *                      "order_done": 1,
+     *                  }}
+     *              )
+     *         )
+     *     ),
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "success",
+     *         @SWG\Schema(
+     *              default={
+     *                  {
+     *                      "id": 13963,
+     *                      "order_created": 0,
+     *                      "order_canceled": 1,
+     *                      "order_changed": 1,
+     *                      "order_done": 0,
+     *                  },
+     *                  {
+     *                      "id": 3983,
+     *                      "order_created": 1,
+     *                      "order_canceled": 1,
+     *                      "order_changed": 1,
+     *                      "order_done": 1,
+     *                  },
+     *                  {
+     *                      "id": 2,
+     *                      "order_created": 1,
+     *                      "order_canceled": 1,
+     *                      "order_changed": 1,
+     *                      "order_done": 1,
+     *                  }
+     *              }
+     *          ),
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "BadRequestHttpException"
+     *     ),
+     *     @SWG\Response(
+     *         response = 401,
+     *         description = "error"
+     *     )
+     * )
+     * @throws \Exception
+     */
+    public function actionContactUpdate()
+    {
+        $this->response = $this->classWebApi->contactUpdate($this->request);
     }
 }

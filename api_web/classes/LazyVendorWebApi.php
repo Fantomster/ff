@@ -523,4 +523,109 @@ class LazyVendorWebApi extends WebApi
         }
         return $model;
     }
+
+    /**
+     * Проверка входа notificationUpdate
+     *
+     * @param $notifications
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    private function validateNotifications($notifications)
+    {
+        $count = 0;
+        $vals = [0, 1];
+        $newNotifications = [];
+        $notificationIds = [];
+        foreach ($notifications as $index => $notification) {
+            if (!isset($notification['id'])) {
+                throw new BadRequestHttpException('lazy_vendor.no_required_param');
+            } elseif (!is_int($notification['id'])) {
+                throw new BadRequestHttpException('lazy_vendor.wrong_value');
+            }
+            $notificationIds[] = $notification['id'];
+            if (!isset($notification['order_created'])) {
+                throw new BadRequestHttpException('lazy_vendor.no_required_param');
+            } elseif (!is_int($notification['order_created']) && !in_array($notification['order_created'], $vals)) {
+                throw new BadRequestHttpException('lazy_vendor.wrong_value');
+            }
+            if (!isset($notification['order_canceled'])) {
+                throw new BadRequestHttpException('lazy_vendor.no_required_param');
+            } elseif (!is_int($notification['order_canceled']) && !in_array($notification['order_canceled'], $vals)) {
+                throw new BadRequestHttpException('lazy_vendor.wrong_value');
+            }
+            if (!isset($notification['order_changed'])) {
+                throw new BadRequestHttpException('lazy_vendor.no_required_param');
+            } elseif (!is_int($notification['order_changed']) && !in_array($notification['order_changed'], $vals)) {
+                throw new BadRequestHttpException('lazy_vendor.wrong_value');
+            }
+            if (!isset($notification['order_done'])) {
+                throw new BadRequestHttpException('lazy_vendor.no_required_param');
+            } elseif (!is_int($notification['order_done']) && !in_array($notification['order_done'], $vals)) {
+                throw new BadRequestHttpException('lazy_vendor.wrong_value');
+            }
+            $newNotifications[$notification['id']] = [
+                'order_created'  => $notification['order_created'],
+                'order_canceled' => $notification['order_canceled'],
+                'order_changed'  => $notification['order_changed'],
+                'order_done'     => $notification['order_done'],
+            ];
+            $count++;
+        }
+        return [
+            'count'           => $count,
+            'notifications'   => $newNotifications,
+            'notificationIds' => $notificationIds,
+        ];
+    }
+
+    /**
+     * Обновление контактов ленивого поставщика
+     *
+     * @param $post
+     * @return array|\yii\db\ActiveRecord[]
+     * @throws BadRequestHttpException
+     */
+    public function contactUpdate($post)
+    {
+        if (!is_array($post)) {
+            throw new BadRequestHttpException('preorder.wrong_value_type');
+        }
+
+        $result = $this->validateNotifications($post);
+
+        $notifications = OrganizationContactNotification::find()
+            ->where(['client_id' => $this->user->id, 'organization_contact_id' => $result['notificationIds']])
+            ->indexBy('organization_contact_id')->all();
+
+        if (count($notifications) !== $result['count']) {
+            throw new BadRequestHttpException('Вы пытаетесь изменить не свои уведомления.');
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+
+        try {
+            /**
+             * @var  integer                         $index
+             * @var  OrganizationContactNotification $notification
+             */
+            foreach ($notifications as $index => $notification) {
+                if (isset($result['notifications'][$index])) {
+                    $notification->order_created = $result['notifications'][$index]['order_created'];
+                    $notification->order_canceled = $result['notifications'][$index]['order_canceled'];
+                    $notification->order_changed = $result['notifications'][$index]['order_changed'];
+                    $notification->order_done = $result['notifications'][$index]['order_done'];
+                    $notification->save();
+                }
+            }
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+        return OrganizationContactNotification::find()
+            ->select(['organization_contact_id id', 'order_created', 'order_canceled', 'order_changed', 'order_done'])
+            ->where(['client_id' => $this->user->id, 'organization_contact_id' => $result['notificationIds']])
+            ->asArray()->all();
+    }
 }

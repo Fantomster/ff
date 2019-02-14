@@ -49,7 +49,7 @@ class OrderSearch extends Order
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function search($params, $delay = 1)
+    public function search($params, $delay = 0)
     {
         $profileTable      = Profile::tableName();
         $organizationTable = Organization::tableName();

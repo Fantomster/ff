@@ -133,7 +133,7 @@ class OrderController extends Controller
      */
     public function actionIndex()
     {
-        $delay = in_array(Yii::$app->user->id, Yii::$app->params['timeKeepers']) ? 0 : 1;
+        //$delay = in_array(Yii::$app->user->id, Yii::$app->params['timeKeepers']) ? 0 : 1;
         $searchModel = new OrderSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $delay);
         //$dataProvider->sort = ['defaultOrder' => ['created_at' => SORT_DESC]];

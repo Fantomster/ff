@@ -51,9 +51,9 @@ class OrderSearch extends Order
      */
     public function search($params)
     {
-        $profileTable = Profile::tableName();
+        $profileTable      = Profile::tableName();
         $organizationTable = Organization::tableName();
-        $orderTable = Order::tableName();
+        $orderTable        = Order::tableName();
 
         $query = Order::find();
 
@@ -69,15 +69,16 @@ class OrderSearch extends Order
             'createdByProfile' => function (Query $query) use ($profileTable) {
                 $query->from(["createdByProfile" => $profileTable]);
             },
-        ], true)->joinWith([
+                ], true)->joinWith([
             'acceptedByProfile' => function (Query $query) use ($profileTable) {
                 $query->from(["acceptedByProfile" => $profileTable]);
             },
-        ], true);
+                ], true);
 
         // add conditions that should always apply here
-        $query->where("vendor.blacklisted in (0, 1) ");
-        $query->andWhere("$orderTable.status <> " . OrderStatus::STATUS_FORMING);
+        $query->where("vendor.blacklisted in (0, 1) ")
+                ->andWhere("$orderTable.status <> " . OrderStatus::STATUS_FORMING);
+
 
         $dataProvider = new ActiveDataProvider([
             'query'      => $query,
@@ -138,13 +139,14 @@ class OrderSearch extends Order
         ]);
 
         $query
-            ->andFilterWhere(['like', 'comment', $this->comment])
-            ->andFilterWhere(['like', "client.name", $this->client_name])
-            ->andFilterWhere(['like', "client.locality", $this->client_city])
-            ->andFilterWhere(['like', "vendor.name", $this->vendor_name])
-            ->andFilterWhere(['like', "createdByProfile.full_name", $this->client_manager])
-            ->andFilterWhere(['like', "acceptedByProfile.full_name", $this->vendor_manager]);
+                ->andFilterWhere(['like', 'comment', $this->comment])
+                ->andFilterWhere(['like', "client.name", $this->client_name])
+                ->andFilterWhere(['like', "client.locality", $this->client_city])
+                ->andFilterWhere(['like', "vendor.name", $this->vendor_name])
+                ->andFilterWhere(['like', "createdByProfile.full_name", $this->client_manager])
+                ->andFilterWhere(['like', "acceptedByProfile.full_name", $this->vendor_manager]);
 
         return $dataProvider;
     }
+
 }

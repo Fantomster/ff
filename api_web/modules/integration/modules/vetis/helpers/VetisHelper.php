@@ -143,12 +143,10 @@ class VetisHelper extends BaseHelper
         $this->getShortInfoVsd($uuid);
 
         $hc = cerberApi::getInstance()->getEnterpriseByGuid($this->vsdModel->sender_guid);
-        if (isset($hc)) {
-            if (isset($hc->owner)) {
-                $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
-            }
+        if (isset($hc) && isset($hc->owner)) {
+            $hc = cerberApi::getInstance()->getBusinessEntityByGuid($hc->owner->guid);
         }
-        $this->consignor_business = isset($hc) ? $hc->name . ', ИНН:' . $hc->inn : null;
+        $this->consignor_business = isset($hc) ? $hc->name . ', ИНН:' . $hc->inn ?? null : null;
         $this->product_type = isset($this->vsdModel->product_type) ?
             MercVsd::$product_types[$this->vsdModel->product_type] : null;
         $product = VetisProductByType::findOne(['guid' => $this->vsdModel->product_guid]);

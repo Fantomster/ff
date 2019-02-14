@@ -92,6 +92,10 @@ if ($countSettingChange > 0) {
                     'label' => 'Разное',
                     'url'   => ['/statistics/misc'],
                 ],
+                [
+                    'label' => 'Расширенная отчетность',
+                    'url'   => ['/statistics/extended-reports'],
+                ],
             ],
         ],
     ];

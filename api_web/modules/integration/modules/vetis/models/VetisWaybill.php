@@ -894,4 +894,29 @@ class VetisWaybill extends WebApi
             '-expiry_date'  => \Yii::t('api_web', 'production_journal.-expiry_date'),
         ];
     }
+
+    /**
+     * @param $request
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function getProductionJournalShortInfo($request)
+    {
+        $this->validateRequest($request, ['uuid']);
+        $model = MercStockEntry::findOne(['uuid' => $request['uuid']]);
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\mercury\Mercury();
+        $_ = new \frontend\modules\clientintegr\modules\merc\helpers\api\products\Products();
+        $attributes = unserialize($model->raw_data);
+        if (isset($attributes->batch->subProduct->guid)) {
+            $productionName = VetisSubproductByProduct::find()->select(['name'])
+                ->where(['guid' => $attributes->batch->subProduct->guid])->one();
+        }
+
+        return [
+            'product_form' => $productionName->name ?? null,
+            'batch_id'     => $model->batch_id,
+            'packing'      => $attributes->batch->packageList->package->packingType->name ?? null,
+
+        ];
+    }
 }

@@ -2,7 +2,6 @@
 
 namespace api_web\classes;
 
-use api_web\components\FireBase;
 use api_web\components\Registry;
 use api_web\helpers\WebApiHelper;
 use api_web\models\ForgotForm;
@@ -10,6 +9,8 @@ use common\models\licenses\License;
 use common\models\ManagerAssociate;
 use common\models\notifications\EmailNotification;
 use common\models\notifications\SmsNotification;
+use common\models\rbac\AuthAssignment;
+use common\models\rbac\helpers\RbacHelper;
 use common\models\RelationSuppRest;
 use common\models\RelationUserOrganization;
 use common\models\Role;
@@ -20,6 +21,7 @@ use common\models\UserToken;
 use api_web\components\Notice;
 use common\models\RelationSuppRestPotential;
 use common\models\Organization;
+use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
@@ -160,8 +162,27 @@ class UserWebApi extends \api_web\components\WebApi
         }
         $user->setRegisterAttributes($role_id, $status);
         $user->save();
+        $this->addRbacRole($user->id, $role_id);
 
         return $user;
+    }
+
+    /**
+     * @param $userId
+     * @param $roleId
+     * @throws ValidationException
+     */
+    public function addRbacRole($userId, $roleId): void
+    {
+        $authAssign = new AuthAssignment([
+            'item_name'       => RbacHelper::$dictRoles[$roleId],
+            'user_id'         => $userId,
+            'organization_id' => $this->user->organization_id
+        ]);
+
+        if (!$authAssign->save()) {
+            throw new ValidationException($authAssign->getFirstErrors());
+        }
     }
 
     /**
@@ -576,7 +597,7 @@ class UserWebApi extends \api_web\components\WebApi
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             $where = [
-                'rest_org_id' => $this->user->organization->id,
+                'rest_org_id' => $this->user->organization_id,
                 'supp_org_id' => $vendor->id
             ];
 
@@ -793,12 +814,13 @@ class UserWebApi extends \api_web\components\WebApi
      * Возвращает GMT из базы, если его нет сохраняет из headers, добавляет плюс к не отрицательному таймзону
      *
      * @return string $gmt
-     * */
+     * @throws ValidationException
+     */
     public function checkGMTFromDb()
     {
         $gmt = $this->getGmt()['GMT'];
 
-        if (!empty($this->user)) {
+        if (!empty($this->user) && !is_null($this->user->organization_id)) {
             $model = $this->user->organization;
             if (is_null($model->gmt)) {
                 $model->gmt = $gmt;
@@ -806,6 +828,7 @@ class UserWebApi extends \api_web\components\WebApi
                     throw new ValidationException($model->getFirstErrors());
                 }
             }
+
             $gmt = $model->gmt;
         }
 
@@ -901,6 +924,7 @@ class UserWebApi extends \api_web\components\WebApi
             throw new BadRequestHttpException('no such user relation');
         }
         $modelName = '\common\models\notifications\\' . $modelName;
+        /** @var ActiveRecord $modelName */
         $notification = $modelName::findOne(['user_id' => $userId, 'rel_user_org_id' => $relation]);
         if (!$notification) {
             $notification = new ${$modelName}();

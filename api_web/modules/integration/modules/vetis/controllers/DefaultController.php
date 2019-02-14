@@ -60,6 +60,7 @@ class DefaultController extends WebApiController
                         'create-transport',
                         'delete-transport',
                         'delete-ingredient',
+                        'transport-storage-type-list'
                         'production-journal-list',
                         'production-journal-producer-filter',
                         'production-journal-sort',
